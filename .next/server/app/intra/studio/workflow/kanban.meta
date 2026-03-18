@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/studio/layout,_N_T_/intra/studio/workflow/layout,_N_T_/intra/studio/workflow/kanban/layout,_N_T_/intra/studio/workflow/kanban/page,_N_T_/intra/studio/workflow/kanban"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/studio/workflow/kanban/__PAGE__",
+    "/intra/studio/workflow/kanban",
+    "/intra/studio/workflow",
+    "/intra/studio",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

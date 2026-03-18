@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/erp/layout,_N_T_/intra/erp/crm/layout,_N_T_/intra/erp/crm/import/layout,_N_T_/intra/erp/crm/import/page,_N_T_/intra/erp/crm/import"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/erp/crm/import/__PAGE__",
+    "/intra/erp/crm/import",
+    "/intra/erp/crm",
+    "/intra/erp",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

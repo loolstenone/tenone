@@ -1,0 +1,49 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, BookOpen, Compass, GraduationCap, FileText, HelpCircle, Settings, LogOut } from "lucide-react";
+import clsx from "clsx";
+import { useAuth } from "@/lib/auth-context";
+import { Logo } from "@/components/Logo";
+
+const navigation = [
+    { name: "Home", href: "/intra/wiki", icon: LayoutDashboard },
+    { name: "Culture", href: "/intra/wiki/culture", icon: BookOpen },
+    { name: "Onboarding", href: "/intra/wiki/onboarding", icon: Compass },
+    { name: "Education", href: "/intra/wiki/education", icon: GraduationCap },
+    { name: "Handbook", href: "/intra/wiki/handbook", icon: FileText },
+    { name: "FAQ", href: "/intra/wiki/faq", icon: HelpCircle },
+];
+
+export function WikiSidebar({ className }: { className?: string }) {
+    const pathname = usePathname();
+    const { user, logout } = useAuth();
+    const isActive = (href: string) => href === "/intra/wiki" ? pathname === "/intra/wiki" : pathname.startsWith(href);
+
+    return (
+        <div className={clsx("flex h-full w-full flex-col bg-zinc-950 text-zinc-400 border-r border-zinc-800", className)}>
+            <div className="flex h-16 items-center px-5 shrink-0 gap-3">
+                <Logo variant="vertical" size="sm" />
+                <Link href="/intra/wiki" className="text-2xl font-bold text-white tracking-tight hover:text-indigo-400 transition-colors">Wiki</Link>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                {navigation.map(item => (
+                    <Link key={item.name} href={item.href} className={clsx(isActive(item.href) ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-900/50 hover:text-white", "group flex items-center rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}>
+                        <item.icon className={clsx(isActive(item.href) ? "text-indigo-500" : "text-zinc-500 group-hover:text-zinc-300", "mr-3 h-[18px] w-[18px]")} />
+                        {item.name}
+                    </Link>
+                ))}
+            </nav>
+            <div className="p-4 border-t border-zinc-800">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">{user?.avatarInitials ?? 'U'}</div>
+                        <div className="text-sm"><p className="text-white font-medium">{user?.name ?? 'User'}</p><p className="text-xs text-zinc-500">{user?.role ?? 'Viewer'}</p></div>
+                    </div>
+                    <button onClick={() => { logout(); window.location.href = '/'; }} className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"><LogOut className="h-4 w-4" /></button>
+                </div>
+            </div>
+        </div>
+    );
+}

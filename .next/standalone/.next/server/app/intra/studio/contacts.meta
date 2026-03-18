@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/studio/layout,_N_T_/intra/studio/contacts/layout,_N_T_/intra/studio/contacts/page,_N_T_/intra/studio/contacts"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/studio/contacts/__PAGE__",
+    "/intra/studio/contacts",
+    "/intra/studio",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

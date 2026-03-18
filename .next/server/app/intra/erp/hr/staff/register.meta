@@ -1,0 +1,19 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/erp/layout,_N_T_/intra/erp/hr/layout,_N_T_/intra/erp/hr/staff/layout,_N_T_/intra/erp/hr/staff/register/layout,_N_T_/intra/erp/hr/staff/register/page,_N_T_/intra/erp/hr/staff/register"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/erp/hr/staff/register/__PAGE__",
+    "/intra/erp/hr/staff/register",
+    "/intra/erp/hr/staff",
+    "/intra/erp/hr",
+    "/intra/erp",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

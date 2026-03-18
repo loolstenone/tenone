@@ -1,0 +1,19 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/erp/layout,_N_T_/intra/erp/crm/layout,_N_T_/intra/erp/crm/people/layout,_N_T_/intra/erp/crm/people/students/layout,_N_T_/intra/erp/crm/people/students/page,_N_T_/intra/erp/crm/people/students"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/erp/crm/people/students/__PAGE__",
+    "/intra/erp/crm/people/students",
+    "/intra/erp/crm/people",
+    "/intra/erp/crm",
+    "/intra/erp",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

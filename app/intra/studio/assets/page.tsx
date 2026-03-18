@@ -1,0 +1,139 @@
+"use client";
+
+import { useState } from "react";
+import { brands, assets } from "@/lib/data";
+import { Search, Filter, Folder, FileText, Image as ImageIcon, Video, Terminal } from "lucide-react";
+import clsx from "clsx";
+import Image from "next/image";
+
+export default function AssetsPage() {
+    const [selectedType, setSelectedType] = useState<string>('All');
+    const [selectedBrand, setSelectedBrand] = useState<string>('All');
+
+    const filteredAssets = assets.filter(asset => {
+        const typeMatch = selectedType === 'All' || asset.type === selectedType;
+        const brandMatch = selectedBrand === 'All' || asset.brandId === selectedBrand;
+        return typeMatch && brandMatch;
+    });
+
+    const getBrandName = (id: string) => brands.find(b => b.id === id)?.name || id;
+
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'Image': return ImageIcon;
+            case 'Video': return Video;
+            case 'Document': return FileText;
+            case 'Prompt': return Terminal;
+            default: return Folder;
+        }
+    };
+
+    return (
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-white">Assets Library</h2>
+                    <p className="mt-2 text-zinc-400">Manage digital assets, media files, and AI prompts.</p>
+                </div>
+                <div className="flex gap-2">
+                    <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-sm font-medium transition-colors">
+                        Upload Asset
+                    </button>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 pb-6 border-b border-zinc-800">
+                <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                    <input
+                        type="text"
+                        placeholder="Search assets..."
+                        className="w-full h-9 pl-9 pr-4 rounded-md border border-zinc-800 bg-zinc-900 text-sm text-zinc-100 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+                    <Filter className="h-4 w-4 text-zinc-500" />
+                    <select
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                        className="h-9 rounded-md border border-zinc-800 bg-zinc-900 text-sm text-zinc-300 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                        <option value="All">All Types</option>
+                        <option value="Image">Image</option>
+                        <option value="Video">Video</option>
+                        <option value="Document">Document</option>
+                        <option value="Prompt">Prompt</option>
+                    </select>
+
+                    <select
+                        value={selectedBrand}
+                        onChange={(e) => setSelectedBrand(e.target.value)}
+                        className="h-9 rounded-md border border-zinc-800 bg-zinc-900 text-sm text-zinc-300 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                        <option value="All">All Brands</option>
+                        {brands.map(b => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            {/* Assets Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {filteredAssets.map(asset => {
+                    const Icon = getIcon(asset.type);
+                    return (
+                        <div key={asset.id} className="group relative rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden hover:border-zinc-700 transition-all cursor-pointer">
+                            {/* Thumbnail Area */}
+                            <div className="aspect-square bg-zinc-950 flex items-center justify-center relative">
+                                {asset.type === 'Image' ? (
+                                    /* Simplify Image load for now since we don't have real assets */
+                                    <div className="relative w-full h-full bg-zinc-800 flex items-center justify-center">
+                                        <ImageIcon className="h-10 w-10 text-zinc-600" />
+                                    </div>
+                                ) : (
+                                    <Icon className="h-10 w-10 text-zinc-600" />
+                                )}
+
+                                {/* Overlay */}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button className="px-4 py-2 bg-indigo-600 text-white text-xs rounded-full font-medium">View</button>
+                                </div>
+                            </div>
+
+                            {/* Info */}
+                            <div className="p-4">
+                                <div className="flex items-start justify-between gap-2">
+                                    <h3 className="text-sm font-medium text-white truncate" title={asset.title}>{asset.title}</h3>
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-xs text-zinc-500 px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700">
+                                        {getBrandName(asset.brandId)}
+                                    </span>
+                                    <span className="text-xs text-zinc-500 uppercase">{asset.type}</span>
+                                </div>
+                                <div className="mt-3 flex items-center justify-between text-xs text-zinc-600">
+                                    <span>{asset.size}</span>
+                                    <span>{asset.createdAt}</span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {filteredAssets.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <Folder className="h-12 w-12 text-zinc-800 mb-4" />
+                    <h3 className="text-lg font-medium text-white">No assets found</h3>
+                    <p className="text-zinc-500 max-w-sm mt-2">
+                        Try adjusting your filters or search query to find what you're looking for.
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+}

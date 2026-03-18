@@ -1,0 +1,195 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { WorkflowTask, TaskStatus, TaskPriority } from "@/types/workflow";
+import { brands } from "@/lib/data";
+import { X } from "lucide-react";
+
+interface TaskModalProps {
+    task?: WorkflowTask | null;
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (task: WorkflowTask) => void;
+    onDelete?: (id: string) => void;
+}
+
+const statuses: TaskStatus[] = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
+const priorities: TaskPriority[] = ['Low', 'Medium', 'High', 'Urgent'];
+
+export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModalProps) {
+    const [form, setForm] = useState({
+        title: '',
+        description: '',
+        status: 'Todo' as TaskStatus,
+        priority: 'Medium' as TaskPriority,
+        assignee: '',
+        brandId: '',
+        dueDate: '',
+        tags: '',
+    });
+
+    useEffect(() => {
+        if (task) {
+            setForm({
+                title: task.title,
+                description: task.description,
+                status: task.status,
+                priority: task.priority,
+                assignee: task.assignee,
+                brandId: task.brandId,
+                dueDate: task.dueDate ?? '',
+                tags: task.tags.join(', '),
+            });
+        } else {
+            setForm({ title: '', description: '', status: 'Todo', priority: 'Medium', assignee: '', brandId: '', dueDate: '', tags: '' });
+        }
+    }, [task, isOpen]);
+
+    if (!isOpen) return null;
+
+    const isEditing = !!task;
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const now = new Date().toISOString().split('T')[0];
+        const savedTask: WorkflowTask = {
+            id: task?.id ?? `t${Date.now()}`,
+            title: form.title,
+            description: form.description,
+            status: form.status,
+            priority: form.priority,
+            assignee: form.assignee,
+            brandId: form.brandId,
+            dueDate: form.dueDate || undefined,
+            tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+            createdAt: task?.createdAt ?? now,
+            updatedAt: now,
+        };
+        onSave(savedTask);
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl mx-4">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-white">
+                        {isEditing ? 'Edit Task' : 'New Task'}
+                    </h3>
+                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm text-zinc-400 mb-1">Title</label>
+                        <input
+                            value={form.title}
+                            onChange={e => setForm({ ...form, title: e.target.value })}
+                            required
+                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-zinc-400 mb-1">Description</label>
+                        <textarea
+                            value={form.description}
+                            onChange={e => setForm({ ...form, description: e.target.value })}
+                            rows={3}
+                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none resize-none"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Status</label>
+                            <select
+                                value={form.status}
+                                onChange={e => setForm({ ...form, status: e.target.value as TaskStatus })}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            >
+                                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Priority</label>
+                            <select
+                                value={form.priority}
+                                onChange={e => setForm({ ...form, priority: e.target.value as TaskPriority })}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            >
+                                {priorities.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Brand</label>
+                            <select
+                                value={form.brandId}
+                                onChange={e => setForm({ ...form, brandId: e.target.value })}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            >
+                                <option value="">Select Brand</option>
+                                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Assignee</label>
+                            <input
+                                value={form.assignee}
+                                onChange={e => setForm({ ...form, assignee: e.target.value })}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Due Date</label>
+                            <input
+                                type="date"
+                                value={form.dueDate}
+                                onChange={e => setForm({ ...form, dueDate: e.target.value })}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-zinc-400 mb-1">Tags (comma separated)</label>
+                            <input
+                                value={form.tags}
+                                onChange={e => setForm({ ...form, tags: e.target.value })}
+                                placeholder="e.g. Creative, MV"
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                        {isEditing && onDelete ? (
+                            <button
+                                type="button"
+                                onClick={() => { onDelete(task!.id); onClose(); }}
+                                className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                            >
+                                Delete Task
+                            </button>
+                        ) : <div />}
+                        <div className="flex gap-3">
+                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                                {isEditing ? 'Save Changes' : 'Create Task'}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}

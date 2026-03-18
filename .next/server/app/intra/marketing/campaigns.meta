@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/intra/layout,_N_T_/intra/marketing/layout,_N_T_/intra/marketing/campaigns/layout,_N_T_/intra/marketing/campaigns/page,_N_T_/intra/marketing/campaigns"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/intra/marketing/campaigns/__PAGE__",
+    "/intra/marketing/campaigns",
+    "/intra/marketing",
+    "/intra",
+    "/_index",
+    "/_head"
+  ]
+}

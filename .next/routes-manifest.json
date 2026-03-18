@@ -1,0 +1,379 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/intra/erp/hr/staff/[id]",
+      "regex": "^/intra/erp/hr/staff/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/intra/erp/hr/staff/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/brands/[id]",
+      "regex": "^/intra/studio/brands/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/intra/studio/brands/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/about",
+      "regex": "^/about(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/about(?:/)?$"
+    },
+    {
+      "page": "/brands",
+      "regex": "^/brands(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/brands(?:/)?$"
+    },
+    {
+      "page": "/contact",
+      "regex": "^/contact(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/contact(?:/)?$"
+    },
+    {
+      "page": "/history",
+      "regex": "^/history(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/history(?:/)?$"
+    },
+    {
+      "page": "/icon.png",
+      "regex": "^/icon\\.png(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/icon\\.png(?:/)?$"
+    },
+    {
+      "page": "/intra",
+      "regex": "^/intra(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra(?:/)?$"
+    },
+    {
+      "page": "/intra/erp",
+      "regex": "^/intra/erp(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/import",
+      "regex": "^/intra/erp/crm/import(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/import(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/people",
+      "regex": "^/intra/erp/crm/people(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/people(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/people/mentors",
+      "regex": "^/intra/erp/crm/people/mentors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/people/mentors(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/people/professionals",
+      "regex": "^/intra/erp/crm/people/professionals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/people/professionals(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/people/students",
+      "regex": "^/intra/erp/crm/people/students(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/people/students(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/crm/segments",
+      "regex": "^/intra/erp/crm/segments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/crm/segments(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/hr/gpr",
+      "regex": "^/intra/erp/hr/gpr(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/hr/gpr(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/hr/gpr/evaluation",
+      "regex": "^/intra/erp/hr/gpr/evaluation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/hr/gpr/evaluation(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/hr/gpr/goals",
+      "regex": "^/intra/erp/hr/gpr/goals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/hr/gpr/goals(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/hr/staff",
+      "regex": "^/intra/erp/hr/staff(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/hr/staff(?:/)?$"
+    },
+    {
+      "page": "/intra/erp/hr/staff/register",
+      "regex": "^/intra/erp/hr/staff/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/erp/hr/staff/register(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing",
+      "regex": "^/intra/marketing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/activities",
+      "regex": "^/intra/marketing/activities(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/activities(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/analytics",
+      "regex": "^/intra/marketing/analytics(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/analytics(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/campaigns",
+      "regex": "^/intra/marketing/campaigns(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/campaigns(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/content",
+      "regex": "^/intra/marketing/content(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/content(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/deals",
+      "regex": "^/intra/marketing/deals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/deals(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/leads",
+      "regex": "^/intra/marketing/leads(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/leads(?:/)?$"
+    },
+    {
+      "page": "/intra/marketing/organizations",
+      "regex": "^/intra/marketing/organizations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/marketing/organizations(?:/)?$"
+    },
+    {
+      "page": "/intra/studio",
+      "regex": "^/intra/studio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/assets",
+      "regex": "^/intra/studio/assets(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/assets(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/brands",
+      "regex": "^/intra/studio/brands(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/brands(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/contacts",
+      "regex": "^/intra/studio/contacts(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/contacts(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/schedule",
+      "regex": "^/intra/studio/schedule(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/schedule(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/settings",
+      "regex": "^/intra/studio/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/settings(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/studio",
+      "regex": "^/intra/studio/studio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/studio(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/studio/editor",
+      "regex": "^/intra/studio/studio/editor(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/studio/editor(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/universe",
+      "regex": "^/intra/studio/universe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/universe(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/workflow",
+      "regex": "^/intra/studio/workflow(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/workflow(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/workflow/automation",
+      "regex": "^/intra/studio/workflow/automation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/workflow/automation(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/workflow/kanban",
+      "regex": "^/intra/studio/workflow/kanban(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/workflow/kanban(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/workflow/pipeline",
+      "regex": "^/intra/studio/workflow/pipeline(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/workflow/pipeline(?:/)?$"
+    },
+    {
+      "page": "/intra/studio/workflow/projects",
+      "regex": "^/intra/studio/workflow/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/studio/workflow/projects(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki",
+      "regex": "^/intra/wiki(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki/culture",
+      "regex": "^/intra/wiki/culture(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki/culture(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki/education",
+      "regex": "^/intra/wiki/education(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki/education(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki/faq",
+      "regex": "^/intra/wiki/faq(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki/faq(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki/handbook",
+      "regex": "^/intra/wiki/handbook(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki/handbook(?:/)?$"
+    },
+    {
+      "page": "/intra/wiki/onboarding",
+      "regex": "^/intra/wiki/onboarding(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/intra/wiki/onboarding(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/profile",
+      "regex": "^/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile(?:/)?$"
+    },
+    {
+      "page": "/signup",
+      "regex": "^/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/signup(?:/)?$"
+    },
+    {
+      "page": "/universe",
+      "regex": "^/universe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/universe(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}
