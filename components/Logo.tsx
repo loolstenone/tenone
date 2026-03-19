@@ -7,6 +7,7 @@ interface LogoProps {
     size?: 'sm' | 'md' | 'lg';
     href?: string;
     className?: string;
+    asLink?: boolean;
 }
 
 const dimensions = {
@@ -14,13 +15,19 @@ const dimensions = {
     vertical: { sm: { w: 28, h: 28 }, md: { w: 40, h: 40 }, lg: { w: 56, h: 56 } },
 };
 
-export function Logo({ variant = 'horizontal', size = 'md', href = '/', className }: LogoProps) {
+export function Logo({ variant = 'horizontal', size = 'md', href = '/', className, asLink = true }: LogoProps) {
     const src = variant === 'vertical' ? '/logo-vertical.png' : '/logo-horizontal.png';
     const { w, h } = dimensions[variant][size];
 
+    const img = <Image src={src} alt="TEN ONE" width={w} height={h} priority />;
+
+    if (!asLink) {
+        return <span className={clsx("inline-flex shrink-0 select-none", className)}>{img}</span>;
+    }
+
     return (
         <Link href={href} className={clsx("inline-flex shrink-0 select-none", className)}>
-            <Image src={src} alt="TEN ONE" width={w} height={h} priority />
+            {img}
         </Link>
     );
 }
