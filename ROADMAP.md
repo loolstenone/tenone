@@ -12,7 +12,7 @@
 | ERP-HR (Staff, GPR) | ⚠️ Mock UI | 데이터 리셋됨 |
 | Marketing (Campaigns, Leads) | ⚠️ Mock UI | 드래그앤드롭 작동 |
 | Studio (Workflow, Kanban) | ⚠️ Mock UI | 드래그앤드롭 작동 |
-| Wiki | ❌ 스켈레톤 | 구조만 존재 |
+| Wiki | ✅ 완성 | 실제 콘텐츠 작성 완료 |
 | Backend API | ❌ 없음 | API 라우트 0개 |
 | Database | ❌ 없음 | ORM/스키마 없음 |
 | 배포 | ❌ 미완성 | 스크립트만 존재 |
@@ -102,7 +102,7 @@
 
 ## Phase 4: 기능 보완 (우선순위: 중간)
 
-- [ ] **4-1. Wiki 콘텐츠 작성**
+- [x] **4-1. Wiki 콘텐츠 작성**
   - Culture, Onboarding, Education, Handbook, FAQ 실제 내용
 
 - [ ] **4-2. 대시보드 실제 통계**

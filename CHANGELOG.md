@@ -4,6 +4,47 @@
 
 ---
 
+## 2026-03-19 (집) — 3차 세션
+
+### 완료
+- 컴포넌트 20개 다크→라이트 모노톤 전환 (모달, 카드, 바디 영역)
+- PublicHeader Logo 중첩 `<a>` 하이드레이션 경고 수정
+- CRM 라우트 완전 이전 (/intra/erp/crm 삭제 → /intra/marketing/crm 통일)
+- Wiki 4개 페이지 실제 콘텐츠 작성 (Onboarding, Education, Handbook, FAQ)
+- 모바일 반응형 개선 (KanbanBoard, 모달/프로필 폼 그리드)
+- `.next` 캐시 git 추적 제거
+
+### 삭제된 파일
+- `app/intra/erp/crm/` (7개 파일) — marketing/crm으로 완전 이전
+
+### 수정된 주요 파일
+- `components/PublicHeader.tsx` — Logo 중복 Link 제거
+- `components/BrandCard.tsx` — 라이트 테마
+- `components/ContactImportModal.tsx` — 라이트 테마
+- `components/TimelineView.tsx` — 라이트 테마
+- `components/RelationshipMap.tsx` — 라이트 테마
+- `components/crm/PersonModal.tsx` — 라이트 테마 + 반응형 그리드
+- `components/workflow/TaskModal.tsx` — 라이트 테마 + 반응형 그리드
+- `components/workflow/AutomationBuilder.tsx` — 라이트 테마 + 반응형 그리드
+- `components/workflow/AutomationCard.tsx` — 라이트 테마
+- `components/workflow/KanbanBoard.tsx` — 라이트 테마 + 가로 스크롤 반응형
+- `components/workflow/ProjectCard.tsx` — 라이트 테마
+- `components/workflow/TaskCard.tsx` — 라이트 테마
+- `app/intra/erp/page.tsx` — CRM 링크 marketing으로 변경
+- `app/(public)/profile/page.tsx` — 반응형 그리드
+- `app/(public)/contact/page.tsx` — 반응형 그리드
+- `app/intra/wiki/onboarding/page.tsx` — 30일 체크리스트 콘텐츠
+- `app/intra/wiki/education/page.tsx` — 교육 코스 콘텐츠
+- `app/intra/wiki/handbook/page.tsx` — 핸드북 아코디언 콘텐츠
+- `app/intra/wiki/faq/page.tsx` — FAQ + 검색 콘텐츠
+
+### 결정 사항
+- 사이드바/푸터는 다크 유지, 바디/모달/카드만 라이트 모노톤
+- CRM은 Marketing 소속 최종 확정 (ERP 쪽 완전 삭제)
+- 프론트엔드 UI 거의 완성 → 다음 단계는 이미지 에셋 또는 Phase 1 인프라
+
+---
+
 ## 2026-03-19 (사무실) — 2차 세션
 
 ### 완료
