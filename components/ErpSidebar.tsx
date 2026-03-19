@@ -25,22 +25,6 @@ const navigationGroups: NavGroup[] = [
         ],
     },
     {
-        label: "CRM",
-        items: [
-            {
-                name: "Contacts", href: "/intra/erp/crm/people", icon: Contact,
-                children: [
-                    { name: "All", href: "/intra/erp/crm/people" },
-                    { name: "Students", href: "/intra/erp/crm/people/students" },
-                    { name: "Professionals", href: "/intra/erp/crm/people/professionals" },
-                    { name: "Mentors", href: "/intra/erp/crm/people/mentors" },
-                ],
-            },
-            { name: "Segments", href: "/intra/erp/crm/segments", icon: Tags },
-            { name: "Import", href: "/intra/erp/crm/import", icon: Upload },
-        ],
-    },
-    {
         label: "HR (HeRo)",
         items: [
             {
@@ -169,20 +153,6 @@ export function ErpSidebar({ className }: { className?: string }) {
                 ))}
             </nav>
 
-            <div className="p-4 border-t border-zinc-800">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">{user?.avatarInitials ?? 'U'}</div>
-                        <div className="text-sm">
-                            <p className="text-white font-medium">{user?.name ?? 'User'}</p>
-                            <p className="text-xs text-zinc-500">{user?.role ?? 'Viewer'}</p>
-                        </div>
-                    </div>
-                    <button onClick={() => { logout(); router.push('/login'); }} className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors" title="Sign out">
-                        <LogOut className="h-4 w-4" />
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

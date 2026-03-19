@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
     LayoutDashboard, Megaphone, TrendingUp, Building2, Handshake,
     Activity, FileText, BarChart3, Settings, LogOut, ChevronDown, ChevronRight,
+    Contact, Tags, Upload,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
@@ -19,11 +20,19 @@ interface NavGroup { label?: string; items: NavItem[]; }
 const navigationGroups: NavGroup[] = [
     { items: [{ name: "Dashboard", href: "/intra/marketing", icon: LayoutDashboard }] },
     {
+        label: "CRM",
+        items: [
+            { name: "Contacts", href: "/intra/marketing/crm/people", icon: Contact },
+            { name: "Organizations", href: "/intra/marketing/organizations", icon: Building2 },
+            { name: "Segments", href: "/intra/marketing/crm/segments", icon: Tags },
+            { name: "Import", href: "/intra/marketing/crm/import", icon: Upload },
+        ],
+    },
+    {
         label: "MARKETING",
         items: [
             { name: "Campaigns", href: "/intra/marketing/campaigns", icon: Megaphone },
             { name: "Leads", href: "/intra/marketing/leads", icon: TrendingUp },
-            { name: "Organizations", href: "/intra/marketing/organizations", icon: Building2 },
             { name: "Deals", href: "/intra/marketing/deals", icon: Handshake },
             { name: "Activities", href: "/intra/marketing/activities", icon: Activity },
             { name: "Content", href: "/intra/marketing/content", icon: FileText },
@@ -66,17 +75,6 @@ export function MarketingSidebar({ className }: { className?: string }) {
                     </div>
                 ))}
             </nav>
-            <div className="p-4 border-t border-zinc-800">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">{user?.avatarInitials ?? 'U'}</div>
-                        <div className="text-sm"><p className="text-white font-medium">{user?.name ?? 'User'}</p><p className="text-xs text-zinc-500">{user?.role ?? 'Viewer'}</p></div>
-                    </div>
-                    <button onClick={() => { logout(); window.location.href = '/'; }} className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors" title="Sign out">
-                        <LogOut className="h-4 w-4" />
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

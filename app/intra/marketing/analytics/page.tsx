@@ -27,44 +27,44 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-3xl font-bold tracking-tight text-white">Analytics</h2>
-                <p className="mt-2 text-zinc-400">마케팅 성과를 분석합니다.</p>
+                <h2 className="text-2xl font-bold">Analytics</h2>
+                <p className="mt-2 text-neutral-500">마케팅 성과를 분석합니다.</p>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-4 gap-4">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-                    <DollarSign className="h-5 w-5 text-emerald-400 mb-2" />
-                    <p className="text-2xl font-bold text-white">₩{(totalSpent / 10000).toLocaleString()}만</p>
-                    <p className="text-xs text-zinc-500">총 마케팅 집행</p>
+                <div className="border border-neutral-200 bg-white p-5">
+                    <DollarSign className="h-5 w-5 text-neutral-500 mb-2" />
+                    <p className="text-2xl font-bold">₩{(totalSpent / 10000).toLocaleString()}만</p>
+                    <p className="text-xs text-neutral-400">총 마케팅 집행</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-                    <TrendingUp className="h-5 w-5 text-indigo-400 mb-2" />
-                    <p className="text-2xl font-bold text-white">{wonLeads}건</p>
-                    <p className="text-xs text-zinc-500">성사 리드 (₩{(totalLeadValue / 10000).toLocaleString()}만)</p>
+                <div className="border border-neutral-200 bg-white p-5">
+                    <TrendingUp className="h-5 w-5 text-neutral-400 mb-2" />
+                    <p className="text-2xl font-bold">{wonLeads}건</p>
+                    <p className="text-xs text-neutral-400">성사 리드 (₩{(totalLeadValue / 10000).toLocaleString()}만)</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-                    <BarChart3 className="h-5 w-5 text-amber-400 mb-2" />
-                    <p className="text-2xl font-bold text-white">{publishedContent}건</p>
-                    <p className="text-xs text-zinc-500">발행 콘텐츠 (총 {totalEngagement} engagement)</p>
+                <div className="border border-neutral-200 bg-white p-5">
+                    <BarChart3 className="h-5 w-5 text-neutral-500 mb-2" />
+                    <p className="text-2xl font-bold">{publishedContent}건</p>
+                    <p className="text-xs text-neutral-400">발행 콘텐츠 (총 {totalEngagement} engagement)</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-                    <Users className="h-5 w-5 text-purple-400 mb-2" />
-                    <p className="text-2xl font-bold text-white">{activeCampaigns}개</p>
-                    <p className="text-xs text-zinc-500">진행 중 캠페인</p>
+                <div className="border border-neutral-200 bg-white p-5">
+                    <Users className="h-5 w-5 text-neutral-500 mb-2" />
+                    <p className="text-2xl font-bold">{activeCampaigns}개</p>
+                    <p className="text-xs text-neutral-400">진행 중 캠페인</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
                 {/* Lead Funnel */}
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-6">
-                    <h3 className="text-sm font-semibold text-white mb-4">리드 퍼널 전환</h3>
+                <div className="border border-neutral-200 bg-white p-6">
+                    <h3 className="text-sm font-semibold mb-4">리드 퍼널 전환</h3>
                     <div className="space-y-3">
                         {funnelData.map((f, idx) => (
                             <div key={f.stage} className="flex items-center gap-3">
-                                <span className="text-xs text-zinc-500 w-20">{f.stage}</span>
-                                <div className="flex-1 h-6 rounded bg-zinc-800 overflow-hidden">
-                                    <div className="h-full rounded bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center pl-2"
+                                <span className="text-xs text-neutral-400 w-20">{f.stage}</span>
+                                <div className="flex-1 h-6 bg-neutral-100 overflow-hidden">
+                                    <div className="h-full bg-neutral-900 flex items-center pl-2"
                                         style={{ width: `${(f.count / maxFunnel) * 100}%`, minWidth: f.count > 0 ? '24px' : '0' }}>
                                         {f.count > 0 && <span className="text-[10px] text-white font-bold">{f.count}</span>}
                                     </div>
@@ -75,18 +75,18 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Channel Performance */}
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-6">
-                    <h3 className="text-sm font-semibold text-white mb-4">채널별 콘텐츠 성과</h3>
+                <div className="border border-neutral-200 bg-white p-6">
+                    <h3 className="text-sm font-semibold mb-4">채널별 콘텐츠 성과</h3>
                     <div className="space-y-3">
                         {channelStats.map(ch => (
-                            <div key={ch.channel} className="flex items-center justify-between py-2 border-b border-zinc-800/50 last:border-0">
+                            <div key={ch.channel} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
                                 <div>
-                                    <p className="text-sm text-indigo-400">{ch.channel}</p>
-                                    <p className="text-[10px] text-zinc-600">{ch.count} posts</p>
+                                    <p className="text-sm text-neutral-500">{ch.channel}</p>
+                                    <p className="text-[10px] text-neutral-300">{ch.count} posts</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-medium text-white">{ch.engagement.toLocaleString()}</p>
-                                    <p className="text-[10px] text-zinc-600">engagement</p>
+                                    <p className="text-sm font-medium">{ch.engagement.toLocaleString()}</p>
+                                    <p className="text-[10px] text-neutral-300">engagement</p>
                                 </div>
                             </div>
                         ))}

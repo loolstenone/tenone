@@ -23,31 +23,31 @@ export default function CulturePage() {
     return (
         <div className="space-y-12 max-w-4xl mx-auto">
             <div>
-                <h1 className="text-3xl font-bold text-white">Culture</h1>
-                <p className="mt-2 text-zinc-400">&ldquo;우리는 컬처를 믿고, 컬처로 일합니다.&rdquo;</p>
+                <h1 className="text-2xl font-bold">Culture</h1>
+                <p className="mt-2 text-neutral-500">&ldquo;우리는 컬처를 믿고, 컬처로 일합니다.&rdquo;</p>
             </div>
 
             <section>
-                <h2 className="text-xl font-bold text-white mb-6">Core Value</h2>
+                <h2 className="text-xl font-bold mb-6">Core Value</h2>
                 <div className="grid md:grid-cols-3 gap-4">
                     {coreValues.map(v => (
-                        <div key={v.title} className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-6 text-center">
-                            <h3 className="text-lg font-bold text-indigo-400">{v.title}</h3>
-                            <p className="text-sm text-zinc-400 mt-2">{v.desc}</p>
+                        <div key={v.title} className="border border-neutral-200 bg-white p-6 text-center">
+                            <h3 className="text-lg font-bold text-neutral-400">{v.title}</h3>
+                            <p className="text-sm text-neutral-500 mt-2">{v.desc}</p>
                         </div>
                     ))}
                 </div>
             </section>
 
             <section>
-                <h2 className="text-xl font-bold text-white mb-6">Principle 10</h2>
+                <h2 className="text-xl font-bold mb-6">Principle 10</h2>
                 <div className="space-y-3">
                     {principles.map(p => (
-                        <div key={p.num} className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 flex items-start gap-4">
-                            <span className="text-2xl font-bold text-indigo-500 w-8 text-right shrink-0">{p.num}</span>
+                        <div key={p.num} className="border border-neutral-200 bg-white p-5 flex items-start gap-4">
+                            <span className="text-2xl font-bold text-neutral-400 w-8 text-right shrink-0">{p.num}</span>
                             <div>
-                                <p className="text-white font-medium">{p.title}</p>
-                                {p.sub && <p className="text-sm text-zinc-500 mt-0.5">{p.sub}</p>}
+                                <p className="font-medium">{p.title}</p>
+                                {p.sub && <p className="text-sm text-neutral-400 mt-0.5">{p.sub}</p>}
                             </div>
                         </div>
                     ))}

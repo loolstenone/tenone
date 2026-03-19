@@ -31,12 +31,12 @@ export default function AutomationPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Automation</h2>
-                    <p className="mt-2 text-zinc-400">자동화 규칙을 설정하고 관리합니다.</p>
+                    <h2 className="text-2xl font-bold">Automation</h2>
+                    <p className="mt-2 text-neutral-500">자동화 규칙을 설정하고 관리합니다.</p>
                 </div>
                 <button
                     onClick={() => { setEditingRule(null); setIsBuilderOpen(true); }}
-                    className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
+                    className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors"
                 >
                     <Plus className="h-4 w-4" />
                     New Automation
@@ -44,20 +44,20 @@ export default function AutomationPage() {
             </div>
 
             {/* Summary */}
-            <div className="flex items-center gap-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+            <div className="flex items-center gap-6 border border-neutral-200 bg-white p-4">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-amber-500/10 p-2">
-                        <Zap className="h-5 w-5 text-amber-500" />
+                    <div className="bg-neutral-100 p-2">
+                        <Zap className="h-5 w-5 text-neutral-500" />
                     </div>
                     <div>
-                        <p className="text-lg font-bold text-white">{activeCount}</p>
-                        <p className="text-xs text-zinc-500">Active Rules</p>
+                        <p className="text-lg font-bold">{activeCount}</p>
+                        <p className="text-xs text-neutral-400">Active Rules</p>
                     </div>
                 </div>
-                <div className="h-8 w-px bg-zinc-800" />
+                <div className="h-8 w-px bg-neutral-200" />
                 <div>
-                    <p className="text-lg font-bold text-white">{automations.length}</p>
-                    <p className="text-xs text-zinc-500">Total Rules</p>
+                    <p className="text-lg font-bold">{automations.length}</p>
+                    <p className="text-xs text-neutral-400">Total Rules</p>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@ export default function AutomationPage() {
                     />
                 ))}
                 {automations.length === 0 && (
-                    <div className="col-span-2 text-center py-16 text-zinc-500">
+                    <div className="col-span-2 text-center py-16 text-neutral-400">
                         No automation rules yet. Create one to get started.
                     </div>
                 )}

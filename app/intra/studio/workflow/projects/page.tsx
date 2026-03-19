@@ -24,15 +24,15 @@ export default function ProjectsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Brand Projects</h2>
-                    <p className="mt-2 text-zinc-400">브랜드별 프로젝트 진행 현황을 관리합니다.</p>
+                    <h2 className="text-2xl font-bold">Brand Projects</h2>
+                    <p className="mt-2 text-neutral-500">브랜드별 프로젝트 진행 현황을 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Filter className="h-4 w-4 text-zinc-500" />
+                    <Filter className="h-4 w-4 text-neutral-400" />
                     <select
                         value={brandFilter}
                         onChange={(e) => setBrandFilter(e.target.value)}
-                        className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                        className="border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
                     >
                         <option value="all">All Brands</option>
                         {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -40,7 +40,7 @@ export default function ProjectsPage() {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                        className="border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
                     >
                         <option value="all">All Status</option>
                         <option value="Active">Active</option>
@@ -52,31 +52,31 @@ export default function ProjectsPage() {
 
             {/* Summary */}
             <div className="grid grid-cols-3 gap-4">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center gap-4">
-                    <div className="rounded-lg bg-emerald-500/10 p-3">
-                        <FolderKanban className="h-5 w-5 text-emerald-500" />
+                <div className="border border-neutral-200 bg-white p-4 flex items-center gap-4">
+                    <div className="bg-neutral-100 p-3">
+                        <FolderKanban className="h-5 w-5 text-neutral-500" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-white">{activeCount}</p>
-                        <p className="text-xs text-zinc-500">Active Projects</p>
+                        <p className="text-2xl font-bold">{activeCount}</p>
+                        <p className="text-xs text-neutral-400">Active Projects</p>
                     </div>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center gap-4">
-                    <div className="rounded-lg bg-indigo-500/10 p-3">
-                        <FolderKanban className="h-5 w-5 text-indigo-500" />
+                <div className="border border-neutral-200 bg-white p-4 flex items-center gap-4">
+                    <div className="bg-neutral-100 p-3">
+                        <FolderKanban className="h-5 w-5 text-neutral-500" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-white">{projects.length}</p>
-                        <p className="text-xs text-zinc-500">Total Projects</p>
+                        <p className="text-2xl font-bold">{projects.length}</p>
+                        <p className="text-xs text-neutral-400">Total Projects</p>
                     </div>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center gap-4">
-                    <div className="rounded-lg bg-amber-500/10 p-3">
-                        <FolderKanban className="h-5 w-5 text-amber-500" />
+                <div className="border border-neutral-200 bg-white p-4 flex items-center gap-4">
+                    <div className="bg-neutral-100 p-3">
+                        <FolderKanban className="h-5 w-5 text-neutral-500" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-white">{avgProgress}%</p>
-                        <p className="text-xs text-zinc-500">Avg Progress</p>
+                        <p className="text-2xl font-bold">{avgProgress}%</p>
+                        <p className="text-xs text-neutral-400">Avg Progress</p>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@ export default function ProjectsPage() {
                     <ProjectCard key={project.id} project={project} />
                 ))}
                 {filteredProjects.length === 0 && (
-                    <div className="col-span-2 text-center py-16 text-zinc-500">
+                    <div className="col-span-2 text-center py-16 text-neutral-400">
                         No projects match the current filters.
                     </div>
                 )}

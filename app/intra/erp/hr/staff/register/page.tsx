@@ -9,8 +9,8 @@ import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 
 const roles: StaffRole[] = ['Admin', 'Manager', 'Editor', 'Viewer'];
-const inputClass = "w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white placeholder-zinc-600 focus:border-indigo-500 focus:outline-none";
-const labelClass = "block text-sm text-zinc-400 mb-1.5";
+const inputClass = "w-full border border-neutral-200 bg-white px-4 py-2.5 placeholder-neutral-300 focus:border-neutral-900 focus:outline-none";
+const labelClass = "block text-sm text-neutral-500 mb-1.5";
 
 export default function StaffRegisterPage() {
     const router = useRouter();
@@ -88,11 +88,11 @@ export default function StaffRegisterPage() {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
-                    <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-                        <UserPlus className="h-8 w-8 text-emerald-400" />
+                    <div className="h-16 w-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+                        <UserPlus className="h-8 w-8 text-neutral-500" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">직원이 등록되었습니다</h3>
-                    <p className="text-sm text-zinc-400 mt-2">{form.name} ({form.employeeId})</p>
+                    <h3 className="text-xl font-bold">직원이 등록되었습니다</h3>
+                    <p className="text-sm text-neutral-500 mt-2">{form.name} ({form.employeeId})</p>
                 </div>
             </div>
         );
@@ -100,19 +100,19 @@ export default function StaffRegisterPage() {
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
-            <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white transition-colors">
+            <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
                 <ArrowLeft className="h-4 w-4" /> Staff List
             </Link>
 
             <div>
-                <h2 className="text-3xl font-bold tracking-tight text-white">직원 등록</h2>
-                <p className="mt-2 text-zinc-400">새로운 직원을 시스템에 등록합니다.</p>
+                <h2 className="text-2xl font-bold">직원 등록</h2>
+                <p className="mt-2 text-neutral-500">새로운 직원을 시스템에 등록합니다.</p>
             </div>
 
             <form onSubmit={handleSubmit}>
                 {/* 기본 정보 */}
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
-                    <h3 className="text-sm font-semibold text-zinc-300 mb-5">기본 정보</h3>
+                <div className="border border-neutral-200 bg-white p-8 mb-6">
+                    <h3 className="text-sm font-semibold mb-5">기본 정보</h3>
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                             <div><label className={labelClass}>사번 *</label><input value={form.employeeId} onChange={e => setForm({...form, employeeId: e.target.value})} placeholder="2026-0001" required className={inputClass} /></div>
@@ -127,8 +127,8 @@ export default function StaffRegisterPage() {
                 </div>
 
                 {/* 조직 배치 */}
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
-                    <h3 className="text-sm font-semibold text-zinc-300 mb-5">조직 배치</h3>
+                <div className="border border-neutral-200 bg-white p-8 mb-6">
+                    <h3 className="text-sm font-semibold mb-5">조직 배치</h3>
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                             <div>
@@ -163,51 +163,51 @@ export default function StaffRegisterPage() {
                 </div>
 
                 {/* 시스템 접근 권한 (중복 선택) */}
-                <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-8 mb-6">
-                    <h3 className="text-sm font-semibold text-indigo-400 mb-2">시스템 접근 권한 (중복 선택)</h3>
-                    <p className="text-xs text-zinc-500 mb-4">부문 선택 시 기본 권한이 자동 할당됩니다. 필요에 따라 추가/제거하세요.</p>
+                <div className="border border-neutral-900 bg-neutral-50 p-8 mb-6">
+                    <h3 className="text-sm font-semibold text-neutral-900 mb-2">시스템 접근 권한 (중복 선택)</h3>
+                    <p className="text-xs text-neutral-400 mb-4">부문 선택 시 기본 권한이 자동 할당됩니다. 필요에 따라 추가/제거하세요.</p>
                     <div className="grid grid-cols-5 gap-3">
                         {accessOptions.map(opt => (
                             <button key={opt.id} type="button" onClick={() => toggleAccess(opt.id as SystemAccess)}
-                                className={`rounded-lg border px-3 py-3 text-center transition-colors ${
+                                className={`border px-3 py-3 text-center transition-colors ${
                                     form.accessLevel.includes(opt.id as SystemAccess)
-                                        ? 'border-indigo-500 bg-indigo-500/10'
-                                        : 'border-zinc-700 hover:border-zinc-600'
+                                        ? 'border-neutral-900 bg-neutral-100'
+                                        : 'border-neutral-200 hover:border-neutral-400'
                                 }`}>
-                                <p className={`text-xs font-medium ${form.accessLevel.includes(opt.id as SystemAccess) ? 'text-indigo-400' : 'text-zinc-300'}`}>{opt.label}</p>
-                                <p className="text-[10px] text-zinc-500 mt-0.5">{opt.desc}</p>
+                                <p className={`text-xs font-medium ${form.accessLevel.includes(opt.id as SystemAccess) ? 'text-neutral-900' : 'text-neutral-500'}`}>{opt.label}</p>
+                                <p className="text-[10px] text-neutral-400 mt-0.5">{opt.desc}</p>
                             </button>
                         ))}
                     </div>
                 </div>
 
                 {/* 소속 브랜드 */}
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
-                    <h3 className="text-sm font-semibold text-zinc-300 mb-4">소속 브랜드</h3>
+                <div className="border border-neutral-200 bg-white p-8 mb-6">
+                    <h3 className="text-sm font-semibold mb-4">소속 브랜드</h3>
                     <div className="flex flex-wrap gap-2">
                         {brandOptions.map(b => (
                             <button key={b.id} type="button" onClick={() => toggleBrand(b.id)}
-                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                                className={`px-3 py-1.5 text-xs font-medium transition-colors border ${
                                     form.brandAssociation.includes(b.id)
-                                        ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/50'
-                                        : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-600'
+                                        ? 'bg-neutral-900 text-white border-neutral-900'
+                                        : 'bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400'
                                 }`}>{b.name}</button>
                         ))}
                     </div>
                 </div>
 
                 {/* 임시 비밀번호 */}
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
+                <div className="border border-neutral-200 bg-white p-8 mb-6">
                     <label className={labelClass}>임시 비밀번호 *</label>
                     <input value={form.tempPassword} onChange={e => setForm({...form, tempPassword: e.target.value})} placeholder="직원에게 전달할 임시 비밀번호" required className={inputClass} />
-                    <p className="text-xs text-zinc-600 mt-1">직원이 최초 로그인 시 변경하도록 안내해주세요.</p>
+                    <p className="text-xs text-neutral-300 mt-1">직원이 최초 로그인 시 변경하도록 안내해주세요.</p>
                 </div>
 
-                {error && <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400 mb-6">{error}</div>}
+                {error && <div className="bg-neutral-100 border border-neutral-200 px-4 py-3 text-sm text-neutral-500 mb-6">{error}</div>}
 
                 <div className="flex items-center justify-between">
-                    <Link href="/intra/erp/hr/staff" className="text-sm text-zinc-400 hover:text-white transition-colors">취소</Link>
-                    <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                    <Link href="/intra/erp/hr/staff" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">취소</Link>
+                    <button type="submit" className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                         <UserPlus className="h-4 w-4" /> 직원 등록
                     </button>
                 </div>

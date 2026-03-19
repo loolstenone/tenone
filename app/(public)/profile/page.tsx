@@ -6,9 +6,9 @@ import { useAuth } from "@/lib/auth-context";
 import { Save, ArrowLeft, Shield, User, Building2 } from "lucide-react";
 import Link from "next/link";
 
-const inputClass = "w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white placeholder-zinc-600 focus:border-indigo-500 focus:outline-none";
-const disabledClass = "w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-500 cursor-not-allowed";
-const labelClass = "block text-sm text-zinc-400 mb-1.5";
+const inputClass = "w-full border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none placeholder:text-neutral-400 bg-white";
+const disabledClass = "w-full border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-sm text-neutral-400 cursor-not-allowed";
+const labelClass = "block text-sm text-neutral-500 mb-1.5";
 
 export default function ProfilePage() {
     const { user, isAuthenticated, isLoading, isStaff, updateProfile } = useAuth();
@@ -49,32 +49,32 @@ export default function ProfilePage() {
     };
 
     const accountLabel = isStaff ? 'Staff' : 'Member';
-    const accountColor = isStaff ? 'bg-indigo-500/10 text-indigo-400' : 'bg-emerald-500/10 text-emerald-400';
+    const accountColor = isStaff ? 'bg-neutral-900 text-neutral-900' : 'bg-neutral-200 text-neutral-700';
 
     return (
         <div className="max-w-2xl mx-auto py-8">
-            <Link href="/" className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white mb-8 transition-colors">
+            <Link href="/" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 mb-8 transition-colors">
                 <ArrowLeft className="h-4 w-4" /> 홈으로
             </Link>
 
-            <h1 className="text-3xl font-bold text-white mb-2">프로필</h1>
-            <p className="text-zinc-400 mb-8">내 정보를 관리합니다.</p>
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">프로필</h1>
+            <p className="text-neutral-500 mb-8">내 정보를 관리합니다.</p>
 
             {/* Avatar + Badge */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-8 mb-6">
                 <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl">
+                    <div className="h-16 w-16 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-900 font-bold text-xl">
                         {user.avatarInitials}
                     </div>
                     <div>
-                        <p className="text-lg font-semibold text-white">{user.name}</p>
-                        <p className="text-sm text-zinc-500">{user.email}</p>
+                        <p className="text-lg font-semibold text-neutral-900">{user.name}</p>
+                        <p className="text-sm text-neutral-400">{user.email}</p>
                         <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${accountColor}`}>
                                 {accountLabel}
                             </span>
-                            <span className="text-xs text-zinc-600">{user.role}</span>
-                            {user.createdAt && <span className="text-xs text-zinc-700">가입일: {user.createdAt}</span>}
+                            <span className="text-xs text-neutral-400">{user.role}</span>
+                            {user.createdAt && <span className="text-xs text-neutral-400">가입일: {user.createdAt}</span>}
                         </div>
                     </div>
                 </div>
@@ -83,9 +83,9 @@ export default function ProfilePage() {
             {/* Profile Form */}
             <form onSubmit={handleSave}>
                 {/* 기본 정보 */}
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 mb-6">
-                    <h2 className="text-sm font-semibold text-zinc-300 mb-5 flex items-center gap-2">
-                        <User className="h-4 w-4 text-zinc-500" /> 기본 정보
+                <div className="rounded-2xl border border-neutral-200 bg-white p-8 mb-6">
+                    <h2 className="text-sm font-semibold text-neutral-700 mb-5 flex items-center gap-2">
+                        <User className="h-4 w-4 text-neutral-400" /> 기본 정보
                     </h2>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -117,8 +117,8 @@ export default function ProfilePage() {
 
                 {/* 직원 전용 정보 */}
                 {isStaff && (
-                    <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-8 mb-6">
-                        <h2 className="text-sm font-semibold text-indigo-400 mb-5 flex items-center gap-2">
+                    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-8 mb-6">
+                        <h2 className="text-sm font-semibold text-neutral-700 mb-5 flex items-center gap-2">
                             <Shield className="h-4 w-4" /> 직원 정보
                         </h2>
                         <div className="space-y-4">
@@ -162,8 +162,8 @@ export default function ProfilePage() {
 
                 {/* 기업 회원 전용 */}
                 {!isStaff && user.company && (
-                    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-8 mb-6">
-                        <h2 className="text-sm font-semibold text-emerald-400 mb-5 flex items-center gap-2">
+                    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-8 mb-6">
+                        <h2 className="text-sm font-semibold text-neutral-600 mb-5 flex items-center gap-2">
                             <Building2 className="h-4 w-4" /> 기업 정보
                         </h2>
                         <div className="space-y-4">
@@ -193,9 +193,9 @@ export default function ProfilePage() {
 
                 {/* Save */}
                 <div className="flex items-center justify-between">
-                    {saved && <span className="text-sm text-emerald-400">저장되었습니다!</span>}
+                    {saved && <span className="text-sm text-neutral-600">저장되었습니다!</span>}
                     {!saved && <div />}
-                    <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                    <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-neutral-900 text-sm font-medium text-neutral-900 hover:bg-neutral-800 transition-colors">
                         <Save className="h-4 w-4" /> 저장
                     </button>
                 </div>

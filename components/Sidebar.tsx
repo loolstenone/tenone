@@ -253,27 +253,6 @@ export function Sidebar({ className }: SidebarProps) {
         ))}
       </nav>
 
-      {/* User profile */}
-      <div className="p-4 border-t border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">
-              {user?.avatarInitials ?? "U"}
-            </div>
-            <div className="text-sm">
-              <p className="text-white font-medium">{user?.name ?? "User"}</p>
-              <p className="text-xs text-zinc-500">{user?.role ?? "Viewer"}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
-            title="Sign out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -7,10 +7,10 @@ export default function BrandsPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Brands & IPs</h2>
-                    <p className="mt-2 text-zinc-400">Manage Ten:One™ Universe brands, projects, and creator profiles.</p>
+                    <h2 className="text-2xl font-bold">Brands & IPs</h2>
+                    <p className="mt-1 text-sm text-neutral-500">Ten:One™ Universe 브랜드 및 프로젝트 관리</p>
                 </div>
-                <button className="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                <button className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-4 w-4" />
                     Add New Brand
                 </button>

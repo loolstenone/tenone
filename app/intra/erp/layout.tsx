@@ -18,8 +18,8 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     }, [isLoading, isAuthenticated, router]);
 
     if (isLoading) return (
-        <div className="h-full bg-black flex items-center justify-center">
-            <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        <div className="h-full bg-neutral-50 flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
         </div>
     );
 
@@ -27,12 +27,12 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
 
     if (!isStaff) {
         return (
-            <div className="h-full bg-black flex items-center justify-center px-4">
+            <div className="h-full bg-neutral-50 flex items-center justify-center px-4">
                 <div className="text-center max-w-md">
                     <ShieldAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-white mb-2">접근 권한이 없습니다</h2>
-                    <p className="text-zinc-400 text-sm mb-6">접근이 허용되지 않았습니다. 관리자에게 권한을 요청하세요.</p>
-                    <button onClick={() => window.location.href = '/'} className="px-6 py-2.5 rounded-lg bg-zinc-800 text-sm text-white hover:bg-zinc-700 transition-colors">
+                    <h2 className="text-xl font-bold text-neutral-900 mb-2">접근 권한이 없습니다</h2>
+                    <p className="text-neutral-500 text-sm mb-6">접근이 허용되지 않았습니다. 관리자에게 권한을 요청하세요.</p>
+                    <button onClick={() => window.location.href = '/'} className="px-6 py-2.5 rounded-lg bg-neutral-900 text-sm text-neutral-900 hover:bg-neutral-800 transition-colors">
                         홈으로 돌아가기
                     </button>
                 </div>
@@ -41,7 +41,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="h-full bg-black">
+        <div className="h-full bg-neutral-50">
             <CrmProvider>
                 <StaffProvider>
                     <GprProvider>

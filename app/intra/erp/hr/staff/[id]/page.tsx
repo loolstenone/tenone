@@ -7,9 +7,9 @@ import { brandOptions } from "@/lib/staff-data";
 import Link from "next/link";
 import { ArrowLeft, Save, User, Shield, Target, TrendingUp, Calendar } from "lucide-react";
 
-const inputClass = "w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-white placeholder-zinc-600 focus:border-indigo-500 focus:outline-none";
-const disabledClass = "w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-500 cursor-not-allowed";
-const labelClass = "block text-sm text-zinc-400 mb-1.5";
+const inputClass = "w-full border border-neutral-200 bg-white px-4 py-2.5 placeholder-neutral-300 focus:border-neutral-900 focus:outline-none";
+const disabledClass = "w-full border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-neutral-400 cursor-not-allowed";
+const labelClass = "block text-sm text-neutral-500 mb-1.5";
 
 type Tab = 'profile' | 'gpr';
 
@@ -31,9 +31,6 @@ const mockGprGoals: GprGoal[] = [
     { id: 'g5', title: 'Vrief 프레임워크 매드리그 교육 적용', type: 'Quarterly', status: 'In Progress', progress: 40, description: '매드리그 대학생 대상 Vrief 3Step 교육 프로그램 운영' },
 ];
 
-const statusColor: Record<string, string> = { 'In Progress': 'text-blue-400 bg-blue-500/10', 'Completed': 'text-emerald-400 bg-emerald-500/10', 'Not Started': 'text-zinc-400 bg-zinc-800' };
-const typeColor: Record<string, string> = { Personal: 'text-purple-400', Quarterly: 'text-amber-400', Yearly: 'text-indigo-400' };
-
 export default function StaffDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -42,7 +39,7 @@ export default function StaffDetailPage() {
     const [saved, setSaved] = useState(false);
 
     const member = getStaffById(params.id as string);
-    if (!member) return <div className="text-zinc-500 text-center py-20">직원을 찾을 수 없습니다.</div>;
+    if (!member) return <div className="text-neutral-400 text-center py-20">직원을 찾을 수 없습니다.</div>;
 
     // Personal editable fields
     const [phone, setPhone] = useState(member.phone ?? '');
@@ -60,28 +57,28 @@ export default function StaffDetailPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white transition-colors">
+            <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
                 <ArrowLeft className="h-4 w-4" /> Staff List
             </Link>
 
             {/* Header */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-6 flex items-center gap-6">
-                <div className="h-20 w-20 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-2xl">
+            <div className="border border-neutral-200 bg-white p-6 flex items-center gap-6">
+                <div className="h-20 w-20 rounded-full bg-neutral-900 flex items-center justify-center text-white font-bold text-2xl">
                     {member.avatarInitials}
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-white">{member.name}</h1>
-                    <p className="text-sm text-zinc-400">{member.position} · {member.department}</p>
+                    <h1 className="text-2xl font-bold">{member.name}</h1>
+                    <p className="text-sm text-neutral-500">{member.position} · {member.department}</p>
                     <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs font-mono text-zinc-500">{member.employeeId}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400">{member.role}</span>
-                        <span className="text-xs text-zinc-600">{member.accessLevel.join(', ')}</span>
+                        <span className="text-xs font-mono text-neutral-400">{member.employeeId}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span>
+                        <span className="text-xs text-neutral-300">{member.accessLevel.join(', ')}</span>
                     </div>
                     {member.brandAssociation.length > 0 && (
                         <div className="flex gap-1 mt-2">
                             {member.brandAssociation.map(b => {
                                 const brand = brandOptions.find(bo => bo.id === b);
-                                return <span key={b} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{brand?.name ?? b}</span>;
+                                return <span key={b} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{brand?.name ?? b}</span>;
                             })}
                         </div>
                     )}
@@ -89,11 +86,11 @@ export default function StaffDetailPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 border-b border-zinc-800">
-                <button onClick={() => setTab('profile')} className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${tab === 'profile' ? 'text-white border-indigo-500' : 'text-zinc-500 border-transparent hover:text-zinc-300'}`}>
+            <div className="flex gap-1 border-b border-neutral-200">
+                <button onClick={() => setTab('profile')} className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${tab === 'profile' ? 'border-neutral-900' : 'text-neutral-400 border-transparent hover:text-neutral-600'}`}>
                     <User className="h-4 w-4 inline mr-1.5" />Profile
                 </button>
-                <button onClick={() => setTab('gpr')} className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${tab === 'gpr' ? 'text-white border-indigo-500' : 'text-zinc-500 border-transparent hover:text-zinc-300'}`}>
+                <button onClick={() => setTab('gpr')} className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${tab === 'gpr' ? 'border-neutral-900' : 'text-neutral-400 border-transparent hover:text-neutral-600'}`}>
                     <Target className="h-4 w-4 inline mr-1.5" />GPR
                 </button>
             </div>
@@ -102,9 +99,9 @@ export default function StaffDetailPage() {
             {tab === 'profile' && (
                 <form onSubmit={handleSaveProfile} className="space-y-6">
                     {/* 시스템 정보 (읽기 전용) */}
-                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-6">
-                        <h3 className="text-sm font-semibold text-zinc-300 mb-4 flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-indigo-500" /> 시스템 정보 (관리자만 수정)
+                    <div className="border border-neutral-200 bg-white p-6">
+                        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-neutral-400" /> 시스템 정보 (관리자만 수정)
                         </h3>
                         <div className="grid grid-cols-3 gap-4">
                             <div><label className={labelClass}>사번</label><input value={member.employeeId} disabled className={disabledClass} /></div>
@@ -119,9 +116,9 @@ export default function StaffDetailPage() {
                     </div>
 
                     {/* 개인 수정 영역 */}
-                    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-                        <h3 className="text-sm font-semibold text-emerald-400 mb-4 flex items-center gap-2">
-                            <User className="h-4 w-4" /> 개인 정보 (본인 수정)
+                    <div className="border border-neutral-200 bg-white p-6">
+                        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <User className="h-4 w-4 text-neutral-500" /> 개인 정보 (본인 수정)
                         </h3>
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -135,9 +132,9 @@ export default function StaffDetailPage() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                        {saved && <span className="text-sm text-emerald-400">저장되었습니다!</span>}
+                        {saved && <span className="text-sm text-neutral-900">저장되었습니다!</span>}
                         {!saved && <div />}
-                        <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                        <button type="submit" className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                             <Save className="h-4 w-4" /> 저장
                         </button>
                     </div>
@@ -149,17 +146,17 @@ export default function StaffDetailPage() {
                 <div className="space-y-6">
                     {/* GPR Summary */}
                     <div className="grid grid-cols-3 gap-4">
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-center">
-                            <p className="text-2xl font-bold text-white">{mockGprGoals.filter(g => g.type === 'Yearly').length}</p>
-                            <p className="text-xs text-indigo-400 mt-1">Yearly Goals</p>
+                        <div className="border border-neutral-200 bg-white p-4 text-center">
+                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.type === 'Yearly').length}</p>
+                            <p className="text-xs text-neutral-500 mt-1">Yearly Goals</p>
                         </div>
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-center">
-                            <p className="text-2xl font-bold text-white">{mockGprGoals.filter(g => g.type === 'Quarterly').length}</p>
-                            <p className="text-xs text-amber-400 mt-1">Quarterly Goals</p>
+                        <div className="border border-neutral-200 bg-white p-4 text-center">
+                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.type === 'Quarterly').length}</p>
+                            <p className="text-xs text-neutral-500 mt-1">Quarterly Goals</p>
                         </div>
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-center">
-                            <p className="text-2xl font-bold text-white">{mockGprGoals.filter(g => g.status === 'Completed').length}/{mockGprGoals.length}</p>
-                            <p className="text-xs text-emerald-400 mt-1">Completed</p>
+                        <div className="border border-neutral-200 bg-white p-4 text-center">
+                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.status === 'Completed').length}/{mockGprGoals.length}</p>
+                            <p className="text-xs text-neutral-500 mt-1">Completed</p>
                         </div>
                     </div>
 
@@ -172,27 +169,27 @@ export default function StaffDetailPage() {
                         const Icon = typeIcons[type];
                         return (
                             <div key={type}>
-                                <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${typeColor[type]}`}>
+                                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-neutral-500">
                                     <Icon className="h-4 w-4" /> {typeLabels[type]}
                                 </h3>
                                 <div className="space-y-3">
                                     {goals.map(goal => (
-                                        <div key={goal.id} className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:border-zinc-600 transition-colors">
+                                        <div key={goal.id} className="border border-neutral-200 bg-white p-5 hover:border-neutral-400 transition-colors">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <h4 className="text-sm font-medium text-white">{goal.title}</h4>
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor[goal.status]}`}>{goal.status}</span>
+                                                        <h4 className="text-sm font-medium">{goal.title}</h4>
+                                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
                                                     </div>
-                                                    <p className="text-sm text-zinc-400 mt-1">{goal.description}</p>
+                                                    <p className="text-sm text-neutral-500 mt-1">{goal.description}</p>
                                                 </div>
-                                                {goal.dueDate && <span className="text-xs text-zinc-600 shrink-0 ml-4">{goal.dueDate}</span>}
+                                                {goal.dueDate && <span className="text-xs text-neutral-300 shrink-0 ml-4">{goal.dueDate}</span>}
                                             </div>
                                             <div className="mt-3 flex items-center gap-3">
-                                                <div className="flex-1 h-2 rounded-full bg-zinc-800 overflow-hidden">
-                                                    <div className={`h-full rounded-full transition-all ${goal.progress === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`} style={{ width: `${goal.progress}%` }} />
+                                                <div className="flex-1 h-2 bg-neutral-200 overflow-hidden">
+                                                    <div className="h-full bg-neutral-900 transition-all" style={{ width: `${goal.progress}%` }} />
                                                 </div>
-                                                <span className="text-xs text-zinc-400 w-10 text-right">{goal.progress}%</span>
+                                                <span className="text-xs text-neutral-500 w-10 text-right">{goal.progress}%</span>
                                             </div>
                                         </div>
                                     ))}

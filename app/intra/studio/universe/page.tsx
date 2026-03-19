@@ -14,19 +14,19 @@ export default function UniversePage() {
         <div className="space-y-8 pb-12">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Universe Visualization</h2>
-                    <p className="mt-2 text-zinc-400">The structure and history of Ten:One™ Universe.</p>
+                    <h2 className="text-2xl font-bold">Universe Visualization</h2>
+                    <p className="mt-2 text-neutral-500">The structure and history of Ten:One™ Universe.</p>
                 </div>
-                <div className="flex items-center bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200">
                     <button
                         onClick={() => setView('timeline')}
-                        className={clsx("flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm font-medium", view === 'timeline' ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white")}
+                        className={clsx("flex items-center gap-2 px-4 py-2 transition-colors text-sm font-medium", view === 'timeline' ? "bg-white" : "text-neutral-500 hover:text-neutral-900")}
                     >
                         <GitGraph className="h-4 w-4" /> Timeline
                     </button>
                     <button
                         onClick={() => setView('graph')}
-                        className={clsx("flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm font-medium", view === 'graph' ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white")}
+                        className={clsx("flex items-center gap-2 px-4 py-2 transition-colors text-sm font-medium", view === 'graph' ? "bg-white" : "text-neutral-500 hover:text-neutral-900")}
                     >
                         <Network className="h-4 w-4" /> Relationships
                     </button>

@@ -40,45 +40,45 @@ export default function SchedulePage() {
             {/* Page Header & Controls */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Schedule</h2>
-                    <p className="mt-2 text-zinc-400">Integrated calendar for Ten:One™ Universe events.</p>
+                    <h2 className="text-2xl font-bold">Schedule</h2>
+                    <p className="mt-2 text-neutral-500">Integrated calendar for Ten:One™ Universe events.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                    <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200">
                         <button
                             onClick={() => setView('month')}
-                            className={clsx("p-2 rounded-md transition-colors", view === 'month' ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white")}
+                            className={clsx("p-2 transition-colors", view === 'month' ? "bg-white" : "text-neutral-500 hover:text-neutral-900")}
                         >
                             <CalendarIcon className="h-5 w-5" />
                         </button>
                         <button
                             onClick={() => setView('list')}
-                            className={clsx("p-2 rounded-md transition-colors", view === 'list' ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white")}
+                            className={clsx("p-2 transition-colors", view === 'list' ? "bg-white" : "text-neutral-500 hover:text-neutral-900")}
                         >
                             <List className="h-5 w-5" />
                         </button>
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-sm font-medium transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium transition-colors">
                         + New Event
                     </button>
                 </div>
             </div>
 
             {/* Calendar View Container */}
-            <div className="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
+            <div className="flex-1 bg-white border border-neutral-200 overflow-hidden flex flex-col">
                 {/* Calendar Header Nav */}
-                <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900/50">
-                    <h3 className="text-xl font-semibold text-white">
+                <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
+                    <h3 className="text-xl font-semibold">
                         {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                     </h3>
                     <div className="flex items-center gap-2">
-                        <button onClick={prevMonth} className="p-2 hover:bg-zinc-800 rounded-full text-zinc-400 hover:text-white">
+                        <button onClick={prevMonth} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500 hover:text-neutral-900">
                             <ChevronLeft className="h-5 w-5" />
                         </button>
-                        <button onClick={(() => setCurrentDate(new Date()))} className="text-sm text-zinc-400 hover:text-white px-3 font-medium">
+                        <button onClick={(() => setCurrentDate(new Date()))} className="text-sm text-neutral-500 hover:text-neutral-900 px-3 font-medium">
                             Today
                         </button>
-                        <button onClick={nextMonth} className="p-2 hover:bg-zinc-800 rounded-full text-zinc-400 hover:text-white">
+                        <button onClick={nextMonth} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500 hover:text-neutral-900">
                             <ChevronRight className="h-5 w-5" />
                         </button>
                     </div>
@@ -88,7 +88,7 @@ export default function SchedulePage() {
                     <div className="flex-1 grid grid-cols-7 grid-rows-[auto_1fr] h-full overflow-hidden">
                         {/* Weekday Headers */}
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                            <div key={day} className="py-2 text-center text-sm font-medium text-zinc-500 border-b border-zinc-800 border-r border-zinc-800 last:border-r-0 bg-zinc-900/30">
+                            <div key={day} className="py-2 text-center text-sm font-medium text-neutral-400 border-b border-neutral-200 border-r border-neutral-200 last:border-r-0 bg-neutral-50">
                                 {day}
                             </div>
                         ))}
@@ -96,22 +96,22 @@ export default function SchedulePage() {
                         {/* Calendar Grid */}
                         <div className="col-span-7 grid grid-cols-7 auto-rows-fr overflow-y-auto">
                             {blanks.map(blank => (
-                                <div key={`blank-${blank}`} className="min-h-[100px] border-b border-r border-zinc-800 bg-zinc-950/30" />
+                                <div key={`blank-${blank}`} className="min-h-[100px] border-b border-r border-neutral-200 bg-neutral-50/30" />
                             ))}
                             {days.map(day => {
                                 const dayEvents = getEventsForDay(day);
                                 const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
 
                                 return (
-                                    <div key={day} className={clsx("min-h-[100px] p-2 border-b border-r border-zinc-800 hover:bg-zinc-900/20 transition-colors relative group", isToday && "bg-indigo-500/5")}>
+                                    <div key={day} className={clsx("min-h-[100px] p-2 border-b border-r border-neutral-200 hover:bg-neutral-50 transition-colors relative group", isToday && "bg-neutral-100")}>
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className={clsx("text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full", isToday ? "bg-indigo-600 text-white" : "text-zinc-400")}>
+                                            <span className={clsx("text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full", isToday ? "bg-neutral-900 text-white" : "text-neutral-500")}>
                                                 {day}
                                             </span>
                                         </div>
                                         <div className="space-y-1">
                                             {dayEvents.map(event => (
-                                                <div key={event.id} className="px-2 py-1 rounded text-xs truncate bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/30">
+                                                <div key={event.id} className="px-2 py-1 text-xs truncate bg-neutral-100 border border-neutral-200 cursor-pointer hover:bg-neutral-200">
                                                     <span className="font-bold mr-1">[{getBrandName(event.brandId)}]</span>
                                                     {event.title}
                                                 </div>
@@ -129,34 +129,31 @@ export default function SchedulePage() {
                             {events
                                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                                 .map(event => (
-                                    <div key={event.id} className="flex gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 transition-colors">
+                                    <div key={event.id} className="flex gap-4 p-4 border border-neutral-200 bg-white hover:border-neutral-400 transition-colors">
                                         <div className="flex-shrink-0 w-16 text-center pt-1">
-                                            <div className="text-xl font-bold text-white">{new Date(event.date).getDate()}</div>
-                                            <div className="text-xs text-zinc-500 uppercase">{new Date(event.date).toLocaleString('default', { month: 'short' })}</div>
+                                            <div className="text-xl font-bold">{new Date(event.date).getDate()}</div>
+                                            <div className="text-xs text-neutral-400 uppercase">{new Date(event.date).toLocaleString('default', { month: 'short' })}</div>
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                     {getBrandName(event.brandId)}
                                                 </span>
-                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
+                                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                     {event.type}
                                                 </span>
                                                 {event.time && (
-                                                    <span className="flex items-center text-xs text-zinc-500">
+                                                    <span className="flex items-center text-xs text-neutral-400">
                                                         <Clock className="w-3 h-3 mr-1" />
                                                         {event.time}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h4 className="text-lg font-medium text-white">{event.title}</h4>
-                                            {event.description && <p className="text-sm text-zinc-400 mt-1">{event.description}</p>}
+                                            <h4 className="text-lg font-medium">{event.title}</h4>
+                                            {event.description && <p className="text-sm text-neutral-500 mt-1">{event.description}</p>}
                                         </div>
                                         <div className="flex flex-col items-end justify-center">
-                                            <span className={clsx("text-xs px-2 py-1 rounded-full font-medium",
-                                                event.status === 'Completed' ? "bg-emerald-500/10 text-emerald-500" :
-                                                    event.status === 'Scheduled' ? "bg-blue-500/10 text-blue-500" : "bg-zinc-800 text-zinc-500"
-                                            )}>
+                                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                 {event.status}
                                             </span>
                                         </div>
