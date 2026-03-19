@@ -41,34 +41,34 @@ export function PersonModal({ person, isOpen, onClose, onSave }: PersonModalProp
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl mx-4 max-h-[85vh] overflow-y-auto">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl mx-4 max-h-[85vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-white">{person ? 'Edit Contact' : 'New Contact'}</h3>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white"><X className="h-5 w-5" /></button>
+                    <h3 className="text-lg font-semibold text-neutral-900">{person ? 'Edit Contact' : 'New Contact'}</h3>
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900"><X className="h-5 w-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm text-zinc-400 mb-1">Name *</label><input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
-                        <div><label className="block text-sm text-zinc-400 mb-1">Email *</label><input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label className="block text-sm text-neutral-500 mb-1">Name *</label><input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
+                        <div><label className="block text-sm text-neutral-500 mb-1">Email *</label><input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm text-zinc-400 mb-1">Type</label><select value={form.type} onChange={e => setForm({...form, type: e.target.value as PersonType})} className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none">{types.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
-                        <div><label className="block text-sm text-zinc-400 mb-1">Status</label><select value={form.status} onChange={e => setForm({...form, status: e.target.value as PersonStatus})} className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none">{statuses.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label className="block text-sm text-neutral-500 mb-1">Type</label><select value={form.type} onChange={e => setForm({...form, type: e.target.value as PersonType})} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none">{types.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                        <div><label className="block text-sm text-neutral-500 mb-1">Status</label><select value={form.status} onChange={e => setForm({...form, status: e.target.value as PersonStatus})} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none">{statuses.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm text-zinc-400 mb-1">Company</label><input value={form.company} onChange={e => setForm({...form, company: e.target.value})} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
-                        <div><label className="block text-sm text-zinc-400 mb-1">Position</label><input value={form.position} onChange={e => setForm({...form, position: e.target.value})} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label className="block text-sm text-neutral-500 mb-1">Company</label><input value={form.company} onChange={e => setForm({...form, company: e.target.value})} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
+                        <div><label className="block text-sm text-neutral-500 mb-1">Position</label><input value={form.position} onChange={e => setForm({...form, position: e.target.value})} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm text-zinc-400 mb-1">Source</label><input value={form.source} onChange={e => setForm({...form, source: e.target.value})} placeholder="MADLeap, Badak, Referral..." className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
-                        <div><label className="block text-sm text-zinc-400 mb-1">Cohort</label><input value={form.cohort} onChange={e => setForm({...form, cohort: e.target.value})} placeholder="MADLeap 5기" className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label className="block text-sm text-neutral-500 mb-1">Source</label><input value={form.source} onChange={e => setForm({...form, source: e.target.value})} placeholder="MADLeap, Badak, Referral..." className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
+                        <div><label className="block text-sm text-neutral-500 mb-1">Cohort</label><input value={form.cohort} onChange={e => setForm({...form, cohort: e.target.value})} placeholder="MADLeap 5기" className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
                     </div>
-                    <div><label className="block text-sm text-zinc-400 mb-1">Tags (comma separated)</label><input value={form.tags} onChange={e => setForm({...form, tags: e.target.value})} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none" /></div>
-                    <div><label className="block text-sm text-zinc-400 mb-1">Notes</label><textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={2} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none resize-none" /></div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:text-white">Cancel</button>
-                        <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500">
+                    <div><label className="block text-sm text-neutral-500 mb-1">Tags (comma separated)</label><input value={form.tags} onChange={e => setForm({...form, tags: e.target.value})} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Notes</label><textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={2} className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 focus:border-indigo-500 focus:outline-none resize-none" /></div>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-900">Cancel</button>
+                        <button type="submit" className="px-4 py-2 rounded-lg bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800">
                             {person ? 'Save Changes' : 'Create Contact'}
                         </button>
                     </div>

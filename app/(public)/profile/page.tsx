@@ -88,7 +88,7 @@ export default function ProfilePage() {
                         <User className="h-4 w-4 text-neutral-400" /> 기본 정보
                     </h2>
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>이름</label>
                                 <input value={name} onChange={e => setName(e.target.value)} required className={inputClass} />
@@ -98,7 +98,7 @@ export default function ProfilePage() {
                                 <input value={user.email} disabled className={disabledClass} />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>연락처</label>
                                 <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="010-0000-0000" className={inputClass} />
@@ -122,7 +122,7 @@ export default function ProfilePage() {
                             <Shield className="h-4 w-4" /> 직원 정보
                         </h2>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label className={labelClass}>사번</label>
                                     <input value={employeeId} onChange={e => setEmployeeId(e.target.value)} placeholder="TEN-001" className={inputClass} />
@@ -136,7 +136,7 @@ export default function ProfilePage() {
                                     <input value={position} onChange={e => setPosition(e.target.value)} placeholder="디렉터" className={inputClass} />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>입사일</label>
                                     <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputClass} />
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                                     <input value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} placeholder="가족 연락처" className={inputClass} />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>권한</label>
                                     <input value={user.role} disabled className={disabledClass} />
@@ -167,7 +167,7 @@ export default function ProfilePage() {
                             <Building2 className="h-4 w-4" /> 기업 정보
                         </h2>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>회사명</label>
                                     <input value={company} onChange={e => setCompany(e.target.value)} className={inputClass} />
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                                     <input placeholder="마케팅, IT, 제조업 등" className={inputClass} />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>회사 웹사이트</label>
                                     <input placeholder="https://company.com" className={inputClass} />
