@@ -1,8 +1,0 @@
-{
-  "/intra/erp/page": "app/intra/erp/page.js",
-  "/intra/marketing/page": "app/intra/marketing/page.js",
-  "/intra/page": "app/intra/page.js",
-  "/intra/studio/page": "app/intra/studio/page.js",
-  "/intra/wiki/page": "app/intra/wiki/page.js",
-  "/page": "app/page.js"
-}
