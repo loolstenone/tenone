@@ -27,7 +27,7 @@ export default function ContactPage() {
                 </div>
             </section>
 
-            <section className="max-w-7xl mx-auto px-6 pb-32 grid lg:grid-cols-12 gap-16">
+            <section className="max-w-7xl mx-auto px-6 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-16">
                 {/* Left — Contact Info */}
                 <div className="lg:col-span-4 space-y-8">
                     <div className="border border-neutral-200 p-6">

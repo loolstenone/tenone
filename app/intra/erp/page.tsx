@@ -11,10 +11,10 @@ export default function ErpDashboard() {
     const recentActivities = [...activities].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
     const stats = [
-        { name: "People", value: people.length, icon: Users, href: "/intra/erp/crm/people", change: `${people.filter(p => p.status === 'Active').length} Active` },
-        { name: "Organizations", value: organizations.length, icon: Building2, href: "/intra/erp/crm/organizations", change: `${organizations.filter(o => o.status === 'Active').length} Active` },
-        { name: "Active Deals", value: activeDeals.length, icon: Handshake, href: "/intra/erp/crm/deals", change: `₩${(totalDealValue / 10000).toLocaleString()}만` },
-        { name: "Activities", value: activities.length, icon: Activity, href: "/intra/erp/crm/activities", change: "This month" },
+        { name: "People", value: people.length, icon: Users, href: "/intra/marketing/crm/people", change: `${people.filter(p => p.status === 'Active').length} Active` },
+        { name: "Organizations", value: organizations.length, icon: Building2, href: "/intra/marketing/crm/organizations", change: `${organizations.filter(o => o.status === 'Active').length} Active` },
+        { name: "Active Deals", value: activeDeals.length, icon: Handshake, href: "/intra/marketing/crm/deals", change: `₩${(totalDealValue / 10000).toLocaleString()}만` },
+        { name: "Activities", value: activities.length, icon: Activity, href: "/intra/marketing/crm/activities", change: "This month" },
     ];
 
     return (
@@ -46,7 +46,7 @@ export default function ErpDashboard() {
                 <div className="border border-neutral-200 bg-white">
                     <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center">
                         <h3 className="text-sm font-semibold">Recent Activities</h3>
-                        <Link href="/intra/erp/crm/activities" className="text-xs text-neutral-400 hover:text-neutral-900">View All</Link>
+                        <Link href="/intra/marketing/crm/activities" className="text-xs text-neutral-400 hover:text-neutral-900">View All</Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
                         {recentActivities.map(act => (
@@ -67,7 +67,7 @@ export default function ErpDashboard() {
                 <div className="border border-neutral-200 bg-white">
                     <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center">
                         <h3 className="text-sm font-semibold">Deal Pipeline</h3>
-                        <Link href="/intra/erp/crm/deals" className="text-xs text-neutral-400 hover:text-neutral-900">View All</Link>
+                        <Link href="/intra/marketing/crm/deals" className="text-xs text-neutral-400 hover:text-neutral-900">View All</Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
                         {deals.slice(0, 5).map(deal => (

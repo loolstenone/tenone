@@ -14,7 +14,7 @@ const priorityStyles: Record<string, string> = {
     Urgent: 'border-l-red-500',
     High: 'border-l-amber-500',
     Medium: 'border-l-blue-500',
-    Low: 'border-l-zinc-600',
+    Low: 'border-l-neutral-300',
 };
 
 export function TaskCard({ task, onEdit, onDragStart }: TaskCardProps) {
@@ -25,17 +25,17 @@ export function TaskCard({ task, onEdit, onDragStart }: TaskCardProps) {
             draggable
             onDragStart={(e) => onDragStart?.(e, task.id)}
             onClick={() => onEdit?.(task)}
-            className={`group rounded-lg border border-zinc-800 border-l-2 ${priorityStyles[task.priority]} bg-zinc-950/50 p-3 cursor-grab active:cursor-grabbing hover:border-zinc-600 transition-colors`}
+            className={`group rounded-lg border border-neutral-200 border-l-2 ${priorityStyles[task.priority]} bg-white p-3 cursor-grab active:cursor-grabbing hover:border-neutral-300 hover:shadow-sm transition-all`}
         >
             <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-white leading-tight pr-2">{task.title}</p>
-                <GripVertical className="h-4 w-4 text-zinc-700 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="text-sm font-medium text-neutral-900 leading-tight pr-2">{task.title}</p>
+                <GripVertical className="h-4 w-4 text-neutral-300 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
             {task.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                     {task.tags.slice(0, 2).map(tag => (
-                        <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                        <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500">
                             {tag}
                         </span>
                     ))}
@@ -43,16 +43,16 @@ export function TaskCard({ task, onEdit, onDragStart }: TaskCardProps) {
             )}
 
             <div className="flex items-center justify-between mt-2.5">
-                <span className="text-xs text-indigo-400">{brandName}</span>
+                <span className="text-xs text-neutral-500">{brandName}</span>
                 <div className="flex items-center gap-2">
                     {task.dueDate && (
-                        <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
                             <Calendar className="h-3 w-3" />
                             {task.dueDate}
                         </span>
                     )}
                     {task.assignee && (
-                        <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+                        <span className="flex items-center gap-1 text-[10px] text-neutral-400">
                             <User className="h-3 w-3" />
                             {task.assignee.split(' ')[0]}
                         </span>

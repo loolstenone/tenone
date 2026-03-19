@@ -15,14 +15,14 @@ const phaseColors: Record<ProjectPhase, string> = {
     Development: 'bg-amber-500',
     Review: 'bg-purple-500',
     Launch: 'bg-emerald-500',
-    Complete: 'bg-zinc-500',
+    Complete: 'bg-neutral-400',
 };
 
 const statusColors: Record<string, string> = {
-    Active: 'text-emerald-400 bg-emerald-500/10',
-    'On Hold': 'text-amber-400 bg-amber-500/10',
-    Completed: 'text-blue-400 bg-blue-500/10',
-    Cancelled: 'text-red-400 bg-red-500/10',
+    Active: 'text-emerald-600 bg-emerald-50',
+    'On Hold': 'text-amber-600 bg-amber-50',
+    Completed: 'text-blue-600 bg-blue-50',
+    Cancelled: 'text-red-600 bg-red-50',
 };
 
 export function ProjectCard({ project }: ProjectCardProps) {
@@ -30,18 +30,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
     const currentPhaseIndex = phaseOrder.indexOf(project.phase);
 
     return (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:border-zinc-600 transition-colors">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 hover:border-neutral-300 hover:shadow-sm transition-all">
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="text-base font-semibold text-white">{project.name}</h3>
-                    <p className="text-sm text-indigo-400 mt-0.5">{brandName}</p>
+                    <h3 className="text-base font-semibold text-neutral-900">{project.name}</h3>
+                    <p className="text-sm text-neutral-500 mt-0.5">{brandName}</p>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[project.status]}`}>
                     {project.status}
                 </span>
             </div>
 
-            <p className="text-sm text-zinc-400 mt-3 line-clamp-2">{project.description}</p>
+            <p className="text-sm text-neutral-500 mt-3 line-clamp-2">{project.description}</p>
 
             {/* Phase Progress */}
             <div className="mt-4">
@@ -50,11 +50,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
                         <div key={phase} className="flex-1 flex flex-col items-center">
                             <div
                                 className={`h-1.5 w-full rounded-full ${
-                                    idx <= currentPhaseIndex ? phaseColors[project.phase] : 'bg-zinc-800'
+                                    idx <= currentPhaseIndex ? phaseColors[project.phase] : 'bg-neutral-200'
                                 }`}
                             />
                             <span className={`text-[9px] mt-1 ${
-                                idx === currentPhaseIndex ? 'text-white font-medium' : 'text-zinc-600'
+                                idx === currentPhaseIndex ? 'text-neutral-900 font-medium' : 'text-neutral-400'
                             }`}>
                                 {phase}
                             </span>
@@ -64,25 +64,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-zinc-800">
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-neutral-200">
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-xs text-zinc-500">
+                    <div className="flex items-center gap-1 text-xs text-neutral-500">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         {project.taskIds.length} tasks
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-zinc-500">
+                    <div className="flex items-center gap-1 text-xs text-neutral-500">
                         <Calendar className="h-3.5 w-3.5" />
                         {project.startDate}
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-20 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                    <div className="w-20 h-1.5 rounded-full bg-neutral-200 overflow-hidden">
                         <div
-                            className="h-full rounded-full bg-indigo-500 transition-all"
+                            className="h-full rounded-full bg-neutral-900 transition-all"
                             style={{ width: `${project.progress}%` }}
                         />
                     </div>
-                    <span className="text-xs text-zinc-400">{project.progress}%</span>
+                    <span className="text-xs text-neutral-500">{project.progress}%</span>
                 </div>
             </div>
         </div>
