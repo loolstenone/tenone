@@ -34,7 +34,7 @@ export function PublicHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-neutral-100">
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
                 <Link href="/" className="flex items-center">
-                    <Logo variant="horizontal" size="sm" />
+                    <Logo variant="horizontal" size="sm" asLink={false} />
                 </Link>
 
                 {/* Desktop Nav */}

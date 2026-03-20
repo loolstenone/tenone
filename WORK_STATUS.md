@@ -1,50 +1,60 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-19 (사무실) — 2차 세션
+> 마지막 업데이트: 2026-03-20 (집)
 
-## 오늘 한 작업 (2차 세션)
+## 오늘 한 작업
 
-### 퍼블릭 페이지 리디자인
-- BCG 레퍼런스 기반 모노톤 화이트 디자인으로 전면 리디자인
-- 랜딩 페이지: Hero 메시지 변경 ("가치로 연결된 거대한 세계관을 만들기로 했다" + 하위 메시지 "인재를 발굴하고, 연결하고, 기업과 사회의 문제를 해결합니다")
-- Hero 배너 이미지 적용 (브랜드 네트워크 시각화)
-- Core Value 섹션 모노톤 리디자인 (본질/속도/이행)
-- 네비게이션 구조 변경: About / Works / Newsroom / Contact (5개 → 4개)
-- Works 페이지 신규 생성 (기존 Brands 대체)
-- Newsroom 페이지 신규 생성
-- About 페이지 통합 (기존 About + Universe + History를 탭 구조로)
-- Contact 페이지 모노톤 리디자인
+### 구조 대통합
+- 4개 독립 프로젝트(web/, erp/, marketing/, wiki/) → 단일 Next.js 프로젝트로 통합
+- office/ 폴더 리네이밍 시도 후 최종적으로 프로젝트 루트(`C:\Projects\TenOne\`)로 통합
+- 모든 내부 시스템을 `/intra` 하위로 배치:
+  - `/intra` — Intra 홈 (공지, 일정, 퀵링크)
+  - `/intra/studio` — 콘텐츠 제작 포털
+  - `/intra/erp` — 사내 관리 포털
+  - `/intra/marketing` — 마케팅 포털
+  - `/intra/wiki` — 교육/온보딩
+  - `/intra/cms` — 사이트 콘텐츠 관리
 
-### Intra 페이지 리디자인
-- 전체 Intra 바디 영역 모노톤 화이트 테마 적용 (40+ 파일)
-- 사이드바 다크 유지 + 바디 라이트 모노톤 조합
-- 사이드바 하단 프로필 제거 → 우측 상단 프로필로 통일
-- "Office" → "Intra" 명칭 변경
-- CMS 메뉴 신규 추가 (Intra 독립 항목)
+### Intra 홈 구현
+- 직원 대상 공지사항 게시판
+- 기업 스케줄 일정 위젯
+- 상단 통계 카드 (Active Staff, Campaigns, Leads, GPR Goals)
+- 퀵링크 카드 제거 (상단 네비에 이미 있으므로 중복)
 
-### 구조 변경
-- CRM을 ERP → Marketing 하위로 이동
-- Marketing 사이드바에 CRM 그룹 추가 (Contacts, Organizations, Segments, Import)
-- ERP는 HR 전용으로 축소
+### 기업 격언 시스템
+- 100개 격언 리스트 작성 (TenOne Culture 기반)
+- Intra 홈 인사말 하단에 랜덤 표시 적용
 
-### 기획/문서
-- PLANNING.md 사이트 기획서 작성 (전체 현황 심층 분석)
-- 집/사무실 동기화 워크플로우 확립
+### 기타
+- `.next/` 캐시 git 추적 제거
+- `.git/` 용량 정리 (305MB → 92MB)
+- GitHub push 완료 (loolstenone/tenone)
+- 96번 격언("Ten:One™ — 열 개의 가치, 하나의 세계관") 삭제 후 대체
 
 ## 현재 진행 중
-- 퍼블릭 페이지 리디자인 거의 완료
-- Intra 서브 페이지 일부 컴포넌트(모달, BrandCard 등)에 다크 테마 잔존 가능
+- 없음 (깔끔하게 정리 완료)
 
 ## 다음에 할 일
-- Intra 모달/컴포넌트 파일(components/ 폴더)의 다크 테마 잔여 정리
-- PublicHeader Logo 중첩 `<a>` 하이드레이션 경고 수정
-- CRM 페이지들의 라우트 정리 (/intra/erp/crm → /intra/marketing/crm 완전 이전)
-- 각 페이지별 실제 콘텐츠 보강
-- 모바일 반응형 점검
-- 이미지 에셋 제작/배치
+- [ ] Intra 각 섹션(Studio/ERP/Marketing/Wiki/CMS) 페이지 콘텐츠 보강
+- [ ] 직원 프로필 vs 개인/기업 프로필 분리 구현
+  - 직원: ERP 연동, 소속 로고, 사번, GPR 탭
+  - 개인/기업: 기본 정보 수정
+- [ ] 프로필 사진 업로드 기능
+- [ ] 직원 등록 기능 (ERP HR)
+  - 사번 체계: YYYY-NNNN
+  - 조직(부서) 매칭
+  - 시스템 접근 레벨 (중복 선택)
+- [ ] 조직 설계 기능 (관리부서/사업부서/제작부서/지원부서)
+- [ ] GPR 기능 (목표 설정, 합의, 자기평가, 상사평가)
+- [ ] 권한 매트릭스 설계 (부서×기능별 접근 권한)
+- [ ] Favicon PNG 적용 (현재 화질 이슈)
+- [ ] 모바일 반응형 점검
+- [ ] 소셜 로그인 준비
 
 ## 주의사항
-- Tailwind CSS v4 사용 중 (v3과 문법 차이: @import "tailwindcss")
-- Next.js 16 + React 19 (최신 버전)
-- 모든 데이터는 Mock → 페이지 새로고침 시 리셋됨
-- CRM 페이지 파일이 /intra/erp/crm과 /intra/marketing/crm 양쪽에 존재 (추후 erp쪽 정리 필요)
+- Tailwind CSS v4 사용 중
+- Next.js 16 + React 19
+- 모든 데이터는 Mock (새로고침 시 리셋)
+- 브랜드 가이드: 문장 내 Ten:One™ 사용 필수
+- 로고: 첨부 이미지 파일 사용 (SVG 재현 금지)
+- 프로젝트 루트가 곧 Next.js 프로젝트 (별도 하위 폴더 없음)
