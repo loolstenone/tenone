@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useCms } from "@/lib/cms-context";
 import { CmsCategory } from "@/types/cms";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowRight } from "lucide-react";
 
-const categories: ('전체' | CmsCategory)[] = ['전체', 'Brand', 'Project', 'Event', 'Media'];
+const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function NewsroomPage() {
     const { getPublishedByChannel } = useCms();
@@ -45,22 +46,34 @@ export default function NewsroomPage() {
             {featured && (
                 <section className="px-6 pb-16">
                     <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8">
-                        <div className="aspect-[16/10] bg-neutral-100 flex items-center justify-center">
-                            <p className="text-sm text-neutral-400">[{featured.image || '이미지'}]</p>
+                        <div className="aspect-[16/10] bg-neutral-100 flex items-center justify-center overflow-hidden">
+                            {featured.image && (featured.image.startsWith('http') || featured.image.startsWith('data:')) ? (
+                                <img src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
+                            ) : (
+                                <p className="text-sm text-neutral-400">[{featured.image || '이미지'}]</p>
+                            )}
                         </div>
                         <div className="flex flex-col justify-center">
                             <div className="flex items-center gap-3 mb-4">
                                 <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-500">{featured.category}</span>
                                 <span className="text-xs text-neutral-400">{featured.date}</span>
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-bold leading-snug">{featured.title}</h2>
+                            <Link href={`/newsroom/${featured.id}`}>
+                                <h2 className="text-2xl md:text-3xl font-bold leading-snug hover:underline">{featured.title}</h2>
+                            </Link>
                             <p className="mt-4 text-neutral-500 leading-relaxed">{featured.summary}</p>
-                            {featured.externalLink && (
-                                <a href={featured.externalLink} target="_blank" rel="noopener noreferrer"
-                                    className="mt-6 inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors">
-                                    자세히 보기 <ExternalLink className="h-3.5 w-3.5" />
-                                </a>
-                            )}
+                            <div className="flex items-center gap-4 mt-6">
+                                <Link href={`/newsroom/${featured.id}`}
+                                    className="inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors">
+                                    자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                                {featured.externalLink && (
+                                    <a href={featured.externalLink} target="_blank" rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
+                                        외부 링크 <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -72,21 +85,35 @@ export default function NewsroomPage() {
                     <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {rest.map(news => (
                             <article key={news.id} className="group">
-                                <div className="aspect-[16/10] bg-neutral-100 mb-4 flex items-center justify-center">
-                                    <p className="text-xs text-neutral-400">[{news.image || '이미지'}]</p>
-                                </div>
+                                <Link href={`/newsroom/${news.id}`} className="block">
+                                    <div className="aspect-[16/10] bg-neutral-100 mb-4 flex items-center justify-center overflow-hidden group-hover:opacity-90 transition-opacity">
+                                        {news.image && (news.image.startsWith('http') || news.image.startsWith('data:')) ? (
+                                            <img src={news.image} alt={news.title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <p className="text-xs text-neutral-400">[{news.image || '이미지'}]</p>
+                                        )}
+                                    </div>
+                                </Link>
                                 <div className="flex items-center gap-3 mb-2">
                                     <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500">{news.category}</span>
                                     <span className="text-xs text-neutral-400">{news.date}</span>
                                 </div>
-                                <h3 className="font-bold text-neutral-900 group-hover:underline leading-snug">{news.title}</h3>
+                                <Link href={`/newsroom/${news.id}`}>
+                                    <h3 className="font-bold text-neutral-900 group-hover:underline leading-snug">{news.title}</h3>
+                                </Link>
                                 <p className="text-sm text-neutral-500 mt-2 line-clamp-2">{news.summary}</p>
-                                {news.externalLink && (
-                                    <a href={news.externalLink} target="_blank" rel="noopener noreferrer"
-                                        className="mt-3 inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-900 transition-colors">
-                                        자세히 보기 <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                )}
+                                <div className="flex items-center gap-3 mt-3">
+                                    <Link href={`/newsroom/${news.id}`}
+                                        className="inline-flex items-center gap-1.5 text-xs text-neutral-900 hover:text-neutral-600 transition-colors">
+                                        자세히 보기 <ArrowRight className="h-3 w-3" />
+                                    </Link>
+                                    {news.externalLink && (
+                                        <a href={news.externalLink} target="_blank" rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-900 transition-colors">
+                                            외부 링크 <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    )}
+                                </div>
                             </article>
                         ))}
                     </div>

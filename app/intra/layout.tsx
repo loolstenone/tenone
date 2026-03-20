@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { PublicHeader } from "@/components/PublicHeader";
+import { IntraSidebar } from "@/components/IntraSidebar";
+import { IntraHeader } from "@/components/IntraHeader";
 import { ShieldAlert } from "lucide-react";
 
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
     if (!isAuthenticated) return null;
 
-    if (!hasAccess('studio')) {
+    if (!hasAccess('project')) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center px-4">
                 <div className="text-center max-w-md">
@@ -36,13 +37,21 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     }
 
     return (
-        <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col">
-            <PublicHeader />
-            <main className="flex-1 pt-16">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-white text-neutral-900 flex">
+            {/* Dark sidebar */}
+            <IntraSidebar />
+
+            {/* Main content */}
+            <div className="flex-1 ml-[240px] flex flex-col min-h-screen">
+                <IntraHeader />
+                <main className="flex-1 p-8">
                     {children}
-                </div>
-            </main>
+                </main>
+                <footer className="border-t border-neutral-100 px-8 py-4 flex items-center justify-between">
+                    <p className="text-xs text-neutral-400">© {new Date().getFullYear()} Ten:One™ Intra Office</p>
+                    <p className="text-xs text-neutral-300">Internal Use Only</p>
+                </footer>
+            </div>
         </div>
     );
 }

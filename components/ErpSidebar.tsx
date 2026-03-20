@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
-import { Logo } from "@/components/Logo";
 import type { LucideIcon } from "lucide-react";
 
 interface NavChild { name: string; href: string; }
@@ -94,10 +93,9 @@ export function ErpSidebar({ className }: { className?: string }) {
     };
 
     return (
-        <div className={clsx("flex h-full w-full flex-col bg-zinc-950 text-zinc-400 border-r border-zinc-800", className)}>
-            <div className="flex h-16 items-center px-5 shrink-0 gap-3">
-                <Logo variant="vertical" size="sm" />
-                <Link href="/intra/erp" className="text-2xl font-bold text-white tracking-tight hover:text-indigo-400 transition-colors">
+        <div className={clsx("flex h-full w-full flex-col bg-neutral-50 text-neutral-600 border-r border-neutral-200", className)}>
+            <div className="flex h-16 items-center px-5 shrink-0 gap-3 border-b border-neutral-100">
+                <Link href="/intra/erp" className="text-2xl font-bold text-neutral-900 tracking-tight hover:text-neutral-600 transition-colors">
                     ERP
                 </Link>
             </div>
@@ -107,10 +105,10 @@ export function ErpSidebar({ className }: { className?: string }) {
                     <div key={gIdx}>
                         {group.label ? (
                             <div className="flex items-center gap-2 px-3 pt-5 pb-2">
-                                <span className="text-[10px] font-semibold tracking-widest text-zinc-600 uppercase">{group.label}</span>
-                                <div className="flex-1 h-px bg-zinc-800/60" />
+                                <span className="text-[10px] font-semibold tracking-widest text-neutral-400 uppercase">{group.label}</span>
+                                <div className="flex-1 h-px bg-neutral-200" />
                             </div>
-                        ) : gIdx > 0 ? <div className="my-2 mx-3 h-px bg-zinc-800/60" /> : null}
+                        ) : gIdx > 0 ? <div className="my-2 mx-3 h-px bg-neutral-200" /> : null}
 
                         <div className="space-y-0.5">
                             {group.items.map((item) => {
@@ -122,24 +120,24 @@ export function ErpSidebar({ className }: { className?: string }) {
                                         {hasChildren ? (
                                             <button
                                                 onClick={() => { toggleMenu(item.name); if (!isOpen) router.push(item.href); }}
-                                                className={clsx(parentActive ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-900/50 hover:text-white", "group flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}
+                                                className={clsx(parentActive ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900", "group flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}
                                             >
                                                 <div className="flex items-center">
-                                                    <item.icon className={clsx(parentActive ? "text-indigo-500" : "text-zinc-500 group-hover:text-zinc-300", "mr-3 h-[18px] w-[18px]")} />
+                                                    <item.icon className={clsx(parentActive ? "text-white" : "text-neutral-400 group-hover:text-neutral-600", "mr-3 h-[18px] w-[18px]")} />
                                                     {item.name}
                                                 </div>
-                                                {isOpen ? <ChevronDown className="h-3.5 w-3.5 text-zinc-500" /> : <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />}
+                                                {isOpen ? <ChevronDown className="h-3.5 w-3.5 text-neutral-400" /> : <ChevronRight className="h-3.5 w-3.5 text-neutral-400" />}
                                             </button>
                                         ) : (
-                                            <Link href={item.href} className={clsx(parentActive ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-900/50 hover:text-white", "group flex items-center rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}>
-                                                <item.icon className={clsx(parentActive ? "text-indigo-500" : "text-zinc-500 group-hover:text-zinc-300", "mr-3 h-[18px] w-[18px]")} />
+                                            <Link href={item.href} className={clsx(parentActive ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900", "group flex items-center rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}>
+                                                <item.icon className={clsx(parentActive ? "text-white" : "text-neutral-400 group-hover:text-neutral-600", "mr-3 h-[18px] w-[18px]")} />
                                                 {item.name}
                                             </Link>
                                         )}
                                         {hasChildren && isOpen && (
-                                            <div className="ml-5 mt-0.5 space-y-0.5 border-l border-zinc-800/60 pl-3">
+                                            <div className="ml-5 mt-0.5 space-y-0.5 border-l border-neutral-200 pl-3">
                                                 {item.children!.map(child => (
-                                                    <Link key={child.href} href={child.href} className={clsx(isActive(child.href) ? "text-white bg-zinc-900/50" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30", "block rounded-md px-2.5 py-1.5 text-[13px] transition-colors")}>
+                                                    <Link key={child.href} href={child.href} className={clsx(isActive(child.href) ? "text-white bg-zinc-900/50" : "text-neutral-400 hover:text-zinc-300 hover:bg-zinc-900/30", "block rounded-md px-2.5 py-1.5 text-[13px] transition-colors")}>
                                                         {child.name}
                                                     </Link>
                                                 ))}

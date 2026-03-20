@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { brands } from "@/lib/data";
 import { useCms } from "@/lib/cms-context";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import Image from "next/image";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare } from "lucide-react";
 
 export default function HomePage() {
     const { getPublishedByChannel } = useCms();
+    const latestWorks = getPublishedByChannel('works').slice(0, 8);
     const latestNews = getPublishedByChannel('newsroom').slice(0, 4);
-    const showcaseBrands = brands.filter(b => b.domain && b.id !== 'tenone');
 
     return (
         <div className="min-h-screen bg-white text-neutral-900">
@@ -34,13 +33,16 @@ export default function HomePage() {
                         <p className="mt-8 text-base text-neutral-400 leading-relaxed">
                             인재를 발굴하고, 연결하고, 기업과 사회의 문제를 해결합니다.
                         </p>
-                        <div className="mt-10 flex gap-4">
-                            <Link href="/universe" className="group px-8 py-3.5 bg-neutral-900 text-white text-sm tracking-wide hover:bg-neutral-800 transition-colors flex items-center gap-2">
+                        <div className="mt-10 flex flex-wrap gap-4">
+                            <Link href="/about?tab=universe" className="group px-8 py-3.5 bg-neutral-900 text-white text-sm tracking-wide hover:bg-neutral-800 transition-colors flex items-center gap-2">
                                 Explore Universe
                                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link href="/about" className="px-8 py-3.5 border border-neutral-300 text-neutral-700 text-sm tracking-wide hover:border-neutral-900 hover:text-neutral-900 transition-colors">
                                 Our Philosophy
+                            </Link>
+                            <Link href="/contact" className="px-8 py-3.5 border border-neutral-300 text-neutral-700 text-sm tracking-wide hover:border-neutral-900 hover:text-neutral-900 transition-colors">
+                                Contact
                             </Link>
                         </div>
                     </div>
@@ -71,13 +73,13 @@ export default function HomePage() {
 
                     <div className="mt-20 grid md:grid-cols-3 gap-px bg-neutral-800">
                         {[
-                            { num: "01", symbol: "◆", title: "본질", en: "Essence", desc: "변하지 않을 가치에 집요하게 집중한다. 트렌드에 흔들리지 않는 근본적인 가치를 찾는다." },
-                            { num: "02", symbol: "→", title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
-                            { num: "03", symbol: "■", title: "이행", en: "Carry Out", desc: "본질이 확인된다면 바로 실행에 옮긴다. 실현되지 않으면 아이디어가 아니다." },
+                            { num: "01", icon: <Diamond className="h-6 w-6 text-neutral-500" />, title: "본질", en: "Essence", desc: "변하지 않을 가치에 집요하게 집중한다. 트렌드에 흔들리지 않는 근본적인 가치를 찾는다." },
+                            { num: "02", icon: <Zap className="h-6 w-6 text-neutral-500" />, title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
+                            { num: "03", icon: <CheckSquare className="h-6 w-6 text-neutral-500" />, title: "이행", en: "Carry Out", desc: "본질이 확인된다면 바로 실행에 옮긴다. 실현되지 않으면 아이디어가 아니다." },
                         ].map((val) => (
                             <div key={val.num} className="bg-neutral-900 p-10 md:p-12">
                                 <span className="text-sm text-neutral-600 font-mono">{val.num}</span>
-                                <h3 className="text-3xl font-bold mt-4"><span className="text-neutral-600 mr-2">{val.symbol}</span>{val.title}</h3>
+                                <h3 className="text-3xl font-bold mt-4 flex items-center gap-3">{val.icon}{val.title}</h3>
                                 <p className="text-sm text-neutral-500 mt-1">{val.en}</p>
                                 <p className="text-sm text-neutral-400 mt-6 leading-relaxed">{val.desc}</p>
                             </div>
@@ -86,16 +88,16 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Universe Brands — 화이트 섹션 */}
+            {/* Works — 화이트 섹션 */}
             <section className="py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-end justify-between mb-16">
                         <div>
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Universe
+                                Works
                             </p>
                             <h2 className="text-3xl md:text-4xl font-light">
-                                하나의 생태계로 연결된 <span className="font-bold">브랜드들</span>
+                                우리가 <span className="font-bold">해온 일들</span>
                             </h2>
                         </div>
                         <Link href="/works" className="hidden md:flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
@@ -104,26 +106,32 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {showcaseBrands.map((brand) => (
-                            <a key={brand.id} href={brand.websiteUrl} target="_blank" rel="noopener noreferrer"
-                                className="group block border-b border-neutral-200 pb-6 hover:border-neutral-900 transition-colors">
-                                <div className="aspect-[3/2] bg-neutral-50 mb-4 flex items-center justify-center">
-                                    <span className="text-2xl font-bold text-neutral-200">{brand.name.slice(0, 2)}</span>
+                        {latestWorks.map((work) => (
+                            <div key={work.id} className="group block border-b border-neutral-200 pb-6 hover:border-neutral-900 transition-colors">
+                                <div className="aspect-[3/2] bg-neutral-50 mb-4 flex items-center justify-center overflow-hidden">
+                                    {work.image && (work.image.startsWith('http') || work.image.startsWith('data:')) ? (
+                                        <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <p className="text-xs text-neutral-300 text-center px-2">[{work.image || '이미지'}]</p>
+                                    )}
                                 </div>
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <h3 className="font-semibold text-neutral-900">{brand.name}</h3>
-                                        <p className="text-xs text-neutral-400 mt-1">{brand.domain}</p>
+                                        <p className="text-xs text-neutral-400 mb-1">{work.category} · {work.date.slice(0, 7)}</p>
+                                        <h3 className="font-semibold text-neutral-900 text-sm leading-snug">{work.title}</h3>
                                     </div>
-                                    <ExternalLink className="h-3.5 w-3.5 text-neutral-300 group-hover:text-neutral-900 transition-colors mt-1" />
+                                    {work.externalLink && (
+                                        <a href={work.externalLink} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="h-3.5 w-3.5 text-neutral-300 group-hover:text-neutral-900 transition-colors mt-1" />
+                                        </a>
+                                    )}
                                 </div>
-                                {brand.tagline && <p className="text-xs text-neutral-500 mt-2">{brand.tagline}</p>}
-                            </a>
+                            </div>
                         ))}
                     </div>
 
                     <Link href="/works" className="md:hidden flex items-center justify-center gap-2 mt-12 text-sm text-neutral-500 hover:text-neutral-900">
-                        모든 브랜드 보기 <ArrowRight className="h-4 w-4" />
+                        모든 Works 보기 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>
@@ -148,8 +156,12 @@ export default function HomePage() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {latestNews.map((news) => (
                             <Link key={news.id} href="/newsroom" className="group block">
-                                <div className="aspect-[4/3] bg-neutral-200 mb-4 flex items-center justify-center">
-                                    <p className="text-xs text-neutral-400 text-center px-4">[{news.image || '이미지'}]</p>
+                                <div className="aspect-[4/3] bg-neutral-200 mb-4 flex items-center justify-center overflow-hidden">
+                                    {news.image && (news.image.startsWith('http') || news.image.startsWith('data:')) ? (
+                                        <img src={news.image} alt={news.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <p className="text-xs text-neutral-400 text-center px-4">[{news.image || '이미지'}]</p>
+                                    )}
                                 </div>
                                 <p className="text-xs text-neutral-400">{news.date}</p>
                                 <h3 className="font-semibold text-neutral-900 mt-1 group-hover:underline">{news.title}</h3>
@@ -176,7 +188,7 @@ export default function HomePage() {
                             <Link href="/contact" className="px-8 py-3.5 bg-white text-neutral-900 text-sm tracking-wide hover:bg-neutral-100 transition-colors">
                                 Join the Universe
                             </Link>
-                            <Link href="/universe" className="px-8 py-3.5 border border-neutral-600 text-neutral-300 text-sm tracking-wide hover:border-white hover:text-white transition-colors">
+                            <Link href="/about?tab=universe" className="px-8 py-3.5 border border-neutral-600 text-neutral-300 text-sm tracking-wide hover:border-white hover:text-white transition-colors">
                                 Explore
                             </Link>
                         </div>

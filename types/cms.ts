@@ -1,5 +1,5 @@
-export type CmsChannel = 'works' | 'newsroom' | 'history';
-export type CmsCategory = 'Brand' | 'Project' | 'Event' | 'Media';
+export type CmsChannel = 'works' | 'newsroom';
+export type CmsCategory = '브랜드' | '프로젝트' | '네트워크' | '교육' | '콘텐츠' | '공지';
 export type CmsStatus = 'Draft' | 'Published' | 'Archived';
 
 export interface CmsPost {

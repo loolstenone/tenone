@@ -3,7 +3,7 @@ import { StaffMember, Division } from '@/types/staff';
 export const initialStaff: StaffMember[] = [
     {
         id: 's1', employeeId: '2019-0001', name: 'Cheonil Jeon', email: 'lools@tenone.biz',
-        role: 'Admin', accessLevel: ['office', 'erp-crm', 'erp-hr', 'erp-finance', 'erp-admin'],
+        role: 'Admin', accessLevel: ['office', 'project', 'erp-hr', 'erp-finance', 'erp-admin'],
         division: 'Management', department: '경영기획', position: '대표',
         brandAssociation: ['tenone', 'luki', 'rook', 'hero', 'badak', 'madleap', 'madleague', 'youinone', 'fwn', '0gamja'],
         startDate: '2019-10-01', status: 'Active', phone: '010-2795-1001',
@@ -13,7 +13,7 @@ export const initialStaff: StaffMember[] = [
     },
     {
         id: 's2', employeeId: '2024-0001', name: 'Sarah Kim', email: 'manager@tenone.com',
-        role: 'Manager', accessLevel: ['office', 'erp-crm'],
+        role: 'Manager', accessLevel: ['office', 'project'],
         division: 'Business', department: '브랜드관리', position: '매니저',
         brandAssociation: ['luki', 'badak'], startDate: '2024-06-01', status: 'Active',
         avatarInitials: 'SK', createdAt: '2024-06-01', updatedAt: '2025-01-15',
@@ -41,18 +41,20 @@ export const positions = ['대표', '이사', '팀장', '매니저', '선임', '
 
 // 부문별 기본 권한
 export const divisionDefaultAccess: Record<Division, string[]> = {
-    Management: ['office', 'erp-crm', 'erp-hr', 'erp-finance'],
-    Business: ['office', 'erp-crm'],
+    Management: ['office', 'project', 'erp-hr', 'erp-finance'],
+    Business: ['office', 'project'],
     Production: ['office'],
     Support: ['office'],
 };
 
 export const accessOptions = [
-    { id: 'office', label: 'Office', desc: '세계관 운영 도구' },
-    { id: 'erp-crm', label: 'ERP CRM', desc: '고객/거래 관리' },
-    { id: 'erp-hr', label: 'ERP HR', desc: '인사/GPR 관리' },
-    { id: 'erp-finance', label: 'ERP Finance', desc: '재무/회계 관리' },
-    { id: 'erp-admin', label: 'ERP Admin', desc: '전체 관리자' },
+    { id: 'office', label: 'Office', desc: '기본 사내 시스템 접근' },
+    { id: 'project', label: 'Project', desc: '프로젝트 관리, 스튜디오, 워크플로우' },
+    { id: 'erp-hr', label: 'ERP · HR', desc: '인력관리, 목표/성과, 근태, 급여 (CHO)' },
+    { id: 'erp-finance', label: 'ERP · Finance', desc: '경비, 법인카드, 청구/지급 (CFO)' },
+    { id: 'erp-admin', label: 'ERP · Admin', desc: '시스템 설정, 권한 관리, 전체 데이터 접근' },
+    { id: 'marketing', label: 'Marketing', desc: '캠페인, 리드, 딜, 콘텐츠 마케팅' },
+    { id: 'wiki', label: 'Wiki', desc: '사내 위키 열람 및 편집' },
 ];
 
 export const brandOptions = [

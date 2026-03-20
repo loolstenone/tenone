@@ -88,11 +88,11 @@ export function ContactImportModal({ isOpen, onClose, onImport }: Props) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
-                <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-                    <h3 className="text-xl font-bold text-white">Import Contacts</h3>
-                    <button onClick={onClose} className="text-zinc-400 hover:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <div className="w-full max-w-2xl bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-2xl">
+                <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+                    <h3 className="text-xl font-bold text-neutral-900">Import Contacts</h3>
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900">
                         <X className="h-6 w-6" />
                     </button>
                 </div>
@@ -106,58 +106,58 @@ export function ContactImportModal({ isOpen, onClose, onImport }: Props) {
                             onClick={() => fileInputRef.current?.click()}
                             className={clsx(
                                 "border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-colors",
-                                isDragging ? "border-indigo-500 bg-indigo-500/10" : "border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900/50"
+                                isDragging ? "border-neutral-900 bg-neutral-50" : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50"
                             )}
                         >
-                            <FileSpreadsheet className="h-12 w-12 text-zinc-500 mb-4" />
-                            <p className="text-lg font-medium text-white mb-1">Upload Excel File</p>
-                            <p className="text-sm text-zinc-400">Drag & drop or click to browse (.xlsx, .csv)</p>
+                            <FileSpreadsheet className="h-12 w-12 text-neutral-400 mb-4" />
+                            <p className="text-lg font-medium text-neutral-900 mb-1">Upload Excel File</p>
+                            <p className="text-sm text-neutral-500">Drag & drop or click to browse (.xlsx, .csv)</p>
                             <input ref={fileInputRef} type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileChange} />
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-lg border border-zinc-800">
+                            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                                 <div className="flex items-center gap-3">
-                                    <FileSpreadsheet className="h-6 w-6 text-emerald-500" />
+                                    <FileSpreadsheet className="h-6 w-6 text-emerald-600" />
                                     <div>
-                                        <p className="text-sm font-medium text-white">{file.name}</p>
-                                        <p className="text-xs text-zinc-500">{(file.size / 1024).toFixed(1)} KB • {preview.length} rows detected</p>
+                                        <p className="text-sm font-medium text-neutral-900">{file.name}</p>
+                                        <p className="text-xs text-neutral-500">{(file.size / 1024).toFixed(1)} KB • {preview.length} rows detected</p>
                                     </div>
                                 </div>
-                                <button onClick={() => { setFile(null); setPreview([]); }} className="text-xs text-zinc-400 hover:text-white underline">
+                                <button onClick={() => { setFile(null); setPreview([]); }} className="text-xs text-neutral-500 hover:text-neutral-900 underline">
                                     Change File
                                 </button>
                             </div>
 
                             {error && (
-                                <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">
+                                <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                                     <AlertCircle className="h-4 w-4" />
                                     {error}
                                 </div>
                             )}
 
                             {preview.length > 0 && (
-                                <div className="max-h-60 overflow-y-auto border border-zinc-800 rounded-lg">
+                                <div className="max-h-60 overflow-y-auto border border-neutral-200 rounded-lg">
                                     <table className="w-full text-xs text-left">
-                                        <thead className="bg-zinc-900 text-zinc-400 sticky top-0">
+                                        <thead className="bg-neutral-50 text-neutral-500 sticky top-0">
                                             <tr>
                                                 {Object.keys(preview[0]).map((key) => (
-                                                    <th key={key} className="px-3 py-2 border-b border-zinc-800 font-medium">{key}</th>
+                                                    <th key={key} className="px-3 py-2 border-b border-neutral-200 font-medium">{key}</th>
                                                 ))}
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-zinc-800 bg-zinc-950/50">
+                                        <tbody className="divide-y divide-neutral-100 bg-white">
                                             {preview.slice(0, 5).map((row, i) => (
                                                 <tr key={i}>
                                                     {Object.values(row).map((val: any, j) => (
-                                                        <td key={j} className="px-3 py-2 text-zinc-300 truncate max-w-[150px]">{String(val)}</td>
+                                                        <td key={j} className="px-3 py-2 text-neutral-700 truncate max-w-[150px]">{String(val)}</td>
                                                     ))}
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                     {preview.length > 5 && (
-                                        <div className="p-2 text-center text-xs text-zinc-500 bg-zinc-900/50 border-t border-zinc-800">
+                                        <div className="p-2 text-center text-xs text-neutral-500 bg-neutral-50 border-t border-neutral-200">
                                             ...and {preview.length - 5} more rows
                                         </div>
                                     )}
@@ -167,14 +167,14 @@ export function ContactImportModal({ isOpen, onClose, onImport }: Props) {
                     )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-800 bg-zinc-900/30">
-                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                <div className="flex items-center justify-end gap-3 p-6 border-t border-neutral-200 bg-neutral-50">
+                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
                         Cancel
                     </button>
                     <button
                         disabled={!file || preview.length === 0}
                         onClick={mapDataToContacts}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md text-sm font-medium transition-colors"
+                        className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md text-sm font-medium transition-colors"
                     >
                         Import {preview.length} Contacts
                     </button>

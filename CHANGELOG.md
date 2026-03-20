@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-03-20 (사무실)
+
+### 완료
+- ERP를 C-Level 역할 기반으로 재구조화 (CHO/CFO)
+- GPR을 HR·CHO 하위에서 분리 → ERP 최상위 독립 섹션으로 승격
+  - GPR Dashboard: 전사 달성률, 부서별 GPR 현황 테이블
+  - 목표 캐스케이드: CEO 전사목표 → 사업부 → 팀 → 개인 트리 구조 + 승인/반려
+  - 평가: 자기평가 → 매니저평가 → 최종 등급 확정 플로우
+  - 인센티브: 등급별 지급률(S:200% ~ D:0%), 인센티브 산정 테이블
+- "내 프로필" → "Myverse"로 리브랜딩 (개인 포털 대시보드)
+  - 인사정보, GPR, 급여, 경비, 프로젝트, 교육, 근태, 시스템 접근 권한
+  - 빠른 실행 섹션 (GPR 목표설정, 근태신청, 경비청구 등)
+- ERP 페이지를 관리자 뷰로 전환
+  - 근태: 전체 구성원 출퇴근/휴가신청 승인/초과근무 관리
+  - 급여: 전체 급여대장 + 퇴직연금 현황 관리
+  - 교육: 전체 구성원 이수현황 + 필수과정 미이수 인원 관리
+- 교육에 텐원 필수 이수과정 추가 (VRIEF, GPR, Mind Set, Universe 입문, 정보보안, 괴롭힘 예방)
+- SystemAccess 정리: `erp-crm` 제거, `studio` → `project`, 권한별 label+description 추가
+- Intra 헤더 추가 (Myverse 바로가기, 조직도, 날짜, 검색, 알림, 프로필 드롭다운)
+- 커뮤니케이션 "지식경영" → "Wiki" 라벨 변경
+
+### 생성된 파일
+- `components/IntraHeader.tsx` — Intra 상단 헤더 바
+- `app/intra/erp/gpr/page.tsx` — GPR Dashboard
+- `app/intra/erp/gpr/cascade/page.tsx` — 목표 캐스케이드
+- `app/intra/erp/gpr/evaluation/page.tsx` — GPR 평가
+- `app/intra/erp/gpr/incentive/page.tsx` — 인센티브 관리
+- `components/IntraSidebar.tsx` — 사이드바 재구조화
+
+### 수정된 주요 파일
+- `types/auth.ts` — SystemAccess 타입 정리, SystemAccessInfo 추가
+- `lib/auth-data.ts` — Mock 사용자 권한 업데이트
+- `types/staff.ts` — SystemAccess 동기화
+- `lib/staff-data.ts` — accessOptions 업데이트
+- `app/intra/layout.tsx` — IntraHeader 추가, studio→project 전환
+- `app/intra/studio/layout.tsx` — studio→project 전환
+- `app/intra/profile/page.tsx` — Myverse 개인 대시보드로 전면 재작성
+- `app/intra/erp/hr/attendance/page.tsx` — 관리자 뷰로 전환
+- `app/intra/erp/hr/payroll/page.tsx` — 관리자 뷰로 전환
+- `app/intra/erp/hr/education/page.tsx` — 관리자 뷰로 전환
+
+### 결정 사항
+- Myverse = 개인 → 회사 (개인화 뷰), ERP = 회사 관리 목적 (관리자 뷰)
+- GPR은 ERP 독립 섹션으로 확정 (HR 하위 아님)
+- CBO(사업관리) → Project 모듈로 이동
+- SystemAccess에서 CRM 제거 (ERP에서 제거됨)
+
+---
+
 ## 2026-03-20 (집)
 
 ### 완료

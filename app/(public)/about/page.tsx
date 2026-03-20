@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -27,6 +27,7 @@ const HISTORY_DATA = [
     { year: "2021", date: "2021.11", title: "MAD Leap", desc: "대학생 마케팅/광고 연합동아리 창단" },
     { year: "2021", date: "2021.02", title: "Badak.biz", desc: "마케팅/광고 업계 네트워킹 커뮤니티", link: "http://badak.biz" },
     { year: "2020", date: "2020.03", title: "Ten:One™ Universe", desc: "세계관의 시작" },
+    { year: "2019", date: "2019.10", title: "자각", desc: "하마터면 열심히 안살 뻔 했다." },
 ];
 
 const years = ['전체', ...Array.from(new Set(HISTORY_DATA.map(h => h.year))).sort((a, b) => b.localeCompare(a))];
@@ -41,7 +42,7 @@ const flywheel = [
     { num: "06", title: "지속 성장", desc: "순환 구조로 네트워크가 확장되고 강화" },
 ];
 
-export default function AboutPage() {
+function AboutContent() {
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState('philosophy');
@@ -186,10 +187,41 @@ export default function AboutPage() {
                         </div>
                     </section>
 
-                    {/* Founder */}
+                    {/* Principle 10 */}
                     <section className="bg-neutral-50 py-24 px-6">
+                        <div className="max-w-4xl mx-auto">
+                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Principle 10</p>
+                            <h2 className="text-3xl font-light mb-16">
+                                우리가 <span className="font-bold">믿는 것들</span>
+                            </h2>
+                            <div className="space-y-6">
+                                {[
+                                    "우리는 모두 기획자다. 적어도 자기 인생에서 만큼은.",
+                                    "기획은 문제를 해결하는 것이다.",
+                                    "기획자는 일이 되게 하는 사람이다.",
+                                    "어설픈 완벽주의는 일을 출발시키지 못한다.",
+                                    "리더와 팔로어는 역할이지 직급이 아니다.",
+                                    "문제의 본질에 집중한다.",
+                                    "실현되지 않으면 아이디어가 아니다.",
+                                    "나의 성장이 우리의 성장이다.",
+                                    "신뢰는 먼저 보여주는 것이다.",
+                                    "나의 작은 세계가 연결되어 하나의 거대한 세계관을 만든다.",
+                                ].map((principle, i) => (
+                                    <div key={i} className="flex items-start gap-6 py-4 border-b border-neutral-200 last:border-0">
+                                        <span className="text-2xl font-bold text-neutral-200 min-w-[2.5rem] text-right font-mono">
+                                            {String(i + 1).padStart(2, '0')}
+                                        </span>
+                                        <p className="text-neutral-700 leading-relaxed">{principle}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Founder */}
+                    <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                            <div className="aspect-square bg-neutral-200 flex items-center justify-center max-w-md">
+                            <div className="aspect-square bg-neutral-100 flex items-center justify-center max-w-md">
                                 <p className="text-sm text-neutral-400 text-center px-8">
                                     [대표 프로필 사진]
                                 </p>
@@ -226,6 +258,36 @@ export default function AboutPage() {
                         </div>
                     </section>
 
+                    {/* Brand Categories */}
+                    <section className="bg-neutral-50 py-24 px-6">
+                        <div className="max-w-7xl mx-auto">
+                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Brand Ecosystem</p>
+                            <h2 className="text-3xl font-light mb-16">
+                                <span className="font-bold">9개 카테고리</span>의 브랜드가 하나의 생태계를 이룹니다.
+                            </h2>
+                            <div className="grid md:grid-cols-3 gap-px bg-neutral-200">
+                                {[
+                                    { category: "AI Idol", brands: "LUKI", desc: "인공지능 아이돌 그룹" },
+                                    { category: "AI Creator", brands: "RooK", desc: "인공지능 크리에이터 플랫폼" },
+                                    { category: "Community", brands: "Badak", desc: "마케팅/광고 업계 네트워킹" },
+                                    { category: "Project Group", brands: "YouInOne", desc: "프로젝트 그룹 연합" },
+                                    { category: "Education", brands: "MAD League", desc: "대학생 마케팅/광고 프로젝트 연합" },
+                                    { category: "Fashion", brands: "FWN", desc: "패션 위크 네트워크" },
+                                    { category: "Character", brands: "0gamja · DAM Be", desc: "캐릭터 IP" },
+                                    { category: "Content", brands: "MADzine", desc: "마케팅/광고 매거진" },
+                                    { category: "Startup", brands: "ChangeUp", desc: "인재 양성 프로그램" },
+                                ].map((item, i) => (
+                                    <div key={i} className="bg-white p-8">
+                                        <p className="text-xs text-neutral-400 font-mono mb-3">{String(i + 1).padStart(2, '0')}</p>
+                                        <h3 className="text-lg font-bold text-neutral-900">{item.category}</h3>
+                                        <p className="text-sm font-medium text-neutral-600 mt-1">{item.brands}</p>
+                                        <p className="text-xs text-neutral-400 mt-2">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
                     {/* Flywheel */}
                     <section className="bg-neutral-900 text-white py-24 px-6">
                         <div className="max-w-7xl mx-auto">
@@ -246,52 +308,24 @@ export default function AboutPage() {
                         </div>
                     </section>
 
-                    {/* Vision House */}
+                    {/* Connection Model */}
                     <section className="py-24 px-6">
-                        <div className="max-w-3xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4 text-center">Vision House</p>
-                            <div className="space-y-px">
-                                {[
-                                    { label: "Declaration", text: "빠르게 변하는 세상 속에서 우물쭈물 하지 않고 도전을 선언한다.", bg: "bg-neutral-900 text-white" },
-                                    { label: "Philosophy", text: "변하지 않을 가치에 집중하여 빠르게 가치를 창출한다", bg: "bg-neutral-100 text-neutral-900" },
-                                    { label: "Mission", text: "기획하고, 연결하고, 확장한다. Plan. Connect. Expand.", bg: "bg-neutral-50 text-neutral-900" },
-                                    { label: "Vision", text: "10,000명의 기획자를 발굴하고 연결한다. Who is the Next?", bg: "bg-neutral-50 text-neutral-900" },
-                                    { label: "Strategy", text: "약한 연결 고리로 빠르게 조직하고 일이 되게 한다.", bg: "bg-neutral-100 text-neutral-900" },
-                                ].map((item) => (
-                                    <div key={item.label} className={`${item.bg} p-8`}>
-                                        <p className="text-xs tracking-[0.2em] uppercase text-neutral-400 mb-2">{item.label}</p>
-                                        <p className="text-lg font-medium">{item.text}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Principle 10 */}
-                    <section className="bg-neutral-50 py-24 px-6">
                         <div className="max-w-4xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Principle 10</p>
+                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Connection Model</p>
                             <h2 className="text-3xl font-light mb-16">
-                                우리가 <span className="font-bold">믿는 것들</span>
+                                브랜드는 <span className="font-bold">4가지 방식</span>으로 연결됩니다.
                             </h2>
-                            <div className="space-y-6">
+                            <div className="grid md:grid-cols-2 gap-8">
                                 {[
-                                    "우리는 모두 기획자다. 적어도 자기 인생에서 만큼은.",
-                                    "기획은 문제를 해결하는 것이다.",
-                                    "기획자는 일이 되게 하는 사람이다.",
-                                    "어설픈 완벽주의는 일을 출발시키지 못한다.",
-                                    "리더와 팔로어는 역할이지 직급이 아니다.",
-                                    "문제의 본질에 집중한다.",
-                                    "실현되지 않으면 아이디어가 아니다.",
-                                    "나의 성장이 우리의 성장이다.",
-                                    "신뢰는 먼저 보여주는 것이다.",
-                                    "나의 작은 세계가 연결되어 하나의 거대한 세계관을 만든다.",
-                                ].map((principle, i) => (
-                                    <div key={i} className="flex items-start gap-6 py-4 border-b border-neutral-200 last:border-0">
-                                        <span className="text-2xl font-bold text-neutral-200 min-w-[2.5rem] text-right font-mono">
-                                            {String(i + 1).padStart(2, '0')}
-                                        </span>
-                                        <p className="text-neutral-700 leading-relaxed">{principle}</p>
+                                    { type: "Parent", desc: "모-자 관계. Ten:One™이 직접 운영하는 핵심 브랜드.", example: "Ten:One → LUKI, RooK, MAD League" },
+                                    { type: "Collaboration", desc: "협업 관계. 프로젝트 단위로 함께 일하는 파트너 브랜드.", example: "MAD League × 지평주조" },
+                                    { type: "Support", desc: "지원 관계. 기술, 인프라, 네트워크를 공유하는 관계.", example: "Badak → YouInOne" },
+                                    { type: "Network", desc: "네트워크 관계. 동일 생태계 내 독립적으로 활동하는 관계.", example: "PAM, ADlle, ABC, 제주수작" },
+                                ].map((conn) => (
+                                    <div key={conn.type} className="border border-neutral-200 p-8">
+                                        <h3 className="text-lg font-bold text-neutral-900">{conn.type}</h3>
+                                        <p className="text-sm text-neutral-500 mt-2 leading-relaxed">{conn.desc}</p>
+                                        <p className="text-xs text-neutral-400 mt-4 font-mono">{conn.example}</p>
                                     </div>
                                 ))}
                             </div>
@@ -366,5 +400,13 @@ export default function AboutPage() {
                 </div>
             </section>
         </div>
+    );
+}
+
+export default function AboutPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white" />}>
+            <AboutContent />
+        </Suspense>
     );
 }

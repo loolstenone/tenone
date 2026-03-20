@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, Compass, GraduationCap, FileText, HelpCircle, Settings, LogOut } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
-import { Logo } from "@/components/Logo";
 
 const navigation = [
     { name: "Home", href: "/intra/wiki", icon: LayoutDashboard },
@@ -22,10 +21,9 @@ export function WikiSidebar({ className }: { className?: string }) {
     const isActive = (href: string) => href === "/intra/wiki" ? pathname === "/intra/wiki" : pathname.startsWith(href);
 
     return (
-        <div className={clsx("flex h-full w-full flex-col bg-zinc-950 text-zinc-400 border-r border-zinc-800", className)}>
-            <div className="flex h-16 items-center px-5 shrink-0 gap-3">
-                <Logo variant="vertical" size="sm" />
-                <Link href="/intra/wiki" className="text-2xl font-bold text-white tracking-tight hover:text-indigo-400 transition-colors">Wiki</Link>
+        <div className={clsx("flex h-full w-full flex-col bg-neutral-50 text-neutral-600 border-r border-neutral-200", className)}>
+            <div className="flex h-16 items-center px-5 shrink-0 gap-3 border-b border-neutral-100">
+                <Link href="/intra/wiki" className="text-2xl font-bold text-neutral-900 tracking-tight hover:text-neutral-600 transition-colors">Wiki</Link>
             </div>
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
                 {navigation.map(item => (

@@ -1,6 +1,6 @@
 # TenOne 프로젝트 로드맵
 
-> 마지막 업데이트: 2026-03-19
+> 마지막 업데이트: 2026-03-20
 
 ## 현재 상태 요약
 
@@ -8,8 +8,10 @@
 |------|------|------|
 | 퍼블릭 페이지 (About, Brands, History 등) | ✅ 완성 | 실제 콘텐츠 |
 | 인증 (Login/Signup) | ⚠️ Mock | localStorage 기반 |
-| ERP-CRM (People, Deals, Activities) | ⚠️ Mock UI | 데이터 리셋됨 |
-| ERP-HR (Staff, GPR) | ⚠️ Mock UI | 데이터 리셋됨 |
+| ERP-CRM → Marketing CRM으로 이동 | ⚠️ Mock UI | 데이터 리셋됨 |
+| ERP-HR (Staff, 근태/급여/교육 관리자뷰) | ⚠️ Mock UI | 관리자 뷰 전환 완료 |
+| ERP-GPR (독립 모듈: Dashboard/캐스케이드/평가/인센티브) | ⚠️ Mock UI | 신규 구현 완료 |
+| Myverse (개인 포털) | ⚠️ Mock UI | 신규 구현 완료 |
 | Marketing (Campaigns, Leads) | ⚠️ Mock UI | 드래그앤드롭 작동 |
 | Studio (Workflow, Kanban) | ⚠️ Mock UI | 드래그앤드롭 작동 |
 | Wiki | ❌ 스켈레톤 | 구조만 존재 |
@@ -18,6 +20,26 @@
 | 배포 | ❌ 미완성 | 스크립트만 존재 |
 | 테스트 | ❌ 없음 | 테스트 파일 0개 |
 | 환경 설정 | ❌ 없음 | .env 파일 없음 |
+
+---
+
+## Phase 0: 프론트엔드 구조 개선 (진행중)
+
+> UI/UX 구조 개편 및 기능 보완
+
+- [x] **0-1. ERP C-Level 구조 개편** — CHO/CFO 역할 기반 재구조화
+- [x] **0-2. GPR 독립 모듈화** — Dashboard, 캐스케이드, 평가, 인센티브
+- [x] **0-3. Myverse 개인 포털** — 개인 대시보드 (인사/GPR/급여/경비/프로젝트/교육)
+- [x] **0-4. ERP 관리자 뷰 전환** — 근태/급여/교육 페이지 관리자 뷰로 변경
+- [x] **0-5. SystemAccess 정리** — CRM 제거, studio→project, label+description 추가
+- [x] **0-6. Intra 헤더** — 상단 네비게이션 (검색, 알림, 프로필 드롭다운)
+- [x] **0-7. 교육 필수 이수과정** — VRIEF, GPR, Mind Set, Universe 입문, 정보보안, 괴롭힘 예방
+- [ ] **0-8. ERP 제증명서/가족관리 관리자 뷰 변경**
+- [ ] **0-9. Myverse 개인 정보 수정 기능**
+- [ ] **0-10. GPR 캐스케이드 승인 플로우 구현**
+- [ ] **0-11. 기존 GPR 경로 리다이렉트 정리** (`/intra/erp/hr/gpr` → `/intra/erp/gpr`)
+- [ ] **0-12. Wiki 콘텐츠 작성**
+- [ ] **0-13. 모바일 반응형 점검**
 
 ---
 

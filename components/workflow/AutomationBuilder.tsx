@@ -81,18 +81,21 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
         onClose();
     };
 
+    const inputClass = "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900";
+    const smallInputClass = "rounded border border-neutral-300 bg-white px-2 py-1.5 text-xs text-neutral-900 focus:border-neutral-900 focus:outline-none";
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl mx-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl mx-4">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                        <Zap className="h-5 w-5 text-amber-500" />
-                        <h3 className="text-lg font-semibold text-white">
+                        <Zap className="h-5 w-5 text-neutral-700" />
+                        <h3 className="text-lg font-semibold text-neutral-900">
                             {editingRule ? 'Edit Automation' : 'New Automation'}
                         </h3>
                     </div>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white">
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
@@ -100,32 +103,17 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                 <div className="space-y-6">
                     {/* Basic Info */}
                     <div className="space-y-3">
-                        <input
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            placeholder="Automation name"
-                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                        />
-                        <textarea
-                            value={description}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="Description"
-                            rows={2}
-                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none resize-none"
-                        />
-                        <select
-                            value={brandId}
-                            onChange={e => setBrandId(e.target.value)}
-                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                        >
+                        <input value={name} onChange={e => setName(e.target.value)} placeholder="Automation name" className={inputClass} />
+                        <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" rows={2} className={`${inputClass} resize-none`} />
+                        <select value={brandId} onChange={e => setBrandId(e.target.value)} className={inputClass}>
                             {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                         </select>
                     </div>
 
                     {/* Trigger */}
                     <div>
-                        <h4 className="text-sm font-medium text-blue-400 mb-2">1. Trigger (When)</h4>
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
+                        <h4 className="text-sm font-medium text-neutral-700 mb-2">1. Trigger (When)</h4>
+                        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
                             <div className="grid grid-cols-2 gap-2">
                                 {triggerOptions.map(opt => (
                                     <button
@@ -133,8 +121,8 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                                         onClick={() => setTriggerType(opt.type)}
                                         className={`rounded-lg border px-3 py-2 text-sm text-left transition-colors ${
                                             triggerType === opt.type
-                                                ? 'border-blue-500 bg-blue-500/10 text-blue-400'
-                                                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                                ? 'border-neutral-900 bg-neutral-900 text-white'
+                                                : 'border-neutral-300 text-neutral-600 hover:border-neutral-400'
                                         }`}
                                     >
                                         {opt.label}
@@ -145,49 +133,36 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                     </div>
 
                     <div className="flex justify-center">
-                        <ArrowDown className="h-5 w-5 text-zinc-600" />
+                        <ArrowDown className="h-5 w-5 text-neutral-300" />
                     </div>
 
                     {/* Conditions */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-medium text-amber-400">2. Conditions (If)</h4>
-                            <button onClick={addCondition} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white">
+                            <h4 className="text-sm font-medium text-neutral-700">2. Conditions (If)</h4>
+                            <button onClick={addCondition} className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900">
                                 <Plus className="h-3 w-3" /> Add
                             </button>
                         </div>
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 space-y-2">
+                        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 space-y-2">
                             {conditions.length === 0 ? (
-                                <p className="text-xs text-zinc-600 text-center py-2">No conditions (always triggers)</p>
+                                <p className="text-xs text-neutral-400 text-center py-2">No conditions (always triggers)</p>
                             ) : (
                                 conditions.map((cond, idx) => (
                                     <div key={idx} className="flex items-center gap-2">
-                                        <select
-                                            value={cond.field}
-                                            onChange={e => updateCondition(idx, { field: e.target.value })}
-                                            className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
-                                        >
+                                        <select value={cond.field} onChange={e => updateCondition(idx, { field: e.target.value })} className={smallInputClass}>
                                             <option value="status">Status</option>
                                             <option value="priority">Priority</option>
                                             <option value="brandId">Brand</option>
                                             <option value="assignee">Assignee</option>
                                         </select>
-                                        <select
-                                            value={cond.operator}
-                                            onChange={e => updateCondition(idx, { operator: e.target.value as AutomationCondition['operator'] })}
-                                            className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
-                                        >
+                                        <select value={cond.operator} onChange={e => updateCondition(idx, { operator: e.target.value as AutomationCondition['operator'] })} className={smallInputClass}>
                                             <option value="equals">equals</option>
                                             <option value="not_equals">not equals</option>
                                             <option value="contains">contains</option>
                                         </select>
-                                        <input
-                                            value={cond.value}
-                                            onChange={e => updateCondition(idx, { value: e.target.value })}
-                                            placeholder="value"
-                                            className="flex-1 rounded border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
-                                        />
-                                        <button onClick={() => removeCondition(idx)} className="text-zinc-600 hover:text-red-400">
+                                        <input value={cond.value} onChange={e => updateCondition(idx, { value: e.target.value })} placeholder="value" className={`flex-1 ${smallInputClass}`} />
+                                        <button onClick={() => removeCondition(idx)} className="text-neutral-400 hover:text-red-500">
                                             <X className="h-3.5 w-3.5" />
                                         </button>
                                     </div>
@@ -197,13 +172,13 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                     </div>
 
                     <div className="flex justify-center">
-                        <ArrowDown className="h-5 w-5 text-zinc-600" />
+                        <ArrowDown className="h-5 w-5 text-neutral-300" />
                     </div>
 
                     {/* Actions */}
                     <div>
-                        <h4 className="text-sm font-medium text-emerald-400 mb-2">3. Actions (Then)</h4>
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
+                        <h4 className="text-sm font-medium text-neutral-700 mb-2">3. Actions (Then)</h4>
+                        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
                             <div className="grid grid-cols-2 gap-2">
                                 {actionOptions.map(opt => (
                                     <button
@@ -211,8 +186,8 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                                         onClick={() => toggleAction(opt.type)}
                                         className={`rounded-lg border px-3 py-2 text-sm text-left transition-colors ${
                                             selectedActions.includes(opt.type)
-                                                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                                                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                                ? 'border-neutral-900 bg-neutral-900 text-white'
+                                                : 'border-neutral-300 text-neutral-600 hover:border-neutral-400'
                                         }`}
                                     >
                                         {opt.label}
@@ -223,14 +198,14 @@ export function AutomationBuilder({ isOpen, onClose, onSave, editingRule }: Auto
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-zinc-800">
-                    <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors">
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-neutral-200">
+                    <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={!name.trim()}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+                        className="px-4 py-2 rounded-lg bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                     >
                         {editingRule ? 'Save Changes' : 'Create Automation'}
                     </button>

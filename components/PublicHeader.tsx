@@ -10,6 +10,8 @@ import { LogOut, Menu, X } from "lucide-react";
 
 const publicNav = [
     { name: "Works", href: "/works" },
+    { name: "Contact", href: "/contact" },
+    { name: "Newsroom", href: "/newsroom" },
     {
         name: "About", href: "/about",
         sub: [
@@ -18,8 +20,6 @@ const publicNav = [
             { name: "History", href: "/about?tab=history" },
         ]
     },
-    { name: "Newsroom", href: "/newsroom" },
-    { name: "Contact", href: "/contact" },
 ];
 
 export function PublicHeader() {
@@ -27,8 +27,6 @@ export function PublicHeader() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading, isStaff, logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    const isIntraRoute = pathname.startsWith('/intra');
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-neutral-100">
@@ -39,7 +37,7 @@ export function PublicHeader() {
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
-                    {!isIntraRoute && publicNav.map(item => (
+                    {publicNav.map(item => (
                         'sub' in item && item.sub ? (
                             <div key={item.name} className="relative group">
                                 <Link href={item.href}
@@ -71,30 +69,15 @@ export function PublicHeader() {
                         )
                     ))}
 
-                    {isIntraRoute && (
-                        <>
-                            <Link href="/intra" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">Intra</Link>
-                            <Link href="/intra/studio" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">Studio</Link>
-                            <Link href="/intra/erp" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">ERP</Link>
-                            <Link href="/intra/marketing" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">Marketing</Link>
-                            <Link href="/intra/wiki" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">Wiki</Link>
-                            <Link href="/intra/cms" className="text-sm text-neutral-400 hover:text-neutral-900 tracking-wide transition-colors">CMS</Link>
-                        </>
-                    )}
                 </div>
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {!isLoading && isAuthenticated && user ? (
                         <div className="flex items-center gap-3">
-                            {isStaff && !isIntraRoute && (
+                            {isStaff && (
                                 <Link href="/intra" className="text-xs tracking-wide text-neutral-400 hover:text-neutral-900 transition-colors">
                                     Intra
-                                </Link>
-                            )}
-                            {isIntraRoute && (
-                                <Link href="/" className="text-xs tracking-wide text-neutral-400 hover:text-neutral-900 transition-colors">
-                                    Home
                                 </Link>
                             )}
                             <Link href="/profile" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
@@ -111,6 +94,9 @@ export function PublicHeader() {
                         <div className="flex items-center gap-4">
                             <Link href="/login" className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
                                 Log in
+                            </Link>
+                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
+                                Sign up
                             </Link>
                         </div>
                     ) : null}
@@ -146,10 +132,16 @@ export function PublicHeader() {
                         </div>
                     ))}
                     {!isLoading && !isAuthenticated && (
-                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                            className="block text-sm text-neutral-400 hover:text-neutral-900 mt-4 pt-4 border-t border-neutral-100">
-                            Log in
-                        </Link>
+                        <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
+                            <Link href="/login" onClick={() => setMobileMenuOpen(false)}
+                                className="block text-sm text-neutral-400 hover:text-neutral-900">
+                                Log in
+                            </Link>
+                            <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
+                                className="block text-sm text-neutral-900 font-medium hover:underline">
+                                Sign up
+                            </Link>
+                        </div>
                     )}
                 </div>
             )}

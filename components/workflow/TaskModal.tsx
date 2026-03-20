@@ -48,6 +48,8 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
     if (!isOpen) return null;
 
     const isEditing = !!task;
+    const inputClass = "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900";
+    const labelClass = "block text-sm text-neutral-500 mb-1";
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,56 +73,38 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl mx-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl mx-4">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-neutral-900">
                         {isEditing ? 'Edit Task' : 'New Task'}
                     </h3>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900 transition-colors">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm text-zinc-400 mb-1">Title</label>
-                        <input
-                            value={form.title}
-                            onChange={e => setForm({ ...form, title: e.target.value })}
-                            required
-                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                        />
+                        <label className={labelClass}>Title</label>
+                        <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required className={inputClass} />
                     </div>
 
                     <div>
-                        <label className="block text-sm text-zinc-400 mb-1">Description</label>
-                        <textarea
-                            value={form.description}
-                            onChange={e => setForm({ ...form, description: e.target.value })}
-                            rows={3}
-                            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none resize-none"
-                        />
+                        <label className={labelClass}>Description</label>
+                        <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className={`${inputClass} resize-none`} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Status</label>
-                            <select
-                                value={form.status}
-                                onChange={e => setForm({ ...form, status: e.target.value as TaskStatus })}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            >
+                            <label className={labelClass}>Status</label>
+                            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value as TaskStatus })} className={inputClass}>
                                 {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Priority</label>
-                            <select
-                                value={form.priority}
-                                onChange={e => setForm({ ...form, priority: e.target.value as TaskPriority })}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            >
+                            <label className={labelClass}>Priority</label>
+                            <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value as TaskPriority })} className={inputClass}>
                                 {priorities.map(p => <option key={p} value={p}>{p}</option>)}
                             </select>
                         </div>
@@ -128,62 +112,40 @@ export function TaskModal({ task, isOpen, onClose, onSave, onDelete }: TaskModal
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Brand</label>
-                            <select
-                                value={form.brandId}
-                                onChange={e => setForm({ ...form, brandId: e.target.value })}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            >
+                            <label className={labelClass}>Brand</label>
+                            <select value={form.brandId} onChange={e => setForm({ ...form, brandId: e.target.value })} className={inputClass}>
                                 <option value="">Select Brand</option>
                                 {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Assignee</label>
-                            <input
-                                value={form.assignee}
-                                onChange={e => setForm({ ...form, assignee: e.target.value })}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            />
+                            <label className={labelClass}>Assignee</label>
+                            <input value={form.assignee} onChange={e => setForm({ ...form, assignee: e.target.value })} className={inputClass} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Due Date</label>
-                            <input
-                                type="date"
-                                value={form.dueDate}
-                                onChange={e => setForm({ ...form, dueDate: e.target.value })}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            />
+                            <label className={labelClass}>Due Date</label>
+                            <input type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} className={inputClass} />
                         </div>
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Tags (comma separated)</label>
-                            <input
-                                value={form.tags}
-                                onChange={e => setForm({ ...form, tags: e.target.value })}
-                                placeholder="e.g. Creative, MV"
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                            />
+                            <label className={labelClass}>Tags (comma separated)</label>
+                            <input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="e.g. Creative, MV" className={inputClass} />
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                    <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
                         {isEditing && onDelete ? (
-                            <button
-                                type="button"
-                                onClick={() => { onDelete(task!.id); onClose(); }}
-                                className="text-sm text-red-400 hover:text-red-300 transition-colors"
-                            >
+                            <button type="button" onClick={() => { onDelete(task!.id); onClose(); }} className="text-sm text-red-500 hover:text-red-600 transition-colors">
                                 Delete Task
                             </button>
                         ) : <div />}
                         <div className="flex gap-3">
-                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors">
+                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500 transition-colors">
+                            <button type="submit" className="px-4 py-2 rounded-lg bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                                 {isEditing ? 'Save Changes' : 'Create Task'}
                             </button>
                         </div>

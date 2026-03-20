@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { brands } from "@/lib/data";
+import Link from "next/link";
+import { useCms } from "@/lib/cms-context";
+import { CmsCategory } from "@/types/cms";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
-const categories = ['All', 'Community', 'Project Group', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Startup'];
+const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function WorksPage() {
-    const [category, setCategory] = useState('All');
-    const workBrands = brands.filter(b => b.id !== 'tenone');
-    const filtered = category === 'All' ? workBrands : workBrands.filter(b => b.category === category);
+    const { getPublishedByChannel } = useCms();
+    const allWorks = getPublishedByChannel('works');
+    const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
+
+    const filtered = filter === '전체' ? allWorks : allWorks.filter(w => w.category === filter);
 
     return (
         <div className="bg-white text-neutral-900">
@@ -33,73 +37,78 @@ export default function WorksPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-wrap gap-2">
                         {categories.map(cat => (
-                            <button key={cat} onClick={() => setCategory(cat)}
+                            <button key={cat} onClick={() => setFilter(cat)}
                                 className={`px-5 py-2 text-sm tracking-wide transition-colors ${
-                                    category === cat
+                                    filter === cat
                                         ? 'bg-neutral-900 text-white'
                                         : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900'
                                 }`}>
-                                {cat === 'All' ? '전체' : cat}
-                            </button>
+                                {cat}</button>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Brand Grid */}
+            {/* Works Grid */}
             <section className="px-6 pb-32">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-12">
-                        {filtered.map(brand => (
-                            <div key={brand.id} className="group">
+                        {filtered.map(work => (
+                            <article key={work.id} className="group">
                                 {/* 이미지 영역 */}
-                                <div className="aspect-[16/9] bg-neutral-100 mb-6 flex items-center justify-center overflow-hidden">
-                                    <div className="text-center">
-                                        <span className="text-4xl font-bold text-neutral-200">{brand.name.slice(0, 2)}</span>
-                                        <p className="text-xs text-neutral-300 mt-2">[{brand.name} 대표 이미지]</p>
+                                <Link href={`/works/${work.id}`} className="block">
+                                    <div className="aspect-[16/9] bg-neutral-100 mb-6 flex items-center justify-center overflow-hidden group-hover:opacity-90 transition-opacity">
+                                        {work.image && (work.image.startsWith('http') || work.image.startsWith('data:')) ? (
+                                            <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <p className="text-sm text-neutral-300 text-center px-8">[{work.image || '이미지'}]</p>
+                                        )}
                                     </div>
-                                </div>
+                                </Link>
 
                                 {/* 정보 */}
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <p className="text-xs text-neutral-400 tracking-wide">{brand.category}</p>
-                                        <h2 className="text-2xl font-bold mt-1">{brand.name}</h2>
-                                    </div>
-                                    <span className={`text-xs px-3 py-1 ${
-                                        brand.status === 'Active' ? 'bg-neutral-900 text-white' :
-                                        brand.status === 'Development' ? 'bg-neutral-200 text-neutral-600' :
-                                        'bg-neutral-100 text-neutral-400'
-                                    }`}>
-                                        {brand.status}
-                                    </span>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-500">{work.category}</span>
+                                    <span className="text-xs text-neutral-400">{work.date}</span>
                                 </div>
-
-                                {brand.tagline && (
-                                    <p className="text-sm text-neutral-500 mt-3 italic">&ldquo;{brand.tagline}&rdquo;</p>
-                                )}
-
-                                <p className="text-sm text-neutral-500 mt-3 leading-relaxed">{brand.description}</p>
+                                <Link href={`/works/${work.id}`}>
+                                    <h2 className="text-2xl font-bold group-hover:underline cursor-pointer">{work.title}</h2>
+                                </Link>
+                                <p className="text-sm text-neutral-500 mt-3 leading-relaxed">{work.summary}</p>
 
                                 {/* 태그 */}
-                                <div className="flex flex-wrap gap-2 mt-4">
-                                    {brand.tags.map(tag => (
-                                        <span key={tag} className="text-xs px-3 py-1 bg-neutral-50 text-neutral-400 border border-neutral-100">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
+                                {work.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {work.tags.map(tag => (
+                                            <span key={tag} className="text-xs px-3 py-1 bg-neutral-50 text-neutral-400 border border-neutral-100">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
 
                                 {/* 링크 */}
-                                {brand.websiteUrl && (
-                                    <a href={brand.websiteUrl} target="_blank" rel="noopener noreferrer"
-                                        className="mt-4 inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors group/link">
-                                        Visit <ExternalLink className="h-3.5 w-3.5" />
-                                    </a>
-                                )}
-                            </div>
+                                <div className="flex items-center gap-3 mt-4">
+                                    <Link href={`/works/${work.id}`}
+                                        className="inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors">
+                                        자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
+                                    </Link>
+                                    {work.externalLink && (
+                                        <a href={work.externalLink} target="_blank" rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
+                                            외부 링크 <ExternalLink className="h-3.5 w-3.5" />
+                                        </a>
+                                    )}
+                                </div>
+                            </article>
                         ))}
                     </div>
+
+                    {filtered.length === 0 && (
+                        <div className="text-center py-20">
+                            <p className="text-neutral-400">아직 등록된 Works가 없습니다.</p>
+                        </div>
+                    )}
                 </div>
             </section>
 

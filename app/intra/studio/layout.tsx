@@ -25,7 +25,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
 
     if (!isAuthenticated) return null;
 
-    if (!hasAccess('studio')) {
+    if (!hasAccess('project')) {
         return (
             <div className="h-full bg-neutral-50 flex items-center justify-center px-4">
                 <div className="text-center max-w-md">

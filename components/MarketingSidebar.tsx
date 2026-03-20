@@ -50,24 +50,23 @@ export function MarketingSidebar({ className }: { className?: string }) {
     const isActive = (href: string) => href === "/intra/marketing" ? pathname === "/intra/marketing" : pathname.startsWith(href);
 
     return (
-        <div className={clsx("flex h-full w-full flex-col bg-zinc-950 text-zinc-400 border-r border-zinc-800", className)}>
-            <div className="flex h-16 items-center px-5 shrink-0 gap-3">
-                <Logo variant="vertical" size="sm" />
-                <Link href="/intra/marketing" className="text-2xl font-bold text-white tracking-tight hover:text-indigo-400 transition-colors">Marketing</Link>
+        <div className={clsx("flex h-full w-full flex-col bg-neutral-50 text-neutral-600 border-r border-neutral-200", className)}>
+            <div className="flex h-16 items-center px-5 shrink-0 gap-3 border-b border-neutral-100">
+                <Link href="/intra/marketing" className="text-lg font-bold text-neutral-900 tracking-tight hover:text-neutral-600 transition-colors">Marketing</Link>
             </div>
             <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
                 {navigationGroups.map((group, gIdx) => (
                     <div key={gIdx}>
                         {group.label ? (
                             <div className="flex items-center gap-2 px-3 pt-5 pb-2">
-                                <span className="text-[10px] font-semibold tracking-widest text-zinc-600 uppercase">{group.label}</span>
-                                <div className="flex-1 h-px bg-zinc-800/60" />
+                                <span className="text-[10px] font-semibold tracking-widest text-neutral-400 uppercase">{group.label}</span>
+                                <div className="flex-1 h-px bg-neutral-200" />
                             </div>
-                        ) : gIdx > 0 ? <div className="my-2 mx-3 h-px bg-zinc-800/60" /> : null}
+                        ) : gIdx > 0 ? <div className="my-2 mx-3 h-px bg-neutral-200" /> : null}
                         <div className="space-y-0.5">
                             {group.items.map(item => (
-                                <Link key={item.name} href={item.href} className={clsx(isActive(item.href) ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-900/50 hover:text-white", "group flex items-center rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}>
-                                    <item.icon className={clsx(isActive(item.href) ? "text-indigo-500" : "text-zinc-500 group-hover:text-zinc-300", "mr-3 h-[18px] w-[18px]")} />
+                                <Link key={item.name} href={item.href} className={clsx(isActive(item.href) ? "bg-neutral-900 text-white" : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900", "group flex items-center rounded-md px-2.5 py-2 text-sm font-medium transition-colors")}>
+                                    <item.icon className={clsx(isActive(item.href) ? "text-white" : "text-neutral-400 group-hover:text-neutral-600", "mr-3 h-[18px] w-[18px]")} />
                                     {item.name}
                                 </Link>
                             ))}

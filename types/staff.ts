@@ -1,7 +1,7 @@
 export type StaffRole = 'Admin' | 'Manager' | 'Editor' | 'Viewer';
 export type StaffStatus = 'Active' | 'On Leave' | 'Resigned';
 
-export type SystemAccess = 'office' | 'erp-crm' | 'erp-hr' | 'erp-finance' | 'erp-admin';
+export type SystemAccess = 'office' | 'project' | 'erp-hr' | 'erp-finance' | 'erp-admin' | 'marketing' | 'wiki';
 
 export type Division = 'Management' | 'Business' | 'Production' | 'Support';
 
