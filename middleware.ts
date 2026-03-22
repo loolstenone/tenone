@@ -28,9 +28,9 @@ export function middleware(request: NextRequest) {
             return NextResponse.next();
         }
 
-        // MADLeague 도메인 → /m/ 프리픽스로 내부 리라이트
+        // MADLeague 도메인 → /ml/ 프리픽스로 내부 리라이트
         const url = request.nextUrl.clone();
-        url.pathname = `/m${pathname === '/' ? '' : pathname}`;
+        url.pathname = `/ml${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);
     }
 

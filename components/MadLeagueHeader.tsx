@@ -8,13 +8,13 @@ import { Menu, X } from "lucide-react";
 
 const navItems = [
     { name: "홈", href: "/m" },
-    { name: "경쟁 PT", href: "/m/pt" },
-    { name: "프로그램", href: "/m/program" },
-    { name: "매드 진", href: "/m/madzine" },
-    { name: "히어로", href: "/m/hero" },
-    { name: "활동인증서", href: "/m/certificate" },
-    { name: "매드 리거", href: "/m/leaguer" },
-    { name: "About", href: "/m/about" },
+    { name: "경쟁 PT", href: "/ml/pt" },
+    { name: "프로그램", href: "/ml/program" },
+    { name: "매드 진", href: "/ml/madzine" },
+    { name: "히어로", href: "/ml/hero" },
+    { name: "활동인증서", href: "/ml/certificate" },
+    { name: "매드 리거", href: "/ml/leaguer" },
+    { name: "About", href: "/ml/about" },
 ];
 
 export function MadLeagueHeader() {
