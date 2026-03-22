@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { validatePassword } from '@/lib/auth-data';
@@ -11,12 +11,15 @@ import { PublicFooter } from '@/components/PublicFooter';
 
 type AccountKind = 'personal' | 'business';
 
-const interests = [
-    { id: 'methodology', label: '방법론/프레임워크', desc: 'VRIEF, GPR 등' },
-    { id: 'networking', label: '네트워킹/이벤트', desc: 'Badak, DAM Party' },
-    { id: 'collaboration', label: '프로젝트 협업/의뢰', desc: '함께 일하기' },
-    { id: 'join', label: '브랜드 합류', desc: 'MAD League 등' },
-    { id: 'content', label: '콘텐츠 구독', desc: 'MADzine, Newsroom' },
+const quotes = [
+    "본질에 집중하라. 나머지는 따라온다.",
+    "어설픈 완벽주의는 일을 출발시키지 못한다.",
+    "실현되지 않으면 아이디어가 아니다.",
+    "길바닥 동전은 먼저 줍는 사람이 임자다.",
+    "빠르게 실패하고, 더 빠르게 배워라.",
+    "약한 연결고리가 강력한 기회를 만든다.",
+    "먼저 움직이는 사람이 판을 바꾼다.",
+    "끝까지 해내는 사람이 결국 이긴다.",
 ];
 
 const specialties = [
@@ -41,16 +44,6 @@ const wantToDo = [
     { id: 'investing', label: '투자/후원', desc: '텐원의 비전에 투자하고 싶어요' },
 ];
 
-const sources = [
-    { id: 'search', label: '검색' },
-    { id: 'sns', label: 'SNS' },
-    { id: 'referral', label: '지인 소개' },
-    { id: 'madleague', label: 'MAD League' },
-    { id: 'badak', label: 'Badak' },
-    { id: 'event', label: '행사/이벤트' },
-    { id: 'other', label: '기타' },
-];
-
 const inputClass = "w-full border border-neutral-200 px-4 py-3 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none placeholder:text-neutral-400 bg-white";
 const labelClass = "block text-sm font-medium text-neutral-700 mb-1.5";
 
@@ -66,14 +59,13 @@ export default function SignupPage() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
     const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
     const [selectedWantToDo, setSelectedWantToDo] = useState<string[]>([]);
-    const [selectedSource, setSelectedSource] = useState('');
-    const [intro, setIntro] = useState('');
     const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [passedStep1, setPassedStep1] = useState(false);
+    const randomQuote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) router.replace('/');
@@ -95,6 +87,7 @@ export default function SignupPage() {
         if (password !== confirmPassword) { setError('비밀번호가 일치하지 않습니다.'); return; }
         const pwCheck = validatePassword(password);
         if (!pwCheck.valid) { setError(pwCheck.error!); return; }
+        setPassedStep1(true);
         setStep(2);
     };
 
@@ -114,20 +107,20 @@ export default function SignupPage() {
             <div className="w-full max-w-lg">
                 <div className="text-center mb-10">
                     <Link href="/" className="text-3xl font-bold tracking-wider hover:opacity-80 transition-opacity">Ten:One™</Link>
-                    <p className="text-sm text-neutral-500 mt-2">Universe의 잠재 파트너가 되어주세요</p>
+                    <p className="text-sm text-neutral-500 mt-2 italic">&ldquo;{randomQuote}&rdquo;</p>
                 </div>
 
                 <div className="border border-neutral-200 p-8">
                     {/* Step Indicator */}
                     <div className="flex items-center gap-2 mb-8">
-                        <div className="flex items-center gap-1.5 flex-1">
+                        <button type="button" onClick={() => setStep(1)} className="flex items-center gap-1.5 flex-1 cursor-pointer">
                             <div className={`h-1 flex-1 ${step >= 1 ? 'bg-neutral-900' : 'bg-neutral-200'}`} />
                             <span className={`text-[10px] ${step >= 1 ? 'text-neutral-900 font-medium' : 'text-neutral-400'}`}>기본 정보</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-1">
+                        </button>
+                        <button type="button" onClick={() => passedStep1 && setStep(2)} className={`flex items-center gap-1.5 flex-1 ${passedStep1 ? 'cursor-pointer' : 'cursor-default'}`}>
                             <div className={`h-1 flex-1 ${step >= 2 ? 'bg-neutral-900' : 'bg-neutral-200'}`} />
                             <span className={`text-[10px] ${step >= 2 ? 'text-neutral-900 font-medium' : 'text-neutral-400'}`}>프로필</span>
-                        </div>
+                        </button>
                     </div>
 
                     {/* ===== Step 1: 기본 정보 ===== */}
@@ -191,8 +184,8 @@ export default function SignupPage() {
                     {step === 2 && (
                         <>
                             <div className="mb-6">
-                                <h2 className="text-xl font-bold">프로필을 완성해주세요</h2>
-                                <p className="text-sm text-neutral-500 mt-1">맞춤 정보를 제공해드립니다 (선택사항)</p>
+                                <h2 className="text-xl font-bold">거의 다 왔어요!</h2>
+                                <p className="text-sm text-neutral-500 mt-1">가입 후 프로필에서 더 자세히 완성할 수 있어요 (선택사항)</p>
                             </div>
 
                             <div className="space-y-8">
@@ -208,24 +201,6 @@ export default function SignupPage() {
                                                         : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
                                                 }`}>
                                                 {item.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* 관심 분야 */}
-                                <div>
-                                    <label className="block text-sm font-medium text-neutral-700 mb-3">관심 분야 <span className="text-neutral-400 font-normal">(복수 선택)</span></label>
-                                    <div className="space-y-2">
-                                        {interests.map(item => (
-                                            <button key={item.id} type="button" onClick={() => toggleList(selectedInterests, item.id, setSelectedInterests)}
-                                                className={`w-full text-left border px-4 py-3 text-sm transition-colors ${
-                                                    selectedInterests.includes(item.id)
-                                                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                                                        : 'border-neutral-200 text-neutral-700 hover:border-neutral-400'
-                                                }`}>
-                                                <span className="font-medium">{item.label}</span>
-                                                <span className={`ml-2 text-xs ${selectedInterests.includes(item.id) ? 'text-neutral-400' : 'text-neutral-400'}`}>{item.desc}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -249,29 +224,6 @@ export default function SignupPage() {
                                     </div>
                                 </div>
 
-                                {/* 자기소개 */}
-                                <div>
-                                    <label className={labelClass}>한 줄 자기소개</label>
-                                    <input value={intro} onChange={e => setIntro(e.target.value)}
-                                        className={inputClass} placeholder="본인을 한 줄로 표현해주세요" />
-                                </div>
-
-                                {/* 유입 경로 */}
-                                <div>
-                                    <label className="block text-sm font-medium text-neutral-700 mb-3">어떻게 알게 되셨나요?</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {sources.map(item => (
-                                            <button key={item.id} type="button" onClick={() => setSelectedSource(item.id)}
-                                                className={`border px-3 py-1.5 text-sm transition-colors ${
-                                                    selectedSource === item.id
-                                                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                                                        : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
-                                                }`}>
-                                                {item.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
                                 {/* 뉴스레터 구독 */}
                                 <div className="border border-neutral-200 bg-neutral-50 p-4">
                                     <div className="flex items-start gap-3">

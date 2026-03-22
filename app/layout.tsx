@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Ten:One™",
   description: "Beyond the Limit, Universe of Possibilities.",
-  icons: { icon: "/icon.png" },
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon-180x180.png",
+  },
 };
 
 export default function RootLayout({

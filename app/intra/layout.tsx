@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { LibraryProvider } from "@/lib/library-context";
+import { PointProvider } from "@/lib/point-context";
 import { IntraSidebar } from "@/components/IntraSidebar";
 import { IntraHeader } from "@/components/IntraHeader";
 import { ShieldAlert } from "lucide-react";
@@ -40,6 +41,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
     return (
         <LibraryProvider>
+        <PointProvider>
             <div className="min-h-screen bg-white text-neutral-900 flex">
                 {/* Dark sidebar */}
                 <IntraSidebar />
@@ -56,6 +58,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                     </footer>
                 </div>
             </div>
+        </PointProvider>
         </LibraryProvider>
     );
 }

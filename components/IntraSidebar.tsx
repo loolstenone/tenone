@@ -71,6 +71,7 @@ const modules: NavModule[] = [
                     { name: "근태", href: "/intra/myverse/attendance", icon: CalendarCheck, staffOnly: true },
                     { name: "급여", href: "/intra/myverse/payroll", icon: Wallet, staffOnly: true },
                     { name: "경비", href: "/intra/myverse/expenses", icon: CreditCard, staffOnly: true },
+                    { name: "포인트", href: "/intra/myverse/points", icon: Award },
                     { name: "Library", href: "/intra/myverse/library", icon: FolderOpen },
                 ],
             },
@@ -96,6 +97,7 @@ const modules: NavModule[] = [
                     { name: "프로젝트 관리", href: "/intra/project/management", icon: ClipboardList },
                     { name: "Job 관리", href: "/intra/project/jobs", icon: Briefcase },
                     { name: "타임시트", href: "/intra/project/timesheet", icon: Clock },
+                    { name: "Partner Pool", href: "/intra/partner-pool", icon: Users },
                 ],
             },
         ],
@@ -173,6 +175,12 @@ const modules: NavModule[] = [
                     { name: "Analytics", href: "/intra/marketing/analytics", icon: BarChart3, staffOnly: true },
                 ],
             },
+            {
+                label: "OPPORTUNITY",
+                items: [
+                    { name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp },
+                ],
+            },
         ],
     },
     {
@@ -196,16 +204,13 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp, intraModule: 'project' as IntraModule,
-        sections: [],
-    },
-    {
-        name: "Partner Pool", href: "/intra/partner-pool", icon: Users, intraModule: 'project' as IntraModule,
-        sections: [],
-    },
-    {
         name: "ERP", href: "/intra/erp", icon: Building2, access: "erp-hr", intraModule: 'erp' as IntraModule,
         sections: [
+            {
+                items: [
+                    { name: "BI Dashboard", href: "/intra/erp/bi", icon: BarChart3 },
+                ],
+            },
             {
                 label: "전자결재",
                 items: [
@@ -257,6 +262,7 @@ const modules: NavModule[] = [
                     },
                     { name: "근태관리", href: "/intra/erp/hr/attendance", icon: CalendarCheck },
                     { name: "급여관리", href: "/intra/erp/hr/payroll", icon: Wallet },
+                    { name: "포인트관리", href: "/intra/erp/hr/points", icon: Award },
                     { name: "교육관리", href: "/intra/erp/hr/education", icon: GraduationCap },
                     { name: "제증명서", href: "/intra/erp/hr/certificates", icon: FileCheck },
                     { name: "가족관리", href: "/intra/erp/hr/family", icon: Heart },
@@ -363,7 +369,7 @@ const modules: NavModule[] = [
         sections: [
             {
                 items: [
-                    { name: "콘텐츠 관리", href: "/intra/cms", icon: FileText },
+                    { name: "사이트 관리", href: "/intra/cms/sites", icon: FileText },
                     { name: "뉴스레터 관리", href: "/intra/cms/newsletter", icon: MessageSquareText },
                     { name: "전체 일정 관리", href: "/intra/cms/schedule", icon: Calendar },
                     { name: "라이브러리 관리", href: "/intra/cms/library", icon: FolderOpen },

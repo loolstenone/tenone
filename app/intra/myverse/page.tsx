@@ -1,16 +1,18 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { usePoints } from "@/lib/point-context";
 import {
     Mail, Building2, Calendar, Target, Edit2, Shield, BookOpen, Clock,
     FileCheck, User, FolderKanban, ChevronRight, CalendarCheck, CreditCard,
     GraduationCap, Wallet, DollarSign, TrendingUp, AlertCircle, CheckCircle2,
-    FileText, Palmtree, Stamp, FileSignature
+    FileText, Palmtree, Stamp, FileSignature, Trophy
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
+import { gradeConfig, getPointsToNextGrade } from "@/types/point";
 
 // --- 개인 Mock 데이터 ---
 const myHR = {
@@ -85,6 +87,49 @@ const myApproval = {
 };
 
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
+
+function PointWidget() {
+    const { getMemberSummary } = usePoints();
+    const summary = getMemberSummary('staff-001');
+    if (!summary) return null;
+    const gc = gradeConfig[summary.grade];
+    const next = getPointsToNextGrade(summary.totalPoints);
+    const currentMin = gc.minPoints;
+    const currentMax = gc.maxPoints ?? summary.totalPoints;
+    const pct = summary.grade === 'Diamond' ? 100 : Math.round(((summary.totalPoints - currentMin) / (currentMax - currentMin + 1)) * 100);
+    return (
+        <div className="border border-neutral-200 bg-white p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5" /> 포인트 · 등급</h3>
+                <Link href="/intra/myverse/points" className="text-[11px] text-neutral-400 hover:text-neutral-900">상세 →</Link>
+            </div>
+            <div className="flex items-center gap-5">
+                <div className={`h-12 w-12 rounded-full ${gc.bgColor} flex items-center justify-center`}>
+                    <span className="text-xl">{gc.icon}</span>
+                </div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className={`text-lg font-bold ${gc.color}`}>{gc.label}</span>
+                        <span className="text-xl font-black">{new Intl.NumberFormat("ko-KR").format(summary.totalPoints)}P</span>
+                    </div>
+                    <div className="mt-1.5">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-0.5">
+                            <span>{summary.grade}</span>
+                            <span>{next.nextGrade ? `${next.nextGrade}까지 ${new Intl.NumberFormat("ko-KR").format(next.remaining)}P` : 'MAX'}</span>
+                        </div>
+                        <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-neutral-400 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <div className="text-[10px] text-neutral-400">이번 달</div>
+                    <div className="text-sm font-bold text-green-600">+{new Intl.NumberFormat("ko-KR").format(summary.thisMonthPoints)}P</div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function MyversePage() {
     const { user, isStaff } = useAuth();
@@ -205,6 +250,9 @@ export default function MyversePage() {
                     </div>
                 ))}
             </div>
+
+            {/* Row 1.3: 포인트 현황 */}
+            <PointWidget />
 
             {/* Row 1.4: HIT + Evolution School */}
             <div className="grid grid-cols-2 gap-4 mb-4">
