@@ -74,7 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     const params = new URLSearchParams(window.location.search);
                     const code = params.get('code');
                     if (code) {
-                        await supabase.auth.exchangeCodeForSession(code);
+                        console.log('[Auth] OAuth code detected, exchanging...');
+                        const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                        if (exchangeError) console.error('[Auth] Code exchange error:', exchangeError.message);
+                        else console.log('[Auth] Code exchange success:', exchangeData?.user?.email);
                         // URL에서 code 파라미터 제거
                         window.history.replaceState({}, '', window.location.pathname);
                     }
@@ -106,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Auth 상태 변경 리스너
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || 'no user');
             if (session?.user) {
                 // members 테이블에서 프로필 조회
                 let { data: member } = await supabase
@@ -156,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             // 1. Supabase Auth 시도
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) console.error('[Auth] Supabase login error:', error.message);
             if (!error && data.user) {
                 // members 테이블에서 프로필 조회
                 const { data: member } = await supabase
