@@ -51,8 +51,19 @@ export default function ScanPage() {
   const scanLog = getScanLog().reverse();
 
   // 내 사이트 (설정에서 가져오기)
-  const savedCompany = typeof window !== 'undefined' ? localStorage.getItem('smarcomm_company') : null;
+  const savedCompany = typeof window !== 'undefined' ? localStorage.getItem('sc_company') : null;
   const mySiteUrl = savedCompany ? JSON.parse(savedCompany).siteUrl || '' : '';
+
+  // 메인 페이지에서 넘어온 pending scan 자동 실행
+  useEffect(() => {
+    const pending = sessionStorage.getItem('sc_pending_scan');
+    if (pending) {
+      sessionStorage.removeItem('sc_pending_scan');
+      setUrl(pending);
+      handleScan(pending);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleScan = async (targetUrl: string) => {
     const normalized = targetUrl.startsWith('http') ? targetUrl : 'https://' + targetUrl;
@@ -109,8 +120,8 @@ export default function ScanPage() {
       <p className="mb-6 text-xs text-text-muted">GEO + SEO 통합 진단 · 경쟁사 비교 · SmarComm. Index 리포트</p>
 
       {/* URL 입력 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white p-5">
-        <div className="flex gap-3">
+      <div className="mb-6 rounded-2xl border border-border bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <div className="relative flex-1">
             <Globe size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
@@ -119,7 +130,7 @@ export default function ScanPage() {
               className="w-full rounded-xl border border-border bg-surface py-3 pl-11 pr-4 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none" />
           </div>
           <button onClick={() => handleScan(url)} disabled={scanning}
-            className="flex items-center gap-1.5 rounded-xl bg-text px-6 py-3 text-sm font-semibold text-white hover:bg-accent-sub disabled:opacity-50">
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-text px-6 py-3 text-sm font-semibold text-white hover:bg-accent-sub disabled:opacity-50">
             <Search size={15} /> {scanning ? '분석 중...' : '진단'}
           </button>
         </div>
@@ -138,22 +149,22 @@ export default function ScanPage() {
       {view === 'result' && result && (
         <div>
           {/* 점수 요약 */}
-          <div className="mb-6 rounded-2xl border border-border bg-white p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                {result.faviconUrl && <img src={result.faviconUrl} alt="" width={40} height={40} className="rounded-xl" />}
+          <div className="mb-6 rounded-2xl border border-border bg-white p-4 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                {result.faviconUrl && <img src={result.faviconUrl} alt="" width={32} height={32} className="rounded-lg sm:h-10 sm:w-10 sm:rounded-xl" />}
                 <div>
-                  <div className="text-base font-semibold text-text">{result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</div>
+                  <div className="text-sm font-semibold text-text sm:text-base">{result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</div>
                   <div className="text-xs text-text-muted">SmarComm. Index</div>
                 </div>
               </div>
-              <div className="flex items-center gap-6">
-                <GaugeChart score={result.seoScore} label="SEO" color={getChartColors()[2]} size={80} />
-                <GaugeChart score={result.geoScore} label="GEO" color={getChartColors()[2]} size={80} />
-                <GaugeChart score={result.totalScore} label="종합" color={GRADE_MAP[result.grade]?.color || '#6B7280'} size={100} />
+              <div className="flex items-center justify-center gap-4 sm:gap-6">
+                <GaugeChart score={result.seoScore} label="SEO" color={getChartColors()[2]} size={64} />
+                <GaugeChart score={result.geoScore} label="GEO" color={getChartColors()[2]} size={64} />
+                <GaugeChart score={result.totalScore} label="종합" color={GRADE_MAP[result.grade]?.color || '#6B7280'} size={80} />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ color: GRADE_MAP[result.grade]?.color, background: `${GRADE_MAP[result.grade]?.color}15` }}>
                 {GRADE_MAP[result.grade]?.label} — {GRADE_MAP[result.grade]?.message}
               </span>
@@ -166,15 +177,17 @@ export default function ScanPage() {
 
           {/* 경쟁사 비교 입력 */}
           <div className="mb-6 rounded-2xl border border-border bg-white p-4">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-text">경쟁사 비교</span>
-              <div className="relative flex-1">
-                <input type="url" value={compareUrl} onChange={e => setCompareUrl(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleCompare()}
-                  placeholder="비교할 경쟁사 URL"
-                  className="w-full rounded-lg border border-border bg-surface py-2 px-3 text-sm placeholder:text-text-muted focus:border-text focus:outline-none" />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <span className="text-sm font-semibold text-text shrink-0">경쟁사 비교</span>
+              <div className="flex flex-1 gap-2">
+                <div className="relative flex-1">
+                  <input type="url" value={compareUrl} onChange={e => setCompareUrl(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleCompare()}
+                    placeholder="비교할 경쟁사 URL"
+                    className="w-full rounded-lg border border-border bg-surface py-2 px-3 text-sm placeholder:text-text-muted focus:border-text focus:outline-none" />
+                </div>
+                <button onClick={handleCompare} className="shrink-0 rounded-lg bg-surface px-4 py-2 text-xs font-medium text-text-sub hover:bg-text hover:text-white">비교</button>
               </div>
-              <button onClick={handleCompare} className="rounded-lg bg-surface px-4 py-2 text-xs font-medium text-text-sub hover:bg-text hover:text-white">비교</button>
             </div>
           </div>
 
@@ -257,10 +270,10 @@ export default function ScanPage() {
                       <span className="text-sm font-semibold text-text">{r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
                       {i === 0 && <span className="rounded bg-text/10 px-1.5 py-0.5 text-[9px] font-bold text-text">내 사이트</span>}
                     </div>
-                    <div className="flex items-center justify-center gap-4">
-                      <GaugeChart score={r.seoScore} label="SEO" color={getChartColors()[2]} size={70} />
-                      <GaugeChart score={r.geoScore} label="GEO" color={getChartColors()[2]} size={70} />
-                      <GaugeChart score={r.totalScore} label="종합" color={grade.color} size={85} />
+                    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                      <GaugeChart score={r.seoScore} label="SEO" color={getChartColors()[2]} size={60} />
+                      <GaugeChart score={r.geoScore} label="GEO" color={getChartColors()[2]} size={60} />
+                      <GaugeChart score={r.totalScore} label="종합" color={grade.color} size={72} />
                     </div>
                     <div className="mt-3 text-center">
                       <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ color: grade.color }}>{grade.label}</span>
@@ -290,16 +303,18 @@ export default function ScanPage() {
                   const a = getScore(scores[i][0]);
                   const b = getScore(scores[i][1]);
                   return (
-                    <div key={i} className="flex items-center gap-3 text-sm">
-                      <span className="w-20 text-xs text-text-sub">{label}</span>
-                      <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text/70" style={{ width: `${a}%` }} /></div>
-                        <span className="w-10 text-right text-xs font-semibold text-text">{a}%</span>
-                      </div>
-                      <span className="text-xs text-text-muted">vs</span>
-                      <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text-muted/50" style={{ width: `${b}%` }} /></div>
-                        <span className="w-10 text-right text-xs font-semibold text-text-sub">{b}%</span>
+                    <div key={i} className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:gap-3">
+                      <span className="w-20 shrink-0 text-xs font-medium text-text-sub">{label}</span>
+                      <div className="flex items-center gap-2 sm:flex-1">
+                        <div className="flex-1 flex items-center gap-2">
+                          <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text/70" style={{ width: `${a}%` }} /></div>
+                          <span className="w-10 text-right text-xs font-semibold text-text">{a}%</span>
+                        </div>
+                        <span className="text-xs text-text-muted">vs</span>
+                        <div className="flex-1 flex items-center gap-2">
+                          <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text-muted/50" style={{ width: `${b}%` }} /></div>
+                          <span className="w-10 text-right text-xs font-semibold text-text-sub">{b}%</span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -339,25 +354,27 @@ export default function ScanPage() {
           {/* 전체 이력 */}
           {scanLog.length > 0 && (
             <div className="rounded-2xl border border-border bg-white">
-              <div className="border-b border-border px-5 py-3">
+              <div className="border-b border-border px-4 py-3 sm:px-5">
                 <h2 className="text-sm font-semibold text-text">전체 진단 이력</h2>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead><tr className="border-b border-border text-xs text-text-muted"><th className="px-5 py-2.5 text-left font-medium">URL</th><th className="px-5 py-2.5 text-center font-medium">점수</th><th className="px-5 py-2.5 text-right font-medium">일시</th></tr></thead>
+                <thead><tr className="border-b border-border text-xs text-text-muted"><th className="px-4 py-2.5 text-left font-medium sm:px-5">URL</th><th className="px-4 py-2.5 text-center font-medium sm:px-5">점수</th><th className="px-4 py-2.5 text-right font-medium sm:px-5">일시</th></tr></thead>
                 <tbody>
                   {scanLog.slice(0, 15).map((scan, i) => {
                     const domain = scan.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
                     const scoreColor = scan.score >= 80 ? '#059669' : scan.score >= 60 ? '#D97706' : scan.score >= 40 ? '#EA580C' : '#DC2626';
                     return (
                       <tr key={i} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer" onClick={() => { setUrl(scan.url); handleScan(scan.url); }}>
-                        <td className="px-5 py-3 font-medium text-text">{domain}</td>
-                        <td className="px-5 py-3 text-center"><span className="inline-block rounded-md px-2 py-0.5 text-xs font-bold text-white" style={{ background: scoreColor }}>{scan.score}</span></td>
-                        <td className="px-5 py-3 text-right text-text-muted">{new Date(scan.date).toLocaleDateString('ko-KR')}</td>
+                        <td className="px-4 py-3 font-medium text-text sm:px-5">{domain}</td>
+                        <td className="px-4 py-3 text-center sm:px-5"><span className="inline-block rounded-md px-2 py-0.5 text-xs font-bold text-white" style={{ background: scoreColor }}>{scan.score}</span></td>
+                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap sm:px-5">{new Date(scan.date).toLocaleDateString('ko-KR')}</td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </>

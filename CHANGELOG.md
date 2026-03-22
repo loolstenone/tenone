@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-03-23 (집, 2차)
+
+### 완료
+- SmarComm 대시보드 모바일 반응형 (아이콘 사이드바 56px + 오버레이 확장)
+- 반응형 브레이크포인트 md→lg(1024px) 변경
+- 우측 패널(RightPanel) 신규 — TODO, 블로그, 가이드, 팀 채팅
+- 스캔 페이지 반응형 (URL입력/게이지/비교/테이블)
+- LineChart clipPath overflow 수정
+- 요금제 5단계 (Free ₩0 ~ Ultra ₩990,000) + 연간할인 + 비교표
+- 메인→워크스페이스 스캔 연결 (로그인 유저 자동 전환)
+- 워크스페이스 로고 드래그앤드롭 업로드
+- 사이드바 상단 회사명 표시 개선
+
+### 생성된 파일
+- `components/smarcomm/RightPanel.tsx`
+
+### 수정된 파일
+- `app/(SmarComm)/sc/dashboard/layout.tsx` — 우측 패널, 반응형
+- `app/(SmarComm)/sc/dashboard/profile/page.tsx` — 로고 업로드
+- `app/(SmarComm)/sc/dashboard/scan/page.tsx` — 반응형, pending scan
+- `app/(SmarComm)/sc/page.tsx` — 워크스페이스 연결
+- `app/(SmarComm)/sc/pricing/page.tsx` — 5단계 요금제
+- `components/SmarCommSidebar.tsx` — 모바일 아이콘 모드
+- `components/smarcomm/charts/LineChart.tsx` — clipPath
+
+---
+
 ## 2026-03-23 (집)
 
 ### 완료

@@ -84,34 +84,101 @@ interface Props {
 
 export default function SmarCommSidebar({ companyName, companyLogo }: Props) {
   const pathname = usePathname();
-  const { collapsed, setCollapsed } = useContext(SCSidebarContext);
+  const { collapsed, setCollapsed, mobileExpanded, setMobileExpanded } = useContext(SCSidebarContext);
 
   return (
     <>
-    <aside className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-white transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
+    {/* ── 데스크탑 사이드바 (lg+) ── */}
+    <aside
+      className="fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-white transition-all duration-200 lg:flex"
+      style={{ width: collapsed ? 56 : 208 }}
+    >
+      <SidebarContent
+        companyName={companyName}
+        companyLogo={companyLogo}
+        collapsed={collapsed}
+        pathname={pathname}
+      />
+    </aside>
+
+    {/* 데스크탑 접기/펼치기 버튼 */}
+    <button
+      onClick={() => setCollapsed(!collapsed)}
+      className="fixed z-50 hidden h-6 w-4 items-center justify-center rounded-r-md border border-l-0 border-border bg-white text-text-muted shadow-sm transition-all duration-200 hover:text-text hover:bg-surface hover:w-5 lg:flex"
+      style={{ left: collapsed ? 56 : 208, top: 52 }}
+      title={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
+    >
+      {collapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+    </button>
+
+    {/* ── 좁은 화면 사이드바 (~lg) ── */}
+    {/* 항상 아이콘만 보이는 56px 사이드바 */}
+    <aside
+      className="fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-white lg:hidden"
+      style={{ width: 56 }}
+    >
+      <SidebarContent
+        companyName={companyName}
+        companyLogo={companyLogo}
+        collapsed={!mobileExpanded}
+        pathname={pathname}
+        onNavigate={() => setMobileExpanded(false)}
+        onExpand={() => setMobileExpanded(true)}
+        isMobile
+      />
+    </aside>
+
+    {/* 모바일 확장 사이드바 (오버레이) */}
+    {mobileExpanded && (
+      <aside
+        className="fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-white shadow-xl lg:hidden"
+        style={{ width: 208 }}
+      >
+        <SidebarContent
+          companyName={companyName}
+          companyLogo={companyLogo}
+          collapsed={false}
+          pathname={pathname}
+          onNavigate={() => setMobileExpanded(false)}
+          isMobile
+        />
+      </aside>
+    )}
+    </>
+  );
+}
+
+function SidebarContent({ companyName, companyLogo, collapsed, pathname, onNavigate, onExpand, isMobile }: {
+  companyName: string;
+  companyLogo?: string;
+  collapsed: boolean;
+  pathname: string;
+  onNavigate?: () => void;
+  onExpand?: () => void;
+  isMobile?: boolean;
+}) {
+  return (
+    <>
       <div className="shrink-0 border-b border-border p-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {companyLogo ? (
-              <img src={companyLogo} alt="" className="h-8 w-8 shrink-0 rounded-lg object-cover" />
-            ) : companyName ? (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-sm font-bold text-text-sub">
-                {companyName.charAt(0).toUpperCase()}
-              </div>
-            ) : (
-              <Link href="/sc/dashboard/profile" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-text-muted/40 text-text-muted hover:border-text hover:text-text" title="로고 설정">
-                <span className="text-sm">+</span>
-              </Link>
-            )}
+          <div
+            className={`flex items-center gap-2.5 min-w-0 ${isMobile && collapsed ? 'cursor-pointer' : ''}`}
+            onClick={isMobile && collapsed && onExpand ? onExpand : undefined}
+          >
+            <Link href={companyLogo ? '/sc/dashboard' : '/sc/dashboard/profile'} onClick={onNavigate} className="shrink-0" title={companyLogo ? companyName || 'Workspace' : '로고 설정'}>
+              {companyLogo ? (
+                <img src={companyLogo} alt="" className="h-8 w-8 rounded-lg object-cover" />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-sm font-bold text-text-sub">
+                  {companyName ? companyName.charAt(0).toUpperCase() : '+'}
+                </div>
+              )}
+            </Link>
             {!collapsed && (
-              <div className="min-w-0 flex-1">
-                {companyName ? (
-                  <div className="text-[10px] text-text-muted truncate">{companyName}</div>
-                ) : (
-                  <Link href="/sc/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
-                )}
+              <Link href={companyLogo ? '/sc/dashboard' : '/sc/dashboard/profile'} onClick={onNavigate} className="min-w-0 flex-1">
+                <div className="text-[10px] text-text-muted truncate">{companyName || '회사명 미설정'}</div>
                 <div className="text-base font-extrabold text-text tracking-tight leading-tight">Workspace</div>
-              </div>
+              </Link>
             )}
           </div>
         </div>
@@ -133,6 +200,7 @@ export default function SmarCommSidebar({ companyName, companyLogo }: Props) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={onNavigate}
                   title={collapsed ? item.label : undefined}
                   className={`flex items-center rounded-lg py-1.5 text-[13px] transition-colors mb-px ${
                     collapsed ? 'justify-center px-0' : 'gap-2.5 px-3'
@@ -165,18 +233,6 @@ export default function SmarCommSidebar({ companyName, companyLogo }: Props) {
           </div>
         )}
       </div>
-    </aside>
-
-    <button
-      onClick={() => setCollapsed(!collapsed)}
-      className={`fixed z-50 flex h-6 w-4 items-center justify-center rounded-r-md border border-l-0 border-border bg-white text-text-muted shadow-sm transition-all duration-200 hover:text-text hover:bg-surface hover:w-5 ${
-        collapsed ? 'left-[56px]' : 'left-[208px]'
-      }`}
-      style={{ top: '52px' }}
-      title={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
-    >
-      {collapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
-    </button>
     </>
   );
 }

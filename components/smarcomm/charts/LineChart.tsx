@@ -40,7 +40,13 @@ export default function LineChart({ data, height = 200, color = '#111827', showA
   });
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" preserveAspectRatio="xMidYMid meet" style={{ overflow: 'hidden' }}>
+      {/* 클리핑 영역 */}
+      <defs>
+        <clipPath id="chart-clip">
+          <rect x={padding.left} y={padding.top} width={chartW} height={chartH} />
+        </clipPath>
+      </defs>
       {/* Y축 그리드 */}
       {yLines.map((tick, i) => (
         <g key={i}>
@@ -61,31 +67,34 @@ export default function LineChart({ data, height = 200, color = '#111827', showA
         );
       })}
 
-      {/* 영역 */}
-      {showArea && (
-        <path d={areaPath} fill={`${color}10`} style={{ transition: 'opacity 1s', opacity: animated ? 1 : 0 }} />
-      )}
+      {/* 클리핑된 차트 영역 */}
+      <g clipPath="url(#chart-clip)">
+        {/* 영역 */}
+        {showArea && (
+          <path d={areaPath} fill={`${color}10`} style={{ transition: 'opacity 1s', opacity: animated ? 1 : 0 }} />
+        )}
 
-      {/* 라인 */}
-      <path
-        d={linePath}
-        fill="none"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{
-          strokeDasharray: animated ? 'none' : '2000',
-          strokeDashoffset: animated ? '0' : '2000',
-          transition: 'stroke-dashoffset 1.5s ease',
-        }}
-      />
+        {/* 라인 */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            strokeDasharray: animated ? 'none' : '2000',
+            strokeDashoffset: animated ? '0' : '2000',
+            transition: 'stroke-dashoffset 1.5s ease',
+          }}
+        />
 
-      {/* 데이터 포인트 */}
-      {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={3} fill="white" stroke={color} strokeWidth={2}
-          style={{ opacity: animated ? 1 : 0, transition: `opacity 0.5s ${i * 0.1}s` }} />
-      ))}
+        {/* 데이터 포인트 */}
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={3} fill="white" stroke={color} strokeWidth={2}
+            style={{ opacity: animated ? 1 : 0, transition: `opacity 0.5s ${i * 0.1}s` }} />
+        ))}
+      </g>
     </svg>
   );
 }

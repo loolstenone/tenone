@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette, Upload, X, ImageIcon } from 'lucide-react';
 import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
 import { useRouter } from 'next/navigation';
 import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [tab, setTab] = useState<SettingsTab>('workspace');
   const [companyName, setCompanyName] = useState('');
+  const [companyLogo, setCompanyLogo] = useState('');
   const [industry, setIndustry] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
   const [goal, setGoal] = useState('');
@@ -20,13 +21,16 @@ export default function ProfilePage() {
   const [selectedPalette, setSelectedPalette] = useState('mono');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('viewer');
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const user = getSCUser();
 
   useEffect(() => {
-    const data = localStorage.getItem('smarcomm_company');
+    const data = localStorage.getItem('sc_company');
     if (data) {
       const parsed = JSON.parse(data);
       setCompanyName(parsed.name || '');
+      setCompanyLogo(parsed.logo || '');
       setIndustry(parsed.industry || '');
       setSiteUrl(parsed.siteUrl || '');
       setGoal(parsed.goal || '');
@@ -34,8 +38,37 @@ export default function ProfilePage() {
     setSelectedPalette(getChartPalette().id);
   }, []);
 
+  const handleLogoFile = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 2 * 1024 * 1024) { alert('2MB 이하 이미지만 업로드 가능합니다.'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setCompanyLogo(dataUrl);
+      // 즉시 저장
+      const existing = localStorage.getItem('sc_company');
+      const parsed = existing ? JSON.parse(existing) : {};
+      localStorage.setItem('sc_company', JSON.stringify({ ...parsed, logo: dataUrl }));
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleLogoFile(file);
+  }, [handleLogoFile]);
+
+  const handleRemoveLogo = () => {
+    setCompanyLogo('');
+    const existing = localStorage.getItem('sc_company');
+    const parsed = existing ? JSON.parse(existing) : {};
+    localStorage.setItem('sc_company', JSON.stringify({ ...parsed, logo: '' }));
+  };
+
   const handleSave = () => {
-    localStorage.setItem('smarcomm_company', JSON.stringify({ name: companyName, industry, siteUrl, goal, logo: '' }));
+    localStorage.setItem('sc_company', JSON.stringify({ name: companyName, industry, siteUrl, goal, logo: companyLogo }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -81,6 +114,60 @@ export default function ProfilePage() {
                   <option value="America/New_York">America/New_York (UTC-5)</option>
                   <option value="Europe/London">Europe/London (UTC+0)</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          {/* 회사 로고 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">회사 로고</h2>
+            <div className="flex items-start gap-5">
+              {/* 로고 미리보기 */}
+              <div className="relative shrink-0">
+                {companyLogo ? (
+                  <div className="relative">
+                    <img src={companyLogo} alt="로고" className="h-20 w-20 rounded-xl border border-border object-cover" />
+                    <button
+                      onClick={handleRemoveLogo}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white shadow-sm hover:bg-danger/80"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface text-text-muted">
+                    <ImageIcon size={24} />
+                  </div>
+                )}
+              </div>
+
+              {/* 드래그앤드롭 영역 */}
+              <div
+                className={`flex flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+                  dragOver ? 'border-accent bg-accent/5' : 'border-border hover:border-text-muted'
+                }`}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                style={{ cursor: 'pointer' }}
+              >
+                <Upload size={20} className={`mb-2 ${dragOver ? 'text-accent' : 'text-text-muted'}`} />
+                <p className="text-sm text-text-sub">
+                  {dragOver ? '여기에 놓으세요' : '이미지를 드래그하거나 클릭하여 업로드'}
+                </p>
+                <p className="mt-1 text-xs text-text-muted">PNG, JPG, SVG · 2MB 이하 · 권장 200×200px</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleLogoFile(file);
+                    e.target.value = '';
+                  }}
+                />
               </div>
             </div>
           </div>

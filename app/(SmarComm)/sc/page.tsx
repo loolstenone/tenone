@@ -96,7 +96,16 @@ export default function SCLandingPage() {
       const parsed = new URL(normalized);
       if (!parsed.hostname.includes('.')) { alert('올바른 URL을 입력해주세요.'); return; }
     } catch { alert('올바른 URL을 입력해주세요.'); return; }
-    router.push(`/sc/scan?url=${encodeURIComponent(normalized)}`);
+
+    // 로그인 유저 → 대시보드 스캔, 미가입자 → 퍼블릭 스캔
+    const scUser = typeof window !== 'undefined' ? sessionStorage.getItem('sc_user') : null;
+    if (scUser) {
+      // 워크스페이스에서 결과 확인
+      sessionStorage.setItem('sc_pending_scan', normalized);
+      router.push('/sc/dashboard/scan');
+    } else {
+      router.push(`/sc/scan?url=${encodeURIComponent(normalized)}`);
+    }
   };
 
   return (
