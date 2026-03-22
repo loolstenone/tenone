@@ -65,14 +65,13 @@ export function middleware(request: NextRequest) {
             pathname.startsWith('/intra') ||
             pathname.startsWith('/api') ||
             pathname.startsWith('/_next') ||
-            pathname.startsWith('/login') ||
-            pathname.startsWith('/signup') ||
             pathname.includes('.')
         ) {
             return NextResponse.next();
         }
 
         // SmarComm 도메인 → /sc/ 프리픽스로 내부 리라이트
+        // /login → /sc/login, /signup → /sc/signup 도 리라이트 대상
         const url = request.nextUrl.clone();
         url.pathname = `/sc${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);

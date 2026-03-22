@@ -15,10 +15,22 @@ export const CHART_PALETTES: ChartPalette[] = [
     preview: ['#111827', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB'],
   },
   {
+    id: 'red',
+    name: '레드 계열',
+    colors: ['#991B1B', '#DC2626', '#EF4444', '#F87171', '#FCA5A5', '#FECACA', '#FEE2E2'],
+    preview: ['#991B1B', '#DC2626', '#EF4444', '#F87171', '#FCA5A5'],
+  },
+  {
     id: 'blue',
     name: '블루 계열',
     colors: ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE'],
     preview: ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
+  },
+  {
+    id: 'yellow',
+    name: '옐로우 계열',
+    colors: ['#92400E', '#D97706', '#F59E0B', '#FBBF24', '#FCD34D', '#FDE68A', '#FEF3C7'],
+    preview: ['#92400E', '#D97706', '#F59E0B', '#FBBF24', '#FCD34D'],
   },
   {
     id: 'green',
