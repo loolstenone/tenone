@@ -54,17 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         let finished = false;
 
-        // 3초 타임아웃: Supabase가 느려도 로그인 버튼은 보이게
-        const timeout = setTimeout(() => {
-            if (!finished) {
-                finished = true;
-                try {
-                    const stored = localStorage.getItem(STORAGE_KEY);
-                    if (stored) setUser(JSON.parse(stored));
-                } catch { /* ignore */ }
-                setIsLoading(false);
+        // localStorage 먼저 체크 → 즉시 UI 표시 (로그인 버튼 or 프로필)
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                setUser(JSON.parse(stored));
             }
-        }, 3000);
+            setIsLoading(false); // 즉시 로딩 해제
+        } catch {
+            setIsLoading(false);
+        }
 
         async function init() {
             try {
@@ -78,36 +77,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         .eq('auth_id', session.user.id)
                         .single();
 
-                    if (member && !finished) {
-                        finished = true;
-                        clearTimeout(timeout);
+                    if (member) {
                         const u = memberToUser(member);
                         setUser(u);
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-                        setIsLoading(false);
                         return;
                     }
                 }
-
-                // 2. Fallback: localStorage (Mock 데이터 호환)
-                if (!finished) {
-                    const stored = localStorage.getItem(STORAGE_KEY);
-                    if (stored) setUser(JSON.parse(stored));
-                }
             } catch {
-                // Fallback to localStorage
-                if (!finished) {
-                    try {
-                        const stored = localStorage.getItem(STORAGE_KEY);
-                        if (stored) setUser(JSON.parse(stored));
-                    } catch { localStorage.removeItem(STORAGE_KEY); }
-                }
+                // Supabase 실패 시 무시 (localStorage에서 이미 복원됨)
             }
-            if (!finished) {
-                finished = true;
-                clearTimeout(timeout);
-                setIsLoading(false);
-            }
+            finished = true;
         }
         init();
 
