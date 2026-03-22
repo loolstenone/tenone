@@ -52,6 +52,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 초기화: Supabase 세션 체크 → members 테이블 조회 → fallback localStorage
     useEffect(() => {
+        let finished = false;
+
+        // 3초 타임아웃: Supabase가 느려도 로그인 버튼은 보이게
+        const timeout = setTimeout(() => {
+            if (!finished) {
+                finished = true;
+                try {
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    if (stored) setUser(JSON.parse(stored));
+                } catch { /* ignore */ }
+                setIsLoading(false);
+            }
+        }, 3000);
+
         async function init() {
             try {
                 // 1. Supabase Auth 세션 확인
@@ -64,7 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         .eq('auth_id', session.user.id)
                         .single();
 
-                    if (member) {
+                    if (member && !finished) {
+                        finished = true;
+                        clearTimeout(timeout);
                         const u = memberToUser(member);
                         setUser(u);
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
@@ -74,16 +90,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
 
                 // 2. Fallback: localStorage (Mock 데이터 호환)
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) setUser(JSON.parse(stored));
-            } catch {
-                // Fallback to localStorage
-                try {
+                if (!finished) {
                     const stored = localStorage.getItem(STORAGE_KEY);
                     if (stored) setUser(JSON.parse(stored));
-                } catch { localStorage.removeItem(STORAGE_KEY); }
+                }
+            } catch {
+                // Fallback to localStorage
+                if (!finished) {
+                    try {
+                        const stored = localStorage.getItem(STORAGE_KEY);
+                        if (stored) setUser(JSON.parse(stored));
+                    } catch { localStorage.removeItem(STORAGE_KEY); }
+                }
             }
-            setIsLoading(false);
+            if (!finished) {
+                finished = true;
+                clearTimeout(timeout);
+                setIsLoading(false);
+            }
         }
         init();
 
