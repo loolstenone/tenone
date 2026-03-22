@@ -1,78 +1,16 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm';
-
-interface SiteConfig {
-    id: SiteIdentifier;
-    name: string;
-    logo: string;
-    accentColor: string;
-    bgDark: string;
-    homePath: string;
-    signupPath: string;
-}
-
-const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
-    tenone: {
-        id: 'tenone', name: 'Ten:One™', logo: 'Ten:One™',
-        accentColor: '#171717', bgDark: '#171717',
-        homePath: '/', signupPath: '/signup',
-    },
-    madleague: {
-        id: 'madleague', name: 'MAD League', logo: 'MAD LEAGUE',
-        accentColor: '#D32F2F', bgDark: '#212121',
-        homePath: '/ml', signupPath: '/signup',
-    },
-    youinone: {
-        id: 'youinone', name: 'YouInOne', logo: 'YouInOne',
-        accentColor: '#171717', bgDark: '#171717',
-        homePath: '/yi', signupPath: '/signup',
-    },
-    luki: {
-        id: 'luki', name: 'LUKI', logo: 'LUKI',
-        accentColor: '#7C3AED', bgDark: '#1a1a2e',
-        homePath: '/', signupPath: '/signup',
-    },
-    rook: {
-        id: 'rook', name: 'RooK', logo: 'RooK',
-        accentColor: '#059669', bgDark: '#1a2e1a',
-        homePath: '/', signupPath: '/signup',
-    },
-    badak: {
-        id: 'badak', name: 'Badak', logo: 'Badak',
-        accentColor: '#2563EB', bgDark: '#1a1a2e',
-        homePath: '/', signupPath: '/signup',
-    },
-    smarcomm: {
-        id: 'smarcomm', name: 'SmarComm.', logo: 'SmarComm.',
-        accentColor: '#3B82F6', bgDark: '#0A0E1A',
-        homePath: '/sc', signupPath: '/signup',
-    },
-};
-
-// 도메인 → 사이트 매핑
-const domainMap: Record<string, SiteIdentifier> = {
-    'madleague.net': 'madleague',
-    'www.madleague.net': 'madleague',
-    'luki.ai': 'luki',
-    'www.luki.ai': 'luki',
-    'rook.co.kr': 'rook',
-    'www.rook.co.kr': 'rook',
-    'youinone.com': 'youinone',
-    'www.youinone.com': 'youinone',
-    'badak.biz': 'badak',
-    'www.badak.biz': 'badak',
-    'smarcomm.co.kr': 'smarcomm',
-    'www.smarcomm.co.kr': 'smarcomm',
-};
+import { siteConfigs, domainMap } from '@/lib/site-config';
+import type { SiteIdentifier, SiteConfig } from '@/lib/site-config';
 
 interface SiteContextType {
     site: SiteConfig;
     siteId: SiteIdentifier;
     isTenOne: boolean;
     isMadLeague: boolean;
+    isYouInOne: boolean;
+    isSmarComm: boolean;
 }
 
 const SiteContext = createContext<SiteContextType>({
@@ -80,6 +18,8 @@ const SiteContext = createContext<SiteContextType>({
     siteId: 'tenone',
     isTenOne: true,
     isMadLeague: false,
+    isYouInOne: false,
+    isSmarComm: false,
 });
 
 export function SiteProvider({ children }: { children: ReactNode }) {
@@ -99,6 +39,8 @@ export function SiteProvider({ children }: { children: ReactNode }) {
             siteId,
             isTenOne: siteId === 'tenone',
             isMadLeague: siteId === 'madleague',
+            isYouInOne: siteId === 'youinone',
+            isSmarComm: siteId === 'smarcomm',
         }}>
             {children}
         </SiteContext.Provider>
@@ -109,4 +51,6 @@ export function useSite() {
     return useContext(SiteContext);
 }
 
-export { siteConfigs };
+// Re-export for backward compatibility
+export { siteConfigs, domainMap };
+export type { SiteIdentifier, SiteConfig };

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Mail, Globe, Lightbulb } from "lucide-react";
+import { UniverseBadge } from "@/components/UniverseBadge";
 
 const quickLinks = [
     { name: "About", href: "/yi/about" },
@@ -81,8 +82,10 @@ export function YouInOneFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; {new Date().getFullYear()} YouInOne. All rights reserved. Powered by Ten:One&trade;
+                    &copy; {new Date().getFullYear()} YouInOne. All rights reserved.
                 </div>
+
+                <UniverseBadge />
             </div>
         </footer>
     );

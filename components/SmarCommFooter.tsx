@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { UniverseBadge } from '@/components/UniverseBadge';
 
 export default function SmarCommFooter() {
   return (
@@ -21,8 +22,10 @@ export default function SmarCommFooter() {
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 text-xs text-text-muted">
-          &copy; 2026 Ten:One&trade; Universe. All rights reserved.
+          &copy; {new Date().getFullYear()} SmarComm. All rights reserved.
         </div>
+
+        <UniverseBadge />
       </div>
     </footer>
   );

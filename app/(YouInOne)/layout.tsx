@@ -1,12 +1,19 @@
 import { YouInOneHeader } from "@/components/YouInOneHeader";
 import { YouInOneFooter } from "@/components/YouInOneFooter";
 import type { Metadata } from "next";
+import { siteConfigs } from "@/lib/site-config";
+
+const site = siteConfigs.youinone;
 
 export const metadata: Metadata = {
-    title: "YouInOne - We are Project Group to solve Problems",
-    description: "기업과 사회의 문제를 해결하는 프로젝트 그룹. Idea + Strategy. 소규모 기업 연합 얼라이언스.",
-    icons: {
-        icon: "/icon.png",
+    title: { default: site.meta.title, template: `%s | ${site.name}` },
+    description: site.meta.description,
+    icons: { icon: site.faviconUrl, apple: site.appleTouchIcon },
+    openGraph: {
+        title: site.meta.title,
+        description: site.meta.description,
+        siteName: site.name,
+        ...(site.meta.ogImage && { images: [site.meta.ogImage] }),
     },
 };
 

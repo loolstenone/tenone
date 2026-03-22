@@ -1,12 +1,19 @@
 import { MadLeagueHeader } from "@/components/MadLeagueHeader";
 import { MadLeagueFooter } from "@/components/MadLeagueFooter";
 import type { Metadata } from "next";
+import { siteConfigs } from "@/lib/site-config";
+
+const site = siteConfigs.madleague;
 
 export const metadata: Metadata = {
-    title: "MAD League - 경쟁을 통한 성장 플랫폼",
-    description: "Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.",
-    icons: {
-        icon: "/icon.png",
+    title: { default: site.meta.title, template: `%s | ${site.name}` },
+    description: site.meta.description,
+    icons: { icon: site.faviconUrl, apple: site.appleTouchIcon },
+    openGraph: {
+        title: site.meta.title,
+        description: site.meta.description,
+        siteName: site.name,
+        ...(site.meta.ogImage && { images: [site.meta.ogImage] }),
     },
 };
 
