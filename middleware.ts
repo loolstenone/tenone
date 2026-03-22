@@ -10,7 +10,9 @@ const domainSiteMap: Record<string, string> = {
     'www.smarcomm.co.kr': 'smarcomm',
     'hero.ne.kr': 'hero',
     'www.hero.ne.kr': 'hero',
-    // 추후 추가: 'luki.ai': 'luki', 'rook.co.kr': 'rook', 'badak.biz': 'badak'
+    'rook.co.kr': 'rook',
+    'www.rook.co.kr': 'rook',
+    // 추후 추가: 'luki.ai': 'luki', 'badak.biz': 'badak'
 };
 
 export function middleware(request: NextRequest) {
@@ -96,6 +98,26 @@ export function middleware(request: NextRequest) {
         // HeRo 도메인 → /hr/ 프리픽스로 내부 리라이트
         const url = request.nextUrl.clone();
         url.pathname = `/hr${pathname === '/' ? '' : pathname}`;
+        return NextResponse.rewrite(url);
+    }
+
+    if (siteId === 'rook') {
+        const pathname = request.nextUrl.pathname;
+
+        if (
+            pathname.startsWith('/intra') ||
+            pathname.startsWith('/api') ||
+            pathname.startsWith('/_next') ||
+            pathname.startsWith('/login') ||
+            pathname.startsWith('/signup') ||
+            pathname.includes('.')
+        ) {
+            return NextResponse.next();
+        }
+
+        // RooK 도메인 → /rk/ 프리픽스로 내부 리라이트
+        const url = request.nextUrl.clone();
+        url.pathname = `/rk${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);
     }
 

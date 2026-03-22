@@ -79,10 +79,10 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     rook: {
         id: 'rook', name: 'RooK', logo: 'RooK', logoText: 'RooK', logoStyle: 'text',
         faviconUrl: '/brands/rook/favicon.png', appleTouchIcon: '/brands/rook/favicon.png',
-        accentColor: '#059669', bgDark: '#1a2e1a',
-        colors: { primary: '#059669', primaryDark: '#047857', secondary: '#34D399', headerBg: '#ffffff', headerText: '#171717', footerBg: '#1a2e1a', footerText: '#a3a3a3', accent: '#059669' },
-        meta: { title: 'RooK — AI Creator Platform', description: 'RooK - AI 크리에이터 플랫폼. Ten:One Universe의 AI 콘텐츠 브랜드.', keywords: ['RooK', 'AI Creator', 'AI 크리에이터', 'Ten:One'] },
-        homePath: '/', signupPath: '/signup', domain: 'rook.co.kr',
+        accentColor: '#00d255', bgDark: '#282828',
+        colors: { primary: '#00d255', primaryDark: '#00b347', secondary: '#00ff66', headerBg: '#282828', headerText: '#ffffff', footerBg: '#1a1a1a', footerText: '#a3a3a3', accent: '#00d255' },
+        meta: { title: 'RooK — AI Creator', description: 'AI Creator RooK. 밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다. 하고 싶은 것이라면 무엇이든 도전합니다.', keywords: ['RooK', 'AI Creator', 'AI 크리에이터', 'AI 아티스트', 'Ten:One'] },
+        homePath: '/rk', signupPath: '/signup', domain: 'rook.co.kr',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
     },
     badak: {

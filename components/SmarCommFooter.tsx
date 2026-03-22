@@ -22,7 +22,7 @@ export default function SmarCommFooter() {
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 text-xs text-text-muted">
-          &copy; {new Date().getFullYear()} SmarComm. All rights reserved.
+          &copy; SmarComm. All rights reserved. Powered by Ten:One&trade; Universe.
         </div>
 
         <UniverseBadge />

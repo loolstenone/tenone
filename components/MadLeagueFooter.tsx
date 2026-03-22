@@ -76,7 +76,7 @@ export function MadLeagueFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; {new Date().getFullYear()} MAD League. All rights reserved.
+                    &copy; MAD League. All rights reserved. Powered by Ten:One&trade; Universe.
                 </div>
 
                 <UniverseBadge />

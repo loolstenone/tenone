@@ -75,7 +75,7 @@ export function HeRoFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; {new Date().getFullYear()} HeRo. All rights reserved.
+                    &copy; HeRo. All rights reserved. Powered by Ten:One&trade; Universe.
                 </div>
 
                 <UniverseBadge />

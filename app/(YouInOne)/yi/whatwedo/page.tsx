@@ -1,117 +1,74 @@
 "use client";
 
 import Link from "next/link";
-import { Megaphone, Palette, Film, GraduationCap, Handshake, ArrowRight } from "lucide-react";
+import { Compass, Users, Building2, GraduationCap, Lightbulb, PartyPopper, Briefcase, Megaphone, Palette, ArrowRight } from "lucide-react";
 
 const services = [
-    {
-        icon: Megaphone,
-        title: "마케팅 컨설팅",
-        desc: "소규모 기업과 스타트업을 위한 마케팅 전략 수립. 시장 분석, 타겟 설정, 채널 전략까지 실행 가능한 플랜을 제공합니다.",
-        tags: ["시장 분석", "전략 수립", "채널 기획"],
-    },
-    {
-        icon: Film,
-        title: "콘텐츠 제작",
-        desc: "영상, SNS, 매거진 등 다양한 형태의 콘텐츠를 기획하고 제작합니다. 브랜드 메시지를 효과적으로 전달합니다.",
-        tags: ["영상 제작", "SNS 콘텐츠", "카피라이팅"],
-    },
-    {
-        icon: Palette,
-        title: "브랜딩",
-        desc: "브랜드 아이덴티티 구축부터 리브랜딩까지. 경쟁력 있는 브랜드를 만들기 위한 전략적 브랜딩 서비스를 제공합니다.",
-        tags: ["BI 개발", "네이밍", "브랜드 전략"],
-    },
-    {
-        icon: GraduationCap,
-        title: "교육 프로그램",
-        desc: "기업가정신 교육, 마케팅 실전 워크숍 등 실무 중심의 교육 프로그램을 설계하고 운영합니다.",
-        tags: ["기업가정신", "워크숍", "실전 교육"],
-    },
-    {
-        icon: Handshake,
-        title: "네트워킹",
-        desc: "업계 전문가와 기업을 연결합니다. 프로젝트 매칭, 네트워킹 이벤트, 커뮤니티 운영을 통해 비즈니스 기회를 만듭니다.",
-        tags: ["프로젝트 매칭", "이벤트", "커뮤니티"],
-    },
+    { icon: Compass, title: "인사이트 투어링", desc: "여행지에서 영감을 얻고 새로운 시각으로 문제를 바라봅니다. 일상에서 벗어나 창의적 발상의 전환을 경험합니다." },
+    { icon: Users, title: "프로젝트 멤버십", desc: "학생과 현업 전문가를 매칭하여 실전 프로젝트를 진행합니다. 학생은 경험을, 현업인은 새로운 아이디어를 얻습니다." },
+    { icon: Building2, title: "유인원 얼라이언스", desc: "소규모 기업들이 연합하여 서로의 강점을 활용하는 네트워크. 혼자서는 어려운 프로젝트도 함께라면 가능합니다." },
+    { icon: GraduationCap, title: "진화 학교 (Evolution School)", desc: "실전 중심의 아카데미. 이론이 아닌 실제 프로젝트를 통해 배우고 성장합니다." },
+    { icon: Lightbulb, title: "선제안 프로젝트 (Pre-Posal)", desc: "사회 문제를 발견하고 먼저 해결책을 제안합니다. 의뢰를 기다리지 않고 능동적으로 프로젝트를 시작합니다." },
+    { icon: PartyPopper, title: "D.A.M 네트워킹 파티", desc: "Draft Assembly Meeting. 마케팅·광고 분야 학생들과 현업 인사담당자를 연결하는 네트워킹 이벤트." },
+    { icon: Briefcase, title: "비즈니스 & 마케팅", desc: "기업의 비즈니스 전략 수립과 마케팅 기획을 지원합니다. 시장 분석부터 실행까지." },
+    { icon: Megaphone, title: "광고 & 캠페인", desc: "사회적 메시지를 담은 광고 캠페인을 기획하고 제작합니다. 광고제 출품 및 수상 경력." },
+    { icon: Palette, title: "디자인", desc: "브랜드 아이덴티티, 그래픽 디자인, 영상 콘텐츠 등 비주얼 커뮤니케이션을 담당합니다." },
+];
+
+const howWeWork = [
+    { num: "01", title: "본질에 다가가는 질문", desc: "왜? 라는 질문으로 문제의 핵심에 접근합니다." },
+    { num: "02", title: "빛나는 아이디어", desc: "다양한 관점에서 창의적인 해결책을 찾습니다." },
+    { num: "03", title: "빠른 실행", desc: "아이디어를 현실로 바꾸는 데 주저하지 않습니다." },
 ];
 
 export default function YouInOneWhatWeDoPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] text-white py-24 px-6">
+            <section className="bg-[#171717] py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#E53935] font-bold text-sm tracking-widest uppercase mb-4">
-                        What We Do
-                    </p>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-6">
-                        우리가 하는 일
+                    <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">WHAT WE DO</p>
+                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6">
+                        Showcase Our Item
                     </h1>
-                    <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mx-auto">
-                        마케팅 컨설팅, 콘텐츠 제작, 브랜딩, 교육, 네트워킹.
-                        기업과 사회의 문제를 해결하기 위한 다섯 가지 핵심 사업 영역입니다.
+                    <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
+                        관심 있는 모든 일들을 프로젝트로 진행합니다
                     </p>
                 </div>
             </section>
 
             {/* Services */}
-            <section className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="space-y-8">
-                        {services.map((service, idx) => (
+            <section className="py-20 px-6 bg-white">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {services.map((s) => (
                             <div
-                                key={service.title}
-                                className={`flex flex-col md:flex-row items-stretch gap-0 border border-neutral-200 rounded-xl overflow-hidden hover:border-[#E53935]/30 transition-colors ${
-                                    idx % 2 === 1 ? "md:flex-row-reverse" : ""
-                                }`}
+                                key={s.title}
+                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all"
                             >
-                                {/* Visual */}
-                                <div className="md:w-2/5 bg-gradient-to-br from-[#171717] to-neutral-800 flex items-center justify-center py-16 md:py-0">
-                                    <service.icon className="h-16 w-16 text-white/20" />
+                                <div className="inline-flex p-3 rounded-lg mb-4 bg-neutral-50 text-[#171717] group-hover:bg-[#E53935]/10 group-hover:text-[#E53935] transition-colors">
+                                    <s.icon className="h-6 w-6" />
                                 </div>
-                                {/* Content */}
-                                <div className="md:w-3/5 p-8 md:p-10 flex flex-col justify-center">
-                                    <span className="text-[#E53935] text-xs font-bold tracking-widest uppercase mb-2">
-                                        0{idx + 1}
-                                    </span>
-                                    <h3 className="text-2xl font-bold text-[#171717] mb-3">{service.title}</h3>
-                                    <p className="text-neutral-500 leading-relaxed mb-4">{service.desc}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {service.tags.map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
+                                <h3 className="text-lg font-bold mb-2 group-hover:text-[#E53935] transition-colors">{s.title}</h3>
+                                <p className="text-sm text-neutral-500 leading-relaxed">{s.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Process */}
+            {/* How We Work */}
             <section className="py-20 px-6 bg-neutral-50">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-[#171717] mb-3">프로젝트 진행 프로세스</h2>
-                        <p className="text-neutral-500">문제 발견부터 해결까지, 체계적으로 진행합니다</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { step: "01", title: "문제 정의", desc: "현장 조사와 인터뷰를 통해 문제의 본질을 파악합니다." },
-                            { step: "02", title: "전략 수립", desc: "데이터 분석과 인사이트를 기반으로 솔루션 전략을 수립합니다." },
-                            { step: "03", title: "실행", desc: "얼라이언스 파트너와 함께 프로젝트를 실행합니다." },
-                            { step: "04", title: "성과 측정", desc: "KPI 기반 성과를 측정하고, 개선점을 도출합니다." },
-                        ].map((item) => (
-                            <div key={item.step} className="p-6 bg-white border border-neutral-200 rounded-xl text-center">
-                                <span className="text-3xl font-extrabold text-[#E53935]/20">{item.step}</span>
-                                <h3 className="font-bold text-[#171717] mt-3 mb-2">{item.title}</h3>
-                                <p className="text-sm text-neutral-500 leading-relaxed">{item.desc}</p>
+                <div className="max-w-4xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-12">How We Work</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {howWeWork.map((h) => (
+                            <div key={h.num} className="text-center">
+                                <span className="inline-flex w-16 h-16 items-center justify-center rounded-full bg-[#171717] text-[#E53935] font-bold text-xl mb-4">
+                                    {h.num}
+                                </span>
+                                <h3 className="text-lg font-bold mb-2">{h.title}</h3>
+                                <p className="text-sm text-neutral-500">{h.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -119,19 +76,15 @@ export default function YouInOneWhatWeDoPage() {
             </section>
 
             {/* CTA */}
-            <section className="py-16 px-6 bg-[#171717] text-white text-center">
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-2xl font-bold mb-4">프로젝트가 필요하신가요?</h2>
-                    <p className="text-neutral-400 mb-8">
-                        문제를 알려주세요. 최적의 솔루션을 제안해 드리겠습니다.
-                    </p>
-                    <Link
-                        href="/yi/contact"
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-[#E53935] text-white font-semibold hover:bg-[#C62828] transition-colors rounded"
-                    >
-                        프로젝트 문의 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
+            <section className="py-16 px-6 bg-[#171717] text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">프로젝트를 함께 하고 싶다면</h2>
+                <p className="text-neutral-400 mb-8">당신의 고민을 이야기해 주세요.</p>
+                <Link
+                    href="/yi/contact"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white font-medium hover:bg-[#C62828] transition-colors rounded"
+                >
+                    문의하기 <ArrowRight className="h-4 w-4" />
+                </Link>
             </section>
         </div>
     );
