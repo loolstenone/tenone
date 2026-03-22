@@ -7,7 +7,6 @@ import clsx from "clsx";
 import { Menu, X } from "lucide-react";
 
 const navItems = [
-    { name: "홈", href: "/hr" },
     { name: "HIT 프로그램", href: "/hr/hit" },
     { name: "커리어", href: "/hr/career" },
     { name: "멘토링", href: "/hr/mentor" },

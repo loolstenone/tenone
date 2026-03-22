@@ -2,22 +2,12 @@
 
 import Link from "next/link";
 import { Youtube, MessageCircle } from "lucide-react";
-import { UniverseBadge } from "@/components/UniverseBadge";
-
 const footerNav = [
-    { name: "Home", href: "/rk" },
     { name: "Works", href: "/rk/works" },
     { name: "Artist", href: "/rk/artist" },
     { name: "Free board", href: "/rk/board" },
     { name: "RooKie", href: "/rk/rookie" },
     { name: "About", href: "/rk/about" },
-];
-
-const universeLinks = [
-    { name: "Badak.biz", href: "https://badak.biz" },
-    { name: "RooK.co.kr", href: "https://rook.co.kr" },
-    { name: "YouInOne.com", href: "https://youinone.com" },
-    { name: "TenOne.biz", href: "https://tenone.biz" },
 ];
 
 export function RooKFooter() {
@@ -57,35 +47,13 @@ export function RooKFooter() {
                                 <span className="font-bold text-xl">Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span></span>
                             </p>
                             <p className="text-sm mt-2">lools@tenone.biz</p>
-                            <p className="text-sm mt-1">powered by Ten:One&trade;</p>
-                        </div>
-
-                        <div>
-                            <h4 className="text-white font-bold text-sm mb-3">Universe:</h4>
-                            <ul className="space-y-1 text-sm">
-                                {universeLinks.map((link) => (
-                                    <li key={link.href}>
-                                        <span className="text-neutral-500 mr-1">-</span>
-                                        <a
-                                            href={link.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="hover:text-white transition-colors"
-                                        >
-                                            {link.name}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-800 text-center text-xs">
-                    &copy; Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span>. All rights reserved. Powered by Ten:One&trade; Universe.
+                    &copy; Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span>. Powered by <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                 </div>
-
-                <UniverseBadge />
             </div>
         </footer>
     );

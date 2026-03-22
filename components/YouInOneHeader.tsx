@@ -7,7 +7,6 @@ import clsx from "clsx";
 import { Menu, X } from "lucide-react";
 
 const navItems = [
-    { name: "Home", href: "/yi" },
     { name: "About", href: "/yi/about" },
     { name: "What We Do", href: "/yi/whatwedo" },
     { name: "Portfolio", href: "/yi/portfolio" },

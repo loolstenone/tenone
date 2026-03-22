@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { UniverseBadge } from '@/components/UniverseBadge';
+
 
 export default function SmarCommFooter() {
   return (
@@ -22,10 +22,8 @@ export default function SmarCommFooter() {
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 text-xs text-text-muted">
-          &copy; SmarComm. All rights reserved. Powered by Ten:One&trade; Universe.
+          &copy; SmarComm. Powered by <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
         </div>
-
-        <UniverseBadge />
       </div>
     </footer>
   );

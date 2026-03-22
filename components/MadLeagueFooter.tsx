@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Instagram, Youtube, Mail } from "lucide-react";
-import { UniverseBadge } from "@/components/UniverseBadge";
+
 
 const quickLinks = [
     { name: "경쟁 PT", href: "/ml/pt" },
@@ -76,10 +76,8 @@ export function MadLeagueFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; MAD League. All rights reserved. Powered by Ten:One&trade; Universe.
+                    &copy; MAD League. Powered by <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                 </div>
-
-                <UniverseBadge />
             </div>
         </footer>
     );

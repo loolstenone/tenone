@@ -2,20 +2,48 @@
 
 export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero';
 
+// ── 일괄 적용 (Global) ──
+// 모든 사이트에 공통 적용되는 설정. 여기를 바꾸면 전체 반영.
+export const globalConfig = {
+    // 푸터 copyright 형식 — {name}은 사이트명으로 치환
+    copyrightTemplate: '© {name}. Powered by Ten:One™ Universe.',
+    // TenOne 자체는 다른 형식
+    copyrightTemplateSelf: '© Ten:One™ Universe.',
+    // 메뉴에 "홈" 포함 여부
+    showHomeInNav: false,
+    // 로그인/회원가입 버튼 표시
+    showAuthButtons: true,
+    // Universe 배지 표시 (TenOne 제외)
+    showUniverseBadge: true,
+    // 공통 Universe 도메인 목록
+    universeLinks: [
+        { name: 'TenOne.biz', href: 'https://tenone.biz' },
+        { name: 'YouInOne.com', href: 'https://youinone.com' },
+        { name: 'MADLeague.net', href: 'https://madleague.net' },
+        { name: 'RooK.co.kr', href: 'https://rook.co.kr' },
+        { name: 'Badak.biz', href: 'https://badak.biz' },
+    ],
+};
+
+// ── 사이트별 적용 (Per-site) ──
+export interface NavItem {
+    name: string;
+    href: string;
+}
+
+export interface FooterLink {
+    name: string;
+    href: string;
+}
+
 export interface SiteConfig {
     id: SiteIdentifier;
     name: string;
-    /** @deprecated Use logoText instead */
-    logo: string;
     logoText: string;
     logoImageUrl?: string;
     logoStyle: 'badge' | 'text' | 'image';
     faviconUrl: string;
     appleTouchIcon: string;
-    /** @deprecated Use colors.primary instead */
-    accentColor: string;
-    /** @deprecated Use colors.headerBg instead */
-    bgDark: string;
     colors: {
         primary: string;
         primaryDark: string;
@@ -37,17 +65,57 @@ export interface SiteConfig {
     domain: string;
     universeLabel: string;
     showUniverseBadge: boolean;
+    // 사이트별 네비게이션 메뉴
+    nav: NavItem[];
+    // 사이트별 푸터 퀵링크
+    footerLinks: FooterLink[];
+    // 사이트별 연락처
+    contact?: {
+        email?: string;
+        phone?: string;
+        kakao?: string;
+        instagram?: string;
+        youtube?: string;
+    };
+    // 사이트 한 줄 설명 (푸터용)
+    tagline?: string;
+
+    /** @deprecated Use logoText instead */
+    logo?: string;
+    /** @deprecated Use colors.primary instead */
+    accentColor?: string;
+    /** @deprecated Use colors.headerBg instead */
+    bgDark?: string;
+}
+
+// 헬퍼: copyright 텍스트 생성
+export function getCopyright(site: SiteConfig): string {
+    if (site.id === 'tenone') return globalConfig.copyrightTemplateSelf;
+    return globalConfig.copyrightTemplate.replace('{name}', site.name);
 }
 
 export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     tenone: {
-        id: 'tenone', name: 'Ten:One™', logo: 'Ten:One™', logoText: 'Ten:One™', logoStyle: 'text',
+        id: 'tenone', name: 'Ten:One™', logoText: 'Ten:One™', logoStyle: 'text',
         faviconUrl: '/icon.png', appleTouchIcon: '/apple-icon-180x180.png',
-        accentColor: '#171717', bgDark: '#171717',
         colors: { primary: '#171717', primaryDark: '#0a0a0a', secondary: '#525252', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#171717' },
         meta: { title: 'Ten:One™ — Beyond the Limit', description: 'Ten:One Universe. 다양한 브랜드와 프로젝트로 구성된 멀티 브랜드 생태계.', keywords: ['TenOne', 'Ten:One', '멀티브랜드', '생태계'] },
         homePath: '/', signupPath: '/signup', domain: 'tenone.biz',
         universeLabel: '', showUniverseBadge: false,
+        nav: [
+            { name: 'About', href: '/about' },
+            { name: 'Universe', href: '/universe' },
+            { name: 'Brands', href: '/brands' },
+            { name: 'Works', href: '/works' },
+            { name: 'Contact', href: '/contact' },
+        ],
+        footerLinks: [
+            { name: 'About', href: '/about' },
+            { name: 'Universe', href: '/universe' },
+            { name: 'Contact', href: '/contact' },
+        ],
+        tagline: 'Beyond the Limit. 가치로 연결된 멀티 브랜드 생태계.',
+        contact: { email: 'lools@tenone.biz' },
     },
     madleague: {
         id: 'madleague', name: 'MAD League', logo: 'MAD LEAGUE', logoText: 'MAD LEAGUE', logoStyle: 'badge',

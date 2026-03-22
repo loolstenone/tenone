@@ -16,6 +16,8 @@ interface AuthContextType {
     hasModuleAccess: (module: IntraModule) => boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
     register: (name: string, email: string, password: string, newsletterSubscribed?: boolean) => Promise<{ success: boolean; error?: string }>;
+    loginWithGoogle: () => Promise<void>;
+    loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
     logout: () => Promise<void>;
 }
@@ -230,6 +232,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, [supabase]);
 
+    // Google 소셜 로그인
+    const loginWithGoogle = useCallback(async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+    }, [supabase]);
+
+    // Kakao 소셜 로그인
+    const loginWithKakao = useCallback(async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: 'kakao',
+            options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+    }, [supabase]);
+
     // 로그아웃
     const logout = useCallback(async () => {
         setUser(null);
@@ -262,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user, isAuthenticated: !!user, isLoading,
             isStaff, isInternal, canAccessIntra,
             hasAccess, hasModuleAccess,
-            login, register, updateProfile, logout,
+            login, register, loginWithGoogle, loginWithKakao, updateProfile, logout,
         }}>
             {children}
         </AuthContext.Provider>
