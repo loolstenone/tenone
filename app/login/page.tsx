@@ -3,16 +3,20 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useSite } from '@/lib/site-context';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
+import { MadLeagueHeader } from '@/components/MadLeagueHeader';
+import { MadLeagueFooter } from '@/components/MadLeagueFooter';
 
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectTo = searchParams.get('redirect') || '/';
     const { login, isAuthenticated, isLoading, user } = useAuth();
+    const { site, siteId, isMadLeague } = useSite();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -22,15 +26,16 @@ function LoginForm() {
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
             const canIntraAccess = user?.accountType && user.accountType !== 'member';
-            const autoRedirect = redirectTo !== '/' ? redirectTo : canIntraAccess ? '/intra' : '/';
+            const defaultRedirect = isMadLeague ? '/ml' : canIntraAccess ? '/intra' : '/';
+            const autoRedirect = redirectTo !== '/' ? redirectTo : defaultRedirect;
             router.replace(autoRedirect);
         }
-    }, [isLoading, isAuthenticated, router, redirectTo, user]);
+    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague]);
 
     if (isLoading || isAuthenticated) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+            <div className={`min-h-screen flex items-center justify-center ${isMadLeague ? 'bg-[#212121]' : 'bg-white'}`}>
+                <div className={`h-8 w-8 border-2 rounded-full animate-spin ${isMadLeague ? 'border-neutral-600 border-t-red-500' : 'border-neutral-200 border-t-neutral-900'}`} />
             </div>
         );
     }
@@ -43,8 +48,8 @@ function LoginForm() {
             const result = await login(email, password);
             if (result.success) {
                 const canIntra = result.user?.accountType && result.user.accountType !== 'member';
-                const dest = redirectTo !== '/' ? redirectTo
-                    : canIntra ? '/intra' : '/';
+                const defaultDest = isMadLeague ? '/ml' : canIntra ? '/intra' : '/';
+                const dest = redirectTo !== '/' ? redirectTo : defaultDest;
                 router.push(dest);
             } else {
                 setError(result.error || '이메일 또는 비밀번호가 올바르지 않습니다.');
@@ -53,6 +58,71 @@ function LoginForm() {
         } catch { setError('로그인 중 오류가 발생했습니다.'); setIsSubmitting(false); }
     };
 
+    // MADLeague 디자인
+    if (isMadLeague) {
+        return (
+            <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
+                <div className="w-full max-w-md">
+                    <div className="text-center mb-10">
+                        <div className="inline-flex items-center gap-2">
+                            <span className="bg-[#D32F2F] text-white font-black text-xl px-2 py-0.5">MAD</span>
+                            <span className="text-white font-bold text-xl tracking-wider">LEAGUE</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-8">
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-white">로그인</h2>
+                            <p className="text-sm text-neutral-400 mt-1">MAD League 계정에 로그인하세요</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-1.5">이메일</label>
+                                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="email@example.com" required
+                                    className="w-full bg-neutral-700 border border-neutral-600 text-white px-4 py-3 text-sm rounded focus:border-red-500 focus:outline-none placeholder:text-neutral-500" />
+                            </div>
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-neutral-300 mb-1.5">비밀번호</label>
+                                <div className="relative">
+                                    <input id="password" type={showPassword ? 'text' : 'password'} value={password}
+                                        onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
+                                        className="w-full bg-neutral-700 border border-neutral-600 text-white px-4 py-3 pr-12 text-sm rounded focus:border-red-500 focus:outline-none placeholder:text-neutral-500" />
+                                    <button type="button"
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowPassword(prev => !prev); }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors">
+                                        {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="border border-red-500/30 bg-red-500/10 rounded px-4 py-3 text-sm text-red-400">{error}</div>
+                            )}
+
+                            <button type="submit" disabled={isSubmitting}
+                                className="w-full flex items-center justify-center gap-2 bg-[#D32F2F] px-4 py-3 text-sm font-medium text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                {isSubmitting ? (
+                                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (<><LogIn className="h-4 w-4" /> 로그인</>)}
+                            </button>
+                        </form>
+
+                        <div className="mt-6 pt-6 border-t border-neutral-700 text-center">
+                            <p className="text-sm text-neutral-400">
+                                계정이 없으신가요? <Link href="/signup" className="text-[#D32F2F] font-medium hover:underline">회원가입</Link>
+                            </p>
+                        </div>
+                    </div>
+
+                    <p className="text-center text-xs text-neutral-600 mt-8">&copy; {new Date().getFullYear()} MAD League. Powered by Ten:One™</p>
+                </div>
+            </div>
+        );
+    }
+
+    // TenOne 기본 디자인
     return (
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
             <div className="w-full max-w-md">
@@ -113,15 +183,17 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+    const { isMadLeague } = useSite();
+
     return (
-        <div className="min-h-screen bg-white flex flex-col">
-            <PublicHeader />
+        <div className={`min-h-screen flex flex-col ${isMadLeague ? 'bg-[#212121]' : 'bg-white'}`}>
+            {isMadLeague ? <MadLeagueHeader /> : <PublicHeader />}
             <main className="flex-1 pt-16">
                 <Suspense fallback={<div className="h-full flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
                     <LoginForm />
                 </Suspense>
             </main>
-            <PublicFooter />
+            {isMadLeague ? <MadLeagueFooter /> : <PublicFooter />}
         </div>
     );
 }

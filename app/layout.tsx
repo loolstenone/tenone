@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { CmsProvider } from "@/lib/cms-context";
+import { SiteProvider } from "@/lib/site-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,11 +34,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
-        <AuthProvider>
-          <CmsProvider>
-            {children}
-          </CmsProvider>
-        </AuthProvider>
+        <SiteProvider>
+          <AuthProvider>
+            <CmsProvider>
+              {children}
+            </CmsProvider>
+          </AuthProvider>
+        </SiteProvider>
       </body>
     </html>
   );
