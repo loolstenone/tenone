@@ -200,6 +200,10 @@ const modules: NavModule[] = [
         sections: [],
     },
     {
+        name: "Partner Pool", href: "/intra/partner-pool", icon: Users, intraModule: 'project' as IntraModule,
+        sections: [],
+    },
+    {
         name: "ERP", href: "/intra/erp", icon: Building2, access: "erp-hr", intraModule: 'erp' as IntraModule,
         sections: [
             {

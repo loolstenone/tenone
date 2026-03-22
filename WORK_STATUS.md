@@ -35,7 +35,7 @@
 - docs/CURRENT_STATUS.md 생성 (현황 + v3 아키텍처 통합)
 
 ## 현재 진행 중
-- Phase 1 전체 완료 + Vercel 배포 완료. Phase 2 시작 전.
+- Phase 2-1 Opportunity 완료. Phase 2-2 Partner Pool 다음.
 
 ## 완료된 Phase 1 (백엔드 기반)
 - **1-1. Supabase 셋업**: DB 15개 테이블, RLS, 인덱스, 패키지, 환경변수
@@ -46,7 +46,7 @@
 - npm run build 에러 0개
 
 ## 다음에 할 일
-- [ ] Phase 2-1: Opportunity 모듈 (AI 크롤링, 기회 DB, 파이프라인)
+- [x] Phase 2-1: Opportunity 모듈 (파이프라인 뷰, 리스트 뷰, API, 사이드바)
 - [ ] Phase 2-2: Partner Pool 모듈 (협력사/프리랜서)
 - [ ] Phase 2-3: 포인트 시스템 (Bronze~Diamond)
 - [ ] Phase 2-4: BI Dashboard (전체 사업 현황)
