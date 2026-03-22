@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'luki' | 'rook' | 'badak';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak';
 
 interface SiteConfig {
     id: SiteIdentifier;
@@ -24,6 +24,11 @@ const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         id: 'madleague', name: 'MAD League', logo: 'MAD LEAGUE',
         accentColor: '#D32F2F', bgDark: '#212121',
         homePath: '/ml', signupPath: '/signup',
+    },
+    youinone: {
+        id: 'youinone', name: 'YouInOne', logo: 'YouInOne',
+        accentColor: '#171717', bgDark: '#171717',
+        homePath: '/yi', signupPath: '/signup',
     },
     luki: {
         id: 'luki', name: 'LUKI', logo: 'LUKI',
@@ -50,6 +55,8 @@ const domainMap: Record<string, SiteIdentifier> = {
     'www.luki.ai': 'luki',
     'rook.co.kr': 'rook',
     'www.rook.co.kr': 'rook',
+    'youinone.com': 'youinone',
+    'www.youinone.com': 'youinone',
     'badak.biz': 'badak',
     'www.badak.biz': 'badak',
 };

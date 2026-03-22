@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 const domainSiteMap: Record<string, string> = {
     'madleague.net': 'madleague',
     'www.madleague.net': 'madleague',
+    'youinone.com': 'youinone',
+    'www.youinone.com': 'youinone',
     // 추후 추가: 'luki.ai': 'luki', 'rook.co.kr': 'rook', 'badak.biz': 'badak'
 };
 
@@ -31,6 +33,26 @@ export function middleware(request: NextRequest) {
         // MADLeague 도메인 → /ml/ 프리픽스로 내부 리라이트
         const url = request.nextUrl.clone();
         url.pathname = `/ml${pathname === '/' ? '' : pathname}`;
+        return NextResponse.rewrite(url);
+    }
+
+    if (siteId === 'youinone') {
+        const pathname = request.nextUrl.pathname;
+
+        if (
+            pathname.startsWith('/intra') ||
+            pathname.startsWith('/api') ||
+            pathname.startsWith('/_next') ||
+            pathname.startsWith('/login') ||
+            pathname.startsWith('/signup') ||
+            pathname.includes('.')
+        ) {
+            return NextResponse.next();
+        }
+
+        // YouInOne 도메인 → /yi/ 프리픽스로 내부 리라이트
+        const url = request.nextUrl.clone();
+        url.pathname = `/yi${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);
     }
 

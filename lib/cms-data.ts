@@ -71,6 +71,11 @@ export const initialSites: CmsSite[] = [
         description: '마케팅/광고 네트워킹 커뮤니티', brandId: 'badak', siteType: 'brand', status: 'active',
         createdAt: '2021-02-08', updatedAt: '2025-08-31',
     },
+    {
+        id: 'site-youinone', name: 'YouInOne', slug: 'youinone', domain: 'youinone.com',
+        description: '프로젝트 그룹 - 기업과 사회의 문제를 해결', brandId: 'youinone', siteType: 'brand', status: 'active',
+        createdAt: '2020-09-01', updatedAt: '2025-08-31',
+    },
 ];
 
 // ── Boards ──
@@ -227,6 +232,37 @@ export const initialBoards: CmsBoard[] = [
         options: defaultOptions,
         design: defaultDesign,
         createdAt: '2021-02-08', updatedAt: '2025-08-31',
+    },
+
+    // YouInOne 사이트 게시판
+    {
+        id: 'board-yio-portfolio', siteId: 'site-youinone', name: '포트폴리오', slug: 'portfolio',
+        description: 'YouInOne 프로젝트 포트폴리오', boardType: 'gallery', skinType: 'card',
+        visibility: 'public', listPermission: 'all', readPermission: 'all', writePermission: 'staff', commentPermission: 'member',
+        allowComments: true, allowAttachments: true, allowSecretPost: false, allowSecretComment: false, allowScheduledPost: true,
+        useCategories: true,
+        categories: [
+            { id: 'cat-yp1', name: '마케팅 컨설팅', slug: 'consulting', order: 1 },
+            { id: 'cat-yp2', name: '브랜딩', slug: 'branding', order: 2 },
+            { id: 'cat-yp3', name: '콘텐츠 제작', slug: 'content', order: 3 },
+            { id: 'cat-yp4', name: '교육', slug: 'education', order: 4 },
+        ],
+        postsPerPage: 12, sortOrder: 'latest',
+        options: defaultOptions,
+        design: { ...defaultDesign, layout: 'grid-thumb-text' },
+        createdAt: '2020-09-01', updatedAt: '2025-08-31',
+    },
+    {
+        id: 'board-yio-notice', siteId: 'site-youinone', name: '공지사항', slug: 'notice',
+        description: 'YouInOne 공지사항', boardType: 'notice', skinType: 'list',
+        visibility: 'public', listPermission: 'all', readPermission: 'all', writePermission: 'staff', commentPermission: 'member',
+        allowComments: true, allowAttachments: true, allowSecretPost: false, allowSecretComment: false, allowScheduledPost: true,
+        useCategories: false,
+        categories: [],
+        postsPerPage: 20, sortOrder: 'pinned-first',
+        options: defaultOptions,
+        design: defaultDesign,
+        createdAt: '2020-09-01', updatedAt: '2025-08-31',
     },
 ];
 
@@ -425,6 +461,74 @@ export const initialBoardPosts: CmsBoardPost[] = [
         eventLocation: '서울 강남구 테헤란로', capacity: 50, fee: 0,
         registrationStatus: '모집중',
         viewCount: 180, commentCount: 12, createdAt: '2026-03-01', updatedAt: '2026-03-01',
+    },
+
+    // YouInOne 포트폴리오
+    {
+        id: 'bp-19', boardId: 'board-yio-portfolio', siteId: 'site-youinone',
+        title: 'ChangeUp 기업가정신 교육 프로그램', summary: '교사와 학생이 함께하는 기업가정신 교육 프로그램',
+        body: '기업가 정신을 가르치는 선생님들과 함께 학생들의 창업 아이디어를 실현하도록 돕는 프로그램입니다.',
+        status: 'published', categoryId: 'cat-yp4', isPinned: true, isRecommended: true, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원', image: 'ChangeUp 프로그램 현장',
+        attachments: [], tags: ['교육', '기업가정신', '창업'], publishedAt: '2024-05-18',
+        viewCount: 520, commentCount: 6, createdAt: '2024-05-18', updatedAt: '2024-05-18',
+    },
+    {
+        id: 'bp-20', boardId: 'board-yio-portfolio', siteId: 'site-youinone',
+        title: '소상공인 브랜딩 컨설팅 프로젝트', summary: '지역 소상공인을 위한 브랜드 아이덴티티 구축',
+        body: '서울 성수동 지역 소상공인 5개 업체를 대상으로 브랜드 아이덴티티 구축 및 마케팅 전략 수립을 진행했습니다.',
+        status: 'published', categoryId: 'cat-yp2', isPinned: false, isRecommended: true, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원', image: '소상공인 브랜딩 결과물',
+        attachments: [], tags: ['브랜딩', '소상공인', '컨설팅'], publishedAt: '2024-11-20',
+        viewCount: 380, commentCount: 3, createdAt: '2024-11-20', updatedAt: '2024-11-20',
+    },
+    {
+        id: 'bp-21', boardId: 'board-yio-portfolio', siteId: 'site-youinone',
+        title: '스타트업 마케팅 전략 워크숍', summary: '초기 스타트업을 위한 Go-to-Market 전략 수립',
+        body: '초기 단계 스타트업 10팀과 함께 Go-to-Market 전략 수립 워크숍을 진행했습니다.',
+        status: 'published', categoryId: 'cat-yp1', isPinned: false, isRecommended: false, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원', image: '워크숍 현장 사진',
+        attachments: [], tags: ['마케팅', '스타트업', '전략'], publishedAt: '2025-03-10',
+        viewCount: 290, commentCount: 2, createdAt: '2025-03-10', updatedAt: '2025-03-10',
+    },
+    {
+        id: 'bp-22', boardId: 'board-yio-portfolio', siteId: 'site-youinone',
+        title: '지역 관광 콘텐츠 제작 프로젝트', summary: '지방자치단체 관광 홍보 영상 및 SNS 콘텐츠 제작',
+        body: '지역 관광자원을 활용한 숏폼 영상 콘텐츠와 SNS 마케팅 캠페인을 기획/제작했습니다.',
+        status: 'published', categoryId: 'cat-yp3', isPinned: false, isRecommended: true, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원', image: '관광 콘텐츠 포스터',
+        attachments: [], tags: ['콘텐츠', '관광', '영상'], publishedAt: '2025-07-05',
+        viewCount: 450, commentCount: 5, createdAt: '2025-07-05', updatedAt: '2025-07-05',
+    },
+
+    // YouInOne 공지사항
+    {
+        id: 'bp-23', boardId: 'board-yio-notice', siteId: 'site-youinone',
+        title: '2026 상반기 얼라이언스 파트너 모집', summary: 'YouInOne 얼라이언스에 함께할 파트너를 모집합니다.',
+        body: 'YouInOne 얼라이언스에 함께할 소규모 기업 파트너를 모집합니다. 마케팅, 콘텐츠, 교육 분야에 관심 있는 기업이라면 지원해주세요.',
+        status: 'published', isPinned: true, isRecommended: false, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원',
+        attachments: [], tags: ['모집', '얼라이언스'], publishedAt: '2026-02-01',
+        noticeStart: '2026-02-01', noticeEnd: '2026-04-30',
+        viewCount: 180, commentCount: 4, createdAt: '2026-02-01', updatedAt: '2026-02-01',
+    },
+    {
+        id: 'bp-24', boardId: 'board-yio-notice', siteId: 'site-youinone',
+        title: 'YouInOne 홈페이지 리뉴얼 안내', summary: '새로운 홈페이지를 공개합니다.',
+        body: 'YouInOne 공식 홈페이지가 리뉴얼되었습니다. 더 나은 서비스를 위해 최선을 다하겠습니다.',
+        status: 'published', isPinned: false, isRecommended: false, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원',
+        attachments: [], tags: ['홈페이지', '리뉴얼'], publishedAt: '2026-03-15',
+        viewCount: 95, commentCount: 1, createdAt: '2026-03-15', updatedAt: '2026-03-15',
+    },
+    {
+        id: 'bp-25', boardId: 'board-yio-notice', siteId: 'site-youinone',
+        title: 'ChangeUp 3기 프로그램 참가자 모집', summary: '기업가정신 교육 프로그램 3기를 모집합니다.',
+        body: 'ChangeUp 기업가정신 교육 프로그램 3기 참가자를 모집합니다. 교사 및 학생 모두 지원 가능합니다.',
+        status: 'published', isPinned: false, isRecommended: true, isSecret: false,
+        authorId: 'staff-ceo', authorName: '텐원',
+        attachments: [], tags: ['ChangeUp', '모집', '교육'], publishedAt: '2026-01-10',
+        viewCount: 210, commentCount: 7, createdAt: '2026-01-10', updatedAt: '2026-01-10',
     },
 ];
 
