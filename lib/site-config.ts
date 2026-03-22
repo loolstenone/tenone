@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero';
 
 export interface SiteConfig {
     id: SiteIdentifier;
@@ -103,6 +103,15 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         homePath: '/sc', signupPath: '/signup', domain: 'smarcomm.co.kr',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
     },
+    hero: {
+        id: 'hero', name: 'HeRo', logo: 'HeRo', logoText: 'HeRo', logoStyle: 'text',
+        faviconUrl: '/brands/hero/favicon.png', appleTouchIcon: '/brands/hero/favicon.png',
+        accentColor: '#F59E0B', bgDark: '#171717',
+        colors: { primary: '#F59E0B', primaryDark: '#D97706', secondary: '#FBBF24', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#F59E0B' },
+        meta: { title: 'HeRo — 인재 발굴·성장 플랫폼', description: '숨겨진 인재를 발굴하고 성장시키는 HeRo 플랫폼. HIT 프로그램, 커리어 로드맵, 멘토링, 브랜딩.', keywords: ['HeRo', '인재발굴', '커리어', '멘토링', 'HIT', 'Ten:One'] },
+        homePath: '/hr', signupPath: '/signup', domain: 'hero.ne.kr',
+        universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
+    },
 };
 
 // 도메인 → 사이트 매핑
@@ -119,4 +128,6 @@ export const domainMap: Record<string, SiteIdentifier> = {
     'www.badak.biz': 'badak',
     'smarcomm.co.kr': 'smarcomm',
     'www.smarcomm.co.kr': 'smarcomm',
+    'hero.ne.kr': 'hero',
+    'www.hero.ne.kr': 'hero',
 };

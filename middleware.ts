@@ -8,6 +8,8 @@ const domainSiteMap: Record<string, string> = {
     'www.youinone.com': 'youinone',
     'smarcomm.co.kr': 'smarcomm',
     'www.smarcomm.co.kr': 'smarcomm',
+    'hero.ne.kr': 'hero',
+    'www.hero.ne.kr': 'hero',
     // 추후 추가: 'luki.ai': 'luki', 'rook.co.kr': 'rook', 'badak.biz': 'badak'
 };
 
@@ -74,6 +76,26 @@ export function middleware(request: NextRequest) {
         // /login → /sc/login, /signup → /sc/signup 도 리라이트 대상
         const url = request.nextUrl.clone();
         url.pathname = `/sc${pathname === '/' ? '' : pathname}`;
+        return NextResponse.rewrite(url);
+    }
+
+    if (siteId === 'hero') {
+        const pathname = request.nextUrl.pathname;
+
+        if (
+            pathname.startsWith('/intra') ||
+            pathname.startsWith('/api') ||
+            pathname.startsWith('/_next') ||
+            pathname.startsWith('/login') ||
+            pathname.startsWith('/signup') ||
+            pathname.includes('.')
+        ) {
+            return NextResponse.next();
+        }
+
+        // HeRo 도메인 → /hr/ 프리픽스로 내부 리라이트
+        const url = request.nextUrl.clone();
+        url.pathname = `/hr${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);
     }
 

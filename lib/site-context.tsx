@@ -11,6 +11,7 @@ interface SiteContextType {
     isMadLeague: boolean;
     isYouInOne: boolean;
     isSmarComm: boolean;
+    isHeRo: boolean;
 }
 
 const SiteContext = createContext<SiteContextType>({
@@ -20,6 +21,7 @@ const SiteContext = createContext<SiteContextType>({
     isMadLeague: false,
     isYouInOne: false,
     isSmarComm: false,
+    isHeRo: false,
 });
 
 export function SiteProvider({ children }: { children: ReactNode }) {
@@ -41,6 +43,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
             isMadLeague: siteId === 'madleague',
             isYouInOne: siteId === 'youinone',
             isSmarComm: siteId === 'smarcomm',
+            isHeRo: siteId === 'hero',
         }}>
             {children}
         </SiteContext.Provider>
