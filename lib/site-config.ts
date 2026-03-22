@@ -65,6 +65,12 @@ export interface SiteConfig {
     domain: string;
     universeLabel: string;
     showUniverseBadge: boolean;
+    // 가입/로그인 방식
+    authMethods: {
+        email: boolean;
+        google: boolean;
+        kakao: boolean;
+    };
     // 사이트별 네비게이션 메뉴
     nav: NavItem[];
     // 사이트별 푸터 퀵링크
@@ -102,6 +108,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'Ten:One™ — Beyond the Limit', description: 'Ten:One Universe. 다양한 브랜드와 프로젝트로 구성된 멀티 브랜드 생태계.', keywords: ['TenOne', 'Ten:One', '멀티브랜드', '생태계'] },
         homePath: '/', signupPath: '/signup', domain: 'tenone.biz',
         universeLabel: '', showUniverseBadge: false,
+        authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: 'About', href: '/about' },
             { name: 'Universe', href: '/universe' },
@@ -125,6 +132,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'MAD League — 경쟁을 통한 성장 플랫폼', description: 'Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.', keywords: ['MAD League', '대학생', '마케팅', '경쟁', 'PT'] },
         homePath: '/ml', signupPath: '/signup', domain: 'madleague.net',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
     youinone: {
         id: 'youinone', name: 'YouInOne', logo: 'YouInOne', logoText: 'YouInOne', logoStyle: 'text',
@@ -134,6 +142,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'YouInOne — 프로젝트 그룹', description: '기업과 사회의 문제를 해결하는 프로젝트 그룹. Idea + Strategy. 소규모 기업 연합 얼라이언스.', keywords: ['YouInOne', '프로젝트그룹', '얼라이언스', '문제해결'] },
         homePath: '/yi', signupPath: '/signup', domain: 'youinone.com',
         universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
     luki: {
         id: 'luki', name: 'LUKI', logo: 'LUKI', logoText: 'LUKI', logoStyle: 'text',
@@ -143,6 +152,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'LUKI — AI Idol Group', description: 'LUKI - AI 기반 아이돌 그룹. Ten:One Universe의 AI 엔터테인먼트 브랜드.', keywords: ['LUKI', 'AI Idol', 'AI 아이돌', 'Ten:One'] },
         homePath: '/', signupPath: '/signup', domain: 'luki.ai',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
     rook: {
         id: 'rook', name: 'RooK', logo: 'RooK', logoText: 'RooK', logoStyle: 'text',
@@ -152,6 +162,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'RooK — AI Creator', description: 'AI Creator RooK. 밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다. 하고 싶은 것이라면 무엇이든 도전합니다.', keywords: ['RooK', 'AI Creator', 'AI 크리에이터', 'AI 아티스트', 'Ten:One'] },
         homePath: '/rk', signupPath: '/signup', domain: 'rook.co.kr',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
     badak: {
         id: 'badak', name: 'Badak', logo: 'Badak', logoText: 'Badak', logoStyle: 'text',
@@ -161,6 +172,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'Badak — 네트워킹 커뮤니티', description: 'Badak - 네트워킹 커뮤니티. Ten:One Universe의 연결 플랫폼.', keywords: ['Badak', '네트워킹', '커뮤니티', 'Ten:One'] },
         homePath: '/', signupPath: '/signup', domain: 'badak.biz',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
     smarcomm: {
         id: 'smarcomm', name: 'SmarComm.', logo: 'SmarComm.', logoText: 'SmarComm.', logoStyle: 'text',
@@ -170,6 +182,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'SmarComm. — AI 마케팅 커뮤니케이션', description: 'SmarComm. - AI 기반 올인원 마케팅 커뮤니케이션 플랫폼.', keywords: ['SmarComm', 'AI 마케팅', '커뮤니케이션', 'Ten:One'] },
         homePath: '/sc', signupPath: '/signup', domain: 'smarcomm.co.kr',
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: false, kakao: false },
     },
     hero: {
         id: 'hero', name: 'HeRo', logo: 'HeRo', logoText: 'HeRo', logoStyle: 'text',
@@ -179,6 +192,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'HeRo — 인재 발굴·성장 플랫폼', description: '숨겨진 인재를 발굴하고 성장시키는 HeRo 플랫폼. HIT 프로그램, 커리어 로드맵, 멘토링, 브랜딩.', keywords: ['HeRo', '인재발굴', '커리어', '멘토링', 'HIT', 'Ten:One'] },
         homePath: '/hr', signupPath: '/signup', domain: 'hero.ne.kr',
         universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
     },
 };
 

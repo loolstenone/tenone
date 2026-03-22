@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { validatePassword } from '@/lib/auth-data';
 import { UserPlus, Eye, EyeOff, User, Building2, Mail } from 'lucide-react';
+import { useSite } from '@/lib/site-context';
 import Link from 'next/link';
 import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
@@ -50,6 +51,7 @@ const labelClass = "block text-sm font-medium text-neutral-700 mb-1.5";
 export default function SignupPage() {
     const router = useRouter();
     const { register, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading } = useAuth();
+    const { site } = useSite();
     const [step, setStep] = useState(1);
     const [accountKind, setAccountKind] = useState<AccountKind>('personal');
     const [name, setName] = useState('');
@@ -266,19 +268,25 @@ export default function SignupPage() {
                         </>
                     )}
 
+                    {(site?.authMethods?.google || site?.authMethods?.kakao) && (
                     <div className="mt-6 pt-6 border-t border-neutral-100 space-y-3">
                         <p className="text-xs text-neutral-400 text-center">또는 소셜 계정으로 가입</p>
+                        {site?.authMethods?.google && (
                         <button onClick={loginWithGoogle} type="button"
                             className="w-full flex items-center justify-center gap-3 border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors">
                             <svg className="h-4 w-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             Google로 가입
                         </button>
+                        )}
+                        {site?.authMethods?.kakao && (
                         <button onClick={loginWithKakao} type="button"
                             className="w-full flex items-center justify-center gap-3 bg-[#FEE500] px-4 py-3 text-sm font-medium text-[#191919] hover:bg-[#F5DC00] transition-colors">
                             <svg className="h-4 w-4" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.72 1.794 5.11 4.504 6.46-.163.6-.593 2.178-.68 2.514-.107.42.155.414.326.301.134-.089 2.13-1.45 3.003-2.042.27.038.546.058.826.076h.042C15.523 18 20 14.537 20 10.309 20 6.081 15.523 3 12 3z" fill="#191919"/></svg>
                             카카오로 가입
                         </button>
+                        )}
                     </div>
+                    )}
 
                     <div className="mt-4 text-center">
                         <p className="text-sm text-neutral-500">이미 계정이 있으신가요? <Link href="/login" className="text-neutral-900 font-medium hover:underline">로그인</Link></p>

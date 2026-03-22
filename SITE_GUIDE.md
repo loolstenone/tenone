@@ -54,8 +54,17 @@
 ### 인프라 작업
 - [ ] Vercel Dashboard → Domains → 도메인 추가 (tenone 프로젝트에)
 - [ ] 도메인 DNS 설정 — A 레코드 또는 CNAME → Vercel
+
+### 인증 설정 (소셜 로그인)
+- [ ] Supabase → URL Configuration → Redirect URLs에 `https://{도메인}/auth/callback` 추가
+- [ ] 카카오 Developers → 앱 → 플랫폼 키 → REST API Key 수정 → Web 사이트 도메인에 `https://{도메인}` 추가
+- [ ] Google Cloud Console → OAuth 2.0 → 승인된 리디렉션 URI에 `https://{도메인}/auth/callback` 추가
+
+### 최종 확인
 - [ ] 빌드 확인 (`npm run build`)
-- [ ] 라이브 확인
+- [ ] 라이브 접속 확인
+- [ ] 소셜 로그인 테스트 (Google + 카카오)
+- [ ] 이메일 가입 테스트
 
 ---
 
