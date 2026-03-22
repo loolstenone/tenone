@@ -146,19 +146,19 @@ function LoginForm() {
 
                 <div className="border border-neutral-200 p-8">
                     <div className="mb-6">
-                        <h2 className="text-xl font-bold">Sign In</h2>
+                        <h2 className="text-xl font-bold">로그인</h2>
                         <p className="text-sm text-neutral-500 mt-1">계정에 로그인하세요</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">Email</label>
+                            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">이메일</label>
                             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                                placeholder="admin@tenone.com" required
+                                placeholder="email@example.com" required
                                 className="w-full border border-neutral-200 px-4 py-3 text-sm focus:border-neutral-900 focus:outline-none" />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">Password</label>
+                            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">비밀번호</label>
                             <div className="relative">
                                 <input id="password" type={showPassword ? 'text' : 'password'} value={password}
                                     onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
@@ -179,7 +179,7 @@ function LoginForm() {
                             className="w-full flex items-center justify-center gap-2 bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                             {isSubmitting ? (
                                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (<><LogIn className="h-4 w-4" /> Sign In</>)}
+                            ) : (<><LogIn className="h-4 w-4" /> 로그인</>)}
                         </button>
                     </form>
 

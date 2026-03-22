@@ -94,10 +94,10 @@ export function PublicHeader() {
                     ) : !isLoading ? (
                         <div className="flex items-center gap-4">
                             <Link href="/login" className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
-                                Log in
+                                로그인
                             </Link>
                             <Link href="/signup" className="text-sm px-4 py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                                Sign up
+                                회원가입
                             </Link>
                         </div>
                     ) : null}
@@ -162,11 +162,11 @@ export function PublicHeader() {
                         <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
                             <Link href="/login" onClick={() => setMobileMenuOpen(false)}
                                 className="block text-sm text-neutral-400 hover:text-neutral-900">
-                                Log in
+                                로그인
                             </Link>
                             <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
                                 className="block text-sm text-neutral-900 font-medium hover:underline">
-                                Sign up
+                                회원가입
                             </Link>
                         </div>
                     ) : null}
