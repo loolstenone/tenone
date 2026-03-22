@@ -44,7 +44,7 @@ export default function StudentsPage() {
                                     <div className="h-7 w-7 rounded-full bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs font-bold">{s.avatarInitials}</div>
                                     <div><p className="text-sm">{s.name}</p><p className="text-xs text-neutral-400">{s.company} · {s.position}</p></div>
                                 </div>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{s.status}</span>
+                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{s.status}</span>
                             </li>
                         ))}
                     </ul>

@@ -57,7 +57,7 @@ export default function ProgramsPage() {
                     { label: "완료", value: mockPrograms.filter(p => p.status === "완료").length },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -70,14 +70,14 @@ export default function ProgramsPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <h3 className="text-sm font-bold">{p.name}</h3>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${typeColor[p.type]}`}>{p.type}</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[p.type]}`}>{p.type}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
                                 </div>
                                 <p className="text-xs text-neutral-500">{p.description}</p>
                             </div>
                             <ArrowRight className="h-4 w-4 text-neutral-300 group-hover:text-neutral-600 transition-colors" />
                         </div>
-                        <div className="mt-3 flex items-center gap-6 text-[10px] text-neutral-400">
+                        <div className="mt-3 flex items-center gap-6 text-xs text-neutral-400">
                             <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {p.startDate} ~ {p.endDate}</span>
                             <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {p.participants}/{p.capacity}명</span>
                         </div>

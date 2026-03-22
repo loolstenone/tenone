@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useCms } from "@/lib/cms-context";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import Image from "next/image";
-import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare } from "lucide-react";
+import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2 } from "lucide-react";
 
 export default function HomePage() {
     const { getPublishedByChannel } = useCms();
+    const [nlEmail, setNlEmail] = useState('');
+    const [nlSubscribed, setNlSubscribed] = useState(false);
+    const [nlAgree, setNlAgree] = useState(false);
     const latestWorks = getPublishedByChannel('works').slice(0, 8);
     const latestNews = getPublishedByChannel('newsroom').slice(0, 4);
 
@@ -31,7 +35,7 @@ export default function HomePage() {
                             만들기로 했다.
                         </h1>
                         <p className="mt-8 text-base text-neutral-400 leading-relaxed">
-                            인재를 발굴하고, 연결하고, 기업과 사회의 문제를 해결합니다.
+                            기업과 사회의 문제를 해결하는 다양한 프로젝트를 합니다.
                         </p>
                         <div className="mt-10 flex flex-wrap gap-4">
                             <Link href="/about?tab=universe" className="group px-8 py-3.5 bg-neutral-900 text-white text-sm tracking-wide hover:bg-neutral-800 transition-colors flex items-center gap-2">
@@ -50,12 +54,62 @@ export default function HomePage() {
                         <div className="aspect-[4/5] relative overflow-hidden">
                             <Image
                                 src="/hero-banner.png"
-                                alt="Ten:One Universe - 브랜드 네트워크 시각화"
+                                alt="Ten:One™ Universe - 브랜드 네트워크 시각화"
                                 fill
                                 className="object-cover opacity-50"
                                 priority
                             />
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Crew CTA — 크루 모집 */}
+            <section className="py-24 px-6 bg-neutral-50">
+                <div className="max-w-5xl mx-auto text-center">
+                    <p className="text-xs tracking-[0.3em] text-neutral-400 uppercase mb-4">Join the Universe</p>
+                    <h2 className="text-3xl font-bold tracking-tight mb-3">
+                        프로젝트 <span className="text-neutral-400">크루</span>를 모집합니다.
+                    </h2>
+                    <p className="text-base text-neutral-500 mb-12 max-w-2xl mx-auto leading-relaxed">
+                        Ten:One™ Crew가 되면 세계관 안에서 함께 성장합니다.<br />
+                        기획자, 마케터, 디자이너, 개발자 — 당신의 재능이 필요합니다.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div className="bg-white border border-neutral-200 p-6 text-left">
+                            <FolderKanban className="h-5 w-5 text-neutral-400 mb-3" />
+                            <h3 className="text-sm font-bold mb-2">실전 프로젝트 참여</h3>
+                            <p className="text-xs text-neutral-500 leading-relaxed">
+                                기업과 지자체 등 실전 프로젝트에 직접 참여합니다.
+                                포트폴리오가 아닌 실전 경험을 쌓습니다.
+                            </p>
+                        </div>
+                        <div className="bg-white border border-neutral-200 p-6 text-left">
+                            <Target className="h-5 w-5 text-neutral-400 mb-3" />
+                            <h3 className="text-sm font-bold mb-2">HeRo 역량 진단 & 성장</h3>
+                            <p className="text-xs text-neutral-500 leading-relaxed">
+                                HIT 통합검사로 나의 강점과 적성을 발견하고,
+                                맞춤 성장 로드맵과 멘토 매칭을 통해 커리어를 설계합니다.
+                            </p>
+                        </div>
+                        <div className="bg-white border border-neutral-200 p-6 text-left">
+                            <Users className="h-5 w-5 text-neutral-400 mb-3" />
+                            <h3 className="text-sm font-bold mb-2">업계 네트워크 연결</h3>
+                            <p className="text-xs text-neutral-500 leading-relaxed">
+                                현업자 네트워크, 기업 파트너와 연결됩니다.
+                                약한 연결이 만들어내는 강력한 기회를 경험하세요.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center gap-4">
+                        <Link href="/CrewInvite" className="px-8 py-3.5 bg-neutral-900 text-white text-sm tracking-wide hover:bg-neutral-800 transition-colors">
+                            Crew 지원하기
+                        </Link>
+                        <Link href="/about" className="px-8 py-3.5 border border-neutral-300 text-neutral-700 text-sm tracking-wide hover:border-neutral-900 hover:text-neutral-900 transition-colors bg-white">
+                            더 알아보기
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -203,6 +257,50 @@ export default function HomePage() {
                             </p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* Newsletter CTA */}
+            <section className="py-20 px-6 border-t border-neutral-100">
+                <div className="max-w-2xl mx-auto text-center">
+                    <p className="text-xs tracking-[0.3em] text-neutral-400 uppercase mb-3">Newsletter</p>
+                    <h2 className="text-2xl font-bold tracking-tight mb-3">
+                        Ten:One™ Universe의 이야기를 받아보세요
+                    </h2>
+                    <p className="text-sm text-neutral-500 mb-8">
+                        프로젝트 소식, 크루 이야기, 업계 인사이트를 격주로 보내드립니다.
+                    </p>
+                    {nlSubscribed ? (
+                        <div className="py-4">
+                            <CheckCircle2 className="h-10 w-10 text-green-500 mx-auto mb-3" />
+                            <p className="text-sm font-bold mb-1">구독이 완료되었습니다!</p>
+                            <p className="text-xs text-neutral-500">{nlEmail}로 뉴스레터를 보내드립니다.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <form onSubmit={e => { e.preventDefault(); if (nlEmail.trim() && nlAgree) setNlSubscribed(true); }}
+                                className="flex flex-col sm:flex-row items-center gap-3 max-w-lg mx-auto">
+                                <input type="email" value={nlEmail} onChange={e => setNlEmail(e.target.value)}
+                                    placeholder="이메일 주소를 입력하세요"
+                                    required
+                                    className="flex-1 w-full px-4 py-3 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400 placeholder:text-neutral-300" />
+                                <button type="submit" disabled={!nlEmail.trim() || !nlAgree}
+                                    className="w-full sm:w-auto px-8 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-30 shrink-0">
+                                    구독하기
+                                </button>
+                            </form>
+                            <div className="flex items-center justify-center gap-2 mt-3">
+                                <button type="button" onClick={() => setNlAgree(!nlAgree)}
+                                    className={`w-3.5 h-3.5 border rounded flex items-center justify-center shrink-0 transition-colors ${
+                                        nlAgree ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 bg-white'
+                                    }`}>
+                                    {nlAgree && <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                                </button>
+                                <p className="text-[10px] text-neutral-400">이메일 수집 및 뉴스레터 수신에 동의합니다</p>
+                            </div>
+                        </>
+                    )}
+                    <p className="text-[10px] text-neutral-300 mt-3">격주 발행 · 언제든 구독 취소 가능 · <Link href="/newsletter" className="underline hover:text-neutral-500">지난 뉴스레터 보기</Link></p>
                 </div>
             </section>
 

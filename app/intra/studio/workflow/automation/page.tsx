@@ -5,7 +5,7 @@ import { useWorkflow } from "@/lib/workflow-context";
 import { AutomationCard } from "@/components/workflow/AutomationCard";
 import { AutomationBuilder } from "@/components/workflow/AutomationBuilder";
 import { AutomationRule } from "@/types/workflow";
-import { Plus, Zap } from "lucide-react";
+import { Plus, Zap, Power, AlertCircle } from "lucide-react";
 
 export default function AutomationPage() {
     const { automations, addAutomation, updateAutomation, toggleAutomation, deleteAutomation } = useWorkflow();
@@ -28,41 +28,48 @@ export default function AutomationPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="max-w-4xl">
+            <div className="flex items-center justify-between mb-5">
                 <div>
-                    <h2 className="text-2xl font-bold">Automation</h2>
-                    <p className="mt-2 text-neutral-500">자동화 규칙을 설정하고 관리합니다.</p>
+                    <h1 className="text-xl font-bold">Automation</h1>
+                    <p className="text-xs text-neutral-400 mt-0.5">자동화 규칙을 설정하고 관리합니다</p>
                 </div>
                 <button
                     onClick={() => { setEditingRule(null); setIsBuilderOpen(true); }}
-                    className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors"
                 >
-                    <Plus className="h-4 w-4" />
-                    New Automation
+                    <Plus className="h-3.5 w-3.5" />
+                    새 자동화
                 </button>
             </div>
 
-            {/* Summary */}
-            <div className="flex items-center gap-6 border border-neutral-200 bg-white p-4">
-                <div className="flex items-center gap-3">
-                    <div className="bg-neutral-100 p-2">
-                        <Zap className="h-5 w-5 text-neutral-500" />
+            {/* 요약 카드 */}
+            <div className="grid grid-cols-3 gap-3 mb-5">
+                <div className="border border-neutral-200 bg-white p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <Zap className="h-4 w-4 text-neutral-400" />
+                        <span className="text-xs text-neutral-400">활성 규칙</span>
                     </div>
-                    <div>
-                        <p className="text-lg font-bold">{activeCount}</p>
-                        <p className="text-xs text-neutral-400">Active Rules</p>
-                    </div>
+                    <p className="text-xl font-bold">{activeCount}</p>
                 </div>
-                <div className="h-8 w-px bg-neutral-200" />
-                <div>
-                    <p className="text-lg font-bold">{automations.length}</p>
-                    <p className="text-xs text-neutral-400">Total Rules</p>
+                <div className="border border-neutral-200 bg-white p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <Power className="h-4 w-4 text-neutral-400" />
+                        <span className="text-xs text-neutral-400">전체 규칙</span>
+                    </div>
+                    <p className="text-xl font-bold">{automations.length}</p>
+                </div>
+                <div className="border border-neutral-200 bg-white p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <AlertCircle className="h-4 w-4 text-neutral-400" />
+                        <span className="text-xs text-neutral-400">비활성</span>
+                    </div>
+                    <p className="text-xl font-bold">{automations.length - activeCount}</p>
                 </div>
             </div>
 
-            {/* Rules List */}
-            <div className="grid gap-4 sm:grid-cols-2">
+            {/* 규칙 목록 */}
+            <div className="grid gap-3 sm:grid-cols-2">
                 {automations.map((rule) => (
                     <AutomationCard
                         key={rule.id}
@@ -73,8 +80,10 @@ export default function AutomationPage() {
                     />
                 ))}
                 {automations.length === 0 && (
-                    <div className="col-span-2 text-center py-16 text-neutral-400">
-                        No automation rules yet. Create one to get started.
+                    <div className="col-span-2 border border-dashed border-neutral-200 bg-white text-center py-16">
+                        <Zap className="h-8 w-8 text-neutral-200 mx-auto mb-3" />
+                        <p className="text-sm text-neutral-400">자동화 규칙이 없습니다</p>
+                        <p className="text-xs text-neutral-300 mt-1">새 자동화를 만들어 업무를 효율화하세요</p>
                     </div>
                 )}
             </div>

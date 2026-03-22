@@ -97,7 +97,7 @@ export const initialPosts: CmsPost[] = [
         id: 'cms-13', title: 'Ten:One™ Universe — 세계관의 시작',
         summary: '과거의 아이디어와 계획들을 세상에 꺼내 놓기로 결심하며 Ten:One™ 사이트를 오픈했습니다.',
         body: '', category: '브랜드', channels: ['works', 'newsroom'], status: 'Published',
-        date: '2020-03-11', brandId: 'tenone', image: 'Ten:One 오리지널 사이트',
+        date: '2020-03-11', brandId: 'tenone', image: 'Ten:One™ 오리지널 사이트',
         tags: ['시작', '세계관'],
         createdAt: '2020-03-11', updatedAt: '2020-03-11'
     },

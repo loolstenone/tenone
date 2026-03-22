@@ -24,7 +24,7 @@ export default function OrganizationsPage() {
                                     {org.industry && <p className="text-xs text-neutral-400">{org.industry}</p>}
                                 </div>
                             </div>
-                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{org.type}</span>
+                            <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{org.type}</span>
                         </div>
                         {org.notes && <p className="text-sm text-neutral-500 mt-3">{org.notes}</p>}
                         <div className="flex items-center justify-between mt-4 pt-3 border-t border-neutral-200">
@@ -32,7 +32,7 @@ export default function OrganizationsPage() {
                                 <span className="flex items-center gap-1"><Users className="h-3 w-3" />{org.contactIds.length} contacts</span>
                                 {org.website && <a href={org.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-neutral-500 hover:text-neutral-900"><Globe className="h-3 w-3" />Website</a>}
                             </div>
-                            <div className="flex gap-1">{org.brandAssociation.map(b => <span key={b} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{b}</span>)}</div>
+                            <div className="flex gap-1">{org.brandAssociation.map(b => <span key={b} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{b}</span>)}</div>
                         </div>
                     </div>
                 ))}

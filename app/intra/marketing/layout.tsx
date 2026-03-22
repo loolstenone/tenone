@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { MarketingShell } from "@/components/MarketingShell";
 import { MarketingProvider } from "@/lib/marketing-context";
 import { CrmProvider } from "@/lib/crm-context";
 import { ShieldAlert } from "lucide-react";
@@ -36,7 +35,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="h-full bg-neutral-50">
             <MarketingProvider>
                 <CrmProvider>
-                    <MarketingShell>{children}</MarketingShell>
+                    {children}
                 </CrmProvider>
             </MarketingProvider>
         </div>

@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { PublicHeader } from '@/components/PublicHeader';
+import { PublicFooter } from '@/components/PublicFooter';
 
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectTo = searchParams.get('redirect') || '/';
-    const { login, isAuthenticated, isLoading } = useAuth();
+    const { login, isAuthenticated, isLoading, user } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -18,8 +20,12 @@ function LoginForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!isLoading && isAuthenticated) router.replace(redirectTo);
-    }, [isLoading, isAuthenticated, router, redirectTo]);
+        if (!isLoading && isAuthenticated) {
+            const canIntraAccess = user?.accountType && user.accountType !== 'member';
+            const autoRedirect = redirectTo !== '/' ? redirectTo : canIntraAccess ? '/intra' : '/';
+            router.replace(autoRedirect);
+        }
+    }, [isLoading, isAuthenticated, router, redirectTo, user]);
 
     if (isLoading || isAuthenticated) {
         return (
@@ -29,15 +35,22 @@ function LoginForm() {
         );
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsSubmitting(true);
-        setTimeout(() => {
-            const result = login(email, password);
-            if (result.success) { router.push(redirectTo); }
-            else { setError(result.error || '이메일 또는 비밀번호가 올바르지 않습니다.'); setIsSubmitting(false); }
-        }, 500);
+        try {
+            const result = await login(email, password);
+            if (result.success) {
+                const canIntra = result.user?.accountType && result.user.accountType !== 'member';
+                const dest = redirectTo !== '/' ? redirectTo
+                    : canIntra ? '/intra' : '/';
+                router.push(dest);
+            } else {
+                setError(result.error || '이메일 또는 비밀번호가 올바르지 않습니다.');
+                setIsSubmitting(false);
+            }
+        } catch { setError('로그인 중 오류가 발생했습니다.'); setIsSubmitting(false); }
     };
 
     return (
@@ -101,8 +114,14 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
-            <LoginForm />
-        </Suspense>
+        <div className="min-h-screen bg-white flex flex-col">
+            <PublicHeader />
+            <main className="flex-1 pt-16">
+                <Suspense fallback={<div className="h-full flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
+                    <LoginForm />
+                </Suspense>
+            </main>
+            <PublicFooter />
+        </div>
     );
 }

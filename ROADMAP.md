@@ -1,181 +1,175 @@
 # TenOne 프로젝트 로드맵
 
-> 마지막 업데이트: 2026-03-20
+> 마지막 업데이트: 2026-03-22
+> 아키텍처 v3.0 기반 재정비
 
 ## 현재 상태 요약
 
 | 영역 | 상태 | 비고 |
 |------|------|------|
-| 퍼블릭 페이지 (About, Brands, History 등) | ✅ 완성 | 실제 콘텐츠 |
-| 인증 (Login/Signup) | ⚠️ Mock | localStorage 기반 |
-| ERP-CRM → Marketing CRM으로 이동 | ⚠️ Mock UI | 데이터 리셋됨 |
-| ERP-HR (Staff, 근태/급여/교육 관리자뷰) | ⚠️ Mock UI | 관리자 뷰 전환 완료 |
-| ERP-GPR (독립 모듈: Dashboard/캐스케이드/평가/인센티브) | ⚠️ Mock UI | 신규 구현 완료 |
-| Myverse (개인 포털) | ⚠️ Mock UI | 신규 구현 완료 |
-| Marketing (Campaigns, Leads) | ⚠️ Mock UI | 드래그앤드롭 작동 |
-| Studio (Workflow, Kanban) | ⚠️ Mock UI | 드래그앤드롭 작동 |
-| Wiki | ❌ 스켈레톤 | 구조만 존재 |
-| Backend API | ❌ 없음 | API 라우트 0개 |
-| Database | ❌ 없음 | ORM/스키마 없음 |
-| 배포 | ❌ 미완성 | 스크립트만 존재 |
-| 테스트 | ❌ 없음 | 테스트 파일 0개 |
-| 환경 설정 | ❌ 없음 | .env 파일 없음 |
+| 퍼블릭 사이트 (11페이지) | ✅ 완성 | 홈/Works/Newsroom/About/Universe 등 |
+| 인트라 9개 모듈 (143페이지) | ✅ UI 완성 | 전부 Mock 데이터 |
+| 사용자 체계 (5단계) | ✅ 구현 | staff/partner/jp/crew/member |
+| 결재 시스템 | ✅ 구현 | Myverse + ERP 결재라인 |
+| 프로젝트/Job 관리 | ✅ 구현 | 등록/상세/손익/인력/파일 |
+| 라이브러리 (Wiki/Myverse/CMS) | ✅ 구현 | 권한별 노출, 즐겨찾기 연동 |
+| Townity 공개 대상 | ✅ 구현 | 공지/자유/일정 공개범위 선택 |
+| Backend API | ❌ 없음 | Mock 데이터만 |
+| Database | ❌ 없음 | 스키마 설계 완료 (v3 문서) |
+| 배포 | ⚠️ 스크립트만 | Cloud Run 미배포 |
 
 ---
 
-## Phase 0: 프론트엔드 구조 개선 (진행중)
+## Phase 0: 프론트엔드 마무리 (즉시)
 
-> UI/UX 구조 개편 및 기능 보완
+> 백엔드 전환 전 UI/UX 완성도 높이기
 
-- [x] **0-1. ERP C-Level 구조 개편** — CHO/CFO 역할 기반 재구조화
-- [x] **0-2. GPR 독립 모듈화** — Dashboard, 캐스케이드, 평가, 인센티브
-- [x] **0-3. Myverse 개인 포털** — 개인 대시보드 (인사/GPR/급여/경비/프로젝트/교육)
-- [x] **0-4. ERP 관리자 뷰 전환** — 근태/급여/교육 페이지 관리자 뷰로 변경
-- [x] **0-5. SystemAccess 정리** — CRM 제거, studio→project, label+description 추가
-- [x] **0-6. Intra 헤더** — 상단 네비게이션 (검색, 알림, 프로필 드롭다운)
-- [x] **0-7. 교육 필수 이수과정** — VRIEF, GPR, Mind Set, Universe 입문, 정보보안, 괴롭힘 예방
-- [ ] **0-8. ERP 제증명서/가족관리 관리자 뷰 변경**
-- [ ] **0-9. Myverse 개인 정보 수정 기능**
-- [ ] **0-10. GPR 캐스케이드 승인 플로우 구현**
-- [ ] **0-11. 기존 GPR 경로 리다이렉트 정리** (`/intra/erp/hr/gpr` → `/intra/erp/gpr`)
-- [ ] **0-12. Wiki 콘텐츠 작성**
-- [ ] **0-13. 모바일 반응형 점검**
+### 완료
+- [x] 0-1. ERP C-Level 구조 개편
+- [x] 0-2. GPR 독립 모듈화
+- [x] 0-3. Myverse 개인 포털
+- [x] 0-4. ERP 관리자 뷰 전환
+- [x] 0-5. SystemAccess 정리
+- [x] 0-6. Intra 헤더
+- [x] 0-7. 교육 필수 이수과정
+- [x] 0-8. Crew/Partner Intra 리다이렉트 수정
+- [x] 0-9. Townity 공개 대상 추가 (공지/자유/일정)
+- [x] 0-10. Wiki Library 페이징 + 즐겨찾기 연동
+- [x] 0-11. 프로필 수정 비밀번호 확인
+- [x] 0-12. 뉴스레터 구독 (가입 시 + 프로필)
+- [x] 0-13. 프로젝트 등록 (코드자동, PM자동, 임시저장, 결재요청)
 
----
-
-## Phase 1: 기반 인프라 (우선순위: 최고)
-
-> 다른 모든 작업의 전제 조건
-
-- [ ] **1-1. 환경 설정 파일 구성**
-  - .env.local, .env.example 생성
-  - DATABASE_URL, NEXTAUTH_SECRET 등 변수 정의
-
-- [ ] **1-2. 데이터베이스 설정**
-  - PostgreSQL 또는 Supabase 선택 및 연결
-  - Prisma ORM 설치 및 스키마 설계
-  - 핵심 테이블: User, Brand, Person, Organization, Staff
-
-- [ ] **1-3. 인증 시스템 구현**
-  - NextAuth.js (Auth.js) 도입
-  - Credentials Provider (이메일/비밀번호)
-  - 세션 관리 및 미들웨어 보호
-  - 기존 mock auth 대체
-
-- [ ] **1-4. API 라우트 기본 구조**
-  - app/api/ 디렉토리 구성
-  - CRUD 패턴 정의 (GET, POST, PUT, DELETE)
-  - 에러 핸들링 공통 유틸
+### 미완료
+- [ ] 0-14. 모바일 반응형 점검 (사이드바 토글, 테이블 스크롤)
+- [ ] 0-15. 텍스트/버튼 일관성 최종 점검
+- [ ] 0-16. 빌드 에러 0개 확인 (npm run build)
 
 ---
 
-## Phase 2: 핵심 데이터 영속화 (우선순위: 높음)
+## Phase 1: 백엔드 기반 (1~8주)
 
-> Mock 데이터를 실제 DB로 전환
+> Mock → 실제 DB. 사람이 가입하고 데이터가 저장되는 상태.
 
-- [ ] **2-1. Brand 데이터 DB 전환**
-  - Brand 테이블 생성
-  - seed 스크립트로 기존 mock 데이터 마이그레이션
-  - API: GET /api/brands, POST /api/brands
+### 1-1. Supabase 셋업 (주 1~2)
+- [ ] Supabase 프로젝트 생성
+- [ ] .env.local 환경변수 설정
+- [ ] DB 스키마 생성 (v3 아키텍처 기반)
+  - members, point_logs
+  - projects, jobs, project_members
+  - posts, events
+  - approvals
+  - courses, enrollments
+  - contents
+  - notifications
+  - chat_rooms, chat_messages, chat_room_members
+- [ ] Supabase Auth 설정 (이메일 + 카카오 로그인)
+- [ ] Supabase Storage 버킷 설정 (avatars, files, content-images)
 
-- [ ] **2-2. CRM 데이터 DB 전환**
-  - Person, Organization, Deal, Activity 테이블
-  - 관계 설정 (Person ↔ Organization, Deal ↔ Activity)
-  - API: /api/crm/people, /api/crm/organizations, /api/crm/deals
+### 1-2. 인증 전환 (주 1~2)
+- [ ] localStorage Mock → Supabase Auth
+- [ ] 5단계 accountType 유지 (members 테이블 연동)
+- [ ] 로그인/회원가입/로그아웃 API
+- [ ] 미들웨어 보호 (인트라 접근 제어)
+- [ ] 카카오 소셜 로그인
 
-- [ ] **2-3. Staff/HR 데이터 DB 전환**
-  - Staff, Goal, Evaluation 테이블
-  - 역할 기반 접근 제어 적용
-  - API: /api/hr/staff, /api/hr/goals
+### 1-3. API Routes + 데이터 마이그레이션 (주 3~4)
+- [ ] API 공통 유틸 (에러 핸들링, 인증 체크)
+- [ ] Members API (CRUD + 프로필 수정)
+- [ ] Projects API (CRUD + Job + 투입인원)
+- [ ] Posts API (공지/자유/QnA)
+- [ ] Events API (일정)
+- [ ] Approvals API (결재 + 결재라인 처리)
+- [ ] 기존 Mock 데이터 → seed 스크립트
 
-- [ ] **2-4. Marketing 데이터 DB 전환**
-  - Campaign, Lead, Content 테이블
-  - 리드 파이프라인 상태 관리
-  - API: /api/marketing/campaigns, /api/marketing/leads
+### 1-4. 모듈 전환 1차 (주 5~6)
+- [ ] Myverse: Context → API (Dashboard, Todo, 타임시트, 결재)
+- [ ] Townity: Context → API (공지, 자유, 일정)
+- [ ] Project: Context → API (프로젝트, Job, 손익)
+- [ ] CMS: Context → API (콘텐츠, 뉴스레터)
 
-- [ ] **2-5. Workflow 데이터 DB 전환**
-  - Task, Pipeline, Project, Automation 테이블
-  - 칸반 보드 상태 저장
-  - API: /api/workflow/tasks, /api/workflow/projects
+### 1-5. 모듈 전환 2차 (주 7~8)
+- [ ] ERP: Context → API (전자결재, HR, Finance, 경영관리)
+- [ ] Wiki: Context → API (Library)
+- [ ] HeRo: Context → API (HIT, 이력서, 커리어)
+- [ ] Evolution School: Context → API (과정, 수강)
+- [ ] Contact 폼 → opportunities 테이블 자동 등록
 
----
-
-## Phase 3: 프론트엔드 연동 (우선순위: 높음)
-
-> Context → API 호출로 전환
-
-- [ ] **3-1. API 클라이언트 유틸 작성**
-  - fetch 래퍼 (에러 핸들링, 토큰 첨부)
-  - SWR 또는 React Query 도입
-
-- [ ] **3-2. 각 Context를 API 연동으로 리팩토링**
-  - crm-context → API 호출
-  - marketing-context → API 호출
-  - workflow-context → API 호출
-  - staff-context → API 호출
-  - gpr-context → API 호출
-
-- [ ] **3-3. 폼 제출 연동**
-  - Contact 페이지 폼 → API 전송
-  - Excel Import → 실제 파싱 및 DB 저장
-  - 프로필 수정 → DB 저장
-
----
-
-## Phase 4: 기능 보완 (우선순위: 중간)
-
-- [ ] **4-1. Wiki 콘텐츠 작성**
-  - Culture, Onboarding, Education, Handbook, FAQ 실제 내용
-
-- [ ] **4-2. 대시보드 실제 통계**
-  - Marketing Analytics → 실제 데이터 기반 차트
-  - CRM 통계 대시보드
-
-- [ ] **4-3. 파일 업로드/에셋 관리**
-  - 이미지/파일 저장소 (GCS 또는 S3)
-  - Studio Assets 실제 파일 관리
-
-- [ ] **4-4. 알림 시스템**
-  - 인앱 알림
-  - 이메일 알림 (선택)
+### Phase 1 완료 기준
+- 실제 회원가입/로그인 작동
+- 프로젝트 생성이 DB에 저장
+- 커뮤니티 글쓰기가 새로고침 후에도 유지
+- 결재 승인/반려가 실제 작동
 
 ---
 
-## Phase 5: 배포 및 운영 (우선순위: 중간)
+## Phase 2: 신규 모듈 + 고도화 (8~16주)
 
-- [ ] **5-1. Docker 설정**
-  - Dockerfile 작성
-  - docker-compose.yml (로컬 개발용)
+> 기회 수집 → 프로젝트 전환 파이프라인 가동
 
-- [ ] **5-2. GCP Cloud Run 배포**
-  - cloudbuild.yaml 작성
-  - 환경별 배포 스크립트 수정
-  - CI/CD 파이프라인
+### 2-1. Opportunity 모듈 (주 8~10)
+- [ ] opportunities 테이블 + UI (파이프라인 뷰)
+- [ ] AI 크롤링 엔진 (나라장터, bizinfo, 공모전)
+- [ ] Cloud Run Jobs + cron 스케줄
+- [ ] Claude API 관련성 분석 (relevance_score)
+- [ ] 기회 → 프로젝트 전환 기능
+- [ ] 마감 임박/고관련성 알림
 
-- [ ] **5-3. 도메인 및 SSL**
-  - 커스텀 도메인 연결
-  - SSL 인증서
+### 2-2. Partner Pool 모듈 (주 8~10)
+- [ ] partners 테이블 + UI
+- [ ] 파트너 등록 (회사/프리랜서)
+- [ ] 역량 기반 검색/필터
+- [ ] Project에서 파트너 투입
+- [ ] 프로젝트 완료 후 평가
+
+### 2-3. 포인트 시스템 (주 10~12)
+- [ ] point_logs 테이블 + 자동 부여 로직
+- [ ] 등급 시스템 (Bronze~Diamond)
+- [ ] Myverse 포인트 현황 표시
+- [ ] 프로젝트 완료 시 크루 포인트 자동 부여
+- [ ] 교육 이수 시 포인트 자동 부여
+
+### 2-4. BI Dashboard (주 12~14)
+- [ ] 전체 사업 현황 (코어/확장/곁가지)
+- [ ] 멤버 현황 (가입 추이, 그룹별, 활성/이탈)
+- [ ] 프로젝트 현황 (진행중/완료, 성공률, 이익률)
+- [ ] Opportunity 파이프라인 (상태별 금액, 전환율)
+
+### 2-5. 고도화 (주 14~16)
+- [ ] 메신저 실시간 (Supabase Realtime)
+- [ ] 알림 센터 (notifications + Realtime)
+- [ ] 크루 정산 + 외부 정산 (ERP 확장)
+- [ ] AI 콘텐츠 생성 (CMS + Claude API)
+- [ ] Badak.biz 9천명 마이그레이션
 
 ---
 
-## Phase 6: 품질 관리 (우선순위: 낮음, 병행 권장)
+## Phase 3: 커머스 + 사업 확장 (16~24주)
 
-- [ ] **6-1. 테스트 환경 구성**
-  - Vitest 설치 및 설정
-  - 핵심 유틸 단위 테스트
-
-- [ ] **6-2. E2E 테스트**
-  - Playwright 설정
-  - 로그인 → CRM → 작업 흐름 시나리오
-
-- [ ] **6-3. 린트/포맷 강화**
-  - ESLint 규칙 정비
-  - Prettier 설정
+- [ ] Commerce 모듈 (상품관리, 포트원 결제, 주문관리)
+- [ ] Evolution School 유료 과정 (Commerce 연동)
+- [ ] 수료증 PDF 자동 발급
+- [ ] HeRo 기업 매칭 대시보드
+- [ ] BI 재무 상세 + 브랜드별 성과
+- [ ] SNS 연동 콘텐츠 배포
 
 ---
 
-## 작업 진행 규칙
+## Phase 4: 생태계 완성 (24주~)
 
-1. 각 작업 완료 시 이 파일의 체크박스를 `[x]`로 변경
-2. "사무실 작업 종료" / "집 작업 종료" 시 WORK_STATUS.md에 현황 기록
-3. 작업 시작 전 `git pull`로 최신 상태 동기화
+- [ ] 모바일 앱 (PWA → 네이티브 검토)
+- [ ] 데이터 기반 AI 추천 (인재/프로젝트/기회)
+- [ ] 오픈 API (외부 시스템 연동)
+- [ ] 솔루션 외부 라이선스 (Vrief/GPR 디지털 툴)
+- [ ] 기존 사이트 완전 통합 (madleague.net, madleap.co.kr 등)
+
+---
+
+## 성공 지표
+
+| Phase | 핵심 지표 | 목표 |
+|-------|---------|------|
+| 0 | UI 완성 / 빌드 에러 | 143페이지 / 0개 |
+| 1 (8주) | 실제 가입 / DB 모듈 | 50명+ / 9개 전환 |
+| 2 (16주) | 크롤링 기회 / 활성 멤버 | 월 50건+ / 100명+ |
+| 3 (24주) | 커머스 매출 / 통합 회원 | 매출 발생 / 5,000명+ |
+| 4 (24주~) | 전체 활성 / 라이선스 | 500명+ / 1건+ |

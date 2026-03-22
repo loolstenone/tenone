@@ -49,7 +49,7 @@ export default function EvaluationPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs font-mono text-neutral-300">{goal.level}</span>
                                             <h4 className="text-sm font-medium">{goal.title}</h4>
-                                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
+                                            <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
                                         </div>
                                         <p className="text-xs text-neutral-400 mt-1">{member?.name} · KPI: {goal.kpi}</p>
                                     </div>
@@ -90,7 +90,7 @@ export default function EvaluationPage() {
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="text-xs font-mono text-neutral-300">{goal.level}</span>
                                         <h4 className="text-sm font-medium">{goal.title}</h4>
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">Evaluated</span>
+                                        <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">Evaluated</span>
                                     </div>
                                     <p className="text-xs text-neutral-400">{member?.name}</p>
                                     <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-neutral-200">
@@ -129,7 +129,7 @@ export default function EvaluationPage() {
                                                 rating === r ? 'border-neutral-900 bg-neutral-100' : 'border-neutral-200 hover:border-neutral-400'
                                             }`}>
                                             <Star className={`h-5 w-5 mx-auto mb-1 ${rating >= r ? 'text-neutral-900 fill-neutral-900' : 'text-neutral-300'}`} />
-                                            <p className={`text-[10px] ${rating === r ? 'text-neutral-900' : 'text-neutral-400'}`}>{ratingLabels[r]}</p>
+                                            <p className={`text-xs ${rating === r ? 'text-neutral-900' : 'text-neutral-400'}`}>{ratingLabels[r]}</p>
                                         </button>
                                     ))}
                                 </div>

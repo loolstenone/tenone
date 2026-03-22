@@ -54,7 +54,7 @@ const cascadeData: DivisionNode[] = [
                     { id: "G-112", title: "MADLeague 인사이트 투어링 성공적 운영", weight: 20, progress: 60, status: "확정", krs: [] },
                     { id: "G-113", title: "LUKI 데뷔 캠페인 완료", weight: 20, progress: 100, status: "확정", krs: [] },
                     { id: "G-114", title: "주간 콘텐츠 파이프라인 운영", weight: 15, progress: 70, status: "확정", krs: [] },
-                    { id: "G-115", title: "Vrief 프레임워크 매드리그 교육 적용", weight: 20, progress: 40, status: "확정", krs: [] },
+                    { id: "G-115", title: "VRIEF 프레임워크 매드리그 교육 적용", weight: 20, progress: 40, status: "확정", krs: [] },
                 ],
             }],
         }],
@@ -122,19 +122,19 @@ export default function GPRCascadePage() {
                 <div className="flex items-center gap-2 mb-4">
                     <Building2 className="h-4 w-4 text-neutral-400" />
                     <h2 className="text-sm font-bold">전사 목표 (CEO)</h2>
-                    <span className="text-[10px] px-2 py-0.5 bg-neutral-900 text-white rounded ml-auto">2026 Q1</span>
+                    <span className="text-xs px-2 py-0.5 bg-neutral-900 text-white rounded ml-auto">2026 Q1</span>
                 </div>
                 <div className="space-y-3">
                     {companyGoals.map(g => (
                         <div key={g.id} className="flex items-center gap-3 py-2 border-b border-neutral-50 last:border-0">
-                            <span className="font-mono text-[10px] text-neutral-400 w-8">{g.id}</span>
+                            <span className="font-mono text-xs text-neutral-400 w-8">{g.id}</span>
                             <span className="text-sm flex-1">{g.title}</span>
-                            <span className="text-[10px] text-neutral-400 w-12 text-right">{g.weight}%</span>
+                            <span className="text-xs text-neutral-400 w-12 text-right">{g.weight}%</span>
                             <div className="w-20 h-1.5 bg-neutral-100 rounded-full">
                                 <div className="h-1.5 bg-neutral-900 rounded-full" style={{ width: `${g.progress}%` }} />
                             </div>
-                            <span className="text-[10px] text-neutral-500 w-8 text-right">{g.progress}%</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${statusStyle[g.status]}`}>{g.status}</span>
+                            <span className="text-xs text-neutral-500 w-8 text-right">{g.progress}%</span>
+                            <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${statusStyle[g.status]}`}>{g.status}</span>
                         </div>
                     ))}
                 </div>
@@ -170,7 +170,7 @@ export default function GPRCascadePage() {
                                         >
                                             {expandedTeams.has(team.name) ? <ChevronDown className="h-3.5 w-3.5 text-neutral-400" /> : <ChevronRight className="h-3.5 w-3.5 text-neutral-400" />}
                                             <span className="text-xs font-medium flex-1 text-left">{team.name}</span>
-                                            <span className="text-[10px] text-neutral-400">{team.head}</span>
+                                            <span className="text-xs text-neutral-400">{team.head}</span>
                                         </button>
 
                                         {expandedTeams.has(team.name) && (
@@ -185,7 +185,7 @@ export default function GPRCascadePage() {
                                                             {expandedMembers.has(member.name) ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
                                                             <User className="h-3.5 w-3.5 text-neutral-400" />
                                                             <span className="text-xs flex-1 text-left">{member.name}</span>
-                                                            <span className="text-[10px] text-neutral-400">{member.position}</span>
+                                                            <span className="text-xs text-neutral-400">{member.position}</span>
                                                             <span className="text-xs font-bold w-10 text-right">{member.rate}%</span>
                                                         </button>
 
@@ -196,18 +196,18 @@ export default function GPRCascadePage() {
                                                                     return (
                                                                         <div key={g.id} className="flex items-center gap-2 px-4 py-1.5">
                                                                             <Icon className={`h-3 w-3 shrink-0 ${g.status === "확정" ? "text-green-500" : g.status === "승인대기" ? "text-yellow-500" : "text-neutral-400"}`} />
-                                                                            <span className="font-mono text-[9px] text-neutral-400">{g.id}</span>
+                                                                            <span className="font-mono text-[11px] text-neutral-400">{g.id}</span>
                                                                             <span className="text-xs flex-1">{g.title}</span>
-                                                                            <span className="text-[10px] text-neutral-400">{g.weight}%</span>
+                                                                            <span className="text-xs text-neutral-400">{g.weight}%</span>
                                                                             <div className="w-16 h-1 bg-neutral-100 rounded-full">
                                                                                 <div className="h-1 bg-neutral-900 rounded-full" style={{ width: `${g.progress}%` }} />
                                                                             </div>
-                                                                            <span className="text-[10px] text-neutral-500 w-8 text-right">{g.progress}%</span>
-                                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${statusStyle[g.status]}`}>{g.status}</span>
+                                                                            <span className="text-xs text-neutral-500 w-8 text-right">{g.progress}%</span>
+                                                                            <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${statusStyle[g.status]}`}>{g.status}</span>
                                                                             {g.status === "승인대기" && (
                                                                                 <div className="flex gap-1">
-                                                                                    <button className="text-[9px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded hover:bg-green-100">승인</button>
-                                                                                    <button className="text-[9px] px-1.5 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100">반려</button>
+                                                                                    <button className="text-[11px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded hover:bg-green-100">승인</button>
+                                                                                    <button className="text-[11px] px-1.5 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100">반려</button>
                                                                                 </div>
                                                                             )}
                                                                         </div>

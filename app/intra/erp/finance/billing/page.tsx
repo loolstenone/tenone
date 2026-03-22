@@ -54,7 +54,7 @@ export default function BillingPage() {
                     { label: "이번 달 입금", value: formatKRW(5000000) },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -83,7 +83,7 @@ export default function BillingPage() {
                                 <td className="p-3 text-neutral-500 text-xs">{inv.issueDate}</td>
                                 <td className="p-3 text-neutral-500 text-xs">{inv.dueDate}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[inv.status]}`}>{inv.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[inv.status]}`}>{inv.status}</span>
                                 </td>
                             </tr>
                         ))}

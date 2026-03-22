@@ -5,3 +5,10 @@ out/
 .env
 .env.*
 !.env.example
+
+# Python (skill artifacts)
+lib/site-packages/
+
+# Word temp files
+~$*.docx
+.env.local

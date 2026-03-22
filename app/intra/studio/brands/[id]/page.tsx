@@ -53,7 +53,7 @@ export default function BrandDetailPage({ params }: Props) {
                                 </li>
                                 <li className="flex justify-between">
                                     <span className="text-neutral-400">Status</span>
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{brand.status}</span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{brand.status}</span>
                                 </li>
                             </ul>
                         </div>

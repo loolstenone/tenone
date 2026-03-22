@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
                                 <div className="flex-1 h-6 bg-neutral-100 overflow-hidden">
                                     <div className="h-full bg-neutral-900 flex items-center pl-2"
                                         style={{ width: `${(f.count / maxFunnel) * 100}%`, minWidth: f.count > 0 ? '24px' : '0' }}>
-                                        {f.count > 0 && <span className="text-[10px] text-white font-bold">{f.count}</span>}
+                                        {f.count > 0 && <span className="text-xs text-white font-bold">{f.count}</span>}
                                     </div>
                                 </div>
                             </div>
@@ -82,11 +82,11 @@ export default function AnalyticsPage() {
                             <div key={ch.channel} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
                                 <div>
                                     <p className="text-sm text-neutral-500">{ch.channel}</p>
-                                    <p className="text-[10px] text-neutral-300">{ch.count} posts</p>
+                                    <p className="text-xs text-neutral-300">{ch.count} posts</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-medium">{ch.engagement.toLocaleString()}</p>
-                                    <p className="text-[10px] text-neutral-300">engagement</p>
+                                    <p className="text-xs text-neutral-300">engagement</p>
                                 </div>
                             </div>
                         ))}

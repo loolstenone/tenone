@@ -24,7 +24,7 @@ export default function MentorsPage() {
                             </div>
                         </div>
                         <p className="text-xs text-neutral-500">{m.company}</p>
-                        <div className="flex gap-1 mt-3 flex-wrap">{m.tags.map(t => <span key={t} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{t}</span>)}</div>
+                        <div className="flex gap-1 mt-3 flex-wrap">{m.tags.map(t => <span key={t} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{t}</span>)}</div>
                         <p className="text-xs text-neutral-300 mt-3">Source: {m.source}</p>
                     </div>
                 ))}

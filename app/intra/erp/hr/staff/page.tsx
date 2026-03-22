@@ -38,8 +38,8 @@ export default function StaffListPage() {
                 <div className="border border-neutral-200 bg-white p-4 flex items-center gap-4">
                     <Shield className="h-5 w-5 text-neutral-400" />
                     <div>
-                        <p className="text-2xl font-bold">{staff.filter(s => s.accessLevel.includes('office')).length}</p>
-                        <p className="text-xs text-neutral-500">Office Access</p>
+                        <p className="text-2xl font-bold">{staff.filter(s => s.accessLevel.includes('project')).length}</p>
+                        <p className="text-xs text-neutral-500">Project Access</p>
                     </div>
                 </div>
             </div>
@@ -73,18 +73,18 @@ export default function StaffListPage() {
                                 </td>
                                 <td className="px-4 py-4 text-sm text-neutral-500">{member.department}</td>
                                 <td className="px-4 py-4 text-sm text-neutral-500">{member.position}</td>
-                                <td className="px-4 py-4"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span></td>
+                                <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span></td>
                                 <td className="px-4 py-4 text-xs text-neutral-600">{member.division}</td>
                                 <td className="px-4 py-4">
                                     <div className="flex gap-1 flex-wrap">
                                         {member.brandAssociation.slice(0, 3).map(b => {
                                             const brand = brandOptions.find(bo => bo.id === b);
-                                            return <span key={b} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{brand?.name ?? b}</span>;
+                                            return <span key={b} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{brand?.name ?? b}</span>;
                                         })}
-                                        {member.brandAssociation.length > 3 && <span className="text-[10px] text-neutral-400">+{member.brandAssociation.length - 3}</span>}
+                                        {member.brandAssociation.length > 3 && <span className="text-xs text-neutral-400">+{member.brandAssociation.length - 3}</span>}
                                     </div>
                                 </td>
-                                <td className="px-4 py-4"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.status}</span></td>
+                                <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.status}</span></td>
                             </tr>
                         ))}
                     </tbody>

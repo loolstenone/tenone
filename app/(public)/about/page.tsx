@@ -112,7 +112,7 @@ function AboutContent() {
                                     얼마나 될까?
                                 </h2>
                                 <p className="mt-8 text-neutral-500 leading-relaxed">
-                                    PC통신 시절부터 사용하던 ID &apos;lools&apos;, 생일이자 Ten:One의 기원인 10월 1일.
+                                    PC통신 시절부터 사용하던 ID &apos;lools&apos;, 생일이자 Ten:One™의 기원인 10월 1일.
                                     반복되는 우연은 그저 우연이 아니라, 마치 계획된 우연처럼 지금의 나를 만들었습니다.
                                 </p>
                                 <p className="mt-4 text-neutral-500 leading-relaxed">
@@ -317,7 +317,7 @@ function AboutContent() {
                             </h2>
                             <div className="grid md:grid-cols-2 gap-8">
                                 {[
-                                    { type: "Parent", desc: "모-자 관계. Ten:One™이 직접 운영하는 핵심 브랜드.", example: "Ten:One → LUKI, RooK, MAD League" },
+                                    { type: "Parent", desc: "모-자 관계. Ten:One™이 직접 운영하는 핵심 브랜드.", example: "Ten:One™ → LUKI, RooK, MAD League" },
                                     { type: "Collaboration", desc: "협업 관계. 프로젝트 단위로 함께 일하는 파트너 브랜드.", example: "MAD League × 지평주조" },
                                     { type: "Support", desc: "지원 관계. 기술, 인프라, 네트워크를 공유하는 관계.", example: "Badak → YouInOne" },
                                     { type: "Network", desc: "네트워크 관계. 동일 생태계 내 독립적으로 활동하는 관계.", example: "PAM, ADlle, ABC, 제주수작" },

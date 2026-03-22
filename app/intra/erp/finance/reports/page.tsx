@@ -45,11 +45,11 @@ export default function ReportsPage() {
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                             <p className="text-lg font-bold">{s.value}</p>
-                            <span className="text-[10px] text-green-600">{s.change}</span>
+                            <span className="text-xs text-green-600">{s.change}</span>
                         </div>
                     </div>
                 ))}

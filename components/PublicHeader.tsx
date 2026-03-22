@@ -12,6 +12,7 @@ const publicNav = [
     { name: "Works", href: "/works" },
     { name: "Contact", href: "/contact" },
     { name: "Newsroom", href: "/newsroom" },
+    { name: "Newsletter", href: "/newsletter" },
     {
         name: "About", href: "/about",
         sub: [
@@ -25,7 +26,7 @@ const publicNav = [
 export function PublicHeader() {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated, isLoading, isStaff, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, isStaff, canAccessIntra, logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -75,7 +76,7 @@ export function PublicHeader() {
                 <div className="hidden md:flex items-center gap-4">
                     {!isLoading && isAuthenticated && user ? (
                         <div className="flex items-center gap-3">
-                            {isStaff && (
+                            {canAccessIntra && (
                                 <Link href="/intra" className="text-xs tracking-wide text-neutral-400 hover:text-neutral-900 transition-colors">
                                     Intra
                                 </Link>
@@ -131,7 +132,33 @@ export function PublicHeader() {
                             )}
                         </div>
                     ))}
-                    {!isLoading && !isAuthenticated && (
+                    {!isLoading && isAuthenticated && user ? (
+                        <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="h-8 w-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-medium">
+                                    {user.avatarInitials}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-neutral-900">{user.name}</p>
+                                    <p className="text-xs text-neutral-400">{user.email}</p>
+                                </div>
+                            </div>
+                            {canAccessIntra && (
+                                <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
+                                    className="block text-sm text-neutral-600 hover:text-neutral-900">
+                                    Intra Office
+                                </Link>
+                            )}
+                            <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
+                                className="block text-sm text-neutral-600 hover:text-neutral-900">
+                                프로필
+                            </Link>
+                            <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
+                                className="block text-sm text-neutral-400 hover:text-neutral-900">
+                                로그아웃
+                            </button>
+                        </div>
+                    ) : !isLoading ? (
                         <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
                             <Link href="/login" onClick={() => setMobileMenuOpen(false)}
                                 className="block text-sm text-neutral-400 hover:text-neutral-900">
@@ -142,7 +169,7 @@ export function PublicHeader() {
                                 Sign up
                             </Link>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             )}
         </header>

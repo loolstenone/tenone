@@ -45,7 +45,7 @@ export default function BiddingPage() {
                     { label: "유찰", value: mockBids.filter(b => b.status === "유찰").length },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -58,10 +58,10 @@ export default function BiddingPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <h3 className="text-sm font-bold">{b.title}</h3>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${typeColor[b.type]}`}>{b.type}</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[b.status]}`}>{b.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[b.type]}`}>{b.type}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[b.status]}`}>{b.status}</span>
                                 </div>
-                                <div className="flex items-center gap-4 text-[10px] text-neutral-400 mt-1">
+                                <div className="flex items-center gap-4 text-xs text-neutral-400 mt-1">
                                     <span>발주처: {b.client}</span>
                                     <span>담당: {b.assignee}</span>
                                     <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> 마감: {b.submitDeadline}</span>

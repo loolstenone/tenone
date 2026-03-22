@@ -42,9 +42,9 @@ export default function DealsPage() {
                                     <div className="h-2 w-2 rounded-full bg-neutral-400" />
                                     <h3 className="text-xs font-semibold text-neutral-500">{stage.label}</h3>
                                 </div>
-                                <span className="text-[10px] text-neutral-300">{stageDeals.length}</span>
+                                <span className="text-xs text-neutral-300">{stageDeals.length}</span>
                             </div>
-                            {total > 0 && <p className="text-[10px] text-neutral-300 mb-2">₩{(total / 10000).toLocaleString()}만</p>}
+                            {total > 0 && <p className="text-xs text-neutral-300 mb-2">₩{(total / 10000).toLocaleString()}만</p>}
                             <div className="space-y-2">
                                 {stageDeals.map(deal => {
                                     const org = getOrgById(deal.organizationId);
@@ -53,10 +53,10 @@ export default function DealsPage() {
                                             className="border border-neutral-200 bg-white p-3 cursor-grab active:cursor-grabbing hover:border-neutral-400 transition-colors"
                                         >
                                             <p className="text-xs font-medium leading-tight">{deal.title}</p>
-                                            <p className="text-[10px] text-neutral-400 mt-1">{org?.name ?? '-'}</p>
+                                            <p className="text-xs text-neutral-400 mt-1">{org?.name ?? '-'}</p>
                                             <div className="flex items-center justify-between mt-2">
                                                 <span className="text-xs font-medium text-neutral-500">₩{deal.value.toLocaleString()}</span>
-                                                {deal.expectedCloseDate && <span className="text-[10px] text-neutral-300">{deal.expectedCloseDate}</span>}
+                                                {deal.expectedCloseDate && <span className="text-xs text-neutral-300">{deal.expectedCloseDate}</span>}
                                             </div>
                                         </div>
                                     );

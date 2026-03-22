@@ -57,7 +57,7 @@ export default function ExpensesPage() {
                     { label: "미처리 건수", value: `${mockExpenses.filter(e => e.status === "대기").length}건` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -87,14 +87,14 @@ export default function ExpensesPage() {
                         {mockExpenses.map(e => (
                             <tr key={e.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                 <td className="p-3 text-neutral-500">{e.date}</td>
-                                <td className="p-3"><span className="text-[10px] px-2 py-0.5 bg-neutral-100 rounded">{e.category}</span></td>
+                                <td className="p-3"><span className="text-xs px-2 py-0.5 bg-neutral-100 rounded">{e.category}</span></td>
                                 <td className="p-3 font-medium">{e.description}</td>
                                 <td className="p-3 text-right font-medium">{formatKRW(e.amount)}</td>
                                 <td className="p-3 text-center text-xs text-neutral-500">{e.payMethod}</td>
                                 <td className="p-3 text-neutral-500">{e.submitter}</td>
                                 <td className="p-3 text-center">{e.receipt ? <FileText className="h-3.5 w-3.5 text-green-500 mx-auto" /> : <span className="text-neutral-300">-</span>}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
                                 </td>
                             </tr>
                         ))}

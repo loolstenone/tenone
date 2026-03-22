@@ -3,6 +3,17 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Plus, MessageSquare, ChevronRight, X } from "lucide-react";
+import clsx from "clsx";
+
+type AudienceType = '전체' | 'Staff' | 'Partner 이상' | 'Crew 이상' | 'Admin Only';
+const audienceOptions: AudienceType[] = ['전체', 'Staff', 'Partner 이상', 'Crew 이상', 'Admin Only'];
+const audienceBadge: Record<AudienceType, string> = {
+    '전체': 'bg-neutral-100 text-neutral-500',
+    'Staff': 'bg-blue-50 text-blue-600',
+    'Partner 이상': 'bg-amber-50 text-amber-600',
+    'Crew 이상': 'bg-green-50 text-green-600',
+    'Admin Only': 'bg-red-50 text-red-500',
+};
 
 interface FreePost {
     id: string;
@@ -10,6 +21,7 @@ interface FreePost {
     body: string;
     author: string;
     date: string;
+    audience?: AudienceType;
     comments: { author: string; body: string; date: string }[];
 }
 
@@ -45,6 +57,7 @@ export default function FreeBoardPage() {
     const [newComment, setNewComment] = useState('');
     const [editorTitle, setEditorTitle] = useState('');
     const [editorBody, setEditorBody] = useState('');
+    const [editorAudience, setEditorAudience] = useState<AudienceType>('전체');
 
     const sorted = [...posts].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -53,10 +66,10 @@ export default function FreeBoardPage() {
         const newPost: FreePost = {
             id: `f-${Date.now()}`, title: editorTitle, body: editorBody,
             author: user?.name || 'Unknown', date: new Date().toISOString().split('T')[0],
-            comments: [],
+            audience: editorAudience, comments: [],
         };
         setPosts(prev => [newPost, ...prev]);
-        setEditorTitle(''); setEditorBody('');
+        setEditorTitle(''); setEditorBody(''); setEditorAudience('전체');
         setShowEditor(false);
     };
 
@@ -132,7 +145,7 @@ export default function FreeBoardPage() {
                                         <div key={i} className="bg-neutral-50 p-4">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-xs font-medium text-neutral-700">{c.author}</span>
-                                                <span className="text-[10px] text-neutral-400">{c.date}</span>
+                                                <span className="text-xs text-neutral-400">{c.date}</span>
                                             </div>
                                             <p className="text-sm text-neutral-600">{c.body}</p>
                                         </div>
@@ -170,6 +183,17 @@ export default function FreeBoardPage() {
                                 <input value={editorTitle} onChange={e => setEditorTitle(e.target.value)}
                                     className="w-full border border-neutral-200 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none"
                                     placeholder="제목을 입력하세요" />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-neutral-700 block mb-1">공개 대상</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {audienceOptions.map(a => (
+                                        <button key={a} onClick={() => setEditorAudience(a)}
+                                            className={clsx("px-3 py-1.5 text-xs border transition-colors",
+                                                editorAudience === a ? "bg-neutral-900 text-white border-neutral-900" : "bg-white text-neutral-500 border-neutral-200"
+                                            )}>{a}</button>
+                                    ))}
+                                </div>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-neutral-700 block mb-1">내용</label>

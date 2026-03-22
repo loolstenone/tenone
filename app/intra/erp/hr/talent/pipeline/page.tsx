@@ -51,7 +51,7 @@ export default function PipelinePage() {
                         <div key={stage} className="min-w-[220px] flex-shrink-0">
                             <div className="flex items-center justify-between mb-2 px-1">
                                 <h3 className="text-xs font-bold text-neutral-600">{stage}</h3>
-                                <span className="text-[10px] text-neutral-400">{candidates.length}</span>
+                                <span className="text-xs text-neutral-400">{candidates.length}</span>
                             </div>
                             <div className="space-y-2">
                                 {candidates.map(c => (
@@ -62,8 +62,8 @@ export default function PipelinePage() {
                                             </div>
                                             <span className="text-sm font-medium">{c.name}</span>
                                         </div>
-                                        <p className="text-[10px] text-neutral-500 mb-1">{c.position}</p>
-                                        <div className="flex items-center justify-between text-[9px] text-neutral-400">
+                                        <p className="text-xs text-neutral-500 mb-1">{c.position}</p>
+                                        <div className="flex items-center justify-between text-[11px] text-neutral-400">
                                             <span>{c.source}</span>
                                             <span>{c.appliedDate}</span>
                                         </div>

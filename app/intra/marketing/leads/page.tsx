@@ -37,17 +37,17 @@ export default function LeadsPage() {
                             <div className="flex items-center gap-1.5 mb-2 px-1">
                                 <div className="h-2 w-2 rounded-full bg-neutral-400" />
                                 <h3 className="text-[11px] font-semibold text-neutral-500">{stage.label}</h3>
-                                <span className="text-[10px] text-neutral-300 ml-auto">{stageLeads.length}</span>
+                                <span className="text-xs text-neutral-300 ml-auto">{stageLeads.length}</span>
                             </div>
                             <div className="space-y-2">
                                 {stageLeads.map(lead => (
                                     <div key={lead.id} draggable onDragStart={e => handleDragStart(e, lead.id)}
                                         className="border border-neutral-200 bg-white p-2.5 cursor-grab active:cursor-grabbing hover:border-neutral-400 transition-colors">
                                         <p className="text-xs font-medium">{lead.name}</p>
-                                        {lead.company && <p className="text-[10px] text-neutral-400">{lead.company}</p>}
+                                        {lead.company && <p className="text-xs text-neutral-400">{lead.company}</p>}
                                         <div className="flex justify-between mt-1.5">
-                                            <span className="text-[10px] text-neutral-300">{lead.source}</span>
-                                            <span className="text-[10px] text-neutral-500">₩{(lead.value / 10000).toLocaleString()}만</span>
+                                            <span className="text-xs text-neutral-300">{lead.source}</span>
+                                            <span className="text-xs text-neutral-500">₩{(lead.value / 10000).toLocaleString()}만</span>
                                         </div>
                                     </div>
                                 ))}

@@ -1,62 +1,60 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-20 (사무실)
+> 마지막 업데이트: 2026-03-22 (집)
 
 ## 오늘 한 작업
 
-### ERP C-Level 구조 개편
-- ERP를 C-Level 역할 기반으로 재구조화 (CHO/CFO)
-- CBO(사업관리) → Project 모듈로 이동 (CBO는 요청자, CHO/CFO가 처리)
-- Project Management를 허브 구조로 변경 (프로젝트 상세 = 5탭: 개요/인력/제작/발주·계약/정산)
-- Project 사이드바 정리: 프로젝트, 입찰관리, 협력사, 타임시트 4개로 축소
+### Townity 공개 대상 추가
+- 공지사항, 자유게시판, 전체 일정 등록 모달에 공개 대상 선택 필드 추가
+- 옵션: 전체 / Staff / Partner 이상 / Crew 이상 / Admin Only
+- 수정 파일: comm/notice/page.tsx, comm/free/page.tsx, comm/calendar/page.tsx
 
-### GPR 독립 모듈화
-- GPR을 HR·CHO 하위에서 분리 → ERP 최상위 독립 섹션
-- GPR Dashboard: 전사 달성률, 부서별 GPR 현황 테이블
-- 목표 캐스케이드: CEO 전사목표 → 사업부 → 팀 → 개인 트리 구조 + 승인/반려
-- 평가: 자기평가 → 매니저평가 → 최종 등급 확정 플로우
-- 인센티브: 등급별 지급률(S:200% ~ D:0%), 인센티브 산정 테이블
+### Crew/Partner/JP Intra 리다이렉트 수정
+- login/page.tsx: staff만 /intra로 보내던 로직 → member 제외 전부 /intra로
+- useEffect + handleSubmit 양쪽 모두 수정
+- user 객체를 useAuth에서 추가 가져오기
 
-### Myverse (개인 포털)
-- "내 프로필" → "Myverse"로 리브랜딩
-- 개인 대시보드 형태: 인사정보, GPR, 급여, 경비, 프로젝트, 교육, 근태, 시스템 접근 권한
-- 빠른 실행 섹션 (GPR 목표설정, 근태신청, 경비청구, 교육신청, 증명서발급, 급여조회 등)
-- ERP "나의 인사정보" 제거 → Myverse로 통합
+### 전체 현황 점검
+- 결재 시스템: 이미 구현됨 (Myverse + ERP 결재라인)
+- 프로젝트 등록: 이미 구현됨 (코드자동, PM자동, 투입인원, 임시저장, 결재요청)
+- 프로젝트 상세: 이미 구현됨 (개요/Job/손익/인력/파일 5탭)
+- Wiki Library: 이미 페이징 구현됨 (20개씩 + 건수 선택)
+- 즐겨찾기 연동: 정상 작동 확인 (Wiki → Myverse)
+- 라이브러리 권한: 정상 작동 확인 (canViewItem)
+- 프로필 비밀번호: 이미 구현됨
 
-### ERP 관리자 뷰 전환
-- 근태: 개인 출퇴근 기록 → 전체 구성원 출퇴근/휴가신청 승인/초과근무 관리
-- 급여: 개인 급여명세 → 전체 급여대장 + 퇴직연금 현황 관리
-- 교육: 개인 교육이력 → 전체 구성원 이수현황 + 필수과정 미이수 인원 관리
-- 교육에 텐원 필수 이수과정 추가 (VRIEF, GPR, Mind Set, Universe 입문, 정보보안, 괴롭힘 예방)
+### 프로젝트 정리
+- site-packages 삭제 (258MB → 2.1MB)
 
-### SystemAccess 정리
-- `erp-crm` 제거 (CRM은 ERP에서 제거됨)
-- `studio` → `project`로 변경
-- 각 권한에 label + description 추가 (SystemAccessInfo)
-- `erp-admin` = "시스템 설정, 권한 관리, 전체 데이터 접근"으로 명확화
+### 로드맵 재정비
+- ROADMAP.md를 아키텍처 v3.0 기반으로 전면 재작성
+- Phase 0(프론트엔드 마무리) ~ Phase 4(생태계 완성)
+- SmarComm 프로젝트 초기화 (C:\Projects\SmarComm)
 
-### Intra 헤더 추가
-- 좌측: Myverse 바로가기, 조직도, 오늘 날짜
-- 우측: 검색, 알림(빨간 점), 프로필 드롭다운 (Myverse/GPR/근태/급여/경비/로그아웃)
-- 커뮤니케이션 "지식경영" → "Wiki" 라벨 변경
+### Claude Chat용 문서 생성
+- docs/CURRENT_STATUS.md 생성 (현황 + v3 아키텍처 통합)
 
 ## 현재 진행 중
-- 없음 (깔끔하게 정리 완료)
+- Phase 1 전체 완료. Phase 2 시작 전.
+
+## 완료된 Phase 1 (백엔드 기반)
+- **1-1. Supabase 셋업**: DB 15개 테이블, RLS, 인덱스, 패키지, 환경변수
+- **1-2. 인증 전환**: Supabase Auth + Mock fallback 하이브리드 (auth-context.tsx)
+- **1-3. API Routes**: 13개 엔드포인트 (members, projects, jobs, posts, events, approvals, contents, library, notifications, timesheets)
+- **1-4. API 클라이언트**: lib/api.ts 모듈별 타입드 함수
+- 모바일 반응형 (사이드바 토글, 본문 전체너비)
+- npm run build 에러 0개
 
 ## 다음에 할 일
-- [ ] ERP 제증명서/가족관리 페이지도 관리자 뷰로 변경
-- [ ] Myverse에서 개인 정보 수정 기능 (연동)
-- [ ] GPR 캐스케이드에서 실제 승인 플로우 구현
-- [ ] 기존 `/intra/erp/hr/gpr` 경로를 `/intra/erp/gpr`로 리다이렉트 정리
-- [ ] Wiki 콘텐츠 실제 작성
-- [ ] 모바일 반응형 점검
-- [ ] 백엔드 API / DB 연동 시작
+- [ ] Phase 2: 신규 모듈 (Opportunity, Partner Pool, BI, 포인트)
+- [ ] 각 페이지 Mock Context → API 호출 점진적 전환
+- [ ] Vercel 배포 연동
+- [ ] SmarComm Phase 1 MVP 개발
 
 ## 주의사항
 - Tailwind CSS v4 사용 중
 - Next.js 16 + React 19
 - 모든 데이터는 Mock (새로고침 시 리셋)
 - 브랜드 가이드: 문장 내 Ten:One™ 사용 필수
-- 로고: 첨부 이미지 파일 사용 (SVG 재현 금지)
 - 프로젝트 루트가 곧 Next.js 프로젝트
-- 로컬스토리지 캐시된 사용자 데이터 → 재로그인 시 새 권한 반영
+- SmarComm은 별도 프로젝트 (C:\Projects\SmarComm)

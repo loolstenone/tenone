@@ -89,7 +89,7 @@ export default function PeoplePage() {
                                 <td className="px-4 py-4 text-xs font-medium text-neutral-600">{person.type}</td>
                                 <td className="px-4 py-4 text-sm text-neutral-500">{person.company ?? '-'}</td>
                                 <td className="px-4 py-4 text-xs text-neutral-400">{person.source}</td>
-                                <td className="px-4 py-4"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{person.status}</span></td>
+                                <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{person.status}</span></td>
                                 <td className="px-4 py-4 text-xs text-neutral-400">{person.lastContacted ?? '-'}</td>
                             </tr>
                         ))}

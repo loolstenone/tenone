@@ -106,10 +106,10 @@ export default function ContactsPage() {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium mr-2">
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium mr-2">
                                         {contact.role}
                                     </span>
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                         {contact.status}
                                     </span>
                                 </td>
@@ -126,7 +126,7 @@ export default function ContactsPage() {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex flex-wrap gap-1">
                                         {contact.brandAssociation?.map(bId => (
-                                            <span key={bId} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                            <span key={bId} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                 {getBrandName(bId)}
                                             </span>
                                         ))}

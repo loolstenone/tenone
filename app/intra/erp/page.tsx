@@ -64,7 +64,7 @@ export default function ErpDashboard() {
                                             <p className="text-xs text-neutral-400">{staff.position}</p>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{staff.status}</span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{staff.status}</span>
                                 </div>
                             </li>
                         ))}
@@ -84,7 +84,7 @@ export default function ErpDashboard() {
                                     <p className="text-sm font-medium">{goal.title}</p>
                                     <p className="text-xs text-neutral-400 mt-0.5">{goal.period}</p>
                                 </div>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
+                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
                             </li>
                         ))}
                     </ul>

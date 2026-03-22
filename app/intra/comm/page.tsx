@@ -8,7 +8,7 @@ import Link from "next/link";
 const recentNotices = [
     { id: 1, title: "2026년 1분기 GPR 자기 평가 마감 안내", date: "2026-03-15", badge: "HR" },
     { id: 2, title: "MADLeague 인사이트 투어링 참가자 모집", date: "2026-03-10", badge: "중요" },
-    { id: 3, title: "Vrief 프레임워크 교육 일정 안내 (4월)", date: "2026-03-08", badge: "교육" },
+    { id: 3, title: "VRIEF 프레임워크 교육 일정 안내 (4월)", date: "2026-03-08", badge: "교육" },
 ];
 
 const recentFree = [
@@ -57,7 +57,7 @@ export default function CommPage() {
                         {recentNotices.map(n => (
                             <li key={n.id} className="px-6 py-3 hover:bg-neutral-50 cursor-pointer transition-colors">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{n.badge}</span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{n.badge}</span>
                                     <span className="text-xs text-neutral-400">{n.date}</span>
                                 </div>
                                 <p className="text-sm">{n.title}</p>
@@ -87,7 +87,7 @@ export default function CommPage() {
                                 <div className="w-px h-8 bg-neutral-200" />
                                 <div>
                                     <p className="text-sm">{ev.title}</p>
-                                    <p className="text-[10px] text-neutral-400">{ev.type}</p>
+                                    <p className="text-xs text-neutral-400">{ev.type}</p>
                                 </div>
                             </li>
                         ))}

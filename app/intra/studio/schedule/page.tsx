@@ -136,10 +136,10 @@ export default function SchedulePage() {
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                     {getBrandName(event.brandId)}
                                                 </span>
-                                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                     {event.type}
                                                 </span>
                                                 {event.time && (
@@ -153,7 +153,7 @@ export default function SchedulePage() {
                                             {event.description && <p className="text-sm text-neutral-500 mt-1">{event.description}</p>}
                                         </div>
                                         <div className="flex flex-col items-end justify-center">
-                                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                            <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                                 {event.status}
                                             </span>
                                         </div>

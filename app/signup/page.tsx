@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { validatePassword } from '@/lib/auth-data';
-import { UserPlus, Eye, EyeOff, User, Building2 } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, User, Building2, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { PublicHeader } from '@/components/PublicHeader';
+import { PublicFooter } from '@/components/PublicFooter';
 
 type AccountKind = 'personal' | 'business';
 
@@ -69,6 +71,7 @@ export default function SignupPage() {
     const [selectedWantToDo, setSelectedWantToDo] = useState<string[]>([]);
     const [selectedSource, setSelectedSource] = useState('');
     const [intro, setIntro] = useState('');
+    const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -95,17 +98,19 @@ export default function SignupPage() {
         setStep(2);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         setIsSubmitting(true);
-        setTimeout(() => {
-            const result = register(name, email, password);
+        try {
+            const result = await register(name, email, password, subscribeNewsletter);
             if (result.success) { router.push('/'); }
             else { setError(result.error || '회원가입에 실패했습니다.'); setIsSubmitting(false); setStep(1); }
-        }, 500);
+        } catch { setError('회원가입 중 오류가 발생했습니다.'); setIsSubmitting(false); setStep(1); }
     };
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center px-4 py-16">
+        <div className="min-h-screen bg-white flex flex-col">
+            <PublicHeader />
+            <div className="flex-1 flex items-center justify-center px-4 py-16 mt-16">
             <div className="w-full max-w-lg">
                 <div className="text-center mb-10">
                     <Link href="/" className="text-3xl font-bold tracking-wider hover:opacity-80 transition-opacity">Ten:One™</Link>
@@ -267,6 +272,27 @@ export default function SignupPage() {
                                         ))}
                                     </div>
                                 </div>
+                                {/* 뉴스레터 구독 */}
+                                <div className="border border-neutral-200 bg-neutral-50 p-4">
+                                    <div className="flex items-start gap-3">
+                                        <button type="button" onClick={() => setSubscribeNewsletter(!subscribeNewsletter)}
+                                            className={`mt-0.5 w-5 h-5 border-2 rounded flex items-center justify-center shrink-0 transition-colors ${
+                                                subscribeNewsletter ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 bg-white'
+                                            }`}>
+                                            {subscribeNewsletter && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                                        </button>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <Mail className="h-3.5 w-3.5 text-neutral-500" />
+                                                <span className="text-sm font-medium text-neutral-800">뉴스레터 구독</span>
+                                            </div>
+                                            <p className="text-xs text-neutral-500 leading-relaxed">
+                                                Ten:One™ Universe의 새로운 소식, 프로젝트 업데이트, 이벤트 초대를 이메일로 받아보세요.
+                                                <br />월 1~2회 발송되며, 언제든 구독 해지할 수 있습니다.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 mt-8">
@@ -293,6 +319,8 @@ export default function SignupPage() {
                     </div>
                 </div>
             </div>
+            </div>
+            <PublicFooter />
         </div>
     );
 }

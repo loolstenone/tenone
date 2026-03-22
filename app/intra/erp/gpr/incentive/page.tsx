@@ -62,7 +62,7 @@ export default function GPRIncentivePage() {
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
@@ -76,7 +76,7 @@ export default function GPRIncentivePage() {
                     {Object.entries(gradeToRate).map(([grade, rate]) => (
                         <div key={grade} className="flex-1 text-center bg-neutral-50 rounded p-2">
                             <p className="text-sm font-bold">{grade}</p>
-                            <p className="text-[10px] text-neutral-500">{rate}%</p>
+                            <p className="text-xs text-neutral-500">{rate}%</p>
                         </div>
                     ))}
                 </div>
@@ -104,14 +104,14 @@ export default function GPRIncentivePage() {
                                 <td className="p-3 text-neutral-500 text-xs">{i.position}</td>
                                 <td className="p-3 text-center">
                                     {i.gprGrade !== "-" ? (
-                                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${gradeColor(i.gprGrade)}`}>{i.gprGrade}</span>
+                                        <span className={`text-xs px-2 py-0.5 rounded font-bold ${gradeColor(i.gprGrade)}`}>{i.gprGrade}</span>
                                     ) : <span className="text-neutral-300">-</span>}
                                 </td>
                                 <td className="p-3 text-right text-neutral-600">{formatKRW(i.baseSalary)}</td>
                                 <td className="p-3 text-center">{i.incentiveRate > 0 ? `${i.incentiveRate}%` : "-"}</td>
                                 <td className="p-3 text-right font-medium">{formatKRW(i.incentiveAmount)}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[i.status]}`}>{i.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[i.status]}`}>{i.status}</span>
                                 </td>
                             </tr>
                         ))}

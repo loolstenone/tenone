@@ -23,8 +23,8 @@ export default function ProfessionalsPage() {
                                 <td className="px-6 py-4"><div className="flex items-center gap-3"><div className="h-8 w-8 rounded-full bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs font-bold">{p.avatarInitials}</div><div><p className="text-sm font-medium">{p.name}</p><p className="text-xs text-neutral-400">{p.email}</p></div></div></td>
                                 <td className="px-4 py-4 text-sm text-neutral-500">{p.company}</td>
                                 <td className="px-4 py-4 text-sm text-neutral-500">{p.position}</td>
-                                <td className="px-4 py-4"><div className="flex gap-1 flex-wrap">{p.tags.slice(0, 2).map(t => <span key={t} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{t}</span>)}</div></td>
-                                <td className="px-4 py-4"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{p.status}</span></td>
+                                <td className="px-4 py-4"><div className="flex gap-1 flex-wrap">{p.tags.slice(0, 2).map(t => <span key={t} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{t}</span>)}</div></td>
+                                <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{p.status}</span></td>
                             </tr>
                         ))}
                     </tbody>

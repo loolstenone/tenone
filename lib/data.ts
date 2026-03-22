@@ -300,7 +300,7 @@ export const contacts: Contact[] = [
 ];
 
 export const historyEvents: HistoryEvent[] = [
-    { id: 'h1', date: '2019-10-01', year: '2019', title: 'Ten:One Universe 시작', description: '"하마터면 열심히 안살 뻔 했다." 수첩 속 아이디어를 세상에 꺼내놓기로 결심.', brandId: 'tenone' },
+    { id: 'h1', date: '2019-10-01', year: '2019', title: 'Ten:One™ Universe 시작', description: '"하마터면 열심히 안살 뻔 했다." 수첩 속 아이디어를 세상에 꺼내놓기로 결심.', brandId: 'tenone' },
     { id: 'h2', date: '2020-03-01', year: '2020', title: '나라는 존재부터 정리하자', description: '내가 가진 강점, 그동안 해 왔던 일, 내가 하고자 하는 일 정리 시작.', brandId: 'tenone' },
     { id: 'h3', date: '2020-06-01', year: '2020', title: '직접 소통 채널 구축', description: '직군별, 직급별, 대학생, 테마별 40여개의 카카오 오픈채팅방으로 분화.', brandId: 'badak' },
     { id: 'h4', date: '2021-02-01', year: '2021', title: 'Badak 커뮤니티 본격화', description: '"업계 = 바닥, 바닥은 좁다. 그래서 네트워크가 강하게 작용한다."', brandId: 'badak' },

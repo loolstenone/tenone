@@ -62,7 +62,7 @@ export default function PayrollAdminPage() {
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
@@ -113,7 +113,7 @@ export default function PayrollAdminPage() {
                                     <td className="p-3 text-right text-neutral-400">{formatKRW(p.deductions)}</td>
                                     <td className="p-3 text-right font-medium">{formatKRW(p.net)}</td>
                                     <td className="p-3 text-center">
-                                        <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${
+                                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
                                             p.status === "지급완료" ? "bg-green-50 text-green-600" : "bg-neutral-100 text-neutral-500"
                                         }`}>{p.status}</span>
                                     </td>
@@ -161,7 +161,7 @@ export default function PayrollAdminPage() {
                                     <td className="p-3 font-medium">{r.name}</td>
                                     <td className="p-3 text-neutral-500 text-xs">{r.dept}</td>
                                     <td className="p-3 text-center">
-                                        <span className="text-[10px] px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{r.type}</span>
+                                        <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{r.type}</span>
                                     </td>
                                     <td className="p-3 text-right text-neutral-600">{formatKRW(r.monthly)}</td>
                                     <td className="p-3 text-right font-medium">{formatKRW(r.total)}</td>

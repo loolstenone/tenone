@@ -41,7 +41,7 @@ export default function RewardsPage() {
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
@@ -68,13 +68,13 @@ export default function RewardsPage() {
                                 <td className="p-3 font-medium">{r.period}</td>
                                 <td className="p-3 text-center">
                                     {r.grade !== "-" ? (
-                                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${gradeColor[r.grade] || ""}`}>{r.grade}</span>
+                                        <span className={`text-xs px-2 py-0.5 rounded font-bold ${gradeColor[r.grade] || ""}`}>{r.grade}</span>
                                     ) : "-"}
                                 </td>
                                 <td className="p-3 text-center text-neutral-500">{r.bonusRate}</td>
                                 <td className="p-3 text-right font-medium">{r.amount}</td>
                                 <td className="p-3 text-center">
-                                    <span className="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">{r.type}</span>
+                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">{r.type}</span>
                                 </td>
                             </tr>
                         ))}

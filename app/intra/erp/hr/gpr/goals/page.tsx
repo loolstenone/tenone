@@ -119,7 +119,7 @@ export default function GoalSettingPage() {
                                     <td className="px-4 py-3 text-xs font-mono text-neutral-400">{goal.level}</td>
                                     <td className="px-4 py-3">
                                         <p className="text-sm">{goal.title}</p>
-                                        {goal.dueDate && <p className="text-[10px] text-neutral-300">{goal.dueDate}</p>}
+                                        {goal.dueDate && <p className="text-xs text-neutral-300">{goal.dueDate}</p>}
                                     </td>
                                     <td className="px-4 py-3 text-xs text-neutral-500 max-w-[200px] truncate">{goal.kpi}</td>
                                     <td className="px-4 py-3 text-xs text-neutral-500">{goal.weight}%</td>
@@ -128,10 +128,10 @@ export default function GoalSettingPage() {
                                             <div className="w-16 h-1.5 bg-neutral-200 overflow-hidden">
                                                 <div className={`h-full ${goal.progress === 100 ? 'bg-neutral-900' : 'bg-neutral-900'}`} style={{ width: `${goal.progress}%` }} />
                                             </div>
-                                            <span className="text-[10px] text-neutral-400">{goal.progress}%</span>
+                                            <span className="text-xs text-neutral-400">{goal.progress}%</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span></td>
+                                    <td className="px-4 py-3"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span></td>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-1">
                                             {goal.status === 'Draft' && (

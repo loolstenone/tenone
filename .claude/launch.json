@@ -2,11 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dev",
+      "name": "tenone-dev",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
-      "port": 3000,
-      "cwd": "."
+      "runtimeArgs": ["./node_modules/next/dist/bin/next", "dev"],
+      "port": 3000
     }
   ]
 }

@@ -1,0 +1,40 @@
+-- ============================================
+-- 기존 테이블/타입 전부 삭제 (초기화)
+-- ============================================
+
+-- 테이블 삭제 (의존 순서)
+DROP TABLE IF EXISTS timesheet_weeks CASCADE;
+DROP TABLE IF EXISTS timesheets CASCADE;
+DROP TABLE IF EXISTS newsletter_subscribers CASCADE;
+DROP TABLE IF EXISTS point_logs CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS library_bookmarks CASCADE;
+DROP TABLE IF EXISTS library_items CASCADE;
+DROP TABLE IF EXISTS enrollments CASCADE;
+DROP TABLE IF EXISTS courses CASCADE;
+DROP TABLE IF EXISTS contents CASCADE;
+DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS post_comments CASCADE;
+DROP TABLE IF EXISTS posts CASCADE;
+DROP TABLE IF EXISTS approvals CASCADE;
+DROP TABLE IF EXISTS project_members CASCADE;
+DROP TABLE IF EXISTS jobs CASCADE;
+DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS members CASCADE;
+
+-- ENUM 타입 삭제
+DROP TYPE IF EXISTS account_type CASCADE;
+DROP TYPE IF EXISTS project_type CASCADE;
+DROP TYPE IF EXISTS project_status CASCADE;
+DROP TYPE IF EXISTS job_type CASCADE;
+DROP TYPE IF EXISTS job_detail CASCADE;
+DROP TYPE IF EXISTS job_status CASCADE;
+DROP TYPE IF EXISTS approval_status CASCADE;
+DROP TYPE IF EXISTS approval_factor CASCADE;
+DROP TYPE IF EXISTS board_type CASCADE;
+DROP TYPE IF EXISTS visibility_type CASCADE;
+DROP TYPE IF EXISTS content_status CASCADE;
+DROP TYPE IF EXISTS content_channel CASCADE;
+DROP TYPE IF EXISTS course_category CASCADE;
+DROP TYPE IF EXISTS enrollment_status CASCADE;
+DROP TYPE IF EXISTS point_grade CASCADE;

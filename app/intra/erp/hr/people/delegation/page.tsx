@@ -62,7 +62,7 @@ export default function DelegationPage() {
                                 <td className="p-3 text-xs text-neutral-500">{d.startDate} ~ {d.endDate}</td>
                                 <td className="p-3 text-neutral-500">{d.reason}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[d.status]}`}>{d.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[d.status]}`}>{d.status}</span>
                                 </td>
                             </tr>
                         ))}

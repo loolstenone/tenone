@@ -21,7 +21,7 @@ export default function ContentPage() {
                         <div key={ch} className="border border-neutral-200 bg-white p-4 text-center">
                             <p className="text-lg font-bold">{posts.length}</p>
                             <p className="text-xs text-neutral-500">{ch}</p>
-                            <p className="text-[10px] text-neutral-300">{published} published</p>
+                            <p className="text-xs text-neutral-300">{published} published</p>
                         </div>
                     );
                 })}
@@ -45,7 +45,7 @@ export default function ContentPage() {
                                 <td className="px-6 py-3 text-sm">{post.title}</td>
                                 <td className="px-4 py-3 text-xs font-medium text-neutral-500">{post.type}</td>
                                 <td className="px-4 py-3 text-xs text-neutral-500">{post.channel}</td>
-                                <td className="px-4 py-3"><span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{post.status}</span></td>
+                                <td className="px-4 py-3"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{post.status}</span></td>
                                 <td className="px-4 py-3 text-xs text-neutral-400">{post.publishDate ?? '-'}</td>
                                 <td className="px-4 py-3 text-xs text-neutral-500">{post.engagement ?? '-'}</td>
                             </tr>

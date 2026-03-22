@@ -5,6 +5,16 @@ import { useAuth } from "@/lib/auth-context";
 import { Plus, Pin, ChevronRight, X, Calendar } from "lucide-react";
 import clsx from "clsx";
 
+type AudienceType = '전체' | 'Staff' | 'Partner 이상' | 'Crew 이상' | 'Admin Only';
+const audienceOptions: AudienceType[] = ['전체', 'Staff', 'Partner 이상', 'Crew 이상', 'Admin Only'];
+const audienceBadge: Record<AudienceType, string> = {
+    '전체': 'bg-neutral-100 text-neutral-500',
+    'Staff': 'bg-blue-50 text-blue-600',
+    'Partner 이상': 'bg-amber-50 text-amber-600',
+    'Crew 이상': 'bg-green-50 text-green-600',
+    'Admin Only': 'bg-red-50 text-red-500',
+};
+
 interface NoticePost {
     id: string;
     title: string;
@@ -15,6 +25,7 @@ interface NoticePost {
     noticeStart?: string;
     noticeEnd?: string;
     badge?: string;
+    audience?: AudienceType;
 }
 
 function isNoticeActive(post: NoticePost): boolean {
@@ -39,7 +50,7 @@ const initialPosts: NoticePost[] = [
         noticeStart: '2026-03-10', noticeEnd: '2026-04-30',
     },
     {
-        id: 'n-3', title: 'Vrief 프레임워크 교육 일정 안내 (4월)',
+        id: 'n-3', title: 'VRIEF 프레임워크 교육 일정 안내 (4월)',
         body: '4월 교육 일정을 안내드립니다. Wiki > Education에서 상세 일정을 확인하세요.',
         author: 'Cheonil Jeon', date: '2026-03-08', badge: '교육',
         noticeStart: '2026-03-08', noticeEnd: '2026-04-30',
@@ -62,6 +73,7 @@ export default function NoticePage() {
     const [editorBadge, setEditorBadge] = useState('공지');
     const [editorNoticeStart, setEditorNoticeStart] = useState('');
     const [editorNoticeEnd, setEditorNoticeEnd] = useState('');
+    const [editorAudience, setEditorAudience] = useState<AudienceType>('전체');
 
     const visiblePosts = posts.filter(isNoticeActive);
     const sorted = [...visiblePosts].sort((a, b) => {
@@ -81,9 +93,10 @@ export default function NoticePage() {
             author: user?.name || 'Unknown', date: new Date().toISOString().split('T')[0],
             pinned: true, badge: editorBadge,
             noticeStart: editorNoticeStart, noticeEnd: editorNoticeEnd,
+            audience: editorAudience,
         };
         setPosts(prev => [newPost, ...prev]);
-        setEditorTitle(''); setEditorBody(''); setEditorNoticeStart(''); setEditorNoticeEnd('');
+        setEditorTitle(''); setEditorBody(''); setEditorNoticeStart(''); setEditorNoticeEnd(''); setEditorAudience('전체');
         setShowEditor(false);
     };
 
@@ -108,9 +121,12 @@ export default function NoticePage() {
                             <div className="flex items-center gap-2 mb-1">
                                 {post.pinned && <Pin className="h-3 w-3 text-neutral-900" />}
                                 {post.badge && (
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-neutral-900 text-white font-medium">{post.badge}</span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-900 text-white font-medium">{post.badge}</span>
                                 )}
                                 <span className="text-sm font-medium text-neutral-900 truncate">{post.title}</span>
+                                {post.audience && post.audience !== '전체' && (
+                                    <span className={`text-[10px] px-1.5 py-0.5 ${audienceBadge[post.audience]}`}>{post.audience}</span>
+                                )}
                             </div>
                             <div className="flex items-center gap-3 text-xs text-neutral-400">
                                 <span>{post.author}</span>
@@ -138,7 +154,7 @@ export default function NoticePage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     {selectedPost.badge && (
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-900 text-white font-medium">{selectedPost.badge}</span>
+                                        <span className="text-xs px-1.5 py-0.5 bg-neutral-900 text-white font-medium">{selectedPost.badge}</span>
                                     )}
                                     <span className="text-xs text-neutral-400">{selectedPost.date}</span>
                                 </div>
@@ -186,6 +202,17 @@ export default function NoticePage() {
                                 </div>
                             </div>
                             <div>
+                                <label className="text-sm font-medium text-neutral-700 block mb-1">공개 대상</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {audienceOptions.map(a => (
+                                        <button key={a} onClick={() => setEditorAudience(a)}
+                                            className={clsx("px-3 py-1.5 text-xs border transition-colors",
+                                                editorAudience === a ? "bg-neutral-900 text-white border-neutral-900" : "bg-white text-neutral-500 border-neutral-200"
+                                            )}>{a}</button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
                                 <label className="text-sm font-medium text-neutral-700 block mb-1">공지 기간 <span className="text-red-400">*</span></label>
                                 <div className="grid grid-cols-2 gap-2">
                                     <input type="date" value={editorNoticeStart} onChange={e => setEditorNoticeStart(e.target.value)}
@@ -193,7 +220,7 @@ export default function NoticePage() {
                                     <input type="date" value={editorNoticeEnd} onChange={e => setEditorNoticeEnd(e.target.value)}
                                         className="border border-neutral-200 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none" />
                                 </div>
-                                <p className="text-[10px] text-neutral-400 mt-1">기간 내에만 노출됩니다.</p>
+                                <p className="text-xs text-neutral-400 mt-1">기간 내에만 노출됩니다.</p>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-neutral-700 block mb-1">제목</label>

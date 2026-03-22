@@ -61,7 +61,7 @@ export default function TalentPoolPage() {
                     { label: "외부", value: `${mockTalents.filter(t => t.source === "외부").length}명` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -93,12 +93,12 @@ export default function TalentPoolPage() {
                                 <td className="p-3 font-medium">{t.name}</td>
                                 <td className="p-3 text-neutral-600">{t.specialty}</td>
                                 <td className="p-3">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${sourceColor[t.source]}`}>{t.source}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${sourceColor[t.source]}`}>{t.source}</span>
                                 </td>
                                 <td className="p-3">
                                     <div className="flex flex-wrap gap-1">
                                         {t.skills.slice(0, 3).map(s => (
-                                            <span key={s} className="text-[9px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">{s}</span>
+                                            <span key={s} className="text-[11px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">{s}</span>
                                         ))}
                                     </div>
                                 </td>
@@ -111,7 +111,7 @@ export default function TalentPoolPage() {
                                 </td>
                                 <td className="p-3 text-xs text-neutral-500">{t.lastContact}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[t.status]}`}>{t.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[t.status]}`}>{t.status}</span>
                                 </td>
                             </tr>
                         ))}

@@ -94,10 +94,10 @@ export default function WorkflowDashboard() {
                                 <p className="text-xs text-neutral-400 mt-1">{task.assignee || 'Unassigned'} · {task.brandId}</p>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                     {task.priority}
                                 </span>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
+                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">
                                     {task.status}
                                 </span>
                             </div>

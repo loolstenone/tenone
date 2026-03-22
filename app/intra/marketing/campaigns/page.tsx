@@ -40,7 +40,7 @@ export default function CampaignsPage() {
                                     <h3 className="text-sm font-semibold">{camp.name}</h3>
                                     <p className="text-xs mt-0.5 text-neutral-500">{camp.type}</p>
                                 </div>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{camp.status}</span>
+                                <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{camp.status}</span>
                             </div>
                             <p className="text-sm text-neutral-500">{camp.description}</p>
                             <div className="flex items-center gap-2 mt-3 text-xs text-neutral-400">
@@ -54,9 +54,9 @@ export default function CampaignsPage() {
                                 <div className="flex-1 h-1.5 bg-neutral-100 overflow-hidden">
                                     <div className="h-full bg-neutral-900" style={{ width: `${spendRate}%` }} />
                                 </div>
-                                <span className="text-[10px] text-neutral-400">₩{(camp.spent / 10000).toLocaleString()}만 / {(camp.budget / 10000).toLocaleString()}만</span>
+                                <span className="text-xs text-neutral-400">₩{(camp.spent / 10000).toLocaleString()}만 / {(camp.budget / 10000).toLocaleString()}만</span>
                             </div>
-                            <div className="flex gap-1 mt-3">{camp.channels.map(ch => <span key={ch} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{ch}</span>)}</div>
+                            <div className="flex gap-1 mt-3">{camp.channels.map(ch => <span key={ch} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{ch}</span>)}</div>
                         </div>
                     );
                 })}

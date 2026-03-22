@@ -43,7 +43,7 @@ export default function FamilyPage() {
                     { label: "건강보험 피부양자", value: `${family.filter(f => f.healthInsurance).length}명` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -60,7 +60,7 @@ export default function FamilyPage() {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-sm font-bold">{member.name}</h3>
-                                        <span className="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">{member.relation}</span>
+                                        <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">{member.relation}</span>
                                     </div>
                                     <p className="text-xs text-neutral-400 mt-0.5">생년월일: {member.birthDate}</p>
                                     {member.phone && <p className="text-xs text-neutral-400">연락처: {member.phone}</p>}
@@ -77,12 +77,12 @@ export default function FamilyPage() {
                         </div>
                         <div className="mt-3 flex items-center gap-4">
                             {member.isDependent && (
-                                <span className="flex items-center gap-1 text-[10px] text-blue-600">
+                                <span className="flex items-center gap-1 text-xs text-blue-600">
                                     <Shield className="h-3 w-3" /> 부양가족
                                 </span>
                             )}
                             {member.healthInsurance && (
-                                <span className="flex items-center gap-1 text-[10px] text-green-600">
+                                <span className="flex items-center gap-1 text-xs text-green-600">
                                     <Shield className="h-3 w-3" /> 건강보험 피부양자
                                 </span>
                             )}

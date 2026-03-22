@@ -175,7 +175,7 @@ export default function StaffRegisterPage() {
                                         : 'border-neutral-200 hover:border-neutral-400'
                                 }`}>
                                 <p className={`text-xs font-medium ${form.accessLevel.includes(opt.id as SystemAccess) ? 'text-neutral-900' : 'text-neutral-500'}`}>{opt.label}</p>
-                                <p className="text-[10px] text-neutral-400 mt-0.5">{opt.desc}</p>
+                                <p className="text-xs text-neutral-400 mt-0.5">{opt.desc}</p>
                             </button>
                         ))}
                     </div>

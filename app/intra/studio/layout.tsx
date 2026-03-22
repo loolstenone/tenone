@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { StudioShell } from "@/components/StudioShell";
 import { ShieldAlert } from "lucide-react";
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
@@ -38,5 +37,5 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
         );
     }
 
-    return <div className="h-full bg-neutral-50"><StudioShell>{children}</StudioShell></div>;
+    return <div className="h-full bg-neutral-50">{children}</div>;
 }

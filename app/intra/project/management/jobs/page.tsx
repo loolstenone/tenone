@@ -70,7 +70,7 @@ export default function JobsPage() {
                                 <td className="p-3 text-xs text-neutral-500">{j.startDate} ~ {j.endDate}</td>
                                 <td className="p-3 text-center">{j.hours}h</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[j.status]}`}>{j.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[j.status]}`}>{j.status}</span>
                                 </td>
                             </tr>
                         ))}

@@ -50,7 +50,7 @@ export default function PaymentPage() {
                     { label: "미지급 건수", value: `${mockPayments.filter(p => p.status === "미지급").length}건` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
-                        <p className="text-[10px] text-neutral-400 mb-1">{s.label}</p>
+                        <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
                 ))}
@@ -75,11 +75,11 @@ export default function PaymentPage() {
                                 <td className="p-3 text-neutral-600">{p.description}</td>
                                 <td className="p-3 text-right font-medium">{formatKRW(p.amount)}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded ${p.type === "정발행" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>{p.type}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded ${p.type === "정발행" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>{p.type}</span>
                                 </td>
                                 <td className="p-3 text-neutral-500 text-xs">{p.dueDate}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
                                 </td>
                             </tr>
                         ))}

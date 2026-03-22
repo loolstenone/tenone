@@ -78,11 +78,11 @@ export default function GprDashboardPage() {
                             {memberGoals.map(goal => (
                                 <li key={goal.id} className="px-6 py-3 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-mono text-neutral-300 w-14">{goal.level}</span>
+                                        <span className="text-xs font-mono text-neutral-300 w-14">{goal.level}</span>
                                         <p className="text-sm">{goal.title}</p>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
+                                        <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
                                         {goal.supervisorRating && (
                                             <span className="text-xs text-neutral-900">{goal.supervisorRating}/5</span>
                                         )}

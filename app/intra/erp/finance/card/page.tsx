@@ -83,11 +83,11 @@ export default function CardPage() {
                             <tr key={u.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                 <td className="p-3 text-neutral-500">{u.date}</td>
                                 <td className="p-3 font-medium">{u.merchant}</td>
-                                <td className="p-3"><span className="text-[10px] px-2 py-0.5 bg-neutral-100 rounded">{u.category}</span></td>
+                                <td className="p-3"><span className="text-xs px-2 py-0.5 bg-neutral-100 rounded">{u.category}</span></td>
                                 <td className="p-3 text-right font-medium">{formatKRW(u.amount)}</td>
                                 <td className="p-3 text-center text-xs text-neutral-400">****{u.cardLast4}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${u.approved ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"}`}>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${u.approved ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"}`}>
                                         {u.approved ? "완료" : "미정산"}
                                     </span>
                                 </td>

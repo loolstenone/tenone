@@ -10,7 +10,7 @@ interface MockAccount {
 const staffAccounts: MockAccount[] = [
     {
         email: 'lools@tenone.biz',
-        password: 'ilove2ne1**',
+        password: 'Test1234!',
         user: {
             id: 'u1', name: 'Cheonil Jeon', email: 'lools@tenone.biz',
             role: 'Admin', accountType: 'staff', avatarInitials: 'CJ',
@@ -21,7 +21,7 @@ const staffAccounts: MockAccount[] = [
     },
     {
         email: 'manager@tenone.com',
-        password: 'tenone1234',
+        password: 'Test1234!',
         user: {
             id: 'u2', name: 'Sarah Kim', email: 'manager@tenone.com',
             role: 'Manager', accountType: 'staff', avatarInitials: 'SK',
@@ -32,7 +32,7 @@ const staffAccounts: MockAccount[] = [
     },
     {
         email: 'official@madleap.co.kr',
-        password: '12345678',
+        password: 'Test1234!',
         user: {
             id: 'u3', name: '김준호', email: 'official@madleap.co.kr',
             role: 'Editor', accountType: 'staff', avatarInitials: 'JH',
@@ -46,24 +46,64 @@ const staffAccounts: MockAccount[] = [
 // Pre-registered member test accounts
 const defaultMembers: MockAccount[] = [
     {
-        email: 'cheonil.jeon@gmail.com',
-        password: '12345678',
+        email: 'member@test.com',
+        password: 'Test1234!',
         user: {
-            id: 'm1', name: '전천일', email: 'cheonil.jeon@gmail.com',
-            role: 'Member', accountType: 'member', avatarInitials: '천일',
+            id: 'm1', name: '김회원', email: 'member@test.com',
+            role: 'Member', accountType: 'member', avatarInitials: '김',
             brandAccess: [], systemAccess: [], createdAt: '2025-03-15',
-            phone: '010-2795-1001', bio: '마케팅·광고 20년차, Ten:One™ Universe 탐험가',
+            phone: '010-0000-0030',
+            bio: '일반 회원 — Ten:One™ Universe 뉴스레터 구독자',
         },
     },
+];
+
+// Partner accounts (external partners)
+const partnerAccounts: MockAccount[] = [
     {
-        email: 'lools@kakao.com',
-        password: '12345678',
+        email: 'partner@test.com',
+        password: 'Test1234!',
         user: {
-            id: 'm2', name: '전천일', email: 'lools@kakao.com',
-            role: 'Member', accountType: 'member', avatarInitials: '천일',
-            brandAccess: [], systemAccess: [], createdAt: '2025-03-15',
-            company: 'Ten:One™', phone: '010-2795-1001',
-            bio: 'Ten:One™ Universe 기업 파트너',
+            id: 'pt1', name: '박파트너', email: 'partner@test.com',
+            role: 'Editor', accountType: 'partner', avatarInitials: '박',
+            brandAccess: ['badak'],
+            systemAccess: ['project', 'wiki'],
+            createdAt: '2025-06-01',
+            company: 'Creative Studio', phone: '010-0000-0010',
+            bio: '외부 파트너 — Badak 네트워크 소속 크리에이티브 디렉터',
+        },
+    },
+];
+
+// Junior Partner accounts
+const juniorPartnerAccounts: MockAccount[] = [
+    {
+        email: 'junior@test.com',
+        password: 'Test1234!',
+        user: {
+            id: 'jp1', name: '이주니어', email: 'junior@test.com',
+            role: 'Viewer', accountType: 'junior-partner', avatarInitials: '이',
+            brandAccess: ['madleague'],
+            systemAccess: ['wiki'],
+            createdAt: '2026-01-15',
+            company: 'Freelance', phone: '010-0000-0020',
+            bio: '주니어 파트너 — MAD League 출신 프리랜서 마케터',
+        },
+    },
+];
+
+// Crew accounts (invited via /invite)
+const crewAccounts: MockAccount[] = [
+    {
+        email: 'crew@test.com',
+        password: 'Test1234!',
+        user: {
+            id: 'c1', name: '강리더', email: 'crew@test.com',
+            role: 'Viewer', accountType: 'crew', avatarInitials: '강',
+            brandAccess: ['madleap', 'madleague'],
+            systemAccess: ['wiki'],
+            createdAt: '2026-03-01',
+            bio: 'MADLeap 5기 회장',
         },
     },
 ];
@@ -101,13 +141,13 @@ export function validatePassword(password: string): { valid: boolean; error?: st
 }
 
 export function validateCredentials(email: string, password: string): User | null {
-    const allAccounts = [...staffAccounts, ...getMembers()];
+    const allAccounts = [...staffAccounts, ...partnerAccounts, ...juniorPartnerAccounts, ...crewAccounts, ...getMembers()];
     const account = allAccounts.find(a => a.email === email && a.password === password);
     return account?.user ?? null;
 }
 
-export function registerMember(name: string, email: string, password: string, company?: string): { success: boolean; error?: string; user?: User } {
-    const allAccounts = [...staffAccounts, ...getMembers()];
+export function registerMember(name: string, email: string, password: string, company?: string, newsletterSubscribed?: boolean): { success: boolean; error?: string; user?: User } {
+    const allAccounts = [...staffAccounts, ...partnerAccounts, ...juniorPartnerAccounts, ...crewAccounts, ...getMembers()];
     if (allAccounts.some(a => a.email === email)) {
         return { success: false, error: '이미 등록된 이메일입니다.' };
     }
@@ -121,6 +161,7 @@ export function registerMember(name: string, email: string, password: string, co
         role: 'Member', accountType: 'member', avatarInitials: initials,
         brandAccess: [], systemAccess: [], createdAt: new Date().toISOString().split('T')[0],
         company: company || undefined,
+        newsletterSubscribed: newsletterSubscribed ?? false,
     };
 
     const members = getMembers();

@@ -29,7 +29,7 @@ const mockData: StaffEducation[] = [
 ];
 
 // 필수과정 이수 현황
-const mandatoryCourses = ["VRIEF Orientation", "GPR 프레임워크 이해", "Mind Set: 본질·속도·이행", "Ten:One Universe 세계관 입문", "정보보안 & 개인정보보호", "직장 내 괴롭힘 예방 교육"];
+const mandatoryCourses = ["VRIEF Orientation", "GPR 프레임워크 이해", "Mind Set: 본질·속도·이행", "Ten:One™ Universe 세계관 입문", "정보보안 & 개인정보보호", "직장 내 괴롭힘 예방 교육"];
 const staffNames = [...new Set(mockData.map(d => d.name))];
 
 const categoryColor: Record<string, string> = {
@@ -90,7 +90,7 @@ export default function EducationAdminPage() {
                     <div key={s.label} className={`border bg-white p-4 ${s.highlight ? 'border-red-200' : 'border-neutral-200'}`}>
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className={`h-3.5 w-3.5 ${s.highlight ? 'text-red-500' : 'text-neutral-400'}`} />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <p className={`text-lg font-bold ${s.highlight ? 'text-red-600' : ''}`}>{s.value}</p>
                     </div>
@@ -147,15 +147,15 @@ export default function EducationAdminPage() {
                                 <td className="p-3">
                                     <div className="flex items-center gap-2">
                                         <span>{e.courseName}</span>
-                                        {e.mandatory && <span className="text-[9px] px-1 py-0.5 bg-red-50 text-red-500 rounded">필수</span>}
+                                        {e.mandatory && <span className="text-[11px] px-1 py-0.5 bg-red-50 text-red-500 rounded">필수</span>}
                                     </div>
                                 </td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${categoryColor[e.category]}`}>{e.category}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${categoryColor[e.category]}`}>{e.category}</span>
                                 </td>
                                 <td className="p-3 text-center text-neutral-600">{e.hours}h</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
                                 </td>
                             </tr>
                         ))}

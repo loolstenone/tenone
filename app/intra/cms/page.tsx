@@ -242,7 +242,7 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                         </div>
                                         <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button type="button" onClick={() => fileInputRef.current?.click()}
-                                                className="px-1.5 py-0.5 bg-white/90 border border-neutral-200 text-neutral-500 hover:text-neutral-900 shadow-sm text-[9px]">
+                                                className="px-1.5 py-0.5 bg-white/90 border border-neutral-200 text-neutral-500 hover:text-neutral-900 shadow-sm text-[11px]">
                                                 변경
                                             </button>
                                             <button type="button" onClick={() => setForm(p => ({ ...p, image: undefined }))}
@@ -257,9 +257,9 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                             <img src={effectiveImage} alt="자동 썸네일" className="w-full h-full object-cover" />
                                         </div>
                                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 rounded">
-                                            <p className="text-[9px] text-white bg-black/50 px-2 py-0.5 rounded mb-1">본문 이미지 사용 중</p>
+                                            <p className="text-[11px] text-white bg-black/50 px-2 py-0.5 rounded mb-1">본문 이미지 사용 중</p>
                                             <button type="button" onClick={() => fileInputRef.current?.click()}
-                                                className="text-[9px] text-white bg-black/50 px-2 py-0.5 rounded hover:bg-black/70">
+                                                className="text-[11px] text-white bg-black/50 px-2 py-0.5 rounded hover:bg-black/70">
                                                 직접 설정
                                             </button>
                                         </div>
@@ -268,8 +268,8 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                     <button type="button" onClick={() => fileInputRef.current?.click()}
                                         className="w-full h-full min-h-[80px] bg-neutral-50 border border-dashed border-neutral-200 flex flex-col items-center justify-center gap-1 hover:border-neutral-400 hover:bg-neutral-100 transition-colors cursor-pointer rounded">
                                         <ImagePlus className="h-5 w-5 text-neutral-300" />
-                                        <p className="text-[10px] text-neutral-400">대표 이미지</p>
-                                        <p className="text-[9px] text-neutral-300">또는 본문 첫 이미지 자동 사용</p>
+                                        <p className="text-xs text-neutral-400">대표 이미지</p>
+                                        <p className="text-[11px] text-neutral-300">또는 본문 첫 이미지 자동 사용</p>
                                     </button>
                                 )}
                             </div>
@@ -298,9 +298,9 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                 <ToolbarBtn icon={Link2} label="링크 삽입" onClick={insertLink} />
                                 <ToolbarBtn icon={ImagePlus} label="이미지 삽입" onClick={() => bodyImageRef.current?.click()} />
                                 <div className="w-px h-5 bg-neutral-200 mx-1" />
-                                <ToolbarBtn icon={({ className }) => <span className={clsx(className, "text-[10px]")}>―</span>}
+                                <ToolbarBtn icon={({ className }) => <span className={clsx(className, "text-xs")}>―</span>}
                                     label="구분선" onClick={insertDivider} />
-                                <span className="ml-auto text-[10px] text-neutral-300 px-2">Markdown</span>
+                                <span className="ml-auto text-xs text-neutral-300 px-2">Markdown</span>
                             </div>
                             {/* Textarea */}
                             <textarea ref={bodyRef} value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value }))}
@@ -395,7 +395,7 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                     {tagInput && (
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {tagInput.split(',').map(t => t.trim()).filter(Boolean).map(tag => (
-                                                <span key={tag} className="text-[10px] px-2 py-0.5 bg-neutral-200 text-neutral-600">{tag}</span>
+                                                <span key={tag} className="text-xs px-2 py-0.5 bg-neutral-200 text-neutral-600">{tag}</span>
                                             ))}
                                         </div>
                                     )}
@@ -410,7 +410,7 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                     <div className="flex items-center gap-1 text-xs text-neutral-400 mb-1">
                                         <Link2 className="h-3 w-3" /> /works/{form.id}
                                     </div>
-                                    <p className="text-[10px] text-neutral-400">자동 생성됩니다.</p>
+                                    <p className="text-xs text-neutral-400">자동 생성됩니다.</p>
                                 </div>
                                 <div>
                                     <label className={labelClass}>검색 엔진 미리보기</label>
@@ -424,7 +424,7 @@ function PostEditor({ post, onSave, onCancel }: { post?: CmsPost | null; onSave:
                                     <label className={labelClass}>메타 설명</label>
                                     <textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))}
                                         className={inputClass + " resize-none"} rows={3} placeholder="검색 결과에 표시될 설명" />
-                                    <p className="text-[10px] text-neutral-400 mt-1">{form.summary.length}/160자</p>
+                                    <p className="text-xs text-neutral-400 mt-1">{form.summary.length}/160자</p>
                                 </div>
                             </>
                         )}
@@ -637,7 +637,7 @@ export default function CmsPage() {
                         {/* Channels */}
                         <div className="flex gap-1 flex-wrap">
                             {post.channels.map(ch => (
-                                <span key={ch} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{channelLabels[ch]}</span>
+                                <span key={ch} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{channelLabels[ch]}</span>
                             ))}
                         </div>
 
@@ -645,7 +645,7 @@ export default function CmsPage() {
                         <span className="text-xs text-neutral-400">{post.date}</span>
 
                         {/* Status */}
-                        <span className={clsx("text-[10px] text-center px-2 py-0.5 font-medium",
+                        <span className={clsx("text-xs text-center px-2 py-0.5 font-medium",
                             post.status === 'Published' ? 'bg-neutral-900 text-white' :
                             post.status === 'Draft' ? 'bg-neutral-200 text-neutral-600' :
                             'bg-neutral-100 text-neutral-400'

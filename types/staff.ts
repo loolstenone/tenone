@@ -1,7 +1,9 @@
 export type StaffRole = 'Admin' | 'Manager' | 'Editor' | 'Viewer';
 export type StaffStatus = 'Active' | 'On Leave' | 'Resigned';
 
-export type SystemAccess = 'office' | 'project' | 'erp-hr' | 'erp-finance' | 'erp-admin' | 'marketing' | 'wiki';
+// SystemAccess는 types/auth.ts에서 가져옴 — 중복 정의 방지
+import type { SystemAccess } from './auth';
+export type { SystemAccess };
 
 export type Division = 'Management' | 'Business' | 'Production' | 'Support';
 

@@ -28,7 +28,7 @@ const mockGprGoals: GprGoal[] = [
     { id: 'g2', title: 'MADLeague 인사이트 투어링 성공적 운영', type: 'Quarterly', status: 'In Progress', progress: 60, description: '영양군 지역 활동가와 학생 연계 프로그램 실행', dueDate: '2025-10-15' },
     { id: 'g3', title: 'LUKI 데뷔 캠페인 완료', type: 'Quarterly', status: 'Completed', progress: 100, description: 'AI 4인조 걸그룹 LUKI 공식 데뷔 및 콘텐츠 배포' },
     { id: 'g4', title: '주간 콘텐츠 파이프라인 운영', type: 'Personal', status: 'In Progress', progress: 70, description: 'Badak, MADLeague, FWN 채널 주기적 콘텐츠 발행' },
-    { id: 'g5', title: 'Vrief 프레임워크 매드리그 교육 적용', type: 'Quarterly', status: 'In Progress', progress: 40, description: '매드리그 대학생 대상 Vrief 3Step 교육 프로그램 운영' },
+    { id: 'g5', title: 'VRIEF 프레임워크 매드리그 교육 적용', type: 'Quarterly', status: 'In Progress', progress: 40, description: '매드리그 대학생 대상 VRIEF 3Step 교육 프로그램 운영' },
 ];
 
 export default function StaffDetailPage() {
@@ -71,14 +71,14 @@ export default function StaffDetailPage() {
                     <p className="text-sm text-neutral-500">{member.position} · {member.department}</p>
                     <div className="flex items-center gap-2 mt-2">
                         <span className="text-xs font-mono text-neutral-400">{member.employeeId}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span>
+                        <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span>
                         <span className="text-xs text-neutral-300">{member.accessLevel.join(', ')}</span>
                     </div>
                     {member.brandAssociation.length > 0 && (
                         <div className="flex gap-1 mt-2">
                             {member.brandAssociation.map(b => {
                                 const brand = brandOptions.find(bo => bo.id === b);
-                                return <span key={b} className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{brand?.name ?? b}</span>;
+                                return <span key={b} className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{brand?.name ?? b}</span>;
                             })}
                         </div>
                     )}
@@ -179,7 +179,7 @@ export default function StaffDetailPage() {
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <h4 className="text-sm font-medium">{goal.title}</h4>
-                                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
+                                                        <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{goal.status}</span>
                                                     </div>
                                                     <p className="text-sm text-neutral-500 mt-1">{goal.description}</p>
                                                 </div>

@@ -36,7 +36,7 @@ export default function ActivitiesPage() {
                                     <div className="flex items-center gap-3 mt-2 text-xs text-neutral-400">
                                         {person && <span>👤 {person.name}</span>}
                                         {org && <span>🏢 {org.name}</span>}
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{act.type}</span>
+                                        <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500">{act.type}</span>
                                     </div>
                                 </div>
                             </div>

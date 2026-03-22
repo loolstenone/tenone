@@ -45,7 +45,7 @@ export const timelineData: UniverseTimelineItem[] = [
 
 // Simple coordinate mapping for a static SVG graph
 export const universeNodes: UniverseNode[] = [
-    { id: "tenone", label: "Ten:One", group: "Core", x: 400, y: 300 },
+    { id: "tenone", label: "Ten:One™", group: "Core", x: 400, y: 300 },
     { id: "luki", label: "LUKI", group: "Branch", x: 400, y: 150 },
     { id: "rook", label: "RooK", group: "Branch", x: 600, y: 200 },
     { id: "badak", label: "Badak", group: "Branch", x: 200, y: 400 },

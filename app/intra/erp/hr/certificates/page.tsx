@@ -40,14 +40,14 @@ export default function CertificatesPage() {
                                 <FileCheck className="h-5 w-5 text-neutral-400" />
                                 <div>
                                     <h3 className="text-sm font-bold">{cert.type}</h3>
-                                    <p className="text-[10px] text-neutral-400 mt-0.5">{cert.description}</p>
+                                    <p className="text-xs text-neutral-400 mt-0.5">{cert.description}</p>
                                 </div>
                             </div>
                             <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all opacity-0 group-hover:opacity-100">
                                 <Download className="h-3 w-3" /> 발급
                             </button>
                         </div>
-                        <div className="mt-3 flex items-center gap-4 text-[10px] text-neutral-400">
+                        <div className="mt-3 flex items-center gap-4 text-xs text-neutral-400">
                             {cert.lastIssued && <span>최근 발급: {cert.lastIssued}</span>}
                             <span>발급 횟수: {cert.issueCount}회</span>
                         </div>

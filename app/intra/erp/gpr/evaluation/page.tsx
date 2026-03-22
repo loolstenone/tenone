@@ -51,7 +51,7 @@ export default function GPREvaluationPage() {
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
                             <s.icon className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-[10px] text-neutral-400">{s.label}</span>
+                            <span className="text-xs text-neutral-400">{s.label}</span>
                         </div>
                         <p className="text-lg font-bold">{s.value}</p>
                     </div>
@@ -91,17 +91,17 @@ export default function GPREvaluationPage() {
                                 <td className="p-3 text-center">{e.managerRate !== null ? `${e.managerRate}%` : "-"}</td>
                                 <td className="p-3 text-center font-bold">{e.finalGrade || "-"}</td>
                                 <td className="p-3 text-center">
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
                                 </td>
                                 <td className="p-3 text-center">
                                     {e.status === "자기평가완료" && (
-                                        <button className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">매니저 평가</button>
+                                        <button className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">매니저 평가</button>
                                     )}
                                     {e.status === "매니저평가중" && (
-                                        <button className="text-[10px] px-2 py-0.5 bg-green-50 text-green-600 rounded hover:bg-green-100">등급 확정</button>
+                                        <button className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded hover:bg-green-100">등급 확정</button>
                                     )}
                                     {e.status === "미제출" && (
-                                        <button className="text-[10px] px-2 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100">독촉</button>
+                                        <button className="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100">독촉</button>
                                     )}
                                 </td>
                             </tr>

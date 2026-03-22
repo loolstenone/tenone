@@ -50,13 +50,13 @@ export default function ExpenseRequestPage() {
                                 <div className="flex items-center gap-2 mb-1">
                                     <FileText className="h-4 w-4 text-neutral-400" />
                                     <h3 className="text-sm font-bold">{r.title}</h3>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${statusColor[r.status]}`}>{r.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[r.status]}`}>{r.status}</span>
                                 </div>
                                 <p className="text-xs text-neutral-500">{r.purpose}</p>
                             </div>
                             <p className="text-lg font-bold">{formatKRW(r.totalAmount)}</p>
                         </div>
-                        <div className="mt-3 flex items-center gap-4 text-[10px] text-neutral-400">
+                        <div className="mt-3 flex items-center gap-4 text-xs text-neutral-400">
                             <span>신청일: {r.date}</span>
                             <span>항목: {r.items}건</span>
                             <span>결재자: {r.approver}</span>
