@@ -196,6 +196,10 @@ const modules: NavModule[] = [
         ],
     },
     {
+        name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp, intraModule: 'project' as IntraModule,
+        sections: [],
+    },
+    {
         name: "ERP", href: "/intra/erp", icon: Building2, access: "erp-hr", intraModule: 'erp' as IntraModule,
         sections: [
             {

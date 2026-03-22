@@ -35,7 +35,7 @@
 - docs/CURRENT_STATUS.md 생성 (현황 + v3 아키텍처 통합)
 
 ## 현재 진행 중
-- Phase 1 전체 완료. Phase 2 시작 전.
+- Phase 1 전체 완료 + Vercel 배포 완료. Phase 2 시작 전.
 
 ## 완료된 Phase 1 (백엔드 기반)
 - **1-1. Supabase 셋업**: DB 15개 테이블, RLS, 인덱스, 패키지, 환경변수
@@ -46,10 +46,18 @@
 - npm run build 에러 0개
 
 ## 다음에 할 일
-- [ ] Phase 2: 신규 모듈 (Opportunity, Partner Pool, BI, 포인트)
+- [ ] Phase 2-1: Opportunity 모듈 (AI 크롤링, 기회 DB, 파이프라인)
+- [ ] Phase 2-2: Partner Pool 모듈 (협력사/프리랜서)
+- [ ] Phase 2-3: 포인트 시스템 (Bronze~Diamond)
+- [ ] Phase 2-4: BI Dashboard (전체 사업 현황)
 - [ ] 각 페이지 Mock Context → API 호출 점진적 전환
-- [ ] Vercel 배포 연동
+- [ ] tenone.biz 도메인 연결 (운영 준비 완료 후)
 - [ ] SmarComm Phase 1 MVP 개발
+
+## Vercel 배포 정보
+- URL: https://tenone.vercel.app (비공개, 도메인 미연결)
+- 자동 배포: git push origin master → 자동 빌드+배포
+- 환경변수: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY 설정됨
 
 ## 주의사항
 - Tailwind CSS v4 사용 중
