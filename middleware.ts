@@ -6,6 +6,8 @@ const domainSiteMap: Record<string, string> = {
     'www.madleague.net': 'madleague',
     'youinone.com': 'youinone',
     'www.youinone.com': 'youinone',
+    'smarcomm.co.kr': 'smarcomm',
+    'www.smarcomm.co.kr': 'smarcomm',
     // 추후 추가: 'luki.ai': 'luki', 'rook.co.kr': 'rook', 'badak.biz': 'badak'
 };
 
@@ -53,6 +55,26 @@ export function middleware(request: NextRequest) {
         // YouInOne 도메인 → /yi/ 프리픽스로 내부 리라이트
         const url = request.nextUrl.clone();
         url.pathname = `/yi${pathname === '/' ? '' : pathname}`;
+        return NextResponse.rewrite(url);
+    }
+
+    if (siteId === 'smarcomm') {
+        const pathname = request.nextUrl.pathname;
+
+        if (
+            pathname.startsWith('/intra') ||
+            pathname.startsWith('/api') ||
+            pathname.startsWith('/_next') ||
+            pathname.startsWith('/login') ||
+            pathname.startsWith('/signup') ||
+            pathname.includes('.')
+        ) {
+            return NextResponse.next();
+        }
+
+        // SmarComm 도메인 → /sc/ 프리픽스로 내부 리라이트
+        const url = request.nextUrl.clone();
+        url.pathname = `/sc${pathname === '/' ? '' : pathname}`;
         return NextResponse.rewrite(url);
     }
 

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm';
 
 interface SiteConfig {
     id: SiteIdentifier;
@@ -45,6 +45,11 @@ const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         accentColor: '#2563EB', bgDark: '#1a1a2e',
         homePath: '/', signupPath: '/signup',
     },
+    smarcomm: {
+        id: 'smarcomm', name: 'SmarComm.', logo: 'SmarComm.',
+        accentColor: '#3B82F6', bgDark: '#0A0E1A',
+        homePath: '/sc', signupPath: '/signup',
+    },
 };
 
 // 도메인 → 사이트 매핑
@@ -59,6 +64,8 @@ const domainMap: Record<string, SiteIdentifier> = {
     'www.youinone.com': 'youinone',
     'badak.biz': 'badak',
     'www.badak.biz': 'badak',
+    'smarcomm.co.kr': 'smarcomm',
+    'www.smarcomm.co.kr': 'smarcomm',
 };
 
 interface SiteContextType {
