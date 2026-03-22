@@ -96,11 +96,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Auth 상태 변경 리스너
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (session?.user) {
-                const { data: member } = await supabase
+                // members 테이블에서 프로필 조회
+                let { data: member } = await supabase
                     .from('members')
                     .select('*')
                     .eq('auth_id', session.user.id)
                     .single();
+
+                // 소셜 로그인으로 처음 가입한 경우 → 자동 프로필 생성
+                if (!member) {
+                    const userName = session.user.user_metadata?.full_name
+                        || session.user.user_metadata?.name
+                        || session.user.email?.split('@')[0]
+                        || '사용자';
+                    const initials = userName.substring(0, 2).toUpperCase();
+                    const { data: newMember } = await supabase
+                        .from('members')
+                        .insert({
+                            auth_id: session.user.id,
+                            email: session.user.email || '',
+                            name: userName,
+                            account_type: 'member',
+                            avatar_initials: initials,
+                            role: 'Member',
+                        })
+                        .select()
+                        .single();
+                    member = newMember;
+                }
+
                 if (member) {
                     const u = memberToUser(member);
                     setUser(u);
