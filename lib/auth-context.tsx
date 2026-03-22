@@ -112,11 +112,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || 'no user');
             if (session?.user) {
                 // members 테이블에서 프로필 조회
-                let { data: member } = await supabase
+                let { data: member, error: memberErr } = await supabase
                     .from('members')
                     .select('*')
                     .eq('auth_id', session.user.id)
                     .single();
+                console.log('[Auth] members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
 
                 // 소셜 로그인으로 처음 가입한 경우 → 자동 프로필 생성
                 if (!member) {
@@ -162,12 +163,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) console.error('[Auth] Supabase login error:', error.message);
             if (!error && data.user) {
+                console.log('[Auth] Supabase login success:', data.user.email);
                 // members 테이블에서 프로필 조회
-                const { data: member } = await supabase
+                const { data: member, error: memberErr } = await supabase
                     .from('members')
                     .select('*')
                     .eq('auth_id', data.user.id)
                     .single();
+                console.log('[Auth] login members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
 
                 if (member) {
                     const u = memberToUser(member);
