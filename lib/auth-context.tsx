@@ -69,7 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         async function init() {
             try {
-                // 1. Supabase Auth 세션 확인
+                // OAuth 콜백: URL에 code가 있으면 세션 교환
+                if (typeof window !== 'undefined') {
+                    const params = new URLSearchParams(window.location.search);
+                    const code = params.get('code');
+                    if (code) {
+                        await supabase.auth.exchangeCodeForSession(code);
+                        // URL에서 code 파라미터 제거
+                        window.history.replaceState({}, '', window.location.pathname);
+                    }
+                }
+
+                // Supabase Auth 세션 확인
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
                     // members 테이블에서 프로필 조회
