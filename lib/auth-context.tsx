@@ -109,46 +109,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Auth 상태 변경 리스너
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || 'no user');
-            if (session?.user) {
-                // members 테이블에서 프로필 조회
-                let { data: member, error: memberErr } = await supabase
-                    .from('members')
-                    .select('*')
-                    .eq('auth_id', session.user.id)
-                    .single();
-                console.log('[Auth] members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
-
-                // 소셜 로그인으로 처음 가입한 경우 → 자동 프로필 생성
-                if (!member) {
-                    const userName = session.user.user_metadata?.full_name
-                        || session.user.user_metadata?.name
-                        || session.user.email?.split('@')[0]
-                        || '사용자';
-                    const initials = userName.substring(0, 2).toUpperCase();
-                    const { data: newMember } = await supabase
+            try {
+                console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || 'no user');
+                if (session?.user) {
+                    // members 테이블에서 프로필 조회
+                    let { data: member, error: memberErr } = await supabase
                         .from('members')
-                        .insert({
-                            auth_id: session.user.id,
-                            email: session.user.email || '',
-                            name: userName,
-                            account_type: 'member',
-                            avatar_initials: initials,
-                            role: 'Member',
-                        })
-                        .select()
+                        .select('*')
+                        .eq('auth_id', session.user.id)
                         .single();
-                    member = newMember;
-                }
+                    console.log('[Auth] members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
 
-                if (member) {
-                    const u = memberToUser(member);
-                    setUser(u);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                    // 소셜 로그인으로 처음 가입한 경우 → 자동 프로필 생성
+                    if (!member) {
+                        const userName = session.user.user_metadata?.full_name
+                            || session.user.user_metadata?.name
+                            || session.user.email?.split('@')[0]
+                            || '사용자';
+                        const initials = userName.substring(0, 2).toUpperCase();
+                        const { data: newMember, error: insertErr } = await supabase
+                            .from('members')
+                            .insert({
+                                auth_id: session.user.id,
+                                email: session.user.email || '',
+                                name: userName,
+                                account_type: 'member',
+                                avatar_initials: initials,
+                                role: 'Member',
+                            })
+                            .select()
+                            .single();
+                        console.log('[Auth] member insert:', newMember ? 'ok' : 'failed', insertErr?.message || '');
+                        member = newMember;
+                    }
+
+                    if (member) {
+                        const u = memberToUser(member);
+                        setUser(u);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                        console.log('[Auth] user set:', u.email, u.role);
+                    } else {
+                        // members 조회/생성 실패해도 최소 로그인은 처리
+                        const fallbackUser: User = {
+                            id: session.user.id,
+                            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '사용자',
+                            email: session.user.email || '',
+                            role: 'Member' as const,
+                            accountType: 'member' as const,
+                            avatarInitials: (session.user.email?.substring(0, 2) || 'U').toUpperCase(),
+                            brandAccess: [],
+                            systemAccess: [],
+                        };
+                        setUser(fallbackUser);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackUser));
+                        console.log('[Auth] fallback user set:', fallbackUser.email);
+                    }
+                } else if (_event === 'SIGNED_OUT') {
+                    setUser(null);
+                    localStorage.removeItem(STORAGE_KEY);
                 }
-            } else if (_event === 'SIGNED_OUT') {
-                setUser(null);
-                localStorage.removeItem(STORAGE_KEY);
+            } catch (err) {
+                console.error('[Auth] onAuthStateChange error:', err);
             }
         });
 
