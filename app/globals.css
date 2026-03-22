@@ -10,6 +10,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* SmarComm Design System Colors */
+  --color-bg: #FFFFFF;
+  --color-surface: #F8F9FB;
+  --color-card: #FFFFFF;
+  --color-card-hover: #F3F4F6;
+  --color-border: #E5E7EB;
+  --color-border-light: #F0F1F3;
+  --color-accent: #1A1A1A;
+  --color-accent-sub: #404040;
+  --color-point: #2563EB;
+  --color-point-light: #EFF6FF;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-orange: #EA580C;
+  --color-danger: #DC2626;
+  --color-text: #111827;
+  --color-text-sub: #6B7280;
+  --color-text-muted: #9CA3AF;
 }
 
 @media (prefers-color-scheme: dark) {
