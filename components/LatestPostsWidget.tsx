@@ -1,7 +1,7 @@
 "use client";
 
-import { useCms } from "@/lib/cms-context";
-import type { WidgetDisplayStyle, WidgetSortBy } from "@/types/cms";
+import { useBums } from "@/lib/bums-context";
+import type { WidgetDisplayStyle, WidgetSortBy } from "@/types/bums";
 import { Eye, Clock, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 
@@ -28,7 +28,7 @@ export function LatestPostsWidget({
     title,
     className,
 }: LatestPostsWidgetProps) {
-    const { getPostsForWidget, getBoardById } = useCms();
+    const { getPostsForWidget, getBoardById } = useBums();
 
     const board = getBoardById(boardId);
     const posts = getPostsForWidget(boardId, count, sortBy);

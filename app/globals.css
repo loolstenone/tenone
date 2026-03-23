@@ -42,4 +42,112 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── TenOne 다크/라이트 테마 ── */
+
+:root, [data-theme="light"] {
+  --tn-bg: #ffffff;
+  --tn-bg-alt: #fafafa;
+  --tn-surface: #ffffff;
+  --tn-text: #111111;
+  --tn-text-sub: #666666;
+  --tn-text-muted: #999999;
+  --tn-border: #e5e5e5;
+  --tn-border-light: #f0f0f0;
+  --tn-header-bg: #ffffff;
+  --tn-header-text: #111111;
+  --tn-footer-bg: #111111;
+  --tn-footer-text: #999999;
+  --tn-card-bg: #ffffff;
+  --tn-card-hover: #fafafa;
+  --tn-accent: #111111;
+  --tn-toggle-bg: #e5e5e5;
+  --tn-toggle-dot: #111111;
+}
+
+[data-theme="dark"] {
+  --tn-bg: #0a0a0a;
+  --tn-bg-alt: #111111;
+  --tn-surface: #161616;
+  --tn-text: #ffffff;
+  --tn-text-sub: #bbbbbb;
+  --tn-text-muted: #777777;
+  --tn-border: #2a2a2a;
+  --tn-border-light: #1e1e1e;
+  --tn-header-bg: #0a0a0a;
+  --tn-header-text: #f0f0f0;
+  --tn-footer-bg: #000000;
+  --tn-footer-text: #666666;
+  --tn-card-bg: #161616;
+  --tn-card-hover: #1e1e1e;
+  --tn-accent: #ffffff;
+  --tn-toggle-bg: #333333;
+  --tn-toggle-dot: #ffffff;
+}
+
+/* TenOne public 페이지에 테마 적용 */
+.tn-themed {
+  background-color: var(--tn-bg);
+  color: var(--tn-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tn-themed .tn-surface { background-color: var(--tn-surface); }
+.tn-themed .tn-bg-alt { background-color: var(--tn-bg-alt); }
+.tn-themed .tn-text { color: var(--tn-text); }
+.tn-themed .tn-text-sub { color: var(--tn-text-sub); }
+.tn-themed .tn-text-muted { color: var(--tn-text-muted); }
+.tn-themed .tn-border { border-color: var(--tn-border); }
+.tn-themed .tn-card {
+  background-color: var(--tn-card-bg);
+  border: 1px solid var(--tn-border);
+  transition: background-color 0.3s ease;
+}
+.tn-themed .tn-card:hover { background-color: var(--tn-card-hover); }
+
+/* ── Intra 공통 디자인 시스템 ── */
+
+/* 카드: 그림자 없음, 보더만 */
+.intra-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+/* 스탯 카드 */
+.intra-stat {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+
+/* 섹션 타이틀 */
+.intra-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #171717;
+}
+
+/* 테이블 */
+.intra-table {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* 인트라 영역 shadow 제거 */
+main.bg-white .shadow,
+main.bg-white .shadow-sm,
+main.bg-white .shadow-md,
+main.bg-white .shadow-lg {
+  box-shadow: none !important;
+}
+
+/* 인트라 영역 rounded-xl → rounded-lg 통일 */
+main.bg-white .rounded-xl {
+  border-radius: 0.5rem;
 }

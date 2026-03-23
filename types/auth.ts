@@ -47,6 +47,9 @@ export const accountTypeAccess: Record<AccountType, IntraModule[]> = {
  * - cms: 관리자 전용
  */
 
+// BUMS 권한
+export type CmsRole = 'admin' | 'editor' | 'contributor';
+
 export interface User {
     id: string;
     name: string;
@@ -61,4 +64,7 @@ export interface User {
     bio?: string;
     createdAt?: string;
     newsletterSubscribed?: boolean;
+    // BUMS 권한
+    cmsRole?: CmsRole;
+    cmsSiteAccess?: string[];  // 접근 가능한 cms site id 배열
 }

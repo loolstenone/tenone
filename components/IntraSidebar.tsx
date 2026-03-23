@@ -24,10 +24,13 @@ import {
     ListTodo, CheckSquare, Inbox,
     // Wiki
     Compass, HelpCircle,
+    // BUMS
+    ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle,
 } from "lucide-react";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
+import { useBums } from "@/lib/bums-context";
 
 interface SubItem {
     name: string;
@@ -54,6 +57,7 @@ interface NavModule {
     access?: SystemAccess;
     intraModule?: IntraModule; // People 유형 기반 접근 제어
     sections: MenuSection[];
+    dynamic?: boolean; // 경로에 따라 동적 메뉴 생성
 }
 
 const modules: NavModule[] = [
@@ -365,17 +369,28 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "CMS", href: "/intra/cms", icon: FileText, intraModule: 'cms' as IntraModule,
+        name: "BUMS", href: "/intra/bums", icon: FileText, intraModule: 'cms' as IntraModule,
         sections: [
             {
                 items: [
-                    { name: "사이트 관리", href: "/intra/cms/sites", icon: FileText },
-                    { name: "뉴스레터 관리", href: "/intra/cms/newsletter", icon: MessageSquareText },
-                    { name: "전체 일정 관리", href: "/intra/cms/schedule", icon: Calendar },
-                    { name: "라이브러리 관리", href: "/intra/cms/library", icon: FolderOpen },
+                    { name: "대시보드", href: "/intra/bums/dashboard", icon: LayoutDashboard },
+                    { name: "통계", href: "/intra/bums/stats", icon: BarChart3 },
+                    { name: "고객 관리", href: "/intra/bums/customers", icon: Users },
+                    { name: "고객문의", href: "/intra/bums/inquiry", icon: MessageCircle },
+                    { name: "쇼핑 관리", href: "/intra/bums/shop", icon: ShoppingCart },
+                    { name: "예약 관리", href: "/intra/bums/reservations", icon: CalendarClock },
+                    { name: "프로모션", href: "/intra/bums/promotion", icon: Gift },
+                    { name: "마케팅 관리", href: "/intra/bums/marketing", icon: Megaphone },
+                    { name: "사이트 관리", href: "/intra/bums/sites", icon: Globe },
+                    { name: "게시판 관리", href: "/intra/bums/boards", icon: LayoutGrid },
+                    { name: "콘텐츠 관리", href: "/intra/bums/content", icon: PenSquare },
+                    { name: "뉴스레터 관리", href: "/intra/bums/newsletter", icon: MessageSquareText },
+                    { name: "전체 일정 관리", href: "/intra/bums/schedule", icon: Calendar },
+                    { name: "라이브러리 관리", href: "/intra/bums/library", icon: FolderOpen },
                 ],
             },
         ],
+        dynamic: true, // 사이트 진입 시 동적 메뉴 생성
     },
 ];
 
@@ -383,9 +398,16 @@ export function IntraSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { user, isStaff, hasAccess, hasModuleAccess, logout } = useAuth();
+    const { getSiteById, getBoardsBySite, getPostsByBoard } = useBums();
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    // BUMS 사이트 진입 감지 — /intra/bums/sites/{siteId}/... 경로에서 siteId 추출
+    const siteMatch = pathname.match(/^\/intra\/bums\/sites\/([^/]+)/);
+    const activeSiteId = siteMatch ? siteMatch[1] : null;
+    const activeSite = activeSiteId ? getSiteById(activeSiteId) : null;
+    const siteBoards = activeSiteId ? getBoardsBySite(activeSiteId) : [];
 
     // 경로 변경 시 모바일 사이드바 닫기
     useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -413,6 +435,11 @@ export function IntraSidebar() {
                 }
             }
             if (isModuleActive) newModules.add(mod.name);
+        }
+
+        // BUMS 사이트 진입 시 콘텐츠 메뉴 자동 펼침
+        if (activeSiteId && (pathname.includes('/content') || pathname.includes('/boards/'))) {
+            newItems.add(`site-content-${activeSiteId}`);
         }
 
         setExpandedModules(newModules);
@@ -471,7 +498,7 @@ export function IntraSidebar() {
             {/* Logo */}
             <div className="px-5 h-14 flex items-center border-b border-neutral-800 shrink-0">
                 <Link href="/intra" className="text-lg font-bold tracking-wider text-white hover:opacity-80 transition-opacity">
-                    TEN<span className="font-light">:</span>ONE
+                    TEN<span className="font-light">:</span>ONE<span className="text-[8px] align-super">™</span>
                 </Link>
                 <span className="ml-2 text-[9px] tracking-widest text-neutral-500 uppercase">Intra</span>
                 <button onClick={() => setMobileOpen(false)} className="lg:hidden ml-auto p-1 text-neutral-400 hover:text-white">
@@ -570,6 +597,92 @@ export function IntraSidebar() {
                                             ))}
                                         </div>
                                     ))}
+
+                                    {/* 동적 사이트 관리 메뉴 (BUMS 사이트 진입 시) */}
+                                    {mod.dynamic && activeSite && activeSiteId && (
+                                        <div className="mt-2 pt-2 border-t border-neutral-800">
+                                            <p className="text-[9px] tracking-widest text-neutral-600 uppercase px-3 pt-1 pb-1">
+                                                {activeSite.name}
+                                            </p>
+                                            {/* 대시보드 */}
+                                            <Link href={`/intra/bums/sites/${activeSiteId}`}
+                                                className={clsx(
+                                                    "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
+                                                    isActive(`/intra/bums/sites/${activeSiteId}`, true)
+                                                        ? "text-white font-medium bg-white/5"
+                                                        : "text-neutral-500 hover:text-white"
+                                                )}>
+                                                <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />
+                                                대시보드
+                                            </Link>
+                                            {/* 콘텐츠 */}
+                                            <button
+                                                onClick={() => toggleItem(`site-content-${activeSiteId}`)}
+                                                className={clsx(
+                                                    "w-full flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
+                                                    pathname.includes('/content') || pathname.includes('/boards/')
+                                                        ? "text-white font-medium"
+                                                        : "text-neutral-500 hover:text-white"
+                                                )}>
+                                                <FileText className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="flex-1 text-left">콘텐츠</span>
+                                                <span className="text-[10px] text-neutral-600 mr-1">
+                                                    {siteBoards.reduce((s, b) => s + getPostsByBoard(b.id).length, 0)}
+                                                </span>
+                                                {expandedItems.has(`site-content-${activeSiteId}`)
+                                                    ? <ChevronDown className="h-2.5 w-2.5 text-neutral-600" />
+                                                    : <ChevronRight className="h-2.5 w-2.5 text-neutral-600" />
+                                                }
+                                            </button>
+                                            {expandedItems.has(`site-content-${activeSiteId}`) && (
+                                                <div className="ml-5 space-y-0.5 mt-0.5">
+                                                    <Link href={`/intra/bums/sites/${activeSiteId}/content`}
+                                                        className={clsx(
+                                                            "block px-3 py-1 text-[11px] rounded transition-all",
+                                                            isActive(`/intra/bums/sites/${activeSiteId}/content`, true)
+                                                                ? "text-white bg-white/10"
+                                                                : "text-neutral-500 hover:text-neutral-300"
+                                                        )}>
+                                                        전체 게시물
+                                                    </Link>
+                                                    {siteBoards.map(board => (
+                                                        <Link key={board.id} href={`/intra/bums/sites/${activeSiteId}/boards/${board.id}`}
+                                                            className={clsx(
+                                                                "flex items-center justify-between px-3 py-1 text-[11px] rounded transition-all",
+                                                                isActive(`/intra/bums/sites/${activeSiteId}/boards/${board.id}`)
+                                                                    ? "text-white bg-white/10"
+                                                                    : "text-neutral-500 hover:text-neutral-300"
+                                                            )}>
+                                                            <span className="truncate">{board.name}</span>
+                                                            <span className="text-[10px] text-neutral-600">{getPostsByBoard(board.id).length}</span>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {/* 통계 */}
+                                            <Link href={`/intra/bums/sites/${activeSiteId}/analytics`}
+                                                className={clsx(
+                                                    "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
+                                                    isActive(`/intra/bums/sites/${activeSiteId}/analytics`)
+                                                        ? "text-white font-medium bg-white/5"
+                                                        : "text-neutral-500 hover:text-white"
+                                                )}>
+                                                <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+                                                통계
+                                            </Link>
+                                            {/* 설정 */}
+                                            <Link href={`/intra/bums/sites/${activeSiteId}/settings`}
+                                                className={clsx(
+                                                    "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
+                                                    isActive(`/intra/bums/sites/${activeSiteId}/settings`)
+                                                        ? "text-white font-medium bg-white/5"
+                                                        : "text-neutral-500 hover:text-white"
+                                                )}>
+                                                <Settings className="h-3.5 w-3.5 shrink-0" />
+                                                설정
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

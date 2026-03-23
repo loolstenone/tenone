@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Lightbulb, Target, Users, ChevronRight } from "lucide-react";
-import { useCms } from "@/lib/cms-context";
+import { useBums } from "@/lib/bums-context";
 
 const typedTexts = [
     "사회 문제를 해결합니다",
@@ -47,7 +47,7 @@ function useTypedText(texts: string[], speed = 80, pause = 2000) {
 
 export default function YouInOneHomePage() {
     const typed = useTypedText(typedTexts);
-    const { getPostsByBoard } = useCms();
+    const { getPostsByBoard } = useBums();
 
     const portfolios = getPostsByBoard("board-yio-portfolio")
         .filter((p) => p.status === "published")

@@ -51,7 +51,7 @@ export const initialLibraryItems: LibraryItem[] = [
     { id: 'wiki-t10', title: 'NDA (비밀유지계약서) 양식', description: '외부 파트너/클라이언트와의 NDA 표준 양식. 기밀정보 범위, 기간, 벌칙조항 포함', category: '계약·법무', source: 'wiki', format: 'PDF', fileSize: '180 KB', tags: ['NDA', '계약', '법무'], author: '이재무', authorId: 'staff-37', createdAt: '2025-10-01', updatedAt: '2026-01-20', permission: 'staff', bookmarkCount: 18, viewCount: 95 },
 
     // ═══════════════════════════════════════════════════
-    // CMS Library
+    // BUMS Library
     // ═══════════════════════════════════════════════════
     { id: 'cms-01', title: 'Newsletter 발행 가이드', description: 'Ten:One™ Newsletter 작성 및 발행 프로세스. 디자인 템플릿 포함', category: '마케팅·콘텐츠', source: 'cms', format: 'PDF', fileSize: '3.4 MB', tags: ['뉴스레터', '발행', 'CMS'], author: '김콘텐', authorId: 'staff-14', createdAt: '2026-02-05', updatedAt: '2026-03-10', permission: 'staff', bookmarkCount: 8, viewCount: 54 },
     { id: 'cms-02', title: '콘텐츠 캘린더 템플릿 (2026 Q2)', description: '2분기 콘텐츠 발행 일정 템플릿. 채널별 주간 계획 포함', category: '템플릿·양식', source: 'cms', format: 'XLSX', fileSize: '89 KB', tags: ['캘린더', '일정', '콘텐츠'], author: '유광고', authorId: 'staff-18', createdAt: '2026-03-01', updatedAt: '2026-03-15', permission: 'staff', bookmarkCount: 12, viewCount: 67 },

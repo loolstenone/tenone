@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 const navItems = [
     { name: "경쟁 PT", href: "/ml/pt" },
     { name: "프로그램", href: "/ml/program" },
+    { name: "Idea Movement", href: "/ml/idea-movement" },
     { name: "매드 진", href: "/ml/madzine" },
     { name: "히어로", href: "/ml/hero" },
     { name: "활동인증서", href: "/ml/certificate" },

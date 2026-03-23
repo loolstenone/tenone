@@ -12,7 +12,7 @@ const brandLinks = [
 
 export function PublicFooter() {
     return (
-        <footer className="bg-neutral-900 text-neutral-400">
+        <footer className="transition-colors duration-300" style={{ backgroundColor: "var(--tn-footer-bg, #111)", color: "var(--tn-footer-text, #999)" }}>
             <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     <div>

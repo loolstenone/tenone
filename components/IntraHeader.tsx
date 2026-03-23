@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { PortalIcon } from "@/components/icons/PortalIcon";
 import {
     Search, Bell, LogOut, ChevronDown, User, Users, Target, CalendarCheck,
     CreditCard, Wallet, Star, Plus, X, MessageSquareText, ListTodo, Stamp,
-    FolderKanban, GripVertical
+    FolderKanban, GripVertical, Home
 } from "lucide-react";
 
 const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -134,7 +135,7 @@ export function IntraHeader() {
                 <span className="text-[10px] text-neutral-300 ml-2">{formatToday()}</span>
             </div>
 
-            {/* Right: search, notifications, profile */}
+            {/* Right: search, notifications, logout, avatar, portal */}
             <div className="flex items-center gap-1">
                 {/* Search */}
                 <div className="relative">
@@ -162,15 +163,18 @@ export function IntraHeader() {
 
                 <div className="h-5 w-px bg-neutral-200 mx-2" />
 
-                {/* Profile dropdown */}
+                {/* Avatar dropdown */}
                 <div className="relative">
                     <button onClick={() => setProfileOpen(!profileOpen)}
                         className="flex items-center gap-2 px-2 py-1 rounded hover:bg-neutral-50 transition-colors">
-                        <div className="h-7 w-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[10px] font-medium">
+                        <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold"
+                            style={{
+                                background: "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
+                                color: "#fff",
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
+                            }}>
                             {user.avatarInitials}
                         </div>
-                        <span className="text-xs text-neutral-600 hidden lg:block">{user.name}</span>
-                        <ChevronDown className="h-3 w-3 text-neutral-400 hidden lg:block" />
                     </button>
 
                     {profileOpen && (
@@ -219,15 +223,20 @@ export function IntraHeader() {
                                     </>)}
                                 </div>
                                 <div className="border-t border-neutral-100 py-1">
-                                    <button onClick={() => { router.push('/'); setTimeout(() => logout(), 100); }}
+                                    <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-400 hover:text-red-600 hover:bg-neutral-50 transition-colors w-full">
-                                        <LogOut className="h-3.5 w-3.5" /> 로그아웃
+                                        <LogOut className="h-3.5 w-3.5" /> Logout
                                     </button>
                                 </div>
                             </div>
                         </>
                     )}
                 </div>
+
+                {/* 퍼블릭 사이트로 나가기 */}
+                <Link href="/" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50" title="퍼블릭 사이트로 나가기">
+                    <PortalIcon direction="exit" size={36} />
+                </Link>
             </div>
         </header>
     );

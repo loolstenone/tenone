@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useCms } from "@/lib/cms-context";
-import { CmsCategory } from "@/types/cms";
+import { useBums } from "@/lib/bums-context";
+import { CmsCategory } from "@/types/bums";
 import { ExternalLink, ArrowRight } from "lucide-react";
 
 const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function NewsroomPage() {
-    const { getPublishedByChannel } = useCms();
+    const { getPublishedByChannel } = useBums();
     const allNews = getPublishedByChannel('newsroom');
     const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
 
@@ -18,13 +18,13 @@ export default function NewsroomPage() {
     const rest = filtered.slice(1);
 
     return (
-        <div className="bg-white text-neutral-900">
+        <div className="tn-surface tn-text">
             {/* Hero */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Newsroom</p>
+                    <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Newsroom</p>
                     <h1 className="text-4xl md:text-6xl font-light leading-tight"><span className="font-bold">소식</span></h1>
-                    <p className="mt-6 text-lg text-neutral-500 max-w-2xl">Ten:One™ Universe의 새로운 소식과 활동을 전합니다.</p>
+                    <p className="mt-6 text-lg tn-text-sub max-w-2xl">Ten:One™ Universe의 새로운 소식과 활동을 전합니다.</p>
                 </div>
             </section>
 
@@ -35,7 +35,7 @@ export default function NewsroomPage() {
                         {categories.map(cat => (
                             <button key={cat} onClick={() => setFilter(cat)}
                                 className={`px-5 py-2 text-sm tracking-wide transition-colors ${
-                                    filter === cat ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900'
+                                    filter === cat ? 'bg-neutral-900 text-white' : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200 hover:tn-text'
                                 }`}>{cat}</button>
                         ))}
                     </div>
@@ -50,26 +50,26 @@ export default function NewsroomPage() {
                             {featured.image && (featured.image.startsWith('http') || featured.image.startsWith('data:')) ? (
                                 <img src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
                             ) : (
-                                <p className="text-sm text-neutral-400">[{featured.image || '이미지'}]</p>
+                                <p className="text-sm tn-text-sub">[{featured.image || '이미지'}]</p>
                             )}
                         </div>
                         <div className="flex flex-col justify-center">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-500">{featured.category}</span>
-                                <span className="text-xs text-neutral-400">{featured.date}</span>
+                                <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{featured.category}</span>
+                                <span className="text-xs tn-text-sub">{featured.date}</span>
                             </div>
                             <Link href={`/newsroom/${featured.id}`}>
                                 <h2 className="text-2xl md:text-3xl font-bold leading-snug hover:underline">{featured.title}</h2>
                             </Link>
-                            <p className="mt-4 text-neutral-500 leading-relaxed">{featured.summary}</p>
+                            <p className="mt-4 tn-text-sub leading-relaxed">{featured.summary}</p>
                             <div className="flex items-center gap-4 mt-6">
                                 <Link href={`/newsroom/${featured.id}`}
-                                    className="inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors">
+                                    className="inline-flex items-center gap-2 text-sm tn-text hover:text-neutral-600 transition-colors">
                                     자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
                                 </Link>
                                 {featured.externalLink && (
                                     <a href={featured.externalLink} target="_blank" rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
+                                        className="inline-flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
                                         외부 링크 <ExternalLink className="h-3.5 w-3.5" />
                                     </a>
                                 )}
@@ -90,26 +90,26 @@ export default function NewsroomPage() {
                                         {news.image && (news.image.startsWith('http') || news.image.startsWith('data:')) ? (
                                             <img src={news.image} alt={news.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <p className="text-xs text-neutral-400">[{news.image || '이미지'}]</p>
+                                            <p className="text-xs tn-text-sub">[{news.image || '이미지'}]</p>
                                         )}
                                     </div>
                                 </Link>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500">{news.category}</span>
-                                    <span className="text-xs text-neutral-400">{news.date}</span>
+                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 tn-text-sub">{news.category}</span>
+                                    <span className="text-xs tn-text-sub">{news.date}</span>
                                 </div>
                                 <Link href={`/newsroom/${news.id}`}>
-                                    <h3 className="font-bold text-neutral-900 group-hover:underline leading-snug">{news.title}</h3>
+                                    <h3 className="font-bold tn-text group-hover:underline leading-snug">{news.title}</h3>
                                 </Link>
-                                <p className="text-sm text-neutral-500 mt-2 line-clamp-2">{news.summary}</p>
+                                <p className="text-sm tn-text-sub mt-2 line-clamp-2">{news.summary}</p>
                                 <div className="flex items-center gap-3 mt-3">
                                     <Link href={`/newsroom/${news.id}`}
-                                        className="inline-flex items-center gap-1.5 text-xs text-neutral-900 hover:text-neutral-600 transition-colors">
+                                        className="inline-flex items-center gap-1.5 text-xs tn-text hover:text-neutral-600 transition-colors">
                                         자세히 보기 <ArrowRight className="h-3 w-3" />
                                     </Link>
                                     {news.externalLink && (
                                         <a href={news.externalLink} target="_blank" rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-900 transition-colors">
+                                            className="inline-flex items-center gap-1.5 text-xs tn-text-sub hover:tn-text transition-colors">
                                             외부 링크 <ExternalLink className="h-3 w-3" />
                                         </a>
                                     )}
@@ -123,7 +123,7 @@ export default function NewsroomPage() {
             {filtered.length === 0 && (
                 <section className="px-6 pb-32">
                     <div className="max-w-7xl mx-auto text-center py-20">
-                        <p className="text-neutral-400">아직 소식이 없습니다.</p>
+                        <p className="tn-text-sub">아직 소식이 없습니다.</p>
                     </div>
                 </section>
             )}

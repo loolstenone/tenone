@@ -1,10 +1,10 @@
 "use client";
 
-import { useCms } from "@/lib/cms-context";
+import { useBums } from "@/lib/bums-context";
 import { Image as ImageIcon } from "lucide-react";
 
 export default function MadzinePage() {
-    const { getPostsByBoard } = useCms();
+    const { getPostsByBoard } = useBums();
 
     const posts = getPostsByBoard("board-mad-gallery")
         .filter((p) => p.status === "published");

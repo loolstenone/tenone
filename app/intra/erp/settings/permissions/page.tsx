@@ -25,7 +25,7 @@ const MODULES = [
     { key: "marketing", label: "Marketing" },
     { key: "studio", label: "Studio" },
     { key: "wiki", label: "Wiki" },
-    { key: "cms", label: "CMS" },
+    { key: "bums", label: "BUMS" },
 ];
 
 const DEPARTMENTS = ["관리부서", "사업부서", "제작부서", "지원부서"];

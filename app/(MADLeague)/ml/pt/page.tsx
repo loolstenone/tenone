@@ -1,6 +1,6 @@
 "use client";
 
-import { useCms } from "@/lib/cms-context";
+import { useBums } from "@/lib/bums-context";
 import { Users, Search, Lightbulb, Presentation } from "lucide-react";
 
 const steps = [
@@ -11,7 +11,7 @@ const steps = [
 ];
 
 export default function PtPage() {
-    const { getPostsByBoard } = useCms();
+    const { getPostsByBoard } = useBums();
 
     const galleryPosts = getPostsByBoard("board-mad-gallery")
         .filter((p) => p.status === "published")

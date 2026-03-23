@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
-import { CmsProvider } from "@/lib/cms-context";
+import { BumsProvider } from "@/lib/bums-context";
 import { SiteProvider } from "@/lib/site-context";
 import "./globals.css";
 
@@ -36,9 +36,9 @@ export default function RootLayout({
       >
         <SiteProvider>
           <AuthProvider>
-            <CmsProvider>
+            <BumsProvider>
               {children}
-            </CmsProvider>
+            </BumsProvider>
           </AuthProvider>
         </SiteProvider>
       </body>

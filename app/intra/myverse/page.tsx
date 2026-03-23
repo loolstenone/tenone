@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import { usePoints } from "@/lib/point-context";
+import { getDailyQuote } from "@/lib/daily-quotes";
 import {
     Mail, Building2, Calendar, Target, Edit2, Shield, BookOpen, Clock,
     FileCheck, User, FolderKanban, ChevronRight, CalendarCheck, CreditCard,
@@ -141,17 +142,7 @@ export default function MyversePage() {
     const tenureYears = Math.floor(months / 12);
     const tenureMonths = months % 12;
 
-    const quotes = [
-        "본질에 집중하라. 나머지는 따라온다.",
-        "어설픈 완벽주의는 일을 출발시키지 못한다.",
-        "실현되지 않으면 아이디어가 아니다.",
-        "길바닥 동전은 먼저 줍는 사람이 임자다.",
-        "빠르게 실패하고, 더 빠르게 배워라.",
-        "약한 연결고리가 강력한 기회를 만든다.",
-        "먼저 움직이는 사람이 판을 바꾼다.",
-        "끝까지 해내는 사람이 결국 이긴다.",
-    ];
-    const todayQuote = quotes[new Date().getDate() % quotes.length];
+    const todayQuote = getDailyQuote(user.id);
 
     const notices = [
         { title: "MADLeague 인사이트 투어링 참가자 모집", badge: "중요", date: "03-15" },
@@ -166,7 +157,7 @@ export default function MyversePage() {
     ];
 
     return (
-        <div className="max-w-5xl">
+        <div>
             {/* 인사말 + 격언 */}
             <div className="mb-6">
                 <h1 className="text-xl font-bold">안녕하세요, {user.name}님</h1>

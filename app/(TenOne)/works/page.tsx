@@ -2,31 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useCms } from "@/lib/cms-context";
-import { CmsCategory } from "@/types/cms";
+import { useBums } from "@/lib/bums-context";
+import { CmsCategory } from "@/types/bums";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function WorksPage() {
-    const { getPublishedByChannel } = useCms();
+    const { getPublishedByChannel } = useBums();
     const allWorks = getPublishedByChannel('works');
     const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
 
     const filtered = filter === '전체' ? allWorks : allWorks.filter(w => w.category === filter);
 
     return (
-        <div className="bg-white text-neutral-900">
+        <div className="tn-surface tn-text">
             {/* Hero */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
+                    <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         Works
                     </p>
                     <h1 className="text-4xl md:text-6xl font-light leading-tight">
                         우리가 <span className="font-bold">해온 일들</span>
                     </h1>
-                    <p className="mt-6 text-lg text-neutral-500 max-w-2xl">
+                    <p className="mt-6 text-lg tn-text-sub max-w-2xl">
                         Ten:One™ Universe에서 발굴하고 연결하여 만들어낸 브랜드와 프로젝트들입니다.
                     </p>
                 </div>
@@ -41,7 +41,7 @@ export default function WorksPage() {
                                 className={`px-5 py-2 text-sm tracking-wide transition-colors ${
                                     filter === cat
                                         ? 'bg-neutral-900 text-white'
-                                        : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900'
+                                        : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200 hover:tn-text'
                                 }`}>
                                 {cat}</button>
                         ))}
@@ -61,26 +61,26 @@ export default function WorksPage() {
                                         {work.image && (work.image.startsWith('http') || work.image.startsWith('data:')) ? (
                                             <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <p className="text-sm text-neutral-300 text-center px-8">[{work.image || '이미지'}]</p>
+                                            <p className="text-sm tn-text-muted text-center px-8">[{work.image || '이미지'}]</p>
                                         )}
                                     </div>
                                 </Link>
 
                                 {/* 정보 */}
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-500">{work.category}</span>
-                                    <span className="text-xs text-neutral-400">{work.date}</span>
+                                    <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{work.category}</span>
+                                    <span className="text-xs tn-text-sub">{work.date}</span>
                                 </div>
                                 <Link href={`/works/${work.id}`}>
                                     <h2 className="text-2xl font-bold group-hover:underline cursor-pointer">{work.title}</h2>
                                 </Link>
-                                <p className="text-sm text-neutral-500 mt-3 leading-relaxed">{work.summary}</p>
+                                <p className="text-sm tn-text-sub mt-3 leading-relaxed">{work.summary}</p>
 
                                 {/* 태그 */}
                                 {work.tags.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-4">
                                         {work.tags.map(tag => (
-                                            <span key={tag} className="text-xs px-3 py-1 bg-neutral-50 text-neutral-400 border border-neutral-100">
+                                            <span key={tag} className="text-xs px-3 py-1 tn-bg-alt tn-text-sub border tn-border">
                                                 {tag}
                                             </span>
                                         ))}
@@ -90,12 +90,12 @@ export default function WorksPage() {
                                 {/* 링크 */}
                                 <div className="flex items-center gap-3 mt-4">
                                     <Link href={`/works/${work.id}`}
-                                        className="inline-flex items-center gap-2 text-sm text-neutral-900 hover:text-neutral-600 transition-colors">
+                                        className="inline-flex items-center gap-2 text-sm tn-text hover:text-neutral-600 transition-colors">
                                         자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
                                     </Link>
                                     {work.externalLink && (
                                         <a href={work.externalLink} target="_blank" rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
+                                            className="inline-flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
                                             외부 링크 <ExternalLink className="h-3.5 w-3.5" />
                                         </a>
                                     )}
@@ -106,7 +106,7 @@ export default function WorksPage() {
 
                     {filtered.length === 0 && (
                         <div className="text-center py-20">
-                            <p className="text-neutral-400">아직 등록된 Works가 없습니다.</p>
+                            <p className="tn-text-sub">아직 등록된 Works가 없습니다.</p>
                         </div>
                     )}
                 </div>
@@ -119,11 +119,11 @@ export default function WorksPage() {
                         <h2 className="text-3xl font-light">
                             함께 만들어갈 <span className="font-bold">다음 프로젝트</span>
                         </h2>
-                        <p className="mt-3 text-neutral-400">
+                        <p className="mt-3 tn-text-sub">
                             당신의 문제를 해결할 인재를 연결해드립니다.
                         </p>
                     </div>
-                    <a href="/contact" className="px-8 py-3.5 bg-white text-neutral-900 text-sm tracking-wide hover:bg-neutral-100 transition-colors flex items-center gap-2">
+                    <a href="/contact" className="px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors flex items-center gap-2">
                         프로젝트 의뢰 <ArrowRight className="h-4 w-4" />
                     </a>
                 </div>

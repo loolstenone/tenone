@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners';
 
 // 인증 전용 도메인 (OAuth redirect를 여기로 통일)
 export const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
@@ -118,13 +118,11 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
             { name: 'Universe', href: '/universe' },
             { name: 'Brands', href: '/brands' },
             { name: 'Works', href: '/works' },
-            { name: "Planner's", href: '/planners' },
             { name: 'Contact', href: '/contact' },
         ],
         footerLinks: [
             { name: 'About', href: '/about' },
             { name: 'Universe', href: '/universe' },
-            { name: "Planner's", href: '/planners' },
             { name: 'Contact', href: '/contact' },
         ],
         tagline: 'Beyond the Limit. 가치로 연결된 멀티 브랜드 생태계.',
@@ -137,6 +135,22 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         colors: { primary: '#D32F2F', primaryDark: '#B71C1C', secondary: '#FF5252', headerBg: '#171717', headerText: '#ffffff', footerBg: '#212121', footerText: '#a3a3a3', accent: '#D32F2F' },
         meta: { title: 'MAD League — 경쟁을 통한 성장 플랫폼', description: 'Match, Act, Develop. 경쟁하고, 행동하고, 성장하라. 전국 대학 연합 마케팅 경쟁 플랫폼 MAD League.', keywords: ['MAD League', '대학생', '마케팅', '경쟁', 'PT'] },
         homePath: '/ml', signupPath: '/signup', domain: 'madleague.net',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+    },
+    madleap: {
+        id: 'madleap', name: 'MADLeap', logo: 'MAD Leap', logoText: 'MAD Leap', logoStyle: 'text',
+        faviconUrl: '/brands/madleap/favicon.png', appleTouchIcon: '/brands/madleap/favicon.png',
+        accentColor: '#00B8FF', bgDark: '#000000',
+        colors: { primary: '#00B8FF', primaryDark: '#0090CC', secondary: '#4DD4FF', headerBg: '#ffffff', headerText: '#171717', footerBg: '#333333', footerText: '#a3a3a3', accent: '#00B8FF' },
+        meta: { title: 'MADLeap — 수도권 마케팅 광고 창업 대학생 연합 동아리', description: '실전 프로젝트 대학생 연합동아리. 마케팅, 광고, 창업을 실전으로 경험하는 MADLeap.', keywords: ['MADLeap', '대학생', '마케팅', '광고', '창업', '연합동아리', '수도권'] },
+        homePath: '/mlp', signupPath: '/signup', domain: 'madleap.co.kr',
+        nav: [
+            { name: '커뮤니티', href: '/mlp/community' },
+            { name: '스터디 룸', href: '/mlp/study-room' },
+            { name: '매드립 소개', href: '/mlp/about' },
+            { name: '포트폴리오', href: '/mlp/portfolio' },
+        ],
         universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
@@ -457,12 +471,58 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         contact: { email: 'lools@tenone.biz' },
         tagline: 'Capturing moments, telling stories.',
     },
+    changeup: {
+        id: 'changeup', name: 'ChangeUp', logoText: 'ChangeUp', logoStyle: 'text' as const,
+        faviconUrl: '/brands/changeup/favicon.png', appleTouchIcon: '/brands/changeup/favicon.png',
+        colors: { primary: '#1AAD64', primaryDark: '#148F52', secondary: '#256EFF', headerBg: '#ffffff', headerText: '#171717', footerBg: '#0F1F2E', footerText: '#a3a3a3', accent: '#1AAD64' },
+        meta: { title: 'ChangeUp — 미래를 만드는 일, 창업', description: 'AI 시대 고등학생·대학생 창업 교육 플랫폼. 부모·학교·지역사회가 함께 투자하는 청소년 창업 생태계.', keywords: ['ChangeUp', '창업교육', '청소년창업', 'AI창업', '투자', 'Ten:One'] },
+        homePath: '/cu', signupPath: '/signup', domain: 'changeup.company',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [
+            { name: '프로그램', href: '/cu/programs' },
+            { name: '투자', href: '/cu/invest' },
+            { name: '스타트업', href: '/cu/startups' },
+            { name: '커뮤니티', href: '/cu/community' },
+            { name: 'About', href: '/cu/about' },
+        ],
+        footerLinks: [
+            { name: '프로그램', href: '/cu/programs' },
+            { name: '투자', href: '/cu/invest' },
+            { name: 'About', href: '/cu/about' },
+        ],
+        contact: { email: 'hello@changeup.company' },
+        tagline: '미래를 만드는 일, 창업',
+    },
+    planners: {
+        id: 'planners', name: "Planner's", logoText: "Planner's", logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        colors: { primary: '#0F766E', primaryDark: '#134E4A', secondary: '#14B8A6', headerBg: '#134E4A', headerText: '#ffffff', footerBg: '#042F2E', footerText: '#99F6E4', accent: '#14B8A6' },
+        meta: { title: "Planner's — 우리는 모두 기획자다", description: '기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.', keywords: ['Planner', '기획자', '기획', 'Planning', 'Ten:One'] },
+        homePath: '/pln', signupPath: '/signup', domain: 'planners.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: false, google: false, kakao: false },
+        nav: [
+            { name: "Planner's", href: '/pln' },
+            { name: 'Planning', href: '/pln?tab=planning' },
+            { name: "Planner's Planner", href: '/pln?tab=planner-tool' },
+        ],
+        footerLinks: [
+            { name: "Planner's", href: '/pln' },
+            { name: 'Planning', href: '/pln?tab=planning' },
+            { name: "Planner's Planner", href: '/pln?tab=planner-tool' },
+        ],
+        contact: { email: 'lools@tenone.biz' },
+        tagline: '우리는 모두 기획자다 — 자기 인생에서 만큼은.',
+    },
 };
 
 // 도메인 → 사이트 매핑
 export const domainMap: Record<string, SiteIdentifier> = {
     'madleague.net': 'madleague',
     'www.madleague.net': 'madleague',
+    'madleap.co.kr': 'madleap',
+    'www.madleap.co.kr': 'madleap',
     'luki.ai': 'luki',
     'www.luki.ai': 'luki',
     'rook.co.kr': 'rook',
@@ -489,4 +549,7 @@ export const domainMap: Record<string, SiteIdentifier> = {
     'naturebox.tenone.biz': 'naturebox',
     'domo.tenone.biz': 'domo',
     'jakka.tenone.biz': 'jakka',
+    'changeup.company': 'changeup',
+    'www.changeup.company': 'changeup',
+    'planners.tenone.biz': 'planners',
 };

@@ -7,6 +7,9 @@ import clsx from "clsx";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth-context";
 import { LogOut, Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/lib/theme-context";
+import { PortalIcon } from "@/components/icons/PortalIcon";
 
 const publicNav = [
     { name: "Works", href: "/works" },
@@ -27,10 +30,13 @@ export function PublicHeader() {
     const pathname = usePathname();
     const router = useRouter();
     const { user, isAuthenticated, isLoading, isStaff, canAccessIntra, logout } = useAuth();
+    const { isDark } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-neutral-100">
+        <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
+            style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Logo variant="horizontal" size="sm" asLink={false} />
@@ -76,29 +82,62 @@ export function PublicHeader() {
                 <div className="hidden md:flex items-center gap-4">
                     {!isLoading && isAuthenticated && user ? (
                         <div className="flex items-center gap-3">
+                            {/* 아바타 드롭다운 */}
+                            <div className="relative">
+                                <button onClick={() => setProfileOpen(!profileOpen)}
+                                    className="flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+                                    <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all duration-300"
+                                        style={{
+                                            background: isDark
+                                                ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
+                                                : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
+                                            color: isDark ? "#111" : "#fff",
+                                            boxShadow: isDark
+                                                ? "0 2px 6px rgba(255,255,255,0.15), inset 0 -2px 3px rgba(0,0,0,0.1)"
+                                                : "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
+                                        }}>
+                                        {user.avatarInitials}
+                                    </div>
+                                </button>
+                                {profileOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                                        <div className="absolute right-0 top-full mt-2 z-50 w-48 py-2 rounded-lg border"
+                                            style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
+                                            <div className="px-4 py-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
+                                                <p className="text-xs font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
+                                                <p className="text-[10px]" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
+                                            </div>
+                                            <Link href="/profile" onClick={() => setProfileOpen(false)}
+                                                className="block px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-sub)" }}>
+                                                프로필
+                                            </Link>
+                                            <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
+                                                className="block w-full text-left px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-muted)" }}>
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            {/* 인트라 포탈 */}
                             {canAccessIntra && (
-                                <Link href="/intra" className="text-xs tracking-wide text-neutral-400 hover:text-neutral-900 transition-colors">
-                                    Intra
+                                <Link href="/intra" className="transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }} title="Intra Office">
+                                    <PortalIcon direction="enter" size={36} darkBg={isDark} />
                                 </Link>
                             )}
-                            <Link href="/profile" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
-                                <div className="h-7 w-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[10px] font-medium">
-                                    {user.avatarInitials}
-                                </div>
-                            </Link>
-                            <button onClick={() => { logout(); router.push('/'); }}
-                                className="p-1.5 text-neutral-300 hover:text-neutral-900 transition-colors" title="로그아웃">
-                                <LogOut className="h-4 w-4" />
-                            </button>
+                            {/* 테마 토글 */}
+                            <ThemeToggle />
                         </div>
                     ) : !isLoading ? (
-                        <div className="flex items-center gap-4">
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
-                                로그인
+                        <div className="flex items-center gap-3">
+                            <Link href="/login" className="text-xs transition-colors" style={{ color: "var(--tn-text-sub)" }}>
+                                Login
                             </Link>
-                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                                회원가입
+                            <Link href="/signup" className="text-xs px-4 py-1.5 transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
+                                Joinup
                             </Link>
+                            <ThemeToggle />
                         </div>
                     ) : null}
                 </div>

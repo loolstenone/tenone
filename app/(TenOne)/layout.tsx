@@ -1,5 +1,6 @@
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
+import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 
@@ -23,12 +24,12 @@ export default function PublicLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen bg-white text-neutral-900 selection:bg-neutral-200 flex flex-col">
+        <TenOneThemeWrapper>
             <PublicHeader />
-            <main className="flex-1 pt-16">
+            <main className="flex-1 pt-20">
                 {children}
             </main>
             <PublicFooter />
-        </div>
+        </TenOneThemeWrapper>
     );
 }

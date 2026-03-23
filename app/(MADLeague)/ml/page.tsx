@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCms } from "@/lib/cms-context";
+import { useBums } from "@/lib/bums-context";
 import { ArrowRight, Target, Rocket, Award, ChevronRight, HelpCircle } from "lucide-react";
 
 export default function MadLeagueHomePage() {
-    const { getPostsByBoard } = useCms();
+    const { getPostsByBoard } = useBums();
 
     const notices = getPostsByBoard("board-mad-notice")
         .filter((p) => p.status === "published")

@@ -242,7 +242,7 @@ const faqItems: FaqItem[] = [
             "TikTok: 15~60초, 첫 3초 후킹, 트렌드 활용",
             "",
             "주간 콘텐츠 캘린더 기반 운영. 월말 성과 리포트 필수.",
-            "브랜드별 톤앤매너는 CMS Library에서 확인하세요.",
+            "브랜드별 톤앤매너는 BUMS Library에서 확인하세요.",
         ],
         author: "유광고", updated: "2026-03-11", views: 56,
     },

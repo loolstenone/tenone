@@ -63,33 +63,33 @@ function AboutContent() {
     ];
 
     return (
-        <div className="bg-white text-neutral-900">
+        <div className="tn-surface tn-text">
             {/* Hero */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
+                    <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         About
                     </p>
                     <h1 className="text-4xl md:text-6xl font-light leading-tight">
                         가치로 연결된<br />
                         <span className="font-bold">세계관을 만드는 사람들</span>
                     </h1>
-                    <p className="mt-6 text-lg text-neutral-500 max-w-2xl">
+                    <p className="mt-6 text-lg tn-text-sub max-w-2xl">
                         Ten:One™은 인재를 발굴하고, 연결하고, 기업과 사회의 문제를 해결합니다.
                     </p>
                 </div>
             </section>
 
             {/* Tab Navigation */}
-            <section className="border-b border-neutral-200 sticky top-16 bg-white z-40">
+            <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0">
                         {tabs.map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
-                                        ? 'border-neutral-900 text-neutral-900 font-medium'
-                                        : 'border-transparent text-neutral-400 hover:text-neutral-700'
+                                        ? 'border-neutral-900 tn-text font-medium'
+                                        : 'border-transparent tn-text-sub hover:text-neutral-700'
                                 }`}>
                                 {tab.label}
                             </button>
@@ -105,26 +105,26 @@ function AboutContent() {
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
                             <div>
-                                <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Origin</p>
+                                <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Origin</p>
                                 <h2 className="text-3xl font-light leading-relaxed">
                                     우연히 시계를 봤을 때<br />
                                     <span className="font-bold">10시 01분</span>일 확률은<br />
                                     얼마나 될까?
                                 </h2>
-                                <p className="mt-8 text-neutral-500 leading-relaxed">
+                                <p className="mt-8 tn-text-sub leading-relaxed">
                                     PC통신 시절부터 사용하던 ID &apos;lools&apos;, 생일이자 Ten:One™의 기원인 10월 1일.
                                     반복되는 우연은 그저 우연이 아니라, 마치 계획된 우연처럼 지금의 나를 만들었습니다.
                                 </p>
-                                <p className="mt-4 text-neutral-500 leading-relaxed">
+                                <p className="mt-4 tn-text-sub leading-relaxed">
                                     머릿속에 끊임없이 떠오르던 수많은 생각과 구상들.
                                     과거의 아이디어와 계획들을 세상에 꺼내 놓기로 결심하며
                                     Ten:One™ Universe가 시작되었습니다.
                                 </p>
                             </div>
                             <div className="aspect-[4/3] bg-neutral-100 flex items-center justify-center">
-                                <p className="text-sm text-neutral-400 text-center px-8">
+                                <p className="text-sm tn-text-sub text-center px-8">
                                     [창업 스토리 비주얼]<br />
-                                    <span className="text-xs text-neutral-300">대표의 스토리를 담은 사진 또는 일러스트</span>
+                                    <span className="text-xs tn-text-muted">대표의 스토리를 담은 사진 또는 일러스트</span>
                                 </p>
                             </div>
                         </div>
@@ -135,24 +135,24 @@ function AboutContent() {
                         <div className="max-w-7xl mx-auto">
                             <div className="grid md:grid-cols-2 gap-16">
                                 <div>
-                                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">Mission</p>
+                                    <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Mission</p>
                                     <h2 className="text-3xl font-bold leading-relaxed">
                                         기획하고, 연결하고, 확장한다.
                                     </h2>
-                                    <p className="text-sm text-neutral-500 mt-2">Plan. Connect. Expand.</p>
-                                    <p className="mt-8 text-neutral-400 leading-relaxed">
+                                    <p className="text-sm tn-text-sub mt-2">Plan. Connect. Expand.</p>
+                                    <p className="mt-8 tn-text-sub leading-relaxed">
                                         약한 연결 고리가 만드는 강력한 기회.
                                         다른 영역에서 다르게 일하는 사람들을 만나고,
                                         본질을 지키며 빠르게 움직이고 실행에 옮깁니다.
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">Vision</p>
+                                    <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Vision</p>
                                     <h2 className="text-3xl font-bold leading-relaxed">
                                         10,000명의 기획자를<br />발굴하고 연결한다.
                                     </h2>
-                                    <p className="text-sm text-neutral-500 mt-2">Who is the Next?</p>
-                                    <p className="mt-8 text-neutral-400 leading-relaxed">
+                                    <p className="text-sm tn-text-sub mt-2">Who is the Next?</p>
+                                    <p className="mt-8 tn-text-sub leading-relaxed">
                                         가치 네트워크를 만드는 연결자가 되기로 했습니다.
                                         적어도 자기 인생에서만큼은 모두가 기획자입니다.
                                     </p>
@@ -164,7 +164,7 @@ function AboutContent() {
                     {/* Core Value */}
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Core Value</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Core Value</p>
                             <h2 className="text-3xl font-light mb-16">
                                 변하지 않을 가치에 집중하여 <span className="font-bold">빠르게 가치를 창출한다</span>
                             </h2>
@@ -174,13 +174,13 @@ function AboutContent() {
                                     { num: "02", symbol: "→", title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
                                     { num: "03", symbol: "■", title: "이행", en: "Carry Out", desc: "본질이 확인된다면 바로 실행에 옮긴다. 실현되지 않으면 아이디어가 아니다." },
                                 ].map((val) => (
-                                    <div key={val.num} className="border-t border-neutral-200 pt-8">
-                                        <span className="text-sm text-neutral-300 font-mono">{val.num}</span>
+                                    <div key={val.num} className="border-t tn-border pt-8">
+                                        <span className="text-sm tn-text-muted font-mono">{val.num}</span>
                                         <h3 className="text-2xl font-bold mt-3">
-                                            <span className="text-neutral-300 mr-2">{val.symbol}</span>{val.title}
+                                            <span className="tn-text-muted mr-2">{val.symbol}</span>{val.title}
                                         </h3>
-                                        <p className="text-sm text-neutral-400 mt-1">{val.en}</p>
-                                        <p className="text-sm text-neutral-500 mt-4 leading-relaxed">{val.desc}</p>
+                                        <p className="text-sm tn-text-sub mt-1">{val.en}</p>
+                                        <p className="text-sm tn-text-sub mt-4 leading-relaxed">{val.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -188,9 +188,9 @@ function AboutContent() {
                     </section>
 
                     {/* Principle 10 */}
-                    <section className="bg-neutral-50 py-24 px-6">
+                    <section className="tn-bg-alt py-24 px-6">
                         <div className="max-w-4xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Principle 10</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Principle 10</p>
                             <h2 className="text-3xl font-light mb-16">
                                 우리가 <span className="font-bold">믿는 것들</span>
                             </h2>
@@ -207,7 +207,7 @@ function AboutContent() {
                                     "신뢰는 먼저 보여주는 것이다.",
                                     "나의 작은 세계가 연결되어 하나의 거대한 세계관을 만든다.",
                                 ].map((principle, i) => (
-                                    <div key={i} className="flex items-start gap-6 py-4 border-b border-neutral-200 last:border-0">
+                                    <div key={i} className="flex items-start gap-6 py-4 border-b tn-border last:border-0">
                                         <span className="text-2xl font-bold text-neutral-200 min-w-[2.5rem] text-right font-mono">
                                             {String(i + 1).padStart(2, '0')}
                                         </span>
@@ -222,21 +222,21 @@ function AboutContent() {
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                             <div className="aspect-square bg-neutral-100 flex items-center justify-center max-w-md">
-                                <p className="text-sm text-neutral-400 text-center px-8">
+                                <p className="text-sm tn-text-sub text-center px-8">
                                     [대표 프로필 사진]
                                 </p>
                             </div>
                             <div>
-                                <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Founder</p>
+                                <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
                                 <h2 className="text-3xl font-bold">전천일</h2>
-                                <p className="text-sm text-neutral-400 mt-1">Cheonil Jeon · Value Connector</p>
-                                <p className="mt-6 text-neutral-500 leading-relaxed">
+                                <p className="text-sm tn-text-sub mt-1">Cheonil Jeon · Value Connector</p>
+                                <p className="mt-6 tn-text-sub leading-relaxed">
                                     광고, 마케팅, 커뮤니케이션, 기획 분야에서 일해왔습니다.
                                     트렌드, 브랜딩, IT에 관심을 가지고 가치를 연결하는 일을 하고 있습니다.
                                 </p>
-                                <div className="mt-6 space-y-2 text-sm text-neutral-500">
-                                    <p><a href="mailto:lools@tenone.biz" className="hover:text-neutral-900 transition-colors">lools@tenone.biz</a></p>
-                                    <p><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors">Kakao Open Chat</a></p>
+                                <div className="mt-6 space-y-2 text-sm tn-text-sub">
+                                    <p><a href="mailto:lools@tenone.biz" className="hover:tn-text transition-colors">lools@tenone.biz</a></p>
+                                    <p><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:tn-text transition-colors">Kakao Open Chat</a></p>
                                 </div>
                             </div>
                         </div>
@@ -250,7 +250,7 @@ function AboutContent() {
                     {/* Universe Intro */}
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Universe</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
                             <h2 className="text-3xl md:text-4xl font-light leading-relaxed max-w-3xl">
                                 각 유니버스는 고유한 <span className="font-bold">본질(Essence)</span>을 가지고 있으며,
                                 하나의 거대한 선순환 생태계로 연결되어 있습니다.
@@ -259,9 +259,9 @@ function AboutContent() {
                     </section>
 
                     {/* Brand Categories */}
-                    <section className="bg-neutral-50 py-24 px-6">
+                    <section className="tn-bg-alt py-24 px-6">
                         <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Brand Ecosystem</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Ecosystem</p>
                             <h2 className="text-3xl font-light mb-16">
                                 <span className="font-bold">9개 카테고리</span>의 브랜드가 하나의 생태계를 이룹니다.
                             </h2>
@@ -277,11 +277,11 @@ function AboutContent() {
                                     { category: "Content", brands: "MADzine", desc: "마케팅/광고 매거진" },
                                     { category: "Startup", brands: "ChangeUp", desc: "인재 양성 프로그램" },
                                 ].map((item, i) => (
-                                    <div key={i} className="bg-white p-8">
-                                        <p className="text-xs text-neutral-400 font-mono mb-3">{String(i + 1).padStart(2, '0')}</p>
-                                        <h3 className="text-lg font-bold text-neutral-900">{item.category}</h3>
+                                    <div key={i} className="tn-surface p-8">
+                                        <p className="text-xs tn-text-sub font-mono mb-3">{String(i + 1).padStart(2, '0')}</p>
+                                        <h3 className="text-lg font-bold tn-text">{item.category}</h3>
                                         <p className="text-sm font-medium text-neutral-600 mt-1">{item.brands}</p>
-                                        <p className="text-xs text-neutral-400 mt-2">{item.desc}</p>
+                                        <p className="text-xs tn-text-sub mt-2">{item.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -291,7 +291,7 @@ function AboutContent() {
                     {/* Flywheel */}
                     <section className="bg-neutral-900 text-white py-24 px-6">
                         <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">Ten:One™ Flywheel</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Ten:One™ Flywheel</p>
                             <h2 className="text-3xl font-light mb-16">
                                 실행은 연결을 가속하고, <span className="font-bold">연결은 더 많은 기회를 만든다.</span>
                             </h2>
@@ -300,7 +300,7 @@ function AboutContent() {
                                     <div key={step.num} className="bg-neutral-900 p-6">
                                         <span className="text-sm text-neutral-600 font-mono">{step.num}</span>
                                         <h3 className="text-sm font-bold mt-3">{step.title}</h3>
-                                        <p className="text-xs text-neutral-500 mt-2 leading-relaxed">{step.desc}</p>
+                                        <p className="text-xs tn-text-sub mt-2 leading-relaxed">{step.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -311,7 +311,7 @@ function AboutContent() {
                     {/* Connection Model */}
                     <section className="py-24 px-6">
                         <div className="max-w-4xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">Connection Model</p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Connection Model</p>
                             <h2 className="text-3xl font-light mb-16">
                                 브랜드는 <span className="font-bold">4가지 방식</span>으로 연결됩니다.
                             </h2>
@@ -322,10 +322,10 @@ function AboutContent() {
                                     { type: "Support", desc: "지원 관계. 기술, 인프라, 네트워크를 공유하는 관계.", example: "Badak → YouInOne" },
                                     { type: "Network", desc: "네트워크 관계. 동일 생태계 내 독립적으로 활동하는 관계.", example: "PAM, ADlle, ABC, 제주수작" },
                                 ].map((conn) => (
-                                    <div key={conn.type} className="border border-neutral-200 p-8">
-                                        <h3 className="text-lg font-bold text-neutral-900">{conn.type}</h3>
-                                        <p className="text-sm text-neutral-500 mt-2 leading-relaxed">{conn.desc}</p>
-                                        <p className="text-xs text-neutral-400 mt-4 font-mono">{conn.example}</p>
+                                    <div key={conn.type} className="border tn-border p-8">
+                                        <h3 className="text-lg font-bold tn-text">{conn.type}</h3>
+                                        <p className="text-sm tn-text-sub mt-2 leading-relaxed">{conn.desc}</p>
+                                        <p className="text-xs tn-text-sub mt-4 font-mono">{conn.example}</p>
                                     </div>
                                 ))}
                             </div>
@@ -340,7 +340,7 @@ function AboutContent() {
                     <div className="max-w-4xl mx-auto">
                         <div className="flex items-end justify-between mb-12">
                             <div>
-                                <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">History</p>
+                                <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">History</p>
                                 <h2 className="text-3xl font-light">
                                     유니버스 <span className="font-bold">연대기</span>
                                 </h2>
@@ -354,7 +354,7 @@ function AboutContent() {
                                     className={`px-4 py-2 text-sm tracking-wide transition-colors ${
                                         yearFilter === y
                                             ? 'bg-neutral-900 text-white'
-                                            : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+                                            : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200'
                                     }`}>
                                     {y}
                                 </button>
@@ -364,21 +364,21 @@ function AboutContent() {
                         {/* Timeline */}
                         <div className="space-y-0">
                             {filteredHistory.map((item, i) => (
-                                <div key={i} className="flex gap-8 py-6 border-b border-neutral-100 group hover:bg-neutral-50 transition-colors px-4 -mx-4">
-                                    <div className="min-w-[5rem] text-sm text-neutral-400 font-mono pt-0.5">
+                                <div key={i} className="flex gap-8 py-6 border-b tn-border group hover:tn-bg-alt transition-colors px-4 -mx-4">
+                                    <div className="min-w-[5rem] text-sm tn-text-sub font-mono pt-0.5">
                                         {item.date}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3">
-                                            <h3 className="font-bold text-neutral-900">{item.title}</h3>
+                                            <h3 className="font-bold tn-text">{item.title}</h3>
                                             {item.link && (
                                                 <a href={item.link} target="_blank" rel="noopener noreferrer"
-                                                    className="text-neutral-300 hover:text-neutral-900 transition-colors">
+                                                    className="tn-text-muted hover:tn-text transition-colors">
                                                     <ExternalLink className="h-3.5 w-3.5" />
                                                 </a>
                                             )}
                                         </div>
-                                        <p className="text-sm text-neutral-500 mt-1">{item.desc}</p>
+                                        <p className="text-sm tn-text-sub mt-1">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -393,8 +393,8 @@ function AboutContent() {
                     <h2 className="text-3xl font-light">
                         <span className="font-bold">너, 나의 동료가 되라.</span>
                     </h2>
-                    <p className="mt-4 text-neutral-500">Ten:One™ Universe는 언제나 열려있습니다.</p>
-                    <Link href="/contact" className="inline-flex items-center gap-2 mt-8 px-8 py-3.5 bg-white text-neutral-900 text-sm tracking-wide hover:bg-neutral-100 transition-colors">
+                    <p className="mt-4 tn-text-sub">Ten:One™ Universe는 언제나 열려있습니다.</p>
+                    <Link href="/contact" className="inline-flex items-center gap-2 mt-8 px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors">
                         Contact Us <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
@@ -405,7 +405,7 @@ function AboutContent() {
 
 export default function AboutPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-white" />}>
+        <Suspense fallback={<div className="min-h-screen tn-surface" />}>
             <AboutContent />
         </Suspense>
     );

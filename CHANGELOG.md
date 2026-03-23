@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-03-23 (사무실)
+
+### 완료
+- 신규 사이트 대량 생성: 0gamja(WP반영), FWN, Seoul/360°, 문래지앙, MoNTZ, Badak, HeRo, Domo, JAKKA, Trend Hunter, My Universe, 타우니티, 자연함 등 → 총 19개 사이트
+- 전용 인증 도메인 auth.tenone.biz 구현 (AES-256-GCM 토큰 암호화, Vercel+DNS+Supabase 설정)
+- CMS → BUMS 전체 리네임 (DB+코드+UI)
+- BUMS Tier 1: Tiptap 에디터, 게시글 CRUD, 사이트 브랜딩 관리, 위젯 관리, 콘텐츠 API, 권한 모델
+- BUMS 목차 완성: 14개 메뉴 (대시보드~라이브러리), 고객관리 4탭, 게시판관리 3탭
+- Supabase bums_* 테이블 6개 + ENUM 10개 + RLS 생성
+- 인트라 디자인 통일 (max-w, shadow제거, bg-white)
+- 일일 격언 365개 시스템
+- TenOne 퍼블릭 다크/라이트 모드 (기본 블랙, 랜덤 전환 효과)
+- 3D 포탈 아이콘 + 입체 아바타/토글
+- 팅커벨 포탈 효과 (StarfieldPortal)
+- 헤더 UI: 아바타 드롭다운+포탈+토글 / 인트라 TEN:ONE™ 로고
+
+### 생성된 파일 (주요)
+- `lib/auth-transfer.ts`, `lib/theme-context.tsx`, `lib/bums-permissions.ts`, `lib/daily-quotes.ts`
+- `app/auth-hub/login/route.ts`, `app/auth-hub/callback/route.ts`, `app/auth/session/route.ts`
+- `app/api/bums/posts/route.ts`, `app/api/bums/post/[postId]/route.ts`, `app/api/bums/boards/route.ts`
+- `components/bums/RichEditor.tsx`, `components/bums/ImageUploader.tsx`
+- `components/ThemeToggle.tsx`, `components/TenOneThemeWrapper.tsx`, `components/StarfieldPortal.tsx`
+- `components/icons/PortalIcon.tsx`
+- `app/intra/bums/` 전체 (boards, customers, content, dashboard, settings, widgets)
+- `supabase/bums-tables.sql`
+- 19개 사이트 폴더 + 헤더/푸터 컴포넌트
+
+### 결정 사항
+- CMS → BUMS (Business Unit Management System)
+- TenOne 퍼블릭 기본 테마: 블랙
+- 인트라 로고: TEN:ONE™
+- 포탈 아이콘: 3D 큐브 + 화살표 (enter/exit)
+- 인트라 진출입: 아바타 드롭다운(Logout 포함) + 포탈 아이콘
+
+---
+
 ## 2026-03-23 (집, 2차)
 
 ### 완료

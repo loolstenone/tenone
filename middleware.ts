@@ -28,6 +28,7 @@ const domainPrefixMap: Record<string, string> = {
     'naturebox.tenone.biz': '/nb',
     'domo.tenone.biz': '/dm',
     'jakka.tenone.biz': '/jk',
+    'planners.tenone.biz': '/pln',
     'auth.tenone.biz': '/auth-hub',
     // 추후 추가: 'luki.ai': '/lk'
 };
