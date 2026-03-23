@@ -69,19 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         async function init() {
             try {
-                // OAuth 콜백: URL에 code가 있으면 세션 교환
-                if (typeof window !== 'undefined') {
-                    const params = new URLSearchParams(window.location.search);
-                    const code = params.get('code');
-                    if (code) {
-                        console.log('[Auth] OAuth code detected, exchanging...');
-                        const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-                        if (exchangeError) console.error('[Auth] Code exchange error:', exchangeError.message);
-                        else console.log('[Auth] Code exchange success:', exchangeData?.user?.email);
-                        // URL에서 code 파라미터 제거
-                        window.history.replaceState({}, '', window.location.pathname);
-                    }
-                }
+                // OAuth 콜백: code 교환은 auth-hub/callback에서 서버사이드로 처리
+                // /auth/session 라우트가 setSession() 후 리다이렉트하면
+                // 아래 getSession()에서 자동으로 세션 감지됨
 
                 // Supabase Auth 세션 확인
                 const { data: { session } } = await supabase.auth.getSession();
@@ -296,21 +286,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, [supabase]);
 
-    // Google 소셜 로그인
+    // Google 소셜 로그인 — auth.tenone.biz 전용 인증 도메인 경유
     const loginWithGoogle = useCallback(async () => {
-        await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: `${window.location.origin}/auth/callback` },
-        });
-    }, [supabase]);
+        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
+        const returnDomain = window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+        const returnPath = window.location.pathname;
+        const state = crypto.randomUUID();
+        sessionStorage.setItem('auth_state', state);
+        window.location.href = `${authDomain}/auth-hub/login?provider=google&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent(returnPath)}&state=${state}`;
+    }, []);
 
-    // Kakao 소셜 로그인
+    // Kakao 소셜 로그인 — auth.tenone.biz 전용 인증 도메인 경유
     const loginWithKakao = useCallback(async () => {
-        await supabase.auth.signInWithOAuth({
-            provider: 'kakao',
-            options: { redirectTo: `${window.location.origin}/auth/callback` },
-        });
-    }, [supabase]);
+        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
+        const returnDomain = window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+        const returnPath = window.location.pathname;
+        const state = crypto.randomUUID();
+        sessionStorage.setItem('auth_state', state);
+        window.location.href = `${authDomain}/auth-hub/login?provider=kakao&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent(returnPath)}&state=${state}`;
+    }, []);
 
     // 로그아웃
     const logout = useCallback(async () => {

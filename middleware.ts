@@ -12,7 +12,24 @@ const domainPrefixMap: Record<string, string> = {
     'www.hero.ne.kr': '/hr',
     'rook.co.kr': '/rk',
     'www.rook.co.kr': '/rk',
-    // 추후 추가: 'luki.ai': '/lk', 'badak.biz': '/bk'
+    '0gamja.com': '/0g',
+    'www.0gamja.com': '/0g',
+    'seoul360.net': '/s360',
+    'www.seoul360.net': '/s360',
+    'mullaesian.tenone.biz': '/mls',
+    'fwn.co.kr': '/fw',
+    'www.fwn.co.kr': '/fw',
+    'montz.tenone.biz': '/mtz',
+    'trendhunter.tenone.biz': '/th',
+    'myverse.tenone.biz': '/mv',
+    'badak.biz': '/bk',
+    'www.badak.biz': '/bk',
+    'townity.tenone.biz': '/tw',
+    'naturebox.tenone.biz': '/nb',
+    'domo.tenone.biz': '/dm',
+    'jakka.tenone.biz': '/jk',
+    'auth.tenone.biz': '/auth-hub',
+    // 추후 추가: 'luki.ai': '/lk'
 };
 
 // 리라이트 제외 경로
