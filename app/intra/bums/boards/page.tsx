@@ -221,7 +221,7 @@ export default function BoardsManagementPage() {
                                                     {statusLabel[post.status]}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3.5 text-neutral-400 text-xs">{post.publishedAt ?? post.createdAt}</td>
+                                            <td className="px-5 py-3.5 text-neutral-400 text-xs">{(post.publishedAt ?? post.createdAt ?? '').substring(0, 10)}</td>
                                             <td className="px-5 py-3.5 text-neutral-400 text-right">{post.viewCount}</td>
                                             <td className="px-5 py-3.5 text-right">
                                                 <div className="flex items-center justify-end gap-1.5">
