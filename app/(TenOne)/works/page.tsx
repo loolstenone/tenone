@@ -59,11 +59,16 @@ export default function WorksPage() {
                             <article key={work.id} className="group">
                                 {/* 이미지 영역 */}
                                 <Link href={`/works/${work.id}`} className="block">
-                                    <div className="aspect-[16/9] bg-neutral-100 mb-6 flex items-center justify-center overflow-hidden group-hover:opacity-90 transition-opacity">
+                                    <div className="aspect-[16/9] mb-6 flex items-center justify-center overflow-hidden group-hover:opacity-90 transition-opacity" style={{ backgroundColor: "var(--tn-surface)" }}>
                                         {work.image && (work.image.startsWith('http') || work.image.startsWith('data:')) ? (
                                             <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <p className="text-sm tn-text-muted text-center px-8">[{work.image || '이미지'}]</p>
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="text-4xl font-bold" style={{ color: "var(--tn-text-muted)" }}>
+                                                    {((work as any).category || (work as any).categoryId || work.title || '').substring(0, 2)}
+                                                </span>
+                                                <span className="text-xs" style={{ color: "var(--tn-text-muted)" }}>{work.title}</span>
+                                            </div>
                                         )}
                                     </div>
                                 </Link>
@@ -71,7 +76,7 @@ export default function WorksPage() {
                                 {/* 정보 */}
                                 <div className="flex items-center gap-3 mb-2">
                                     <span className="text-xs px-3 py-1 tn-text-sub" style={{ backgroundColor: "var(--tn-surface)" }}>{(work as any).category || (work as any).categoryId || ''}</span>
-                                    <span className="text-xs tn-text-sub">{(work as any).date || (work as any).publishedAt || (work as any).createdAt || ''}</span>
+                                    <span className="text-xs tn-text-sub">{(() => { const d = ((work as any).date || (work as any).publishedAt || (work as any).createdAt || '').substring(0, 7); return d ? `${d.split('-')[0]}년 ${d.split('-')[1]}월` : ''; })()}</span>
                                 </div>
                                 <Link href={`/works/${work.id}`}>
                                     <h2 className="text-2xl font-bold group-hover:underline cursor-pointer">{work.title}</h2>

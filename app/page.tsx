@@ -178,7 +178,8 @@ export default function HomePage() {
                             const title = (work.title as string) || '';
                             const image = (work.image as string) || '';
                             const category = (work.category as string) || (work.categoryId as string) || '';
-                            const date = ((work.date as string) || (work.publishedAt as string) || (work.createdAt as string) || '').slice(0, 7);
+                            const rawDate = ((work.date as string) || (work.publishedAt as string) || (work.createdAt as string) || '').substring(0, 7);
+                            const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
                             const extLink = work.externalLink as string | undefined;
                             return (
                                 <div key={work.id as string} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
@@ -186,7 +187,7 @@ export default function HomePage() {
                                         {image && (image.startsWith('http') || image.startsWith('data:')) ? (
                                             <img src={image} alt={title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <p className="text-xs tn-text-muted text-center px-2">[{image || '이미지'}]</p>
+                                            <span className="text-lg font-bold tn-text-muted">{category || title?.substring(0, 2)}</span>
                                         )}
                                     </div>
                                     <div className="flex items-start justify-between">
