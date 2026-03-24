@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { User, SystemAccess, IntraModule, accountTypeAccess } from '@/types/auth';
+import { User, SystemAccess, IntraModule } from '@/types/auth';
 import { validateCredentials, registerMember } from '@/lib/auth-data';
 import { createClient } from '@/lib/supabase/client';
 
@@ -26,24 +26,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'tenone_auth_user';
 
-// Supabase members → User 변환
+// Supabase members → User 변환 (v2)
 function memberToUser(member: Record<string, unknown>): User {
+    const accountType = (member.account_type as User['accountType']) || 'member';
     return {
         id: member.id as string,
         name: member.name as string,
         email: member.email as string,
         role: (member.role as string) || 'Viewer',
-        accountType: (member.account_type as User['accountType']) || 'member',
+        accountType,
+        primaryType: (member.primary_type as string) || accountType,
         avatarInitials: (member.avatar_initials as string) || ((member.name as string) || '').substring(0, 2).toUpperCase(),
-        brandAccess: (member.brand_access as string[]) || [],
+
+        // 역할 & 소속
+        roles: (member.roles as string[]) || [accountType],
+        affiliations: (member.affiliations as string[]) || [],
+        originSite: (member.origin_site as string) || 'tenone.biz',
+
+        // 접근 권한
+        intraAccess: (member.intra_access as boolean) ?? accountType !== 'member',
+        moduleAccess: (member.module_access as User['moduleAccess']) || [],
         systemAccess: (member.system_access as SystemAccess[]) || [],
+        brandAccess: (member.brand_access as string[]) || [],
+
+        // 프로필
         department: member.department as string | undefined,
         employeeId: member.employee_id as string | undefined,
+        position: member.position as string | undefined,
         phone: member.phone as string | undefined,
         bio: member.bio as string | undefined,
         company: member.company as string | undefined,
         createdAt: member.created_at as string,
         newsletterSubscribed: member.newsletter_subscribed as boolean | undefined,
+
+        // 포인트
+        totalPoints: member.total_points as number | undefined,
+        grade: member.grade as string | undefined,
     };
 }
 
@@ -314,8 +332,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const isStaff = user?.accountType === 'staff';
-    const isInternal = user?.accountType === 'staff' || user?.accountType === 'partner' || user?.accountType === 'junior-partner';
-    const canAccessIntra = !!user && user.accountType !== 'member';
+    const isInternal = user?.accountType === 'staff' || user?.accountType === 'partner' || user?.accountType === 'alliance';
+    const canAccessIntra = !!user && (user.intraAccess ?? user.accountType !== 'member');
 
     const hasAccess = useCallback((system: SystemAccess) => {
         if (!user) return false;
@@ -326,11 +344,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hasModuleAccess = useCallback((module: IntraModule) => {
         if (!user) return false;
         if (user.role === 'Admin') return true;
-        const allowed = accountTypeAccess[user.accountType] || [];
-        if (module === 'myverse' && allowed.includes('myverse-full')) return true;
-        if (module === 'comm' && allowed.includes('comm-full')) return true;
-        if (module === 'wiki' && allowed.includes('wiki-full')) return true;
-        return allowed.includes(module);
+        // v2: DB module_access 우선
+        if (user.moduleAccess && user.moduleAccess.length > 0) {
+            return user.moduleAccess.includes(module);
+        }
+        // fallback: accountType 기반 기본값
+        const { defaultModuleAccess } = require('@/types/auth');
+        const defaults = defaultModuleAccess[user.accountType] || [];
+        return defaults.includes(module);
     }, [user]);
 
     return (
