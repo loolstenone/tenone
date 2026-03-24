@@ -23,9 +23,9 @@ export default function MadLeapAboutPage() {
     return (
         <>
             {/* Hero */}
-            <section className="bg-black text-white py-24 md:py-32">
+            <section className="bg-black text-white py-16 md:py-24 md:py-32">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">매드립 소개</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-6">매드립 소개</h1>
                     <p className="text-neutral-400 text-lg">
                         Marketing · Advertising · Digital — Leap!
                     </p>

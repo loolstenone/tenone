@@ -97,9 +97,9 @@ export default function MadLeapHome() {
             </section>
 
             {/* ── About Preview ── */}
-            <section className="bg-black text-white py-24 md:py-32">
+            <section className="bg-black text-white py-16 md:py-24 md:py-32">
                 <div className="mx-auto max-w-3xl px-6 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-10">About.</h2>
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-10">About.</h2>
                     <div className="space-y-6 text-base md:text-lg leading-relaxed text-neutral-300">
                         <p className="text-[#00B8FF] font-semibold text-lg md:text-xl">
                             우리의 시작은 기웃거림이었습니다.
@@ -130,7 +130,7 @@ export default function MadLeapHome() {
             </section>
 
             {/* ── Activities ── */}
-            <section className="relative bg-black text-white py-24 md:py-32 overflow-hidden">
+            <section className="relative bg-black text-white py-16 md:py-24 md:py-32 overflow-hidden">
                 {/* Particle-style bg */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-900/50 to-black" />
                 <div className="absolute inset-0 opacity-20">
@@ -141,7 +141,7 @@ export default function MadLeapHome() {
                 </div>
 
                 <div className="relative z-10 mx-auto max-w-5xl px-6">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <h2 className="text-3xl md:text-5xl font-bold mb-4">
                             우리들의 미친 도약
                         </h2>
@@ -150,7 +150,7 @@ export default function MadLeapHome() {
                         </p>
                     </div>
 
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <h3 className="text-2xl md:text-3xl font-bold mb-2">Activities.</h3>
                         <p className="text-neutral-400 text-sm md:text-base max-w-2xl mx-auto">
                             매드립은 역량강화와 조직 운영을 위한 체계적인 구성을 갖추었습니다.<br />
@@ -174,10 +174,10 @@ export default function MadLeapHome() {
             </section>
 
             {/* ── 5대 운영 가치 ── */}
-            <section className="bg-white py-24 md:py-32">
+            <section className="bg-white py-16 md:py-24 md:py-32">
                 <div className="mx-auto max-w-5xl px-6">
-                    <div className="mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold">MADLeap</h2>
+                    <div className="mb-10 md:mb-16">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold">MADLeap</h2>
                         <p className="text-xl md:text-2xl font-semibold text-neutral-600 mt-1">5대 운영 가치</p>
                     </div>
 

@@ -23,12 +23,12 @@ export default function HomePage() {
 
             {/* Hero — 좌측 정렬, 비대칭 */}
             <section className="min-h-screen flex items-center px-6 lg:px-0">
-                <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                     <div className="lg:pl-8">
                         <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-6">
                             Value Connector
                         </p>
-                        <h1 className="text-5xl md:text-7xl font-light tracking-tight leading-[1.1]">
+                        <h1 className="text-3xl md:text-5xl lg:text-7xl font-light tracking-tight leading-[1.1]">
                             가치로 연결된
                             <br />
                             <span className="font-bold">거대한 세계관</span>을
@@ -38,7 +38,7 @@ export default function HomePage() {
                         <p className="mt-8 text-base tn-text-sub leading-relaxed">
                             기업과 사회의 문제를 해결하는 다양한 프로젝트를 합니다.
                         </p>
-                        <div className="mt-10 flex flex-wrap gap-4">
+                        <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
                             <Link href="/about?tab=universe"
                                 className="group px-8 py-3.5 text-sm tracking-wide transition-colors flex items-center gap-2"
                                 style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
@@ -75,7 +75,7 @@ export default function HomePage() {
             <section className="py-24 px-6 tn-bg-alt">
                 <div className="max-w-5xl mx-auto text-center">
                     <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-4">Join the Universe</p>
-                    <h2 className="text-3xl font-bold tracking-tight mb-3">
+                    <h2 className="text-xl md:text-3xl font-bold tracking-tight mb-3">
                         프로젝트 <span className="tn-text-sub">크루</span>를 모집합니다.
                     </h2>
                     <p className="text-base tn-text-sub mb-12 max-w-2xl mx-auto leading-relaxed">
@@ -123,12 +123,12 @@ export default function HomePage() {
             </section>
 
             {/* Core Values — 다크 섹션 */}
-            <section className="tn-card py-32 px-6">
+            <section className="tn-card py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         Core Value
                     </p>
-                    <h2 className="text-3xl md:text-4xl font-light">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
                         변하지 않을 가치에 집중하여<br />
                         <span className="font-bold">빠르게 가치를 창출한다</span>
                     </h2>
@@ -141,7 +141,7 @@ export default function HomePage() {
                         ].map((val) => (
                             <div key={val.num} className="bg-[var(--tn-surface)] p-10 md:p-12">
                                 <span className="text-sm text-[var(--tn-text-sub)] font-mono">{val.num}</span>
-                                <h3 className="text-3xl font-bold mt-4 flex items-center gap-3">{val.icon}{val.title}</h3>
+                                <h3 className="text-xl md:text-3xl font-bold mt-4 flex items-center gap-3">{val.icon}{val.title}</h3>
                                 <p className="text-sm tn-text-sub mt-1">{val.en}</p>
                                 <p className="text-sm tn-text-sub mt-6 leading-relaxed">{val.desc}</p>
                             </div>
@@ -151,14 +151,14 @@ export default function HomePage() {
             </section>
 
             {/* Works — 화이트 섹션 */}
-            <section className="py-32 px-6">
+            <section className="py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-16">
+                    <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                                 Works
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-light">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
                                 우리가 <span className="font-bold">해온 일들</span>
                             </h2>
                         </div>
@@ -199,14 +199,14 @@ export default function HomePage() {
             </section>
 
             {/* Latest — 이미지 카드, 라이트 그레이 배경 */}
-            <section className="py-32 px-6 tn-bg-alt">
+            <section className="py-20 md:py-32 px-6 tn-bg-alt">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-16">
+                    <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                                 Latest
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-light">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
                                 새로운 <span className="font-bold">소식</span>
                             </h2>
                         </div>
@@ -235,8 +235,8 @@ export default function HomePage() {
             </section>
 
             {/* CTA — 다크 섹션 */}
-            <section className="tn-card py-32 px-6">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <section className="tn-card py-20 md:py-32 px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
                     <div>
                         <h2 className="text-3xl md:text-5xl font-light leading-tight">
                             Are you ready to build<br />
@@ -246,7 +246,7 @@ export default function HomePage() {
                             당신의 작은 세계가 연결되어<br />
                             하나의 거대한 세계관을 만듭니다.
                         </p>
-                        <div className="mt-10 flex gap-4">
+                        <div className="mt-10 flex flex-col sm:flex-row gap-4">
                             <Link href="/contact" className="px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors">
                                 Join the Universe
                             </Link>

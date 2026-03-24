@@ -50,7 +50,7 @@ export default function WorkspacePage() {
               <Sparkles size={14} />
               SmarComm. Workspace
             </div>
-            <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl">
+            <h1 className="mb-4 text-xl md:text-3xl lg:text-5xl font-bold text-white">
               마케팅의 모든 것,<br />하나의 워크스페이스에서
             </h1>
             <p className="mx-auto mb-8 max-w-lg text-[15px] leading-relaxed text-white/50">

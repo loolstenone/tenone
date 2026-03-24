@@ -17,7 +17,7 @@ export default function RooKBoardPage() {
             <div className="mx-auto max-w-7xl">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold mb-2">Free Board</h1>
+                        <h1 className="text-2xl md:text-4xl font-bold mb-2">Free Board</h1>
                         <p className="text-neutral-600">
                             누구나 작성할 수 있는 자랑게시판입니다. 성공작도 망작도 괜찮습니다.
                         </p>

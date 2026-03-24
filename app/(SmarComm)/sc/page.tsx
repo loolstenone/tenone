@@ -118,7 +118,7 @@ export default function SCLandingPage() {
             <p className="mb-5 text-[13px] font-medium tracking-widest text-white/40 uppercase">
               Smart Marketing Communication
             </p>
-            <h1 className="mb-5 text-3xl font-bold leading-tight tracking-tight text-white md:text-[44px] md:leading-[1.2]">
+            <h1 className="mb-5 text-xl md:text-3xl font-bold leading-tight tracking-tight text-white md:text-[44px] md:leading-[1.2]">
               {headline.main}<br />
               <span className="text-white/80">{headline.accent}</span>
             </h1>

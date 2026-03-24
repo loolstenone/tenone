@@ -18,7 +18,7 @@ export default function ShopPage() {
         <div>
             <section className="py-12 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h1 className="text-3xl font-bold text-neutral-900 mb-2">바닥 상회</h1>
+                    <h1 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2">바닥 상회</h1>
                     <p className="text-neutral-500 text-sm mb-8">마케터를 위한 무료 템플릿과 툴</p>
 
                     {/* Category Filter */}

@@ -14,10 +14,10 @@ export default function RooKiePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#282828] py-24 px-6">
+            <section className="bg-[#282828] py-16 md:py-24 px-6">
                 <div className="mx-auto max-w-4xl text-center">
                     <p className="text-[#00d255] text-sm font-medium tracking-widest mb-4">ROOKIE PROGRAM</p>
-                    <h1 className="text-white text-4xl md:text-6xl font-bold mb-6">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-6xl font-bold mb-6">
                         I want You<br />For Rookie
                     </h1>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto leading-relaxed">
@@ -39,7 +39,7 @@ export default function RooKiePage() {
             {/* Benefits */}
             <section className="py-20 px-6 bg-white">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-center mb-12">RooKie가 되면</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">RooKie가 되면</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {benefits.map((b) => (
                             <div key={b.title} className="flex gap-4 p-6 bg-neutral-50 rounded-lg">
@@ -59,7 +59,7 @@ export default function RooKiePage() {
             {/* Process */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-4xl">
-                    <h2 className="text-3xl font-bold text-center mb-12">지원 과정</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">지원 과정</h2>
                     <div className="space-y-6">
                         {["지원서 제출 (포트폴리오 첨부)", "AI 과제 테스트 (1주)", "면접 (온라인)", "합류 & 온보딩"].map((step, i) => (
                             <div key={i} className="flex items-center gap-4 p-5 bg-white rounded-lg border border-neutral-200">

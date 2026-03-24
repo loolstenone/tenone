@@ -132,9 +132,9 @@ export default function AdminPage() {
                     <td className="px-4 py-3 text-text-muted text-xs">{post.publishedAt}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <a href={`/blog/${post.slug}`} target="_blank" className="text-text-muted hover:text-text"><ExternalLink size={13} /></a>
-                        <button onClick={() => openEditor(post)} className="text-text-muted hover:text-text"><Edit3 size={13} /></button>
-                        <button onClick={() => deletePost(post.id)} className="text-text-muted hover:text-danger"><Trash2 size={13} /></button>
+                        <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-text" aria-label={`${post.title} 새 탭에서 열기`}><ExternalLink size={13} /></a>
+                        <button onClick={() => openEditor(post)} className="text-text-muted hover:text-text" aria-label={`${post.title} 수정`}><Edit3 size={13} /></button>
+                        <button onClick={() => deletePost(post.id)} className="text-text-muted hover:text-danger" aria-label={`${post.title} 삭제`}><Trash2 size={13} /></button>
                       </div>
                     </td>
                   </tr>
@@ -171,7 +171,7 @@ export default function AdminPage() {
                   <td className="px-4 py-3 text-xs text-text-muted">{page.path}</td>
                   <td className="px-4 py-3 text-center"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">{page.status}</span></td>
                   <td className="px-4 py-3 text-right">
-                    <a href={page.path} target="_blank" className="text-text-muted hover:text-text"><ExternalLink size={13} /></a>
+                    <a href={page.path} target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-text" aria-label={`${page.name} 새 탭에서 열기`}><ExternalLink size={13} /></a>
                   </td>
                 </tr>
               ))}

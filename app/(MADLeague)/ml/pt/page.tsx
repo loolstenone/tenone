@@ -20,12 +20,12 @@ export default function PtPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         Competition PT
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">경쟁 PT</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">경쟁 PT</h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
                         실제 기업의 마케팅 과제를 바탕으로 팀 단위 경쟁 프레젠테이션을 진행합니다.
                         실전과 동일한 환경에서 마케팅 역량을 극대화하세요.
@@ -108,7 +108,7 @@ export default function PtPage() {
                                 {galleryPosts.map((post) => (
                                     <div key={post.id} className="aspect-[4/3] bg-neutral-100 rounded-lg overflow-hidden relative group">
                                         <div className="w-full h-full bg-gradient-to-br from-[#D32F2F]/10 to-neutral-200 flex items-center justify-center">
-                                            <span className="text-3xl font-bold text-[#D32F2F]/20">MAD</span>
+                                            <span className="text-xl md:text-3xl font-bold text-[#D32F2F]/20">MAD</span>
                                         </div>
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                                             <p className="text-white text-xs font-medium">{post.title}</p>

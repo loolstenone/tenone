@@ -100,9 +100,9 @@ export default function NatureBoxHome() {
             {/* ── 자연함 이야기 (About) ── */}
             <section id="about" className="py-20 px-6 bg-neutral-50 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#6B8E23] mb-4 block">Our Story</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             자연함 이야기
                         </h2>
                         <p className="text-neutral-600 max-w-2xl mx-auto leading-relaxed">
@@ -130,9 +130,9 @@ export default function NatureBoxHome() {
             {/* ── 우리 먹거리 (Products) ── */}
             <section id="products" className="py-20 px-6 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#6B8E23] mb-4 block">Products</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             우리 먹거리
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -169,9 +169,9 @@ export default function NatureBoxHome() {
             {/* ── 정선 이야기 (Jeongseon) ── */}
             <section id="jeongseon" className="py-20 px-6 bg-[#6B8E23]/5 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#6B8E23] mb-4 block">Jeongseon</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             정선 이야기
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -200,7 +200,7 @@ export default function NatureBoxHome() {
                 <div className="mx-auto max-w-4xl">
                     <div className="text-center mb-12">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#6B8E23] mb-4 block">Visit Us</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             오시는 길
                         </h2>
                     </div>

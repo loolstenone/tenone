@@ -7,10 +7,10 @@ export default function RooKAboutPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#282828] py-24 px-6">
+            <section className="bg-[#282828] py-16 md:py-24 px-6">
                 <div className="mx-auto max-w-4xl text-center">
                     <p className="text-[#00d255] text-sm font-medium tracking-widest mb-4">ABOUT</p>
-                    <h1 className="text-white text-4xl md:text-6xl font-bold mb-6">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-6xl font-bold mb-6">
                         AI Creator<br />
                         <span className="text-[#00d255]">RooK</span>
                     </h1>

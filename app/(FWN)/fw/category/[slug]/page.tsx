@@ -35,7 +35,7 @@ export default function FWNCategoryPage() {
             <section className="py-16 px-6 border-b border-neutral-800">
                 <div className="mx-auto max-w-7xl text-center">
                     <span className="text-6xl block mb-4">{cat.emoji}</span>
-                    <h1 className="text-4xl font-bold text-white mb-2">{cat.name}</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{cat.name}</h1>
                     <p className="text-neutral-400">{cat.desc}</p>
                 </div>
             </section>

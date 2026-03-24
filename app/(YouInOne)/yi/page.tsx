@@ -65,7 +65,7 @@ export default function YouInOneHomePage() {
                     <p className="text-[#E53935] font-bold text-sm tracking-widest uppercase mb-6">
                         Project Group
                     </p>
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
                         We are Project Group<br />
                         to solve <span className="text-[#E53935]">Problems</span>
                     </h1>
@@ -100,7 +100,7 @@ export default function YouInOneHomePage() {
             <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-[#171717] mb-3">Idea + Strategy</h2>
+                        <h2 className="text-xl md:text-3xl font-bold text-[#171717] mb-3">Idea + Strategy</h2>
                         <p className="text-neutral-500">문제 해결을 위한 유인원의 핵심 접근법</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -168,7 +168,7 @@ export default function YouInOneHomePage() {
                                     className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#E53935]/30 transition-all"
                                 >
                                     <div className="aspect-[16/10] bg-gradient-to-br from-[#171717] to-neutral-700 flex items-center justify-center">
-                                        <span className="text-3xl font-bold text-white/10">YIO</span>
+                                        <span className="text-xl md:text-3xl font-bold text-white/10">YIO</span>
                                     </div>
                                     <div className="p-5">
                                         <h3 className="font-bold text-[#171717] mb-2 group-hover:text-[#E53935] transition-colors">
@@ -228,7 +228,7 @@ export default function YouInOneHomePage() {
             {/* CTA */}
             <section className="py-20 px-6 bg-[#171717] text-white text-center">
                 <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold mb-4">
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">
                         유인원과 함께<br />
                         세상에 질문을 던져보세요
                     </h2>

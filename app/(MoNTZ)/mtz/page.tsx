@@ -93,7 +93,7 @@ export default function MoNTZHome() {
                                 }`}
                                 style={{ transitionDelay: `${i * 150 + 300}ms` }}
                             >
-                                <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                                <span className="text-xl md:text-3xl lg:text-4xl lg:text-5xl font-bold text-white">
                                     {item.letter}
                                 </span>
                                 <span className="text-2xl md:text-3xl lg:text-4xl font-light text-neutral-300">

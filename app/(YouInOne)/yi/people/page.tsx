@@ -21,10 +21,10 @@ export default function YouInOnePeoplePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] py-24 px-6">
+            <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">PEOPLE</p>
-                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6">
                         유인원의 사람들
                     </h1>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ export default function YouInOnePeoplePage() {
                                 className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all text-center"
                             >
                                 <div className="w-20 h-20 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
-                                    <span className="text-3xl">{m.emoji}</span>
+                                    <span className="text-xl md:text-3xl">{m.emoji}</span>
                                 </div>
                                 <h3 className="text-lg font-bold group-hover:text-[#E53935] transition-colors">{m.name}</h3>
                                 <p className="text-sm text-[#E53935] font-medium mt-1">{m.role}</p>

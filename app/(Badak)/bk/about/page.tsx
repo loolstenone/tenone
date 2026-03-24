@@ -24,7 +24,7 @@ export default function AboutPage() {
             {/* Hero */}
             <section className="py-20 px-6 text-center">
                 <div className="mx-auto max-w-3xl">
-                    <h1 className="text-5xl md:text-7xl font-black text-neutral-900 mb-6">Badak</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-neutral-900 mb-6">Badak</h1>
                     <p className="text-lg text-neutral-500 mb-2">마케팅 광고 네트워킹 커뮤니티</p>
                     <p className="text-neutral-400 text-sm">약한 연결 고리가 만드는 강력한 기회</p>
                 </div>

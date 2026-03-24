@@ -39,7 +39,7 @@ export default function OgamjaPrograms() {
             {/* Hero */}
             <section className="py-20 px-6 bg-gradient-to-b from-[#F5C518]/5 to-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">프로그램</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">프로그램</h1>
                     <p className="text-lg text-neutral-500">
                         감자들이 함께 성장하는 세 가지 프로그램을 운영합니다.
                     </p>
@@ -83,7 +83,7 @@ export default function OgamjaPrograms() {
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-4xl text-center">
                     <span className="text-6xl block mb-4">🌱</span>
-                    <h2 className="text-3xl font-bold mb-4">함께 자라는 감자밭</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">함께 자라는 감자밭</h2>
                     <p className="text-neutral-500 mb-8">
                         혼자 쓰는 글은 일기지만, 함께 나누면 이야기가 됩니다.<br />
                         공감자의 프로그램과 함께 성장해보세요.

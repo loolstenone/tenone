@@ -16,7 +16,7 @@ export default function RooKArtistPage() {
     return (
         <div className="py-12 px-6">
             <div className="mx-auto max-w-7xl">
-                <h1 className="text-4xl font-bold mb-2">AI Artist</h1>
+                <h1 className="text-2xl md:text-4xl font-bold mb-2">AI Artist</h1>
                 <p className="text-neutral-600 mb-10">
                     루크 소속 인공지능 모델들입니다. 당신의 브랜드와 콘텐츠를 위해서라면 최선을 다합니다.
                 </p>

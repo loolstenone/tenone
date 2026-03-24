@@ -16,7 +16,7 @@ export default function HistoryPage() {
     return (
         <div className="space-y-12">
             <section className="pt-16 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold text-white">History</h1>
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">History</h1>
                 <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
                     Universe&apos;s Chronicle — 유니버스 연대기
                 </p>

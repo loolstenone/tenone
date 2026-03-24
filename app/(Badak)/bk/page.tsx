@@ -81,7 +81,7 @@ export default function BadakHome() {
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-3xl text-center">
                     <p className="text-neutral-500 text-sm mb-6">약한 연결 고리가 만드는 강력한 기회</p>
-                    <h1 className="text-7xl md:text-9xl font-black text-neutral-900 mb-10 tracking-tight">
+                    <h1 className="text-4xl md:text-7xl lg:text-9xl font-black text-neutral-900 mb-10 tracking-tight">
                         Badak
                     </h1>
 
@@ -157,7 +157,7 @@ export default function BadakHome() {
 
             {/* ── Badak Pick + Badak Now ── */}
             <section className="py-16 px-6">
-                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
                     {/* Badak Pick */}
                     <div>
                         <h2 className="text-2xl font-bold text-neutral-900 mb-6">Badak Pick</h2>
@@ -254,7 +254,7 @@ export default function BadakHome() {
 
             {/* ── HeRo + Jakka ── */}
             <section className="py-16 px-6">
-                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
                     {/* HeRo 캐릭터 영역 */}
                     <div className="flex flex-col items-center justify-center">
                         <div className="w-32 h-32 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
@@ -317,7 +317,7 @@ export default function BadakHome() {
 
             {/* ── 바카데미 + 레퍼런스 창고 ── */}
             <section className="py-16 px-6">
-                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
                     {/* 바카데미 */}
                     <div>
                         <h2 className="text-xl font-bold text-neutral-900 mb-1">

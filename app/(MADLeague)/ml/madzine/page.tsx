@@ -12,12 +12,12 @@ export default function MadzinePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         MADzine
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">매드 진</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">매드 진</h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
                         MAD League의 활동과 이야기를 기록합니다.
                         경쟁 PT, 워크숍, 네트워킹 현장의 생생한 모습을 만나보세요.

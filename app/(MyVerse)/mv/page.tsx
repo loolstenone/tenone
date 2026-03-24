@@ -27,14 +27,14 @@ function HeroSection() {
                 <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] rounded-full bg-purple-500/10 blur-[80px]" />
             </div>
 
-            <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-32 lg:py-44">
+            <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-20 md:py-32 lg:py-44">
                 <div className="text-center max-w-3xl mx-auto">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-neutral-300 mb-8">
                         <Orbit className="h-4 w-4 text-indigo-400" />
                         Ten:One™ Universe
                     </div>
 
-                    <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-tight">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-7xl font-bold tracking-tight leading-tight">
                         나를 중심으로 한
                         <br />
                         <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -93,10 +93,10 @@ function AboutSection() {
     return (
         <section id="about" className="py-24 lg:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
                     <div>
                         <p className="text-indigo-400 font-medium text-sm mb-3">ABOUT MY UNIVERSE</p>
-                        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                             정보 생산 권력의 이동
                         </h2>
                         <div className="mt-6 space-y-4 text-neutral-400 leading-relaxed">
@@ -181,9 +181,9 @@ function ValuesSection() {
     return (
         <section id="values" className="py-24 lg:py-32 bg-white/[0.02]">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <p className="text-indigo-400 font-medium text-sm mb-3">CORE VALUES</p>
-                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                         4가지 핵심 가치
                     </h2>
                     <p className="mt-4 text-neutral-400 max-w-xl mx-auto">
@@ -241,7 +241,7 @@ function AgentSection() {
     return (
         <section id="agent" className="py-24 lg:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
                     <div className="order-2 lg:order-1">
                         <div className="space-y-6">
                             {agentFeatures.map((feature) => (
@@ -259,7 +259,7 @@ function AgentSection() {
                     </div>
                     <div className="order-1 lg:order-2">
                         <p className="text-indigo-400 font-medium text-sm mb-3">AI AGENT</p>
-                        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                             당신만의
                             <br />
                             AI 에이전트
@@ -311,9 +311,9 @@ function RoadmapSection() {
     return (
         <section id="roadmap" className="py-24 lg:py-32 bg-white/[0.02]">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <p className="text-indigo-400 font-medium text-sm mb-3">ROADMAP</p>
-                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                         개발 로드맵
                     </h2>
                     <p className="mt-4 text-neutral-400 max-w-xl mx-auto">
@@ -370,7 +370,7 @@ function WaitlistSection() {
 
                     <div className="relative p-10 rounded-3xl bg-white/[0.03] border border-white/10">
                         <Orbit className="h-10 w-10 text-indigo-400 mx-auto mb-6" />
-                        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-4">
                             나만의 우주를 만들 준비가 되셨나요?
                         </h2>
                         <p className="text-neutral-400 mb-8 max-w-md mx-auto">

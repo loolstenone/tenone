@@ -21,7 +21,7 @@ export default function RooKWorksPage() {
     return (
         <div className="py-12 px-6">
             <div className="mx-auto max-w-7xl">
-                <h1 className="text-4xl font-bold mb-2">Works</h1>
+                <h1 className="text-2xl md:text-4xl font-bold mb-2">Works</h1>
                 <p className="text-neutral-600 mb-8">루크가 작업한 제작물입니다. 밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다.</p>
 
                 {/* Category Filter */}
@@ -44,7 +44,7 @@ export default function RooKWorksPage() {
                             className="break-inside-avoid bg-neutral-900 rounded-lg overflow-hidden group cursor-pointer hover:ring-2 hover:ring-[#00d255] transition-all"
                         >
                             <div className={`flex items-center justify-center ${i % 3 === 0 ? 'h-80' : i % 3 === 1 ? 'h-56' : 'h-64'}`}>
-                                <span className="text-7xl">{work.emoji}</span>
+                                <span className="text-5xl md:text-7xl">{work.emoji}</span>
                             </div>
                             <div className="p-4">
                                 <p className="text-white font-medium group-hover:text-[#00d255] transition-colors">{work.title}</p>

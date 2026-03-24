@@ -13,7 +13,7 @@ export default function FWNNetwork() {
         <div>
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4">네트워크 등록</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-4">네트워크 등록</h1>
                     <p className="text-neutral-400 mb-12">
                         FWN 네트워크에 등록하고 글로벌 패션 산업과 연결되세요.
                     </p>

@@ -57,7 +57,7 @@ export default function YouInOnePortfolioPage() {
         <div className="py-12 px-6">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-10">
-                    <h1 className="text-4xl font-bold mb-2">Portfolio</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold mb-2">Portfolio</h1>
                     <p className="text-neutral-600">유인원이 진행한 프로젝트들입니다. 모든 프로젝트는 &ldquo;왜?&rdquo;라는 질문에서 시작합니다.</p>
                 </div>
 
@@ -86,7 +86,7 @@ export default function YouInOnePortfolioPage() {
                             className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#E53935]/30 transition-all"
                         >
                             <div className="aspect-video bg-gradient-to-br from-[#171717] to-neutral-700 flex items-center justify-center">
-                                <span className="text-7xl">{p.emoji}</span>
+                                <span className="text-5xl md:text-7xl">{p.emoji}</span>
                             </div>
                             <div className="p-6">
                                 <span className="text-xs text-[#E53935] font-medium">{p.category}</span>

@@ -114,7 +114,7 @@ export default function DomoHome() {
             {/* ── 핵심 서비스 ── */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2">핵심 서비스</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2">핵심 서비스</h2>
                     <p className="text-neutral-500 mb-10">당신의 인생 2회차를 함께 준비합니다</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {services.map((svc) => (
@@ -146,7 +146,7 @@ export default function DomoHome() {
                 <div className="mx-auto max-w-5xl">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-3xl font-bold text-neutral-900 mb-1">다가오는 모임</h2>
+                            <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-1">다가오는 모임</h2>
                             <p className="text-neutral-500 text-sm">함께하는 시간이 기회가 됩니다</p>
                         </div>
                         <Link href="/dm/events" className="text-sm text-[#7F1146] hover:text-[#5C0C33] font-medium flex items-center gap-1 transition-colors">
@@ -176,7 +176,7 @@ export default function DomoHome() {
                 <div className="mx-auto max-w-5xl">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-3xl font-bold text-neutral-900 mb-1">인사이트</h2>
+                            <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-1">인사이트</h2>
                             <p className="text-neutral-500 text-sm">경험에서 우러나온 비즈니스 지혜</p>
                         </div>
                         <Link href="/dm/insights" className="text-sm text-[#7F1146] hover:text-[#5C0C33] font-medium flex items-center gap-1 transition-colors">
@@ -202,7 +202,7 @@ export default function DomoHome() {
             {/* ── 멤버 후기 ── */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2 text-center">멤버 이야기</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2 text-center">멤버 이야기</h2>
                     <p className="text-neutral-500 text-center mb-12">Domo와 함께하는 분들의 이야기</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {memberTestimonials.map((member, i) => (
@@ -224,7 +224,7 @@ export default function DomoHome() {
             {/* ── CTA ── */}
             <section className="py-20 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white text-center">
                 <div className="mx-auto max-w-2xl">
-                    <h2 className="text-3xl font-bold mb-4">함께 도모합시다</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">함께 도모합시다</h2>
                     <p className="text-white/70 mb-8 leading-relaxed">
                         돈은 있는데 집에만 있기 싫으신가요?<br />
                         경험과 네트워크를 활용할 새로운 무대가 여기 있습니다.

@@ -68,7 +68,7 @@ export default function CareerPage() {
                                 Career Roadmap
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             C-Level을 향한<br />
                             <span className="text-amber-500">성장 경로</span>를 설계합니다
                         </h1>
@@ -104,7 +104,7 @@ export default function CareerPage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">직무별 경로</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">직무별 경로</h2>
                         <p className="text-neutral-500">4가지 C-Level 트랙에서 나의 경로를 선택하세요</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

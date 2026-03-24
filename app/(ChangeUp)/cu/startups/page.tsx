@@ -98,7 +98,7 @@ export default function StartupsPage() {
             {/* Hero */}
             <section className="bg-gradient-to-br from-[#0F1F2E] to-[#1a3a52] text-white py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h1 className="text-4xl sm:text-5xl font-black">스타트업</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black">스타트업</h1>
                     <p className="mt-4 text-lg text-neutral-300 max-w-2xl">
                         ChangeUp에서 탄생한 청소년·대학생 스타트업들.
                         작은 아이디어에서 시작된 큰 변화를 만나보세요.

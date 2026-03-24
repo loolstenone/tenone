@@ -22,10 +22,10 @@ export default function YouInOneAboutPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] py-24 px-6">
+            <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">ABOUT</p>
-                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                         Project Group of<br />
                         Thinking Apes.<br />
                         <span className="text-[#E53935]">We Ask Why?</span>
@@ -90,7 +90,7 @@ export default function YouInOneAboutPage() {
             {/* Brand Story */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold mb-8 text-center">왜라고 질문하는 유인원</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-8 text-center">왜라고 질문하는 유인원</h2>
                     <div className="bg-white p-8 rounded-xl border border-neutral-200 mb-10">
                         <p className="text-neutral-600 leading-relaxed mb-6">
                             유인원(類人猿) — 사람과 닮은 동물. 진화론에서 인간으로 진화하기 직전의 존재.
@@ -124,7 +124,7 @@ export default function YouInOneAboutPage() {
             {/* Core Values */}
             <section className="py-20 px-6 bg-white">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center mb-12">Core Value</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">Core Value</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {coreValues.map((v) => (
                             <div key={v.num} className="p-6 bg-neutral-50 rounded-xl">
@@ -140,7 +140,7 @@ export default function YouInOneAboutPage() {
             {/* Behavior */}
             <section className="py-20 px-6 bg-[#171717]">
                 <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold text-white text-center mb-12">Behavior</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white text-center mb-12">Behavior</h2>
                     <div className="space-y-4">
                         {behaviors.map((b, i) => (
                             <div key={i} className="flex items-center gap-4 p-5 border border-neutral-700 rounded-lg">

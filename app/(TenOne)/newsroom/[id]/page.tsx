@@ -46,7 +46,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
                         </span>
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{post.title}</h1>
+                    <h1 className="text-xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4">{post.title}</h1>
                     <p className="text-lg tn-text-sub leading-relaxed mb-8">{post.summary}</p>
 
                     <div className="flex items-center gap-3 mb-10 pb-8 border-b tn-border">

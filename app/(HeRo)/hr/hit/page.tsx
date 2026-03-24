@@ -59,7 +59,7 @@ export default function HitProgramPage() {
                                 HIT Program
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             Hidden Intelligence<br />
                             <span className="text-amber-500">Talent</span>
                         </h1>
@@ -81,7 +81,7 @@ export default function HitProgramPage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">선발 과정</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">선발 과정</h2>
                         <p className="text-neutral-500">3단계 통합 진단으로 숨겨진 인재를 발굴합니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -122,7 +122,7 @@ export default function HitProgramPage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">HIT 프로그램 혜택</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">HIT 프로그램 혜택</h2>
                         <p className="text-neutral-500">진단 완료 후 받을 수 있는 혜택</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -145,7 +145,7 @@ export default function HitProgramPage() {
             <section className="bg-amber-500">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
                     <ClipboardCheck className="h-12 w-12 text-white mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-white mb-3">HIT 진단 시작하기</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white mb-3">HIT 진단 시작하기</h2>
                     <p className="text-amber-100 mb-8 max-w-lg mx-auto">
                         20문항 통합 진단으로 나의 숨겨진 잠재력을 발견하세요. 소요 시간 약 10분.
                     </p>

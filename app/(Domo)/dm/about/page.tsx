@@ -23,7 +23,7 @@ export default function DomoAbout() {
             {/* Hero */}
             <section className="py-24 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-5xl md:text-6xl font-black mb-6">도모(Domo)란?</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6">도모(Domo)란?</h1>
                     <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
                         &lsquo;도모하다&rsquo; — 어떤 일을 이루기 위하여 미리 대책과 방법을 세움.<br />
                         인생 후반전을 함께 기획하고, 준비하고, 실행하는 플랫폼입니다.
@@ -34,7 +34,7 @@ export default function DomoAbout() {
             {/* 우리가 하는 일 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-4">왜 Domo인가?</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-4">왜 Domo인가?</h2>
                     <p className="text-neutral-500 mb-10">기존 시니어 모임과 다른 점</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {whyDomo.map((item) => (
@@ -55,7 +55,7 @@ export default function DomoAbout() {
             {/* 타임라인 */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-3xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-10 text-center">로드맵</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-10 text-center">로드맵</h2>
                     <div className="space-y-8">
                         {timeline.map((item, i) => (
                             <div key={i} className="flex gap-6">
@@ -79,7 +79,7 @@ export default function DomoAbout() {
             {/* 대상 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-4xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-10 text-center">이런 분들을 위해 만들었습니다</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-10 text-center">이런 분들을 위해 만들었습니다</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
                             "정년을 앞두고 은퇴 후 계획을 세우고 싶은 분",

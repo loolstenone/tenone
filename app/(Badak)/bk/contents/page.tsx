@@ -22,7 +22,7 @@ export default function ContentsPage() {
             {/* Header */}
             <section className="py-12 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h1 className="text-3xl font-bold text-neutral-900 mb-6">콘텐츠</h1>
+                    <h1 className="text-xl md:text-3xl font-bold text-neutral-900 mb-6">콘텐츠</h1>
 
                     {/* Category Filter */}
                     <div className="flex flex-wrap gap-2 mb-8">

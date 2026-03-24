@@ -152,7 +152,7 @@ export default function ScanPage() {
           <div className="mb-6 rounded-2xl border border-border bg-white p-4 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                {result.faviconUrl && <img src={result.faviconUrl} alt="" width={32} height={32} className="rounded-lg sm:h-10 sm:w-10 sm:rounded-xl" />}
+                {result.faviconUrl && <img src={result.faviconUrl} alt={`${result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')} 파비콘`} width={32} height={32} className="rounded-lg sm:h-10 sm:w-10 sm:rounded-xl" />}
                 <div>
                   <div className="text-sm font-semibold text-text sm:text-base">{result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</div>
                   <div className="text-xs text-text-muted">SmarComm. Index</div>
@@ -266,7 +266,7 @@ export default function ScanPage() {
                 return (
                   <div key={i} className={`rounded-xl border p-5 ${i === 0 ? 'border-text/20 bg-surface' : 'border-border'}`}>
                     <div className="mb-3 flex items-center gap-2">
-                      {r.faviconUrl && <img src={r.faviconUrl} alt="" width={24} height={24} className="rounded" />}
+                      {r.faviconUrl && <img src={r.faviconUrl} alt={`${r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')} 파비콘`} width={24} height={24} className="rounded" />}
                       <span className="text-sm font-semibold text-text">{r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
                       {i === 0 && <span className="rounded bg-text/10 px-1.5 py-0.5 text-[9px] font-bold text-text">내 사이트</span>}
                     </div>

@@ -34,7 +34,7 @@ export default function DomoNetwork() {
             {/* Hero */}
             <section className="py-24 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-5xl md:text-6xl font-black mb-6">네트워크</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6">네트워크</h1>
                     <p className="text-lg text-white/70 max-w-2xl mx-auto">
                         같은 뜻, 같은 세대.<br />
                         경험과 지혜를 나누는 시니어 비즈니스 네트워크.
@@ -45,7 +45,7 @@ export default function DomoNetwork() {
             {/* 네트워크 그룹 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2">네트워크 그룹</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2">네트워크 그룹</h2>
                     <p className="text-neutral-500 mb-10">관심사와 목적에 맞는 그룹에 참여하세요</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {networkGroups.map((group) => (
@@ -75,7 +75,7 @@ export default function DomoNetwork() {
             {/* 멤버 프로필 */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2">멤버 프로필</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2">멤버 프로필</h2>
                     <p className="text-neutral-500 mb-10">각 분야 전문가들이 함께합니다 (가명 표시)</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {featuredMembers.map((m, i) => (
@@ -99,7 +99,7 @@ export default function DomoNetwork() {
             {/* 지역 네트워크 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2">지역 네트워크</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2">지역 네트워크</h2>
                     <p className="text-neutral-500 mb-10">가까운 곳에서 만나는 비즈니스 동료</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                         {regions.map((r) => (

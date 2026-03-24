@@ -36,7 +36,7 @@ export function OgamjaHeader() {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
                 <Link href="/0g" className="shrink-0 flex items-center gap-2">
-                    <span className="text-3xl">🥔</span>
+                    <span className="text-xl md:text-3xl">🥔</span>
                     <span className="text-xl font-bold text-neutral-900" style={{ fontFamily: "sans-serif" }}>
                         공감자
                     </span>

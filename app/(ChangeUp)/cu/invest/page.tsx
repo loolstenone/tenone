@@ -108,7 +108,7 @@ export default function InvestPage() {
                         <HandCoins className="w-4 h-4 text-[#1AAD64]" />
                         <span>세상에서 가장 따뜻한 투자</span>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-black">투자 프로그램</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black">투자 프로그램</h1>
                     <p className="mt-4 text-lg text-neutral-300 max-w-2xl">
                         부모, 학교, 지역사회가 청소년의 꿈에 투자합니다.
                         가장 작은 금액이 가장 큰 변화를 만듭니다.

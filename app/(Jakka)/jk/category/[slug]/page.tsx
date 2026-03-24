@@ -135,7 +135,7 @@ export default function CategoryPage() {
                         <ArrowLeft className="h-4 w-4" />
                         포트폴리오
                     </Link>
-                    <h1 className="text-3xl font-light tracking-tight text-neutral-900">
+                    <h1 className="text-xl md:text-3xl font-light tracking-tight text-neutral-900">
                         {data.title}
                     </h1>
                     <p className="mt-2 text-neutral-500 text-sm">{data.description}</p>

@@ -52,14 +52,14 @@ export default function ContentEditorPage() {
                 <div className="flex-1 flex flex-col bg-white border border-neutral-200 overflow-hidden">
                     {/* Formatting Toolbar (Mock) */}
                     <div className="flex items-center gap-1 p-2 border-b border-neutral-200 bg-neutral-50">
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"><Type className="h-4 w-4" /></button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900" aria-label="텍스트 서식"><Type className="h-4 w-4" /></button>
                         <div className="w-px h-4 bg-neutral-200 mx-1"></div>
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 font-bold">B</button>
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 italic">I</button>
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 underline">U</button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 font-bold" aria-label="굵게">B</button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 italic" aria-label="기울임">I</button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 underline" aria-label="밑줄">U</button>
                         <div className="w-px h-4 bg-neutral-200 mx-1"></div>
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"><ImageIcon className="h-4 w-4" /></button>
-                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"><Video className="h-4 w-4" /></button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900" aria-label="이미지 삽입"><ImageIcon className="h-4 w-4" /></button>
+                        <button className="p-2 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900" aria-label="동영상 삽입"><Video className="h-4 w-4" /></button>
                     </div>
 
                     <textarea

@@ -168,7 +168,7 @@ function ReportContent({ scanId }: { scanId: string }) {
           <div className="mb-6 flex items-center gap-5 rounded-2xl border border-border bg-white px-6 py-5">
             <div className="flex flex-col items-center">
               {scan.faviconUrl && !faviconError ? (
-                <img src={scan.faviconUrl} alt="" width={48} height={48} className="rounded-xl" onError={() => setFaviconError(true)} />
+                <img src={scan.faviconUrl} alt={`${displayDomain} 파비콘`} width={48} height={48} className="rounded-xl" onError={() => setFaviconError(true)} />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface text-base font-bold text-text-sub">
                   {displayDomain.charAt(0).toUpperCase()}
@@ -299,7 +299,7 @@ function ReportContent({ scanId }: { scanId: string }) {
 
                   <div className="grid gap-6 lg:grid-cols-5">
                     <div className="lg:col-span-2">
-                      <div className="text-5xl mb-3">{personality.emoji}</div>
+                      <div className="text-3xl md:text-5xl mb-3">{personality.emoji}</div>
                       <div className="text-2xl font-bold text-text mb-1">{personality.name}</div>
                       <div className="text-xs font-mono text-text-muted tracking-widest mb-3">{personality.type}</div>
                       <p className="text-sm leading-relaxed text-text-sub">{personality.description}</p>

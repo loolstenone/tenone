@@ -133,7 +133,7 @@ export default function StationPage() {
                     }}
                 />
                 <div className="relative text-center py-16">
-                    <h1 className="text-4xl md:text-5xl font-light">Station</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-light">Station</h1>
                     <p className="text-neutral-400 mt-2 text-sm">
                         Find any Seoul subway station by name
                     </p>

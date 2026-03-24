@@ -107,7 +107,7 @@ export default function MentoringPage() {
                                 Mentoring
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             현직 전문가와<br />
                             <span className="text-amber-500">1:1 멘토링</span>
                         </h1>
@@ -142,7 +142,7 @@ export default function MentoringPage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-10">
-                        <h2 className="text-3xl font-bold mb-3">멘토 프로필</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">멘토 프로필</h2>
                         <p className="text-neutral-500">분야별 전문가 멘토를 만나보세요</p>
                     </div>
 

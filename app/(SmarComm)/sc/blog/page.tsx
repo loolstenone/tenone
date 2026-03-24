@@ -30,7 +30,7 @@ export default function SCBlogPage() {
       <main className="min-h-screen bg-white pt-20">
         <div className="mx-auto max-w-4xl px-6 py-12">
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-text tracking-tight">블로그</h1>
+            <h1 className="text-xl md:text-3xl font-extrabold text-text tracking-tight">블로그</h1>
             <p className="mt-2 text-sm text-text-muted">마케팅 인사이트, 실전 사례, AI 트렌드를 공유합니다</p>
           </div>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">

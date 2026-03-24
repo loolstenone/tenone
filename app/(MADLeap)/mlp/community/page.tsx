@@ -24,7 +24,7 @@ export default function MadLeapCommunityPage() {
             {/* Hero */}
             <section className="bg-black text-white py-20 md:py-24">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">커뮤니티</h1>
+                    <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-4">커뮤니티</h1>
                     <p className="text-neutral-400">리퍼들의 소통 공간</p>
                 </div>
             </section>

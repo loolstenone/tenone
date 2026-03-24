@@ -25,12 +25,12 @@ export default function AboutPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         About MAD League
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">
                         MAD League
                     </h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">

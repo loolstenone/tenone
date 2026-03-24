@@ -26,7 +26,7 @@ export default function MadLeagueHomePage() {
                     <p className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-4">
                         Match &middot; Act &middot; Develop
                     </p>
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
                         실전 만큼 강력한<br />교육이 있을까?
                     </h1>
                     <p className="text-lg sm:text-xl text-neutral-300 mb-10 leading-relaxed">
@@ -54,7 +54,7 @@ export default function MadLeagueHomePage() {
             <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-neutral-900 mb-3">핵심 프로그램</h2>
+                        <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-3">핵심 프로그램</h2>
                         <p className="text-neutral-500">MAD League의 핵심 성장 프로그램을 소개합니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -213,7 +213,7 @@ export default function MadLeagueHomePage() {
             {/* CTA */}
             <section className="py-20 px-6 bg-[#212121] text-white text-center">
                 <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold mb-4">지금 합류하세요</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">지금 합류하세요</h2>
                     <p className="text-neutral-400 mb-8 leading-relaxed">
                         MAD League와 함께 실전 경쟁을 통해 성장하세요.<br />
                         전국의 열정 있는 대학생들이 당신을 기다리고 있습니다.

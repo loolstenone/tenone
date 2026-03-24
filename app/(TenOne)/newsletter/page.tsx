@@ -47,9 +47,9 @@ export default function NewsletterPage() {
     return (
         <div className="max-w-4xl mx-auto px-6 py-16">
             {/* 헤더 */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-10 md:mb-16">
                 <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-3">Newsletter</p>
-                <h1 className="text-3xl font-bold tracking-tight mb-4">
+                <h1 className="text-xl md:text-3xl font-bold tracking-tight mb-4">
                     Ten:One™ Universe의<br />이야기를 받아보세요
                 </h1>
                 <p className="text-sm tn-text-sub max-w-lg mx-auto">
@@ -58,7 +58,7 @@ export default function NewsletterPage() {
             </div>
 
             {/* 구독 폼 */}
-            <div className="tn-bg-alt border tn-border p-8 mb-16">
+            <div className="tn-bg-alt border tn-border p-8 mb-10 md:mb-16">
                 {subscribed || isMemberSubscribed ? (
                     <div className="text-center py-4">
                         <CheckCircle2 className="h-10 w-10 text-green-500 mx-auto mb-3" />

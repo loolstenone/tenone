@@ -59,7 +59,7 @@ export default function MadLeapStudyRoomPage() {
             {/* Hero */}
             <section className="bg-black text-white py-20 md:py-24">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">스터디 룸</h1>
+                    <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-4">스터디 룸</h1>
                     <p className="text-neutral-400">함께 공부하고, 함께 성장합니다</p>
                 </div>
             </section>

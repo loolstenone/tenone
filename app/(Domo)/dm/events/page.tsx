@@ -33,7 +33,7 @@ export default function DomoEvents() {
             {/* Hero */}
             <section className="py-24 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-5xl md:text-6xl font-black mb-6">이벤트</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6">이벤트</h1>
                     <p className="text-lg text-white/70 max-w-2xl mx-auto">
                         함께하는 시간이 기회가 됩니다.<br />
                         네트워킹, 세미나, 골프, 투자 설명회까지.
@@ -44,7 +44,7 @@ export default function DomoEvents() {
             {/* 다가오는 이벤트 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-10">다가오는 이벤트</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-10">다가오는 이벤트</h2>
                     <div className="space-y-5">
                         {upcomingEvents.map((ev, i) => (
                             <div key={i} className="border border-neutral-200 rounded-xl p-6 hover:shadow-md transition-shadow">
@@ -88,7 +88,7 @@ export default function DomoEvents() {
             {/* 지난 이벤트 */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-8">지난 이벤트</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-8">지난 이벤트</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {pastEvents.map((ev, i) => (
                             <div key={i} className="bg-white rounded-xl p-5 border border-neutral-200">

@@ -70,7 +70,7 @@ function AboutContent() {
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         About
                     </p>
-                    <h1 className="text-4xl md:text-6xl font-light leading-tight">
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight">
                         가치로 연결된<br />
                         <span className="font-bold">세계관을 만드는 사람들</span>
                     </h1>
@@ -103,10 +103,10 @@ function AboutContent() {
                 <>
                     {/* Origin Story */}
                     <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Origin</p>
-                                <h2 className="text-3xl font-light leading-relaxed">
+                                <h2 className="text-xl md:text-3xl font-light leading-relaxed">
                                     우연히 시계를 봤을 때<br />
                                     <span className="font-bold">10시 01분</span>일 확률은<br />
                                     얼마나 될까?
@@ -131,12 +131,12 @@ function AboutContent() {
                     </section>
 
                     {/* Mission / Vision */}
-                    <section className="bg-neutral-900 text-white py-24 px-6">
+                    <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
-                            <div className="grid md:grid-cols-2 gap-16">
+                            <div className="grid md:grid-cols-2 gap-8 md:gap-16">
                                 <div>
                                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Mission</p>
-                                    <h2 className="text-3xl font-bold leading-relaxed">
+                                    <h2 className="text-xl md:text-3xl font-bold leading-relaxed">
                                         기획하고, 연결하고, 확장한다.
                                     </h2>
                                     <p className="text-sm tn-text-sub mt-2">Plan. Connect. Expand.</p>
@@ -148,7 +148,7 @@ function AboutContent() {
                                 </div>
                                 <div>
                                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Vision</p>
-                                    <h2 className="text-3xl font-bold leading-relaxed">
+                                    <h2 className="text-xl md:text-3xl font-bold leading-relaxed">
                                         10,000명의 기획자를<br />발굴하고 연결한다.
                                     </h2>
                                     <p className="text-sm tn-text-sub mt-2">Who is the Next?</p>
@@ -165,10 +165,10 @@ function AboutContent() {
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Core Value</p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 변하지 않을 가치에 집중하여 <span className="font-bold">빠르게 가치를 창출한다</span>
                             </h2>
-                            <div className="grid md:grid-cols-3 gap-12">
+                            <div className="grid md:grid-cols-3 gap-6 md:gap-12">
                                 {[
                                     { num: "01", symbol: "◆", title: "본질", en: "Essence", desc: "변하지 않을 가치에 집요하게 집중한다. 트렌드에 흔들리지 않는 근본적인 가치를 찾는다." },
                                     { num: "02", symbol: "→", title: "속도", en: "Speed", desc: "옳은 방향을 계속 확인하며 빠르게 전진한다. 완벽을 기다리지 않고 움직인다." },
@@ -188,10 +188,10 @@ function AboutContent() {
                     </section>
 
                     {/* Principle 10 */}
-                    <section className="tn-bg-alt py-24 px-6">
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Principle 10</p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 우리가 <span className="font-bold">믿는 것들</span>
                             </h2>
                             <div className="space-y-6">
@@ -220,7 +220,7 @@ function AboutContent() {
 
                     {/* Founder */}
                     <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
                             <div className="aspect-square bg-neutral-100 flex items-center justify-center max-w-md">
                                 <p className="text-sm tn-text-sub text-center px-8">
                                     [대표 프로필 사진]
@@ -228,7 +228,7 @@ function AboutContent() {
                             </div>
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
-                                <h2 className="text-3xl font-bold">전천일</h2>
+                                <h2 className="text-xl md:text-3xl font-bold">전천일</h2>
                                 <p className="text-sm tn-text-sub mt-1">Cheonil Jeon · Value Connector</p>
                                 <p className="mt-6 tn-text-sub leading-relaxed">
                                     광고, 마케팅, 커뮤니케이션, 기획 분야에서 일해왔습니다.
@@ -251,7 +251,7 @@ function AboutContent() {
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
-                            <h2 className="text-3xl md:text-4xl font-light leading-relaxed max-w-3xl">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light leading-relaxed max-w-3xl">
                                 각 유니버스는 고유한 <span className="font-bold">본질(Essence)</span>을 가지고 있으며,
                                 하나의 거대한 선순환 생태계로 연결되어 있습니다.
                             </h2>
@@ -259,10 +259,10 @@ function AboutContent() {
                     </section>
 
                     {/* Brand Categories */}
-                    <section className="tn-bg-alt py-24 px-6">
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Ecosystem</p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 <span className="font-bold">9개 카테고리</span>의 브랜드가 하나의 생태계를 이룹니다.
                             </h2>
                             <div className="grid md:grid-cols-3 gap-px bg-neutral-200">
@@ -289,10 +289,10 @@ function AboutContent() {
                     </section>
 
                     {/* Flywheel */}
-                    <section className="bg-neutral-900 text-white py-24 px-6">
+                    <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Ten:One™ Flywheel</p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 실행은 연결을 가속하고, <span className="font-bold">연결은 더 많은 기회를 만든다.</span>
                             </h2>
                             <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-px bg-neutral-800">
@@ -312,7 +312,7 @@ function AboutContent() {
                     <section className="py-24 px-6">
                         <div className="max-w-4xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Connection Model</p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 브랜드는 <span className="font-bold">4가지 방식</span>으로 연결됩니다.
                             </h2>
                             <div className="grid md:grid-cols-2 gap-8">
@@ -341,7 +341,7 @@ function AboutContent() {
                         <div className="flex items-end justify-between mb-12">
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">History</p>
-                                <h2 className="text-3xl font-light">
+                                <h2 className="text-xl md:text-3xl font-light">
                                     유니버스 <span className="font-bold">연대기</span>
                                 </h2>
                             </div>
@@ -388,9 +388,9 @@ function AboutContent() {
             )}
 
             {/* CTA */}
-            <section className="bg-neutral-900 text-white py-24 px-6">
+            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-3xl font-light">
+                    <h2 className="text-xl md:text-3xl font-light">
                         <span className="font-bold">너, 나의 동료가 되라.</span>
                     </h2>
                     <p className="mt-4 tn-text-sub">Ten:One™ Universe는 언제나 열려있습니다.</p>

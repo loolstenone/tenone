@@ -7,10 +7,10 @@ export default function YouInOneContactPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] py-24 px-6">
+            <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">CONTACT</p>
-                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                         세상을 바꾸는 프로젝트<br />
                         <span className="text-[#E53935]">당신의 고민을 이야기해 주세요</span>
                     </h1>
@@ -24,7 +24,7 @@ export default function YouInOneContactPage() {
             {/* Contact Info */}
             <section className="py-20 px-6 bg-white">
                 <div className="max-w-4xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 md:mb-16">
                         <div className="p-8 bg-neutral-50 rounded-xl">
                             <Mail className="h-8 w-8 text-[#E53935] mb-4" />
                             <h3 className="text-lg font-bold mb-2">Email</h3>

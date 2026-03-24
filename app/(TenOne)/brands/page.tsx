@@ -19,7 +19,7 @@ export default function BrandsPage() {
     return (
         <div className="space-y-12">
             <section className="pt-16 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold text-white">Brands</h1>
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">Brands</h1>
                 <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
                     Ten:One™ Universe를 구성하는 브랜드 포트폴리오
                 </p>

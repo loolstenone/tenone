@@ -20,7 +20,7 @@ export default function JakkaAboutPage() {
 
                     {/* 소개 텍스트 */}
                     <div>
-                        <h1 className="text-3xl font-light tracking-tight text-neutral-900 mb-6">
+                        <h1 className="text-xl md:text-3xl font-light tracking-tight text-neutral-900 mb-6">
                             안녕하세요
                         </h1>
                         <div className="space-y-4 text-sm text-neutral-600 leading-relaxed">

@@ -51,7 +51,7 @@ export default function DomoServices() {
             {/* Hero */}
             <section className="py-24 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-5xl md:text-6xl font-black mb-6">서비스</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6">서비스</h1>
                     <p className="text-lg text-white/70 max-w-2xl mx-auto">
                         준비서 서비스, 기획 컨설팅, 투자 자문까지.<br />
                         인생 2회차에 필요한 모든 비즈니스 지원.
@@ -63,7 +63,7 @@ export default function DomoServices() {
             {serviceCategories.map((cat, ci) => (
                 <section key={ci} className={`py-20 px-6 ${ci % 2 === 1 ? "bg-neutral-50" : ""}`}>
                     <div className="mx-auto max-w-5xl">
-                        <h2 className="text-3xl font-bold text-neutral-900 mb-1">{cat.title}</h2>
+                        <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-1">{cat.title}</h2>
                         <p className="text-sm text-[#7F1146] font-medium mb-2">{cat.subtitle}</p>
                         <p className="text-neutral-500 mb-10 max-w-2xl">{cat.desc}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -89,7 +89,7 @@ export default function DomoServices() {
             {/* 요금제 */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <h2 className="text-3xl font-bold text-neutral-900 mb-2 text-center">멤버십 플랜</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-neutral-900 mb-2 text-center">멤버십 플랜</h2>
                     <p className="text-neutral-500 text-center mb-12">나에게 맞는 멤버십을 선택하세요</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {pricingPlans.map((plan) => (

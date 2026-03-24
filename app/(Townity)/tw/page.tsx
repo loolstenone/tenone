@@ -113,9 +113,9 @@ export default function TownityHome() {
             {/* ── 왜 타우니티인가 (About) ── */}
             <section id="about" className="py-20 px-6 bg-neutral-50 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#10B981] mb-4 block">Why Townity</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             왜 타우니티인가
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -142,9 +142,9 @@ export default function TownityHome() {
             {/* ── 우리 동네 프로그램 (Town) ── */}
             <section id="town" className="py-20 px-6 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#10B981] mb-4 block">Our Programs</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             우리 동네 프로그램
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -172,7 +172,7 @@ export default function TownityHome() {
             <section id="together" className="py-20 px-6 bg-[#10B981]/5 scroll-mt-16">
                 <div className="mx-auto max-w-4xl text-center">
                     <span className="text-sm font-semibold tracking-widest uppercase text-[#10B981] mb-4 block">Join Us</span>
-                    <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-6">
                         함께 해요
                     </h2>
                     <p className="text-neutral-600 max-w-2xl mx-auto leading-relaxed mb-12">
@@ -215,9 +215,9 @@ export default function TownityHome() {
             {/* ── 이야기 (Stories) ── */}
             <section id="stories" className="py-20 px-6 scroll-mt-16">
                 <div className="mx-auto max-w-6xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-sm font-semibold tracking-widest uppercase text-[#10B981] mb-4 block">Stories</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             지역의 이야기
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">

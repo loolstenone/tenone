@@ -25,10 +25,10 @@ export default function YouInOneWhatWeDoPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] py-24 px-6">
+            <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">WHAT WE DO</p>
-                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6">
                         Showcase Our Item
                     </h1>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto">
@@ -60,7 +60,7 @@ export default function YouInOneWhatWeDoPage() {
             {/* How We Work */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center mb-12">How We Work</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">How We Work</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {howWeWork.map((h) => (
                             <div key={h.num} className="text-center">

@@ -51,7 +51,7 @@ export default function AboutPage() {
                         <Sparkles className="w-4 h-4 text-[#1AAD64]" />
                         <span>About ChangeUp</span>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-black leading-tight">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black leading-tight">
                         미래를 만드는 일,<br />
                         <span className="text-[#1AAD64]">창업</span>
                     </h1>
@@ -66,7 +66,7 @@ export default function AboutPage() {
             {/* Values */}
             <section className="py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">우리의 가치</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">우리의 가치</h2>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {values.map((v) => (
                             <div key={v.title} className="text-center">
@@ -84,7 +84,7 @@ export default function AboutPage() {
             {/* Timeline */}
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-4xl px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">우리의 여정</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">우리의 여정</h2>
                     <div className="relative">
                         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-[#1AAD64]/20" />
                         <div className="space-y-8">
@@ -106,7 +106,7 @@ export default function AboutPage() {
             {/* Team */}
             <section className="py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">팀</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">팀</h2>
                     <div className="grid md:grid-cols-3 gap-8">
                         {team.map((member) => (
                             <div key={member.name} className="text-center border border-neutral-200 rounded-2xl p-8">
@@ -125,9 +125,9 @@ export default function AboutPage() {
             {/* Contact */}
             <section className="py-20 bg-[#0F1F2E] text-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="grid md:grid-cols-2 gap-12">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-12">
                         <div>
-                            <h2 className="text-3xl font-bold mb-6">문의하기</h2>
+                            <h2 className="text-xl md:text-3xl font-bold mb-6">문의하기</h2>
                             <p className="text-neutral-400 leading-relaxed mb-8">
                                 프로그램 참가, 투자 문의, 학교 협력 등
                                 무엇이든 편하게 연락주세요.

@@ -108,7 +108,7 @@ export default function SignupPage() {
             <div className="flex-1 flex items-center justify-center px-4 py-16 mt-16">
             <div className="w-full max-w-lg">
                 <div className="text-center mb-10">
-                    <Link href="/" className="text-3xl font-bold tracking-wider hover:opacity-80 transition-opacity">Ten:One™</Link>
+                    <Link href="/" className="text-xl md:text-3xl font-bold tracking-wider hover:opacity-80 transition-opacity">Ten:One™</Link>
                     <p className="text-sm text-neutral-500 mt-2 italic">&ldquo;{randomQuote}&rdquo;</p>
                 </div>
 

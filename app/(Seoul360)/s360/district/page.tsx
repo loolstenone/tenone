@@ -171,7 +171,7 @@ export default function DistrictPage() {
                     }}
                 />
                 <div className="relative text-center py-16">
-                    <h1 className="text-4xl md:text-5xl font-light">District of Seoul</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-light">District of Seoul</h1>
                     <p className="text-neutral-400 mt-2 text-sm">25 Districts (Gu) of Seoul</p>
                 </div>
                 <div className="h-1.5 bg-[#F5C518]" />

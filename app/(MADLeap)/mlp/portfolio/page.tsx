@@ -67,7 +67,7 @@ export default function MadLeapPortfolioPage() {
             {/* Hero */}
             <section className="bg-black text-white py-20 md:py-24">
                 <div className="mx-auto max-w-4xl px-6 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">포트폴리오</h1>
+                    <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-4">포트폴리오</h1>
                     <p className="text-neutral-400">매드립 리퍼들의 실전 프로젝트 결과물</p>
                 </div>
             </section>
@@ -100,7 +100,7 @@ export default function MadLeapPortfolioPage() {
                             <div key={p.title} className="group border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg transition-all">
                                 {/* Thumbnail placeholder */}
                                 <div className="aspect-video bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
-                                    <span className="text-3xl font-black text-neutral-300">
+                                    <span className="text-xl md:text-3xl font-black text-neutral-300">
                                         {p.team}
                                     </span>
                                 </div>

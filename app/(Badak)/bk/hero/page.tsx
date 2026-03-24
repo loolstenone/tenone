@@ -61,7 +61,7 @@ export default function HeroPage() {
                         <div className="inline-block bg-neutral-900 text-white text-xs px-3 py-1 rounded mb-4 font-bold">
                             HeRo
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-light text-neutral-900 mb-2">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-light text-neutral-900 mb-2">
                             We<br />believe in<br />your talent
                         </h1>
                     </div>

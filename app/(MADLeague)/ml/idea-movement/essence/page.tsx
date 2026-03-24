@@ -7,7 +7,7 @@ export default function EssencePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <Link
                         href="/ml/idea-movement"
@@ -16,7 +16,7 @@ export default function EssencePage() {
                         <ArrowLeft className="h-4 w-4" />
                         Idea Movement
                     </Link>
-                    <h1 className="text-5xl sm:text-6xl font-extrabold mb-6">
+                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-6">
                         <span className="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
                             Essence
                         </span>
@@ -41,9 +41,9 @@ export default function EssencePage() {
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-start">
                         <div>
-                            <h2 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-6 leading-tight">
+                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 mb-6 leading-tight">
                                 <span className="text-amber-500">본질</span>이란
                                 <br />
                                 무엇인가
@@ -97,7 +97,7 @@ export default function EssencePage() {
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                         <div className="order-2 lg:order-1">
                             <div className="aspect-square bg-gradient-to-br from-orange-500/20 to-transparent rounded-3xl flex items-center justify-center">
                                 <div className="text-center space-y-4">
@@ -115,7 +115,7 @@ export default function EssencePage() {
                         </div>
 
                         <div className="order-1 lg:order-2">
-                            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 leading-tight">
+                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-6 leading-tight">
                                 불을 찾아 떠나는
                                 <br />
                                 <span className="text-orange-400">모험</span>
@@ -146,7 +146,7 @@ export default function EssencePage() {
             {/* Connection */}
             <section className="py-24 px-6 bg-white">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl font-extrabold text-neutral-900 mb-6">
+                    <h2 className="text-xl md:text-3xl font-extrabold text-neutral-900 mb-6">
                         Idea Movement의 본질
                     </h2>
                     <p className="text-neutral-500 text-lg leading-relaxed max-w-2xl mx-auto mb-14">
@@ -179,7 +179,7 @@ export default function EssencePage() {
             {/* CTA */}
             <section className="py-20 px-6 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
                 <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-4">
                         본질에 집중하라
                     </h2>
                     <p className="text-white/80 text-lg mb-10">

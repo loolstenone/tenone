@@ -24,7 +24,7 @@ export function OgamjaFooter() {
                     {/* 브랜드 */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-4xl">🥔</span>
+                            <span className="text-2xl md:text-4xl">🥔</span>
                             <span className="text-white text-xl font-bold">공감자</span>
                         </div>
                         <p className="text-sm leading-relaxed">

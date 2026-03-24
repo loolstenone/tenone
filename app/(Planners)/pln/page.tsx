@@ -140,7 +140,7 @@ function PlannersContent() {
                     <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
                         Planner&apos;s
                     </p>
-                    <h1 className="text-4xl md:text-6xl font-light leading-tight">
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight">
                         우리는 모두 기획자다<br />
                         <span className="font-bold">자기 인생에서 만큼은</span>
                     </h1>
@@ -186,12 +186,12 @@ function PlannersContent() {
                 <>
                     {/* 기획 vs 계획 */}
                     <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                     Definition
                                 </p>
-                                <h2 className="text-3xl font-light leading-relaxed">
+                                <h2 className="text-xl md:text-3xl font-light leading-relaxed">
                                     기획하여<br />
                                     <span className="font-bold">계획하다</span>
                                 </h2>
@@ -231,12 +231,12 @@ function PlannersContent() {
                     </section>
 
                     {/* 운영 요소 */}
-                    <section className="bg-teal-900 text-white py-24 px-6">
+                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
                                 Operations
                             </p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 기획의 실행을 위한 <span className="font-bold">3가지 자원</span>
                             </h2>
                             <div className="grid md:grid-cols-3 gap-px bg-teal-800">
@@ -262,14 +262,14 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Who is Planner?
                             </p>
-                            <h2 className="text-3xl font-light mb-4">
+                            <h2 className="text-xl md:text-3xl font-light mb-4">
                                 Planner = <span className="font-bold">일이 되게 하는 사람</span>
                             </h2>
                             <p className="text-neutral-500 mb-4 max-w-3xl">
                                 한국에서 &apos;기획자&apos;라 불리는 사람을, 해외에서는 &apos;Manager&apos;라 부른다.
                                 직군명은 다르지만 본질은 같다 — 일이 되게 만드는 사람.
                             </p>
-                            <p className="text-neutral-500 mb-16 max-w-3xl">
+                            <p className="text-neutral-500 mb-10 md:mb-16 max-w-3xl">
                                 꼭 경영학과를 나올 필요 없다. 기획은 특정 전공의 영역이 아니라,
                                 문제를 발견하고 해결하려는 모든 사람의 역량이다.
                             </p>
@@ -288,12 +288,12 @@ function PlannersContent() {
                     </section>
 
                     {/* 기획의 필수성 */}
-                    <section className="bg-neutral-50 py-24 px-6">
+                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
                         <div className="max-w-4xl mx-auto text-center">
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Essence
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-light leading-relaxed">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light leading-relaxed">
                                 기획에는<br />
                                 <span className="font-bold">시간이 걸린다</span>
                             </h2>
@@ -319,7 +319,7 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 The Word
                             </p>
-                            <h2 className="text-3xl font-light leading-relaxed max-w-3xl">
+                            <h2 className="text-xl md:text-3xl font-light leading-relaxed max-w-3xl">
                                 <span className="font-bold">기획자</span>,<br />
                                 유독 우리나라에서 많이 사용하는 말이다
                             </h2>
@@ -331,12 +331,12 @@ function PlannersContent() {
                     </section>
 
                     {/* 우리는 모두가 기획자다 */}
-                    <section className="bg-teal-900 text-white py-24 px-6">
+                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto text-center">
                             <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
                                 Everyone is a Planner
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-bold leading-relaxed">
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-bold leading-relaxed">
                                 우리는 모두가 기획자다
                             </h2>
                             <p className="mt-6 text-teal-300/80 max-w-2xl mx-auto leading-relaxed">
@@ -352,11 +352,11 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Problem Solving
                             </p>
-                            <h2 className="text-3xl font-light mb-6">
+                            <h2 className="text-xl md:text-3xl font-light mb-6">
                                 이상과 현실의 차이 =<br />
                                 <span className="font-bold">해결해야 할 문제</span>
                             </h2>
-                            <p className="text-neutral-500 leading-relaxed max-w-3xl mb-16">
+                            <p className="text-neutral-500 leading-relaxed max-w-3xl mb-10 md:mb-16">
                                 기획의 출발점은 문제 인식이다. 현재 상태(As-Is)와 바람직한 상태(To-Be)의 차이를 발견하고,
                                 그 차이를 줄이기 위한 방법을 설계하는 것이 기획의 본질이다.
                             </p>
@@ -378,12 +378,12 @@ function PlannersContent() {
                     </section>
 
                     {/* 필요한 것: 논리 + 분석 + 창의 */}
-                    <section className="bg-neutral-50 py-24 px-6">
+                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Required Skills
                             </p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 기획자에게 필요한 것:<br />
                                 <span className="font-bold">논리 + 분석 + 창의</span>
                             </h2>
@@ -406,7 +406,7 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Completion
                             </p>
-                            <h2 className="text-3xl font-light mb-8">
+                            <h2 className="text-xl md:text-3xl font-light mb-8">
                                 기획의 <span className="font-bold">완성</span>
                             </h2>
                             <div className="space-y-8">
@@ -438,7 +438,7 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 About
                             </p>
-                            <h2 className="text-3xl font-light leading-relaxed max-w-3xl">
+                            <h2 className="text-xl md:text-3xl font-light leading-relaxed max-w-3xl">
                                 플래너를<br />
                                 <span className="font-bold">다시 만들다</span>
                             </h2>
@@ -451,12 +451,12 @@ function PlannersContent() {
                     </section>
 
                     {/* Plan - Do - See */}
-                    <section className="bg-teal-900 text-white py-24 px-6">
+                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
                                 Methodology
                             </p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 모든 업무의 기본 구조: <span className="font-bold">Plan — Do — See</span>
                             </h2>
                             <div className="grid md:grid-cols-3 gap-6">
@@ -487,7 +487,7 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Package
                             </p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 <span className="font-bold">Planner&apos;s Planner</span> 구성
                             </h2>
                             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -511,15 +511,15 @@ function PlannersContent() {
                     </section>
 
                     {/* Project Book 7단계 */}
-                    <section className="bg-neutral-50 py-24 px-6">
+                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 Project Book
                             </p>
-                            <h2 className="text-3xl font-light mb-4">
+                            <h2 className="text-xl md:text-3xl font-light mb-4">
                                 프로젝트 북 <span className="font-bold">7단계</span>
                             </h2>
-                            <p className="text-neutral-500 mb-16 max-w-3xl">
+                            <p className="text-neutral-500 mb-10 md:mb-16 max-w-3xl">
                                 복잡한 문제를 구조적으로 해결하기 위한 프레임워크.
                                 질문에서 시작해 결과 정리까지, 프로젝트의 전 과정을 담는다.
                             </p>
@@ -544,14 +544,14 @@ function PlannersContent() {
                             <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
                                 How to Use
                             </p>
-                            <h2 className="text-3xl font-light mb-16">
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 작성 방식 <span className="font-bold">4단계</span>
                             </h2>
                             <div className="space-y-8">
                                 {FOUR_STEPS.map((item, i) => (
                                     <div key={item.step} className="flex gap-8 items-start py-8 border-b border-neutral-100">
                                         <div className="min-w-[4rem] text-center">
-                                            <span className="text-3xl font-bold text-teal-200">{String(i + 1).padStart(2, "0")}</span>
+                                            <span className="text-xl md:text-3xl font-bold text-teal-200">{String(i + 1).padStart(2, "0")}</span>
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
@@ -570,7 +570,7 @@ function PlannersContent() {
                     </section>
 
                     {/* Quote */}
-                    <section className="bg-teal-950 text-white py-24 px-6">
+                    <section className="bg-teal-950 text-white py-16 md:py-24 px-6">
                         <div className="max-w-4xl mx-auto text-center">
                             <h2 className="text-2xl md:text-3xl font-light leading-relaxed">
                                 &ldquo;생각한 대로 행동하라<br />
@@ -586,9 +586,9 @@ function PlannersContent() {
             )}
 
             {/* CTA (공통) */}
-            <section className="bg-neutral-900 text-white py-24 px-6">
+            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-3xl font-light">
+                    <h2 className="text-xl md:text-3xl font-light">
                         <span className="font-bold">기획자의 여정을 함께하세요</span>
                     </h2>
                     <p className="mt-4 text-neutral-500">

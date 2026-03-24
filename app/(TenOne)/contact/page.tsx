@@ -21,7 +21,7 @@ export default function ContactPage() {
             <section className="pt-32 pb-16 px-6">
                 <div className="max-w-7xl mx-auto">
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Contact</p>
-                    <h1 className="text-4xl md:text-6xl font-light leading-tight">
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight">
                         함께 <span className="font-bold">시작하기</span>
                     </h1>
                     <div className="mt-6 text-lg tn-text-sub max-w-2xl space-y-1">
@@ -31,7 +31,7 @@ export default function ContactPage() {
                 </div>
             </section>
 
-            <section className="max-w-7xl mx-auto px-6 pb-32 grid lg:grid-cols-12 gap-16">
+            <section className="max-w-7xl mx-auto px-6 pb-32 grid lg:grid-cols-12 gap-8 md:gap-16">
                 {/* Left — Contact Info */}
                 <div className="lg:col-span-4 space-y-8">
                     <div className="border tn-border p-6">

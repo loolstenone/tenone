@@ -95,13 +95,13 @@ export default function ChangeUpHomePage() {
                     <div className="absolute top-20 left-10 w-72 h-72 bg-[#1AAD64] rounded-full blur-3xl" />
                     <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#256EFF] rounded-full blur-3xl" />
                 </div>
-                <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-24 lg:py-36">
+                <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-16 md:py-24 lg:py-36">
                     <div className="max-w-3xl">
                         <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-1.5 rounded-full text-sm mb-6">
                             <Sparkles className="w-4 h-4 text-[#1AAD64]" />
                             <span>AI 시대, 창업은 누구나 할 수 있다</span>
                         </div>
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
                             미래를 만드는 일,<br />
                             <span className="text-[#1AAD64]">창업</span>
                         </h1>
@@ -134,7 +134,7 @@ export default function ChangeUpHomePage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
                         {stats.map((stat) => (
                             <div key={stat.label}>
-                                <div className="text-3xl sm:text-4xl font-black">{stat.value}</div>
+                                <div className="text-xl sm:text-3xl lg:text-4xl font-black">{stat.value}</div>
                                 <div className="text-sm mt-1 text-white/80">{stat.label}</div>
                             </div>
                         ))}
@@ -146,7 +146,7 @@ export default function ChangeUpHomePage() {
             <section className="py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold">당신은 누구인가요?</h2>
+                        <h2 className="text-xl md:text-3xl font-bold">당신은 누구인가요?</h2>
                         <p className="mt-3 text-neutral-500">ChangeUp에서의 여정이 시작됩니다</p>
                         <div className="mt-6 inline-flex bg-neutral-100 rounded-full p-1">
                             <button
@@ -211,7 +211,7 @@ export default function ChangeUpHomePage() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="flex items-center justify-between mb-10">
                         <div>
-                            <h2 className="text-3xl font-bold">성공 사례</h2>
+                            <h2 className="text-xl md:text-3xl font-bold">성공 사례</h2>
                             <p className="mt-2 text-neutral-500">ChangeUp에서 시작한 스타트업들</p>
                         </div>
                         <Link href="/cu/startups" className="hidden sm:inline-flex items-center gap-1 text-sm text-[#1AAD64] font-medium hover:gap-2 transition-all">
@@ -267,7 +267,7 @@ export default function ChangeUpHomePage() {
             {/* CTA */}
             <section className="bg-gradient-to-r from-[#1AAD64] to-[#256EFF] text-white py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl sm:text-4xl font-black">지금 시작하세요</h2>
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-black">지금 시작하세요</h2>
                     <p className="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
                         아이디어만 있으면 충분합니다. AI 도구와 함께라면 누구나 창업할 수 있습니다.
                         부모님, 선생님, 이웃이 당신의 첫 투자자가 됩니다.

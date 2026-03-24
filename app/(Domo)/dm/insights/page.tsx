@@ -26,7 +26,7 @@ export default function DomoInsights() {
             {/* Hero */}
             <section className="py-24 px-6 bg-gradient-to-br from-[#2D1B2E] to-[#1E1220] text-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-5xl md:text-6xl font-black mb-6">인사이트</h1>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6">인사이트</h1>
                     <p className="text-lg text-white/70 max-w-2xl mx-auto">
                         경험에서 우러나온 비즈니스 지혜.<br />
                         시니어 비즈니스맨을 위한 깊이 있는 콘텐츠.

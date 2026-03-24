@@ -72,7 +72,7 @@ export default function BacademyPage() {
 
             {/* Contest + Seminar */}
             <section className="py-8 px-6">
-                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
                     {/* 공모전 정보 */}
                     <div>
                         <h2 className="text-xl font-bold text-neutral-900 mb-4">공모전 정보</h2>

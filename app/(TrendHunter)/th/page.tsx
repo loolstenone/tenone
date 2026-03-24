@@ -103,7 +103,7 @@ export default function TrendHunterPage() {
                         <span className="text-[#00FF88] text-xs font-mono tracking-wider">AI-POWERED TREND ANALYSIS</span>
                     </div>
 
-                    <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-7xl font-bold leading-tight mb-6">
                         <span className="text-white">AI가 데이터를 읽고,</span>
                         <br />
                         <span className="text-[#00FF88]">우리가 트렌드를 만든다.</span>
@@ -135,9 +135,9 @@ export default function TrendHunterPage() {
             {/* ════════════════════════ ABOUT — 트렌드란 무엇인가 ════════════════════════ */}
             <section id="about" className="py-24 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-[#00FF88] text-xs font-mono tracking-widest">WHAT IS TREND</span>
-                        <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3">유행과 트렌드는 다릅니다</h2>
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mt-3">유행과 트렌드는 다릅니다</h2>
                         <p className="text-neutral-400 mt-4 max-w-xl mx-auto">
                             일시적 유행(Fad)은 금방 사라지지만, 진정한 트렌드는 장기적으로 나타나며 가치와 방향성이 수반됩니다.
                         </p>
@@ -188,9 +188,9 @@ export default function TrendHunterPage() {
             {/* ════════════════════════ PROCESS — AI 프로세스 ════════════════════════ */}
             <section id="process" className="py-24 px-6 bg-gradient-to-b from-[#0A0A0A] via-[#0d1a12] to-[#0A0A0A]">
                 <div className="mx-auto max-w-5xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-[#00FF88] text-xs font-mono tracking-widest">AI-POWERED PROCESS</span>
-                        <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3">데이터에서 인사이트까지</h2>
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mt-3">데이터에서 인사이트까지</h2>
                         <p className="text-neutral-400 mt-4 max-w-xl mx-auto">
                             3단계 AI 프로세스로 트렌드 시그널을 발견하고, 실행 가능한 전략으로 전환합니다.
                         </p>
@@ -228,9 +228,9 @@ export default function TrendHunterPage() {
             {/* ════════════════════════ SERVICES ════════════════════════ */}
             <section id="services" className="py-24 px-6">
                 <div className="mx-auto max-w-5xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <span className="text-[#00FF88] text-xs font-mono tracking-widest">SERVICES</span>
-                        <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3">트렌드를 실행으로</h2>
+                        <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mt-3">트렌드를 실행으로</h2>
                         <p className="text-neutral-400 mt-4 max-w-xl mx-auto">
                             데이터 수집부터 전략 수립, 콘텐츠 제작까지. 트렌드의 발견과 실행을 한 곳에서.
                         </p>
@@ -282,7 +282,7 @@ export default function TrendHunterPage() {
             <section id="contact" className="py-24 px-6">
                 <div className="mx-auto max-w-3xl text-center">
                     <Layers className="w-10 h-10 text-[#00FF88] mx-auto mb-6" />
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
                         트렌드가 궁금하신가요?
                     </h2>
                     <p className="text-neutral-400 mb-8 max-w-lg mx-auto">

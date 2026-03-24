@@ -14,7 +14,7 @@ export default function MoNTZAbout() {
         <div className="pt-14">
             <section className="py-16 px-6">
                 <div className="mx-auto max-w-6xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 items-center">
                         {/* 사진 — 카메라 들고 있는 포토그래퍼 */}
                         <div
                             className={`transition-all duration-700 ${
@@ -34,7 +34,7 @@ export default function MoNTZAbout() {
                                 visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                             }`}
                         >
-                            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6">
+                            <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-6">
                                 MoNTZ입니다.
                             </h1>
                             <p className="text-lg md:text-xl font-semibold text-neutral-800 leading-relaxed mb-4">

@@ -24,8 +24,8 @@ export default function OgamjaAbout() {
             {/* Hero */}
             <section className="py-20 px-6 bg-gradient-to-b from-[#F5C518]/5 to-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <span className="text-7xl block mb-6">🥔</span>
-                    <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">0gamja는 당신의 이야기 입니다.</h1>
+                    <span className="text-5xl md:text-7xl block mb-6">🥔</span>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">0gamja는 당신의 이야기 입니다.</h1>
                     <p className="text-xl text-neutral-500">하찮고 소중한 감자들의 공감 이야기</p>
                     <div className="w-16 h-1 bg-[#F5C518] mx-auto mt-6" />
                 </div>
@@ -86,7 +86,7 @@ export default function OgamjaAbout() {
             {/* CTA */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="text-3xl font-bold mb-4">새로운 감자를 기다립니다.</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">새로운 감자를 기다립니다.</h2>
                     <p className="text-neutral-500 mb-2">에세이, 소설, 시놉시스, 트렌드, 일기, 요약 정리 어떤 형태도 좋습니다.</p>
                     <p className="text-neutral-500 mb-8">자신 만의 방법으로 세상과 소통하고 자신의 생각을 사람들에게 공유하고 싶은 사람들을 기다리고 있습니다.</p>
                     <Link

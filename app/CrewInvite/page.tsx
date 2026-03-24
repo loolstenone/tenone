@@ -82,7 +82,7 @@ export default function ApplyPage() {
                         <p className="text-xs tracking-[0.3em] text-neutral-500 uppercase">Invitation</p>
                         <Sparkles className="h-4 w-4 text-neutral-500" />
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-4">
+                    <h1 className="text-xl md:text-3xl font-bold tracking-tight mb-4">
                         당신을 Ten:One™ Universe로<br />초대합니다.
                     </h1>
                     <p className="text-sm text-neutral-500 leading-relaxed max-w-lg mx-auto mb-3">
@@ -97,7 +97,7 @@ export default function ApplyPage() {
 
             {/* 혜택 */}
             <div className="max-w-3xl mx-auto px-6 -mt-8">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="bg-white border border-neutral-200 p-5 text-center shadow-sm">
                         <FolderKanban className="h-5 w-5 text-neutral-400 mx-auto mb-2" />
                         <p className="text-xs font-bold">실전 프로젝트</p>
@@ -159,7 +159,7 @@ export default function ApplyPage() {
                         </div>
 
                         {type === "student" && (
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-[10px] text-neutral-400 mb-1">소속 동아리 (해당 시)</label>
                                     <select value={club} onChange={e => setClub(e.target.value)}

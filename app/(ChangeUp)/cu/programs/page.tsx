@@ -89,7 +89,7 @@ export default function ProgramsPage() {
             {/* Hero */}
             <section className="bg-gradient-to-br from-[#0F1F2E] to-[#1a3a52] text-white py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h1 className="text-4xl sm:text-5xl font-black">프로그램</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black">프로그램</h1>
                     <p className="mt-4 text-lg text-neutral-300 max-w-2xl">
                         AI 시대에 맞는 창업 교육. 고등학생부터 대학생까지,
                         단계별 프로그램으로 아이디어를 현실로 만듭니다.

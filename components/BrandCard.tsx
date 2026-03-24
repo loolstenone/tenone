@@ -49,8 +49,9 @@ export function BrandCard({ brand }: BrandCardProps) {
                     <a
                         href={brand.websiteUrl}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="text-neutral-400 hover:text-neutral-700"
+                        aria-label={`${brand.name} 웹사이트 열기`}
                     >
                         <ExternalLink className="h-4 w-4" />
                     </a>

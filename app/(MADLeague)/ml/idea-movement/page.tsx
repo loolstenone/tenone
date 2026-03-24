@@ -74,7 +74,7 @@ export default function IdeaMovementPage() {
                     <p className="text-violet-400 font-bold text-sm tracking-widest uppercase mb-4">
                         MAD League &middot; Project
                     </p>
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
+                    <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold leading-tight mb-6">
                         <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
                             Idea
                         </span>{" "}
@@ -110,9 +110,9 @@ export default function IdeaMovementPage() {
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                         <div>
-                            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 leading-tight">
+                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-6 leading-tight">
                                 세상에는 많은 사람들이 있고
                                 <br />
                                 그 숫자만큼{" "}
@@ -159,7 +159,7 @@ export default function IdeaMovementPage() {
                         </span>
                     </div>
 
-                    <h2 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-6 leading-tight">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 mb-6 leading-tight">
                         하나의 문제에는
                         <br />
                         <span className="text-violet-500">다양한 해결책</span>이
@@ -201,7 +201,7 @@ export default function IdeaMovementPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 text-amber-500 mb-6">
                         <Zap className="h-8 w-8" />
                     </div>
-                    <h2 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-6">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 mb-6">
                         아이디어 과잉의 함정
                     </h2>
                     <p className="text-neutral-500 text-lg leading-relaxed max-w-2xl mx-auto mb-12">
@@ -213,7 +213,7 @@ export default function IdeaMovementPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                         <div className="p-6 bg-white rounded-xl border border-neutral-200">
-                            <div className="text-4xl font-black text-red-200 mb-3">
+                            <div className="text-2xl md:text-4xl font-black text-red-200 mb-3">
                                 X
                             </div>
                             <p className="text-sm text-neutral-600">
@@ -221,7 +221,7 @@ export default function IdeaMovementPage() {
                             </p>
                         </div>
                         <div className="p-6 bg-white rounded-xl border border-neutral-200">
-                            <div className="text-4xl font-black text-amber-200 mb-3">
+                            <div className="text-2xl md:text-4xl font-black text-amber-200 mb-3">
                                 !
                             </div>
                             <p className="text-sm text-neutral-600">
@@ -229,7 +229,7 @@ export default function IdeaMovementPage() {
                             </p>
                         </div>
                         <div className="p-6 bg-white rounded-xl border-2 border-violet-300 shadow-sm">
-                            <div className="text-4xl font-black text-violet-400 mb-3">
+                            <div className="text-2xl md:text-4xl font-black text-violet-400 mb-3">
                                 O
                             </div>
                             <p className="text-sm text-neutral-700 font-medium">
@@ -243,12 +243,12 @@ export default function IdeaMovementPage() {
             {/* Execution Section */}
             <section className="py-24 px-6 bg-[#212121] text-white">
                 <div className="max-w-5xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                         <div>
                             <span className="text-emerald-400 font-bold text-sm tracking-widest uppercase mb-4 block">
                                 Execution
                             </span>
-                            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 leading-tight">
+                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-6 leading-tight">
                                 아이디어로
                                 <br />
                                 세상을{" "}
@@ -303,7 +303,7 @@ export default function IdeaMovementPage() {
             {/* Term Definitions */}
             <section className="py-24 px-6 bg-white">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-extrabold text-neutral-900 text-center mb-14">
+                    <h2 className="text-xl md:text-3xl font-extrabold text-neutral-900 text-center mb-14">
                         용어 정의
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -334,7 +334,7 @@ export default function IdeaMovementPage() {
             <section className="py-20 px-6 bg-gradient-to-r from-violet-600 to-blue-600 text-white">
                 <div className="max-w-3xl mx-auto text-center">
                     <Lightbulb className="h-12 w-12 mx-auto mb-6 opacity-80" />
-                    <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-4">
                         당신의 아이디어가
                         <br />
                         세상을 바꿀 수 있습니다

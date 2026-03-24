@@ -34,7 +34,7 @@ export default function OgamjaHome() {
                     <div className="text-6xl md:text-8xl">🥔</div>
                     <div className="text-center md:text-left">
                         <p className="text-[#D4A017] text-sm font-semibold tracking-widest mb-2">공감자와 함께할 필찐 모집 중</p>
-                        <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+                        <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-3">
                             Feel 충만 <span className="text-[#F5C518]">찐</span>, 필찐을 모집합니다.
                         </h1>
                         <p className="text-neutral-600 mb-6">

@@ -87,8 +87,8 @@ export default function Seoul360Home() {
                             "url('https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=1600&q=80')",
                     }}
                 />
-                <div className="relative mx-auto max-w-7xl px-6 py-24 lg:py-32 text-center">
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+                <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-24 lg:py-32 text-center">
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight">
                         Seoul/360°
                     </h1>
                     <p className="mt-4 text-lg text-neutral-300">

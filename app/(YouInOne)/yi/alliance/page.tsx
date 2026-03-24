@@ -20,10 +20,10 @@ export default function YouInOneAlliancePage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#171717] py-24 px-6">
+            <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">MEMBERSHIP & ALLIANCE</p>
-                    <h1 className="text-white text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                    <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                         함께 하면<br />
                         <span className="text-[#E53935]">더 큰 가치</span>를 만듭니다
                     </h1>
@@ -37,7 +37,7 @@ export default function YouInOneAlliancePage() {
             {/* Who Can Join */}
             <section className="py-20 px-6 bg-white">
                 <div className="max-w-5xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center mb-12">누가 참여할 수 있나요?</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-center mb-12">누가 참여할 수 있나요?</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {memberTypes.map((m) => (
                             <div key={m.title} className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all">

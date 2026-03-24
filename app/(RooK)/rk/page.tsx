@@ -40,7 +40,7 @@ export default function RooKHome() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-[#282828]" />
                 <div className="relative text-center px-6">
                     <p className="text-[#00d255] text-sm font-medium tracking-widest mb-4">AI CREATOR</p>
-                    <h1 className="text-white text-5xl md:text-7xl font-bold tracking-tight mb-6">
+                    <h1 className="text-white text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6">
                         Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span>
                     </h1>
                     <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -62,7 +62,7 @@ export default function RooKHome() {
             {/* Works Section */}
             <section className="py-20 px-6 bg-white">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="text-xl md:text-3xl font-bold mb-2">
                         Works
                         <span className="text-base font-normal text-neutral-500 ml-3">루크가 작업한 제작물입니다.</span>
                     </h2>
@@ -92,7 +92,7 @@ export default function RooKHome() {
             {/* Free Board Section */}
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="text-xl md:text-3xl font-bold mb-2">
                         Free board
                         <span className="text-base font-normal text-neutral-500 ml-3">누구나 작성할 수 있는 자랑게시판입니다.</span>
                     </h2>
@@ -107,7 +107,7 @@ export default function RooKHome() {
                                 className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                             >
                                 <div className="aspect-video bg-neutral-900 flex items-center justify-center">
-                                    <span className="text-5xl">{post.image}</span>
+                                    <span className="text-3xl md:text-5xl">{post.image}</span>
                                 </div>
                                 <div className="p-4">
                                     <p className="font-medium group-hover:text-[#00d255] transition-colors">{post.title}</p>
@@ -122,7 +122,7 @@ export default function RooKHome() {
             {/* AI Artist Section */}
             <section className="py-20 px-6 bg-white">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="text-xl md:text-3xl font-bold mb-2">
                         AI Artist
                         <span className="text-base font-normal text-neutral-500 ml-3">루크 소속 인공지능 모델들입니다.</span>
                     </h2>
@@ -137,7 +137,7 @@ export default function RooKHome() {
                                 className="group text-center"
                             >
                                 <div className="aspect-[3/4] bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center group-hover:ring-2 group-hover:ring-[#00d255] transition-all">
-                                    <span className="text-5xl">{artist.emoji}</span>
+                                    <span className="text-3xl md:text-5xl">{artist.emoji}</span>
                                 </div>
                                 <p className="mt-3 font-medium group-hover:text-[#00d255] transition-colors">{artist.name}</p>
                                 <p className="text-sm text-neutral-500">{artist.role}</p>
@@ -162,8 +162,8 @@ export default function RooKHome() {
                     <div className="flex items-center justify-center gap-6">
                         <div className="text-6xl">🎨</div>
                         <div className="text-left">
-                            <p className="text-white text-3xl md:text-4xl font-bold italic mb-2">I want You</p>
-                            <p className="text-white text-3xl md:text-4xl font-bold italic">For Rookie</p>
+                            <p className="text-white text-xl md:text-3xl lg:text-4xl font-bold italic mb-2">I want You</p>
+                            <p className="text-white text-xl md:text-3xl lg:text-4xl font-bold italic">For Rookie</p>
                         </div>
                     </div>
                     <div className="mt-8">

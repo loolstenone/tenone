@@ -58,12 +58,12 @@ export default function ProgramPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         Programs
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">프로그램</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">프로그램</h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
                         MAD League가 제공하는 다양한 실전 프로그램을 통해 마케팅 전문가로 성장하세요.
                     </p>

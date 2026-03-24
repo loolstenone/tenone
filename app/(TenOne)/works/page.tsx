@@ -23,7 +23,7 @@ export default function WorksPage() {
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
                         Works
                     </p>
-                    <h1 className="text-4xl md:text-6xl font-light leading-tight">
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight">
                         우리가 <span className="font-bold">해온 일들</span>
                     </h1>
                     <p className="mt-6 text-lg tn-text-sub max-w-2xl">
@@ -52,7 +52,7 @@ export default function WorksPage() {
             {/* Works Grid */}
             <section className="px-6 pb-32">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-12">
                         {filtered.map(work => (
                             <article key={work.id} className="group">
                                 {/* 이미지 영역 */}
@@ -113,10 +113,10 @@ export default function WorksPage() {
             </section>
 
             {/* CTA */}
-            <section className="bg-neutral-900 text-white py-24 px-6">
+            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
                     <div>
-                        <h2 className="text-3xl font-light">
+                        <h2 className="text-xl md:text-3xl font-light">
                             함께 만들어갈 <span className="font-bold">다음 프로젝트</span>
                         </h2>
                         <p className="mt-3 tn-text-sub">

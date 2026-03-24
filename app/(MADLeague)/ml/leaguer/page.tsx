@@ -51,12 +51,12 @@ export default function LeaguerPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         MAD Leaguer
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">매드 리거</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">매드 리거</h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
                         MAD League와 함께 성장한 리거들을 소개합니다.
                     </p>

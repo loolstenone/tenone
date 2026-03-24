@@ -81,7 +81,7 @@ export default function ProfilePage() {
                 <ArrowLeft className="h-4 w-4" /> 홈으로
             </Link>
 
-            <h1 className="text-3xl font-bold tn-text mb-2">프로필</h1>
+            <h1 className="text-xl md:text-3xl font-bold tn-text mb-2">프로필</h1>
             <p className="tn-text-sub mb-8">내 정보를 관리합니다.</p>
 
             {/* Avatar + Badge */}
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                             <Shield className="h-4 w-4" /> 직원 정보
                         </h2>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label className={labelClass}>사번</label>
                                     <input value={employeeId} onChange={e => setEmployeeId(e.target.value)} placeholder="TEN-001" className={inputClass} />

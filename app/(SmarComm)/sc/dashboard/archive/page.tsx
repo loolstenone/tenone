@@ -90,8 +90,8 @@ export default function ArchivePage() {
                     <td className="px-5 py-3 text-right text-text-muted">{c.createdAt}</td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-center gap-1">
-                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="미리보기"><Eye size={13} /></button>
-                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="다운로드"><Download size={13} /></button>
+                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="미리보기" aria-label="미리보기"><Eye size={13} /></button>
+                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="다운로드" aria-label="다운로드"><Download size={13} /></button>
                       </div>
                     </td>
                   </tr>

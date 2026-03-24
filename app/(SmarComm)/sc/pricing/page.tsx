@@ -108,7 +108,7 @@ export default function SCPricingPage() {
       <main className="min-h-screen px-5 pb-20 pt-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-8 text-center">
-            <h1 className="mb-3 text-3xl font-extrabold text-text">요금제</h1>
+            <h1 className="mb-3 text-xl md:text-3xl font-extrabold text-text">요금제</h1>
             <p className="mb-6 text-base text-text-sub">무료로 시작하고, 성장에 맞춰 업그레이드하세요</p>
 
             {/* 월간/연간 토글 */}

@@ -25,7 +25,7 @@ export default function FWNAbout() {
             {/* Hero */}
             <section className="py-20 px-6">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Welcome to FWN</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Welcome to FWN</h1>
                     <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
                         Fashion Week Network. 전 세계에서 열리는 패션 위크를 네트워크로 연결하고,
                         글로벌 패션 산업의 교류를 돕습니다.
@@ -37,7 +37,7 @@ export default function FWNAbout() {
             <section className="py-16 px-6">
                 <div className="mx-auto max-w-4xl">
                     <div className="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-10 text-center">
-                        <h2 className="text-3xl md:text-4xl font-bold text-sky-400 mb-6">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-sky-400 mb-6">
                             The World is on the Runway
                         </h2>
                         <div className="flex flex-wrap justify-center gap-3">
@@ -90,7 +90,7 @@ export default function FWNAbout() {
             {/* Network 등록 CTA */}
             <section className="py-20 px-6 bg-[#1a1a1a]">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="text-3xl font-bold text-white mb-4">네트워크에 참여하세요</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white mb-4">네트워크에 참여하세요</h2>
                     <p className="text-neutral-400 mb-8">
                         브랜드, 모델, 포토그래퍼 — FWN 네트워크에 등록하고 글로벌 패션 시장과 연결되세요.
                     </p>

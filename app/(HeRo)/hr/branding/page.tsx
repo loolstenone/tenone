@@ -61,7 +61,7 @@ export default function BrandingPage() {
                                 Personal Branding
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             나만의 <span className="text-amber-500">브랜드</span>를<br />
                             만드세요
                         </h1>
@@ -107,7 +107,7 @@ export default function BrandingPage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">브랜딩 프로그램</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">브랜딩 프로그램</h2>
                         <p className="text-neutral-500">4가지 프로그램으로 나만의 브랜드를 구축하세요</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -140,7 +140,7 @@ export default function BrandingPage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">HeRo 캐릭터 예시</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">HeRo 캐릭터 예시</h2>
                         <p className="text-neutral-500">HIT 진단 결과를 기반으로 생성되는 캐릭터</p>
                     </div>
                     <div className="max-w-2xl mx-auto bg-white border border-neutral-200 rounded-xl p-8">
@@ -177,7 +177,7 @@ export default function BrandingPage() {
             {/* CTA */}
             <section className="bg-amber-500">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
-                    <h2 className="text-3xl font-bold text-white mb-3">나만의 브랜드를 시작하세요</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white mb-3">나만의 브랜드를 시작하세요</h2>
                     <p className="text-amber-100 mb-8">HIT 진단 결과를 기반으로 퍼스널 브랜딩 프로그램에 참여하세요</p>
                     <Link
                         href="/signup"

@@ -23,7 +23,7 @@ export default function NewsroomPage() {
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Newsroom</p>
-                    <h1 className="text-4xl md:text-6xl font-light leading-tight"><span className="font-bold">소식</span></h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-6xl font-light leading-tight"><span className="font-bold">소식</span></h1>
                     <p className="mt-6 text-lg tn-text-sub max-w-2xl">Ten:One™ Universe의 새로운 소식과 활동을 전합니다.</p>
                 </div>
             </section>

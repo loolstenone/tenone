@@ -58,12 +58,12 @@ export default function AboutPage() {
             <section className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28 text-center">
                     <div className="max-w-3xl mx-auto">
-                        <span className="text-4xl font-extrabold tracking-tight mb-2 block">
+                        <span className="text-2xl md:text-4xl font-extrabold tracking-tight mb-2 block">
                             <span className="text-amber-500">He</span>
                             <span className="text-neutral-900">Ro</span>
                         </span>
                         <p className="text-lg text-neutral-500 mb-4">Hidden Intelligence &amp; Real Opportunity</p>
-                        <h1 className="text-3xl lg:text-4xl font-bold mb-6">
+                        <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6">
                             숨겨진 인재를 발굴하고<br />성장시키는 플랫폼
                         </h1>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -98,7 +98,7 @@ export default function AboutPage() {
                         {stats.map((stat) => (
                             <div key={stat.label} className="text-center">
                                 <stat.icon className="h-6 w-6 text-amber-500 mx-auto mb-2" />
-                                <p className="text-3xl font-extrabold text-neutral-900">{stat.value}</p>
+                                <p className="text-xl md:text-3xl font-extrabold text-neutral-900">{stat.value}</p>
                                 <p className="text-sm text-neutral-500 mt-1">{stat.label}</p>
                             </div>
                         ))}
@@ -110,7 +110,7 @@ export default function AboutPage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">연혁</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">연혁</h2>
                         <p className="text-neutral-500">HeRo의 성장 스토리</p>
                     </div>
                     <div className="max-w-2xl mx-auto">
@@ -143,7 +143,7 @@ export default function AboutPage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">파트너</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">파트너</h2>
                         <p className="text-neutral-500">Ten:One Universe 생태계와 함께합니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -163,7 +163,7 @@ export default function AboutPage() {
             {/* CTA */}
             <section className="bg-amber-500">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
-                    <h2 className="text-3xl font-bold text-white mb-3">HeRo에 합류하세요</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white mb-3">HeRo에 합류하세요</h2>
                     <p className="text-amber-100 mb-8">당신도 HeRo가 될 수 있습니다</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link

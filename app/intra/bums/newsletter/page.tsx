@@ -150,10 +150,10 @@ export default function NewsletterCmsPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded"><Edit2 className="h-3 w-3 text-neutral-400" /></button>}
-                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded"><Send className="h-3 w-3 text-neutral-400" /></button>}
-                                    {nl.status === '발송완료' && <button className="p-1.5 hover:bg-neutral-100 rounded"><Eye className="h-3 w-3 text-neutral-400" /></button>}
-                                    <button className="p-1.5 hover:bg-red-50 rounded"><Trash2 className="h-3 w-3 text-neutral-300 hover:text-red-500" /></button>
+                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="수정"><Edit2 className="h-3 w-3 text-neutral-400" /></button>}
+                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="발송"><Send className="h-3 w-3 text-neutral-400" /></button>}
+                                    {nl.status === '발송완료' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="미리보기"><Eye className="h-3 w-3 text-neutral-400" /></button>}
+                                    <button className="p-1.5 hover:bg-red-50 rounded" aria-label="삭제"><Trash2 className="h-3 w-3 text-neutral-300 hover:text-red-500" /></button>
                                 </div>
                             </div>
                         </div>
@@ -219,7 +219,7 @@ export default function NewsletterCmsPage() {
                                             </span>
                                         </td>
                                         <td className="p-3 text-center">
-                                            <button className="p-1 hover:bg-red-50 rounded"><Trash2 className="h-3 w-3 text-neutral-300" /></button>
+                                            <button className="p-1 hover:bg-red-50 rounded" aria-label="구독자 삭제"><Trash2 className="h-3 w-3 text-neutral-300" /></button>
                                         </td>
                                     </tr>
                                 ))}

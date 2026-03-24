@@ -47,7 +47,7 @@ export default function CommunityPage() {
             {/* Hero */}
             <section className="bg-gradient-to-br from-[#0F1F2E] to-[#1a3a52] text-white py-16">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h1 className="text-4xl font-black">커뮤니티</h1>
+                    <h1 className="text-2xl md:text-4xl font-black">커뮤니티</h1>
                     <p className="mt-3 text-neutral-300">함께 배우고, 나누고, 성장하는 공간</p>
                 </div>
             </section>

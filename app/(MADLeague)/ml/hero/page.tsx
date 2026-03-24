@@ -34,12 +34,12 @@ export default function HeroPage() {
     return (
         <div>
             {/* Hero */}
-            <section className="bg-[#212121] text-white py-24 px-6">
+            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
                         HeRo Program
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold mb-6">히어로</h1>
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">히어로</h1>
                     <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
                         <span className="text-[#D32F2F] font-bold">He</span>lp &amp; <span className="text-[#D32F2F] font-bold">Ro</span>le Model
                         &mdash; 인재 발굴과 성장을 지원하는 MAD League의 핵심 인재 프로그램입니다.

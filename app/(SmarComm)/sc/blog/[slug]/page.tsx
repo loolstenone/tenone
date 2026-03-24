@@ -72,7 +72,7 @@ export default function SCBlogPostPage() {
             <span className="flex items-center gap-1 text-xs text-text-muted"><Clock size={12} />{post.readTime}분 읽기</span>
             <span className="text-xs text-text-muted">{post.publishedAt}</span>
           </div>
-          <h1 className="mb-4 text-3xl font-extrabold text-text tracking-tight leading-tight">{post.title}</h1>
+          <h1 className="mb-4 text-xl md:text-3xl font-extrabold text-text tracking-tight leading-tight">{post.title}</h1>
           <p className="mb-8 text-base text-text-sub leading-relaxed">{post.summary}</p>
           <div className="mb-8 h-px bg-border" />
           <div className="prose-sm">{renderContent(post.content)}</div>

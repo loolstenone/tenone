@@ -141,7 +141,7 @@ function LoginForm() {
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold tracking-wider">Ten:One™</h1>
+                    <h1 className="text-xl md:text-3xl font-bold tracking-wider">Ten:One™</h1>
                 </div>
 
                 <div className="border border-neutral-200 p-8">

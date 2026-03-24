@@ -15,7 +15,7 @@ export default function OgamjaWriters() {
             {/* Hero */}
             <section className="py-20 px-6 bg-gradient-to-b from-[#F5C518]/5 to-white">
                 <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">필찐감자를 모집합니다</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">필찐감자를 모집합니다</h1>
                     <p className="text-lg text-neutral-500">
                         우량 감자도, 불량 감자도 괜찮습니다.
                     </p>
@@ -77,7 +77,7 @@ export default function OgamjaWriters() {
             <section className="py-20 px-6 bg-neutral-50">
                 <div className="mx-auto max-w-4xl text-center">
                     <span className="text-6xl block mb-4">✍️</span>
-                    <h2 className="text-3xl font-bold mb-4">함께 쓰는 감자 이야기</h2>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4">함께 쓰는 감자 이야기</h2>
                     <p className="text-neutral-500 mb-8">
                         글 잘 쓰는 사람보다, 진짜 이야기를 가진 사람을 찾습니다.<br />
                         감자처럼 소소해도 괜찮습니다. 당신의 이야기가 누군가의 위로가 됩니다.

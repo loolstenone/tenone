@@ -49,7 +49,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{post.title}</h1>
+                    <h1 className="text-xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4">{post.title}</h1>
                     <p className="text-lg tn-text-sub leading-relaxed mb-8">{post.summary}</p>
 
                     {/* Actions */}

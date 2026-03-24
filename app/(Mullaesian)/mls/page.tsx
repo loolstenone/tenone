@@ -78,7 +78,7 @@ export default function MullaesianHome() {
                             <MapPin className="h-5 w-5" />
                             <span className="text-sm font-semibold tracking-widest uppercase">Tour de Mullae</span>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             뚜르 드 문래
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -130,7 +130,7 @@ export default function MullaesianHome() {
                             <Camera className="h-5 w-5" />
                             <span className="text-sm font-semibold tracking-widest uppercase">Gallery Mullae</span>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             갤러리 문래
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">
@@ -161,12 +161,12 @@ export default function MullaesianHome() {
             {/* ── 문래 꼬뮨 (Mullae Commune) ── */}
             <section id="commune" className="py-20 px-6 bg-neutral-50 scroll-mt-16">
                 <div className="mx-auto max-w-4xl">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-10 md:mb-16">
                         <div className="inline-flex items-center gap-2 text-[#007BBF] mb-4">
                             <Clock className="h-5 w-5" />
                             <span className="text-sm font-semibold tracking-widest uppercase">Mullae Commune</span>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+                        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
                             문래 꼬뮨
                         </h2>
                         <p className="text-neutral-600 max-w-xl mx-auto">

@@ -77,7 +77,7 @@ export default function HeRoHomePage() {
         <div>
             {/* Hero Section */}
             <section className="relative bg-gradient-to-br from-amber-50 via-white to-orange-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24 lg:py-32">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 md:py-24 lg:py-32">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-6">
                             <Target className="h-5 w-5 text-amber-500" />
@@ -85,7 +85,7 @@ export default function HeRoHomePage() {
                                 Hidden Intelligence &amp; Real Opportunity
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight mb-6">
+                        <h1 className="text-2xl md:text-4xl lg:text-6xl font-extrabold tracking-tight mb-6">
                             숨겨진 인재를<br />
                             <span className="text-amber-500">발굴</span>하고{" "}
                             <span className="text-amber-500">성장</span>시킵니다
@@ -118,7 +118,7 @@ export default function HeRoHomePage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat) => (
                             <div key={stat.label} className="text-center">
-                                <p className="text-3xl font-extrabold text-amber-500">
+                                <p className="text-xl md:text-3xl font-extrabold text-amber-500">
                                     {stat.value}
                                     <span className="text-lg text-neutral-400 ml-1">{stat.unit}</span>
                                 </p>
@@ -133,7 +133,7 @@ export default function HeRoHomePage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-3">HeRo 프로그램</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">HeRo 프로그램</h2>
                         <p className="text-neutral-500">인재 발굴부터 성장까지, 체계적인 프로그램을 제공합니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -162,9 +162,9 @@ export default function HeRoHomePage() {
             {/* Career Roadmap Preview */}
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                         <div>
-                            <h2 className="text-3xl font-bold mb-4">커리어 로드맵</h2>
+                            <h2 className="text-xl md:text-3xl font-bold mb-4">커리어 로드맵</h2>
                             <p className="text-neutral-600 mb-6">
                                 C-Level을 향한 성장 경로를 설계합니다. CMO, CTO, CSO, CBO 등
                                 다양한 트랙에서 나만의 커리어 경로를 찾으세요.
@@ -213,7 +213,7 @@ export default function HeRoHomePage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-3">멘토 하이라이트</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">멘토 하이라이트</h2>
                         <p className="text-neutral-500">현직 전문가들이 당신의 성장을 돕습니다</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -254,7 +254,7 @@ export default function HeRoHomePage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-3">성공 사례</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">성공 사례</h2>
                         <p className="text-neutral-500">HeRo와 함께 성장한 인재들의 이야기</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -285,7 +285,7 @@ export default function HeRoHomePage() {
             {/* CTA */}
             <section className="bg-amber-500">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
-                    <h2 className="text-3xl font-bold text-white mb-4">HeRo가 되어보세요</h2>
+                    <h2 className="text-xl md:text-3xl font-bold text-white mb-4">HeRo가 되어보세요</h2>
                     <p className="text-amber-100 mb-8 max-w-xl mx-auto">
                         숨겨진 당신의 잠재력을 발견하고, 체계적인 성장 프로그램으로 꿈을 현실로 만드세요.
                     </p>

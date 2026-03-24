@@ -87,7 +87,7 @@ export default function ResumePage() {
                                 Resume Consulting
                             </span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             이력서를<br />
                             <span className="text-amber-500">완벽하게</span> 다듬습니다
                         </h1>
@@ -109,7 +109,7 @@ export default function ResumePage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">컨설팅 서비스</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">컨설팅 서비스</h2>
                         <p className="text-neutral-500">AI + 전문가가 함께하는 이력서 컨설팅</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -130,7 +130,7 @@ export default function ResumePage() {
             <section className="bg-neutral-50">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">Before / After 사례</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">Before / After 사례</h2>
                         <p className="text-neutral-500">실제 개선 사례를 확인하세요</p>
                     </div>
                     <div className="max-w-3xl mx-auto space-y-6">
@@ -162,7 +162,7 @@ export default function ResumePage() {
             <section className="bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
                     <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold mb-3">이용 요금</h2>
+                        <h2 className="text-xl md:text-3xl font-bold mb-3">이용 요금</h2>
                         <p className="text-neutral-500">필요에 맞는 플랜을 선택하세요</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">

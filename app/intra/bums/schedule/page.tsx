@@ -168,9 +168,9 @@ export default function CmsSchedulePage() {
                     {/* Calendar */}
                     <div className="border border-neutral-200 bg-white rounded">
                         <div className="px-5 py-3 border-b border-neutral-100 flex items-center justify-between">
-                            <button onClick={prevMonth} className="p-1 hover:bg-neutral-100 rounded"><ChevronLeft className="h-4 w-4" /></button>
+                            <button onClick={prevMonth} className="p-1 hover:bg-neutral-100 rounded" aria-label="이전 달"><ChevronLeft className="h-4 w-4" /></button>
                             <h2 className="text-sm font-semibold">{year}년 {MONTHS[month]}</h2>
-                            <button onClick={nextMonth} className="p-1 hover:bg-neutral-100 rounded"><ChevronRight className="h-4 w-4" /></button>
+                            <button onClick={nextMonth} className="p-1 hover:bg-neutral-100 rounded" aria-label="다음 달"><ChevronRight className="h-4 w-4" /></button>
                         </div>
                         <div className="grid grid-cols-7">
                             {DAYS.map(d => (

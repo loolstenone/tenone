@@ -127,7 +127,7 @@ export default function SubwayLinePage() {
                     <div className="h-3 bg-[#E6186C]" />
                 </div>
                 <div className="bg-[#3D3D3D] text-white text-center py-12">
-                    <h1 className="text-4xl md:text-5xl font-light">Seoul Subway</h1>
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-light">Seoul Subway</h1>
                     <p className="text-neutral-400 mt-2 text-sm">
                         13 Lines covering the entire Seoul Metropolitan Area
                     </p>

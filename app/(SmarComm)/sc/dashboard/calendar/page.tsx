@@ -47,9 +47,9 @@ export default function CalendarPage() {
 
       {/* Month Navigation */}
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={prevMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronLeft size={16} /></button>
+        <button onClick={prevMonth} className="rounded-lg border border-border p-2 hover:bg-surface" aria-label="이전 달"><ChevronLeft size={16} /></button>
         <span className="text-base font-semibold text-text">{year}년 {month + 1}월</span>
-        <button onClick={nextMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronRight size={16} /></button>
+        <button onClick={nextMonth} className="rounded-lg border border-border p-2 hover:bg-surface" aria-label="다음 달"><ChevronRight size={16} /></button>
       </div>
 
       {/* Calendar Grid */}
