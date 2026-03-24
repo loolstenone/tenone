@@ -8,8 +8,8 @@ import { useState } from "react";
 
 export default function WorkDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { getPostById } = useBums();
-    const post = getPostById(id);
+    const { getPostById, getBoardPostById } = useBums();
+    const post = getPostById(id) || getBoardPostById(id);
     const [copied, setCopied] = useState(false);
 
     const handleCopyUrl = () => {
@@ -42,9 +42,9 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
 
                     {/* Meta */}
                     <div className="flex items-center gap-3 mb-4">
-                        <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{post.category}</span>
+                        <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{(post as any).category || (post as any).categoryId || ''}</span>
                         <span className="flex items-center gap-1 text-xs tn-text-sub">
-                            <Calendar className="h-3 w-3" /> {post.date}
+                            <Calendar className="h-3 w-3" /> {(post as any).date || (post as any).publishedAt || (post as any).createdAt || ''}
                         </span>
                     </div>
 
@@ -58,8 +58,8 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                             className="inline-flex items-center gap-2 px-4 py-2 text-xs border tn-border tn-text-sub hover:tn-text hover:border-neutral-400 transition-colors">
                             {copied ? <><Check className="h-3.5 w-3.5 text-green-500" /> 복사됨</> : <><Link2 className="h-3.5 w-3.5" /> URL 복사</>}
                         </button>
-                        {post.externalLink && (
-                            <a href={post.externalLink} target="_blank" rel="noopener noreferrer"
+                        {(post as any).externalLink && (
+                            <a href={(post as any).externalLink} target="_blank" rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 text-xs border tn-border tn-text-sub hover:tn-text hover:border-neutral-400 transition-colors">
                                 <ExternalLink className="h-3.5 w-3.5" /> 외부 링크
                             </a>
@@ -67,7 +67,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
 
                     {/* Image */}
-                    {post.image && (
+                    {(post as any).image && (
                         <div className="aspect-[16/9] bg-neutral-100 mb-10 overflow-hidden">
                             {(post.image.startsWith('http') || post.image.startsWith('data:')) ? (
                                 <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
@@ -91,10 +91,10 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     )}
 
                     {/* Tags */}
-                    {post.tags.length > 0 && (
+                    {((post as any).tags || []).length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-10 pt-8 border-t tn-border">
                             <Tag className="h-3.5 w-3.5 tn-text-muted mt-0.5" />
-                            {post.tags.map(tag => (
+                            {((post as any).tags || []).map((tag: string) => (
                                 <span key={tag} className="text-xs px-3 py-1 tn-bg-alt tn-text-sub border tn-border">
                                     {tag}
                                 </span>

@@ -9,11 +9,13 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function WorksPage() {
-    const { getPublishedByChannel } = useBums();
-    const allWorks = getPublishedByChannel('works');
+    const { getPublishedByChannel, getPublishedByBoardSlug } = useBums();
+    const dbData = getPublishedByBoardSlug('tenone', 'works');
+    const legacyData = getPublishedByChannel('works');
+    const allWorks = dbData.length > 0 ? dbData : legacyData;
     const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
 
-    const filtered = filter === '전체' ? allWorks : allWorks.filter(w => w.category === filter);
+    const filtered = filter === '전체' ? allWorks : allWorks.filter(w => ((w as any).category || (w as any).categoryId || '') === filter);
 
     return (
         <div className="tn-surface tn-text">
@@ -68,8 +70,8 @@ export default function WorksPage() {
 
                                 {/* 정보 */}
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{work.category}</span>
-                                    <span className="text-xs tn-text-sub">{work.date}</span>
+                                    <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{(work as any).category || (work as any).categoryId || ''}</span>
+                                    <span className="text-xs tn-text-sub">{(work as any).date || (work as any).publishedAt || (work as any).createdAt || ''}</span>
                                 </div>
                                 <Link href={`/works/${work.id}`}>
                                     <h2 className="text-2xl font-bold group-hover:underline cursor-pointer">{work.title}</h2>
@@ -77,9 +79,9 @@ export default function WorksPage() {
                                 <p className="text-sm tn-text-sub mt-3 leading-relaxed">{work.summary}</p>
 
                                 {/* 태그 */}
-                                {work.tags.length > 0 && (
+                                {((work as any).tags || []).length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-4">
-                                        {work.tags.map(tag => (
+                                        {((work as any).tags || []).map((tag: string) => (
                                             <span key={tag} className="text-xs px-3 py-1 tn-bg-alt tn-text-sub border tn-border">
                                                 {tag}
                                             </span>
@@ -93,8 +95,8 @@ export default function WorksPage() {
                                         className="inline-flex items-center gap-2 text-sm tn-text hover:text-neutral-600 transition-colors">
                                         자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
                                     </Link>
-                                    {work.externalLink && (
-                                        <a href={work.externalLink} target="_blank" rel="noopener noreferrer"
+                                    {((work as any).externalLink) && (
+                                        <a href={(work as any).externalLink} target="_blank" rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
                                             외부 링크 <ExternalLink className="h-3.5 w-3.5" />
                                         </a>

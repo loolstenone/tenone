@@ -9,11 +9,13 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
 
 export default function NewsroomPage() {
-    const { getPublishedByChannel } = useBums();
-    const allNews = getPublishedByChannel('newsroom');
+    const { getPublishedByChannel, getPublishedByBoardSlug } = useBums();
+    const dbData = getPublishedByBoardSlug('tenone', 'newsroom');
+    const legacyData = getPublishedByChannel('newsroom');
+    const allNews = dbData.length > 0 ? dbData : legacyData;
     const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
 
-    const filtered = filter === '전체' ? allNews : allNews.filter(n => n.category === filter);
+    const filtered = filter === '전체' ? allNews : allNews.filter(n => ((n as any).category || (n as any).categoryId || '') === filter);
     const featured = filtered[0];
     const rest = filtered.slice(1);
 
@@ -55,8 +57,8 @@ export default function NewsroomPage() {
                         </div>
                         <div className="flex flex-col justify-center">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{featured.category}</span>
-                                <span className="text-xs tn-text-sub">{featured.date}</span>
+                                <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{(featured as any).category || (featured as any).categoryId || ''}</span>
+                                <span className="text-xs tn-text-sub">{(featured as any).date || (featured as any).publishedAt || (featured as any).createdAt || ''}</span>
                             </div>
                             <Link href={`/newsroom/${featured.id}`}>
                                 <h2 className="text-2xl md:text-3xl font-bold leading-snug hover:underline">{featured.title}</h2>
@@ -67,8 +69,8 @@ export default function NewsroomPage() {
                                     className="inline-flex items-center gap-2 text-sm tn-text hover:text-neutral-600 transition-colors">
                                     자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
                                 </Link>
-                                {featured.externalLink && (
-                                    <a href={featured.externalLink} target="_blank" rel="noopener noreferrer"
+                                {(featured as any).externalLink && (
+                                    <a href={(featured as any).externalLink} target="_blank" rel="noopener noreferrer"
                                         className="inline-flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
                                         외부 링크 <ExternalLink className="h-3.5 w-3.5" />
                                     </a>
@@ -95,8 +97,8 @@ export default function NewsroomPage() {
                                     </div>
                                 </Link>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 tn-text-sub">{news.category}</span>
-                                    <span className="text-xs tn-text-sub">{news.date}</span>
+                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 tn-text-sub">{(news as any).category || (news as any).categoryId || ''}</span>
+                                    <span className="text-xs tn-text-sub">{(news as any).date || (news as any).publishedAt || (news as any).createdAt || ''}</span>
                                 </div>
                                 <Link href={`/newsroom/${news.id}`}>
                                     <h3 className="font-bold tn-text group-hover:underline leading-snug">{news.title}</h3>
@@ -107,8 +109,8 @@ export default function NewsroomPage() {
                                         className="inline-flex items-center gap-1.5 text-xs tn-text hover:text-neutral-600 transition-colors">
                                         자세히 보기 <ArrowRight className="h-3 w-3" />
                                     </Link>
-                                    {news.externalLink && (
-                                        <a href={news.externalLink} target="_blank" rel="noopener noreferrer"
+                                    {(news as any).externalLink && (
+                                        <a href={(news as any).externalLink} target="_blank" rel="noopener noreferrer"
                                             className="inline-flex items-center gap-1.5 text-xs tn-text-sub hover:tn-text transition-colors">
                                             외부 링크 <ExternalLink className="h-3 w-3" />
                                         </a>
