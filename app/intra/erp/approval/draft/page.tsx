@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, Upload, User, ArrowRight } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
 
 const approvalLine = [
     { role: "기안자", name: "나 (Cheonil Jeon)" },
@@ -16,6 +17,13 @@ export default function ApprovalDraftPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // DB에 기안 생성 시도 (실패 시 무시)
+        erpDb.createApproval({
+            title,
+            type,
+            content,
+            status: 'pending',
+        }).catch(() => {});
         alert("기안이 제출되었습니다.");
     };
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, CheckCircle, XCircle, Clock } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface PendingApproval {
     docNo: string;
@@ -43,12 +44,32 @@ export default function ApprovalPendingPage() {
     const [items, setItems] = useState(pendingItems);
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
+    // DB 로드 시도 (실패 시 Mock 유지)
+    useEffect(() => {
+        erpDb.fetchApprovals({ status: 'pending' })
+            .then(({ approvals }) => {
+                if (approvals.length > 0) {
+                    setItems(approvals.map((a: Record<string, unknown>) => ({
+                        docNo: (a.id as string) || '',
+                        title: (a.title as string) || '',
+                        drafter: ((a.requester as Record<string, unknown>)?.name as string) || '알 수 없음',
+                        draftDate: ((a.created_at as string) || '').slice(0, 10),
+                        type: (a.type as string) || '기안',
+                        status: '승인대기',
+                    })));
+                }
+            })
+            .catch(() => { /* Mock 유지 */ });
+    }, []);
+
     const handleApprove = (docNo: string) => {
         setItems((prev) => prev.filter((item) => item.docNo !== docNo));
+        erpDb.updateApprovalStatus(docNo, 'approved').catch(() => {});
     };
 
     const handleReject = (docNo: string) => {
         setItems((prev) => prev.filter((item) => item.docNo !== docNo));
+        erpDb.updateApprovalStatus(docNo, 'rejected').catch(() => {});
     };
 
     return (

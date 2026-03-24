@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Target, Users, TrendingUp, CheckCircle2, Clock, AlertCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { getMemberStats } from "@/lib/supabase/members";
 
 interface DivisionGPR {
     name: string;
@@ -41,6 +43,15 @@ function gradeColor(grade: string) {
 }
 
 export default function GPRDashboardPage() {
+    const [totalMembers, setTotalMembers] = useState<number | null>(null);
+
+    // DB에서 전체 멤버 수 로드 (실패 시 Mock 유지)
+    useEffect(() => {
+        getMemberStats()
+            .then((stats) => setTotalMembers(stats.total))
+            .catch(() => { /* Mock 유지 */ });
+    }, []);
+
     return (
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-2">
@@ -52,9 +63,10 @@ export default function GPRDashboardPage() {
             </div>
 
             {/* Company-level stats */}
-            <div className="grid grid-cols-5 gap-3 mt-6 mb-6">
+            <div className="grid grid-cols-6 gap-3 mt-6 mb-6">
                 {[
                     { label: "전사 달성률", value: `${companyGPR.overallRate}%`, icon: TrendingUp },
+                    { label: "전체 인원", value: totalMembers !== null ? `${totalMembers}명` : `${divisions.reduce((s, d) => s + d.members, 0)}명`, icon: Users },
                     { label: "전체 목표", value: `${companyGPR.totalGoals}건`, icon: Target },
                     { label: "완료", value: `${companyGPR.completed}건`, icon: CheckCircle2 },
                     { label: "승인 대기", value: `${companyGPR.pendingApproval}건`, icon: Clock, highlight: companyGPR.pendingApproval > 0 },
