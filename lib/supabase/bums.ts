@@ -148,6 +148,14 @@ export async function fetchPostBySlug(siteId: string, slug: string) {
 
 export async function createPost(post: Record<string, unknown>) {
     const row = camelToSnake(post);
+    // ID가 UUID 형식이 아니면 제거 (DB가 자동 생성)
+    if (row.id && typeof row.id === 'string' && !row.id.match(/^[0-9a-f]{8}-/)) {
+        delete row.id;
+    }
+    // author_id가 UUID 형식이 아니면 null로
+    if (row.author_id && typeof row.author_id === 'string' && !row.author_id.match(/^[0-9a-f]{8}-/)) {
+        row.author_id = null;
+    }
     const { data, error } = await supabase
         .from('bums_posts')
         .insert(row)
