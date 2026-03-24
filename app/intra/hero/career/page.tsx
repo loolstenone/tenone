@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BarChart3, Zap, Target, BookOpen } from "lucide-react";
 import clsx from "clsx";
 import Link from "next/link";
+import * as heroDb from "@/lib/supabase/hero";
+import { useAuth } from "@/lib/auth-context";
 
 const competencies = [
     { name: "전략", value: 92 },
@@ -29,7 +31,29 @@ const developAreas = [
 ];
 
 export default function CareerDiagnosisPage() {
-    const maxVal = Math.max(...competencies.map(c => c.value));
+    const { user } = useAuth();
+    const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
+
+    // DB에서 커리어 프로필 로드
+    useEffect(() => {
+        if (!user?.id) return;
+        heroDb.fetchCareerProfile(user.id)
+            .then(data => { if (data) setProfileData(data); })
+            .catch(() => { /* Mock fallback */ });
+    }, [user?.id]);
+
+    // DB 데이터가 있으면 사용, 없으면 Mock 유지
+    const activeCompetencies = profileData?.competencies
+        ? (profileData.competencies as typeof competencies)
+        : competencies;
+    const activeStrengths = profileData?.top_strengths
+        ? (profileData.top_strengths as typeof topStrengths)
+        : topStrengths;
+    const activeDevelopAreas = profileData?.develop_areas
+        ? (profileData.develop_areas as typeof developAreas)
+        : developAreas;
+
+    const maxVal = Math.max(...activeCompetencies.map(c => c.value));
 
     return (
         <div className="max-w-4xl">
@@ -45,7 +69,7 @@ export default function CareerDiagnosisPage() {
                     <h3 className="text-sm font-semibold">역량 레이더</h3>
                 </div>
                 <div className="space-y-3">
-                    {competencies.map(c => (
+                    {activeCompetencies.map(c => (
                         <div key={c.name} className="flex items-center gap-3">
                             <span className="text-xs w-20 text-right text-neutral-600">{c.name}</span>
                             <div className="flex-1 h-5 bg-neutral-100 relative">
@@ -75,7 +99,7 @@ export default function CareerDiagnosisPage() {
                     <h3 className="text-sm font-semibold">강점 TOP 3</h3>
                 </div>
                 <div className="space-y-4">
-                    {topStrengths.map((s, i) => (
+                    {activeStrengths.map((s, i) => (
                         <div key={s.name} className="flex gap-4">
                             <span className="text-lg font-bold text-neutral-200 w-8 text-right flex-shrink-0">
                                 {i + 1}
@@ -99,7 +123,7 @@ export default function CareerDiagnosisPage() {
                     <h3 className="text-sm font-semibold">개발 필요 역량</h3>
                 </div>
                 <div className="space-y-4">
-                    {developAreas.map(d => (
+                    {activeDevelopAreas.map(d => (
                         <div key={d.name} className="border border-neutral-100 p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="text-sm font-medium">{d.name}</h4>

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ClipboardCheck, ChevronRight, ArrowRight } from "lucide-react";
 import clsx from "clsx";
 import Link from "next/link";
+import * as heroDb from "@/lib/supabase/hero";
+import { useAuth } from "@/lib/auth-context";
 
 interface Question {
     id: number;
@@ -41,9 +43,19 @@ const step2Questions: Question[] = [
 const likertLabels = ["전혀 아니다", "아니다", "보통이다", "그렇다", "매우 그렇다"];
 
 export default function HitTestPage() {
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [answers, setAnswers] = useState<Record<number, number | string>>({});
     const [completed, setCompleted] = useState(false);
+    const [previousResults, setPreviousResults] = useState<unknown[]>([]);
+
+    // DB에서 이전 결과 로드
+    useEffect(() => {
+        if (!user?.id) return;
+        heroDb.fetchHitResults(user.id)
+            .then(data => setPreviousResults(data))
+            .catch(() => { /* Mock fallback */ });
+    }, [user?.id]);
 
     const questions = step === 1 ? step1Questions : step2Questions;
     const answeredCount = questions.filter(q => answers[q.id] !== undefined).length;
@@ -62,8 +74,20 @@ export default function HitTestPage() {
     const canProceed = answeredCount === questions.length;
 
     const handleNext = () => {
-        if (step === 1) setStep(2);
-        else setCompleted(true);
+        if (step === 1) {
+            setStep(2);
+        } else {
+            setCompleted(true);
+            // DB에 결과 저장
+            if (user?.id) {
+                heroDb.saveHitResult({
+                    member_id: user.id,
+                    test_type: "HIT_INTEGRATED",
+                    scores: answers as Record<string, unknown>,
+                    summary: `Step1+Step2 완료, ${Object.keys(answers).length}문항 응답`,
+                }).catch(() => { /* silent */ });
+            }
+        }
     };
 
     if (completed) {

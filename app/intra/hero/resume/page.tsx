@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Save,
   FileDown,
@@ -15,6 +15,8 @@ import {
   Circle,
 } from "lucide-react";
 import clsx from "clsx";
+import * as heroDb from "@/lib/supabase/hero";
+import { useAuth } from "@/lib/auth-context";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -103,6 +105,9 @@ const genId = () => `_${++_idCounter}`;
 // ─── Component ───────────────────────────────────────────────────
 
 export default function ResumePage() {
+  const { user } = useAuth();
+  const [dbResumeId, setDbResumeId] = useState<string | null>(null);
+
   // Section 1: 타이틀
   const [slogan, setSlogan] = useState("가치로 연결된 세계관을 만드는");
   const [fullName, setFullName] = useState("전천일");
@@ -211,6 +216,50 @@ export default function ResumePage() {
   });
   const [saving, setSaving] = useState(false);
 
+  // ─── DB 로드 ──────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!user?.id) return;
+    heroDb.fetchResumes(user.id)
+      .then(rows => {
+        if (rows.length > 0) {
+          const r = rows[0];
+          setDbResumeId(r.id);
+          const c = r.content as Record<string, unknown> | undefined;
+          if (c) {
+            if (c.slogan) setSlogan(c.slogan as string);
+            if (c.fullName) setFullName(c.fullName as string);
+            if (c.nameKr) setNameKr(c.nameKr as string);
+            if (c.nameHanja) setNameHanja(c.nameHanja as string);
+            if (c.nameEn) setNameEn(c.nameEn as string);
+            if (c.birth) setBirth(c.birth as string);
+            if (c.address) setAddress(c.address as string);
+            if (c.mobile) setMobile(c.mobile as string);
+            if (c.email) setEmail(c.email as string);
+            if (c.military) setMilitary(c.military as string);
+            if (c.etc) setEtc(c.etc as string);
+            if (c.educations) setEducations(c.educations as Education[]);
+            if (c.certificates) setCertificates(c.certificates as Certificate[]);
+            if (c.awards) setAwards(c.awards as Award[]);
+            if (c.judgings) setJudgings(c.judgings as Judging[]);
+            if (c.lectures) setLectures(c.lectures as Lecture[]);
+            if (c.activities) setActivities(c.activities as ExternalActivity[]);
+            if (c.strengthText) setStrengthText(c.strengthText as string);
+            if (c.atlText) setAtlText(c.atlText as string);
+            if (c.btlText) setBtlText(c.btlText as string);
+            if (c.digitalText) setDigitalText(c.digitalText as string);
+            if (c.consultingText) setConsultingText(c.consultingText as string);
+            if (c.crmText) setCrmText(c.crmText as string);
+            if (c.brandCategories) setBrandCategories(c.brandCategories as BrandCategory[]);
+            if (c.achievements) setAchievements(c.achievements as Achievement[]);
+            if (c.careerSummaries) setCareerSummaries(c.careerSummaries as CareerSummary[]);
+            if (c.careerDetails) setCareerDetails(c.careerDetails as CareerDetail[]);
+          }
+        }
+      })
+      .catch(() => { /* Mock fallback */ });
+  }, [user?.id]);
+
   // ─── Helpers ─────────────────────────────────────────────────────
 
   const toggleSection = (n: number) =>
@@ -218,6 +267,21 @@ export default function ResumePage() {
 
   const handleSave = () => {
     setSaving(true);
+    // DB 저장
+    if (user?.id) {
+      const content = {
+        slogan, fullName, nameKr, nameHanja, nameEn, birth, address, mobile, email, military, etc,
+        educations, certificates, awards, judgings, lectures, activities,
+        strengthText, atlText, btlText, digitalText, consultingText, crmText, brandCategories,
+        achievements, careerSummaries, careerDetails,
+      };
+      const promise = dbResumeId
+        ? heroDb.updateResume(dbResumeId, { content })
+        : heroDb.createResume({ member_id: user.id, title: `${fullName} 이력서`, content });
+      promise
+        .then(data => { if (!dbResumeId && data?.id) setDbResumeId(data.id); })
+        .catch(() => { /* silent */ });
+    }
     setTimeout(() => setSaving(false), 1200);
   };
 

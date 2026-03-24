@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Hash, FileText, FolderOpen, Eye, EyeOff } from "lucide-react";
 import clsx from "clsx";
+import * as heroDb from "@/lib/supabase/hero";
+import { useAuth } from "@/lib/auth-context";
 
 const mockProjects = [
     {
@@ -29,6 +31,7 @@ const mockProjects = [
 ];
 
 export default function PersonalBrandingPage() {
+    const { user } = useAuth();
     const [keywords, setKeywords] = useState<string[]>(["전략", "연결", "세계관", "AI", "브랜드", "리더십"]);
     const [newKeyword, setNewKeyword] = useState("");
     const [story, setStory] = useState(
@@ -36,15 +39,43 @@ export default function PersonalBrandingPage() {
     );
     const [isPublic, setIsPublic] = useState(false);
 
+    // DB에서 커리어 프로필 로드 (브랜딩 데이터 연동)
+    useEffect(() => {
+        if (!user?.id) return;
+        heroDb.fetchCareerProfile(user.id)
+            .then(data => {
+                if (data) {
+                    if (data.brand_keywords) setKeywords(data.brand_keywords as string[]);
+                    if (data.brand_story) setStory(data.brand_story as string);
+                    if (data.is_public !== undefined) setIsPublic(data.is_public as boolean);
+                }
+            })
+            .catch(() => { /* Mock fallback */ });
+    }, [user?.id]);
+
+    // 브랜딩 데이터 변경 시 DB 저장
+    const saveBrandingToDb = () => {
+        if (!user?.id) return;
+        heroDb.upsertCareerProfile(user.id, {
+            brand_keywords: keywords,
+            brand_story: story,
+            is_public: isPublic,
+        }).catch(() => { /* silent */ });
+    };
+
     const addKeyword = () => {
         if (newKeyword.trim() && !keywords.includes(newKeyword.trim())) {
-            setKeywords(prev => [...prev, newKeyword.trim()]);
+            const updated = [...keywords, newKeyword.trim()];
+            setKeywords(updated);
             setNewKeyword("");
+            if (user?.id) heroDb.upsertCareerProfile(user.id, { brand_keywords: updated, brand_story: story, is_public: isPublic }).catch(() => {});
         }
     };
 
     const removeKeyword = (kw: string) => {
-        setKeywords(prev => prev.filter(k => k !== kw));
+        const updated = keywords.filter(k => k !== kw);
+        setKeywords(updated);
+        if (user?.id) heroDb.upsertCareerProfile(user.id, { brand_keywords: updated, brand_story: story, is_public: isPublic }).catch(() => {});
     };
 
     return (
@@ -118,6 +149,7 @@ export default function PersonalBrandingPage() {
                 <textarea
                     value={story}
                     onChange={e => setStory(e.target.value)}
+                    onBlur={() => saveBrandingToDb()}
                     rows={5}
                     className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400 resize-none"
                 />
@@ -159,7 +191,7 @@ export default function PersonalBrandingPage() {
                         </div>
                     </div>
                     <button
-                        onClick={() => setIsPublic(!isPublic)}
+                        onClick={() => setIsPublic(prev => { const next = !prev; if (user?.id) heroDb.upsertCareerProfile(user.id, { brand_keywords: keywords, brand_story: story, is_public: next }).catch(() => {}); return next; })}
                         className={clsx(
                             "relative w-12 h-6 rounded-full transition-colors",
                             isPublic ? "bg-neutral-900" : "bg-neutral-300"
