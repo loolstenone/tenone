@@ -8,8 +8,8 @@ import {
 import clsx from "clsx";
 
 const statusColor: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    maintenance: "bg-yellow-100 text-yellow-700",
+    active: "bg-emerald-50 text-emerald-700",
+    maintenance: "bg-yellow-50 text-yellow-700",
     inactive: "bg-neutral-100 text-neutral-500",
 };
 
@@ -40,21 +40,21 @@ export default function CmsDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-bold">CMS Dashboard</h2>
+                <h2 className="text-2xl font-bold tracking-tight">BUMS Dashboard</h2>
                 <p className="mt-1 text-sm text-neutral-500">사이트 & 게시판 통합 관리</p>
             </div>
 
             {/* Summary Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map(item => (
                     <Link key={item.name} href={item.href}
-                        className="group border border-neutral-200 bg-white p-6 hover:border-neutral-900 transition-all">
+                        className="group rounded-xl bg-white border border-neutral-100 shadow-sm p-6 hover:shadow-md hover:border-neutral-200 transition-all">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-neutral-500">{item.name}</p>
-                                <p className="mt-2 text-3xl font-bold">{item.value}</p>
+                                <p className="mt-2 text-3xl font-bold tracking-tight">{item.value}</p>
                             </div>
-                            <div className="p-3 bg-neutral-100 text-neutral-400">
+                            <div className="p-3 bg-neutral-50 rounded-xl text-neutral-400 group-hover:bg-neutral-100 transition-colors">
                                 <item.icon className="h-5 w-5" />
                             </div>
                         </div>
@@ -65,18 +65,18 @@ export default function CmsDashboard() {
             {/* Managed Sites */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">관리 사이트</h3>
-                    <Link href="/intra/bums/sites" className="text-xs text-neutral-400 hover:text-neutral-900">
+                    <h3 className="text-lg font-semibold tracking-tight">관리 사이트</h3>
+                    <Link href="/intra/bums/sites" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">
                         전체 보기
                     </Link>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {sites.map(site => {
                         const siteBoards = boards.filter(b => b.siteId === site.id);
                         const sitePosts = boardPosts.filter(p => p.siteId === site.id);
                         return (
                             <Link key={site.id} href={`/intra/bums/sites/${site.id}`}
-                                className="border border-neutral-200 bg-white p-5 hover:border-neutral-900 transition-all group">
+                                className="rounded-xl bg-white border border-neutral-100 shadow-sm p-5 hover:shadow-md hover:border-neutral-200 transition-all group">
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <h4 className="font-semibold text-sm">{site.name}</h4>
@@ -85,12 +85,12 @@ export default function CmsDashboard() {
                                             {site.domain}
                                         </p>
                                     </div>
-                                    <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-medium", statusColor[site.status])}>
+                                    <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-medium", statusColor[site.status])}>
                                         {statusLabel[site.status]}
                                     </span>
                                 </div>
-                                <p className="text-xs text-neutral-500 mt-2 line-clamp-1">{site.description}</p>
-                                <div className="flex gap-4 mt-3 text-xs text-neutral-400">
+                                <p className="text-xs text-neutral-500 mt-2.5 line-clamp-1">{site.description}</p>
+                                <div className="flex gap-4 mt-3.5 text-xs text-neutral-400">
                                     <span>게시판 {siteBoards.length}</span>
                                     <span>게시글 {sitePosts.length}</span>
                                 </div>
@@ -101,7 +101,7 @@ export default function CmsDashboard() {
             </div>
 
             {/* Recent Posts */}
-            <div className="border border-neutral-200 bg-white">
+            <div className="rounded-xl bg-white border border-neutral-100 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center">
                     <h3 className="text-sm font-semibold">최근 게시글</h3>
                 </div>
@@ -110,7 +110,7 @@ export default function CmsDashboard() {
                         const board = boards.find(b => b.id === post.boardId);
                         const site = sites.find(s => s.id === post.siteId);
                         return (
-                            <li key={post.id} className="px-6 py-3 hover:bg-neutral-50 transition-colors">
+                            <li key={post.id} className="px-6 py-3.5 hover:bg-neutral-50/50 transition-colors">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export default function CmsDashboard() {
                         );
                     })}
                     {recentPosts.length === 0 && (
-                        <li className="px-6 py-8 text-center text-sm text-neutral-400">게시글이 없습니다</li>
+                        <li className="px-6 py-12 text-center text-sm text-neutral-400">게시글이 없습니다</li>
                     )}
                 </ul>
             </div>
