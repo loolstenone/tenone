@@ -5,10 +5,10 @@ import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight } from "lucide-r
 import { useWorkflow } from "@/lib/smarcomm/workflow-context";
 
 const modules = [
-  { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/dashboard/workflow/pipeline", icon: GitBranch },
-  { name: "칸반 보드", description: "드래그앤드롭으로 태스크를 관리합니다.", href: "/dashboard/workflow/kanban", icon: KanbanSquare },
-  { name: "프로젝트", description: "캠페인별 프로젝트 진행 현황을 관리합니다.", href: "/dashboard/workflow/projects", icon: FolderKanban },
-  { name: "자동화", description: "자동화 규칙을 설정하고 관리합니다.", href: "/dashboard/workflow/automation", icon: Zap },
+  { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/sc/dashboard/workflow/pipeline", icon: GitBranch },
+  { name: "칸반 보드", description: "드래그앤드롭으로 태스크를 관리합니다.", href: "/sc/dashboard/workflow/kanban", icon: KanbanSquare },
+  { name: "프로젝트", description: "캠페인별 프로젝트 진행 현황을 관리합니다.", href: "/sc/dashboard/workflow/projects", icon: FolderKanban },
+  { name: "자동화", description: "자동화 규칙을 설정하고 관리합니다.", href: "/sc/dashboard/workflow/automation", icon: Zap },
 ];
 
 export default function WorkflowDashboard() {

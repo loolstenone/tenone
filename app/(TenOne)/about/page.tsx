@@ -131,7 +131,7 @@ function AboutContent() {
                     </section>
 
                     {/* Mission / Vision */}
-                    <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
+                    <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                         <div className="max-w-7xl mx-auto">
                             <div className="grid md:grid-cols-2 gap-8 md:gap-16">
                                 <div>
@@ -265,7 +265,7 @@ function AboutContent() {
                             <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 <span className="font-bold">9개 카테고리</span>의 브랜드가 하나의 생태계를 이룹니다.
                             </h2>
-                            <div className="grid md:grid-cols-3 gap-px bg-neutral-200">
+                            <div className="grid md:grid-cols-3 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
                                 {[
                                     { category: "AI Idol", brands: "LUKI", desc: "인공지능 아이돌 그룹" },
                                     { category: "AI Creator", brands: "RooK", desc: "인공지능 크리에이터 플랫폼" },
@@ -289,15 +289,15 @@ function AboutContent() {
                     </section>
 
                     {/* Flywheel */}
-                    <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
+                    <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                         <div className="max-w-7xl mx-auto">
                             <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Ten:One™ Flywheel</p>
                             <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
                                 실행은 연결을 가속하고, <span className="font-bold">연결은 더 많은 기회를 만든다.</span>
                             </h2>
-                            <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-px bg-neutral-800">
+                            <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
                                 {flywheel.map((step) => (
-                                    <div key={step.num} className="bg-neutral-900 p-6">
+                                    <div key={step.num} className="p-6" style={{ backgroundColor: "var(--tn-surface)" }}>
                                         <span className="text-sm text-neutral-600 font-mono">{step.num}</span>
                                         <h3 className="text-sm font-bold mt-3">{step.title}</h3>
                                         <p className="text-xs tn-text-sub mt-2 leading-relaxed">{step.desc}</p>
@@ -351,11 +351,11 @@ function AboutContent() {
                         <div className="flex flex-wrap gap-2 mb-12">
                             {years.map(y => (
                                 <button key={y} onClick={() => setYearFilter(y)}
-                                    className={`px-4 py-2 text-sm tracking-wide transition-colors ${
-                                        yearFilter === y
-                                            ? 'bg-neutral-900 text-white'
-                                            : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200'
-                                    }`}>
+                                    className="px-4 py-2 text-sm tracking-wide transition-colors"
+                                    style={yearFilter === y
+                                        ? { backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }
+                                        : { backgroundColor: "var(--tn-surface)", color: "var(--tn-text-sub)" }
+                                    }>
                                     {y}
                                 </button>
                             ))}
@@ -388,13 +388,13 @@ function AboutContent() {
             )}
 
             {/* CTA */}
-            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
+            <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                 <div className="max-w-7xl mx-auto text-center">
                     <h2 className="text-xl md:text-3xl font-light">
                         <span className="font-bold">너, 나의 동료가 되라.</span>
                     </h2>
                     <p className="mt-4 tn-text-sub">Ten:One™ Universe는 언제나 열려있습니다.</p>
-                    <Link href="/contact" className="inline-flex items-center gap-2 mt-8 px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors">
+                    <Link href="/contact" className="inline-flex items-center gap-2 mt-8 px-8 py-3.5 text-sm tracking-wide transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                         Contact Us <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>

@@ -78,7 +78,7 @@ export default function ScanPage() {
       if (res.ok) {
         const plan = await res.json();
         sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
-        router.push('/dashboard/advisor');
+        router.push('/sc/dashboard/advisor');
       }
     } catch (e) {
       console.error('Campaign plan generation failed:', e);
@@ -743,7 +743,7 @@ export default function ScanPage() {
         </div>
       )}
 
-      <NextStepCTA stage="진단 → 기획" title="진단 결과로 개선 프로젝트 시작" description="발견된 개선 포인트를 프로젝트와 태스크로 전환하여 체계적으로 관리하세요" actionLabel="프로젝트 생성" href="/dashboard/workflow/projects" />
+      <NextStepCTA stage="진단 → 기획" title="진단 결과로 개선 프로젝트 시작" description="발견된 개선 포인트를 프로젝트와 태스크로 전환하여 체계적으로 관리하세요" actionLabel="프로젝트 생성" href="/sc/dashboard/workflow/projects" />
     </div>
   );
 }

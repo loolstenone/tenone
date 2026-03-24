@@ -40,11 +40,11 @@ export default function WorksPage() {
                     <div className="flex flex-wrap gap-2">
                         {categories.map(cat => (
                             <button key={cat} onClick={() => setFilter(cat)}
-                                className={`px-5 py-2 text-sm tracking-wide transition-colors ${
-                                    filter === cat
-                                        ? 'bg-neutral-900 text-white'
-                                        : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200 hover:tn-text'
-                                }`}>
+                                className="px-5 py-2 text-sm tracking-wide transition-colors"
+                                style={filter === cat
+                                    ? { backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }
+                                    : { backgroundColor: "var(--tn-surface)", color: "var(--tn-text-sub)" }
+                                }>
                                 {cat}</button>
                         ))}
                     </div>
@@ -70,7 +70,7 @@ export default function WorksPage() {
 
                                 {/* 정보 */}
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{(work as any).category || (work as any).categoryId || ''}</span>
+                                    <span className="text-xs px-3 py-1 tn-text-sub" style={{ backgroundColor: "var(--tn-surface)" }}>{(work as any).category || (work as any).categoryId || ''}</span>
                                     <span className="text-xs tn-text-sub">{(work as any).date || (work as any).publishedAt || (work as any).createdAt || ''}</span>
                                 </div>
                                 <Link href={`/works/${work.id}`}>
@@ -115,7 +115,7 @@ export default function WorksPage() {
             </section>
 
             {/* CTA */}
-            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
+            <section className="tn-card py-16 md:py-24 px-6" style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)" }}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
                     <div>
                         <h2 className="text-xl md:text-3xl font-light">
@@ -125,7 +125,7 @@ export default function WorksPage() {
                             당신의 문제를 해결할 인재를 연결해드립니다.
                         </p>
                     </div>
-                    <a href="/contact" className="px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors flex items-center gap-2">
+                    <a href="/contact" className="px-8 py-3.5 text-sm tracking-wide transition-colors flex items-center gap-2" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                         프로젝트 의뢰 <ArrowRight className="h-4 w-4" />
                     </a>
                 </div>

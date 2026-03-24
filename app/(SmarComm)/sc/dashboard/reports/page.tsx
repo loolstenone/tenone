@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Download, Calendar, BarChart3, TrendingUp, Globe, Plus, Search, Star } from 'lucide-react';
 import { MOCK_CAMPAIGNS, MOCK_SALES, formatCurrency, getStatusLabel, getStatusColor } from '@/lib/smarcomm/dashboard-data';
 import { INSIGHT_REPORTS, SAVED_REPORTS, AVAILABLE_CHARTS, CHART_TYPE_MAP, REPORT_TEMPLATES, TEMPLATE_CATEGORIES } from '@/lib/smarcomm/report-data';
-import LineChart from '@/components/charts/LineChart';
-import BarChart from '@/components/charts/BarChart';
-import DonutChart from '@/components/charts/DonutChart';
+import LineChart from '@/components/smarcomm/charts/LineChart';
+import BarChart from '@/components/smarcomm/charts/BarChart';
+import DonutChart from '@/components/smarcomm/charts/DonutChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
 import PageTopBar from '@/components/smarcomm/PageTopBar';
@@ -44,7 +44,7 @@ export default function ReportsPage() {
       {mainTab === 'campaigns' && <CampaignsTab />}
       {mainTab === 'data' && <DataReportsTab />}
 
-      <NextStepCTA stage="결과 → 진단" title="사이트를 재진단하여 개선 효과 측정" description="캠페인 집행 후 GEO/SEO 점수 변화를 확인하고 다음 사이클을 시작하세요" actionLabel="사이트 재진단" href="/dashboard/scan" />
+      <NextStepCTA stage="결과 → 진단" title="사이트를 재진단하여 개선 효과 측정" description="캠페인 집행 후 GEO/SEO 점수 변화를 확인하고 다음 사이클을 시작하세요" actionLabel="사이트 재진단" href="/sc/dashboard/scan" />
     </div>
   );
 }

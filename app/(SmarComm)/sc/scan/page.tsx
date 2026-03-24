@@ -60,7 +60,7 @@ function ScanContent() {
         setProgress(100);
         setStep(4);
         setTimeout(() => {
-          router.push(`/report/${scanId}`);
+          router.push(`/sc/report/${scanId}`);
         }, 500);
       })
       .catch((err) => {

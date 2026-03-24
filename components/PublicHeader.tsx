@@ -3,10 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import clsx from "clsx";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth-context";
-import { LogOut, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
 import { PortalIcon } from "@/components/icons/PortalIcon";
@@ -29,10 +28,12 @@ const publicNav = [
 export function PublicHeader() {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated, isLoading, isStaff, canAccessIntra, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, canAccessIntra, logout } = useAuth();
     const { isDark } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
+
+    const isActive = (href: string) => pathname === href || pathname.startsWith(href + "?");
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
@@ -48,17 +49,17 @@ export function PublicHeader() {
                         'sub' in item && item.sub ? (
                             <div key={item.name} className="relative group">
                                 <Link href={item.href}
-                                    className={clsx(
-                                        pathname === item.href || pathname.startsWith(item.href) ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-900",
-                                        "text-sm tracking-wide transition-colors"
-                                    )}>
+                                    className="text-sm tracking-wide transition-colors hover:opacity-80"
+                                    style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-muted)" }}>
                                     {item.name}
                                 </Link>
                                 <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                                    <div className="bg-white border border-neutral-100 shadow-lg py-2 min-w-[160px]">
+                                    <div className="py-2 min-w-[160px] border rounded-lg shadow-lg"
+                                        style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
                                         {item.sub.map(sub => (
                                             <Link key={sub.name} href={sub.href}
-                                                className="block px-5 py-2 text-sm text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50 transition-colors">
+                                                className="block px-5 py-2 text-sm transition-colors hover:opacity-70"
+                                                style={{ color: "var(--tn-text-sub)" }}>
                                                 {sub.name}
                                             </Link>
                                         ))}
@@ -67,25 +68,22 @@ export function PublicHeader() {
                             </div>
                         ) : (
                             <Link key={item.name} href={item.href}
-                                className={clsx(
-                                    pathname === item.href ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-900",
-                                    "text-sm tracking-wide transition-colors"
-                                )}>
+                                className="text-sm tracking-wide transition-colors hover:opacity-80"
+                                style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-muted)" }}>
                                 {item.name}
                             </Link>
                         )
                     ))}
-
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-3">
                     {!isLoading && isAuthenticated && user ? (
-                        <div className="flex items-center gap-3">
-                            {/* 아바타 드롭다운 */}
+                        <>
+                            {/* Avatar dropdown */}
                             <div className="relative">
                                 <button onClick={() => setProfileOpen(!profileOpen)}
-                                    className="flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+                                    className="flex items-center hover:opacity-90 transition-opacity">
                                     <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all duration-300"
                                         style={{
                                             background: isDark
@@ -120,42 +118,47 @@ export function PublicHeader() {
                                     </>
                                 )}
                             </div>
-                            {/* 인트라 포탈 */}
+                            {/* Portal */}
                             {canAccessIntra && (
-                                <Link href="/intra" className="transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }} title="Intra Office">
+                                <Link href="/intra" className="hover:opacity-70 transition-opacity" title="Intra Office">
                                     <PortalIcon direction="enter" size={36} darkBg={isDark} />
                                 </Link>
                             )}
-                            {/* 테마 토글 */}
+                            {/* Theme toggle */}
                             <ThemeToggle />
-                        </div>
+                        </>
                     ) : !isLoading ? (
-                        <div className="flex items-center gap-3">
-                            <Link href="/login" className="text-xs transition-colors" style={{ color: "var(--tn-text-sub)" }}>
+                        <>
+                            <Link href="/login" className="text-xs transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 Login
                             </Link>
                             <Link href="/signup" className="text-xs px-4 py-1.5 transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 Joinup
                             </Link>
                             <ThemeToggle />
-                        </div>
+                        </>
                     ) : null}
                 </div>
 
                 {/* Mobile menu button */}
-                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2">
-                    {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </button>
+                <div className="flex md:hidden items-center gap-2">
+                    <ThemeToggle />
+                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 transition-colors" style={{ color: "var(--tn-text)" }}>
+                        {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </button>
+                </div>
             </nav>
 
             {/* Mobile menu */}
             {mobileMenuOpen && (
-                <div className="md:hidden bg-white border-t border-neutral-100 px-6 py-6 space-y-4">
+                <div className="md:hidden border-t px-6 py-6 space-y-4"
+                    style={{ backgroundColor: "var(--tn-bg)", borderColor: "var(--tn-border)" }}>
                     {publicNav.map(item => (
                         <div key={item.name}>
                             <Link href={item.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm text-neutral-600 hover:text-neutral-900">
+                                className="block text-sm transition-colors hover:opacity-70"
+                                style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-sub)" }}>
                                 {item.name}
                             </Link>
                             {'sub' in item && item.sub && (
@@ -163,7 +166,8 @@ export function PublicHeader() {
                                     {item.sub.map(sub => (
                                         <Link key={sub.name} href={sub.href}
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className="block text-sm text-neutral-400 hover:text-neutral-900">
+                                            className="block text-sm transition-colors hover:opacity-70"
+                                            style={{ color: "var(--tn-text-muted)" }}>
                                             {sub.name}
                                         </Link>
                                     ))}
@@ -172,39 +176,47 @@ export function PublicHeader() {
                         </div>
                     ))}
                     {!isLoading && isAuthenticated && user ? (
-                        <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
+                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="h-8 w-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-medium">
+                                <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium"
+                                    style={{
+                                        background: isDark
+                                            ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
+                                            : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
+                                        color: isDark ? "#111" : "#fff",
+                                    }}>
                                     {user.avatarInitials}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-neutral-900">{user.name}</p>
-                                    <p className="text-xs text-neutral-400">{user.email}</p>
+                                    <p className="text-sm font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
+                                    <p className="text-xs" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
                                 </div>
                             </div>
                             {canAccessIntra && (
                                 <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
-                                    className="block text-sm text-neutral-600 hover:text-neutral-900">
+                                    className="flex items-center gap-2 text-sm transition-colors hover:opacity-70"
+                                    style={{ color: "var(--tn-text-sub)" }}>
+                                    <PortalIcon direction="enter" size={20} darkBg={isDark} />
                                     Intra Office
                                 </Link>
                             )}
                             <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm text-neutral-600 hover:text-neutral-900">
+                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 프로필
                             </Link>
                             <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
-                                className="block text-sm text-neutral-400 hover:text-neutral-900">
+                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-muted)" }}>
                                 로그아웃
                             </button>
                         </div>
                     ) : !isLoading ? (
-                        <div className="mt-4 pt-4 border-t border-neutral-100 space-y-3">
+                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
                             <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm text-neutral-400 hover:text-neutral-900">
+                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 로그인
                             </Link>
                             <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm text-neutral-900 font-medium hover:underline">
+                                className="block text-sm font-medium transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }}>
                                 회원가입
                             </Link>
                         </div>

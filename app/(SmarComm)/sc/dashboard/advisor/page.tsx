@@ -6,7 +6,7 @@ import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Targe
 import type { CampaignPlan } from '@/lib/smarcomm/campaign-plan';
 import { type CampaignExecution, createExecution, saveExecution, loadExecution, calculateScoreChanges, generateAlerts, generateImprovementSuggestions } from '@/lib/smarcomm/campaign-tracker';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import BarChart from '@/components/charts/BarChart';
+import BarChart from '@/components/smarcomm/charts/BarChart';
 import PageTopBar from '@/components/smarcomm/PageTopBar';
 import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
@@ -54,22 +54,22 @@ const SEVERITY_CONFIG: Record<InsightSeverity, { icon: typeof AlertTriangle; col
 const MOCK_INSIGHTS: Insight[] = [
   { id: 'i1', severity: 'danger', stage: 'consideration', title: 'Consideration 단계 전환율 급락',
     message: 'Consideration → Purchase 전환율이 업종 평균보다 42% 낮습니다. 랜딩 페이지의 이탈률이 58%로 매우 높습니다. CTA 위치를 스크롤 없이 보이는 영역으로 이동하고, 소셜 프루프(리뷰/사례)를 추가하세요.',
-    action: 'A/B 테스트 시작', actionHref: '/dashboard/abtest', impact: 'high', ease: 'medium', status: 'new', createdAt: '2026-03-22' },
+    action: 'A/B 테스트 시작', actionHref: '/sc/dashboard/abtest', impact: 'high', ease: 'medium', status: 'new', createdAt: '2026-03-22' },
   { id: 'i2', severity: 'warning', stage: 'retention', title: 'Retention 재방문율 하락 추세',
     message: '지난 4주 동안 재방문율이 28%→23%로 지속 하락 중입니다. 7일 미방문 사용자에게 자동 리마인더를 설정하고, 14일 미방문 사용자에게 인센티브(쿠폰/할인)를 제공하세요.',
-    action: '자동화 설정', actionHref: '/dashboard/workflow/automation', impact: 'high', ease: 'easy', status: 'new', createdAt: '2026-03-22' },
+    action: '자동화 설정', actionHref: '/sc/dashboard/workflow/automation', impact: 'high', ease: 'easy', status: 'new', createdAt: '2026-03-22' },
   { id: 'i3', severity: 'opportunity', stage: 'purchase', title: 'Purchase CVR 상승 기회',
     message: '현재 전환율 1.72%로 업종 평균(1.5%) 대비 양호하지만, A/B 테스트에서 "30초 무료 점검" CTA가 "무료 진단 시작"보다 전환율 17% 높았습니다. 승리 소재를 전체 적용하면 CVR 2.0% 달성이 가능합니다.',
-    action: '소재 전체 적용', actionHref: '/dashboard/creative', impact: 'medium', ease: 'easy', status: 'in_progress', createdAt: '2026-03-21' },
+    action: '소재 전체 적용', actionHref: '/sc/dashboard/creative', impact: 'medium', ease: 'easy', status: 'in_progress', createdAt: '2026-03-21' },
   { id: 'i4', severity: 'suggestion', stage: 'awareness', title: '네이버 SA 키워드 확장 제안',
     message: '"GEO 마케팅", "AI 검색 최적화" 키워드의 검색량이 전월 대비 45% 증가했습니다. 이 키워드를 네이버 SA 캠페인에 추가하면 Awareness 단계의 노출을 20% 이상 늘릴 수 있습니다.',
-    action: '캠페인 수정', actionHref: '/dashboard/campaigns', impact: 'medium', ease: 'easy', status: 'new', createdAt: '2026-03-21' },
+    action: '캠페인 수정', actionHref: '/sc/dashboard/campaigns', impact: 'medium', ease: 'easy', status: 'new', createdAt: '2026-03-21' },
   { id: 'i5', severity: 'suggestion', stage: 'advocacy', title: 'NPS 상승 — 리뷰 캠페인 추천',
     message: 'NPS가 31→36으로 상승했습니다. 이 모멘텀을 활용하여 구매 후 7일 시점에 자동 리뷰 요청 이메일을 발송하면 리뷰 수를 50% 이상 늘릴 수 있습니다.',
-    action: '이메일 자동화', actionHref: '/dashboard/crm/email', impact: 'low', ease: 'easy', status: 'new', createdAt: '2026-03-20' },
+    action: '이메일 자동화', actionHref: '/sc/dashboard/crm/email', impact: 'low', ease: 'easy', status: 'new', createdAt: '2026-03-20' },
   { id: 'i6', severity: 'warning', stage: 'interest', title: 'Meta 광고 CTR 하락',
     message: '인스타그램 광고 CTR이 2.8%→2.1%로 하락했습니다. 광고 피로도가 높아진 것으로 보입니다. 새로운 소재를 제작하고 오디언스를 리프레시하세요.',
-    action: '소재 제작', actionHref: '/dashboard/creative', impact: 'medium', ease: 'medium', status: 'new', createdAt: '2026-03-20' },
+    action: '소재 제작', actionHref: '/sc/dashboard/creative', impact: 'medium', ease: 'medium', status: 'new', createdAt: '2026-03-20' },
 ];
 
 const MOCK_BEFORE_AFTER: BeforeAfter[] = [
@@ -298,7 +298,7 @@ export default function AdvisorPage() {
                           channel: action.channel,
                           desc: action.description,
                         });
-                        router.push(`/dashboard/creative?${params.toString()}`);
+                        router.push(`/sc/dashboard/creative?${params.toString()}`);
                       }}
                       className="mt-2 flex items-center gap-1 rounded-lg bg-text px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-accent-sub"
                     >

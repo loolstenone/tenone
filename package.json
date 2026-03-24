@@ -11,6 +11,7 @@
     "deploy:prod": "node scripts/deploy.js --env=production"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.99.3",
     "@tiptap/extension-image": "^3.20.4",

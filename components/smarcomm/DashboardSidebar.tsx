@@ -47,48 +47,48 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: '진단',
     items: [
-      { href: '/dashboard/scan', label: 'GEO & SEO 진단', icon: Crosshair, pack: 'core' },
-      { href: '/dashboard/advisor', label: 'AI 어드바이저', icon: Lightbulb, pack: 'action' },
+      { href: '/sc/dashboard/scan', label: 'GEO & SEO 진단', icon: Crosshair, pack: 'core' },
+      { href: '/sc/dashboard/advisor', label: 'AI 어드바이저', icon: Lightbulb, pack: 'action' },
     ],
   },
   // ── 제작 ──
   {
     title: '제작',
     items: [
-      { href: '/dashboard/creative', label: 'AI 소재 제작', icon: Brush, pack: 'action' },
+      { href: '/sc/dashboard/creative', label: 'AI 소재 제작', icon: Brush, pack: 'action' },
     ],
   },
   // ── 설정 ──
   {
     title: '설정',
     items: [
-      { href: '/dashboard/profile', label: '워크스페이스', icon: Wrench, pack: 'setting' },
+      { href: '/sc/dashboard/profile', label: '워크스페이스', icon: Wrench, pack: 'setting' },
     ],
   },
   // ── 개발중 ──
   {
     title: '개발중',
     items: [
-      { href: '/dashboard/funnel', label: '퍼널 분석', icon: GitBranch, pack: 'core' },
-      { href: '/dashboard/traffic', label: '트래픽 분석', icon: Globe, pack: 'core' },
-      { href: '/dashboard/geo', label: 'AI 가시성', icon: Eye, pack: 'core' },
-      { href: '/dashboard/geo/prompts', label: '프롬프트 관리', icon: Search, pack: 'core' },
-      { href: '/dashboard/content', label: '콘텐츠', icon: BookOpen, pack: 'action' },
-      { href: '/dashboard/archive', label: '소재 아카이브', icon: Archive, pack: 'action' },
-      { href: '/dashboard/reports', label: '리포트', icon: FileBarChart, pack: 'core' },
-      { href: '/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban, pack: 'ops' },
-      { href: '/dashboard/workflow/kanban', label: '칸반 보드', icon: KanbanSquare, pack: 'ops' },
-      { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops' },
-      { href: '/dashboard/abtest', label: 'A/B 테스트', icon: Gauge, pack: 'experiment' },
-      { href: '/dashboard/workflow/automation', label: '자동화', icon: Zap, pack: 'ops' },
-      { href: '/dashboard/journey', label: '사용자 여정', icon: Route, pack: 'experiment' },
-      { href: '/dashboard/cohort', label: '코호트', icon: PieChart, pack: 'experiment' },
-      { href: '/dashboard/events', label: '이벤트 관리', icon: Activity, pack: 'experiment' },
-      { href: '/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm' },
-      { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm' },
-      { href: '/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm' },
-      { href: '/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm' },
-      { href: '/dashboard/workflow', label: '워크플로우', icon: ListChecks, pack: 'setting' },
+      { href: '/sc/dashboard/funnel', label: '퍼널 분석', icon: GitBranch, pack: 'core' },
+      { href: '/sc/dashboard/traffic', label: '트래픽 분석', icon: Globe, pack: 'core' },
+      { href: '/sc/dashboard/geo', label: 'AI 가시성', icon: Eye, pack: 'core' },
+      { href: '/sc/dashboard/geo/prompts', label: '프롬프트 관리', icon: Search, pack: 'core' },
+      { href: '/sc/dashboard/content', label: '콘텐츠', icon: BookOpen, pack: 'action' },
+      { href: '/sc/dashboard/archive', label: '소재 아카이브', icon: Archive, pack: 'action' },
+      { href: '/sc/dashboard/reports', label: '리포트', icon: FileBarChart, pack: 'core' },
+      { href: '/sc/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban, pack: 'ops' },
+      { href: '/sc/dashboard/workflow/kanban', label: '칸반 보드', icon: KanbanSquare, pack: 'ops' },
+      { href: '/sc/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays, pack: 'ops' },
+      { href: '/sc/dashboard/abtest', label: 'A/B 테스트', icon: Gauge, pack: 'experiment' },
+      { href: '/sc/dashboard/workflow/automation', label: '자동화', icon: Zap, pack: 'ops' },
+      { href: '/sc/dashboard/journey', label: '사용자 여정', icon: Route, pack: 'experiment' },
+      { href: '/sc/dashboard/cohort', label: '코호트', icon: PieChart, pack: 'experiment' },
+      { href: '/sc/dashboard/events', label: '이벤트 관리', icon: Activity, pack: 'experiment' },
+      { href: '/sc/dashboard/crm', label: '고객 관리', icon: Users, pack: 'crm' },
+      { href: '/sc/dashboard/crm/kakao', label: '카카오', icon: MessageSquare, pack: 'crm' },
+      { href: '/sc/dashboard/crm/email', label: '이메일', icon: Mail, pack: 'crm' },
+      { href: '/sc/dashboard/crm/push', label: '푸시', icon: Bell, pack: 'crm' },
+      { href: '/sc/dashboard/workflow', label: '워크플로우', icon: ListChecks, pack: 'setting' },
     ],
   },
 ];
@@ -157,7 +157,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 {companyName.charAt(0).toUpperCase()}
               </div>
             ) : (
-              <Link href="/dashboard/profile" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-text-muted/40 text-text-muted hover:border-text hover:text-text" title="로고 설정">
+              <Link href="/sc/dashboard/profile" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-text-muted/40 text-text-muted hover:border-text hover:text-text" title="로고 설정">
                 <span className="text-sm">+</span>
               </Link>
             )}
@@ -166,7 +166,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 {companyName ? (
                   <div className="text-[10px] text-text-muted truncate">{companyName}</div>
                 ) : (
-                  <Link href="/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
+                  <Link href="/sc/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
                 )}
                 <div className="text-base font-extrabold text-text tracking-tight leading-tight">Workspace</div>
               </div>

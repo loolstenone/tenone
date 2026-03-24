@@ -35,7 +35,7 @@ export default function ContactPage() {
                 {/* Left — Contact Info */}
                 <div className="lg:col-span-4 space-y-8">
                     <div className="border tn-border p-6">
-                        <div className="w-14 h-14 bg-neutral-900 rounded-full flex items-center justify-center text-xl text-white font-medium mb-4">C</div>
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium mb-4" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>C</div>
                         <h3 className="text-lg font-bold">전천일 <span className="tn-text-sub font-normal text-sm">Cheonil Jeon</span></h3>
                         <p className="text-sm tn-text-sub mt-1">Founder / Value Connector</p>
                         <p className="text-sm tn-text-sub mt-4">Planning, Business, Marketing, Advertising, Communication, HR</p>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                             </div>
                             <div><label className={labelClass}>포트폴리오/이력서 링크</label><input type="url" className={inputClass} placeholder="https://..." /></div>
                             <div><label className={labelClass}>자기소개 및 지원동기</label><textarea rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
-                            <button type="button" className="w-full py-3.5 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2">
+                            <button type="button" className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Handshake className="h-4 w-4" /> 파트너 신청하기
                             </button>
                         </form>
@@ -148,7 +148,7 @@ export default function ContactPage() {
                                 </select>
                             </div>
                             <div><label className={labelClass}>프로젝트 내용</label><textarea rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
-                            <button type="button" className="w-full py-3.5 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2">
+                            <button type="button" className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 <Briefcase className="h-4 w-4" /> 의뢰하기
                             </button>
                         </form>
@@ -163,7 +163,7 @@ export default function ContactPage() {
                             </div>
 
                             <div className="border tn-border p-8 text-center">
-                                <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "var(--tn-surface)" }}>
                                     {isAuthenticated ? <CheckCircle className="h-7 w-7 text-green-500" /> : <UserPlus className="h-7 w-7 tn-text-sub" />}
                                 </div>
                                 {isAuthenticated ? (
@@ -174,7 +174,8 @@ export default function ContactPage() {
                                             파트너 신청이나 프로젝트 의뢰를 진행해보세요.
                                         </p>
                                         <button type="button" onClick={() => setActiveTab('partner')}
-                                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">
+                                            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-medium transition-colors"
+                                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                             파트너 신청하기 <ArrowRight className="h-4 w-4" />
                                         </button>
                                     </>
@@ -186,7 +187,8 @@ export default function ContactPage() {
                                             Works 업데이트, 이벤트 초대 등을 받아볼 수 있습니다.
                                         </p>
                                         <Link href="/signup"
-                                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">
+                                            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-medium transition-colors"
+                                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                             가입 페이지로 이동 <ArrowRight className="h-4 w-4" />
                                         </Link>
                                     </>

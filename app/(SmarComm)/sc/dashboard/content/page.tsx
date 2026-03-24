@@ -8,7 +8,7 @@ import {
   FileText, Sparkles, Search, RefreshCw, Plus, Filter,
 } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import BarChart from '@/components/charts/BarChart';
+import BarChart from '@/components/smarcomm/charts/BarChart';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
 import { useWorkflow } from '@/lib/smarcomm/workflow-context';
 import { PipelineStage } from '@/types/workflow';
@@ -68,7 +68,7 @@ export default function ContentPage() {
           <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">콘텐츠</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">콘텐츠 관리와 파이프라인을 통합 관리합니다</p>
         </div>
-        <Link href="/dashboard/creative" className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-sub">
+        <Link href="/sc/dashboard/creative" className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-sub">
           <Plus size={13} /> AI 콘텐츠 생성
         </Link>
       </div>
@@ -89,7 +89,7 @@ export default function ContentPage() {
       {mainTab === 'content' && <ContentManageTab />}
       {mainTab === 'pipeline' && <PipelineTab />}
 
-      <NextStepCTA stage="제작 → 실행" title="제작된 콘텐츠를 광고 채널에 집행" description="SEO 최적화된 콘텐츠를 캠페인 소재로 바로 활용하세요" actionLabel="캠페인 집행" href="/dashboard/campaigns" />
+      <NextStepCTA stage="제작 → 실행" title="제작된 콘텐츠를 광고 채널에 집행" description="SEO 최적화된 콘텐츠를 캠페인 소재로 바로 활용하세요" actionLabel="캠페인 집행" href="/sc/dashboard/campaigns" />
     </div>
   );
 }
@@ -198,7 +198,7 @@ function ContentManageTab() {
                       <span>검색량: <b className="text-text-sub">{topic.searchVolume}</b></span>
                     </div>
                   </div>
-                  <Link href="/dashboard/creative" className="shrink-0 flex items-center gap-1 rounded-lg bg-surface px-3 py-2 text-[10px] font-semibold text-text-sub hover:bg-text hover:text-white transition-colors">
+                  <Link href="/sc/dashboard/creative" className="shrink-0 flex items-center gap-1 rounded-lg bg-surface px-3 py-2 text-[10px] font-semibold text-text-sub hover:bg-text hover:text-white transition-colors">
                     <Sparkles size={11} /> AI 작성
                   </Link>
                 </div>

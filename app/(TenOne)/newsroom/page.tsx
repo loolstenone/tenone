@@ -36,9 +36,11 @@ export default function NewsroomPage() {
                     <div className="flex flex-wrap gap-2">
                         {categories.map(cat => (
                             <button key={cat} onClick={() => setFilter(cat)}
-                                className={`px-5 py-2 text-sm tracking-wide transition-colors ${
-                                    filter === cat ? 'bg-neutral-900 text-white' : 'bg-neutral-100 tn-text-sub hover:bg-neutral-200 hover:tn-text'
-                                }`}>{cat}</button>
+                                className="px-5 py-2 text-sm tracking-wide transition-colors"
+                                style={filter === cat
+                                    ? { backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }
+                                    : { backgroundColor: "var(--tn-surface)", color: "var(--tn-text-sub)" }
+                                }>{cat}</button>
                         ))}
                     </div>
                 </div>
@@ -57,7 +59,7 @@ export default function NewsroomPage() {
                         </div>
                         <div className="flex flex-col justify-center">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="text-xs px-3 py-1 bg-neutral-100 tn-text-sub">{(featured as any).category || (featured as any).categoryId || ''}</span>
+                                <span className="text-xs px-3 py-1 tn-text-sub" style={{ backgroundColor: "var(--tn-surface)" }}>{(featured as any).category || (featured as any).categoryId || ''}</span>
                                 <span className="text-xs tn-text-sub">{(featured as any).date || (featured as any).publishedAt || (featured as any).createdAt || ''}</span>
                             </div>
                             <Link href={`/newsroom/${featured.id}`}>
@@ -97,7 +99,7 @@ export default function NewsroomPage() {
                                     </div>
                                 </Link>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-xs px-2 py-0.5 bg-neutral-100 tn-text-sub">{(news as any).category || (news as any).categoryId || ''}</span>
+                                    <span className="text-xs px-2 py-0.5 tn-text-sub" style={{ backgroundColor: "var(--tn-surface)" }}>{(news as any).category || (news as any).categoryId || ''}</span>
                                     <span className="text-xs tn-text-sub">{(news as any).date || (news as any).publishedAt || (news as any).createdAt || ''}</span>
                                 </div>
                                 <Link href={`/newsroom/${news.id}`}>

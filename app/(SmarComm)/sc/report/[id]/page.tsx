@@ -129,7 +129,7 @@ function ReportContent({ scanId }: { scanId: string }) {
       if (res.ok) {
         const plan = await res.json();
         sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
-        router.push('/dashboard/advisor');
+        router.push('/sc/dashboard/advisor');
       }
     } catch (e) {
       console.error('Campaign plan generation failed:', e);
