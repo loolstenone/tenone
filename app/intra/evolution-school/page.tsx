@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import clsx from "clsx";
 import {
   BookOpen,
@@ -38,6 +38,8 @@ import {
   Trophy,
   FileText,
 } from "lucide-react";
+import * as educationDb from "@/lib/supabase/education";
+import { useAuth } from "@/lib/auth-context";
 
 /* ================================================================== */
 /*  Types                                                              */
@@ -1104,6 +1106,36 @@ export default function EvolutionSchoolPage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
 
+  // ── Auth & DB sync ──
+  const { user } = useAuth();
+
+  useEffect(() => {
+    educationDb.fetchCourses().then(({ courses: dbCourses }) => {
+      if (dbCourses && dbCourses.length > 0) {
+        // DB 과정이 있으면 state 업데이트 (Mock fallback 대체)
+        const mapped: Course[] = dbCourses.map((dc: Record<string, unknown>) => ({
+          id: Number(dc.id),
+          title: String(dc.title ?? ""),
+          subtitle: String(dc.subtitle ?? ""),
+          category: (dc.category as Course["category"]) ?? "필수",
+          duration: String(dc.duration ?? ""),
+          durationMin: Number(dc.duration_min ?? 0),
+          status: (dc.status as CourseStatus) ?? "미이수",
+          score: dc.score != null ? Number(dc.score) : null,
+          completedDate: dc.completed_date ? String(dc.completed_date) : null,
+          description: String(dc.description ?? ""),
+          objectives: Array.isArray(dc.objectives) ? dc.objectives as string[] : [],
+          targetAudience: String(dc.target_audience ?? ""),
+          instructor: String(dc.instructor ?? ""),
+          quiz: Array.isArray(dc.quiz) ? dc.quiz as QuizQuestion[] : [],
+        }));
+        setCourses(mapped);
+      }
+    }).catch(() => {
+      // DB 실패 시 Mock 데이터 유지
+    });
+  }, []);
+
   // ── Derived stats ──
   const stats = useMemo(() => {
     const total = courses.length;
@@ -1157,6 +1189,10 @@ export default function EvolutionSchoolPage() {
     setCourses((prev) =>
       prev.map((c) => (c.id === id ? { ...c, status: "학습중" as CourseStatus } : c))
     );
+    // DB 수강 등록 (비동기, 실패 무시)
+    if (user?.id) {
+      educationDb.enrollCourse(user.id, String(id)).catch(() => {});
+    }
   };
 
   const openQuiz = (id: number) => {
@@ -1194,6 +1230,10 @@ export default function EvolutionSchoolPage() {
             : c
         )
       );
+      // DB 이수 완료 기록 (비동기, 실패 무시)
+      if (user?.id) {
+        educationDb.completeEnrollment(String(quizCourseId), finalScore).catch(() => {});
+      }
     }
   };
 
