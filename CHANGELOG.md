@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-03-24 (사무실)
+
+### 완료
+- 전체 모듈 DB 연결 Phase 0~9 (BUMS, 회원, Myverse, Townity, Project, Evolution, HeRo, Wiki, ERP, Vridge)
+- Supabase CRUD 레이어 8개 생성 (bums, members, townity, projects, education, hero, wiki, erp)
+- 회원 체계 v2: alliance/madleaguer 추가, junior-partner 삭제, roles[]/module_access[] 도입
+- members 테이블 v2 마이그레이션 (primary_type, roles, affiliations, intra_access, module_access)
+- HeRo DB 테이블 신규: hit_results, career_profiles, resumes
+- ARCHITECTURE.md + ROADMAP_IMPLEMENTATION.md 작성
+- Vridge 명칭 확정, ERP 모듈화 (erp-hr/people/finance/sales)
+- TenOne Works: Google Sites history → DB 13개 게시글
+- BUMS: 내용보기 모달, 체크박스 벌크삭제, 페이지네이션, 수정/삭제 분리
+- 에디터: 이미지 붙여넣기/드래그앤드롭, 태그/대표이미지 위치 개선, SEO 접기
+- 다크모드: PublicHeader + Works/Contact/About/Newsroom 전면 CSS 변수 전환
+- 빌드 에러 수정 (SmarComm import, report-data)
+- BUMS 404 해결 (6개 placeholder 페이지)
+- BUMS 디자인 모던화
+- 홈페이지 Mock 제거 → DB only
+
+### 결정 사항
+- Vridge = GPR & Vrief 통합 명칭
+- ERP 모듈: erp-hr, erp-people, erp-finance, erp-sales
+- 회원 유형: staff/partner/alliance/madleaguer/crew/member (junior-partner 삭제)
+- 모든 모듈: DB 우선 + Mock fallback 전략
+
+### 이슈
+- 게시물 수정 후 사이트로 리다이렉트 (관리 페이지로 돌아가야 함)
+- 게시물 관리 vs 콘텐츠 관리 역할 혼란
+
+---
+
 ## 2026-03-23 (사무실)
 
 ### 완료

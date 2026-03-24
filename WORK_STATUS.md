@@ -1,93 +1,94 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-23 (사무실)
+> 마지막 업데이트: 2026-03-24 (사무실)
 
-## 오늘 한 작업 (사무실)
+## 오늘 한 작업
 
-### 1. 신규 사이트 대량 생성 (19개 사이트 완성)
-- 0gamja (공감자): WP XML 콘텐츠 반영, 실제 포스트 6개
-- FWN (Fashion Week Network): 홈+About+카테고리+네트워크 등록
-- Seoul/360°, 문래지앙, MoNTZ, Badak, HeRo, Domo, JAKKA, Trend Hunter, My Universe, 타우니티, 자연함 등
+### 1. 전체 모듈 DB 연결 (Phase 0~9)
+- Phase 1: 회원 관리 UI → Supabase members 직접 조회, 역할 변경
+- Phase 2: Myverse 대시보드 → 공지/일정 DB
+- Phase 3: Townity → 공지사항/자유게시판/캘린더 DB
+- Phase 4: Project → 프로젝트/Job/타임시트 DB
+- Phase 5: Evolution School → 과정/수강 DB
+- Phase 6: HeRo → HIT/커리어/이력서 DB (테이블 신규 생성)
+- Phase 7: Wiki → 라이브러리/북마크 DB
+- Phase 8: ERP → 결재/기안/GPR DB
+- Phase 9: Vridge → GPR/BI Dashboard DB 통계
 
-### 2. 전용 인증 도메인 (auth.tenone.biz) 구현
-- auth-hub/login, auth-hub/callback, auth/session 서버 라우트
-- AES-256-GCM 토큰 암호화 (lib/auth-transfer.ts)
-- auth-context.tsx OAuth를 auth.tenone.biz 경유로 변경
-- Vercel 도메인 + 환경변수 + Supabase Redirect URL + DNS A레코드 설정 완료
+### 2. 회원 체계 v2
+- AccountType: staff/partner/alliance/madleaguer/crew/member
+- junior-partner 삭제
+- members 테이블: primary_type, roles[], affiliations[], intra_access, module_access[] 추가
+- types/auth.ts + auth-context.tsx 동기화
+- 사이드바 moduleAccess 권한 체크 (v2 모듈명 매핑)
+- 가입 흐름: origin_site 자동 설정
 
-### 3. CMS → BUMS (Business Unit Management System) 리네임
-- DB 테이블: cms_* DROP → bums_* 재생성 (Supabase 실행 완료)
-- 코드 전체: 28개 파일 import/타입/변수명 일괄 치환
-- 사이드바 라벨 CMS → BUMS
+### 3. 설계 문서
+- ARCHITECTURE.md: 전체 시스템 아키텍처
+- ROADMAP_IMPLEMENTATION.md: Phase별 구축 로드맵
+- Vridge (GPR & Vrief 통합 명칭 확정)
+- ERP 모듈화: erp-hr, erp-people, erp-finance, erp-sales
 
-### 4. BUMS Tier 1 핵심 기능 구현
-- Tiptap WYSIWYG 리치 에디터 (components/bums/RichEditor.tsx)
-- 이미지 업로더 (components/bums/ImageUploader.tsx)
-- 게시글 CRUD: 작성/수정(postId 쿼리)/삭제/벌크 관리
-- 사이트 브랜딩 관리: 로고/파비콘/OG 업로드, 색상 피커, SEO 메타
-- 위젯 관리: CRUD + 실시간 미리보기
-- 콘텐츠 API: /api/bums/posts, /api/bums/post/[id], /api/bums/boards
-- CMS 권한 모델: admin/editor/contributor + site_access (lib/bums-permissions.ts)
-- Supabase CMS 테이블 6개 + ENUM 10개 + 인덱스 + RLS
+### 4. TenOne Works 실데이터
+- Google Sites history → DB 13개 게시글 INSERT
+- tenone.biz/works 실제 DB 데이터 표시 확인
+- 날짜 포맷: 2025년 08월
+- 카테고리 필터: AI/브랜딩/프로젝트/네트워크/교육/콘텐츠
 
-### 5. BUMS 목차 구조 완성 (PPTX 기준)
-- 대시보드, 통계, 고객 관리(4탭), 고객문의, 쇼핑 관리, 예약 관리
-- 프로모션, 마케팅 관리
-- 사이트 관리(PPTX 레이아웃: 좌측 목록 + 우측 상세), 게시판 관리(3탭), 콘텐츠 관리
-- 뉴스레터 관리, 전체 일정 관리, 라이브러리 관리
-- 전 페이지 우측 상단 BU(사이트) 선택 드롭다운
+### 5. BUMS 게시글 관리 개선
+- 제목 클릭 → 내용 보기 모달
+- 체크박스 + 일괄 삭제
+- 페이지네이션 (20개씩)
+- 관리 헤더: 수정/삭제 텍스트 분리
 
-### 6. 인트라 디자인 통일
-- 본문 max-w-[1200px] 통일
-- shadow 제거, rounded-xl → rounded-lg CSS 오버라이드
-- 배경 bg-white 통일
+### 6. 에디터 개선
+- RichEditor: 이미지 클립보드 붙여넣기 + 드래그앤드롭
+- 레이아웃: 태그/대표이미지 에디터 아래로, SEO 접기, 모던 디자인
 
-### 7. 일일 격언 시스템 (365개)
-- lib/daily-quotes.ts: 텐원/마케팅/인생/비즈니스/자기개발/안빈낙도 365개
-- 멤버ID + 연도+월+일 djb2 해싱 → 매일 다른 격언, 같은 날 같은 격언
+### 7. 다크모드 전면 수정
+- PublicHeader: 전체 CSS 변수 전환
+- Works/Contact/About/Newsroom: 하드코딩 색상 제거
+- 빌드 에러 수정 (SmarComm import, report-data)
 
-### 8. TenOne 퍼블릭 다크/라이트 모드
-- ThemeProvider + ThemeToggle (수직/가로/대각선 랜덤 전환 효과)
-- 기본 테마: 블랙(다크)
-- CSS 변수 기반 (--tn-bg, --tn-text, --tn-accent 등)
-- 홈페이지 + 하위 페이지 + 헤더 + 푸터 테마 적용
-
-### 9. 포탈 아이콘 + 헤더 UI
-- 3D 큐브 포탈 아이콘 (PortalIcon.tsx): enter/exit + darkBg 대응
-- 3D 입체 아바타 (radial-gradient 구체)
-- 3D 입체 토글 (gradient 트랙 + 구체 dot)
-- 퍼블릭: CJ(아바타 드롭다운) + ←□(인트라 진입) + ◐(테마)
-- 인트라: CJ(아바타 드롭다운+Logout) + □→(퍼블릭 탈출)
-- 인트라 사이드바 로고: TEN:ONE™ INTRA
-
-### 10. 팅커벨 포탈 효과 (StarfieldPortal)
-- 금빛/은빛 파티클 → 소용돌이 → 포탈 홀 → 클릭 → 인트라 이동
-- 멤버 전용 (isAuthenticated)
-- Badak 사이트에 예시 적용
+### 8. 기타
+- BUMS 미구현 페이지 6개 생성 (404 해결)
+- BUMS 디자인 모던화 (pill 탭, rounded-xl, shadow-sm)
+- 홈페이지 Works/News Mock 제거 → DB only
 
 ## 현재 이슈 ⚠️
-- 소셜 로그인: auth.tenone.biz 인프라 완성, DNS 전파 후 라이브 테스트 필요
-- 다크모드: 하위 페이지(Contact, Newsletter 등) 일부 하드코딩 색상 남아있음
-- 포탈 효과: 트리거 조건 미구현 (10:01 시각, Welcome Back 등)
+- 게시물 수정 후 사이트 페이지로 리다이렉트됨 (게시판 관리로 돌아가야 함)
+- 게시물 관리 vs 콘텐츠 관리 역할 혼란 → 정리 필요
+- 다크모드: 일부 하위 페이지 아직 하드코딩 남아있을 수 있음
+- ERP 53개 페이지 DB 연결 미완 (핵심 3개만 완료)
 
 ## 다음에 할 일
-- [ ] 다크모드 하위 페이지 색상 완전 적용 (About, Brands, Works, Newsroom 등)
-- [ ] 컨텐츠 간 여백 여유 있게 조정
-- [ ] 소셜 로그인 라이브 테스트 (auth.tenone.biz DNS 전파 확인)
-- [ ] BUMS Tier 2: SEO 동적 관리, 콘텐츠 API ISR 연결, 메뉴 관리
-- [ ] BUMS Tier 3: Gmail→CMS 수집 파이프라인, SNS 자동 배포 큐
-- [ ] 포탈 트리거 시스템 (10:01, Welcome Back, 포인트, 교육 넛지)
-- [ ] 멤버 권한 확정 후 전 사이트 포탈 적용
-- [ ] 사이트 로고 이미지 적용 (public/brands/ 폴더에 파일 필요)
+- [ ] 게시물 수정 후 리다이렉트 → 게시판 관리 페이지로
+- [ ] 게시물 관리 / 콘텐츠 관리 역할 정리 (BUMS 메뉴 구조)
+- [ ] 나머지 ERP 페이지 DB 연결
+- [ ] 퍼블릭 게시판 회원 글쓰기
+- [ ] 이미지 관리 (Supabase Storage bums-assets 버킷)
+- [ ] CrewInvite 지원 → 심사 → 역할 전환 흐름
+- [ ] 각 브랜드 사이트 DB 데이터 연결 (TenOne 패턴 복제)
+
+## Supabase CRUD 레이어 (8개)
+- `lib/supabase/bums.ts` — 사이트/게시판/게시글/위젯
+- `lib/supabase/members.ts` — 회원 관리
+- `lib/supabase/townity.ts` — 게시판/댓글/일정
+- `lib/supabase/projects.ts` — 프로젝트/Job/투입인력/타임시트
+- `lib/supabase/education.ts` — 과정/수강
+- `lib/supabase/hero.ts` — HIT/커리어/이력서
+- `lib/supabase/wiki.ts` — 라이브러리/북마크
+- `lib/supabase/erp.ts` — 결재/포인트/알림
 
 ## Vercel 배포 정보
-- URL: https://tenone.vercel.app → tenone.biz
-- 도메인: tenone.biz, youinone.com, madleague.net, rook.co.kr, smarcomm.co.kr, hero.ne.kr, 0gamja.com, seoul360.net, badak.biz, fwn.co.kr, auth.tenone.biz + 서브도메인 8개
-- 환경변수: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_AUTH_DOMAIN, AUTH_TOKEN_ENCRYPTION_KEY
+- Hobby (무료) 플랜
+- 자동 배포: git push origin master → 빌드+배포
+- 현재 도메인 ~20개
 
 ## 주의사항
 - Tailwind CSS v4, Next.js 16 + React 19
-- Supabase: members + bums_* 테이블 (cms_* 삭제됨)
+- Supabase: members + bums_* + hero_* 테이블
 - 멀티 사이트 19개 (middleware 도메인 분기)
-- BUMS = Business Unit Management System (구 CMS)
-- 테마: 기본 다크, 토글로 라이트 전환 가능
+- BUMS = Business Unit Management System
+- Vridge = GPR & Vrief 통합 (경영전략)
+- 테마: 기본 다크, 토글로 라이트 전환
