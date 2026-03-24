@@ -58,6 +58,8 @@ export default function BoardsManagementPage() {
     const [showNewPostModal, setShowNewPostModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 20;
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [viewingPost, setViewingPost] = useState<typeof boardPosts[0] | null>(null);
 
     // 사이트 필터는 레이아웃 드롭다운에서 관리
     const siteBoards = boards.filter(b => selectedSiteId === "all" || b.siteId === selectedSiteId);
@@ -195,10 +197,37 @@ export default function BoardsManagementPage() {
                         </button>
                     </div>
 
+                    {/* 벌크 액션 */}
+                    {selectedIds.size > 0 && (
+                        <div className="flex items-center gap-3 px-1 py-2">
+                            <span className="text-xs text-neutral-500">{selectedIds.size}건 선택</span>
+                            <button onClick={() => {
+                                if (confirm(`${selectedIds.size}건을 삭제하시겠습니까?`)) {
+                                    selectedIds.forEach(id => deleteBoardPost(id));
+                                    setSelectedIds(new Set());
+                                }
+                            }} className="px-3 py-1.5 text-xs text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-all">일괄 삭제</button>
+                            <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-900 transition-all">선택 해제</button>
+                        </div>
+                    )}
+
                     <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-neutral-100 text-left bg-neutral-50/60">
+                                    <th className="px-3 py-3.5 w-10">
+                                        <input type="checkbox"
+                                            checked={selectedIds.size > 0 && filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).every(p => selectedIds.has(p.id))}
+                                            onChange={e => {
+                                                const pageIds = filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).map(p => p.id);
+                                                setSelectedIds(prev => {
+                                                    const next = new Set(prev);
+                                                    pageIds.forEach(id => e.target.checked ? next.add(id) : next.delete(id));
+                                                    return next;
+                                                });
+                                            }}
+                                            className="rounded" />
+                                    </th>
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">제목</th>
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">사이트</th>
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">게시판</th>
@@ -206,7 +235,8 @@ export default function BoardsManagementPage() {
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">상태</th>
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">날짜</th>
                                     <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider text-right">조회</th>
-                                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider text-right">관리</th>
+                                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider text-center">수정</th>
+                                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wider text-center">삭제</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-100">
@@ -214,7 +244,19 @@ export default function BoardsManagementPage() {
                                     const board = boards.find(b => b.id === post.boardId);
                                     return (
                                         <tr key={post.id} className="hover:bg-neutral-50/50 transition-colors">
-                                            <td className="px-5 py-3.5 font-medium truncate max-w-[300px]">{post.title}</td>
+                                            <td className="px-3 py-3.5">
+                                                <input type="checkbox" checked={selectedIds.has(post.id)}
+                                                    onChange={e => {
+                                                        setSelectedIds(prev => {
+                                                            const next = new Set(prev);
+                                                            e.target.checked ? next.add(post.id) : next.delete(post.id);
+                                                            return next;
+                                                        });
+                                                    }} className="rounded" />
+                                            </td>
+                                            <td className="px-5 py-3.5 font-medium truncate max-w-[300px]">
+                                                <button onClick={() => setViewingPost(post)} className="hover:underline text-left">{post.title}</button>
+                                            </td>
                                             <td className="px-5 py-3.5 text-neutral-500 text-xs">{getSiteName(post.siteId)}</td>
                                             <td className="px-5 py-3.5 text-neutral-500 text-xs">{board?.name}</td>
                                             <td className="px-5 py-3.5 text-neutral-500 text-xs">{post.authorName}</td>
@@ -225,17 +267,17 @@ export default function BoardsManagementPage() {
                                             </td>
                                             <td className="px-5 py-3.5 text-neutral-400 text-xs">{(post.publishedAt ?? post.createdAt ?? '').substring(0, 10)}</td>
                                             <td className="px-5 py-3.5 text-neutral-400 text-right">{post.viewCount}</td>
-                                            <td className="px-5 py-3.5 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    <button onClick={() => router.push(`/intra/bums/sites/${post.siteId}/boards/${post.boardId}/new?postId=${post.id}`)}
-                                                        className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-all" title="수정">
-                                                        <Pencil className="h-3.5 w-3.5" />
-                                                    </button>
-                                                    <button onClick={() => { if (confirm('삭제하시겠습니까?')) deleteBoardPost(post.id); }}
-                                                        className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="삭제">
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                    </button>
-                                                </div>
+                                            <td className="px-5 py-3.5 text-center">
+                                                <button onClick={() => router.push(`/intra/bums/sites/${post.siteId}/boards/${post.boardId}/new?postId=${post.id}`)}
+                                                    className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-all" title="수정">
+                                                    <Pencil className="h-3.5 w-3.5" />
+                                                </button>
+                                            </td>
+                                            <td className="px-5 py-3.5 text-center">
+                                                <button onClick={() => { if (confirm('삭제하시겠습니까?')) deleteBoardPost(post.id); }}
+                                                    className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="삭제">
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -270,6 +312,46 @@ export default function BoardsManagementPage() {
                             );
                         })()}
                     </div>
+
+                    {/* 게시글 내용 보기 모달 */}
+                    {viewingPost && (
+                        <>
+                            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" onClick={() => setViewingPost(null)} />
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+                                    <div className="p-6 border-b border-neutral-100 flex items-start justify-between shrink-0">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-medium", statusBadge[viewingPost.status])}>
+                                                    {statusLabel[viewingPost.status]}
+                                                </span>
+                                                <span className="text-xs text-neutral-400">{(viewingPost.publishedAt ?? viewingPost.createdAt ?? '').substring(0, 10)}</span>
+                                                <span className="text-xs text-neutral-400">· 조회 {viewingPost.viewCount}</span>
+                                            </div>
+                                            <h2 className="text-xl font-bold tracking-tight">{viewingPost.title}</h2>
+                                            <p className="text-xs text-neutral-400 mt-1">{viewingPost.authorName} · {getSiteName(viewingPost.siteId)} · {boards.find(b => b.id === viewingPost.boardId)?.name}</p>
+                                        </div>
+                                        <button onClick={() => setViewingPost(null)} className="text-neutral-400 hover:text-neutral-900 text-xl p-1">✕</button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-6">
+                                        {viewingPost.summary && (
+                                            <p className="text-sm text-neutral-500 mb-4 italic">{viewingPost.summary}</p>
+                                        )}
+                                        <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                                            {viewingPost.body || '(본문 없음)'}
+                                        </div>
+                                    </div>
+                                    <div className="p-4 border-t border-neutral-100 flex justify-end gap-2">
+                                        <button onClick={() => {
+                                            setViewingPost(null);
+                                            router.push(`/intra/bums/sites/${viewingPost.siteId}/boards/${viewingPost.boardId}/new?postId=${viewingPost.id}`);
+                                        }} className="px-4 py-2 text-sm rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 transition-all">수정</button>
+                                        <button onClick={() => setViewingPost(null)} className="px-4 py-2 text-sm rounded-lg text-neutral-500 hover:bg-neutral-100 transition-all">닫기</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* 새 글 작성 모달 — 배경 블러 + 고급 스타일 */}
                     {showNewPostModal && (
