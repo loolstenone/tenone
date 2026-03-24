@@ -62,6 +62,9 @@ interface BumsContextType {
     getPostsByCategory: (category: CmsCategory) => CmsPost[];
     getPublishedByChannel: (channel: CmsChannel) => CmsPost[];
 
+    // DB 통합 조회 (퍼블릭용)
+    getPublishedByBoardSlug: (siteSlug: string, boardSlug: string, limit?: number) => BumsBoardPost[];
+
     // DB 상태
     isDbConnected: boolean;
     refreshFromDb: () => Promise<void>;
@@ -340,6 +343,19 @@ export function BumsProvider({ children }: { children: ReactNode }) {
             .sort((a, b) => b.date.localeCompare(a.date));
     }, [posts]);
 
+    // ── DB 통합 조회 (퍼블릭용) ──
+
+    const getPublishedByBoardSlug = useCallback((siteSlug: string, boardSlug: string, limit?: number) => {
+        const site = sites.find(s => s.slug === siteSlug);
+        if (!site) return [];
+        const board = boards.find(b => b.siteId === site.id && b.slug === boardSlug);
+        if (!board) return [];
+        const published = boardPosts
+            .filter(p => p.boardId === board.id && p.status === 'published')
+            .sort((a, b) => (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt));
+        return limit ? published.slice(0, limit) : published;
+    }, [sites, boards, boardPosts]);
+
     // ── Render ──
 
     return (
@@ -358,6 +374,8 @@ export function BumsProvider({ children }: { children: ReactNode }) {
             // Legacy
             posts, addPost, updatePost, deletePost,
             getPostById, getPostsByChannel, getPostsByCategory, getPublishedByChannel,
+            // DB 통합
+            getPublishedByBoardSlug,
             // DB 상태
             isDbConnected, refreshFromDb,
         }}>

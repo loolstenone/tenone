@@ -10,12 +10,18 @@ import Image from "next/image";
 import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2 } from "lucide-react";
 
 export default function HomePage() {
-    const { getPublishedByChannel } = useBums();
+    const { getPublishedByChannel, getPublishedByBoardSlug } = useBums();
     const [nlEmail, setNlEmail] = useState('');
     const [nlSubscribed, setNlSubscribed] = useState(false);
     const [nlAgree, setNlAgree] = useState(false);
-    const latestWorks = getPublishedByChannel('works').slice(0, 8);
-    const latestNews = getPublishedByChannel('newsroom').slice(0, 4);
+
+    // DB 우선, 없으면 Legacy Mock
+    const dbWorks = getPublishedByBoardSlug('tenone', 'works', 8);
+    const dbNews = getPublishedByBoardSlug('tenone', 'newsroom', 4);
+    const legacyWorks = getPublishedByChannel('works').slice(0, 8);
+    const legacyNews = getPublishedByChannel('newsroom').slice(0, 4);
+    const latestWorks = dbWorks.length > 0 ? dbWorks : legacyWorks;
+    const latestNews = dbNews.length > 0 ? dbNews : legacyNews;
 
     return (
         <TenOneThemeWrapper>
@@ -168,28 +174,35 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {latestWorks.map((work) => (
-                            <div key={work.id} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
-                                <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden">
-                                    {work.image && (work.image.startsWith('http') || work.image.startsWith('data:')) ? (
-                                        <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <p className="text-xs tn-text-muted text-center px-2">[{work.image || '이미지'}]</p>
-                                    )}
-                                </div>
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <p className="text-xs tn-text-sub mb-1">{work.category} · {work.date.slice(0, 7)}</p>
-                                        <h3 className="font-semibold tn-text text-sm leading-snug">{work.title}</h3>
+                        {latestWorks.map((work: Record<string, unknown>) => {
+                            const title = (work.title as string) || '';
+                            const image = (work.image as string) || '';
+                            const category = (work.category as string) || (work.categoryId as string) || '';
+                            const date = ((work.date as string) || (work.publishedAt as string) || (work.createdAt as string) || '').slice(0, 7);
+                            const extLink = work.externalLink as string | undefined;
+                            return (
+                                <div key={work.id as string} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
+                                    <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden">
+                                        {image && (image.startsWith('http') || image.startsWith('data:')) ? (
+                                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <p className="text-xs tn-text-muted text-center px-2">[{image || '이미지'}]</p>
+                                        )}
                                     </div>
-                                    {work.externalLink && (
-                                        <a href={work.externalLink} target="_blank" rel="noopener noreferrer">
-                                            <ExternalLink className="h-3.5 w-3.5 tn-text-muted group-hover:tn-text transition-colors mt-1" />
-                                        </a>
-                                    )}
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-xs tn-text-sub mb-1">{category}{date ? ` · ${date}` : ''}</p>
+                                            <h3 className="font-semibold tn-text text-sm leading-snug">{title}</h3>
+                                        </div>
+                                        {extLink && (
+                                            <a href={extLink} target="_blank" rel="noopener noreferrer">
+                                                <ExternalLink className="h-3.5 w-3.5 tn-text-muted group-hover:tn-text transition-colors mt-1" />
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <Link href="/works" className="md:hidden flex items-center justify-center gap-2 mt-12 text-sm tn-text-sub hover:tn-text">
@@ -216,20 +229,26 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {latestNews.map((news) => (
-                            <Link key={news.id} href="/newsroom" className="group block">
-                                <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
-                                    {news.image && (news.image.startsWith('http') || news.image.startsWith('data:')) ? (
-                                        <img src={news.image} alt={news.title} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <p className="text-xs tn-text-sub text-center px-4">[{news.image || '이미지'}]</p>
-                                    )}
-                                </div>
-                                <p className="text-xs tn-text-sub">{news.date}</p>
-                                <h3 className="font-semibold tn-text mt-1 group-hover:underline">{news.title}</h3>
-                                <p className="text-sm tn-text-sub mt-1 line-clamp-1">{news.summary}</p>
-                            </Link>
-                        ))}
+                        {latestNews.map((news: Record<string, unknown>) => {
+                            const title = (news.title as string) || '';
+                            const image = (news.image as string) || '';
+                            const date = (news.date as string) || (news.publishedAt as string) || (news.createdAt as string) || '';
+                            const summary = (news.summary as string) || '';
+                            return (
+                                <Link key={news.id as string} href="/newsroom" className="group block">
+                                    <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
+                                        {image && (image.startsWith('http') || image.startsWith('data:')) ? (
+                                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <p className="text-xs tn-text-sub text-center px-4">[{image || '이미지'}]</p>
+                                        )}
+                                    </div>
+                                    <p className="text-xs tn-text-sub">{date}</p>
+                                    <h3 className="font-semibold tn-text mt-1 group-hover:underline">{title}</h3>
+                                    <p className="text-sm tn-text-sub mt-1 line-clamp-1">{summary}</p>
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
