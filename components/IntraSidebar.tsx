@@ -82,7 +82,7 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "Townity", href: "/intra/comm", icon: MessageSquareText, intraModule: 'comm' as IntraModule,
+        name: "Townity", href: "/intra/comm", icon: MessageSquareText, intraModule: 'townity' as IntraModule,
         sections: [
             {
                 items: [
@@ -139,7 +139,7 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: 'education' as IntraModule,
+        name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: 'evolution' as IntraModule,
         sections: [
             {
                 items: [
@@ -149,7 +149,7 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "SmarComm.", href: "/intra/studio", icon: Megaphone, intraModule: 'project' as IntraModule,
+        name: "SmarComm.", href: "/intra/studio", icon: Megaphone, intraModule: 'smarcomm' as IntraModule,
         sections: [
             {
                 label: "STUDIO",
@@ -369,7 +369,7 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "BUMS", href: "/intra/bums", icon: FileText, intraModule: 'cms' as IntraModule,
+        name: "BUMS", href: "/intra/bums", icon: FileText, intraModule: 'bums' as IntraModule,
         sections: [
             {
                 items: [
