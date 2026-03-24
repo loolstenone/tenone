@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette, Upload, X, ImageIcon } from 'lucide-react';
-import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
+import { useState, useEffect } from 'react';
+import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-react';
+import { getUser, logout } from '@/lib/smarcomm/auth';
 import { useRouter } from 'next/navigation';
 import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 type SettingsTab = 'workspace' | 'members' | 'palette' | 'plan' | 'integrations';
 
@@ -12,7 +14,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const [tab, setTab] = useState<SettingsTab>('workspace');
   const [companyName, setCompanyName] = useState('');
-  const [companyLogo, setCompanyLogo] = useState('');
   const [industry, setIndustry] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
   const [goal, setGoal] = useState('');
@@ -21,16 +22,13 @@ export default function ProfilePage() {
   const [selectedPalette, setSelectedPalette] = useState('mono');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('viewer');
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const user = getSCUser();
+  const user = getUser();
 
   useEffect(() => {
-    const data = localStorage.getItem('sc_company');
+    const data = localStorage.getItem('smarcomm_company');
     if (data) {
       const parsed = JSON.parse(data);
       setCompanyName(parsed.name || '');
-      setCompanyLogo(parsed.logo || '');
       setIndustry(parsed.industry || '');
       setSiteUrl(parsed.siteUrl || '');
       setGoal(parsed.goal || '');
@@ -38,55 +36,27 @@ export default function ProfilePage() {
     setSelectedPalette(getChartPalette().id);
   }, []);
 
-  const handleLogoFile = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > 2 * 1024 * 1024) { alert('2MB 이하 이미지만 업로드 가능합니다.'); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setCompanyLogo(dataUrl);
-      // 즉시 저장
-      const existing = localStorage.getItem('sc_company');
-      const parsed = existing ? JSON.parse(existing) : {};
-      localStorage.setItem('sc_company', JSON.stringify({ ...parsed, logo: dataUrl }));
-    };
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleLogoFile(file);
-  }, [handleLogoFile]);
-
-  const handleRemoveLogo = () => {
-    setCompanyLogo('');
-    const existing = localStorage.getItem('sc_company');
-    const parsed = existing ? JSON.parse(existing) : {};
-    localStorage.setItem('sc_company', JSON.stringify({ ...parsed, logo: '' }));
-  };
-
   const handleSave = () => {
-    localStorage.setItem('sc_company', JSON.stringify({ name: companyName, industry, siteUrl, goal, logo: companyLogo }));
+    localStorage.setItem('smarcomm_company', JSON.stringify({ name: companyName, industry, siteUrl, goal, logo: '' }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleLogout = () => { scLogout(); router.push('/'); };
+  const handleLogout = () => { logout(); router.push('/'); };
 
   const inputClass = "w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none";
 
   const TABS = [
-    { id: 'workspace' as SettingsTab, label: '워크스페이스' },
-    { id: 'members' as SettingsTab, label: '멤버 · 권한' },
+    { id: 'workspace' as SettingsTab, label: '기업정보' },
+    { id: 'members' as SettingsTab, label: '관리자 · 권한' },
     { id: 'palette' as SettingsTab, label: '차트 컬러' },
-    { id: 'plan' as SettingsTab, label: '사용중인 플랜' },
+    { id: 'plan' as SettingsTab, label: '플랜 관리' },
     { id: 'integrations' as SettingsTab, label: '외부 연동' },
   ];
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <h1 className="mb-1 text-xl font-bold text-text">워크스페이스 설정</h1>
       <p className="mb-6 text-xs text-text-muted">워크스페이스 정보와 연동을 관리합니다</p>
 
@@ -118,83 +88,70 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* 회사 로고 */}
+          {/* 기업 기본 정보 */}
           <div className="rounded-2xl border border-border bg-white p-5">
-            <h2 className="mb-4 text-sm font-semibold text-text">회사 로고</h2>
-            <div className="flex items-start gap-5">
-              {/* 로고 미리보기 */}
-              <div className="relative shrink-0">
-                {companyLogo ? (
-                  <div className="relative">
-                    <img src={companyLogo} alt="로고" className="h-20 w-20 rounded-xl border border-border object-cover" />
-                    <button
-                      onClick={handleRemoveLogo}
-                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white shadow-sm hover:bg-danger/80"
-                    >
-                      <X size={10} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface text-text-muted">
-                    <ImageIcon size={24} />
-                  </div>
-                )}
-              </div>
-
-              {/* 드래그앤드롭 영역 */}
-              <div
-                className={`flex flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
-                  dragOver ? 'border-accent bg-accent/5' : 'border-border hover:border-text-muted'
-                }`}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                style={{ cursor: 'pointer' }}
-              >
-                <Upload size={20} className={`mb-2 ${dragOver ? 'text-accent' : 'text-text-muted'}`} />
-                <p className="text-sm text-text-sub">
-                  {dragOver ? '여기에 놓으세요' : '이미지를 드래그하거나 클릭하여 업로드'}
-                </p>
-                <p className="mt-1 text-xs text-text-muted">PNG, JPG, SVG · 2MB 이하 · 권장 200×200px</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleLogoFile(file);
-                    e.target.value = '';
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 회사 프로필 */}
-          <div className="rounded-2xl border border-border bg-white p-5">
-            <h2 className="mb-4 text-sm font-semibold text-text">회사 프로필</h2>
+            <h2 className="mb-4 text-sm font-semibold text-text">기업 기본 정보</h2>
             <div className="space-y-3">
-              <div><label className="mb-1 block text-xs text-text-sub">회사명</label><input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="주식회사 OOO" className={inputClass} /></div>
+              <div><label className="mb-1 block text-xs text-text-sub">회사명 / 브랜드명</label><input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="주식회사 OOO" className={inputClass} /></div>
               <div><label className="mb-1 block text-xs text-text-sub">업종</label>
                 <select value={industry} onChange={e => setIndustry(e.target.value)} className={inputClass}>
-                  <option value="">선택</option><option value="food">음식/F&B</option><option value="beauty">뷰티</option><option value="fashion">패션</option><option value="tech">IT/테크</option><option value="education">교육</option><option value="retail">소매/유통</option><option value="service">서비스</option><option value="medical">의료</option><option value="other">기타</option>
+                  <option value="">선택</option><option value="ecommerce">이커머스</option><option value="food">음식/F&B</option><option value="beauty">뷰티/화장품</option><option value="fashion">패션/의류</option><option value="tech">IT/테크/SaaS</option><option value="education">교육</option><option value="retail">소매/유통</option><option value="service">전문 서비스</option><option value="medical">의료/헬스케어</option><option value="finance">금융/핀테크</option><option value="travel">여행/관광</option><option value="realestate">부동산</option><option value="other">기타</option>
                 </select>
               </div>
-              <div><label className="mb-1 block text-xs text-text-sub">대표 사이트 URL</label><input value={siteUrl} onChange={e => setSiteUrl(e.target.value)} placeholder="https://yourcompany.com" className={inputClass} /></div>
+              <div><label className="mb-1 block text-xs text-text-sub">대표 사이트 URL</label><input value={siteUrl} onChange={e => setSiteUrl(e.target.value)} placeholder="https://yourcompany.com" className={inputClass} />
+                <p className="mt-1 text-[10px] text-text-muted">GEO & SEO 진단, AI 가시성 테스트에 기본 URL로 사용됩니다</p>
+              </div>
               <div><label className="mb-1 block text-xs text-text-sub">마케팅 목표</label>
                 <select value={goal} onChange={e => setGoal(e.target.value)} className={inputClass}>
-                  <option value="">선택</option><option value="awareness">인지도 향상</option><option value="traffic">트래픽 증가</option><option value="conversion">매출 증대</option><option value="retention">리텐션</option><option value="seo">검색 순위</option><option value="geo">AI 검색 노출</option>
+                  <option value="">선택</option><option value="awareness">브랜드 인지도 향상</option><option value="traffic">웹사이트 트래픽 증가</option><option value="conversion">전환율/매출 증대</option><option value="retention">고객 유지/재구매</option><option value="seo">검색 순위 개선</option><option value="geo">AI 검색 노출 강화</option>
                 </select>
               </div>
-              <button onClick={handleSave} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-text py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
-                <Save size={15} /> {saved ? '저장 완료!' : '저장'}
-              </button>
             </div>
           </div>
 
-          {/* 로그아웃은 상단 프로필 드롭다운에서 */}
+          {/* 브랜드 & AI 설정 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-1 text-sm font-semibold text-text">브랜드 & AI 설정</h2>
+            <p className="mb-4 text-[10px] text-text-muted">AI 소재 생성, 캠페인 기획서에 자동 반영됩니다</p>
+            <div className="space-y-3">
+              <div><label className="mb-1 block text-xs text-text-sub">브랜드 톤앤매너</label>
+                <select className={inputClass}>
+                  <option value="">선택</option><option value="professional">전문적/신뢰감</option><option value="friendly">친근한/따뜻한</option><option value="trendy">트렌디/감각적</option><option value="luxury">프리미엄/고급</option><option value="casual">캐주얼/재미있는</option><option value="informative">정보 중심/교육적</option>
+                </select>
+              </div>
+              <div><label className="mb-1 block text-xs text-text-sub">타깃 고객</label>
+                <input placeholder="예: 20~30대 여성, 서울 거주, 뷰티에 관심" className={inputClass} />
+              </div>
+              <div><label className="mb-1 block text-xs text-text-sub">핵심 제품/서비스</label>
+                <input placeholder="예: AI 마케팅 자동화 플랫폼" className={inputClass} />
+              </div>
+              <div><label className="mb-1 block text-xs text-text-sub">차별점 (USP)</label>
+                <input placeholder="예: 30초 만에 SEO/GEO 진단, AI가 캠페인 자동 기획" className={inputClass} />
+              </div>
+            </div>
+          </div>
+
+          {/* 경쟁사 & 키워드 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-1 text-sm font-semibold text-text">경쟁사 & 키워드</h2>
+            <p className="mb-4 text-[10px] text-text-muted">GEO 가시성 비교, SEO 키워드 추적에 사용됩니다</p>
+            <div className="space-y-3">
+              <div><label className="mb-1 block text-xs text-text-sub">경쟁사 URL (최대 5개)</label>
+                {[1, 2, 3].map(i => (
+                  <input key={i} placeholder={`경쟁사 ${i} URL`} className={`${inputClass} ${i > 1 ? 'mt-2' : ''}`} />
+                ))}
+                <button className="mt-2 text-xs text-point hover:underline">+ 경쟁사 추가</button>
+              </div>
+              <div><label className="mb-1 block text-xs text-text-sub">핵심 키워드 (쉼표로 구분)</label>
+                <input placeholder="예: AI 마케팅, SEO 진단, GEO 최적화" className={inputClass} />
+                <p className="mt-1 text-[10px] text-text-muted">프롬프트 추적, AI 가시성 모니터링에 사용됩니다</p>
+              </div>
+            </div>
+          </div>
+
+          <button onClick={handleSave} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-text py-3 text-sm font-semibold text-white hover:bg-accent-sub">
+            <Save size={15} /> {saved ? '저장 완료!' : '기업정보 저장'}
+          </button>
         </div>
       )}
 
@@ -203,26 +160,83 @@ export default function ProfilePage() {
       {/* 플랜 */}
       {tab === 'plan' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-border bg-white p-6 text-center">
-            <div className="text-xs text-text-muted mb-1">현재 플랜</div>
-            <div className="text-3xl font-bold text-text mb-2">Free</div>
-            <p className="text-sm text-text-sub mb-4">무료 플랜으로 기본 기능을 사용 중입니다</p>
-            <button className="rounded-xl bg-text px-6 py-2.5 text-sm font-semibold text-white">플랜 업그레이드</button>
+          {/* 현재 플랜 */}
+          <div className="rounded-2xl border border-border bg-white p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs text-text-muted mb-1">현재 플랜</div>
+                <div className="text-2xl font-bold text-text">Free</div>
+                <p className="mt-1 text-xs text-text-sub">무료 플랜으로 기본 진단 기능을 사용 중입니다</p>
+              </div>
+              <button className="rounded-xl bg-text px-6 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">업그레이드</button>
+            </div>
           </div>
+
+          {/* 이번 달 사용량 */}
           <div className="rounded-2xl border border-border bg-white p-5">
-            <h2 className="mb-3 text-sm font-semibold text-text">사용량</h2>
-            <div className="space-y-3 text-sm">
+            <h2 className="mb-4 text-sm font-semibold text-text">이번 달 사용량</h2>
+            <div className="space-y-4">
               {[
-                { label: '진단 횟수', used: '22', limit: '무제한' },
-                { label: '소재 생성', used: '5', limit: '5건 (무료)' },
-                { label: 'CRM 메시지', used: '0', limit: '100건/월' },
-                { label: '팀 멤버', used: '1', limit: '3명' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-text-sub">{item.label}</span>
-                  <span className="text-text">{item.used} / {item.limit}</span>
-                </div>
-              ))}
+                { label: '사이트 진단', used: 5, limit: 10, unit: '회' },
+                { label: 'AI 캠페인 기획서', used: 2, limit: 3, unit: '건' },
+                { label: 'AI 소재 생성', used: 8, limit: 15, unit: '개' },
+                { label: '팀 멤버', used: 1, limit: 1, unit: '명' },
+              ].map((item, i) => {
+                const pct = Math.min(100, (item.used / item.limit) * 100);
+                return (
+                  <div key={i}>
+                    <div className="mb-1 flex items-center justify-between text-sm">
+                      <span className="text-text-sub">{item.label}</span>
+                      <span className="font-medium text-text">{item.used} / {item.limit}{item.unit}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-surface">
+                      <div className={`h-2 rounded-full transition-all ${pct >= 90 ? 'bg-danger' : pct >= 70 ? 'bg-warning' : 'bg-point'}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 플랜 비교 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">플랜 비교</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border text-xs text-text-muted">
+                  <th className="px-3 py-2 text-left font-medium">기능</th>
+                  <th className="px-3 py-2 text-center font-medium bg-surface">Free</th>
+                  <th className="px-3 py-2 text-center font-medium">Standard<br/><span className="text-[10px]">₩99,000/월</span></th>
+                  <th className="px-3 py-2 text-center font-medium">Pro<br/><span className="text-[10px]">₩299,000/월</span></th>
+                </tr></thead>
+                <tbody className="text-xs">
+                  {[
+                    { feature: '사이트 진단', free: '10회/월', standard: '100회/월', pro: '무제한' },
+                    { feature: 'AI 기획서', free: '3건/월', standard: '30건/월', pro: '무제한' },
+                    { feature: 'AI 소재 생성', free: '15개/월', standard: '200개/월', pro: '무제한' },
+                    { feature: '팀 멤버', free: '1명', standard: '5명', pro: '20명' },
+                    { feature: '외부 연동', free: '—', standard: '3개', pro: '무제한' },
+                    { feature: 'AI 가시성 추적', free: '—', standard: '주 1회', pro: '일 1회' },
+                    { feature: '리포트 자동 발송', free: '—', standard: '—', pro: '✓' },
+                  ].map((r, i) => (
+                    <tr key={i} className="border-b border-border last:border-0">
+                      <td className="px-3 py-2.5 text-text-sub">{r.feature}</td>
+                      <td className="px-3 py-2.5 text-center bg-surface">{r.free}</td>
+                      <td className="px-3 py-2.5 text-center">{r.standard}</td>
+                      <td className="px-3 py-2.5 text-center font-medium text-point">{r.pro}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 계정 관리 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-3 text-sm font-semibold text-text">계정 관리</h2>
+            <div className="flex gap-3">
+              <button className="rounded-xl border border-border px-4 py-2 text-xs text-text-sub hover:bg-surface">다운그레이드</button>
+              <button className="rounded-xl border border-danger/30 px-4 py-2 text-xs text-danger hover:bg-danger/5">서비스 탈퇴</button>
             </div>
           </div>
         </div>
@@ -316,7 +330,7 @@ export default function ProfilePage() {
                     { role: '관리자', plan: '유료', scan: '✓', creative: '✓', analysis: '✓', crm: '✓', settings: '✓', color: getChartPalette().colors[0], desc: '모든 권한 + 멤버/설정 관리' },
                     { role: '운영 크루', plan: '유료', scan: '✓', creative: '✓', analysis: '✓', crm: '✓', settings: '—', color: getChartPalette().colors[1], desc: '워크스페이스 설정 제외 모든 기능' },
                     { role: '뷰어', plan: '유료', scan: '✓', creative: '보기만', analysis: '보기만', crm: '보기만', settings: '—', color: getChartPalette().colors[2], desc: '리포트 조회만 가능' },
-                    { role: '일반', plan: '무료', scan: '✓', creative: '🔒', analysis: '🔒', crm: '🔒', settings: '—', color: getChartPalette().colors[3], desc: '사이트 진단만 가능, 유료 전환 유도' },
+                    { role: '일반', plan: '무료', scan: '✓', creative: '—', analysis: '—', crm: '—', settings: '—', color: getChartPalette().colors[3], desc: '사이트 진단만 가능, 유료 전환 유도' },
                   ].map((r, i) => (
                     <tr key={i} className="border-b border-border last:border-0">
                       <td className="px-4 py-3">
@@ -339,7 +353,7 @@ export default function ProfilePage() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-3 text-xs text-text-muted">🔒 표시된 기능은 무료 사용자에게 비활성화되며, 유료 전환을 유도하는 안내가 표시됩니다.</p>
+            <p className="mt-3 text-xs text-text-muted">"—" 표시된 기능은 무료 사용자에게 비활성화되며, 유료 전환을 유도하는 안내가 표시됩니다.</p>
           </div>
 
           {/* 현재 멤버 */}
@@ -437,25 +451,105 @@ export default function ProfilePage() {
 
       {/* 외부 연동 */}
       {tab === 'integrations' && (
-        <div>
-          <p className="mb-4 text-sm text-text-sub">자주 사용하는 업무 툴과 SmarComm을 연동하여 팀원들과 함께 관리해보세요.</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { name: 'Google Analytics', desc: 'GA4와 연동하여 사이트 데이터를 통합 분석', connected: false },
-              { name: 'Slack', desc: '진단 완료, 캠페인 변경 등 알림을 슬랙으로 전달', connected: false },
-              { name: 'Notion', desc: '보고서와 인사이트를 노션으로 자동 내보내기', connected: false },
-              { name: '네이버 검색광고', desc: '네이버 SA 캠페인 데이터 연동', connected: false },
-              { name: '카카오 비즈', desc: '카카오톡 채널 및 알림톡 연동', connected: false },
-              { name: 'Meta Ads', desc: '메타(FB/IG) 광고 캠페인 연동', connected: false },
-            ].map((tool, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-white p-5">
-                <h3 className="mb-1 text-sm font-semibold text-text">{tool.name}</h3>
-                <p className="mb-3 text-xs text-text-sub">{tool.desc}</p>
-                <button className="w-full rounded-xl border border-border py-2 text-xs font-medium text-text-sub hover:bg-surface hover:text-text">
-                  연동하기
-                </button>
-              </div>
-            ))}
+        <div className="space-y-6">
+          <p className="text-sm text-text-sub">SmarComm과 제휴하고 있는 외부 서비스를 연동하여 데이터를 자동 수집하고 마케팅을 실행합니다.</p>
+
+          {/* 분석 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">분석 · 트래킹</h2>
+            <div className="space-y-3">
+              {[
+                { name: 'Google Analytics (GA4)', desc: '웹사이트 트래픽, 전환, 사용자 행동 데이터', status: 'available' },
+                { name: 'Google Search Console', desc: 'SEO 키워드 순위, 클릭, 노출 데이터', status: 'available' },
+                { name: '네이버 서치어드바이저', desc: '네이버 검색 노출, 클릭, 키워드 데이터', status: 'planned' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+                  <div>
+                    <div>
+                      <div className="text-sm font-medium text-text">{s.name}</div>
+                      <div className="text-[10px] text-text-muted">{s.desc}</div>
+                    </div>
+                  </div>
+                  <button className={`rounded-lg px-3 py-1.5 text-[10px] font-medium ${s.status === 'planned' ? 'bg-surface text-text-muted cursor-not-allowed' : 'border border-border text-text-sub hover:bg-surface hover:text-text'}`} disabled={s.status === 'planned'}>
+                    {s.status === 'planned' ? '준비중' : '연동하기'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 광고 매체 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">광고 매체</h2>
+            <div className="space-y-3">
+              {[
+                { name: 'Google Ads', desc: '검색/디스플레이/영상 광고 캠페인 성과', status: 'available' },
+                { name: 'Meta Ads (Facebook/Instagram)', desc: 'Meta 광고 캠페인 성과 및 소재 관리', status: 'available' },
+                { name: '네이버 검색광고 (SA)', desc: '네이버 검색광고 캠페인 데이터', status: 'available' },
+                { name: '네이버 GFA', desc: '네이버 성과형 디스플레이 광고', status: 'planned' },
+                { name: '카카오 모먼트', desc: '카카오톡/다음 광고 캠페인 데이터', status: 'planned' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+                  <div>
+                    <div>
+                      <div className="text-sm font-medium text-text">{s.name}</div>
+                      <div className="text-[10px] text-text-muted">{s.desc}</div>
+                    </div>
+                  </div>
+                  <button className={`rounded-lg px-3 py-1.5 text-[10px] font-medium ${s.status === 'planned' ? 'bg-surface text-text-muted cursor-not-allowed' : 'border border-border text-text-sub hover:bg-surface hover:text-text'}`} disabled={s.status === 'planned'}>
+                    {s.status === 'planned' ? '준비중' : '연동하기'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CRM · 메시징 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">CRM · 메시징</h2>
+            <div className="space-y-3">
+              {[
+                { name: '카카오 비즈메시지', desc: '알림톡, 친구톡 발송 (카카오톡 채널 연동)', status: 'planned' },
+                { name: '이메일 발송 (AWS SES)', desc: '대량 이메일 캠페인 발송', status: 'planned' },
+                { name: 'Firebase (푸시 알림)', desc: '웹/앱 푸시 알림 발송', status: 'planned' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+                  <div>
+                    <div>
+                      <div className="text-sm font-medium text-text">{s.name}</div>
+                      <div className="text-[10px] text-text-muted">{s.desc}</div>
+                    </div>
+                  </div>
+                  <button className="rounded-lg bg-surface px-3 py-1.5 text-[10px] font-medium text-text-muted cursor-not-allowed" disabled>준비중</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 협업 · 알림 */}
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-text">협업 · 알림</h2>
+            <div className="space-y-3">
+              {[
+                { name: 'Slack', desc: '진단 완료, 캠페인 변경, 알림을 슬랙 채널로 전달', status: 'planned' },
+                { name: 'Notion', desc: '리포트, 인사이트를 노션 페이지로 자동 내보내기', status: 'planned' },
+                { name: 'Google Sheets', desc: '데이터를 구글 스프레드시트로 자동 동기화', status: 'planned' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+                  <div>
+                    <div>
+                      <div className="text-sm font-medium text-text">{s.name}</div>
+                      <div className="text-[10px] text-text-muted">{s.desc}</div>
+                    </div>
+                  </div>
+                  <button className="rounded-lg bg-surface px-3 py-1.5 text-[10px] font-medium text-text-muted cursor-not-allowed" disabled>준비중</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-surface px-4 py-3 text-center text-xs text-text-muted">
+            연동 서비스는 순차적으로 확대됩니다. 필요한 연동이 있으면 <button className="text-point hover:underline">요청하기</button>
           </div>
         </div>
       )}

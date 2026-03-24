@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Target, ChevronDown, ChevronRight, CheckCircle2, Clock, AlertCircle, Building2, Users, User } from "lucide-react";
+import { getMemberStats } from "@/lib/supabase/members";
 
 type GoalStatus = "확정" | "승인대기" | "초안" | "반려";
 
@@ -105,6 +106,13 @@ export default function GPRCascadePage() {
     const [expandedDivs, setExpandedDivs] = useState<Set<string>>(new Set(["경영기획"]));
     const [expandedTeams, setExpandedTeams] = useState<Set<string>>(new Set(["경영기획팀"]));
     const [expandedMembers, setExpandedMembers] = useState<Set<string>>(new Set(["Cheonil Jeon"]));
+    const [dbMemberTotal, setDbMemberTotal] = useState<number | null>(null);
+
+    useEffect(() => {
+        getMemberStats()
+            .then(stats => setDbMemberTotal(stats.total))
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+    }, []);
 
     const toggle = (set: Set<string>, key: string, setter: (s: Set<string>) => void) => {
         const next = new Set(set);
@@ -115,7 +123,10 @@ export default function GPRCascadePage() {
     return (
         <div className="max-w-5xl">
             <h1 className="text-2xl font-bold mb-2">목표 캐스케이드</h1>
-            <p className="text-sm text-neutral-500 mb-6">회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름</p>
+            <p className="text-sm text-neutral-500 mb-6">
+                회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름
+                {dbMemberTotal !== null && <span className="ml-2 text-neutral-400">· 전체 멤버 {dbMemberTotal}명</span>}
+            </p>
 
             {/* Company Level */}
             <div className="border border-neutral-200 bg-white p-5 mb-6">

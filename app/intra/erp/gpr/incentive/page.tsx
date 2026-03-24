@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { DollarSign, Users, TrendingUp, Award } from "lucide-react";
+import { getProjectStats } from "@/lib/supabase/projects";
 
 interface IncentiveRecord {
     name: string;
@@ -44,13 +46,24 @@ const statusColor: Record<string, string> = {
 };
 
 export default function GPRIncentivePage() {
+    const [dbProjectStats, setDbProjectStats] = useState<{ totalRevenue: number; totalProfit: number } | null>(null);
+
+    useEffect(() => {
+        getProjectStats()
+            .then(stats => setDbProjectStats({ totalRevenue: stats.totalRevenue, totalProfit: stats.totalProfit }))
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+    }, []);
+
     const confirmed = mockIncentives.filter(i => i.status === "확정");
     const totalIncentive = confirmed.reduce((s, i) => s + i.incentiveAmount, 0);
 
     return (
         <div className="max-w-5xl">
             <h1 className="text-2xl font-bold mb-2">인센티브</h1>
-            <p className="text-sm text-neutral-500 mb-6">GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리</p>
+            <p className="text-sm text-neutral-500 mb-6">
+                GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리
+                {dbProjectStats && <span className="ml-2 text-neutral-400">· 매출 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalRevenue)}원 / 이익 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalProfit)}원</span>}
+            </p>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[

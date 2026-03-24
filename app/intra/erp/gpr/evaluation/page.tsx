@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Target, CheckCircle2, Clock, Users } from "lucide-react";
+import { getMemberStats } from "@/lib/supabase/members";
 
 interface EvalRecord {
     name: string;
@@ -31,6 +32,14 @@ const statusColor: Record<string, string> = {
 
 export default function GPREvaluationPage() {
     const [filter, setFilter] = useState("all");
+    const [dbMemberTotal, setDbMemberTotal] = useState<number | null>(null);
+
+    useEffect(() => {
+        getMemberStats()
+            .then(stats => setDbMemberTotal(stats.total))
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+    }, []);
+
     const confirmed = mockEvals.filter(e => e.status === "확정").length;
     const pending = mockEvals.filter(e => e.status !== "확정").length;
 
@@ -43,7 +52,7 @@ export default function GPREvaluationPage() {
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: "전체 대상", value: `${mockEvals.length}명`, icon: Users },
+                    { label: "전체 대상", value: `${dbMemberTotal ?? mockEvals.length}명`, icon: Users },
                     { label: "평가 확정", value: `${confirmed}명`, icon: CheckCircle2 },
                     { label: "진행중", value: `${pending}명`, icon: Clock },
                     { label: "미제출", value: `${mockEvals.filter(e => e.status === "미제출").length}명`, icon: Target },

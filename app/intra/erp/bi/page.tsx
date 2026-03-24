@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePoints } from "@/lib/point-context";
 import {
     TrendingUp, Users, FolderKanban, DollarSign, Target,
@@ -12,6 +12,8 @@ import {
 import Link from "next/link";
 import { gradeConfig, gradeLevels } from "@/types/point";
 import type { GradeLevel } from "@/types/point";
+import { getMemberStats } from "@/lib/supabase/members";
+import { getProjectStats } from "@/lib/supabase/projects";
 
 function fmt(n: number) { return new Intl.NumberFormat("ko-KR").format(n); }
 function fmtM(n: number) { return (n / 10000).toFixed(0) + '만'; }
@@ -109,10 +111,22 @@ export default function BIDashboardPage() {
     const [period] = useState('2026 Q1');
     const leaderboard = getLeaderboard().slice(0, 5);
 
-    const totalRevenue = bizOverview.core.revenue + bizOverview.expand.revenue + bizOverview.side.revenue;
+    const [dbMemberStats, setDbMemberStats] = useState<{ total: number; staff: number; active: number } | null>(null);
+    const [dbProjectStats, setDbProjectStats] = useState<{ total: number; inProgress: number; totalRevenue: number; totalProfit: number } | null>(null);
+
+    useEffect(() => {
+        getMemberStats()
+            .then(stats => setDbMemberStats({ total: stats.total, staff: stats.staff, active: stats.active }))
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+        getProjectStats()
+            .then(stats => setDbProjectStats({ total: stats.total, inProgress: stats.inProgress, totalRevenue: stats.totalRevenue, totalProfit: stats.totalProfit }))
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+    }, []);
+
+    const totalRevenue = dbProjectStats?.totalRevenue || (bizOverview.core.revenue + bizOverview.expand.revenue + bizOverview.side.revenue);
     const totalTarget = bizOverview.core.target + bizOverview.expand.target + bizOverview.side.target;
     const totalCost = monthlyRevenue.reduce((s, m) => s + m.cost, 0);
-    const totalProfit = totalRevenue - totalCost;
+    const totalProfit = dbProjectStats?.totalProfit || (totalRevenue - totalCost);
 
     return (
         <div className="max-w-7xl">
@@ -152,7 +166,7 @@ export default function BIDashboardPage() {
                         <FolderKanban className="h-3.5 w-3.5 text-neutral-400" />
                         <span className="text-[10px] text-neutral-400">진행 프로젝트</span>
                     </div>
-                    <div className="text-xl font-bold">{projectStats.inProgress}<span className="text-sm font-normal text-neutral-400">/{projectStats.total}</span></div>
+                    <div className="text-xl font-bold">{dbProjectStats?.inProgress ?? projectStats.inProgress}<span className="text-sm font-normal text-neutral-400">/{dbProjectStats?.total ?? projectStats.total}</span></div>
                     <div className="text-[10px] text-neutral-400 mt-1">평균 완료율 {projectStats.avgCompletionRate}%</div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
@@ -168,7 +182,7 @@ export default function BIDashboardPage() {
                         <Users className="h-3.5 w-3.5 text-neutral-400" />
                         <span className="text-[10px] text-neutral-400">전체 멤버</span>
                     </div>
-                    <div className="text-xl font-bold">{memberStats.total}<span className="text-sm font-normal text-neutral-400">명</span></div>
+                    <div className="text-xl font-bold">{dbMemberStats?.total ?? memberStats.total}<span className="text-sm font-normal text-neutral-400">명</span></div>
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-green-600">
                         <UserPlus className="h-3 w-3" /> 이번 달 +{memberStats.newThisMonth}
                     </div>

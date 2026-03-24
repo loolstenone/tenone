@@ -1,4 +1,5 @@
 // 실제 HTML을 분석하여 SEO 점수를 산출하는 엔진
+import Anthropic from '@anthropic-ai/sdk';
 
 export interface AnalysisItem {
   name: string;
@@ -50,6 +51,15 @@ export interface DeepAnalysis {
   };
 }
 
+export interface PerformanceData {
+  score: number;               // 0~100
+  lcp: number;                 // ms (Largest Contentful Paint)
+  cls: number;                 // 점수 (Cumulative Layout Shift)
+  tbt: number;                 // ms (Total Blocking Time)
+  fcp: number;                 // ms (First Contentful Paint)
+  si: number;                  // ms (Speed Index)
+}
+
 export interface AnalysisResult {
   url: string;
   faviconUrl: string;
@@ -58,6 +68,7 @@ export interface AnalysisResult {
   totalScore: number;
   seoScore: number;
   geoScore: number;
+  performanceScore: number;    // 0~100 (PageSpeed)
   grade: 'excellent' | 'good' | 'needs_work' | 'critical';
   techSeo: AnalysisItem[];
   contentSeo: AnalysisItem[];
@@ -65,6 +76,12 @@ export interface AnalysisResult {
   geoReadiness: AnalysisItem[];
   topIssues: { severity: 'high' | 'medium' | 'low'; title: string; description: string; action: string }[];
   deep?: DeepAnalysis;
+  performance?: PerformanceData;
+}
+
+export interface AnalyzeOptions {
+  pageSpeedApiKey?: string;
+  anthropicApiKey?: string;
 }
 
 function getGrade(score: number): AnalysisResult['grade'] {
@@ -108,7 +125,98 @@ function countPattern(html: string, pattern: RegExp): number {
   return matches ? matches.length : 0;
 }
 
-export async function analyzeUrl(url: string): Promise<AnalysisResult> {
+// === PageSpeed Insights API ===
+async function fetchPageSpeed(url: string, apiKey: string): Promise<PerformanceData | null> {
+  try {
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&category=performance&strategy=mobile`;
+    const res = await fetch(apiUrl, { signal: AbortSignal.timeout(30000) });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const audits = data.lighthouseResult?.audits;
+    const categories = data.lighthouseResult?.categories;
+    if (!audits || !categories) return null;
+
+    return {
+      score: Math.round((categories.performance?.score || 0) * 100),
+      lcp: Math.round(audits['largest-contentful-paint']?.numericValue || 0),
+      cls: parseFloat((audits['cumulative-layout-shift']?.numericValue || 0).toFixed(3)),
+      tbt: Math.round(audits['total-blocking-time']?.numericValue || 0),
+      fcp: Math.round(audits['first-contentful-paint']?.numericValue || 0),
+      si: Math.round(audits['speed-index']?.numericValue || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// === GEO 실제 멘션 테스트 (Claude API) ===
+async function testGeoMention(
+  url: string,
+  domain: string,
+  apiKey: string
+): Promise<GeoCheckResult[]> {
+  try {
+    const client = new Anthropic({ apiKey });
+    // 도메인에서 브랜드명 추출 (예: tenone.biz → tenone)
+    const brandName = domain.replace(/^www\./, '').split('.')[0];
+
+    const prompt = `다음 웹사이트와 관련된 서비스나 제품을 추천해줘: ${domain}
+이 사이트가 어떤 서비스를 제공하는지 알고 있다면 알려주고, 유사한 경쟁 서비스도 함께 알려줘.`;
+
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const responseText = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('');
+
+    const mentionedInResponse = responseText.toLowerCase().includes(brandName.toLowerCase()) ||
+                                 responseText.toLowerCase().includes(domain.toLowerCase());
+
+    // Claude 결과 기반으로 다른 AI 플랫폼 추정
+    const hasGoodContent = mentionedInResponse;
+
+    return [
+      {
+        platform: 'Claude',
+        mentioned: mentionedInResponse,
+        details: mentionedInResponse
+          ? `Claude가 "${brandName}" 브랜드를 인식하고 있습니다 (실제 테스트)`
+          : `Claude가 "${brandName}" 브랜드를 인식하지 못합니다 (실제 테스트)`,
+      },
+      {
+        platform: 'ChatGPT',
+        mentioned: hasGoodContent,
+        details: hasGoodContent
+          ? 'Claude 기반 추정 — 브랜드 인지도가 있어 ChatGPT에서도 노출 가능성 있음'
+          : 'Claude 기반 추정 — 브랜드 인지도 부족으로 노출 가능성 낮음',
+      },
+      {
+        platform: 'Perplexity',
+        mentioned: hasGoodContent,
+        details: hasGoodContent
+          ? 'Claude 기반 추정 — 웹 검색 기반 AI이므로 노출 가능성 있음'
+          : 'Claude 기반 추정 — 노출 가능성 낮음',
+      },
+      {
+        platform: '네이버 AI (Cue)',
+        mentioned: domain.endsWith('.kr') || domain.endsWith('.co.kr'),
+        details: (domain.endsWith('.kr') || domain.endsWith('.co.kr'))
+          ? '.kr 도메인 — 네이버 AI 노출 가능성 있음 (추정)'
+          : '해외 도메인 — 네이버 AI 노출 가능성 낮음 (추정)',
+      },
+    ];
+  } catch {
+    return []; // 실패 시 빈 배열 → fallback으로 기존 추정 사용
+  }
+}
+
+export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise<AnalysisResult> {
   let normalizedUrl = url.trim();
   if (!normalizedUrl.startsWith('http')) {
     normalizedUrl = 'https://' + normalizedUrl;
@@ -120,14 +228,14 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
   let html = '';
   let statusCode = 0;
   let fetchError = '';
-  const responseHeaders: Record<string, string> = {};
+  let responseHeaders: Record<string, string> = {};
 
   // fetch 시도 (TLS 실패 시 재시도)
-  const fetchWithRetry = async (fetchUrl: string): Promise<Response> => {
+  const fetchWithRetry = async (url: string): Promise<Response> => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 10000);
     try {
-      const res = await fetch(fetchUrl, {
+      const res = await fetch(url, {
         signal: controller.signal,
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; SmarComm-Scanner/1.0)',
@@ -141,8 +249,8 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
     } catch (err) {
       clearTimeout(timer);
       // TLS 실패 시 http로 재시도
-      if (fetchUrl.startsWith('https://')) {
-        const httpUrl = fetchUrl.replace('https://', 'http://');
+      if (url.startsWith('https://')) {
+        const httpUrl = url.replace('https://', 'http://');
         const controller2 = new AbortController();
         const timer2 = setTimeout(() => controller2.abort(), 10000);
         try {
@@ -179,20 +287,37 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
 
   const fetchTime = Date.now() - startTime;
 
+  // === 외부 API 병렬 호출 (PageSpeed + GEO 멘션 테스트) ===
+  const domain = (() => { try { return new URL(normalizedUrl).hostname; } catch { return ''; } })();
+
+  const [pageSpeedData, geoTestResults] = await Promise.all([
+    options?.pageSpeedApiKey ? fetchPageSpeed(normalizedUrl, options.pageSpeedApiKey) : Promise.resolve(null),
+    options?.anthropicApiKey ? testGeoMention(normalizedUrl, domain, options.anthropicApiKey) : Promise.resolve([]),
+  ]);
+
   // === 기술 SEO 분석 ===
   const techSeo: AnalysisItem[] = [];
 
-  // 1. 페이지 로딩 속도 (fetch 시간 기반 근사치)
+  // 1. 페이지 로딩 속도 (PageSpeed API 또는 fetch 시간 기반)
   {
     let score = 15;
     let desc = '';
-    if (fetchTime < 1000) { score = 15; desc = `응답 시간 ${fetchTime}ms — 매우 빠름`; }
-    else if (fetchTime < 2000) { score = 12; desc = `응답 시간 ${fetchTime}ms — 양호`; }
-    else if (fetchTime < 3000) { score = 8; desc = `응답 시간 ${fetchTime}ms — 개선 권장`; }
-    else if (fetchTime < 5000) { score = 5; desc = `응답 시간 ${fetchTime}ms — 느림`; }
-    else { score = 2; desc = `응답 시간 ${fetchTime}ms — 매우 느림`; }
+    if (pageSpeedData) {
+      // 실제 PageSpeed 점수 사용
+      const psScore = pageSpeedData.score;
+      if (psScore >= 90) { score = 15; desc = `PageSpeed 점수 ${psScore}/100 — 우수 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
+      else if (psScore >= 50) { score = Math.round(psScore / 100 * 15); desc = `PageSpeed 점수 ${psScore}/100 — 개선 필요 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
+      else { score = Math.round(psScore / 100 * 15); desc = `PageSpeed 점수 ${psScore}/100 — 느림 (LCP ${(pageSpeedData.lcp / 1000).toFixed(1)}s)`; }
+    } else {
+      // fallback: fetch 시간 기반
+      if (fetchTime < 1000) { score = 15; desc = `응답 시간 ${fetchTime}ms — 매우 빠름`; }
+      else if (fetchTime < 2000) { score = 12; desc = `응답 시간 ${fetchTime}ms — 양호`; }
+      else if (fetchTime < 3000) { score = 8; desc = `응답 시간 ${fetchTime}ms — 개선 권장`; }
+      else if (fetchTime < 5000) { score = 5; desc = `응답 시간 ${fetchTime}ms — 느림`; }
+      else { score = 2; desc = `응답 시간 ${fetchTime}ms — 매우 느림`; }
+    }
     if (fetchError) { score = 0; desc = `사이트 접속 실패: ${fetchError}`; }
-    techSeo.push({ name: '페이지 응답 속도', score, maxScore: 15, status: getStatus(score, 15), description: desc, action: '서버 응답 속도 최적화, CDN 적용 검토' });
+    techSeo.push({ name: '페이지 로딩 속도', score, maxScore: 15, status: getStatus(score, 15), description: desc, action: '이미지 최적화, 코드 분할, CDN 적용으로 LCP 2.5초 이하 달성' });
   }
 
   // 2. 모바일 최적화 (viewport 메타태그 확인)
@@ -357,37 +482,38 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
   const contentMax = contentSeo.reduce((s, i) => s + i.maxScore, 0);
   const seoScore = Math.round(((techTotal + contentTotal) / (techMax + contentMax)) * 100);
 
-  // === GEO 분석 (시뮬레이션 — 구조화 데이터 기반 추정) ===
+  // === GEO 분석 (실제 테스트 + 구조화 데이터 기반 추정) ===
   const hasSchema = html.includes('application/ld+json') || /itemtype=["']https?:\/\/schema\.org/i.test(html);
   const hasFaqSchema = /FAQPage|faqpage/i.test(html);
   const hasProductSchema = /Product|product/i.test(html) && hasSchema;
   const hasGoodContent = (contentTotal / contentMax) > 0.6;
-  const domain = (() => { try { return new URL(normalizedUrl).hostname; } catch { return ''; } })();
   const isKnownDomain = domain.includes('.com') || domain.includes('.co.kr') || domain.includes('.kr');
 
-  // GEO 노출 추정 (구조화 데이터 + 콘텐츠 품질 기반)
-  const geoChecks: GeoCheckResult[] = [
-    {
-      platform: 'ChatGPT',
-      mentioned: hasGoodContent && isKnownDomain,
-      details: hasGoodContent && isKnownDomain ? '콘텐츠 품질 기반 노출 가능성 있음 (추정)' : '콘텐츠 부족 — 노출 가능성 낮음 (추정)',
-    },
-    {
-      platform: 'Perplexity',
-      mentioned: hasSchema && hasGoodContent,
-      details: hasSchema && hasGoodContent ? '구조화 데이터 + 콘텐츠 기반 인용 가능성 있음 (추정)' : '구조화 데이터 부족 — 인용 가능성 낮음 (추정)',
-    },
-    {
-      platform: 'Google AI Overview',
-      mentioned: hasFaqSchema || (hasGoodContent && hasSchema),
-      details: hasFaqSchema ? 'FAQ 스키마 감지 — AI 요약 포함 가능성 높음 (추정)' : '구조화 데이터 보강 필요 (추정)',
-    },
-    {
-      platform: '네이버 AI (Cue)',
-      mentioned: domain.endsWith('.kr') || domain.endsWith('.co.kr'),
-      details: domain.endsWith('.kr') || domain.endsWith('.co.kr') ? '.kr 도메인 — 네이버 AI 노출 가능성 있음 (추정)' : '해외 도메인 — 네이버 AI 노출 가능성 낮음 (추정)',
-    },
-  ];
+  // GEO 노출: 실제 테스트 결과가 있으면 사용, 없으면 추정
+  const geoChecks: GeoCheckResult[] = geoTestResults.length > 0
+    ? geoTestResults
+    : [
+      {
+        platform: 'ChatGPT',
+        mentioned: hasGoodContent && isKnownDomain,
+        details: hasGoodContent && isKnownDomain ? '콘텐츠 품질 기반 노출 가능성 있음 (추정)' : '콘텐츠 부족 — 노출 가능성 낮음 (추정)',
+      },
+      {
+        platform: 'Perplexity',
+        mentioned: hasSchema && hasGoodContent,
+        details: hasSchema && hasGoodContent ? '구조화 데이터 + 콘텐츠 기반 인용 가능성 있음 (추정)' : '구조화 데이터 부족 — 인용 가능성 낮음 (추정)',
+      },
+      {
+        platform: 'Google AI Overview',
+        mentioned: hasFaqSchema || (hasGoodContent && hasSchema),
+        details: hasFaqSchema ? 'FAQ 스키마 감지 — AI 요약 포함 가능성 높음 (추정)' : '구조화 데이터 보강 필요 (추정)',
+      },
+      {
+        platform: '네이버 AI (Cue)',
+        mentioned: domain.endsWith('.kr') || domain.endsWith('.co.kr'),
+        details: domain.endsWith('.kr') || domain.endsWith('.co.kr') ? '.kr 도메인 — 네이버 AI 노출 가능성 있음 (추정)' : '해외 도메인 — 네이버 AI 노출 가능성 낮음 (추정)',
+      },
+    ];
 
   const geoExposure = [20, 20, 20, 15];
   const geoExposureScore = geoChecks.reduce((s, c, i) => s + (c.mentioned ? geoExposure[i] : 0), 0);
@@ -423,7 +549,10 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
   const geoReadinessMax = geoReadiness.reduce((s, i) => s + i.maxScore, 0);
   const geoScore = Math.round(((geoExposureScore + geoReadinessScore) / (75 + geoReadinessMax)) * 100);
 
-  const totalScore = Math.round(seoScore * 0.5 + geoScore * 0.5);
+  const performanceScore = pageSpeedData ? pageSpeedData.score : Math.round(Math.max(0, 100 - fetchTime / 50));
+  const totalScore = pageSpeedData
+    ? Math.round(seoScore * 0.4 + geoScore * 0.4 + performanceScore * 0.2)
+    : Math.round(seoScore * 0.5 + geoScore * 0.5);
 
   // 상위 이슈: 점수가 낮은 항목 기반
   const allItems = [...techSeo, ...contentSeo, ...geoReadiness];
@@ -578,6 +707,7 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
     totalScore,
     seoScore,
     geoScore,
+    performanceScore,
     grade: getGrade(totalScore),
     techSeo,
     contentSeo,
@@ -585,5 +715,6 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
     geoReadiness,
     topIssues,
     deep,
+    performance: pageSpeedData || undefined,
   };
 }

@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle, X, Gauge, Zap, Timer, Lightbulb, Loader2 } from 'lucide-react';
 import { getScanLog } from '@/lib/smarcomm/auth';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
 import RadarChart from '@/components/smarcomm/RadarChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 type ViewMode = 'list' | 'result' | 'compare';
 type Status = 'pass' | 'warning' | 'fail';
@@ -23,6 +25,8 @@ interface ScanResult {
   contentSeo: { name: string; score: number; maxScore: number; status: Status; description: string; action: string }[];
   geoChecks: { platform: string; mentioned: boolean; details: string }[];
   geoReadiness: { name: string; score: number; maxScore: number; status: Status; description: string; action: string }[];
+  performanceScore?: number;
+  performance?: { score: number; lcp: number; cls: number; tbt: number; fcp: number; si: number };
   topIssues: { severity: string; title: string; description: string; action: string }[];
   deep?: any;
 }
@@ -48,51 +52,122 @@ export default function ScanPage() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [compareResult, setCompareResult] = useState<ScanResult | null>(null);
+  const [error, setError] = useState('');
+  const [historyPage, setHistoryPage] = useState(1);
+  const [compHistoryPage, setCompHistoryPage] = useState(1);
+  const [compareHistory, setCompareHistory] = useState<{ url: string; score: number; seo: number; geo: number; date: string }[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try { return JSON.parse(localStorage.getItem('smarcomm_compare_log') || '[]'); } catch { return []; }
+  });
+  const [competitors, setCompetitors] = useState<string[]>([]);
+  const [newCompetitor, setNewCompetitor] = useState('');
+  const [generatingPlan, setGeneratingPlan] = useState(false);
   const scanLog = getScanLog().reverse();
+  const HISTORY_PAGE_SIZE = 5;
+
+  const handleGenerateCampaignPlan = async () => {
+    const scanData = result;
+    if (!scanData) return;
+    setGeneratingPlan(true);
+    try {
+      const res = await fetch('/api/smarcomm/advisor/campaign-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scanResult: scanData }),
+      });
+      if (res.ok) {
+        const plan = await res.json();
+        sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
+        router.push('/dashboard/advisor');
+      }
+    } catch (e) {
+      console.error('Campaign plan generation failed:', e);
+    }
+    setGeneratingPlan(false);
+  };
+
+  // 경쟁사 목록 localStorage 로드
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('smarcomm_competitors');
+      if (saved) setCompetitors(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const saveCompetitors = (list: string[]) => {
+    setCompetitors(list);
+    localStorage.setItem('smarcomm_competitors', JSON.stringify(list));
+  };
+
+  const addCompetitor = () => {
+    const trimmed = newCompetitor.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (!trimmed) return;
+    if (!competitors.includes(trimmed)) saveCompetitors([...competitors, trimmed]);
+    setNewCompetitor('');
+  };
+
+  const removeCompetitor = (domain: string) => {
+    saveCompetitors(competitors.filter(c => c !== domain));
+  };
 
   // 내 사이트 (설정에서 가져오기)
-  const savedCompany = typeof window !== 'undefined' ? localStorage.getItem('sc_company') : null;
-  const mySiteUrl = savedCompany ? JSON.parse(savedCompany).siteUrl || '' : '';
-
-  // 메인 페이지에서 넘어온 pending scan 자동 실행
+  const [mySiteUrl, setMySiteUrl] = useState('');
   useEffect(() => {
-    const pending = sessionStorage.getItem('sc_pending_scan');
-    if (pending) {
-      sessionStorage.removeItem('sc_pending_scan');
-      setUrl(pending);
-      handleScan(pending);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    try {
+      const saved = localStorage.getItem('smarcomm_company');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.siteUrl) setMySiteUrl(parsed.siteUrl);
+      }
+    } catch {}
   }, []);
 
   const handleScan = async (targetUrl: string) => {
+    if (!targetUrl.trim()) { setError('URL을 입력해주세요'); return; }
     const normalized = targetUrl.startsWith('http') ? targetUrl : 'https://' + targetUrl;
-    try { new URL(normalized); } catch { return; }
+    // 도메인에 . 이 없으면 유효하지 않음
+    const domainPart = normalized.replace(/^https?:\/\//, '').split('/')[0];
+    if (!domainPart.includes('.')) { setError('유효하지 않은 URL입니다. 예: tenone.biz'); return; }
 
     setScanning(true);
+    setError('');
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/smarcomm/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),
       });
-      if (!res.ok) { setScanning(false); return; }
       const data = await res.json();
+      if (!res.ok) { setError(data.error || '분석에 실패했습니다'); setScanning(false); return; }
       setResult(data);
       setView('result');
 
-      // 스캔 로그 저장
       const { saveScanUrl } = await import('@/lib/smarcomm/auth');
-      saveScanUrl(data.url, data.totalScore);
-    } catch { }
+      saveScanUrl(data.url, data.totalScore, data.seoScore, data.geoScore);
+
+      // 경쟁사 URL이면 경쟁사 이력에도 저장
+      const scanDomain = data.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const myDomain = mySiteUrl ? mySiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') : '';
+      if (scanDomain !== myDomain && competitors.includes(scanDomain)) {
+        const newEntry = { url: data.url, score: data.totalScore, seo: data.seoScore, geo: data.geoScore, date: new Date().toISOString() };
+        setCompareHistory(prev => {
+          const updated = [newEntry, ...prev.filter(h => h.url !== data.url)];
+          localStorage.setItem('smarcomm_compare_log', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch (e) {
+      setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+    }
     setScanning(false);
   };
 
   const handleCompare = async () => {
     if (!compareUrl.trim()) return;
     const normalized = compareUrl.startsWith('http') ? compareUrl : 'https://' + compareUrl;
+    setScanning(true);
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/smarcomm/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),
@@ -101,8 +176,16 @@ export default function ScanPage() {
         const data = await res.json();
         setCompareResult(data);
         setView('compare');
+        // 경쟁사 이력 저장 (localStorage 영속)
+        const newEntry = { url: data.url, score: data.totalScore, seo: data.seoScore, geo: data.geoScore, date: new Date().toISOString() };
+        setCompareHistory(prev => {
+          const updated = [newEntry, ...prev.filter(h => h.url !== data.url)];
+          localStorage.setItem('smarcomm_compare_log', JSON.stringify(updated));
+          return updated;
+        });
       }
     } catch { }
+    setScanning(false);
   };
 
   // 중복 제거
@@ -116,12 +199,22 @@ export default function ScanPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="mb-1 text-xl font-bold text-text">사이트 진단</h1>
-      <p className="mb-6 text-xs text-text-muted">GEO + SEO 통합 진단 · 경쟁사 비교 · SmarComm. Index 리포트</p>
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">GEO & SEO 진단</h1><GuideHelpButton /></div>
+          <p className="mt-1 text-xs text-text-muted">AI 검색 + 전통 검색 통합 진단 · 경쟁사 비교 · 풀 리포트</p>
+        </div>
+        {view !== 'list' && (
+          <button onClick={() => { setView('list'); setCompareResult(null); }} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted hover:bg-surface hover:text-text transition-colors">
+            ← 목록으로
+          </button>
+        )}
+      </div>
 
-      {/* URL 입력 */}
-      <div className="mb-6 rounded-2xl border border-border bg-white p-4 sm:p-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+      {/* URL 입력 (1개) */}
+      <div className="mb-6 rounded-2xl border border-border bg-white p-5">
+        <div className="flex gap-3">
           <div className="relative flex-1">
             <Globe size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
@@ -130,17 +223,58 @@ export default function ScanPage() {
               className="w-full rounded-xl border border-border bg-surface py-3 pl-11 pr-4 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none" />
           </div>
           <button onClick={() => handleScan(url)} disabled={scanning}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-text px-6 py-3 text-sm font-semibold text-white hover:bg-accent-sub disabled:opacity-50">
+            className="flex items-center gap-1.5 rounded-xl bg-text px-6 py-3 text-sm font-semibold text-white hover:bg-accent-sub disabled:opacity-50">
             <Search size={15} /> {scanning ? '분석 중...' : '진단'}
           </button>
         </div>
-        {mySiteUrl && (
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-text-muted">내 사이트:</span>
-            <button onClick={() => { setUrl(mySiteUrl); handleScan(mySiteUrl); }}
-              className="rounded-full border border-border px-3 py-1 text-xs text-text-sub hover:text-text hover:bg-surface">
-              {mySiteUrl.replace(/^https?:\/\//, '')}
-            </button>
+        {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+        {scanning && <p className="mt-2 text-xs text-text-muted">사이트를 분석하고 있습니다... (30초~2분 소요)</p>}
+
+        {/* 내 사이트 + 경쟁사 바로 진단 */}
+        {!scanning && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {mySiteUrl && (
+              <>
+                <span className="text-[10px] font-semibold text-text-muted">내 사이트</span>
+                <button onClick={() => { setUrl(mySiteUrl); handleScan(mySiteUrl); }}
+                  className="rounded-full bg-text/5 border border-text/10 px-3 py-1 text-xs font-medium text-text hover:bg-text hover:text-white transition-colors">
+                  {mySiteUrl.replace(/^https?:\/\//, '')}
+                </button>
+              </>
+            )}
+            {competitors.length > 0 && (
+              <>
+                <span className="text-[10px] font-semibold text-text-muted ml-1">경쟁사</span>
+                {competitors.map(comp => (
+                  <div key={comp} className="flex items-center gap-0.5">
+                    <button onClick={() => { setUrl('https://' + comp); handleScan('https://' + comp); }}
+                      className="rounded-l-full border border-border px-3 py-1 text-xs text-text-sub hover:bg-surface hover:text-text transition-colors">
+                      {comp}
+                    </button>
+                    <button onClick={() => removeCompetitor(comp)}
+                      className="rounded-r-full border border-l-0 border-border px-1.5 py-1 text-text-muted hover:text-danger hover:bg-red-50 transition-colors">
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
+            {/* 경쟁사 추가 (최대 4개) */}
+            {competitors.length < 4 && (
+              <div className="flex items-center gap-1">
+                <input type="text" value={newCompetitor} onChange={e => setNewCompetitor(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addCompetitor()}
+                  placeholder="경쟁사 도메인"
+                  className="w-28 rounded-l-full border border-dashed border-text-muted/30 px-3 py-1 text-[10px] text-text-muted placeholder:text-text-muted/50 focus:border-text focus:outline-none focus:w-36 transition-all" />
+                <button onClick={addCompetitor}
+                  className="rounded-r-full border border-l-0 border-dashed border-text-muted/30 px-2 py-1 text-[10px] font-bold text-text-muted hover:bg-text hover:text-white hover:border-text transition-colors">
+                  +
+                </button>
+              </div>
+            )}
+            {competitors.length >= 4 && (
+              <span className="text-[9px] text-text-muted/50">최대 4개</span>
+            )}
           </div>
         )}
       </div>
@@ -149,47 +283,33 @@ export default function ScanPage() {
       {view === 'result' && result && (
         <div>
           {/* 점수 요약 */}
-          <div className="mb-6 rounded-2xl border border-border bg-white p-4 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                {result.faviconUrl && <img src={result.faviconUrl} alt={`${result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')} 파비콘`} width={32} height={32} className="rounded-lg sm:h-10 sm:w-10 sm:rounded-xl" />}
+          <div className="mb-6 rounded-2xl border border-border bg-white p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {result.faviconUrl && <img src={result.faviconUrl} alt="" width={40} height={40} className="rounded-xl" />}
                 <div>
-                  <div className="text-sm font-semibold text-text sm:text-base">{result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</div>
-                  <div className="text-xs text-text-muted">SmarComm. Index</div>
+                  <div className="text-base font-semibold text-text">{result.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</div>
+                  <div className="text-xs text-text-muted">GEO & SEO 진단</div>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-4 sm:gap-6">
-                <GaugeChart score={result.seoScore} label="SEO" color={getChartColors()[2]} size={64} />
-                <GaugeChart score={result.geoScore} label="GEO" color={getChartColors()[2]} size={64} />
-                <GaugeChart score={result.totalScore} label="종합" color={GRADE_MAP[result.grade]?.color || '#6B7280'} size={80} />
+              <div className="flex items-center gap-6">
+                <GaugeChart score={result.seoScore} label="SEO" color={getChartColors()[2]} size={80} />
+                <GaugeChart score={result.geoScore} label="GEO" color={getChartColors()[2]} size={80} />
+                {result.performanceScore !== undefined && (
+                  <GaugeChart score={result.performanceScore} label="Performance" color={result.performanceScore >= 90 ? '#059669' : result.performanceScore >= 50 ? '#D97706' : '#DC2626'} size={80} />
+                )}
+                <GaugeChart score={result.totalScore} label="종합" color={GRADE_MAP[result.grade]?.color || '#6B7280'} size={100} />
               </div>
             </div>
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-4 flex items-center justify-between">
               <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ color: GRADE_MAP[result.grade]?.color, background: `${GRADE_MAP[result.grade]?.color}15` }}>
                 {GRADE_MAP[result.grade]?.label} — {GRADE_MAP[result.grade]?.message}
               </span>
               <div className="flex gap-2">
-                <button onClick={() => window.print()} className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-sub hover:text-text">PDF</button>
-                <button onClick={() => { setView('list'); setCompareResult(null); }} className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-sub hover:text-text">목록</button>
               </div>
             </div>
           </div>
 
-          {/* 경쟁사 비교 입력 */}
-          <div className="mb-6 rounded-2xl border border-border bg-white p-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <span className="text-sm font-semibold text-text shrink-0">경쟁사 비교</span>
-              <div className="flex flex-1 gap-2">
-                <div className="relative flex-1">
-                  <input type="url" value={compareUrl} onChange={e => setCompareUrl(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleCompare()}
-                    placeholder="비교할 경쟁사 URL"
-                    className="w-full rounded-lg border border-border bg-surface py-2 px-3 text-sm placeholder:text-text-muted focus:border-text focus:outline-none" />
-                </div>
-                <button onClick={handleCompare} className="shrink-0 rounded-lg bg-surface px-4 py-2 text-xs font-medium text-text-sub hover:bg-text hover:text-white">비교</button>
-              </div>
-            </div>
-          </div>
 
           {/* 상위 이슈 */}
           <div className="mb-6">
@@ -201,7 +321,7 @@ export default function ScanPage() {
                   <div key={i} className="rounded-xl border border-border bg-white p-4" style={{ borderLeftWidth: 3, borderLeftColor: sc }}>
                     <div className="mb-1 flex items-center justify-between">
                       <span className="text-sm font-semibold text-text">{issue.title}</span>
-                      <span className="text-[10px] font-semibold uppercase" style={{ color: sc }}>{issue.severity}</span>
+                      <span className="text-xs font-semibold" style={{ color: sc }}>{issue.severity === 'high' ? '위험' : issue.severity === 'medium' ? '주의' : '참고'}</span>
                     </div>
                     <p className="text-xs text-text-sub">{issue.description}</p>
                     <p className="mt-1 text-xs text-text-muted">→ {issue.action}</p>
@@ -239,7 +359,65 @@ export default function ScanPage() {
             </div>
           </div>
 
-          {/* AI 검색 */}
+          {/* 성능 (Core Web Vitals) */}
+          {result.performance && (
+            <div className="mt-4 rounded-2xl border border-border bg-white p-5">
+              <h2 className="mb-3 text-sm font-bold text-text flex items-center gap-1.5"><Gauge size={14} /> 성능 (Core Web Vitals)</h2>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {(() => {
+                  const perf = result.performance;
+                  const lcpColor = perf.lcp < 2500 ? '#059669' : perf.lcp < 4000 ? '#D97706' : '#DC2626';
+                  const clsColor = perf.cls < 0.1 ? '#059669' : perf.cls < 0.25 ? '#D97706' : '#DC2626';
+                  const tbtColor = perf.tbt < 200 ? '#059669' : perf.tbt < 600 ? '#D97706' : '#DC2626';
+                  return (
+                    <>
+                      <div className="rounded-xl border border-border p-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Zap size={12} /> LCP</div>
+                        <div className="text-2xl font-bold" style={{ color: lcpColor }}>{(perf.lcp / 1000).toFixed(1)}s</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Largest Contentful Paint</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: lcpColor }}>{perf.lcp < 2500 ? '양호' : perf.lcp < 4000 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                      <div className="rounded-xl border border-border p-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Gauge size={12} /> CLS</div>
+                        <div className="text-2xl font-bold" style={{ color: clsColor }}>{perf.cls.toFixed(3)}</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Cumulative Layout Shift</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: clsColor }}>{perf.cls < 0.1 ? '양호' : perf.cls < 0.25 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                      <div className="rounded-xl border border-border p-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Timer size={12} /> TBT</div>
+                        <div className="text-2xl font-bold" style={{ color: tbtColor }}>{perf.tbt}ms</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Total Blocking Time</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: tbtColor }}>{perf.tbt < 200 ? '양호' : perf.tbt < 600 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* GEO Readiness */}
+          {result.geoReadiness && result.geoReadiness.length > 0 && (
+            <div className="mt-4 rounded-2xl border border-border bg-white p-5">
+              <h2 className="mb-3 text-sm font-bold text-text">AI 검색 최적화 (GEO Readiness)</h2>
+              <div className="space-y-2">
+                {result.geoReadiness.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    <StatusIcon status={item.status} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-text-sub">{item.name}</span>
+                        <span className="font-semibold text-text">{item.score}/{item.maxScore}</span>
+                      </div>
+                      {item.status !== 'pass' && <p className="mt-0.5 text-xs text-text-muted">→ {item.action}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI 검색 노출 */}
           <div className="mt-4 rounded-2xl border border-border bg-white p-5">
             <h2 className="mb-3 text-sm font-bold text-text">AI 검색 노출 추정</h2>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -252,6 +430,78 @@ export default function ScanPage() {
               ))}
             </div>
           </div>
+
+          {/* 레이더 차트 */}
+          <div className="mt-4 rounded-2xl border border-border bg-white p-5">
+            <h2 className="mb-3 text-sm font-bold text-text">GEO & SEO 종합 분석</h2>
+            <div className="flex justify-center">
+              <RadarChart
+                labels={['기술 SEO', '콘텐츠 SEO', 'AI 가시성', 'AI 최적화', '키워드', '콘텐츠 갭']}
+                values={[
+                  (() => {
+                    const techPct = result.techSeo.length > 0 ? Math.round(result.techSeo.reduce((s, x) => s + x.score, 0) / result.techSeo.reduce((s, x) => s + x.maxScore, 0) * 100) : 0;
+                    return result.performance?.score !== undefined ? Math.round((techPct + result.performance.score) / 2) : techPct;
+                  })(),
+                  result.contentSeo.length > 0 ? Math.round(result.contentSeo.reduce((s, x) => s + x.score, 0) / result.contentSeo.reduce((s, x) => s + x.maxScore, 0) * 100) : 0,
+                  result.geoChecks.length > 0 ? Math.round(result.geoChecks.filter(c => c.mentioned).length / result.geoChecks.length * 100) : 0,
+                  result.geoReadiness && result.geoReadiness.length > 0 ? Math.round(result.geoReadiness.reduce((s, x) => s + x.score, 0) / result.geoReadiness.reduce((s, x) => s + x.maxScore, 0) * 100) : 0,
+                  result.deep?.keywords ? Math.min(100, result.deep.keywords.length * 10) : 50,
+                  result.deep?.contentGaps ? Math.max(0, 100 - result.deep.contentGaps.length * 15) : 60,
+                ]}
+                size={280}
+              />
+            </div>
+          </div>
+
+          {/* 심화 분석 (deep) */}
+          {result.deep && (
+            <div className="mt-4 space-y-4">
+              {/* 키워드 분석 */}
+              {result.deep.keywords && result.deep.keywords.length > 0 && (
+                <div className="rounded-2xl border border-border bg-white p-5">
+                  <h2 className="mb-3 text-sm font-bold text-text">키워드 분석</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {result.deep.keywords.map((kw: any, i: number) => (
+                      <span key={i} className="rounded-full bg-surface px-3 py-1 text-xs text-text-sub">{typeof kw === 'string' ? kw : kw.keyword || JSON.stringify(kw)}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 콘텐츠 갭 */}
+              {result.deep.contentGaps && result.deep.contentGaps.length > 0 && (
+                <div className="rounded-2xl border border-border bg-white p-5">
+                  <h2 className="mb-3 text-sm font-bold text-text">콘텐츠 갭 분석</h2>
+                  <p className="mb-2 text-xs text-text-muted">경쟁사 대비 부족한 콘텐츠 영역</p>
+                  <div className="space-y-1.5">
+                    {result.deep.contentGaps.map((gap: any, i: number) => (
+                      <div key={i} className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-xs text-text-sub">
+                        <span className="text-warning">!</span> {typeof gap === 'string' ? gap : gap.gap || gap.title || JSON.stringify(gap)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 개선 액션 플랜 */}
+              {result.deep.actionPlan && result.deep.actionPlan.length > 0 && (
+                <div className="rounded-2xl border border-border bg-white p-5">
+                  <h2 className="mb-3 text-sm font-bold text-text">개선 액션 플랜</h2>
+                  <div className="space-y-2">
+                    {result.deep.actionPlan.map((action: { priority: string; title: string; description: string }, i: number) => (
+                      <div key={i} className="flex items-start gap-3 rounded-xl border border-border p-3">
+                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${action.priority === 'high' ? 'bg-danger' : action.priority === 'medium' ? 'bg-warning' : 'bg-text-muted'}`}>{i + 1}</div>
+                        <div>
+                          <div className="text-xs font-semibold text-text">{action.title}</div>
+                          <div className="mt-0.5 text-[11px] text-text-muted">{action.description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -266,14 +516,14 @@ export default function ScanPage() {
                 return (
                   <div key={i} className={`rounded-xl border p-5 ${i === 0 ? 'border-text/20 bg-surface' : 'border-border'}`}>
                     <div className="mb-3 flex items-center gap-2">
-                      {r.faviconUrl && <img src={r.faviconUrl} alt={`${r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')} 파비콘`} width={24} height={24} className="rounded" />}
+                      {r.faviconUrl && <img src={r.faviconUrl} alt="" width={24} height={24} className="rounded" />}
                       <span className="text-sm font-semibold text-text">{r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
                       {i === 0 && <span className="rounded bg-text/10 px-1.5 py-0.5 text-[9px] font-bold text-text">내 사이트</span>}
                     </div>
-                    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-                      <GaugeChart score={r.seoScore} label="SEO" color={getChartColors()[2]} size={60} />
-                      <GaugeChart score={r.geoScore} label="GEO" color={getChartColors()[2]} size={60} />
-                      <GaugeChart score={r.totalScore} label="종합" color={grade.color} size={72} />
+                    <div className="flex items-center justify-center gap-4">
+                      <GaugeChart score={r.seoScore} label="SEO" color={getChartColors()[2]} size={70} />
+                      <GaugeChart score={r.geoScore} label="GEO" color={getChartColors()[2]} size={70} />
+                      <GaugeChart score={r.totalScore} label="종합" color={grade.color} size={85} />
                     </div>
                     <div className="mt-3 text-center">
                       <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ color: grade.color }}>{grade.label}</span>
@@ -303,18 +553,16 @@ export default function ScanPage() {
                   const a = getScore(scores[i][0]);
                   const b = getScore(scores[i][1]);
                   return (
-                    <div key={i} className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:gap-3">
-                      <span className="w-20 shrink-0 text-xs font-medium text-text-sub">{label}</span>
-                      <div className="flex items-center gap-2 sm:flex-1">
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text/70" style={{ width: `${a}%` }} /></div>
-                          <span className="w-10 text-right text-xs font-semibold text-text">{a}%</span>
-                        </div>
-                        <span className="text-xs text-text-muted">vs</span>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text-muted/50" style={{ width: `${b}%` }} /></div>
-                          <span className="w-10 text-right text-xs font-semibold text-text-sub">{b}%</span>
-                        </div>
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <span className="w-20 text-xs text-text-sub">{label}</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text/70" style={{ width: `${a}%` }} /></div>
+                        <span className="w-10 text-right text-xs font-semibold text-text">{a}%</span>
+                      </div>
+                      <span className="text-xs text-text-muted">vs</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 h-4 rounded bg-surface overflow-hidden"><div className="h-full rounded bg-text-muted/50" style={{ width: `${b}%` }} /></div>
+                        <span className="w-10 text-right text-xs font-semibold text-text-sub">{b}%</span>
                       </div>
                     </div>
                   );
@@ -322,65 +570,180 @@ export default function ScanPage() {
               </div>
             </div>
           </div>
-          <button onClick={() => { setView('result'); setCompareResult(null); }} className="text-xs text-text-muted hover:text-text">← 단일 리포트로 돌아가기</button>
         </div>
       )}
 
       {/* 목록 뷰 */}
       {view === 'list' && (
         <>
-          {uniqueScans.length > 0 && (
-            <div className="mb-6">
-              <h2 className="mb-3 text-sm font-semibold text-text">진단한 사이트</h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {uniqueScans.slice(0, 6).map((scan, i) => {
-                  const domain = scan.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                  const scoreColor = scan.score >= 80 ? '#059669' : scan.score >= 60 ? '#D97706' : scan.score >= 40 ? '#EA580C' : '#DC2626';
-                  return (
-                    <div key={i} className="flex items-center justify-between rounded-2xl border border-border bg-white p-4 hover:bg-surface cursor-pointer"
-                      onClick={() => { setUrl(scan.url); handleScan(scan.url); }}>
-                      <div>
-                        <div className="text-sm font-medium text-text">{domain}</div>
-                        <div className="flex items-center gap-1 text-xs text-text-muted"><Clock size={10} />{new Date(scan.date).toLocaleDateString('ko-KR')}</div>
-                      </div>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold text-white" style={{ background: scoreColor }}>{scan.score}</div>
+          {/* ── 자사 진단 이력 ── */}
+          {(() => {
+            const mySiteDomain = mySiteUrl ? mySiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') : '';
+            const myScans = mySiteDomain ? scanLog.filter(s => s.url.replace(/^https?:\/\//, '').replace(/\/$/, '') === mySiteDomain) : scanLog;
+            const totalPages = Math.ceil(myScans.length / HISTORY_PAGE_SIZE);
+            const paged = myScans.slice((historyPage - 1) * HISTORY_PAGE_SIZE, historyPage * HISTORY_PAGE_SIZE);
+            return myScans.length > 0 ? (
+              <div className="mb-6 rounded-2xl border border-border bg-white">
+                <div className="border-b border-border px-5 py-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text">자사 진단 이력</h2>
+                  <span className="text-xs text-text-muted">{mySiteDomain || '전체'} · {myScans.length}건</span>
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border text-xs text-text-muted bg-surface">
+                      <th className="px-4 py-3 text-left font-medium">URL</th>
+                      <th className="px-3 py-3 text-center font-medium">GEO</th>
+                      <th className="px-3 py-3 text-center font-medium">SEO</th>
+                      <th className="px-3 py-3 text-center font-medium">평균</th>
+                      <th className="px-3 py-3 text-center font-medium">변화</th>
+                      <th className="px-3 py-3 text-center font-medium">차트</th>
+                      <th className="px-4 py-3 text-right font-medium">일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paged.map((scan, i) => {
+                      const domain = scan.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                      const scoreColor = scan.score >= 80 ? '#059669' : scan.score >= 60 ? '#D97706' : scan.score >= 40 ? '#EA580C' : '#DC2626';
+                      const geo = scan.geoScore ?? Math.round(scan.score * 0.48);
+                      const seo = scan.seoScore ?? (scan.score - (scan.geoScore ?? Math.round(scan.score * 0.48)));
+                      const globalIdx = (historyPage - 1) * HISTORY_PAGE_SIZE + i;
+                      const prev = myScans[globalIdx + 1];
+                      const diff = prev ? scan.score - prev.score : 0;
+                      const rv = [geo * 2, seo * 2, Math.min(100, scan.score + 10), Math.min(100, geo * 1.8), Math.min(100, seo * 1.5), Math.max(0, 100 - scan.score)];
+                      return (
+                        <tr key={i} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer" onClick={() => { setUrl(scan.url); handleScan(scan.url); }}>
+                          <td className="px-4 py-3 font-medium text-text text-sm">{domain}</td>
+                          <td className="px-3 py-3 text-center text-sm text-text-sub">{geo}</td>
+                          <td className="px-3 py-3 text-center text-sm text-text-sub">{seo}</td>
+                          <td className="px-3 py-2.5 text-center">
+                            <span className="inline-block rounded-md px-2.5 py-1 text-xs font-bold text-white" style={{ background: scoreColor }}>{scan.score}</span>
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            {globalIdx < myScans.length - 1 ? (
+                              <span className={`text-sm font-bold ${diff > 0 ? 'text-success' : diff < 0 ? 'text-danger' : 'text-text-muted'}`}>
+                                {diff > 0 ? `+${diff}` : diff === 0 ? '—' : diff}
+                              </span>
+                            ) : <span className="text-xs text-text-muted">—</span>}
+                          </td>
+                          <td className="px-3 py-1 text-center">
+                            <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={56} hideLabels /></div>
+                          </td>
+                          <td className="px-4 py-3 text-right text-xs text-text-muted">{new Date(scan.date).toLocaleDateString('ko-KR')}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-border px-5 py-2.5">
+                    <span className="text-xs text-text-muted">{historyPage} / {totalPages} 페이지</span>
+                    <div className="flex gap-1">
+                      <button onClick={() => setHistoryPage(Math.max(1, historyPage - 1))} disabled={historyPage === 1}
+                        className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">이전</button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 5).map(p => (
+                        <button key={p} onClick={() => setHistoryPage(p)}
+                          className={`rounded px-2 py-1 text-[10px] font-medium ${historyPage === p ? 'bg-text text-white' : 'border border-border text-text-sub hover:bg-surface'}`}>{p}</button>
+                      ))}
+                      <button onClick={() => setHistoryPage(Math.min(totalPages, historyPage + 1))} disabled={historyPage === totalPages}
+                        className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">다음</button>
                     </div>
-                  );
-                })}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            ) : null;
+          })()}
 
-          {/* 전체 이력 */}
-          {scanLog.length > 0 && (
-            <div className="rounded-2xl border border-border bg-white">
-              <div className="border-b border-border px-4 py-3 sm:px-5">
-                <h2 className="text-sm font-semibold text-text">전체 진단 이력</h2>
-              </div>
-              <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead><tr className="border-b border-border text-xs text-text-muted"><th className="px-4 py-2.5 text-left font-medium sm:px-5">URL</th><th className="px-4 py-2.5 text-center font-medium sm:px-5">점수</th><th className="px-4 py-2.5 text-right font-medium sm:px-5">일시</th></tr></thead>
-                <tbody>
-                  {scanLog.slice(0, 15).map((scan, i) => {
-                    const domain = scan.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                    const scoreColor = scan.score >= 80 ? '#059669' : scan.score >= 60 ? '#D97706' : scan.score >= 40 ? '#EA580C' : '#DC2626';
-                    return (
-                      <tr key={i} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer" onClick={() => { setUrl(scan.url); handleScan(scan.url); }}>
-                        <td className="px-4 py-3 font-medium text-text sm:px-5">{domain}</td>
-                        <td className="px-4 py-3 text-center sm:px-5"><span className="inline-block rounded-md px-2 py-0.5 text-xs font-bold text-white" style={{ background: scoreColor }}>{scan.score}</span></td>
-                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap sm:px-5">{new Date(scan.date).toLocaleDateString('ko-KR')}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              </div>
+          {/* ── 경쟁사 진단 이력 ── */}
+          <div className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-text">경쟁사 진단 이력</h2>
+              <span className="text-xs text-text-muted">상단 검색창에서 경쟁사 URL을 진단하면 자동으로 기록됩니다</span>
             </div>
-          )}
+
+            {compareHistory.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border bg-white py-10 text-center">
+                <p className="text-sm text-text-muted">경쟁사 진단 이력이 없습니다</p>
+                <p className="mt-1 text-xs text-text-muted/60">상단에 경쟁사를 등록하고 진단 버튼을 클릭하세요</p>
+              </div>
+            )}
+            {compareHistory.length > 0 && (() => {
+              const compTotal = Math.ceil(compareHistory.length / HISTORY_PAGE_SIZE);
+              const compPaged = compareHistory.slice((compHistoryPage - 1) * HISTORY_PAGE_SIZE, compHistoryPage * HISTORY_PAGE_SIZE);
+              return (
+                <div className="rounded-2xl border border-border bg-white">
+                  <div className="border-b border-border px-5 py-3 flex items-center justify-between">
+                    <span className="text-xs text-text-muted">경쟁사 {compareHistory.length}건</span>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-xs text-text-muted bg-surface">
+                        <th className="px-4 py-3 text-left font-medium">URL</th>
+                        <th className="px-3 py-3 text-center font-medium">GEO</th>
+                        <th className="px-3 py-3 text-center font-medium">SEO</th>
+                        <th className="px-3 py-3 text-center font-medium">평균</th>
+                        <th className="px-3 py-3 text-center font-medium">차트</th>
+                        <th className="px-4 py-3 text-right font-medium">일시</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {compPaged.map((ch, i) => {
+                        const domain = ch.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                        const scoreColor = ch.score >= 80 ? '#059669' : ch.score >= 60 ? '#D97706' : ch.score >= 40 ? '#EA580C' : '#DC2626';
+                        const rv = [ch.geo * 2, ch.seo * 2, Math.min(100, ch.score + 10), Math.min(100, ch.geo * 1.8), Math.min(100, ch.seo * 1.5), Math.max(0, 100 - ch.score)];
+                        return (
+                          <tr key={i} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer"
+                            onClick={() => { setUrl(ch.url); handleScan(ch.url); }}>
+                            <td className="px-4 py-3 font-medium text-text text-sm">{domain}</td>
+                            <td className="px-3 py-3 text-center text-sm text-text-sub">{ch.geo}</td>
+                            <td className="px-3 py-3 text-center text-sm text-text-sub">{ch.seo}</td>
+                            <td className="px-3 py-3 text-center">
+                              <span className="inline-block rounded-md px-2.5 py-1 text-xs font-bold text-white" style={{ background: scoreColor }}>{ch.score}</span>
+                            </td>
+                            <td className="px-3 py-1 text-center">
+                              <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={56} hideLabels /></div>
+                            </td>
+                            <td className="px-4 py-3 text-right text-xs text-text-muted">{new Date(ch.date).toLocaleDateString('ko-KR')}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {compTotal > 1 && (
+                    <div className="flex items-center justify-between border-t border-border px-5 py-2.5">
+                      <span className="text-xs text-text-muted">{compHistoryPage} / {compTotal}</span>
+                      <div className="flex gap-1">
+                        <button onClick={() => setCompHistoryPage(Math.max(1, compHistoryPage - 1))} disabled={compHistoryPage === 1}
+                          className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">이전</button>
+                        <button onClick={() => setCompHistoryPage(Math.min(compTotal, compHistoryPage + 1))} disabled={compHistoryPage === compTotal}
+                          className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">다음</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
         </>
       )}
 
-      <NextStepCTA stage="진단 → 기획" title="진단 결과로 개선 프로젝트 시작" description="발견된 개선 포인트를 프로젝트와 태스크로 전환하여 체계적으로 관리하세요" actionLabel="프로젝트 생성" href="/sc/dashboard/workflow/projects" />
+      {/* AI 캠페인 기획서 생성 */}
+      {result && view === 'result' && (
+        <div className="mb-4 text-center">
+          <button
+            onClick={handleGenerateCampaignPlan}
+            disabled={generatingPlan}
+            className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-800 disabled:opacity-60"
+          >
+            {generatingPlan ? (
+              <><Loader2 size={16} className="animate-spin" /> 기획서 생성 중...</>
+            ) : (
+              <><Lightbulb size={16} /> AI 캠페인 기획서 생성</>
+            )}
+          </button>
+        </div>
+      )}
+
+      <NextStepCTA stage="진단 → 기획" title="진단 결과로 개선 프로젝트 시작" description="발견된 개선 포인트를 프로젝트와 태스크로 전환하여 체계적으로 관리하세요" actionLabel="프로젝트 생성" href="/dashboard/workflow/projects" />
     </div>
   );
 }

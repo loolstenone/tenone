@@ -2,16 +2,18 @@
 
 import { use, useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, AlertTriangle, CheckCircle2, XCircle,
   ExternalLink, Clock, Target, ChevronRight, Lock,
-  Download, Share2, Printer
+  Download, Share2, Printer, Gauge, Zap, Timer,
+  Lightbulb, Loader2
 } from 'lucide-react';
-import SmarCommHeader from '@/components/SmarCommHeader';
-import SmarCommFooter from '@/components/SmarCommFooter';
+import Header from '@/components/smarcomm/Header';
+import Footer from '@/components/smarcomm/Footer';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import RadarChart from '@/components/smarcomm/RadarChart';
-import { getSCUser } from '@/lib/smarcomm/auth';
+import { getUser } from '@/lib/smarcomm/auth';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 
 const GRADE_MAP = {
@@ -61,6 +63,8 @@ interface ScanData {
   contentSeo: { name: string; score: number; maxScore: number; status: Status; description: string; action: string }[];
   geoChecks: { platform: string; mentioned: boolean; details: string }[];
   geoReadiness: { name: string; score: number; maxScore: number; status: Status; description: string; action: string }[];
+  performanceScore?: number;
+  performance?: { score: number; lcp: number; cls: number; tbt: number; fcp: number; si: number };
   topIssues: { severity: string; title: string; description: string; action: string }[];
   deep?: {
     keywords: { keyword: string; relevance: string; found: boolean; suggestion: string }[];
@@ -104,16 +108,39 @@ function SeoItemRow({ item }: { item: { name: string; score: number; maxScore: n
 }
 
 function ReportContent({ scanId }: { scanId: string }) {
+  const router = useRouter();
   const [scan, setScan] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+
+  const handleGenerateCampaignPlan = async () => {
+    const stored = sessionStorage.getItem(`scan_${scanId}`);
+    if (!stored) return;
+    setGeneratingPlan(true);
+    try {
+      const res = await fetch('/api/smarcomm/advisor/campaign-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scanResult: JSON.parse(stored) }),
+      });
+      if (res.ok) {
+        const plan = await res.json();
+        sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
+        router.push('/dashboard/advisor');
+      }
+    } catch (e) {
+      console.error('Campaign plan generation failed:', e);
+    }
+    setGeneratingPlan(false);
+  };
 
   useEffect(() => {
     const stored = sessionStorage.getItem(`scan_${scanId}`);
     if (stored) setScan(JSON.parse(stored));
-    setIsLoggedIn(!!getSCUser());
+    setIsLoggedIn(!!getUser());
     setLoading(false);
   }, [scanId]);
 
@@ -131,11 +158,11 @@ function ReportContent({ scanId }: { scanId: string }) {
   if (!scan) {
     return (
       <>
-        <SmarCommHeader />
+        <Header />
         <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
           <h1 className="mb-2 text-xl font-bold text-text">리포트를 찾을 수 없습니다</h1>
           <p className="mb-6 text-sm text-text-sub">스캔 결과가 만료되었거나 존재하지 않습니다.</p>
-          <Link href="/sc" className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white">새 점검 시작</Link>
+          <Link href="/" className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white">새 점검 시작</Link>
         </main>
       </>
     );
@@ -150,12 +177,12 @@ function ReportContent({ scanId }: { scanId: string }) {
 
   return (
     <>
-      <SmarCommHeader />
+      <Header />
       <main className="min-h-screen px-5 pb-24 pt-20">
         <div className="mx-auto max-w-3xl">
           {/* Top Nav */}
           <div className="mb-5 flex items-center justify-between">
-            <Link href="/sc" className="flex items-center gap-1 text-sm text-text-muted transition-colors hover:text-text">
+            <Link href="/" className="flex items-center gap-1 text-sm text-text-muted transition-colors hover:text-text">
               <ArrowLeft size={15} /> 새 점검
             </Link>
             <div className="flex items-center gap-3 text-xs text-text-muted">
@@ -164,11 +191,12 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
-          {/* Report Header */}
+          {/* Report Header — 로고 왼쪽 + 타이틀 + 액션 */}
           <div className="mb-6 flex items-center gap-5 rounded-2xl border border-border bg-white px-6 py-5">
+            {/* 왼쪽: 로고 + 도메인 */}
             <div className="flex flex-col items-center">
               {scan.faviconUrl && !faviconError ? (
-                <img src={scan.faviconUrl} alt={`${displayDomain} 파비콘`} width={48} height={48} className="rounded-xl" onError={() => setFaviconError(true)} />
+                <img src={scan.faviconUrl} alt="" width={48} height={48} className="rounded-xl" onError={() => setFaviconError(true)} />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface text-base font-bold text-text-sub">
                   {displayDomain.charAt(0).toUpperCase()}
@@ -177,6 +205,7 @@ function ReportContent({ scanId }: { scanId: string }) {
               <div className="mt-1.5 text-xs font-medium text-text-sub">{displayDomain}</div>
             </div>
 
+            {/* 가운데: SmarComm. Index */}
             <div className="flex-1 text-center">
               <div className="text-2xl font-bold tracking-tight text-text md:text-3xl">
                 <span className="font-light">Smar</span>Comm<span className="text-text-sub">.</span> Index
@@ -184,6 +213,7 @@ function ReportContent({ scanId }: { scanId: string }) {
               <p className="mt-0.5 text-xs text-text-muted">스마트한 마케팅 커뮤니케이션은 진단에서 시작됩니다</p>
             </div>
 
+            {/* 오른쪽: 액션 */}
             <div className="flex items-center gap-1.5">
               <button onClick={() => window.print()} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-text-muted hover:text-text hover:bg-surface" title="프린트 / PDF 저장">
                 <Printer size={14} />
@@ -206,6 +236,9 @@ function ReportContent({ scanId }: { scanId: string }) {
             <div className="flex flex-wrap items-center justify-center gap-8">
               <GaugeChart score={scan.seoScore} label="SEO" color="#6B7280" size={100} />
               <GaugeChart score={scan.geoScore} label="GEO" color="#6B7280" size={100} />
+              {scan.performanceScore !== undefined && (
+                <GaugeChart score={scan.performanceScore} label="Performance" color={scan.performanceScore >= 90 ? '#059669' : scan.performanceScore >= 50 ? '#D97706' : '#DC2626'} size={100} />
+              )}
               <GaugeChart score={scan.totalScore} label="종합" color={grade.color} size={130} />
             </div>
             <div className="mt-4 text-center">
@@ -235,7 +268,7 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
-          {/* Radar + 분석 요약 + 브랜드 성격 */}
+          {/* Radar + 분석 요약 (나란히) + 브랜드 성격 */}
           {scan.deep && (() => {
             const techPct = Math.round(techSeoTotal / techSeoMax * 100);
             const contentPct = Math.round(contentSeoTotal / contentSeoMax * 100);
@@ -255,6 +288,7 @@ function ReportContent({ scanId }: { scanId: string }) {
 
             return (
               <>
+                {/* 레이더 + 분석 요약 나란히 */}
                 <div className="mb-10 grid gap-5 lg:grid-cols-2">
                   <div className="rounded-2xl border border-border bg-white p-6">
                     <h2 className="mb-2 text-[15px] font-bold text-text">종합 분석 레이더</h2>
@@ -292,19 +326,21 @@ function ReportContent({ scanId }: { scanId: string }) {
                   </div>
                 </div>
 
-                {/* 브랜드 커뮤니케이션 성격 제안 */}
+                {/* 브랜드 커뮤니케이션 성격 제안 — 좌우 분리 */}
                 <div className="mb-10 rounded-2xl border border-border bg-white p-6">
                   <h2 className="mb-1 text-[15px] font-bold text-text">브랜드 커뮤니케이션 성격 제안</h2>
                   <p className="mb-5 text-xs text-text-muted">SEO/GEO 분석을 기반으로 브랜드의 디지털 성격을 진단합니다</p>
 
                   <div className="grid gap-6 lg:grid-cols-5">
+                    {/* 왼쪽: 타이틀 */}
                     <div className="lg:col-span-2">
-                      <div className="text-3xl md:text-5xl mb-3">{personality.emoji}</div>
+                      <div className="text-5xl mb-3">{personality.emoji}</div>
                       <div className="text-2xl font-bold text-text mb-1">{personality.name}</div>
                       <div className="text-xs font-mono text-text-muted tracking-widest mb-3">{personality.type}</div>
                       <p className="text-sm leading-relaxed text-text-sub">{personality.description}</p>
                     </div>
 
+                    {/* 오른쪽: 상세 */}
                     <div className="lg:col-span-3 space-y-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -401,12 +437,50 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           </div>
 
+          {/* 성능 (Core Web Vitals) */}
+          {scan.performance && (
+            <div className="mb-10">
+              <h2 className="mb-4 text-[15px] font-bold text-text flex items-center gap-1.5"><Gauge size={15} /> 성능 (Core Web Vitals)</h2>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {(() => {
+                  const perf = scan.performance;
+                  const lcpColor = perf.lcp < 2500 ? '#059669' : perf.lcp < 4000 ? '#D97706' : '#DC2626';
+                  const clsColor = perf.cls < 0.1 ? '#059669' : perf.cls < 0.25 ? '#D97706' : '#DC2626';
+                  const tbtColor = perf.tbt < 200 ? '#059669' : perf.tbt < 600 ? '#D97706' : '#DC2626';
+                  return (
+                    <>
+                      <div className="rounded-xl border border-border bg-white px-5 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Zap size={12} /> LCP</div>
+                        <div className="text-2xl font-bold" style={{ color: lcpColor }}>{(perf.lcp / 1000).toFixed(1)}s</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Largest Contentful Paint</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: lcpColor }}>{perf.lcp < 2500 ? '양호' : perf.lcp < 4000 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                      <div className="rounded-xl border border-border bg-white px-5 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Gauge size={12} /> CLS</div>
+                        <div className="text-2xl font-bold" style={{ color: clsColor }}>{perf.cls.toFixed(3)}</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Cumulative Layout Shift</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: clsColor }}>{perf.cls < 0.1 ? '양호' : perf.cls < 0.25 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                      <div className="rounded-xl border border-border bg-white px-5 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xs text-text-muted mb-2"><Timer size={12} /> TBT</div>
+                        <div className="text-2xl font-bold" style={{ color: tbtColor }}>{perf.tbt}ms</div>
+                        <div className="mt-1 text-[10px] text-text-muted">Total Blocking Time</div>
+                        <div className="mt-1 text-[10px] font-medium" style={{ color: tbtColor }}>{perf.tbt < 200 ? '양호' : perf.tbt < 600 ? '개선 필요' : '나쁨'}</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
           {/* Deep Analysis */}
           {scan.deep && (
             <div className="mb-8">
               <h2 className="mb-4 text-[15px] font-bold text-text">심화 분석</h2>
 
               {isLoggedIn ? (
+                /* === 로그인 사용자: 전체 공개 === */
                 <>
                   {/* Page Details */}
                   <div className="mb-5">
@@ -515,6 +589,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                   )}
                 </>
               ) : (
+                /* === 비로그인: 제목만 보여주기 === */
                 <div className="space-y-2">
                   {[
                     { title: '페이지 상세 정보', desc: '타이틀, 메타, OG태그, 이미지, 링크 등 10개 항목 상세' },
@@ -536,12 +611,27 @@ function ReportContent({ scanId }: { scanId: string }) {
             </div>
           )}
 
-          {/* Bottom CTA */}
+          {/* AI 캠페인 기획서 생성 */}
+          <div className="mb-6 text-center">
+            <button
+              onClick={handleGenerateCampaignPlan}
+              disabled={generatingPlan}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-800 disabled:opacity-60"
+            >
+              {generatingPlan ? (
+                <><Loader2 size={16} className="animate-spin" /> 기획서 생성 중...</>
+              ) : (
+                <><Lightbulb size={16} /> AI 캠페인 기획서 생성</>
+              )}
+            </button>
+          </div>
+
+          {/* Bottom CTA — 비로그인만 */}
           {!isLoggedIn && (
             <div className="rounded-2xl border border-border bg-surface p-8 text-center">
               <h3 className="mb-2 text-lg font-bold text-text">심화 분석과 개선 가이드가 필요하신가요?</h3>
               <p className="mb-5 text-sm text-text-sub">무료 회원가입으로 정식 보고서와 맞춤 액션 플랜을 확인하세요</p>
-              <Link href="/sc/signup" className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-sub">
+              <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-sub">
                 정식 보고서 확인
                 <ChevronRight size={15} />
               </Link>
@@ -550,15 +640,15 @@ function ReportContent({ scanId }: { scanId: string }) {
         </div>
       </main>
 
-      {/* 우하단 플로팅 */}
+      {/* 우하단 플로팅 — 비로그인만 */}
       <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${showFloating && !isLoggedIn ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'}`}>
-        <Link href="/sc/signup" className="flex items-center gap-2 rounded-full bg-text px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-accent-sub hover:shadow-xl">
+        <Link href="/signup" className="flex items-center gap-2 rounded-full bg-text px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-accent-sub hover:shadow-xl">
           정식 보고서 확인
           <ChevronRight size={15} />
         </Link>
       </div>
 
-      <SmarCommFooter />
+      <Footer />
     </>
   );
 }

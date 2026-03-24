@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Globe, Settings, FileText, Bot, Calculator, CheckCircle2, AlertCircle } from 'lucide-react';
-import SmarCommHeader from '@/components/SmarCommHeader';
+import Header from '@/components/smarcomm/Header';
 import { saveScanUrl } from '@/lib/smarcomm/auth';
 
 const STEPS = [
@@ -31,13 +31,13 @@ function ScanContent() {
     // 프로그레스 애니메이션 (API 호출과 병렬)
     const iv = setInterval(() => {
       setProgress((p) => {
-        if (p >= 90) { clearInterval(iv); return 90; }
+        if (p >= 90) { clearInterval(iv); return 90; } // 90%에서 대기 (API 완료 대기)
         return p + 1;
       });
     }, 100);
 
     // 실제 API 호출
-    fetch('/api/scan', {
+    fetch('/api/smarcomm/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
@@ -51,14 +51,16 @@ function ScanContent() {
         return res.json();
       })
       .then((result) => {
+        // 결과를 sessionStorage에 저장 + 스캔 URL 기록
         const scanId = Date.now().toString(36);
         sessionStorage.setItem(`scan_${scanId}`, JSON.stringify(result));
         saveScanUrl(result.url, result.totalScore);
 
+        // 프로그레스 100%로 올리고 리포트 이동
         setProgress(100);
         setStep(4);
         setTimeout(() => {
-          router.push(`/sc/report/${scanId}`);
+          router.push(`/report/${scanId}`);
         }, 500);
       })
       .catch((err) => {
@@ -75,27 +77,10 @@ function ScanContent() {
 
   const StepIcon = STEPS[step].icon;
 
-  if (!url) {
-    return (
-      <>
-        <SmarCommHeader />
-        <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
-          <div className="w-full max-w-md text-center">
-            <h1 className="mb-2 text-xl font-bold text-text">URL이 필요합니다</h1>
-            <p className="mb-6 text-sm text-text-muted">분석할 사이트 URL을 입력해주세요.</p>
-            <button onClick={() => router.push('/sc')} className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
-              홈으로 돌아가기
-            </button>
-          </div>
-        </main>
-      </>
-    );
-  }
-
   if (error) {
     return (
       <>
-        <SmarCommHeader />
+        <Header />
         <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
           <div className="w-full max-w-md text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10">
@@ -103,7 +88,10 @@ function ScanContent() {
             </div>
             <h1 className="mb-2 text-xl font-bold text-text">분석 실패</h1>
             <p className="mb-6 text-sm text-text-sub">{error}</p>
-            <button onClick={() => router.push('/sc')} className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white">
+            <button
+              onClick={() => router.push('/')}
+              className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white"
+            >
               다시 시도
             </button>
           </div>
@@ -114,7 +102,7 @@ function ScanContent() {
 
   return (
     <>
-      <SmarCommHeader />
+      <Header />
       <main className="flex min-h-screen flex-col items-center justify-center px-5 pt-14">
         <div className="w-full max-w-md text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface">
@@ -179,7 +167,7 @@ function ScanContent() {
   );
 }
 
-export default function SCScanPage() {
+export default function ScanPage() {
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-text-muted">로딩 중...</div>}>
       <ScanContent />
