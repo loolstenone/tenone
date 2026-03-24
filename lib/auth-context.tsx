@@ -135,19 +135,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             || session.user.email?.split('@')[0]
                             || '사용자';
                         const initials = userName.substring(0, 2).toUpperCase();
+                        // origin_site 기반 초기 역할 설정
+                        const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
+                        const { defaultModuleAccess } = await import('@/types/auth');
+                        const initialType = 'member' as const;
+                        const initialModules = defaultModuleAccess[initialType] || [];
+
                         const { data: newMember, error: insertErr } = await supabase
                             .from('members')
                             .insert({
                                 auth_id: session.user.id,
                                 email: session.user.email || '',
                                 name: userName,
-                                account_type: 'member',
+                                account_type: initialType,
+                                primary_type: initialType,
+                                roles: [initialType],
                                 avatar_initials: initials,
                                 role: 'Member',
+                                origin_site: originSite,
+                                intra_access: initialType !== 'member',
+                                module_access: initialModules,
+                                affiliations: [],
                             })
                             .select()
                             .single();
-                        console.log('[Auth] member insert:', newMember ? 'ok' : 'failed', insertErr?.message || '');
+                        console.log('[Auth] member insert:', newMember ? 'ok' : 'failed', insertErr?.message || '', 'origin:', originSite);
                         member = newMember;
                     }
 
@@ -235,7 +247,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!error && data.user) {
-                // members 테이블에 프로필 생성
+                // members 테이블에 프로필 생성 (origin_site 기반)
+                const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
+                const { defaultModuleAccess } = await import('@/types/auth');
+                const initialType = 'member' as const;
+                const initialModules = defaultModuleAccess[initialType] || [];
                 const initials = name.substring(0, 2).toUpperCase();
                 const { data: member, error: memberError } = await supabase
                     .from('members')
@@ -243,8 +259,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         auth_id: data.user.id,
                         email,
                         name,
-                        account_type: 'member',
+                        account_type: initialType,
+                        primary_type: initialType,
+                        roles: [initialType],
                         avatar_initials: initials,
+                        origin_site: originSite,
+                        intra_access: false,
+                        module_access: initialModules,
+                        affiliations: [],
                         newsletter_subscribed: newsletterSubscribed || false,
                         role: 'Viewer',
                     })
