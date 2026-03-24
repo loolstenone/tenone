@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface ImageUploaderProps {
     value?: string;
@@ -10,6 +11,7 @@ interface ImageUploaderProps {
     accept?: string;
     maxSizeMB?: number;
     previewSize?: "sm" | "md" | "lg";
+    storagePath?: string; // e.g. "sites/tenone/posts"
 }
 
 export function ImageUploader({
@@ -19,8 +21,10 @@ export function ImageUploader({
     accept = "image/png,image/jpeg,image/webp,image/svg+xml",
     maxSizeMB = 5,
     previewSize = "md",
+    storagePath = "uploads",
 }: ImageUploaderProps) {
     const [dragging, setDragging] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,7 +34,7 @@ export function ImageUploader({
         lg: "h-60 w-full",
     }[previewSize];
 
-    const handleFile = useCallback((file: File) => {
+    const handleFile = useCallback(async (file: File) => {
         setError("");
         if (!file.type.startsWith("image/")) {
             setError("이미지 파일만 업로드 가능합니다.");
@@ -40,13 +44,45 @@ export function ImageUploader({
             setError(`파일 크기는 ${maxSizeMB}MB 이하여야 합니다.`);
             return;
         }
-        // base64로 변환 (추후 Supabase Storage로 교체)
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            onChange(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-    }, [onChange, maxSizeMB]);
+
+        setUploading(true);
+        try {
+            const supabase = createClient();
+            const ext = file.name.split('.').pop() || 'jpg';
+            const fileName = `${storagePath}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+            const { data, error: uploadError } = await supabase.storage
+                .from('bums-assets')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: true,
+                });
+
+            if (uploadError) {
+                // Storage 버킷이 없거나 권한 문제 → base64 fallback
+                console.warn('[ImageUploader] Storage upload failed, using base64:', uploadError.message);
+                const reader = new FileReader();
+                reader.onload = (e) => onChange(e.target?.result as string);
+                reader.readAsDataURL(file);
+                return;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('bums-assets')
+                .getPublicUrl(data.path);
+
+            onChange(publicUrl);
+            console.log('[ImageUploader] Uploaded to Storage:', publicUrl);
+        } catch (err) {
+            // 완전 실패 시 base64 fallback
+            console.warn('[ImageUploader] Upload error, using base64:', err);
+            const reader = new FileReader();
+            reader.onload = (e) => onChange(e.target?.result as string);
+            reader.readAsDataURL(file);
+        } finally {
+            setUploading(false);
+        }
+    }, [onChange, maxSizeMB, storagePath]);
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -77,25 +113,35 @@ export function ImageUploader({
                 </div>
             ) : (
                 <div
-                    onClick={() => inputRef.current?.click()}
+                    onClick={() => !uploading && inputRef.current?.click()}
                     onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={handleDrop}
-                    className={`${sizeClass} rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                        dragging
-                            ? "border-blue-400 bg-blue-50"
-                            : "border-neutral-300 bg-neutral-50 hover:border-neutral-400 hover:bg-neutral-100"
+                    className={`${sizeClass} rounded-lg border-2 border-dashed flex flex-col items-center justify-center transition-colors ${
+                        uploading
+                            ? "border-neutral-300 bg-neutral-100 cursor-wait"
+                            : dragging
+                                ? "border-blue-400 bg-blue-50 cursor-pointer"
+                                : "border-neutral-300 bg-neutral-50 hover:border-neutral-400 hover:bg-neutral-100 cursor-pointer"
                     }`}
                 >
-                    {dragging ? (
-                        <Upload className="h-8 w-8 text-blue-400 mb-2" />
+                    {uploading ? (
+                        <>
+                            <Loader2 className="h-8 w-8 text-neutral-400 mb-2 animate-spin" />
+                            <p className="text-sm text-neutral-500">업로드 중...</p>
+                        </>
+                    ) : dragging ? (
+                        <>
+                            <Upload className="h-8 w-8 text-blue-400 mb-2" />
+                            <p className="text-sm text-neutral-500">여기에 놓으세요</p>
+                        </>
                     ) : (
-                        <ImageIcon className="h-8 w-8 text-neutral-400 mb-2" />
+                        <>
+                            <ImageIcon className="h-8 w-8 text-neutral-400 mb-2" />
+                            <p className="text-sm text-neutral-500">클릭 또는 드래그하여 업로드</p>
+                            <p className="text-xs text-neutral-400 mt-1">PNG, JPG, WebP, SVG (최대 {maxSizeMB}MB)</p>
+                        </>
                     )}
-                    <p className="text-sm text-neutral-500">
-                        {dragging ? "여기에 놓으세요" : "클릭 또는 드래그하여 업로드"}
-                    </p>
-                    <p className="text-xs text-neutral-400 mt-1">PNG, JPG, WebP, SVG (최대 {maxSizeMB}MB)</p>
                 </div>
             )}
 
