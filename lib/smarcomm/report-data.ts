@@ -88,3 +88,27 @@ export const SAVED_REPORTS: Report[] = [
   { id: 'sr4', name: 'KPI / 목표 관련', description: '전사 KPI 모니터링용 차트', category: 'KPI', charts: [], starred: true, createdAt: '2026-03-10', updatedAt: '2026-03-18' },
   { id: 'sr5', name: 'CRM / 고객 관계', description: 'CRM 캠페인 성과와 고객 분석', category: 'CRM', charts: [], starred: true, createdAt: '2026-03-12', updatedAt: '2026-03-17' },
 ];
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  charts: string[];
+}
+
+export const TEMPLATE_CATEGORIES = [
+  { key: '진단', label: '진단', icon: '🔍' },
+  { key: '마케팅', label: '마케팅', icon: '📢' },
+  { key: '비즈니스', label: '비즈니스', icon: '💼' },
+  { key: 'KPI', label: 'KPI', icon: '🎯' },
+  { key: 'CRM', label: 'CRM', icon: '👥' },
+];
+
+export const REPORT_TEMPLATES: ReportTemplate[] = [
+  { id: 'rt1', name: 'GEO·SEO 진단 리포트', description: '검색 엔진 최적화 현황 종합 분석', category: '진단', charts: ['geo-score', 'seo-keywords'] },
+  { id: 'rt2', name: '월간 마케팅 성과', description: '채널별 캠페인 성과 월간 리포트', category: '마케팅', charts: ['channel-performance', 'campaign-roi'] },
+  { id: 'rt3', name: '매출·ROAS 분석', description: '매출 추이와 광고 수익률 분석', category: '비즈니스', charts: ['revenue-trend', 'roas'] },
+  { id: 'rt4', name: 'KPI 대시보드', description: '전사 핵심 지표 모니터링', category: 'KPI', charts: ['kpi-overview', 'goal-progress'] },
+  { id: 'rt5', name: 'CRM 캠페인 리포트', description: '고객 세그먼트별 캠페인 효과 분석', category: 'CRM', charts: ['crm-segments', 'engagement'] },
+];

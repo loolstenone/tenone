@@ -13,7 +13,7 @@ import Header from '@/components/smarcomm/Header';
 import Footer from '@/components/smarcomm/Footer';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import RadarChart from '@/components/smarcomm/RadarChart';
-import { getUser } from '@/lib/smarcomm/auth';
+import { getSCUser as getUser } from '@/lib/smarcomm/auth';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 
 const GRADE_MAP = {
