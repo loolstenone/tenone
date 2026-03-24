@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useStaff } from "@/lib/staff-context";
 import { StaffRole, Division, SystemAccess } from "@/types/staff";
 import { divisions, positions, accessOptions, divisionDefaultAccess, brandOptions } from "@/lib/staff-data";
+import * as membersDb from "@/lib/supabase/members";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 
@@ -56,7 +57,7 @@ export default function StaffRegisterPage() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         if (!form.name || !form.email || !form.employeeId || !form.division || !form.department || !form.position) {
@@ -72,6 +73,7 @@ export default function StaffRegisterPage() {
         const initials = form.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || form.name.slice(0, 2).toUpperCase();
         const now = new Date().toISOString().split('T')[0];
 
+        // Mock 저장 (기존 호환)
         addStaff({
             id: `s${Date.now()}`, employeeId: form.employeeId, name: form.name, email: form.email,
             role: form.role, accessLevel: form.accessLevel, division: form.division as Division,
@@ -80,8 +82,23 @@ export default function StaffRegisterPage() {
             phone: form.phone || undefined, avatarInitials: initials, createdAt: now, updatedAt: now,
         });
 
+        // DB 저장 (Supabase members 테이블)
+        try {
+            await membersDb.createStaffMember({
+                email: form.email,
+                name: form.name,
+                department: form.department,
+                position: form.position,
+                employee_id: form.employeeId,
+                system_access: form.accessLevel,
+            });
+            console.log('[Staff] Saved to DB:', form.name);
+        } catch (err) {
+            console.warn('[Staff] DB save failed (mock saved):', err);
+        }
+
         setSuccess(true);
-        setTimeout(() => router.push('/erp/hr/staff'), 1500);
+        setTimeout(() => router.push('/intra/erp/hr/staff'), 1500);
     };
 
     if (success) {
