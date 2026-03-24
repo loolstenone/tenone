@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { usePoints } from "@/lib/point-context";
 import { getDailyQuote } from "@/lib/daily-quotes";
+import * as townityDb from "@/lib/supabase/townity";
 import {
     Mail, Building2, Calendar, Target, Edit2, Shield, BookOpen, Clock,
     FileCheck, User, FolderKanban, ChevronRight, CalendarCheck, CreditCard,
@@ -134,6 +136,38 @@ function PointWidget() {
 
 export default function MyversePage() {
     const { user, isStaff } = useAuth();
+    const [dbNotices, setDbNotices] = useState<{ title: string; badge: string; date: string }[]>([]);
+    const [dbSchedule, setDbSchedule] = useState<{ time: string; title: string; type: string }[]>([]);
+
+    useEffect(() => {
+        // DB에서 공지사항 로드
+        townityDb.fetchPosts({ board: 'notice', limit: 5 }).then(({ posts }) => {
+            if (posts.length > 0) {
+                setDbNotices(posts.map((p: Record<string, unknown>) => ({
+                    title: p.title as string,
+                    badge: (p.badge as string) || '공지',
+                    date: ((p.created_at as string) || '').substring(5, 10),
+                })));
+            }
+        }).catch(() => {});
+
+        // DB에서 오늘 일정 로드
+        const today = new Date().toISOString().split('T')[0];
+        townityDb.fetchEvents({
+            startAfter: `${today}T00:00:00`,
+            endBefore: `${today}T23:59:59`,
+            limit: 10,
+        }).then((events) => {
+            if (events.length > 0) {
+                setDbSchedule(events.map((e: Record<string, unknown>) => ({
+                    time: ((e.start_at as string) || '').substring(11, 16),
+                    title: e.title as string,
+                    type: (e.event_type as string) || '일반',
+                })));
+            }
+        }).catch(() => {});
+    }, []);
+
     if (!user) return null;
 
     const hireDate = new Date(myHR.hireDate);
@@ -144,13 +178,14 @@ export default function MyversePage() {
 
     const todayQuote = getDailyQuote(user.id);
 
-    const notices = [
+    // DB 우선, 없으면 Mock fallback
+    const notices = dbNotices.length > 0 ? dbNotices : [
         { title: "MADLeague 인사이트 투어링 참가자 모집", badge: "중요", date: "03-15" },
         { title: "LUKI 2nd Single 관련 콘텐츠 가이드라인", badge: "공지", date: "03-12" },
         { title: "3월 Badak 밋업 일정 확정", badge: "일정", date: "03-10" },
     ];
 
-    const todaySchedule = [
+    const todaySchedule = dbSchedule.length > 0 ? dbSchedule : [
         { time: "10:00", title: "주간 팀 회의", type: "회의" },
         { time: "14:00", title: "LUKI 컨셉 회의", type: "프로젝트" },
         { time: "16:00", title: "Badak 밋업 준비", type: "이벤트" },
