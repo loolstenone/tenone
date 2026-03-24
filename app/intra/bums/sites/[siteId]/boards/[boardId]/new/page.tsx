@@ -281,7 +281,7 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                     )}
 
                     {board.boardType === "video" && (
-                        <div className="border border-neutral-200 bg-white p-5 space-y-4">
+                        <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5 space-y-4">
                             <h3 className="text-sm font-semibold">영상 정보</h3>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
@@ -297,17 +297,38 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                             </div>
                         </div>
                     )}
+
+                    {/* 태그 + 대표이미지 — 에디터 바로 아래 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5">
+                            <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">태그</h4>
+                            <input value={tagInput} onChange={e => setTagInput(e.target.value)}
+                                placeholder="쉼표로 구분 (예: AI, 마케팅, 브랜딩)"
+                                className={inputClass} />
+                            {tagInput && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {tagInput.split(',').map(t => t.trim()).filter(Boolean).map(tag => (
+                                        <span key={tag} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full">#{tag}</span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5">
+                            <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">대표 이미지</h4>
+                            <ImageUploader value={image} onChange={setImage} label="" previewSize="sm" storagePath={`sites/${siteId}/posts`} />
+                        </div>
+                    </div>
                 </div>
 
-                {/* Side Panel */}
+                {/* Side Panel — 발행 설정 + 옵션 + SEO */}
                 <div className="space-y-4">
                     {/* Status */}
-                    <div className="border border-neutral-200 bg-white p-4 space-y-3">
+                    <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5 space-y-3">
                         <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">발행 설정</h4>
                         <div>
                             <label className={labelClass}>상태</label>
                             <select value={status} onChange={e => setStatus(e.target.value as PostStatus)}
-                                className={inputClass}>
+                                className={inputClass + " rounded-lg"}>
                                 {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                             </select>
                         </div>
@@ -316,17 +337,17 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                                 <label className={labelClass}>예약 일시</label>
                                 <input type="datetime-local" value={scheduledAt}
                                     onChange={e => setScheduledAt(e.target.value)}
-                                    className={inputClass} />
+                                    className={inputClass + " rounded-lg"} />
                             </div>
                         )}
                     </div>
 
                     {/* Category */}
                     {board.categories.length > 0 && (
-                        <div className="border border-neutral-200 bg-white p-4 space-y-3">
+                        <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5 space-y-3">
                             <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">카테고리</h4>
                             <select value={categoryId} onChange={e => setCategoryId(e.target.value)}
-                                className={inputClass}>
+                                className={inputClass + " rounded-lg"}>
                                 <option value="">선택 안함</option>
                                 {board.categories.map(c => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -335,57 +356,45 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                         </div>
                     )}
 
-                    {/* Tags */}
-                    <div className="border border-neutral-200 bg-white p-4 space-y-3">
-                        <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">태그</h4>
-                        <input value={tagInput} onChange={e => setTagInput(e.target.value)}
-                            placeholder="쉼표로 구분 (예: AI, 마케팅)"
-                            className={inputClass} />
-                    </div>
-
-                    {/* Featured Image */}
-                    <div className="border border-neutral-200 bg-white p-4 space-y-3">
-                        <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">대표 이미지</h4>
-                        <ImageUploader value={image} onChange={setImage} label="" previewSize="sm" />
-                    </div>
-
                     {/* Toggles */}
-                    <div className="border border-neutral-200 bg-white p-4 space-y-3">
+                    <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5 space-y-3">
                         <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">옵션</h4>
                         <Toggle checked={isPinned} onChange={setIsPinned} label="고정글" icon={Pin} />
                         <Toggle checked={isSecret} onChange={setIsSecret} label="비밀글" icon={Lock} />
                         <Toggle checked={isRecommended} onChange={setIsRecommended} label="추천" icon={Star} />
                     </div>
 
-                    {/* SEO */}
-                    <div className="border border-neutral-200 bg-white p-4 space-y-3">
-                        <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">SEO / OG</h4>
-                        <div>
-                            <label className={labelClass}>OG Title</label>
-                            <input value={ogTitle} onChange={e => setOgTitle(e.target.value)}
-                                placeholder={title || "OG Title (비우면 제목 사용)"} className={inputClass} />
+                    {/* SEO — 접기 가능 */}
+                    <details className="rounded-xl border border-neutral-100 bg-white shadow-sm">
+                        <summary className="p-5 text-xs font-semibold text-neutral-500 uppercase tracking-wider cursor-pointer hover:text-neutral-700">SEO / OG</summary>
+                        <div className="px-5 pb-5 space-y-3">
+                            <div>
+                                <label className={labelClass}>OG Title</label>
+                                <input value={ogTitle} onChange={e => setOgTitle(e.target.value)}
+                                    placeholder={title || "비우면 제목 사용"} className={inputClass + " rounded-lg"} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>OG Description</label>
+                                <textarea value={ogDescription} onChange={e => setOgDescription(e.target.value)}
+                                    placeholder={summary || "비우면 요약 사용"}
+                                    rows={2} className={inputClass + " rounded-lg resize-y"} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>OG Image URL</label>
+                                <input value={ogImage} onChange={e => setOgImage(e.target.value)}
+                                    placeholder="비우면 대표 이미지 사용" className={inputClass + " rounded-lg"} />
+                            </div>
                         </div>
-                        <div>
-                            <label className={labelClass}>OG Description</label>
-                            <textarea value={ogDescription} onChange={e => setOgDescription(e.target.value)}
-                                placeholder={summary || "OG Description (비우면 요약 사용)"}
-                                rows={2} className={inputClass + " resize-y"} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>OG Image URL</label>
-                            <input value={ogImage} onChange={e => setOgImage(e.target.value)}
-                                placeholder={image || "비우면 대표 이미지 사용"} className={inputClass} />
-                        </div>
-                    </div>
+                    </details>
 
                     {/* Action buttons */}
                     <div className="space-y-2">
                         <button onClick={handlePublish}
-                            className="w-full bg-neutral-900 text-white py-2.5 text-sm font-medium hover:bg-neutral-800 transition-colors">
+                            className="w-full bg-neutral-900 text-white py-3 text-sm font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm">
                             {isEditMode ? "수정 완료" : "발행"}
                         </button>
                         <button onClick={handleDraft}
-                            className="w-full border border-neutral-200 py-2.5 text-sm hover:bg-neutral-50 transition-colors">
+                            className="w-full border border-neutral-200 py-3 text-sm rounded-lg hover:bg-neutral-50 transition-all">
                             임시저장
                         </button>
                     </div>

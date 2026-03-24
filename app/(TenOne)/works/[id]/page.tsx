@@ -44,7 +44,7 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
                     <div className="flex items-center gap-3 mb-4">
                         <span className="text-xs px-3 py-1 tn-text-sub" style={{ backgroundColor: "var(--tn-surface)" }}>{(post as any).category || (post as any).categoryId || ''}</span>
                         <span className="flex items-center gap-1 text-xs tn-text-sub">
-                            <Calendar className="h-3 w-3" /> {(post as any).date || (post as any).publishedAt || (post as any).createdAt || ''}
+                            <Calendar className="h-3 w-3" /> {(() => { const d = ((post as any).date || (post as any).publishedAt || (post as any).createdAt || '').substring(0, 7); return d ? `${d.split('-')[0]}년 ${d.split('-')[1]}월` : ''; })()}
                         </span>
                     </div>
 

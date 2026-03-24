@@ -39,6 +39,48 @@ export function RichEditor({ value, onChange, placeholder = "내용을 입력하
             attributes: {
                 class: "prose prose-sm max-w-none min-h-[300px] px-4 py-3 focus:outline-none",
             },
+            handlePaste: (view, event) => {
+                const items = event.clipboardData?.items;
+                if (!items) return false;
+                for (const item of Array.from(items)) {
+                    if (item.type.startsWith('image/')) {
+                        event.preventDefault();
+                        const file = item.getAsFile();
+                        if (!file) return false;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const src = e.target?.result as string;
+                            if (src) {
+                                view.dispatch(view.state.tr.replaceSelectionWith(
+                                    view.state.schema.nodes.image.create({ src })
+                                ));
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                        return true;
+                    }
+                }
+                return false;
+            },
+            handleDrop: (view, event) => {
+                const files = event.dataTransfer?.files;
+                if (!files?.length) return false;
+                const file = files[0];
+                if (!file.type.startsWith('image/')) return false;
+                event.preventDefault();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const src = e.target?.result as string;
+                    if (src) {
+                        const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos || view.state.selection.from;
+                        view.dispatch(view.state.tr.insert(pos,
+                            view.state.schema.nodes.image.create({ src })
+                        ));
+                    }
+                };
+                reader.readAsDataURL(file);
+                return true;
+            },
         },
     });
 
