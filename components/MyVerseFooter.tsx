@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { Orbit } from "lucide-react";
 
-const quickLinks = [
-    { name: "About", href: "/mv#about" },
-    { name: "Core Values", href: "/mv#values" },
-    { name: "Agent", href: "/mv#agent" },
-    { name: "Roadmap", href: "/mv#roadmap" },
+const siteLinks = [
+    { name: "철학", href: "/mv/philosophy" },
+    { name: "서비스", href: "/mv/service" },
+    { name: "기술 & 보안", href: "/mv/technology" },
+    { name: "로드맵", href: "/mv/roadmap" },
+    { name: "팀", href: "/mv/team" },
+    { name: "Contact", href: "/mv/contact" },
 ];
 
-const coreValues = [
-    { name: "개인화 (Personalize)", href: "/mv#values" },
-    { name: "사용자 주도권 (Initiative)", href: "/mv#values" },
-    { name: "완벽한 보안 (Security)", href: "/mv#values" },
-    { name: "쉬운 연결과 단절 (Connect)", href: "/mv#values" },
+const principles = [
+    { name: "개인화 (Personalize)", href: "/mv/philosophy" },
+    { name: "사용자 주도권 (Initiative)", href: "/mv/philosophy" },
+    { name: "완벽한 보안 (Security)", href: "/mv/technology" },
+    { name: "데이터 주권 (Sovereignty)", href: "/mv/technology" },
 ];
 
 export function MyVerseFooter() {
@@ -31,18 +33,20 @@ export function MyVerseFooter() {
                             </span>
                         </div>
                         <p className="text-sm text-neutral-400 mb-2">
-                            나를 중심으로 한 초맞춤 AI 에이전트.
+                            디지털 속 나를 키운다.
                         </p>
                         <p className="text-xs text-neutral-500">
-                            개인 데이터 주권 시대. 나의 능력, 관계, 기록이 만들어가는 개인화된 세계관.
+                            나의 능력, 관계, 기록이 만들어가는 개인화된 세계관.
+                            <br />
+                            나의 Personal Black Box.
                         </p>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* Site Links */}
                     <div>
                         <h3 className="text-white text-sm font-semibold mb-3">바로가기</h3>
                         <div className="flex flex-col gap-1.5">
-                            {quickLinks.map((item) => (
+                            {siteLinks.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
@@ -54,11 +58,11 @@ export function MyVerseFooter() {
                         </div>
                     </div>
 
-                    {/* Core Values */}
+                    {/* Principles */}
                     <div>
-                        <h3 className="text-white text-sm font-semibold mb-3">핵심 가치</h3>
+                        <h3 className="text-white text-sm font-semibold mb-3">핵심 원칙</h3>
                         <div className="flex flex-col gap-1.5">
-                            {coreValues.map((item) => (
+                            {principles.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}

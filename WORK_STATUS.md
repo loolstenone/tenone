@@ -1,77 +1,48 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-24 (사무실)
+> 마지막 업데이트: 2026-03-25 (집)
 
 ## 오늘 한 작업
 
-### 1. 전체 모듈 DB 연결 (Phase 0~9)
-- Phase 1: 회원 관리 UI → Supabase members 직접 조회, 역할 변경
-- Phase 2: Myverse 대시보드 → 공지/일정 DB
-- Phase 3: Townity → 공지사항/자유게시판/캘린더 DB
-- Phase 4: Project → 프로젝트/Job/타임시트 DB
-- Phase 5: Evolution School → 과정/수강 DB
-- Phase 6: HeRo → HIT/커리어/이력서 DB (테이블 신규 생성)
-- Phase 7: Wiki → 라이브러리/북마크 DB
-- Phase 8: ERP → 결재/기안/GPR DB
-- Phase 9: Vridge → GPR/BI Dashboard DB 통계
+### 1. Ten:One™ 통합 게시판 Phase 2 — 공용 UI 컴포넌트 완성
+- `components/board/` 디렉토리 신규 생성 (6개 파일)
+  - `BoardPage.tsx` — 사이트별 게시판 래퍼 (설정 로드, 목록↔상세 전환)
+  - `BoardList.tsx` — 목록 (카드/리스트 뷰 전환, 카테고리 탭, 검색, 정렬/기간 필터, 페이지네이션)
+  - `PostCard.tsx` — 카드형 아이템 (대표이미지, 카테고리 뱃지, NEW/공지, 통계)
+  - `PostListItem.tsx` — 리스트형 아이템 (전통 게시판 스타일)
+  - `PostDetail.tsx` — 상세 (본문, 첨부파일 다운로드, 태그, 좋아요/북마크/공유, 이전/다음글)
+  - `CommentSection.tsx` — 댓글 (대댓글 1depth, 비회원 닉네임+비밀번호, 좋아요, 삭제 메뉴)
+  - `index.ts` — barrel export
+- RooK 게시판 페이지(`app/(RooK)/rk/board/page.tsx`) → 새 BoardPage 컴포넌트로 교체
+- 기존 하드코딩 Mock 데이터 제거, `/api/board/*` API 연결
 
-### 2. 회원 체계 v2
-- AccountType: staff/partner/alliance/madleaguer/crew/member
-- junior-partner 삭제
-- members 테이블: primary_type, roles[], affiliations[], intra_access, module_access[] 추가
-- types/auth.ts + auth-context.tsx 동기화
-- 사이드바 moduleAccess 권한 체크 (v2 모듈명 매핑)
-- 가입 흐름: origin_site 자동 설정
+### 2. 아키텍처 결정
+- BUMS(복잡한 CMS) 버리고 board-system(심플)으로 통일
+- 기존 `types/board.ts` + `lib/supabase/board.ts` + `app/api/board/*` 재사용 (Phase 1 이미 80% 완료 상태)
+- BUMS 잔재(28개 파일)는 이후 정리
+- 게시판 철학: "각 사이트는 자기 행성에서 완결된다. 우주는 뒤에서 돌아간다."
 
-### 3. 설계 문서
-- ARCHITECTURE.md: 전체 시스템 아키텍처
-- ROADMAP_IMPLEMENTATION.md: Phase별 구축 로드맵
-- Vridge (GPR & Vrief 통합 명칭 확정)
-- ERP 모듈화: erp-hr, erp-people, erp-finance, erp-sales
-
-### 4. TenOne Works 실데이터
-- Google Sites history → DB 13개 게시글 INSERT
-- tenone.biz/works 실제 DB 데이터 표시 확인
-- 날짜 포맷: 2025년 08월
-- 카테고리 필터: AI/브랜딩/프로젝트/네트워크/교육/콘텐츠
-
-### 5. BUMS 게시글 관리 개선
-- 제목 클릭 → 내용 보기 모달
-- 체크박스 + 일괄 삭제
-- 페이지네이션 (20개씩)
-- 관리 헤더: 수정/삭제 텍스트 분리
-
-### 6. 에디터 개선
-- RichEditor: 이미지 클립보드 붙여넣기 + 드래그앤드롭
-- 레이아웃: 태그/대표이미지 에디터 아래로, SEO 접기, 모던 디자인
-
-### 7. 다크모드 전면 수정
-- PublicHeader: 전체 CSS 변수 전환
-- Works/Contact/About/Newsroom: 하드코딩 색상 제거
-- 빌드 에러 수정 (SmarComm import, report-data)
-
-### 8. 기타
-- BUMS 미구현 페이지 6개 생성 (404 해결)
-- BUMS 디자인 모던화 (pill 탭, rounded-xl, shadow-sm)
-- 홈페이지 Works/News Mock 제거 → DB only
+### 3. Ten:One 유니버스 세계관 정립
+- "우주는 누구도 한 눈에 볼 수 없다" — 소비자는 자기 서비스만 알면 됨, 나중에 전체를 발견
+- MCU 모델: 각 사이트가 독립적 가치 → 연결은 발견의 놀라움
 
 ## 현재 이슈 ⚠️
+- Supabase에 `board-system.sql` 테이블 아직 미적용 → API 호출 시 에러 (빈 목록 표시)
+- BUMS 잔재 28개 파일 아직 남아있음 (동작에 영향 없음)
 - 게시물 수정 후 사이트 페이지로 리다이렉트됨 (게시판 관리로 돌아가야 함)
-- 게시물 관리 vs 콘텐츠 관리 역할 혼란 → 정리 필요
-- 다크모드: 일부 하위 페이지 아직 하드코딩 남아있을 수 있음
-- ERP 53개 페이지 DB 연결 미완 (핵심 3개만 완료)
+- ERP 53개 페이지 DB 연결 미완
 
 ## 다음에 할 일
-- [ ] 게시물 수정 후 리다이렉트 → 게시판 관리 페이지로
-- [ ] 게시물 관리 / 콘텐츠 관리 역할 정리 (BUMS 메뉴 구조)
-- [ ] 나머지 ERP 페이지 DB 연결
-- [ ] 퍼블릭 게시판 회원 글쓰기
-- [ ] 이미지 관리 (Supabase Storage bums-assets 버킷)
-- [ ] CrewInvite 지원 → 심사 → 역할 전환 흐름
-- [ ] 각 브랜드 사이트 DB 데이터 연결 (TenOne 패턴 복제)
+- [ ] Supabase에 `board-system.sql` 테이블 적용 (posts, comments, attachments, likes, bookmarks, board_configs). `supabase/board-system.sql` 파일에 SQL 있음
+- [ ] Phase 3: 글쓰기 에디터 컴포넌트 (`components/board/PostEditor.tsx`). Tiptap 에디터 이미 있음, 제목/본문/카테고리/태그/대표이미지/첨부파일/비회원정보 필드
+- [ ] Phase 4: 좋아요/북마크 + 검색/필터 + 카테고리/태그 (UI는 Phase 2에서 뼈대 완성, API 연결만 하면 됨)
+- [ ] 나머지 사이트들에 BoardPage 연결 (MADLeague, Badak, TenOne 등). 한 줄이면 됨: `<BoardPage site="madleague" board="news" accentColor="#D32F2F" />`
+- [ ] AI 에이전트 구축 — 관리자 API(`POST /api/board/posts`)로 자동 게시
+- [ ] BUMS 잔재 정리 (lib/bums-*.ts, types/bums.ts, app/intra/bums/, components/bums/, app/api/bums/)
 
-## Supabase CRUD 레이어 (8개)
-- `lib/supabase/bums.ts` — 사이트/게시판/게시글/위젯
+## Supabase CRUD 레이어
+- `lib/supabase/board.ts` — 통합 게시판 (posts/comments/likes/bookmarks/attachments/configs)
+- `lib/supabase/bums.ts` — (레거시, 제거 예정)
 - `lib/supabase/members.ts` — 회원 관리
 - `lib/supabase/townity.ts` — 게시판/댓글/일정
 - `lib/supabase/projects.ts` — 프로젝트/Job/투입인력/타임시트
@@ -79,6 +50,13 @@
 - `lib/supabase/hero.ts` — HIT/커리어/이력서
 - `lib/supabase/wiki.ts` — 라이브러리/북마크
 - `lib/supabase/erp.ts` — 결재/포인트/알림
+
+## 주요 파일 위치
+- 게시판 컴포넌트: `components/board/` (6개)
+- 게시판 타입: `types/board.ts`
+- 게시판 API: `app/api/board/{posts,comments,like,bookmark,configs,tags}/route.ts`
+- 게시판 DB함수: `lib/supabase/board.ts`
+- DB 스키마: `supabase/board-system.sql`
 
 ## Vercel 배포 정보
 - Hobby (무료) 플랜
@@ -89,6 +67,5 @@
 - Tailwind CSS v4, Next.js 16 + React 19
 - Supabase: members + bums_* + hero_* 테이블
 - 멀티 사이트 19개 (middleware 도메인 분기)
-- BUMS = Business Unit Management System
 - Vridge = GPR & Vrief 통합 (경영전략)
 - 테마: 기본 다크, 토글로 라이트 전환

@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-03-25 (집)
+
+### 완료
+- Ten:One™ 통합 게시판 Phase 2: 공용 UI 컴포넌트 6개 생성 (`components/board/`)
+  - BoardPage, BoardList, PostCard, PostListItem, PostDetail, CommentSection
+- RooK 게시판 페이지를 새 컴포넌트로 교체 (Mock → API 연결)
+- 아키텍처 결정: BUMS 버리고 board-system으로 통일
+- 유니버스 세계관 정립: "각 사이트는 자기 행성에서 완결, 우주는 뒤에서 돌아간다"
+
+### 생성된 파일
+- `components/board/BoardPage.tsx` — 사이트별 게시판 래퍼 (설정 로드, 목록↔상세 전환)
+- `components/board/BoardList.tsx` — 목록 (카드/리스트 뷰, 카테고리 탭, 검색, 정렬, 페이지네이션)
+- `components/board/PostCard.tsx` — 카드형 아이템
+- `components/board/PostListItem.tsx` — 리스트형 아이템
+- `components/board/PostDetail.tsx` — 상세 (좋아요/북마크/공유, 첨부, 태그, 이전/다음글, 댓글)
+- `components/board/CommentSection.tsx` — 댓글 (대댓글, 비회원, 좋아요)
+- `components/board/index.ts` — barrel export
+
+### 수정된 파일
+- `app/(RooK)/rk/board/page.tsx` — Mock 하드코딩 → BoardPage 컴포넌트
+
+### 결정 사항
+- BUMS(복잡한 CMS) 폐기, board-system(심플) 통일
+- 기존 Phase 1(DB+타입+API) 80% 재사용
+- 사용법: `<BoardPage site="madleague" board="news" accentColor="#D32F2F" />` 한 줄
+- 유니버스 철학: 소비자는 자기 서비스만 알면 됨 → 나중에 전체 발견
+
+---
+
 ## 2026-03-24 (사무실)
 
 ### 완료

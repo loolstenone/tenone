@@ -7,21 +7,18 @@ import clsx from "clsx";
 import { Menu, X, Orbit } from "lucide-react";
 
 const navItems = [
-    { name: "About", href: "/mv#about" },
-    { name: "Core Values", href: "/mv#values" },
-    { name: "Agent", href: "/mv#agent" },
-    { name: "Roadmap", href: "/mv#roadmap" },
+    { name: "철학", href: "/mv/philosophy" },
+    { name: "서비스", href: "/mv/service" },
+    { name: "기술", href: "/mv/technology" },
+    { name: "로드맵", href: "/mv/roadmap" },
+    { name: "팀", href: "/mv/team" },
 ];
 
 export function MyVerseHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    const isActive = (href: string) => {
-        const base = href.split("#")[0];
-        if (base === "/mv") return pathname === "/mv";
-        return pathname.startsWith(base);
-    };
+    const isActive = (href: string) => pathname === href;
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0D17]/95 backdrop-blur-md border-b border-white/5">
@@ -55,10 +52,10 @@ export function MyVerseHeader() {
                 {/* CTA */}
                 <div className="hidden lg:flex items-center">
                     <Link
-                        href="/mv#waitlist"
+                        href="/mv/contact"
                         className="text-sm font-medium px-4 py-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-colors"
                     >
-                        Get Early Access
+                        Early Access
                     </Link>
                 </div>
 
@@ -90,11 +87,11 @@ export function MyVerseHeader() {
                         </Link>
                     ))}
                     <Link
-                        href="/mv#waitlist"
+                        href="/mv/contact"
                         onClick={() => setMobileOpen(false)}
                         className="block text-sm font-medium py-2 text-indigo-400 hover:text-indigo-300 transition-colors"
                     >
-                        Get Early Access
+                        Early Access
                     </Link>
                 </div>
             )}
