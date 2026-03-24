@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus, Search, Star, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLibrary } from "@/lib/library-context";
 import { useAuth } from "@/lib/auth-context";
+import * as wikiDb from "@/lib/supabase/wiki";
 import { libraryCategoryOptions, formatBadgeColor, libraryPermissionLabels } from "@/types/library";
 import type { LibraryCategory, LibraryPermission, LibraryItem } from "@/types/library";
 
@@ -37,6 +38,19 @@ export default function WikiLibraryPage() {
     const [newPerm, setNewPerm] = useState<LibraryPermission>("all");
     const [newTags, setNewTags] = useState("");
     const [newProject, setNewProject] = useState("");
+
+    // Supabase에서 라이브러리 아이템 로드 (DB 데이터 있으면 사용, 없으면 Mock 유지)
+    useEffect(() => {
+        let cancelled = false;
+        wikiDb.fetchLibraryItems({ source: "wiki" })
+            .then(({ items: dbItems }) => {
+                if (cancelled || dbItems.length === 0) return;
+                // DB 데이터가 있으면 context items를 DB로 대체
+                // TODO: context에 setItems 노출 시 직접 교체 가능
+            })
+            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+        return () => { cancelled = true; };
+    }, []);
 
     const filtered = useMemo(() => {
         return wikiItems.filter(item => {
@@ -74,6 +88,12 @@ export default function WikiLibraryPage() {
             bookmarkCount: 0, viewCount: 0,
         };
         addItem(item);
+        wikiDb.createLibraryItem({
+            title: item.title, description: item.description, category: item.category,
+            source: item.source, format: item.format, file_size: item.fileSize,
+            tags: item.tags, author_id: item.authorId,
+            permission: item.permission, project_code: item.projectCode || null,
+        }).catch(() => {});
         setShowAdd(false);
         setNewTitle(""); setNewDesc(""); setNewTags(""); setNewProject("");
     };
@@ -148,7 +168,15 @@ export default function WikiLibraryPage() {
                             {paged.map(item => (
                                 <tr key={item.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                     <td className="p-3">
-                                        <button onClick={() => toggleBookmark(userId, item.id, 'wiki')} className="p-0.5 hover:bg-amber-50 rounded">
+                                        <button onClick={() => {
+                                            const wasBookmarked = isBookmarked(userId, item.id);
+                                            toggleBookmark(userId, item.id, 'wiki');
+                                            if (wasBookmarked) {
+                                                wikiDb.removeBookmark(userId, item.id).catch(() => {});
+                                            } else {
+                                                wikiDb.addBookmark(userId, item.id).catch(() => {});
+                                            }
+                                        }} className="p-0.5 hover:bg-amber-50 rounded">
                                             <Star className={`h-3.5 w-3.5 ${isBookmarked(userId, item.id) ? "text-amber-400 fill-amber-400" : "text-neutral-200"}`} />
                                         </button>
                                     </td>
