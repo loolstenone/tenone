@@ -8,8 +8,9 @@ import { BoardTypeInfo } from "@/types/bums";
 import { BoardSettingsModal } from "@/components/bums/BoardSettingsModal";
 import {
     Settings, FileText, Users, Search, Eye, EyeOff, Lock,
-    ChevronRight, Pencil, Trash2,
+    ChevronRight, Pencil, Trash2, Plus,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 
 const tabs = [
@@ -45,12 +46,16 @@ const statusLabel: Record<string, string> = {
 const visibilityLabel: Record<string, string> = { public: "공개", intra: "인트라", staff: "스태프" };
 
 export default function BoardsManagementPage() {
-    const { sites, boards, boardPosts } = useBums();
+    const { sites, boards, boardPosts, deleteBoardPost } = useBums();
     const { selectedSiteId } = useBumsFilter();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabId>("settings");
     const [search, setSearch] = useState("");
     const [boardFilter, setBoardFilter] = useState("전체");
     const [settingsBoardId, setSettingsBoardId] = useState<string | null>(null);
+    const [newPostSiteId, setNewPostSiteId] = useState("");
+    const [newPostBoardId, setNewPostBoardId] = useState("");
+    const [showNewPostModal, setShowNewPostModal] = useState(false);
 
     // 사이트 필터는 레이아웃 드롭다운에서 관리
     const siteBoards = boards.filter(b => selectedSiteId === "all" || b.siteId === selectedSiteId);
@@ -178,49 +183,121 @@ export default function BoardsManagementPage() {
             )}
 
             {activeTab === "posts" && (
-                <div className="border border-neutral-200 bg-white overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-neutral-100 text-left">
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">제목</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">사이트</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">게시판</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">작성자</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">상태</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">날짜</th>
-                                <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase text-right">조회</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-neutral-100">
-                            {filteredPosts.slice(0, 50).map(post => {
-                                const board = boards.find(b => b.id === post.boardId);
-                                return (
-                                    <tr key={post.id} className="hover:bg-neutral-50">
-                                        <td className="px-4 py-3 font-medium truncate max-w-[300px]">{post.title}</td>
-                                        <td className="px-4 py-3 text-neutral-500 text-xs">{getSiteName(post.siteId)}</td>
-                                        <td className="px-4 py-3 text-neutral-500 text-xs">{board?.name}</td>
-                                        <td className="px-4 py-3 text-neutral-500 text-xs">{post.authorName}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-medium", statusBadge[post.status])}>
-                                                {statusLabel[post.status]}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-neutral-400 text-xs">{post.publishedAt ?? post.createdAt}</td>
-                                        <td className="px-4 py-3 text-neutral-400 text-right">{post.viewCount}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                    {filteredPosts.length === 0 && (
-                        <div className="px-6 py-12 text-center text-neutral-400 text-sm">게시글이 없습니다.</div>
+                <>
+                    {/* + 새 글 작성 버튼 */}
+                    <div className="flex justify-end">
+                        <button onClick={() => setShowNewPostModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-sm hover:bg-neutral-800 transition-colors">
+                            <Plus className="h-4 w-4" />
+                            새 글 작성
+                        </button>
+                    </div>
+
+                    <div className="border border-neutral-200 bg-white overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-neutral-100 text-left">
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">제목</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">사이트</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">게시판</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">작성자</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">상태</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase">날짜</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase text-right">조회</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-neutral-500 uppercase text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100">
+                                {filteredPosts.slice(0, 50).map(post => {
+                                    const board = boards.find(b => b.id === post.boardId);
+                                    return (
+                                        <tr key={post.id} className="hover:bg-neutral-50">
+                                            <td className="px-4 py-3 font-medium truncate max-w-[300px]">{post.title}</td>
+                                            <td className="px-4 py-3 text-neutral-500 text-xs">{getSiteName(post.siteId)}</td>
+                                            <td className="px-4 py-3 text-neutral-500 text-xs">{board?.name}</td>
+                                            <td className="px-4 py-3 text-neutral-500 text-xs">{post.authorName}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-medium", statusBadge[post.status])}>
+                                                    {statusLabel[post.status]}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-neutral-400 text-xs">{post.publishedAt ?? post.createdAt}</td>
+                                            <td className="px-4 py-3 text-neutral-400 text-right">{post.viewCount}</td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => router.push(`/intra/bums/sites/${post.siteId}/boards/${post.boardId}/new?postId=${post.id}`)}
+                                                        className="text-neutral-400 hover:text-neutral-900 transition-colors" title="수정">
+                                                        <Pencil className="h-3.5 w-3.5" />
+                                                    </button>
+                                                    <button onClick={() => { if (confirm('삭제하시겠습니까?')) deleteBoardPost(post.id); }}
+                                                        className="text-neutral-400 hover:text-red-600 transition-colors" title="삭제">
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        {filteredPosts.length === 0 && (
+                            <div className="px-6 py-12 text-center text-neutral-400 text-sm">게시글이 없습니다.</div>
+                        )}
+                        {filteredPosts.length > 50 && (
+                            <div className="px-4 py-3 text-xs text-neutral-400 border-t border-neutral-100">
+                                {filteredPosts.length}건 중 50건 표시
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 새 글 작성 모달 — 사이트/게시판 선택 */}
+                    {showNewPostModal && (
+                        <>
+                            <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setShowNewPostModal(false)} />
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
+                                    <h3 className="text-lg font-bold">새 글 작성</h3>
+                                    <p className="text-sm text-neutral-500">사이트와 게시판을 선택하세요.</p>
+
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-neutral-600 mb-1">사이트</label>
+                                            <select value={newPostSiteId} onChange={e => { setNewPostSiteId(e.target.value); setNewPostBoardId(""); }}
+                                                className="w-full border border-neutral-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-neutral-900">
+                                                <option value="">선택하세요</option>
+                                                {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-neutral-600 mb-1">게시판</label>
+                                            <select value={newPostBoardId} onChange={e => setNewPostBoardId(e.target.value)}
+                                                disabled={!newPostSiteId}
+                                                className="w-full border border-neutral-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-neutral-900 disabled:opacity-50">
+                                                <option value="">선택하세요</option>
+                                                {boards.filter(b => b.siteId === newPostSiteId).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <button onClick={() => setShowNewPostModal(false)}
+                                            className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                                            취소
+                                        </button>
+                                        <button disabled={!newPostSiteId || !newPostBoardId}
+                                            onClick={() => {
+                                                setShowNewPostModal(false);
+                                                router.push(`/intra/bums/sites/${newPostSiteId}/boards/${newPostBoardId}/new`);
+                                            }}
+                                            className="px-4 py-2 bg-neutral-900 text-white text-sm hover:bg-neutral-800 transition-colors disabled:opacity-30">
+                                            작성하기
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
-                    {filteredPosts.length > 50 && (
-                        <div className="px-4 py-3 text-xs text-neutral-400 border-t border-neutral-100">
-                            {filteredPosts.length}건 중 50건 표시
-                        </div>
-                    )}
-                </div>
+                </>
             )}
 
             {activeTab === "authors" && (
