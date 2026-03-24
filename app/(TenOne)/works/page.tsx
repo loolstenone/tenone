@@ -6,14 +6,14 @@ import { useBums } from "@/lib/bums-context";
 import { CmsCategory } from "@/types/bums";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
-const categories: ('전체' | CmsCategory)[] = ['전체', '브랜드', '프로젝트', '네트워크', '교육', '콘텐츠', '공지'];
+const categories: string[] = ['전체', 'AI', '브랜딩', '프로젝트', '네트워크', '교육', '콘텐츠'];
 
 export default function WorksPage() {
     const { getPublishedByChannel, getPublishedByBoardSlug } = useBums();
     const dbData = getPublishedByBoardSlug('tenone', 'works');
     const legacyData = getPublishedByChannel('works');
     const allWorks = dbData.length > 0 ? dbData : legacyData;
-    const [filter, setFilter] = useState<'전체' | CmsCategory>('전체');
+    const [filter, setFilter] = useState('전체');
 
     const filtered = filter === '전체' ? allWorks : allWorks.filter(w => ((w as any).category || (w as any).categoryId || '') === filter);
 
