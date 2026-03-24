@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Clock,
   ChevronLeft,
@@ -11,10 +11,12 @@ import {
   Users,
   TrendingUp,
   Download,
+  Loader2,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import type { JobType, JobDetail } from "@/types/project";
+import * as projectsDb from "@/lib/supabase/projects";
 
 // ── 타입 ──
 interface TimesheetJob {
@@ -295,11 +297,60 @@ function fmtKRW(n: number) {
 // ── 메인 페이지 ──
 export default function TimesheetPage() {
   const { isStaff } = useAuth();
+  const [tsProjects, setTsProjects] = useState<TimesheetProject[]>(mockProjects);
+  const [loading, setLoading] = useState(true);
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedProject, setSelectedProject] = useState("all");
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
     new Set(mockProjects.map((p) => p.code))
   );
+
+  // DB 로드
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { projects: dbProjects } = await projectsDb.fetchProjects();
+        if (!cancelled && dbProjects.length > 0) {
+          const mapped: TimesheetProject[] = await Promise.all(
+            dbProjects.map(async (p: any) => {
+              let jobs: TimesheetJob[] = [];
+              try {
+                const dbJobs = await projectsDb.fetchJobs(p.id);
+                jobs = dbJobs.map((j: any) => ({
+                  id: j.id,
+                  jobCode: j.code ?? j.id,
+                  jobName: j.name,
+                  jobType: (j.type ?? "PR") as JobType,
+                  jobDetail: (j.detail ?? "PL") as JobDetail,
+                  assignee: j.assignee ?? "-",
+                  estimatedHours: j.estimated_hours ?? j.estimatedHours ?? 0,
+                  actualHours: j.actual_hours ?? j.actualHours ?? 0,
+                  hourlyRate: j.hourly_rate ?? j.hourlyRate ?? 0,
+                  status: j.status ?? "대기",
+                }));
+              } catch { /* jobs 로드 실패 무시 */ }
+              return {
+                code: p.code,
+                name: p.name,
+                jobs,
+              } as TimesheetProject;
+            })
+          );
+          const hasAnyJobs = mapped.some((p) => p.jobs.length > 0);
+          if (hasAnyJobs) {
+            setTsProjects(mapped);
+            setExpandedProjects(new Set(mapped.map((p) => p.code)));
+          }
+        }
+      } catch (e) {
+        console.warn("[Timesheet] DB 로드 실패, Mock 사용:", e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // 현재 월 표시
   const currentDate = useMemo(() => {
@@ -310,11 +361,20 @@ export default function TimesheetPage() {
 
   const monthLabel = `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월`;
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+        <span className="ml-2 text-sm text-neutral-400">타임시트 로딩중...</span>
+      </div>
+    );
+  }
+
   // 필터링된 프로젝트
   const filteredProjects = useMemo(() => {
-    if (selectedProject === "all") return mockProjects;
-    return mockProjects.filter((p) => p.code === selectedProject);
-  }, [selectedProject]);
+    if (selectedProject === "all") return tsProjects;
+    return tsProjects.filter((p) => p.code === selectedProject);
+  }, [selectedProject, tsProjects]);
 
   // 전체 집계
   const totalStats = useMemo(() => {
@@ -462,7 +522,7 @@ export default function TimesheetPage() {
               className="text-xs border border-neutral-200 rounded px-2 py-1.5 bg-white text-neutral-700 focus:outline-none focus:border-neutral-400"
             >
               <option value="all">전체</option>
-              {mockProjects.map((p) => (
+              {tsProjects.map((p) => (
                 <option key={p.code} value={p.code}>
                   {p.name}
                 </option>

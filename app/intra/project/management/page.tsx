@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { FolderKanban, Plus, Search, Calendar, Users, Briefcase, TrendingUp } from "lucide-react";
+import { FolderKanban, Plus, Search, Calendar, Users, Briefcase, TrendingUp, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import * as projectsDb from "@/lib/supabase/projects";
 
 /* ─── Types ─── */
 
@@ -123,6 +124,8 @@ type SortKey = "code" | "name" | "pm" | "status" | "startDate" | "grossProfit";
 
 export default function ProjectListPage() {
     const { isStaff } = useAuth();
+    const [projects, setProjects] = useState<Project[]>(mockProjects);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState<"전체" | ProjectType>("전체");
     const [statusFilter, setStatusFilter] = useState<"전체" | ProjectStatus>("전체");
@@ -130,16 +133,49 @@ export default function ProjectListPage() {
     const [sortAsc, setSortAsc] = useState(false);
     const [showLegend, setShowLegend] = useState(false);
 
-    /*
-     * Visibility rules (mock):
-     * - Crew/Partner: 자기가 참여한 프로젝트만
-     * - Staff: 자기 조직 프로젝트 (부서 기준)
-     * - 사업부장: 사업부 전체
-     * - CEO/Admin: 전체
-     * 현재는 모든 프로젝트 표시 (mock)
-     */
+    // DB 로드 (실패 시 Mock fallback)
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const { projects: dbRows } = await projectsDb.fetchProjects();
+                if (!cancelled && dbRows.length > 0) {
+                    const mapped: Project[] = dbRows.map((r: any) => ({
+                        code: r.code,
+                        name: r.name,
+                        type: r.type,
+                        subType: r.sub_type ?? r.subType ?? "캠페인",
+                        status: r.status,
+                        pm: r.pm?.name ?? r.pm_name ?? "-",
+                        startDate: r.start_date ?? r.startDate ?? "",
+                        endDate: r.end_date ?? r.endDate ?? "",
+                        memberCount: r.member_count ?? r.memberCount ?? 0,
+                        jobCount: r.job_count ?? r.jobCount ?? 0,
+                        estimatedHours: r.estimated_hours ?? r.estimatedHours ?? 0,
+                        billing: r.billing ?? 0,
+                        grossProfit: r.gross_profit ?? r.grossProfit ?? r.profit ?? 0,
+                    }));
+                    setProjects(mapped);
+                }
+            } catch (e) {
+                console.warn("[ProjectList] DB 로드 실패, Mock 사용:", e);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
 
-    const filtered = mockProjects
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                <span className="ml-2 text-sm text-neutral-400">프로젝트 로딩중...</span>
+            </div>
+        );
+    }
+
+    const filtered = projects
         .filter((p) => {
             if (typeFilter !== "전체" && p.type !== typeFilter) return false;
             if (statusFilter !== "전체" && p.status !== statusFilter) return false;
@@ -163,10 +199,10 @@ export default function ProjectListPage() {
         else { setSortKey(key); setSortAsc(true); }
     };
 
-    const activeCount = mockProjects.filter((p) => p.status === "진행").length;
-    const completedCount = mockProjects.filter((p) => p.status === "완료").length;
-    const totalMembers = mockProjects.filter((p) => p.status === "진행").reduce((s, p) => s + p.memberCount, 0);
-    const totalJobs = mockProjects.filter((p) => p.status === "진행").reduce((s, p) => s + p.jobCount, 0);
+    const activeCount = projects.filter((p) => p.status === "진행").length;
+    const completedCount = projects.filter((p) => p.status === "완료").length;
+    const totalMembers = projects.filter((p) => p.status === "진행").reduce((s, p) => s + p.memberCount, 0);
+    const totalJobs = projects.filter((p) => p.status === "진행").reduce((s, p) => s + p.jobCount, 0);
 
     return (
         <div className="max-w-5xl">
@@ -187,7 +223,7 @@ export default function ProjectListPage() {
             {/* Summary Cards */}
             <div className="grid grid-cols-4 gap-3 mb-5">
                 {[
-                    { label: "전체 프로젝트", value: `${mockProjects.length}건`, icon: FolderKanban },
+                    { label: "전체 프로젝트", value: `${projects.length}건`, icon: FolderKanban },
                     { label: "진행중", value: `${activeCount}건`, icon: Briefcase },
                     { label: "완료", value: `${completedCount}건`, icon: FolderKanban },
                     { label: "진행중 투입 인원", value: `${totalMembers}명`, icon: Users },
@@ -249,7 +285,7 @@ export default function ProjectListPage() {
                     <button onClick={() => setShowLegend(!showLegend)} className="text-xs text-neutral-400 hover:text-neutral-700 underline">
                         {showLegend ? "범례 닫기" : "범례 보기"}
                     </button>
-                    <span className="text-xs text-neutral-400">{filtered.length}건 표시 / 전체 {mockProjects.length}건</span>
+                    <span className="text-xs text-neutral-400">{filtered.length}건 표시 / 전체 {projects.length}건</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-neutral-400">
                     <span>정렬:</span>

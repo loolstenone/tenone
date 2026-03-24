@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { FolderKanban, Plus, ChevronDown, ChevronRight, Clock, Calendar, Users, Briefcase, CheckCircle2, X, Trash2 } from "lucide-react";
+import { FolderKanban, Plus, ChevronDown, ChevronRight, Clock, Calendar, Users, Briefcase, CheckCircle2, X, Trash2, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import type { JobType, JobDetail } from "@/types/project";
 import { jobTypeLabels, jobDetailLabels } from "@/types/project";
+import * as projectsDb from "@/lib/supabase/projects";
 
 interface Job {
     code: string;
@@ -77,12 +78,76 @@ let jobCounter = 100;
 export default function MyProjectsPage() {
     const { user, isStaff } = useAuth();
     const [projects, setProjects] = useState(myProjects);
+    const [loading, setLoading] = useState(true);
     const [expandedProject, setExpandedProject] = useState<string | null>('PRJ-2026-0001');
     const [showJobModal, setShowJobModal] = useState<string | null>(null);
     const [newJob, setNewJob] = useState({ name: '', type: 'PR' as JobType, detail: 'PL' as JobDetail, startDate: '', dueDate: '', estimatedHours: '' });
     const [jobMembers, setJobMembers] = useState<{ name: string; hours: string; startDate: string; endDate: string }[]>([]);
 
+    // DB 로드 (프로젝트 + Job)
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const { projects: dbProjects } = await projectsDb.fetchProjects();
+                if (!cancelled && dbProjects.length > 0) {
+                    const mapped: MyProject[] = await Promise.all(
+                        dbProjects.map(async (p: any) => {
+                            let jobs: Job[] = [];
+                            try {
+                                const dbJobs = await projectsDb.fetchJobs(p.id);
+                                jobs = dbJobs.map((j: any) => ({
+                                    code: j.code ?? j.id,
+                                    name: j.name,
+                                    type: j.type ?? 'PR',
+                                    detail: j.detail ?? 'PL',
+                                    members: j.members ?? [{ name: '-', hours: 0 }],
+                                    startDate: j.start_date ?? j.startDate ?? '',
+                                    dueDate: j.due_date ?? j.dueDate ?? '',
+                                    estimatedHours: j.estimated_hours ?? j.estimatedHours ?? 0,
+                                    actualHours: j.actual_hours ?? j.actualHours ?? 0,
+                                    status: j.status ?? '대기',
+                                }));
+                            } catch { /* jobs 로드 실패 무시 */ }
+                            return {
+                                code: p.code,
+                                name: p.name,
+                                type: p.type ?? '내부',
+                                status: p.status ?? '기획',
+                                pm: p.pm?.name ?? '-',
+                                myRole: p.my_role ?? '멤버',
+                                startDate: p.start_date ?? p.startDate ?? '',
+                                endDate: p.end_date ?? p.endDate ?? '',
+                                jobs,
+                            } as MyProject;
+                        })
+                    );
+                    // DB에서 job이 하나라도 있는 프로젝트가 있으면 DB 데이터 사용
+                    const hasAnyJobs = mapped.some(p => p.jobs.length > 0);
+                    if (hasAnyJobs) {
+                        setProjects(mapped);
+                        if (mapped.length > 0) setExpandedProject(mapped[0].code);
+                    }
+                }
+            } catch (e) {
+                console.warn("[Jobs] DB 로드 실패, Mock 사용:", e);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
     if (!user) return null;
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                <span className="ml-2 text-sm text-neutral-400">Job 로딩중...</span>
+            </div>
+        );
+    }
 
     const addJob = (projectCode: string) => {
         if (!newJob.name.trim()) return;
@@ -111,6 +176,20 @@ export default function MyProjectsPage() {
         };
 
         setProjects(prev => prev.map(p => p.code === projectCode ? { ...p, jobs: [...p.jobs, job] } : p));
+
+        // DB 저장 (비동기)
+        projectsDb.createJob({
+            code: jobCode,
+            name: job.name,
+            type: job.type,
+            detail: job.detail,
+            start_date: job.startDate,
+            due_date: job.dueDate,
+            estimated_hours: job.estimatedHours,
+            actual_hours: 0,
+            status: job.status,
+        }).catch(e => console.warn("[Jobs] DB 저장 실패:", e));
+
         setShowJobModal(null);
         setNewJob({ name: '', type: 'PR', detail: 'PL', startDate: '', dueDate: '', estimatedHours: '' });
         setJobMembers([]);
