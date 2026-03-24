@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import {
     BumsSite, BumsBoard, BumsBoardPost, BumsComment, BumsWidget,
     CmsPost, CmsChannel, CmsCategory,
@@ -10,6 +10,7 @@ import {
     initialSites, initialBoards, initialBoardPosts,
     initialComments, initialWidgets, initialPosts,
 } from '@/lib/bums-data';
+import * as db from '@/lib/supabase/bums';
 
 // ── Context 타입 정의 ──
 
@@ -60,6 +61,10 @@ interface BumsContextType {
     getPostsByChannel: (channel: CmsChannel) => CmsPost[];
     getPostsByCategory: (category: CmsCategory) => CmsPost[];
     getPublishedByChannel: (channel: CmsChannel) => CmsPost[];
+
+    // DB 상태
+    isDbConnected: boolean;
+    refreshFromDb: () => Promise<void>;
 }
 
 const BumsContext = createContext<BumsContextType | undefined>(undefined);
@@ -73,19 +78,58 @@ export function BumsProvider({ children }: { children: ReactNode }) {
     const [comments, setComments] = useState<BumsComment[]>(initialComments);
     const [widgets, setWidgets] = useState<BumsWidget[]>(initialWidgets);
     const [posts, setPosts] = useState<CmsPost[]>(initialPosts);
+    const [isDbConnected, setIsDbConnected] = useState(false);
 
     const now = () => new Date().toISOString().split('T')[0];
 
-    // ── Sites ──
+    // ── 초기화: Supabase에서 데이터 로드 (실패 시 Mock 유지) ──
+    const refreshFromDb = useCallback(async () => {
+        try {
+            const [dbSites, dbBoards, dbPostsResult, dbWidgets] = await Promise.all([
+                db.fetchSites(),
+                db.fetchBoards(),
+                db.fetchPosts({ limit: 500 }),
+                db.fetchWidgets(),
+            ]);
 
-    const addSite = useCallback((site: BumsSite) => {
-        setSites(prev => [site, ...prev]);
+            // DB에 데이터가 있으면 사용, 없으면 Mock 유지
+            if (dbSites.length > 0) setSites(dbSites as BumsSite[]);
+            if (dbBoards.length > 0) setBoards(dbBoards as BumsBoard[]);
+            if (dbPostsResult.posts.length > 0) setBoardPosts(dbPostsResult.posts as BumsBoardPost[]);
+            if (dbWidgets.length > 0) setWidgets(dbWidgets as BumsWidget[]);
+
+            setIsDbConnected(true);
+            console.log('[BUMS] DB connected:', dbSites.length, 'sites,', dbBoards.length, 'boards,', dbPostsResult.posts.length, 'posts');
+        } catch (err) {
+            console.warn('[BUMS] DB connection failed, using mock data:', err);
+            setIsDbConnected(false);
+        }
     }, []);
 
-    const updateSite = useCallback((id: string, updates: Partial<BumsSite>) => {
+    useEffect(() => {
+        refreshFromDb();
+    }, [refreshFromDb]);
+
+    // ── Sites ──
+
+    const addSite = useCallback(async (site: BumsSite) => {
+        setSites(prev => [site, ...prev]);
+        try {
+            await db.upsertSite(site as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] addSite DB failed:', err);
+        }
+    }, []);
+
+    const updateSite = useCallback(async (id: string, updates: Partial<BumsSite>) => {
         setSites(prev => prev.map(s =>
             s.id === id ? { ...s, ...updates, updatedAt: now() } : s
         ));
+        try {
+            await db.upsertSite({ id, ...updates } as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] updateSite DB failed:', err);
+        }
     }, []);
 
     const deleteSite = useCallback((id: string) => {
@@ -98,18 +142,33 @@ export function BumsProvider({ children }: { children: ReactNode }) {
 
     // ── Boards ──
 
-    const addBoard = useCallback((board: BumsBoard) => {
+    const addBoard = useCallback(async (board: BumsBoard) => {
         setBoards(prev => [board, ...prev]);
+        try {
+            await db.upsertBoard(board as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] addBoard DB failed:', err);
+        }
     }, []);
 
-    const updateBoard = useCallback((id: string, updates: Partial<BumsBoard>) => {
+    const updateBoard = useCallback(async (id: string, updates: Partial<BumsBoard>) => {
         setBoards(prev => prev.map(b =>
             b.id === id ? { ...b, ...updates, updatedAt: now() } : b
         ));
+        try {
+            await db.upsertBoard({ id, ...updates } as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] updateBoard DB failed:', err);
+        }
     }, []);
 
-    const deleteBoard = useCallback((id: string) => {
+    const deleteBoard = useCallback(async (id: string) => {
         setBoards(prev => prev.filter(b => b.id !== id));
+        try {
+            await db.deleteBoard(id);
+        } catch (err) {
+            console.warn('[BUMS] deleteBoard DB failed:', err);
+        }
     }, []);
 
     const getBoardById = useCallback((id: string) => {
@@ -122,18 +181,34 @@ export function BumsProvider({ children }: { children: ReactNode }) {
 
     // ── Board Posts ──
 
-    const addBoardPost = useCallback((post: BumsBoardPost) => {
+    const addBoardPost = useCallback(async (post: BumsBoardPost) => {
         setBoardPosts(prev => [post, ...prev]);
+        try {
+            await db.createPost(post as unknown as Record<string, unknown>);
+            console.log('[BUMS] Post saved to DB:', post.title);
+        } catch (err) {
+            console.warn('[BUMS] addBoardPost DB failed:', err);
+        }
     }, []);
 
-    const updateBoardPost = useCallback((id: string, updates: Partial<BumsBoardPost>) => {
+    const updateBoardPost = useCallback(async (id: string, updates: Partial<BumsBoardPost>) => {
         setBoardPosts(prev => prev.map(p =>
             p.id === id ? { ...p, ...updates, updatedAt: now() } : p
         ));
+        try {
+            await db.updatePost(id, updates as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] updateBoardPost DB failed:', err);
+        }
     }, []);
 
-    const deleteBoardPost = useCallback((id: string) => {
+    const deleteBoardPost = useCallback(async (id: string) => {
         setBoardPosts(prev => prev.filter(p => p.id !== id));
+        try {
+            await db.deletePost(id);
+        } catch (err) {
+            console.warn('[BUMS] deleteBoardPost DB failed:', err);
+        }
     }, []);
 
     const getBoardPostById = useCallback((id: string) => {
@@ -172,8 +247,13 @@ export function BumsProvider({ children }: { children: ReactNode }) {
 
     // ── Comments ──
 
-    const addComment = useCallback((comment: BumsComment) => {
+    const addComment = useCallback(async (comment: BumsComment) => {
         setComments(prev => [comment, ...prev]);
+        try {
+            await db.createComment(comment as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] addComment DB failed:', err);
+        }
     }, []);
 
     const updateComment = useCallback((id: string, updates: Partial<BumsComment>) => {
@@ -182,8 +262,13 @@ export function BumsProvider({ children }: { children: ReactNode }) {
         ));
     }, []);
 
-    const deleteComment = useCallback((id: string) => {
+    const deleteComment = useCallback(async (id: string) => {
         setComments(prev => prev.filter(c => c.id !== id));
+        try {
+            await db.deleteComment(id);
+        } catch (err) {
+            console.warn('[BUMS] deleteComment DB failed:', err);
+        }
     }, []);
 
     const getCommentsByPost = useCallback((postId: string) => {
@@ -192,18 +277,33 @@ export function BumsProvider({ children }: { children: ReactNode }) {
 
     // ── Widgets ──
 
-    const addWidget = useCallback((widget: BumsWidget) => {
+    const addWidget = useCallback(async (widget: BumsWidget) => {
         setWidgets(prev => [widget, ...prev]);
+        try {
+            await db.upsertWidget(widget as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] addWidget DB failed:', err);
+        }
     }, []);
 
-    const updateWidget = useCallback((id: string, updates: Partial<BumsWidget>) => {
+    const updateWidget = useCallback(async (id: string, updates: Partial<BumsWidget>) => {
         setWidgets(prev => prev.map(w =>
             w.id === id ? { ...w, ...updates } : w
         ));
+        try {
+            await db.upsertWidget({ id, ...updates } as unknown as Record<string, unknown>);
+        } catch (err) {
+            console.warn('[BUMS] updateWidget DB failed:', err);
+        }
     }, []);
 
-    const deleteWidget = useCallback((id: string) => {
+    const deleteWidget = useCallback(async (id: string) => {
         setWidgets(prev => prev.filter(w => w.id !== id));
+        try {
+            await db.deleteWidget(id);
+        } catch (err) {
+            console.warn('[BUMS] deleteWidget DB failed:', err);
+        }
     }, []);
 
     // ── Legacy (하위 호환) ──
@@ -258,6 +358,8 @@ export function BumsProvider({ children }: { children: ReactNode }) {
             // Legacy
             posts, addPost, updatePost, deletePost,
             getPostById, getPostsByChannel, getPostsByCategory, getPublishedByChannel,
+            // DB 상태
+            isDbConnected, refreshFromDb,
         }}>
             {children}
         </BumsContext.Provider>
