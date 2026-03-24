@@ -56,6 +56,8 @@ export default function BoardsManagementPage() {
     const [newPostSiteId, setNewPostSiteId] = useState("");
     const [newPostBoardId, setNewPostBoardId] = useState("");
     const [showNewPostModal, setShowNewPostModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 20;
 
     // 사이트 필터는 레이아웃 드롭다운에서 관리
     const siteBoards = boards.filter(b => selectedSiteId === "all" || b.siteId === selectedSiteId);
@@ -208,7 +210,7 @@ export default function BoardsManagementPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-100">
-                                {filteredPosts.slice(0, 50).map(post => {
+                                {filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).map(post => {
                                     const board = boards.find(b => b.id === post.boardId);
                                     return (
                                         <tr key={post.id} className="hover:bg-neutral-50/50 transition-colors">
@@ -243,11 +245,30 @@ export default function BoardsManagementPage() {
                         {filteredPosts.length === 0 && (
                             <div className="px-6 py-16 text-center text-neutral-400 text-sm">게시글이 없습니다.</div>
                         )}
-                        {filteredPosts.length > 50 && (
-                            <div className="px-5 py-3.5 text-xs text-neutral-400 border-t border-neutral-100 bg-neutral-50/40">
-                                {filteredPosts.length}건 중 50건 표시
-                            </div>
-                        )}
+                        {filteredPosts.length > postsPerPage && (() => {
+                            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+                            return (
+                                <div className="px-5 py-3.5 border-t border-neutral-100 bg-neutral-50/40 flex items-center justify-between">
+                                    <span className="text-xs text-neutral-400">
+                                        전체 {filteredPosts.length}건 · {currentPage}/{totalPages} 페이지
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                                            className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30 transition-all">←</button>
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button key={page} onClick={() => setCurrentPage(page)}
+                                                className={`px-2.5 py-1 text-xs rounded-lg transition-all ${
+                                                    currentPage === page
+                                                        ? 'bg-neutral-900 text-white'
+                                                        : 'border border-neutral-200 hover:bg-neutral-100'
+                                                }`}>{page}</button>
+                                        ))}
+                                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                                            className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30 transition-all">→</button>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* 새 글 작성 모달 — 배경 블러 + 고급 스타일 */}
