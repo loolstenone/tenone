@@ -10,18 +10,16 @@ import Image from "next/image";
 import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2 } from "lucide-react";
 
 export default function HomePage() {
-    const { getPublishedByChannel, getPublishedByBoardSlug } = useBums();
+    const { getPublishedByBoardSlug } = useBums();
     const [nlEmail, setNlEmail] = useState('');
     const [nlSubscribed, setNlSubscribed] = useState(false);
     const [nlAgree, setNlAgree] = useState(false);
 
-    // DB 우선, 없으면 Legacy Mock
+    // DB 데이터 (boardPosts state 변경 시 자동 재계산)
     const dbWorks = getPublishedByBoardSlug('tenone', 'works', 8);
     const dbNews = getPublishedByBoardSlug('tenone', 'newsroom', 4);
-    const legacyWorks = getPublishedByChannel('works').slice(0, 8);
-    const legacyNews = getPublishedByChannel('newsroom').slice(0, 4);
-    const latestWorks = dbWorks.length > 0 ? dbWorks : legacyWorks;
-    const latestNews = dbNews.length > 0 ? dbNews : legacyNews;
+    const latestWorks = dbWorks;
+    const latestNews = dbNews;
 
     return (
         <TenOneThemeWrapper>
@@ -157,7 +155,7 @@ export default function HomePage() {
             </section>
 
             {/* Works — 화이트 섹션 */}
-            <section className="py-20 md:py-32 px-6">
+            {latestWorks.length > 0 && <section className="py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
@@ -210,10 +208,10 @@ export default function HomePage() {
                         모든 Works 보기 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
-            </section>
+            </section>}
 
             {/* Latest — 이미지 카드, 라이트 그레이 배경 */}
-            <section className="py-20 md:py-32 px-6 tn-bg-alt">
+            {latestNews.length > 0 && <section className="py-20 md:py-32 px-6 tn-bg-alt">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
@@ -252,7 +250,7 @@ export default function HomePage() {
                         })}
                     </div>
                 </div>
-            </section>
+            </section>}
 
             {/* CTA — 다크 섹션 */}
             <section className="tn-card py-20 md:py-32 px-6">
