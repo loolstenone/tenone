@@ -11,22 +11,36 @@ import { PublicFooter } from '@/components/PublicFooter';
 import { MadLeagueHeader } from '@/components/MadLeagueHeader';
 import { MadLeagueFooter } from '@/components/MadLeagueFooter';
 import SmarCommHeader from '@/components/SmarCommHeader';
+import { getUser } from '@/lib/smarcomm/auth';
+import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
-    const { login, isAuthenticated, isLoading } = useAuth();
+    // SmarComm은 대시보드와 동일한 인증 체크 (getUser + Supabase 직접) 사용
+    // useAuth() (TenOne 인증)을 쓰면 대시보드와 판단이 달라져 리다이렉트 루프 발생
+    const { login } = useAuth(); // login 함수만 사용 (Supabase 로그인)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            window.location.replace('/dashboard');
-        }
-    }, [isLoading, isAuthenticated]);
+        // 대시보드와 동일한 인증 체크: SmarComm Mock auth → Supabase session
+        const u = getUser();
+        if (u) { window.location.replace('/dashboard'); return; }
 
-    if (isLoading || isAuthenticated) {
+        const sb = createClient();
+        sb.auth.getSession().then(({ data }) => {
+            if (data?.session?.user) {
+                window.location.replace('/dashboard');
+            } else {
+                setChecking(false);
+            }
+        }).catch(() => setChecking(false));
+    }, []);
+
+    if (checking) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />

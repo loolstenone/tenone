@@ -10,31 +10,41 @@ import Link from 'next/link';
 import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
 import SmarCommHeader from '@/components/SmarCommHeader';
+import { getUser } from '@/lib/smarcomm/auth';
+import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 회원가입 컴포넌트 ---
 function SmarCommSignupForm() {
-    const { register, isAuthenticated, isLoading } = useAuth();
+    const { register } = useAuth(); // register 함수만 사용
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [lastScan, setLastScan] = useState<{ url: string; score: number } | null>(null);
+    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            window.location.replace('/dashboard');
-        }
-    }, [isLoading, isAuthenticated]);
-
-    useEffect(() => {
-        try {
-            const scanLog = JSON.parse(localStorage.getItem('smarcomm_scan_log') || '[]');
-            if (scanLog.length > 0) setLastScan(scanLog[scanLog.length - 1]);
-        } catch {}
+        // 대시보드와 동일한 인증 체크
+        const u = getUser();
+        if (u) { window.location.replace('/dashboard'); return; }
+        const sb = createClient();
+        sb.auth.getSession().then(({ data }) => {
+            if (data?.session?.user) { window.location.replace('/dashboard'); }
+            else { setChecking(false); }
+        }).catch(() => setChecking(false));
     }, []);
 
-    if (isLoading || isAuthenticated) {
+    useEffect(() => {
+        if (!checking) {
+            try {
+                const scanLog = JSON.parse(localStorage.getItem('smarcomm_scan_log') || '[]');
+                if (scanLog.length > 0) setLastScan(scanLog[scanLog.length - 1]);
+            } catch {}
+        }
+    }, [checking]);
+
+    if (checking) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
