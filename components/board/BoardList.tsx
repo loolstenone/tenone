@@ -107,7 +107,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                             category === ""
                                 ? "font-semibold border-current"
-                                : "text-neutral-500 border-transparent hover:text-neutral-700"
+                                : "text-neutral-400 border-transparent hover:text-neutral-200"
                         }`}
                         style={category === "" ? { color: accentColor } : {}}
                     >
@@ -120,7 +120,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                             className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                                 category === cat
                                     ? "font-semibold border-current"
-                                    : "text-neutral-500 border-transparent hover:text-neutral-700"
+                                    : "text-neutral-400 border-transparent hover:text-neutral-200"
                             }`}
                             style={category === cat ? { color: accentColor } : {}}
                         >
@@ -140,7 +140,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         placeholder="검색..."
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400 bg-transparent text-neutral-200 placeholder:text-neutral-500"
                     />
                 </form>
 

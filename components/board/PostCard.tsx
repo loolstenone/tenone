@@ -30,11 +30,11 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
     return (
         <article
             onClick={() => onClick?.(post)}
-            className="group relative bg-white border border-neutral-200 rounded-lg overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+            className="group relative bg-neutral-900 border border-neutral-700/50 rounded-lg overflow-hidden hover:border-neutral-500 transition-all cursor-pointer"
         >
             {/* 대표 이미지 */}
             {post.representImage ? (
-                <div className="aspect-video bg-neutral-100 overflow-hidden">
+                <div className="aspect-video bg-neutral-800 overflow-hidden">
                     <img
                         src={post.representImage}
                         alt={post.title}
@@ -42,8 +42,8 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                     />
                 </div>
             ) : (
-                <div className="aspect-video bg-neutral-50 flex items-center justify-center">
-                    <span className="text-neutral-300 text-sm">No Image</span>
+                <div className="aspect-video bg-neutral-800 flex items-center justify-center">
+                    <span className="text-2xl font-light text-neutral-600">{post.category || post.title?.substring(0, 2)}</span>
                 </div>
             )}
 
@@ -65,7 +65,7 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                     )}
                 </div>
 
-                <h3 className="font-medium text-neutral-900 line-clamp-2 group-hover:opacity-70 transition-opacity">
+                <h3 className="font-medium text-neutral-100 line-clamp-2 group-hover:text-white transition-colors">
                     {post.title}
                     {post.commentCount > 0 && (
                         <span className="ml-1 text-sm" style={{ color: accentColor }}>
@@ -75,10 +75,10 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                 </h3>
 
                 {post.excerpt && (
-                    <p className="mt-1.5 text-sm text-neutral-500 line-clamp-2">{post.excerpt}</p>
+                    <p className="mt-1.5 text-sm text-neutral-400 line-clamp-2">{post.excerpt}</p>
                 )}
 
-                <div className="flex items-center justify-between mt-3 text-xs text-neutral-400">
+                <div className="flex items-center justify-between mt-3 text-xs text-neutral-500">
                     <span>{getAuthorName(post)} · {formatDate(post.createdAt)}</span>
                     <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1">
