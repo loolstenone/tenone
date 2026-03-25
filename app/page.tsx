@@ -1,25 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useBums } from "@/lib/bums-context";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2 } from "lucide-react";
 
+interface SimplePost {
+    id: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    represent_image: string;
+    created_at: string;
+    view_count: number;
+}
+
 export default function HomePage() {
-    const { getPublishedByBoardSlug } = useBums();
     const [nlEmail, setNlEmail] = useState('');
     const [nlSubscribed, setNlSubscribed] = useState(false);
     const [nlAgree, setNlAgree] = useState(false);
+    const [latestWorks, setLatestWorks] = useState<SimplePost[]>([]);
+    const [latestNews, setLatestNews] = useState<SimplePost[]>([]);
 
-    // DB 데이터 (boardPosts state 변경 시 자동 재계산)
-    const dbWorks = getPublishedByBoardSlug('tenone', 'works', 8);
-    const dbNews = getPublishedByBoardSlug('tenone', 'newsroom', 4);
-    const latestWorks = dbWorks;
-    const latestNews = dbNews;
+    useEffect(() => {
+        fetch('/api/board/posts?site=tenone&board=works&limit=8&status=published')
+            .then(r => r.json()).then(d => setLatestWorks(d.posts || [])).catch(() => {});
+        fetch('/api/board/posts?site=tenone&board=newsroom&limit=4&status=published')
+            .then(r => r.json()).then(d => setLatestNews(d.posts || [])).catch(() => {});
+    }, []);
 
     return (
         <TenOneThemeWrapper>
@@ -172,34 +183,23 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {latestWorks.map((work: Record<string, unknown>) => {
-                            const title = (work.title as string) || '';
-                            const image = (work.image as string) || '';
-                            const category = (work.category as string) || (work.categoryId as string) || '';
-                            const rawDate = ((work.date as string) || (work.publishedAt as string) || (work.createdAt as string) || '').substring(0, 7);
+                        {latestWorks.map((work) => {
+                            const rawDate = (work.created_at || '').substring(0, 7);
                             const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
-                            const extLink = work.externalLink as string | undefined;
                             return (
-                                <div key={work.id as string} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
+                                <Link key={work.id} href={`/works`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
                                     <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden">
-                                        {image && (image.startsWith('http') || image.startsWith('data:')) ? (
-                                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                                        {work.represent_image ? (
+                                            <img src={work.represent_image} alt={work.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-lg font-bold tn-text-muted">{category || title?.substring(0, 2)}</span>
+                                            <span className="text-lg font-bold tn-text-muted">{work.category || work.title?.substring(0, 2)}</span>
                                         )}
                                     </div>
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="text-xs tn-text-sub mb-1">{category}{date ? ` · ${date}` : ''}</p>
-                                            <h3 className="font-semibold tn-text text-sm leading-snug">{title}</h3>
-                                        </div>
-                                        {extLink && (
-                                            <a href={extLink} target="_blank" rel="noopener noreferrer">
-                                                <ExternalLink className="h-3.5 w-3.5 tn-text-muted group-hover:tn-text transition-colors mt-1" />
-                                            </a>
-                                        )}
+                                    <div>
+                                        <p className="text-xs tn-text-sub mb-1">{work.category}{date ? ` · ${date}` : ''}</p>
+                                        <h3 className="font-semibold tn-text text-sm leading-snug">{work.title}</h3>
                                     </div>
-                                </div>
+                                </Link>
                             );
                         })}
                     </div>
@@ -228,23 +228,20 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {latestNews.map((news: Record<string, unknown>) => {
-                            const title = (news.title as string) || '';
-                            const image = (news.image as string) || '';
-                            const date = (news.date as string) || (news.publishedAt as string) || (news.createdAt as string) || '';
-                            const summary = (news.summary as string) || '';
+                        {latestNews.map((news) => {
+                            const rawDate = (news.created_at || '').substring(0, 10);
                             return (
-                                <Link key={news.id as string} href="/newsroom" className="group block">
+                                <Link key={news.id} href="/newsroom" className="group block">
                                     <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
-                                        {image && (image.startsWith('http') || image.startsWith('data:')) ? (
-                                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                                        {news.represent_image ? (
+                                            <img src={news.represent_image} alt={news.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <p className="text-xs tn-text-sub text-center px-4">[{image || '이미지'}]</p>
+                                            <p className="text-xs tn-text-sub text-center px-4">{news.category || '뉴스'}</p>
                                         )}
                                     </div>
-                                    <p className="text-xs tn-text-sub">{date}</p>
-                                    <h3 className="font-semibold tn-text mt-1 group-hover:underline">{title}</h3>
-                                    <p className="text-sm tn-text-sub mt-1 line-clamp-1">{summary}</p>
+                                    <p className="text-xs tn-text-sub">{rawDate}</p>
+                                    <h3 className="font-semibold tn-text mt-1 group-hover:underline">{news.title}</h3>
+                                    <p className="text-sm tn-text-sub mt-1 line-clamp-1">{news.excerpt}</p>
                                 </Link>
                             );
                         })}
