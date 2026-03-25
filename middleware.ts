@@ -34,9 +34,9 @@ const domainPrefixMap: Record<string, string> = {
 };
 
 // 리라이트 제외 경로
-const skipPaths = ['/intra', '/api', '/_next'];
+const skipPaths = ['/intra', '/api', '/_next', '/auth'];
 // SmarComm은 자체 login/signup 있으므로 제외하지 않음
-const skipPathsWithAuth = ['/intra', '/api', '/_next', '/login', '/signup'];
+const skipPathsWithAuth = ['/intra', '/api', '/_next', '/auth', '/login', '/signup'];
 
 export function middleware(request: NextRequest) {
     const hostname = request.headers.get('host') || '';

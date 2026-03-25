@@ -28,8 +28,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      // 항상 SmarComm 대시보드로
-      router.push('/sc/dashboard');
+      // SmarComm 대시보드로 (middleware가 /dashboard → /sc/dashboard로 rewrite)
+      window.location.href = '/dashboard';
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.push(redirect);
+      window.location.href = '/dashboard';
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다');
     } finally {
