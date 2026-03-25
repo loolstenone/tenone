@@ -45,7 +45,7 @@ const METHODS = [
       { name: '플라이휠 컨설팅', form: '4주', target: '에이전시', price: '700만원' },
       { name: '플라이휠 진단', form: '온라인 설문', target: '기존 조직', price: '50만원' },
     ]},
-  { code: 'WIO', name: 'WIO Protocol', tagline: '하나에서 일하기 위한 운영 규칙. 도구 + 프로세스 + 문화 통합', tag: '운영·통합', color: '#D4537E',
+  { code: 'WIO', name: 'WIO Protocol', tagline: '하나로 일하기 위한 운영 규칙. 도구 + 프로세스 + 문화 통합', tag: '운영·통합', color: '#D4537E',
     desc: 'Vision House + Principle 10 + Vrief + GPR + 플라이휠을 하나의 운영 체계로 통합.',
     products: [
       { name: 'WIO 도입 컨설팅', form: '8주', target: 'System 구매 고객', price: '2,000만원' },

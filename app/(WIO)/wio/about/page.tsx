@@ -24,7 +24,7 @@ export default function AboutPage() {
 
           <h1 className="text-4xl font-black mb-6 leading-tight">
             Work In One.<br />
-            <span className="text-indigo-400">하나에서 일하세요.</span>
+            <span className="text-indigo-400">하나로 일하세요.</span>
           </h1>
 
           <div className="space-y-8 text-slate-400 leading-relaxed">

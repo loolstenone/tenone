@@ -216,7 +216,148 @@ export async function calculateProjectPnL(projectId: string): Promise<{ revenue:
   return {
     revenue: project.revenue,
     internalCost,
-    externalCost: 0, // Phase 2에서 파트너 정산 추가
+    externalCost: 0,
     profit: project.revenue - internalCost,
   };
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 게시판
+// ══════════════════════════════════════
+
+export async function fetchPosts(tenantId: string, board?: string): Promise<any[]> {
+  let query = supabase.from('wio_posts').select('*, author:wio_members!wio_posts_author_id_fkey(display_name, avatar_url)').eq('tenant_id', tenantId).order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
+  if (board) query = query.eq('board', board);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createPost(post: { tenantId: string; board: string; title: string; content: string; authorId: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_posts').insert(camelToSnake(post as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 할일
+// ══════════════════════════════════════
+
+export async function fetchTodos(memberId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_todos').select('*').eq('member_id', memberId).order('is_done').order('created_at', { ascending: false });
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createTodo(todo: { tenantId: string; memberId: string; title: string; dueDate?: string; projectId?: string; priority?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_todos').insert(camelToSnake(todo as any));
+  return !error;
+}
+
+export async function toggleTodo(todoId: string, isDone: boolean): Promise<boolean> {
+  const { error } = await supabase.from('wio_todos').update({ is_done: isDone }).eq('id', todoId);
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 알림
+// ══════════════════════════════════════
+
+export async function fetchNotifications(memberId: string, limit = 20): Promise<any[]> {
+  const { data } = await supabase.from('wio_notifications').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(limit);
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function markNotificationRead(notifId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_notifications').update({ is_read: true }).eq('id', notifId);
+  return !error;
+}
+
+export async function createNotification(notif: { tenantId: string; memberId: string; type: string; title: string; body?: string; link?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_notifications').insert(camelToSnake(notif as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 전자결재
+// ══════════════════════════════════════
+
+export async function fetchApprovals(tenantId: string, status?: string): Promise<any[]> {
+  let query = supabase.from('wio_approvals').select('*, requester:wio_members!wio_approvals_requester_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  if (status) query = query.eq('status', status);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createApproval(approval: { tenantId: string; type: string; title: string; content?: string; requesterId: string; approverId?: string; projectId?: string; amount?: number }): Promise<boolean> {
+  const { error } = await supabase.from('wio_approvals').insert(camelToSnake(approval as any));
+  return !error;
+}
+
+export async function updateApprovalStatus(approvalId: string, status: 'approved' | 'rejected'): Promise<boolean> {
+  const { error } = await supabase.from('wio_approvals').update({ status, approved_at: new Date().toISOString() }).eq('id', approvalId);
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 경비
+// ══════════════════════════════════════
+
+export async function fetchExpenses(tenantId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_expenses').select('*, member:wio_members!wio_expenses_member_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createExpense(expense: { tenantId: string; memberId: string; projectId?: string; category: string; description: string; amount: number }): Promise<boolean> {
+  const { error } = await supabase.from('wio_expenses').insert(camelToSnake(expense as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 정산
+// ══════════════════════════════════════
+
+export async function fetchSettlements(projectId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_settlements').select('*, member:wio_members!wio_settlements_member_id_fkey(display_name)').eq('project_id', projectId).order('created_at');
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createSettlement(settlement: { tenantId: string; projectId: string; memberId?: string; type: string; amount: number; note?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_settlements').insert(camelToSnake(settlement as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 일정
+// ══════════════════════════════════════
+
+export async function fetchEvents(tenantId: string, month?: string): Promise<any[]> {
+  let query = supabase.from('wio_events').select('*').eq('tenant_id', tenantId).order('start_at');
+  if (month) {
+    query = query.gte('start_at', `${month}-01`).lte('start_at', `${month}-31`);
+  }
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createEvent(event: { tenantId: string; title: string; startAt: string; endAt?: string; allDay?: boolean; projectId?: string; createdBy: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_events').insert(camelToSnake(event as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 2: 프로젝트 채팅 자동 생성
+// ══════════════════════════════════════
+
+export async function createProjectChatThread(tenantId: string, projectId: string, projectTitle: string): Promise<string | null> {
+  const { data, error } = await supabase.from('wio_chat_threads').insert({ tenant_id: tenantId, name: projectTitle, type: 'project', project_id: projectId }).select('id').single();
+  if (error) return null;
+  return data.id;
+}
+
+export async function fetchChatMessages(threadId: string, limit = 50): Promise<any[]> {
+  const { data } = await supabase.from('wio_chat_messages').select('*, sender:wio_members!wio_chat_messages_sender_id_fkey(display_name, avatar_url)').eq('thread_id', threadId).order('created_at', { ascending: false }).limit(limit);
+  return (data || []).reverse().map(r => snakeToCamel(r));
+}
+
+export async function sendChatMessage(threadId: string, senderId: string, content: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_chat_messages').insert({ thread_id: threadId, sender_id: senderId, content });
+  return !error;
 }
