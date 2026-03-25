@@ -102,9 +102,9 @@ export default function SCLandingPage() {
     if (scUser) {
       // 워크스페이스에서 결과 확인
       sessionStorage.setItem('sc_pending_scan', normalized);
-      router.push('/sc/dashboard/scan');
+      router.push('/dashboard/scan');
     } else {
-      router.push(`/sc/scan?url=${encodeURIComponent(normalized)}`);
+      router.push(`/scan?url=${encodeURIComponent(normalized)}`);
     }
   };
 
