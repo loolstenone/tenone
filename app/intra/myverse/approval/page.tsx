@@ -6,6 +6,7 @@ import {
     User, Check, X, Circle,
 } from "lucide-react";
 import Link from "next/link";
+import { PageHeader, PrimaryButton, Badge, Card } from "@/components/intra/IntraUI";
 
 type ApprovalStatus = "대기" | "진행중" | "완료" | "반려";
 type ApprovalFactor = "일반" | "프로젝트" | "타임시트" | "경비" | "구매" | "인사" | "계약";
@@ -147,11 +148,11 @@ const completedItems: ApprovalItem[] = [
     },
 ];
 
-const statusStyle: Record<ApprovalStatus, string> = {
-    대기: "bg-amber-50 text-amber-600",
-    진행중: "bg-blue-50 text-blue-600",
-    완료: "bg-green-50 text-green-600",
-    반려: "bg-red-50 text-red-600",
+const statusBadge: Record<ApprovalStatus, "default" | "success" | "warning" | "danger" | "info"> = {
+    대기: "warning",
+    진행중: "info",
+    완료: "success",
+    반려: "danger",
 };
 
 const tabs: { key: TabKey; label: string }[] = [
@@ -221,15 +222,11 @@ export default function MyApprovalPage() {
     return (
         <div className="max-w-4xl">
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h1 className="text-xl font-bold">내 결재</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">결재 대기 · 기안 · 처리 내역</p>
-                </div>
-                <Link href="/intra/erp/approval/draft" className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
+            <PageHeader title="내 결재" description="결재 대기 · 기안 · 처리 내역">
+                <PrimaryButton href="/intra/erp/approval/draft">
                     <Plus className="h-4 w-4" />새 기안
-                </Link>
-            </div>
+                </PrimaryButton>
+            </PageHeader>
 
             {/* Tabs */}
             <div className="mb-4 flex gap-1 rounded bg-neutral-100 p-1">
@@ -247,12 +244,12 @@ export default function MyApprovalPage() {
             {/* Items */}
             <div className="space-y-2">
                 {currentItems.length === 0 ? (
-                    <div className="border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400">결재 항목이 없습니다.</div>
+                    <Card className="text-center text-xs text-neutral-400">결재 항목이 없습니다.</Card>
                 ) : (
                     currentItems.map((item) => {
                         const isExpanded = expandedId === item.id;
                         return (
-                            <div key={item.id} className="border border-neutral-200 bg-white p-4">
+                            <Card key={item.id} padding={false} className="p-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <button className="min-w-0 flex-1 text-left" onClick={() => setExpandedId(isExpanded ? null : item.id)}>
                                         <div className="mb-1 flex items-center gap-2 flex-wrap">
@@ -283,7 +280,7 @@ export default function MyApprovalPage() {
                                 </div>
                                 {/* 결재라인 스텝퍼 (확장 시) */}
                                 {isExpanded && <ApprovalStepper steps={item.approvalLine} />}
-                            </div>
+                            </Card>
                         );
                     })
                 )}

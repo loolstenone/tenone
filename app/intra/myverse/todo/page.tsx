@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, ChevronDown, ChevronRight, Clock, History } from "lucide-react";
 import clsx from "clsx";
+import { PageHeader, PrimaryButton, Badge, Card } from "@/components/intra/IntraUI";
 
 type TodoCategory = '일반' | '프로젝트' | '기타';
 type TodoPriority = '높음' | '중간' | '낮음';
@@ -30,7 +31,7 @@ const initialTodos: TodoItem[] = [
 ];
 
 const priorityColor: Record<TodoPriority, string> = { '높음': 'bg-red-400', '중간': 'bg-amber-400', '낮음': 'bg-blue-300' };
-const statusStyle: Record<TodoStatus, string> = { '대기': 'bg-neutral-100 text-neutral-500', '진행중': 'bg-blue-50 text-blue-600', '완료': 'bg-green-50 text-green-600', '승인대기': 'bg-amber-50 text-amber-600', '반려': 'bg-red-50 text-red-600' };
+const statusBadge: Record<TodoStatus, "default" | "success" | "warning" | "danger" | "info"> = { '대기': 'default', '진행중': 'info', '완료': 'success', '승인대기': 'warning', '반려': 'danger' };
 const categoryStyle: Record<TodoCategory, string> = { '일반': 'bg-neutral-100 text-neutral-600', '프로젝트': 'bg-violet-50 text-violet-600', '기타': 'bg-sky-50 text-sky-600' };
 let counter = 100;
 
@@ -72,18 +73,14 @@ export default function TodoPage() {
 
     return (
         <div className="max-w-4xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-xl font-bold">Todo</h1>
-                    <p className="text-sm text-neutral-500 mt-1">업무 관리 · 체크리스트</p>
-                </div>
-                <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
+            <PageHeader title="Todo" description="업무 관리 · 체크리스트">
+                <PrimaryButton onClick={() => setShowAdd(!showAdd)}>
                     <Plus className="h-4 w-4" /> 새 할 일
-                </button>
-            </div>
+                </PrimaryButton>
+            </PageHeader>
 
             {showAdd && (
-                <div className="border border-neutral-200 bg-white p-4 mb-4 space-y-3">
+                <Card className="mb-4" padding={false}><div className="p-4 space-y-3">
                     <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="할 일 제목..." autoFocus
                         className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400"
                         onKeyDown={e => { if (e.key === 'Enter') addTodo(); }} />
@@ -101,15 +98,15 @@ export default function TodoPage() {
                     </div>
                     <textarea value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="상세 내용 (선택)..." rows={2}
                         className="w-full px-3 py-2 text-[11px] border border-neutral-200 rounded resize-none focus:outline-none focus:border-neutral-400" />
-                </div>
+                </div></Card>
             )}
 
             <div className="grid grid-cols-4 gap-3 mb-4">
-                {[{ l: '전체', v: counts.total, c: 'text-neutral-900' }, { l: '진행중', v: counts.active, c: 'text-blue-600' }, { l: '완료', v: counts.done, c: 'text-green-600' }, { l: '승인대기', v: counts.pending, c: 'text-amber-600' }].map(c => (
-                    <div key={c.l} className="border border-neutral-200 bg-white p-3 text-center">
-                        <p className={`text-lg font-bold ${c.c}`}>{c.v}</p>
+                {[{ l: '전체', v: counts.total }, { l: '진행중', v: counts.active }, { l: '완료', v: counts.done }, { l: '승인대기', v: counts.pending }].map(c => (
+                    <Card key={c.l} padding={false} className="p-3 text-center">
+                        <p className="text-lg font-bold">{c.v}</p>
                         <p className="text-[11px] text-neutral-400">{c.l}</p>
-                    </div>
+                    </Card>
                 ))}
             </div>
 
@@ -133,7 +130,7 @@ export default function TodoPage() {
                     const isExp = expandedId === todo.id;
                     const isHist = showHistory === todo.id;
                     return (
-                        <div key={todo.id} className="border border-neutral-200 bg-white">
+                        <Card key={todo.id} padding={false}>
                             <div className="flex items-center gap-2.5 px-4 py-2.5">
                                 <button onClick={() => toggleStatus(todo.id)}
                                     className={clsx("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0",
@@ -147,7 +144,7 @@ export default function TodoPage() {
                                 </button>
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${categoryStyle[todo.category]}`}>{todo.category}</span>
                                 {todo.project && <span className="text-[10px] text-neutral-300 shrink-0 max-w-20 truncate">{todo.project}</span>}
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${statusStyle[todo.status]}`}>{todo.status}</span>
+                                <Badge label={todo.status} variant={statusBadge[todo.status]} />
                                 {todo.dueDate && <span className="flex items-center gap-0.5 text-[10px] text-neutral-300 shrink-0"><Clock className="h-2.5 w-2.5" />{todo.dueDate.slice(5)}</span>}
                                 <button onClick={() => setShowHistory(isHist ? null : todo.id)} className={clsx("p-1 rounded shrink-0", isHist ? 'bg-neutral-200' : 'hover:bg-neutral-100')}>
                                     <History className="h-3 w-3 text-neutral-400" />
@@ -186,7 +183,7 @@ export default function TodoPage() {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </Card>
                     );
                 })}
             </div>
