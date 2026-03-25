@@ -40,7 +40,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
     const init = async () => {
       const sb = createClient();
       const { data: { user } } = await sb.auth.getUser();
-      if (!user) { router.push('/login?redirect=/wio/app'); return; }
+      if (!user) { router.push('/wio/login'); return; }
 
       let tenants = await fetchMyTenants();
 
