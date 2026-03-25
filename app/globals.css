@@ -151,3 +151,30 @@ main.bg-white .shadow-lg {
 main.bg-white .rounded-xl {
   border-radius: 0.5rem;
 }
+
+/* ── Print / PDF 스타일 ── */
+@media print {
+  /* 네비게이션, 사이드바, 버튼 등 UI 요소 숨기기 */
+  header, nav, aside, footer,
+  .no-print,
+  button:not(.print-keep),
+  [role="navigation"],
+  .fixed { display: none !important; }
+
+  /* 본문만 전체 너비로 */
+  main {
+    margin: 0 !important;
+    padding: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 배경색 제거, 보더 유지 */
+  body { background: white !important; color: black !important; }
+  * { box-shadow: none !important; }
+
+  /* 페이지 브레이크 */
+  .page-break { page-break-before: always; }
+  table { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+}

@@ -36,7 +36,9 @@ export async function GET(request: NextRequest) {
         maxAge: 600,
         path: '/',
     });
-    cookieStore.set('auth_state', state, {
+    // state에 returnDomain을 백업 인코딩 (쿠키 유실 대비)
+    const compositeState = `${state}|${returnDomain}|${returnPath}`;
+    cookieStore.set('auth_state', compositeState, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

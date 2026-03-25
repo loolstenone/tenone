@@ -36,10 +36,16 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL('/login?error=code_exchange_failed', request.url));
     }
 
-    // 저장된 리턴 정보 읽기
-    const returnDomain = cookieStore.get('auth_return_domain')?.value || 'tenone.biz';
-    const returnPath = cookieStore.get('auth_return_path')?.value || '/';
-    const state = cookieStore.get('auth_state')?.value || '';
+    // 저장된 리턴 정보 읽기 (쿠키 우선, state 파라미터 fallback)
+    const compositeState = cookieStore.get('auth_state')?.value || '';
+    // state 형식: "userState|returnDomain|returnPath" (쿠키 유실 대비 백업)
+    const stateParts = compositeState.split('|');
+    const state = stateParts[0] || '';
+    const stateDomain = stateParts[1] || '';
+    const statePath = stateParts[2] || '';
+
+    const returnDomain = cookieStore.get('auth_return_domain')?.value || stateDomain || 'tenone.biz';
+    const returnPath = cookieStore.get('auth_return_path')?.value || statePath || '/';
 
     // 토큰 암호화
     const encrypted = encryptTokenPayload({

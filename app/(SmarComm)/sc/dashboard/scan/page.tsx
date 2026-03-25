@@ -473,12 +473,20 @@ export default function ScanPage() {
                 <div className="rounded-2xl border border-border bg-white p-5">
                   <h2 className="mb-3 text-sm font-bold text-text">콘텐츠 갭 분석</h2>
                   <p className="mb-2 text-xs text-text-muted">경쟁사 대비 부족한 콘텐츠 영역</p>
-                  <div className="space-y-1.5">
-                    {result.deep.contentGaps.map((gap: any, i: number) => (
-                      <div key={i} className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-xs text-text-sub">
-                        <span className="text-warning">!</span> {typeof gap === 'string' ? gap : gap.gap || gap.title || JSON.stringify(gap)}
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    {result.deep.contentGaps.map((gap: any, i: number) => {
+                      const pColor = (gap.priority === 'high') ? '#DC2626' : '#EA580C';
+                      return (
+                        <div key={i} className="rounded-xl border border-border bg-white p-3" style={{ borderLeftWidth: 3, borderLeftColor: pColor }}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-semibold text-text">{gap.topic || gap.title || gap.gap || '항목'}</span>
+                            <span className="text-[9px] font-semibold uppercase" style={{ color: pColor }}>{gap.priority}</span>
+                          </div>
+                          <p className="text-[11px] text-text-sub">{gap.reason}</p>
+                          {gap.suggestedFormat && <p className="mt-1 text-[11px] text-text-muted">📝 {gap.suggestedFormat}</p>}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -488,12 +496,16 @@ export default function ScanPage() {
                 <div className="rounded-2xl border border-border bg-white p-5">
                   <h2 className="mb-3 text-sm font-bold text-text">개선 액션 플랜</h2>
                   <div className="space-y-2">
-                    {result.deep.actionPlan.map((action: { priority: string; title: string; description: string }, i: number) => (
+                    {result.deep.actionPlan.map((item: any, i: number) => (
                       <div key={i} className="flex items-start gap-3 rounded-xl border border-border p-3">
-                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${action.priority === 'high' ? 'bg-danger' : action.priority === 'medium' ? 'bg-warning' : 'bg-text-muted'}`}>{i + 1}</div>
-                        <div>
-                          <div className="text-xs font-semibold text-text">{action.title}</div>
-                          <div className="mt-0.5 text-[11px] text-text-muted">{action.description}</div>
+                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${item.impact === '높음' ? 'bg-danger' : 'bg-warning'}`}>{item.priority || i + 1}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] text-text-sub">{item.category}</span>
+                            <span className={`text-[10px] font-semibold ${item.impact === '높음' ? 'text-danger' : 'text-warning'}`}>{item.impact}</span>
+                          </div>
+                          <div className="text-xs text-text break-words">{item.action}</div>
+                          {item.effort && <div className="mt-0.5 text-[10px] text-text-muted">난이도: {item.effort}</div>}
                         </div>
                       </div>
                     ))}

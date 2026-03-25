@@ -110,7 +110,8 @@ export default function LandingPage() {
       alert('올바른 URL을 입력해주세요.\n예: https://yoursite.com');
       return;
     }
-    router.push(`/scan?url=${encodeURIComponent(normalized)}`);
+    // full navigation으로 middleware rewrite 보장 (router.push는 client-side에서 middleware 미작동 가능)
+    window.location.href = `/scan?url=${encodeURIComponent(normalized)}`;
   };
 
   return (
