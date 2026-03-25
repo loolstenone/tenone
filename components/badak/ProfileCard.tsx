@@ -15,7 +15,7 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
 
   if (variant === 'mini') {
     return (
-      <Link href={`/profile/${profile.id}`} className="flex items-center gap-2.5 rounded-lg border border-neutral-200 p-2.5 hover:bg-neutral-50 transition-colors">
+      <Link href={`/bk/profile/${profile.id}`} className="flex items-center gap-2.5 rounded-lg border border-neutral-200 p-2.5 hover:bg-neutral-50 transition-colors">
         {profile.avatarUrl ? (
           <img src={profile.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
         ) : (
@@ -87,7 +87,7 @@ export default function ProfileCard({ profile, variant = 'compact' }: Props) {
 
   // compact (기본) — 탐색 그리드용
   return (
-    <Link href={`/profile/${profile.id}`} className="group block rounded-xl border border-neutral-200 bg-white p-4 hover:border-blue-300 hover:shadow-sm transition-all">
+    <Link href={`/bk/profile/${profile.id}`} className="group block rounded-xl border border-neutral-200 bg-white p-4 hover:border-blue-300 hover:shadow-sm transition-all">
       <div className="flex items-center gap-3">
         {profile.avatarUrl ? (
           <img src={profile.avatarUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />

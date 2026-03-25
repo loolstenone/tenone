@@ -7,11 +7,12 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
+const PREFIX = '/bk';
 const navItems = [
-    { name: "탐색", href: "/explore" },
-    { name: "이바닥 스타", href: "/stars" },
-    { name: "커뮤니티", href: "/community" },
-    { name: "바닥이란", href: "/about" },
+    { name: "탐색", href: `${PREFIX}/explore` },
+    { name: "이바닥 스타", href: `${PREFIX}/stars` },
+    { name: "커뮤니티", href: `${PREFIX}/community` },
+    { name: "바닥이란", href: `${PREFIX}/about` },
 ];
 
 export function BadakHeader() {
@@ -28,7 +29,7 @@ export function BadakHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e] text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="shrink-0 flex items-center gap-3">
+                <Link href={PREFIX} className="shrink-0 flex items-center gap-3">
                     <span className="text-xl font-black leading-none tracking-tight">
                         <span className="block text-[11px]">Ba</span>
                         <span className="block text-[11px]">dak</span>
@@ -56,13 +57,13 @@ export function BadakHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                        <Link href={`${PREFIX}/my`} className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
                         <>
                             <Link href="/login" className="text-sm text-neutral-300 hover:text-white transition-colors">로그인</Link>
-                            <Link href="/signup" className="text-sm text-neutral-300 hover:text-white transition-colors">가입</Link>
+                            <Link href="/login" className="text-sm text-neutral-300 hover:text-white transition-colors">닉네임 가입</Link>
                         </>
                     )}
                 </div>
@@ -96,13 +97,13 @@ export function BadakHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">가입</Link>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">닉네임 가입</Link>
                             </>
                         )}
                     </div>

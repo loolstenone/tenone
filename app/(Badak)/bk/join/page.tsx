@@ -27,7 +27,7 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/login?redirect=/join');
+      router.replace('/login?redirect=/bk/join');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -35,7 +35,7 @@ export default function JoinPage() {
   useEffect(() => {
     if (user?.id) {
       fetchBadakProfile(user.id).then(p => {
-        if (p) router.replace('/my');
+        if (p) router.replace('/bk/my');
       });
     }
   }, [user, router]);
@@ -76,7 +76,7 @@ export default function JoinPage() {
       avatarUrl: null,
     });
     if (result) {
-      router.push(`/profile/${user.id}`);
+      router.push(`/bk/profile/${user.id}`);
     } else {
       setSubmitting(false);
       alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');

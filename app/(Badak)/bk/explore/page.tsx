@@ -66,7 +66,7 @@ function ExploreContent() {
     if (search) params.set('q', search);
     if (page > 1) params.set('page', String(page));
     const qs = params.toString();
-    router.replace(`/explore${qs ? '?' + qs : ''}`, { scroll: false });
+    router.replace(`/bk/explore${qs ? '?' + qs : ''}`, { scroll: false });
   }, [jobFunction, industry, jobLevel, lookingFor, canOffer, search, page, router]);
 
   const clearFilters = () => {
