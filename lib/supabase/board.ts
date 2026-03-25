@@ -482,3 +482,41 @@ function extractExcerpt(html: string, maxLength = 200): string {
     const text = html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
+
+// ── Storage (이미지 업로드) ──
+
+const BUCKET = 'board-assets';
+
+export async function uploadImage(file: File, path?: string): Promise<string> {
+    const ext = file.name.split('.').pop() || 'png';
+    const filePath = path || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+    });
+    if (error) throw error;
+
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+    return data.publicUrl;
+}
+
+export async function uploadBase64Image(base64: string, filename?: string): Promise<string> {
+    const match = base64.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!match) throw new Error('Invalid base64 image');
+
+    const ext = match[1];
+    const data = match[2];
+    const buffer = Buffer.from(data, 'base64');
+    const filePath = filename || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, buffer, {
+        contentType: `image/${ext}`,
+        cacheControl: '3600',
+        upsert: false,
+    });
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+    return urlData.publicUrl;
+}

@@ -256,12 +256,28 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                     <label className="inline-flex items-center gap-2 px-4 py-2 border border-dashed border-neutral-300 rounded-lg cursor-pointer hover:border-neutral-400 transition-colors text-sm text-neutral-500">
                         <Upload size={14} />
                         이미지 업로드
-                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                        <input type="file" accept="image/*" className="hidden" onChange={async e => {
                             const file = e.target.files?.[0];
                             if (!file) return;
-                            const reader = new FileReader();
-                            reader.onload = ev => setRepresentImage(ev.target?.result as string);
-                            reader.readAsDataURL(file);
+                            try {
+                                const fd = new FormData();
+                                fd.append('file', file);
+                                fd.append('site', config.site);
+                                const res = await fetch('/api/board/upload', { method: 'POST', body: fd });
+                                if (res.ok) {
+                                    const { url } = await res.json();
+                                    setRepresentImage(url);
+                                } else {
+                                    // fallback to base64
+                                    const reader = new FileReader();
+                                    reader.onload = ev => setRepresentImage(ev.target?.result as string);
+                                    reader.readAsDataURL(file);
+                                }
+                            } catch {
+                                const reader = new FileReader();
+                                reader.onload = ev => setRepresentImage(ev.target?.result as string);
+                                reader.readAsDataURL(file);
+                            }
                         }} />
                     </label>
                 )}
