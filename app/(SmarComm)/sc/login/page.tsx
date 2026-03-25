@@ -20,14 +20,18 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const r = params.get('redirect');
-    if (r) setRedirect(r);
+    // SmarComm 내부 경로만 허용, 외부 경로는 무시
+    if (r && r.startsWith('/sc/')) {
+      setRedirect(r);
+    }
   }, []);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push(redirect);
+      // 항상 SmarComm 대시보드로
+      router.push('/sc/dashboard');
     }
-  }, [isLoading, isAuthenticated, redirect, router]);
+  }, [isLoading, isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
