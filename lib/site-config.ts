@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio';
 
 // 인증 전용 도메인 (OAuth redirect를 여기로 통일)
 export const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
@@ -515,6 +515,22 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         ],
         contact: { email: 'lools@tenone.biz' },
         tagline: '우리는 모두 기획자다 — 자기 인생에서 만큼은.',
+    },
+    wio: {
+        id: 'wio', name: 'WIO', logoText: 'WIO', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#6366F1', bgDark: '#0F0F23',
+        colors: { primary: '#6366F1', primaryDark: '#4F46E5', secondary: '#818CF8', headerBg: '#0F0F23', headerText: '#ffffff', footerBg: '#0F0F23', footerText: '#94A3B8', accent: '#6366F1' },
+        meta: { title: 'WIO — Work In One', description: '프로젝트 중심으로 사람·일·돈·지식이 하나의 시스템에서 돌아가는 통합 운영 플랫폼. 솔루션 구축과 컨설팅.', keywords: ['WIO', 'Work In One', '프로젝트 관리', 'ERP', 'GPR', 'Vrief', 'Ten:One'] },
+        homePath: '/wio', signupPath: '/signup', domain: 'wio.work',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [
+            { name: '솔루션', href: '/wio/solutions' },
+            { name: '프레임워크', href: '/wio/framework' },
+            { name: '가격', href: '/wio/pricing' },
+            { name: '소개', href: '/wio/about' },
+        ],
     },
 };
 
