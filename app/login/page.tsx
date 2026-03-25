@@ -10,6 +10,8 @@ import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
 import { MadLeagueHeader } from '@/components/MadLeagueHeader';
 import { MadLeagueFooter } from '@/components/MadLeagueFooter';
+import dynamic from 'next/dynamic';
+const SmarCommLoginPage = dynamic(() => import('@/app/(SmarComm)/sc/login/page'), { ssr: false });
 
 function LoginForm() {
     const router = useRouter();
@@ -23,20 +25,28 @@ function LoginForm() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // SmarComm 도메인이면 SmarComm 대시보드로
+    // SmarComm 도메인이면 SmarComm 전용 로그인으로 이동 (이 페이지를 렌더링하지 않음)
     const [isSmarComm, setIsSmarComm] = useState(false);
+    const [scChecked, setScChecked] = useState(false);
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.location.hostname.includes('smarcomm')) {
-            setIsSmarComm(true);
-            if (!isLoading && isAuthenticated) {
-                window.location.href = '/dashboard';
-                return;
+        if (typeof window !== 'undefined') {
+            if (window.location.hostname.includes('smarcomm')) {
+                setIsSmarComm(true);
+                // 이미 로그인 → 대시보드로
+                if (!isLoading && isAuthenticated) {
+                    window.location.replace('/dashboard');
+                } else if (!isLoading && !isAuthenticated) {
+                    // 로그인 안 됨 → 이 페이지에서 SmarComm용 로그인 표시
+                    setScChecked(true);
+                }
+            } else {
+                setScChecked(true);
             }
         }
     }, [isLoading, isAuthenticated]);
 
     useEffect(() => {
-        if (isSmarComm) return; // SmarComm은 위에서 처리
+        if (isSmarComm) return;
         if (!isLoading && isAuthenticated) {
             const canIntraAccess = user?.accountType && user.accountType !== 'member';
             const defaultRedirect = isMadLeague ? '/ml' : canIntraAccess ? '/intra' : '/';
@@ -45,12 +55,17 @@ function LoginForm() {
         }
     }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague, isSmarComm]);
 
-    if (isLoading || isAuthenticated) {
+    if (isLoading || (!scChecked) || (isAuthenticated && !isSmarComm)) {
         return (
             <div className={`min-h-screen flex items-center justify-center ${isMadLeague ? 'bg-[#212121]' : 'bg-white'}`}>
                 <div className={`h-8 w-8 border-2 rounded-full animate-spin ${isMadLeague ? 'border-neutral-600 border-t-red-500' : 'border-neutral-200 border-t-neutral-900'}`} />
             </div>
         );
+    }
+
+    // SmarComm 도메인이면 SmarComm 로그인 페이지 렌더링
+    if (isSmarComm) {
+        return <SmarCommLoginPage />;
     }
 
     const handleSubmit = async (e: React.FormEvent) => {

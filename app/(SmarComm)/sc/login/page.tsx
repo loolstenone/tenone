@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [redirect, setRedirect] = useState('/sc/dashboard');
+  const [redirect, setRedirect] = useState('/dashboard');
   const { login, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const r = params.get('redirect');
     // SmarComm 내부 경로만 허용, 외부 경로는 무시
-    if (r && r.startsWith('/sc/')) {
+    if (r && r.startsWith('/')) {
       setRedirect(r);
     }
   }, []);
@@ -125,7 +125,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-6 text-center text-sm text-neutral-400">
-            계정이 없으신가요? <Link href="/sc/signup" className="font-medium text-neutral-900">회원가입</Link>
+            계정이 없으신가요? <Link href="/signup" className="font-medium text-neutral-900">회원가입</Link>
           </div>
         </div>
       </main>
