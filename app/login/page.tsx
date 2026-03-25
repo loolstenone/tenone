@@ -52,10 +52,14 @@ function SmarCommLoginForm() {
         );
     }
 
-    // 직접 Supabase OAuth (auth-hub 경유 없이 — 쿠키 유실/리다이렉트 문제 해결)
+    // 직접 Supabase OAuth (auth-hub 경유 없이)
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
-        // redirectTo는 Supabase Redirect URLs에 정확히 매칭되어야 함 (쿼리 파라미터 없이)
+        // redirect 목적지를 쿠키에 저장 (auth/callback 서버에서 복원)
+        const pendingRedirect = searchParams.get('redirect') || '/';
+        if (pendingRedirect !== '/') {
+            document.cookie = `auth_redirect=${encodeURIComponent(pendingRedirect)};path=/;max-age=300;SameSite=Lax`;
+        }
         const redirectTo = `${window.location.origin}/auth/callback`;
         const { data, error } = await sb.auth.signInWithOAuth({
             provider,
