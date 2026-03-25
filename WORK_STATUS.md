@@ -1,71 +1,88 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-25 (집)
+> 마지막 업데이트: 2026-03-25 (사무실)
 
 ## 오늘 한 작업
 
-### 1. Ten:One™ 통합 게시판 Phase 2 — 공용 UI 컴포넌트 완성
-- `components/board/` 디렉토리 신규 생성 (6개 파일)
-  - `BoardPage.tsx` — 사이트별 게시판 래퍼 (설정 로드, 목록↔상세 전환)
-  - `BoardList.tsx` — 목록 (카드/리스트 뷰 전환, 카테고리 탭, 검색, 정렬/기간 필터, 페이지네이션)
-  - `PostCard.tsx` — 카드형 아이템 (대표이미지, 카테고리 뱃지, NEW/공지, 통계)
-  - `PostListItem.tsx` — 리스트형 아이템 (전통 게시판 스타일)
-  - `PostDetail.tsx` — 상세 (본문, 첨부파일 다운로드, 태그, 좋아요/북마크/공유, 이전/다음글)
-  - `CommentSection.tsx` — 댓글 (대댓글 1depth, 비회원 닉네임+비밀번호, 좋아요, 삭제 메뉴)
-  - `index.ts` — barrel export
-- RooK 게시판 페이지(`app/(RooK)/rk/board/page.tsx`) → 새 BoardPage 컴포넌트로 교체
-- 기존 하드코딩 Mock 데이터 제거, `/api/board/*` API 연결
+### 1. 통합 게시판 Phase 3-4 완성
+- PostEditor 글쓰기 컴포넌트 (Tiptap + 이미지 붙여넣기/드래그 + 태그 + 대표이미지)
+- BoardPage 4모드 전환 (목록/상세/글쓰기/수정) + 좋아요/북마크 API 연결
+- 6개 사이트 게시판 BoardPage 교체 (Badak, MADLeague, MADLeap, ChangeUp, TenOne Works+Newsroom)
 
-### 2. 아키텍처 결정
-- BUMS(복잡한 CMS) 버리고 board-system(심플)으로 통일
-- 기존 `types/board.ts` + `lib/supabase/board.ts` + `app/api/board/*` 재사용 (Phase 1 이미 80% 완료 상태)
-- BUMS 잔재(28개 파일)는 이후 정리
-- 게시판 철학: "각 사이트는 자기 행성에서 완결된다. 우주는 뒤에서 돌아간다."
+### 2. 퍼블릭 페이지 useBums() 완전 제거
+- 홈페이지, Works, Works/[id], Newsroom, Newsroom/[id] → /api/board/posts 직접 호출
+- MADLeague 홈/PT, YouInOne 홈 → fetch API 교체
+- app/layout.tsx에서 BumsProvider 제거
 
-### 3. Ten:One 유니버스 세계관 정립
-- "우주는 누구도 한 눈에 볼 수 없다" — 소비자는 자기 서비스만 알면 됨, 나중에 전체를 발견
-- MCU 모델: 각 사이트가 독립적 가치 → 연결은 발견의 놀라움
+### 3. BUMS 레거시 완전 삭제
+- lib/bums-context.tsx, bums-data.ts, bums-permissions.ts, types/bums.ts, lib/supabase/bums.ts 삭제
+- components/bums/ 디렉토리 삭제, app/api/bums/ 삭제
+- BUMS 인트라 19개 파일 useBums → static/stub 교체
+- 인트라 comm 공지/자유게시판 → BoardPage 통합
+
+### 4. 감사 리포트 긴급 수정
+- 홈/About 플레이스홀더 텍스트 제거
+- robots.txt + sitemap.ts 생성
+- JSON-LD 구조화 데이터 (Organization + Person)
+- SEO 메타 강화 (title 키워드, description, OG, Twitter Card)
+- 이메일 평문 전체 제거 (PublicFooter + 12개 브랜드 푸터 + 8개 페이지)
+
+### 5. 다크모드 완전 대응
+- CSS 변수: text-sub #bbb→#ccc, text-muted #777→#999, footer #666→#888
+- 게시판 6개 컴포넌트 다크모드 (PostCard, PostListItem, PostDetail, CommentSection, BoardList, BoardPage)
+- About/Works/Newsroom 상세 bg-neutral-100 → tn-bg-alt
+
+### 6. DB 실데이터 투입
+- board_configs 8개 (tenone works/newsroom/notice/free, badak, madleague, madleap, changeup)
+- posts 32개 (Works 13 + Newsroom 7 + Badak 4 + MADLeague 4 + YouInOne 4)
+- projects 8개 (진행 3 + 기획 2 + 완료 3)
+- HeRo 테이블 3개 생성 (hit_results, career_profiles, resumes)
+- RLS 정책 추가 (projects_read, board tables)
+
+### 7. Supabase board-system.sql 적용
+- 6개 테이블: posts, comments, attachments, likes, bookmarks, board_configs
+- 3개 함수: increment_post_view, sync_comment_count, sync_like_count, sync_bookmark_count
+- 기존 Townity posts 테이블 DROP → 새 스키마로 재생성
 
 ## 현재 이슈 ⚠️
-- Supabase에 `board-system.sql` 테이블 아직 미적용 → API 호출 시 에러 (빈 목록 표시)
-- BUMS 잔재 28개 파일 아직 남아있음 (동작에 영향 없음)
-- 게시물 수정 후 사이트 페이지로 리다이렉트됨 (게시판 관리로 돌아가야 함)
-- ERP 53개 페이지 DB 연결 미완
+- Preview hook이 사무실에서 계속 차단 (localhost 접속 불가) → settings.local.json에 disableAllHooks 설정했지만 세션 재시작 필요
+- ERP 55개 페이지 DB 연결 미완 (Mock 유지)
+- 브랜드 사이트 게시판 라이브 테스트 미완
 
 ## 다음에 할 일
-- [ ] Supabase에 `board-system.sql` 테이블 적용 (posts, comments, attachments, likes, bookmarks, board_configs). `supabase/board-system.sql` 파일에 SQL 있음
-- [ ] Phase 3: 글쓰기 에디터 컴포넌트 (`components/board/PostEditor.tsx`). Tiptap 에디터 이미 있음, 제목/본문/카테고리/태그/대표이미지/첨부파일/비회원정보 필드
-- [ ] Phase 4: 좋아요/북마크 + 검색/필터 + 카테고리/태그 (UI는 Phase 2에서 뼈대 완성, API 연결만 하면 됨)
-- [ ] 나머지 사이트들에 BoardPage 연결 (MADLeague, Badak, TenOne 등). 한 줄이면 됨: `<BoardPage site="madleague" board="news" accentColor="#D32F2F" />`
-- [ ] AI 에이전트 구축 — 관리자 API(`POST /api/board/posts`)로 자동 게시
-- [ ] BUMS 잔재 정리 (lib/bums-*.ts, types/bums.ts, app/intra/bums/, components/bums/, app/api/bums/)
+- [ ] 브랜드 사이트 게시판 라이브 테스트 (badak.biz, madleague.net 등)
+- [ ] 홈페이지에서 Works/News DB 데이터 표시 확인
+- [ ] 각 브랜드 사이트 헤더/푸터 다크모드 (TenOne 외)
+- [ ] ERP 핵심 페이지 DB 연결 (결재, HR, 재무)
+- [ ] AI 에이전트 API 키 연결
+- [ ] Supabase Storage 이미지 업로드 연결
+- [ ] CrewInvite 지원 → 심사 → 역할 전환 흐름
+
+## Supabase DB 현황
+- posts: 32건 (6개 게시판)
+- board_configs: 8건
+- projects: 8건
+- members: 1건
+- hit_results: 0 (테이블 생성됨)
+- career_profiles: 0 (테이블 생성됨)
+- resumes: 0 (테이블 생성됨)
 
 ## Supabase CRUD 레이어
-- `lib/supabase/board.ts` — 통합 게시판 (posts/comments/likes/bookmarks/attachments/configs)
-- `lib/supabase/bums.ts` — (레거시, 제거 예정)
+- `lib/supabase/board.ts` — 통합 게시판
 - `lib/supabase/members.ts` — 회원 관리
-- `lib/supabase/townity.ts` — 게시판/댓글/일정
-- `lib/supabase/projects.ts` — 프로젝트/Job/투입인력/타임시트
-- `lib/supabase/education.ts` — 과정/수강
+- `lib/supabase/projects.ts` — 프로젝트
+- `lib/supabase/education.ts` — 교육 과정
 - `lib/supabase/hero.ts` — HIT/커리어/이력서
-- `lib/supabase/wiki.ts` — 라이브러리/북마크
-- `lib/supabase/erp.ts` — 결재/포인트/알림
+- `lib/supabase/wiki.ts` — 라이브러리
+- `lib/supabase/erp.ts` — 결재/포인트
 
 ## 주요 파일 위치
-- 게시판 컴포넌트: `components/board/` (6개)
+- 게시판 컴포넌트: `components/board/` (7개 - BoardPage, BoardList, PostCard, PostListItem, PostDetail, CommentSection, PostEditor)
 - 게시판 타입: `types/board.ts`
-- 게시판 API: `app/api/board/{posts,comments,like,bookmark,configs,tags}/route.ts`
-- 게시판 DB함수: `lib/supabase/board.ts`
-- DB 스키마: `supabase/board-system.sql`
+- 게시판 API: `app/api/board/`
+- AI 에이전트: `lib/agent/`
 
 ## Vercel 배포 정보
 - Hobby (무료) 플랜
-- 자동 배포: git push origin master → 빌드+배포
+- 자동 배포: git push origin master
 - 현재 도메인 ~20개
-
-## 주의사항
-- Tailwind CSS v4, Next.js 16 + React 19
-- Supabase: members + bums_* + hero_* 테이블
-- 멀티 사이트 19개 (middleware 도메인 분기)
-- Vridge = GPR & Vrief 통합 (경영전략)
-- 테마: 기본 다크, 토글로 라이트 전환
