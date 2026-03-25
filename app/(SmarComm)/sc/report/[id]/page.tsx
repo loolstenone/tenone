@@ -336,7 +336,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                 <div className="mb-10 grid gap-5 lg:grid-cols-2">
                   <div className="rounded-2xl border border-border bg-white p-6">
                     <h2 className="mb-2 text-[15px] font-bold text-text">종합 분석 레이더</h2>
-                    <RadarChart labels={radarLabels} values={radarValues} size={280} />
+                    <RadarChart labels={radarLabels} values={radarValues} size={360} />
                   </div>
 
                   <div className="rounded-2xl border border-border bg-white p-6">

@@ -448,7 +448,7 @@ export default function ScanPage() {
                   result.deep?.keywords ? Math.min(100, result.deep.keywords.length * 10) : 50,
                   result.deep?.contentGaps ? Math.max(0, 100 - result.deep.contentGaps.length * 15) : 60,
                 ]}
-                size={280}
+                size={360}
               />
             </div>
           </div>
@@ -638,7 +638,7 @@ export default function ScanPage() {
                             ) : <span className="text-xs text-text-muted">—</span>}
                           </td>
                           <td className="px-3 py-1 text-center">
-                            <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={56} hideLabels /></div>
+                            <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={72} hideLabels /></div>
                           </td>
                           <td className="px-4 py-3 text-right text-xs text-text-muted">{new Date(scan.date).toLocaleDateString('ko-KR')}</td>
                         </tr>
@@ -712,7 +712,7 @@ export default function ScanPage() {
                               <span className="inline-block rounded-md px-2.5 py-1 text-xs font-bold text-white" style={{ background: scoreColor }}>{ch.score}</span>
                             </td>
                             <td className="px-3 py-1 text-center">
-                              <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={56} hideLabels /></div>
+                              <div className="inline-block"><RadarChart labels={['기술','콘텐츠','AI','최적화','KW','갭']} values={rv} size={72} hideLabels /></div>
                             </td>
                             <td className="px-4 py-3 text-right text-xs text-text-muted">{new Date(ch.date).toLocaleDateString('ko-KR')}</td>
                           </tr>
