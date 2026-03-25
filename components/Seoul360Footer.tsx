@@ -3,23 +3,23 @@
 import Link from "next/link";
 
 const quickLinks = [
-    { name: "Seoul/360°", href: "/s360" },
-    { name: "Subway Line", href: "/s360/subway-line" },
-    { name: "District", href: "/s360/district" },
-    { name: "Station", href: "/s360/station" },
-    { name: "Outside Seoul", href: "/s360/outside-seoul" },
+    { name: "Seoul/360°", href: "/" },
+    { name: "Subway Line", href: "/subway-line" },
+    { name: "District", href: "/district" },
+    { name: "Station", href: "/station" },
+    { name: "Outside Seoul", href: "/outside-seoul" },
 ];
 
 const subwayLines = [
-    { name: "Line 1", href: "/s360/subway-line#line1" },
-    { name: "Line 2", href: "/s360/subway-line#line2" },
-    { name: "Line 3", href: "/s360/subway-line#line3" },
-    { name: "Line 4", href: "/s360/subway-line#line4" },
-    { name: "Line 5", href: "/s360/subway-line#line5" },
-    { name: "Line 6", href: "/s360/subway-line#line6" },
-    { name: "Line 7", href: "/s360/subway-line#line7" },
-    { name: "Line 8", href: "/s360/subway-line#line8" },
-    { name: "Line 9", href: "/s360/subway-line#line9" },
+    { name: "Line 1", href: "/subway-line#line1" },
+    { name: "Line 2", href: "/subway-line#line2" },
+    { name: "Line 3", href: "/subway-line#line3" },
+    { name: "Line 4", href: "/subway-line#line4" },
+    { name: "Line 5", href: "/subway-line#line5" },
+    { name: "Line 6", href: "/subway-line#line6" },
+    { name: "Line 7", href: "/subway-line#line7" },
+    { name: "Line 8", href: "/subway-line#line8" },
+    { name: "Line 9", href: "/subway-line#line9" },
 ];
 
 export function Seoul360Footer() {

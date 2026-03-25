@@ -30,11 +30,11 @@ export function ChangeUpFooter() {
                     <div className="space-y-4">
                         <h4 className="text-white text-sm font-semibold">바로가기</h4>
                         <div className="space-y-2">
-                            <Link href="/cu/programs" className="block text-sm hover:text-white transition-colors">프로그램</Link>
-                            <Link href="/cu/invest" className="block text-sm hover:text-white transition-colors">투자</Link>
-                            <Link href="/cu/startups" className="block text-sm hover:text-white transition-colors">스타트업</Link>
-                            <Link href="/cu/community" className="block text-sm hover:text-white transition-colors">커뮤니티</Link>
-                            <Link href="/cu/about" className="block text-sm hover:text-white transition-colors">About</Link>
+                            <Link href="/programs" className="block text-sm hover:text-white transition-colors">프로그램</Link>
+                            <Link href="/invest" className="block text-sm hover:text-white transition-colors">투자</Link>
+                            <Link href="/startups" className="block text-sm hover:text-white transition-colors">스타트업</Link>
+                            <Link href="/community" className="block text-sm hover:text-white transition-colors">커뮤니티</Link>
+                            <Link href="/about" className="block text-sm hover:text-white transition-colors">About</Link>
                         </div>
                     </div>
 

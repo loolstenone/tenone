@@ -3,10 +3,10 @@
 import Link from "next/link";
 
 const menuLinks = [
-    { name: "About", href: "/th#about" },
-    { name: "Services", href: "/th#services" },
-    { name: "Process", href: "/th#process" },
-    { name: "Contact", href: "/th#contact" },
+    { name: "About", href: "/#about" },
+    { name: "Services", href: "/#services" },
+    { name: "Process", href: "/#process" },
+    { name: "Contact", href: "/#contact" },
 ];
 
 const universeLinks = [

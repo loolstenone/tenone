@@ -6,10 +6,10 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "자연함 이야기", href: "/nb#about" },
-    { name: "우리 먹거리", href: "/nb#products" },
-    { name: "정선 이야기", href: "/nb#jeongseon" },
-    { name: "오시는 길", href: "/nb#visit" },
+    { name: "자연함 이야기", href: "/#about" },
+    { name: "우리 먹거리", href: "/#products" },
+    { name: "정선 이야기", href: "/#jeongseon" },
+    { name: "오시는 길", href: "/#visit" },
 ];
 
 export function NatureBoxHeader() {
@@ -19,7 +19,7 @@ export function NatureBoxHeader() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
             <nav className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-                <Link href="/nb" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-2xl font-bold tracking-tight text-neutral-900">
                         자연<span className="text-[#6B8E23]">함</span>
                     </span>
@@ -41,7 +41,7 @@ export function NatureBoxHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/nb/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-[#6B8E23] transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-[#6B8E23] transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -74,7 +74,7 @@ export function NatureBoxHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/nb/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

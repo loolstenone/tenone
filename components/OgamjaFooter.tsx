@@ -3,9 +3,9 @@
 import Link from "next/link";
 
 const footerNav = [
-    { name: "About Ogamja", href: "/0g/about" },
-    { name: "필찐감자", href: "/0g/writers" },
-    { name: "프로그램", href: "/0g/programs" },
+    { name: "About Ogamja", href: "/about" },
+    { name: "필찐감자", href: "/writers" },
+    { name: "프로그램", href: "/programs" },
 ];
 
 const universeLinks = [

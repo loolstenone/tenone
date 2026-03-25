@@ -8,11 +8,11 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "프로그램", href: "/cu/programs" },
-    { name: "투자", href: "/cu/invest" },
-    { name: "스타트업", href: "/cu/startups" },
-    { name: "커뮤니티", href: "/cu/community" },
-    { name: "About", href: "/cu/about" },
+    { name: "프로그램", href: "/programs" },
+    { name: "투자", href: "/invest" },
+    { name: "스타트업", href: "/startups" },
+    { name: "커뮤니티", href: "/community" },
+    { name: "About", href: "/about" },
 ];
 
 export function ChangeUpHeader() {
@@ -21,7 +21,7 @@ export function ChangeUpHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/cu") return pathname === "/cu";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -29,7 +29,7 @@ export function ChangeUpHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/cu" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-xl font-black tracking-tight text-[#1AAD64]">Change</span>
                     <span className="text-xl font-black tracking-tight text-[#256EFF]">Up</span>
                 </Link>
@@ -55,7 +55,7 @@ export function ChangeUpHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/cu/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -95,7 +95,7 @@ export function ChangeUpHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/cu/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

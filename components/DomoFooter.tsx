@@ -28,10 +28,10 @@ export function DomoFooter() {
                     <div className="space-y-4">
                         <h4 className="text-white text-sm font-semibold">서비스</h4>
                         <div className="space-y-2">
-                            <Link href="/dm/services" className="block text-sm hover:text-white transition-colors">준비서 서비스</Link>
-                            <Link href="/dm/network" className="block text-sm hover:text-white transition-colors">네트워킹</Link>
-                            <Link href="/dm/insights" className="block text-sm hover:text-white transition-colors">인사이트</Link>
-                            <Link href="/dm/events" className="block text-sm hover:text-white transition-colors">이벤트</Link>
+                            <Link href="/services" className="block text-sm hover:text-white transition-colors">준비서 서비스</Link>
+                            <Link href="/network" className="block text-sm hover:text-white transition-colors">네트워킹</Link>
+                            <Link href="/insights" className="block text-sm hover:text-white transition-colors">인사이트</Link>
+                            <Link href="/events" className="block text-sm hover:text-white transition-colors">이벤트</Link>
                         </div>
                     </div>
 

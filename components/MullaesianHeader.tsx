@@ -6,9 +6,9 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "뚜르 드 문래", href: "/mls#tour" },
-    { name: "갤러리 문래", href: "/mls#gallery" },
-    { name: "문래 꼬뮨", href: "/mls#commune" },
+    { name: "뚜르 드 문래", href: "/#tour" },
+    { name: "갤러리 문래", href: "/#gallery" },
+    { name: "문래 꼬뮨", href: "/#commune" },
 ];
 
 export function MullaesianHeader() {
@@ -19,7 +19,7 @@ export function MullaesianHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
             <nav className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/mls" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-2xl font-bold tracking-tight text-neutral-900">
                         문래<span className="text-[#007BBF]">지앙</span>
                     </span>
@@ -42,7 +42,7 @@ export function MullaesianHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/mls/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-[#007BBF] transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-[#007BBF] transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -77,7 +77,7 @@ export function MullaesianHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/mls/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

@@ -8,10 +8,10 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "커뮤니티", href: "/mlp/community" },
-    { name: "스터디 룸", href: "/mlp/study-room" },
-    { name: "매드립 소개", href: "/mlp/about" },
-    { name: "포트폴리오", href: "/mlp/portfolio" },
+    { name: "커뮤니티", href: "/community" },
+    { name: "스터디 룸", href: "/study-room" },
+    { name: "매드립 소개", href: "/about" },
+    { name: "포트폴리오", href: "/portfolio" },
 ];
 
 export function MadLeapHeader() {
@@ -20,7 +20,7 @@ export function MadLeapHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/mlp") return pathname === "/mlp";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -30,10 +30,10 @@ export function MadLeapHeader() {
                 {/* Left Nav */}
                 <div className="hidden md:flex items-center gap-6">
                     <Link
-                        href="/mlp"
+                        href="/"
                         className={clsx(
                             "text-sm font-medium transition-colors",
-                            pathname === "/mlp"
+                            pathname === "/"
                                 ? "text-neutral-900 underline underline-offset-4"
                                 : "text-neutral-500 hover:text-neutral-900"
                         )}
@@ -57,7 +57,7 @@ export function MadLeapHeader() {
                 </div>
 
                 {/* Center Logo */}
-                <Link href="/mlp" className="absolute left-1/2 -translate-x-1/2 flex items-center">
+                <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center">
                     <span className="text-2xl font-black tracking-tight">
                         M<span className="relative">A</span>D
                     </span>
@@ -67,7 +67,7 @@ export function MadLeapHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/mlp/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -91,11 +91,11 @@ export function MadLeapHeader() {
             {mobileOpen && (
                 <div className="md:hidden bg-white border-t border-neutral-200 px-6 py-6 space-y-3">
                     <Link
-                        href="/mlp"
+                        href="/"
                         onClick={() => setMobileOpen(false)}
                         className={clsx(
                             "block text-sm font-medium transition-colors",
-                            pathname === "/mlp" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                            pathname === "/" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
                         )}
                     >
                         홈
@@ -115,7 +115,7 @@ export function MadLeapHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/mlp/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

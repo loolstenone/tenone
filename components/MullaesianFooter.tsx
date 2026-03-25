@@ -21,9 +21,9 @@ const universeProjects = [
 ];
 
 const footerNav = [
-    { name: "뚜르 드 문래", href: "/mls#tour" },
-    { name: "갤러리 문래", href: "/mls#gallery" },
-    { name: "문래 꼬뮨", href: "/mls#commune" },
+    { name: "뚜르 드 문래", href: "/#tour" },
+    { name: "갤러리 문래", href: "/#gallery" },
+    { name: "문래 꼬뮨", href: "/#commune" },
 ];
 
 export function MullaesianFooter() {

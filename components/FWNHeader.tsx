@@ -8,16 +8,16 @@ import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "서울", href: "/fw/category/seoul" },
-    { name: "파리", href: "/fw/category/paris" },
-    { name: "뉴욕", href: "/fw/category/newyork" },
-    { name: "런던", href: "/fw/category/london" },
-    { name: "밀라노", href: "/fw/category/milan" },
-    { name: "월드", href: "/fw/category/world" },
-    { name: "모델", href: "/fw/category/models" },
-    { name: "브랜드", href: "/fw/category/brands" },
-    { name: "스트리트 런웨이", href: "/fw/category/street" },
-    { name: "About", href: "/fw/about" },
+    { name: "서울", href: "/category/seoul" },
+    { name: "파리", href: "/category/paris" },
+    { name: "뉴욕", href: "/category/newyork" },
+    { name: "런던", href: "/category/london" },
+    { name: "밀라노", href: "/category/milan" },
+    { name: "월드", href: "/category/world" },
+    { name: "모델", href: "/category/models" },
+    { name: "브랜드", href: "/category/brands" },
+    { name: "스트리트 런웨이", href: "/category/street" },
+    { name: "About", href: "/about" },
 ];
 
 export function FWNHeader() {
@@ -26,7 +26,7 @@ export function FWNHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/fw") return pathname === "/fw";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -35,7 +35,7 @@ export function FWNHeader() {
             {/* 로고 바 */}
             <div className="bg-[#1a1a1a] border-b border-neutral-800">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
-                    <Link href="/fw" className="shrink-0">
+                    <Link href="/" className="shrink-0">
                         <span className="text-white font-bold text-2xl tracking-tight">
                             FWN
                         </span>
@@ -47,7 +47,7 @@ export function FWNHeader() {
                         </button>
                         <div className="hidden lg:flex items-center gap-3">
                             {isAuthenticated ? (
-                                <Link href="/fw/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                                <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                                     <User className="h-4 w-4" /> {user?.name || "마이"}
                                 </Link>
                             ) : (
@@ -107,7 +107,7 @@ export function FWNHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/fw/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

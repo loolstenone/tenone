@@ -6,8 +6,6 @@ const domainPrefixMap: Record<string, string> = {
     'www.madleague.net': '/ml',
     'youinone.com': '/yi',
     'www.youinone.com': '/yi',
-    'smarcomm.co.kr': '/sc',
-    'www.smarcomm.co.kr': '/sc',
     'smarcomm.biz': '/sc',
     'www.smarcomm.biz': '/sc',
     'hero.ne.kr': '/hr',

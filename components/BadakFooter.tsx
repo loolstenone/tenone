@@ -39,7 +39,7 @@ export function BadakFooter() {
                     </div>
 
                     <div>
-                        <Link href="/bk/about" className="text-sm hover:text-white transition-colors">
+                        <Link href="/about" className="text-sm hover:text-white transition-colors">
                             About _Badak & Contact
                         </Link>
                     </div>

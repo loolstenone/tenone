@@ -17,10 +17,10 @@ const universeProjects = [
 ];
 
 const footerNav = [
-    { name: "자연함 이야기", href: "/nb#about" },
-    { name: "우리 먹거리", href: "/nb#products" },
-    { name: "정선 이야기", href: "/nb#jeongseon" },
-    { name: "오시는 길", href: "/nb#visit" },
+    { name: "자연함 이야기", href: "/#about" },
+    { name: "우리 먹거리", href: "/#products" },
+    { name: "정선 이야기", href: "/#jeongseon" },
+    { name: "오시는 길", href: "/#visit" },
 ];
 
 export function NatureBoxFooter() {

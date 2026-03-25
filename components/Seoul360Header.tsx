@@ -8,11 +8,11 @@ import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "Seoul/360°", href: "/s360" },
-    { name: "Subway Line", href: "/s360/subway-line" },
-    { name: "District", href: "/s360/district" },
-    { name: "Station", href: "/s360/station" },
-    { name: "Outside Seoul", href: "/s360/outside-seoul" },
+    { name: "Seoul/360°", href: "/" },
+    { name: "Subway Line", href: "/subway-line" },
+    { name: "District", href: "/district" },
+    { name: "Station", href: "/station" },
+    { name: "Outside Seoul", href: "/outside-seoul" },
 ];
 
 export function Seoul360Header() {
@@ -21,7 +21,7 @@ export function Seoul360Header() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/s360") return pathname === "/s360";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -29,7 +29,7 @@ export function Seoul360Header() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#3D3D3D]">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/s360" className="shrink-0 flex items-center gap-1">
+                <Link href="/" className="shrink-0 flex items-center gap-1">
                     <span className="bg-white text-[#3D3D3D] text-xs font-bold px-1.5 py-0.5 rounded-sm">
                         Seoul
                     </span>
@@ -62,7 +62,7 @@ export function Seoul360Header() {
                         <Search className="h-4 w-4" />
                     </button>
                     {isAuthenticated ? (
-                        <Link href="/s360/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -102,7 +102,7 @@ export function Seoul360Header() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-600 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/s360/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

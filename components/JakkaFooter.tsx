@@ -3,11 +3,11 @@
 import Link from "next/link";
 
 const portfolioLinks = [
-    { name: "인물 사진", href: "/jk/category/portrait" },
-    { name: "스튜디오", href: "/jk/category/studio" },
-    { name: "스포츠", href: "/jk/category/sports" },
-    { name: "항공 사진", href: "/jk/category/aerial" },
-    { name: "콘서트", href: "/jk/category/concert" },
+    { name: "인물 사진", href: "/category/portrait" },
+    { name: "스튜디오", href: "/category/studio" },
+    { name: "스포츠", href: "/category/sports" },
+    { name: "항공 사진", href: "/category/aerial" },
+    { name: "콘서트", href: "/category/concert" },
 ];
 
 const universeLinks = [

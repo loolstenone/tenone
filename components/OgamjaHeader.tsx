@@ -8,9 +8,9 @@ import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "필찐감자", href: "/0g/writers" },
-    { name: "프로그램", href: "/0g/programs" },
-    { name: "About", href: "/0g/about" },
+    { name: "필찐감자", href: "/writers" },
+    { name: "프로그램", href: "/programs" },
+    { name: "About", href: "/about" },
 ];
 
 export function OgamjaHeader() {
@@ -19,7 +19,7 @@ export function OgamjaHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/0g") return pathname === "/0g";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -28,7 +28,7 @@ export function OgamjaHeader() {
             {/* 상단 유틸 바 */}
             <div className="bg-neutral-50 border-b border-neutral-100">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-8 items-center justify-between text-xs text-neutral-500">
-                    <Link href="/0g" className="hover:text-[#F5C518] transition-colors">
+                    <Link href="/" className="hover:text-[#F5C518] transition-colors">
                         공감자 뉴스레터 구독 신청
                     </Link>
                     <span>{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</span>
@@ -37,7 +37,7 @@ export function OgamjaHeader() {
 
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/0g" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-xl md:text-3xl">🥔</span>
                     <span className="text-xl font-bold text-neutral-900" style={{ fontFamily: "sans-serif" }}>
                         공감자
@@ -68,7 +68,7 @@ export function OgamjaHeader() {
                         <Search className="h-4 w-4" />
                     </button>
                     {isAuthenticated ? (
-                        <Link href="/0g/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -108,7 +108,7 @@ export function OgamjaHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/0g/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

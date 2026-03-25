@@ -8,14 +8,14 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "경쟁 PT", href: "/ml/pt" },
-    { name: "프로그램", href: "/ml/program" },
-    { name: "Idea Movement", href: "/ml/idea-movement" },
-    { name: "매드 진", href: "/ml/madzine" },
-    { name: "히어로", href: "/ml/hero" },
-    { name: "활동인증서", href: "/ml/certificate" },
-    { name: "매드 리거", href: "/ml/leaguer" },
-    { name: "About", href: "/ml/about" },
+    { name: "경쟁 PT", href: "/pt" },
+    { name: "프로그램", href: "/program" },
+    { name: "Idea Movement", href: "/idea-movement" },
+    { name: "매드 진", href: "/madzine" },
+    { name: "히어로", href: "/hero" },
+    { name: "활동인증서", href: "/certificate" },
+    { name: "매드 리거", href: "/leaguer" },
+    { name: "About", href: "/about" },
 ];
 
 export function MadLeagueHeader() {
@@ -24,7 +24,7 @@ export function MadLeagueHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/m") return pathname === "/m";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -32,7 +32,7 @@ export function MadLeagueHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-neutral-900">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/m" className="flex items-center gap-1 shrink-0">
+                <Link href="/" className="flex items-center gap-1 shrink-0">
                     <span className="bg-[#D32F2F] text-white font-extrabold text-lg px-2 py-0.5 tracking-tight">
                         MAD
                     </span>
@@ -62,7 +62,7 @@ export function MadLeagueHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/ml/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -102,7 +102,7 @@ export function MadLeagueHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/ml/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

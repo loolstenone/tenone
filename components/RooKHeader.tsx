@@ -8,11 +8,11 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "WORKS", href: "/rk/works" },
-    { name: "ARTIST", href: "/rk/artist" },
-    { name: "FREE BOARD", href: "/rk/board" },
-    { name: "ROOKIE", href: "/rk/rookie" },
-    { name: "ABOUT", href: "/rk/about" },
+    { name: "WORKS", href: "/works" },
+    { name: "ARTIST", href: "/artist" },
+    { name: "FREE BOARD", href: "/board" },
+    { name: "ROOKIE", href: "/rookie" },
+    { name: "ABOUT", href: "/about" },
 ];
 
 export function RooKHeader() {
@@ -21,7 +21,7 @@ export function RooKHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/rk") return pathname === "/rk";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -29,7 +29,7 @@ export function RooKHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#282828]">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/rk" className="shrink-0">
+                <Link href="/" className="shrink-0">
                     <span className="text-white font-bold text-2xl tracking-tight" style={{ fontFamily: 'sans-serif' }}>
                         Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span>
                     </span>
@@ -56,7 +56,7 @@ export function RooKHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/rk/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -96,7 +96,7 @@ export function RooKHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-700 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/rk/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

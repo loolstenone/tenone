@@ -8,9 +8,9 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "Planner's", href: "/pln" },
-    { name: "Planning", href: "/pln?tab=planning" },
-    { name: "Planner's Planner", href: "/pln?tab=planner-tool" },
+    { name: "Planner's", href: "/" },
+    { name: "Planning", href: "/?tab=planning" },
+    { name: "Planner's Planner", href: "/?tab=planner-tool" },
 ];
 
 export function PlannersHeader() {
@@ -19,7 +19,7 @@ export function PlannersHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/pln") return pathname === "/pln";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -27,7 +27,7 @@ export function PlannersHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-teal-900 text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/pln" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-lg font-bold tracking-tight text-white">
                         Planner&apos;s
                     </span>
@@ -54,7 +54,7 @@ export function PlannersHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/pln/my" className="flex items-center gap-2 text-sm text-teal-200 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-teal-200 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -102,7 +102,7 @@ export function PlannersHeader() {
                     ))}
                     <div className="pt-2 border-t border-teal-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/pln/my" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

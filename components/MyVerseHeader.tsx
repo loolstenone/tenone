@@ -8,11 +8,11 @@ import { Menu, X, Orbit, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "철학", href: "/mv/philosophy" },
-    { name: "서비스", href: "/mv/service" },
-    { name: "기술", href: "/mv/technology" },
-    { name: "로드맵", href: "/mv/roadmap" },
-    { name: "팀", href: "/mv/team" },
+    { name: "철학", href: "/philosophy" },
+    { name: "서비스", href: "/service" },
+    { name: "기술", href: "/technology" },
+    { name: "로드맵", href: "/roadmap" },
+    { name: "팀", href: "/team" },
 ];
 
 export function MyVerseHeader() {
@@ -26,7 +26,7 @@ export function MyVerseHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0D17]/95 backdrop-blur-md border-b border-white/5">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/mv" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <Orbit className="h-5 w-5 text-indigo-400" />
                     <span className="text-white font-semibold text-lg tracking-tight">
                         My <span className="text-indigo-400">Universe</span>
@@ -54,7 +54,7 @@ export function MyVerseHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/mv/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -64,7 +64,7 @@ export function MyVerseHeader() {
                         </>
                     )}
                     <Link
-                        href="/mv/contact"
+                        href="/contact"
                         className="text-sm font-medium px-4 py-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-colors"
                     >
                         Early Access
@@ -100,7 +100,7 @@ export function MyVerseHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-white/5 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/mv/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
@@ -111,7 +111,7 @@ export function MyVerseHeader() {
                         )}
                     </div>
                     <Link
-                        href="/mv/contact"
+                        href="/contact"
                         onClick={() => setMobileOpen(false)}
                         className="block text-sm font-medium py-2 text-indigo-400 hover:text-indigo-300 transition-colors"
                     >

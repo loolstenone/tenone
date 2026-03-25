@@ -8,12 +8,12 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "히어로", href: "/bk/hero" },
-    { name: "바카데미", href: "/bk/bacademy" },
-    { name: "콘텐츠", href: "/bk/contents" },
-    { name: "바닥 상회", href: "/bk/shop" },
-    { name: "커뮤니티", href: "/bk/community" },
-    { name: "바닥이란", href: "/bk/about" },
+    { name: "히어로", href: "/hero" },
+    { name: "바카데미", href: "/bacademy" },
+    { name: "콘텐츠", href: "/contents" },
+    { name: "바닥 상회", href: "/shop" },
+    { name: "커뮤니티", href: "/community" },
+    { name: "바닥이란", href: "/about" },
 ];
 
 export function BadakHeader() {
@@ -22,7 +22,7 @@ export function BadakHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/bk") return pathname === "/bk";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -30,7 +30,7 @@ export function BadakHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e] text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/bk" className="shrink-0 flex items-center gap-3">
+                <Link href="/" className="shrink-0 flex items-center gap-3">
                     <span className="text-xl font-black leading-none tracking-tight">
                         <span className="block text-[11px]">Ba</span>
                         <span className="block text-[11px]">dak</span>
@@ -58,7 +58,7 @@ export function BadakHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/bk/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -98,7 +98,7 @@ export function BadakHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/bk/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

@@ -6,10 +6,10 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "About", href: "/th#about" },
-    { name: "Services", href: "/th#services" },
-    { name: "Process", href: "/th#process" },
-    { name: "Contact", href: "/th#contact" },
+    { name: "About", href: "/#about" },
+    { name: "Services", href: "/#services" },
+    { name: "Process", href: "/#process" },
+    { name: "Contact", href: "/#contact" },
 ];
 
 export function TrendHunterHeader() {
@@ -19,7 +19,7 @@ export function TrendHunterHeader() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-neutral-800/50">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-                <Link href="/th" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-[#00FF88] font-mono font-bold text-xl tracking-tight">
                         T.H
                     </span>
@@ -40,7 +40,7 @@ export function TrendHunterHeader() {
                         </Link>
                     ))}
                     {isAuthenticated ? (
-                        <Link href="/th/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -75,7 +75,7 @@ export function TrendHunterHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-800/50 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/th/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88] flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88] flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

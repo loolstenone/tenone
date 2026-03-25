@@ -3,12 +3,12 @@
 import Link from "next/link";
 
 const mainMenu = [
-    { name: "New York", href: "/fw/category/newyork" },
-    { name: "Paris", href: "/fw/category/paris" },
-    { name: "London", href: "/fw/category/london" },
-    { name: "Milan", href: "/fw/category/milan" },
-    { name: "Seoul", href: "/fw/category/seoul" },
-    { name: "About FWN", href: "/fw/about" },
+    { name: "New York", href: "/category/newyork" },
+    { name: "Paris", href: "/category/paris" },
+    { name: "London", href: "/category/london" },
+    { name: "Milan", href: "/category/milan" },
+    { name: "Seoul", href: "/category/seoul" },
+    { name: "About FWN", href: "/about" },
 ];
 
 const universeLinks = [

@@ -8,12 +8,12 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "HIT 프로그램", href: "/hr/hit" },
-    { name: "커리어", href: "/hr/career" },
-    { name: "멘토링", href: "/hr/mentor" },
-    { name: "브랜딩", href: "/hr/branding" },
-    { name: "이력서", href: "/hr/resume" },
-    { name: "About", href: "/hr/about" },
+    { name: "HIT 프로그램", href: "/hit" },
+    { name: "커리어", href: "/career" },
+    { name: "멘토링", href: "/mentor" },
+    { name: "브랜딩", href: "/branding" },
+    { name: "이력서", href: "/resume" },
+    { name: "About", href: "/about" },
 ];
 
 export function HeRoHeader() {
@@ -22,7 +22,7 @@ export function HeRoHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/hr") return pathname === "/hr";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -30,7 +30,7 @@ export function HeRoHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/hr" className="flex items-center shrink-0">
+                <Link href="/" className="flex items-center shrink-0">
                     <span className="text-2xl font-extrabold tracking-tight">
                         <span className="text-amber-500">He</span>
                         <span className="text-neutral-900">Ro</span>
@@ -58,7 +58,7 @@ export function HeRoHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/hr/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -98,7 +98,7 @@ export function HeRoHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/hr/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

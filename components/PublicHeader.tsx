@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
-import { PortalIcon } from "@/components/icons/PortalIcon";
+
 
 const publicNav = [
     { name: "Works", href: "/works" },
@@ -118,8 +118,8 @@ export function PublicHeader() {
                         </div>
                     )}
                     {isAuthenticated && canAccessIntra && (
-                        <Link href="/intra" className="flex items-center hover:opacity-70 transition-opacity" title="Intra">
-                            <PortalIcon direction="enter" size={28} darkBg={isDark} />
+                        <Link href="/intra" className="text-xs font-medium hover:opacity-70 transition-opacity flex items-center gap-0.5" style={{ color: "var(--tn-text-sub)" }}>
+                            입장 <span style={{ color: "var(--tn-text-muted)" }}>→</span>
                         </Link>
                     )}
                     {!isLoading && !isAuthenticated && (
@@ -189,10 +189,9 @@ export function PublicHeader() {
                             </div>
                             {canAccessIntra && (
                                 <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2 text-sm transition-colors hover:opacity-70"
+                                    className="flex items-center gap-1 text-sm transition-colors hover:opacity-70"
                                     style={{ color: "var(--tn-text-sub)" }}>
-                                    <PortalIcon direction="enter" size={20} darkBg={isDark} />
-                                    Intra Office
+                                    입장 <span style={{ color: "var(--tn-text-muted)" }}>→</span>
                                 </Link>
                             )}
                             <Link href="/profile" onClick={() => setMobileMenuOpen(false)}

@@ -8,8 +8,8 @@ import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "MoNTZ", href: "/mtz" },
-    { name: "소개", href: "/mtz/about" },
+    { name: "MoNTZ", href: "/" },
+    { name: "소개", href: "/about" },
 ];
 
 export function MoNTZHeader() {
@@ -18,14 +18,14 @@ export function MoNTZHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/mtz") return pathname === "/mtz";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a1a]/90 backdrop-blur-sm">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
-                <Link href="/mtz" className="shrink-0">
+                <Link href="/" className="shrink-0">
                     <span className="text-white font-bold text-xl tracking-wider">
                         M<span className="text-[#c8a97e]">o</span>NTZ
                     </span>
@@ -51,7 +51,7 @@ export function MoNTZHeader() {
                         <Search className="h-4 w-4" />
                     </button>
                     {isAuthenticated ? (
-                        <Link href="/mtz/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -91,7 +91,7 @@ export function MoNTZHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/mtz/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

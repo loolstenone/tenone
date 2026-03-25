@@ -695,8 +695,7 @@ export function IntraSidebar() {
             <div className="border-t border-neutral-800 shrink-0">
                 <Link href="/"
                     className="flex items-center gap-3 px-6 py-2.5 text-xs text-neutral-500 hover:text-white transition-colors">
-                    <Home className="h-3.5 w-3.5" />
-                    Public Site
+                    퇴장 <span className="text-neutral-600">→</span>
                 </Link>
                 {user && (
                     <div className="px-4 py-3 flex items-center gap-3">

@@ -16,7 +16,6 @@ const ALLOWED_RETURN_DOMAINS = new Set([
     'youinone.com', 'www.youinone.com',
     'rook.co.kr', 'www.rook.co.kr',
     'badak.biz', 'www.badak.biz',
-    'smarcomm.co.kr', 'www.smarcomm.co.kr',
     'smarcomm.biz', 'www.smarcomm.biz',
     'hero.ne.kr', 'www.hero.ne.kr',
     '0gamja.com', 'www.0gamja.com',

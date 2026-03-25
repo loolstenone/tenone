@@ -5,12 +5,12 @@ import { Instagram, Youtube, Mail } from "lucide-react";
 
 
 const quickLinks = [
-    { name: "HIT 프로그램", href: "/hr/hit" },
-    { name: "커리어", href: "/hr/career" },
-    { name: "멘토링", href: "/hr/mentor" },
-    { name: "브랜딩", href: "/hr/branding" },
-    { name: "이력서", href: "/hr/resume" },
-    { name: "About", href: "/hr/about" },
+    { name: "HIT 프로그램", href: "/hit" },
+    { name: "커리어", href: "/career" },
+    { name: "멘토링", href: "/mentor" },
+    { name: "브랜딩", href: "/branding" },
+    { name: "이력서", href: "/resume" },
+    { name: "About", href: "/about" },
 ];
 
 export function HeRoFooter() {
@@ -20,7 +20,7 @@ export function HeRoFooter() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {/* Logo & Description */}
                     <div>
-                        <Link href="/hr" className="flex items-center mb-4">
+                        <Link href="/" className="flex items-center mb-4">
                             <span className="text-2xl font-extrabold tracking-tight">
                                 <span className="text-amber-500">He</span>
                                 <span className="text-white">Ro</span>

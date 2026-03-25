@@ -27,9 +27,9 @@ export function PlannersFooter() {
                     <div className="space-y-4">
                         <h4 className="text-white text-sm font-semibold">Menu</h4>
                         <div className="space-y-2">
-                            <Link href="/pln" className="block text-sm hover:text-white transition-colors">Planner&apos;s</Link>
-                            <Link href="/pln?tab=planning" className="block text-sm hover:text-white transition-colors">Planning</Link>
-                            <Link href="/pln?tab=planner-tool" className="block text-sm hover:text-white transition-colors">Planner&apos;s Planner</Link>
+                            <Link href="/" className="block text-sm hover:text-white transition-colors">Planner&apos;s</Link>
+                            <Link href="/?tab=planning" className="block text-sm hover:text-white transition-colors">Planning</Link>
+                            <Link href="/?tab=planner-tool" className="block text-sm hover:text-white transition-colors">Planner&apos;s Planner</Link>
                         </div>
                     </div>
 

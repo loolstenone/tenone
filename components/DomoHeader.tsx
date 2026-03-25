@@ -8,11 +8,11 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "서비스", href: "/dm/services" },
-    { name: "네트워크", href: "/dm/network" },
-    { name: "인사이트", href: "/dm/insights" },
-    { name: "이벤트", href: "/dm/events" },
-    { name: "About", href: "/dm/about" },
+    { name: "서비스", href: "/services" },
+    { name: "네트워크", href: "/network" },
+    { name: "인사이트", href: "/insights" },
+    { name: "이벤트", href: "/events" },
+    { name: "About", href: "/about" },
 ];
 
 export function DomoHeader() {
@@ -21,7 +21,7 @@ export function DomoHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/dm") return pathname === "/dm";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -29,7 +29,7 @@ export function DomoHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#2D1B2E] text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/dm" className="shrink-0 flex items-center gap-2">
+                <Link href="/" className="shrink-0 flex items-center gap-2">
                     <span className="text-lg font-bold tracking-tight text-white">
                         Domo
                     </span>
@@ -57,7 +57,7 @@ export function DomoHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
                     {isAuthenticated ? (
-                        <Link href="/dm/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -97,7 +97,7 @@ export function DomoHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/dm/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

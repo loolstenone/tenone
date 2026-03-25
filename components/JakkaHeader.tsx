@@ -8,8 +8,8 @@ import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "포트폴리오", href: "/jk" },
-    { name: "소개", href: "/jk/about" },
+    { name: "포트폴리오", href: "/" },
+    { name: "소개", href: "/about" },
 ];
 
 export function JakkaHeader() {
@@ -18,7 +18,7 @@ export function JakkaHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/jk") return pathname === "/jk";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -27,7 +27,7 @@ export function JakkaHeader() {
             <div className="border-b border-neutral-200">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                     {/* 로고 */}
-                    <Link href="/jk" className="shrink-0">
+                    <Link href="/" className="shrink-0">
                         <span
                             className="text-sm font-semibold tracking-[0.3em] text-neutral-900 border border-neutral-900 px-2.5 py-1"
                         >
@@ -55,7 +55,7 @@ export function JakkaHeader() {
                             <Search className="h-4 w-4" />
                         </button>
                         {isAuthenticated ? (
-                            <Link href="/jk/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                            <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
                                 <User className="h-4 w-4" /> {user?.name || "마이"}
                             </Link>
                         ) : (
@@ -96,7 +96,7 @@ export function JakkaHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-200 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/jk/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (

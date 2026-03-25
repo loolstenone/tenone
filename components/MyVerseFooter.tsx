@@ -4,19 +4,19 @@ import Link from "next/link";
 import { Orbit } from "lucide-react";
 
 const siteLinks = [
-    { name: "철학", href: "/mv/philosophy" },
-    { name: "서비스", href: "/mv/service" },
-    { name: "기술 & 보안", href: "/mv/technology" },
-    { name: "로드맵", href: "/mv/roadmap" },
-    { name: "팀", href: "/mv/team" },
-    { name: "Contact", href: "/mv/contact" },
+    { name: "철학", href: "/philosophy" },
+    { name: "서비스", href: "/service" },
+    { name: "기술 & 보안", href: "/technology" },
+    { name: "로드맵", href: "/roadmap" },
+    { name: "팀", href: "/team" },
+    { name: "Contact", href: "/contact" },
 ];
 
 const principles = [
-    { name: "개인화 (Personalize)", href: "/mv/philosophy" },
-    { name: "사용자 주도권 (Initiative)", href: "/mv/philosophy" },
-    { name: "완벽한 보안 (Security)", href: "/mv/technology" },
-    { name: "데이터 주권 (Sovereignty)", href: "/mv/technology" },
+    { name: "개인화 (Personalize)", href: "/philosophy" },
+    { name: "사용자 주도권 (Initiative)", href: "/philosophy" },
+    { name: "완벽한 보안 (Security)", href: "/technology" },
+    { name: "데이터 주권 (Sovereignty)", href: "/technology" },
 ];
 
 export function MyVerseFooter() {

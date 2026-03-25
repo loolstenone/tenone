@@ -18,10 +18,10 @@ const universeProjects = [
 ];
 
 const footerNav = [
-    { name: "타우니티란", href: "/tw#about" },
-    { name: "우리 동네", href: "/tw#town" },
-    { name: "함께 해요", href: "/tw#together" },
-    { name: "이야기", href: "/tw#stories" },
+    { name: "타우니티란", href: "/#about" },
+    { name: "우리 동네", href: "/#town" },
+    { name: "함께 해요", href: "/#together" },
+    { name: "이야기", href: "/#stories" },
 ];
 
 export function TownityFooter() {

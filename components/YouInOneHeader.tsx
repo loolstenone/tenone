@@ -8,11 +8,11 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "About", href: "/yi/about" },
-    { name: "What We Do", href: "/yi/whatwedo" },
-    { name: "Portfolio", href: "/yi/portfolio" },
-    { name: "People", href: "/yi/people" },
-    { name: "Contact", href: "/yi/contact" },
+    { name: "About", href: "/about" },
+    { name: "What We Do", href: "/whatwedo" },
+    { name: "Portfolio", href: "/portfolio" },
+    { name: "People", href: "/people" },
+    { name: "Contact", href: "/contact" },
 ];
 
 export function YouInOneHeader() {
@@ -21,7 +21,7 @@ export function YouInOneHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/yi") return pathname === "/yi";
+        if (href === "/") return pathname === "/";
         return pathname.startsWith(href);
     };
 
@@ -29,7 +29,7 @@ export function YouInOneHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/yi" className="flex items-baseline gap-0 shrink-0">
+                <Link href="/" className="flex items-baseline gap-0 shrink-0">
                     <span className="text-[#171717] font-extrabold text-xl tracking-tight">
                         You
                     </span>
@@ -62,7 +62,7 @@ export function YouInOneHeader() {
                 {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
                     {isAuthenticated ? (
-                        <Link href="/yi/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-[#171717] transition-colors">
+                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-[#171717] transition-colors">
                             <User className="h-4 w-4" /> {user?.name || "마이"}
                         </Link>
                     ) : (
@@ -72,7 +72,7 @@ export function YouInOneHeader() {
                         </>
                     )}
                     <Link
-                        href="/yi/alliance"
+                        href="/alliance"
                         className="text-sm px-5 py-2 bg-[#171717] text-white hover:bg-[#E53935] transition-colors rounded"
                     >
                         Members &amp; Alliance
@@ -108,7 +108,7 @@ export function YouInOneHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/yi/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#171717] flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#171717] flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
@@ -118,7 +118,7 @@ export function YouInOneHeader() {
                             </>
                         )}
                         <Link
-                            href="/yi/alliance"
+                            href="/alliance"
                             onClick={() => setMobileOpen(false)}
                             className="inline-block text-sm px-5 py-2 bg-[#171717] text-white hover:bg-[#E53935] rounded transition-colors"
                         >

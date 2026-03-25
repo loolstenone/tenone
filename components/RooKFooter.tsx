@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { Youtube, MessageCircle } from "lucide-react";
 const footerNav = [
-    { name: "Works", href: "/rk/works" },
-    { name: "Artist", href: "/rk/artist" },
-    { name: "Free board", href: "/rk/board" },
-    { name: "RooKie", href: "/rk/rookie" },
-    { name: "About", href: "/rk/about" },
+    { name: "Works", href: "/works" },
+    { name: "Artist", href: "/artist" },
+    { name: "Free board", href: "/board" },
+    { name: "RooKie", href: "/rookie" },
+    { name: "About", href: "/about" },
 ];
 
 export function RooKFooter() {

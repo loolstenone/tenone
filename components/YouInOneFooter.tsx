@@ -5,11 +5,11 @@ import { Mail, Globe, Lightbulb } from "lucide-react";
 
 
 const quickLinks = [
-    { name: "About", href: "/yi/about" },
-    { name: "What We Do", href: "/yi/whatwedo" },
-    { name: "Portfolio", href: "/yi/portfolio" },
-    { name: "People", href: "/yi/people" },
-    { name: "Alliance", href: "/yi/alliance" },
+    { name: "About", href: "/about" },
+    { name: "What We Do", href: "/whatwedo" },
+    { name: "Portfolio", href: "/portfolio" },
+    { name: "People", href: "/people" },
+    { name: "Alliance", href: "/alliance" },
 ];
 
 export function YouInOneFooter() {
@@ -19,7 +19,7 @@ export function YouInOneFooter() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {/* Logo & Description */}
                     <div>
-                        <Link href="/yi" className="flex items-baseline gap-0 mb-4">
+                        <Link href="/" className="flex items-baseline gap-0 mb-4">
                             <span className="text-white font-extrabold text-lg tracking-tight">
                                 You
                             </span>
