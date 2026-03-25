@@ -12,7 +12,7 @@ const universeLinks = [
 ];
 
 const contactLinks = [
-    { name: "lools@tenone.biz", href: "mailto:lools@tenone.biz" },
+    { name: "tenone.biz/contact", href: "mailto:tenone.biz/contact" },
 ];
 
 export function MoNTZFooter() {

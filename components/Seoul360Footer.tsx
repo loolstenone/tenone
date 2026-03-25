@@ -80,7 +80,7 @@ export function Seoul360Footer() {
                 <div className="mt-8 pt-6 border-t border-neutral-600">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-xs">
-                            Contact: lools@tenone.biz
+                            Contact: tenone.biz/contact
                         </p>
                         <p className="text-xs">
                             &copy; Seoul/360°. Powered by{" "}

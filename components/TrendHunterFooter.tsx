@@ -52,7 +52,7 @@ export function TrendHunterFooter() {
                     {/* Contact + Universe */}
                     <div>
                         <h3 className="text-white text-sm font-semibold mb-4 font-mono">Contact</h3>
-                        <p className="text-sm mb-1">lools@tenone.biz</p>
+                        <p className="text-sm mb-1">tenone.biz/contact</p>
                         <p className="text-sm mb-4">+82 10 2795 1001</p>
                         <h3 className="text-white text-sm font-semibold mb-2 font-mono">Ten:One Universe</h3>
                         <div className="space-y-1">

@@ -54,7 +54,7 @@ export function FWNFooter() {
                     {/* Contact */}
                     <div>
                         <h3 className="text-white text-sm font-semibold mb-4">Contact</h3>
-                        <p className="text-sm mb-4">lools@tenone.biz</p>
+                        <p className="text-sm mb-4">tenone.biz/contact</p>
                         <h3 className="text-white text-sm font-semibold mb-2">Ten:One Universe</h3>
                         <div className="space-y-1">
                             {universeLinks.map((link) => (

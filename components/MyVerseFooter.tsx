@@ -79,7 +79,7 @@ export function MyVerseFooter() {
                 <div className="mt-8 pt-6 border-t border-white/10">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-xs">
-                            Contact: lools@tenone.biz
+                            Contact: tenone.biz/contact
                         </p>
                         <p className="text-xs">
                             &copy; My Universe. Powered by{" "}

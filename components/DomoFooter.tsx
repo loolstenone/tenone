@@ -39,7 +39,7 @@ export function DomoFooter() {
                     <div className="space-y-4">
                         <h4 className="text-white text-sm font-semibold">Contact</h4>
                         <div className="space-y-2 text-sm">
-                            <p>Email: lools@tenone.biz</p>
+                            <p>Email: tenone.biz/contact</p>
                             <p>Tel: +82 10 2795 1001</p>
                             <a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="block hover:text-white transition-colors">
                                 KakaoTalk: @tenone

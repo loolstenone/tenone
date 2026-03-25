@@ -106,8 +106,8 @@ export function MullaesianFooter() {
                             <p>전천일 (Cheonil Jeon)</p>
                             <p>광고, 마케팅, 커뮤니케이션 기획</p>
                             <p>
-                                <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">
-                                    lools@tenone.biz
+                                <a href="mailto:tenone.biz/contact" className="hover:text-white transition-colors">
+                                    tenone.biz/contact
                                 </a>
                             </p>
                             <p>+82 10 2795 1001</p>

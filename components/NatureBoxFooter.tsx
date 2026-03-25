@@ -87,8 +87,8 @@ export function NatureBoxFooter() {
                             <p>강원도 정선군 화암면 용소길 258</p>
                             <p>한소농장</p>
                             <p>
-                                <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">
-                                    lools@tenone.biz
+                                <a href="mailto:tenone.biz/contact" className="hover:text-white transition-colors">
+                                    tenone.biz/contact
                                 </a>
                             </p>
                             <p>+82 10 2795 1001</p>

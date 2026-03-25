@@ -46,7 +46,7 @@ export function RooKFooter() {
                                 <span className="text-sm text-neutral-500 mr-2">AI Creator</span>
                                 <span className="font-bold text-xl">Roo<span className="inline-block" style={{ transform: 'scaleX(-1)' }}>K</span></span>
                             </p>
-                            <p className="text-sm mt-2">lools@tenone.biz</p>
+                            <p className="text-sm mt-2">tenone.biz/contact</p>
                         </div>
                     </div>
                 </div>

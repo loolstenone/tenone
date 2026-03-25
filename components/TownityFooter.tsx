@@ -87,8 +87,8 @@ export function TownityFooter() {
                         <div className="space-y-2 text-sm">
                             <p>전천일 (Cheonil Jeon)</p>
                             <p>
-                                <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">
-                                    lools@tenone.biz
+                                <a href="mailto:tenone.biz/contact" className="hover:text-white transition-colors">
+                                    tenone.biz/contact
                                 </a>
                             </p>
                             <p>+82 10 2795 1001</p>
