@@ -48,11 +48,23 @@ export default function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    try { await loginWithGoogle(); } catch { setError('Google 로그인에 실패했습니다'); }
+    try {
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
+      const returnDomain = window.location.hostname;
+      const state = crypto.randomUUID();
+      sessionStorage.setItem('auth_state', state);
+      window.location.href = `${authDomain}/auth-hub/login?provider=google&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent('/dashboard')}&state=${state}`;
+    } catch { setError('Google 로그인에 실패했습니다'); }
   };
 
   const handleKakao = async () => {
-    try { await loginWithKakao(); } catch { setError('카카오 로그인에 실패했습니다'); }
+    try {
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
+      const returnDomain = window.location.hostname;
+      const state = crypto.randomUUID();
+      sessionStorage.setItem('auth_state', state);
+      window.location.href = `${authDomain}/auth-hub/login?provider=kakao&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent('/dashboard')}&state=${state}`;
+    } catch { setError('카카오 로그인에 실패했습니다'); }
   };
 
   return (
