@@ -51,7 +51,7 @@ export default function ProfileDetailPage() {
       <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center">
         <div className="text-4xl mb-3">😕</div>
         <p className="text-neutral-500">프로필을 찾을 수 없습니다</p>
-        <Link href="/bk/explore" className="mt-3 text-sm text-blue-600 hover:underline">탐색으로 돌아가기</Link>
+        <Link href="/badak/explore" className="mt-3 text-sm text-blue-600 hover:underline">탐색으로 돌아가기</Link>
       </div>
     );
   }
@@ -66,7 +66,7 @@ export default function ProfileDetailPage() {
         {/* 액션 버튼 */}
         <div className="mt-6">
           {isOwn ? (
-            <Link href="/bk/my" className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-5 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+            <Link href="/badak/my" className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-5 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
               프로필 수정
             </Link>
           ) : connStatus === 'accepted' ? (

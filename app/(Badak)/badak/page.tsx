@@ -30,10 +30,10 @@ export default function BadakHome() {
             업계 사람들의 신뢰 기반 인맥 네트워크.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/bk/join" className="flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
+            <Link href="/badak/join" className="flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
               바닥 프로필 만들기 <ArrowRight size={16} />
             </Link>
-            <Link href="/bk/explore" className="flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+            <Link href="/badak/explore" className="flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition-colors">
               바닥 탐색하기
             </Link>
           </div>
@@ -115,11 +115,11 @@ export default function BadakHome() {
                 <Star size={18} className="text-amber-500 fill-amber-500" />
                 <h2 className="text-xl font-bold text-neutral-900">이바닥 스타</h2>
               </div>
-              <Link href="/bk/stars" className="text-sm text-blue-600 hover:underline">전체 보기</Link>
+              <Link href="/badak/stars" className="text-sm text-blue-600 hover:underline">전체 보기</Link>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {stars.map(star => (
-                <Link key={star.id} href={`/bk/stars/${star.slug}`}
+                <Link key={star.id} href={`/badak/stars/${star.slug}`}
                   className="group block rounded-xl border border-neutral-200 overflow-hidden hover:border-blue-300 transition-colors">
                   {star.coverImageUrl && (
                     <div className="aspect-video overflow-hidden">
@@ -141,7 +141,7 @@ export default function BadakHome() {
         <div className="mx-auto max-w-lg px-6 text-center">
           <h2 className="text-2xl font-bold text-neutral-900 mb-3">바닥을 깔 준비 됐나요?</h2>
           <p className="text-sm text-neutral-500 mb-6">2분이면 프로필 완성. 같은 바닥의 사람을 만나세요.</p>
-          <Link href="/bk/join" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
+          <Link href="/badak/join" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
             지금 시작하기 <ArrowRight size={16} />
           </Link>
         </div>

@@ -148,7 +148,7 @@ function LoginForm() {
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
             const canIntraAccess = user?.accountType && user.accountType !== 'member';
-            const defaultRedirect = isMadLeague ? '/ml' : canIntraAccess ? '/intra' : '/';
+            const defaultRedirect = isMadLeague ? '/madleague' : canIntraAccess ? '/intra' : '/';
             const autoRedirect = redirectTo !== '/' ? redirectTo : defaultRedirect;
             router.replace(autoRedirect);
         }
@@ -170,7 +170,7 @@ function LoginForm() {
             const result = await login(email, password);
             if (result.success) {
                 const canIntra = result.user?.accountType && result.user.accountType !== 'member';
-                const defaultDest = isMadLeague ? '/ml' : canIntra ? '/intra' : '/';
+                const defaultDest = isMadLeague ? '/madleague' : canIntra ? '/intra' : '/';
                 const dest = redirectTo !== '/' ? redirectTo : defaultDest;
                 router.push(dest);
             } else {

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // 도메인 → 사이트 프리픽스 매핑
 const domainPrefixMap: Record<string, string> = {
-    'madleague.net': '/ml',
-    'www.madleague.net': '/ml',
+    'madleague.net': '/madleague',
+    'www.madleague.net': '/madleague',
     'youinone.com': '/yi',
     'www.youinone.com': '/yi',
     'smarcomm.biz': '/sc',
@@ -22,8 +22,8 @@ const domainPrefixMap: Record<string, string> = {
     'montz.tenone.biz': '/mtz',
     'trendhunter.tenone.biz': '/th',
     'myverse.tenone.biz': '/mv',
-    'badak.biz': '/bk',
-    'www.badak.biz': '/bk',
+    'badak.biz': '/badak',
+    'www.badak.biz': '/badak',
     'townity.tenone.biz': '/tw',
     'naturebox.tenone.biz': '/nb',
     'domo.tenone.biz': '/dm',

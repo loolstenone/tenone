@@ -4,11 +4,11 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 const subNav = [
-    { name: "채용 정보", href: "/bk/hero" },
-    { name: "자까", href: "/bk/hero/jakka" },
-    { name: "돈츠", href: "/bk/hero/donts" },
-    { name: "이력서 등록", href: "/bk/hero/resume" },
-    { name: "프리워커 등록", href: "/bk/hero/freelancer" },
+    { name: "채용 정보", href: "/badak/hero" },
+    { name: "자까", href: "/badak/hero/jakka" },
+    { name: "돈츠", href: "/badak/hero/donts" },
+    { name: "이력서 등록", href: "/badak/hero/resume" },
+    { name: "프리워커 등록", href: "/badak/hero/freelancer" },
 ];
 
 const jobCategories = [
@@ -92,7 +92,7 @@ export default function HeroPage() {
                         {jobPostings.map((job, i) => (
                             <Link
                                 key={i}
-                                href="/bk/hero"
+                                href="/badak/hero"
                                 className="flex items-center justify-between py-4 border-b border-neutral-100 group hover:bg-neutral-50 px-2 -mx-2 transition-colors"
                             >
                                 <div className="flex-1">

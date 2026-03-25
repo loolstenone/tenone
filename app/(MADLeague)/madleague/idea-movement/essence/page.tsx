@@ -10,7 +10,7 @@ export default function EssencePage() {
             <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <Link
-                        href="/ml/idea-movement"
+                        href="/madleague/idea-movement"
                         className="inline-flex items-center gap-2 text-violet-400 text-sm hover:text-violet-300 transition-colors mb-8"
                     >
                         <ArrowLeft className="h-4 w-4" />
@@ -187,7 +187,7 @@ export default function EssencePage() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
-                            href="/ml/idea-movement"
+                            href="/madleague/idea-movement"
                             className="px-8 py-3 bg-white text-amber-600 font-semibold hover:bg-neutral-100 transition-colors rounded"
                         >
                             Idea Movement

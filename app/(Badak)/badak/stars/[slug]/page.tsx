@@ -26,7 +26,7 @@ export default function StarDetailPage() {
     return (
       <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center">
         <p className="text-neutral-500">아티클을 찾을 수 없습니다</p>
-        <Link href="/bk/stars" className="mt-3 text-sm text-blue-600 hover:underline">목록으로</Link>
+        <Link href="/badak/stars" className="mt-3 text-sm text-blue-600 hover:underline">목록으로</Link>
       </div>
     );
   }
@@ -34,7 +34,7 @@ export default function StarDetailPage() {
   return (
     <div className="min-h-[calc(100vh-56px)] bg-white">
       <div className="mx-auto max-w-3xl px-4 py-8">
-        <Link href="/bk/stars" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 mb-6">
+        <Link href="/badak/stars" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 mb-6">
           <ArrowLeft size={14} /> 이바닥 스타
         </Link>
 

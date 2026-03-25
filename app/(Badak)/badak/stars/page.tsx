@@ -36,7 +36,7 @@ export default function StarsPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {stars.map(star => (
-              <Link key={star.id} href={`/bk/stars/${star.slug}`}
+              <Link key={star.id} href={`/badak/stars/${star.slug}`}
                 className="group block rounded-xl border border-neutral-200 bg-white overflow-hidden hover:border-blue-300 hover:shadow-sm transition-all">
                 {star.coverImageUrl && (
                   <div className="aspect-[2/1] overflow-hidden">

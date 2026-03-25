@@ -3,8 +3,8 @@
 import Link from "next/link";
 
 const subNav = [
-    { name: "교육/세미나 정보", href: "/bk/bacademy" },
-    { name: "공모전 정보", href: "/bk/bacademy/contest" },
+    { name: "교육/세미나 정보", href: "/badak/bacademy" },
+    { name: "공모전 정보", href: "/badak/bacademy/contest" },
 ];
 
 const contests = [
@@ -78,7 +78,7 @@ export default function BacademyPage() {
                         <h2 className="text-xl font-bold text-neutral-900 mb-4">공모전 정보</h2>
                         <div className="border-t border-neutral-900 pt-2 space-y-0">
                             {contests.map((item, i) => (
-                                <Link key={i} href="/bk/bacademy" className="block text-sm text-neutral-700 hover:text-neutral-900 py-2.5 border-b border-neutral-100 transition-colors">
+                                <Link key={i} href="/badak/bacademy" className="block text-sm text-neutral-700 hover:text-neutral-900 py-2.5 border-b border-neutral-100 transition-colors">
                                     {item}
                                 </Link>
                             ))}
@@ -90,7 +90,7 @@ export default function BacademyPage() {
                         <h2 className="text-xl font-bold text-neutral-900 mb-4">교육/세미나 정보</h2>
                         <div className="border-t border-neutral-900 pt-2 space-y-0">
                             {seminars.map((item, i) => (
-                                <Link key={i} href="/bk/bacademy" className="block text-sm text-neutral-700 hover:text-neutral-900 py-2.5 border-b border-neutral-100 transition-colors">
+                                <Link key={i} href="/badak/bacademy" className="block text-sm text-neutral-700 hover:text-neutral-900 py-2.5 border-b border-neutral-100 transition-colors">
                                     {item}
                                 </Link>
                             ))}

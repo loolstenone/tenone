@@ -38,31 +38,36 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const init = async () => {
-      const sb = createClient();
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) { router.push('/wio/login'); return; }
+      try {
+        const sb = createClient();
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { router.push('/wio/login'); return; }
 
-      let tenants = await fetchMyTenants();
+        let tenants = await fetchMyTenants();
 
-      // 테넌트가 없으면 텐원 기본 테넌트에 멤버로 자동 등록
-      if (tenants.length === 0) {
-        const defaultTenantId = 'a0000000-0000-0000-0000-000000000001';
-        await addMember(defaultTenantId, user.id, user.email?.split('@')[0] || '사용자', 'member');
-        tenants = await fetchMyTenants();
-        if (tenants.length === 0) { router.push('/wio'); return; }
+        // 테넌트가 없으면 텐원 기본 테넌트에 멤버로 자동 등록
+        if (tenants.length === 0) {
+          const defaultTenantId = 'a0000000-0000-0000-0000-000000000001';
+          await addMember(defaultTenantId, user.id, user.email?.split('@')[0] || '사용자', 'member');
+          tenants = await fetchMyTenants();
+          if (tenants.length === 0) { router.push('/wio'); return; }
+        }
+
+        const t = tenants[0];
+        setTenant(t);
+
+        let m = await fetchMyMembership(t.id);
+        // 멤버십 없으면 자동 등록
+        if (!m) {
+          await addMember(t.id, user.id, user.email?.split('@')[0] || '사용자', 'member');
+          m = await fetchMyMembership(t.id);
+        }
+        setMember(m);
+        setLoading(false);
+      } catch {
+        // DB 오류 시 로그인 페이지로
+        router.push('/wio/login');
       }
-
-      const t = tenants[0];
-      setTenant(t);
-
-      let m = await fetchMyMembership(t.id);
-      // 멤버십 없으면 자동 등록
-      if (!m) {
-        await addMember(t.id, user.id, user.email?.split('@')[0] || '사용자', 'member');
-        m = await fetchMyMembership(t.id);
-      }
-      setMember(m);
-      setLoading(false);
     };
     init();
   }, [router]);

@@ -39,7 +39,7 @@ export default function ShopPage() {
                     {/* Product Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {products.map((product, i) => (
-                            <Link key={i} href="/bk/shop" className="block group">
+                            <Link key={i} href="/badak/shop" className="block group">
                                 <div className="aspect-[4/3] bg-neutral-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-neutral-200 transition-colors">
                                     <span className="text-5xl">🗓️</span>
                                 </div>

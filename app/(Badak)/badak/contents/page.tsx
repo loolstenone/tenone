@@ -44,7 +44,7 @@ export default function ContentsPage() {
                         {articles.map((article, i) => (
                             <Link
                                 key={i}
-                                href="/bk/contents"
+                                href="/badak/contents"
                                 className="block py-5 border-b border-neutral-200 group hover:bg-neutral-50 px-2 -mx-2 transition-colors"
                             >
                                 <div className="flex items-start justify-between gap-4">

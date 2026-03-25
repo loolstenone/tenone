@@ -89,7 +89,7 @@ export default function IdeaMovementPage() {
                         그것이 Idea Movement의 전부다.
                     </p>
                     <Link
-                        href="/ml/idea-movement/essence"
+                        href="/madleague/idea-movement/essence"
                         className="inline-flex items-center gap-2 px-8 py-3 bg-violet-600 text-white font-semibold hover:bg-violet-700 transition-colors rounded"
                     >
                         Essence 보기
@@ -344,7 +344,7 @@ export default function IdeaMovementPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
-                            href="/ml/idea-movement/essence"
+                            href="/madleague/idea-movement/essence"
                             className="px-8 py-3 bg-white text-violet-600 font-semibold hover:bg-neutral-100 transition-colors rounded"
                         >
                             Essence 알아보기

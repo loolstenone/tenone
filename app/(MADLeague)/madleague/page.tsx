@@ -33,7 +33,7 @@ export default function MadLeagueHomePage() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
-                            href="/ml/about"
+                            href="/madleague/about"
                             className="px-8 py-3 bg-[#D32F2F] text-white font-semibold hover:bg-[#B71C1C] transition-colors rounded"
                         >
                             더 알아보기
@@ -61,21 +61,21 @@ export default function MadLeagueHomePage() {
                                 icon: Target,
                                 title: "경쟁 PT",
                                 desc: "실제 기업 과제를 팀 단위로 분석하고 경쟁 프레젠테이션을 통해 실전 마케팅 역량을 키웁니다.",
-                                href: "/ml/pt",
+                                href: "/madleague/pt",
                                 color: "bg-red-50 text-[#D32F2F]",
                             },
                             {
                                 icon: Rocket,
                                 title: "프로그램",
                                 desc: "마케팅 부트캠프, 브랜딩 워크숍 등 다양한 실전 프로그램으로 전문성을 강화합니다.",
-                                href: "/ml/program",
+                                href: "/madleague/program",
                                 color: "bg-orange-50 text-orange-600",
                             },
                             {
                                 icon: Award,
                                 title: "히어로",
                                 desc: "HeRo 프로그램을 통해 잠재력 있는 인재를 발굴하고 성장을 지원합니다.",
-                                href: "/ml/hero",
+                                href: "/madleague/hero",
                                 color: "bg-amber-50 text-amber-600",
                             },
                         ].map((card) => (
@@ -107,7 +107,7 @@ export default function MadLeagueHomePage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center justify-between mb-8">
                         <h2 className="text-2xl font-bold text-neutral-900">공지사항</h2>
-                        <Link href="/ml/about" className="text-sm text-[#D32F2F] hover:underline flex items-center gap-1">
+                        <Link href="/madleague/about" className="text-sm text-[#D32F2F] hover:underline flex items-center gap-1">
                             전체보기 <ChevronRight className="h-4 w-4" />
                         </Link>
                     </div>
@@ -143,7 +143,7 @@ export default function MadLeagueHomePage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center justify-between mb-8">
                         <h2 className="text-2xl font-bold text-neutral-900">활동 갤러리</h2>
-                        <Link href="/ml/madzine" className="text-sm text-[#D32F2F] hover:underline flex items-center gap-1">
+                        <Link href="/madleague/madzine" className="text-sm text-[#D32F2F] hover:underline flex items-center gap-1">
                             전체보기 <ChevronRight className="h-4 w-4" />
                         </Link>
                     </div>

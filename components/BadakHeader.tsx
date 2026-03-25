@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
-const PREFIX = '/bk';
+const PREFIX = '/badak';
 const navItems = [
     { name: "탐색", href: `${PREFIX}/explore` },
     { name: "이바닥 스타", href: `${PREFIX}/stars` },
