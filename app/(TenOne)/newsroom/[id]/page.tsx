@@ -88,7 +88,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
 
                     {post.represent_image && (
-                        <div className="aspect-[16/9] bg-neutral-100 mb-10 overflow-hidden">
+                        <div className="aspect-[16/9] tn-bg-alt mb-10 overflow-hidden">
                             <img src={post.represent_image} alt={post.title} className="w-full h-full object-cover" />
                         </div>
                     )}
