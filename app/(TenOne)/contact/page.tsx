@@ -8,6 +8,63 @@ import { useAuth } from "@/lib/auth-context";
 
 type TabType = 'partner' | 'business' | 'signup';
 
+function OffOniceToggle() {
+    const [isOn, setIsOn] = useState(true);
+
+    return (
+        <button
+            onClick={() => setIsOn(!isOn)}
+            className="relative inline-flex items-center h-8 rounded-full transition-all duration-500 cursor-pointer select-none overflow-hidden"
+            style={{
+                width: 160,
+                background: isOn
+                    ? "linear-gradient(135deg, #1a1a1a 0%, #333 100%)"
+                    : "linear-gradient(135deg, #e0e0e0 0%, #ccc 100%)",
+                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)",
+            }}
+        >
+            {/* 슬라이딩 원 */}
+            <div
+                className="absolute rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                style={{
+                    width: 24,
+                    height: 24,
+                    top: 4,
+                    left: isOn ? 108 : 4,
+                    background: isOn
+                        ? "radial-gradient(circle at 35% 35%, #fff 0%, #ddd 60%, #bbb 100%)"
+                        : "radial-gradient(circle at 35% 35%, #999 0%, #777 60%, #555 100%)",
+                    boxShadow: isOn
+                        ? "0 2px 6px rgba(0,0,0,0.3), inset 0 -1px 2px rgba(0,0,0,0.1)"
+                        : "0 2px 6px rgba(0,0,0,0.15), inset 0 -1px 2px rgba(0,0,0,0.05)",
+                }}
+            />
+            {/* Off 텍스트 */}
+            <span
+                className="absolute text-xs font-bold tracking-wider transition-opacity duration-300"
+                style={{
+                    left: 14,
+                    opacity: isOn ? 0.3 : 0.8,
+                    color: isOn ? "#666" : "#444",
+                }}
+            >
+                Off
+            </span>
+            {/* Onice 텍스트 */}
+            <span
+                className="absolute text-xs font-bold tracking-wider transition-opacity duration-300"
+                style={{
+                    left: 52,
+                    opacity: isOn ? 1 : 0.3,
+                    color: isOn ? "#fff" : "#999",
+                }}
+            >
+                Onice
+            </span>
+        </button>
+    );
+}
+
 const inputClass = "w-full border tn-border px-4 py-3 text-sm tn-text focus:border-neutral-900 focus:outline-none placeholder:tn-text-sub tn-surface";
 const labelClass = "text-sm font-medium text-neutral-700 block mb-1.5";
 
@@ -70,7 +127,7 @@ export default function ContactPage() {
                         <div className="flex items-start gap-3">
                             <MapPin className="h-4 w-4 tn-text-sub mt-0.5" />
                             <div>
-                                <h4 className="text-sm font-medium tn-text">Online Everywhere</h4>
+                                <OffOniceToggle />
                                 <p className="text-sm tn-text-sub mt-1">tenone.biz</p>
                             </div>
                         </div>
