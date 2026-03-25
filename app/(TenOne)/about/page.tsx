@@ -49,7 +49,7 @@ function AboutContent() {
     const [yearFilter, setYearFilter] = useState('전체');
 
     useEffect(() => {
-        if (tabParam && ['philosophy', 'universe', 'history'].includes(tabParam)) {
+        if (tabParam && ['philosophy', 'universe', 'brands', 'history'].includes(tabParam)) {
             setActiveTab(tabParam);
         }
     }, [tabParam]);
@@ -59,6 +59,7 @@ function AboutContent() {
     const tabs = [
         { id: 'philosophy', label: 'Philosophy' },
         { id: 'universe', label: 'Universe' },
+        { id: 'brands', label: 'Brands' },
         { id: 'history', label: 'History' },
     ];
 
@@ -84,16 +85,24 @@ function AboutContent() {
             <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0">
-                        {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
-                                    activeTab === tab.id
-                                        ? 'border-neutral-900 tn-text font-medium'
-                                        : 'border-transparent tn-text-sub hover:text-neutral-700'
-                                }`}>
-                                {tab.label}
-                            </button>
-                        ))}
+                        {tabs.map(tab => {
+                            const isLink = tab.id === 'universe' || tab.id === 'brands';
+                            return isLink ? (
+                                <a key={tab.id} href={`/${tab.id}`}
+                                    className="px-6 py-4 text-sm tracking-wide transition-colors border-b-2 border-transparent tn-text-sub hover:text-neutral-700">
+                                    {tab.label}
+                                </a>
+                            ) : (
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                                    className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
+                                        activeTab === tab.id
+                                            ? 'border-neutral-900 tn-text font-medium'
+                                            : 'border-transparent tn-text-sub hover:text-neutral-700'
+                                    }`}>
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
