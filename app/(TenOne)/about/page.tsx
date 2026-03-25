@@ -5,6 +5,57 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
+// ===== Brand Directory Data =====
+const BRAND_DIRECTORY = [
+  { title: '컨트롤타워', brands: [
+    { name: 'Ten:One™', domain: 'tenone.biz', meaning: '열시 일분', role: '세계관의 중심. 모든 프로젝트의 철학·방향·전략을 관장', core: '"연결은 더 많은 기회를 만들어 낸다"' },
+    { name: 'YouInOne', domain: 'youinone.com', meaning: 'Project Group of Thinking Apes (유인원)', role: '실행 중심 프로젝트 그룹. 누구나 프로젝트 발제', core: '신뢰 기반 네트워크 프로젝트 그룹' },
+    { name: "Planner's", meaning: "Planner's Planner", role: '기획자 양성 프로그램. 시스템 플래너', core: '기획자를 키우는 시스템 + 도구' },
+  ]},
+  { title: '커뮤니티', brands: [
+    { name: 'MADLeague', domain: 'madleague.net', meaning: 'Marketing, Advertising & Digital League', role: '전국 7개 대학 동아리 연합. 실전 경연 PT로 역량 강화', core: '"실전이 우리를 강하게 하리라"' },
+    { name: 'MADLeap', domain: 'madleap.co.kr', meaning: '미치지 않으면 미치지 못한다', role: '서울/경기 거점 대학생 연합 동아리', core: 'MADLeague 핵심 거점' },
+    { name: 'YouInOne Alliance', meaning: '유인원 얼라이언스', role: '전국 지역 거점 사업자 협력체', core: '각자의 사업 강점으로 뭉친 협력체' },
+    { name: 'Badak', domain: 'badak.biz', meaning: '업계 = 바닥, 바닥은 좁다', role: '업계 네트워킹 커뮤니티. 등록 9,000명', core: '"약한 연결이 만드는 강력한 기회"' },
+    { name: 'domo', meaning: '미래를 도모하다', role: '비즈니스 네트워킹. 사업가들의 성장과 성공을 도모', core: '사업가 대상 상위 네트워킹' },
+    { name: 'ChangeUp', domain: 'changeup.company', meaning: '창업, 체인지업, 변화구', role: '고등학생·대학생 창업 프로그램', core: '청년 창업을 지역사회가 함께 키운다' },
+  ]},
+  { title: '인재 · 교육', brands: [
+    { name: 'HeRo', meaning: 'We Believe in your talent', role: 'Talent Agency. 인재와 기업 매칭, 커리어 컨설팅', core: '인재 생태계 선순환의 엔진' },
+    { name: 'Evolution School', meaning: '진화 학교 — 성장이 필요할 때', role: '마케팅·광고·크리에이티브·기획 직무 전문가 교육', core: '현업 전문가 중심 실전 교육' },
+  ]},
+  { title: '비즈니스 서비스', brands: [
+    { name: 'SmarComm.', domain: 'smarcomm.biz', meaning: 'Smart Marketing Communication', role: 'AI 기반 마케팅·광고 커뮤니케이션 솔루션', core: '세계관 구성원이 참여하는 서비스' },
+    { name: 'Brand Gravity', meaning: '소비자는 우주를 떠다니는 유성과 같다', role: '기업 브랜딩 · 퍼스널 브랜딩 컨설팅', core: '브랜드라는 중력으로 소비자를 끌어당기다' },
+    { name: 'RooK', domain: 'rook.co.kr', meaning: '새로운 사람, 새로운 방법', role: '인공지능 크리에이터. AI 기반 콘텐츠 제작', core: 'AI로 만드는 새로운 크리에이티브' },
+    { name: 'WIO', meaning: 'Work In One', role: '통합 운영 플랫폼. 솔루션 구축과 컨설팅', core: '일의 방식을 통일하는 운영 체계' },
+  ]},
+  { title: '콘텐츠 · 미디어', brands: [
+    { name: '0gamja', domain: '0gamja.com', meaning: '영감자 (0 = 영, gamja = 감자)', role: '공감 콘텐츠. 심리 상담, 중고대학생 대상', core: '공감과 위로를 콘텐츠로 연결' },
+    { name: 'FWN', domain: 'fwn.co.kr', meaning: 'Fashion Week Network', role: '전세계 패션위크 소식, 패션 종사자 네트워크', core: '패션 업계 전문 네트워크' },
+    { name: 'MoNTZ', meaning: 'Ugly Modeling Agency', role: '독특한 캐릭터 모델 에이전시', core: '개성이 곧 경쟁력' },
+    { name: 'TrendHunter', meaning: '트렌드헌터', role: '소비자 연구 및 트렌드 분석 컨설팅', core: '소비자 인사이트 기반 컨설팅' },
+    { name: 'Scribble', meaning: '낙서, 자유로운 글쓰기', role: '개인 창작. 소설, 드라마 극본', core: '개인 창작 아카이브' },
+  ]},
+  { title: '플랫폼 · 프로덕트', brands: [
+    { name: 'Myverse', meaning: 'My Universe', role: '개인 세계관 기록 플랫폼', core: '서비스가 개인에 접속하는 구조' },
+    { name: 'Townity', meaning: 'Town + Community', role: '지역 커뮤니티. 공동육아 지역 기반 연결', core: '지역 기반 커뮤니티 연결' },
+    { name: 'Seoul360', domain: 'seoul360.net', meaning: '서울 360도', role: '서울 자유여행 가이드', core: '서울을 360도로 경험' },
+    { name: 'Jakka', meaning: '작가 (JAKKA)', role: '아티스트 포트폴리오 플랫폼', core: '창작자들의 작품 전시·연결' },
+    { name: 'Nature Box', meaning: '자연함 (自然函)', role: '강원도 정선. 자연 식품 브랜드', core: '자연에서 온 식품 이야기' },
+    { name: 'Mullaesian', meaning: '문래동 + -sian', role: '문래동 창작촌 지역 플랫폼', core: '문래동 사람들의 연결' },
+  ]},
+  { title: '도구 · 프레임워크', brands: [
+    { name: 'Vrief', meaning: 'Vision + Brief', role: '조사분석 → 가설검증 → 전략수립 3단계 기획 프레임워크', core: '일을 시작할 때의 사고 프레임' },
+    { name: 'GPR', meaning: 'Goal · Plan · Result', role: '목표 관리 프레임워크. 사업부 → 팀 → 개인', core: '일을 관리하고 평가할 때의 프레임' },
+    { name: 'Principle 10', meaning: '일하는 10대 원칙', role: '세계관 전체 행동 강령', core: '"우리는 모두 기획자다"' },
+    { name: 'Vision House', meaning: '비전 체계', role: 'Philosophy → Mission → Vision → Goal → Strategy → Core Values', core: '세계관 전체의 방향타' },
+    { name: 'HIT', meaning: 'HeRo Integrated Test', role: 'HeRo 인재 매칭을 위한 통합 역량 테스트', core: '인재의 역량을 측정하는 기준' },
+    { name: "Planner's Planner", meaning: '기획자를 위한 플래너', role: '시스템 플래너. 아이패드·삼성노트·앱 제공', core: '기획자의 사고와 실행을 담는 도구' },
+    { name: 'Career Design', meaning: '커리어 디자인', role: '개인의 커리어를 설계하고 방향을 잡는 프레임워크', core: '내 커리어를 기획하다' },
+  ]},
+];
+
 // ===== History Data =====
 const HISTORY_DATA = [
     { year: "2025", date: "2025.08", title: "LUKI", desc: "인공지능 4인조 여성 아이돌 데뷔", link: "https://youtube.com/@LUKI-AIdol" },
@@ -85,24 +136,16 @@ function AboutContent() {
             <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-0">
-                        {tabs.map(tab => {
-                            const isLink = tab.id === 'universe' || tab.id === 'brands';
-                            return isLink ? (
-                                <a key={tab.id} href={`/${tab.id}`}
-                                    className="px-6 py-4 text-sm tracking-wide transition-colors border-b-2 border-transparent tn-text-sub hover:text-neutral-700">
-                                    {tab.label}
-                                </a>
-                            ) : (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                    className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
-                                        activeTab === tab.id
-                                            ? 'border-neutral-900 tn-text font-medium'
-                                            : 'border-transparent tn-text-sub hover:text-neutral-700'
-                                    }`}>
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                        {tabs.map(tab => (
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                                className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
+                                    activeTab === tab.id
+                                        ? 'border-neutral-900 tn-text font-medium'
+                                        : 'border-transparent tn-text-sub hover:text-neutral-700'
+                                }`}>
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -341,6 +384,47 @@ function AboutContent() {
                         </div>
                     </section>
                 </>
+            )}
+
+            {/* ===== Brands Tab ===== */}
+            {activeTab === 'brands' && (
+                <section className="py-24 px-6">
+                    <div className="max-w-4xl mx-auto">
+                        <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Directory</p>
+                        <h2 className="text-xl md:text-3xl font-light mb-2">
+                            가치로 연결된 <span className="font-bold">브랜드 생태계</span>
+                        </h2>
+                        <p className="tn-text-sub text-sm mb-8">{BRAND_DIRECTORY.length}개 카테고리 · {BRAND_DIRECTORY.reduce((s, sec) => s + sec.brands.length, 0)}개 브랜드</p>
+
+                        <div className="space-y-10">
+                            {BRAND_DIRECTORY.map((sec, si) => (
+                                <div key={si}>
+                                    <div className="flex items-center gap-3 mb-4 pb-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
+                                        <span className="text-[10px] font-mono tn-text-sub">{String(si + 1).padStart(2, '0')}</span>
+                                        <h3 className="text-sm font-semibold tracking-wide tn-text uppercase">{sec.title}</h3>
+                                        <span className="text-[10px] tn-text-sub">{sec.brands.length}</span>
+                                    </div>
+                                    <div className="grid gap-px sm:grid-cols-2">
+                                        {sec.brands.map((b, bi) => (
+                                            <div key={bi} className="p-5 border" style={{ borderColor: "color-mix(in srgb, var(--tn-border) 50%, transparent)" }}>
+                                                <div className="flex items-start justify-between mb-1">
+                                                    <span className="font-semibold tn-text text-[15px]">{b.name}</span>
+                                                    {b.domain && (
+                                                        <a href={`https://${b.domain}`} target="_blank" rel="noopener noreferrer"
+                                                            className="text-[11px] tn-text-sub hover:underline">{b.domain}</a>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] tn-text-sub mb-2">{b.meaning}</p>
+                                                <p className="text-sm tn-text-sub leading-relaxed mb-1">{b.role}</p>
+                                                <p className="text-xs italic" style={{ color: "var(--tn-accent)" }}>{b.core}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             )}
 
             {/* ===== History Tab ===== */}
