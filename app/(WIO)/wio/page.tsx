@@ -45,11 +45,12 @@ export default function WIOHome() {
           <div className="inline-block mb-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 text-xs text-indigo-300 font-medium">
             Solution & Consulting
           </div>
-          <h1 className="text-4xl md:text-6xl font-black leading-[1.15] mb-6">
+          <h1 className="text-4xl md:text-6xl font-black leading-[1.15] mb-3">
             왜 서비스를<br />
             다 쪼개 놨어,<br />
             <span className="text-indigo-400">WIO</span> 하나로 일하세요
           </h1>
+          <p className="text-xl md:text-2xl font-light text-slate-300 tracking-wide mb-6">Work In One</p>
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
             프로젝트 중심으로 사람·일·돈·지식이<br className="hidden md:block" />
             하나의 시스템에서 돌아가는 통합 운영 플랫폼.
