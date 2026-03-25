@@ -26,18 +26,22 @@ function SmarCommLoginForm() {
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        // 대시보드와 동일한 인증 체크: SmarComm Mock auth → Supabase session
+        // SmarComm Mock auth 체크
         const u = getUser();
         if (u) { window.location.replace('/dashboard'); return; }
 
+        // Supabase 세션 체크 (타임아웃 5초 — 무한 스피너 방지)
         const sb = createClient();
+        const timeout = setTimeout(() => setChecking(false), 5000);
         sb.auth.getUser().then(({ data: { user: sbUser } }) => {
+            clearTimeout(timeout);
             if (sbUser) {
+                // Supabase 세션 있으면 대시보드로. 대시보드에서도 getUser()로 확인하므로 작동함
                 window.location.replace('/dashboard');
             } else {
                 setChecking(false);
             }
-        }).catch(() => setChecking(false));
+        }).catch(() => { clearTimeout(timeout); setChecking(false); });
     }, []);
 
     if (checking) {
