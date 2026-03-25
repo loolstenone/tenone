@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-03-26 (집) — 26커밋
+
+### SmarComm
+- 로그인/가입 도메인 분기, 리다이렉트 루프, 직접 OAuth, 세션 유지
+- 다중 페이지 크롤링, 36가지 브랜드 유형, 퍼포먼스 UI
+- **미해결**: 소셜 로그인 텐원 넘어감, 리프레시 세션 유실
+
+### Badak MVP
+- DB 4개 + CRUD + 6개 페이지 전체 구축
+- badak.biz는 기존 서버 운영 중, 개발만
+
+### WIO 솔루션 (Sprint 1~5 전체)
+- 마케팅 사이트 5페이지 (랜덤 카피 5종)
+- **24개 DB 테이블** Supabase 생성
+- **10개 모듈** 앱 UI: Home, Project, Talk, Finance, People, Sales, Learn, Content, Wiki, Insight
+- 파일: app/(WIO)/, types/wio.ts, lib/supabase/wio.ts, lib/wio-app-data.ts
+
+### TenOne Universe
+- About 페이지 탭 4개: Philosophy/Universe/Brands/History
+- Brands 탭에 7카테고리 33개 브랜드 디렉토리 추가
+- docs/TenOne_Universe_Directory.html 원본 보관
+
+### 결정 사항
+- WIO는 텐원 회원 시스템 공유, 솔루션 DB는 별도 (wio_ 프리픽스)
+- 멀티도메인 로그인: 도메인별 직접 OAuth 방식 채택 (auth-hub 경유 제거)
+- Universe=세계관설명, Brands=브랜드디렉토리로 분리
+
+---
+
 ## 2026-03-25 (집)
 
 ### 완료

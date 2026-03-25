@@ -1,76 +1,82 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-26 (집)
+> 마지막 업데이트: 2026-03-26 (집) — 작업 종료
 
 ## 오늘 한 작업
 
-### SmarComm 긴급 (7커밋)
-- 로그인/가입 도메인 분기 — 깜빡임 제거 (SmarComm 전용 컴포넌트 분리)
-- 회원가입 페이지 SmarComm 전용 UI 추가
-- 대시보드 빈 화면 → 로딩 스피너 + auth 안정화
-- 리다이렉트 루프 해결 (대시보드와 동일한 인증 체크)
+### SmarComm (7커밋)
+- 로그인/가입 도메인 분기 — 깜빡임 제거 (전용 컴포넌트 분리)
+- 리다이렉트 루프 해결
 - 소셜 로그인 직접 OAuth (auth-hub 경유 제거, Supabase redirect URL 등록)
 - 세션 유지 (getSession→getUser 서버 검증)
-- 콘텐츠 갭/액션 플랜 JSON 원문 → 파싱 UI
-- /scan 404 수정, PDF print CSS, 레이더 차트 확대
-- 사이드바 DEV 배지, Workspace 네이밍, 홈 링크
-- 다중 페이지 크롤링 (내부 링크 최대 5개 서브페이지)
+- 콘텐츠 갭/액션 플랜 JSON → 파싱 UI
+- 다중 페이지 크롤링 (최대 5개 서브페이지)
 - 36가지 브랜드 유형 (16→36 확장)
-- 퍼포먼스 점수 산출 근거 UI 명시
+- 퍼포먼스 점수 산출 근거 UI
 
 ### Badak MVP (3커밋)
-- 4개 DB 테이블 생성 (badak_profiles, connections, feedbacks, stars + RLS)
-- types/badak.ts + lib/badak-constants.ts + lib/supabase/badak.ts (CRUD 20+ 함수)
-- components/badak/ProfileCard.tsx (3 variant) + TagPicker.tsx
-- 6개 페이지: 랜딩, /join(온보딩 4단계), /explore(필터+그리드), /profile/[id](연결요청), /stars, /stars/[slug]
-- BadakHeader 네비 업데이트 + 내부 링크 /bk 프리픽스 통일
+- 4개 DB 테이블 (badak_profiles, connections, feedbacks, stars + RLS)
+- CRUD 20+ 함수 + ProfileCard 컴포넌트
+- 6개 페이지: 랜딩, 온보딩, 탐색, 프로필, 스타, 스타 상세
 
-### WIO (3커밋)
-- 마케팅 사이트 5페이지: 랜딩, /solutions(9카테고리 50+기능), /framework(6방법론 25상품), /pricing(4단계), /about
-- 솔루션 Sprint 1: 6개 DB 테이블 (wio_tenants, members, projects, jobs, timesheets, project_members)
-- types/wio.ts + lib/supabase/wio.ts (CRUD 20+ 함수)
-- WIO App: 레이아웃(테넌트 컨텍스트+모듈 사이드바), 대시보드, 프로젝트 목록/생성
+### WIO 솔루션 (Sprint 1~5 전체 완료, 11커밋)
+- **마케팅 사이트**: 랜딩(랜덤 카피 5종), 솔루션, 프레임워크, 가격, 소개
+- **Sprint 1**: 6개 DB (tenants, members, projects, jobs, timesheets, project_members)
+- **Sprint 2**: 9개 DB (posts, events, todos, notifications, chat_threads, chat_messages, approvals, expenses, settlements)
+- **Sprint 3**: 5개 DB (points, hit_results, opportunities, leads, gpr)
+- **Sprint 4**: 4개 DB (courses, enrollments, contents, documents)
+- **Sprint 5**: Insight BI 대시보드 + Settings 페이지 + Home 강화
+- **총 24개 WIO 테이블 Supabase 생성 완료**
+- **10개 모듈 앱 UI 전체 구축**: Home, Project, Talk, Finance, People, Sales, Learn, Content, Wiki, Insight
+
+### TenOne Universe (5커밋)
+- /about 페이지 탭 4개: Philosophy / Universe / Brands / History
+- Brands 탭: 7카테고리 33개 브랜드 디렉토리 (인라인)
+- Universe 탭: 기존 세계관 설명글 유지
+- 헤더 드롭다운 메뉴 일치
+- docs/TenOne_Universe_Directory.html 원본 보관
 
 ## 현재 이슈 ⚠️
-- SmarComm 카카오 로그인: 직접 OAuth로 변경했으나 라이브 테스트 필요
-- Badak: badak.biz 도메인은 기존 서버에서 운영 중, 개발만 진행
-- WIO: wio.work 도메인 미확보, /wio 프리픽스로 개발
 
-## 다음에 할 일
+### 로그인 문제 (미해결 — 사무실에서 계속)
+- **SmarComm 소셜 로그인**: 구글/카카오 로그인 시 텐원으로 넘어가는 문제 잔존
+- **SmarComm 리프레시 시 로그아웃**: 대시보드에서 F5 하면 세션 유실
+- **근본 원인**: 멀티도메인 OAuth redirect URI + 세션 쿠키 도메인 격리
+- **해결 방향**: Gemini 분석 참고 — state 파라미터 + 중앙 인증 or 도메인별 직접 OAuth
+- **Supabase에 등록 필요**: badak.biz, madleague.net 등 나머지 도메인 redirect URL
 
-### WIO 솔루션 (Sprint 2)
-- [ ] wio_posts, wio_events 테이블 + Talk 모듈 UI
-- [ ] wio_approvals, wio_expenses 테이블 + Finance 모듈 UI
-- [ ] wio_todos 테이블 + Home Todo 연동
-- [ ] 메신저 (wio_chat_threads + Realtime)
-- [ ] 알림 센터 기본
+### 기타
+- Badak: badak.biz는 기존 서버 운영 중, 개발만 진행
+- WIO: 도메인 미확보 (/wio 프리픽스), 로그인 연결 필요
 
-### SmarComm
-- [ ] 카카오 로그인 라이브 테스트
-- [ ] 스캔 리포트 서브페이지 분석 결과 확인
-- [ ] /scan 페이지 라이브 테스트
+## 다음에 할 일 (사무실)
 
-### TenOne 높음
-- [ ] 인트라 나머지 모듈 DB 연결 (50+ 페이지)
-- [ ] AI 에이전트 API 키 연결
+### 🔴 긴급: 로그인 전면 재검토
+- [ ] SmarComm 소셜 로그인 텐원 넘어감 → auth callback에서 origin 도메인 확인 후 리다이렉트
+- [ ] 리프레시 시 세션 유실 → Supabase SSR 쿠키 설정 점검 (SameSite, Domain)
+- [ ] WIO 로그인 연결 — /wio/login 페이지 + auth callback
+- [ ] Supabase redirect URL 일괄 등록 (badak.biz, madleague.net, wio.co.kr 등)
+
+### WIO 도메인 + 연결
+- [ ] wio.co.kr 또는 wio.work 도메인 연결 (Vercel custom domain)
+- [ ] WIO 미들웨어 도메인 분기 추가
+- [ ] WIO 로그인/가입 페이지 구축
+
+### TenOne 기타
+- [ ] 인트라 나머지 모듈 DB 연결
+- [ ] AI 에이전트 API 키 연결 (Anthropic/OpenAI)
 - [ ] Supabase Storage 이미지 업로드
 
-## Supabase DB 현황
-- 기존 테이블: members(4), posts(39), board_configs(8), projects(8), approvals(4), expenses(5), gpr_goals(5), attendance(5), biz_plans(3), chat_threads(0)
-- Badak 신규: badak_profiles, badak_connections, badak_feedbacks, badak_stars
-- WIO 신규: wio_tenants(1 시드), wio_members, wio_projects, wio_jobs, wio_timesheets, wio_project_members
+## Supabase DB 현황 (총 32+ 테이블)
 
-## 배포 커밋 (13건)
-1. 7fbb3d5 — SmarComm 도메인 분기 근본 해결
-2. 97537bb — 리다이렉트 루프 해결
-3. 3ddf63d — 스캔/로그인/리포트 다수 수정
-4. f8c148e — 다중 페이지 크롤링 + 36유형 + 퍼포먼스
-5. acbec82 — 소셜 로그인 직접 OAuth
-6. bf2d358 — 세션 유지 + Workspace 네이밍
-7. b0330a8 — Workspace 클릭 홈 이동
-8. 2c6873f — 레이더 차트 크기 확대
-9. 83bb217 — Badak MVP 전체 구축
-10. dfcd838 — Badak 내부 링크 /bk 프리픽스
-11. 53d72e4 — WIO 기본 구조 생성
-12. 2e95c49 — WIO 4개 메뉴 페이지
-13. 76aaeef — WIO Sprint 1 멀티테넌트+프로젝트
+### 기존
+members(4), posts(39), board_configs(8), projects(8), approvals(4), expenses(5), gpr_goals(5), attendance(5), biz_plans(3), chat_threads(0)
+
+### Badak (4개)
+badak_profiles, badak_connections, badak_feedbacks, badak_stars
+
+### WIO (24개)
+- Sprint 1: wio_tenants(1 시드), wio_members, wio_projects, wio_jobs, wio_timesheets, wio_project_members
+- Sprint 2: wio_posts, wio_events, wio_todos, wio_notifications, wio_chat_threads, wio_chat_messages, wio_approvals, wio_expenses, wio_settlements
+- Sprint 3: wio_points, wio_hit_results, wio_opportunities, wio_leads, wio_gpr
+- Sprint 4: wio_courses, wio_enrollments, wio_contents, wio_documents
