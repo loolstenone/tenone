@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 
 interface Brand { name: string; domain?: string; meaning: string; role: string; core: string; }
 interface Section { title: string; brands: Brand[]; }
@@ -56,12 +56,6 @@ const DIRECTORY: Section[] = [
   ]},
 ];
 
-const COLORS: Record<string, string> = {
-  '컨트롤타워': '#0F4C81', '커뮤니티': '#D32F2F', '인재 · 교육': '#1D9E75',
-  '비즈니스 서비스': '#6366F1', '콘텐츠 · 미디어': '#D4537E',
-  '플랫폼 · 프로덕트': '#BA7517', '도구 · 프레임워크': '#534AB7',
-};
-
 export default function UniversePage() {
   const [filter, setFilter] = useState('');
   const total = DIRECTORY.reduce((s, sec) => s + sec.brands.length, 0);
@@ -70,41 +64,52 @@ export default function UniversePage() {
     : DIRECTORY;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <p className="text-xs tracking-widest text-neutral-400 uppercase mb-2">Service & Brand Directory</p>
-      <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">Ten:One™ Universe</h1>
-      <p className="text-neutral-500 italic mb-1">가치로 연결된 하나의 거대한 세계관을 만들기로 했다.</p>
-      <p className="text-sm text-neutral-400 mb-8">{DIRECTORY.length}개 카테고리 · {total}개 브랜드</p>
+    <div className="mx-auto max-w-4xl px-6 py-12">
+      {/* 헤더 */}
+      <div className="mb-12">
+        <p className="text-xs tracking-[0.2em] text-zinc-500 uppercase mb-3">Service & Brand Directory</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Ten:One™ Universe</h1>
+        <p className="text-zinc-500 italic text-sm">가치로 연결된 하나의 거대한 세계관을 만들기로 했다.</p>
+        <p className="text-xs text-zinc-600 mt-2">{DIRECTORY.length}개 카테고리 · {total}개 브랜드</p>
+      </div>
 
+      {/* 검색 */}
       <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="브랜드 검색..."
-        className="w-full max-w-sm rounded border border-neutral-200 px-4 py-2.5 text-sm mb-8 focus:border-neutral-900 focus:outline-none" />
+        className="w-full max-w-sm rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder-zinc-600 mb-10 focus:border-zinc-600 focus:outline-none" />
 
-      <div className="space-y-8">
-        {filtered.map((sec, si) => {
-          const c = COLORS[sec.title] || '#333';
-          return (
-            <div key={si}>
-              <div className="flex items-center gap-3 mb-3 pb-2 border-b-2" style={{ borderColor: c }}>
-                <span className="text-xs font-bold px-2 py-0.5 rounded text-white" style={{ background: c }}>{String(si + 1).padStart(2, '0')}</span>
-                <h2 className="text-lg font-bold" style={{ color: c }}>{sec.title}</h2>
-                <span className="text-xs text-neutral-400">{sec.brands.length}</span>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {sec.brands.map((b, bi) => (
-                  <div key={bi} className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-400 transition-colors">
-                    <div className="flex items-start justify-between mb-1">
-                      <span className="font-bold text-neutral-900">{b.name}</span>
-                      {b.domain && <a href={`https://${b.domain}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 text-[11px] text-blue-600 hover:underline">{b.domain}<ExternalLink size={9} /></a>}
-                    </div>
-                    <p className="text-xs text-neutral-400 mb-1.5">{b.meaning}</p>
-                    <p className="text-sm text-neutral-600 mb-2">{b.role}</p>
-                    <p className="text-xs font-medium" style={{ color: c }}>{b.core}</p>
-                  </div>
-                ))}
-              </div>
+      {/* 디렉토리 */}
+      <div className="space-y-12">
+        {filtered.map((sec, si) => (
+          <div key={si}>
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-zinc-800">
+              <span className="text-[10px] font-mono text-zinc-600">{String(si + 1).padStart(2, '0')}</span>
+              <h2 className="text-sm font-semibold tracking-wide text-zinc-300 uppercase">{sec.title}</h2>
+              <span className="text-[10px] text-zinc-700">{sec.brands.length}</span>
             </div>
-          );
-        })}
+            <div className="grid gap-px sm:grid-cols-2">
+              {sec.brands.map((b, bi) => (
+                <div key={bi} className="p-5 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
+                  <div className="flex items-start justify-between mb-1.5">
+                    <span className="font-semibold text-white text-[15px]">{b.name}</span>
+                    {b.domain && (
+                      <a href={`https://${b.domain}`} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors">
+                        {b.domain} <ExternalLink size={9} />
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-600 mb-2">{b.meaning}</p>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-2">{b.role}</p>
+                  <p className="text-xs text-zinc-500 italic">{b.core}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-16 pt-6 border-t border-zinc-800 text-center text-[11px] text-zinc-700">
+        &copy; Ten:One™. All Rights Reserved
       </div>
     </div>
   );
