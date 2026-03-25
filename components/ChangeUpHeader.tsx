@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "프로그램", href: "/cu/programs" },
@@ -17,6 +18,7 @@ const navItems = [
 export function ChangeUpHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/cu") return pathname === "/cu";
@@ -52,18 +54,16 @@ export function ChangeUpHeader() {
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link
-                        href="/login"
-                        className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
-                    >
-                        로그인
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full hover:bg-[#148F52] transition-colors"
-                    >
-                        시작하기
-                    </Link>
+                    {isAuthenticated ? (
+                        <Link href="/cu/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full hover:bg-[#148F52] transition-colors">시작하기</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile menu button */}
@@ -94,12 +94,16 @@ export function ChangeUpHeader() {
                         </Link>
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
-                        <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">
-                            로그인
-                        </Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full">
-                            시작하기
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link href="/cu/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full">시작하기</Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

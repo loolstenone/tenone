@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "About", href: "/yi/about" },
@@ -17,6 +18,7 @@ const navItems = [
 export function YouInOneHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/yi") return pathname === "/yi";
@@ -57,8 +59,18 @@ export function YouInOneHeader() {
                     ))}
                 </div>
 
-                {/* Right side - CTA */}
+                {/* Right side */}
                 <div className="hidden lg:flex items-center gap-3">
+                    {isAuthenticated ? (
+                        <Link href="/yi/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-[#171717] transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-400 hover:text-[#171717] transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm text-neutral-400 hover:text-[#171717] transition-colors">가입</Link>
+                        </>
+                    )}
                     <Link
                         href="/yi/alliance"
                         className="text-sm px-5 py-2 bg-[#171717] text-white hover:bg-[#E53935] transition-colors rounded"
@@ -94,7 +106,17 @@ export function YouInOneHeader() {
                             {item.name}
                         </Link>
                     ))}
-                    <div className="pt-4 mt-4 border-t border-neutral-100">
+                    <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
+                        {isAuthenticated ? (
+                            <Link href="/yi/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#171717] flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#171717]">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#171717]">가입</Link>
+                            </>
+                        )}
                         <Link
                             href="/yi/alliance"
                             onClick={() => setMobileOpen(false)}

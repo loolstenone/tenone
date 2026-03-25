@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, Orbit } from "lucide-react";
+import { Menu, X, Orbit, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "철학", href: "/mv/philosophy" },
@@ -17,6 +18,7 @@ const navItems = [
 export function MyVerseHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => pathname === href;
 
@@ -49,8 +51,18 @@ export function MyVerseHeader() {
                     ))}
                 </div>
 
-                {/* CTA */}
-                <div className="hidden lg:flex items-center">
+                {/* Right side */}
+                <div className="hidden lg:flex items-center gap-3">
+                    {isAuthenticated ? (
+                        <Link href="/mv/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm text-neutral-400 hover:text-white transition-colors">가입</Link>
+                        </>
+                    )}
                     <Link
                         href="/mv/contact"
                         className="text-sm font-medium px-4 py-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-colors"
@@ -86,6 +98,18 @@ export function MyVerseHeader() {
                             {item.name}
                         </Link>
                     ))}
+                    <div className="pt-2 mt-2 border-t border-white/5 flex items-center gap-4">
+                        {isAuthenticated ? (
+                            <Link href="/mv/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">가입</Link>
+                            </>
+                        )}
+                    </div>
                     <Link
                         href="/mv/contact"
                         onClick={() => setMobileOpen(false)}

@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "필찐감자", href: "/0g/writers" },
@@ -15,6 +16,7 @@ const navItems = [
 export function OgamjaHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/0g") return pathname === "/0g";
@@ -65,18 +67,16 @@ export function OgamjaHeader() {
                     <button className="p-2 text-neutral-500 hover:text-neutral-900 transition-colors">
                         <Search className="h-4 w-4" />
                     </button>
-                    <Link
-                        href="/login"
-                        className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-                    >
-                        로그인
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] transition-colors rounded-full"
-                    >
-                        회원가입
-                    </Link>
+                    {isAuthenticated ? (
+                        <Link href="/0g/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] transition-colors rounded-full">회원가입</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile menu button */}
@@ -107,20 +107,16 @@ export function OgamjaHeader() {
                         </Link>
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
-                        <Link
-                            href="/login"
-                            onClick={() => setMobileOpen(false)}
-                            className="text-sm text-neutral-600 hover:text-neutral-900"
-                        >
-                            로그인
-                        </Link>
-                        <Link
-                            href="/signup"
-                            onClick={() => setMobileOpen(false)}
-                            className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full"
-                        >
-                            회원가입
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link href="/0g/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">회원가입</Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

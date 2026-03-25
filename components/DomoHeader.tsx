@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "서비스", href: "/dm/services" },
@@ -17,6 +18,7 @@ const navItems = [
 export function DomoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/dm") return pathname === "/dm";
@@ -54,18 +56,16 @@ export function DomoHeader() {
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link
-                        href="/login"
-                        className="text-sm text-neutral-300 hover:text-white transition-colors"
-                    >
-                        로그인
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="text-sm bg-[#7F1146] hover:bg-[#5C0C33] px-4 py-1.5 rounded transition-colors"
-                    >
-                        멤버 가입
-                    </Link>
+                    {isAuthenticated ? (
+                        <Link href="/dm/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-300 hover:text-white transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm bg-[#7F1146] hover:bg-[#5C0C33] px-4 py-1.5 rounded transition-colors">멤버 가입</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile menu button */}
@@ -96,12 +96,16 @@ export function DomoHeader() {
                         </Link>
                     ))}
                     <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
-                        <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">
-                            로그인
-                        </Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">
-                            멤버 가입
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link href="/dm/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">멤버 가입</Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

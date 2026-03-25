@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "히어로", href: "/bk/hero" },
@@ -18,6 +19,7 @@ const navItems = [
 export function BadakHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/bk") return pathname === "/bk";
@@ -55,18 +57,16 @@ export function BadakHeader() {
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link
-                        href="/login"
-                        className="text-sm text-neutral-300 hover:text-white transition-colors"
-                    >
-                        로그인
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="text-sm text-neutral-300 hover:text-white transition-colors"
-                    >
-                        닉네임 가입
-                    </Link>
+                    {isAuthenticated ? (
+                        <Link href="/bk/my" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-neutral-300 hover:text-white transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm text-neutral-300 hover:text-white transition-colors">가입</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile menu button */}
@@ -97,12 +97,16 @@ export function BadakHeader() {
                         </Link>
                     ))}
                     <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
-                        <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">
-                            로그인
-                        </Link>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">
-                            닉네임 가입
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link href="/bk/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">가입</Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

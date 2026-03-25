@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
     { name: "Planner's", href: "/pln" },
@@ -15,6 +16,7 @@ const navItems = [
 export function PlannersHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/pln") return pathname === "/pln";
@@ -51,6 +53,16 @@ export function PlannersHeader() {
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-4">
+                    {isAuthenticated ? (
+                        <Link href="/pln/my" className="flex items-center gap-2 text-sm text-teal-200 hover:text-white transition-colors">
+                            <User className="h-4 w-4" /> {user?.name || "마이"}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="text-sm text-teal-200 hover:text-white transition-colors">로그인</Link>
+                            <Link href="/signup" className="text-sm text-teal-200 hover:text-white transition-colors">가입</Link>
+                        </>
+                    )}
                     <a
                         href="https://tenone.biz"
                         target="_blank"
@@ -88,6 +100,18 @@ export function PlannersHeader() {
                             {item.name}
                         </Link>
                     ))}
+                    <div className="pt-2 border-t border-teal-800 flex items-center gap-4">
+                        {isAuthenticated ? (
+                            <Link href="/pln/my" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
+                                <User className="h-4 w-4" /> 마이페이지
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
+                            </>
+                        )}
+                    </div>
                     <div className="pt-2 border-t border-teal-800">
                         <a
                             href="https://tenone.biz"
