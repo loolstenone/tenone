@@ -58,10 +58,10 @@ export default function WorkspacePage() {
               팀과 함께 사용하는 AI 마케팅 커뮤니케이션 워크스페이스
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/sc/signup" className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-[#0A0E1A] transition-all hover:bg-white/90">
+              <Link href="/signup" className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-[#0A0E1A] transition-all hover:bg-white/90">
                 무료로 시작하기
               </Link>
-              <Link href="/sc" className="rounded-full border border-white/20 px-8 py-3 text-sm font-medium text-white/70 transition-all hover:bg-white/10">
+              <Link href="/" className="rounded-full border border-white/20 px-8 py-3 text-sm font-medium text-white/70 transition-all hover:bg-white/10">
                 무료 진단 먼저 해보기
               </Link>
             </div>
@@ -120,7 +120,7 @@ export default function WorkspacePage() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 text-2xl font-bold text-text">지금 바로 시작하세요</h2>
             <p className="mb-6 text-sm text-text-sub">무료 가입으로 워크스페이스의 모든 기능을 체험할 수 있습니다</p>
-            <Link href="/sc/signup" className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3.5 text-sm font-semibold text-white hover:bg-accent-sub">
+            <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-text px-8 py-3.5 text-sm font-semibold text-white hover:bg-accent-sub">
               무료 가입하기 <ChevronRight size={16} />
             </Link>
           </div>

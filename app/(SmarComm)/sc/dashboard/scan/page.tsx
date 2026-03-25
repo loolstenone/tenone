@@ -78,7 +78,7 @@ export default function ScanPage() {
       if (res.ok) {
         const plan = await res.json();
         sessionStorage.setItem('campaignPlan', JSON.stringify(plan));
-        router.push('/sc/dashboard/advisor');
+        router.push('/dashboard/advisor');
       }
     } catch (e) {
       console.error('Campaign plan generation failed:', e);

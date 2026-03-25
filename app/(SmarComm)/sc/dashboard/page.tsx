@@ -25,7 +25,7 @@ export default function SCDashboardOverview() {
     const trimmed = url.trim();
     if (!trimmed) return;
     const normalized = trimmed.startsWith('http') ? trimmed : 'https://' + trimmed;
-    router.push(`/sc/scan?url=${encodeURIComponent(normalized)}`);
+    router.push(`/scan?url=${encodeURIComponent(normalized)}`);
   };
 
   const activeCampaigns = MOCK_CAMPAIGNS.filter(c => c.status === 'active');
@@ -50,9 +50,9 @@ export default function SCDashboardOverview() {
         <h2 className="mb-4 text-lg font-bold text-text">빠르게 시작하기</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { title: '사이트 GEO/SEO 진단', desc: 'URL 하나로 AI 검색 노출 + 검색 최적화 상태를 즉시 점검하세요.', action: '진단 시작', href: '/sc/dashboard/scan', color: getChartColors()[0] },
-            { title: 'AI 소재 제작', desc: '브랜드 가이드 기반으로 광고 카피, 배너, 영상 소재를 자동 생성합니다.', action: '소재 만들기', href: '/sc/dashboard/creative', color: getChartColors()[1] },
-            { title: '마케팅 용어 사전', desc: '500개 이상의 마케팅 용어를 한눈에. 기업 맞춤 용어도 추가하세요.', action: '용어 보기', href: '/sc/dashboard/glossary', color: getChartColors()[2] },
+            { title: '사이트 GEO/SEO 진단', desc: 'URL 하나로 AI 검색 노출 + 검색 최적화 상태를 즉시 점검하세요.', action: '진단 시작', href: '/dashboard/scan', color: getChartColors()[0] },
+            { title: 'AI 소재 제작', desc: '브랜드 가이드 기반으로 광고 카피, 배너, 영상 소재를 자동 생성합니다.', action: '소재 만들기', href: '/dashboard/creative', color: getChartColors()[1] },
+            { title: '마케팅 용어 사전', desc: '500개 이상의 마케팅 용어를 한눈에. 기업 맞춤 용어도 추가하세요.', action: '용어 보기', href: '/dashboard/glossary', color: getChartColors()[2] },
           ].map((card, i) => (
             <div key={i} className="group cursor-pointer rounded-2xl border border-border bg-white p-5 transition-all hover:shadow-md" onClick={() => router.push(card.href)}>
               <div className="mb-2 text-xs font-semibold" style={{ color: card.color }}>{card.title}</div>
@@ -112,7 +112,7 @@ export default function SCDashboardOverview() {
           <div className="mb-6 rounded-2xl border border-border bg-white">
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h3 className="text-sm font-semibold text-text">캠페인</h3>
-              <button onClick={() => router.push('/sc/dashboard/campaigns')} className="text-xs text-text-muted hover:text-text">전체 보기 →</button>
+              <button onClick={() => router.push('/dashboard/campaigns')} className="text-xs text-text-muted hover:text-text">전체 보기 →</button>
             </div>
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border text-xs text-text-muted">
@@ -124,7 +124,7 @@ export default function SCDashboardOverview() {
               </tr></thead>
               <tbody>
                 {MOCK_CAMPAIGNS.slice(0, 4).map(c => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer" onClick={() => router.push('/sc/dashboard/campaigns')}>
+                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface cursor-pointer" onClick={() => router.push('/dashboard/campaigns')}>
                     <td className="px-5 py-3 font-medium text-text">{c.name}</td>
                     <td className="px-5 py-3 text-text-sub">{c.channel}</td>
                     <td className="px-5 py-3 text-center">
@@ -146,28 +146,28 @@ export default function SCDashboardOverview() {
         <div className="rounded-2xl border border-border bg-white p-6">
           <h3 className="mb-3 text-sm font-semibold text-text">사이트 진단</h3>
           <p className="text-sm text-text-sub">사이트 진단 페이지에서 URL을 입력하고 GEO/SEO 통합 진단을 받아보세요.</p>
-          <button onClick={() => router.push('/sc/dashboard/scan')} className="mt-4 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">진단 페이지로 이동</button>
+          <button onClick={() => router.push('/dashboard/scan')} className="mt-4 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">진단 페이지로 이동</button>
         </div>
       )}
 
       {tab === 'campaigns' && (
         <div className="rounded-2xl border border-border bg-white p-6">
           <h3 className="mb-3 text-sm font-semibold text-text">캠페인 상세</h3>
-          <button onClick={() => router.push('/sc/dashboard/campaigns')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">캠페인 관리로 이동</button>
+          <button onClick={() => router.push('/dashboard/campaigns')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">캠페인 관리로 이동</button>
         </div>
       )}
 
       {tab === 'creative' && (
         <div className="rounded-2xl border border-border bg-white p-6">
           <h3 className="mb-3 text-sm font-semibold text-text">소재 관리</h3>
-          <button onClick={() => router.push('/sc/dashboard/creative')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">소재 제작으로 이동</button>
+          <button onClick={() => router.push('/dashboard/creative')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">소재 제작으로 이동</button>
         </div>
       )}
 
       {tab === 'sales' && (
         <div className="rounded-2xl border border-border bg-white p-6">
           <h3 className="mb-3 text-sm font-semibold text-text">매출 분석</h3>
-          <button onClick={() => router.push('/sc/dashboard/analytics')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">매출 분석으로 이동</button>
+          <button onClick={() => router.push('/dashboard/analytics')} className="mt-2 rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">매출 분석으로 이동</button>
         </div>
       )}
     </div>

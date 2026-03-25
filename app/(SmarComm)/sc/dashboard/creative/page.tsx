@@ -180,7 +180,7 @@ export default function CreativePage() {
       <div className="rounded-2xl border border-border bg-white">
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <h2 className="text-sm font-semibold text-text">최근 소재</h2>
-          <button onClick={() => window.location.href = '/sc/dashboard/archive'} className="text-xs text-text-muted hover:text-text">전체 아카이브 →</button>
+          <button onClick={() => window.location.href = '/dashboard/archive'} className="text-xs text-text-muted hover:text-text">전체 아카이브 →</button>
         </div>
         <table className="w-full text-sm">
           <thead><tr className="border-b border-border text-xs text-text-muted">

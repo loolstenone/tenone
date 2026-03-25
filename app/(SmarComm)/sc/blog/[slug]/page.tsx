@@ -29,7 +29,7 @@ export default function SCBlogPostPage() {
         <main className="min-h-screen bg-white pt-20">
           <div className="mx-auto max-w-3xl px-6 py-20 text-center">
             <h1 className="text-2xl font-bold text-text">글을 찾을 수 없습니다</h1>
-            <Link href="/sc/blog" className="mt-4 inline-block text-sm text-text-muted hover:text-text">← 블로그로 돌아가기</Link>
+            <Link href="/blog" className="mt-4 inline-block text-sm text-text-muted hover:text-text">← 블로그로 돌아가기</Link>
           </div>
         </main>
         <SmarCommFooter />
@@ -64,7 +64,7 @@ export default function SCBlogPostPage() {
       <SmarCommHeader />
       <main className="min-h-screen bg-white pt-20">
         <article className="mx-auto max-w-3xl px-6 py-12">
-          <Link href="/sc/blog" className="mb-6 inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text">
+          <Link href="/blog" className="mb-6 inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text">
             <ArrowLeft size={12} /> 블로그
           </Link>
           <div className="mb-4 flex items-center gap-3">

@@ -32,7 +32,7 @@ export default function SignupPage() {
     if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
     const success = scSignup(email, password);
     if (!success) { setError('이미 가입된 이메일입니다'); return; }
-    router.push('/sc/dashboard');
+    router.push('/dashboard');
   };
 
   const inputClass = "w-full rounded-xl border border-border bg-white py-2.5 pl-10 pr-4 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none";
@@ -100,7 +100,7 @@ export default function SignupPage() {
           </form>
 
           <div className="mt-5 text-center text-sm text-text-muted">
-            이미 계정이 있으신가요? <Link href="/sc/login" className="font-medium text-text">로그인</Link>
+            이미 계정이 있으신가요? <Link href="/login" className="font-medium text-text">로그인</Link>
           </div>
         </div>
       </main>

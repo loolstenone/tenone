@@ -36,18 +36,33 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
   const { isAuthenticated, isLoading: authLoading, user: supaUser } = useAuth();
 
   useEffect(() => {
-    if (authLoading) return;
     const u = getSCUser();
-    // Supabase Auth 또는 SmarComm 자체 인증 중 하나라도 OK
-    if (!u && !isAuthenticated) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+
+    // SC 자체 인증이 있으면 바로 진입
+    if (u) {
+      setUser(u);
+      setReady(true);
       return;
     }
-    // Supabase Auth로 로그인한 경우 SC user 세팅
-    if (!u && isAuthenticated && supaUser) {
+
+    // Supabase Auth 로딩 중이면 2초까지만 대기
+    if (authLoading) {
+      const timer = setTimeout(() => {
+        // 2초 후에도 로딩 중이면 로그인으로
+        if (!getSCUser()) {
+          router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+
+    // Supabase Auth로 로그인한 경우
+    if (isAuthenticated && supaUser) {
       setUser({ email: supaUser.email || '' });
-    } else if (u) {
-      setUser(u);
+    } else {
+      // 둘 다 안 됨 → 로그인으로
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
     }
 
     const savedCompany = localStorage.getItem('sc_company');
@@ -58,7 +73,7 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
     }
 
     setReady(true);
-  }, [router]);
+  }, [router, authLoading, isAuthenticated, supaUser]);
 
   // 페이지 이동 시 모바일 사이드바 접기
   useEffect(() => {
@@ -78,7 +93,7 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
   const desktopSidebarW = collapsed ? 56 : 208;
   const mobileSidebarW = 56;
   const initial = user?.email?.charAt(0).toUpperCase() || '?';
-  const handleLogout = () => { scLogout(); window.location.href = '/sc'; };
+  const handleLogout = () => { scLogout(); window.location.href = '/'; };
 
   return (
     <SCSidebarContext.Provider value={{ collapsed, setCollapsed, mobileExpanded, setMobileExpanded, rightOpen, setRightOpen }}>
@@ -118,8 +133,8 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
 
           {profileOpen && (
             <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border bg-white py-1.5 shadow-lg z-50">
-              <Link href="/sc/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
-              <Link href="/sc" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>SmarComm 홈</Link>
+              <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>워크스페이스 설정</Link>
+              <Link href="/" className="block px-4 py-2 text-sm text-text-sub hover:bg-surface hover:text-text" onClick={() => setProfileOpen(false)}>SmarComm 홈</Link>
               <div className="my-1 border-t border-border" />
               <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text-muted hover:bg-surface hover:text-text">
                 <LogOut size={13} /> 로그아웃

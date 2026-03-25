@@ -29,9 +29,9 @@ export default function CRMPage() {
       {/* CRM 채널 바로가기 */}
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         {[
-          { icon: Bell, label: '푸시 메시지', desc: '4건 발송 완료', href: '/sc/dashboard/crm/push', count: '37.8% 오픈율' },
-          { icon: Mail, label: '이메일', desc: '5개 자동화 활성', href: '/sc/dashboard/crm/email', count: '42.1% 오픈율' },
-          { icon: MessageSquare, label: '카카오 메시지', desc: '12건 캠페인', href: '/sc/dashboard/crm/kakao', count: '89.7% 읽음율' },
+          { icon: Bell, label: '푸시 메시지', desc: '4건 발송 완료', href: '/dashboard/crm/push', count: '37.8% 오픈율' },
+          { icon: Mail, label: '이메일', desc: '5개 자동화 활성', href: '/dashboard/crm/email', count: '42.1% 오픈율' },
+          { icon: MessageSquare, label: '카카오 메시지', desc: '12건 캠페인', href: '/dashboard/crm/kakao', count: '89.7% 읽음율' },
         ].map((channel, i) => (
           <div key={i} className="flex items-center justify-between rounded-2xl border border-border bg-white p-4 cursor-pointer hover:bg-surface" onClick={() => router.push(channel.href)}>
             <div className="flex items-center gap-3">

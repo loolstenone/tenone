@@ -44,7 +44,7 @@ export default function ReportsPage() {
       {mainTab === 'campaigns' && <CampaignsTab />}
       {mainTab === 'data' && <DataReportsTab />}
 
-      <NextStepCTA stage="결과 → 진단" title="사이트를 재진단하여 개선 효과 측정" description="캠페인 집행 후 GEO/SEO 점수 변화를 확인하고 다음 사이클을 시작하세요" actionLabel="사이트 재진단" href="/sc/dashboard/scan" />
+      <NextStepCTA stage="결과 → 진단" title="사이트를 재진단하여 개선 효과 측정" description="캠페인 집행 후 GEO/SEO 점수 변화를 확인하고 다음 사이클을 시작하세요" actionLabel="사이트 재진단" href="/dashboard/scan" />
     </div>
   );
 }
