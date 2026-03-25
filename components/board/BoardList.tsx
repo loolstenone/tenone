@@ -101,15 +101,15 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
         <div className="w-full">
             {/* 카테고리 탭 */}
             {categories.length > 0 && (
-                <div className="flex items-center gap-1 border-b border-neutral-200 mb-4 overflow-x-auto">
+                <div className="flex items-center gap-1 border-b mb-4 overflow-x-auto" style={{ borderColor: 'var(--tn-border, #e5e5e5)' }}>
                     <button
                         onClick={() => handleCategoryChange("")}
                         className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                             category === ""
                                 ? "font-semibold border-current"
-                                : "text-neutral-400 border-transparent hover:text-neutral-200"
+                                : "border-transparent hover:opacity-70"
                         }`}
-                        style={category === "" ? { color: accentColor } : {}}
+                        style={category === "" ? { color: accentColor || '#fff' } : { color: 'var(--tn-text-muted, #999)' }}
                     >
                         전체
                     </button>
@@ -120,9 +120,9 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                             className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                                 category === cat
                                     ? "font-semibold border-current"
-                                    : "text-neutral-400 border-transparent hover:text-neutral-200"
+                                    : "border-transparent hover:opacity-70"
                             }`}
-                            style={category === cat ? { color: accentColor } : {}}
+                            style={category === cat ? { color: accentColor || '#fff' } : { color: 'var(--tn-text-muted, #999)' }}
                         >
                             {cat}
                         </button>

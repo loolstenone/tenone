@@ -119,7 +119,7 @@ export function PublicHeader() {
                     )}
                     {isAuthenticated && canAccessIntra && (
                         <Link href="/intra" className="text-xs font-medium hover:opacity-70 transition-opacity flex items-center gap-0.5" style={{ color: "var(--tn-text-sub)" }}>
-                            입장 <span style={{ color: "var(--tn-text-muted)" }}>→</span>
+                            →]
                         </Link>
                     )}
                     {!isLoading && !isAuthenticated && (
@@ -191,7 +191,7 @@ export function PublicHeader() {
                                 <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
                                     className="flex items-center gap-1 text-sm transition-colors hover:opacity-70"
                                     style={{ color: "var(--tn-text-sub)" }}>
-                                    입장 <span style={{ color: "var(--tn-text-muted)" }}>→</span>
+                                    →]
                                 </Link>
                             )}
                             <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
