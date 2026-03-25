@@ -149,10 +149,10 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`p-2 rounded-lg border transition-colors ${
-                            showFilters ? "border-neutral-400 bg-neutral-50" : "border-neutral-200 hover:bg-neutral-50"
+                            showFilters ? "border-neutral-500 bg-neutral-800" : "border-neutral-600 hover:bg-neutral-800"
                         }`}
                     >
-                        <SlidersHorizontal className="h-4 w-4 text-neutral-600" />
+                        <SlidersHorizontal className="h-4 w-4 text-neutral-400" />
                     </button>
 
                     {/* 뷰 전환 */}
@@ -160,7 +160,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <button
                             onClick={() => setViewMode("card")}
                             className={`p-2 transition-colors ${
-                                viewMode === "card" ? "bg-neutral-900 text-white" : "hover:bg-neutral-50"
+                                viewMode === "card" ? "bg-neutral-900 text-white" : "hover:bg-neutral-800"
                             }`}
                         >
                             <LayoutGrid className="h-4 w-4" />
@@ -168,7 +168,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <button
                             onClick={() => setViewMode("list")}
                             className={`p-2 transition-colors ${
-                                viewMode === "list" ? "bg-neutral-900 text-white" : "hover:bg-neutral-50"
+                                viewMode === "list" ? "bg-neutral-900 text-white" : "hover:bg-neutral-800"
                             }`}
                         >
                             <List className="h-4 w-4" />
@@ -179,13 +179,13 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
 
             {/* 필터 패널 */}
             {showFilters && (
-                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-neutral-50 rounded-lg">
+                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-neutral-800/50 rounded-lg">
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-neutral-500">정렬</span>
                         <select
                             value={sort}
                             onChange={(e) => { setSort(e.target.value as SortOption); setPage(1); }}
-                            className="text-sm border border-neutral-200 rounded px-2 py-1 bg-white"
+                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-transparent text-neutral-200"
                         >
                             {Object.entries(sortLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
@@ -197,7 +197,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <select
                             value={period}
                             onChange={(e) => { setPeriod(e.target.value as PeriodOption); setPage(1); }}
-                            className="text-sm border border-neutral-200 rounded px-2 py-1 bg-white"
+                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-transparent text-neutral-200"
                         >
                             {Object.entries(periodLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
@@ -289,7 +289,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                                 className={`min-w-[36px] h-9 rounded text-sm transition-colors ${
                                     page === pageNum
                                         ? "text-white font-medium"
-                                        : "hover:bg-neutral-100 text-neutral-600"
+                                        : "hover:bg-neutral-100 text-neutral-400"
                                 }`}
                                 style={page === pageNum ? { backgroundColor: accentColor } : {}}
                             >

@@ -72,14 +72,14 @@ body {
   --tn-bg-alt: #111111;
   --tn-surface: #161616;
   --tn-text: #ffffff;
-  --tn-text-sub: #bbbbbb;
-  --tn-text-muted: #777777;
+  --tn-text-sub: #cccccc;
+  --tn-text-muted: #999999;
   --tn-border: #2a2a2a;
   --tn-border-light: #1e1e1e;
   --tn-header-bg: #0a0a0a;
   --tn-header-text: #f0f0f0;
   --tn-footer-bg: #000000;
-  --tn-footer-text: #666666;
+  --tn-footer-text: #888888;
   --tn-card-bg: #161616;
   --tn-card-hover: #1e1e1e;
   --tn-accent: #ffffff;
