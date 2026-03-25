@@ -7,6 +7,7 @@ import { LogOut, ChevronDown, PanelRightOpen, PanelRightClose } from 'lucide-rea
 import SmarCommSidebar from '@/components/SmarCommSidebar';
 import SCRightPanel from '@/components/smarcomm/RightPanel';
 import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
+import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 
 export const SCSidebarContext = createContext({
@@ -32,10 +33,22 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
 
+  const { isAuthenticated, isLoading: authLoading, user: supaUser } = useAuth();
+
   useEffect(() => {
+    if (authLoading) return;
     const u = getSCUser();
-    if (!u) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
-    setUser(u);
+    // Supabase Auth 또는 SmarComm 자체 인증 중 하나라도 OK
+    if (!u && !isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    // Supabase Auth로 로그인한 경우 SC user 세팅
+    if (!u && isAuthenticated && supaUser) {
+      setUser({ email: supaUser.email || '' });
+    } else if (u) {
+      setUser(u);
+    }
 
     const savedCompany = localStorage.getItem('sc_company');
     if (savedCompany) {
