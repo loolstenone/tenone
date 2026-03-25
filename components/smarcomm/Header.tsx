@@ -5,6 +5,7 @@ import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { getUser, logout } from '@/lib/smarcomm/auth';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,7 +15,18 @@ export default function Header() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setUser(getUser());
+    const u = getUser();
+    if (u) {
+      setUser(u);
+    } else {
+      // Supabase 세션도 체크
+      const sb = createClient();
+      sb.auth.getSession().then(({ data }) => {
+        if (data?.session?.user) {
+          setUser({ email: data.session.user.email || '' });
+        }
+      }).catch(() => {});
+    }
     const handleClick = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
@@ -51,7 +63,7 @@ export default function Header() {
             요금제
           </Link>
           <Link
-            href={user ? '/dashboard' : '/workspace'}
+            href="/workspace"
             className="text-[13px] font-medium text-text-sub transition-colors hover:text-text"
           >
             워크스페이스
@@ -127,7 +139,7 @@ export default function Header() {
             <Link href="/#process" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>서비스</Link>
             <Link href="/blog" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>블로그</Link>
             <Link href="/pricing" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>요금제</Link>
-            <Link href={user ? '/dashboard' : '/workspace'} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>워크스페이스</Link>
+            <Link href="/workspace" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>워크스페이스</Link>
             {user ? (
               <>
                 <div className="flex items-center gap-2 border-t border-border pt-3">
