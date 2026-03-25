@@ -45,7 +45,7 @@ export default function JakkaAboutPage() {
                             <div className="space-y-2 text-sm text-neutral-600">
                                 <p>
                                     <span className="text-neutral-400 mr-2">Email</span>
-                                    lools@tenone.biz
+                                    tenone.biz/contact
                                 </p>
                                 <p>
                                     <span className="text-neutral-400 mr-2">Instagram</span>

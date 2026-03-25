@@ -226,8 +226,8 @@ export default function NatureBoxHome() {
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-white border border-neutral-200">
                                 <Mail className="h-4 w-4 text-[#6B8E23]" />
-                                <a href="mailto:lools@tenone.biz" className="hover:text-[#6B8E23] transition-colors">
-                                    lools@tenone.biz
+                                <a href="https://tenone.biz/contact" className="hover:text-[#6B8E23] transition-colors">
+                                    tenone.biz/contact
                                 </a>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-white border border-neutral-200">

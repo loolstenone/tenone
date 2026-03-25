@@ -291,14 +291,14 @@ export default function TrendHunterPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a
-                            href="mailto:lools@tenone.biz"
+                            href="https://tenone.biz/contact"
                             className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#00FF88] text-black font-semibold rounded-lg hover:bg-[#00DD77] transition-colors"
                         >
                             이메일 보내기
                             <ArrowRight className="w-4 h-4" />
                         </a>
                         <div className="text-neutral-500 text-sm font-mono">
-                            lools@tenone.biz &middot; +82 10 2795 1001
+                            tenone.biz/contact &middot; +82 10 2795 1001
                         </div>
                     </div>
                 </div>

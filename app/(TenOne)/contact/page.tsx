@@ -41,8 +41,8 @@ export default function ContactPage() {
                         <p className="text-sm tn-text-sub mt-4">Planning, Business, Marketing, Advertising, Communication, HR</p>
 
                         <div className="mt-6 space-y-3">
-                            <a href="mailto:lools@tenone.biz" className="flex items-center gap-3 text-sm text-neutral-600 hover:tn-text transition-colors">
-                                <Mail className="h-4 w-4 tn-text-sub" /> lools@tenone.biz
+                            <a href="https://tenone.biz/contact" className="flex items-center gap-3 text-sm text-neutral-600 hover:tn-text transition-colors">
+                                <Mail className="h-4 w-4 tn-text-sub" /> tenone.biz/contact
                             </a>
                             <a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-sm text-neutral-600 hover:tn-text transition-colors">

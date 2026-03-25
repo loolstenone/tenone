@@ -235,7 +235,7 @@ function AboutContent() {
                                     트렌드, 브랜딩, IT에 관심을 가지고 가치를 연결하는 일을 하고 있습니다.
                                 </p>
                                 <div className="mt-6 space-y-2 text-sm tn-text-sub">
-                                    <p><a href="mailto:lools@tenone.biz" className="hover:tn-text transition-colors">lools@tenone.biz</a></p>
+                                    <p><a href="https://tenone.biz/contact" className="hover:tn-text transition-colors">tenone.biz/contact</a></p>
                                     <p><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:tn-text transition-colors">Kakao Open Chat</a></p>
                                 </div>
                             </div>

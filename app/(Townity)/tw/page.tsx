@@ -257,9 +257,9 @@ export default function TownityHome() {
                     <h2 className="text-2xl font-bold text-neutral-900 mb-2">Contact</h2>
                     <p className="text-neutral-600 mb-8">타우니티 프로젝트에 관심이 있으시다면 연락 주세요.</p>
                     <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm text-neutral-600">
-                        <a href="mailto:lools@tenone.biz" className="inline-flex items-center gap-2 hover:text-[#10B981] transition-colors">
+                        <a href="https://tenone.biz/contact" className="inline-flex items-center gap-2 hover:text-[#10B981] transition-colors">
                             <Mail className="h-4 w-4" />
-                            lools@tenone.biz
+                            tenone.biz/contact
                         </a>
                         <span className="inline-flex items-center gap-2">
                             <Phone className="h-4 w-4" />
