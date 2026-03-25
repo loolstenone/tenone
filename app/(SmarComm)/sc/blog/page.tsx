@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { getPublishedPosts, BLOG_CATEGORIES } from '@/lib/smarcomm/blog-data';
-import SmarCommHeader from '@/components/SmarCommHeader';
-import SmarCommFooter from '@/components/SmarCommFooter';
+import Header from '@/components/smarcomm/Header';
+import Footer from '@/components/smarcomm/Footer';
 
-export default function SCBlogPage() {
+export default function BlogPage() {
   const [category, setCategory] = useState('전체');
   const [search, setSearch] = useState('');
   const posts = getPublishedPosts();
+
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
 
@@ -24,42 +25,57 @@ export default function SCBlogPage() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const handleCategory = (cat: string) => { setCategory(cat); setPage(1); };
+  const handleSearch = (val: string) => { setSearch(val); setPage(1); };
+
   return (
     <>
-      <SmarCommHeader />
+      <Header />
       <main className="min-h-screen bg-white pt-20">
         <div className="mx-auto max-w-4xl px-6 py-12">
           <div className="mb-8">
-            <h1 className="text-xl md:text-3xl font-extrabold text-text tracking-tight">블로그</h1>
+            <h1 className="text-3xl font-extrabold text-text tracking-tight">블로그</h1>
             <p className="mt-2 text-sm text-text-muted">마케팅 인사이트, 실전 사례, AI 트렌드를 공유합니다</p>
           </div>
+
+          {/* 검색 + 카테고리 */}
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="글 검색..."
+              <input type="text" value={search} onChange={e => handleSearch(e.target.value)} placeholder="글 검색..."
                 className="w-full rounded-xl border border-border bg-surface py-2.5 pl-9 pr-4 text-sm placeholder:text-text-muted focus:border-text focus:outline-none" />
             </div>
             <div className="flex flex-wrap gap-1.5">
               {BLOG_CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => { setCategory(cat); setPage(1); }}
+                <button key={cat} onClick={() => handleCategory(cat)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${category === cat ? 'bg-text text-white' : 'bg-surface text-text-sub hover:text-text'}`}>
                   {cat}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* 게시판 리스트 */}
           <div className="rounded-2xl border border-border bg-white overflow-hidden">
+            {/* 헤더 */}
             <div className="grid grid-cols-[1fr_100px_80px_80px] border-b border-border bg-surface px-5 py-2.5 text-[11px] font-semibold text-text-muted">
-              <span>제목</span><span className="text-center">카테고리</span><span className="text-center">읽기</span><span className="text-right">날짜</span>
+              <span>제목</span>
+              <span className="text-center">카테고리</span>
+              <span className="text-center">읽기</span>
+              <span className="text-right">날짜</span>
             </div>
-            {paged.length > 0 ? paged.map((post) => (
-              <Link key={post.id} href={`/sc/blog/${post.slug}`}
+
+            {/* 글 목록 */}
+            {paged.length > 0 ? paged.map((post, i) => (
+              <Link key={post.id} href={`/blog/${post.slug}`}
                 className="grid grid-cols-[1fr_100px_80px_80px] items-center border-b border-border px-5 py-3.5 transition-colors hover:bg-surface last:border-0">
                 <div className="min-w-0 pr-4">
                   <div className="text-sm font-medium text-text truncate">{post.title}</div>
                   <div className="mt-0.5 text-[11px] text-text-muted truncate">{post.summary}</div>
                 </div>
-                <div className="text-center"><span className="inline-block rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-text-sub">{post.category}</span></div>
+                <div className="text-center">
+                  <span className="inline-block rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold text-text-sub">{post.category}</span>
+                </div>
                 <div className="text-center text-[11px] text-text-muted">{post.readTime}분</div>
                 <div className="text-right text-[11px] text-text-muted">{post.publishedAt.replace('2026-', '')}</div>
               </Link>
@@ -67,18 +83,33 @@ export default function SCBlogPage() {
               <div className="py-16 text-center text-sm text-text-muted">검색 결과가 없습니다</div>
             )}
           </div>
+
+          {/* 하단: 총 건수 + 페이지네이션 */}
           <div className="mt-4 flex items-center justify-between">
-            <div className="text-xs text-text-muted">총 {filtered.length}건 {totalPages > 1 && `| ${page} / ${totalPages} 페이지`}</div>
+            <div className="text-xs text-text-muted">
+              총 {filtered.length}건 {totalPages > 1 && `| ${page} / ${totalPages} 페이지`}
+            </div>
+
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
-                <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">이전</button>
-                <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">다음</button>
+                <button onClick={() => setPage(1)} disabled={page === 1}
+                  className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">처음</button>
+                <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
+                  className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">이전</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button key={p} onClick={() => setPage(p)}
+                    className={`rounded px-2.5 py-1 text-[10px] font-medium ${page === p ? 'bg-text text-white' : 'border border-border text-text-sub hover:bg-surface'}`}>{p}</button>
+                ))}
+                <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}
+                  className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">다음</button>
+                <button onClick={() => setPage(totalPages)} disabled={page === totalPages}
+                  className="rounded border border-border px-2 py-1 text-[10px] text-text-muted hover:bg-surface disabled:opacity-30">끝</button>
               </div>
             )}
           </div>
         </div>
       </main>
-      <SmarCommFooter />
+      <Footer />
     </>
   );
 }

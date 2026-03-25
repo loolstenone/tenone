@@ -6,9 +6,10 @@ interface RadarChartProps {
   labels: string[];
   values: number[]; // 0~100
   size?: number;
+  hideLabels?: boolean; // true면 라벨/값 숨김 (미니 차트용)
 }
 
-export default function RadarChart({ labels, values, size = 280 }: RadarChartProps) {
+export default function RadarChart({ labels, values, size = 280, hideLabels = false }: RadarChartProps) {
   const [animated, setAnimated] = useState(values.map(() => 0));
 
   useEffect(() => {
@@ -18,7 +19,8 @@ export default function RadarChart({ labels, values, size = 280 }: RadarChartPro
 
   const cx = size / 2;
   const cy = size / 2;
-  const r = size / 2 - 40;
+  const padding = hideLabels ? 4 : 40;
+  const r = size / 2 - padding;
   const n = labels.length;
   const angleStep = (Math.PI * 2) / n;
 
@@ -86,15 +88,15 @@ export default function RadarChart({ labels, values, size = 280 }: RadarChartPro
           <circle
             key={`dot-${i}`}
             cx={p.x} cy={p.y}
-            r={3}
+            r={hideLabels ? 1.5 : 3}
             fill="#111827"
             style={{ transition: 'all 1s cubic-bezier(0.4,0,0.2,1)' }}
           />
         );
       })}
 
-      {/* Labels */}
-      {labels.map((label, i) => {
+      {/* Labels (큰 차트에서만) */}
+      {!hideLabels && labels.map((label, i) => {
         const p = getPoint(i, 118);
         return (
           <text
@@ -110,8 +112,8 @@ export default function RadarChart({ labels, values, size = 280 }: RadarChartPro
         );
       })}
 
-      {/* Score values */}
-      {animated.map((v, i) => {
+      {/* Score values (큰 차트에서만) */}
+      {!hideLabels && animated.map((v, i) => {
         const p = getPoint(i, v > 30 ? v - 12 : v + 15);
         return (
           <text

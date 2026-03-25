@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useWorkflow } from "@/lib/smarcomm/workflow-context";
+import { useWorkflow } from "@/lib/workflow-context";
 import { KanbanBoard } from "@/components/smarcomm/workflow/KanbanBoard";
 import { TaskModal } from "@/components/smarcomm/workflow/TaskModal";
 import { WorkflowTask, TaskStatus } from "@/types/workflow";
 import { workflowChannels } from "@/lib/smarcomm/workflow-data";
 import { Plus, Filter } from "lucide-react";
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 export default function KanbanPage() {
   const { tasks, moveTask, addTask, updateTask, deleteTask } = useWorkflow();
@@ -30,9 +32,10 @@ export default function KanbanPage() {
 
   return (
     <div className="max-w-6xl space-y-5">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">칸반 보드</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">칸반 보드</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">드래그앤드롭으로 태스크를 관리합니다</p>
         </div>
         <div className="flex items-center gap-2">

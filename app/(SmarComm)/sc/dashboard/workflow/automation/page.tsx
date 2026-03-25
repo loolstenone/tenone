@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useWorkflow } from "@/lib/smarcomm/workflow-context";
+import { useWorkflow } from "@/lib/workflow-context";
 import { AutomationCard } from "@/components/smarcomm/workflow/AutomationCard";
 import { AutomationBuilder } from "@/components/smarcomm/workflow/AutomationBuilder";
 import { AutomationRule } from "@/types/workflow";
 import { Plus, Zap, Power, AlertCircle } from "lucide-react";
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 export default function AutomationPage() {
   const { automations, addAutomation, updateAutomation, toggleAutomation, deleteAutomation } = useWorkflow();
@@ -18,9 +20,10 @@ export default function AutomationPage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-text">자동화</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">자동화</h1><GuideHelpButton /></div>
           <p className="text-xs text-text-muted mt-0.5">자동화 규칙을 설정하고 관리합니다</p>
         </div>
         <button onClick={() => { setEditingRule(null); setIsBuilderOpen(true); }}

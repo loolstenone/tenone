@@ -12,8 +12,8 @@ import {
   Workflow, KanbanSquare, FolderKanban, Zap,
   Eye, Search, Target, Radar, Globe, BookOpen, Lock
 } from 'lucide-react';
-import { useContext, useState, useEffect } from 'react';
-import { SidebarContext } from '@/app/dashboard/layout';
+import { createContext, useContext, useState, useEffect } from 'react';
+const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 // 팩 타입: core=항상 보임, action/crm/experiment/ops/launch=확장팩
 type PackType = 'core' | 'action' | 'crm' | 'experiment' | 'ops' | 'launch' | 'setting';

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Search, Globe, FileText, Palette, Megaphone, LineChart, Clock, ChevronRight } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 // SmarComm 고객 여정 타임라인
 interface JourneyEvent {
@@ -47,8 +49,9 @@ export default function JourneyPage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-text">사용자 여정</h1>
+        <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">사용자 여정</h1><GuideHelpButton /></div>
         <p className="mt-1 text-xs text-text-muted">고객이 SmarComm과 함께한 여정을 타임라인으로 확인하세요</p>
       </div>
 

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight } from "lucide-react";
-import { useWorkflow } from "@/lib/smarcomm/workflow-context";
+import { useWorkflow } from "@/lib/workflow-context";
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 const modules = [
   { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/dashboard/workflow/pipeline", icon: GitBranch },
@@ -23,7 +25,8 @@ export default function WorkflowDashboard() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-xl font-bold text-text">워크플로우</h1>
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
+      <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">워크플로우</h1><GuideHelpButton /></div>
       <p className="mt-1 text-xs text-text-muted">마케팅 작업 흐름을 체계적으로 관리합니다</p>
 
       <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -58,7 +58,7 @@ export default function CreativePage() {
         }
       } catch { /* ignore */ }
 
-      const res = await fetch('/api/smarcomm/creative/generate', {
+      const res = await fetch('/api/creative/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

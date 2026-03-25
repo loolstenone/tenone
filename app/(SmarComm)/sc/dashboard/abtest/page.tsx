@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Plus, CheckCircle2, BarChart3, Search, ChevronRight } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface ABTest {
   id: string;
@@ -41,9 +43,10 @@ export default function ABTestPage() {
 
   return (
     <div className="max-w-5xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">A/B 테스트</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">A/B 테스트</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">실험을 통해 데이터 기반의 의사결정을 해보세요</p>
         </div>
         <button className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

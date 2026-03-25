@@ -133,7 +133,7 @@ export default function AdvisorPage() {
     if (!execution) return;
     setRescanning(true);
     try {
-      const res = await fetch('/api/smarcomm/scan', {
+      const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: execution.scan_url }),
@@ -298,7 +298,7 @@ export default function AdvisorPage() {
                           channel: action.channel,
                           desc: action.description,
                         });
-                        router.push(`/sc/dashboard/creative?${params.toString()}`);
+                        router.push(`/dashboard/creative?${params.toString()}`);
                       }}
                       className="mt-2 flex items-center gap-1 rounded-lg bg-text px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-accent-sub"
                     >

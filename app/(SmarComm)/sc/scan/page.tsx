@@ -37,7 +37,7 @@ function ScanContent() {
     }, 100);
 
     // 실제 API 호출
-    fetch('/api/smarcomm/scan', {
+    fetch('/api/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
@@ -60,7 +60,7 @@ function ScanContent() {
         setProgress(100);
         setStep(4);
         setTimeout(() => {
-          router.push(`/sc/report/${scanId}`);
+          router.push(`/report/${scanId}`);
         }, 500);
       })
       .catch((err) => {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ExternalLink, BookOpen, Lightbulb } from 'lucide-react';
 import { GUIDES } from '@/lib/smarcomm/guide-data';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
 
 export default function GuidePage() {
   const [activeGuideId, setActiveGuideId] = useState(GUIDES[0].id);
@@ -45,6 +46,7 @@ export default function GuidePage() {
       {/* 우측: 콘텐츠 */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-3xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
           {/* 브레드크럼 */}
           <div className="mb-4 flex items-center gap-1 text-xs text-text-muted">
             <span>서비스 가이드</span>

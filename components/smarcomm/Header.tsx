@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { getSCUser as getUser, scLogout as logout } from '@/lib/smarcomm/auth';
+import { getUser, logout } from '@/lib/smarcomm/auth';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);

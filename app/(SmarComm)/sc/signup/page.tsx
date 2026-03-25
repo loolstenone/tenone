@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, CheckCircle2 } from 'lucide-react';
-import SmarCommHeader from '@/components/SmarCommHeader';
-import { scSignup } from '@/lib/smarcomm/auth';
+import Header from '@/components/smarcomm/Header';
+import { signup } from '@/lib/smarcomm/auth';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -30,7 +30,7 @@ export default function SignupPage() {
     if (!email || !password) { setError('이메일과 비밀번호를 입력해주세요'); return; }
     if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return; }
     if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
-    const success = scSignup(email, password);
+    const success = signup(email, password);
     if (!success) { setError('이미 가입된 이메일입니다'); return; }
     router.push('/dashboard');
   };
@@ -39,7 +39,7 @@ export default function SignupPage() {
 
   return (
     <>
-      <SmarCommHeader />
+      <Header />
       <main className="flex min-h-screen items-center justify-center px-5 pt-14">
         <div className="w-full max-w-sm">
           <div className="mb-6 text-center">

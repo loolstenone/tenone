@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { MOCK_CALENDAR } from '@/lib/smarcomm/dashboard-data';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // 2026년 3월
@@ -43,13 +45,14 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="mb-6 text-xl font-bold text-text">마케팅 캘린더</h1>
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
+      <div className="flex items-center gap-2 mb-6"><h1 className="text-xl font-bold text-text">마케팅 캘린더</h1><GuideHelpButton /></div>
 
       {/* Month Navigation */}
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={prevMonth} className="rounded-lg border border-border p-2 hover:bg-surface" aria-label="이전 달"><ChevronLeft size={16} /></button>
+        <button onClick={prevMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronLeft size={16} /></button>
         <span className="text-base font-semibold text-text">{year}년 {month + 1}월</span>
-        <button onClick={nextMonth} className="rounded-lg border border-border p-2 hover:bg-surface" aria-label="다음 달"><ChevronRight size={16} /></button>
+        <button onClick={nextMonth} className="rounded-lg border border-border p-2 hover:bg-surface"><ChevronRight size={16} /></button>
       </div>
 
       {/* Calendar Grid */}

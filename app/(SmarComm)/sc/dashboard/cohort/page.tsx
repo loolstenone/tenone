@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Plus, Users, Download, Search, ChevronRight } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface Cohort {
   id: string;
@@ -56,9 +58,10 @@ export default function CohortPage() {
 
   return (
     <div className="max-w-5xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">코호트</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">코호트</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">원하는 사용자 그룹을 설정하고, 데이터 분석과 메시지에 활용하세요</p>
         </div>
         <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

@@ -13,7 +13,7 @@ import Header from '@/components/smarcomm/Header';
 import Footer from '@/components/smarcomm/Footer';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import RadarChart from '@/components/smarcomm/RadarChart';
-import { getSCUser as getUser } from '@/lib/smarcomm/auth';
+import { getUser } from '@/lib/smarcomm/auth';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 
 const GRADE_MAP = {
@@ -121,7 +121,7 @@ function ReportContent({ scanId }: { scanId: string }) {
     if (!stored) return;
     setGeneratingPlan(true);
     try {
-      const res = await fetch('/api/smarcomm/advisor/campaign-plan', {
+      const res = await fetch('/api/advisor/campaign-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scanResult: JSON.parse(stored) }),

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Search, Image, Type, Video, Filter, Download, Eye, Trash2, Plus } from 'lucide-react';
 import { MOCK_CREATIVES } from '@/lib/smarcomm/dashboard-data';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 const TYPE_ICON = { text: Type, banner: Image, video: Video };
 const TYPE_LABEL = { text: '텍스트', banner: '이미지', video: '영상' };
@@ -21,9 +23,10 @@ export default function ArchivePage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">소재 아카이브</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">소재 아카이브</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">제작한 소재를 저장하고 관리하세요</p>
         </div>
         <button onClick={() => window.location.href = '/dashboard/creative'} className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
@@ -90,8 +93,8 @@ export default function ArchivePage() {
                     <td className="px-5 py-3 text-right text-text-muted">{c.createdAt}</td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-center gap-1">
-                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="미리보기" aria-label="미리보기"><Eye size={13} /></button>
-                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="다운로드" aria-label="다운로드"><Download size={13} /></button>
+                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="미리보기"><Eye size={13} /></button>
+                        <button className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:text-text hover:bg-surface" title="다운로드"><Download size={13} /></button>
                       </div>
                     </td>
                   </tr>

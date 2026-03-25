@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Bell, Plus, Send, Clock, Users, BarChart3 } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface PushCampaign {
   id: string;
@@ -29,9 +31,10 @@ const STATUS_MAP = { sent: { label: '발송 완료', color: _psc[0] }, scheduled
 export default function PushPage() {
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">푸시 메시지</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">푸시 메시지</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">고객에게 적시에 맞춤 메시지를 전달하세요</p>
         </div>
         <button className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

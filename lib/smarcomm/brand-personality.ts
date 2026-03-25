@@ -47,6 +47,7 @@ export function analyzeBrandPersonality(scores: {
   contentGap: number;  // 콘텐츠 갭 수 (역산)
 }): BrandPersonality {
   const avgSeo = (scores.techSeo + scores.contentSeo) / 2;
+  const avgGeo = (scores.geoExposure + scores.geoReadiness) / 2;
 
   // V(Visible) vs I(Invisible)
   const v = avgSeo >= 60 ? 'V' : 'I';
@@ -55,7 +56,7 @@ export function analyzeBrandPersonality(scores: {
   const c = scores.techSeo >= 50 ? 'C' : 'I';
 
   // P(Progressive) vs O(Organic)
-  const p = scores.contentSeo >= 50 || scores.geoExposure >= 40 ? 'P' : 'O';
+  const p = scores.contentSeo >= 50 || avgGeo >= 40 ? 'P' : 'O';
 
   // F(Formal) vs C(Casual)
   const f = scores.geoReadiness >= 40 ? 'F' : 'C';

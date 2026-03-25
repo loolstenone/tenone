@@ -1,6 +1,8 @@
 'use client';
 
 import { Plus, MessageSquare, Send, Users } from 'lucide-react';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface KakaoMessage {
   id: string;
@@ -25,9 +27,10 @@ const TYPE_LABEL = { alimtalk: '알림톡', friendtalk: '친구톡' };
 export default function KakaoPage() {
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">카카오 메시지</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">카카오 메시지</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">알림톡과 친구톡으로 고객과 직접 소통하세요</p>
         </div>
         <button className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

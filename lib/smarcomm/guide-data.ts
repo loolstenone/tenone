@@ -6,12 +6,21 @@ export interface GuideStep {
   tip?: string;
 }
 
+// 확장 섹션 (MD 파일 구조 대응)
+export interface GuideSection {
+  id: string; // tab ID
+  label: string; // 탭 이름
+  items: { title?: string; content: string }[];
+}
+
 export interface Guide {
   id: string;
   category: string;
   title: string;
   description: string;
-  steps: GuideStep[];
+  tier?: string; // 'Starter' | 'Growth' | 'Pro' | 'Enterprise'
+  sections?: GuideSection[]; // 확장 구조 (있으면 탭 UI)
+  steps: GuideStep[]; // 기본 구조 (하위호환)
   relatedLinks: { label: string; href: string }[];
 }
 
@@ -408,6 +417,407 @@ export const GUIDES: Guide[] = [
       { label: '프로젝트', href: '/dashboard/workflow/projects' },
       { label: '칸반 보드', href: '/dashboard/workflow/kanban' },
       { label: '캘린더', href: '/dashboard/calendar' },
+    ],
+  },
+
+  // ══════ Core 메뉴 가이드 ══════
+  {
+    id: 'traffic-guide',
+    category: 'Core',
+    title: '트래픽 분석 활용하기',
+    description: 'GA4 연동 후 채널별 유입, 상위 페이지, 오디언스 프로필을 한눈에 분석합니다.',
+    tier: 'Starter',
+    sections: [
+      { id: 'pain', label: '이런 고민이 있다면', items: [
+        { content: '우리 사이트에 사람이 오긴 오는데, 어디서 오는 건지 모르겠어요' },
+        { content: '블로그 글을 열심히 쓰는데, 실제로 트래픽에 도움이 되고 있는 건지 확인이 안 돼요' },
+        { content: 'ChatGPT나 Perplexity에서 우리 사이트로 유입되는 사람이 있다는데, 측정할 방법이 없어요' },
+        { content: '모바일이랑 PC 중 어디에 더 집중해야 하는지 데이터를 보고 결정하고 싶어요' },
+      ]},
+      { id: 'overview', label: '한눈에 보기', items: [
+        { title: '❶ 기간 선택 필터', content: '7일/30일/90일/커스텀 기간을 선택하여 데이터 범위를 조정합니다' },
+        { title: '❷ 채널별 유입 차트', content: '자연검색, 유료검색, 직접유입, AI 추천, 소셜, 이메일, 레퍼럴 채널의 세션·사용자를 막대/라인 차트로 비교합니다' },
+        { title: '❸ AI 추천 유입 패널', content: 'ChatGPT, Perplexity 등 AI 검색에서 유입된 트래픽을 별도 추적하는 SmarComm 고유 지표입니다' },
+        { title: '❹ 상위 페이지 테이블', content: '조회수, 체류 시간, 이탈률 기준으로 정렬된 TOP 페이지 목록입니다' },
+        { title: '❺ 오디언스 프로필', content: '디바이스(데스크탑/모바일), 신규 vs 재방문, 지역별 분포를 보여줍니다' },
+      ]},
+      { id: 'metrics', label: '핵심 지표', items: [
+        { title: '세션(Session)', content: '사용자가 사이트를 방문하여 활동하는 하나의 단위. 30분 무활동 시 새 세션. 🟢 전월 대비 10%↑ 양호 🟡 ±10% 보통 🔴 10%↓ 위험. 퍼널 연결: Awareness 단계 기반 지표' },
+        { title: '이탈률(Bounce Rate)', content: '페이지를 1개만 보고 떠난 세션 비율. 🟢 40% 미만 양호 🟡 40~60% 보통 🔴 60% 초과 위험. 퍼널 연결: Consideration 단계 — 관심은 있었지만 설득되지 않았다는 의미' },
+        { title: '평균 세션 시간', content: '사용자가 사이트에 머문 평균 시간. 🟢 2분 이상 양호 🟡 1~2분 보통 🔴 1분 미만 위험. 퍼널 연결: Interest → Consideration 전환 지표' },
+        { title: 'AI 추천 유입', content: 'ChatGPT, Perplexity, Gemini, Naver Cue 등에서 링크를 타고 유입된 트래픽. SmarComm 독자 지표. GA4 기본 채널에 미포함. 아직 벤치마크가 없으므로 전월 대비 증감 추이로 모니터링' },
+      ]},
+      { id: 'howto', label: '이렇게 활용하세요', items: [
+        { title: 'Step 1. GA4를 연동하세요', content: '워크스페이스 설정 > 외부 연동에서 GA4를 연결합니다. OAuth 로그인 한 번으로 완료. 연동 전에는 샘플 데이터가 표시되므로 반드시 연동 후 실데이터를 확인하세요.' },
+        { title: 'Step 2. 채널별 유입을 비교하세요', content: '7개 채널의 세션과 사용자를 나란히 비교합니다. 비중이 가장 높은 채널(현재 주력)과 성장률이 가장 높은 채널(미래 기회)을 먼저 파악하세요.' },
+        { title: 'Step 3. AI 추천 유입을 확인하세요', content: 'AI 추천 유입 패널에서 AI 검색 플랫폼별 유입량을 확인합니다. 이 수치가 올라가면 GEO 최적화 효과가 트래픽으로 전환되고 있다는 증거입니다.' },
+        { title: 'Step 4. 상위 페이지를 분석하세요', content: 'TOP 10 페이지 확인. 조회수는 높지만 이탈률도 높은 페이지 = 사람은 오지만 설득 못하는 페이지. CTA나 콘텐츠를 개선하면 전환율이 오릅니다.' },
+        { title: 'Step 5. 오디언스 프로필로 타깃을 점검하세요', content: '모바일 80%인데 PC 위주 랜딩이면 모바일 최적화 급선무. 신규가 적으면 인지도 확대, 재방문이 적으면 리텐션 강화에 집중.' },
+      ]},
+      { id: 'cases', label: '실전 사례', items: [
+        { title: '이커머스 — 여성 패션 쇼핑몰 A사', content: '상황: 월 광고비 300만원, 검색광고 위주, 매출 정체. 발견: 자연검색 8%, 유료검색 78%, AI 추천 0건. 액션: GEO/SEO 진단 후 블로그 12편 + FAQ Schema 추가. 결과: 자연검색 8%→22%(+175%), AI 추천 0→340건/월, 유료 의존도 78%→55%, 총 트래픽 +54%' },
+        { title: 'B2B SaaS — HR솔루션 B사', content: '상황: 모바일 65%인데 PC 위주 랜딩. 발견: 모바일 이탈률 72% vs PC 38%. 액션: 모바일 전용 랜딩, CTA 확대, 폼 3개→1개. 결과: 모바일 이탈률 72%→45%(-27%p), 모바일 전환율 0.8%→2.1%(+163%), 전체 리드 23건→41건(+78%)' },
+      ]},
+    ],
+    steps: [
+      { title: 'Step 1. GA4 연동', content: '워크스페이스 설정 > 외부 연동에서 GA4를 연결합니다.' },
+      { title: 'Step 2. 채널별 유입 비교', content: '7개 채널의 세션과 사용자를 비교합니다.' },
+      { title: 'Step 3. AI 추천 유입 확인', content: 'AI 검색 플랫폼별 유입량을 확인합니다.' },
+      { title: 'Step 4. 상위 페이지 분석', content: 'TOP 10 페이지 조회수/이탈률 확인.' },
+      { title: 'Step 5. 오디언스 프로필', content: '디바이스, 신규/재방문, 지역 확인.' },
+    ],
+    relatedLinks: [
+      { label: '트래픽 분석', href: '/dashboard/traffic' },
+      { label: 'GA4 연동', href: '/dashboard/profile' },
+      { label: '퍼널 분석', href: '/dashboard/funnel' },
+    ],
+  },
+  {
+    id: 'breaking-funnel-guide',
+    category: 'Core',
+    title: '퍼널 분석 진단 이해하기',
+    description: '6단계 마케팅 퍼널(Awareness→Interest→Consideration→Purchase→Retention→Advocacy)을 자동 진단합니다. "광고는 하고 있는데 어디가 문제인지 모르겠어요"라는 고민을 해결합니다.',
+    steps: [
+      { title: 'Step 1. 퍼널 전체를 먼저 훑어보세요', content: '퍼널 분석 차트에서 6단계의 색상을 확인합니다. 빨간색(🔴) 단계가 병목입니다. 대부분의 비즈니스는 1~2개의 병목이 전체 성과를 좌우합니다. 모든 단계를 동시에 개선하려 하지 말고, 가장 빨간 단계에 집중하세요.', tip: '가중치: Purchase(30%) > Consideration(20%) > Interest(15%) > Awareness(15%) > Retention(10%) > Advocacy(10%)' },
+      { title: 'Step 2. 빨간 단계를 클릭하세요', content: '해당 단계의 상세 지표 3개와 전주 대비 변화율이 펼쳐집니다. 예: Interest 단계를 클릭하면 CTR, CPC, 페이지뷰 데이터가 채널별로 표시됩니다.' },
+      { title: 'Step 3. 병목 진단 카드를 확인하세요', content: 'AI가 자동으로 감지한 병목 원인과 심각도를 확인합니다. 업종 벤치마크 대비 가장 낮은 2개 단계가 하이라이트됩니다.', tip: '예: "Consideration→Purchase 전환율이 업종 평균보다 42% 낮습니다. 랜딩 페이지 CTA 위치 변경, 소셜 프루프 추가를 권장합니다"' },
+      { title: 'Step 4. AI 인사이트로 액션하세요', content: '각 인사이트 카드의 액션 버튼을 클릭하면 A/B 테스트, 자동화, 소재 제작 등 관련 페이지로 바로 이동합니다. 추천된 액션을 실행하면 Before/After가 자동 추적됩니다.' },
+      { title: 'Step 5. 기간별 추이를 비교하세요', content: '7일/30일/90일 기간을 전환하며 퍼널 변화를 추적하세요. 특정 캠페인 실행 전후로 비교하면 마케팅 효과를 수치로 증명할 수 있습니다.', tip: '실전 사례: 이커머스 A사 — Consideration 병목(이탈률 68%) 발견 → 리뷰 섹션 추가 + CTA 변경 → CVR 2.1%→3.8% (+81%)' },
+    ],
+    relatedLinks: [
+      { label: '퍼널 분석', href: '/dashboard/funnel' },
+      { label: 'AI 어드바이저', href: '/dashboard/advisor' },
+      { label: 'A/B 테스트', href: '/dashboard/abtest' },
+    ],
+  },
+  {
+    id: 'analytics-guide',
+    category: 'Core',
+    title: '매출 분석으로 ROAS 추적하기',
+    description: '매출, 광고비, ROAS 추이를 분석하고 채널별 기여도를 파악합니다. "광고비를 쓰고 있는데 효과가 있는 건지 모르겠어요"라는 고민을 숫자로 답합니다.',
+    steps: [
+      { title: 'Step 1. 상단 KPI 카드를 확인하세요', content: '총 매출, 총 광고비, 평균 ROAS 3개 수치를 먼저 봅니다. 전월 대비 변화율(▲▼)이 함께 표시됩니다. ROAS가 떨어졌다면 원인을 찾아야 합니다.', tip: 'ROAS 기준: 400% 이상=양호, 200~400%=보통(마진에 따라), 200% 미만=위험' },
+      { title: 'Step 2. 매출 추이 차트에서 패턴을 읽으세요', content: '매출 라인과 광고비 라인을 나란히 비교합니다. 광고비를 올렸는데 매출도 비례하여 올랐는가(스케일링 가능)? 광고비를 올렸는데 매출은 그대로인가(효율 저하, 채널/소재 점검)?', tip: 'CPA 판단: LTV의 1/3 이하=양호, 1/3~1/2=보통, 1/2 초과=위험' },
+      { title: 'Step 3. 채널별 도넛차트에서 예산 배분을 판단하세요', content: '메타, 네이버, 구글, 카카오 등 채널별 매출 기여를 확인합니다. ROAS가 가장 높은 채널에 예산을 더 배분하는 것이 기본 전략입니다.', tip: '기여도가 높은데 ROAS가 낮은 채널=효율 개선 여지. 기여도가 낮은데 ROAS가 높은 채널=예산 확대 후보.' },
+      { title: 'Step 4. 데이터를 입력하거나 API를 연동하세요', content: '광고 API 연동 전에는 월별 매출/광고비를 직접 입력할 수 있습니다. 연동 후에는 데이터가 자동 수집됩니다.', tip: '실전 사례: 로컬 F&B — 네이버 SA ROAS 580%(최고), 인스타 320% → 네이버 예산 +30% 재배분 → 전체 ROAS 380%→450%' },
+    ],
+    relatedLinks: [
+      { label: '매출 분석', href: '/dashboard/analytics' },
+      { label: '캠페인 보고서', href: '/dashboard/reports' },
+      { label: 'AI 어드바이저', href: '/dashboard/advisor' },
+    ],
+  },
+  {
+    id: 'campaign-report-guide',
+    category: 'Core',
+    title: '캠페인 보고서 활용하기',
+    description: '채널별 캠페인 성과를 비교 분석하고 통합 리포트를 생성합니다. CTR↔CVR 교차 분석으로 소재와 랜딩의 개선 포인트를 찾습니다.',
+    steps: [
+      { title: 'Step 1. 월간 KPI를 확인하세요', content: '보고서 상단의 월 선택 드롭다운에서 원하는 월을 선택합니다. 매출, 광고비, ROAS, CPA가 카드에 표시됩니다.' },
+      { title: 'Step 2. 성과 테이블을 CTR/CVR 순으로 정렬하세요', content: '테이블 헤더를 클릭하면 정렬됩니다. CTR 순으로 정렬하면 소재 효율이, CVR 순으로 정렬하면 전환 효율이 좋은 캠페인이 위로 올라옵니다.', tip: 'CTR 높음+CVR 높음=최고(예산 확대), CTR 높음+CVR 낮음=랜딩 개선, CTR 낮음+CVR 높음=소재 교체, 둘 다 낮음=전면 재검토' },
+      { title: 'Step 3. 차트로 트렌드를 파악하세요', content: '월별 매출 바 차트와 채널별 전환 비중 도넛 차트로 시간에 따른 변화와 채널별 기여도를 시각적으로 확인합니다.' },
+      { title: 'Step 4. PDF로 내보내어 공유하세요', content: '보고서를 PDF로 내보내거나 링크로 공유할 수 있습니다. 대행사는 클라이언트에게, 실무자는 경영진에게 보고할 때 활용하세요.', tip: '실전 사례: 대행사 — CTR 높은데 CVR 낮은 캠페인 발견 → 랜딩 페이지 CTA 변경 → CVR 1.2%→2.8%(+133%)' },
+    ],
+    relatedLinks: [
+      { label: '캠페인 보고서', href: '/dashboard/reports' },
+      { label: '데이터 리포트', href: '/dashboard/data-reports' },
+    ],
+  },
+  {
+    id: 'data-report-guide',
+    category: 'Core',
+    title: '데이터 리포트 & 템플릿 활용하기',
+    description: '31개 프리셋 템플릿으로 업종/역할에 맞는 퍼널 분석 리포트를 생성합니다. 같은 데이터를 실무자/경영진/대행사에게 다르게 보여줍니다.',
+    steps: [
+      { title: 'Step 1. 업종에 맞는 템플릿을 선택하세요', content: '템플릿 갤러리에서 업종별 카테고리를 먼저 확인합니다. E-Commerce(CVR,ROAS,객단가), B2B SaaS(리드전환,MQL→SQL), 로컬(전화문의,지도노출), 앱(설치,리텐션,ARPU) — 자신의 업종에 맞는 퍼널 분석 템플릿에는 해당 업종의 핵심 KPI가 이미 구성되어 있습니다.' },
+      { title: 'Step 2. 보고 대상에 맞는 역할별 뷰를 선택하세요', content: '실무 마케터=캠페인별 세부 성과, 팀장=월간 KPI 달성률, 경영진=ROAS와 매출 성장률 1페이지 요약, 대행사=클라이언트별 성과 비교. 같은 데이터를 보는 사람에 맞게 다르게 보여줍니다.' },
+      { title: 'Step 3. 한국 매체 템플릿을 활용하세요', content: '네이버 검색광고, 카카오 비즈메시지, 네이버 쇼핑 등 한국 매체에 특화된 6개 템플릿을 제공합니다. 글로벌 솔루션에서는 찾을 수 없는 한국 시장 맞춤 지표가 포함되어 있습니다.' },
+      { title: 'Step 4. 커스텀 리포트를 만들어 저장하세요', content: '"리포트 만들기"를 클릭하면 20개 이상의 차트 위젯에서 원하는 것을 골라 배치합니다. 자주 사용하는 구성을 저장해두면 매주 클릭 한 번으로 보고서가 완성됩니다.', tip: '예상 소요: 첫 템플릿 선택 3분, 커스텀 리포트 구성 15분' },
+    ],
+    relatedLinks: [
+      { label: '데이터 리포트', href: '/dashboard/data-reports' },
+      { label: '매출 분석', href: '/dashboard/analytics' },
+    ],
+  },
+
+  // ══════ AI 가시성 메뉴 가이드 ══════
+  {
+    id: 'geo-overview-guide',
+    category: 'AI 가시성',
+    title: 'AI 가시성 개요 이해하기',
+    description: 'ChatGPT, Perplexity, Gemini, Claude, Naver Cue에서 브랜드가 어떻게 노출되는지 종합 분석합니다. "구글 검색에서는 나오는데 ChatGPT에 물어보면 안 나와요"라는 고민을 해결합니다.',
+    steps: [
+      { title: 'Step 1. AI 가시성 점수를 확인하세요', content: 'AI 가시성 점수(0~100)를 먼저 확인합니다. 멘션 빈도(40%) + 감성 점수(30%) + 포지션 순위(30%)로 구성됩니다. 이 점수가 현재 AI 검색에서 브랜드의 위치를 한 숫자로 보여줍니다.', tip: '70점 이상=양호, 40~69점=보통(개선 여지 큼), 40점 미만=위험(거의 안 보임)' },
+      { title: 'Step 2. 플랫폼별로 어디가 약한지 파악하세요', content: 'ChatGPT, Perplexity, Gemini, Claude, Naver Cue — 5개 플랫폼 각각의 점수를 확인합니다. 플랫폼마다 점수 차이가 있을 수 있습니다. 예: Perplexity에서는 잘 나오는데 ChatGPT에서 안 나올 수 있습니다.' },
+      { title: 'Step 3. 경쟁사와 비교하세요', content: '경쟁사를 추가하고 점수를 나란히 비교합니다. 경쟁사보다 낮다면 구조화 데이터 추가, FAQ 콘텐츠 강화, 전문가 인용 확보 등의 GEO 전략을 우선 실행하세요.', tip: '감성 분포 목표: 긍정 60% 이상, 부정 10% 미만. 멘션 포지션 1~3위=우선 추천, 8위 이하=거의 노출 안 됨' },
+      { title: 'Step 4. 주요 프롬프트에서 멘션 여부를 확인하세요', content: '사용자들이 AI에게 자주 물어보는 질문 목록에서 브랜드가 멘션되는 것과 안 되는 것을 확인합니다. 미멘션 프롬프트 중 검색량이 높은 것이 GEO 기회입니다.', tip: '실전 사례: B2B SaaS H사 — AI 가시성 28점, ChatGPT 멘션 0회 → FAQ Schema + 비교 콘텐츠 발행 → 3개월 후 61점, ChatGPT 주 8회 멘션' },
+    ],
+    relatedLinks: [
+      { label: '가시성 개요', href: '/dashboard/geo' },
+      { label: '프롬프트 리서치', href: '/dashboard/geo/prompts' },
+      { label: '브랜드 실적', href: '/dashboard/geo/brand' },
+    ],
+  },
+  {
+    id: 'geo-competitors-guide',
+    category: 'AI 가시성',
+    title: '경쟁사 AI 리서치 활용하기',
+    description: '경쟁사의 AI 가시성을 분석하여 자사의 GEO 전략을 수립합니다.',
+    steps: [
+      { title: 'Step 1. 경쟁사 추가', content: '비교할 경쟁사 도메인을 입력하여 분석 대상에 추가합니다.' },
+      { title: 'Step 2. 점수 비교', content: '경쟁사별 AI 가시성 종합 점수를 바 차트로 비교합니다.' },
+      { title: 'Step 3. 플랫폼별 상세', content: '각 경쟁사의 ChatGPT/Perplexity/Gemini/Claude 점수, 추세(상승/하락), 주요 키워드를 비교합니다.' },
+    ],
+    relatedLinks: [
+      { label: '경쟁사 리서치', href: '/dashboard/geo/competitors' },
+      { label: '사이트 진단', href: '/dashboard/scan' },
+    ],
+  },
+  {
+    id: 'geo-prompts-guide',
+    category: 'AI 가시성',
+    title: '프롬프트 리서치로 기회 찾기',
+    description: '사용자들이 AI에게 어떤 질문을 하는지 추적하고 브랜드 멘션 기회를 발견합니다.',
+    steps: [
+      { title: 'Step 1. 프롬프트 목록 확인', content: '브랜드와 관련된 프롬프트들의 멘션 여부, 포지션, 감성, 추정 검색량을 확인합니다.' },
+      { title: 'Step 2. 카테고리 필터', content: '추천/비교/정보/가이드/브랜드 카테고리로 필터링하여 관심 영역의 프롬프트를 분석합니다.' },
+      { title: 'Step 3. 미멘션 프롬프트 분석', content: '브랜드가 멘션되지 않는 높은 검색량 프롬프트를 찾아 GEO 최적화 기회를 발견하세요.', tip: '미멘션 프롬프트에 대응하는 콘텐츠를 만들면 AI 가시성이 올라갑니다.' },
+    ],
+    relatedLinks: [
+      { label: '프롬프트 리서치', href: '/dashboard/geo/prompts' },
+      { label: '콘텐츠', href: '/dashboard/content' },
+    ],
+  },
+  {
+    id: 'geo-brand-guide',
+    category: 'AI 가시성',
+    title: '브랜드 AI 실적 분석하기',
+    description: 'AI 검색에서 브랜드의 인식, 감성, 내러티브 요인을 심층 분석합니다.',
+    steps: [
+      { title: 'Step 1. 인식 점수', content: '브랜드 인식 점수(0~100)와 감성 분포(긍정/중립/부정)를 확인합니다.' },
+      { title: 'Step 2. 내러티브 요인', content: 'AI가 브랜드를 설명할 때 강조하는 요인(전문성, 가격, 한국 매체 지원 등)과 각 요인의 점수를 분석합니다.' },
+      { title: 'Step 3. 브랜드 질문', content: '"SmarComm이 뭐야?", "가격은 얼마야?" 등 사용자들이 AI에게 브랜드에 대해 묻는 질문과 정확한 응답 여부를 추적합니다.' },
+    ],
+    relatedLinks: [
+      { label: '브랜드 실적', href: '/dashboard/geo/brand' },
+      { label: '가시성 개요', href: '/dashboard/geo' },
+    ],
+  },
+  {
+    id: 'geo-tracking-guide',
+    category: 'AI 가시성',
+    title: '프롬프트 추적 설정하기',
+    description: '주요 프롬프트를 정기적으로 모니터링하여 브랜드 포지션 변화를 추적합니다.',
+    steps: [
+      { title: 'Step 1. 프롬프트 등록', content: '"프롬프트 추가" 버튼으로 추적할 질문을 등록합니다. 테스트할 AI 플랫폼과 추적 주기(매일/매주)를 선택하세요.' },
+      { title: 'Step 2. 포지션 추적', content: '등록된 프롬프트에 대해 브랜드가 AI 응답에서 몇 번째로 멘션되는지(포지션) 추적합니다. 포지션 변화(↑↓)가 표시됩니다.' },
+      { title: 'Step 3. 활성/일시정지', content: '토글로 추적을 켜고 끌 수 있습니다. 불필요한 프롬프트는 삭제하세요.' },
+    ],
+    relatedLinks: [
+      { label: '프롬프트 추적', href: '/dashboard/geo/tracking' },
+      { label: '프롬프트 리서치', href: '/dashboard/geo/prompts' },
+    ],
+  },
+
+  // ══════ 액션팩 가이드 ══════
+  {
+    id: 'content-guide',
+    category: '액션팩',
+    title: '콘텐츠 모듈 활용하기',
+    description: 'AI 주제 추천, SEO 최적화, 콘텐츠 재활용으로 마케팅 콘텐츠를 효율화합니다.',
+    steps: [
+      { title: 'Step 1. 콘텐츠 현황 파악', content: '총 콘텐츠 수, 조회수, 카테고리별 분포를 확인합니다.' },
+      { title: 'Step 2. AI 주제 추천', content: '퍼널 분석 각 단계에서 부족한 콘텐츠를 AI가 분석하고 타겟 키워드 + 검색량 기반으로 주제를 추천합니다.' },
+      { title: 'Step 3. SEO 최적화', content: '각 콘텐츠의 SEO 점수(0~100)를 확인하고, 점수가 낮은 콘텐츠의 개선 포인트를 파악합니다.' },
+      { title: 'Step 4. 재활용', content: '성과 좋은 블로그 글을 인스타그램 캐러셀, 이메일, 카카오, 유튜브용으로 자동 변환합니다.', tip: '하나의 콘텐츠를 여러 채널에 재활용하면 제작 비용을 80% 절감할 수 있습니다.' },
+    ],
+    relatedLinks: [
+      { label: '콘텐츠', href: '/dashboard/content' },
+      { label: 'AI 소재 제작', href: '/dashboard/creative' },
+    ],
+  },
+  {
+    id: 'advisor-guide',
+    category: '액션팩',
+    title: 'AI 어드바이저 활용하기',
+    description: '퍼널 분석 데이터 기반 AI 인사이트와 액션 추천을 활용합니다.',
+    steps: [
+      { title: 'Step 1. 인사이트 피드', content: '위험(🔴), 주의(🟡), 기회(🟢), 제안(💡) 4가지 심각도의 인사이트 카드를 확인합니다. 각 카드에는 퍼널 단계 태그가 표시됩니다.' },
+      { title: 'Step 2. 액션 실행', content: '각 인사이트의 "액션 버튼"을 클릭하면 A/B 테스트, 자동화, 소재 제작 등 관련 기능으로 바로 이동합니다.' },
+      { title: 'Step 3. 예산 재분배 제안', content: '현재 채널별 예산 배분 vs AI 추천 배분을 차트로 비교합니다.', tip: '"예산 재분배 제안" 버튼을 클릭하면 AI가 최적의 채널별 예산 배분을 제안합니다.' },
+      { title: 'Step 4. Before/After 추적', content: '과거 추천 액션을 실행한 후의 성과 변화(전환율 3.2%→4.8%)를 자동으로 추적합니다.' },
+    ],
+    relatedLinks: [
+      { label: 'AI 어드바이저', href: '/dashboard/advisor' },
+      { label: '퍼널 분석', href: '/dashboard/funnel' },
+    ],
+  },
+
+  // ══════ CRM팩 가이드 ══════
+  {
+    id: 'crm-guide',
+    category: 'CRM팩',
+    title: '고객 관리(CRM) 시작하기',
+    description: '리드 파이프라인을 관리하고 옴니채널 메시지를 발송합니다.',
+    steps: [
+      { title: 'Step 1. 리드 확인', content: '리드→미팅→진행→계약 4단계 파이프라인에서 현재 리드 현황을 파악합니다.' },
+      { title: 'Step 2. 채널 바로가기', content: '푸시, 이메일, 카카오 채널로 바로 이동하여 메시지를 발송합니다.' },
+      { title: 'Step 3. 코호트 연계', content: '코호트에서 정의한 세그먼트를 CRM 메시지 타겟으로 활용합니다.' },
+    ],
+    relatedLinks: [
+      { label: '고객 관리', href: '/dashboard/crm' },
+      { label: '카카오', href: '/dashboard/crm/kakao' },
+      { label: '이메일', href: '/dashboard/crm/email' },
+    ],
+  },
+  {
+    id: 'kakao-guide',
+    category: 'CRM팩',
+    title: '카카오 메시지 발송하기',
+    description: '카카오 알림톡/친구톡을 세그먼트 기반으로 발송하고 성과를 추적합니다.',
+    steps: [
+      { title: 'Step 1. 비즈채널 연동', content: '워크스페이스 설정 > 외부 연동에서 카카오 비즈메시지 API를 연결합니다.' },
+      { title: 'Step 2. 메시지 유형 선택', content: '알림톡(정보성, ~8원/건), 친구톡(광고성, ~15원/건), 브랜드 메시지 중 선택합니다.' },
+      { title: 'Step 3. 세그먼트 타겟 발송', content: '코호트에서 정의한 세그먼트(이탈 위험군, VIP 등)를 타겟으로 메시지를 발송합니다.' },
+      { title: 'Step 4. 성과 추적', content: '발송 수, 수신율, 클릭율이 자동 추적됩니다.', tip: 'A/B 테스트로 메시지 내용을 최적화하세요.' },
+    ],
+    relatedLinks: [
+      { label: '카카오 메시지', href: '/dashboard/crm/kakao' },
+      { label: '코호트', href: '/dashboard/cohort' },
+    ],
+  },
+
+  // ══════ 실험팩 가이드 ══════
+  {
+    id: 'abtest-guide',
+    category: '실험팩',
+    title: 'A/B 테스트 설계 및 분석하기',
+    description: '소재, 랜딩 페이지, CTA, 이메일, 푸시 메시지를 실험하고 데이터로 최적안을 결정합니다.',
+    steps: [
+      { title: 'Step 1. 테스트 유형 선택', content: '소재(creative), 랜딩(landing), CTA(cta), 이메일(email), 푸시(push) 5가지 유형 중 선택합니다.' },
+      { title: 'Step 2. 변형 설정', content: 'A안과 B안을 설정합니다. 한 번에 하나의 변수만 바꾸는 것이 핵심입니다.' },
+      { title: 'Step 3. 결과 해석', content: '통계적 유의성(95% 이상)과 신뢰도를 확인합니다.', tip: '변형당 최소 1,000명 이상의 데이터가 필요합니다.' },
+      { title: 'Step 4. 퍼널 연계', content: '퍼널 분석에서 "이 소재가 Awareness에서는 좋았지만 Consideration에서 떨어졌다"는 인사이트를 확인할 수 있습니다.' },
+    ],
+    relatedLinks: [
+      { label: 'A/B 테스트', href: '/dashboard/abtest' },
+      { label: '소재 제작', href: '/dashboard/creative' },
+    ],
+  },
+  {
+    id: 'journey-guide',
+    category: '실험팩',
+    title: '사용자 여정 분석하기',
+    description: '고객이 서비스 내에서 어떤 경로로 이동하고, 어디서 이탈하는지 시각화합니다.',
+    steps: [
+      { title: 'Step 1. 고객 선택', content: '미리 정의된 고객 여정(굿프레시 F&B, 스타일온 패션, 테크하우스 등)을 선택합니다.' },
+      { title: 'Step 2. 타임라인 확인', content: '진단 완료 → 회원가입 → 리포트 열람 → 미팅 → 소재 제작 → 캠페인 시작 순서의 여정을 타임라인으로 확인합니다.' },
+      { title: 'Step 3. 이탈 포인트 파악', content: '여정이 중간에 끊긴 고객의 이탈 포인트를 확인하고 개입 전략을 수립합니다.' },
+    ],
+    relatedLinks: [
+      { label: '사용자 여정', href: '/dashboard/journey' },
+      { label: '퍼널 분석', href: '/dashboard/funnel' },
+    ],
+  },
+  {
+    id: 'events-guide',
+    category: '실험팩',
+    title: '이벤트 관리 설정하기',
+    description: '추적할 사용자 행동을 정의하고 관리합니다.',
+    steps: [
+      { title: 'Step 1. 이벤트 이해', content: '이벤트는 사용자의 특정 행동(페이지뷰, 버튼 클릭, 구매 등)을 추적하는 단위입니다.' },
+      { title: 'Step 2. 이벤트 등록', content: '이벤트 목록에서 "추가" 버튼으로 새 이벤트를 등록합니다. 이름, 속성(파라미터), 이벤트 컬렉션을 설정합니다.' },
+      { title: 'Step 3. 퍼널 매핑', content: '등록한 이벤트를 퍼널 분석의 6단계 중 하나에 매핑합니다. 이를 통해 이벤트 데이터가 퍼널 분석에 반영됩니다.' },
+    ],
+    relatedLinks: [
+      { label: '이벤트 관리', href: '/dashboard/events' },
+      { label: '추적 코드 설치', href: '/dashboard/profile' },
+    ],
+  },
+
+  // ══════ 집행팩 가이드 ══════
+  {
+    id: 'campaigns-guide',
+    category: '집행팩',
+    title: '광고 집행 관리하기',
+    description: '네이버, 메타, 구글 등 다채널 캠페인을 관리하고 성과를 추적합니다.',
+    steps: [
+      { title: 'Step 1. 캠페인 현황', content: '총 예산, 집행 금액, 집행률, 총 전환을 KPI 카드로 확인합니다.' },
+      { title: 'Step 2. 캠페인별 전환', content: '캠페인별 전환 수 바 차트와 채널별 비중 도넛 차트로 성과를 비교합니다.' },
+      { title: 'Step 3. 상태 관리', content: '진행 중, 일시정지, 종료, 준비 중 상태를 필터링하여 관리합니다.' },
+      { title: 'Step 4. 새 캠페인 생성', content: '"새 캠페인" 버튼으로 캠페인을 생성합니다. 채널, 예산, 기간, 소재를 설정하세요.', tip: '소재 아카이브에서 승인된 소재를 바로 선택할 수 있습니다.' },
+    ],
+    relatedLinks: [
+      { label: '광고 집행', href: '/dashboard/campaigns' },
+      { label: '소재 아카이브', href: '/dashboard/archive' },
+    ],
+  },
+
+  // ══════ 운영팩 가이드 (기존: 칸반/파이프라인/자동화/프로젝트) ──
+  {
+    id: 'calendar-guide',
+    category: '운영팩',
+    title: '마케팅 캘린더 사용하기',
+    description: '캠페인 일정, 콘텐츠 발행일, 시즌 이벤트를 캘린더로 관리합니다.',
+    steps: [
+      { title: 'Step 1. 이벤트 등록', content: '"+" 버튼으로 새 이벤트를 등록합니다. 제목, 유형(캠페인/영상/시즌/콘텐츠), 날짜를 설정하세요.' },
+      { title: 'Step 2. 유형별 색상', content: '캠페인=파랑, 영상=보라, 시즌=핑크, 콘텐츠=초록으로 구분됩니다.' },
+      { title: 'Step 3. 월간 뷰', content: '좌우 화살표로 월을 이동하며 전체 마케팅 일정을 한눈에 파악합니다.' },
+    ],
+    relatedLinks: [
+      { label: '마케팅 캘린더', href: '/dashboard/calendar' },
+      { label: '프로젝트', href: '/dashboard/workflow/projects' },
+    ],
+  },
+  {
+    id: 'archive-guide',
+    category: '운영팩',
+    title: '소재 아카이브 관리하기',
+    description: '제작된 소재를 중앙에서 보관하고 캠페인에 활용합니다.',
+    steps: [
+      { title: 'Step 1. 소재 검색', content: '유형(카피/배너/영상), 채널별 필터로 원하는 소재를 빠르게 찾습니다.' },
+      { title: 'Step 2. 소재 미리보기', content: '각 소재의 내용, 생성일, 채널을 확인합니다.' },
+      { title: 'Step 3. 캠페인 연결', content: '보관된 소재를 선택하여 캠페인 생성에 바로 활용합니다.', tip: 'AI 소재 제작에서 생성된 소재는 자동으로 아카이브에 저장됩니다.' },
+    ],
+    relatedLinks: [
+      { label: '소재 아카이브', href: '/dashboard/archive' },
+      { label: '소재 제작', href: '/dashboard/creative' },
+      { label: '광고 집행', href: '/dashboard/campaigns' },
+    ],
+  },
+
+  // ══════ 설정 가이드 ══════
+  {
+    id: 'admin-guide',
+    category: '설정',
+    title: '사이트 관리(CMS) 사용하기',
+    description: '블로그, 페이지, SEO, 회원을 중앙에서 관리합니다.',
+    steps: [
+      { title: 'Step 1. 블로그 관리', content: '글 작성/수정/삭제, 발행/비공개 토글, 카테고리와 태그를 관리합니다.' },
+      { title: 'Step 2. 페이지 관리', content: '퍼블릭 페이지(홈, 요금제, 블로그 등)의 상태를 확인합니다.' },
+      { title: 'Step 3. SEO 설정', content: '메타태그, Google Search Console/GA4 인증 코드, 추적 코드를 설정합니다.' },
+      { title: 'Step 4. 회원 관리', content: '등록된 회원의 플랜, 활동, 진단 횟수를 확인합니다.' },
+      { title: 'Step 5. 사이트 설정', content: '기본 정보, 상단 공지 배너, SNS 연결을 관리합니다.' },
+    ],
+    relatedLinks: [
+      { label: '사이트 관리', href: '/dashboard/admin' },
+      { label: '워크스페이스 설정', href: '/dashboard/profile' },
+    ],
+  },
+  {
+    id: 'workspace-guide',
+    category: '설정',
+    title: '워크스페이스 설정하기',
+    description: '워크스페이스 기본 정보, 멤버 관리, 차트 팔레트, 외부 연동을 설정합니다.',
+    steps: [
+      { title: 'Step 1. 기본 정보', content: '워크스페이스 이름, 사이트 URL, 업종, 로고를 설정합니다.' },
+      { title: 'Step 2. 멤버 · 권한', content: '관리자(모든 권한), 운영 크루(설정 제외), 뷰어(보기만), 일반(진단만) 4단계 역할을 관리합니다.' },
+      { title: 'Step 3. 차트 컬러', content: '6가지 차트 팔레트(모노/레드/블루/옐로우/그린/레인보우) 중 선택합니다. 선택한 팔레트가 전체 차트에 적용됩니다.' },
+      { title: 'Step 4. 외부 연동', content: 'Google Ads, Meta, GA4, 네이버 SA, 카카오를 OAuth로 연동합니다.', tip: '연동은 한 번만 하면 이후 데이터가 자동 수집됩니다.' },
+    ],
+    relatedLinks: [
+      { label: '워크스페이스 설정', href: '/dashboard/profile' },
+      { label: '멤버 관리', href: '/dashboard/members' },
     ],
   },
 ];

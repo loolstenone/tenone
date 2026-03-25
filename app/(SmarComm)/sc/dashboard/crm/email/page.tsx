@@ -2,6 +2,8 @@
 
 import { Plus, Mail, Send, Clock, Eye, MousePointerClick } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface EmailCampaign {
   id: string;
@@ -29,9 +31,10 @@ const STATUS_MAP = { active: { label: '활성', color: _esc[0] }, paused: { labe
 export default function EmailPage() {
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">이메일 마케팅</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">이메일 마케팅</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">가입 후 자동 이메일부터 뉴스레터까지 — 관계를 유지하세요</p>
         </div>
         <button className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

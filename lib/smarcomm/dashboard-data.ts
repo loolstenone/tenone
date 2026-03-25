@@ -1,4 +1,4 @@
-// SmarComm 마케팅 대시보드 Mock 데이터
+// 마케팅 대시보드 Mock 데이터
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 
 export interface Campaign {

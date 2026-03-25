@@ -70,7 +70,7 @@ export default function ScanPage() {
     if (!scanData) return;
     setGeneratingPlan(true);
     try {
-      const res = await fetch('/api/smarcomm/advisor/campaign-plan', {
+      const res = await fetch('/api/advisor/campaign-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scanResult: scanData }),
@@ -132,7 +132,7 @@ export default function ScanPage() {
     setScanning(true);
     setError('');
     try {
-      const res = await fetch('/api/smarcomm/scan', {
+      const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),
@@ -167,7 +167,7 @@ export default function ScanPage() {
     const normalized = compareUrl.startsWith('http') ? compareUrl : 'https://' + compareUrl;
     setScanning(true);
     try {
-      const res = await fetch('/api/smarcomm/scan', {
+      const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: normalized }),

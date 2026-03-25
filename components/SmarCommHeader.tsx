@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
+import { getUser, logout } from '@/lib/smarcomm/auth';
 
 export default function SmarCommHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,7 +14,7 @@ export default function SmarCommHeader() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setUser(getSCUser());
+    setUser(getUser());
     const handleClick = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
@@ -25,7 +25,7 @@ export default function SmarCommHeader() {
   }, []);
 
   const handleLogout = () => {
-    scLogout();
+    logout();
     window.location.href = '/';
   };
 

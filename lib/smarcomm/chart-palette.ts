@@ -1,10 +1,10 @@
-// SmarComm 차트 컬러 팔레트 시스템
+// 차트 컬러 팔레트 시스템
 
 export interface ChartPalette {
   id: string;
   name: string;
   colors: string[];
-  preview: string[];
+  preview: string[]; // 미리보기용 5색
 }
 
 export const CHART_PALETTES: ChartPalette[] = [
@@ -48,16 +48,16 @@ export const CHART_PALETTES: ChartPalette[] = [
 
 export function getChartPalette(): ChartPalette {
   if (typeof window === 'undefined') return CHART_PALETTES[0];
-  const saved = localStorage.getItem('sc_chart_palette');
+  const saved = localStorage.getItem('smarcomm_chart_palette');
   if (saved) {
     const found = CHART_PALETTES.find(p => p.id === saved);
     if (found) return found;
   }
-  return CHART_PALETTES[0];
+  return CHART_PALETTES[0]; // 기본: 모노
 }
 
 export function setChartPalette(id: string) {
-  localStorage.setItem('sc_chart_palette', id);
+  localStorage.setItem('smarcomm_chart_palette', id);
 }
 
 export function getChartColors(count: number = 7): string[] {

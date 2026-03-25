@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, Plus, BookOpen, X } from 'lucide-react';
 import { GLOSSARY, CATEGORIES, type GlossaryTerm } from '@/lib/smarcomm/glossary-data';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
 
 export default function GlossaryPage() {
   const [search, setSearch] = useState('');
@@ -62,6 +63,7 @@ export default function GlossaryPage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-text flex items-center gap-2">

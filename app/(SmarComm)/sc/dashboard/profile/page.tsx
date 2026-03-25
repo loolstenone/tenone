@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-react';
-import { getSCUser as getUser, scLogout as logout } from '@/lib/smarcomm/auth';
+import { getUser, logout } from '@/lib/smarcomm/auth';
 import { useRouter } from 'next/navigation';
 import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
 import PageTopBar from '@/components/smarcomm/PageTopBar';

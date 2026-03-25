@@ -6,8 +6,8 @@ import {
   GitBranch, Activity, FileBarChart, BookOpen, Route,
   ChevronRight, BarChart3, Sparkles, Shield
 } from 'lucide-react';
-import SmarCommHeader from '@/components/SmarCommHeader';
-import SmarCommFooter from '@/components/SmarCommFooter';
+import Header from '@/components/smarcomm/Header';
+import Footer from '@/components/smarcomm/Footer';
 
 const FEATURES = [
   {
@@ -41,7 +41,7 @@ const FEATURES = [
 export default function WorkspacePage() {
   return (
     <>
-      <SmarCommHeader />
+      <Header />
       <main className="min-h-screen">
         {/* Hero */}
         <section className="bg-[#0A0E1A] px-5 pb-16 pt-28 md:pt-36">
@@ -50,7 +50,7 @@ export default function WorkspacePage() {
               <Sparkles size={14} />
               SmarComm. Workspace
             </div>
-            <h1 className="mb-4 text-xl md:text-3xl lg:text-5xl font-bold text-white">
+            <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl">
               마케팅의 모든 것,<br />하나의 워크스페이스에서
             </h1>
             <p className="mx-auto mb-8 max-w-lg text-[15px] leading-relaxed text-white/50">
@@ -126,7 +126,7 @@ export default function WorkspacePage() {
           </div>
         </section>
       </main>
-      <SmarCommFooter />
+      <Footer />
     </>
   );
 }

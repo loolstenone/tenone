@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { Search, Plus, Bell, Mail, MessageSquare, ChevronRight } from 'lucide-react';
 import { MOCK_LEADS, getLeadStatusLabel, getLeadStatusColor } from '@/lib/smarcomm/dashboard-data';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 export default function CRMPage() {
   const router = useRouter();
@@ -16,9 +18,10 @@ export default function CRMPage() {
 
   return (
     <div className="max-w-5xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">고객 관리</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">고객 관리</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">리드부터 계약까지, 고객 관계를 체계적으로 관리하세요</p>
         </div>
         <button className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">

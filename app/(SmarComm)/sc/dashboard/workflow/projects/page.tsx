@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useWorkflow } from "@/lib/smarcomm/workflow-context";
+import { useWorkflow } from "@/lib/workflow-context";
 import { ProjectCard } from "@/components/smarcomm/workflow/ProjectCard";
 import { workflowChannels } from "@/lib/smarcomm/workflow-data";
 import { Filter, FolderKanban } from "lucide-react";
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 export default function ProjectsPage() {
   const { projects } = useWorkflow();
@@ -24,9 +26,10 @@ export default function ProjectsPage() {
 
   return (
     <div className="max-w-5xl space-y-5">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">프로젝트</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">프로젝트</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">캠페인별 프로젝트 진행 현황을 관리합니다</p>
         </div>
         <div className="flex items-center gap-2">

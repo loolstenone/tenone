@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { WorkflowTask, PipelineItem, BrandProject, AutomationRule, TaskStatus, PipelineStage } from '@/types/workflow';
-import { initialTasks, initialPipelineItems, initialProjects, initialAutomations } from '@/lib/smarcomm/workflow-data';
+import { initialTasks, initialPipelineItems, initialProjects, initialAutomations } from '@/lib/workflow-data';
 
 interface WorkflowContextType {
     // Tasks

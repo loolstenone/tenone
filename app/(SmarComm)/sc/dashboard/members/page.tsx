@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Plus, Mail, Shield, UserPlus, MoreHorizontal, Crown } from 'lucide-react';
-import { getSCUser } from '@/lib/smarcomm/auth';
+import { getUser } from '@/lib/smarcomm/auth';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
+import PageTopBar from '@/components/smarcomm/PageTopBar';
+import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
 
 interface Member {
   email: string;
@@ -21,7 +23,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function MembersPage() {
-  const user = getSCUser();
+  const user = getUser();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer'>('viewer');
   const [showInvite, setShowInvite] = useState(false);
@@ -44,9 +46,10 @@ export default function MembersPage() {
 
   return (
     <div className="max-w-3xl">
+      <div className="mb-4 flex justify-end print:hidden"><PageTopBar /></div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-text">관리자</h1>
+          <div className="flex items-center gap-2"><h1 className="text-xl font-bold text-text">관리자</h1><GuideHelpButton /></div>
           <p className="mt-1 text-xs text-text-muted">워크스페이스 멤버를 관리하고 역할을 설정하세요</p>
         </div>
         <button onClick={() => setShowInvite(!showInvite)} className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
