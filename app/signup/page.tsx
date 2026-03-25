@@ -73,7 +73,7 @@ function SmarCommSignupForm() {
     // 직접 Supabase OAuth (auth-hub 경유 없이)
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
-        const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`;
+        const redirectTo = `${window.location.origin}/auth/callback`;
         const { data, error: oauthError } = await sb.auth.signInWithOAuth({
             provider,
             options: { redirectTo },

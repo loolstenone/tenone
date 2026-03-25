@@ -5,7 +5,10 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/';
+    const hostname = request.headers.get('host') || '';
+    // SmarComm 도메인이면 기본 리다이렉트를 /dashboard로
+    const defaultNext = hostname.includes('smarcomm') ? '/dashboard' : '/';
+    const next = searchParams.get('next') ?? defaultNext;
 
     if (code) {
         const cookieStore = await cookies();
