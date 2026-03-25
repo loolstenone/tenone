@@ -1,7 +1,7 @@
 "use client";
 
-import { useBums } from "@/lib/bums-context";
-import type { WidgetDisplayStyle, WidgetSortBy } from "@/types/bums";
+type WidgetDisplayStyle = "list" | "card" | "thumbnail";
+type WidgetSortBy = "latest" | "views" | "recommended";
 import { Eye, Clock, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 
@@ -28,10 +28,8 @@ export function LatestPostsWidget({
     title,
     className,
 }: LatestPostsWidgetProps) {
-    const { getPostsForWidget, getBoardById } = useBums();
-
-    const board = getBoardById(boardId);
-    const posts = getPostsForWidget(boardId, count, sortBy);
+    const board: any = null;
+    const posts: any[] = [];
     const headerTitle = title || board?.name || "최근 게시글";
 
     if (posts.length === 0) {

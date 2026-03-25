@@ -3,15 +3,21 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BoardTypeInfo } from "@/types/bums";
-import type { BumsBoard, BoardType, SkinType, BoardVisibility } from "@/types/bums";
+type BoardType = 'general' | 'notice' | 'gallery' | 'video' | 'faq' | 'qna' | 'commerce' | 'recruit' | 'event';
+type SkinType = 'list' | 'card' | 'gallery' | 'video';
+type BoardVisibility = 'public' | 'intra' | 'staff';
+type BumsBoard = any;
+const BoardTypeInfo: Record<string, { label: string }> = {
+    general: { label: '일반' }, notice: { label: '공지' }, gallery: { label: '갤러리' },
+    video: { label: '영상' }, faq: { label: 'FAQ' }, qna: { label: 'Q&A' },
+    commerce: { label: '커머스' }, recruit: { label: '채용' }, event: { label: '이벤트' },
+};
 import {
     ArrowLeft, Plus, ExternalLink, ChevronDown, ChevronRight,
     Eye, EyeOff, Lock, FileText, LayoutGrid, Settings,
     Clock, X,
 } from "lucide-react";
 import clsx from "clsx";
-import { BoardSettingsModal } from "@/components/bums/BoardSettingsModal";
 
 /* ─── Constants ─── */
 
@@ -507,14 +513,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                 </div>
             </div>
 
-            {settingsBoardId && (
-                <BoardSettingsModal
-                    boardId={settingsBoardId}
-                    siteId={siteId}
-                    isOpen={!!settingsBoardId}
-                    onClose={() => setSettingsBoardId(null)}
-                />
-            )}
+            {/* Board settings modal removed */}
         </div>
     );
 }

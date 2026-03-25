@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { BumsWidget } from "@/types/bums";
+type BumsWidget = { displayStyle: "list" | "card" | "thumbnail"; sortBy: "latest" | "views" | "recommended" };
 import { ArrowLeft, Plus, Trash2, Eye, LayoutGrid, List, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 

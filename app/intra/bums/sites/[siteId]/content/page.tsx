@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { BoardTypeInfo } from "@/types/bums";
+const BoardTypeInfo: Record<string, { label: string }> = {};
 import { Search, Eye, MessageSquare, Pin, Lock } from "lucide-react";
 import clsx from "clsx";
 

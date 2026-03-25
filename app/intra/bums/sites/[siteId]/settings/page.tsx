@@ -2,7 +2,14 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ImageUploader } from "@/components/bums/ImageUploader";
+function ImageUploader({ value, onChange, label, previewSize }: { value: string; onChange: (v: string) => void; label: string; previewSize?: string }) {
+    return (
+        <div>
+            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider block mb-1.5">{label}</label>
+            <input value={value} onChange={e => onChange(e.target.value)} placeholder="이미지 URL" className="w-full border border-neutral-200 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none bg-white rounded" />
+        </div>
+    );
+}
 import { ArrowLeft, Check } from "lucide-react";
 
 const inputClass = "w-full border border-neutral-200 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none bg-white rounded";

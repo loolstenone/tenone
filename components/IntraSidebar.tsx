@@ -30,7 +30,6 @@ import {
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
-import { useBums } from "@/lib/bums-context";
 
 interface SubItem {
     name: string;
@@ -398,7 +397,9 @@ export function IntraSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { user, isStaff, hasAccess, hasModuleAccess, logout } = useAuth();
-    const { getSiteById, getBoardsBySite, getPostsByBoard } = useBums();
+    const getSiteById = (_id: string): any => null;
+    const getBoardsBySite = (_id: string): any[] => [];
+    const getPostsByBoard = (_id: string): any[] => [];
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [mobileOpen, setMobileOpen] = useState(false);

@@ -14,3 +14,4 @@ lib/site-packages/
 .env.local
 .vercel
 .env*.local
+.claude/settings.local.json

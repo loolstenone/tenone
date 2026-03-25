@@ -2,21 +2,41 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    BoardTypeInfo,
-    type BoardType,
-    type BoardPermissionLevel,
-    type SortOrder,
-    type CmsBoardCategory,
-    type SecretPostMode,
-    type NewBadgeDuration,
-    type WriteButtonDisplay,
-    type CommentOrder,
-    type AuthorDisplayType,
-    type BoardLayout,
-    type BoardOptionSettings,
-    type BoardDesignSettings,
-} from "@/types/bums";
+type BoardType = 'general' | 'notice' | 'gallery' | 'video' | 'faq' | 'qna' | 'commerce' | 'recruit' | 'event';
+type BoardPermissionLevel = 'all' | 'member' | 'intra' | 'staff' | 'admin';
+type SortOrder = 'latest' | 'popular' | 'pinned-first';
+type CmsBoardCategory = { id: string; name: string; slug: string; order: number };
+type SecretPostMode = 'disabled' | 'optional' | 'always';
+type NewBadgeDuration = 0 | 1 | 3 | 7 | 14 | 30;
+type WriteButtonDisplay = 'always' | 'logged-in' | 'hidden';
+type CommentOrder = 'asc' | 'desc';
+type AuthorDisplayType = 'nickname' | 'name' | 'id' | 'anonymous';
+type BoardLayout = 'list-thumb' | 'list-detail' | 'list-image' | 'list-text' | 'grid-thumb-text' | 'grid-text-thumb' | 'grid-image' | 'grid-text' | 'masonry-thumb-text' | 'masonry-image' | 'masonry-full' | 'masonry-text';
+type BoardOptionSettings = {
+    secretPostMode: SecretPostMode; secretRequirePassword: boolean; secretHideTitle: boolean;
+    secretRequirePasswordOnView: boolean; newBadgeDuration: NewBadgeDuration; writeButtonDisplay: WriteButtonDisplay;
+    commentOrder: CommentOrder; allowFeaturedImage: boolean; allowTimeRestriction: boolean;
+    authorDisplayType: AuthorDisplayType; titleTemplateLocked: boolean; bodyPlaceholder: string;
+    titleTemplate?: string;
+};
+type BoardDesignSettings = {
+    showBoardName: boolean; showTotalCount: boolean; showProfileImage: boolean; showSearchBar: boolean; showLightbox: boolean;
+    showAuthor: boolean; showDate: boolean; showNumber: boolean; showCategory: boolean; showViews: boolean;
+    showCommentCount: boolean; showLikes: boolean; showShare: boolean; showPrint: boolean;
+    rowsPerPage: number; rowSpacing: number; pinNoticeOnAllPages: boolean; titleFontSize: number; metaFontSize: number;
+    layout: BoardLayout;
+};
+const BoardTypeInfo: Record<BoardType, { label: string; description: string }> = {
+    general: { label: '일반', description: '일반 게시판' },
+    notice: { label: '공지', description: '공지사항' },
+    gallery: { label: '갤러리', description: '갤러리' },
+    video: { label: '영상', description: '영상 게시판' },
+    faq: { label: 'FAQ', description: '자주 묻는 질문' },
+    qna: { label: 'Q&A', description: '질의응답' },
+    commerce: { label: '커머스', description: '상품 게시판' },
+    recruit: { label: '채용', description: '채용 공고' },
+    event: { label: '이벤트', description: '이벤트' },
+};
 import { ArrowLeft, Plus, X as XIcon } from "lucide-react";
 
 // ── 상수 ──

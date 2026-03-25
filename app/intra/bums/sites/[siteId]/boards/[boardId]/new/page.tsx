@@ -2,9 +2,9 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { BumsBoardPost, PostStatus, EmploymentType } from "@/types/bums";
-import { RichEditor } from "@/components/bums/RichEditor";
-import { ImageUploader } from "@/components/bums/ImageUploader";
+type PostStatus = "draft" | "published" | "scheduled" | "private";
+type EmploymentType = "정규" | "계약" | "인턴" | "프리랜서";
+type BumsBoardPost = any;
 import {
     ArrowLeft,
     Pin, Lock, Star, Calendar,
@@ -212,7 +212,8 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                         className={inputClass} />
 
                     {/* Rich Editor */}
-                    <RichEditor value={body} onChange={setBody} placeholder="내용을 작성하세요..." />
+                    <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="내용을 작성하세요..."
+                        rows={12} className={inputClass + " resize-y"} />
 
                     {/* Board type specific fields */}
                     {board.boardType === "recruit" && (
@@ -314,7 +315,7 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                         </div>
                         <div className="rounded-xl border border-neutral-100 bg-white shadow-sm p-5">
                             <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">대표 이미지</h4>
-                            <ImageUploader value={image} onChange={setImage} label="" previewSize="sm" storagePath={`sites/${siteId}/posts`} />
+                            <input value={image} onChange={e => setImage(e.target.value)} placeholder="이미지 URL" className={inputClass} />
                         </div>
                     </div>
                 </div>

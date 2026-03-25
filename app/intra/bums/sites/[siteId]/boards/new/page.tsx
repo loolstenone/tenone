@@ -2,10 +2,23 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    BoardTypeInfo, type BoardType, type SkinType, type BoardPermissionLevel,
-    type BoardVisibility, type SortOrder, type BumsBoard,
-} from "@/types/bums";
+type BoardType = 'general' | 'notice' | 'gallery' | 'video' | 'faq' | 'qna' | 'commerce' | 'recruit' | 'event';
+type SkinType = 'list' | 'card' | 'gallery' | 'video';
+type BoardPermissionLevel = 'all' | 'member' | 'intra' | 'staff' | 'admin';
+type BoardVisibility = 'public' | 'intra' | 'staff';
+type SortOrder = 'latest' | 'popular' | 'pinned-first';
+type BumsBoard = any;
+const BoardTypeInfo: Record<BoardType, { label: string; description: string }> = {
+    general: { label: '일반', description: '일반 게시판' },
+    notice: { label: '공지', description: '공지사항' },
+    gallery: { label: '갤러리', description: '갤러리' },
+    video: { label: '영상', description: '영상 게시판' },
+    faq: { label: 'FAQ', description: '자주 묻는 질문' },
+    qna: { label: 'Q&A', description: '질의응답' },
+    commerce: { label: '커머스', description: '상품 게시판' },
+    recruit: { label: '채용', description: '채용 공고' },
+    event: { label: '이벤트', description: '이벤트' },
+};
 import { ArrowLeft } from "lucide-react";
 import clsx from "clsx";
 

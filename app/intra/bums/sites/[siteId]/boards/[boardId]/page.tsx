@@ -2,15 +2,14 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BoardTypeInfo } from "@/types/bums";
-import type { BumsBoardPost } from "@/types/bums";
+type BumsBoardPost = any;
+const BoardTypeInfo: Record<string, { label: string }> = {};
 import {
     ArrowLeft, Plus, Settings, Pin, Lock, Eye, MessageSquare,
     Star, ChevronDown, ChevronRight, Video, Image as ImageIcon,
     Pencil, Trash2, Search, CheckSquare,
 } from "lucide-react";
 import clsx from "clsx";
-import { BoardSettingsModal } from "@/components/bums/BoardSettingsModal";
 
 const statusBadge: Record<string, string> = {
     draft: "bg-neutral-100 text-neutral-500",
@@ -345,12 +344,7 @@ export default function BoardPostListPage({ params }: { params: Promise<{ siteId
             {/* Posts */}
             {renderPosts()}
 
-            <BoardSettingsModal
-                boardId={boardId}
-                siteId={siteId}
-                isOpen={showSettings}
-                onClose={() => setShowSettings(false)}
-            />
+            {/* Board settings modal removed */}
         </div>
     );
 }
