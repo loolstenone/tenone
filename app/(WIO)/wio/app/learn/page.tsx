@@ -1,26 +1,67 @@
 'use client';
 
-const MODULE_INFO: Record<string, { title: string; desc: string; sprint: string }> = {
-  people: { title: '인재', desc: '인재 DB, 역량 진단, 포인트, 매칭', sprint: 'Sprint 3' },
-  sales: { title: '영업', desc: 'AI 크롤링, 리드/딜 파이프라인, 캠페인', sprint: 'Sprint 3' },
-  learn: { title: '교육', desc: 'LMS, 과정, 퀴즈, 이수 관리', sprint: 'Sprint 4' },
-  content: { title: '콘텐츠', desc: 'CMS, AI 생성, 뉴스레터', sprint: 'Sprint 4' },
-  wiki: { title: '위키', desc: '지식관리, 아카이브, 문서', sprint: 'Sprint 4' },
-  insight: { title: '인사이트', desc: 'BI 대시보드, 경영 분석', sprint: 'Sprint 5' },
-  settings: { title: '설정', desc: '테넌트 설정, 멤버 관리, 브랜딩', sprint: 'Sprint 5' },
-};
+import { useState, useEffect } from 'react';
+import { BookOpen, Clock, Award, CheckCircle2 } from 'lucide-react';
+import { useWIO } from '../layout';
+import { fetchCourses, fetchMyEnrollments, enrollCourse } from '@/lib/supabase/wio';
 
-export default function ModulePage() {
-  const path = typeof window !== 'undefined' ? window.location.pathname.split('/').pop() || '' : '';
-  const info = MODULE_INFO[path] || { title: path, desc: '', sprint: '' };
+export default function LearnPage() {
+  const { tenant, member } = useWIO();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!tenant || !member) return;
+    Promise.all([fetchCourses(tenant.id), fetchMyEnrollments(member.id)]).then(([c, e]) => {
+      setCourses(c); setEnrollments(e); setLoading(false);
+    });
+  }, [tenant, member]);
+
+  const getEnrollment = (courseId: string) => enrollments.find((e: any) => e.courseId === courseId);
+
+  const handleEnroll = async (courseId: string) => {
+    if (!tenant || !member) return;
+    await enrollCourse(tenant.id, courseId, member.id);
+    fetchMyEnrollments(member.id).then(setEnrollments);
+  };
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-2">{info.title}</h1>
-      <p className="text-sm text-slate-500 mb-6">{info.desc}</p>
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-8 text-center">
-        <p className="text-slate-500">{info.sprint}에서 구현 예정</p>
-      </div>
+      <h1 className="text-xl font-bold mb-6">교육</h1>
+      {loading ? (
+        <div className="flex justify-center py-16"><div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
+      ) : courses.length === 0 ? (
+        <div className="text-center py-16 text-slate-500"><BookOpen size={32} className="mx-auto mb-2 text-slate-600" /><p>등록된 과정이 없습니다</p></div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((c: any) => {
+            const enr = getEnrollment(c.id);
+            return (
+              <div key={c.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${c.category === 'required' ? 'text-red-400 bg-red-500/10' : c.category === 'professional' ? 'text-blue-400 bg-blue-500/10' : 'text-violet-400 bg-violet-500/10'}`}>
+                    {c.category === 'required' ? '필수' : c.category === 'professional' ? '전문' : '심화'}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-slate-500"><Clock size={11} />{c.durationMinutes}분</div>
+                </div>
+                <h3 className="font-semibold mb-1">{c.title}</h3>
+                <p className="text-xs text-slate-500 mb-3 line-clamp-2">{c.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-xs text-indigo-400"><Award size={12} />{c.pointsReward}P</div>
+                  {enr?.status === 'completed' ? (
+                    <span className="flex items-center gap-1 text-xs text-emerald-400"><CheckCircle2 size={12} />이수 완료</span>
+                  ) : enr ? (
+                    <span className="text-xs text-amber-400">학습 중</span>
+                  ) : (
+                    <button onClick={() => handleEnroll(c.id)} className="text-xs text-indigo-400 hover:underline">수강 시작</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -457,3 +457,105 @@ export async function updateGPR(gprId: string, updates: { plan?: string; result?
   const { error } = await supabase.from('wio_gpr').update({ ...camelToSnake(updates as any), updated_at: new Date().toISOString() }).eq('id', gprId);
   return !error;
 }
+
+// ══════════════════════════════════════
+// Sprint 4: 교육 (Learn)
+// ══════════════════════════════════════
+
+export async function fetchCourses(tenantId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_courses').select('*').eq('tenant_id', tenantId).eq('is_published', true).order('created_at');
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function fetchMyEnrollments(memberId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_enrollments').select('*, course:wio_courses!wio_enrollments_course_id_fkey(title, category, duration_minutes, points_reward)').eq('member_id', memberId);
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function enrollCourse(tenantId: string, courseId: string, memberId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_enrollments').upsert({ tenant_id: tenantId, course_id: courseId, member_id: memberId, status: 'in_progress' }, { onConflict: 'course_id,member_id' });
+  return !error;
+}
+
+export async function completeEnrollment(enrollmentId: string, quizScore: number): Promise<boolean> {
+  const status = quizScore >= 80 ? 'completed' : 'quiz';
+  const { error } = await supabase.from('wio_enrollments').update({ status, quiz_score: quizScore, completed_at: status === 'completed' ? new Date().toISOString() : null }).eq('id', enrollmentId);
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 4: 콘텐츠 (Content)
+// ══════════════════════════════════════
+
+export async function fetchContents(tenantId: string, channel?: string): Promise<any[]> {
+  let query = supabase.from('wio_contents').select('*, author:wio_members!wio_contents_author_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  if (channel) query = query.eq('channel', channel);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createContent(content: { tenantId: string; title: string; body: string; channel?: string; authorId: string; tags?: string[] }): Promise<boolean> {
+  const { error } = await supabase.from('wio_contents').insert(camelToSnake(content as any));
+  return !error;
+}
+
+export async function publishContent(contentId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_contents').update({ status: 'published', published_at: new Date().toISOString() }).eq('id', contentId);
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 4: 위키 (Wiki)
+// ══════════════════════════════════════
+
+export async function fetchDocuments(tenantId: string, category?: string): Promise<any[]> {
+  let query = supabase.from('wio_documents').select('*, author:wio_members!wio_documents_author_id_fkey(display_name)').eq('tenant_id', tenantId).eq('is_archived', false).order('updated_at', { ascending: false });
+  if (category) query = query.eq('category', category);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createDocument(doc: { tenantId: string; title: string; body: string; category?: string; authorId: string; projectId?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_documents').insert(camelToSnake(doc as any));
+  return !error;
+}
+
+export async function archiveDocument(docId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_documents').update({ is_archived: true }).eq('id', docId);
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 4: 프로젝트 완료 트리거 체인
+// ══════════════════════════════════════
+
+export async function triggerProjectCompletion(tenantId: string, projectId: string): Promise<{ success: boolean; actions: string[] }> {
+  const actions: string[] = [];
+
+  // 1. 프로젝트 상태 완료
+  await updateProject(projectId, { status: 'completed' as any, completedAt: new Date().toISOString() } as any);
+  actions.push('프로젝트 완료 처리');
+
+  // 2. 크루 포인트 자동 부여
+  const members = await fetchProjectMembers(projectId);
+  for (const pm of members) {
+    const pts = pm.role === 'pm' ? 500 : pm.role === 'lead' ? 300 : 200;
+    await addPoints(tenantId, pm.memberId, pts, 'project_completion', projectId, 'project');
+    actions.push(`${pm.member?.displayName || pm.memberId}에게 ${pts}P 부여`);
+  }
+
+  // 3. 위키 자동 아카이브
+  const project = await fetchProject(projectId);
+  if (project) {
+    await createDocument({ tenantId, title: `[완료] ${project.title}`, body: `프로젝트 ${project.code} 완료 아카이브`, category: 'project_archive', authorId: members[0]?.memberId || '', projectId });
+    actions.push('위키 아카이브 등록');
+  }
+
+  // 4. 알림 발송
+  for (const pm of members) {
+    await createNotification({ tenantId, memberId: pm.memberId, type: 'project_complete', title: `${project?.title} 프로젝트가 완료되었습니다`, link: `/wio/app/project/${projectId}` });
+  }
+  actions.push(`${members.length}명에게 알림 발송`);
+
+  return { success: true, actions };
+}
