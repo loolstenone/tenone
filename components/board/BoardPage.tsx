@@ -34,17 +34,22 @@ export default function BoardPage({
     const [loading, setLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    // 게시판 설정 로드
+    // 게시판 설정 로드 (캐시 활용)
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch(`/api/board/configs?site=${site}&board=${board}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.configs?.length > 0) setBoardConfig(data.configs[0]);
+        const cacheKey = `board_config_${site}_${board}`;
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+            try { setBoardConfig(JSON.parse(cached)); } catch {}
+        }
+        fetch(`/api/board/configs?site=${site}&board=${board}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data?.configs?.length > 0) {
+                    setBoardConfig(data.configs[0]);
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data.configs[0]));
                 }
-            } catch { /* ignore */ }
-        })();
+            })
+            .catch(() => {});
     }, [site, board]);
 
     // 게시글 상세 로드
