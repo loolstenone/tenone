@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { siteConfigs, type SiteIdentifier } from "@/lib/site-config";
-import { useBums } from "@/lib/bums-context";
 import { ImageUploader } from "@/components/bums/ImageUploader";
 import {
     Globe, ExternalLink, Search, ChevronRight, Settings,
@@ -24,7 +23,8 @@ interface SiteEntry {
 }
 
 export default function SitesListPage() {
-    const { boards, boardPosts } = useBums();
+    const boards: any[] = [];
+    const boardPosts: any[] = [];
     const [search, setSearch] = useState("");
     const [selectedSite, setSelectedSite] = useState<SiteIdentifier | null>(null);
     const [saved, setSaved] = useState(false);

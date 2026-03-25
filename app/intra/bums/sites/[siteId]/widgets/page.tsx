@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import type { BumsWidget } from "@/types/bums";
 import { ArrowLeft, Plus, Trash2, Eye, LayoutGrid, List, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
@@ -17,11 +16,13 @@ const sortByLabel: Record<string, string> = { latest: "최신순", views: "조�
 export default function WidgetsPage({ params }: { params: Promise<{ siteId: string }> }) {
     const { siteId } = use(params);
     const router = useRouter();
-    const { getSiteById, getBoardsBySite, widgets, addWidget, deleteWidget, getPostsForWidget } = useBums();
-
-    const site = getSiteById(siteId);
-    const boards = getBoardsBySite(siteId);
-    const siteWidgets = widgets.filter(w => boards.some(b => b.id === w.boardId));
+    const site: any = null;
+    const boards: any[] = [];
+    const widgets: any[] = [];
+    const addWidget = (_w: any) => {};
+    const deleteWidget = (_id: string) => {};
+    const getPostsForWidget = (_boardId: string, _count: number, _sort: string): any[] => [];
+    const siteWidgets = widgets.filter((w: any) => boards.some((b: any) => b.id === w.boardId));
 
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState({

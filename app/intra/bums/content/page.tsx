@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useBums } from "@/lib/bums-context";
 import { useBumsFilter } from "../layout";
 import { siteConfigs } from "@/lib/site-config";
 import {
@@ -59,7 +58,7 @@ const mockContent = [
 
 export default function ContentManagementPage() {
     const { selectedSiteId } = useBumsFilter();
-    const { boards } = useBums();
+    const boards: any[] = [];
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState<ContentType>("전체");
     const [boardFilter, setBoardFilter] = useState("전체");

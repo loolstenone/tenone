@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import {
     BoardTypeInfo,
     type BoardType,
@@ -106,9 +105,8 @@ const rowCls = "flex gap-4 py-4 border-b border-neutral-100";
 export default function BoardSettingsPage({ params }: { params: Promise<{ siteId: string; boardId: string }> }) {
     const { siteId, boardId } = use(params);
     const router = useRouter();
-    const { getBoardById, updateBoard } = useBums();
-
-    const board = getBoardById(boardId);
+    const board: any = null;
+    const updateBoard = (_id: string, _data: any) => {};
 
     const [tab, setTab] = useState<'settings' | 'design'>('settings');
 

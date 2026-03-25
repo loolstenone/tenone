@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import {
     BoardTypeInfo, type BoardType, type SkinType, type BoardPermissionLevel,
     type BoardVisibility, type SortOrder, type BumsBoard,
@@ -46,7 +45,7 @@ function toSlug(name: string) {
 export default function CreateBoardPage({ params }: { params: Promise<{ siteId: string }> }) {
     const { siteId } = use(params);
     const router = useRouter();
-    const { addBoard } = useBums();
+    const addBoard = (_board: BumsBoard) => {};
 
     const [form, setForm] = useState({
         name: "",

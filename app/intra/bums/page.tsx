@@ -1,6 +1,5 @@
 "use client";
 
-import { useBums } from "@/lib/bums-context";
 import Link from "next/link";
 import {
     Globe, LayoutGrid, FileText, Eye, ExternalLink, Clock,
@@ -20,7 +19,9 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function CmsDashboard() {
-    const { sites, boards, boardPosts } = useBums();
+    const sites: any[] = [];
+    const boards: any[] = [];
+    const boardPosts: any[] = [];
 
     const totalBoards = boards.length;
     const totalPosts = boardPosts.length;

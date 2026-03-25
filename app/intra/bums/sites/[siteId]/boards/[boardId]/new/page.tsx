@@ -2,7 +2,6 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import type { BumsBoardPost, PostStatus, EmploymentType } from "@/types/bums";
 import { RichEditor } from "@/components/bums/RichEditor";
 import { ImageUploader } from "@/components/bums/ImageUploader";
@@ -30,11 +29,11 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
     const router = useRouter();
     const searchParams = useSearchParams();
     const postId = searchParams.get("postId");
-    const { getBoardById, getSiteById, addBoardPost, updateBoardPost, getBoardPostById } = useBums();
-
-    const board = getBoardById(boardId);
-    const site = getSiteById(siteId);
-    const existingPost = postId ? getBoardPostById(postId) : null;
+    const board: any = null;
+    const site: any = null;
+    const existingPost: any = null;
+    const addBoardPost = (_post: BumsBoardPost) => {};
+    const updateBoardPost = (_id: string, _post: BumsBoardPost) => {};
     const isEditMode = !!existingPost;
 
     const [title, setTitle] = useState("");

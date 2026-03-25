@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useBums } from "@/lib/bums-context";
 import { BoardTypeInfo } from "@/types/bums";
 import { Search, Eye, MessageSquare, Pin, Lock } from "lucide-react";
 import clsx from "clsx";
@@ -23,9 +22,9 @@ const statusLabel: Record<string, string> = {
 
 export default function SiteContentPage({ params }: { params: Promise<{ siteId: string }> }) {
     const { siteId } = use(params);
-    const { getBoardsBySite, getPostsByBoard, getSiteById } = useBums();
-    const site = getSiteById(siteId);
-    const boards = getBoardsBySite(siteId);
+    const site: any = null;
+    const boards: any[] = [];
+    const getPostsByBoard = (_id: string): any[] => [];
 
     const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
     const [search, setSearch] = useState("");

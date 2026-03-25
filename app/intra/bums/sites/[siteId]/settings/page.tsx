@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import { ImageUploader } from "@/components/bums/ImageUploader";
 import { ArrowLeft, Check } from "lucide-react";
 
@@ -12,8 +11,8 @@ const labelClass = "text-xs font-medium text-neutral-500 uppercase tracking-wide
 export default function SiteSettingsPage({ params }: { params: Promise<{ siteId: string }> }) {
     const { siteId } = use(params);
     const router = useRouter();
-    const { getSiteById, updateSite } = useBums();
-    const site = getSiteById(siteId);
+    const site: any = null;
+    const updateSite = (_id: string, _data: any) => {};
 
     const [name, setName] = useState(site?.name || "");
     const [domain, setDomain] = useState(site?.domain || "");

@@ -3,7 +3,6 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useBums } from "@/lib/bums-context";
 import { BoardTypeInfo } from "@/types/bums";
 import type { BumsBoard, BoardType, SkinType, BoardVisibility } from "@/types/bums";
 import {
@@ -86,11 +85,11 @@ const postStatusBadge: Record<string, string> = {
 export default function SiteDetailPage({ params }: { params: Promise<{ siteId: string }> }) {
     const { siteId } = use(params);
     const router = useRouter();
-    const { getSiteById, getBoardsBySite, boardPosts, addBoard } = useBums();
-
-    const site = getSiteById(siteId);
-    const siteBoards = getBoardsBySite(siteId);
-    const sitePosts = boardPosts.filter((p) => p.siteId === siteId);
+    const boardPosts: any[] = [];
+    const site: any = null;
+    const siteBoards: any[] = [];
+    const sitePosts: any[] = [];
+    const addBoard = (_board: any) => {};
 
     // Accordion state
     const [expandedBoard, setExpandedBoard] = useState<string | null>(null);

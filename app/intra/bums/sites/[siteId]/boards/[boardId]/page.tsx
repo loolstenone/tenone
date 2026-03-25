@@ -2,7 +2,6 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBums } from "@/lib/bums-context";
 import { BoardTypeInfo } from "@/types/bums";
 import type { BumsBoardPost } from "@/types/bums";
 import {
@@ -261,13 +260,12 @@ function FaqQnaView({ posts }: { posts: BumsBoardPost[] }) {
 export default function BoardPostListPage({ params }: { params: Promise<{ siteId: string; boardId: string }> }) {
     const { siteId, boardId } = use(params);
     const router = useRouter();
-    const { getBoardById, getPostsByBoard, getSiteById, deleteBoardPost } = useBums();
+    const board: any = null;
+    const site: any = null;
+    const allPosts: any[] = [];
+    const deleteBoardPost = (_id: string) => {};
     const [search, setSearch] = useState("");
     const [showSettings, setShowSettings] = useState(false);
-
-    const board = getBoardById(boardId);
-    const site = getSiteById(siteId);
-    const allPosts = getPostsByBoard(boardId);
     const posts = search
         ? allPosts.filter(p => p.title.toLowerCase().includes(search.toLowerCase()) || p.authorName.toLowerCase().includes(search.toLowerCase()))
         : allPosts;

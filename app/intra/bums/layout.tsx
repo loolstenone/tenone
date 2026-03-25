@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, createContext, useContext } from "react";
-import { useBums } from "@/lib/bums-context";
 import { siteConfigs } from "@/lib/site-config";
 import { ChevronDown, Globe } from "lucide-react";
 import clsx from "clsx";
@@ -22,7 +21,6 @@ export function useBumsFilter() {
 }
 
 export default function BumsLayout({ children }: { children: React.ReactNode }) {
-    const { sites } = useBums();
     const [selectedSiteId, setSelectedSiteId] = useState("all");
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
