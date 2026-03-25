@@ -2,7 +2,7 @@
  * Ten:One™ 통합 게시판 Supabase CRUD
  * posts, comments, attachments, likes, bookmarks, board_configs
  */
-import { createClient } from './client';
+import { createClient as createBrowserClient } from '@supabase/supabase-js';
 import type {
     Post, Comment, Attachment, BoardConfig, BoardSettings,
     PostListParams, PostListResponse,
@@ -10,7 +10,10 @@ import type {
     SiteCode,
 } from '@/types/board';
 
-const supabase = createClient();
+const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // ── 유틸 ──
 
@@ -97,7 +100,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
 
     let query = supabase
         .from('posts')
-        .select('id, site, board, title, excerpt, category, status, author_type, author_name, represent_image, tags, is_pinned, is_recommended, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
+        .select('id, site, board, title, excerpt, category, status, author_type, represent_image, tags, is_pinned, is_recommended, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
         .eq('site', site);
 
     if (board) query = query.eq('board', board);
