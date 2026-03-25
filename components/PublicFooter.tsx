@@ -51,7 +51,7 @@ export function PublicFooter() {
                         <ul className="space-y-3 text-sm text-neutral-500">
                             <li className="text-white">전천일 Cheonil Jeon</li>
                             <li>Founder / Value Connector</li>
-                            <li><a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">lools@tenone.biz</a></li>
+                            <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
                             <li><a href="https://open.kakao.com/me/tenone" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kakao Open Chat</a></li>
                         </ul>
                     </div>

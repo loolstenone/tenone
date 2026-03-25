@@ -271,13 +271,11 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="hidden lg:block">
-                        <div className="aspect-video bg-[var(--tn-bg-alt)] flex items-center justify-center">
-                            <p className="text-sm text-[var(--tn-text-sub)] text-center px-12 leading-relaxed">
-                                [CTA 비주얼]<br />
-                                팀 활동 사진, 네트워킹 이벤트,<br />
-                                또는 브랜드 콜라주 이미지<br /><br />
-                                <span className="text-xs text-[var(--tn-text)]">권장: Badak 밋업, MAD League 활동 등<br />실제 활동 사진</span>
-                            </p>
+                        <div className="aspect-video bg-[var(--tn-bg-alt)] flex items-center justify-center overflow-hidden">
+                            <div className="text-center">
+                                <p className="text-4xl font-light tracking-tight" style={{ color: "var(--tn-text-sub)" }}>Ten:One™</p>
+                                <p className="text-xs mt-2" style={{ color: "var(--tn-text-muted)" }}>Universe of Possibilities</p>
+                            </div>
                         </div>
                     </div>
                 </div>

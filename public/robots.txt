@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /intra/
+Disallow: /api/
+Disallow: /auth-hub/
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://www.tenone.biz/sitemap.xml
