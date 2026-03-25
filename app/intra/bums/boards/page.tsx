@@ -2,22 +2,24 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-    Settings, FileText, Users, Search, Pencil, Trash2, Plus, Eye, X,
+    Settings, FileText, Users, Search, Pencil, Trash2, Plus, X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-
-interface BoardConfig {
-    id: string; site: string; slug: string; name: string; description: string;
-    categories: string[]; settings: Record<string, unknown>; sort_order: number;
-}
-
+import { useBumsFilter } from "../layout";
+import { siteConfigs } from "@/lib/site-config";
+/* ── API 응답용 snake_case 인터페이스 ── */
 interface PostRow {
     id: string; site: string; board: string; title: string; content: string;
     excerpt: string; category: string; status: string; author_type: string;
     author_id: string | null; guest_nickname: string | null;
     view_count: number; like_count: number; comment_count: number;
     is_pinned: boolean; created_at: string; tags: string[];
+}
+
+interface ConfigRow {
+    id: string; site: string; slug: string; name: string; description: string;
+    categories: string[]; settings: Record<string, unknown>; sort_order: number;
 }
 
 const tabs = [
@@ -37,54 +39,85 @@ const statusLabel: Record<string, string> = {
 
 export default function BoardsManagementPage() {
     const router = useRouter();
+    const { selectedSiteId } = useBumsFilter();
+
     const [activeTab, setActiveTab] = useState<TabId>("posts");
-    const [configs, setConfigs] = useState<BoardConfig[]>([]);
+    const [configs, setConfigs] = useState<ConfigRow[]>([]);
     const [posts, setPosts] = useState<PostRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [siteFilter, setSiteFilter] = useState("전체");
     const [boardFilter, setBoardFilter] = useState("전체");
+    const [statusFilter, setStatusFilter] = useState("전체");
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [viewingPost, setViewingPost] = useState<PostRow | null>(null);
     const postsPerPage = 20;
 
-    // 데이터 로드
+    /* ── 데이터 로드 ── */
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [configRes, postRes] = await Promise.all([
-                fetch('/api/board/configs'),
-                fetch('/api/board/posts?limit=500&status=published'),
-            ]);
-            if (configRes.ok) { const d = await configRes.json(); setConfigs(d.configs || []); }
-            if (postRes.ok) { const d = await postRes.json(); setPosts(d.posts || []); }
+            // configs: site 파라미터 있으면 해당 사이트만, 없으면 전체
+            const configUrl = selectedSiteId === "all"
+                ? "/api/board/configs"
+                : `/api/board/configs?site=${selectedSiteId}`;
+            const configRes = await fetch(configUrl);
+            const configData = configRes.ok ? await configRes.json() : { configs: [] };
+            setConfigs(configData.configs || []);
+
+            // posts: 사이트별로 fetch (API가 site 필수이므로 사이트별 호출)
+            if (selectedSiteId === "all") {
+                // 전체: 모든 사이트에서 가져오기 (configs에서 사이트 추출)
+                const sites = [...new Set((configData.configs || []).map((c: ConfigRow) => c.site))];
+                const allPosts: PostRow[] = [];
+                await Promise.all(
+                    sites.map(async (site: string) => {
+                        const res = await fetch(`/api/board/posts?site=${site}&limit=500`);
+                        if (res.ok) {
+                            const d = await res.json();
+                            allPosts.push(...(d.posts || []));
+                        }
+                    })
+                );
+                setPosts(allPosts);
+            } else {
+                const postRes = await fetch(`/api/board/posts?site=${selectedSiteId}&limit=500`);
+                const postData = postRes.ok ? await postRes.json() : { posts: [] };
+                setPosts(postData.posts || []);
+            }
         } catch { /* ignore */ }
         setLoading(false);
-    }, []);
+    }, [selectedSiteId]);
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    // 삭제
+    // BU 변경 시 필터 리셋
+    useEffect(() => {
+        setBoardFilter("전체");
+        setStatusFilter("전체");
+        setCurrentPage(1);
+        setSelectedIds(new Set());
+    }, [selectedSiteId]);
+
+    /* ── 삭제 ── */
     const handleDelete = async (id: string) => {
-        if (!confirm('삭제하시겠습니까?')) return;
-        await fetch(`/api/board/posts/${id}`, { method: 'DELETE' });
+        if (!confirm("삭제하시겠습니까?")) return;
+        await fetch(`/api/board/posts/${id}`, { method: "DELETE" });
         setPosts(prev => prev.filter(p => p.id !== id));
     };
 
     const handleBulkDelete = async () => {
         if (!confirm(`${selectedIds.size}건을 삭제하시겠습니까?`)) return;
-        await Promise.all(Array.from(selectedIds).map(id => fetch(`/api/board/posts/${id}`, { method: 'DELETE' })));
+        await Promise.all(Array.from(selectedIds).map(id => fetch(`/api/board/posts/${id}`, { method: "DELETE" })));
         setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
         setSelectedIds(new Set());
     };
 
-    // 필터
-    const sites = [...new Set(configs.map(c => c.site))];
-    const filteredConfigs = configs.filter(c => siteFilter === "전체" || c.site === siteFilter);
+    /* ── 필터링 ── */
+    const filteredConfigs = configs;
     const filteredPosts = posts.filter(p => {
-        if (siteFilter !== "전체" && p.site !== siteFilter) return false;
         if (boardFilter !== "전체" && p.board !== boardFilter) return false;
+        if (statusFilter !== "전체" && p.status !== statusFilter) return false;
         if (search) {
             const q = search.toLowerCase();
             if (!p.title.toLowerCase().includes(q)) return false;
@@ -95,16 +128,21 @@ export default function BoardsManagementPage() {
     const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
     const pagePosts = filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
-    // 작성자 집계
+    /* ── 작성자 집계 ── */
     const authorMap = new Map<string, { name: string; count: number; sites: Set<string> }>();
     posts.forEach(p => {
-        if (siteFilter !== "전체" && p.site !== siteFilter) return;
-        const key = p.author_id || p.guest_nickname || 'unknown';
-        const name = p.guest_nickname || (p.author_type === 'admin' ? '관리자' : p.author_type === 'agent' ? 'AI Agent' : '회원');
+        const key = p.author_id || p.guest_nickname || "unknown";
+        const name = p.guest_nickname || (p.author_type === "admin" ? "관리자" : p.author_type === "agent" ? "AI Agent" : "회원");
         const existing = authorMap.get(key);
         if (existing) { existing.count++; existing.sites.add(p.site); }
         else authorMap.set(key, { name, count: 1, sites: new Set([p.site]) });
     });
+
+    /* ── 사이트명 표시 ── */
+    const siteName = (code: string) => {
+        const cfg = siteConfigs[code as keyof typeof siteConfigs];
+        return cfg?.name || code;
+    };
 
     if (loading) {
         return <div className="flex justify-center py-20"><div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" /></div>;
@@ -114,7 +152,9 @@ export default function BoardsManagementPage() {
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">게시판 관리</h1>
-                <p className="text-sm text-neutral-500 mt-1">전체 사이트의 게시판, 게시글, 작성자를 통합 관리합니다.</p>
+                <p className="text-sm text-neutral-500 mt-1">
+                    {selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)}의 게시판, 게시글, 작성자를 통합 관리합니다.
+                </p>
             </div>
 
             {/* Tabs */}
@@ -129,27 +169,32 @@ export default function BoardsManagementPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
                 <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                     <input value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                         placeholder="검색..." className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none bg-white" />
                 </div>
-                <select value={siteFilter} onChange={e => { setSiteFilter(e.target.value); setBoardFilter("전체"); setCurrentPage(1); }}
-                    className="rounded-lg border border-neutral-200 px-3.5 py-2.5 text-sm bg-white">
-                    <option value="전체">전체 사이트</option>
-                    {sites.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
                 {activeTab === "posts" && (
-                    <select value={boardFilter} onChange={e => { setBoardFilter(e.target.value); setCurrentPage(1); }}
-                        className="rounded-lg border border-neutral-200 px-3.5 py-2.5 text-sm bg-white">
-                        <option value="전체">전체 게시판</option>
-                        {filteredConfigs.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
-                    </select>
+                    <>
+                        <select value={boardFilter} onChange={e => { setBoardFilter(e.target.value); setCurrentPage(1); }}
+                            className="rounded-lg border border-neutral-200 px-3.5 py-2.5 text-sm bg-white">
+                            <option value="전체">전체 게시판</option>
+                            {filteredConfigs.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
+                        </select>
+                        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                            className="rounded-lg border border-neutral-200 px-3.5 py-2.5 text-sm bg-white">
+                            <option value="전체">전체 상태</option>
+                            <option value="published">발행</option>
+                            <option value="draft">임시</option>
+                            <option value="hidden">숨김</option>
+                            <option value="deleted">삭제</option>
+                        </select>
+                    </>
                 )}
             </div>
 
-            {/* 게시판 설정 탭 */}
+            {/* ── 게시판 설정 탭 ── */}
             {activeTab === "settings" && (
                 <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">
                     <table className="w-full text-sm">
@@ -164,7 +209,7 @@ export default function BoardsManagementPage() {
                             {filteredConfigs.map(c => (
                                 <tr key={c.id} className="hover:bg-neutral-50/50">
                                     <td className="px-5 py-3.5 font-medium">{c.name}</td>
-                                    <td className="px-5 py-3.5 text-neutral-500 text-xs">{c.site}</td>
+                                    <td className="px-5 py-3.5 text-neutral-500 text-xs">{siteName(c.site)}</td>
                                     <td className="px-5 py-3.5 text-neutral-400 text-xs font-mono">{c.slug}</td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex gap-1 flex-wrap">
@@ -183,7 +228,7 @@ export default function BoardsManagementPage() {
                 </div>
             )}
 
-            {/* 게시글 목록 탭 */}
+            {/* ── 게시글 목록 탭 ── */}
             {activeTab === "posts" && (
                 <>
                     <div className="flex items-center justify-between">
@@ -194,7 +239,7 @@ export default function BoardsManagementPage() {
                                 <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-900">선택 해제</button>
                             </div>
                         ) : <div />}
-                        <button onClick={() => router.push('/intra/bums/content')}
+                        <button onClick={() => router.push("/intra/bums/content")}
                             className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 shadow-sm">
                             <Plus className="h-4 w-4" /> 새 글 작성
                         </button>
@@ -235,9 +280,12 @@ export default function BoardsManagementPage() {
                                                 })} className="rounded" />
                                         </td>
                                         <td className="px-5 py-3.5 font-medium truncate max-w-[280px]">
-                                            <button onClick={() => setViewingPost(post)} className="hover:underline text-left">{post.title}</button>
+                                            <button onClick={() => setViewingPost(post)} className="hover:underline text-left">
+                                                {post.is_pinned && <span className="text-[10px] text-amber-500 mr-1.5">PIN</span>}
+                                                {post.title}
+                                            </button>
                                         </td>
-                                        <td className="px-5 py-3.5 text-neutral-500 text-xs">{post.site}</td>
+                                        <td className="px-5 py-3.5 text-neutral-500 text-xs">{siteName(post.site)}</td>
                                         <td className="px-5 py-3.5 text-neutral-500 text-xs">{post.board}</td>
                                         <td className="px-5 py-3.5">
                                             <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-medium", statusBadge[post.status])}>{statusLabel[post.status] || post.status}</span>
@@ -262,13 +310,13 @@ export default function BoardsManagementPage() {
                                 <span className="text-xs text-neutral-400">전체 {filteredPosts.length}건 · {currentPage}/{totalPages}</span>
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                                        className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30">←</button>
+                                        className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30">&larr;</button>
                                     {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(page => (
                                         <button key={page} onClick={() => setCurrentPage(page)}
-                                            className={`px-2.5 py-1 text-xs rounded-lg ${currentPage === page ? 'bg-neutral-900 text-white' : 'border border-neutral-200 hover:bg-neutral-100'}`}>{page}</button>
+                                            className={`px-2.5 py-1 text-xs rounded-lg ${currentPage === page ? "bg-neutral-900 text-white" : "border border-neutral-200 hover:bg-neutral-100"}`}>{page}</button>
                                     ))}
                                     <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                                        className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30">→</button>
+                                        className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-30">&rarr;</button>
                                 </div>
                             </div>
                         )}
@@ -288,13 +336,13 @@ export default function BoardsManagementPage() {
                                                 <span className="text-xs text-neutral-400">· 조회 {viewingPost.view_count}</span>
                                             </div>
                                             <h2 className="text-xl font-bold">{viewingPost.title}</h2>
-                                            <p className="text-xs text-neutral-400 mt-1">{viewingPost.site} · {viewingPost.board}</p>
+                                            <p className="text-xs text-neutral-400 mt-1">{siteName(viewingPost.site)} · {viewingPost.board}</p>
                                         </div>
                                         <button onClick={() => setViewingPost(null)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="h-5 w-5" /></button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-6">
                                         {viewingPost.excerpt && <p className="text-sm text-neutral-500 mb-4 italic">{viewingPost.excerpt}</p>}
-                                        <div className="text-sm text-neutral-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: viewingPost.content || '(본문 없음)' }} />
+                                        <div className="text-sm text-neutral-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: viewingPost.content || "(본문 없음)" }} />
                                     </div>
                                     <div className="p-4 border-t border-neutral-100 flex justify-end gap-2">
                                         <button onClick={() => { setViewingPost(null); router.push(`/intra/bums/content?edit=${viewingPost.id}`); }}
@@ -308,7 +356,7 @@ export default function BoardsManagementPage() {
                 </>
             )}
 
-            {/* 작성자 관리 탭 */}
+            {/* ── 작성자 관리 탭 ── */}
             {activeTab === "authors" && (
                 <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">
                     <table className="w-full text-sm">
@@ -324,7 +372,7 @@ export default function BoardsManagementPage() {
                                     <td className="px-5 py-3.5 text-neutral-500">{info.count}건</td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex gap-1.5 flex-wrap">
-                                            {Array.from(info.sites).map(s => <span key={s} className="text-[10px] px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full">{s}</span>)}
+                                            {Array.from(info.sites).map(s => <span key={s} className="text-[10px] px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full">{siteName(s)}</span>)}
                                         </div>
                                     </td>
                                 </tr>
