@@ -70,20 +70,19 @@ function SmarCommSignupForm() {
         } catch { setError('회원가입 중 오류가 발생했습니다'); setIsSubmitting(false); }
     };
 
-    const handleGoogle = () => {
-        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
-        const rd = window.location.hostname;
-        const st = crypto.randomUUID();
-        sessionStorage.setItem('auth_state', st);
-        window.location.href = `${authDomain}/auth-hub/login?provider=google&returnDomain=${encodeURIComponent(rd)}&returnPath=${encodeURIComponent('/dashboard')}&state=${st}`;
+    // 직접 Supabase OAuth (auth-hub 경유 없이)
+    const handleSocialLogin = async (provider: 'google' | 'kakao') => {
+        const sb = createClient();
+        const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`;
+        const { data, error: oauthError } = await sb.auth.signInWithOAuth({
+            provider,
+            options: { redirectTo },
+        });
+        if (data?.url) window.location.href = data.url;
+        else if (oauthError) setError(`${provider} 가입 실패: ${oauthError.message}`);
     };
-    const handleKakao = () => {
-        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
-        const rd = window.location.hostname;
-        const st = crypto.randomUUID();
-        sessionStorage.setItem('auth_state', st);
-        window.location.href = `${authDomain}/auth-hub/login?provider=kakao&returnDomain=${encodeURIComponent(rd)}&returnPath=${encodeURIComponent('/dashboard')}&state=${st}`;
-    };
+    const handleGoogle = () => handleSocialLogin('google');
+    const handleKakao = () => handleSocialLogin('kakao');
 
     const inputClass = "w-full border border-neutral-200 bg-white py-2.5 px-4 text-sm focus:border-neutral-900 focus:outline-none";
 
