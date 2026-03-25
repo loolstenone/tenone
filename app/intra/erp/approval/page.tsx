@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader, Card, Badge, Spinner } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
 
 interface PendingApproval {
     docNo: string;
@@ -13,54 +15,30 @@ interface PendingApproval {
     status: string;
 }
 
-const pendingItems: PendingApproval[] = [
-    {
-        docNo: "APR-2026-0042",
-        title: "2026년 1분기 마케팅 예산 품의",
-        drafter: "Sarah Kim",
-        draftDate: "2026-03-18",
-        type: "품의",
-        status: "승인대기",
-    },
-    {
-        docNo: "APR-2026-0041",
-        title: "신규 장비 구매 요청서",
-        drafter: "박영상",
-        draftDate: "2026-03-17",
-        type: "기안",
-        status: "승인대기",
-    },
-    {
-        docNo: "APR-2026-0040",
-        title: "3월 주간 업무보고",
-        drafter: "김준호",
-        draftDate: "2026-03-17",
-        type: "보고",
-        status: "승인대기",
-    },
-];
-
 export default function ApprovalPendingPage() {
-    const [items, setItems] = useState(pendingItems);
+    const { user } = useAuth();
+    const [items, setItems] = useState<PendingApproval[]>([]);
+    const [loading, setLoading] = useState(true);
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-    // DB 로드 시도 (실패 시 Mock 유지)
     useEffect(() => {
+        setLoading(true);
         erpDb.fetchApprovals({ status: 'pending' })
             .then(({ approvals }) => {
-                if (approvals.length > 0) {
-                    setItems(approvals.map((a: Record<string, unknown>) => ({
-                        docNo: (a.id as string) || '',
-                        title: (a.title as string) || '',
-                        drafter: ((a.requester as Record<string, unknown>)?.name as string) || '알 수 없음',
-                        draftDate: ((a.created_at as string) || '').slice(0, 10),
-                        type: (a.type as string) || '기안',
-                        status: '승인대기',
-                    })));
-                }
+                setItems(approvals.map((a: Record<string, unknown>) => ({
+                    docNo: (a.id as string) || '',
+                    title: (a.title as string) || '',
+                    drafter: ((a.requester as Record<string, unknown>)?.name as string) || '알 수 없음',
+                    draftDate: ((a.created_at as string) || '').slice(0, 10),
+                    type: (a.type as string) || '기안',
+                    status: '승인대기',
+                })));
             })
-            .catch(() => { /* Mock 유지 */ });
-    }, []);
+            .catch(() => {
+                setItems([]);
+            })
+            .finally(() => setLoading(false));
+    }, [user?.id]);
 
     const handleApprove = (docNo: string) => {
         setItems((prev) => prev.filter((item) => item.docNo !== docNo));
@@ -72,12 +50,11 @@ export default function ApprovalPendingPage() {
         erpDb.updateApprovalStatus(docNo, 'rejected').catch(() => {});
     };
 
+    if (loading) return <div className="max-w-5xl"><Spinner /></div>;
+
     return (
         <div className="max-w-5xl">
-            <div className="mb-6">
-                <h1 className="text-xl font-bold">결재 대기</h1>
-                <p className="text-sm text-neutral-500 mt-1">승인 대기 중인 문서</p>
-            </div>
+            <PageHeader title="결재 대기" description="승인 대기 중인 문서" />
 
             {/* 요약 */}
             <div className="flex gap-3 mb-4">
@@ -89,7 +66,7 @@ export default function ApprovalPendingPage() {
             </div>
 
             {/* 테이블 */}
-            <div className="bg-white border border-neutral-200 overflow-hidden">
+            <Card padding={false}>
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b border-neutral-100 bg-neutral-50">
@@ -115,14 +92,10 @@ export default function ApprovalPendingPage() {
                                 <td className="px-4 py-2.5 text-xs text-neutral-600">{item.drafter}</td>
                                 <td className="px-4 py-2.5 text-xs text-neutral-500">{item.draftDate}</td>
                                 <td className="px-4 py-2.5">
-                                    <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
-                                        {item.type}
-                                    </span>
+                                    <Badge label={item.type} />
                                 </td>
                                 <td className="px-4 py-2.5">
-                                    <span className="text-xs px-2 py-0.5 rounded bg-amber-50 text-amber-600">
-                                        {item.status}
-                                    </span>
+                                    <Badge label={item.status} variant="warning" />
                                 </td>
                                 <td className="px-4 py-2.5 text-right">
                                     {hoveredIdx === idx && (
@@ -155,13 +128,13 @@ export default function ApprovalPendingPage() {
                         {items.length === 0 && (
                             <tr>
                                 <td colSpan={7} className="px-4 py-8 text-center text-xs text-neutral-400">
-                                    대기 중인 결재 문서가 없습니다.
+                                    데이터가 없습니다
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
-            </div>
+            </Card>
         </div>
     );
 }
