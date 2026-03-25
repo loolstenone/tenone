@@ -1,8 +1,12 @@
 import './smarcomm.css';
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { SmarCommPreviewGate } from '@/components/SmarCommPreviewGate';
 
 const site = siteConfigs.smarcomm;
+const PREVIEW_KEY = 'tenone1001';
 
 export const metadata: Metadata = {
     title: { default: site.meta.title, template: `%s | ${site.name}` },
@@ -16,6 +20,17 @@ export const metadata: Metadata = {
     },
 };
 
-export default function SmarCommGroupLayout({ children }: { children: React.ReactNode }) {
+export default async function SmarCommGroupLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const hasPreview = cookieStore.get('sc_preview')?.value === PREVIEW_KEY;
+
+  if (!hasPreview) {
+    return (
+      <div className="smarcomm-theme">
+        <SmarCommPreviewGate previewKey={PREVIEW_KEY} />
+      </div>
+    );
+  }
+
   return <div className="smarcomm-theme">{children}</div>;
 }
