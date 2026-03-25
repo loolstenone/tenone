@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import {
-  Wallet,
   Download,
   ChevronDown,
   ChevronUp,
   TrendingUp,
-  CreditCard,
 } from "lucide-react";
+import { PageHeader, Card, SectionTitle } from "@/components/intra/IntraUI";
 
 interface PayItem {
   label: string;
@@ -56,16 +55,12 @@ export default function MyPayrollPage() {
   const [showBreakdown, setShowBreakdown] = useState(true);
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6">
-      <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
         {/* Header */}
-        <div className="mb-6 flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-neutral-700" />
-          <h1 className="text-base font-semibold text-neutral-800">내 급여</h1>
-        </div>
+        <PageHeader title="내 급여" description="급여 명세 · 이력 조회" />
 
         {/* This Month Summary */}
-        <div className="mb-6 border border-neutral-200 bg-white p-5">
+        <Card className="mb-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-neutral-400">2026년 3월 급여</p>
@@ -99,10 +94,10 @@ export default function MyPayrollPage() {
               </p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Breakdown */}
-        <div className="mb-6 border border-neutral-200 bg-white">
+        <Card className="mb-6" padding={false}>
           <button
             onClick={() => setShowBreakdown(!showBreakdown)}
             className="flex w-full items-center justify-between p-4"
@@ -179,10 +174,10 @@ export default function MyPayrollPage() {
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Pension */}
-        <div className="mb-6 border border-neutral-200 bg-white p-4">
+        <Card className="mb-6" padding={false}><div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-neutral-500" />
@@ -195,13 +190,11 @@ export default function MyPayrollPage() {
           <p className="mt-1 text-lg font-bold text-neutral-800">
             {formatKRW(18500000)}
           </p>
-        </div>
+        </div></Card>
 
         {/* Recent History */}
-        <div className="mb-6 border border-neutral-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-700">
-            최근 6개월 실수령액
-          </h2>
+        <Card className="mb-6" padding={false}><div className="p-4">
+          <SectionTitle title="최근 6개월 실수령액" />
           <div className="space-y-1.5">
             {recentHistory.map((h) => (
               <div
@@ -217,14 +210,13 @@ export default function MyPayrollPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div></Card>
 
         {/* Download */}
         <button className="flex w-full items-center justify-center gap-1.5 rounded-md border border-neutral-200 bg-white py-2.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50">
           <Download className="h-3.5 w-3.5" />
           급여명세서 다운로드
         </button>
-      </div>
     </div>
   );
 }

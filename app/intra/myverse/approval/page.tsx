@@ -265,7 +265,7 @@ export default function MyApprovalPage() {
                                         </div>
                                     </button>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[item.status]}`}>{item.status}</span>
+                                        <Badge label={item.status} variant={statusBadge[item.status]} />
                                         {activeTab === "pending" && (
                                             <div className="flex gap-1">
                                                 <button onClick={() => handleApprove(item.id)} className="flex items-center gap-0.5 rounded bg-green-50 px-2 py-1 text-[11px] font-medium text-green-600 hover:bg-green-100">

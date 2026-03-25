@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import {
-  Receipt,
   Plus,
-  ChevronDown,
-  ChevronUp,
   Upload,
   Car,
   UtensilsCrossed,
   Package,
 } from "lucide-react";
+import { PageHeader, StatCard, Card, Badge, PrimaryButton, SectionTitle } from "@/components/intra/IntraUI";
 
 type ExpenseStatus = "승인대기" | "승인" | "지급완료";
 type ExpenseCategory = "교통" | "식비" | "사무용품";
@@ -32,10 +30,10 @@ const expenses: ExpenseItem[] = [
   { id: "e5", date: "2026-03-10", description: "사무용품 구매 (문구류)", amount: 45000, category: "사무용품", status: "지급완료" },
 ];
 
-const statusStyle: Record<ExpenseStatus, string> = {
-  승인대기: "bg-amber-50 text-amber-600",
-  승인: "bg-blue-50 text-blue-600",
-  지급완료: "bg-green-50 text-green-600",
+const statusBadge: Record<ExpenseStatus, "default" | "success" | "warning" | "danger" | "info"> = {
+  승인대기: "warning",
+  승인: "info",
+  지급완료: "success",
 };
 
 const categoryIcon: Record<ExpenseCategory, typeof Car> = {
@@ -65,47 +63,25 @@ export default function MyExpensesPage() {
   const thisMonthTotal = 350000;
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6">
-      <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-neutral-700" />
-            <h1 className="text-base font-semibold text-neutral-800">
-              내 경비
-            </h1>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-1 rounded-md bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700"
-          >
+        <PageHeader title="내 경비" description="경비 청구 · 내역 조회">
+          <PrimaryButton onClick={() => setShowForm(!showForm)}>
             <Plus className="h-3.5 w-3.5" />
             경비 청구
-          </button>
-        </div>
+          </PrimaryButton>
+        </PageHeader>
 
         {/* Summary */}
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <div className="border border-neutral-200 bg-white p-4">
-            <p className="mb-1 text-xs text-neutral-400">미처리 건수</p>
-            <p className="text-2xl font-bold text-neutral-800">
-              {pendingCount}건
-            </p>
-          </div>
-          <div className="border border-neutral-200 bg-white p-4">
-            <p className="mb-1 text-xs text-neutral-400">이번 달 총 경비</p>
-            <p className="text-2xl font-bold text-neutral-800">
-              {formatKRW(thisMonthTotal)}
-            </p>
-          </div>
+          <StatCard label="미처리 건수" value={`${pendingCount}건`} />
+          <StatCard label="이번 달 총 경비" value={formatKRW(thisMonthTotal)} />
         </div>
 
         {/* Expense Form (expandable) */}
         {showForm && (
-          <div className="mb-6 border border-neutral-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-neutral-700">
-              경비 청구서 작성
-            </h2>
+          <Card className="mb-6" padding={false}><div className="p-4">
+            <SectionTitle title="경비 청구서 작성" />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-neutral-500">
@@ -179,14 +155,12 @@ export default function MyExpensesPage() {
                 청구하기
               </button>
             </div>
-          </div>
+          </div></Card>
         )}
 
         {/* Expense List */}
-        <div className="mb-6 border border-neutral-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-700">
-            경비 내역
-          </h2>
+        <Card className="mb-6" padding={false}><div className="p-4">
+          <SectionTitle title="경비 내역" />
           <div className="space-y-2">
             {expenses.map((exp) => {
               const Icon = categoryIcon[exp.category];
@@ -215,23 +189,17 @@ export default function MyExpensesPage() {
                     <span className="text-xs font-semibold text-neutral-700">
                       {formatKRW(exp.amount)}
                     </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[exp.status]}`}
-                    >
-                      {exp.status}
-                    </span>
+                    <Badge label={exp.status} variant={statusBadge[exp.status]} />
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </div></Card>
 
         {/* Category Totals */}
-        <div className="border border-neutral-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-700">
-            이번 달 카테고리별 합계
-          </h2>
+        <Card padding={false}><div className="p-4">
+          <SectionTitle title="이번 달 카테고리별 합계" />
           <div className="space-y-2">
             {categoryTotals.map((ct) => {
               const Icon = categoryIcon[ct.category];
@@ -259,8 +227,7 @@ export default function MyExpensesPage() {
               );
             })}
           </div>
-        </div>
-      </div>
+        </div></Card>
     </div>
   );
 }

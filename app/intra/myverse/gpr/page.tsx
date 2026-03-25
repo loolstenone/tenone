@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
+import { PageHeader, Card, SectionTitle } from "@/components/intra/IntraUI";
 
 // ── Types ──
 
@@ -384,18 +385,14 @@ export default function MyGPRPage() {
   return (
     <div className="max-w-4xl">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold">내 GPR</h1>
-          <p className="text-sm text-neutral-500 mt-1">목표 현황 · 자기평가 · 상사평가 · GPR 리뷰 ({quarter})</p>
-        </div>
+      <PageHeader title="내 GPR" description={`목표 현황 · 자기평가 · 상사평가 · GPR 리뷰 (${quarter})`}>
         <Link
           href="/intra/erp/gpr"
           className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-700"
         >
           GPR 전체 현황 <ChevronRight className="h-3 w-3" />
         </Link>
-      </div>
+      </PageHeader>
 
       {/* ── GPR Philosophy Banner ── */}
       <div className="mb-5 border border-neutral-200 bg-neutral-50 px-4 py-3">
@@ -415,34 +412,34 @@ export default function MyGPRPage() {
 
       {/* ── Summary Cards ── */}
       <div className={clsx("grid gap-3 mb-5", hasSubordinates ? "grid-cols-4" : "grid-cols-3")}>
-        <div className="border border-neutral-200 bg-white p-3.5">
+        <Card padding={false} className="p-3.5">
           <p className="text-xs text-neutral-400 mb-1">종합 진행률</p>
           <p className="text-xl font-bold">{overallProgress}%</p>
           <ProgressBar value={overallProgress} className="mt-1.5" />
-        </div>
-        <div className="border border-neutral-200 bg-white p-3.5">
+        </Card>
+        <Card padding={false} className="p-3.5">
           <p className="text-xs text-neutral-400 mb-1">현재 등급</p>
           <p className="text-xl font-bold">{grade}</p>
           <p className="text-[11px] text-neutral-400 mt-1">
             {goals.length}개 목표 중 {goals.filter((g) => g.status === "완료").length}개 완료
           </p>
-        </div>
-        <div className="border border-neutral-200 bg-white p-3.5">
+        </Card>
+        <Card padding={false} className="p-3.5">
           <p className="text-xs text-neutral-400 mb-1">자기평가 진행</p>
           <p className="text-xl font-bold">
             {selfEvalDone}/{goals.length}
             <span className="text-xs font-normal text-neutral-400 ml-1">완료</span>
           </p>
           <p className="text-[11px] text-amber-500 mt-1 font-medium">마감 D-{daysLeft}</p>
-        </div>
+        </Card>
         {hasSubordinates && (
-          <div className="border border-neutral-200 bg-white p-3.5">
+          <Card padding={false} className="p-3.5">
             <p className="text-xs text-neutral-400 mb-1">부하 평가</p>
             <p className="text-xl font-bold">
               {subs.filter((s) => s.goals.every((g) => g.mgrWhat)).length}/{subs.length}
             </p>
             <p className="text-[11px] text-neutral-400 mt-1">직속 {subs.length}명</p>
-          </div>
+          </Card>
         )}
       </div>
 
@@ -524,7 +521,7 @@ export default function MyGPRPage() {
               {goals.map((goal) => {
                 const isOpen = expandedGoals.has(goal.id);
                 return (
-                  <div key={goal.id} className="border border-neutral-200 bg-white">
+                  <Card key={goal.id} padding={false}>
                     <button
                       onClick={() => toggleGoal(goal.id)}
                       className="w-full px-4 py-3 flex items-start gap-3 text-left hover:bg-neutral-50 transition-colors"
@@ -589,7 +586,7 @@ export default function MyGPRPage() {
                         </div>
                       </div>
                     )}
-                  </div>
+                  </Card>
                 );
               })}
             </div>
@@ -615,7 +612,7 @@ export default function MyGPRPage() {
 
           {/* Eval per goal */}
           {goals.map((goal) => (
-            <div key={goal.id} className="border border-neutral-200 bg-white">
+            <Card key={goal.id} padding={false}>
               <div className="px-4 py-3 border-b border-neutral-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -687,11 +684,11 @@ export default function MyGPRPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
 
           {/* Overall Self-Reflection */}
-          <div className="border border-neutral-200 bg-white px-4 py-3">
+          <Card padding={false} className="px-4 py-3">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="h-3.5 w-3.5 text-neutral-400" />
               <p className="text-xs font-medium">분기 회고</p>
@@ -706,7 +703,7 @@ export default function MyGPRPage() {
               placeholder="이번 분기 전체를 돌아보며 자신의 성장, 변화, 깨달음을 자유롭게 서술하세요..."
               className="w-full px-3 py-2 text-[11px] border border-neutral-200 rounded resize-none focus:outline-none focus:border-neutral-400"
             />
-          </div>
+          </Card>
 
           <button className="w-full py-2.5 bg-neutral-900 text-white text-xs font-medium rounded hover:bg-neutral-800">
             자기평가 제출
@@ -727,7 +724,7 @@ export default function MyGPRPage() {
             const isExpanded = expandedSub === sub.id;
             const evalDone = sub.goals.every((g) => g.mgrWhat);
             return (
-              <div key={sub.id} className="border border-neutral-200 bg-white">
+              <Card key={sub.id} padding={false}>
                 <button
                   onClick={() => setExpandedSub(isExpanded ? null : sub.id)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-neutral-50 transition-colors"
@@ -786,7 +783,7 @@ export default function MyGPRPage() {
                     </button>
                   </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -834,7 +831,7 @@ export default function MyGPRPage() {
                       )}
                     />
                   </div>
-                  <div className="flex-1 border border-neutral-200 bg-white px-4 py-3">
+                  <Card className="flex-1" padding={false}><div className="px-4 py-3">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs text-neutral-400">{entry.date}</span>
                       <span
@@ -848,7 +845,7 @@ export default function MyGPRPage() {
                     </div>
                     <p className="text-xs text-neutral-500 mb-0.5">{entry.reviewer}</p>
                     <p className="text-xs text-neutral-700">{entry.detail}</p>
-                  </div>
+                  </div></Card>
                 </div>
               ))}
             </div>
