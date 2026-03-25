@@ -52,15 +52,17 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // 제외 경로 체크
+    // 제외 경로 체크 (SmarComm은 /login, /signup도 rewrite 대상)
     const paths = domain.startsWith('smarcomm') ? skipPaths : skipPathsWithAuth;
     if (paths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {
         return NextResponse.next();
     }
 
-    // 도메인 → 내부 프리픽스로 리라이트
+    // 도메인 → 내부 프리픽스로 리라이트 (URL은 그대로 유지)
     const url = request.nextUrl.clone();
     url.pathname = `${prefix}${pathname === '/' ? '' : pathname}`;
+
+    // rewrite: URL 바에는 원래 경로 유지, 내부적으로 프리픽스 경로 렌더링
     return NextResponse.rewrite(url);
 }
 
