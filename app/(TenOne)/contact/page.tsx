@@ -14,6 +14,21 @@ const labelClass = "text-sm font-medium text-neutral-700 block mb-1.5";
 export default function ContactPage() {
     const [activeTab, setActiveTab] = useState<TabType>('partner');
     const { isAuthenticated } = useAuth();
+    const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async (formType: string, form: HTMLFormElement) => {
+        setSubmitting(true);
+        const fd = new FormData(form);
+        const body: Record<string, string> = { formType };
+        fd.forEach((v, k) => { body[k] = v as string; });
+        try {
+            const res = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (res.ok) setSubmitted(true);
+            else alert('제출에 실패했습니다. 다시 시도해주세요.');
+        } catch { alert('네트워크 오류가 발생했습니다.'); }
+        setSubmitting(false);
+    };
 
     return (
         <div className="tn-surface tn-text">
@@ -92,20 +107,29 @@ export default function ContactPage() {
                         </button>
                     </div>
 
+                    {submitted && (
+                        <div className="py-16 text-center">
+                            <CheckCircle className="h-12 w-12 mx-auto mb-4" style={{ color: "var(--tn-accent)" }} />
+                            <h3 className="text-xl font-bold mb-2">제출 완료!</h3>
+                            <p className="tn-text-sub">빠른 시간 내에 연락드리겠습니다.</p>
+                            <button onClick={() => setSubmitted(false)} className="mt-6 text-sm tn-text-sub hover:tn-text underline">다른 문의하기</button>
+                        </div>
+                    )}
+
                     {/* 파트너 신청 */}
-                    {activeTab === 'partner' && (
-                        <form className="space-y-6">
+                    {!submitted && activeTab === 'partner' && (
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('partner', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">Partner with Us</h3>
                                 <p className="text-sm tn-text-sub mt-1">Ten:One™의 파트너가 되어 함께 문제를 해결해요.</p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-5">
-                                <div><label className={labelClass}>이름</label><input type="text" className={inputClass} placeholder="홍길동" /></div>
-                                <div><label className={labelClass}>이메일</label><input type="email" className={inputClass} placeholder="hello@example.com" /></div>
+                                <div><label className={labelClass}>이름</label><input name="name" type="text" required className={inputClass} placeholder="홍길동" /></div>
+                                <div><label className={labelClass}>이메일</label><input name="email" type="email" required className={inputClass} placeholder="hello@example.com" /></div>
                             </div>
                             <div>
                                 <label className={labelClass}>지원 분야</label>
-                                <select className={inputClass}>
+                                <select name="company" className={inputClass}>
                                     <option>기획자 (Planner)</option>
                                     <option>디자이너 (Designer)</option>
                                     <option>개발자 (Developer)</option>
@@ -114,32 +138,32 @@ export default function ContactPage() {
                                     <option>기타 (Other)</option>
                                 </select>
                             </div>
-                            <div><label className={labelClass}>포트폴리오/이력서 링크</label><input type="url" className={inputClass} placeholder="https://..." /></div>
-                            <div><label className={labelClass}>자기소개 및 지원동기</label><textarea rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
-                            <button type="button" className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                <Handshake className="h-4 w-4" /> 파트너 신청하기
+                            <div><label className={labelClass}>포트폴리오/이력서 링크</label><input name="portfolioUrl" type="url" className={inputClass} placeholder="https://..." /></div>
+                            <div><label className={labelClass}>자기소개 및 지원동기</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="간단한 자기소개와 함께하고 싶은 이유를 자유롭게 적어주세요." /></div>
+                            <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
+                                <Handshake className="h-4 w-4" /> {submitting ? '제출 중...' : '파트너 신청하기'}
                             </button>
                         </form>
                     )}
 
                     {/* 프로젝트 의뢰 */}
-                    {activeTab === 'business' && (
-                        <form className="space-y-6">
+                    {!submitted && activeTab === 'business' && (
+                        <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit('business', e.currentTarget); }}>
                             <div className="mb-6">
                                 <h3 className="text-xl font-bold">Business Inquiry</h3>
                                 <p className="text-sm tn-text-sub mt-1">프로젝트 의뢰 및 파트너십 제안을 보내주세요.</p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-5">
-                                <div><label className={labelClass}>담당자명</label><input type="text" className={inputClass} placeholder="홍길동 팀장" /></div>
-                                <div><label className={labelClass}>회사/단체명</label><input type="text" className={inputClass} placeholder="회사명" /></div>
+                                <div><label className={labelClass}>담당자명</label><input name="name" type="text" required className={inputClass} placeholder="홍길동 팀장" /></div>
+                                <div><label className={labelClass}>회사/단체명</label><input name="company" type="text" className={inputClass} placeholder="회사명" /></div>
                             </div>
                             <div className="grid md:grid-cols-2 gap-5">
-                                <div><label className={labelClass}>이메일</label><input type="email" className={inputClass} placeholder="work@company.com" /></div>
-                                <div><label className={labelClass}>연락처</label><input type="tel" className={inputClass} placeholder="010-0000-0000" /></div>
+                                <div><label className={labelClass}>이메일</label><input name="email" type="email" required className={inputClass} placeholder="work@company.com" /></div>
+                                <div><label className={labelClass}>연락처</label><input name="phone" type="tel" className={inputClass} placeholder="010-0000-0000" /></div>
                             </div>
                             <div>
                                 <label className={labelClass}>의뢰 분야</label>
-                                <select className={inputClass}>
+                                <select name="extra" className={inputClass}>
                                     <option>브랜딩/디자인</option>
                                     <option>마케팅/광고</option>
                                     <option>콘텐츠 제작</option>
@@ -147,9 +171,9 @@ export default function ContactPage() {
                                     <option>기타 파트너십</option>
                                 </select>
                             </div>
-                            <div><label className={labelClass}>프로젝트 내용</label><textarea rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
-                            <button type="button" className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                <Briefcase className="h-4 w-4" /> 의뢰하기
+                            <div><label className={labelClass}>프로젝트 내용</label><textarea name="message" rows={5} className={inputClass + " resize-none"} placeholder="프로젝트의 목적, 예산, 일정 등 구체적인 내용을 적어주세요." /></div>
+                            <button type="submit" disabled={submitting} className="w-full py-3.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
+                                <Briefcase className="h-4 w-4" /> {submitting ? '제출 중...' : '의뢰하기'}
                             </button>
                         </form>
                     )}
