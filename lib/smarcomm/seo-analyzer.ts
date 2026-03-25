@@ -60,6 +60,18 @@ export interface PerformanceData {
   si: number;                  // ms (Speed Index)
 }
 
+export interface SubPageResult {
+  url: string;
+  title: string;
+  hasMetaDescription: boolean;
+  hasH1: boolean;
+  textLength: number;
+  imgCount: number;
+  imgWithAlt: number;
+  statusCode: number;
+  issues: string[];
+}
+
 export interface AnalysisResult {
   url: string;
   faviconUrl: string;
@@ -77,11 +89,68 @@ export interface AnalysisResult {
   topIssues: { severity: 'high' | 'medium' | 'low'; title: string; description: string; action: string }[];
   deep?: DeepAnalysis;
   performance?: PerformanceData;
+  subPages?: SubPageResult[];
+  pagesAnalyzed?: number;
 }
 
 export interface AnalyzeOptions {
   pageSpeedApiKey?: string;
   anthropicApiKey?: string;
+}
+
+// --- 다중 페이지 크롤링 ---
+function extractInternalLinks(html: string, baseUrl: string): string[] {
+  const links: Set<string> = new Set();
+  const origin = new URL(baseUrl).origin;
+  const regex = /<a[^>]*href=["']([^"'#]*?)["']/gi;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    let href = match[1].trim();
+    if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+    try {
+      const resolved = new URL(href, baseUrl).toString();
+      if (resolved.startsWith(origin) && !resolved.match(/\.(jpg|jpeg|png|gif|svg|pdf|zip|css|js|ico|woff|woff2|ttf|eot)(\?|$)/i)) {
+        // 중복/앵커/쿼리 제거
+        const clean = resolved.split('?')[0].split('#')[0].replace(/\/$/, '');
+        if (clean !== baseUrl.replace(/\/$/, '')) links.add(clean);
+      }
+    } catch {}
+  }
+  return Array.from(links).slice(0, 10); // 최대 10개 링크 추출
+}
+
+async function analyzeSubPage(url: string): Promise<SubPageResult | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SmarComm-Scanner/1.0)', 'Accept': 'text/html,*/*' },
+      redirect: 'follow',
+    });
+    clearTimeout(timer);
+    if (!res.ok) return { url, title: '', hasMetaDescription: false, hasH1: false, textLength: 0, imgCount: 0, imgWithAlt: 0, statusCode: res.status, issues: [`HTTP ${res.status}`] };
+
+    const html = await res.text();
+    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const hasMetaDesc = /<meta[^>]*name=["']description["'][^>]*content=["'][^"']+["']/i.test(html);
+    const hasH1 = /<h1[^>]*>/i.test(html);
+    const textOnly = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    const imgCount = (html.match(/<img[^>]*>/gi) || []).length;
+    const imgWithAlt = (html.match(/<img[^>]*alt=["'][^"']+["']/gi) || []).length;
+
+    const issues: string[] = [];
+    if (!title) issues.push('타이틀 없음');
+    if (!hasMetaDesc) issues.push('메타 설명 없음');
+    if (!hasH1) issues.push('H1 없음');
+    if (textOnly.length < 300) issues.push('콘텐츠 부족');
+    if (imgCount > 0 && imgWithAlt < imgCount / 2) issues.push('이미지 ALT 부족');
+
+    return { url, title, hasMetaDescription: hasMetaDesc, hasH1, textLength: textOnly.length, imgCount, imgWithAlt, statusCode: res.status, issues };
+  } catch {
+    return null;
+  }
 }
 
 function getGrade(score: number): AnalysisResult['grade'] {
@@ -699,6 +768,21 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
     },
   };
 
+  // === 다중 페이지 크롤링 (최대 5개 서브페이지) ===
+  const internalLinks = extractInternalLinks(html, normalizedUrl);
+  const subPagePromises = internalLinks.slice(0, 5).map(link => analyzeSubPage(link));
+  const subPageResults = (await Promise.all(subPagePromises)).filter((r): r is SubPageResult => r !== null);
+
+  // 서브페이지 이슈를 콘텐츠 갭에 반영
+  const pagesWithoutMeta = subPageResults.filter(p => !p.hasMetaDescription).length;
+  const pagesWithoutH1 = subPageResults.filter(p => !p.hasH1).length;
+  if (subPageResults.length > 0 && pagesWithoutMeta > subPageResults.length / 2) {
+    contentGaps.push({ topic: '서브페이지 메타 설명', reason: `분석한 ${subPageResults.length}개 페이지 중 ${pagesWithoutMeta}개에 메타 설명 없음`, priority: 'medium', suggestedFormat: '각 페이지별 고유한 70~160자 메타 설명' });
+  }
+  if (subPageResults.length > 0 && pagesWithoutH1 > subPageResults.length / 2) {
+    contentGaps.push({ topic: '서브페이지 H1 태그', reason: `분석한 ${subPageResults.length}개 페이지 중 ${pagesWithoutH1}개에 H1 없음`, priority: 'medium', suggestedFormat: '각 페이지별 키워드 포함 H1 태그 1개' });
+  }
+
   return {
     url: normalizedUrl,
     faviconUrl,
@@ -716,5 +800,7 @@ export async function analyzeUrl(url: string, options?: AnalyzeOptions): Promise
     topIssues,
     deep,
     performance: pageSpeedData || undefined,
+    subPages: subPageResults.length > 0 ? subPageResults : undefined,
+    pagesAnalyzed: 1 + subPageResults.length,
   };
 }

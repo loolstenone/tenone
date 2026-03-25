@@ -247,6 +247,15 @@ function ReportContent({ scanId }: { scanId: string }) {
               </span>
               <p className="mt-2 text-sm text-text-sub">{grade.message}</p>
             </div>
+            {/* 점수 산출 근거 */}
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="text-[11px] text-text-muted text-center">
+                종합 = {scan.performanceScore !== undefined ? 'SEO 40% + GEO 40% + Performance 20%' : 'SEO 50% + GEO 50%'}
+                {scan.performanceScore !== undefined
+                  ? ` (Performance: ${scan.pageSpeedData ? 'Google PageSpeed Insights' : '서버 응답시간 기반'})`
+                  : ''}
+              </p>
+            </div>
           </div>
 
           {/* Top Issues */}
@@ -267,6 +276,41 @@ function ReportContent({ scanId }: { scanId: string }) {
               })}
             </div>
           </div>
+
+          {/* 서브페이지 분석 결과 */}
+          {scan.subPages && scan.subPages.length > 0 && (
+            <div className="mb-8">
+              <h2 className="mb-1 text-[15px] font-bold text-text">사이트 전체 페이지 분석</h2>
+              <p className="mb-3 text-xs text-text-muted">홈페이지 포함 총 {scan.pagesAnalyzed || 1}개 페이지 분석</p>
+              <div className="rounded-2xl border border-border bg-white overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-surface text-xs text-text-muted">
+                      <th className="px-4 py-2 text-left font-medium">페이지</th>
+                      <th className="w-20 px-3 py-2 text-center font-medium">상태</th>
+                      <th className="px-4 py-2 text-left font-medium">이슈</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scan.subPages.map((page: any, i: number) => (
+                      <tr key={i} className="border-b border-border last:border-0">
+                        <td className="px-4 py-2.5">
+                          <div className="text-xs font-medium text-text truncate max-w-[200px]">{page.title || '(제목 없음)'}</div>
+                          <div className="text-[10px] text-text-muted truncate max-w-[200px]">{page.url.replace(/^https?:\/\/[^/]+/, '')}</div>
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          {page.issues.length === 0
+                            ? <span className="text-[10px] font-semibold text-success">양호</span>
+                            : <span className="text-[10px] font-semibold text-warning">{page.issues.length}건</span>}
+                        </td>
+                        <td className="px-4 py-2.5 text-[11px] text-text-sub break-words">{page.issues.join(', ') || '이슈 없음'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Radar + 분석 요약 (나란히) + 브랜드 성격 */}
           {scan.deep && (() => {
@@ -336,7 +380,8 @@ function ReportContent({ scanId }: { scanId: string }) {
                     <div className="lg:col-span-2">
                       <div className="text-5xl mb-3">{personality.emoji}</div>
                       <div className="text-2xl font-bold text-text mb-1">{personality.name}</div>
-                      <div className="text-xs font-mono text-text-muted tracking-widest mb-3">{personality.type}</div>
+                      {'subtitle' in personality && <div className="text-sm text-text-sub mb-2">{(personality as any).subtitle}</div>}
+                      <div className="text-[10px] font-mono text-text-muted tracking-widest mb-3">{personality.type}</div>
                       <p className="text-sm leading-relaxed text-text-sub">{personality.description}</p>
                     </div>
 
@@ -364,19 +409,9 @@ function ReportContent({ scanId }: { scanId: string }) {
                           </div>
                         </div>
                       </div>
-                      <div className="space-y-3 border-t border-border pt-4">
-                        <div>
-                          <h4 className="text-xs font-semibold text-text mb-1">소비자와의 관계</h4>
-                          <p className="text-sm text-text-sub">{personality.relationship}</p>
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-text mb-1">커뮤니케이션 방식</h4>
-                          <p className="text-sm text-text-sub">{personality.communication}</p>
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-text mb-1">추천 개선 방향</h4>
-                          <p className="text-sm text-text-sub">{personality.recommendation}</p>
-                        </div>
+                      <div className="border-t border-border pt-4">
+                        <h4 className="text-xs font-semibold text-text mb-1">추천 개선 방향</h4>
+                        <p className="text-sm text-text-sub">{personality.recommendation}</p>
                       </div>
                     </div>
                   </div>
