@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, FileText, Check, Clock, X as XIcon } from "lucide-react";
+import { Plus, Search, FileText } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
 import { PageHeader, Card, StatCard, Badge, Spinner } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";

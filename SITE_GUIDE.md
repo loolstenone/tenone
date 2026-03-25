@@ -4,153 +4,252 @@
 
 ### 일괄 적용 (Global) — `lib/site-config.ts > globalConfig`
 
-한 곳을 바꾸면 **모든 사이트**에 반영되는 항목:
-
 | 항목 | 설정 위치 | 예시 |
 |------|----------|------|
-| Footer copyright 형식 | `globalConfig.copyrightTemplate` | `© {name}. All rights reserved. Powered by Ten:One™ Universe.` |
-| 메뉴에 "홈" 포함 여부 | `globalConfig.showHomeInNav` | `false` (로고 클릭으로 대체) |
+| Footer copyright 형식 | `globalConfig.copyrightTemplate` | `© {name}. All rights reserved.` |
 | 로그인/회원가입 버튼 | `globalConfig.showAuthButtons` | `true` |
-| Universe 배지 표시 | `globalConfig.showUniverseBadge` | `true` (TenOne 제외) |
-| Universe 도메인 목록 | `globalConfig.universeLinks` | 푸터에 표시되는 브랜드 URL 목록 |
-| middleware 도메인 분기 | `middleware.ts` | 새 사이트 추가 시 여기에 도메인 등록 |
-| Vercel 도메인 | Vercel Dashboard | 새 도메인 추가 시 Vercel에도 등록 |
+| Universe 배지 표시 | `globalConfig.showUniverseBadge` | `true` |
+| middleware 도메인 분기 | `middleware.ts` | 새 사이트 추가 시 등록 |
+| Vercel 도메인 | Vercel Dashboard | 새 도메인 추가 시 등록 |
 
 ### 사이트별 적용 (Per-site) — `lib/site-config.ts > siteConfigs.{사이트}`
-
-사이트마다 개별 설정하는 항목:
 
 | 항목 | 필드명 | 예시 |
 |------|--------|------|
 | 사이트명 | `name` | `MAD League` |
 | 로고 | `logoText`, `logoStyle` | `MAD LEAGUE`, `badge` |
-| 브랜드 색상 | `colors.*` | primary, headerBg, footerBg 등 |
-| 메뉴 구성 | `nav[]` | 사이트별 네비게이션 항목 |
-| 푸터 링크 | `footerLinks[]` | 사이트별 푸터 퀵링크 |
-| 메타데이터 | `meta.*` | title, description, ogImage, keywords |
-| 연락처 | `contact.*` | email, kakao, instagram, youtube |
-| 한 줄 설명 | `tagline` | 푸터에 표시되는 설명 |
-| Favicon | `faviconUrl` | `/brands/{사이트}/favicon.png` |
+| 브랜드 색상 | `colors.*` | primary, headerBg, footerBg |
+| 메뉴 구성 | `nav[]` | 사이트별 네비게이션 |
+| 푸터 링크 | `footerLinks[]` | 사이트별 푸터 |
+| 메타데이터 | `meta.*` | title, description, ogImage |
 | 도메인 | `domain` | `madleague.net` |
 | 경로 프리픽스 | `homePath` | `/ml` |
 
 ---
 
-## 2. 새 사이트 추가 체크리스트
+## 2. 새 서비스 런칭 절차
 
-새 브랜드 사이트를 추가할 때 순서:
+### Phase 1: 기획 확정
 
-### 코드 작업
-- [ ] `lib/site-config.ts` — `SiteIdentifier`에 ID 추가
-- [ ] `lib/site-config.ts` — `siteConfigs`에 설정 추가 (색상, 메뉴, meta 등)
-- [ ] `lib/site-config.ts` — `domainMap`에 도메인 매핑 추가
-- [ ] `middleware.ts` — `domainPrefixMap`에 도메인 → 프리픽스 추가
-- [ ] `app/(사이트명)/` — 라우트 그룹 + layout.tsx 생성
-- [ ] `app/(사이트명)/{프리픽스}/` — 페이지들 생성
-- [ ] `components/{사이트명}Header.tsx` — 헤더 (siteConfig 기반)
-- [ ] `components/{사이트명}Footer.tsx` — 푸터 (siteConfig 기반)
-- [ ] `public/brands/{사이트명}/` — favicon, og-image 등 에셋
+- [ ] 서비스명, 도메인, 프리픽스 확정
+- [ ] 브랜드 색상, 로고 디자인
+- [ ] 메뉴 구조 (nav 항목) 확정
+- [ ] 타겟 사용자 및 가입 유형 결정 (Member/Crew/Alliance 등)
+- [ ] 게시판 구성 결정 (board_configs에 등록할 게시판)
 
-### 인프라 작업
-- [ ] Vercel Dashboard → Domains → 도메인 추가 (tenone 프로젝트에)
-- [ ] 도메인 DNS 설정 — A 레코드 또는 CNAME → Vercel
+### Phase 2: 코드 작업
 
-### 인증 설정 (소셜 로그인)
-- [ ] Supabase → URL Configuration → Redirect URLs에 `https://{도메인}/auth/callback` 추가
-- [ ] 카카오 Developers → 앱 → 플랫폼 키 → REST API Key 수정 → Web 사이트 도메인에 `https://{도메인}` 추가
-- [ ] Google Cloud Console → OAuth 2.0 → 승인된 리디렉션 URI에 `https://{도메인}/auth/callback` 추가
+```
+1. lib/site-config.ts
+   - SiteIdentifier에 ID 추가
+   - siteConfigs에 설정 추가
+   - domainMap에 도메인 매핑
 
-### 최종 확인
-- [ ] 빌드 확인 (`npm run build`)
-- [ ] 라이브 접속 확인
+2. middleware.ts
+   - domainPrefixMap에 도메인 → 프리픽스 추가
+
+3. lib/auth-transfer.ts
+   - ALLOWED_RETURN_DOMAINS에 도메인 추가 (소셜 로그인용)
+
+4. app/(사이트명)/ 라우트 그룹 생성
+   - layout.tsx (헤더/푸터 래핑)
+   - {프리픽스}/page.tsx (홈)
+   - {프리픽스}/about/page.tsx 등 페이지들
+   - {프리픽스}/my/page.tsx (마이페이지)
+
+5. components/
+   - {사이트명}Header.tsx (auth + /my 링크 포함)
+   - {사이트명}Footer.tsx
+
+6. public/brands/{사이트명}/
+   - favicon.png
+   - og-image.png
+   - logo.svg (있으면)
+```
+
+### Phase 3: 인프라 작업
+
+```
+1. 도메인 구매 (가비아 등)
+
+2. DNS 설정
+   - A @ 76.76.21.21
+   - CNAME www cname.vercel-dns.com.
+
+3. Vercel Dashboard → Settings → Domains
+   - {도메인} 추가
+   - www.{도메인} 추가
+   - SSL 인증서 자동 생성 확인
+
+4. Supabase → Authentication → URL Configuration
+   - Redirect URLs에 https://{도메인}/auth/callback 추가
+```
+
+### Phase 4: 데이터 설정
+
+```
+1. Supabase SQL Editor — board_configs 등록
+   INSERT INTO board_configs (site, slug, name, description, categories, settings)
+   VALUES ('{사이트ID}', '{게시판슬러그}', '{게시판명}', '{설명}', '["카테1","카테2"]', '{}');
+
+2. seed 데이터 (선택)
+   - 초기 게시글, 공지사항 등
+
+3. 가입 유형 설정 (types/auth.ts)
+   - origin_site → 초기 역할 매핑 확인
+```
+
+### Phase 5: 검증
+
+- [ ] `npm run build` 성공
+- [ ] git push → Vercel 자동 배포
+- [ ] 라이브 접속 확인 (도메인)
 - [ ] 소셜 로그인 테스트 (Google + 카카오)
 - [ ] 이메일 가입 테스트
+- [ ] 게시판 표시 확인
+- [ ] 마이페이지 (/my) 접속 확인
+- [ ] 모바일 반응형 확인
 
 ---
 
-## 3. 회원 관리 체계
+## 3. 회원 등급 체계
 
-### 회원 유형과 사이트 접근
+### 내부
 
-| 가입 경로 | 계정 유형 | 접근 가능 사이트 |
-|-----------|----------|----------------|
-| TenOne 직접 가입 | `member` | TenOne + 모든 사이트 퍼블릭 |
-| MADLeague에서 가입 | `crew` (madleague) | MADLeague + Intra 기본 |
-| YouInOne에서 가입 | `member` / `crew` | YouInOne + Intra 기본 |
-| RooK에서 가입 | `member` | RooK + 퍼블릭 |
-| SmarComm에서 가입 | `member` | SmarComm (독자 대시보드) |
-| HeRo에서 가입 | `member` | HeRo + Intra 기본 |
+| 등급 | 설명 |
+|------|------|
+| Staff | 직원, 직접 선발/입력, 모든 기능 접근 |
 
-### 핵심 원칙
-1. **통합 계정** — 어디서 가입하든 하나의 Supabase 계정. 한번 가입하면 모든 사이트 이용 가능.
-2. **가입 출처 추적** — `signupSource` 필드로 어느 사이트에서 가입했는지 기록.
-3. **사이트별 프로필** — 기본 프로필은 공유, 사이트별 추가 정보는 별도 관리.
-4. **권한은 accountType 기반** — 가입 출처와 무관하게 `staff/partner/crew/member` 구분.
-5. **Intra 접근** — `member`도 HeRo, Education, Wiki 등 `public` 레벨 기능 사용 가능.
+### 외부 (높음 → 낮음)
 
-### 회원 데이터 구조
+| 등급 | 설명 | 인트라 접근 |
+|------|------|-----------|
+| Partner | 텐원의 세계관과 뜻을 같이 하는 사람 | 6개 모듈 |
+| Alliance | 지역 거점 멘토 | 4개 모듈 |
+| Crew | 프로젝트에 참여하고 싶은 사람 | 6개 모듈 |
+| MADLeaguer | MAD League 동아리에서 가입 | 6개 모듈 |
+| Member | 각 사이트에서 가입한 사람 | /my만 |
+
+### 가입 경로별 초기 역할
+
+| 가입 사이트 | 초기 역할 |
+|------------|----------|
+| tenone.biz | Member |
+| badak.biz | Member |
+| madleague.net | MADLeaguer |
+| madleap 동아리 | MADLeaguer |
+| youinone.com | Alliance |
+| changeup.company | Crew |
+| smarcomm.biz | Member |
+| hero.ne.kr | Member |
+
+### 승급 경로
 
 ```
-User (Supabase Auth)
-├── id, email, password (인증)
-├── accountType: staff | partner | crew | member
-├── role: admin | manager | member
-├── signupSource: tenone | madleague | youinone | rook | smarcomm | hero
-├── permissions: Permission[] (개별 부여)
-│
-├── Profile (공통)
-│   ├── name, phone, bio, avatar
-│   └── tags, interests
-│
-├── SiteProfile (사이트별)
-│   ├── madleague: { clubId, generation, clubRole }
-│   ├── rook: { artistName, portfolio }
-│   └── smarcomm: { company, plan }
-│
-└── Activity (활동 기록)
-    ├── points (포인트)
-    ├── projects (참여 프로젝트)
-    └── education (교육 이수)
+Member → Crew → Partner → Staff
+MADLeaguer → Crew → Partner
+Alliance → Partner
 ```
 
 ---
 
-## 4. 파일 구조 맵
+## 4. 권한 매트릭스
 
 ```
-lib/
-  site-config.ts          ← 일괄/사이트별 설정 (이 파일 하나로 관리)
-
-middleware.ts              ← 도메인 → 프리픽스 라우팅
-
-app/
-  (TenOne)/               ← tenone.biz
-  (MADLeague)/ml/          ← madleague.net
-  (YouInOne)/yi/           ← youinone.com
-  (RooK)/rk/               ← rook.co.kr
-  (SmarComm)/sc/           ← smarcomm.co.kr
-  (HeRo)/hr/               ← hero.ne.kr
-
-components/
-  {사이트}Header.tsx       ← 사이트별 헤더 (siteConfig.nav 기반)
-  {사이트}Footer.tsx       ← 사이트별 푸터 (siteConfig.footerLinks 기반)
-  UniverseBadge.tsx        ← 공통 배지 컴포넌트
-
-public/brands/{사이트}/    ← 사이트별 에셋 (favicon, og-image)
+              Staff  Partner  Alliance  Crew  MADLeaguer  Member
+Myverse        ✅     ✅       ✅       ✅      ✅         ❌
+Townity        ✅     ✅       ✅       ✅      ✅         ❌
+Project        ✅     ✅(리드)  ❌       ✅(멤버) ❌         ❌
+HeRo           ✅     ✅       ✅       ✅      ✅         ❌
+Evo School     ✅     ✅       ✅       ✅      ✅         ❌
+Wiki           ✅     ✅       ✅       ✅      ✅         ❌
+ERP            ✅     ❌       ❌       ❌      ❌         ❌
+Vridge         ✅     ❌       ❌       ❌      ❌         ❌
+SmarComm       ✅     ❌       ❌       ❌      ❌         ❌
+BUMS           ✅     ❌       ❌       ❌      ❌         ❌
+각 사이트 /my   ✅     ✅       ✅       ✅      ✅         ✅
 ```
 
 ---
 
-## 5. 수정 가이드 — "이걸 바꾸려면 어디를?"
+## 5. 현재 사이트 목록
 
-| 바꾸고 싶은 것 | 일괄/사이트별 | 수정 위치 |
-|--------------|------------|----------|
-| 푸터 copyright 문구 | 일괄 | `globalConfig.copyrightTemplate` |
-| 메뉴에 홈 추가/제거 | 일괄 | `globalConfig.showHomeInNav` |
-| Universe 도메인 목록 | 일괄 | `globalConfig.universeLinks` |
-| 특정 사이트 메뉴 변경 | 사이트별 | `siteConfigs.{사이트}.nav` |
-| 특정 사이트 색상 변경 | 사이트별 | `siteConfigs.{사이트}.colors` |
-| 특정 사이트 SEO 변경 | 사이트별 | `siteConfigs.{사이트}.meta` |
-| 새 도메인 추가 | 사이트별 | `middleware.ts` + `domainMap` + Vercel |
-| 회원 가입 양식 변경 | 사이트별 | `app/signup/page.tsx` (가입 출처별 분기) |
-| 권한 체계 변경 | 일괄 | `types/auth.ts` + `lib/auth-context.tsx` |
+| 사이트 | 도메인 | 프리픽스 | 상태 |
+|--------|--------|---------|------|
+| Ten:One™ | tenone.biz | / | 운영중 |
+| MAD League | madleague.net | /ml | 운영중 |
+| YouInOne | youinone.com | /yi | 운영중 |
+| RooK | rook.co.kr | /rk | 운영중 |
+| Badak | badak.biz | /bk | 운영중 |
+| SmarComm | smarcomm.biz | /sc | 운영중 |
+| HeRo | hero.ne.kr | /hr | 운영중 |
+| 0gamja | 0gamja.com | /0g | 운영중 |
+| Seoul/360° | seoul360.net | /s360 | 운영중 |
+| FWN | fwn.co.kr | /fw | 운영중 |
+| MADLeap | madleap.tenone.biz | /mlp | 서브도메인 |
+| LUKI | luki.tenone.biz | /lk | 서브도메인 |
+| MoNTZ | montz.tenone.biz | /mtz | 서브도메인 |
+| 문래지앙 | mullaesian.tenone.biz | /mls | 서브도메인 |
+| Trend Hunter | trendhunter.tenone.biz | /th | 서브도메인 |
+| ChangeUp | changeup.tenone.biz | /cu | 서브도메인 |
+| Domo | domo.tenone.biz | /dm | 서브도메인 |
+| JAKKA | jakka.tenone.biz | /jk | 서브도메인 |
+| Townity | townity.tenone.biz | /tw | 서브도메인 |
+| NatureBox | naturebox.tenone.biz | /nb | 서브도메인 |
+| My Universe | myverse.tenone.biz | /mv | 서브도메인 |
+| Planners | planners.tenone.biz | /pln | 서브도메인 |
+
+---
+
+## 6. DB 현황
+
+### Supabase 테이블
+
+| 테이블 | 용도 | 데이터 |
+|--------|------|--------|
+| members | 통합 회원 | 1건 |
+| posts | 통합 게시글 | 50+건 |
+| comments | 댓글 | 0건 |
+| board_configs | 게시판 설정 | 8건 |
+| likes/bookmarks | 좋아요/북마크 | 0건 |
+| projects | 프로젝트 | 8건 |
+| approvals | 결재 | 0건 (테이블 생성) |
+| expenses | 경비 | 0건 (테이블 생성) |
+| gpr_goals | GPR 목표 | 0건 (테이블 생성) |
+| attendance | 근태 | 0건 (테이블 생성) |
+| payroll | 급여 | 0건 (테이블 생성) |
+| biz_plans | 사업계획 | 0건 (테이블 생성) |
+| hit_results | HIT 검사 결과 | 0건 |
+| career_profiles | 커리어 프로필 | 0건 |
+| resumes | 이력서 | 0건 |
+| bums_sites | BUMS 사이트 | 6건 |
+| bums_boards | BUMS 게시판 | 9건 |
+| bums_posts | BUMS 게시글 | 0건 (legacy) |
+
+### CRUD 레이어
+
+| 파일 | 대상 |
+|------|------|
+| lib/supabase/board.ts | posts, board_configs, comments, likes, bookmarks |
+| lib/supabase/members.ts | members |
+| lib/supabase/erp.ts | approvals, expenses, gpr_goals, attendance, payroll, biz_plans, staff, people |
+| lib/supabase/projects.ts | projects |
+| lib/supabase/education.ts | 교육 과정 |
+| lib/supabase/hero.ts | HIT, career, resumes |
+| lib/supabase/wiki.ts | 라이브러리 |
+| lib/supabase/townity.ts | Townity (legacy) |
+
+---
+
+## 7. 수정 가이드
+
+| 바꾸고 싶은 것 | 수정 위치 |
+|--------------|----------|
+| 사이트 메뉴 변경 | `siteConfigs.{사이트}.nav` |
+| 사이트 색상 변경 | `siteConfigs.{사이트}.colors` |
+| SEO 메타 변경 | `siteConfigs.{사이트}.meta` |
+| 새 도메인 추가 | `middleware.ts` + `auth-transfer.ts` + `site-config.ts` + Vercel |
+| 회원 유형 추가 | `types/auth.ts` + Supabase ENUM |
+| 게시판 추가 | `board_configs` INSERT + 페이지에 BoardPage 컴포넌트 |
+| ERP 기능 추가 | `lib/supabase/erp.ts` + 페이지 수정 |
+| 인트라 메뉴 변경 | `components/IntraSidebar.tsx` |

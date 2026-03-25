@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  CalendarCheck, Clock, Users, AlertTriangle, Search,
-  CheckCircle2, ChevronDown, ChevronUp, Filter, Palmtree, UserCheck,
+  Users, AlertTriangle, Search,
+  CheckCircle2, Palmtree,
 } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";

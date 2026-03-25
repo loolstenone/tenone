@@ -26,7 +26,7 @@ export default function SmarCommHeader() {
 
   const handleLogout = () => {
     scLogout();
-    window.location.href = '/sc';
+    window.location.href = '/';
   };
 
   const initial = user?.email?.charAt(0).toUpperCase() || '?';
@@ -34,24 +34,24 @@ export default function SmarCommHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link href="/sc" className="flex items-center text-xl tracking-[-0.03em]">
+        <Link href="/" className="flex items-center text-xl tracking-[-0.03em]">
           <span className="font-light text-text">Smar</span>
           <span className="font-semibold text-text">Comm</span>
           <span className="font-semibold text-text">.</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/sc#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
+          <Link href="/#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
             서비스
           </Link>
-          <Link href="/sc/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
+          <Link href="/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
             블로그
           </Link>
-          <Link href="/sc/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
+          <Link href="/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
             요금제
           </Link>
           <Link
-            href={user ? '/sc/dashboard' : '/sc'}
+            href={user ? '/dashboard' : '/'}
             className="text-[13px] font-medium text-text-sub transition-colors hover:text-text"
           >
             워크스페이스
@@ -77,14 +77,14 @@ export default function SmarCommHeader() {
                     <div className="text-xs text-text-muted">Free 플랜</div>
                   </div>
                   <Link
-                    href="/sc/dashboard"
+                    href="/dashboard"
                     className="block px-4 py-2.5 text-sm text-text-sub hover:bg-surface hover:text-text"
                     onClick={() => setProfileOpen(false)}
                   >
                     워크스페이스
                   </Link>
                   <Link
-                    href="/sc/dashboard/profile"
+                    href="/dashboard/profile"
                     className="block px-4 py-2.5 text-sm text-text-sub hover:bg-surface hover:text-text"
                     onClick={() => setProfileOpen(false)}
                   >
@@ -121,10 +121,10 @@ export default function SmarCommHeader() {
       {menuOpen && (
         <div className="border-t border-border bg-white px-5 py-4 md:hidden">
           <nav className="flex flex-col gap-3">
-            <Link href="/sc#process" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>서비스</Link>
-            <Link href="/sc/blog" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>블로그</Link>
-            <Link href="/sc/pricing" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>요금제</Link>
-            <Link href={user ? '/sc/dashboard' : '/sc'} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>워크스페이스</Link>
+            <Link href="/#process" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>서비스</Link>
+            <Link href="/blog" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>블로그</Link>
+            <Link href="/pricing" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>요금제</Link>
+            <Link href={user ? '/dashboard' : '/'} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>워크스페이스</Link>
             {user ? (
               <>
                 <div className="flex items-center gap-2 border-t border-border pt-3">
@@ -134,7 +134,7 @@ export default function SmarCommHeader() {
                     <div className="text-xs text-text-muted">Free 플랜</div>
                   </div>
                 </div>
-                <Link href="/sc/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
+                <Link href="/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
                 <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-text-muted">
                   <LogOut size={14} /> 로그아웃
                 </button>
