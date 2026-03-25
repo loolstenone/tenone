@@ -1,6 +1,6 @@
 "use client";
 
-import { useBums } from "@/lib/bums-context";
+import { useState, useEffect } from "react";
 import { Users, Search, Lightbulb, Presentation } from "lucide-react";
 
 const steps = [
@@ -11,11 +11,11 @@ const steps = [
 ];
 
 export default function PtPage() {
-    const { getPostsByBoard } = useBums();
+    const [galleryPosts, setGalleryPosts] = useState<any[]>([]);
 
-    const galleryPosts = getPostsByBoard("board-mad-gallery")
-        .filter((p) => p.status === "published")
-        .slice(0, 6);
+    useEffect(() => {
+        fetch('/api/board/posts?site=madleague&board=madzine&limit=6&status=published').then(r => r.json()).then(d => setGalleryPosts(d.posts || [])).catch(() => {});
+    }, []);
 
     return (
         <div>

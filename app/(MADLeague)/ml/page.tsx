@@ -1,21 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useBums } from "@/lib/bums-context";
 import { ArrowRight, Target, Rocket, Award, ChevronRight, HelpCircle } from "lucide-react";
 
 export default function MadLeagueHomePage() {
-    const { getPostsByBoard } = useBums();
+    const [notices, setNotices] = useState<any[]>([]);
+    const [gallery, setGallery] = useState<any[]>([]);
+    const [faqs, setFaqs] = useState<any[]>([]);
 
-    const notices = getPostsByBoard("board-mad-notice")
-        .filter((p) => p.status === "published")
-        .slice(0, 3);
-    const gallery = getPostsByBoard("board-mad-gallery")
-        .filter((p) => p.status === "published")
-        .slice(0, 4);
-    const faqs = getPostsByBoard("board-mad-faq")
-        .filter((p) => p.status === "published")
-        .slice(0, 3);
+    useEffect(() => {
+        fetch('/api/board/posts?site=madleague&board=notice&limit=3&status=published').then(r => r.json()).then(d => setNotices(d.posts || [])).catch(() => {});
+        fetch('/api/board/posts?site=madleague&board=madzine&limit=4&status=published').then(r => r.json()).then(d => setGallery(d.posts || [])).catch(() => {});
+        fetch('/api/board/posts?site=madleague&board=faq&limit=3&status=published').then(r => r.json()).then(d => setFaqs(d.posts || [])).catch(() => {});
+    }, []);
 
     return (
         <div>

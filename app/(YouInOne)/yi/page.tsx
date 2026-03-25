@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Lightbulb, Target, Users, ChevronRight } from "lucide-react";
-import { useBums } from "@/lib/bums-context";
+import { useState as useStateYi, useEffect as useEffectYi } from "react";
 
 const typedTexts = [
     "사회 문제를 해결합니다",
@@ -47,14 +47,13 @@ function useTypedText(texts: string[], speed = 80, pause = 2000) {
 
 export default function YouInOneHomePage() {
     const typed = useTypedText(typedTexts);
-    const { getPostsByBoard } = useBums();
+    const [portfolios, setPortfolios] = useStateYi<any[]>([]);
+    const [notices, setNotices] = useStateYi<any[]>([]);
 
-    const portfolios = getPostsByBoard("board-yio-portfolio")
-        .filter((p) => p.status === "published")
-        .slice(0, 3);
-    const notices = getPostsByBoard("board-yio-notice")
-        .filter((p) => p.status === "published")
-        .slice(0, 3);
+    useEffectYi(() => {
+        fetch('/api/board/posts?site=youinone&board=portfolio&limit=3&status=published').then(r => r.json()).then(d => setPortfolios(d.posts || [])).catch(() => {});
+        fetch('/api/board/posts?site=youinone&board=notice&limit=3&status=published').then(r => r.json()).then(d => setNotices(d.posts || [])).catch(() => {});
+    }, []);
 
     return (
         <div>
