@@ -19,7 +19,8 @@ const publicNav = [
         name: "About", href: "/about",
         sub: [
             { name: "Philosophy", href: "/about?tab=philosophy" },
-            { name: "Universe", href: "/about?tab=universe" },
+            { name: "Universe", href: "/universe" },
+            { name: "Brands", href: "/brands" },
             { name: "History", href: "/about?tab=history" },
         ]
     },
