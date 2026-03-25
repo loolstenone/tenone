@@ -31,8 +31,8 @@ function SmarCommLoginForm() {
         if (u) { window.location.replace('/dashboard'); return; }
 
         const sb = createClient();
-        sb.auth.getSession().then(({ data }) => {
-            if (data?.session?.user) {
+        sb.auth.getUser().then(({ data: { user: sbUser } }) => {
+            if (sbUser) {
                 window.location.replace('/dashboard');
             } else {
                 setChecking(false);

@@ -18,11 +18,11 @@ export default function SmarCommHeader() {
     // SmarComm Mock auth 체크
     const u = getUser();
     if (u) { setUser(u); } else {
-      // Supabase 세션 체크 (소셜 로그인 대응)
+      // Supabase 세션 체크 (소셜 로그인 대응 — getUser로 서버 검증)
       const sb = createClient();
-      sb.auth.getSession().then(({ data }) => {
-        if (data?.session?.user) {
-          setUser({ email: data.session.user.email || '' });
+      sb.auth.getUser().then(({ data: { user: sbUser } }) => {
+        if (sbUser) {
+          setUser({ email: sbUser.email || '' });
         }
       }).catch(() => {});
     }

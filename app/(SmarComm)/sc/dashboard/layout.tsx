@@ -34,17 +34,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return;
       }
 
-      // 2) Supabase 세션 체크 (소셜 로그인 / 이메일 로그인 대응)
+      // 2) Supabase 세션 체크 (getUser로 서버 검증 — 리프레시에서도 유지)
       try {
         const sb = createClient();
-        const { data } = await sb.auth.getSession();
+        // getUser()는 서버에 토큰을 검증하므로 리프레시에서도 안정적
+        const { data: { user: sbUser } } = await sb.auth.getUser();
         if (cancelled) return;
 
-        if (data?.session?.user) {
-          setUser({ email: data.session.user.email || '' });
+        if (sbUser) {
+          setUser({ email: sbUser.email || '' });
           initDashboard();
         } else {
-          router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+          // getUser 실패 시 getSession fallback (토큰 만료 등)
+          const { data: sessionData } = await sb.auth.getSession();
+          if (cancelled) return;
+          if (sessionData?.session?.user) {
+            setUser({ email: sessionData.session.user.email || '' });
+            initDashboard();
+          } else {
+            router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+          }
         }
       } catch {
         if (!cancelled) {
@@ -93,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
         <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-xs text-neutral-400">대시보드 로딩 중...</p>
+        <p className="text-xs text-neutral-400">Workspace 로딩 중...</p>
       </div>
     </div>
   );

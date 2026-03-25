@@ -40,7 +40,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: '',
     items: [
-      { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
+      { href: '/dashboard', label: '홈', icon: LayoutDashboard },
     ],
   },
   // ── 진단 ──
