@@ -562,14 +562,14 @@ function ReportContent({ scanId }: { scanId: string }) {
                     <div className="mb-5">
                       <h3 className="mb-2 text-sm font-semibold text-text-sub">개선 액션 플랜</h3>
                       <div className="rounded-xl border border-border bg-white overflow-hidden">
-                        <table className="w-full text-sm">
+                        <table className="w-full text-sm table-fixed">
                           <thead>
                             <tr className="border-b border-border bg-surface text-xs text-text-muted">
-                              <th className="px-4 py-2 text-left font-medium">#</th>
-                              <th className="px-4 py-2 text-left font-medium">카테고리</th>
+                              <th className="w-10 px-4 py-2 text-left font-medium">#</th>
+                              <th className="w-24 px-4 py-2 text-left font-medium">카테고리</th>
                               <th className="px-4 py-2 text-left font-medium">액션</th>
-                              <th className="px-4 py-2 text-center font-medium">영향도</th>
-                              <th className="px-4 py-2 text-center font-medium">난이도</th>
+                              <th className="w-16 px-4 py-2 text-center font-medium">영향도</th>
+                              <th className="w-16 px-4 py-2 text-center font-medium">난이도</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -577,7 +577,7 @@ function ReportContent({ scanId }: { scanId: string }) {
                               <tr key={i} className="border-b border-border last:border-0">
                                 <td className="px-4 py-2.5 text-text-muted">{item.priority}</td>
                                 <td className="px-4 py-2.5"><span className="rounded bg-surface px-1.5 py-0.5 text-xs text-text-sub">{item.category}</span></td>
-                                <td className="px-4 py-2.5 text-text-sub">{item.action}</td>
+                                <td className="px-4 py-2.5 text-text-sub break-words">{item.action}</td>
                                 <td className="px-4 py-2.5 text-center"><span className={`text-xs font-semibold ${item.impact === '높음' ? 'text-danger' : 'text-warning'}`}>{item.impact}</span></td>
                                 <td className="px-4 py-2.5 text-center text-xs text-text-muted">{item.effort}</td>
                               </tr>

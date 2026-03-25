@@ -5,6 +5,7 @@ import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { getUser, logout } from '@/lib/smarcomm/auth';
+import { createClient } from '@/lib/supabase/client';
 
 export default function SmarCommHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,7 +15,18 @@ export default function SmarCommHeader() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setUser(getUser());
+    // SmarComm Mock auth 체크
+    const u = getUser();
+    if (u) { setUser(u); } else {
+      // Supabase 세션 체크 (소셜 로그인 대응)
+      const sb = createClient();
+      sb.auth.getSession().then(({ data }) => {
+        if (data?.session?.user) {
+          setUser({ email: data.session.user.email || '' });
+        }
+      }).catch(() => {});
+    }
+
     const handleClick = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
@@ -24,8 +36,9 @@ export default function SmarCommHeader() {
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    logout(); // SmarComm Mock auth 클리어
+    try { const sb = createClient(); await sb.auth.signOut(); } catch {} // Supabase 세션 클리어
     window.location.href = '/';
   };
 

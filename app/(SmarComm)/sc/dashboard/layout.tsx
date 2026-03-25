@@ -24,28 +24,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [favorites, setFavorites] = useState<{ path: string; label: string }[]>([]);
 
   useEffect(() => {
-    const u = getUser();
-    if (u) {
-      setUser(u);
-    } else {
-      // Supabase 세션 체크 (소셜 로그인 대응)
-      const sb = createClient();
-      sb.auth.getSession().then(({ data }) => {
+    let cancelled = false;
+
+    const checkAuth = async () => {
+      // 1) SmarComm Mock 인증 체크
+      const u = getUser();
+      if (u) {
+        if (!cancelled) { setUser(u); initDashboard(); }
+        return;
+      }
+
+      // 2) Supabase 세션 체크 (소셜 로그인 / 이메일 로그인 대응)
+      try {
+        const sb = createClient();
+        const { data } = await sb.auth.getSession();
+        if (cancelled) return;
+
         if (data?.session?.user) {
           setUser({ email: data.session.user.email || '' });
+          initDashboard();
         } else {
           router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-          return;
         }
-        // Supabase 인증 성공 시에도 나머지 초기화 진행
-        initDashboard();
-      }).catch(() => {
-        router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-      });
-      return;
-    }
+      } catch {
+        if (!cancelled) {
+          router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+        }
+      }
+    };
 
-    initDashboard();
+    checkAuth();
+    return () => { cancelled = true; };
   }, [router]);
 
   const initDashboard = () => {
@@ -80,12 +89,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setReady(true);
   };
 
-  if (!ready) return null;
+  if (!ready) return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="text-center">
+        <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs text-neutral-400">대시보드 로딩 중...</p>
+      </div>
+    </div>
+  );
 
   const sidebarWidth = collapsed ? 56 : 224;
   const initial = user?.email?.charAt(0).toUpperCase() || '?';
 
-  const handleLogout = () => { logout(); window.location.href = '/'; };
+  const handleLogout = async () => {
+    logout(); // SmarComm Mock auth 클리어
+    try { const sb = createClient(); await sb.auth.signOut(); } catch {} // Supabase 세션 클리어
+    window.location.href = '/';
+  };
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>

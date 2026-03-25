@@ -190,10 +190,15 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
               {!collapsed && section.title && (
                 <div className="mb-1 px-3 flex items-center gap-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{section.title}</span>
+                  {section.title === '개발중' && <span className="rounded bg-orange/10 px-1 py-px text-[8px] font-semibold text-orange">DEV</span>}
                   {isPackSection && packInfo && <span className="text-[8px]">{packInfo.emoji}</span>}
                 </div>
               )}
-              {collapsed && section.title && <div className="mx-auto my-2 h-px w-6 bg-border" />}
+              {collapsed && section.title && (
+                section.title === '개발중'
+                  ? <div className="mx-auto my-2 flex flex-col items-center gap-0.5"><div className="h-px w-6 bg-orange/30" /><span className="text-[6px] text-orange font-bold">DEV</span></div>
+                  : <div className="mx-auto my-2 h-px w-6 bg-border" />
+              )}
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
