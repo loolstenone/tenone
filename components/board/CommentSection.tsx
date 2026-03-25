@@ -42,11 +42,11 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
 
     return (
         <div className={`${isReply ? "ml-8 md:ml-12" : ""}`}>
-            <div className={`py-4 ${!isReply ? "border-b border-neutral-100" : ""}`}>
+            <div className={`py-4 ${!isReply ? "border-b border-neutral-700/50" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 mb-2">
                         {isReply && <CornerDownRight className="h-3 w-3 text-neutral-400" />}
-                        <span className="text-sm font-medium text-neutral-900">
+                        <span className="text-sm font-medium text-neutral-100">
                             {getAuthorName(comment)}
                         </span>
                         <span className="text-xs text-neutral-400">
@@ -61,7 +61,7 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                             <MoreHorizontal className="h-4 w-4" />
                         </button>
                         {showMenu && (
-                            <div className="absolute right-0 mt-1 py-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-10 min-w-[100px]">
+                            <div className="absolute right-0 mt-1 py-1 bg-neutral-900 border border-neutral-600 rounded-lg shadow-lg z-10 min-w-[100px]">
                                 <button
                                     onClick={() => { onDelete?.(comment.id); setShowMenu(false); }}
                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-500 hover:bg-red-50"
@@ -231,7 +231,7 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                             value={guestNickname}
                             onChange={(e) => setGuestNickname(e.target.value)}
                             placeholder="닉네임"
-                            className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400"
+                            className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400"
                             maxLength={20}
                         />
                         <input
@@ -239,7 +239,7 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                             value={guestPassword}
                             onChange={(e) => setGuestPassword(e.target.value)}
                             placeholder="비밀번호"
-                            className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400"
+                            className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400"
                             maxLength={20}
                         />
                     </div>
@@ -252,7 +252,7 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="댓글을 작성하세요..."
                         rows={3}
-                        className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg resize-none focus:outline-none focus:border-neutral-400"
+                        className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg resize-none focus:outline-none focus:border-neutral-400"
                     />
                     <button
                         type="submit"

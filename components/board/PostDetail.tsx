@@ -91,7 +91,7 @@ export default function PostDetail({
             {/* 뒤로가기 */}
             <button
                 onClick={onBack}
-                className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-6"
+                className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-100 transition-colors mb-6"
             >
                 <ArrowLeft className="h-4 w-4" /> 목록으로
             </button>
@@ -106,10 +106,10 @@ export default function PostDetail({
                         {post.category}
                     </span>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
+                <h1 className="text-2xl md:text-3xl font-bold text-neutral-100 mb-4">
                     {post.title}
                 </h1>
-                <div className="flex items-center justify-between text-sm text-neutral-500 pb-4 border-b border-neutral-200">
+                <div className="flex items-center justify-between text-sm text-neutral-500 pb-4 border-b border-neutral-600">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1">
                             <User className="h-3.5 w-3.5" /> {getAuthorName(post)}
@@ -137,7 +137,7 @@ export default function PostDetail({
 
             {/* 첨부파일 */}
             {post.attachments && post.attachments.length > 0 && (
-                <div className="mb-8 p-4 bg-neutral-50 rounded-lg">
+                <div className="mb-8 p-4 bg-neutral-800 rounded-lg">
                     <h4 className="text-sm font-medium text-neutral-700 mb-3">첨부파일</h4>
                     <div className="space-y-2">
                         {post.attachments.map((file: Attachment) => (
@@ -145,7 +145,7 @@ export default function PostDetail({
                                 key={file.id}
                                 href={file.filepath}
                                 download={file.filename}
-                                className="flex items-center justify-between p-2 bg-white rounded border border-neutral-200 hover:border-neutral-300 transition-colors group"
+                                className="flex items-center justify-between p-2 bg-neutral-900 rounded border border-neutral-600 hover:border-neutral-300 transition-colors group"
                             >
                                 <div className="flex items-center gap-2 text-sm min-w-0">
                                     <Download className="h-4 w-4 text-neutral-400 group-hover:text-neutral-600 shrink-0" />
@@ -178,13 +178,13 @@ export default function PostDetail({
             )}
 
             {/* 액션 버튼 */}
-            <div className="flex items-center justify-center gap-3 py-6 border-t border-b border-neutral-200 mb-8">
+            <div className="flex items-center justify-center gap-3 py-6 border-t border-b border-neutral-600 mb-8">
                 <button
                     onClick={handleLike}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border transition-colors ${
                         liked
                             ? "text-white border-transparent"
-                            : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                            : "border-neutral-300 text-neutral-600 hover:bg-neutral-800"
                     }`}
                     style={liked ? { backgroundColor: accentColor } : {}}
                 >
@@ -196,7 +196,7 @@ export default function PostDetail({
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border transition-colors ${
                         bookmarked
                             ? "text-amber-600 border-amber-300 bg-amber-50"
-                            : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                            : "border-neutral-300 text-neutral-600 hover:bg-neutral-800"
                     }`}
                 >
                     <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
@@ -204,7 +204,7 @@ export default function PostDetail({
                 </button>
                 <button
                     onClick={handleShare}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-300 text-neutral-600 hover:bg-neutral-50 transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-300 text-neutral-600 hover:bg-neutral-800 transition-colors"
                 >
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">공유</span>
@@ -219,11 +219,11 @@ export default function PostDetail({
             )}
 
             {/* 이전/다음 글 */}
-            <div className="border border-neutral-200 rounded-lg overflow-hidden mb-8">
+            <div className="border border-neutral-600 rounded-lg overflow-hidden mb-8">
                 {nextPost && (
                     <button
                         onClick={() => onNavigate?.(nextPost.id)}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-neutral-50 transition-colors border-b border-neutral-100"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-neutral-800 transition-colors border-b border-neutral-700/50"
                     >
                         <ChevronUp className="h-4 w-4 text-neutral-400 shrink-0" />
                         <span className="text-neutral-400 w-14 shrink-0">다음 글</span>
@@ -233,7 +233,7 @@ export default function PostDetail({
                 {prevPost && (
                     <button
                         onClick={() => onNavigate?.(prevPost.id)}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-neutral-50 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-neutral-800 transition-colors"
                     >
                         <ChevronDown className="h-4 w-4 text-neutral-400 shrink-0" />
                         <span className="text-neutral-400 w-14 shrink-0">이전 글</span>
