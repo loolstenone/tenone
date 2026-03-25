@@ -764,7 +764,7 @@ export default function MessengerPage() {
                 2열: 대화창
                ══════════════════════════════════ */}
             <div className={clsx(
-                "flex-1 flex flex-col bg-neutral-50 min-w-0 transition-transform duration-300 ease-in-out",
+                "flex-1 flex flex-col bg-neutral-50 min-w-0 max-w-2xl transition-transform duration-300 ease-in-out",
                 // 데스크탑
                 "md:relative md:translate-x-0",
                 // 모바일
@@ -980,7 +980,7 @@ export default function MessengerPage() {
             <div className={clsx(
                 "border-l border-neutral-200 bg-white flex flex-col shrink-0 overflow-y-auto transition-transform duration-300 ease-in-out",
                 // 데스크탑
-                "md:w-[240px] md:relative md:translate-x-0",
+                "md:w-[280px] md:relative md:translate-x-0 md:flex-1",
                 // 모바일
                 "w-full absolute inset-0 z-40",
                 mobileView === 'profile' ? 'translate-x-0' : 'translate-x-full',
