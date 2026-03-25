@@ -71,7 +71,7 @@ export function PlannersFooter() {
 
                 {/* Copyright */}
                 <div className="mt-6 text-xs text-teal-700">
-                    &copy; 2020. Ten:One™ all rights reserved. Powered by Ten:One™ Universe.
+                    &copy; Planner's. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

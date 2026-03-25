@@ -76,7 +76,7 @@ export function MadLeagueFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; MAD League. Powered by <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
+                    &copy; MAD League. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

@@ -72,7 +72,7 @@ export function TrendHunterFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-800/50 text-center text-xs">
-                    &copy; Trend Hunter. Powered by{" "}
+                    &copy; TrendHunter. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                     <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-[#00FF88] transition-colors">
                         Ten:One&trade; Universe
                     </a>

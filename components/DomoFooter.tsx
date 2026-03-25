@@ -69,7 +69,7 @@ export function DomoFooter() {
                 </div>
 
                 <div className="mt-6 text-xs">
-                    Copyright &copy; Ten:One&trade; Universe All rights reserved.
+                    &copy; domo. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

@@ -69,7 +69,7 @@ export function OgamjaFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; 공감자. Powered by{" "}
+                    &copy; 0gamja. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                     <a
                         href="https://tenone.biz"
                         target="_blank"

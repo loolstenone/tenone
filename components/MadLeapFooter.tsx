@@ -43,7 +43,7 @@ export function MadLeapFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-600 text-center text-xs">
-                    &copy; MADLeap. Powered by <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
+                    &copy; MADLeap. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>
