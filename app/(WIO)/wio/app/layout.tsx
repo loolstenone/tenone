@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, LogOut, Settings
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { fetchMyTenants, fetchMyMembership } from '@/lib/supabase/wio';
+import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
 import type { WIOTenant, WIOMember, WIOModule } from '@/types/wio';
 
 const MODULE_ICONS: Record<string, any> = {
@@ -42,13 +42,25 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
       const { data: { user } } = await sb.auth.getUser();
       if (!user) { router.push('/login?redirect=/wio/app'); return; }
 
-      const tenants = await fetchMyTenants();
-      if (tenants.length === 0) { router.push('/wio'); return; }
+      let tenants = await fetchMyTenants();
 
-      const t = tenants[0]; // 첫 번째 테넌트 (추후 테넌트 선택 UI 추가)
+      // 테넌트가 없으면 텐원 기본 테넌트에 멤버로 자동 등록
+      if (tenants.length === 0) {
+        const defaultTenantId = 'a0000000-0000-0000-0000-000000000001';
+        await addMember(defaultTenantId, user.id, user.email?.split('@')[0] || '사용자', 'member');
+        tenants = await fetchMyTenants();
+        if (tenants.length === 0) { router.push('/wio'); return; }
+      }
+
+      const t = tenants[0];
       setTenant(t);
 
-      const m = await fetchMyMembership(t.id);
+      let m = await fetchMyMembership(t.id);
+      // 멤버십 없으면 자동 등록
+      if (!m) {
+        await addMember(t.id, user.id, user.email?.split('@')[0] || '사용자', 'member');
+        m = await fetchMyMembership(t.id);
+      }
       setMember(m);
       setLoading(false);
     };
