@@ -121,11 +121,11 @@ function AboutContent() {
                                     Ten:One™ Universe가 시작되었습니다.
                                 </p>
                             </div>
-                            <div className="aspect-[4/3] bg-neutral-100 flex items-center justify-center">
-                                <p className="text-sm tn-text-sub text-center px-8">
-                                    [창업 스토리 비주얼]<br />
-                                    <span className="text-xs tn-text-muted">대표의 스토리를 담은 사진 또는 일러스트</span>
-                                </p>
+                            <div className="aspect-[4/3] bg-neutral-100 flex items-center justify-center overflow-hidden">
+                                <div className="text-center">
+                                    <p className="text-3xl font-light tracking-tight text-neutral-300">10:01</p>
+                                    <p className="text-xs mt-1 text-neutral-400">The moment it all began</p>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -221,10 +221,10 @@ function AboutContent() {
                     {/* Founder */}
                     <section className="py-24 px-6">
                         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-                            <div className="aspect-square bg-neutral-100 flex items-center justify-center max-w-md">
-                                <p className="text-sm tn-text-sub text-center px-8">
-                                    [대표 프로필 사진]
-                                </p>
+                            <div className="aspect-square bg-neutral-100 flex items-center justify-center max-w-md overflow-hidden">
+                                <div className="w-32 h-32 rounded-full bg-neutral-900 flex items-center justify-center">
+                                    <span className="text-3xl font-bold text-white">CJ</span>
+                                </div>
                             </div>
                             <div>
                                 <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Founder</p>
