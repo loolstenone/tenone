@@ -77,57 +77,52 @@ export function PublicHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex items-center gap-3">
-                    {!isLoading && isAuthenticated && user ? (
-                        <>
-                            {/* Avatar dropdown */}
-                            <div className="relative">
-                                <button onClick={() => setProfileOpen(!profileOpen)}
-                                    className="flex items-center hover:opacity-90 transition-opacity">
-                                    <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all duration-300"
-                                        style={{
-                                            background: isDark
-                                                ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
-                                                : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
-                                            color: isDark ? "#111" : "#fff",
-                                            boxShadow: isDark
-                                                ? "0 2px 6px rgba(255,255,255,0.15), inset 0 -2px 3px rgba(0,0,0,0.1)"
-                                                : "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
-                                        }}>
-                                        {user.avatarInitials}
-                                    </div>
-                                </button>
-                                {profileOpen && (
-                                    <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                                        <div className="absolute right-0 top-full mt-2 z-50 w-48 py-2 rounded-lg border"
-                                            style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
-                                            <div className="px-4 py-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
-                                                <p className="text-xs font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
-                                                <p className="text-[10px]" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
-                                            </div>
-                                            <Link href="/profile" onClick={() => setProfileOpen(false)}
-                                                className="block px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-sub)" }}>
-                                                프로필
-                                            </Link>
-                                            <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
-                                                className="block w-full text-left px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-muted)" }}>
-                                                Logout
-                                            </button>
+                <div className="hidden md:flex items-center gap-2">
+                    {isAuthenticated && user && (
+                        <div className="relative">
+                            <button onClick={() => setProfileOpen(!profileOpen)}
+                                className="flex items-center hover:opacity-90 transition-opacity">
+                                <div className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                                    style={{
+                                        background: isDark
+                                            ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
+                                            : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
+                                        color: isDark ? "#111" : "#fff",
+                                        boxShadow: isDark
+                                            ? "0 2px 6px rgba(255,255,255,0.15), inset 0 -2px 3px rgba(0,0,0,0.1)"
+                                            : "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
+                                    }}>
+                                    {user.avatarInitials}
+                                </div>
+                            </button>
+                            {profileOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                                    <div className="absolute right-0 top-full mt-2 z-50 w-48 py-2 rounded-lg border"
+                                        style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
+                                        <div className="px-4 py-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
+                                            <p className="text-xs font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
+                                            <p className="text-[10px]" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
                                         </div>
-                                    </>
-                                )}
-                            </div>
-                            {/* Portal */}
-                            {canAccessIntra && (
-                                <Link href="/intra" className="hover:opacity-70 transition-opacity" title="Intra Office">
-                                    <PortalIcon direction="enter" size={36} darkBg={isDark} />
-                                </Link>
+                                        <Link href="/profile" onClick={() => setProfileOpen(false)}
+                                            className="block px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-sub)" }}>
+                                            프로필
+                                        </Link>
+                                        <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
+                                            className="block w-full text-left px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-muted)" }}>
+                                            Logout
+                                        </button>
+                                    </div>
+                                </>
                             )}
-                            {/* Theme toggle */}
-                            <ThemeToggle />
-                        </>
-                    ) : !isLoading ? (
+                        </div>
+                    )}
+                    {isAuthenticated && canAccessIntra && (
+                        <Link href="/intra" className="flex items-center hover:opacity-70 transition-opacity" title="Intra">
+                            <PortalIcon direction="enter" size={28} darkBg={isDark} />
+                        </Link>
+                    )}
+                    {!isLoading && !isAuthenticated && (
                         <>
                             <Link href="/login" className="text-xs transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 Login
@@ -135,9 +130,9 @@ export function PublicHeader() {
                             <Link href="/signup" className="text-xs px-4 py-1.5 transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 Joinup
                             </Link>
-                            <ThemeToggle />
                         </>
-                    ) : null}
+                    )}
+                    <ThemeToggle />
                 </div>
 
                 {/* Mobile menu button */}

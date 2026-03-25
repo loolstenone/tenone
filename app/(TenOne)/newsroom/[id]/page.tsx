@@ -24,7 +24,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
     useEffect(() => {
         fetch(`/api/board/posts/${id}`)
             .then(r => r.json())
-            .then(d => setPost(d.post || null))
+            .then(d => setPost(d.post || d || null))
             .catch(() => {})
             .finally(() => setLoading(false));
     }, [id]);

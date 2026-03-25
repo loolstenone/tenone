@@ -3,7 +3,8 @@
 import { useTheme } from "@/lib/theme-context";
 import { useRef, useCallback } from "react";
 
-export function ThemeToggle() {
+export function ThemeToggle(props: { size?: number }) {
+    const size = props.size;
     const { isDark, toggleTheme } = useTheme();
     const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -33,7 +34,7 @@ export function ThemeToggle() {
             ref={btnRef}
             onClick={handleToggle}
             className="relative shrink-0"
-            style={{ width: 48, height: 26 }}
+            style={{ width: size ? size * 1.7 : 48, height: size || 26 }}
             title={isDark ? "라이트 모드" : "다크 모드"}
         >
             {/* 트랙 — 3D 입체 */}
@@ -50,11 +51,12 @@ export function ThemeToggle() {
             />
             {/* 썸(dot) — 3D 구체 */}
             <div
-                className="absolute top-[3px] rounded-full transition-all duration-300"
+                className="absolute rounded-full transition-all duration-300"
                 style={{
-                    width: 20,
-                    height: 20,
-                    left: isDark ? 25 : 3,
+                    top: 3,
+                    width: (size || 26) - 6,
+                    height: (size || 26) - 6,
+                    left: isDark ? (size ? size * 0.75 : 25) : 3,
                     background: isDark
                         ? "radial-gradient(circle at 35% 35%, #fff 0%, #ddd 50%, #bbb 100%)"
                         : "radial-gradient(circle at 35% 35%, #555 0%, #333 50%, #111 100%)",

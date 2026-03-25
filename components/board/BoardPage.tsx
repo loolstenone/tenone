@@ -54,7 +54,7 @@ export default function BoardPage({
             const res = await fetch(`/api/board/posts/${postId}`);
             if (res.ok) {
                 const data = await res.json();
-                setSelectedPost(data.post);
+                setSelectedPost(data.post || data);
                 setMode("detail");
             }
         } catch (err) {

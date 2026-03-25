@@ -70,11 +70,8 @@ export default function ContactPage() {
                         <div className="flex items-start gap-3">
                             <MapPin className="h-4 w-4 tn-text-sub mt-0.5" />
                             <div>
-                                <h4 className="text-sm font-medium">
-                                    <span className="line-through tn-text-sub">Office</span>{" "}
-                                    <span className="font-bold tn-text">Onice</span>
-                                </h4>
-                                <p className="text-sm tn-text-sub mt-1">Tenone.biz</p>
+                                <h4 className="text-sm font-medium tn-text">Online Everywhere</h4>
+                                <p className="text-sm tn-text-sub mt-1">tenone.biz</p>
                             </div>
                         </div>
                     </div>
