@@ -7,6 +7,7 @@ import { LogOut, ChevronDown, PanelRightOpen, PanelRightClose } from 'lucide-rea
 import SmarCommSidebar from '@/components/SmarCommSidebar';
 import SCRightPanel from '@/components/smarcomm/RightPanel';
 import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
+import { createClient } from '@/lib/supabase/client';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 
 export const SCSidebarContext = createContext({
@@ -39,12 +40,8 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
     if (u) {
       setUser(u);
     } else {
-      // Supabase 세션을 직접 체크 (useAuth 의존 없이)
-      const { createClient } = require('@supabase/supabase-js');
-      const sb = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      // Supabase 브라우저 클라이언트로 세션 체크
+      const sb = createClient();
       sb.auth.getSession().then(({ data }: any) => {
         if (data?.session?.user) {
           setUser({ email: data.session.user.email || '' });
