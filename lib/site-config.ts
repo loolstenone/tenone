@@ -192,10 +192,8 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'Badak — 마케팅 광고 네트워킹 커뮤니티', description: 'Badak - 마케팅 업계 네트워킹 커뮤니티. 약한 연결 고리가 만드는 강력한 기회.', keywords: ['Badak', '네트워킹', '커뮤니티', '마케팅', '광고', 'Ten:One'] },
         homePath: '/bk', signupPath: '/signup', domain: 'badak.biz',
         nav: [
-            { name: '히어로', href: '/bk/hero' },
-            { name: '바카데미', href: '/bk/bacademy' },
-            { name: '콘텐츠', href: '/bk/contents' },
-            { name: '바닥 상회', href: '/bk/shop' },
+            { name: '탐색', href: '/bk/explore' },
+            { name: '이바닥 스타', href: '/bk/stars' },
             { name: '커뮤니티', href: '/bk/community' },
             { name: '바닥이란', href: '/bk/about' },
         ],

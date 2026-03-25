@@ -8,10 +8,8 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-    { name: "히어로", href: "/hero" },
-    { name: "바카데미", href: "/bacademy" },
-    { name: "콘텐츠", href: "/contents" },
-    { name: "바닥 상회", href: "/shop" },
+    { name: "탐색", href: "/explore" },
+    { name: "이바닥 스타", href: "/stars" },
     { name: "커뮤니티", href: "/community" },
     { name: "바닥이란", href: "/about" },
 ];
