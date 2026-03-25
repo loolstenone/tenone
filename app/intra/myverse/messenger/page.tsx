@@ -1221,7 +1221,7 @@ export default function MessengerPage() {
                             <button onClick={() => setShowNewGroupModal(false)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
                             <button onClick={createGroupChat}
                                 disabled={groupSelectedMembers.size < 1 || !groupName.trim()}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white rounded disabled:opacity-30 disabled:cursor-not-allowed">
+                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30 disabled:cursor-not-allowed">
                                 생성 ({groupSelectedMembers.size}명 선택)
                             </button>
                         </div>
@@ -1300,7 +1300,7 @@ export default function MessengerPage() {
                             <button onClick={() => setShowBroadcastModal(false)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
                             <button onClick={sendBroadcast}
                                 disabled={!broadcastMessage.trim()}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white rounded disabled:opacity-30 disabled:cursor-not-allowed">
+                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30 disabled:cursor-not-allowed">
                                 전송
                             </button>
                         </div>

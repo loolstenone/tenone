@@ -206,7 +206,7 @@ export default function FinancialsPage() {
         ].map((card) => (
           <div
             key={card.label}
-            className="border border-neutral-200 rounded-lg p-4 bg-white"
+            className="border border-neutral-200 p-4 bg-white"
           >
             <div className="flex items-center gap-1.5 mb-2">
               <card.icon className="h-3.5 w-3.5 text-neutral-400" />
@@ -218,7 +218,7 @@ export default function FinancialsPage() {
       </div>
 
       {/* P&L Table */}
-      <div className="border border-neutral-200 rounded-lg overflow-hidden mb-8">
+      <div className="border border-neutral-200 overflow-hidden mb-8">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-neutral-50 border-b border-neutral-200">

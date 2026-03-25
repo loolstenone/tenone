@@ -45,7 +45,7 @@ export default function BumsDashboard() {
                     { label: "게시글 수", value: posts.length, icon: FileText },
                     { label: "총 조회수", value: totalViews.toLocaleString(), icon: Eye },
                 ].map(stat => (
-                    <div key={stat.label} className="bg-white rounded-xl border border-neutral-100 p-5">
+                    <div key={stat.label} className="bg-white border border-neutral-100 p-5">
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-xs text-neutral-500">{stat.label}</span>
                             <stat.icon className="h-4 w-4 text-neutral-300" />
@@ -66,7 +66,7 @@ export default function BumsDashboard() {
                         const siteConfigs = configs.filter(c => c.site === site);
                         const sitePosts = posts.filter(p => p.site === site);
                         return (
-                            <div key={site} className="bg-white rounded-xl border border-neutral-100 p-5">
+                            <div key={site} className="bg-white border border-neutral-100 p-5">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-bold">{site}</h3>
                                     <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">운영중</span>
@@ -84,7 +84,7 @@ export default function BumsDashboard() {
                     <h2 className="font-semibold">최근 게시글</h2>
                     <Link href="/intra/bums/boards" className="text-xs text-neutral-500 hover:text-neutral-900">전체 보기</Link>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-100 divide-y divide-neutral-100">
+                <div className="bg-white border border-neutral-100 divide-y divide-neutral-100">
                     {recentPosts.map(post => (
                         <div key={post.id} className="px-5 py-3.5 flex items-center justify-between">
                             <div>

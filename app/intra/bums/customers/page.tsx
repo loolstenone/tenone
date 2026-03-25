@@ -148,7 +148,7 @@ export default function CustomersPage() {
                         { role: "에디터", perms: ["담당 사이트 접근", "게시글 작성/수정", "댓글 관리"] },
                         { role: "기여자", perms: ["담당 사이트 접근", "게시글 작성 (본인 글만 수정)"] },
                     ].map(r => (
-                        <div key={r.role} className="border border-neutral-100 rounded-lg p-4">
+                        <div key={r.role} className="border border-neutral-100 p-4">
                             <h3 className="font-semibold text-sm mb-2">{r.role}</h3>
                             <div className="flex flex-wrap gap-2">
                                 {r.perms.map(p => (

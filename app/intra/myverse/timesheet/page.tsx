@@ -305,7 +305,7 @@ export default function TimesheetInputPage() {
                                     setWeekStatus(prev => ({ ...prev, [currentWeekKey]: 'submitted' }));
                                 }
                             }}
-                                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                                 마감 신청
                             </button>
                         </>

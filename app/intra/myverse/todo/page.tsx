@@ -77,7 +77,7 @@ export default function TodoPage() {
                     <h1 className="text-xl font-bold">Todo</h1>
                     <p className="text-sm text-neutral-500 mt-1">업무 관리 · 체크리스트</p>
                 </div>
-                <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 새 할 일
                 </button>
             </div>
@@ -97,7 +97,7 @@ export default function TodoPage() {
                         <input type="date" value={newDue} onChange={e => setNewDue(e.target.value)} className="px-2 py-1.5 text-[11px] border border-neutral-200 rounded" />
                         <div className="flex-1" />
                         <button onClick={() => setShowAdd(false)} className="text-[11px] text-neutral-400">취소</button>
-                        <button onClick={addTodo} disabled={!newTitle.trim()} className="px-3 py-1.5 text-[11px] bg-neutral-900 text-white rounded disabled:opacity-30">추가</button>
+                        <button onClick={addTodo} disabled={!newTitle.trim()} className="px-3 py-1.5 text-[11px] bg-neutral-900 text-white disabled:opacity-30">추가</button>
                     </div>
                     <textarea value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="상세 내용 (선택)..." rows={2}
                         className="w-full px-3 py-2 text-[11px] border border-neutral-200 rounded resize-none focus:outline-none focus:border-neutral-400" />

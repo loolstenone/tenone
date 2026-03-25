@@ -281,7 +281,7 @@ export default function OrgChartPage() {
             {/* 우측: 선택된 인물 정보 */}
             <div className="w-[45%] min-w-0">
                 {selectedPerson ? (
-                    <div className="border border-neutral-200 rounded-lg p-6 bg-white sticky top-4">
+                    <div className="border border-neutral-200 p-6 bg-white sticky top-4">
                         <div className="flex items-center gap-4 mb-6">
                             <div className="h-14 w-14 rounded-full bg-neutral-100 flex items-center justify-center text-lg font-bold text-neutral-400">
                                 {selectedPerson.name[0]}

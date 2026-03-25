@@ -203,7 +203,7 @@ export default function ApprovalLinePage() {
                         </div>
                         <div className="flex justify-end gap-2 mt-5">
                             <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-700">취소</button>
-                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">추가</button>
+                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">추가</button>
                         </div>
                     </div>
                 </div>

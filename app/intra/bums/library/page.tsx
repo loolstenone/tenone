@@ -193,7 +193,7 @@ export default function CmsLibraryPage() {
                     <h1 className="text-xl font-bold">라이브러리 관리</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">전체 사이트의 모든 파일을 통합 관리합니다</p>
                 </div>
-                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 자료 등록
                 </button>
             </div>
@@ -308,7 +308,7 @@ export default function CmsLibraryPage() {
             {/* 등록 모달 */}
             {showAdd && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                    <div className="bg-white border border-neutral-200 rounded-lg w-full max-w-lg p-5">
+                    <div className="bg-white border border-neutral-200 w-full max-w-lg p-5">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-sm font-bold">자료 등록</h2>
                             <button onClick={resetModal}><X className="h-4 w-4 text-neutral-400" /></button>
@@ -399,7 +399,7 @@ export default function CmsLibraryPage() {
                         </div>
                         <div className="flex justify-end gap-2 mt-5">
                             <button onClick={resetModal} className="px-4 py-2 text-sm text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
-                            <button onClick={handleAdd} disabled={!newTitle.trim()} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed">등록</button>
+                            <button onClick={handleAdd} disabled={!newTitle.trim()} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed">등록</button>
                         </div>
                     </div>
                 </div>

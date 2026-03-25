@@ -241,7 +241,7 @@ export default function ClubsPage() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
         >
           <Plus size={14} />
           동아리 추가
@@ -260,7 +260,7 @@ export default function ClubsPage() {
           const selectedGenData = gens.find((g) => g.generation === selectedGen);
 
           return (
-            <div key={club.id} className="border border-neutral-200 rounded-lg bg-white">
+            <div key={club.id} className="border border-neutral-200 bg-white">
               {/* Card header */}
               <div
                 className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-neutral-50 transition-colors"
@@ -480,7 +480,7 @@ export default function ClubsPage() {
               <button
                 onClick={handleAddClub}
                 disabled={!newName.trim() || !newRegion.trim()}
-                className="px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 추가
               </button>
@@ -530,7 +530,7 @@ export default function ClubsPage() {
               <button
                 onClick={handleEditClub}
                 disabled={!editName.trim() || !editRegion.trim()}
-                className="px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 저장
               </button>

@@ -133,7 +133,7 @@ export default function GPRCascadePage() {
                 <div className="flex items-center gap-2 mb-4">
                     <Building2 className="h-4 w-4 text-neutral-400" />
                     <h2 className="text-sm font-bold">전사 목표 (CEO)</h2>
-                    <span className="text-xs px-2 py-0.5 bg-neutral-900 text-white rounded ml-auto">2026 Q1</span>
+                    <span className="text-xs px-2 py-0.5 bg-neutral-900 text-white ml-auto">2026 Q1</span>
                 </div>
                 <div className="space-y-3">
                     {companyGoals.map(g => (

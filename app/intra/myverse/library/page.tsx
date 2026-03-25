@@ -64,7 +64,7 @@ export default function MyverseLibraryPage() {
                     <h1 className="text-xl font-bold">내 라이브러리</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">개인 학습자료, 보고서, 레퍼런스 관리</p>
                 </div>
-                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 자료 등록
                 </button>
             </div>
@@ -171,7 +171,7 @@ export default function MyverseLibraryPage() {
                         </div>
                         <div className="flex justify-end gap-2 mt-5">
                             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">등록</button>
+                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">등록</button>
                         </div>
                     </div>
                 </div>

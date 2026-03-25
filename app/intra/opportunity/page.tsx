@@ -174,7 +174,7 @@ export default function OpportunityPage() {
                         </button>
                     </div>
                     <button onClick={() => setShowAdd(true)}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                         <Plus className="h-4 w-4" /> 기회 등록
                     </button>
                 </div>
@@ -372,7 +372,7 @@ export default function OpportunityPage() {
                                 )}
                             </div>
                             {selectedOpp.status === 'won' && !selectedOpp.category?.includes('전환') && (
-                                <button className="px-4 py-2 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800 flex items-center gap-1">
+                                <button className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 flex items-center gap-1">
                                     <ArrowRight className="h-3 w-3" /> 프로젝트 전환
                                 </button>
                             )}
@@ -427,7 +427,7 @@ export default function OpportunityPage() {
                         </div>
                         <div className="p-5 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">등록</button>
+                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">등록</button>
                         </div>
                     </div>
                 </div>

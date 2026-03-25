@@ -1382,7 +1382,7 @@ export default function EvolutionSchoolPage() {
               return (
                 <div
                   key={course.id}
-                  className="border border-neutral-200 rounded-lg bg-white overflow-hidden"
+                  className="border border-neutral-200 bg-white overflow-hidden"
                 >
                   {/* Card header */}
                   <button
@@ -1527,7 +1527,7 @@ export default function EvolutionSchoolPage() {
       {activeTab === "내 수료 현황" && (
         <div className="space-y-6">
           {/* Summary */}
-          <div className="border border-neutral-200 rounded-lg bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <h3 className="text-sm font-semibold text-neutral-900 mb-3">이수 현황 요약</h3>
 
             {/* Overall progress bar */}
@@ -1572,7 +1572,7 @@ export default function EvolutionSchoolPage() {
           </div>
 
           {/* Completed courses table */}
-          <div className="border border-neutral-200 rounded-lg bg-white overflow-hidden">
+          <div className="border border-neutral-200 bg-white overflow-hidden">
             <div className="px-4 py-3 border-b border-neutral-100">
               <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
                 <Trophy className="w-3.5 h-3.5 text-amber-500" /> 이수 완료 과정
@@ -1620,7 +1620,7 @@ export default function EvolutionSchoolPage() {
           </div>
 
           {/* Incomplete courses table */}
-          <div className="border border-neutral-200 rounded-lg bg-white overflow-hidden">
+          <div className="border border-neutral-200 bg-white overflow-hidden">
             <div className="px-4 py-3 border-b border-neutral-100">
               <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5 text-neutral-400" /> 미이수 과정
@@ -1687,7 +1687,7 @@ export default function EvolutionSchoolPage() {
       {activeTab === "VRIEF" && (
         <div className="space-y-5">
           {/* Overview */}
-          <div className="border border-neutral-200 rounded-lg bg-white p-5">
+          <div className="border border-neutral-200 bg-white p-5">
             <div className="flex items-center gap-2 mb-3">
               <FlaskConical className="w-4 h-4 text-neutral-700" />
               <h3 className="text-sm font-semibold text-neutral-900">VRIEF 프레임워크</h3>
@@ -1732,7 +1732,7 @@ export default function EvolutionSchoolPage() {
             const vrief = courses.find((c) => c.id === 5);
             if (!vrief) return null;
             return (
-              <div className="border border-neutral-200 rounded-lg bg-white overflow-hidden">
+              <div className="border border-neutral-200 bg-white overflow-hidden">
                 <div className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-md bg-neutral-100 flex items-center justify-center text-neutral-600">
@@ -1805,7 +1805,7 @@ export default function EvolutionSchoolPage() {
       {activeTab === "GPR" && (
         <div className="space-y-5">
           {/* Overview */}
-          <div className="border border-neutral-200 rounded-lg bg-white p-5">
+          <div className="border border-neutral-200 bg-white p-5">
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-4 h-4 text-neutral-700" />
               <h3 className="text-sm font-semibold text-neutral-900">GPR 성장 철학</h3>
@@ -1857,7 +1857,7 @@ export default function EvolutionSchoolPage() {
             const gpr = courses.find((c) => c.id === 4);
             if (!gpr) return null;
             return (
-              <div className="border border-neutral-200 rounded-lg bg-white overflow-hidden">
+              <div className="border border-neutral-200 bg-white overflow-hidden">
                 <div className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-md bg-neutral-100 flex items-center justify-center text-neutral-600">

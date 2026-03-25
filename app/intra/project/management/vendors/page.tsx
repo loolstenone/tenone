@@ -188,7 +188,7 @@ export default function VendorsPage() {
                     <h1 className="text-xl font-bold">협력사</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">프로젝트 협력사 등록 · 평가 · 거래 관리</p>
                 </div>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 협력사 등록
                 </button>
             </div>
@@ -366,7 +366,7 @@ export default function VendorsPage() {
                         <div className="px-5 py-3 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setEvalModal(null)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
                             <button onClick={() => submitEval(evalModal)} disabled={evalScore === 0}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white rounded disabled:opacity-30">평가 등록</button>
+                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30">평가 등록</button>
                         </div>
                     </div>
                 </div>

@@ -105,7 +105,7 @@ export default function WikiLibraryPage() {
                     <h1 className="text-xl font-bold">Knowledge Library</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">지식 관리 · 템플릿 · 레퍼런스 · 내부 문서</p>
                 </div>
-                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 자료 등록
                 </button>
             </div>
@@ -269,7 +269,7 @@ export default function WikiLibraryPage() {
                         </div>
                         <div className="flex justify-end gap-2 mt-5">
                             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">등록</button>
+                            <button onClick={handleAdd} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">등록</button>
                         </div>
                     </div>
                 </div>

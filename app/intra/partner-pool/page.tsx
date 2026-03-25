@@ -84,7 +84,7 @@ export default function PartnerPoolPage() {
                     <p className="text-xs text-neutral-400 mt-0.5">외부 협력사 · 프리랜서 등록 · 검색 · 프로젝트 투입</p>
                 </div>
                 <button onClick={() => setShowAdd(true)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 파트너 등록
                 </button>
             </div>
@@ -212,7 +212,7 @@ export default function PartnerPoolPage() {
                         </div>
                         <div className="p-5 border-t border-neutral-100 flex justify-end gap-2">
                             <button className="px-4 py-2 text-xs border border-neutral-200 rounded hover:bg-neutral-50">프로젝트 투입</button>
-                            <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800">닫기</button>
+                            <button onClick={() => setSelectedPartner(null)} className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800">닫기</button>
                         </div>
                     </div>
                 </div>
@@ -283,7 +283,7 @@ export default function PartnerPoolPage() {
                         </div>
                         <div className="p-5 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">등록</button>
+                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">등록</button>
                         </div>
                     </div>
                 </div>

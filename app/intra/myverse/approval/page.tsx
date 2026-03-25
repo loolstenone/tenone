@@ -226,7 +226,7 @@ export default function MyApprovalPage() {
                     <h1 className="text-xl font-bold">내 결재</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">결재 대기 · 기안 · 처리 내역</p>
                 </div>
-                <Link href="/intra/erp/approval/draft" className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                <Link href="/intra/erp/approval/draft" className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" />새 기안
                 </Link>
             </div>

@@ -92,7 +92,7 @@ export default function ContentManagementPage() {
                     <h1 className="text-2xl font-bold tracking-tight">콘텐츠 관리</h1>
                     <p className="text-sm text-neutral-500 mt-1">아티클, 갤러리, 영상, 팟캐스트 등 콘텐츠를 통합 관리합니다.</p>
                 </div>
-                <button className="flex items-center gap-1.5 px-5 py-2.5 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-all shadow-sm">
+                <button className="flex items-center gap-1.5 px-5 py-2.5 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-all">
                     <Plus className="h-4 w-4" /> 콘텐츠 작성
                 </button>
             </div>
@@ -105,7 +105,7 @@ export default function ContentManagementPage() {
                     { label: "임시저장", value: stats.draft, color: "text-neutral-500" },
                     { label: "예약", value: stats.scheduled, color: "text-blue-600" },
                 ].map(s => (
-                    <div key={s.label} className="rounded-xl bg-white border border-neutral-100 shadow-sm p-4">
+                    <div key={s.label} className="bg-white border border-neutral-100 p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
                         <p className={clsx("text-xl font-bold", s.color)}>{s.value}</p>
                     </div>
@@ -150,7 +150,7 @@ export default function ContentManagementPage() {
 
             {/* Content List */}
             {viewMode === "list" ? (
-                <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">
+                <div className="bg-white border border-neutral-100 overflow-hidden">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-neutral-100 text-left bg-neutral-50/60">
@@ -213,7 +213,7 @@ export default function ContentManagementPage() {
                     {filtered.map(c => {
                         const TypeIcon = contentTypeIcon[c.type] || FileText;
                         return (
-                            <div key={c.id} className="rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-neutral-200 transition-all group overflow-hidden">
+                            <div key={c.id} className="bg-white border border-neutral-100 hover:shadow-md hover:border-neutral-200 transition-all group overflow-hidden">
                                 <div className="aspect-video bg-neutral-50 flex items-center justify-center">
                                     <TypeIcon className="h-8 w-8 text-neutral-300" />
                                 </div>

@@ -153,7 +153,7 @@ export default function MyProjectsPage() {
                                             <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> {project.jobs.filter(j => j.status === '완료').length}건 완료</span>
                                         </div>
                                         <button onClick={() => setShowJobModal(project.code)}
-                                            className="flex items-center gap-1 px-2.5 py-1 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800">
+                                            className="flex items-center gap-1 px-2.5 py-1 text-xs bg-neutral-900 text-white hover:bg-neutral-800">
                                             <Plus className="h-3 w-3" /> Job 등록
                                         </button>
                                     </div>
@@ -277,7 +277,7 @@ export default function MyProjectsPage() {
                         <div className="px-5 py-3 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setShowJobModal(null)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
                             <button onClick={() => addJob(showJobModal)} disabled={!newJob.name.trim()}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white rounded disabled:opacity-30">Job 등록</button>
+                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30">Job 등록</button>
                         </div>
                     </div>
                 </div>

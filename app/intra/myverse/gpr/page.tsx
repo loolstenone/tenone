@@ -1001,7 +1001,7 @@ function ManagerGoalEval({
             <button
               onClick={() => setEditing(false)}
               disabled={!goal.mgrWhat}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-neutral-900 text-white rounded disabled:opacity-30"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30"
             >
               <Save className="h-3 w-3" /> 저장
             </button>

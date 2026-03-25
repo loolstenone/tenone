@@ -537,7 +537,7 @@ export default function TimesheetPage() {
       </div>
 
       {/* Main Table */}
-      <div className="border border-neutral-200 rounded-lg overflow-hidden mb-8">
+      <div className="border border-neutral-200 overflow-hidden mb-8">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-neutral-50 border-b border-neutral-200">
@@ -645,7 +645,7 @@ function SummaryCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="border border-neutral-200 rounded-lg px-4 py-3">
+    <div className="border border-neutral-200 px-4 py-3">
       <div className="flex items-center gap-1.5 text-neutral-400 mb-1.5">
         {icon}
         <span className="text-xs">{label}</span>

@@ -227,7 +227,7 @@ export default function CalendarPage() {
         </div>
         <button
           onClick={() => { setShowEditor(true); setEdDate(selectedDate || todayStr); }}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
         >
           <Plus className="h-4 w-4" /> 일정 등록
         </button>

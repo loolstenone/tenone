@@ -32,7 +32,7 @@ export default function ReportDraftPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* 보고 유형 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">보고 유형</label>
                     <select
                         value={reportType}
@@ -47,7 +47,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 제목 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">제목</label>
                     <input
                         type="text"
@@ -60,7 +60,7 @@ export default function ReportDraftPage() {
 
                 {/* 기간 */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                    <div className="bg-white border border-neutral-200 p-4">
                         <label className="block text-xs font-medium text-neutral-500 mb-1.5">기간 (시작)</label>
                         <input
                             type="date"
@@ -69,7 +69,7 @@ export default function ReportDraftPage() {
                             className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-neutral-300"
                         />
                     </div>
-                    <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                    <div className="bg-white border border-neutral-200 p-4">
                         <label className="block text-xs font-medium text-neutral-500 mb-1.5">기간 (종료)</label>
                         <input
                             type="date"
@@ -81,7 +81,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 주요성과 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">주요성과</label>
                     <textarea
                         value={achievements}
@@ -93,7 +93,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 이슈사항 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">이슈사항</label>
                     <textarea
                         value={issues}
@@ -105,7 +105,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 다음 계획 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">다음 계획</label>
                     <textarea
                         value={nextPlan}
@@ -117,7 +117,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 결재라인 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-2">결재라인</label>
                     <div className="flex items-center gap-1.5">
                         {approvalLine.map((step, idx) => (
@@ -138,7 +138,7 @@ export default function ReportDraftPage() {
                 </div>
 
                 {/* 첨부파일 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">첨부파일</label>
                     <div className="flex items-center gap-2 px-3 py-2 border border-dashed border-neutral-300 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors">
                         <Upload className="w-4 h-4 text-neutral-400" />

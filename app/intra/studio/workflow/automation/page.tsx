@@ -36,7 +36,7 @@ export default function AutomationPage() {
                 </div>
                 <button
                     onClick={() => { setEditingRule(null); setIsBuilderOpen(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
                 >
                     <Plus className="h-3.5 w-3.5" />
                     새 자동화

@@ -56,7 +56,7 @@ export default function ApprovalProgressPage() {
 
             {/* 요약 */}
             <div className="flex gap-3 mb-4">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200">
                     <FileText className="w-4 h-4 text-blue-500" />
                     <span className="text-xs text-neutral-600">진행 중</span>
                     <span className="text-sm font-semibold">{progressItems.length}건</span>
@@ -64,7 +64,7 @@ export default function ApprovalProgressPage() {
             </div>
 
             {/* 테이블 */}
-            <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
+            <div className="bg-white border border-neutral-200 overflow-hidden">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b border-neutral-100 bg-neutral-50">
