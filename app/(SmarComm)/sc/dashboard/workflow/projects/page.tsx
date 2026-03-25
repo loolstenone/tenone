@@ -56,7 +56,7 @@ export default function ProjectsPage() {
         {filtered.length === 0 && <div className="col-span-2 text-center py-16 text-text-muted text-sm">조건에 맞는 프로젝트가 없습니다</div>}
       </div>
 
-      <NextStepCTA stage="기획 → 제작" title="프로젝트에 필요한 소재 제작" description="기획된 캠페인에 맞는 카피, 배너, 영상 소재를 AI로 제작하세요" actionLabel="소재 제작" href="/sc/dashboard/creative" />
+      <NextStepCTA stage="기획 → 제작" title="프로젝트에 필요한 소재 제작" description="기획된 캠페인에 맞는 카피, 배너, 영상 소재를 AI로 제작하세요" actionLabel="소재 제작" href="/dashboard/creative" />
     </div>
   );
 }

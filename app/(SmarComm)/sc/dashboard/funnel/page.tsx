@@ -174,7 +174,7 @@ export default function FunnelPage() {
         </div>
       </div>
 
-      <NextStepCTA stage="진단 → 기획" title="이탈 구간 기반으로 사용자 여정 설계" description="퍼널 병목을 해소하는 고객 접점 시나리오를 설계하세요" actionLabel="여정 설계" href="/sc/dashboard/journey" />
+      <NextStepCTA stage="진단 → 기획" title="이탈 구간 기반으로 사용자 여정 설계" description="퍼널 병목을 해소하는 고객 접점 시나리오를 설계하세요" actionLabel="여정 설계" href="/dashboard/journey" />
     </div>
   );
 }

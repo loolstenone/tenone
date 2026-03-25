@@ -207,7 +207,7 @@ export default function CreativePage() {
         </table>
       </div>
 
-      <NextStepCTA stage="제작 → 실행" title="완성된 소재를 광고 채널에 집행" description="제작된 카피와 배너를 네이버, 메타, 구글 등에서 바로 집행하세요" actionLabel="캠페인 집행" href="/sc/dashboard/campaigns" />
+      <NextStepCTA stage="제작 → 실행" title="완성된 소재를 광고 채널에 집행" description="제작된 카피와 배너를 네이버, 메타, 구글 등에서 바로 집행하세요" actionLabel="캠페인 집행" href="/dashboard/campaigns" />
     </div>
   );
 }

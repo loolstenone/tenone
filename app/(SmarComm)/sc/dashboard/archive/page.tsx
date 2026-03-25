@@ -26,7 +26,7 @@ export default function ArchivePage() {
           <h1 className="text-xl font-bold text-text">소재 아카이브</h1>
           <p className="mt-1 text-xs text-text-muted">제작한 소재를 저장하고 관리하세요</p>
         </div>
-        <button onClick={() => window.location.href = '/sc/dashboard/creative'} className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
+        <button onClick={() => window.location.href = '/dashboard/creative'} className="flex items-center gap-1.5 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-sub">
           <Plus size={15} /> 새 소재
         </button>
       </div>
@@ -102,7 +102,7 @@ export default function ArchivePage() {
         </div>
       )}
 
-      <NextStepCTA stage="제작 → 실행" title="보관된 소재를 캠페인에 활용" description="승인된 소재를 선택하여 광고 캠페인을 생성하세요" actionLabel="캠페인 생성" href="/sc/dashboard/campaigns" />
+      <NextStepCTA stage="제작 → 실행" title="보관된 소재를 캠페인에 활용" description="승인된 소재를 선택하여 광고 캠페인을 생성하세요" actionLabel="캠페인 생성" href="/dashboard/campaigns" />
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { LogOut, ChevronDown, PanelRightOpen, PanelRightClose } from 'lucide-rea
 import SmarCommSidebar from '@/components/SmarCommSidebar';
 import SCRightPanel from '@/components/smarcomm/RightPanel';
 import { getSCUser, scLogout } from '@/lib/smarcomm/auth';
-import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 
 export const SCSidebarContext = createContext({
@@ -33,35 +32,29 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
 
-  const { isAuthenticated, isLoading: authLoading, user: supaUser } = useAuth();
-
   useEffect(() => {
     const u = getSCUser();
 
     // SC 자체 인증이 있으면 바로 진입
     if (u) {
       setUser(u);
-      setReady(true);
-      return;
-    }
-
-    // Supabase Auth 로딩 중이면 2초까지만 대기
-    if (authLoading) {
-      const timer = setTimeout(() => {
-        // 2초 후에도 로딩 중이면 로그인으로
-        if (!getSCUser()) {
+    } else {
+      // Supabase 세션을 직접 체크 (useAuth 의존 없이)
+      const { createClient } = require('@supabase/supabase-js');
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      sb.auth.getSession().then(({ data }: any) => {
+        if (data?.session?.user) {
+          setUser({ email: data.session.user.email || '' });
+          setReady(true);
+        } else {
           router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
         }
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-
-    // Supabase Auth로 로그인한 경우
-    if (isAuthenticated && supaUser) {
-      setUser({ email: supaUser.email || '' });
-    } else {
-      // 둘 다 안 됨 → 로그인으로
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      }).catch(() => {
+        router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      });
       return;
     }
 
@@ -73,7 +66,7 @@ export default function SCDashboardLayout({ children }: { children: React.ReactN
     }
 
     setReady(true);
-  }, [router, authLoading, isAuthenticated, supaUser]);
+  }, [router]);
 
   // 페이지 이동 시 모바일 사이드바 접기
   useEffect(() => {

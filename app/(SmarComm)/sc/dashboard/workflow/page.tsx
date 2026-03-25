@@ -5,10 +5,10 @@ import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight } from "lucide-r
 import { useWorkflow } from "@/lib/smarcomm/workflow-context";
 
 const modules = [
-  { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/sc/dashboard/workflow/pipeline", icon: GitBranch },
-  { name: "칸반 보드", description: "드래그앤드롭으로 태스크를 관리합니다.", href: "/sc/dashboard/workflow/kanban", icon: KanbanSquare },
-  { name: "프로젝트", description: "캠페인별 프로젝트 진행 현황을 관리합니다.", href: "/sc/dashboard/workflow/projects", icon: FolderKanban },
-  { name: "자동화", description: "자동화 규칙을 설정하고 관리합니다.", href: "/sc/dashboard/workflow/automation", icon: Zap },
+  { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/dashboard/workflow/pipeline", icon: GitBranch },
+  { name: "칸반 보드", description: "드래그앤드롭으로 태스크를 관리합니다.", href: "/dashboard/workflow/kanban", icon: KanbanSquare },
+  { name: "프로젝트", description: "캠페인별 프로젝트 진행 현황을 관리합니다.", href: "/dashboard/workflow/projects", icon: FolderKanban },
+  { name: "자동화", description: "자동화 규칙을 설정하고 관리합니다.", href: "/dashboard/workflow/automation", icon: Zap },
 ];
 
 export default function WorkflowDashboard() {
@@ -51,7 +51,7 @@ export default function WorkflowDashboard() {
       <div className="mt-6 rounded-2xl border border-border bg-white">
         <div className="px-5 py-3 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-text">최근 태스크</h3>
-          <Link href="/sc/dashboard/workflow/kanban" className="text-xs text-text-muted hover:text-text">전체 보기 →</Link>
+          <Link href="/dashboard/workflow/kanban" className="text-xs text-text-muted hover:text-text">전체 보기 →</Link>
         </div>
         <ul className="divide-y divide-border">
           {tasks.slice(0, 5).map(task => (

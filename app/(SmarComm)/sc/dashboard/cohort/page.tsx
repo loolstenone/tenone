@@ -162,7 +162,7 @@ export default function CohortPage() {
         </table>
       </div>
 
-      <NextStepCTA stage="진단 → 실행" title="이 세그먼트에 타겟 메시지 발송" description="코호트 그룹을 대상으로 푸시, 이메일, 카카오 메시지를 발송하세요" actionLabel="메시지 발송" href="/sc/dashboard/crm/push" />
+      <NextStepCTA stage="진단 → 실행" title="이 세그먼트에 타겟 메시지 발송" description="코호트 그룹을 대상으로 푸시, 이메일, 카카오 메시지를 발송하세요" actionLabel="메시지 발송" href="/dashboard/crm/push" />
     </div>
   );
 }

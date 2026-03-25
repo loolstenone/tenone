@@ -85,7 +85,7 @@ export default function Header() {
                     워크스페이스
                   </Link>
                   <Link
-                    href="/sc/dashboard/profile"
+                    href="/dashboard/profile"
                     className="block px-4 py-2.5 text-sm text-text-sub hover:bg-surface hover:text-text"
                     onClick={() => setProfileOpen(false)}
                   >
@@ -137,7 +137,7 @@ export default function Header() {
                     <div className="text-xs text-text-muted">Free 플랜</div>
                   </div>
                 </div>
-                <Link href="/sc/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
+                <Link href="/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
                 <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-text-muted">
                   <LogOut size={14} /> 로그아웃
                 </button>

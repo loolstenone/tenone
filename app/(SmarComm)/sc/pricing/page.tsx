@@ -78,7 +78,7 @@ const TIERS = [
   {
     name: 'Ultra', monthlyPrice: 990000, yearlyPrice: 790000,
     target: '기업 · 에이전시',
-    cta: '문의하기', ctaLink: '/sc', accent: false, badge: 'Enterprise',
+    cta: '문의하기', ctaLink: '/', accent: false, badge: 'Enterprise',
     features: [
       { label: 'GEO & SEO 무제한 진단', included: true },
       { label: '경쟁사 비교 무제한', included: true },

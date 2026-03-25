@@ -130,7 +130,7 @@ export default function GeoPage() {
       {tab === 'competitors' && <CompetitorsTab pc={pc} />}
       {tab === 'brand' && <BrandTab pc={pc} />}
 
-      <NextStepCTA stage="진단 → 기획" title="AI 가시성 개선 프로젝트 시작" description="AI 검색에서 브랜드 노출을 높이기 위한 GEO 최적화 프로젝트를 생성하세요" actionLabel="프로젝트 생성" href="/sc/dashboard/workflow/projects" />
+      <NextStepCTA stage="진단 → 기획" title="AI 가시성 개선 프로젝트 시작" description="AI 검색에서 브랜드 노출을 높이기 위한 GEO 최적화 프로젝트를 생성하세요" actionLabel="프로젝트 생성" href="/dashboard/workflow/projects" />
     </div>
   );
 }
@@ -239,7 +239,7 @@ function OverviewTab({ pc }: { pc: string[] }) {
         <div className="rounded-2xl border border-border bg-white p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text">주요 프롬프트</h2>
-            <Link href="/sc/dashboard/geo/prompts" className="text-[10px] text-text-muted hover:text-text">전체 →</Link>
+            <Link href="/dashboard/geo/prompts" className="text-[10px] text-text-muted hover:text-text">전체 →</Link>
           </div>
           <div className="space-y-2">
             {TOP_PROMPTS.map((tp, i) => (

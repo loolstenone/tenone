@@ -18,61 +18,61 @@ const MENU_SECTIONS = [
   {
     title: '',
     items: [
-      { href: '/sc/dashboard', label: '대시보드', icon: LayoutDashboard },
+      { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
     ],
   },
   {
     title: '진단',
     items: [
-      { href: '/sc/dashboard/scan', label: '사이트 진단', icon: Crosshair },
-      { href: '/sc/dashboard/journey', label: '사용자 여정', icon: Route },
-      { href: '/sc/dashboard/funnel', label: '퍼널 분석', icon: GitBranch },
-      { href: '/sc/dashboard/cohort', label: '코호트', icon: PieChart },
-      { href: '/sc/dashboard/events', label: '이벤트 관리', icon: Activity },
+      { href: '/dashboard/scan', label: '사이트 진단', icon: Crosshair },
+      { href: '/dashboard/journey', label: '사용자 여정', icon: Route },
+      { href: '/dashboard/funnel', label: '퍼널 분석', icon: GitBranch },
+      { href: '/dashboard/cohort', label: '코호트', icon: PieChart },
+      { href: '/dashboard/events', label: '이벤트 관리', icon: Activity },
     ],
   },
   {
     title: '기획',
     items: [
-      { href: '/sc/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban },
-      { href: '/sc/dashboard/workflow/kanban', label: '칸반 보드', icon: KanbanSquare },
-      { href: '/sc/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays },
+      { href: '/dashboard/workflow/projects', label: '프로젝트', icon: FolderKanban },
+      { href: '/dashboard/workflow/kanban', label: '칸반 보드', icon: KanbanSquare },
+      { href: '/dashboard/calendar', label: '마케팅 캘린더', icon: CalendarDays },
     ],
   },
   {
     title: '제작',
     items: [
-      { href: '/sc/dashboard/creative', label: '소재 제작', icon: Brush },
-      { href: '/sc/dashboard/workflow/pipeline', label: '콘텐츠 파이프라인', icon: Workflow },
-      { href: '/sc/dashboard/archive', label: '소재 아카이브', icon: Archive },
+      { href: '/dashboard/creative', label: '소재 제작', icon: Brush },
+      { href: '/dashboard/workflow/pipeline', label: '콘텐츠 파이프라인', icon: Workflow },
+      { href: '/dashboard/archive', label: '소재 아카이브', icon: Archive },
     ],
   },
   {
     title: '실행',
     items: [
-      { href: '/sc/dashboard/campaigns', label: '광고 집행', icon: Rocket },
-      { href: '/sc/dashboard/abtest', label: 'A/B 테스트', icon: Gauge },
-      { href: '/sc/dashboard/crm', label: '고객 관리', icon: Users },
-      { href: '/sc/dashboard/crm/push', label: '푸시 메시지', icon: Bell },
-      { href: '/sc/dashboard/crm/email', label: '이메일', icon: Mail },
-      { href: '/sc/dashboard/crm/kakao', label: '카카오', icon: MessageSquare },
-      { href: '/sc/dashboard/workflow/automation', label: '자동화', icon: Zap },
+      { href: '/dashboard/campaigns', label: '광고 집행', icon: Rocket },
+      { href: '/dashboard/abtest', label: 'A/B 테스트', icon: Gauge },
+      { href: '/dashboard/crm', label: '고객 관리', icon: Users },
+      { href: '/dashboard/crm/push', label: '푸시 메시지', icon: Bell },
+      { href: '/dashboard/crm/email', label: '이메일', icon: Mail },
+      { href: '/dashboard/crm/kakao', label: '카카오', icon: MessageSquare },
+      { href: '/dashboard/workflow/automation', label: '자동화', icon: Zap },
     ],
   },
   {
     title: '결과',
     items: [
-      { href: '/sc/dashboard/analytics', label: '매출 분석', icon: LineChart },
-      { href: '/sc/dashboard/reports', label: '캠페인 보고서', icon: FileBarChart },
-      { href: '/sc/dashboard/data-reports', label: '데이터 리포트', icon: BarChart3 },
+      { href: '/dashboard/analytics', label: '매출 분석', icon: LineChart },
+      { href: '/dashboard/reports', label: '캠페인 보고서', icon: FileBarChart },
+      { href: '/dashboard/data-reports', label: '데이터 리포트', icon: BarChart3 },
     ],
   },
   {
     title: '설정',
     items: [
-      { href: '/sc/dashboard/admin', label: '사이트 관리', icon: Shield },
-      { href: '/sc/dashboard/workflow', label: '워크플로우 현황', icon: ListChecks },
-      { href: '/sc/dashboard/profile', label: '워크스페이스 설정', icon: Wrench },
+      { href: '/dashboard/admin', label: '사이트 관리', icon: Shield },
+      { href: '/dashboard/workflow', label: '워크플로우 현황', icon: ListChecks },
+      { href: '/dashboard/profile', label: '워크스페이스 설정', icon: Wrench },
     ],
   },
 ];
@@ -165,7 +165,7 @@ function SidebarContent({ companyName, companyLogo, collapsed, pathname, onNavig
             className={`flex items-center gap-2.5 min-w-0 ${isMobile && collapsed ? 'cursor-pointer' : ''}`}
             onClick={isMobile && collapsed && onExpand ? onExpand : undefined}
           >
-            <Link href={companyLogo ? '/sc/dashboard' : '/sc/dashboard/profile'} onClick={onNavigate} className="shrink-0" title={companyLogo ? companyName || 'Workspace' : '로고 설정'}>
+            <Link href={companyLogo ? '/dashboard' : '/dashboard/profile'} onClick={onNavigate} className="shrink-0" title={companyLogo ? companyName || 'Workspace' : '로고 설정'}>
               {companyLogo ? (
                 <img src={companyLogo} alt="" className="h-8 w-8 rounded-lg object-cover" />
               ) : (
@@ -175,7 +175,7 @@ function SidebarContent({ companyName, companyLogo, collapsed, pathname, onNavig
               )}
             </Link>
             {!collapsed && (
-              <Link href={companyLogo ? '/sc/dashboard' : '/sc/dashboard/profile'} onClick={onNavigate} className="min-w-0 flex-1">
+              <Link href={companyLogo ? '/dashboard' : '/dashboard/profile'} onClick={onNavigate} className="min-w-0 flex-1">
                 <div className="text-[10px] text-text-muted truncate">{companyName || '회사명 미설정'}</div>
                 <div className="text-base font-extrabold text-text tracking-tight leading-tight">Workspace</div>
               </Link>
