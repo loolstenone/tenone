@@ -103,7 +103,7 @@ export default function SmarCommHeader() {
             </div>
           ) : (
             <>
-              <Link href={`/login?redirect=${encodeURIComponent(currentPath)}`} className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
+              <Link href={`/sc/login?redirect=${encodeURIComponent(currentPath)}`} className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">
                 로그인
               </Link>
               <Link href="/signup" className="rounded-full bg-text px-5 py-2 text-[13px] font-semibold text-white transition-all hover:bg-accent-sub">
@@ -141,7 +141,7 @@ export default function SmarCommHeader() {
               </>
             ) : (
               <>
-                <Link href={`/login?redirect=${encodeURIComponent(currentPath)}`} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
+                <Link href={`/sc/login?redirect=${encodeURIComponent(currentPath)}`} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
                 <Link href="/signup" className="mt-1 rounded-full bg-text px-4 py-2.5 text-center text-sm font-semibold text-white" onClick={() => setMenuOpen(false)}>무료 가입</Link>
               </>
             )}
