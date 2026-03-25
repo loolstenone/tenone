@@ -1,7 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Layers, Target, Zap, Users, BarChart3, BookOpen, Shield } from 'lucide-react';
+
+const HERO_COPIES = [
+  { head: '인사, 재무, 경비\n왜 다 쪼개 놨어?', accent: 'WIO', tail: ' 하나로 일하세요' },
+  { head: 'Slack, Notion, 엑셀\n언제까지 따로 쓸 거야?', accent: 'WIO', tail: ' 하나로 일하세요' },
+  { head: '프로젝트 끝나면\n정산은 누가 해?', accent: 'WIO', tail: '가 자동으로 합니다' },
+  { head: '5개 앱 열어서\n한 줄 보고하는 거\n이상하지 않아?', accent: 'WIO', tail: ' 하나로 일하세요' },
+  { head: '도구는 늘었는데\n일은 왜 더 복잡해졌을까?', accent: 'WIO', tail: ' 하나면 됩니다' },
+];
 
 const MODULES = [
   { icon: Target, name: 'GPR', desc: 'Goal → Plan → Result. 조직부터 개인까지 목표를 연결한다.' },
@@ -20,6 +29,8 @@ const TARGETS = [
 ];
 
 export default function WIOHome() {
+  const hero = useMemo(() => HERO_COPIES[Math.floor(Math.random() * HERO_COPIES.length)], []);
+
   return (
     <>
       {/* Header */}
@@ -45,10 +56,9 @@ export default function WIOHome() {
           <div className="inline-block mb-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 text-xs text-indigo-300 font-medium">
             Solution & Consulting
           </div>
-          <h1 className="text-4xl md:text-6xl font-black leading-[1.15] mb-3">
-            왜 서비스를<br />
-            다 쪼개 놨어,<br />
-            <span className="text-indigo-400">WIO</span> 하나로 일하세요
+          <h1 className="text-4xl md:text-5xl font-black leading-[1.2] mb-3 whitespace-pre-line">
+            {hero.head.split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}
+            <span className="text-indigo-400">{hero.accent}</span>{hero.tail}
           </h1>
           <p className="text-xl md:text-2xl font-light text-slate-300 tracking-wide mb-6">Work In One</p>
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
