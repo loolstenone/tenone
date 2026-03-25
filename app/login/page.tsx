@@ -23,13 +23,6 @@ function LoginForm() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // SmarComm 도메인이면 SmarComm 로그인으로 리다이렉트
-    useEffect(() => {
-        if (typeof window !== 'undefined' && window.location.hostname.includes('smarcomm')) {
-            window.location.href = '/sc/login' + window.location.search;
-        }
-    }, []);
-
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
             const canIntraAccess = user?.accountType && user.accountType !== 'member';

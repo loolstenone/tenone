@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
+import * as chatDb from '@/lib/supabase/chat';
 import { initialStaff, divisions } from "@/lib/staff-data";
 import { initialPeople, madleagueClubs } from "@/lib/people-data";
 import {
@@ -204,10 +205,132 @@ export default function MessengerPage() {
     const [chatSearchQuery, setChatSearchQuery] = useState('');
     const [showChatSearch, setShowChatSearch] = useState(false);
 
+    // DB 연동 상태
+    const [dbLoaded, setDbLoaded] = useState(false);
+
     // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const msgCounter = useRef(100);
+    const realtimeUnsub = useRef<(() => void) | null>(null);
+
+    // ── DB: 초기 스레드 로드 ──
+    useEffect(() => {
+        if (!user?.id) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const threads = await chatDb.fetchThreads(user.id);
+                if (cancelled) return;
+                if (threads.length > 0) {
+                    // DB 스레드 → 로컬 ChatThread 형태로 변환
+                    const converted: ChatThread[] = threads.map(t => ({
+                        id: t.id,
+                        name: t.name || '대화',
+                        participants: t.participants,
+                        messages: [], // 메시지는 스레드 선택 시 로드
+                        isGroup: t.is_group,
+                        lastActive: new Date(t.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    }));
+                    setChats(converted);
+                    setDbLoaded(true);
+                } else {
+                    // DB에 스레드 없으면 Mock 유지
+                    setDbLoaded(false);
+                }
+            } catch {
+                // DB 에러 시 Mock 유지
+                setDbLoaded(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user?.id]);
+
+    // ── DB: 전체 스레드 실시간 구독 (새 메시지 → 스레드 목록 갱신) ──
+    useEffect(() => {
+        if (!user?.id || !dbLoaded) return;
+        const unsub = chatDb.subscribeToAllThreads(user.id, (newMsg) => {
+            // 현재 선택된 스레드에 메시지가 오면 messages에 추가
+            setChats(prev => prev.map(c => {
+                if (c.id !== newMsg.thread_id) return c;
+                // 이미 존재하는 메시지면 무시 (optimistic update 중복 방지)
+                if (c.messages.some(m => m.id === newMsg.id)) return c;
+                const converted: Message = {
+                    id: newMsg.id,
+                    from: newMsg.sender_id,
+                    text: newMsg.content,
+                    time: new Date(newMsg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'chat',
+                    read: newMsg.read_by?.includes(user.id) || false,
+                };
+                return { ...c, messages: [...c.messages, converted], lastActive: converted.time };
+            }));
+        });
+        return () => unsub();
+    }, [user?.id, dbLoaded]);
+
+    // ── DB: 스레드 선택 시 메시지 로드 + 개별 구독 + 읽음 처리 ──
+    useEffect(() => {
+        if (!user?.id || !dbLoaded || !selectedChat || selectedChat === 'notifications') return;
+        let cancelled = false;
+
+        // 이전 구독 해제
+        if (realtimeUnsub.current) {
+            realtimeUnsub.current();
+            realtimeUnsub.current = null;
+        }
+
+        (async () => {
+            try {
+                const msgs = await chatDb.fetchMessages(selectedChat);
+                if (cancelled) return;
+                const converted: Message[] = msgs.map(m => ({
+                    id: m.id,
+                    from: m.sender_id,
+                    text: m.content,
+                    time: new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'chat' as const,
+                    read: m.read_by?.includes(user.id) || false,
+                }));
+                setChats(prev => prev.map(c =>
+                    c.id === selectedChat ? { ...c, messages: converted } : c
+                ));
+
+                // 읽음 처리
+                chatDb.markAsRead(selectedChat, user.id);
+            } catch {
+                // 에러 시 기존 메시지 유지
+            }
+        })();
+
+        // 개별 스레드 실시간 구독
+        realtimeUnsub.current = chatDb.subscribeToMessages(selectedChat, (newMsg) => {
+            if (cancelled) return;
+            setChats(prev => prev.map(c => {
+                if (c.id !== selectedChat) return c;
+                if (c.messages.some(m => m.id === newMsg.id)) return c;
+                const converted: Message = {
+                    id: newMsg.id,
+                    from: newMsg.sender_id,
+                    text: newMsg.content,
+                    time: new Date(newMsg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'chat',
+                    read: newMsg.read_by?.includes(user.id) || false,
+                };
+                return { ...c, messages: [...c.messages, converted], lastActive: converted.time };
+            }));
+            // 새 메시지 읽음 처리
+            chatDb.markAsRead(selectedChat, user.id);
+        });
+
+        return () => {
+            cancelled = true;
+            if (realtimeUnsub.current) {
+                realtimeUnsub.current();
+                realtimeUnsub.current = null;
+            }
+        };
+    }, [selectedChat, user?.id, dbLoaded]);
 
     // 스크롤 → 최신 메시지
     useEffect(() => {
@@ -281,6 +404,10 @@ export default function MessengerPage() {
         setSelectedChat(chatId);
         setChatMenuOpen(null);
         setMobileView('chat');
+        // DB 모드: 읽음 처리
+        if (user?.id && dbLoaded && chatId !== 'notifications') {
+            chatDb.markAsRead(chatId, user.id);
+        }
     };
 
     const goMobileBack = () => {
@@ -314,14 +441,18 @@ export default function MessengerPage() {
         e.target.value = '';
     };
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (!newMessage.trim() || !selectedThread) return;
         const now = new Date();
         const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const content = newMessage.trim();
+
+        // Optimistic update
+        const optimisticId = `msg-${msgCounter.current++}`;
         const msg: Message = {
-            id: `msg-${msgCounter.current++}`,
+            id: optimisticId,
             from: currentUserId,
-            text: newMessage.trim(),
+            text: content,
             time: timeStr,
             type: 'chat',
             read: false,
@@ -333,35 +464,78 @@ export default function MessengerPage() {
         ));
         setNewMessage('');
 
-        // 자동 응답 (1.5초 후)
-        const threadRef = selectedThread;
-        const chatRef = selectedChat;
-        setTimeout(() => {
-            const otherParticipant = threadRef.participants.find(p => p !== currentUserId);
-            if (!otherParticipant) return;
-            const replies = [
-                '네, 알겠습니다!', '확인했습니다.', '좋은 생각이에요.', '바로 처리하겠습니다.',
-                '내일까지 정리해서 공유드릴게요.', '감사합니다!', '동의합니다.',
-            ];
-            const reply: Message = {
-                id: `msg-${msgCounter.current++}`,
-                from: otherParticipant,
-                text: replies[Math.floor(Math.random() * replies.length)],
-                time: timeStr,
-                type: 'chat',
-                read: false,
-            };
-            setChats(prev => prev.map(c =>
-                c.id === chatRef ? { ...c, messages: [...c.messages, reply] } : c
-            ));
-        }, 1500);
+        // DB 전송 (로그인 + DB 연동 시)
+        if (user?.id && dbLoaded) {
+            const sent = await chatDb.sendMessage({
+                threadId: selectedThread.id,
+                senderId: user.id,
+                senderName: user.name || '나',
+                content,
+            });
+            // DB 전송 성공 시 optimistic 메시지 ID를 실제 ID로 교체
+            if (sent) {
+                setChats(prev => prev.map(c => {
+                    if (c.id !== selectedChat) return c;
+                    return {
+                        ...c,
+                        messages: c.messages.map(m =>
+                            m.id === optimisticId ? { ...m, id: sent.id } : m
+                        ),
+                    };
+                }));
+            }
+        } else {
+            // Mock 모드: 자동 응답 (1.5초 후)
+            const threadRef = selectedThread;
+            const chatRef = selectedChat;
+            setTimeout(() => {
+                const otherParticipant = threadRef.participants.find(p => p !== currentUserId);
+                if (!otherParticipant) return;
+                const replies = [
+                    '네, 알겠습니다!', '확인했습니다.', '좋은 생각이에요.', '바로 처리하겠습니다.',
+                    '내일까지 정리해서 공유드릴게요.', '감사합니다!', '동의합니다.',
+                ];
+                const reply: Message = {
+                    id: `msg-${msgCounter.current++}`,
+                    from: otherParticipant,
+                    text: replies[Math.floor(Math.random() * replies.length)],
+                    time: timeStr,
+                    type: 'chat',
+                    read: false,
+                };
+                setChats(prev => prev.map(c =>
+                    c.id === chatRef ? { ...c, messages: [...c.messages, reply] } : c
+                ));
+            }, 1500);
+        }
     };
 
-    const startChatWith = (personId: string) => {
+    const startChatWith = async (personId: string) => {
         const existing = chats.find(c => !c.isGroup && c.participants.includes(personId) && c.participants.includes(currentUserId));
         if (existing) {
             setSelectedChat(existing.id);
+        } else if (user?.id && dbLoaded) {
+            // DB 모드: 스레드 생성
+            const person = getAnyPerson(personId);
+            const thread = await chatDb.createThread({
+                isGroup: false,
+                participants: [user.id, personId],
+                createdBy: user.id,
+            });
+            if (thread) {
+                const newChat: ChatThread = {
+                    id: thread.id,
+                    name: person?.name || '새 대화',
+                    participants: thread.participants,
+                    messages: [],
+                    isGroup: false,
+                    lastActive: '방금',
+                };
+                setChats(prev => [newChat, ...prev]);
+                setSelectedChat(thread.id);
+            }
         } else {
+            // Mock 모드
             const person = getAnyPerson(personId);
             const newChat: ChatThread = {
                 id: `c-new-${personId}`,
@@ -378,26 +552,59 @@ export default function MessengerPage() {
         setMobileView('chat');
     };
 
-    const createGroupChat = () => {
+    const createGroupChat = async () => {
         if (groupSelectedMembers.size < 1 || !groupName.trim()) return;
         const participants = [currentUserId, ...Array.from(groupSelectedMembers)];
-        const newChat: ChatThread = {
-            id: `c-group-${Date.now()}`,
-            name: groupName.trim(),
-            participants,
-            messages: [{
-                id: `msg-${msgCounter.current++}`,
-                from: 'system',
-                text: `그룹 채팅이 생성되었습니다. (${participants.length}명)`,
-                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                type: 'chat',
-                read: true,
-            }],
-            isGroup: true,
-            lastActive: '방금',
-        };
-        setChats(prev => [newChat, ...prev]);
-        setSelectedChat(newChat.id);
+        const name = groupName.trim();
+
+        if (user?.id && dbLoaded) {
+            // DB 모드
+            const thread = await chatDb.createThread({
+                name,
+                isGroup: true,
+                participants,
+                createdBy: user.id,
+            });
+            if (thread) {
+                const systemMsg: Message = {
+                    id: `msg-${msgCounter.current++}`,
+                    from: 'system',
+                    text: `그룹 채팅이 생성되었습니다. (${participants.length}명)`,
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'chat',
+                    read: true,
+                };
+                const newChat: ChatThread = {
+                    id: thread.id,
+                    name,
+                    participants: thread.participants,
+                    messages: [systemMsg],
+                    isGroup: true,
+                    lastActive: '방금',
+                };
+                setChats(prev => [newChat, ...prev]);
+                setSelectedChat(thread.id);
+            }
+        } else {
+            // Mock 모드
+            const newChat: ChatThread = {
+                id: `c-group-${Date.now()}`,
+                name,
+                participants,
+                messages: [{
+                    id: `msg-${msgCounter.current++}`,
+                    from: 'system',
+                    text: `그룹 채팅이 생성되었습니다. (${participants.length}명)`,
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'chat',
+                    read: true,
+                }],
+                isGroup: true,
+                lastActive: '방금',
+            };
+            setChats(prev => [newChat, ...prev]);
+            setSelectedChat(newChat.id);
+        }
         setShowNewGroupModal(false);
         setGroupSelectedMembers(new Set());
         setGroupName('');
