@@ -361,3 +361,99 @@ export async function sendChatMessage(threadId: string, senderId: string, conten
   const { error } = await supabase.from('wio_chat_messages').insert({ thread_id: threadId, sender_id: senderId, content });
   return !error;
 }
+
+// ══════════════════════════════════════
+// Sprint 3: 포인트
+// ══════════════════════════════════════
+
+export async function fetchMemberPoints(memberId: string): Promise<{ total: number; logs: any[] }> {
+  const { data } = await supabase.from('wio_points').select('*').eq('member_id', memberId).order('created_at', { ascending: false });
+  const logs = (data || []).map(r => snakeToCamel(r));
+  const total = logs.reduce((s: number, l: any) => s + (l.points || 0), 0);
+  return { total, logs };
+}
+
+export async function addPoints(tenantId: string, memberId: string, points: number, activity: string, refId?: string, refType?: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_points').insert({ tenant_id: tenantId, member_id: memberId, points, activity, reference_id: refId, reference_type: refType });
+  return !error;
+}
+
+export function getGrade(totalPoints: number): string {
+  if (totalPoints >= 10000) return 'Diamond';
+  if (totalPoints >= 5000) return 'Platinum';
+  if (totalPoints >= 2000) return 'Gold';
+  if (totalPoints >= 500) return 'Silver';
+  return 'Bronze';
+}
+
+// ══════════════════════════════════════
+// Sprint 3: 기회 (Opportunity)
+// ══════════════════════════════════════
+
+export async function fetchOpportunities(tenantId: string, status?: string): Promise<any[]> {
+  let query = supabase.from('wio_opportunities').select('*, assigned:wio_members!wio_opportunities_assigned_to_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  if (status) query = query.eq('status', status);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createOpportunity(opp: { tenantId: string; title: string; source?: string; url?: string; description?: string; estimatedValue?: number; deadline?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_opportunities').insert(camelToSnake(opp as any));
+  return !error;
+}
+
+export async function updateOpportunityStatus(oppId: string, status: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_opportunities').update({ status, updated_at: new Date().toISOString() }).eq('id', oppId);
+  return !error;
+}
+
+// 기회 → 프로젝트 전환
+export async function convertOpportunityToProject(oppId: string, tenantId: string, pmId: string): Promise<string | null> {
+  const opp = await supabase.from('wio_opportunities').select('*').eq('id', oppId).single();
+  if (!opp.data) return null;
+  const code = await generateProjectCode(tenantId, 'client');
+  const project = await createProject({
+    tenantId, code, title: opp.data.title, type: 'client' as any,
+    description: opp.data.description, budget: opp.data.estimated_value || 0, pmId, status: 'draft' as any,
+  });
+  if (!project) return null;
+  await supabase.from('wio_opportunities').update({ status: 'converted', converted_project_id: project.id }).eq('id', oppId);
+  return project.id;
+}
+
+// ══════════════════════════════════════
+// Sprint 3: 리드
+// ══════════════════════════════════════
+
+export async function fetchLeads(tenantId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_leads').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createLead(lead: { tenantId: string; name: string; company?: string; email?: string; phone?: string; source?: string; note?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_leads').insert(camelToSnake(lead as any));
+  return !error;
+}
+
+// ══════════════════════════════════════
+// Sprint 3: GPR
+// ══════════════════════════════════════
+
+export async function fetchGPRs(tenantId: string, options?: { level?: string; ownerId?: string; projectId?: string }): Promise<any[]> {
+  let query = supabase.from('wio_gpr').select('*, owner:wio_members!wio_gpr_owner_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  if (options?.level) query = query.eq('level', options.level);
+  if (options?.ownerId) query = query.eq('owner_id', options.ownerId);
+  if (options?.projectId) query = query.eq('project_id', options.projectId);
+  const { data } = await query;
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createGPR(gpr: { tenantId: string; level: string; ownerId: string; projectId?: string; period: string; goal: string; parentGprId?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_gpr').insert(camelToSnake(gpr as any));
+  return !error;
+}
+
+export async function updateGPR(gprId: string, updates: { plan?: string; result?: string; score?: number; status?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_gpr').update({ ...camelToSnake(updates as any), updated_at: new Date().toISOString() }).eq('id', gprId);
+  return !error;
+}
