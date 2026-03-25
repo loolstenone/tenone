@@ -32,16 +32,26 @@ export default function NewsletterPage() {
     // 로그인 회원이면 이미 구독 중인지 확인
     const isMemberSubscribed = isAuthenticated && user?.newsletterSubscribed;
 
-    const handleSubscribe = (e: React.FormEvent) => {
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isAuthenticated) {
-            // 회원 구독 → 프로필에 반영 (실제로는 updateProfile 호출)
-            setSubscribed(true);
-        } else {
-            if (!email.trim() || !agreePrivacy) return;
-            // 비회원 구독
-            setSubscribed(true);
-        }
+        if (!isAuthenticated && (!email.trim() || !agreePrivacy)) return;
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: isAuthenticated ? user?.email : email,
+                    name: isAuthenticated ? user?.name : guestName,
+                    memberId: isAuthenticated ? user?.id : null,
+                }),
+            });
+            if (res.ok) setSubscribed(true);
+            else alert('구독에 실패했습니다. 다시 시도해주세요.');
+        } catch { alert('네트워크 오류가 발생했습니다.'); }
+        setSubmitting(false);
     };
 
     return (
