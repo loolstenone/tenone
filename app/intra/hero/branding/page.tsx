@@ -81,7 +81,7 @@ export default function PersonalBrandingPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-1">퍼스널 브랜딩</h1>
+                <h1 className="text-xl font-bold mb-1">퍼스널 브랜딩</h1>
                 <p className="text-sm text-neutral-500">나만의 브랜드를 기획합니다</p>
             </div>
 

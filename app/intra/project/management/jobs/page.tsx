@@ -34,7 +34,7 @@ export default function JobsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold mb-1">Job 관리</h1>
+                    <h1 className="text-xl font-bold mb-1">Job 관리</h1>
                     <p className="text-sm text-neutral-500">프로젝트 하위 작업(Job)을 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">

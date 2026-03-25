@@ -9,7 +9,7 @@ export default function OrganizationsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold">Organizations</h2>
+                <h2 className="text-xl font-bold">Organizations</h2>
                 <p className="mt-2 text-neutral-500">파트너, 클라이언트, 스폰서 조직을 관리합니다.</p>
             </div>
 

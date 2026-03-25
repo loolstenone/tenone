@@ -40,7 +40,7 @@ export default function SchedulePage() {
             {/* Page Header & Controls */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold">Schedule</h2>
+                    <h2 className="text-xl font-bold">Schedule</h2>
                     <p className="mt-2 text-neutral-500">Integrated calendar for Ten:One™ Universe events.</p>
                 </div>
                 <div className="flex items-center gap-4">

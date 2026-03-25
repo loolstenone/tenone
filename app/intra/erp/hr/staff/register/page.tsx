@@ -122,7 +122,7 @@ export default function StaffRegisterPage() {
             </Link>
 
             <div>
-                <h2 className="text-2xl font-bold">직원 등록</h2>
+                <h2 className="text-xl font-bold">직원 등록</h2>
                 <p className="mt-2 text-neutral-500">새로운 직원을 시스템에 등록합니다.</p>
             </div>
 

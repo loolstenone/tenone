@@ -9,7 +9,7 @@ export default function PromotionPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">프로모션</h1>
+                <h1 className="text-xl font-bold tracking-tight">프로모션</h1>
                 <p className="text-sm text-neutral-500 mt-1">프로모션과 이벤트를 관리합니다.</p>
             </div>
 

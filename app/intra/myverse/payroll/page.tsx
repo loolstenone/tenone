@@ -65,7 +65,7 @@ export default function MyPayrollPage() {
         </div>
 
         {/* This Month Summary */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-5">
+        <div className="mb-6 border border-neutral-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-neutral-400">2026년 3월 급여</p>
@@ -102,7 +102,7 @@ export default function MyPayrollPage() {
         </div>
 
         {/* Breakdown */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white">
+        <div className="mb-6 border border-neutral-200 bg-white">
           <button
             onClick={() => setShowBreakdown(!showBreakdown)}
             className="flex w-full items-center justify-between p-4"
@@ -182,7 +182,7 @@ export default function MyPayrollPage() {
         </div>
 
         {/* Pension */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-neutral-500" />
@@ -198,7 +198,7 @@ export default function MyPayrollPage() {
         </div>
 
         {/* Recent History */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-700">
             최근 6개월 실수령액
           </h2>

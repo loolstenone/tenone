@@ -40,17 +40,17 @@ export default function ProjectProfitPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-neutral-900">프로젝트 수익성</h1>
+        <h1 className="text-xl font-bold text-neutral-900">프로젝트 수익성</h1>
         <p className="text-sm text-neutral-500">프로젝트별 손익 랭킹</p>
       </div>
 
       {/* Summary */}
       <div className="mb-6 grid grid-cols-3 gap-3">
-        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="border border-neutral-200 bg-white p-4">
           <p className="mb-1 text-xs text-neutral-500">평균 이익률</p>
           <p className="text-xl font-bold text-neutral-900">{avgRate}%</p>
         </div>
-        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="border border-neutral-200 bg-white p-4">
           <div className="mb-1 flex items-center gap-1 text-xs text-green-600">
             <ArrowUp size={12} />
             최고 이익률
@@ -58,7 +58,7 @@ export default function ProjectProfitPage() {
           <p className="text-sm font-bold text-neutral-900">{topProject.name}</p>
           <p className="text-lg font-bold text-green-600">{topProject.profitRate}%</p>
         </div>
-        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="border border-neutral-200 bg-white p-4">
           <div className="mb-1 flex items-center gap-1 text-xs text-red-500">
             <ArrowDown size={12} />
             최저 이익률
@@ -89,7 +89,7 @@ export default function ProjectProfitPage() {
       </div>
 
       {/* Project Ranking Table */}
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">

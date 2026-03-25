@@ -78,7 +78,7 @@ export default function ResumeConsultingPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-1">이력서 AI 컨설팅</h1>
+                <h1 className="text-xl font-bold mb-1">이력서 AI 컨설팅</h1>
                 <p className="text-sm text-neutral-500">AI가 이력서를 분석하고 개선점을 제안합니다</p>
             </div>
 

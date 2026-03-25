@@ -26,7 +26,7 @@ export default function ReportDraftPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-4">
-                <h1 className="text-2xl font-bold">업무보고 작성</h1>
+                <h1 className="text-xl font-bold">업무보고 작성</h1>
                 <p className="text-sm text-neutral-500">업무 보고서를 작성합니다</p>
             </div>
 

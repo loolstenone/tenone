@@ -17,7 +17,7 @@ export default function OfficeDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-bold">Studio Dashboard</h2>
+                <h2 className="text-xl font-bold">Studio Dashboard</h2>
                 <p className="mt-1 text-sm text-neutral-500">Ten:One™ 콘텐츠 제작 및 브랜드 관리</p>
             </div>
 

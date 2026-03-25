@@ -45,7 +45,7 @@ export default function KanbanPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">Kanban Board</h2>
+                    <h2 className="text-xl font-bold">Kanban Board</h2>
                     <p className="mt-2 text-neutral-500">드래그앤드롭으로 태스크를 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-3">

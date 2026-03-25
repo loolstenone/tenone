@@ -63,7 +63,7 @@ export default function SiteSettingsPage({ params }: { params: Promise<{ siteId:
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {site.name}
                 </button>
-                <h2 className="text-2xl font-bold">사이트 설정</h2>
+                <h2 className="text-xl font-bold">사이트 설정</h2>
                 <p className="text-sm text-neutral-500 mt-1">{site.name} 브랜딩 및 메타 정보 관리</p>
             </div>
 

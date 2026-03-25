@@ -37,7 +37,7 @@ export default function CommPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-2xl font-bold">커뮤니케이션</h1>
+                <h1 className="text-xl font-bold">커뮤니케이션</h1>
                 <p className="text-sm text-neutral-500 mt-1">사내 소통 · 공지 · 일정 · 지식경영</p>
             </div>
 

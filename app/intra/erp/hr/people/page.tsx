@@ -84,7 +84,7 @@ export default function PeoplePage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">회원 관리</h1>
+                <h1 className="text-xl font-bold tracking-tight">회원 관리</h1>
                 <p className="text-sm text-neutral-500 mt-1">전체 회원의 역할, 권한, 소속을 통합 관리합니다.</p>
             </div>
 
@@ -115,7 +115,7 @@ export default function PeoplePage() {
             </div>
 
             {/* Members Table */}
-            <div className="rounded-xl bg-white shadow-sm border border-neutral-100 overflow-hidden">
+            <div className="bg-white border border-neutral-100 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-neutral-100 text-left bg-neutral-50/60">

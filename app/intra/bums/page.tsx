@@ -41,7 +41,7 @@ export default function CmsDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-bold">CMS Dashboard</h2>
+                <h2 className="text-xl font-bold">CMS Dashboard</h2>
                 <p className="mt-1 text-sm text-neutral-500">사이트 & 게시판 통합 관리</p>
             </div>
 

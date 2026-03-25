@@ -46,9 +46,10 @@ function toComment(row: Record<string, unknown>): Comment {
 
 // ── Board Configs ──
 
-export async function fetchBoardConfigs(site?: SiteCode): Promise<BoardConfig[]> {
+export async function fetchBoardConfigs(site?: SiteCode, slug?: string): Promise<BoardConfig[]> {
     let query = supabase.from('board_configs').select('*').order('sort_order');
     if (site) query = query.eq('site', site);
+    if (slug) query = query.eq('slug', slug);
     const { data, error } = await query;
     if (error) throw error;
     return (data || []).map(r => {

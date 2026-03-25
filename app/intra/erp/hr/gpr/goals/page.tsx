@@ -31,7 +31,7 @@ export default function GoalSettingPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">Goal Setting</h2>
+                    <h2 className="text-xl font-bold">Goal Setting</h2>
                     <p className="mt-2 text-neutral-500">목표 설정, 합의, 추적</p>
                 </div>
                 <div className="flex items-center gap-3">

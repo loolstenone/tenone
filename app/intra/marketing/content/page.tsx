@@ -9,7 +9,7 @@ export default function ContentPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold">Content</h2>
+                <h2 className="text-xl font-bold">Content</h2>
                 <p className="mt-2 text-neutral-500">채널별 콘텐츠 발행을 관리합니다.</p>
             </div>
 

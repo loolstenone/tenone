@@ -86,13 +86,13 @@ export default function MyExpensesPage() {
 
         {/* Summary */}
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <p className="mb-1 text-xs text-neutral-400">미처리 건수</p>
             <p className="text-2xl font-bold text-neutral-800">
               {pendingCount}건
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <p className="mb-1 text-xs text-neutral-400">이번 달 총 경비</p>
             <p className="text-2xl font-bold text-neutral-800">
               {formatKRW(thisMonthTotal)}
@@ -102,7 +102,7 @@ export default function MyExpensesPage() {
 
         {/* Expense Form (expandable) */}
         {showForm && (
-          <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="mb-6 border border-neutral-200 bg-white p-4">
             <h2 className="mb-3 text-sm font-semibold text-neutral-700">
               경비 청구서 작성
             </h2>
@@ -183,7 +183,7 @@ export default function MyExpensesPage() {
         )}
 
         {/* Expense List */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-700">
             경비 내역
           </h2>
@@ -228,7 +228,7 @@ export default function MyExpensesPage() {
         </div>
 
         {/* Category Totals */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-700">
             이번 달 카테고리별 합계
           </h2>

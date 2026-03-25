@@ -48,7 +48,7 @@ export default function DivisionProfitPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-neutral-900">부문별 이익률</h1>
+        <h1 className="text-xl font-bold text-neutral-900">부문별 이익률</h1>
         <p className="text-sm text-neutral-500">2026년 2월 기준</p>
       </div>
 
@@ -93,7 +93,7 @@ export default function DivisionProfitPage() {
       </div>
 
       {/* Comparison Table */}
-      <div className="mb-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="mb-6 overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">
@@ -123,7 +123,7 @@ export default function DivisionProfitPage() {
       </div>
 
       {/* Bar Visualization */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="border border-neutral-200 bg-white p-4">
         <h3 className="mb-4 text-xs font-medium text-neutral-500">부문별 매출 비교</h3>
         <div className="space-y-3">
           {divisions.map((div) => (

@@ -44,7 +44,7 @@ export default function WorkflowDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-bold">Workflow</h2>
+                <h2 className="text-xl font-bold">Workflow</h2>
                 <p className="mt-2 text-neutral-500">프로젝트와 콘텐츠의 전체 작업 흐름을 관리합니다.</p>
             </div>
 

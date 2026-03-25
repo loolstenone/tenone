@@ -100,7 +100,7 @@ export default function HandbookPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <BookMarked className="w-5 h-5 text-neutral-400" />
-          <h1 className="text-2xl font-bold">핸드북</h1>
+          <h1 className="text-xl font-bold">핸드북</h1>
         </div>
         <p className="text-sm text-neutral-500">
           Ten:One™ 임직원이 알아야 할 기본 규정과 정책을 안내합니다.

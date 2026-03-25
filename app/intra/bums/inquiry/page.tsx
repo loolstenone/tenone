@@ -9,7 +9,7 @@ export default function InquiryPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">고객문의</h1>
+                <h1 className="text-xl font-bold tracking-tight">고객문의</h1>
                 <p className="text-sm text-neutral-500 mt-1">고객 문의를 관리하고 응대합니다.</p>
             </div>
 

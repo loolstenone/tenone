@@ -55,7 +55,7 @@ export default function PLDashboardPage() {
     <div className="max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">손익 현황</h1>
+          <h1 className="text-xl font-bold text-neutral-900">손익 현황</h1>
           <p className="text-sm text-neutral-500">전사 손익 대시보드</p>
         </div>
         <button
@@ -72,7 +72,7 @@ export default function PLDashboardPage() {
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {summaryCards.map((c) => (
-          <div key={c.label} className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div key={c.label} className="border border-neutral-200 bg-white p-4">
             <div className="mb-1 flex items-center gap-1.5 text-xs text-neutral-500">
               <c.icon size={14} />
               {c.label}
@@ -86,7 +86,7 @@ export default function PLDashboardPage() {
       </div>
 
       {/* Monthly P&L Table */}
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">

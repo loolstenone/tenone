@@ -47,7 +47,7 @@ export default function GPREvaluationPage() {
 
     return (
         <div className="max-w-5xl">
-            <h1 className="text-2xl font-bold mb-2">GPR 평가</h1>
+            <h1 className="text-xl font-bold mb-2">GPR 평가</h1>
             <p className="text-sm text-neutral-500 mb-6">분기별 자기평가 → 매니저평가 → 최종 등급 확정</p>
 
             <div className="grid grid-cols-4 gap-4 mb-6">

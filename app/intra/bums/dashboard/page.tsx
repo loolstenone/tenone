@@ -33,7 +33,7 @@ export default function BumsDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">BUMS Dashboard</h1>
+                <h1 className="text-xl font-bold tracking-tight">BUMS Dashboard</h1>
                 <p className="text-sm text-neutral-500 mt-1">사이트 & 게시판 통합 관리</p>
             </div>
 

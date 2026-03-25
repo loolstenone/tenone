@@ -59,7 +59,7 @@ export default function GPRIncentivePage() {
 
     return (
         <div className="max-w-5xl">
-            <h1 className="text-2xl font-bold mb-2">인센티브</h1>
+            <h1 className="text-xl font-bold mb-2">인센티브</h1>
             <p className="text-sm text-neutral-500 mb-6">
                 GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리
                 {dbProjectStats && <span className="ml-2 text-neutral-400">· 매출 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalRevenue)}원 / 이익 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalProfit)}원</span>}

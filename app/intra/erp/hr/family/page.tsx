@@ -27,7 +27,7 @@ export default function FamilyPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold mb-1">가족관리</h1>
+                    <h1 className="text-xl font-bold mb-1">가족관리</h1>
                     <p className="text-sm text-neutral-500">가족 및 부양가족 정보를 관리합니다.</p>
                 </div>
                 <button onClick={() => setShowForm(true)}

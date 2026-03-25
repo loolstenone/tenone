@@ -161,7 +161,7 @@ export default function PermissionsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">권한 설정</h2>
+                    <h2 className="text-xl font-bold">권한 설정</h2>
                     <p className="mt-1 text-sm text-neutral-500">
                         시스템 접근 권한을 관리합니다
                     </p>

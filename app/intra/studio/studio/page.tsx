@@ -28,7 +28,7 @@ export default function StudioPage() {
         <div className="h-[calc(100vh-8rem)] flex flex-col">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold">Content Studio</h2>
+                    <h2 className="text-xl font-bold">Content Studio</h2>
                     <p className="mt-2 text-neutral-500">Manage content pipeline from idea to publication.</p>
                 </div>
                 <div className="flex items-center gap-2">

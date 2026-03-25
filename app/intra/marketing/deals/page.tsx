@@ -24,7 +24,7 @@ export default function DealsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold">Deals</h2>
+                <h2 className="text-xl font-bold">Deals</h2>
                 <p className="mt-2 text-neutral-500">영업 파이프라인을 관리합니다.</p>
             </div>
 

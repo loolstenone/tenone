@@ -14,7 +14,7 @@ export default function UniversePage() {
         <div className="space-y-8 pb-12">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">Universe Visualization</h2>
+                    <h2 className="text-xl font-bold">Universe Visualization</h2>
                     <p className="mt-2 text-neutral-500">The structure and history of Ten:One™ Universe.</p>
                 </div>
                 <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200">

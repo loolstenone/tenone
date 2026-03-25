@@ -28,7 +28,7 @@ const recentHistory = [
 export default function CertificatesPage() {
     return (
         <div className="max-w-4xl">
-            <h1 className="text-2xl font-bold mb-2">제증명서 관리</h1>
+            <h1 className="text-xl font-bold mb-2">제증명서 관리</h1>
             <p className="text-sm text-neutral-500 mb-8">각종 증명서를 발급하고 이력을 확인합니다.</p>
 
             {/* Certificate types */}

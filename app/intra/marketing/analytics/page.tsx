@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold">Analytics</h2>
+                <h2 className="text-xl font-bold">Analytics</h2>
                 <p className="mt-2 text-neutral-500">마케팅 성과를 분석합니다.</p>
             </div>
 

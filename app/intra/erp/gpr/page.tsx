@@ -56,7 +56,7 @@ export default function GPRDashboardPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <h1 className="text-2xl font-bold">GPR</h1>
+                    <h1 className="text-xl font-bold">GPR</h1>
                     <p className="text-sm text-neutral-500">Goal — Plan — Result: 전사 목표-계획-결과 관리</p>
                 </div>
                 <span className="text-xs text-neutral-400 border border-neutral-200 px-3 py-1.5 rounded">{companyGPR.quarter}</span>

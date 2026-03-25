@@ -67,7 +67,7 @@ export default function StaffDetailPage() {
                     {member.avatarInitials}
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold">{member.name}</h1>
+                    <h1 className="text-xl font-bold">{member.name}</h1>
                     <p className="text-sm text-neutral-500">{member.position} · {member.department}</p>
                     <div className="flex items-center gap-2 mt-2">
                         <span className="text-xs font-mono text-neutral-400">{member.employeeId}</span>

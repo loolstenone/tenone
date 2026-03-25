@@ -67,14 +67,14 @@ export default function GapAnalysisPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-neutral-900">Gap 분석</h1>
+        <h1 className="text-xl font-bold text-neutral-900">Gap 분석</h1>
         <p className="text-sm text-neutral-500">계획 vs 추정 vs 실적 비교</p>
       </div>
 
       {/* Comparison Cards */}
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
         {comparisons.map((card) => (
-          <div key={card.title} className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div key={card.title} className="border border-neutral-200 bg-white p-4">
             <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-neutral-500">
               <card.icon size={14} />
               {card.title}
@@ -105,7 +105,7 @@ export default function GapAnalysisPage() {
       </div>
 
       {/* Monthly Trend Table */}
-      <div className="mb-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="mb-6 overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">
@@ -142,7 +142,7 @@ export default function GapAnalysisPage() {
       </div>
 
       {/* Bar Chart Visualization */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="border border-neutral-200 bg-white p-4">
         <h3 className="mb-4 text-xs font-medium text-neutral-500">계획 vs 실적 (매출 기준)</h3>
         <div className="space-y-3">
           {monthlyTrends.map((row) => (

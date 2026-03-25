@@ -89,7 +89,7 @@ export default function ContentManagementPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">콘텐츠 관리</h1>
+                    <h1 className="text-xl font-bold tracking-tight">콘텐츠 관리</h1>
                     <p className="text-sm text-neutral-500 mt-1">아티클, 갤러리, 영상, 팟캐스트 등 콘텐츠를 통합 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-5 py-2.5 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-all">

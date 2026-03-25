@@ -10,9 +10,10 @@ import type { SiteCode } from '@/types/board';
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const site = searchParams.get('site') as SiteCode | null;
+    const board = searchParams.get('board');
 
     try {
-        const configs = await boardDb.fetchBoardConfigs(site || undefined);
+        const configs = await boardDb.fetchBoardConfigs(site || undefined, board || undefined);
         return NextResponse.json({ configs });
     } catch (error) {
         console.error('fetchBoardConfigs error:', error);

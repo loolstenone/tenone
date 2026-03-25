@@ -43,7 +43,7 @@ export default function ActualConfirmPage() {
     <div className="max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">실적 확정</h1>
+          <h1 className="text-xl font-bold text-neutral-900">실적 확정</h1>
           <p className="text-sm text-neutral-500">2026년 {months[monthIdx]} 실적</p>
         </div>
         <span
@@ -57,7 +57,7 @@ export default function ActualConfirmPage() {
       </div>
 
       {/* Month Selector */}
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 w-fit">
+      <div className="mb-4 flex items-center gap-2 border border-neutral-200 bg-white px-3 py-1.5 w-fit">
         <button onClick={prevMonth} className="text-neutral-400 hover:text-neutral-700">
           <ChevronLeft size={16} />
         </button>
@@ -68,7 +68,7 @@ export default function ActualConfirmPage() {
       </div>
 
       {/* Actual Table */}
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">

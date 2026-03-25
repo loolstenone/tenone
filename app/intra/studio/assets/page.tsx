@@ -33,7 +33,7 @@ export default function AssetsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold">Assets Library</h2>
+                    <h2 className="text-xl font-bold">Assets Library</h2>
                     <p className="mt-2 text-neutral-500">Manage digital assets, media files, and AI prompts.</p>
                 </div>
                 <div className="flex gap-2">

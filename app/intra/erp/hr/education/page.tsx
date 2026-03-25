@@ -68,7 +68,7 @@ export default function EducationAdminPage() {
     return (
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-2">
-                <h1 className="text-2xl font-bold">교육 관리</h1>
+                <h1 className="text-xl font-bold">교육 관리</h1>
                 <div className="flex gap-2">
                     <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
                         <Download className="h-3 w-3" /> 이수 현황 다운로드

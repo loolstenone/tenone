@@ -81,7 +81,7 @@ export default function MyAttendancePage() {
         </div>
 
         {/* Today Status */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-neutral-700">오늘</h2>
             <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600">
@@ -126,22 +126,22 @@ export default function MyAttendancePage() {
 
         {/* Monthly Summary */}
         <div className="mb-6 grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <p className="mb-1 text-xs text-neutral-400">이번 달 근무일</p>
             <p className="text-xl font-bold text-neutral-800">14일</p>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <p className="mb-1 text-xs text-neutral-400">평균 근무시간</p>
             <p className="text-xl font-bold text-neutral-800">9h 12m</p>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="border border-neutral-200 bg-white p-4">
             <p className="mb-1 text-xs text-neutral-400">초과근무</p>
             <p className="text-xl font-bold text-neutral-800">4h 30m</p>
           </div>
         </div>
 
         {/* Leave Balance */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-neutral-700">
               <Palmtree className="mr-1.5 inline h-4 w-4" />
@@ -181,7 +181,7 @@ export default function MyAttendancePage() {
         </div>
 
         {/* Recent Leave Requests */}
-        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="mb-6 border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-700">
             최근 휴가 신청
           </h2>
@@ -213,7 +213,7 @@ export default function MyAttendancePage() {
         </div>
 
         {/* Monthly Calendar */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <div className="border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-700">
             <CalendarDays className="mr-1.5 inline h-4 w-4" />
             2026년 3월

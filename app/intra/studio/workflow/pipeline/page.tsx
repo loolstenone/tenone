@@ -49,7 +49,7 @@ export default function PipelinePage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">Content Pipeline</h2>
+                    <h2 className="text-xl font-bold">Content Pipeline</h2>
                     <p className="mt-2 text-neutral-500">콘텐츠 제작 흐름을 단계별로 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-2">

@@ -30,13 +30,13 @@ export default function ApprovalDraftPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-4">
-                <h1 className="text-2xl font-bold">기안하기</h1>
+                <h1 className="text-xl font-bold">기안하기</h1>
                 <p className="text-sm text-neutral-500">새로운 기안 문서를 작성합니다</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* 결재유형 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">기안 유형</label>
                     <select
                         value={type}
@@ -50,7 +50,7 @@ export default function ApprovalDraftPage() {
                 </div>
 
                 {/* 제목 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">제목</label>
                     <input
                         type="text"
@@ -62,7 +62,7 @@ export default function ApprovalDraftPage() {
                 </div>
 
                 {/* 결재라인 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-2">결재라인</label>
                     <div className="flex items-center gap-1.5">
                         {approvalLine.map((step, idx) => (
@@ -83,7 +83,7 @@ export default function ApprovalDraftPage() {
                 </div>
 
                 {/* 내용 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">내용</label>
                     <textarea
                         value={content}
@@ -95,7 +95,7 @@ export default function ApprovalDraftPage() {
                 </div>
 
                 {/* 첨부파일 */}
-                <div className="bg-white border border-neutral-200 rounded-lg p-4">
+                <div className="bg-white border border-neutral-200 p-4">
                     <label className="block text-xs font-medium text-neutral-500 mb-1.5">첨부파일</label>
                     <div className="flex items-center gap-2 px-3 py-2 border border-dashed border-neutral-300 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors">
                         <Upload className="w-4 h-4 text-neutral-400" />

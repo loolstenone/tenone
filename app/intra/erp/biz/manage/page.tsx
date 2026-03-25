@@ -42,7 +42,7 @@ export default function MonthlyForecastPage() {
     <div className="max-w-5xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">월별 추정</h1>
+          <h1 className="text-xl font-bold text-neutral-900">월별 추정</h1>
           <p className="text-sm text-neutral-500">
             2026년 {months[monthIdx]} {round}차 추정
           </p>
@@ -61,7 +61,7 @@ export default function MonthlyForecastPage() {
 
       {/* Selectors */}
       <div className="mb-4 flex items-center gap-4">
-        <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5">
+        <div className="flex items-center gap-2 border border-neutral-200 bg-white px-3 py-1.5">
           <button onClick={prevMonth} className="text-neutral-400 hover:text-neutral-700">
             <ChevronLeft size={16} />
           </button>
@@ -87,7 +87,7 @@ export default function MonthlyForecastPage() {
       </div>
 
       {/* Forecast Table */}
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">

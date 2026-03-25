@@ -58,7 +58,7 @@ export default function CareerDiagnosisPage() {
     return (
         <div className="max-w-4xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-1">역량 진단</h1>
+                <h1 className="text-xl font-bold mb-1">역량 진단</h1>
                 <p className="text-sm text-neutral-500">HIT 결과 기반 강점/약점 분석</p>
             </div>
 

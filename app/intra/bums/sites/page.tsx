@@ -82,7 +82,7 @@ export default function SitesListPage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">사이트 관리</h1>
+                <h1 className="text-xl font-bold tracking-tight">사이트 관리</h1>
                 <p className="text-sm text-neutral-500 mt-1">
                     {allSites.length}개 사이트 자동 등록 — 도메인, SEO, 브랜딩 정보를 관리합니다.
                 </p>
@@ -97,7 +97,7 @@ export default function SitesListPage() {
                             placeholder="사이트명, 도메인 검색..."
                             className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-neutral-200 shadow-sm focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100 bg-white transition-all" />
                     </div>
-                    <div className="rounded-xl bg-white border border-neutral-100 shadow-sm max-h-[600px] overflow-y-auto divide-y divide-neutral-100">
+                    <div className="bg-white border border-neutral-100 max-h-[600px] overflow-y-auto divide-y divide-neutral-100">
                         {filtered.map(site => {
                             const siteBoards = boards.filter(b => b.siteId === `site-${site.id}` || b.siteId === site.id);
                             const sitePosts = boardPosts.filter(p => p.siteId === `site-${site.id}` || p.siteId === site.id);
@@ -135,7 +135,7 @@ export default function SitesListPage() {
                 {sel && selectedSite ? (
                     <div className="space-y-5">
                         {/* 사이트 헤더 */}
-                        <div className="rounded-xl bg-white border border-neutral-100 shadow-sm p-6 flex items-center justify-between">
+                        <div className="bg-white border border-neutral-100 p-6 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
                                     style={{ backgroundColor: sel.colors.primary }}>
@@ -162,7 +162,7 @@ export default function SitesListPage() {
                         </div>
 
                         {/* 브랜딩: 로고, 파비콘, 대표이미지 */}
-                        <div className="rounded-xl bg-white border border-neutral-100 shadow-sm p-6">
+                        <div className="bg-white border border-neutral-100 p-6">
                             <h3 className="text-sm font-semibold mb-4">브랜딩</h3>
                             <div className="grid grid-cols-3 gap-4">
                                 <ImageUploader value={editLogo} onChange={setEditLogo} label="로고" previewSize="sm" />
@@ -172,7 +172,7 @@ export default function SitesListPage() {
                         </div>
 
                         {/* SEO / 메타 */}
-                        <div className="rounded-xl bg-white border border-neutral-100 shadow-sm p-6 space-y-4">
+                        <div className="bg-white border border-neutral-100 p-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold">SEO / 메타 설정</h3>
                                 <span className="text-xs text-neutral-400">자동 입력, 수정 가능</span>
@@ -216,7 +216,7 @@ export default function SitesListPage() {
                         </div>
 
                         {/* 색상 */}
-                        <div className="rounded-xl bg-white border border-neutral-100 shadow-sm p-6">
+                        <div className="bg-white border border-neutral-100 p-6">
                             <h3 className="text-sm font-semibold mb-4">사이트 색상</h3>
                             <div className="grid grid-cols-4 gap-3">
                                 {[
@@ -246,7 +246,7 @@ export default function SitesListPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="rounded-xl bg-white border border-neutral-100 shadow-sm flex items-center justify-center py-20">
+                    <div className="bg-white border border-neutral-100 flex items-center justify-center py-20">
                         <div className="text-center text-neutral-400">
                             <Globe className="h-10 w-10 mx-auto mb-3" />
                             <p className="text-sm">좌측에서 사이트를 선택하세요</p>

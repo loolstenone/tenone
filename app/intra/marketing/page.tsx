@@ -20,7 +20,7 @@ export default function MarketingDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-bold">Marketing Dashboard</h2>
+                <h2 className="text-xl font-bold">Marketing Dashboard</h2>
                 <p className="mt-1 text-sm text-neutral-500">Ten:One™ 마케팅 포털</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

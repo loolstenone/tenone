@@ -66,7 +66,7 @@ export default function CostAnalysisPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-neutral-900">비용 분석</h1>
+        <h1 className="text-xl font-bold text-neutral-900">비용 분석</h1>
         <p className="text-sm text-neutral-500">외부비/내부비 구성 및 추이</p>
       </div>
 
@@ -93,7 +93,7 @@ export default function CostAnalysisPage() {
       </div>
 
       {/* Cost Breakdown */}
-      <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="mb-6 border border-neutral-200 bg-white p-4">
         <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-neutral-500">
           <PieChart size={14} />
           {tab === "external" ? "외부비" : "내부비"} 구성 (월평균)
@@ -134,7 +134,7 @@ export default function CostAnalysisPage() {
       </div>
 
       {/* Monthly Cost Trend */}
-      <div className="mb-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="mb-6 overflow-x-auto border border-neutral-200 bg-white">
         <div className="flex items-center gap-1.5 px-4 pt-3 text-xs font-medium text-neutral-500">
           <TrendingUp size={14} />
           월별 비용 추이
@@ -162,7 +162,7 @@ export default function CostAnalysisPage() {
       </div>
 
       {/* Allocation Table */}
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto border border-neutral-200 bg-white">
         <div className="flex items-center gap-1.5 px-4 pt-3 text-xs font-medium text-neutral-500">
           <Layers size={14} />
           배부율 현황 (공통비 배분)

@@ -9,7 +9,7 @@ export default function StatsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">통계</h1>
+                <h1 className="text-xl font-bold tracking-tight">통계</h1>
                 <p className="text-sm text-neutral-500 mt-1">사이트별 방문자, 게시글, 매출 통계를 분석합니다.</p>
             </div>
 

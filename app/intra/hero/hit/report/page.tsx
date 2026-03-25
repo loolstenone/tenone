@@ -34,7 +34,7 @@ export default function HitReportPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold mb-1">HIT 결과 리포트</h1>
+                    <h1 className="text-xl font-bold mb-1">HIT 결과 리포트</h1>
                     <p className="text-sm text-neutral-500">Cheonil Jeon님의 HeRo 프로필</p>
                 </div>
                 <button

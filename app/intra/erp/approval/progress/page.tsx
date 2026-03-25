@@ -50,7 +50,7 @@ export default function ApprovalProgressPage() {
     return (
         <div className="max-w-5xl">
             <div className="mb-2">
-                <h1 className="text-2xl font-bold">결재 진행</h1>
+                <h1 className="text-xl font-bold">결재 진행</h1>
                 <p className="text-sm text-neutral-500">진행 중인 결재 문서</p>
             </div>
 

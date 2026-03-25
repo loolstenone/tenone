@@ -39,7 +39,7 @@ export default function CustomersPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold">고객 관리</h1>
+                <h1 className="text-xl font-bold">고객 관리</h1>
                 <p className="text-sm text-neutral-500 mt-1">회원, 운영진, 권한 및 가입 설정을 관리합니다.</p>
             </div>
 

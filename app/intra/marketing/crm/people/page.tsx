@@ -30,7 +30,7 @@ export default function PeoplePage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">People</h2>
+                    <h2 className="text-xl font-bold">People</h2>
                     <p className="mt-1 text-sm text-neutral-500">TenOne Universe의 모든 연락처를 관리합니다.</p>
                 </div>
                 <button onClick={() => { setEditingPerson(null); setIsModalOpen(true); }} className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">

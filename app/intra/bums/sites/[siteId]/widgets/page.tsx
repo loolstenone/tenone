@@ -60,7 +60,7 @@ export default function WidgetsPage({ params }: { params: Promise<{ siteId: stri
                 </button>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold">위젯 관리</h2>
+                        <h2 className="text-xl font-bold">위젯 관리</h2>
                         <p className="text-sm text-neutral-500 mt-1">게시판 글을 사이트 페이지에 노출하는 위젯</p>
                     </div>
                     <button onClick={() => setShowForm(!showForm)}

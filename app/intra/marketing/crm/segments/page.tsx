@@ -23,7 +23,7 @@ export default function SegmentsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold">Segments</h2>
+                <h2 className="text-xl font-bold">Segments</h2>
                 <p className="mt-2 text-neutral-500">고객을 세그먼트로 분류하여 관리합니다.</p>
             </div>
 
