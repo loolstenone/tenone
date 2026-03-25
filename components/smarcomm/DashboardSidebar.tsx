@@ -168,7 +168,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
                 ) : (
                   <Link href="/dashboard/profile" className="text-[10px] text-text-muted hover:text-text">로고 설정 →</Link>
                 )}
-                <div className="text-base font-extrabold text-text tracking-tight leading-tight">Workspace</div>
+                <Link href="/dashboard" className="text-base font-extrabold text-text tracking-tight leading-tight hover:opacity-70 transition-opacity">Workspace</Link>
               </div>
             )}
           </div>
