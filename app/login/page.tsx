@@ -23,14 +23,27 @@ function LoginForm() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // SmarComm 도메인이면 SmarComm 대시보드로
+    const [isSmarComm, setIsSmarComm] = useState(false);
     useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hostname.includes('smarcomm')) {
+            setIsSmarComm(true);
+            if (!isLoading && isAuthenticated) {
+                window.location.href = '/dashboard';
+                return;
+            }
+        }
+    }, [isLoading, isAuthenticated]);
+
+    useEffect(() => {
+        if (isSmarComm) return; // SmarComm은 위에서 처리
         if (!isLoading && isAuthenticated) {
             const canIntraAccess = user?.accountType && user.accountType !== 'member';
             const defaultRedirect = isMadLeague ? '/ml' : canIntraAccess ? '/intra' : '/';
             const autoRedirect = redirectTo !== '/' ? redirectTo : defaultRedirect;
             router.replace(autoRedirect);
         }
-    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague]);
+    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague, isSmarComm]);
 
     if (isLoading || isAuthenticated) {
         return (
