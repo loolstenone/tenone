@@ -201,7 +201,7 @@ export default function MyversePage() {
 
             {/* 전체 현황: 공지 + 일정 (직원만) */}
             {isStaff && (
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="border border-neutral-200 bg-white p-4">
                         <h3 className="text-xs font-bold mb-3">공지사항</h3>
                         <div className="space-y-2">
@@ -230,7 +230,7 @@ export default function MyversePage() {
             )}
 
             {/* Profile Header */}
-            <div className="border border-neutral-200 bg-white p-5 mb-6 flex items-center gap-5">
+            <div className="border border-neutral-200 bg-white p-4 sm:p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
                 <div className="h-14 w-14 rounded-full bg-neutral-900 text-white flex items-center justify-center text-lg font-bold shrink-0">
                     {user.avatarInitials}
                 </div>
@@ -251,7 +251,7 @@ export default function MyversePage() {
             </div>
 
             {/* Row 1: 핵심 지표 */}
-            <div className={clsx("grid gap-3 mb-6", isStaff ? "grid-cols-6" : "grid-cols-3")}>
+            <div className={clsx("grid gap-3 mb-6", isStaff ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-6" : "grid-cols-2 sm:grid-cols-3")}>
                 {[
                     ...(isStaff ? [
                         { label: "오늘 출근", value: myAttendance.today.checkIn, sub: myAttendance.today.status, icon: Clock },
@@ -281,7 +281,7 @@ export default function MyversePage() {
             <PointWidget />
 
             {/* Row 1.4: HIT + Evolution School */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* HIT 검사 결과 */}
                 <div className="border border-neutral-200 bg-white p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -456,7 +456,7 @@ export default function MyversePage() {
             </div>
 
             {/* Row 2: GPR + 근태 */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* GPR */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -541,7 +541,7 @@ export default function MyversePage() {
             </div>
 
             {/* Row 3: 급여 + 경비 */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* 급여 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -611,7 +611,7 @@ export default function MyversePage() {
             </div>
 
             {/* Row 4: 프로젝트 + 교육 */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* 투입 프로젝트 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
