@@ -1,58 +1,113 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, Bookmark, Globe, Newspaper, Radio, Pen } from "lucide-react";
 
-const categories = ["All", "Marketing", "AI/Tech", "Design", "Business", "Content", "Career"];
+const categories = ["All", "Newsletter", "Media", "Tool", "Community", "Research"];
 
 const references = [
-    { id: "1", title: "2026 Marketing Trends — Complete Analysis", domain: "think.google", category: "Marketing", shared: 47, date: "03.25" },
-    { id: "2", title: "Claude for Marketing Automation — A Practical Guide", domain: "anthropic.com", category: "AI/Tech", shared: 35, date: "03.24" },
-    { id: "3", title: "Building a Brand Identity Design System", domain: "medium.com", category: "Design", shared: 28, date: "03.23" },
-    { id: "4", title: "How to Earn $5K/mo with Micro-SaaS", domain: "disquiet.io", category: "Business", shared: 63, date: "03.22" },
-    { id: "5", title: "Short-Form vs Long-Form: 2026 Content Strategy", domain: "hubspot.com", category: "Content", shared: 41, date: "03.21" },
-    { id: "6", title: "Career Strategy for Marketers in the Agent AI Era", domain: "linkedin.com", category: "Career", shared: 52, date: "03.20" },
+    { id: "r1", name: "TrendHunter", url: "trendhunter.com", desc: "World's largest trend platform. AI-powered innovation and consumer insights.", category: "Media", featured: true, tags: ["AI", "Innovation"] },
+    { id: "r2", name: "Careet", url: "careet.net", desc: "Korean Gen MZ insight media. Covers youth culture, consumption, and brand trends.", category: "Media", featured: true, tags: ["Gen Z", "Korea"] },
+    { id: "r3", name: "WGSN", url: "wgsn.com", desc: "Global trend forecasting. Industry-leading color, material, and consumer forecasts.", category: "Research", featured: false, tags: ["Forecasting", "Fashion"] },
+    { id: "r4", name: "Morning Brew", url: "morningbrew.com", desc: "Daily business newsletter read by 4M+ professionals. Sharp, concise business news.", category: "Newsletter", featured: true, tags: ["Business", "Daily"] },
+    { id: "r5", name: "Exploding Topics", url: "explodingtopics.com", desc: "Surface rapidly growing topics before they go mainstream. Data-driven trend discovery.", category: "Tool", featured: false, tags: ["Data", "Keywords"] },
+    { id: "r6", name: "The Hustle", url: "thehustle.co", desc: "Tech and business trends for entrepreneurs. Irreverent voice, serious insights.", category: "Newsletter", featured: false, tags: ["Startup", "Tech"] },
+    { id: "r7", name: "Some Trend", url: "some.co.kr", desc: "Korean social media trend analysis. Real-time keyword and sentiment tracking.", category: "Tool", featured: true, tags: ["Social", "Korea"] },
+    { id: "r8", name: "CB Insights", url: "cbinsights.com", desc: "Tech market intelligence. Venture capital, startup, and industry analysis.", category: "Research", featured: false, tags: ["VC", "Startup"] },
+    { id: "r9", name: "Product Hunt", url: "producthunt.com", desc: "Discover the best new products daily. Early signal for tech and consumer trends.", category: "Community", featured: false, tags: ["Product", "Launch"] },
+    { id: "r10", name: "Trend Monitor", url: "trendmonitor.co.kr", desc: "Korean consumer research platform. Survey-based trend analysis since 1998.", category: "Research", featured: false, tags: ["Consumer", "Korea"] },
+    { id: "r11", name: "Dense Discovery", url: "densediscovery.com", desc: "Weekly newsletter on design, tech, sustainability, and culture. Thoughtful curation.", category: "Newsletter", featured: false, tags: ["Design", "Culture"] },
+    { id: "r12", name: "Indie Hackers", url: "indiehackers.com", desc: "Community for bootstrapped founders sharing revenue, strategies, and lessons.", category: "Community", featured: false, tags: ["Indie", "SaaS"] },
 ];
 
+const catIcons: Record<string, React.ElementType> = {
+    Newsletter: Pen,
+    Media: Newspaper,
+    Tool: Star,
+    Community: Radio,
+    Research: Globe,
+};
+
 export default function MindleReferencesPage() {
-    const [cat, setCat] = useState("All");
-    const filtered = cat === "All" ? references : references.filter(r => r.category === cat);
+    const [selectedCat, setSelectedCat] = useState("All");
+
+    const filtered = selectedCat === "All" ? references : references.filter(r => r.category === selectedCat);
+    const featuredRefs = references.filter(r => r.featured);
 
     return (
         <div className="bg-[#0A0A0A]">
-            <section className="py-16 sm:py-20 px-6">
-                <div className="mx-auto max-w-5xl">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">References</h1>
-                    <p className="text-neutral-400 mb-8">The most-shared must-read industry content from the community.</p>
-                    <div className="flex flex-wrap gap-2 mb-8">
-                        {categories.map((c) => (
-                            <button key={c} onClick={() => setCat(c)}
-                                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${cat === c ? "bg-[#F5C518] text-black" : "bg-neutral-900 text-neutral-400 border border-neutral-800"}`}>
-                                {c}
+            <div className="mx-auto max-w-5xl px-6">
+                {/* Header */}
+                <section className="py-8 border-b border-neutral-800/50">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">References</h1>
+                    <p className="text-neutral-500 text-sm">Curated sources we track and recommend for trend intelligence.</p>
+                </section>
+
+                {/* Featured */}
+                <section className="py-6 border-b border-neutral-800/30">
+                    <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">EDITOR&apos;S PICKS</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {featuredRefs.map(r => (
+                            <a key={r.id} href={`https://${r.url}`} target="_blank" rel="noopener noreferrer"
+                                className="group bg-neutral-900/30 border border-neutral-800/50 rounded-xl p-4 hover:border-[#F5C518]/30 transition-all">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Bookmark className="w-3 h-3 text-[#F5C518]" />
+                                    <span className="text-white font-bold text-sm group-hover:text-[#F5C518] transition-colors">{r.name}</span>
+                                </div>
+                                <p className="text-neutral-500 text-[11px] leading-relaxed line-clamp-2 mb-2">{r.desc}</p>
+                                <span className="text-[10px] text-neutral-600 flex items-center gap-1">
+                                    {r.url} <ExternalLink className="w-2.5 h-2.5" />
+                                </span>
+                            </a>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Filters */}
+                <section className="py-5 border-b border-neutral-800/30">
+                    <div className="flex flex-wrap gap-1.5">
+                        {categories.map(cat => (
+                            <button key={cat} onClick={() => setSelectedCat(cat)}
+                                className={`px-3 py-1 rounded text-[11px] font-semibold tracking-wide transition-colors ${
+                                    selectedCat === cat ? "bg-white text-black" : "text-neutral-500 hover:text-white"
+                                }`}>
+                                {cat.toUpperCase()}
                             </button>
                         ))}
                     </div>
-                    <div className="space-y-3">
-                        {filtered.map((r) => (
-                            <article key={r.id} className="group flex items-center gap-4 p-4 rounded-xl border border-neutral-800/50 bg-neutral-900/20 hover:border-[#F5C518]/20 transition-colors">
-                                <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center shrink-0">
-                                    <Link2 className="w-4 h-4 text-[#F5C518]" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-white text-sm font-medium group-hover:text-[#F5C518] transition-colors truncate">{r.title}</h3>
-                                    <div className="flex items-center gap-3 text-[11px] text-neutral-500 mt-1">
-                                        <span>{r.domain}</span>
-                                        <span>{r.category}</span>
-                                        <span className="flex items-center gap-0.5"><Star className="w-2.5 h-2.5 text-[#F5C518]" />{r.shared}</span>
-                                        <span>{r.date}</span>
+                </section>
+
+                {/* All References */}
+                <section className="py-6">
+                    <div className="divide-y divide-neutral-800/30">
+                        {filtered.map(r => {
+                            const CatIcon = catIcons[r.category] || Globe;
+                            return (
+                                <a key={r.id} href={`https://${r.url}`} target="_blank" rel="noopener noreferrer"
+                                    className="group flex items-start gap-4 py-4 cursor-pointer">
+                                    <div className="w-9 h-9 shrink-0 rounded-lg bg-neutral-900 border border-neutral-800/50 flex items-center justify-center group-hover:border-[#F5C518]/30 transition-colors">
+                                        <CatIcon className="w-4 h-4 text-neutral-600 group-hover:text-[#F5C518] transition-colors" />
                                     </div>
-                                </div>
-                                <ExternalLink className="w-4 h-4 text-neutral-600 group-hover:text-[#F5C518] transition-colors shrink-0" />
-                            </article>
-                        ))}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className="text-white font-bold text-sm group-hover:text-[#F5C518] transition-colors">{r.name}</span>
+                                            <span className="text-[10px] text-neutral-700">{r.category.toUpperCase()}</span>
+                                            {r.featured && <Star className="w-2.5 h-2.5 text-[#F5C518]" />}
+                                        </div>
+                                        <p className="text-neutral-500 text-[12px] leading-relaxed mb-1.5 line-clamp-1">{r.desc}</p>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-neutral-600 flex items-center gap-1">{r.url} <ExternalLink className="w-2.5 h-2.5" /></span>
+                                            {r.tags.map(tag => (
+                                                <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800/50 text-neutral-500">{tag}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })}
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
     );
 }
