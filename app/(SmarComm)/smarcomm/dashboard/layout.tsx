@@ -6,60 +6,30 @@ import Link from 'next/link';
 import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import DashboardSidebar from '@/components/smarcomm/DashboardSidebar';
 import ContextPanel from '@/components/smarcomm/ContextPanel';
-import { getUser, logout } from '@/lib/smarcomm/auth';
-import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 
 export const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [ready, setReady] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [companyLogo, setCompanyLogo] = useState('');
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [contextOpen, setContextOpen] = useState(true);
-  const [user, setUser] = useState<{ email: string } | null>(null);
   const [favorites, setFavorites] = useState<{ path: string; label: string }[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const checkAuth = async () => {
-      // 1) SmarComm Mock 인증 체크
-      const u = getUser();
-      if (u) {
-        if (!cancelled) { setUser(u); initDashboard(); }
-        return;
-      }
-
-      // 2) Supabase 세션 체크 (타임아웃 8초 — 무한 로딩 방지)
-      try {
-        const sb = createClient();
-        const authPromise = sb.auth.getUser();
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
-        const result = await Promise.race([authPromise, timeoutPromise]);
-
-        if (cancelled) return;
-
-        const sbUser = result && 'data' in result ? result.data.user : null;
-        if (sbUser) {
-          setUser({ email: sbUser.email || '' });
-          initDashboard();
-        } else {
-          router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-        }
-      } catch {
-        if (!cancelled) {
-          router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-        }
-      }
-    };
-
-    checkAuth();
-    return () => { cancelled = true; };
-  }, [router]);
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    initDashboard();
+  }, [isLoading, isAuthenticated, router]);
 
   const initDashboard = () => {
     const savedCompany = localStorage.getItem('smarcomm_company');
@@ -93,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setReady(true);
   };
 
-  if (!ready) return (
+  if (!ready || isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
         <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
@@ -103,11 +73,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   const sidebarWidth = collapsed ? 56 : 224;
-  const initial = user?.email?.charAt(0).toUpperCase() || '?';
+  const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();
+  const displayEmail = user?.email || '';
 
   const handleLogout = async () => {
-    logout(); // SmarComm Mock auth 클리어
-    try { const sb = createClient(); await sb.auth.signOut(); } catch {} // Supabase 세션 클리어
+    await logout();
     window.location.href = '/';
   };
 
@@ -121,7 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className="fixed top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-white/80 px-5 backdrop-blur-sm transition-all duration-200"
         style={{ left: `${sidebarWidth}px`, right: 0 }}
       >
-        {/* 즐겨찾기 바로가기 (드래그 스크롤) */}
+        {/* 즐겨찾기 바로가기 */}
         <div className="flex items-center gap-2 min-w-0 flex-1 mr-4">
           {favorites.length > 0 && (
             <>
@@ -153,7 +123,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="relative">
           <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 transition-colors hover:bg-surface">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-text text-[10px] font-bold text-white">{initial}</div>
-            <span className="text-xs text-text-sub max-w-[120px] truncate">{user?.email}</span>
+            <span className="text-xs text-text-sub max-w-[120px] truncate">{displayEmail}</span>
             <ChevronDown size={11} className="text-text-muted" />
           </button>
 
@@ -170,29 +140,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* 메인 콘텐츠 (우측 사이드바 영향) */}
+      {/* 메인 콘텐츠 */}
       <main className="min-h-screen bg-surface pt-12 transition-all duration-200" style={{ marginLeft: `${sidebarWidth}px`, marginRight: contextOpen ? '288px' : '0' }}>
         <div className="p-6">
           {children}
         </div>
       </main>
 
-      {/* 우측 컨텍스트 패널 — 상단 바 아래에 위치 */}
       <ContextPanel isOpen={contextOpen} onClose={() => setContextOpen(false)} />
 
-      {/* 우측 사이드바 접기/펼치기 화살표 + 알림 배지 */}
       <button
         onClick={() => setContextOpen(!contextOpen)}
         className="fixed z-50 flex items-center justify-center rounded-l-md border border-r-0 border-border bg-white text-text-muted shadow-sm transition-all duration-200 hover:text-text hover:bg-surface"
         style={{ top: '56px', right: contextOpen ? '288px' : '0', width: contextOpen ? '16px' : '28px', height: contextOpen ? '28px' : '28px' }}
         title={contextOpen ? '패널 접기' : '패널 펼치기'}
       >
-        {contextOpen ? (
-          <ChevronRight size={10} />
-        ) : (
-          <ChevronLeft size={12} />
-        )}
-        {/* 알림 배지 (닫혀있을 때만) */}
+        {contextOpen ? <ChevronRight size={10} /> : <ChevronLeft size={12} />}
         {!contextOpen && (
           <span className="absolute -top-1.5 -left-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[8px] font-bold text-white">2</span>
         )}

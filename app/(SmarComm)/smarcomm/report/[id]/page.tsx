@@ -13,7 +13,7 @@ import Header from '@/components/smarcomm/Header';
 import Footer from '@/components/smarcomm/Footer';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import RadarChart from '@/components/smarcomm/RadarChart';
-import { getUser } from '@/lib/smarcomm/auth';
+import { useAuth } from '@/lib/auth-context';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 
 const GRADE_MAP = {
@@ -113,7 +113,7 @@ function ReportContent({ scanId }: { scanId: string }) {
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated: isLoggedIn } = useAuth();
   const [generatingPlan, setGeneratingPlan] = useState(false);
 
   const handleGenerateCampaignPlan = async () => {
@@ -140,7 +140,6 @@ function ReportContent({ scanId }: { scanId: string }) {
   useEffect(() => {
     const stored = sessionStorage.getItem(`scan_${scanId}`);
     if (stored) setScan(JSON.parse(stored));
-    setIsLoggedIn(!!getUser());
     setLoading(false);
   }, [scanId]);
 

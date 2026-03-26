@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { TrendHunterLogo } from "@/components/TrendHunterLogo";
 
 const menuLinks = [
-    { name: "About", href: "/#about" },
-    { name: "Services", href: "/#services" },
-    { name: "Process", href: "/#process" },
-    { name: "Contact", href: "/#contact" },
+    { name: "Weekly", href: "/trendhunter/weekly" },
+    { name: "Signals", href: "/trendhunter/signals" },
+    { name: "References", href: "/trendhunter/references" },
+    { name: "About", href: "/trendhunter/about" },
 ];
 
 const universeLinks = [
@@ -24,8 +25,7 @@ export function TrendHunterFooter() {
                     {/* 브랜드 */}
                     <div>
                         <div className="mb-4">
-                            <span className="text-[#00FF88] text-2xl font-mono font-bold">T.H</span>
-                            <span className="text-white text-lg ml-2 font-light">Trend Hunter</span>
+                            <TrendHunterLogo size="sm" variant="dark" />
                         </div>
                         <p className="text-sm leading-relaxed">
                             AI가 데이터를 읽고, 우리가 트렌드를 만든다.<br />
@@ -52,7 +52,7 @@ export function TrendHunterFooter() {
                     {/* Contact + Universe */}
                     <div>
                         <h3 className="text-white text-sm font-semibold mb-4 font-mono">Contact</h3>
-                        <p className="text-sm mb-1">tenone.biz/contact</p>
+                        <p className="text-sm mb-1">lools@tenone.biz</p>
                         <p className="text-sm mb-4">+82 10 2795 1001</p>
                         <h3 className="text-white text-sm font-semibold mb-2 font-mono">Ten:One Universe</h3>
                         <div className="space-y-1">
@@ -72,11 +72,10 @@ export function TrendHunterFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-800/50 text-center text-xs">
-                    &copy; TrendHunter. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
-                    <a href="https://tenone.biz" target="_blank" rel="noopener noreferrer" className="hover:text-[#00FF88] transition-colors">
+                    &copy; TrendHunter. Powered by{" "}
+                    <a href="/about?tab=universe" className="hover:text-white transition-colors underline">
                         Ten:One&trade; Universe
-                    </a>
-                    .
+                    </a>.
                 </div>
             </div>
         </footer>

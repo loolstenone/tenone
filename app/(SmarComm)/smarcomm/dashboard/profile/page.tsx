@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-react';
-import { getUser, logout } from '@/lib/smarcomm/auth';
+import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
 import PageTopBar from '@/components/smarcomm/PageTopBar';
@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const [selectedPalette, setSelectedPalette] = useState('mono');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('viewer');
-  const user = getUser();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const data = localStorage.getItem('smarcomm_company');
@@ -42,7 +42,7 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleLogout = () => { logout(); router.push('/'); };
+  const handleLogout = async () => { await logout(); router.push('/'); };
 
   const inputClass = "w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none";
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Mail, Shield, UserPlus, MoreHorizontal, Crown } from 'lucide-react';
-import { getUser } from '@/lib/smarcomm/auth';
+import { useAuth } from '@/lib/auth-context';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 import PageTopBar from '@/components/smarcomm/PageTopBar';
 import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
@@ -23,7 +23,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function MembersPage() {
-  const user = getUser();
+  const { user } = useAuth();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer'>('viewer');
   const [showInvite, setShowInvite] = useState(false);

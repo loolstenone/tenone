@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle, X, Gauge, Zap, Timer, Lightbulb, Loader2 } from 'lucide-react';
-import { getScanLog } from '@/lib/smarcomm/auth';
+import { getScanLog } from '@/lib/smarcomm/scan-data';
 import GaugeChart from '@/components/smarcomm/GaugeChart';
 import NextStepCTA from '@/components/smarcomm/NextStepCTA';
 import RadarChart from '@/components/smarcomm/RadarChart';

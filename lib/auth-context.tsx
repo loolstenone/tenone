@@ -326,25 +326,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, [supabase]);
 
-    // Google 소셜 로그인 — auth.tenone.biz 전용 인증 도메인 경유
+    // Google 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithGoogle = useCallback(async () => {
-        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
-        const returnDomain = window.location.hostname + (window.location.port ? ':' + window.location.port : '');
         const returnPath = window.location.pathname;
-        const state = crypto.randomUUID();
-        sessionStorage.setItem('auth_state', state);
-        window.location.href = `${authDomain}/auth-hub/login?provider=google&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent(returnPath)}&state=${state}`;
-    }, []);
+        if (returnPath !== '/login' && returnPath !== '/signup' && returnPath !== '/') {
+            document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
+        }
+        const redirectTo = `${window.location.origin}/auth/callback`;
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo },
+        });
+        if (data?.url) window.location.href = data.url;
+        if (error) console.error('Google OAuth error:', error);
+    }, [supabase]);
 
-    // Kakao 소셜 로그인 — auth.tenone.biz 전용 인증 도메인 경유
+    // Kakao 소셜 로그인 — 도메인별 직접 Supabase OAuth
     const loginWithKakao = useCallback(async () => {
-        const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
-        const returnDomain = window.location.hostname + (window.location.port ? ':' + window.location.port : '');
         const returnPath = window.location.pathname;
-        const state = crypto.randomUUID();
-        sessionStorage.setItem('auth_state', state);
-        window.location.href = `${authDomain}/auth-hub/login?provider=kakao&returnDomain=${encodeURIComponent(returnDomain)}&returnPath=${encodeURIComponent(returnPath)}&state=${state}`;
-    }, []);
+        if (returnPath !== '/login' && returnPath !== '/signup' && returnPath !== '/') {
+            document.cookie = `auth_redirect=${encodeURIComponent(returnPath)};path=/;max-age=300;SameSite=Lax`;
+        }
+        const redirectTo = `${window.location.origin}/auth/callback`;
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'kakao',
+            options: { redirectTo },
+        });
+        if (data?.url) window.location.href = data.url;
+        if (error) console.error('Kakao OAuth error:', error);
+    }, [supabase]);
 
     // 로그아웃
     const logout = useCallback(async () => {

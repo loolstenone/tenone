@@ -9,7 +9,7 @@ import {
   BarChart3, Megaphone, Palette, DollarSign, Globe,
   Clock, ChevronRight, Sparkles, BookOpen
 } from 'lucide-react';
-import { getScanLog } from '@/lib/smarcomm/auth';
+import { getScanLog } from '@/lib/smarcomm/scan-data';
 import { MOCK_CAMPAIGNS, MOCK_CREATIVES, MOCK_SALES, formatCurrency, getStatusLabel, getStatusColor } from '@/lib/smarcomm/dashboard-data';
 import LineChart from '@/components/smarcomm/charts/LineChart';
 import DonutChart from '@/components/smarcomm/charts/DonutChart';

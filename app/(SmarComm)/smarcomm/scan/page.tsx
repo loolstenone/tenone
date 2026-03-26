@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Globe, Settings, FileText, Bot, Calculator, CheckCircle2, AlertCircle } from 'lucide-react';
 import Header from '@/components/smarcomm/Header';
-import { saveScanUrl } from '@/lib/smarcomm/auth';
+import { saveScanUrl } from '@/lib/smarcomm/scan-data';
 
 const STEPS = [
   { label: '사이트 접속 중...', icon: Globe },

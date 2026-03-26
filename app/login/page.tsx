@@ -11,40 +11,25 @@ import { PublicFooter } from '@/components/PublicFooter';
 import { MadLeagueHeader } from '@/components/MadLeagueHeader';
 import { MadLeagueFooter } from '@/components/MadLeagueFooter';
 import SmarCommHeader from '@/components/SmarCommHeader';
-import { getUser } from '@/lib/smarcomm/auth';
 import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
-    // SmarComm은 대시보드와 동일한 인증 체크 (getUser + Supabase 직접) 사용
-    // useAuth() (TenOne 인증)을 쓰면 대시보드와 판단이 달라져 리다이렉트 루프 발생
-    const { login } = useAuth(); // login 함수만 사용 (Supabase 로그인)
+    const { login, isAuthenticated, isLoading } = useAuth();
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        // SmarComm Mock auth 체크
-        const u = getUser();
-        if (u) { window.location.replace('/dashboard'); return; }
+        if (!isLoading && isAuthenticated) {
+            router.replace('/dashboard');
+        }
+    }, [isLoading, isAuthenticated, router]);
 
-        // Supabase 세션 체크 (타임아웃 5초 — 무한 스피너 방지)
-        const sb = createClient();
-        const timeout = setTimeout(() => setChecking(false), 5000);
-        sb.auth.getUser().then(({ data: { user: sbUser } }) => {
-            clearTimeout(timeout);
-            if (sbUser) {
-                // Supabase 세션 있으면 대시보드로. 대시보드에서도 getUser()로 확인하므로 작동함
-                window.location.replace('/dashboard');
-            } else {
-                setChecking(false);
-            }
-        }).catch(() => { clearTimeout(timeout); setChecking(false); });
-    }, []);
-
-    if (checking) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
@@ -52,21 +37,19 @@ function SmarCommLoginForm() {
         );
     }
 
-    // 직접 Supabase OAuth (auth-hub 경유 없이)
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
-        // redirect 목적지를 쿠키에 저장 (auth/callback 서버에서 복원)
-        const pendingRedirect = searchParams.get('redirect') || '/';
+        const pendingRedirect = searchParams.get('redirect') || '/dashboard';
         if (pendingRedirect !== '/') {
             document.cookie = `auth_redirect=${encodeURIComponent(pendingRedirect)};path=/;max-age=300;SameSite=Lax`;
         }
         const redirectTo = `${window.location.origin}/auth/callback`;
-        const { data, error } = await sb.auth.signInWithOAuth({
+        const { data, error: oauthError } = await sb.auth.signInWithOAuth({
             provider,
             options: { redirectTo },
         });
         if (data?.url) window.location.href = data.url;
-        else if (error) setError(`${provider} 로그인 실패: ${error.message}`);
+        else if (oauthError) setError(`${provider} 로그인 실패: ${oauthError.message}`);
     };
     const handleGoogle = () => handleSocialLogin('google');
     const handleKakao = () => handleSocialLogin('kakao');
