@@ -29,6 +29,8 @@ const domainPrefixMap: Record<string, string> = {
     'domo.tenone.biz': '/domo',
     'jakka.tenone.biz': '/jakka',
     'planners.tenone.biz': '/planners',
+    'wio.tenone.biz': '/wio',
+    'seoul360.tenone.biz': '/seoul360',
     'auth.tenone.biz': '/auth-hub',
     // 추후 추가: 'luki.ai': '/lk'
 };
