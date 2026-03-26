@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function WIOLoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +21,7 @@ export default function WIOLoginPage() {
     const sb = createClient();
     const { error: err } = await sb.auth.signInWithPassword({ email, password });
     if (err) { setError('이메일 또는 비밀번호가 올바르지 않습니다.'); setLoading(false); return; }
-    window.location.href = '/wio/app';
+    router.push('/wio/app');
   };
 
   const handleSignup = async (e: React.FormEvent) => {

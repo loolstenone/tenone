@@ -78,7 +78,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/';
   };
 
   return (

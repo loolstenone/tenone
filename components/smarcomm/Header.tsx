@@ -37,7 +37,6 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/';
   };
 
   const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();

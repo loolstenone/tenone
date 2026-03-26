@@ -84,7 +84,7 @@ export function TrendHunterHeader() {
                             <Link href="/trendhunter/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88] flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
-                            <button onClick={async () => { await logout(); window.location.reload(); }} className="text-sm text-neutral-500 hover:text-red-400 flex items-center gap-2">
+                            <button onClick={async () => { await logout(); }} className="text-sm text-neutral-500 hover:text-red-400 flex items-center gap-2">
                                 <LogOut className="h-3.5 w-3.5" /> 로그아웃
                             </button>
                             </>

@@ -48,7 +48,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
     const isAdmin = user?.role === "Admin" || user?.accountType === "staff"
         || (config.adminEmails || []).includes(user?.email || "");
 
-    const handleLogout = async () => { await logout(); window.location.reload(); };
+    const handleLogout = async () => { await logout(); };
 
     const handleShare = async () => {
         const url = typeof window !== "undefined" ? window.location.href : "";

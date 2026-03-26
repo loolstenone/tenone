@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function SmarCommPreviewGate({ previewKey }: { previewKey: string }) {
+  const router = useRouter();
   const [showInput, setShowInput] = useState(false);
   const [key, setKey] = useState('');
   const [error, setError] = useState('');
@@ -10,7 +12,7 @@ export function SmarCommPreviewGate({ previewKey }: { previewKey: string }) {
   const handleUnlock = () => {
     if (key === previewKey) {
       document.cookie = `sc_preview=${previewKey}; path=/; max-age=${60 * 60 * 24 * 30}`;
-      window.location.reload();
+      router.refresh();
     } else {
       setError('올바르지 않은 코드입니다');
       setKey('');

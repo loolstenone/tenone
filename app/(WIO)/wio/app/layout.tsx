@@ -89,7 +89,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const handleLogout = async () => {
     const sb = createClient();
     await sb.auth.signOut();
-    window.location.href = '/wio';
+    router.push('/wio');
   };
 
   return (

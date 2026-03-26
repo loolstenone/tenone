@@ -56,7 +56,7 @@ function SmarCommSignupForm() {
         try {
             const result = await register(email.split('@')[0], email, password, false);
             if (result.success) {
-                window.location.href = '/dashboard';
+                router.push('/dashboard');
             } else {
                 setError(result.error || '회원가입에 실패했습니다');
                 setIsSubmitting(false);

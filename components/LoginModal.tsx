@@ -20,11 +20,10 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717" }: LoginMo
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 로그인 성공 시 모달 닫기 + 페이지 새로고침
+    // 로그인 성공 시 모달 닫기
     useEffect(() => {
         if (isAuthenticated && isOpen) {
             onClose();
-            window.location.reload();
         }
     }, [isAuthenticated, isOpen, onClose]);
 
