@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { TrendHunterLogo } from "@/components/TrendHunterLogo";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "Weekly", href: "/trendhunter/weekly" },
@@ -16,10 +17,12 @@ const navItems = [
 
 export function TrendHunterHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
     const pathname = usePathname();
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-neutral-800/50">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 <Link href="/trendhunter" className="shrink-0 flex items-center">
@@ -48,7 +51,7 @@ export function TrendHunterHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">가입</Link>
                         </>
                     )}
@@ -87,7 +90,7 @@ export function TrendHunterHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88]">로그인</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-[#00FF88]">로그인</button>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88]">가입</Link>
                             </>
                         )}
@@ -95,5 +98,9 @@ export function TrendHunterHeader() {
                 </div>
             )}
         </header>
+
+        {/* 로그인 모달 */}
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00C853" />
+        </>
     );
 }
