@@ -121,10 +121,24 @@ export default function FinancePage() {
 
       {/* 목록 */}
       {loading ? (
-        <div className="flex justify-center py-16"><div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
+        <div className="space-y-2">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 animate-pulse">
+              <div className="h-4 w-2/3 bg-white/5 rounded mb-2" />
+              <div className="h-3 w-1/3 bg-white/5 rounded" />
+            </div>
+          ))}
+        </div>
       ) : tab === 'approval' ? (
         approvals.length === 0 ? (
-          <div className="text-center py-16 text-slate-500"><FileText size={32} className="mx-auto mb-2 text-slate-600" /><p>결재 요청이 없습니다</p></div>
+          <div className="text-center py-16">
+            <FileText size={36} className="mx-auto mb-3 text-slate-700" />
+            <p className="text-sm text-slate-400 mb-1">결재 요청이 없어요</p>
+            <p className="text-xs text-slate-600 mb-4">프로젝트 승인, 경비 등 결재를 요청해보세요</p>
+            <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors">
+              <Plus size={14} /> 결재 요청하기
+            </button>
+          </div>
         ) : (
           <div className="space-y-2">
             {approvals.map((ap: any) => {
@@ -152,7 +166,14 @@ export default function FinancePage() {
         )
       ) : (
         expenses.length === 0 ? (
-          <div className="text-center py-16 text-slate-500"><CreditCard size={32} className="mx-auto mb-2 text-slate-600" /><p>경비 내역이 없습니다</p></div>
+          <div className="text-center py-16">
+            <CreditCard size={36} className="mx-auto mb-3 text-slate-700" />
+            <p className="text-sm text-slate-400 mb-1">경비 내역이 없어요</p>
+            <p className="text-xs text-slate-600 mb-4">업무 관련 경비를 신청하세요</p>
+            <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors">
+              <Plus size={14} /> 경비 신청하기
+            </button>
+          </div>
         ) : (
           <div className="space-y-2">
             {expenses.map((ex: any) => (
