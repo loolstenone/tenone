@@ -82,15 +82,7 @@ export function MyVerseFooter() {
                             Contact: tenone.biz/contact
                         </p>
                         <p className="text-xs">
-                            &copy; MyVerse. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
-                            <a
-                                href="https://tenone.biz"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-white transition-colors"
-                            >
-                                Ten:One&trade; Universe
-                            </a>.
+                            &copy; MyVerse. Powered by <a href="/" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                         </p>
                     </div>
                 </div>

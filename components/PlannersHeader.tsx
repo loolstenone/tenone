@@ -54,21 +54,13 @@ export function PlannersHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex ml-auto items-center gap-4">
+                <div className="hidden md:flex ml-auto">
                     <UniverseUtilityBar
                         aboutPath="/planners/about"
                         profilePath="/planners/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
                     />
-                    <a
-                        href="https://tenone.biz"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-teal-400 hover:text-white transition-colors"
-                    >
-                        Ten:One™ Universe
-                    </a>
                 </div>
 
                 {/* Mobile toggle */}
@@ -109,16 +101,6 @@ export function PlannersHeader() {
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
                             </>
                         )}
-                    </div>
-                    <div className="pt-2 border-t border-teal-800">
-                        <a
-                            href="https://tenone.biz"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block px-3 py-2 text-xs text-teal-400 hover:text-white transition-colors"
-                        >
-                            Ten:One™ Universe
-                        </a>
                     </div>
                 </div>
             )}
