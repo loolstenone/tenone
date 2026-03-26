@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { MindleLogo } from "@/components/MindleLogo";
 import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
@@ -20,6 +19,7 @@ export function MindleHeader() {
     const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user, logout } = useAuth();
     const pathname = usePathname();
+    const isHome = pathname === "/mindle" || pathname === "/";
 
     const handleLogout = async () => { await logout(); window.location.reload(); };
 
@@ -27,9 +27,11 @@ export function MindleHeader() {
         <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-neutral-800/50">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
-                <Link href="/mindle" className="shrink-0">
-                    <MindleLogo size="sm" variant="dark" />
-                </Link>
+                {!isHome && (
+                    <Link href="/mindle" className="shrink-0 text-lg font-bold tracking-tight">
+                        <span className="text-[#F5C518]">Mindle</span> <span className="text-white text-sm font-normal">Whole See</span>
+                    </Link>
+                )}
 
                 <nav className="hidden md:flex items-center gap-7">
                     {navItems.map((item) => (
