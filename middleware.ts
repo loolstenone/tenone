@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 // 도메인 → 사이트 프리픽스 매핑
 const domainPrefixMap: Record<string, string> = {
@@ -39,31 +40,53 @@ const domainPrefixMap: Record<string, string> = {
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증 통일 후 SmarComm 분기 제거)
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+    // 1. Supabase 세션 갱신 (모든 요청에서)
+    let response = NextResponse.next({ request });
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() { return request.cookies.getAll(); },
+                setAll(cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        request.cookies.set(name, value);
+                        response.cookies.set(name, value, options);
+                    });
+                },
+            },
+        }
+    );
+    // getUser()를 호출해야 세션 쿠키가 갱신됨
+    await supabase.auth.getUser();
+
+    // 2. 도메인 → 프리픽스 리라이트
     const hostname = request.headers.get('host') || '';
     const domain = hostname.split(':')[0];
     const prefix = domainPrefixMap[domain];
 
-    if (!prefix) return NextResponse.next();
+    if (!prefix) return response;
 
     const pathname = request.nextUrl.pathname;
 
-    // 이미 프리픽스가 붙어있으면 스킵 (이중 리라이트 방지)
-    if (pathname.startsWith(prefix)) {
-        return NextResponse.next();
-    }
+    if (pathname.startsWith(prefix)) return response;
 
-    // 제외 경로 체크
     if (skipPaths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {
-        return NextResponse.next();
+        return response;
     }
 
-    // 도메인 → 내부 프리픽스로 리라이트 (URL은 그대로 유지)
     const url = request.nextUrl.clone();
     url.pathname = `${prefix}${pathname === '/' ? '' : pathname}`;
 
-    // rewrite: URL 바에는 원래 경로 유지, 내부적으로 프리픽스 경로 렌더링
-    return NextResponse.rewrite(url);
+    // rewrite with session cookies preserved
+    const rewriteResponse = NextResponse.rewrite(url, { request });
+    // 세션 쿠키를 rewrite 응답에도 복사
+    response.cookies.getAll().forEach(cookie => {
+        rewriteResponse.cookies.set(cookie.name, cookie.value);
+    });
+    return rewriteResponse;
 }
 
 export const config = {
