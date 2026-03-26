@@ -358,6 +358,28 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         contact: { email: 'lools@tenone.biz', phone: '+82 10 2795 1001' },
         tagline: 'AI가 데이터를 읽고, 우리가 트렌드를 만든다.',
     },
+    mindle: {
+        id: 'mindle', name: 'Mindle', logoText: 'Mindle', logoStyle: 'text' as const,
+        faviconUrl: '/brands/mindle/favicon.png', appleTouchIcon: '/brands/mindle/favicon.png',
+        colors: { primary: '#F5C518', primaryDark: '#E5B616', secondary: '#FFD54F', headerBg: '#0A0A0A', headerText: '#ffffff', footerBg: '#0A0A0A', footerText: '#a3a3a3', accent: '#F5C518' },
+        meta: { title: 'Mindle — 트렌드의 홀씨를 찾아, 인사이트로 피워냅니다', description: 'AI 기반 트렌드 분석 플랫폼. 데이터 크롤링부터 인사이트 큐레이션까지.', keywords: ['Mindle', '민들레', '트렌드', 'AI 분석', '트렌드 리포트', 'Ten:One'] },
+        homePath: '/mindle', signupPath: '/signup', domain: 'mindle.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [
+            { name: '트렌드', href: '/mindle/trends' },
+            { name: '리포트', href: '/mindle/reports' },
+            { name: '데이터', href: '/mindle/data' },
+            { name: '레퍼런스', href: '/mindle/references' },
+        ],
+        footerLinks: [
+            { name: '트렌드', href: '/mindle/trends' },
+            { name: '리포트', href: '/mindle/reports' },
+            { name: 'About', href: '/mindle/about' },
+        ],
+        contact: { email: 'lools@tenone.biz', phone: '+82 10 2795 1001' },
+        tagline: '트렌드의 홀씨를 찾아, 인사이트로 피워냅니다.',
+    },
     townity: {
         id: 'townity', name: '타우니티', logoText: '타우니티', logoStyle: 'text' as const,
         faviconUrl: '/brands/townity/favicon.png', appleTouchIcon: '/brands/townity/favicon.png',

@@ -21,6 +21,7 @@ const domainPrefixMap: Record<string, string> = {
     'www.fwn.co.kr': '/fwn',
     'montz.tenone.biz': '/montz',
     'trendhunter.tenone.biz': '/trendhunter',
+    'mindle.tenone.biz': '/mindle',
     'myverse.tenone.biz': '/myverse',
     'badak.biz': '/badak',
     'www.badak.biz': '/badak',
