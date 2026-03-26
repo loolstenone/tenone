@@ -128,16 +128,16 @@ function LoginForm() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 서브도메인 감지 (*.tenone.biz 또는 커스텀 도메인)
-    const [isSubdomain, setIsSubdomain] = useState(false);
+    // 서브도메인 감지 (null=미확인, true/false=확인됨)
+    const [isSubdomain, setIsSubdomain] = useState<boolean | null>(null);
     useEffect(() => {
         const h = window.location.hostname;
         setIsSubdomain(h !== 'tenone.biz' && h !== 'www.tenone.biz' && h !== 'localhost');
     }, []);
 
     useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            // 서브도메인에서는 /로 돌아가면 middleware가 올바른 사이트로 rewrite
+        // isSubdomain 확인 전에는 리다이렉트 안 함 (race condition 방지)
+        if (!isLoading && isAuthenticated && isSubdomain !== null) {
             if (isSubdomain) {
                 router.replace(redirectTo !== '/' ? redirectTo : '/');
                 return;
