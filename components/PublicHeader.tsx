@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 
 const publicNav = [
@@ -33,13 +33,10 @@ export function PublicHeader() {
     const { user, isAuthenticated, isLoading, canAccessIntra, logout } = useAuth();
     const { isDark } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
-    const [profileOpen, setProfileOpen] = useState(false);
 
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + "?");
 
     return (
-        <>
         <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
             style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
@@ -82,61 +79,8 @@ export function PublicHeader() {
 
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
-                    {isAuthenticated && user && (
-                        <div className="relative">
-                            <button onClick={() => setProfileOpen(!profileOpen)}
-                                className="flex items-center hover:opacity-90 transition-opacity">
-                                <div className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                                    style={{
-                                        background: isDark
-                                            ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
-                                            : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
-                                        color: isDark ? "#111" : "#fff",
-                                        boxShadow: isDark
-                                            ? "0 2px 6px rgba(255,255,255,0.15), inset 0 -2px 3px rgba(0,0,0,0.1)"
-                                            : "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
-                                    }}>
-                                    {user.avatarInitials}
-                                </div>
-                            </button>
-                            {profileOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                                    <div className="absolute right-0 top-full mt-2 z-50 w-48 py-2 rounded-lg border"
-                                        style={{ backgroundColor: "var(--tn-surface)", borderColor: "var(--tn-border)" }}>
-                                        <div className="px-4 py-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
-                                            <p className="text-xs font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
-                                            <p className="text-[10px]" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
-                                        </div>
-                                        <Link href="/profile" onClick={() => setProfileOpen(false)}
-                                            className="block px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-sub)" }}>
-                                            프로필
-                                        </Link>
-                                        <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
-                                            className="block w-full text-left px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-muted)" }}>
-                                            로그아웃
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
-                    {isAuthenticated && canAccessIntra && (
-                        <Link href="/intra" className="text-xs font-medium hover:opacity-70 transition-opacity flex items-center gap-0.5" style={{ color: "var(--tn-text-sub)" }}>
-                            Intra
-                        </Link>
-                    )}
-                    {!isLoading && !isAuthenticated && (
-                        <>
-                            <Link href="/login" className="text-xs transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
-                                로그인
-                            </Link>
-                            <Link href="/signup" className="text-xs px-4 py-1.5 transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                회원가입
-                            </Link>
-                        </>
-                    )}
                     <ThemeToggle />
+                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: canAccessIntra ? '/intra' : undefined, workspaceLabel: 'INTRA', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
                 </div>
 
                 {/* Mobile menu button */}
@@ -222,8 +166,5 @@ export function PublicHeader() {
                 </div>
             )}
         </header>
-
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#171717" />
-        </>
     );
 }

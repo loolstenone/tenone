@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
+import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
 
 const navItems = [
     { name: '솔루션', href: '/wio/solutions' },
@@ -35,9 +36,9 @@ export function WIOMarketingHeader() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <Link href="/wio/login" className="hidden md:inline-block px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition">
-                        시작하기
-                    </Link>
+                    <div className="hidden md:block">
+                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: '/wio/app', workspaceLabel: 'APP', signupPath: '/wio/login', accentColor: '#6366f1' }} />
+                    </div>
                     {/* Mobile hamburger */}
                     <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1 text-slate-400">
                         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
