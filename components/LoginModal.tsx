@@ -71,6 +71,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717" }: LoginMo
     };
 
     if (!isOpen) return null;
+    if (typeof window === 'undefined') return null;
 
     return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
