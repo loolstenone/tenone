@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Check, ArrowRight } from 'lucide-react';
+import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
 const PLANS = [
   { name: 'Starter', price: '월 49만원', desc: '소규모 팀, 기본 프로젝트 관리', members: '최대 20명', highlight: false,
@@ -17,17 +18,7 @@ const PLANS = [
 export default function PricingPage() {
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F23]/80 backdrop-blur-xl border-b border-white/5">
-        <nav className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
-          <Link href="/wio" className="text-xl font-black tracking-tight"><span className="text-indigo-400">W</span>IO</Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/wio/solutions" className="text-sm text-slate-400 hover:text-white transition-colors">솔루션</Link>
-            <Link href="/wio/framework" className="text-sm text-slate-400 hover:text-white transition-colors">프레임워크</Link>
-            <Link href="/wio/pricing" className="text-sm text-white font-semibold">가격</Link>
-            <Link href="/wio/about" className="text-sm text-slate-400 hover:text-white transition-colors">소개</Link>
-          </div>
-        </nav>
-      </header>
+      <WIOMarketingHeader />
 
       <div className="pt-20 pb-16 px-6">
         <div className="mx-auto max-w-5xl">

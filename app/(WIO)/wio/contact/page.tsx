@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Send, Check, Building2, Users, Briefcase, GraduationCap } from 'lucide-react';
+import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
 const interests = [
     { id: 'solution', label: '솔루션 구축', icon: Building2 },
@@ -32,18 +33,7 @@ export default function ContactPage() {
 
     return (
         <>
-            <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F23]/80 backdrop-blur-xl border-b border-white/5">
-                <nav className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
-                    <Link href="/wio" className="text-xl font-black tracking-tight"><span className="text-indigo-400">W</span>IO</Link>
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link href="/wio/solutions" className="text-sm text-slate-400 hover:text-white transition-colors">솔루션</Link>
-                        <Link href="/wio/framework" className="text-sm text-slate-400 hover:text-white transition-colors">프레임워크</Link>
-                        <Link href="/wio/pricing" className="text-sm text-slate-400 hover:text-white transition-colors">가격</Link>
-                        <Link href="/wio/about" className="text-sm text-slate-400 hover:text-white transition-colors">소개</Link>
-                    </div>
-                    <Link href="/wio/login" className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition">시작하기</Link>
-                </nav>
-            </header>
+            <WIOMarketingHeader />
 
             <main className="min-h-screen bg-[#0F0F23] text-white pt-24 pb-20 px-6">
                 <div className="mx-auto max-w-2xl">

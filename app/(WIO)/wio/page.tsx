@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Layers, Target, Zap, Users, BarChart3, BookOpen, Shield } from 'lucide-react';
+import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
 const HERO_COPIES = [
   { head: '인사, 재무, 경비\n왜 다 쪼개 놨어?', accent: 'WIO', tail: ' 하나로 일하세요' },
@@ -33,21 +34,7 @@ export default function WIOHome() {
 
   return (
     <>
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F23]/80 backdrop-blur-xl border-b border-white/5">
-        <nav className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
-          <Link href="/wio" className="text-xl font-black tracking-tight">
-            <span className="text-indigo-400">W</span>IO
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/wio/solutions" className="text-sm text-slate-400 hover:text-white transition-colors">솔루션</Link>
-            <Link href="/wio/framework" className="text-sm text-slate-400 hover:text-white transition-colors">프레임워크</Link>
-            <Link href="/wio/pricing" className="text-sm text-slate-400 hover:text-white transition-colors">가격</Link>
-            <Link href="/wio/about" className="text-sm text-slate-400 hover:text-white transition-colors">소개</Link>
-            <Link href="/login" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">시작하기</Link>
-          </div>
-        </nav>
-      </header>
+      <WIOMarketingHeader />
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6">
