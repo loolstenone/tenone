@@ -33,10 +33,8 @@ const domainPrefixMap: Record<string, string> = {
     // 추후 추가: 'luki.ai': '/lk'
 };
 
-// 리라이트 제외 경로
-const skipPaths = ['/intra', '/api', '/_next', '/auth'];
-// SmarComm은 자체 login/signup 있으므로 제외하지 않음
-const skipPathsWithAuth = ['/intra', '/api', '/_next', '/auth', '/login', '/signup'];
+// 리라이트 제외 경로 (모든 도메인 공통 — 인증 통일 후 SmarComm 분기 제거)
+const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup'];
 
 export function middleware(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
@@ -52,9 +50,8 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // 제외 경로 체크 (SmarComm은 /login, /signup도 rewrite 대상)
-    const paths = domain.startsWith('smarcomm') ? skipPaths : skipPathsWithAuth;
-    if (paths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {
+    // 제외 경로 체크
+    if (skipPaths.some(p => pathname.startsWith(p)) || pathname.includes('.')) {
         return NextResponse.next();
     }
 
