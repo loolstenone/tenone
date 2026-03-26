@@ -53,6 +53,10 @@ public/            # 정적 파일 (로고, 파비콘)
 
 ## 아키텍처 철학: WIO 중심 솔루션 공유
 
+> **⚠️ WIO 완전 설계서: `docs/WIO_Master_Architecture.md` (단일 진실 소스)**
+> 모든 WIO 관련 설계·가격·모듈·체크리스트는 이 문서에 있다.
+> 개발 시작 전 반드시 읽을 것.
+
 > WIO는 Ten:One Universe의 **공유 IT 인프라**다.
 > 각 브랜드는 WIO의 모듈을 가져다 쓴다. 별도 백엔드를 만들지 않는다.
 
@@ -86,15 +90,20 @@ public/            # 정적 파일 (로고, 파비콘)
 
 **구현 원칙:**
 - 새 기능은 먼저 WIO 모듈로 만들고, 각 브랜드가 import해서 사용
-- DB 테이블은 `wio_` 프리픽스 (멀티테넌트, brand_id 기반 RLS)
+- DB 테이블은 `[module]_[resource]` 네이밍 (멀티테넌트, brand_id 기반 RLS)
 - 각 브랜드 사이트는 WIO API를 호출하거나 `lib/supabase/wio.ts`를 직접 사용
-- **새 모듈 체크리스트** (`docs/WIO_Vision_Complete.md` 참조):
+- **새 모듈 체크리스트** (`docs/WIO_Master_Architecture.md` PART 10 참조):
   - □ 모든 테이블에 brand_id 컬럼이 있는가?
   - □ RLS 정책이 brand_id 기반으로 적용됐는가?
   - □ TenOne super_admin은 전체 접근 가능한가?
   - □ 모듈 간 연동은 API/이벤트로만 하고 직접 JOIN은 없는가?
+  - □ API 응답 구조가 APIResponse<T> 형식을 따르는가?
   - □ 이 모듈을 외부 기업이 써도 작동하는가?
+  - □ 7가지 입장(사용자·관리자·TenOne·외부·보안·확장·AI) 검증 완료?
 - **핵심 포지셔닝**: "입력을 없앤다. AI가 80%를 채운다."
+
+**WIO 가격 (확정):**
+| Free(0원/5명) | Starter(4.9만/20명) | Pro(14.9만/100명) | Business(39.9만/무제한) | Enterprise(협의) |
 
 ## 브랜드 시스템
 
