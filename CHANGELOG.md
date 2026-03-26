@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-03-26 (사무실) — 8커밋
+
+### TrendHunter 사이트 구축
+- 14개 페이지 생성 (홈/About/Reports/Insights/Services/My/Weekly/Signals/References/Opportunities/Dashboard)
+- 로고 PDF 반영 (T빨강/r노랑/e연두/n하늘/d초록 + Hunter흰색)
+- DB 스키마 9개 테이블 (supabase/trendhunter-tables.sql)
+- API 3개 (/collect, /respond, /stats)
+- 기술설계서 + WIO 계획서 docs/ 복사
+
+### 인증 시스템 전면 개편
+- SmarComm sessionStorage Mock 제거 → useAuth() 단일 경로 통일 (13개 파일)
+- auth-hub 크로스도메인 토큰 전송 폐기 → 도메인별 직접 Supabase OAuth
+- searchParams 크래시 버그 수정, 로그아웃 쿠키 강제 제거
+- SmarComm 리다이렉트 루프 수정, 서브도메인 리다이렉트 수정
+
+### LoginModal 팝업 로그인
+- LoginModal 공통 컴포넌트 + 전 브랜드 20개 헤더 적용
+
+### 서브도메인 인프라
+- 가비아 DNS 8개 + mindle CNAME 등록
+- Vercel 프로젝트 도메인 9개 등록
+- Supabase Redirect URL 19개 등록
+
+### 결정 사항
+- 인증: 도메인별 독립 로그인 (Option A). 쿠키는 도메인 격리, SSO는 나중에
+- 로그인 UX: 페이지 이동 → 팝업 모달로 전환
+- TrendHunter → Mindle(민들레) 리브랜딩 결정 (도메인: mindle.tenone.biz)
+- 참고사이트: trendhunter.com, some.co.kr, careet.net, trendmonitor.co.kr
+
+---
+
 ## 2026-03-26 (집) — 31커밋
 
 ### SmarComm
