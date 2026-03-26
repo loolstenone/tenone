@@ -78,10 +78,10 @@ export default function MindleAdminPage() {
         const today = new Date().toISOString().split("T")[0];
 
         const [collectedRes, countRes, crawlerRes, oppRes, draftsRes] = await Promise.all([
-            supabase.from("collected_data").select("*").order("created_at", { ascending: false }).limit(10),
-            supabase.from("collected_data").select("id", { count: "exact", head: true }).gte("created_at", today),
-            supabase.from("crawler_status").select("*").order("name"),
-            supabase.from("th_opportunities").select("*").order("created_at", { ascending: false }).limit(10),
+            supabase.from("collected_data").select("*").order("collected_at", { ascending: false }).limit(10),
+            supabase.from("collected_data").select("id", { count: "exact", head: true }).gte("collected_at", today),
+            supabase.from("crawler_status").select("*").order("crawler_name"),
+            supabase.from("th_opportunities").select("*").order("detected_at", { ascending: false }).limit(10),
             supabase.from("content_drafts").select("*").order("created_at", { ascending: false }).limit(10),
         ]);
 
@@ -164,9 +164,9 @@ export default function MindleAdminPage() {
                                             className="w-full flex items-center justify-between p-3 text-left">
                                             <div className="flex items-center gap-3 min-w-0 flex-1">
                                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 shrink-0">
-                                                    {row.platform || row.source || "Unknown"}
+                                                    {(row as any).source_type || (row as any).platform || "Unknown"}
                                                 </span>
-                                                <span className="text-white text-sm truncate">{row.keyword || row.url || row.id}</span>
+                                                <span className="text-white text-sm truncate">{(row as any).title || (row as any).source_name || row.url || row.id}</span>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0 ml-2">
                                                 <span className="text-neutral-600 text-[10px]">
@@ -211,15 +211,15 @@ export default function MindleAdminPage() {
                                             <div className="flex items-center gap-2">
                                                 <span>{c.icon || "🔧"}</span>
                                                 <div>
-                                                    <p className="text-white text-sm">{c.name}</p>
-                                                    <p className="text-neutral-600 text-[10px]">{c.last_run || "N/A"}</p>
+                                                    <p className="text-white text-sm">{(c as any).crawler_name || c.name}</p>
+                                                    <p className="text-neutral-600 text-[10px]">{(c as any).last_run ? new Date((c as any).last_run).toLocaleString() : "N/A"}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <p className={`text-xs font-mono ${c.status === "active" ? "text-green-400" : "text-[#F5C518]"}`}>
                                                     {c.status === "active" ? "● Active" : "⏸ Paused"}
                                                 </p>
-                                                <p className="text-neutral-400 text-xs">{c.today_count ?? 0} items</p>
+                                                <p className="text-neutral-400 text-xs">{(c as any).last_count ?? 0} items</p>
                                             </div>
                                         </div>
                                     ))}
