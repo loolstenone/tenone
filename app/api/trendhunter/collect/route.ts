@@ -34,6 +34,33 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
+
+        // Batch mode: array of items
+        if (Array.isArray(body.items)) {
+            const results = { inserted: 0, errors: 0 };
+            for (const item of body.items) {
+                if (!item.source || !item.message) { results.errors++; continue; }
+                const masked = maskPII(item.message);
+                const urls = extractUrls(item.message);
+                const { error } = await supabase.from('collected_data').insert({
+                    source_type: item.source,
+                    source_name: item.room || 'unknown',
+                    topic: item.topic,
+                    author: item.sender,
+                    title: item.title,
+                    content: masked,
+                    content_type: item.content_type || 'text',
+                    url: item.url,
+                    has_urls: urls.length > 0,
+                    extracted_urls: urls.length > 0 ? urls : null,
+                    metadata: { ...item.metadata, original_timestamp: item.timestamp },
+                    collected_at: item.timestamp || new Date().toISOString(),
+                });
+                if (error) results.errors++; else results.inserted++;
+            }
+            return NextResponse.json({ ok: true, mode: 'batch', ...results });
+        }
+
         const {
             source,       // kakao, kakao_ext, web, discord, rss, news, smarcomm
             room,         // 방 이름 / 사이트명

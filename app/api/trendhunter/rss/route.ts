@@ -10,8 +10,8 @@ const RSS_FEEDS = [
   { name: 'Hacker News', url: 'https://hnrss.org/frontpage', topic: 'ai_tech' },
   { name: 'Product Hunt', url: 'https://www.producthunt.com/feed', topic: 'business' },
   { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', topic: 'ai_tech' },
-  { name: 'Indie Hackers', url: 'https://feeds.transistor.fm/indie-hackers', topic: 'business' },
-  { name: 'Morning Brew', url: 'https://morningbrew.com/daily/rss', topic: 'business' },
+  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', topic: 'ai_tech' },
+  { name: 'Wired', url: 'https://www.wired.com/feed/rss', topic: 'ai_tech' },
   { name: 'Google News KR Tech', url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtdHZHZ0pMVWlnQVAB?hl=ko&gl=KR&ceid=KR:ko', topic: 'ai_tech' },
   { name: 'Google News KR Business', url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FtdHZHZ0pMVWlnQVAB?hl=ko&gl=KR&ceid=KR:ko', topic: 'business' },
 ];

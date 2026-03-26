@@ -59,8 +59,8 @@ export function PublicFooter() {
                 <div className="mt-16 pt-8 border-t border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-xs text-neutral-600">&copy; <a href="https://tenone.biz" className="hover:text-neutral-400 transition-colors">Ten:One&trade; Universe</a>.</p>
                     <div className="flex gap-6 text-xs text-neutral-600">
-                        <span>Privacy Policy</span>
-                        <span>Terms of Service</span>
+                        <a href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</a>
+                        <a href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</a>
                     </div>
                 </div>
             </div>

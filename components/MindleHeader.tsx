@@ -12,6 +12,7 @@ const navItems = [
     { name: "REPORTS", href: "/mindle/reports" },
     { name: "DATA", href: "/mindle/data" },
     { name: "REFERENCES", href: "/mindle/references" },
+    { name: "NEWSLETTER", href: "/mindle/newsletter" },
 ];
 
 export function MindleHeader() {
@@ -37,10 +38,32 @@ export function MindleHeader() {
 
     return (
         <>
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]">
-            {/* Top utility bar */}
-            <div className="border-b border-neutral-800/40">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-9 items-center justify-end gap-5">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-neutral-800/50 backdrop-blur-md">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-12 items-center">
+                {/* Logo */}
+                <Link href="/mindle" className="shrink-0 text-xl font-black tracking-tight mr-8">
+                    <span className="text-[#F5C518]">M</span><span className="text-white">indle</span>
+                </Link>
+
+                {/* Desktop nav */}
+                <nav className="hidden md:flex items-center gap-6">
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`text-[12px] font-bold tracking-wider transition-colors ${
+                                pathname?.startsWith(item.href)
+                                    ? "text-[#F5C518]"
+                                    : "text-neutral-300 hover:text-white"
+                            }`}
+                        >
+                            {item.name}
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Right side utilities */}
+                <div className="hidden md:flex items-center gap-5 ml-auto">
                     <Link href="/mindle/about" className="text-[11px] font-semibold tracking-wider text-neutral-400 hover:text-white transition-colors">
                         ABOUT
                     </Link>
@@ -65,38 +88,11 @@ export function MindleHeader() {
                         <Search className="h-3.5 w-3.5" />
                     </button>
                 </div>
-            </div>
 
-            {/* Main nav bar */}
-            <div className="border-b border-neutral-800/50 bg-[#0A0A0A]/95 backdrop-blur-md">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-11 items-center">
-                    {/* Logo */}
-                    <Link href="/mindle" className="shrink-0 text-xl font-black tracking-tight mr-8">
-                        <span className="text-[#F5C518]">M</span><span className="text-white">indle</span>
-                    </Link>
-
-                    {/* Desktop nav */}
-                    <nav className="hidden md:flex items-center gap-6">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`text-[12px] font-bold tracking-wider transition-colors ${
-                                    pathname?.startsWith(item.href)
-                                        ? "text-[#F5C518]"
-                                        : "text-neutral-300 hover:text-white"
-                                }`}
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
-                    </nav>
-
-                    {/* Mobile hamburger */}
-                    <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-neutral-400 ml-auto">
-                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                    </button>
-                </div>
+                {/* Mobile hamburger */}
+                <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-neutral-400 ml-auto">
+                    {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
             </div>
 
             {/* Search bar (expandable) */}

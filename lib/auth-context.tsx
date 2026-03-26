@@ -70,126 +70,114 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
 
-    // 초기화: Supabase 세션 체크 → members 테이블 조회 → fallback localStorage
-    useEffect(() => {
-        let finished = false;
+    // Supabase 세션에서 members 조회 → User 설정
+    const syncUserFromSession = useCallback(async (sessionUser: { id: string; email?: string; user_metadata?: any }) => {
+        try {
+            let { data: member } = await supabase
+                .from('members')
+                .select('*')
+                .eq('auth_id', sessionUser.id)
+                .single();
 
-        // localStorage 먼저 체크 → 즉시 UI 표시 (로그인 버튼 or 프로필)
+            // 소셜 로그인 첫 가입 → 자동 프로필 생성
+            if (!member) {
+                const userName = sessionUser.user_metadata?.full_name
+                    || sessionUser.user_metadata?.name
+                    || sessionUser.email?.split('@')[0]
+                    || '사용자';
+                const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
+                const { defaultModuleAccess } = await import('@/types/auth');
+                const initialType = 'member' as const;
+
+                const { data: newMember } = await supabase
+                    .from('members')
+                    .insert({
+                        auth_id: sessionUser.id,
+                        email: sessionUser.email || '',
+                        name: userName,
+                        account_type: initialType,
+                        primary_type: initialType,
+                        roles: [initialType],
+                        avatar_initials: userName.substring(0, 2).toUpperCase(),
+                        role: 'Member',
+                        origin_site: originSite,
+                        intra_access: false,
+                        module_access: defaultModuleAccess[initialType] || [],
+                        affiliations: [],
+                    })
+                    .select()
+                    .single();
+                member = newMember;
+            }
+
+            if (member) {
+                const u = memberToUser(member);
+                setUser(u);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                return u;
+            }
+
+            // members 조회/생성 실패 → 최소 로그인 처리
+            const fallbackUser: User = {
+                id: sessionUser.id,
+                name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || '사용자',
+                email: sessionUser.email || '',
+                role: 'Member' as const,
+                accountType: 'member' as const,
+                avatarInitials: (sessionUser.email?.substring(0, 2) || 'U').toUpperCase(),
+                brandAccess: [],
+                systemAccess: [],
+            };
+            setUser(fallbackUser);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackUser));
+            return fallbackUser;
+        } catch {
+            return null;
+        }
+    }, [supabase]);
+
+    // 초기화: localStorage 즉시 표시 → Supabase 세션 검증 → 불일치 시 정리
+    useEffect(() => {
+        // 1단계: localStorage 즉시 복원 (깜박임 방지)
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                setUser(JSON.parse(stored));
-            }
-            setIsLoading(false); // 즉시 로딩 해제
-        } catch {
-            setIsLoading(false);
-        }
+            if (stored) setUser(JSON.parse(stored));
+        } catch { /* ignore */ }
+        setIsLoading(false);
 
-        async function init() {
+        // 2단계: Supabase 세션 검증 (비동기)
+        async function validateSession() {
             try {
-                // OAuth 콜백: code 교환은 auth-hub/callback에서 서버사이드로 처리
-                // /auth/session 라우트가 setSession() 후 리다이렉트하면
-                // 아래 getSession()에서 자동으로 세션 감지됨
-
-                // Supabase Auth 세션 확인
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
-                    // members 테이블에서 프로필 조회
-                    const { data: member } = await supabase
-                        .from('members')
-                        .select('*')
-                        .eq('auth_id', session.user.id)
-                        .single();
-
-                    if (member) {
-                        const u = memberToUser(member);
-                        setUser(u);
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-                        return;
+                    // 유효한 세션 → 최신 프로필 동기화
+                    await syncUserFromSession(session.user);
+                } else {
+                    // 세션 없음 → localStorage에 남은 stale 데이터 정리
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    if (stored) {
+                        console.log('[Auth] Supabase session expired, clearing stale localStorage');
+                        setUser(null);
+                        localStorage.removeItem(STORAGE_KEY);
                     }
                 }
             } catch {
-                // Supabase 실패 시 무시 (localStorage에서 이미 복원됨)
+                // Supabase 접속 실패 → localStorage 유지 (오프라인 대응)
             }
-            finished = true;
         }
-        init();
+        validateSession();
 
-        // Auth 상태 변경 리스너
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            try {
-                console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || 'no user');
+        // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('[Auth] onAuthStateChange:', event, session?.user?.email || 'no user');
+
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (session?.user) {
-                    // members 테이블에서 프로필 조회
-                    let { data: member, error: memberErr } = await supabase
-                        .from('members')
-                        .select('*')
-                        .eq('auth_id', session.user.id)
-                        .single();
-                    console.log('[Auth] members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
-
-                    // 소셜 로그인으로 처음 가입한 경우 → 자동 프로필 생성
-                    if (!member) {
-                        const userName = session.user.user_metadata?.full_name
-                            || session.user.user_metadata?.name
-                            || session.user.email?.split('@')[0]
-                            || '사용자';
-                        const initials = userName.substring(0, 2).toUpperCase();
-                        // origin_site 기반 초기 역할 설정
-                        const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
-                        const { defaultModuleAccess } = await import('@/types/auth');
-                        const initialType = 'member' as const;
-                        const initialModules = defaultModuleAccess[initialType] || [];
-
-                        const { data: newMember, error: insertErr } = await supabase
-                            .from('members')
-                            .insert({
-                                auth_id: session.user.id,
-                                email: session.user.email || '',
-                                name: userName,
-                                account_type: initialType,
-                                primary_type: initialType,
-                                roles: [initialType],
-                                avatar_initials: initials,
-                                role: 'Member',
-                                origin_site: originSite,
-                                intra_access: initialType !== 'member',
-                                module_access: initialModules,
-                                affiliations: [],
-                            })
-                            .select()
-                            .single();
-                        console.log('[Auth] member insert:', newMember ? 'ok' : 'failed', insertErr?.message || '', 'origin:', originSite);
-                        member = newMember;
-                    }
-
-                    if (member) {
-                        const u = memberToUser(member);
-                        setUser(u);
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-                        console.log('[Auth] user set:', u.email, u.role);
-                    } else {
-                        // members 조회/생성 실패해도 최소 로그인은 처리
-                        const fallbackUser: User = {
-                            id: session.user.id,
-                            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '사용자',
-                            email: session.user.email || '',
-                            role: 'Member' as const,
-                            accountType: 'member' as const,
-                            avatarInitials: (session.user.email?.substring(0, 2) || 'U').toUpperCase(),
-                            brandAccess: [],
-                            systemAccess: [],
-                        };
-                        setUser(fallbackUser);
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackUser));
-                        console.log('[Auth] fallback user set:', fallbackUser.email);
-                    }
-                } else if (_event === 'SIGNED_OUT') {
-                    setUser(null);
-                    localStorage.removeItem(STORAGE_KEY);
+                    await syncUserFromSession(session.user);
                 }
-            } catch (err) {
-                console.error('[Auth] onAuthStateChange error:', err);
+            } else if (event === 'SIGNED_OUT') {
+                setUser(null);
+                localStorage.removeItem(STORAGE_KEY);
             }
         });
 
@@ -200,33 +188,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 로그인: Supabase Auth → fallback Mock
     const login = useCallback(async (email: string, password: string) => {
         try {
-            // 1. Supabase Auth 시도
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) console.error('[Auth] Supabase login error:', error.message);
             if (!error && data.user) {
-                console.log('[Auth] Supabase login success:', data.user.email);
-                // members 테이블에서 프로필 조회
-                const { data: member, error: memberErr } = await supabase
-                    .from('members')
-                    .select('*')
-                    .eq('auth_id', data.user.id)
-                    .single();
-                console.log('[Auth] login members lookup:', member ? 'found' : 'not found', memberErr?.message || '');
-
-                if (member) {
-                    const u = memberToUser(member);
-                    setUser(u);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                const u = await syncUserFromSession(data.user);
+                if (u) {
                     // last_login_at 업데이트
-                    await supabase.from('members').update({ last_login_at: new Date().toISOString() }).eq('id', member.id);
+                    supabase.from('members').update({ last_login_at: new Date().toISOString() }).eq('auth_id', data.user.id).then(() => {});
                     return { success: true, user: u };
                 }
             }
+            if (error) console.error('[Auth] Supabase login error:', error.message);
         } catch {
             // Supabase 실패 시 Mock fallback
         }
 
-        // 2. Fallback: Mock 인증 (개발 중 호환)
+        // Fallback: Mock 인증 (개발 중 호환)
         const validatedUser = validateCredentials(email, password);
         if (validatedUser) {
             setUser(validatedUser);
@@ -234,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: true, user: validatedUser };
         }
         return { success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' };
-    }, [supabase]);
+    }, [supabase, syncUserFromSession]);
 
     // 회원가입: Supabase Auth + members 테이블
     const register = useCallback(async (name: string, email: string, password: string, newsletterSubscribed?: boolean) => {

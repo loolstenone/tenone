@@ -27,9 +27,13 @@ export default function HomePage() {
 
     useEffect(() => {
         fetch('/api/board/posts?site=tenone&board=works&limit=8&status=published')
-            .then(r => r.json()).then(d => setLatestWorks(d.posts || [])).catch(() => {});
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(d => setLatestWorks(d.posts || []))
+            .catch(() => console.warn('[Home] Works fetch failed — using empty state'));
         fetch('/api/board/posts?site=tenone&board=newsroom&limit=4&status=published')
-            .then(r => r.json()).then(d => setLatestNews(d.posts || [])).catch(() => {});
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(d => setLatestNews(d.posts || []))
+            .catch(() => console.warn('[Home] Newsroom fetch failed — using empty state'));
     }, []);
 
     return (
@@ -73,14 +77,22 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="hidden lg:block">
-                        <div className="aspect-[4/5] relative overflow-hidden">
+                        <div className="aspect-[4/5] relative overflow-hidden" style={{ backgroundColor: "var(--tn-surface, #111)" }}>
                             <Image
                                 src="/hero-banner.png"
                                 alt="Ten:One™ Universe - 브랜드 네트워크 시각화"
                                 fill
                                 className="object-cover opacity-50"
                                 priority
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
+                            {/* Fallback: 그라디언트 + 텍스트 */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                                <div className="text-center">
+                                    <div className="text-6xl font-black tracking-tighter" style={{ color: "var(--tn-text-muted)" }}>10:01</div>
+                                    <div className="text-xs tracking-[0.3em] mt-2" style={{ color: "var(--tn-text-muted)" }}>UNIVERSE</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -88,7 +88,7 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
+            <Link href="/wio/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
               구축 상담 받기 <ArrowRight size={16} />
             </Link>
           </div>

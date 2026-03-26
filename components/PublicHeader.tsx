@@ -20,7 +20,7 @@ const publicNav = [
         name: "About", href: "/about",
         sub: [
             { name: "Philosophy", href: "/about?tab=philosophy" },
-            { name: "Universe", href: "/about?tab=universe" },
+            { name: "Universe Structure", href: "/universe" },
             { name: "Brands", href: "/about?tab=brands" },
             { name: "History", href: "/about?tab=history" },
         ]
@@ -114,7 +114,7 @@ export function PublicHeader() {
                                         </Link>
                                         <button onClick={() => { setProfileOpen(false); logout(); router.push('/'); }}
                                             className="block w-full text-left px-4 py-2 text-xs hover:opacity-70 transition-opacity" style={{ color: "var(--tn-text-muted)" }}>
-                                            Logout
+                                            로그아웃
                                         </button>
                                     </div>
                                 </>
@@ -123,16 +123,16 @@ export function PublicHeader() {
                     )}
                     {isAuthenticated && canAccessIntra && (
                         <Link href="/intra" className="text-xs font-medium hover:opacity-70 transition-opacity flex items-center gap-0.5" style={{ color: "var(--tn-text-sub)" }}>
-                            →]
+                            Intra
                         </Link>
                     )}
                     {!isLoading && !isAuthenticated && (
                         <>
                             <Link href="/login" className="text-xs transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
-                                Login
+                                로그인
                             </Link>
                             <Link href="/signup" className="text-xs px-4 py-1.5 transition-colors" style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                Joinup
+                                회원가입
                             </Link>
                         </>
                     )}
@@ -195,7 +195,7 @@ export function PublicHeader() {
                                 <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
                                     className="flex items-center gap-1 text-sm transition-colors hover:opacity-70"
                                     style={{ color: "var(--tn-text-sub)" }}>
-                                    →]
+                                    Intra
                                 </Link>
                             )}
                             <Link href="/profile" onClick={() => setMobileMenuOpen(false)}

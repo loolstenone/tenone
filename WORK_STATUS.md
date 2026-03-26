@@ -1,82 +1,106 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-26 (사무실) — 작업 종료 #2
+> 마지막 업데이트: 2026-03-26 (집) — 작업 종료
 
-## 오늘 한 작업 (3/26 사무실) — 약 15커밋
+## 오늘 한 작업 (3/26 집)
 
-### 1. Mindle(민들레) 사이트 구축 ✅
-- TrendHunter → **Mindle** 리브랜딩 완료
-- 도메인: `mindle.tenone.biz` (DNS + Vercel + middleware)
-- **전 페이지 영문 전환**: 홈/Trends/Reports/Data/References/About/My/Admin
-- **2단 헤더**: 상단 유틸리티(ABOUT/LOGIN/Share/Search) + 하단 네비(TRENDS/REPORTS/DATA/REFERENCES)
-- **홈**: 신문 레이아웃 + 30개 영문 랜덤 카피 + Hot Keywords + Featured Article + TODAY'S PICKS
-- **Trends**: Featured 기사 + 리스트/그리드 뷰 전환 + 카테고리 필터 + 인라인 검색
-- **Reports**: 주간 타임라인 + LATEST/PREMIUM 뱃지 + 키워드 태그
-- **Data**: 키워드 랭킹 테이블(15개) + 기간 필터(24H/7D/30D/90D) + 수집 소스 현황 + Biggest Movers
-- **References**: Editor's Picks + 카테고리 필터 + 12개 소스 + 태그
-- **Admin**: Supabase 실데이터 연결 + 이메일 기반 관리자 권한
+### 1. Mindle 고도화 ✅
+- RSS 크롤러 cron 자동화 (vercel.json — 매시간)
+- RSS 피드 404 수정 (Indie Hackers→Ars Technica, Morning Brew→Wired)
+- Newsletter 페이지 생성 (/mindle/newsletter)
+- 헤더 2줄→1줄 정리 (Logo+Nav 왼쪽, Utility 오른쪽)
+- Admin 고도화 (검색/필터/Run Crawl Now/Run AI Analysis)
+- 콘텐츠 파이프라인 API (/api/trendhunter/analyze)
+  - Rule-based 키워드 추출 + 트렌드 요약
+  - newsletter/report/article 3종 초안 자동 생성
+  - content_drafts + th_insights DB 저장
+- Collect API 배치 모드 추가 (items[] 배열)
 
-### 2. Mindle DB + 크롤러 ✅
-- Supabase에 **9개 테이블 생성 완료** (collected_data, digests, bot_responses, th_opportunities, url_archive, daily_stats, th_insights, content_drafts, crawler_status)
-- **RLS 정책** 설정 (authenticated read, anon/auth insert, auth update)
-- **RSS 자동 수집 크롤러** 구축: `/api/trendhunter/rss` (GET/POST)
-  - 8개 피드: TechCrunch, Hacker News, Product Hunt, The Verge, Indie Hackers, Morning Brew, Google News KR Tech/Business
-  - 중복 체크(24시간) + RSS 2.0/Atom 파싱 + crawler_status 자동 업데이트
-  - **첫 실행으로 30건 수집 성공** (6개 피드 정상, 2개 404)
-- 테스트 데이터: crawler_status 4건 + collected_data 3건 수동 입력
+### 2. 크롤러 확장 3종 ✅
+- **디스코드 봇** (bots/discord/) — discord.js, 배치 전송, 채널별 토픽 매핑
+- **웹 크롤러** (bots/web-crawler/) — Puppeteer, 네이버 블로그/카페
+- **바닥쇠** (bots/badaksoe/) — 메신저봇R, 카카오 오픈채팅 내부/외부 방
 
-### 3. 인증 시스템 최종 해결 ✅
-- **Supabase Redirect URL**: `https://*.tenone.biz/auth/callback` 와일드카드 등록 → 전 서브도메인 소셜 로그인 해결
-- **LoginModal** 22개 헤더 전체 적용 확인
-- **서브도메인 로그인 후 텐원 이동 문제** 해결 (isSubdomain race condition fix)
+### 3. WIO 점검 + 수정 ✅
+- wio.tenone.biz 라이브 테스트 — 마케팅홈/로그인/앱 모두 정상
+- 사이드바 기본 모듈 ['home','project','talk'] → 10개 전체로 확장
+- /contact 페이지 생성 (상담 신청 폼, 인디고 테마)
+- 마케팅 3페이지 CTA 링크 /contact → /wio/contact 수정
+- 프로젝트 상세 페이지 생성 (/wio/app/project/[id])
 
-### 4. 서브도메인 인프라 ✅
-- 가비아 DNS: CNAME 8개 (trendhunter, wio, seoul360, montz, jakka, townity, planners, mullaesian)
-- Vercel: 9개 도메인 등록 (위 8개 + mindle)
-- middleware: mindle.tenone.biz, wio.tenone.biz, seoul360.tenone.biz 매핑
+### 4. 인증 세션 끊김 수정 ✅
+- Supabase 클라이언트 싱글톤 (매번 새 인스턴스 → 싱글톤)
+- 세션 만료 시 stale localStorage 정리
+- TOKEN_REFRESHED 이벤트 처리 추가
+- syncUserFromSession() 공통 함수 추출
 
-### 5. WIO 8대 모듈 완성 ✅
-- **Timesheet 모듈 추가**: 주간 시수 그리드 + 프로젝트별 시간/비용 계산 + AI Auto-Fill 버튼 + Submit/Approve 워크플로우
-- 8대 모듈: Project, People, Finance, Sales, Timesheet(NEW), Content, Wiki, Insight
+### 5. 인트라 DB 연결 ✅
+- Marketing 모듈 Supabase 연결 (SQL스키마 + DB레이어 + Context DB우선/Mock fallback)
+- supabase/marketing-tables.sql (4테이블: campaigns, leads, content, deals)
+- lib/supabase/marketing.ts (CRUD 전체)
+
+### 6. TenOne 고도화 ✅
+- Universe 페이지 인터랙티브 구조도 (리다이렉트 → 실제 콘텐츠)
+  - Ten:One Hub → WIO/YIO 양대 OS → 9개 사업 포트폴리오 (WIO·YIO 적용 방식)
+  - 수평 시너지 체인 3개 (인재/트렌드-비즈니스/교육)
+  - TenOne 다크 테마 + CSS 변수 통일
+- 한/영 UI 통일 (Logout→로그아웃, Login→로그인, Joinup→회원가입, →]→Intra)
+- Privacy Policy 페이지 생성 (개인정보처리방침 7조)
+- Terms of Service 페이지 생성 (이용약관 9조)
+- 푸터 Privacy/Terms 링크 활성화
+- Brands 페이지 다크 테마 적용 (CSS 변수 기반)
+- About > Universe 서브메뉴 → /universe 독립 링크
+- 홈 히어로 이미지 fallback (에러 시 10:01 UNIVERSE 텍스트)
+- Works/Newsroom fetch 에러 핸들링 개선
+
+### 7. 전체 분석 + 문서화 ✅
+- SITE_ANALYSIS.md 전체 사이트 종합 분석 보고서
+  - TenOne 7/10, WIO 6.5/10, SmarComm 6.5/10, Mindle 8.5/10
+  - CRITICAL 8건, HIGH 12건 식별
+  - Sprint 1~4 액션 플랜 23개 항목
+- CLAUDE.md 규칙 추가 (작업종료 묻지않기 + 톤앤매너 준수)
 
 ## 현재 이슈 ⚠️
 
 ### 해결 완료
-- [x] 서브도메인 소셜 로그인 → 와일드카드 URL로 해결
-- [x] Mindle DB 테이블 생성
-- [x] Mindle Admin 컬럼명 매칭 (collected_at, crawler_name 등)
-- [x] Mindle Admin 관리자 권한 (이메일 화이트리스트)
+- [x] 인증 세션 끊김 → 싱글톤 + 세션만료정리 + TOKEN_REFRESHED
+- [x] Mindle newsletter 404 → 페이지 생성
+- [x] WIO /contact 404 → 페이지 생성
+- [x] TenOne Universe 빈 페이지 → 인터랙티브 구조도
+- [x] TenOne 한/영 혼용 → 한국어 통일
+- [x] 푸터 Privacy/Terms 비활성 → 페이지 생성 + 링크 연결
 
 ### 잔여 이슈
-- [ ] RSS 크롤러 2개 피드 404 (Indie Hackers, Morning Brew) — URL 교체 필요
+- [ ] RSS 크롤러 404 피드 2개 → Ars Technica/Wired로 교체 완료, Vercel 배포 후 확인
 - [ ] 카카오 OAuth Provider Supabase 설정 확인 필요
-- [ ] newsletter 페이지 404 (/mindle/newsletter 미생성)
+- [ ] WIO Settings CRUD 미구현 (다음 세션)
+- [ ] SmarComm "개발중" 15+ 페이지 네비 노출 → 피처플래그 필요
 
-## 다음에 할 일 (집)
+## 다음에 할 일 (사무실)
 
-### 🔴 최우선: Mindle 고도화
-- [ ] RSS 크롤러 cron 자동화 (Vercel Cron 또는 Cloud Scheduler로 1시간마다 자동 실행)
-  - vercel.json에 `crons: [{ path: "/api/trendhunter/rss", schedule: "0 * * * *" }]` 추가
-- [ ] RSS 피드 404 수정: Indie Hackers, Morning Brew URL 교체
-- [ ] Mindle Admin 고도화: 수집 데이터 검색/필터, AI 분석 트리거 버튼
-- [ ] Mindle newsletter 페이지 생성 (/mindle/newsletter)
-- [ ] 콘텐츠 파이프라인: 수집 데이터 → AI 분석 → 콘텐츠 초안 자동 생성
+### 🔴 최우선: WIO 고도화 계속
+- [ ] WIO Settings CRUD (조직 편집/멤버 초대·삭제/모듈 토글/브랜딩 수정)
+  - `app/(WIO)/wio/app/settings/page.tsx` 현재 읽기전용 → 각 탭에 편집 폼 추가
+  - Supabase `wio_tenants` UPDATE, `wio_tenant_members` INSERT/DELETE
+- [ ] WIO 모듈 접근 제어 (tenant.plan → activeModules 필터링)
+  - `app/(WIO)/wio/app/layout.tsx` line 86 기본값을 plan 기반으로 변경
+- [ ] WIO 이메일 인증 + 비밀번호 재설정 플로우
+- [ ] WIO Timesheet Mock → Supabase 연결
 
-### 크롤러 확장
-- [ ] 디스코드 봇 크롤러 (discord.js → /api/trendhunter/collect)
-- [ ] 웹 크롤러 (Puppeteer) — 네이버 카페/블로그
-- [ ] 바닥쇠 (카카오 오픈채팅) — 안드로이드 공기계 + 메신저봇R
+### SmarComm 고도화
+- [ ] "개발중" 페이지 네비에서 숨김 (피처플래그 또는 리스트 분리)
+- [ ] TierGate localStorage → 서버 인증 전환
+- [ ] /api/scan 엔드포인트 실제 구현 (현재 프론트만)
 
-### WIO
-- [ ] wio.tenone.biz 라이브 테스트
-- [ ] WIO 로그인 → 앱 진입 플로우 확인
-- [ ] Timesheet이 사이드바에 표시되는지 확인 (tenant.modules에 'timesheet' 포함 필요)
+### 인트라 모듈
+- [ ] Studio 모듈 DB 연결 (schedule, assets)
+- [ ] BUMS 모듈 DB 연결
 
-### TenOne 기타
-- [ ] 인트라 나머지 모듈 DB 연결
-- [ ] AI 에이전트 API 키 연결
+### AI
+- [ ] Claude API 키 연결 → Mindle AI 분석 rule-based→Claude 전환
+- [ ] AI 에이전트 API 연동
 
-## Supabase DB 현황 (총 50+ 테이블)
+## Supabase DB 현황 (총 55+ 테이블)
 
 ### 기존 (10개)
 members(4), posts(39), board_configs(8), projects(8), approvals(4), expenses(5), gpr_goals(5), attendance(5), biz_plans(3), chat_threads(0)
@@ -87,5 +111,8 @@ badak_profiles, badak_connections, badak_feedbacks, badak_stars
 ### WIO (24개)
 Sprint 1~4 동일
 
-### Mindle/TrendHunter (9개) — ✅ 생성 완료 + RLS 설정
+### Mindle/TrendHunter (9개)
 collected_data(37+), digests(0), bot_responses(0), th_opportunities(0), url_archive(0), daily_stats(0), th_insights(0), content_drafts(0), crawler_status(4)
+
+### Marketing (4개) — ✅ 신규
+marketing_campaigns, marketing_leads, marketing_content, marketing_deals

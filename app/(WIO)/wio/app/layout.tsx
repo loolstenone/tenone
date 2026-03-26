@@ -83,7 +83,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  const activeModules = (tenant?.modules || ['home', 'project', 'talk']) as WIOModule[];
+  const activeModules = (tenant?.modules || ['home', 'project', 'talk', 'finance', 'people', 'sales', 'timesheet', 'content', 'wiki', 'insight']) as WIOModule[];
   const sidebarWidth = collapsed ? 56 : 220;
 
   const handleLogout = async () => {

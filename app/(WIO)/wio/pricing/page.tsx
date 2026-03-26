@@ -52,7 +52,7 @@ export default function PricingPage() {
                     </div>
                   ))}
                 </div>
-                <Link href="/contact" className={`text-center rounded-lg py-2.5 text-sm font-semibold transition-colors ${plan.highlight ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'border border-white/10 text-slate-300 hover:bg-white/5'}`}>
+                <Link href="/wio/contact" className={`text-center rounded-lg py-2.5 text-sm font-semibold transition-colors ${plan.highlight ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'border border-white/10 text-slate-300 hover:bg-white/5'}`}>
                   {plan.price === '별도 협의' ? '상담 신청' : '시작하기'}
                 </Link>
               </div>

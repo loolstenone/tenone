@@ -4,6 +4,59 @@
 
 ---
 
+## 2026-03-26 (집) — 대규모 고도화
+
+### Mindle 고도화
+- vercel.json cron 자동화 (매시간 RSS 크롤러)
+- RSS 피드 Indie Hackers→Ars Technica, Morning Brew→Wired 교체
+- Newsletter 페이지 (/mindle/newsletter) + 헤더 1줄 정리
+- Admin: 검색/필터 + Run Crawl Now + Run AI Analysis 버튼
+- 콘텐츠 파이프라인 API (/api/trendhunter/analyze) — rule-based 분석, 3종 초안 자동생성
+- Collect API 배치 모드 (items[] 배열)
+
+### 크롤러 확장 3종
+- bots/discord/ — discord.js 봇 (채널별 토픽, 배치 전송)
+- bots/web-crawler/ — Puppeteer (네이버 블로그/카페)
+- bots/badaksoe/ — 메신저봇R (카카오 오픈채팅)
+
+### WIO 고도화
+- 사이드바 기본 모듈 3개→10개 확장 (timesheet 포함)
+- /wio/contact 상담 신청 페이지 생성
+- 마케팅 3페이지 CTA /contact→/wio/contact 수정
+- /wio/app/project/[id] 프로젝트 상세 페이지 (개요/업무/인원 탭)
+
+### 인증 세션 끊김 수정
+- Supabase 클라이언트 싱글톤화 (lib/supabase/client.ts)
+- 세션 만료 시 stale localStorage 정리
+- TOKEN_REFRESHED 이벤트 처리
+- syncUserFromSession() 공통 함수
+
+### 인트라 Marketing DB 연결
+- supabase/marketing-tables.sql (4테이블 + RLS + 인덱스)
+- lib/supabase/marketing.ts (Campaign/Lead/Content CRUD)
+- marketing-context.tsx DB우선 + Mock fallback 패턴
+
+### TenOne 퍼블릭 고도화
+- /universe 인터랙티브 구조도 (Hub→OS→사업 포트폴리오 + 시너지 체인)
+- 한/영 UI 통일 (Logout→로그아웃, Login→로그인, →]→Intra)
+- /privacy 개인정보처리방침 + /terms 이용약관 생성
+- 푸터 Privacy/Terms 링크 활성화
+- /brands 다크 테마 적용
+- About > Universe Structure 독립 링크
+- 홈 히어로 이미지 fallback + API fetch 에러 핸들링
+
+### 문서화
+- SITE_ANALYSIS.md 전체 사이트 종합 분석 (5개 사이트, CRITICAL 8건)
+- CLAUDE.md 규칙 추가 (작업종료 묻지않기, 톤앤매너 준수)
+
+### 결정 사항
+- 개발 우선순위: TenOne(허브) → WIO+YIO(OS) → 수익사업 → 나머지
+- TenOne 다크 테마 CSS 변수 (`--tn-*`) 모든 페이지 통일
+- 크롤러 확장: RSS(완료) → Discord → Web → 바닥쇠 순서
+- WIO Settings CRUD는 다음 세션 (Supabase UPDATE 필요)
+
+---
+
 ## 2026-03-26 (사무실 #2) — 약 15커밋
 
 ### Mindle(민들레) 사이트 완성

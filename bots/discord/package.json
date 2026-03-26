@@ -1,0 +1,13 @@
+{
+  "name": "mindle-discord-crawler",
+  "version": "1.0.0",
+  "description": "Mindle Discord Bot Crawler — collects messages and sends to Mindle pipeline",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.0"
+  }
+}

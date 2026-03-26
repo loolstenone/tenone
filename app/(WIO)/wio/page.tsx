@@ -154,7 +154,7 @@ export default function WIOHome() {
           <Shield size={32} className="mx-auto mb-4 text-indigo-400" />
           <h2 className="text-2xl font-bold mb-3">구축 상담 받기</h2>
           <p className="text-sm text-slate-400 mb-6">귀사에 맞는 솔루션 구성과 도입 일정을 안내해드립니다.</p>
-          <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
+          <Link href="/wio/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
             상담 신청 <ArrowRight size={16} />
           </Link>
         </div>
