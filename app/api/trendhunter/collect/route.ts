@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
                 url: u,
                 author: sender,
             }));
-            await supabase.from('url_archive').insert(urlInserts).throwOnError().catch(() => {});
+            await supabase.from('url_archive').insert(urlInserts);
         }
 
         return NextResponse.json({ ok: true, mode: 'full', urls_found: urls.length });
