@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
@@ -71,7 +72,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717" }: LoginMo
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
             {/* 배경 오버레이 */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -173,6 +174,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717" }: LoginMo
                     </p>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
