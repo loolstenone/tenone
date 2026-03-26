@@ -5,14 +5,16 @@ import { ArrowLeft, Check, ArrowRight } from 'lucide-react';
 import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
 const PLANS = [
-  { name: 'Starter', price: '월 49만원', desc: '소규모 팀, 기본 프로젝트 관리', members: '최대 20명', highlight: false,
-    features: ['Project (기본)', 'Home (대시보드, 메신저)', 'Talk (공지, 게시판)', '5GB 스토리지', '이메일 지원'] },
-  { name: 'Growth', price: '월 149만원', desc: '성장하는 조직, 인재+영업 관리', members: '최대 50명', highlight: true,
-    features: ['Starter 전체', 'People (인재관리, HIT)', 'Sales (CRM, 파이프라인)', 'Finance (결재, 경비)', 'GPR 기본', '20GB 스토리지', '우선 지원'] },
-  { name: 'Pro', price: '월 299만원', desc: '전문 에이전시/기업, 전체 모듈', members: '최대 200명', highlight: false,
-    features: ['Growth 전체', 'AI 크롤링 (영업 기회)', 'AI 콘텐츠 생성', 'Learn (LMS)', 'Wiki (지식관리)', 'Insight (BI)', 'Vrief 템플릿', '100GB 스토리지', '전담 매니저'] },
-  { name: 'Enterprise', price: '별도 협의', desc: '대규모 조직, 화이트라벨, 커스텀', members: '무제한', highlight: false,
-    features: ['Pro 전체', '화이트라벨 (자사 브랜딩)', '커스텀 도메인', 'Shop (커머스)', 'Partner (외부 협력사)', '무제한 스토리지', 'SLA 보장', '온사이트 교육'] },
+  { name: 'Free', price: '무료', desc: '체험하고 시작하세요', members: '10명', highlight: false,
+    features: ['Home (대시보드)', 'People (멤버 관리)', 'Talk (소통)', 'Content (콘텐츠)', 'Insight (기본 통계)', '1GB 스토리지'] },
+  { name: 'Starter', price: '월 39,000원', desc: '소규모 팀, 프로젝트 시작', members: '50명', highlight: false,
+    features: ['Free 전체', 'Project (프로젝트 관리)', 'Learn (교육 LMS)', '5GB 스토리지', '이메일 지원'] },
+  { name: 'Pro', price: '월 99,000원', desc: '성장하는 조직, 비즈니스 확장', members: '200명', highlight: true,
+    features: ['Starter 전체', 'Sales (CRM, 파이프라인)', 'Finance (결재, 경비)', 'Timesheet (시수 관리)', 'GPR (목표 관리)', 'Wiki (지식관리)', '20GB 스토리지', '우선 지원'] },
+  { name: 'Business', price: '월 299,000원', desc: '전체 기능 + AI 자동화', members: '무제한', highlight: false,
+    features: ['Pro 전체', 'AI Assistant (업무 비서)', 'AI Creative (콘텐츠 생성)', 'AI Matching (인재 매칭)', 'Approval (전자결재)', 'HR (인사관리)', '특화 모듈 전체', '100GB 스토리지', '전담 매니저'] },
+  { name: 'Enterprise', price: '별도 협의', desc: '화이트라벨, 커스텀, 전담', members: '무제한', highlight: false,
+    features: ['Business 전체', '화이트라벨 (자사 브랜딩)', '커스텀 도메인', 'Shop (커머스)', '무제한 스토리지', 'SLA 보장', 'API 접근', '온사이트 교육'] },
 ];
 
 export default function PricingPage() {

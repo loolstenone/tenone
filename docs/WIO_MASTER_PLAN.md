@@ -157,12 +157,15 @@
 
 ### 가격 체계
 
+> 상세: `docs/REVENUE_MODEL.md` 참조
+
 | 플랜 | 월 가격 | 포함 모듈 | 인원 | 스토리지 |
 |------|--------|----------|------|---------|
-| **Starter** | 49만원 | Core 3개 | ~20명 | 5GB |
-| **Growth** | 149만원 | Core + Growth 7개 | ~50명 | 20GB |
-| **Pro** | 299만원 | Core + Growth + Pro 11개 | ~200명 | 100GB |
-| **Enterprise** | 별도 협의 | 전체 + 화이트라벨 + AI | 무제한 | 무제한 |
+| **Free** | 0원 | Core 5개 | 10명 | 1GB |
+| **Starter** | 3.9만원 | Core + Project + Learn | 50명 | 5GB |
+| **Pro** | 9.9만원 | + Sales·Finance·Timesheet·GPR·Wiki | 200명 | 20GB |
+| **Business** | 29.9만원 | + AI 모듈 + 특화 모듈 | 무제한 | 100GB |
+| **Enterprise** | 별도 협의 | 전체 + 화이트라벨 + API | 무제한 | 무제한 |
 
 ### 컨설팅 서비스
 
