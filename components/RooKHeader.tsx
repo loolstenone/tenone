@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "WORKS", href: "/works" },
@@ -19,7 +19,6 @@ const navItems = [
 export function RooKHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -57,17 +56,13 @@ export function RooKHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex items-center gap-3">
-                    {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347] transition-colors rounded">회원가입</Link>
-                        </>
-                    )}
+                <div className="hidden lg:flex ml-auto">
+                    <UniverseUtilityBar
+                        aboutPath="/rook/about"
+                        profilePath="/rook/my"
+                        accentColor="#00d255"
+                        signupPath="/signup"
+                    />
                 </div>
 
                 {/* Mobile menu button */}
@@ -104,7 +99,7 @@ export function RooKHeader() {
                             </Link>
                         ) : (
                             <>
-                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-white">로그인</button>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347] rounded">회원가입</Link>
                             </>
                         )}
@@ -112,7 +107,6 @@ export function RooKHeader() {
                 </div>
             )}
         </header>
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00d255" />
         </>
     );
 }

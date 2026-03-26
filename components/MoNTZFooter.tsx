@@ -79,7 +79,7 @@ export function MoNTZFooter() {
                 </div>
 
                 <div className="mt-8 text-center text-xs text-neutral-500">
-                    &copy; MoNTZ. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
+                    &copy; MoNTZ. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

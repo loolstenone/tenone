@@ -40,7 +40,7 @@ export function MindleFooter() {
                     </div>
                 </div>
                 <div className="mt-10 pt-6 border-t border-neutral-800/50 text-center text-xs text-neutral-600">
-                    &copy; Mindle. Powered by <a href="/about?tab=universe" className="hover:text-neutral-400 transition-colors underline">Ten:One&trade; Universe</a>.
+                    &copy; Mindle. Powered by <a href="/about?tab=universe" className="hover:text-neutral-400 transition-colors">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "프로그램", href: "/programs" },
@@ -19,7 +19,6 @@ const navItems = [
 export function ChangeUpHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -56,17 +55,13 @@ export function ChangeUpHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex items-center gap-4">
-                    {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm bg-[#1AAD64] text-white px-4 py-1.5 rounded-full hover:bg-[#148F52] transition-colors">시작하기</Link>
-                        </>
-                    )}
+                <div className="hidden md:flex ml-auto">
+                    <UniverseUtilityBar
+                        aboutPath="/changeup/about"
+                        profilePath="/changeup/my"
+                        accentColor="#2563EB"
+                        signupPath="/signup"
+                    />
                 </div>
 
                 {/* Mobile menu button */}
@@ -111,8 +106,6 @@ export function ChangeUpHeader() {
                 </div>
             )}
         </header>
-
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#1AAD64" />
         </>
     );
 }

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "HIT 프로그램", href: "/hit" },
@@ -20,7 +20,6 @@ const navItems = [
 export function HeRoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -59,17 +58,13 @@ export function HeRoHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex items-center gap-3">
-                    {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 transition-colors rounded">가입</Link>
-                        </>
-                    )}
+                <div className="hidden lg:flex ml-auto">
+                    <UniverseUtilityBar
+                        aboutPath="/hero/about"
+                        profilePath="/hero/my"
+                        accentColor="#F59E0B"
+                        signupPath="/signup"
+                    />
                 </div>
 
                 {/* Mobile menu button */}
@@ -106,7 +101,7 @@ export function HeRoHeader() {
                             </Link>
                         ) : (
                             <>
-                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</button>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 rounded">가입</Link>
                             </>
                         )}
@@ -114,7 +109,6 @@ export function HeRoHeader() {
                 </div>
             )}
         </header>
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#F59E0B" />
         </>
     );
 }

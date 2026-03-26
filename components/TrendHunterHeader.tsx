@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { TrendHunterLogo } from "@/components/TrendHunterLogo";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "Weekly", href: "/trendhunter/weekly" },
@@ -17,7 +17,6 @@ const navItems = [
 
 export function TrendHunterHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user, logout } = useAuth();
     const pathname = usePathname();
 
@@ -45,21 +44,12 @@ export function TrendHunterHeader() {
                             {item.name}
                         </Link>
                     ))}
-                    {isAuthenticated ? (
-                        <div className="flex items-center gap-4">
-                            <Link href="/trendhunter/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">
-                                <User className="h-4 w-4" /> {user?.name || "마이"}
-                            </Link>
-                            <button onClick={async () => { await logout(); window.location.reload(); }} className="flex items-center gap-1 text-sm text-neutral-500 hover:text-red-400 transition-colors">
-                                <LogOut className="h-3.5 w-3.5" />
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">가입</Link>
-                        </>
-                    )}
+                    <UniverseUtilityBar
+                        aboutPath="/trendhunter/about"
+                        profilePath="/trendhunter/my"
+                        accentColor="#F5C518"
+                        signupPath="/signup"
+                    />
                 </nav>
 
                 {/* 모바일 메뉴 버튼 */}
@@ -100,7 +90,7 @@ export function TrendHunterHeader() {
                             </>
                         ) : (
                             <>
-                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-[#00FF88]">로그인</button>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88]">로그인</Link>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88]">가입</Link>
                             </>
                         )}
@@ -109,8 +99,6 @@ export function TrendHunterHeader() {
             )}
         </header>
 
-        {/* 로그인 모달 */}
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00C853" />
         </>
     );
 }

@@ -58,7 +58,7 @@ export function ChangeUpFooter() {
                 </div>
 
                 <div className="mt-12 pt-6 border-t border-neutral-700 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-                    &copy; ChangeUp. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
+                    &copy; ChangeUp. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                     <span className="text-neutral-500">hello@changeup.company</span>
                 </div>
             </div>

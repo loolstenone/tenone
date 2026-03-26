@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, Orbit, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "철학", href: "/philosophy" },
@@ -19,7 +19,6 @@ const navItems = [
 export function MyVerseHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => pathname === href;
@@ -55,17 +54,13 @@ export function MyVerseHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden lg:flex items-center gap-3">
-                    {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm text-neutral-400 hover:text-white transition-colors">가입</Link>
-                        </>
-                    )}
+                <div className="hidden lg:flex ml-auto items-center gap-3">
+                    <UniverseUtilityBar
+                        aboutPath="/myverse/about"
+                        profilePath="/myverse/my"
+                        accentColor="#1a1a2e"
+                        signupPath="/signup"
+                    />
                     <Link
                         href="/contact"
                         className="text-sm font-medium px-4 py-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-colors"
@@ -123,8 +118,6 @@ export function MyVerseHeader() {
                 </div>
             )}
         </header>
-
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#6366f1" />
         </>
     );
 }

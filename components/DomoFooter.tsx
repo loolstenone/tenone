@@ -69,7 +69,7 @@ export function DomoFooter() {
                 </div>
 
                 <div className="mt-6 text-xs">
-                    &copy; domo. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
+                    &copy; domo. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

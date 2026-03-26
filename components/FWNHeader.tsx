@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, Search, User } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "서울", href: "/category/seoul" },
@@ -24,7 +24,6 @@ const navItems = [
 export function FWNHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -45,20 +44,13 @@ export function FWNHeader() {
                         <span className="text-neutral-400 text-xs ml-2 hidden sm:inline">패션 위크 네트워크</span>
                     </Link>
                     <div className="flex items-center gap-3">
-                        <button className="p-2 text-neutral-400 hover:text-white transition-colors">
-                            <Search className="h-4 w-4" />
-                        </button>
-                        <div className="hidden lg:flex items-center gap-3">
-                            {isAuthenticated ? (
-                                <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-                                    <User className="h-4 w-4" /> {user?.name || "마이"}
-                                </Link>
-                            ) : (
-                                <>
-                                    <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
-                                    <Link href="/signup" className="text-sm text-neutral-400 hover:text-white transition-colors">가입</Link>
-                                </>
-                            )}
+                        <div className="hidden lg:flex ml-auto">
+                            <UniverseUtilityBar
+                                aboutPath="/fwn/about"
+                                profilePath="/fwn/my"
+                                accentColor="#000000"
+                                signupPath="/signup"
+                            />
                         </div>
                         <button
                             onClick={() => setMobileOpen(!mobileOpen)}
@@ -123,8 +115,6 @@ export function FWNHeader() {
                 </div>
             )}
         </header>
-
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00C853" />
         </>
     );
 }

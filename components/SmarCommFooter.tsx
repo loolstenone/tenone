@@ -22,7 +22,7 @@ export default function SmarCommFooter() {
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 text-xs text-text-muted">
-          &copy; SmarComm. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors underline">Ten:One&trade; Universe</a>.
+          &copy; SmarComm. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
         </div>
       </div>
     </footer>

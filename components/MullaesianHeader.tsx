@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { LoginModal } from "@/components/LoginModal";
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "뚜르 드 문래", href: "/#tour" },
@@ -14,7 +14,6 @@ const navItems = [
 
 export function MullaesianHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     return (
@@ -43,17 +42,13 @@ export function MullaesianHeader() {
                 </div>
 
                 {/* Right side */}
-                <div className="hidden md:flex items-center gap-3">
-                    {isAuthenticated ? (
-                        <Link href="/my" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-[#007BBF] transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
-                    ) : (
-                        <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</button>
-                            <Link href="/signup" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">가입</Link>
-                        </>
-                    )}
+                <div className="hidden md:flex ml-auto">
+                    <UniverseUtilityBar
+                        aboutPath="/mullaesian/about"
+                        profilePath="/mullaesian/my"
+                        accentColor="#1a1a2e"
+                        signupPath="/signup"
+                    />
                 </div>
 
                 {/* Mobile menu button */}
@@ -93,8 +88,6 @@ export function MullaesianHeader() {
                 </div>
             )}
         </header>
-
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#007BBF" />
         </>
     );
 }

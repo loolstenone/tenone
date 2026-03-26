@@ -73,9 +73,7 @@ export function TrendHunterFooter() {
 
                 <div className="mt-10 pt-6 border-t border-neutral-800/50 text-center text-xs">
                     &copy; TrendHunter. Powered by{" "}
-                    <a href="/about?tab=universe" className="hover:text-white transition-colors underline">
-                        Ten:One&trade; Universe
-                    </a>.
+                    <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>
