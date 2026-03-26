@@ -8,10 +8,10 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
-    { name: "트렌드", href: "/mindle/trends" },
-    { name: "리포트", href: "/mindle/reports" },
-    { name: "데이터", href: "/mindle/data" },
-    { name: "레퍼런스", href: "/mindle/references" },
+    { name: "Trends", href: "/mindle/trends" },
+    { name: "Reports", href: "/mindle/reports" },
+    { name: "Data", href: "/mindle/data" },
+    { name: "References", href: "/mindle/references" },
 ];
 
 export function MindleHeader() {
@@ -59,8 +59,8 @@ export function MindleHeader() {
                         </div>
                     ) : (
                         <div className="flex items-center gap-3 ml-2">
-                            <button onClick={() => setLoginOpen(true)} className="text-[13px] text-neutral-400 hover:text-white transition-colors">로그인</button>
-                            <Link href="/signup" className="text-[13px] px-4 py-1.5 rounded-full bg-[#F5C518] text-black font-semibold hover:bg-[#E5B616] transition-colors">가입</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-[13px] text-neutral-400 hover:text-white transition-colors">Login</button>
+                            <Link href="/signup" className="text-[13px] px-4 py-1.5 rounded-full bg-[#F5C518] text-black font-semibold hover:bg-[#E5B616] transition-colors">Join</Link>
                         </div>
                     )}
                 </nav>
@@ -81,11 +81,11 @@ export function MindleHeader() {
                     <div className="pt-2 mt-2 border-t border-neutral-800/50 space-y-2">
                         {isAuthenticated ? (
                             <>
-                                <Link href="/mindle/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-400"><User className="h-3.5 w-3.5 inline mr-1" />마이페이지</Link>
-                                <button onClick={handleLogout} className="text-sm text-neutral-500"><LogOut className="h-3.5 w-3.5 inline mr-1" />로그아웃</button>
+                                <Link href="/mindle/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-400"><User className="h-3.5 w-3.5 inline mr-1" />My Page</Link>
+                                <button onClick={handleLogout} className="text-sm text-neutral-500"><LogOut className="h-3.5 w-3.5 inline mr-1" />Logout</button>
                             </>
                         ) : (
-                            <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400">로그인</button>
+                            <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400">Login</button>
                         )}
                     </div>
                 </div>

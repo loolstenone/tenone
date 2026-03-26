@@ -1,165 +1,290 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { Activity, Database, Zap, TrendingUp, FileText, BarChart3, Settings, Eye, CheckCircle, Clock, AlertCircle, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Activity, Database, Zap, TrendingUp, FileText, BarChart3, Settings, Eye, CheckCircle, Clock, AlertCircle, ChevronRight, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
-const crawlerStatus = [
-    { name: "바닥쇠 (카카오)", status: "active", lastRun: "3분 전", todayCount: 847, icon: "🔩" },
-    { name: "웹크롤러 (네이버)", status: "active", lastRun: "1시간 전", todayCount: 124, icon: "🌐" },
-    { name: "디스코드 봇", status: "active", lastRun: "실시간", todayCount: 356, icon: "💬" },
-    { name: "RSS/뉴스레터", status: "active", lastRun: "2시간 전", todayCount: 67, icon: "📰" },
-    { name: "SmarComm 크롤러", status: "paused", lastRun: "어제", todayCount: 0, icon: "🏛" },
-];
+interface CollectedDataRow {
+    id: string;
+    source?: string;
+    keyword?: string;
+    content?: string;
+    url?: string;
+    platform?: string;
+    collected_at?: string;
+    created_at?: string;
+}
 
-const contentDrafts = [
-    { id: "d1", title: "에이전트 AI 실무 활용 가이드", brand: "RooK", format: "article", status: "draft" },
-    { id: "d2", title: "이번 주 핫 키워드: 슬로우 콘텐츠", brand: "Badak", format: "newsletter", status: "reviewed" },
-    { id: "d3", title: "AI 영상 편집 툴 TOP 5", brand: "RooK", format: "sns", status: "draft" },
-    { id: "d4", title: "대학생이 알아야 할 AI 영상 편집", brand: "MADLeague", format: "article", status: "published" },
-];
+interface CrawlerStatusRow {
+    id: string;
+    name: string;
+    status: string;
+    last_run?: string;
+    today_count?: number;
+    icon?: string;
+}
 
-const opportunities = [
-    { type: "AI 수요", title: "AI 영상 편집 자동화 니즈", brand: "RooK", status: "new", time: "2시간 전" },
-    { type: "인재 수요", title: "퍼포먼스 마케터 인력 수요", brand: "HeRo", status: "new", time: "5시간 전" },
-    { type: "컨설팅", title: "리브랜딩 니즈", brand: "Brand Gravity", status: "reviewed", time: "1일 전" },
-    { type: "교육", title: "Claude API 교육 수요", brand: "Evo School", status: "acted", time: "1일 전" },
-];
+interface OpportunityRow {
+    id: string;
+    type?: string;
+    title: string;
+    brand?: string;
+    status: string;
+    created_at?: string;
+}
+
+interface ContentDraftRow {
+    id: string;
+    title: string;
+    brand?: string;
+    format?: string;
+    status: string;
+}
 
 const draftStatusMap: Record<string, { label: string; color: string }> = {
-    draft: { label: "초안", color: "text-neutral-400 bg-neutral-800" },
-    reviewed: { label: "검수완료", color: "text-[#F5C518] bg-[#F5C518]/10" },
-    published: { label: "발행", color: "text-green-400 bg-green-400/10" },
+    draft: { label: "Draft", color: "text-neutral-400 bg-neutral-800" },
+    reviewed: { label: "Reviewed", color: "text-[#F5C518] bg-[#F5C518]/10" },
+    published: { label: "Published", color: "text-green-400 bg-green-400/10" },
 };
 
 const oppStatusMap: Record<string, { label: string; color: string }> = {
-    new: { label: "신규", color: "text-red-400 bg-red-400/10" },
-    reviewed: { label: "검토중", color: "text-[#F5C518] bg-[#F5C518]/10" },
-    acted: { label: "대응완료", color: "text-green-400 bg-green-400/10" },
+    new: { label: "New", color: "text-red-400 bg-red-400/10" },
+    reviewed: { label: "Under Review", color: "text-[#F5C518] bg-[#F5C518]/10" },
+    acted: { label: "Acted On", color: "text-green-400 bg-green-400/10" },
 };
 
 export default function MindleAdminPage() {
     const { isAuthenticated, user } = useAuth();
     const isAdmin = user?.role === "Admin" || user?.accountType === "staff";
 
+    const [collectedData, setCollectedData] = useState<CollectedDataRow[]>([]);
+    const [collectedTodayCount, setCollectedTodayCount] = useState(0);
+    const [crawlerStatus, setCrawlerStatus] = useState<CrawlerStatusRow[]>([]);
+    const [opportunities, setOpportunities] = useState<OpportunityRow[]>([]);
+    const [contentDrafts, setContentDrafts] = useState<ContentDraftRow[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isAuthenticated || !isAdmin) return;
+        fetchData();
+    }, [isAuthenticated, isAdmin]);
+
+    async function fetchData() {
+        setLoading(true);
+        const supabase = createClient();
+        const today = new Date().toISOString().split("T")[0];
+
+        const [collectedRes, countRes, crawlerRes, oppRes, draftsRes] = await Promise.all([
+            supabase.from("collected_data").select("*").order("created_at", { ascending: false }).limit(10),
+            supabase.from("collected_data").select("id", { count: "exact", head: true }).gte("created_at", today),
+            supabase.from("crawler_status").select("*").order("name"),
+            supabase.from("th_opportunities").select("*").order("created_at", { ascending: false }).limit(10),
+            supabase.from("content_drafts").select("*").order("created_at", { ascending: false }).limit(10),
+        ]);
+
+        setCollectedData(collectedRes.data ?? []);
+        setCollectedTodayCount(countRes.count ?? 0);
+        setCrawlerStatus(crawlerRes.data ?? []);
+        setOpportunities(oppRes.data ?? []);
+        setContentDrafts(draftsRes.data ?? []);
+        setLoading(false);
+    }
+
     if (!isAuthenticated || !isAdmin) {
         return (
             <div className="bg-[#0A0A0A] min-h-[60vh] flex items-center justify-center px-6">
                 <div className="text-center">
                     <Settings className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                    <h2 className="text-white text-xl font-bold mb-2">관리자 전용</h2>
-                    <p className="text-neutral-400 text-sm">이 페이지는 관리자만 접근할 수 있습니다.</p>
+                    <h2 className="text-white text-xl font-bold mb-2">Admin Only</h2>
+                    <p className="text-neutral-400 text-sm">This page is restricted to administrators.</p>
                 </div>
             </div>
         );
     }
 
+    const activeCrawlers = crawlerStatus.filter(c => c.status === "active").length;
+    const draftCount = contentDrafts.filter(d => d.status === "draft").length;
+
     return (
         <div className="bg-[#0A0A0A]">
             <section className="py-12 px-6">
                 <div className="mx-auto max-w-6xl">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Settings className="w-5 h-5 text-[#F5C518]" />
-                        <h1 className="text-2xl font-bold text-white">Mindle Admin</h1>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                            <Settings className="w-5 h-5 text-[#F5C518]" />
+                            <h1 className="text-2xl font-bold text-white">Mindle Admin</h1>
+                        </div>
+                        <button onClick={fetchData} disabled={loading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-600 transition-colors text-xs">
+                            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> Refresh
+                        </button>
                     </div>
 
-                    {/* 요약 카드 */}
+                    {/* Summary Cards */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                         <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50">
                             <Database className="w-4 h-4 text-blue-400 mb-2" />
-                            <p className="text-2xl font-bold text-white">1,394</p>
-                            <p className="text-neutral-500 text-xs">오늘 수집</p>
+                            <p className="text-2xl font-bold text-white">{loading ? "..." : collectedTodayCount.toLocaleString()}</p>
+                            <p className="text-neutral-500 text-xs">Collected Today</p>
                         </div>
                         <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50">
                             <Zap className="w-4 h-4 text-[#F5C518] mb-2" />
-                            <p className="text-2xl font-bold text-white">4</p>
-                            <p className="text-neutral-500 text-xs">기회 감지</p>
+                            <p className="text-2xl font-bold text-white">{loading ? "..." : opportunities.length}</p>
+                            <p className="text-neutral-500 text-xs">Opportunities Detected</p>
                         </div>
                         <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50">
                             <FileText className="w-4 h-4 text-green-400 mb-2" />
-                            <p className="text-2xl font-bold text-white">3</p>
-                            <p className="text-neutral-500 text-xs">콘텐츠 초안</p>
+                            <p className="text-2xl font-bold text-white">{loading ? "..." : draftCount}</p>
+                            <p className="text-neutral-500 text-xs">Content Drafts</p>
                         </div>
                         <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50">
                             <Activity className="w-4 h-4 text-purple-400 mb-2" />
-                            <p className="text-2xl font-bold text-white">5</p>
-                            <p className="text-neutral-500 text-xs">크롤러 활성</p>
+                            <p className="text-2xl font-bold text-white">{loading ? "..." : activeCrawlers}</p>
+                            <p className="text-neutral-500 text-xs">Active Crawlers</p>
                         </div>
+                    </div>
+
+                    {/* Collected Data Section */}
+                    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-5 mb-6">
+                        <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                            <Database className="w-4 h-4 text-blue-400" /> Collected Data (Latest 10)
+                        </h2>
+                        {loading ? (
+                            <p className="text-neutral-500 text-sm py-4 text-center">Loading...</p>
+                        ) : collectedData.length === 0 ? (
+                            <p className="text-neutral-500 text-sm py-4 text-center">No collected data yet.</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {collectedData.map((row) => (
+                                    <div key={row.id} className="rounded-lg bg-neutral-900/50 border border-neutral-800/30">
+                                        <button onClick={() => setExpandedRow(expandedRow === row.id ? null : row.id)}
+                                            className="w-full flex items-center justify-between p-3 text-left">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 shrink-0">
+                                                    {row.platform || row.source || "Unknown"}
+                                                </span>
+                                                <span className="text-white text-sm truncate">{row.keyword || row.url || row.id}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                                                <span className="text-neutral-600 text-[10px]">
+                                                    {row.collected_at || row.created_at ? new Date(row.collected_at || row.created_at!).toLocaleString() : ""}
+                                                </span>
+                                                {expandedRow === row.id ? <ChevronDown className="w-3 h-3 text-neutral-500" /> : <ChevronRight className="w-3 h-3 text-neutral-500" />}
+                                            </div>
+                                        </button>
+                                        {expandedRow === row.id && (
+                                            <div className="px-3 pb-3 border-t border-neutral-800/30 pt-2">
+                                                <pre className="text-neutral-400 text-xs whitespace-pre-wrap break-all max-h-48 overflow-y-auto">
+                                                    {row.content || JSON.stringify(row, null, 2)}
+                                                </pre>
+                                                {row.url && (
+                                                    <a href={row.url} target="_blank" rel="noopener noreferrer"
+                                                        className="text-[#F5C518] text-xs mt-2 inline-block hover:underline">
+                                                        Open source link
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* 크롤러 상태 */}
+                        {/* Crawler Status */}
                         <div className="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-5">
                             <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-blue-400" /> 크롤러 상태
+                                <Activity className="w-4 h-4 text-blue-400" /> Crawler Status
                             </h2>
-                            <div className="space-y-2">
-                                {crawlerStatus.map((c) => (
-                                    <div key={c.name} className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50">
-                                        <div className="flex items-center gap-2">
-                                            <span>{c.icon}</span>
-                                            <div>
-                                                <p className="text-white text-sm">{c.name}</p>
-                                                <p className="text-neutral-600 text-[10px]">{c.lastRun}</p>
+                            {loading ? (
+                                <p className="text-neutral-500 text-sm py-4 text-center">Loading...</p>
+                            ) : crawlerStatus.length === 0 ? (
+                                <p className="text-neutral-500 text-sm py-4 text-center">No crawlers configured yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {crawlerStatus.map((c) => (
+                                        <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50">
+                                            <div className="flex items-center gap-2">
+                                                <span>{c.icon || "🔧"}</span>
+                                                <div>
+                                                    <p className="text-white text-sm">{c.name}</p>
+                                                    <p className="text-neutral-600 text-[10px]">{c.last_run || "N/A"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className={`text-xs font-mono ${c.status === "active" ? "text-green-400" : "text-[#F5C518]"}`}>
+                                                    {c.status === "active" ? "● Active" : "⏸ Paused"}
+                                                </p>
+                                                <p className="text-neutral-400 text-xs">{c.today_count ?? 0} items</p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className={`text-xs font-mono ${c.status === "active" ? "text-green-400" : "text-[#F5C518]"}`}>
-                                                {c.status === "active" ? "● 활성" : "⏸ 정지"}
-                                            </p>
-                                            <p className="text-neutral-400 text-xs">{c.todayCount}건</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* 콘텐츠 초안 */}
+                        {/* Content Workflow */}
                         <div className="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-5">
                             <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-green-400" /> 콘텐츠 워크플로우
+                                <FileText className="w-4 h-4 text-green-400" /> Content Workflow
                             </h2>
-                            <div className="space-y-2">
-                                {contentDrafts.map((d) => (
-                                    <div key={d.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50">
-                                        <div className="min-w-0">
-                                            <p className="text-white text-sm truncate">{d.title}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[10px] text-neutral-500">{d.brand}</span>
-                                                <span className="text-[10px] text-neutral-600">{d.format}</span>
+                            {loading ? (
+                                <p className="text-neutral-500 text-sm py-4 text-center">Loading...</p>
+                            ) : contentDrafts.length === 0 ? (
+                                <p className="text-neutral-500 text-sm py-4 text-center">No content drafts yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {contentDrafts.map((d) => (
+                                        <div key={d.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50">
+                                            <div className="min-w-0">
+                                                <p className="text-white text-sm truncate">{d.title}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="text-[10px] text-neutral-500">{d.brand || "—"}</span>
+                                                    <span className="text-[10px] text-neutral-600">{d.format || "—"}</span>
+                                                </div>
                                             </div>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded ${(draftStatusMap[d.status] || draftStatusMap.draft).color}`}>
+                                                {(draftStatusMap[d.status] || draftStatusMap.draft).label}
+                                            </span>
                                         </div>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded ${draftStatusMap[d.status].color}`}>
-                                            {draftStatusMap[d.status].label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* 기회 감지 */}
+                    {/* Opportunity Radar */}
                     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-5 mt-6">
                         <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-[#F5C518]" /> 기회 레이더
+                            <Zap className="w-4 h-4 text-[#F5C518]" /> Opportunity Radar
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {opportunities.map((o, i) => (
-                                <div key={i} className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/50">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-[10px] text-[#F5C518]">{o.type}</span>
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${oppStatusMap[o.status].color}`}>
-                                            {oppStatusMap[o.status].label}
-                                        </span>
+                        {loading ? (
+                            <p className="text-neutral-500 text-sm py-4 text-center">Loading...</p>
+                        ) : opportunities.length === 0 ? (
+                            <p className="text-neutral-500 text-sm py-4 text-center">No opportunities detected yet.</p>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                {opportunities.map((o) => (
+                                    <div key={o.id} className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/50">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-[10px] text-[#F5C518]">{o.type || "General"}</span>
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${(oppStatusMap[o.status] || oppStatusMap.new).color}`}>
+                                                {(oppStatusMap[o.status] || oppStatusMap.new).label}
+                                            </span>
+                                        </div>
+                                        <p className="text-white text-sm font-medium">{o.title}</p>
+                                        <div className="flex items-center justify-between mt-2 text-[10px] text-neutral-500">
+                                            <span>{o.brand ? `→ ${o.brand}` : ""}</span>
+                                            <span>{o.created_at ? new Date(o.created_at).toLocaleDateString() : ""}</span>
+                                        </div>
                                     </div>
-                                    <p className="text-white text-sm font-medium">{o.title}</p>
-                                    <div className="flex items-center justify-between mt-2 text-[10px] text-neutral-500">
-                                        <span>→ {o.brand}</span>
-                                        <span>{o.time}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
