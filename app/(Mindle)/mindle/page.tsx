@@ -65,13 +65,15 @@ export default function MindleHomePage() {
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#F5C518]/20 bg-[#F5C518]/5 mb-6">
                         <span className="text-[#F5C518] text-[10px] font-mono tracking-widest">AI-POWERED TREND PLATFORM</span>
                     </div>
-                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-5">
-                        트렌드의 <span className="text-[#F5C518]">홀씨</span>를 찾아,<br />
-                        인사이트로 피워냅니다.
+                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-3">
+                        <span className="text-[#F5C518]">Mindle</span> Whole See,
                     </h1>
+                    <p className="text-xl sm:text-2xl text-white font-medium mb-5">
+                        인사이트로 피워냅니다.
+                    </p>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto mb-8">
-                        수백만 데이터에서 트렌드 시그널을 포착하고,
-                        AI와 전문가가 함께 만든 인사이트를 매일 전합니다.
+                        수백만 데이터에서 트렌드 시그널을 포착하고,<br className="hidden sm:inline" />
+                        AI와 전문가가 함께 만든 인사이트를 전합니다.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <Link href="/mindle/trends" className="inline-flex items-center gap-2 px-7 py-3 bg-[#F5C518] text-black font-semibold rounded-full hover:bg-[#E5B616] transition-colors">
