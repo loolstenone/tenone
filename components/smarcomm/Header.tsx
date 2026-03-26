@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, LogOut, ChevronDown, Share2, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -12,6 +12,18 @@ export default function Header() {
   const currentPath = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const profileRef = useRef<HTMLDivElement>(null);
+  const [shareToast, setShareToast] = useState(false);
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      try { await navigator.share({ title: 'SmarComm', url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2000);
+    }
+  };
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -31,6 +43,7 @@ export default function Header() {
   const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center text-xl tracking-[-0.03em]">
@@ -44,6 +57,9 @@ export default function Header() {
           <Link href="/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
           <Link href="/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
           <Link href="/workspace" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">워크스페이스</Link>
+          <button onClick={handleShare} className="text-text-muted hover:text-text transition-colors" title="공유">
+            <Share2 size={15} />
+          </button>
 
           {isAuthenticated && user ? (
             <div ref={profileRef} className="relative">
@@ -110,5 +126,7 @@ export default function Header() {
         </div>
       )}
     </header>
+    {shareToast && <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 bg-neutral-800 text-white text-sm rounded-lg shadow-lg">링크가 복사되었습니다</div>}
+    </>
   );
 }
