@@ -37,6 +37,11 @@ export async function GET(request: NextRequest) {
             if (authRedirectCookie) {
                 cookieStore.set('auth_redirect', '', { path: '/', maxAge: 0 });
             }
+            // 비밀번호 재설정 플로우 감지
+            const type = searchParams.get('type');
+            if (type === 'recovery') {
+                return NextResponse.redirect(`${origin}/reset-password`);
+            }
             return NextResponse.redirect(`${origin}${next}`);
         }
     }

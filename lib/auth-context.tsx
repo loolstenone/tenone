@@ -20,6 +20,8 @@ interface AuthContextType {
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
     logout: () => Promise<void>;
+    resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+    updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -332,6 +334,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) console.error('Kakao OAuth error:', error);
     }, [supabase]);
 
+    // 비밀번호 재설정 이메일 발송
+    const resetPassword = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
+            if (error) return { success: false, error: error.message };
+            return { success: true };
+        } catch {
+            return { success: false, error: '비밀번호 재설정 요청에 실패했습니다' };
+        }
+    }, [supabase]);
+
+    // 새 비밀번호 설정 (재설정 링크 클릭 후)
+    const updatePassword = useCallback(async (newPassword: string): Promise<{ success: boolean; error?: string }> => {
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) return { success: false, error: error.message };
+            return { success: true };
+        } catch {
+            return { success: false, error: '비밀번호 변경에 실패했습니다' };
+        }
+    }, [supabase]);
+
     // 로그아웃 — Supabase 세션 + localStorage + 쿠키 모두 클리어
     const logout = useCallback(async () => {
         setUser(null);
@@ -376,7 +402,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user, isAuthenticated: !!user, isLoading,
             isStaff, isInternal, canAccessIntra,
             hasAccess, hasModuleAccess,
-            login, register, loginWithGoogle, loginWithKakao, updateProfile, logout,
+            login, register, loginWithGoogle, loginWithKakao, updateProfile, logout, resetPassword, updatePassword,
         }}>
             {children}
         </AuthContext.Provider>

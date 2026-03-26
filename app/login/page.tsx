@@ -106,7 +106,10 @@ function SmarCommLoginForm() {
                             </button>
                         </div>
                     </div>
-                    <div className="mt-6 text-center text-sm text-neutral-400">
+                    <div className="mt-4 text-center">
+                        <Link href="/reset-password" className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors">비밀번호를 잊으셨나요?</Link>
+                    </div>
+                    <div className="mt-3 text-center text-sm text-neutral-400">
                         계정이 없으신가요? <Link href="/signup" className="font-medium text-neutral-900">회원가입</Link>
                     </div>
                 </div>
