@@ -10,7 +10,7 @@ export type ProjectMemberRole = 'pm' | 'lead' | 'member' | 'support';
 
 export const WIO_MODULES = [
   'home', 'project', 'talk', 'finance', 'people',
-  'sales', 'learn', 'content', 'wiki', 'insight', 'shop',
+  'sales', 'timesheet', 'learn', 'content', 'wiki', 'insight', 'shop',
 ] as const;
 export type WIOModule = typeof WIO_MODULES[number];
 
