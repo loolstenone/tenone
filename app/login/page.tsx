@@ -128,14 +128,25 @@ function LoginForm() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // 서브도메인 감지 (*.tenone.biz 또는 커스텀 도메인)
+    const isSubdomain = typeof window !== 'undefined' &&
+        window.location.hostname !== 'tenone.biz' &&
+        window.location.hostname !== 'www.tenone.biz' &&
+        window.location.hostname !== 'localhost';
+
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
+            // 서브도메인에서는 /로 돌아가면 middleware가 올바른 사이트로 rewrite
+            if (isSubdomain) {
+                router.replace(redirectTo !== '/' ? redirectTo : '/');
+                return;
+            }
             const canIntraAccess = user?.accountType && user.accountType !== 'member';
             const defaultRedirect = isMadLeague ? '/madleague' : canIntraAccess ? '/intra' : '/';
             const autoRedirect = redirectTo !== '/' ? redirectTo : defaultRedirect;
             router.replace(autoRedirect);
         }
-    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague]);
+    }, [isLoading, isAuthenticated, router, redirectTo, user, isMadLeague, isSubdomain]);
 
     if (isLoading || isAuthenticated) {
         return (
@@ -152,10 +163,14 @@ function LoginForm() {
         try {
             const result = await login(email, password);
             if (result.success) {
-                const canIntra = result.user?.accountType && result.user.accountType !== 'member';
-                const defaultDest = isMadLeague ? '/madleague' : canIntra ? '/intra' : '/';
-                const dest = redirectTo !== '/' ? redirectTo : defaultDest;
-                router.push(dest);
+                if (isSubdomain) {
+                    router.push(redirectTo !== '/' ? redirectTo : '/');
+                } else {
+                    const canIntra = result.user?.accountType && result.user.accountType !== 'member';
+                    const defaultDest = isMadLeague ? '/madleague' : canIntra ? '/intra' : '/';
+                    const dest = redirectTo !== '/' ? redirectTo : defaultDest;
+                    router.push(dest);
+                }
             } else {
                 setError(result.error || '이메일 또는 비밀번호가 올바르지 않습니다.');
                 setIsSubmitting(false);
