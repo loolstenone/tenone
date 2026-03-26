@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { TrendHunterLogo } from "@/components/TrendHunterLogo";
 import { LoginModal } from "@/components/LoginModal";
@@ -18,7 +18,7 @@ const navItems = [
 export function TrendHunterHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated, user, logout } = useAuth();
     const pathname = usePathname();
 
     return (
@@ -46,9 +46,14 @@ export function TrendHunterHeader() {
                         </Link>
                     ))}
                     {isAuthenticated ? (
-                        <Link href="/trendhunter/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">
-                            <User className="h-4 w-4" /> {user?.name || "마이"}
-                        </Link>
+                        <div className="flex items-center gap-4">
+                            <Link href="/trendhunter/my" className="flex items-center gap-2 text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">
+                                <User className="h-4 w-4" /> {user?.name || "마이"}
+                            </Link>
+                            <button onClick={async () => { await logout(); window.location.reload(); }} className="flex items-center gap-1 text-sm text-neutral-500 hover:text-red-400 transition-colors">
+                                <LogOut className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                     ) : (
                         <>
                             <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</button>
@@ -85,9 +90,14 @@ export function TrendHunterHeader() {
                     ))}
                     <div className="pt-2 mt-2 border-t border-neutral-800/50 flex items-center gap-4">
                         {isAuthenticated ? (
+                            <>
                             <Link href="/trendhunter/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#00FF88] flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
+                            <button onClick={async () => { await logout(); window.location.reload(); }} className="text-sm text-neutral-500 hover:text-red-400 flex items-center gap-2">
+                                <LogOut className="h-3.5 w-3.5" /> 로그아웃
+                            </button>
+                            </>
                         ) : (
                             <>
                                 <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-[#00FF88]">로그인</button>
