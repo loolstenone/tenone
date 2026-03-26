@@ -268,6 +268,77 @@ export async function createPost(post: { tenantId: string; board: string; title:
   return !error;
 }
 
+export async function fetchPost(postId: string): Promise<any | null> {
+  const { data } = await supabase.from('wio_posts').select('*, author:wio_members!wio_posts_author_id_fkey(display_name, avatar_url)').eq('id', postId).single();
+  if (!data) return null;
+  // 조회수 증가
+  supabase.from('wio_posts').update({ view_count: (data.view_count || 0) + 1 }).eq('id', postId).then(() => {});
+  return snakeToCamel(data);
+}
+
+// 댓글
+export async function fetchComments(postId: string): Promise<any[]> {
+  const { data } = await supabase.from('wio_comments').select('*, author:wio_members!wio_comments_author_id_fkey(display_name, avatar_url)').eq('post_id', postId).eq('is_deleted', false).order('created_at');
+  return (data || []).map(r => snakeToCamel(r));
+}
+
+export async function createComment(comment: { postId: string; tenantId: string; authorId: string; content: string; parentId?: string }): Promise<boolean> {
+  const { error } = await supabase.from('wio_comments').insert(camelToSnake(comment as any));
+  if (!error) {
+    // comment_count 증가
+    const { data: post } = await supabase.from('wio_posts').select('comment_count').eq('id', comment.postId).single();
+    await supabase.from('wio_posts').update({ comment_count: (post?.comment_count || 0) + 1 }).eq('id', comment.postId);
+  }
+  return !error;
+}
+
+export async function deleteComment(commentId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_comments').update({ is_deleted: true, content: '삭제된 댓글입니다' }).eq('id', commentId);
+  return !error;
+}
+
+// 좋아요
+export async function toggleLike(targetType: 'post' | 'comment', targetId: string, tenantId: string, userId: string): Promise<boolean> {
+  const { data: existing } = await supabase.from('wio_likes').select('id').eq('target_type', targetType).eq('target_id', targetId).eq('user_id', userId).single();
+  if (existing) {
+    await supabase.from('wio_likes').delete().eq('id', existing.id);
+    if (targetType === 'post') {
+      const { data: post } = await supabase.from('wio_posts').select('like_count').eq('id', targetId).single();
+      await supabase.from('wio_posts').update({ like_count: Math.max(0, (post?.like_count || 1) - 1) }).eq('id', targetId);
+    }
+    return false; // unliked
+  } else {
+    await supabase.from('wio_likes').insert({ target_type: targetType, target_id: targetId, tenant_id: tenantId, user_id: userId });
+    if (targetType === 'post') {
+      const { data: post } = await supabase.from('wio_posts').select('like_count').eq('id', targetId).single();
+      await supabase.from('wio_posts').update({ like_count: (post?.like_count || 0) + 1 }).eq('id', targetId);
+    }
+    return true; // liked
+  }
+}
+
+export async function checkLiked(targetType: 'post' | 'comment', targetId: string, userId: string): Promise<boolean> {
+  const { data } = await supabase.from('wio_likes').select('id').eq('target_type', targetType).eq('target_id', targetId).eq('user_id', userId).single();
+  return !!data;
+}
+
+// 북마크
+export async function toggleBookmark(postId: string, tenantId: string, userId: string): Promise<boolean> {
+  const { data: existing } = await supabase.from('wio_bookmarks').select('id').eq('post_id', postId).eq('user_id', userId).single();
+  if (existing) {
+    await supabase.from('wio_bookmarks').delete().eq('id', existing.id);
+    return false;
+  } else {
+    await supabase.from('wio_bookmarks').insert({ post_id: postId, tenant_id: tenantId, user_id: userId });
+    return true;
+  }
+}
+
+export async function checkBookmarked(postId: string, userId: string): Promise<boolean> {
+  const { data } = await supabase.from('wio_bookmarks').select('id').eq('post_id', postId).eq('user_id', userId).single();
+  return !!data;
+}
+
 // ══════════════════════════════════════
 // Sprint 2: 할일
 // ══════════════════════════════════════
