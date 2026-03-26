@@ -66,8 +66,8 @@ export function HeRoHeader() {
                         </Link>
                     ) : (
                         <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">LOGIN</button>
-                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 transition-colors rounded">JOIN</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">로그인</button>
+                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 transition-colors rounded">가입</Link>
                         </>
                     )}
                 </div>
@@ -106,8 +106,8 @@ export function HeRoHeader() {
                             </Link>
                         ) : (
                             <>
-                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-500 hover:text-neutral-900">LOGIN</button>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 rounded">JOIN</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</button>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 rounded">가입</Link>
                             </>
                         )}
                     </div>

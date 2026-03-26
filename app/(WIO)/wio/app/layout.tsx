@@ -24,7 +24,7 @@ const MODULE_LABELS: Record<string, string> = {
   learn: '교육', content: '콘텐츠', wiki: '위키', insight: '인사이트',
 };
 
-interface WIOContext { tenant: WIOTenant | null; member: WIOMember | null; }
+interface WIOContext { tenant: WIOTenant | null; member: WIOMember | null; refreshTenant?: () => void; }
 const WIOCtx = createContext<WIOContext>({ tenant: null, member: null });
 export const useWIO = () => useContext(WIOCtx);
 
@@ -93,7 +93,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   };
 
   return (
-    <WIOCtx.Provider value={{ tenant, member }}>
+    <WIOCtx.Provider value={{ tenant, member, refreshTenant: async () => { if (tenant) { const { fetchTenant } = await import('@/lib/supabase/wio'); const t = await fetchTenant(tenant.id); if (t) setTenant(t); } } }}>
       <div className="min-h-screen bg-slate-950 text-white">
         {/* 사이드바 */}
         <aside className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-white/5 bg-[#0F0F23] transition-all duration-200 ${collapsed ? 'w-14' : 'w-[220px]'}`}>

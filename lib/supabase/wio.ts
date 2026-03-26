@@ -55,9 +55,40 @@ export async function createTenant(tenant: Partial<WIOTenant>): Promise<WIOTenan
   return snakeToCamel(data) as unknown as WIOTenant;
 }
 
+export async function updateTenant(tenantId: string, updates: Partial<WIOTenant>): Promise<boolean> {
+  const snake = camelToSnake(updates as Record<string, unknown>);
+  snake['updated_at'] = new Date().toISOString();
+  const { error } = await supabase.from('wio_tenants').update(snake).eq('id', tenantId);
+  if (error) { console.error('updateTenant:', error); return false; }
+  return true;
+}
+
 // ══════════════════════════════════════
 // 멤버
 // ══════════════════════════════════════
+
+export async function inviteMember(tenantId: string, email: string, role: string = 'member'): Promise<WIOMember | null> {
+  // 이메일로 auth user 찾기
+  const { data: members } = await supabase.from('members').select('auth_id').eq('email', email).single();
+  if (!members?.auth_id) { console.error('inviteMember: user not found'); return null; }
+  const { data, error } = await supabase.from('wio_members').insert({
+    tenant_id: tenantId, user_id: members.auth_id, role, display_name: email.split('@')[0], is_active: true,
+  }).select().single();
+  if (error) { console.error('inviteMember:', error); return null; }
+  return snakeToCamel(data) as unknown as WIOMember;
+}
+
+export async function updateMemberRole(memberId: string, role: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_members').update({ role }).eq('id', memberId);
+  if (error) { console.error('updateMemberRole:', error); return false; }
+  return true;
+}
+
+export async function removeMember(memberId: string): Promise<boolean> {
+  const { error } = await supabase.from('wio_members').update({ is_active: false }).eq('id', memberId);
+  if (error) { console.error('removeMember:', error); return false; }
+  return true;
+}
 
 export async function fetchTenantMembers(tenantId: string): Promise<WIOMember[]> {
   const { data } = await supabase.from('wio_members').select('*').eq('tenant_id', tenantId).eq('is_active', true).order('joined_at');

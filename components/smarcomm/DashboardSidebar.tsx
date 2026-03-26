@@ -13,6 +13,7 @@ import {
   Eye, Search, Target, Radar, Globe, BookOpen, Lock
 } from 'lucide-react';
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth-context';
 const SidebarContext = createContext({ collapsed: false, setCollapsed: (v: boolean) => {} });
 
 // 팩 타입: core=항상 보임, action/crm/experiment/ops/launch=확장팩
@@ -137,8 +138,9 @@ function isMasterUser(): boolean {
 export default function DashboardSidebar({ companyName, companyLogo }: Props) {
   const pathname = usePathname();
   const { collapsed, setCollapsed } = useContext(SidebarContext);
-  // 현재 개발 단계: 모든 메뉴 잠금 해제 (프로덕션에서 getUserTier() 활성화)
-  const [userTier] = useState<UserTier>('enterprise');
+  // Auth 기반 티어 결정 (staff/admin→enterprise, 일반→starter)
+  const { user } = useAuth();
+  const userTier: UserTier = (user?.accountType === 'staff' || user?.role === 'Admin' || ['admin@smarcomm.com', 'cheonil@tenone.biz', 'tenone@tenone.biz'].includes(user?.email || '')) ? 'enterprise' : 'starter';
 
   const TIER_ORDER: UserTier[] = ['starter', 'growth', 'pro', 'enterprise'];
   const userTierIndex = TIER_ORDER.indexOf(userTier);
@@ -179,7 +181,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
 
       {/* 메뉴 */}
       <nav className="flex-1 overflow-y-auto p-2 scrollbar-hide">
-        {MENU_SECTIONS.map((section, si) => {
+        {MENU_SECTIONS.filter(s => s.title !== '개발중').map((section, si) => {
           const packInfo = section.items[0]?.pack ? PACK_LABELS[section.items[0].pack] : null;
           const packType = section.items[0]?.pack || 'core';
           const requiredTier = PACK_TIER[packType] || 'starter';

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Lock, ChevronRight, X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 
 type Tier = 'starter' | 'growth' | 'pro' | 'enterprise';
 
@@ -21,25 +22,24 @@ interface TierGateProps {
   children: React.ReactNode;
 }
 
-// Mock: 현재 사용자 티어 (localStorage에서 가져오거나 기본 starter)
-function getCurrentTier(): Tier {
-  if (typeof window === 'undefined') return 'starter';
-  // 마스터 계정은 enterprise 취급
-  const user = localStorage.getItem('smarcomm_user');
-  if (user) {
-    try {
-      const parsed = JSON.parse(user);
-      if (parsed.email === 'admin@smarcomm.com') return 'enterprise';
-    } catch {}
-  }
-  return (localStorage.getItem('smarcomm_tier') as Tier) || 'starter';
+// 관리자 이메일 목록 (서버 환경변수로 옮길 것)
+const ADMIN_EMAILS = ['admin@smarcomm.com', 'cheonil@tenone.biz', 'tenone@tenone.biz'];
+
+// 티어 결정: Supabase Auth 기반 (staff→enterprise, 관리자→enterprise, 일반→starter)
+function useCurrentTier(): Tier {
+  const { user } = useAuth();
+  if (!user) return 'starter';
+  if (user.accountType === 'staff' || user.role === 'Admin') return 'enterprise';
+  if (ADMIN_EMAILS.includes(user.email)) return 'enterprise';
+  // TODO: 실제 결제 연동 후 members 테이블 또는 subscription 테이블에서 tier 조회
+  return 'starter';
 }
 
 const TIER_ORDER: Tier[] = ['starter', 'growth', 'pro', 'enterprise'];
 
 export default function TierGate({ requiredTier, featureName, featureDesc, features, children }: TierGateProps) {
   const [showModal, setShowModal] = useState(false);
-  const currentTier = getCurrentTier();
+  const currentTier = useCurrentTier();
   const currentIndex = TIER_ORDER.indexOf(currentTier);
   const requiredIndex = TIER_ORDER.indexOf(requiredTier);
 
@@ -117,7 +117,7 @@ export default function TierGate({ requiredTier, featureName, featureDesc, featu
 
 // 사이드바용 잠금 아이콘 (메뉴 레이블 옆에 표시)
 export function TierBadge({ tier }: { tier: Tier }) {
-  const currentTier = getCurrentTier();
+  const currentTier = useCurrentTier();
   const currentIndex = TIER_ORDER.indexOf(currentTier);
   const requiredIndex = TIER_ORDER.indexOf(tier);
   if (currentIndex >= requiredIndex) return null;

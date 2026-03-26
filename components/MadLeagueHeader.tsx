@@ -70,8 +70,8 @@ export function MadLeagueHeader() {
                         </Link>
                     ) : (
                         <>
-                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">LOGIN</button>
-                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] transition-colors rounded">JOIN</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
+                            <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] transition-colors rounded">가입</Link>
                         </>
                     )}
                 </div>
@@ -110,8 +110,8 @@ export function MadLeagueHeader() {
                             </Link>
                         ) : (
                             <>
-                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-white">LOGIN</button>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] rounded">JOIN</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-white">로그인</button>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] rounded">가입</Link>
                             </>
                         )}
                     </div>
