@@ -161,21 +161,41 @@
 
 ---
 
-### 🔵 Mindle (트렌드 플랫폼)
+### 🔵 Mindle (트렌드 인텔리전스)
 
-**핵심 업무**: 트렌드 수집-분석-콘텐츠 생산
+**핵심 업무**: 트렌드 수집→분석→해석→콘텐츠 생산→전략 소스 제공
+
+**역할**: Universe가 세상을 먼저 읽는 눈. SmarComm·Brand Gravity·Planner's에 전략 인풋 공급.
 
 ```
-필수: Home · Content · AI Crawler · AI Creative · Insight
-보조: Project · Wiki
+필수: Home · Content · AI Crawler · AI Creative · Insight · Wiki
+보조: Project · People · Talk
 ```
 
 **일상 시나리오**:
-- 자동: AI Crawler가 매일 9시 RSS 8개 소스 수집
-- 아침: Home에서 어제 수집 데이터 30건 확인
-- 오전: AI Creative에서 수집 데이터 → 주간 리포트 초안 자동 생성
-- 오후: Content에서 초안 검수 → NEWSLETTER 발행
-- 주간: Insight에서 키워드 트렌드 변화 분석
+- 자동(매일 9시): AI Crawler가 RSS 8개 + Discord + 네이버 수집 (30~50건/일)
+- 아침: Home에서 어제 수집 데이터 확인 + AI가 뽑은 Top Signal 3개
+- 오전: Insight에서 키워드 히트맵, 급등/급락 트렌드 분석
+- 점심: AI Creative에서 수집 데이터 → 3종 콘텐츠 초안 자동 생성
+  - Newsletter (주간 구독자 발송)
+  - Weekly Report (심층 분석)
+  - Article (단건 트렌드 해석)
+- 오후: Content에서 초안 검수 → 편집 → 발행
+- 금요일: Wiki에 주간 트렌드 아카이브 저장
+- 월요일: Project에서 "3월 4주차 Mindle Report" 작업 관리
+
+**다른 브랜드에 공급하는 것**:
+- → SmarComm: 마케팅 전략 수립 소스 (Insight 데이터 공유)
+- → Brand Gravity: 브랜딩 방향 인풋 (트렌드 키워드)
+- → Planner's: 기획 인풋 (시장 환경 분석)
+- → RooK: 크리에이티브 소재 (트렌드 기반 콘텐츠 주제)
+- → 전 브랜드: 주간 뉴스레터 (Universe 전체 트렌드 브리핑)
+
+**Admin 전용 기능**:
+- 크롤러 상태 모니터링 (RSS/Discord/Web/바닥쇠)
+- AI 분석 트리거 (수동 실행)
+- 수집 데이터 검색/필터
+- 콘텐츠 파이프라인 관리 (수집→분석→초안→발행)
 
 ---
 
