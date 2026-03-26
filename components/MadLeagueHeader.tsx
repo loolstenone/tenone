@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "경쟁 PT", href: "/pt" },
@@ -21,6 +22,7 @@ const navItems = [
 export function MadLeagueHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -29,6 +31,7 @@ export function MadLeagueHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-neutral-900">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
@@ -67,7 +70,7 @@ export function MadLeagueHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">LOGIN</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">LOGIN</button>
                             <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] transition-colors rounded">JOIN</Link>
                         </>
                     )}
@@ -107,7 +110,7 @@ export function MadLeagueHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">LOGIN</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-white">LOGIN</button>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] rounded">JOIN</Link>
                             </>
                         )}
@@ -115,5 +118,7 @@ export function MadLeagueHeader() {
                 </div>
             )}
         </header>
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#D32F2F" />
+        </>
     );
 }

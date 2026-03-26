@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "About", href: "/about" },
@@ -18,6 +19,7 @@ const navItems = [
 export function YouInOneHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -67,7 +69,7 @@ export function YouInOneHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-[#171717] transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-[#171717] transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm text-neutral-400 hover:text-[#171717] transition-colors">가입</Link>
                         </>
                     )}

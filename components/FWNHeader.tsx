@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "서울", href: "/category/seoul" },
@@ -23,6 +24,7 @@ const navItems = [
 export function FWNHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -31,6 +33,7 @@ export function FWNHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50">
             {/* 로고 바 */}
             <div className="bg-[#1a1a1a] border-b border-neutral-800">
@@ -52,7 +55,7 @@ export function FWNHeader() {
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</Link>
+                                    <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
                                     <Link href="/signup" className="text-sm text-neutral-400 hover:text-white transition-colors">가입</Link>
                                 </>
                             )}
@@ -120,5 +123,8 @@ export function FWNHeader() {
                 </div>
             )}
         </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00C853" />
+        </>
     );
 }

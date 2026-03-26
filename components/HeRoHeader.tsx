@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "HIT 프로그램", href: "/hit" },
@@ -19,6 +20,7 @@ const navItems = [
 export function HeRoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -27,6 +29,7 @@ export function HeRoHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
@@ -63,7 +66,7 @@ export function HeRoHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">LOGIN</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">LOGIN</button>
                             <Link href="/signup" className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 transition-colors rounded">JOIN</Link>
                         </>
                     )}
@@ -103,7 +106,7 @@ export function HeRoHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">LOGIN</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-500 hover:text-neutral-900">LOGIN</button>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-amber-500 text-white hover:bg-amber-600 rounded">JOIN</Link>
                             </>
                         )}
@@ -111,5 +114,7 @@ export function HeRoHeader() {
                 </div>
             )}
         </header>
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#F59E0B" />
+        </>
     );
 }

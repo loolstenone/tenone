@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "커뮤니티", href: "/community" },
@@ -17,6 +18,7 @@ const navItems = [
 export function MadLeapHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -25,6 +27,7 @@ export function MadLeapHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Left Nav */}
@@ -72,7 +75,7 @@ export function MadLeapHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">Login</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">Login</button>
                             <Link href="/signup" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">Register</Link>
                         </>
                     )}
@@ -120,7 +123,7 @@ export function MadLeapHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">Login</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-500 hover:text-neutral-900">Login</button>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">Register</Link>
                             </>
                         )}
@@ -128,5 +131,7 @@ export function MadLeapHeader() {
                 </div>
             )}
         </header>
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#171717" />
+        </>
     );
 }

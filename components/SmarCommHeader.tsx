@@ -5,9 +5,11 @@ import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { LoginModal } from '@/components/LoginModal';
 
 export default function SmarCommHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const currentPath = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
@@ -31,6 +33,7 @@ export default function SmarCommHeader() {
   const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center text-xl tracking-[-0.03em]">
@@ -70,7 +73,7 @@ export default function SmarCommHeader() {
             </div>
           ) : (
             <>
-              <Link href={`/login?redirect=${encodeURIComponent(currentPath)}`} className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">로그인</Link>
+              <button onClick={() => setLoginOpen(true)} className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">로그인</button>
               <Link href="/signup" className="rounded-full bg-text px-5 py-2 text-[13px] font-semibold text-white transition-all hover:bg-accent-sub">무료 가입</Link>
             </>
           )}
@@ -102,7 +105,7 @@ export default function SmarCommHeader() {
               </>
             ) : (
               <>
-                <Link href={`/login?redirect=${encodeURIComponent(currentPath)}`} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
+                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-text-sub">로그인</button>
                 <Link href="/signup" className="mt-1 rounded-full bg-text px-4 py-2.5 text-center text-sm font-semibold text-white" onClick={() => setMenuOpen(false)}>무료 가입</Link>
               </>
             )}
@@ -110,5 +113,8 @@ export default function SmarCommHeader() {
         </div>
       )}
     </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#171717" />
+        </>
   );
 }

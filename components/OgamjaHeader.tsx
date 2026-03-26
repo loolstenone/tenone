@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "필찐감자", href: "/writers" },
@@ -16,6 +17,7 @@ const navItems = [
 export function OgamjaHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -24,6 +26,7 @@ export function OgamjaHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             {/* 상단 유틸 바 */}
             <div className="bg-neutral-50 border-b border-neutral-100">
@@ -73,7 +76,7 @@ export function OgamjaHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] transition-colors rounded-full">회원가입</Link>
                         </>
                     )}
@@ -121,5 +124,8 @@ export function OgamjaHeader() {
                 </div>
             )}
         </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#F5C518" />
+        </>
     );
 }

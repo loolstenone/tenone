@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "자연함 이야기", href: "/#about" },
@@ -14,9 +15,11 @@ const navItems = [
 
 export function NatureBoxHeader() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
             <nav className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 <Link href="/" className="shrink-0 flex items-center gap-2">
@@ -46,7 +49,7 @@ export function NatureBoxHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">가입</Link>
                         </>
                     )}
@@ -87,5 +90,8 @@ export function NatureBoxHeader() {
                 </div>
             )}
         </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#6B8E23" />
+        </>
     );
 }

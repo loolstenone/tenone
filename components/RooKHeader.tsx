@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "WORKS", href: "/works" },
@@ -18,6 +19,7 @@ const navItems = [
 export function RooKHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -26,6 +28,7 @@ export function RooKHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#282828]">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
@@ -61,7 +64,7 @@ export function RooKHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347] transition-colors rounded">회원가입</Link>
                         </>
                     )}
@@ -101,7 +104,7 @@ export function RooKHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
+                                <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="text-sm text-neutral-400 hover:text-white">로그인</button>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#00d255] text-black font-semibold hover:bg-[#00b347] rounded">회원가입</Link>
                             </>
                         )}
@@ -109,5 +112,7 @@ export function RooKHeader() {
                 </div>
             )}
         </header>
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#00d255" />
+        </>
     );
 }

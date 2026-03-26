@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
@@ -32,11 +33,13 @@ export function PublicHeader() {
     const { user, isAuthenticated, isLoading, canAccessIntra, logout } = useAuth();
     const { isDark } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
 
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + "?");
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
             style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
@@ -219,5 +222,8 @@ export function PublicHeader() {
                 </div>
             )}
         </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#171717" />
+        </>
     );
 }

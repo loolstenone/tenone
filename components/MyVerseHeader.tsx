@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, Orbit, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { LoginModal } from "@/components/LoginModal";
 
 const navItems = [
     { name: "철학", href: "/philosophy" },
@@ -18,11 +19,13 @@ const navItems = [
 export function MyVerseHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => pathname === href;
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0D17]/95 backdrop-blur-md border-b border-white/5">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
@@ -59,7 +62,7 @@ export function MyVerseHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</Link>
+                            <button onClick={() => setLoginOpen(true)} className="text-sm text-neutral-400 hover:text-white transition-colors">로그인</button>
                             <Link href="/signup" className="text-sm text-neutral-400 hover:text-white transition-colors">가입</Link>
                         </>
                     )}
@@ -120,5 +123,8 @@ export function MyVerseHeader() {
                 </div>
             )}
         </header>
+
+        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#6366f1" />
+        </>
     );
 }
