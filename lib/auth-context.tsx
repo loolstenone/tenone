@@ -141,11 +141,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 초기화: localStorage 즉시 표시 → Supabase 세션 검증 → 불일치 시 정리
     useEffect(() => {
         // 1단계: localStorage 즉시 복원 (깜박임 방지)
+        let hasLocalData = false;
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) setUser(JSON.parse(stored));
+            if (stored) {
+                setUser(JSON.parse(stored));
+                hasLocalData = true;
+                setIsLoading(false); // localStorage 있으면 즉시 표시
+            }
         } catch { /* ignore */ }
-        setIsLoading(false);
 
         // 2단계: Supabase 세션 검증 (비동기)
         async function validateSession() {
@@ -158,13 +162,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     // 세션 없음 → localStorage에 남은 stale 데이터 정리
                     const stored = localStorage.getItem(STORAGE_KEY);
                     if (stored) {
-                        console.log('[Auth] Supabase session expired, clearing stale localStorage');
                         setUser(null);
                         localStorage.removeItem(STORAGE_KEY);
                     }
                 }
             } catch {
                 // Supabase 접속 실패 → localStorage 유지 (오프라인 대응)
+            } finally {
+                if (!hasLocalData) setIsLoading(false); // localStorage 없었으면 여기서 로딩 해제
             }
         }
         validateSession();
@@ -183,7 +188,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        return () => subscription.unsubscribe();
+        // 4단계: 크로스탭 세션 동기화 (다른 탭에서 로그인/로그아웃 시 반영)
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === STORAGE_KEY) {
+                if (e.newValue) {
+                    try { setUser(JSON.parse(e.newValue)); } catch { /* ignore */ }
+                } else {
+                    setUser(null);
+                }
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            subscription.unsubscribe();
+            window.removeEventListener('storage', handleStorageChange);
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
