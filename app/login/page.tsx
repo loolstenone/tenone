@@ -10,7 +10,6 @@ import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
 import { MadLeagueHeader } from '@/components/MadLeagueHeader';
 import { MadLeagueFooter } from '@/components/MadLeagueFooter';
-import SmarCommHeader from '@/components/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
@@ -53,23 +52,22 @@ function SmarCommLoginForm() {
     };
     const handleGoogle = () => handleSocialLogin('google');
     const handleKakao = () => handleSocialLogin('kakao');
+    const redirectTo = searchParams.get('redirect') || '/';
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         try {
             await login(email, password);
-            router.push('/dashboard');
+            router.push(redirectTo);
         } catch { setError('이메일 또는 비밀번호가 올바르지 않습니다'); }
     };
 
     return (
-        <>
-            <SmarCommHeader />
-            <main className="flex min-h-screen items-center justify-center px-5 pt-14">
+            <main className="flex min-h-screen items-center justify-center px-5">
                 <div className="w-full max-w-sm">
                     <div className="mb-8 text-center">
-                        <h1 className="mb-2 text-2xl font-bold">로그인</h1>
-                        <p className="text-sm text-neutral-500">SmarComm에 오신 것을 환영합니다</p>
+                        <h1 className="mb-2 text-2xl font-bold">Ten:One™</h1>
+                        <p className="text-sm text-neutral-500">Universe에 로그인</p>
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {error && <p className="text-xs text-red-500">{error}</p>}
@@ -114,7 +112,6 @@ function SmarCommLoginForm() {
                     </div>
                 </div>
             </main>
-        </>
     );
 }
 
