@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-03-26 (사무실 #2) — 약 15커밋
+
+### Mindle(민들레) 사이트 완성
+- TrendHunter → Mindle 리브랜딩 + 전 페이지 영문 전환 (8페이지)
+- 2단 헤더: 상단 유틸리티(ABOUT/LOGIN/Share/Search) + 하단 네비
+- 신문 레이아웃: Featured Article + TODAY'S PICKS + Hot Keywords + 30개 랜덤 카피
+- Trends: 리스트/그리드 뷰 전환 + 카테고리 필터 + Featured
+- Reports: 주간 타임라인 + LATEST/PREMIUM 뱃지
+- Data: 키워드 랭킹 테이블 + 기간 필터(24H/7D/30D/90D) + 수집 소스 + Biggest Movers
+- References: Editor's Picks + 12개 소스 + 태그
+- Admin: Supabase 실데이터 연결 + 이메일 기반 관리자 권한
+
+### Mindle DB + RSS 크롤러
+- Supabase 9개 테이블 생성 + RLS 정책 설정
+- RSS 자동 수집 크롤러: /api/trendhunter/rss (8개 피드, 첫 실행 30건 수집 성공)
+- crawler_status 4건 + collected_data 시드 데이터
+
+### 인증 최종 해결
+- Supabase에 `https://*.tenone.biz/auth/callback` 와일드카드 등록 → 전 서브도메인 소셜 로그인 해결
+- isSubdomain race condition fix (useState null 초기값)
+
+### WIO Timesheet 모듈
+- 주간 시수 그리드 + AI Auto-Fill 버튼 + Submit/Approve 워크플로우 → 8대 모듈 완성
+
+### 서브도메인 인프라
+- 가비아 CNAME 8개 + Vercel 도메인 9개 (mindle 포함)
+- middleware: mindle.tenone.biz, wio.tenone.biz, seoul360.tenone.biz 매핑
+
+### 결정 사항
+- Mindle = 영문 사이트 (크롬 번역으로 한국어 대응)
+- 크롤러 우선순위: RSS(무료) → 디스코드(무료) → 웹(월$10) → 바닥쇠(공기계)
+- 서브도메인 SSO: .tenone.biz 쿠키 공유 가능 (Google 방식)
+
+---
+
 ## 2026-03-26 (사무실) — 8커밋
 
 ### TrendHunter 사이트 구축
