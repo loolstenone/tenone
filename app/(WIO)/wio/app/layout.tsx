@@ -41,7 +41,13 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
       try {
         const sb = createClient();
         const { data: { user } } = await sb.auth.getUser();
-        if (!user) { router.push('/wio/login'); return; }
+        if (!user) {
+          // 데모 모드: 비로그인도 체험 가능 (읽기 전용)
+          setTenant({ id: 'demo', name: 'WIO Demo', serviceName: 'Work In One', domain: '', plan: 'free', modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance'] } as any);
+          setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+          setLoading(false);
+          return;
+        }
 
         let tenants = await fetchMyTenants();
 
@@ -65,8 +71,10 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         setMember(m);
         setLoading(false);
       } catch {
-        // DB 오류 시 로그인 페이지로
-        router.push('/wio/login');
+        // DB 오류 시에도 데모 모드로 진입
+        setTenant({ id: 'demo', name: 'WIO Demo', serviceName: 'Work In One', domain: '', plan: 'free', modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance'] } as any);
+        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+        setLoading(false);
       }
     };
     init();
