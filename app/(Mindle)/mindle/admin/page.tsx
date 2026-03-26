@@ -57,7 +57,8 @@ const oppStatusMap: Record<string, { label: string; color: string }> = {
 
 export default function MindleAdminPage() {
     const { isAuthenticated, user } = useAuth();
-    const isAdmin = user?.role === "Admin" || user?.accountType === "staff";
+    const adminEmails = ["cheonil@tenone.biz", "tenone@tenone.biz", "admin@tenone.biz"];
+    const isAdmin = user?.role === "Admin" || user?.accountType === "staff" || adminEmails.includes(user?.email || "");
 
     const [collectedData, setCollectedData] = useState<CollectedDataRow[]>([]);
     const [collectedTodayCount, setCollectedTodayCount] = useState(0);
