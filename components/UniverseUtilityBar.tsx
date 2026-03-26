@@ -72,7 +72,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                     ABOUT
                 </Link>
 
-                {!isLoading && isAuthenticated ? (
+                {isAuthenticated ? (
                     <>
                         {/* 프로필 */}
                         {config.profilePath && (
@@ -97,7 +97,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                             <LogOut className="h-3.5 w-3.5" />
                         </button>
                     </>
-                ) : !isLoading ? (
+                ) : (
                     <>
                         {/* 로그인 */}
                         {config.loginPath ? (
@@ -114,7 +114,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                             JOIN
                         </Link>
                     </>
-                ) : null}
+                )}
 
                 {/* 공유 */}
                 <button onClick={handleShare} className="opacity-50 hover:opacity-100 transition-opacity" title="공유">
