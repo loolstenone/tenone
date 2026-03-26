@@ -181,7 +181,7 @@ export default function DashboardSidebar({ companyName, companyLogo }: Props) {
 
       {/* 메뉴 */}
       <nav className="flex-1 overflow-y-auto p-2 scrollbar-hide">
-        {MENU_SECTIONS.filter(s => s.title !== '개발중').map((section, si) => {
+        {MENU_SECTIONS.map((section, si) => {
           const packInfo = section.items[0]?.pack ? PACK_LABELS[section.items[0].pack] : null;
           const packType = section.items[0]?.pack || 'core';
           const requiredTier = PACK_TIER[packType] || 'starter';
