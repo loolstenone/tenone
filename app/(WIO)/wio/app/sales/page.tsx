@@ -120,7 +120,7 @@ export default function SalesPage() {
         <div className="flex justify-center py-16"><div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
       ) : tab === 'opportunities' ? (
         opps.length === 0 ? (
-          <div className="text-center py-16 text-slate-500"><TrendingUp size={32} className="mx-auto mb-2 text-slate-600" /><p>등록된 기회가 없습니다</p></div>
+          <div className="text-center py-16"><TrendingUp size={36} className="mx-auto mb-3 text-slate-700" /><p className="text-sm text-slate-400 mb-1">아직 영업 기회가 없어요</p><p className="text-xs text-slate-600 mb-4">영업 기회를 등록해서 파이프라인을 관리하세요</p><button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors"><Plus size={14} /> 기회 등록하기</button></div>
         ) : (
           <div className="space-y-2">
             {opps.map((o: any) => {
@@ -142,7 +142,7 @@ export default function SalesPage() {
         )
       ) : (
         leads.length === 0 ? (
-          <div className="text-center py-16 text-slate-500"><Users size={32} className="mx-auto mb-2 text-slate-600" /><p>등록된 리드가 없습니다</p></div>
+          <div className="text-center py-16"><Users size={36} className="mx-auto mb-3 text-slate-700" /><p className="text-sm text-slate-400 mb-1">아직 리드가 없어요</p><p className="text-xs text-slate-600 mb-4">잠재 고객을 등록해서 관리하세요</p><button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors"><Plus size={14} /> 리드 등록하기</button></div>
         ) : (
           <div className="space-y-2">
             {leads.map((l: any) => (

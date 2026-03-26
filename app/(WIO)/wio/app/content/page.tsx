@@ -58,9 +58,9 @@ export default function ContentPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-16"><div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
+        <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 animate-pulse"><div className="h-4 w-2/3 bg-white/5 rounded mb-2" /><div className="h-3 w-1/3 bg-white/5 rounded" /></div>)}</div>
       ) : contents.length === 0 ? (
-        <div className="text-center py-16 text-slate-500"><FileText size={32} className="mx-auto mb-2 text-slate-600" /><p>콘텐츠가 없습니다</p></div>
+        <div className="text-center py-16"><FileText size={36} className="mx-auto mb-3 text-slate-700" /><p className="text-sm text-slate-400 mb-1">아직 콘텐츠가 없어요</p><p className="text-xs text-slate-600 mb-4">블로그, 뉴스룸, 작품을 작성해보세요</p><button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors"><Plus size={14} /> 콘텐츠 작성하기</button></div>
       ) : (
         <div className="space-y-2">
           {contents.map((c: any) => (
