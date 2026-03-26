@@ -4,6 +4,60 @@
 
 ---
 
+## 2026-03-27 (집) — WIO 전 모듈 고도화 + 인프라 대수술
+
+### 문서
+- WIO_Master_Architecture.md (19 PART 완전 설계서, 단일 진실 소스)
+- 기존 WIO 문서 6개 통합 삭제
+- REVENUE_MODEL.md (10개 서비스 독립 수익 모델)
+- 가격 확정: Free→Starter(4.9만)→Pro(14.9만)→Business(39.9만)→Enterprise
+
+### 인프라
+- window.location.reload() 11개 파일 제거 → router.push
+- /reset-password 비밀번호 재설정 플로우
+- 크로스탭 세션 동기화 (storage event)
+- 헤더 isLoading 타이밍 수정
+- Supabase brands 테이블 + profiles + RLS + 23개 브랜드
+- middleware Supabase 세션 갱신 (Google 로그인 유지 해결)
+- LoginModal createPortal(document.body) — stacking context 탈출
+
+### WIO 모듈 (11개)
+- Home: 스켈레톤, Principle, 빠른 액션, 데모 모드
+- Talk: 상세+댓글2depth+좋아요+북마크+검색, DB 마이그레이션(002)
+- People: 상세 프로필, 역할 필터, 초대
+- Project: Job 추가/토글
+- GPR: 신규 모듈 (Goal→Plan→Result)
+- Learn: 카테고리 필터, 검색, 통계
+- Finance: 스켈레톤, 빈 상태
+- Insight: 드릴다운, 스택바 차트
+- Sales/Wiki/Content: 빈 상태 가이드 통일
+
+### UI 통일
+- UniverseUtilityBar 23개 헤더 전체 적용 (WIO, SmarComm, TenOne 포함)
+- 푸터 통일 (언더라인 제거, 중복 정리)
+- 통합 로그인 페이지 (SmarComm→TenOne Universe)
+- WIO 데모 모드 (비로그인 체험)
+
+### 파일 변경 (주요)
+- components/UniverseUtilityBar.tsx — loginPath, isLoading 제거
+- components/LoginModal.tsx — createPortal, SSR guard
+- components/PublicHeader.tsx — UniverseUtilityBar 적용
+- components/SmarCommHeader.tsx — UniverseUtilityBar 적용
+- components/WIOMarketingHeader.tsx — UniverseUtilityBar 적용
+- middleware.ts — Supabase 세션 갱신
+- app/login/page.tsx — TenOne Universe 브랜딩 + redirect
+- app/reset-password/page.tsx — 신규
+- app/(WIO)/wio/app/gpr/page.tsx — 신규
+- app/(WIO)/wio/app/talk/[id]/page.tsx — 신규
+- app/(WIO)/wio/app/people/[id]/page.tsx — 신규
+- lib/auth-context.tsx — resetPassword, updatePassword, 크로스탭
+- lib/supabase/brands.ts — 신규
+- supabase/migrations/001_brands_and_profiles.sql — 신규
+- supabase/migrations/002_talk_comments_likes.sql — 신규
+- docs/WIO_Master_Architecture.md — 신규 (단일 진실 소스)
+
+---
+
 ## 2026-03-26 (집) — 대규모 고도화
 
 ### Mindle 고도화
