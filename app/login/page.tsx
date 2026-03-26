@@ -129,10 +129,11 @@ function LoginForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // 서브도메인 감지 (*.tenone.biz 또는 커스텀 도메인)
-    const isSubdomain = typeof window !== 'undefined' &&
-        window.location.hostname !== 'tenone.biz' &&
-        window.location.hostname !== 'www.tenone.biz' &&
-        window.location.hostname !== 'localhost';
+    const [isSubdomain, setIsSubdomain] = useState(false);
+    useEffect(() => {
+        const h = window.location.hostname;
+        setIsSubdomain(h !== 'tenone.biz' && h !== 'www.tenone.biz' && h !== 'localhost');
+    }, []);
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
