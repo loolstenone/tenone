@@ -356,11 +356,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) console.error('Kakao OAuth error:', error);
     }, [supabase]);
 
-    // 로그아웃
+    // 로그아웃 — Supabase 세션 + localStorage + 쿠키 모두 클리어
     const logout = useCallback(async () => {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
-        try { await supabase.auth.signOut(); } catch { /* ignore */ }
+        try {
+            await supabase.auth.signOut({ scope: 'local' });
+        } catch { /* ignore */ }
+        // Supabase SSR 쿠키 강제 제거
+        document.cookie.split(';').forEach(c => {
+            const name = c.split('=')[0].trim();
+            if (name.startsWith('sb-')) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+        });
     }, [supabase]);
 
     const isStaff = user?.accountType === 'staff';

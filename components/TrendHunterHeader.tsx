@@ -48,7 +48,7 @@ export function TrendHunterHeader() {
                         </Link>
                     ) : (
                         <>
-                            <Link href="/login" className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</Link>
+                            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">로그인</Link>
                             <Link href="/signup" className="text-sm text-neutral-400 hover:text-[#00FF88] transition-colors">가입</Link>
                         </>
                     )}
