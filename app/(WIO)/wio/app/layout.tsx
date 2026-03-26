@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   LayoutDashboard, FolderKanban, MessageSquare, Receipt,
   Users, TrendingUp, BookOpen, FileText, Library, BarChart3, Clock,
-  ChevronLeft, ChevronRight, LogOut, Settings
+  ChevronLeft, ChevronRight, LogOut, Settings, Target
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
@@ -15,13 +15,13 @@ import type { WIOTenant, WIOMember, WIOModule } from '@/types/wio';
 const MODULE_ICONS: Record<string, any> = {
   home: LayoutDashboard, project: FolderKanban, talk: MessageSquare,
   finance: Receipt, people: Users, sales: TrendingUp, timesheet: Clock,
-  learn: BookOpen, content: FileText, wiki: Library, insight: BarChart3,
+  learn: BookOpen, content: FileText, wiki: Library, insight: BarChart3, gpr: Target,
 };
 
 const MODULE_LABELS: Record<string, string> = {
   home: '홈', project: '프로젝트', talk: '소통',
   finance: '재무', people: '인재', sales: '영업', timesheet: '시수',
-  learn: '교육', content: '콘텐츠', wiki: '위키', insight: '인사이트',
+  learn: '교육', content: '콘텐츠', wiki: '위키', insight: '인사이트', gpr: 'GPR',
 };
 
 interface WIOContext { tenant: WIOTenant | null; member: WIOMember | null; refreshTenant?: () => void; }
