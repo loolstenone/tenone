@@ -25,6 +25,8 @@ export interface UtilityBarConfig {
     signupPath?: string;
     /** 검색 placeholder */
     searchPlaceholder?: string;
+    /** 로그인 페이지 경로 (설정 시 모달 대신 페이지 이동) */
+    loginPath?: string;
 }
 
 const defaultConfig: UtilityBarConfig = {
@@ -98,9 +100,15 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                 ) : !isLoading ? (
                     <>
                         {/* 로그인 */}
-                        <button onClick={() => setLoginOpen(true)} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                            LOG IN
-                        </button>
+                        {config.loginPath ? (
+                            <Link href={config.loginPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                                LOG IN
+                            </Link>
+                        ) : (
+                            <button onClick={() => setLoginOpen(true)} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                                LOG IN
+                            </button>
+                        )}
                         {/* 가입 */}
                         <Link href={config.signupPath || "/signup"} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                             JOIN

@@ -37,7 +37,7 @@ export function WIOMarketingHeader() {
 
                 <div className="flex items-center gap-3">
                     <div className="hidden md:block">
-                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: '/wio/app', workspaceLabel: 'APP', signupPath: '/wio/login', accentColor: '#6366f1' }} />
+                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: '/wio/app', workspaceLabel: 'APP', signupPath: '/wio/login', loginPath: '/wio/login', accentColor: '#6366f1' }} />
                     </div>
                     {/* Mobile hamburger */}
                     <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1 text-slate-400">
