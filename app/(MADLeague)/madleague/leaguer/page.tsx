@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { GraduationCap, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Leaguer {
     name: string;
@@ -11,6 +12,7 @@ interface Leaguer {
     role: string;
 }
 
+// Mock fallback — DB에 데이터 들어오면 자동으로 대체됨
 const mockLeaguers: Leaguer[] = [
     { name: "김서연", school: "서울대학교", generation: 8, role: "회장" },
     { name: "이준호", school: "연세대학교", generation: 8, role: "부회장" },
@@ -45,8 +47,31 @@ const roleColors: Record<string, string> = {
 
 export default function LeaguerPage() {
     const [activeGen, setActiveGen] = useState<number>(8);
+    const [leaguers, setLeaguers] = useState<Leaguer[]>(mockLeaguers);
 
-    const filtered = mockLeaguers.filter((l) => l.generation === activeGen);
+    // DB 우선: members 테이블에서 MADLeague 소속 멤버 조회
+    useEffect(() => {
+        async function loadFromDB() {
+            try {
+                const supabase = createClient();
+                const { data } = await supabase
+                    .from('members')
+                    .select('name, company, department, position, affiliations')
+                    .contains('affiliations', ['madleague']);
+                if (data && data.length > 0) {
+                    setLeaguers(data.map((m: any) => ({
+                        name: m.name || '이름 없음',
+                        school: m.company || m.department || '',
+                        generation: parseInt(m.position) || 8, // position에 기수 저장
+                        role: m.department || '멤버',
+                    })));
+                }
+            } catch { /* Mock fallback 유지 */ }
+        }
+        loadFromDB();
+    }, []);
+
+    const filtered = leaguers.filter((l) => l.generation === activeGen);
 
     return (
         <div>

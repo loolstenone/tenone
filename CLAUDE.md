@@ -51,6 +51,26 @@ public/            # 정적 파일 (로고, 파비콘)
 - **라우팅**: Next.js App Router, `(public)` 그룹으로 퍼블릭/인트라 레이아웃 분리
 - **경로 별칭**: `@/*` → 프로젝트 루트
 
+## 아키텍처 철학: WIO 중심 솔루션 공유
+
+> WIO는 Ten:One Universe의 **공유 IT 인프라**다.
+> 각 브랜드는 WIO의 모듈을 가져다 쓴다. 별도 백엔드를 만들지 않는다.
+
+| WIO 모듈 | 사용 브랜드 | 용도 |
+|----------|-----------|------|
+| ERP (재무/HR/결재/GPR) | **TenOne 인트라** | 기업 운영 |
+| Project + People + Talk | **MADLeague, MADLeap** | 커뮤니티 멤버·프로젝트 관리 |
+| Marketing + Campaign | **SmarComm** | 마케팅 커뮤니케이션 솔루션 |
+| Crawler + Content Pipeline | **Mindle** | 크롤링→트렌드 콘텐츠 생산 |
+| Sales + CRM | **HeRo, Badak** | 인재 매칭, 네트워킹 |
+| Learn + Wiki | **Evolution School, Planner's** | 교육·지식 관리 |
+| Timesheet + Finance | **YouInOne** | 크루 시수·정산 |
+
+**원칙:**
+- 새 기능은 먼저 WIO 모듈로 만들고, 각 브랜드가 import해서 사용
+- DB 테이블은 `wio_` 프리픽스 (멀티테넌트)
+- 각 브랜드 사이트는 WIO API를 호출하거나 `lib/supabase/wio.ts`를 직접 사용
+
 ## 브랜드 시스템
 
 Ten:One Universe는 여러 브랜드로 구성:
