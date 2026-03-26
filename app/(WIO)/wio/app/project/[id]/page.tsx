@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, DollarSign, Users, FolderKanban, Clock, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { fetchProject, fetchProjectMembers, fetchJobs } from '@/lib/supabase/wio';
+import { ArrowLeft, Calendar, DollarSign, Users, FolderKanban, Clock, Edit2, CheckCircle2, AlertCircle, Plus, Send } from 'lucide-react';
+import { fetchProject, fetchProjectMembers, fetchJobs, createJob, updateJob } from '@/lib/supabase/wio';
 import type { WIOProject, WIOJob, WIOProjectMember } from '@/types/wio';
+import { useWIO } from '../../layout';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     draft: { label: '초안', color: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
@@ -23,11 +24,14 @@ const TYPE_LABELS: Record<string, string> = {
 export default function ProjectDetailPage() {
     const params = useParams();
     const projectId = params?.id as string;
+    const { tenant } = useWIO();
     const [project, setProject] = useState<WIOProject | null>(null);
     const [members, setMembers] = useState<WIOProjectMember[]>([]);
     const [jobs, setJobs] = useState<WIOJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<'overview' | 'jobs' | 'members'>('overview');
+    const [newJobTitle, setNewJobTitle] = useState('');
+    const [showJobForm, setShowJobForm] = useState(false);
 
     useEffect(() => {
         if (!projectId) return;
@@ -42,6 +46,28 @@ export default function ProjectDetailPage() {
             setLoading(false);
         });
     }, [projectId]);
+
+    const reload = () => {
+        Promise.all([
+            fetchProject(projectId),
+            fetchProjectMembers(projectId).catch(() => []),
+            fetchJobs(projectId).catch(() => []),
+        ]).then(([p, m, j]) => { setProject(p); setMembers(m); setJobs(j); });
+    };
+
+    const handleAddJob = async () => {
+        if (!tenant || !newJobTitle.trim()) return;
+        await createJob({ projectId, tenantId: tenant.id, title: newJobTitle.trim(), status: 'draft' as any });
+        setNewJobTitle('');
+        setShowJobForm(false);
+        reload();
+    };
+
+    const handleToggleJob = async (job: WIOJob) => {
+        const next = job.status === 'completed' ? 'in_progress' : 'completed';
+        await updateJob(job.id, { status: next as any });
+        reload();
+    };
 
     if (loading) {
         return (
@@ -153,27 +179,49 @@ export default function ProjectDetailPage() {
             )}
 
             {tab === 'jobs' && (
-                <div className="space-y-2">
-                    {jobs.length === 0 ? (
-                        <p className="text-center py-10 text-slate-500 text-sm">등록된 업무가 없습니다.</p>
-                    ) : jobs.map(job => (
-                        <div key={job.id} className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/[0.02]">
-                            <div className="flex items-center gap-3">
-                                {job.status === 'completed' ? (
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                ) : (
-                                    <Clock className="w-4 h-4 text-slate-500" />
-                                )}
-                                <div>
-                                    <p className="text-sm">{job.title}</p>
-                                    <p className="text-[10px] text-slate-500">{job.assigneeId || '미배정'}</p>
-                                </div>
-                            </div>
-                            <span className={`text-[10px] px-2 py-0.5 rounded ${STATUS_LABELS[job.status]?.color || 'text-slate-400'}`}>
-                                {STATUS_LABELS[job.status]?.label || job.status}
-                            </span>
+                <div>
+                    {/* 업무 추가 */}
+                    {showJobForm ? (
+                        <div className="flex gap-2 mb-4">
+                            <input value={newJobTitle} onChange={e => setNewJobTitle(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleAddJob()}
+                                placeholder="업무 제목..." autoFocus
+                                className="flex-1 rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                            <button onClick={handleAddJob} disabled={!newJobTitle.trim()}
+                                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm disabled:opacity-40 hover:bg-indigo-500 transition-colors"><Send size={14} /></button>
                         </div>
-                    ))}
+                    ) : (
+                        <button onClick={() => setShowJobForm(true)}
+                            className="flex items-center gap-1.5 mb-4 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                            <Plus size={13} /> 업무 추가
+                        </button>
+                    )}
+                    <div className="space-y-2">
+                        {jobs.length === 0 ? (
+                            <div className="text-center py-10">
+                                <p className="text-sm text-slate-400 mb-1">등록된 업무가 없어요</p>
+                                <p className="text-xs text-slate-600">업무를 추가해서 진행률을 관리하세요</p>
+                            </div>
+                        ) : jobs.map(job => (
+                            <button key={job.id} onClick={() => handleToggleJob(job)}
+                                className="flex items-center justify-between w-full p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors text-left">
+                                <div className="flex items-center gap-3">
+                                    {job.status === 'completed' ? (
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                    ) : (
+                                        <div className="w-4 h-4 rounded border border-slate-600 shrink-0" />
+                                    )}
+                                    <div>
+                                        <p className={`text-sm ${job.status === 'completed' ? 'line-through text-slate-600' : ''}`}>{job.title}</p>
+                                        <p className="text-[10px] text-slate-500">{job.assigneeId || '미배정'}</p>
+                                    </div>
+                                </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded ${STATUS_LABELS[job.status]?.color || 'text-slate-400'}`}>
+                                    {STATUS_LABELS[job.status]?.label || job.status}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
 

@@ -58,11 +58,31 @@ export default function ProjectListPage() {
 
       {/* 프로젝트 목록 */}
       {loading ? (
-        <div className="flex items-center justify-center py-20"><div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 animate-pulse">
+              <div className="h-4 w-2/3 bg-white/5 rounded mb-2" />
+              <div className="h-3 w-1/3 bg-white/5 rounded" />
+            </div>
+          ))}
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-slate-500">
-          <FolderKanban size={40} className="mx-auto mb-3 text-slate-600" />
-          <p>프로젝트가 없습니다</p>
+        <div className="text-center py-20">
+          <FolderKanban size={36} className="mx-auto mb-3 text-slate-700" />
+          {search || filter ? (
+            <>
+              <p className="text-sm text-slate-400 mb-1">검색 결과가 없습니다</p>
+              <p className="text-xs text-slate-600">다른 조건으로 검색해보세요</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-400 mb-1">아직 프로젝트가 없어요</p>
+              <p className="text-xs text-slate-600 mb-4">첫 프로젝트를 만들어서 시작해보세요</p>
+              <Link href="/wio/app/project/new" className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors">
+                <Plus size={14} /> 프로젝트 만들기
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
