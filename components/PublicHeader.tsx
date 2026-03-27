@@ -15,7 +15,7 @@ const publicNav = [
     { name: "Works", href: "/works" },
     { name: "Contact", href: "/contact" },
     { name: "Newsroom", href: "/newsroom" },
-    { name: "Newsletter", href: "/newsletter" },
+    // { name: "Newsletter", href: "/newsletter" },  // 임시 숨김
     {
         name: "About", href: "/about",
         sub: [

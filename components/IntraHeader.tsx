@@ -233,6 +233,12 @@ export function IntraHeader() {
                     )}
                 </div>
 
+                {/* 로그아웃 */}
+                <button onClick={() => { logout(); router.push('/'); }}
+                    className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded hover:bg-neutral-50" title="로그아웃">
+                    <LogOut className="h-4 w-4" />
+                </button>
+
                 {/* 퍼블릭 사이트로 나가기 */}
                 <Link href="/" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50" title="퍼블릭 사이트로 나가기">
                     <PortalIcon direction="exit" size={36} />

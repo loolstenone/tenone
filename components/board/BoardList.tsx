@@ -106,7 +106,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         onClick={() => handleCategoryChange("")}
                         className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                             category === ""
-                                ? "font-semibold border-current"
+                                ? "font-semibold border-current bg-white/5"
                                 : "border-transparent hover:opacity-70"
                         }`}
                         style={category === "" ? { color: accentColor || '#fff' } : { color: 'var(--tn-text-muted, #999)' }}
@@ -119,7 +119,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                             onClick={() => handleCategoryChange(cat)}
                             className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 transition-colors ${
                                 category === cat
-                                    ? "font-semibold border-current"
+                                    ? "font-semibold border-current bg-white/5"
                                     : "border-transparent hover:opacity-70"
                             }`}
                             style={category === cat ? { color: accentColor || '#fff' } : { color: 'var(--tn-text-muted, #999)' }}
@@ -185,7 +185,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <select
                             value={sort}
                             onChange={(e) => { setSort(e.target.value as SortOption); setPage(1); }}
-                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-transparent text-neutral-200"
+                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-neutral-900 text-neutral-200"
                         >
                             {Object.entries(sortLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
@@ -197,7 +197,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         <select
                             value={period}
                             onChange={(e) => { setPeriod(e.target.value as PeriodOption); setPage(1); }}
-                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-transparent text-neutral-200"
+                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-neutral-900 text-neutral-200"
                         >
                             {Object.entries(periodLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
