@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink } from "lucide-react";
+import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink, Zap, Globe, Layers } from "lucide-react";
 
 const businesses = [
     { id: "madleague", name: "MADLeague", role: "전국 대학생 동아리 연합", tags: ["wio", "yio"],
@@ -28,7 +28,7 @@ const businesses = [
     { id: "evschool", name: "Evolution School", role: "직무 교육", tags: ["yio", "rev", "edu"],
         wio: ["LMS 플랫폼", "수강 관리·수료증", "온라인 강의 시스템"],
         yio: ["Badak 멘토→강사", "커리큘럼 팀", "코호트 운영"],
-        syn: "Badak 멘토를 강사로. WIO LMS로 운영 자동화. HeRo 연계로 수료생 기업 연결.", href: "#" },
+        syn: "Badak 멘토를 강사로. WIO LMS로 운영 자동화. HeRo 연계로 수료생 기업 연결.", href: "/evschool" },
     { id: "planners", name: "Planner's", role: "기획 도구·교육", tags: ["wio", "edu"],
         wio: ["Vrief·GPR 디지털 도구", "템플릿 시스템", "플래너 앱"],
         yio: ["기획 워크숍 퍼실리테이터", "MADLeague 강의"],
@@ -36,7 +36,7 @@ const businesses = [
     { id: "brandgravity", name: "Brand Gravity", role: "브랜딩 컨설팅", tags: ["yio", "rev"],
         wio: ["Mindle 트렌드 데이터 활용", "브랜드 자산 관리"],
         yio: ["컨설턴트 팀(YouInOne)", "Badak 전문가 네트워크"],
-        syn: "Mindle 트렌드 기반 브랜딩. SmarComm과 마케팅+브랜딩 풀패키지.", href: "#" },
+        syn: "Mindle 트렌드 기반 브랜딩. SmarComm과 마케팅+브랜딩 풀패키지.", href: "/brandgravity" },
     { id: "rook", name: "RooK", role: "AI 크리에이티브", tags: ["wio", "rev"],
         wio: ["AI 콘텐츠 생산 파이프라인", "Claude API 연동"],
         yio: ["크리에이터 크루", "MoNTZ 연계"],
@@ -78,6 +78,34 @@ export default function UniversePage() {
     return (
         <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
             <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
+
+                {/* Vision */}
+                <section className="mb-20">
+                    <p className="text-xs tracking-[0.3em] uppercase mb-6" style={{ color: "var(--tn-text-sub)" }}>
+                        Ten:One&trade; Universe
+                    </p>
+                    <h1 className="text-3xl sm:text-4xl font-light tracking-tight leading-snug mb-6">
+                        가치로 연결된<br />하나의 거대한 세계관
+                    </h1>
+                    <p className="text-sm leading-relaxed max-w-xl" style={{ color: "var(--tn-text-sub)" }}>
+                        사람, 돈, 시간 &mdash; 세 가지 자원을 기준으로 모든 사업이 연결됩니다.
+                        각 브랜드는 독립적으로 작동하되, WIO와 YouInOne이라는 두 인프라 위에서 시너지를 만듭니다.
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-px mt-10" style={{ backgroundColor: "var(--tn-border)" }}>
+                        {[
+                            { icon: Users, label: "사람", desc: "누가, 몇 명, 어떤 역할" },
+                            { icon: Layers, label: "돈", desc: "얼마, 수익, 비용, 정산" },
+                            { icon: Zap, label: "시간", desc: "언제까지, 몇 시간, 일정" },
+                        ].map(r => (
+                            <div key={r.label} className="p-5 text-center" style={{ backgroundColor: "var(--tn-bg)" }}>
+                                <r.icon className="w-4 h-4 mx-auto mb-2 opacity-50" />
+                                <div className="text-sm font-light">{r.label}</div>
+                                <div className="text-[10px] mt-1" style={{ color: "var(--tn-text-sub)" }}>{r.desc}</div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 {/* Hub */}
                 <section className="text-center mb-10">
@@ -191,12 +219,18 @@ export default function UniversePage() {
                 </section>
 
                 {/* CTA */}
-                <section className="text-center">
+                <section className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Link href="/about"
                         className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide transition-colors"
                         style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                        Philosophy &middot; History &middot; Brands
+                        Philosophy &middot; History
                         <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link href="/brands"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-colors hover:opacity-80"
+                        style={{ borderColor: "var(--tn-border)", color: "var(--tn-text)" }}>
+                        <Globe className="w-4 h-4" />
+                        전체 브랜드 보기
                     </Link>
                 </section>
             </div>

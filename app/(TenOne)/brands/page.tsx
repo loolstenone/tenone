@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { brands } from "@/lib/data";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowRight } from "lucide-react";
 
 const categories = ['All', 'Corporate', 'Community', 'Project Group', 'Startup', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Content'];
 
@@ -70,10 +71,17 @@ export default function BrandsPage() {
                             </div>
 
                             {brand.websiteUrl && (
-                                <a href={brand.websiteUrl} target="_blank" rel="noopener noreferrer"
-                                    className="mt-3 inline-flex items-center gap-1 text-xs hover:opacity-70 transition" style={{ color: "var(--tn-text-sub)" }}>
-                                    Visit <ExternalLink className="h-3 w-3" />
-                                </a>
+                                brand.websiteUrl.startsWith('/') ? (
+                                    <Link href={brand.websiteUrl}
+                                        className="mt-3 inline-flex items-center gap-1 text-xs hover:opacity-70 transition" style={{ color: "var(--tn-text-sub)" }}>
+                                        Visit <ArrowRight className="h-3 w-3" />
+                                    </Link>
+                                ) : (
+                                    <a href={brand.websiteUrl} target="_blank" rel="noopener noreferrer"
+                                        className="mt-3 inline-flex items-center gap-1 text-xs hover:opacity-70 transition" style={{ color: "var(--tn-text-sub)" }}>
+                                        Visit <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                )
                             )}
                         </div>
                     ))}

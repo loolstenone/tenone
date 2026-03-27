@@ -20,8 +20,8 @@ const publicNav = [
         name: "About", href: "/about",
         sub: [
             { name: "Philosophy", href: "/about?tab=philosophy" },
-            { name: "Universe Structure", href: "/universe" },
-            { name: "Brands", href: "/about?tab=brands" },
+            { name: "Universe", href: "/universe" },
+            { name: "Brands", href: "/brands" },
             { name: "History", href: "/about?tab=history" },
         ]
     },
@@ -80,7 +80,7 @@ export function PublicHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
                     <ThemeToggle />
-                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: canAccessIntra ? '/intra' : undefined, workspaceLabel: 'INTRA', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
+                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
                 </div>
 
                 {/* Mobile menu button */}

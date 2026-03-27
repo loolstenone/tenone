@@ -67,9 +67,9 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
         <>
             {/* Utility items */}
             <div className="flex items-center gap-4">
-                {/* About */}
-                <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                    ABOUT
+                {/* 인트라 입구 (항상 표시) */}
+                <Link href="/intra" className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                    INTRA
                 </Link>
 
                 {isAuthenticated ? (
