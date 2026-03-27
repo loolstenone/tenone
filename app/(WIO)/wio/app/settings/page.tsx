@@ -81,7 +81,7 @@ export default function SettingsPage() {
   // ── 일반 설정 저장 ──
   async function saveGeneral() {
     setSaving(true);
-    const ok = await updateTenant(tenant.id, { name: editName, serviceName: editServiceName, domain: editDomain || null } as any);
+    const ok = await updateTenant(tenant!.id, { name: editName, serviceName: editServiceName, domain: editDomain || null } as any);
     setSaving(false);
     if (ok) { showToast('저장되었습니다'); refreshTenant?.(); }
     else showToast('저장 실패');
@@ -91,7 +91,7 @@ export default function SettingsPage() {
   async function handleInvite() {
     if (!inviteEmail) return;
     setInviting(true);
-    const m = await inviteMember(tenant.id, inviteEmail, inviteRole);
+    const m = await inviteMember(tenant!.id, inviteEmail, inviteRole);
     setInviting(false);
     if (m) { setMembers(prev => [...prev, m]); setInviteEmail(''); showToast('초대 완료'); }
     else showToast('초대 실패 — 가입된 이메일인지 확인하세요');
@@ -111,16 +111,16 @@ export default function SettingsPage() {
 
   // ── 모듈 토글 ──
   async function toggleModule(mod: WIOModule) {
-    const current = tenant.modules || [];
+    const current = tenant!.modules || [];
     const next = current.includes(mod) ? current.filter(m => m !== mod) : [...current, mod];
-    const ok = await updateTenant(tenant.id, { modules: next } as any);
+    const ok = await updateTenant(tenant!.id, { modules: next } as any);
     if (ok) { showToast(`${MODULE_LABELS[mod]} ${next.includes(mod) ? '활성화' : '비활성화'}`); refreshTenant?.(); }
   }
 
   // ── 브랜딩 저장 ──
   async function saveBranding() {
     setSaving(true);
-    const ok = await updateTenant(tenant.id, { primaryColor: editColor, poweredBy: editPoweredBy } as any);
+    const ok = await updateTenant(tenant!.id, { primaryColor: editColor, poweredBy: editPoweredBy } as any);
     setSaving(false);
     if (ok) { showToast('브랜딩 저장됨'); refreshTenant?.(); }
     else showToast('저장 실패');

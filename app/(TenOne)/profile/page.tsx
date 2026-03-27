@@ -178,7 +178,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div>
                                     <label className={labelClass}>브랜드 접근</label>
-                                    <input value={user.brandAccess.join(', ') || '없음'} disabled className={disabledClass} />
+                                    <input value={user.brandAccess?.join(', ') || '없음'} disabled className={disabledClass} />
                                 </div>
                             </div>
                         </div>

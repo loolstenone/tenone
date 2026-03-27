@@ -62,7 +62,7 @@ export function StarfieldPortal({ isAuthenticated }: { isAuthenticated: boolean 
         let portalRadius = 0;
         let ringPulse = 0;
 
-        function spawnParticle() {
+        const spawnParticle = () => {
             // 화면 위/좌/우에서 랜덤 생성
             const side = Math.random();
             let x: number, y: number;
@@ -82,7 +82,7 @@ export function StarfieldPortal({ isAuthenticated }: { isAuthenticated: boolean 
             });
         }
 
-        function animate() {
+        const animate = () => {
             if (!ctx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             frameRef.current++;

@@ -10,6 +10,8 @@ const permissionAccess: Record<AccountType, LibraryPermission[]> = {
     staff: ['all', 'partner', 'staff', 'admin'],
     partner: ['all', 'partner'],
     'junior-partner': ['all', 'partner'],
+    alliance: ['all', 'partner'],
+    madleaguer: ['all'],
     crew: ['all'],
     member: ['all'],
 };

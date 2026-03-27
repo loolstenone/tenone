@@ -1,7 +1,7 @@
 export type UserRole = 'Admin' | 'Manager' | 'Editor' | 'Viewer' | 'Member';
 
 // 회원 유형 (v2)
-export type AccountType = 'staff' | 'partner' | 'alliance' | 'madleaguer' | 'crew' | 'member';
+export type AccountType = 'staff' | 'partner' | 'junior-partner' | 'alliance' | 'madleaguer' | 'crew' | 'member';
 
 // ERP 세부 시스템 접근
 export type SystemAccess = 'project' | 'erp-hr' | 'erp-people' | 'erp-finance' | 'erp-sales' | 'erp-admin' | 'marketing' | 'wiki';
@@ -44,6 +44,7 @@ export const IntraModuleInfo: Record<IntraModule, { label: string; description: 
 export const defaultModuleAccess: Record<AccountType, IntraModule[]> = {
     staff: ['myverse', 'townity', 'project', 'hero', 'evolution', 'smarcomm', 'wiki', 'erp', 'vridge', 'bums'],
     partner: ['myverse', 'townity', 'project', 'hero', 'evolution', 'wiki'],
+    'junior-partner': ['myverse', 'townity', 'hero', 'evolution'],
     alliance: ['myverse', 'townity', 'hero', 'evolution'],
     madleaguer: ['myverse', 'townity', 'project', 'hero', 'evolution', 'wiki'],
     crew: ['myverse', 'townity', 'project', 'hero', 'evolution', 'wiki'],
@@ -59,19 +60,19 @@ export interface User {
     email: string;
     role: UserRole;
     accountType: AccountType;
-    primaryType: string;
+    primaryType?: string;
     avatarInitials: string;
 
     // 역할 & 소속
-    roles: string[];             // ['staff'], ['crew', 'madleaguer'] 등
-    affiliations: string[];      // ['madleague', 'badak'] 등 소속
-    originSite: string;          // 가입 경로 사이트
+    roles?: string[];             // ['staff'], ['crew', 'madleaguer'] 등
+    affiliations?: string[];      // ['madleague', 'badak'] 등 소속
+    originSite?: string;          // 가입 경로 사이트
 
     // 접근 권한
-    intraAccess: boolean;        // 인트라 접근 가능 여부
-    moduleAccess: IntraModule[]; // DB 기반 모듈 접근 목록
-    systemAccess: SystemAccess[];// ERP 세부 권한
-    brandAccess: string[];       // 브랜드별 접근
+    intraAccess?: boolean;        // 인트라 접근 가능 여부
+    moduleAccess?: IntraModule[]; // DB 기반 모듈 접근 목록
+    systemAccess?: SystemAccess[];// ERP 세부 권한
+    brandAccess?: string[];       // 브랜드별 접근
 
     // 프로필
     company?: string;

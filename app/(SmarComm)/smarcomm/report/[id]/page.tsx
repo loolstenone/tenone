@@ -66,6 +66,9 @@ interface ScanData {
   performanceScore?: number;
   performance?: { score: number; lcp: number; cls: number; tbt: number; fcp: number; si: number };
   topIssues: { severity: string; title: string; description: string; action: string }[];
+  pageSpeedData?: boolean;
+  subPages?: { url: string; title: string; issues: { title: string; severity: string }[] }[];
+  pagesAnalyzed?: number;
   deep?: {
     keywords: { keyword: string; relevance: string; found: boolean; suggestion: string }[];
     contentGaps: { topic: string; reason: string; priority: string; suggestedFormat: string }[];

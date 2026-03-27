@@ -11,8 +11,14 @@ import {
   Rocket, PieChart, Wrench, ListChecks, Shield,
   Workflow, KanbanSquare, FolderKanban, Zap
 } from 'lucide-react';
-import { useContext } from 'react';
-import { SCSidebarContext } from '@/app/(SmarComm)/sc/dashboard/layout';
+import { createContext, useContext } from 'react';
+
+export const SCSidebarContext = createContext({
+  collapsed: false,
+  setCollapsed: (_v: boolean) => {},
+  mobileExpanded: false,
+  setMobileExpanded: (_v: boolean) => {},
+});
 
 const MENU_SECTIONS = [
   {

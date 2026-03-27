@@ -1,4 +1,4 @@
-export type BrandCategory = 'AI Idol' | 'AI Creator' | 'Community' | 'Project Group' | 'Fashion' | 'Character' | 'Corporate' | 'Startup' | 'Content';
+export type BrandCategory = 'AI Idol' | 'AI Creator' | 'Community' | 'Project Group' | 'Fashion' | 'Character' | 'Corporate' | 'Startup' | 'Content' | 'Marketing' | 'Consulting' | 'Education' | 'Platform' | 'Network' | 'Wellness';
 
 export interface Brand {
     id: string;

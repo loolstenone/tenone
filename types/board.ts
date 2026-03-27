@@ -11,7 +11,8 @@ export type SiteCode =
     | 'fwn'
     | 'badak'
     | 'hero'
-    | 'ogamja';
+    | 'ogamja'
+    | 'changeup';
 
 // ── 게시판 설정 ──
 

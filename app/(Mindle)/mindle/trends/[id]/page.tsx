@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, Eye, Bookmark, Share2, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Bookmark, Share2, ChevronRight, Tag, ThumbsUp, MessageCircle } from "lucide-react";
 import { findArticle, statusBadge, trends } from "@/lib/mindle/trend-data";
 
 export default function TrendDetailPage() {
@@ -61,6 +61,16 @@ export default function TrendDetailPage() {
                     </div>
                 </div>
 
+                {/* Tags */}
+                <div className="flex items-center gap-2 mb-6 flex-wrap">
+                    <Tag className="w-3 h-3 text-neutral-600" />
+                    {[article.category, ...(article.status === 'trending' ? ['Hot Topic'] : []), 'Mindle Pick'].map(tag => (
+                        <span key={tag} className="text-[10px] px-2.5 py-1 bg-neutral-900 border border-neutral-800 rounded-full text-neutral-400 hover:border-[#F5C518]/30 hover:text-[#F5C518] transition-colors cursor-pointer">
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
+
                 <div className="border-t border-neutral-800/50 mb-8" />
 
                 {/* Content */}
@@ -83,6 +93,26 @@ export default function TrendDetailPage() {
                                   dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }} />;
                     })}
                 </article>
+
+                {/* Reaction Bar */}
+                <div className="flex items-center justify-between py-4 px-5 bg-neutral-900/50 border border-neutral-800/50 rounded-xl mb-10">
+                    <div className="flex items-center gap-4">
+                        <button className="flex items-center gap-1.5 text-neutral-400 hover:text-[#F5C518] transition-colors text-sm">
+                            <ThumbsUp className="w-4 h-4" /> 유용해요 <span className="text-neutral-600 text-xs">24</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition-colors text-sm">
+                            <MessageCircle className="w-4 h-4" /> 의견 <span className="text-neutral-600 text-xs">3</span>
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button className="p-2 text-neutral-500 hover:text-[#F5C518] transition-colors" title="Bookmark">
+                            <Bookmark className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-neutral-500 hover:text-white transition-colors" title="Share">
+                            <Share2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
 
                 {/* Related */}
                 {related.length > 0 && (

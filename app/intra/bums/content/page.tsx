@@ -80,8 +80,8 @@ export default function ContentManagementPage() {
                 const sites = [...new Set((configData.configs || []).map((c: ConfigRow) => c.site))];
                 const allPosts: PostRow[] = [];
                 await Promise.all(
-                    sites.map(async (site: string) => {
-                        const res = await fetch(`/api/board/posts?site=${site}&limit=500`);
+                    sites.map(async (site: unknown) => {
+                        const res = await fetch(`/api/board/posts?site=${site as string}&limit=500`);
                         if (res.ok) {
                             const d = await res.json();
                             allPosts.push(...(d.posts || []));

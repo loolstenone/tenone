@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'mindle' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio';
 
 // 인증 전용 도메인 (OAuth redirect를 여기로 통일)
 export const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
@@ -76,9 +76,9 @@ export interface SiteConfig {
         kakao: boolean;
     };
     // 사이트별 네비게이션 메뉴
-    nav: NavItem[];
+    nav?: NavItem[];
     // 사이트별 푸터 퀵링크
-    footerLinks: FooterLink[];
+    footerLinks?: FooterLink[];
     // 사이트별 연락처
     contact?: {
         email?: string;

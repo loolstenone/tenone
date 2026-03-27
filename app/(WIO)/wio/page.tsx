@@ -135,15 +135,89 @@ export default function WIOHome() {
         </div>
       </section>
 
+      {/* Getting Started — 풀링포레스트 참고 */}
+      <section className="py-20 px-6">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <p className="text-xs tracking-[0.2em] uppercase text-slate-500 mb-3">Getting Started</p>
+            <h2 className="text-3xl font-bold mb-3">프로젝트의 의사결정,<br />WIO가 함께합니다</h2>
+            <p className="text-slate-400 text-sm">구체적인 기획이 없어도 괜찮습니다.<br />상담부터 제안까지, 실현 가능한 방향으로 정리해 드립니다.</p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { step: '01', tag: 'CONTACT', title: '상담 접수', client: '전화·이메일·문의 폼으로 연락', wio: '접수 확인 및 담당자 배정' },
+              { step: '02', tag: 'REVIEW', title: '프로젝트 검토', client: '요구사항·아이디어 공유', wio: '유선·미팅으로 기술 실현 가능성 분석' },
+              { step: '03', tag: 'PROPOSAL', title: '제안서 전달', client: '제안서 수령 및 내부 검토', wio: '범위·일정·기술 스택 맞춤 제안서 작성' },
+              { step: '04', tag: 'KICKOFF', title: '프로젝트 착수', client: 'PoC·견적 확정', wio: 'PoC 범위·견적 확정 → 프로젝트 시작' },
+            ].map(s => (
+              <div key={s.step} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                <div className="text-3xl font-extralight text-white/10 mb-2">{s.step}</div>
+                <p className="text-[10px] tracking-[0.15em] uppercase text-indigo-400 mb-1">{s.tag}</p>
+                <h3 className="text-sm font-bold text-white mb-3">{s.title}</h3>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-[9px] text-slate-600 uppercase">고객</p>
+                    <p className="text-xs text-slate-400">{s.client}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-indigo-400/60 uppercase">WIO</p>
+                    <p className="text-xs text-slate-400">{s.wio}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 자체 도구 — 풀링포레스트 P-Grid/P-Canvas 참고 */}
+      <section className="py-20 px-6 bg-white/[0.02]">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <p className="text-xs tracking-[0.2em] uppercase text-slate-500 mb-3">Our Tools</p>
+            <h2 className="text-3xl font-bold mb-3">WIO 자체 도구로 운영합니다</h2>
+            <p className="text-slate-400 text-sm">프로젝트 관리부터 실시간 대시보드까지, WIO가 직접 구축한 도구를 사용합니다.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { name: 'W-Board', icon: Layers, desc: '프로젝트·타임시트·결재를 하나의 보드에서 관리하여, 모든 흐름을 한눈에 파악할 수 있습니다.', tags: ['Web', 'Mobile'] },
+              { name: 'W-Insight', icon: BarChart3, desc: '경영 현황을 실시간으로 확인할 수 있는 대시보드. 사업·프로젝트·인재 성과를 통합 분석합니다.', tags: ['Web', 'API'] },
+              { name: 'W-Shield', icon: Shield, desc: '멀티테넌트 RLS 기반 보안. 브랜드별 데이터 격리와 역할 기반 접근 제어를 자동 적용합니다.', tags: ['Security', 'RLS'] },
+            ].map(tool => {
+              const Icon = tool.icon;
+              return (
+                <div key={tool.name} className="rounded-xl border border-white/5 bg-white/[0.03] p-6 hover:border-indigo-500/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Icon size={18} className="text-indigo-400" />
+                    <h3 className="text-sm font-bold text-white italic">{tool.name}</h3>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">{tool.desc}</p>
+                  <div className="flex gap-2">
+                    {tool.tags.map(tag => (
+                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded border border-white/10 text-slate-500">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-6 bg-gradient-to-b from-indigo-900/10 to-transparent">
         <div className="mx-auto max-w-lg text-center">
           <Shield size={32} className="mx-auto mb-4 text-indigo-400" />
           <h2 className="text-2xl font-bold mb-3">구축 상담 받기</h2>
           <p className="text-sm text-slate-400 mb-6">귀사에 맞는 솔루션 구성과 도입 일정을 안내해드립니다.</p>
-          <Link href="/wio/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
-            상담 신청 <ArrowRight size={16} />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/wio/contact" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors">
+              상담 신청 <ArrowRight size={16} />
+            </Link>
+            <Link href="/wio/app" className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-8 py-3.5 text-sm font-medium text-slate-300 hover:bg-white/5 transition-colors">
+              데모 체험하기
+            </Link>
+          </div>
         </div>
       </section>
 

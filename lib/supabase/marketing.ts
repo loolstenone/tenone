@@ -195,10 +195,10 @@ export async function fetchMarketingStats() {
 
   return {
     totalCampaigns: campaignData.length,
-    activeCampaigns: campaignData.filter(c => c.status === 'Active').length,
+    activeCampaigns: campaignData.filter((c: any) => c.status === 'Active').length,
     totalLeads: leadData.length,
-    pipelineValue: leadData.reduce((sum, l) => sum + (Number(l.value) || 0), 0),
-    wonLeads: leadData.filter(l => l.stage === 'Won').length,
+    pipelineValue: leadData.reduce((sum: number, l: any) => sum + (Number(l.value) || 0), 0),
+    wonLeads: leadData.filter((l: any) => l.stage === 'Won').length,
     totalContent: (content.data || []).length,
   };
 }

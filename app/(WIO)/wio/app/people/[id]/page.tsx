@@ -18,7 +18,7 @@ export default function PeopleDetailPage() {
   useEffect(() => {
     if (!id) return;
     const sb = createClient();
-    sb.from('wio_members').select('*').eq('id', id).single().then(async ({ data }) => {
+    sb.from('wio_members').select('*').eq('id', id).single().then(async ({ data }: { data: Record<string, unknown> | null }) => {
       if (data) {
         const camel: any = {};
         Object.entries(data).forEach(([k, v]) => {

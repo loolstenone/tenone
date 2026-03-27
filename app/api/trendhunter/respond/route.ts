@@ -70,16 +70,18 @@ export async function POST(request: NextRequest) {
         const tokensUsed = (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0);
 
         // 응답 로그 저장
-        await supabase.from('bot_responses').insert({
-            room: topic,
-            topic,
-            sender: sender || 'unknown',
-            query,
-            response: answer,
-            model: 'claude-sonnet-4-20250514',
-            tokens_used: tokensUsed,
-            response_time_ms: responseTime,
-        }).catch(() => {});
+        try {
+            await supabase.from('bot_responses').insert({
+                room: topic,
+                topic,
+                sender: sender || 'unknown',
+                query,
+                response: answer,
+                model: 'claude-sonnet-4-20250514',
+                tokens_used: tokensUsed,
+                response_time_ms: responseTime,
+            });
+        } catch { /* ignore logging errors */ }
 
         return NextResponse.json({ answer, tokens: tokensUsed, time_ms: responseTime });
     } catch (err) {

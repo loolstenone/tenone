@@ -5,7 +5,7 @@ import Link from "next/link";
 import { brands } from "@/lib/data";
 import { ExternalLink, ArrowRight } from "lucide-react";
 
-const categories = ['All', 'Corporate', 'Community', 'Project Group', 'Startup', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Content'];
+const categories = ['All', 'Corporate', 'Platform', 'Marketing', 'Consulting', 'Education', 'Community', 'Project Group', 'Network', 'Content', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Startup', 'Wellness'];
 
 const statusColor: Record<string, string> = {
     Active: 'bg-emerald-500/10 text-emerald-400',

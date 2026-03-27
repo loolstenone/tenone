@@ -251,7 +251,7 @@ function LoginForm() {
                         </div>
                     </div>
 
-                    <p className="text-center text-xs text-neutral-600 mt-8">&copy; {new Date().getFullYear()} MAD League. Powered by Ten:One™</p>
+                    <p className="text-center text-xs text-neutral-600 mt-8">&copy; {new Date().getFullYear()} Ten:One&trade; Universe.</p>
                 </div>
             </div>
         );

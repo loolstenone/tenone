@@ -4,7 +4,7 @@
  */
 import { createClient as createBrowserClient } from '@supabase/supabase-js';
 import type {
-    Post, Comment, Attachment, BoardConfig, BoardSettings,
+    Post, Comment, Attachment, BoardConfig,
     PostListParams, PostListResponse,
     CreatePostInput, UpdatePostInput, CreateCommentInput,
     SiteCode,
@@ -43,7 +43,7 @@ function toPost(row: Record<string, unknown>): Post {
 function toComment(row: Record<string, unknown>): Comment {
     const c = snakeToCamel(row) as unknown as Comment;
     // guestPassword는 응답에서 제거
-    delete (c as Record<string, unknown>).guestPassword;
+    delete (c as unknown as Record<string, unknown>).guestPassword;
     return c;
 }
 
@@ -123,8 +123,9 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
             case 'week': from = new Date(now.setDate(now.getDate() - 7)); break;
             case 'month': from = new Date(now.setMonth(now.getMonth() - 1)); break;
             case 'year': from = new Date(now.setFullYear(now.getFullYear() - 1)); break;
+            default: from = new Date(now.setDate(now.getDate() - 7)); break;
         }
-        query = query.gte('created_at', from!.toISOString());
+        query = query.gte('created_at', from.toISOString());
     }
 
     // 정렬 (공지 우선)
@@ -411,7 +412,7 @@ export async function fetchBookmarks(userId: string, page = 1, limit = 12): Prom
     const posts = (data || [])
         .map(row => row.posts)
         .filter(Boolean)
-        .map(p => toPost(p as Record<string, unknown>));
+        .map(p => toPost(p as unknown as Record<string, unknown>));
 
     return { posts, total, page, limit, totalPages: Math.ceil(total / limit) };
 }

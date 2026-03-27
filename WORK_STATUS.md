@@ -1,68 +1,72 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-27 (집) — 작업 종료
+> 마지막 업데이트: 2026-03-27 (사무실) — 작업 종료
 
-## 오늘 한 작업 (3/27 집)
+## 오늘 한 작업 (3/27 사무실)
 
-### 1. 전 사이트 분석 ✅
-- TenOne, WIO, SmarComm, Mindle, 기타 브랜드 전체 품질 감사
-- 인증 UX 감사 (23개 이슈 발견)
-- 페이지 성능 감사 (로딩, 에러 바운더리, 이미지 등)
+### 1. Supabase DB 마이그레이션 ✅
+- SQL Editor에서 001_brands_and_profiles.sql 실행 (brands 23개 + profiles + RLS)
+- SQL Editor에서 002_talk_comments_likes.sql 실행 (wio_comments, wio_likes, wio_bookmarks + RLS)
+- 테이블 생성 및 데이터 입력 검증 완료
 
-### 2. 문서 대정리 ✅
-- WIO_Master_Architecture.md — 19개 PART 완전 설계서 (단일 진실 소스)
-- 기존 WIO 문서 6개 삭제 (Vision, MASTER_PLAN, MODULE_MAP 등 통합)
-- REVENUE_MODEL.md — 10개 서비스별 독립 수익 모델
-- 가격 확정: Free(0) → Starter(4.9만) → Pro(14.9만) → Business(39.9만) → Enterprise
-- CLAUDE.md 업데이트 (Master Architecture 최우선 참조)
+### 2. TenOne Universe 페이지 고도화 ✅
+- 통계 섹션 추가 (23 브랜드, 14 WIO 모듈, 3 핵심 자원, ∞ 시너지)
+- 사업 포트폴리오 9개 → 12개 (NamingFactory, ChangeUp, 0gamja 추가)
+- Coming Soon 섹션 (8개 준비중 브랜드: domo, FWN, MoNTZ, Myverse 등)
+- 시너지 체인 설명 텍스트 강화
+- WIO 체험하기 CTA 버튼 추가
 
-### 3. 0순위 인프라 ✅
-- window.location.reload() 전부 제거 → React router 전환 (11개 파일)
-- 비밀번호 재설정 플로우 (/reset-password + auth-context)
-- 크로스탭 세션 동기화 (storage 이벤트)
-- 헤더 로딩 깜빡임 수정 (isLoading 타이밍)
-- Supabase brands 테이블 + RLS + 23개 브랜드 초기 데이터
-- middleware Supabase 세션 갱신 추가 (Google 로그인 유지)
+### 3. Mindle 개선 ✅
+- MY 페이지: 활동 통계 카드 (조회/저장/알림/이번주 읽음)
+- 상세 페이지: 태그 시스템 (#AI/Tech, #Hot Topic, #Mindle Pick)
+- 상세 페이지: 반응 바 (유용해요/의견/북마크/공유)
 
-### 4. WIO 11개 모듈 고도화 ✅
-- Home: 스켈레톤, Principle, 빠른 액션, 빈 상태 가이드
-- Talk: 상세 페이지, 댓글 2depth, 좋아요, 북마크, 검색, DB 마이그레이션
-- People: 상세 프로필, 역할 필터, 초대, 검색
-- Project: Job 추가/토글, 스켈레톤, 빈 상태
-- GPR: Goal→Plan→Result 신규 모듈, 레벨, 인라인 편집, 자기 평가
-- Learn: 카테고리 필터, 검색, 통계
-- Timesheet + Finance: 스켈레톤, 빈 상태 통일
-- Insight: 드릴다운, 스택바 차트
-- Sales: 빈 상태 가이드
-- Wiki + Content: 스켈레톤, 빈 상태 가이드
+### 4. 브랜드 데이터 대규모 확장 ✅
+- lib/data.ts 브랜드 10개 → 22개 (SmarComm, WIO, Mindle, EvoSchool, Planners, BrandGravity, NamingFactory, ChangeUp, domo, MoNTZ, Myverse, Seoul360)
+- types/brand.ts 카테고리 타입 확장 (Marketing, Consulting, Education, Platform, Network, Wellness)
+- Brands 페이지 카테고리 필터 업데이트
 
-### 5. 전 사이트 UI 통일 ✅
-- UniverseUtilityBar 23개 헤더 전체 적용 (WIO, SmarComm, TenOne 포함)
-- 푸터 통일: © [Brand]. Powered by Ten:One™ Universe. (언더라인 제거)
-- LoginModal → createPortal(document.body) 수정
-- isLoading 대기 제거 — 항상 LOG IN/JOIN 표시
-- 통합 로그인 페이지 (SmarComm 전용 → Ten:One Universe)
-- WIO 데모 모드 (비로그인도 앱 체험 가능)
+### 5. WIO 모바일 반응형 수정 ✅
+- 사이드바: 모바일에서 기본 숨김 → 햄버거 토글로 오버레이 오픈
+- 모바일 헤더 추가 (☰ + 타이틀 바)
+- 경로 변경 시 자동 닫기
+- usePathname으로 안전한 경로 감지
 
-### 6. 배포 ✅
-- Vercel 프로덕션 배포 완료 (tenone.biz 라이브)
+### 6. TypeScript 에러 72개 → 0개 ✅
+- 4개 에이전트 병렬 수정 (WIO, lib, components, app)
+- 주요 수정: JobStatus 'completed'→'done', tenant null check, SiteCode 'changeup' 추가
+- StarfieldPortal function→arrow 변환, SmarCommSidebar context 로컬 정의
+- auth types 확장 (junior-partner, optional v2 fields)
+- 프로덕션 빌드(npm run build) 성공 확인
+
+### 7. 텍스트/버튼 일관성 ✅
+- 로그인 페이지: "MAD League" → "Ten:One™ Universe" 수정
+- 전 사이트 푸터 "© [Brand]. Powered by Ten:One™ Universe." 통일 확인
+- UniverseUtilityBar LOG IN/JOIN 통일 확인
+
+### 8. 브랜드 랜딩 3개 신규 생성 ✅
+- Brand Gravity: 다크 테마, 앰버 액센트, 서비스 카드 4개, Universe 연동 CTA
+- Naming Factory: 화이트 테마, 바이올렛 액센트, 4단계 프로세스, 무료 샘플 CTA
+- Evolution School: 다크 네이비, 시안 액센트, 과정 리스트 6개, 교육→커리어 파이프라인
+
+### 9. WIO 랜딩 고도화 (진행중) 🔧
+- Getting Started 섹션 추가 (풀링포레스트 참고: 4단계 고객/WIO 구분)
+- 자체 도구 섹션 추가 (W-Board, W-Insight, W-Shield)
+- SmarComm 랜딩도 개선 예정 (미완료)
 
 ---
 
 ## 다음 할 일
 
-### 즉시 (DB 설정)
-- Supabase SQL Editor에서 마이그레이션 실행:
-  - `supabase/migrations/001_brands_and_profiles.sql`
-  - `supabase/migrations/002_talk_comments_likes.sql`
-- 실 데이터로 WIO 각 모듈 테스트
+### 즉시 (이어서)
+- SmarComm 랜딩 페이지 고도화 (풀링포레스트 참고: 프로세스 카드, PoC 섹션)
+- WIO 랜딩 완성 확인 (브라우저 테스트)
+- Vercel 배포
 
 ### 단기
-- TenOne 퍼블릭 고도화 (Universe 페이지 콘텐츠, 히어로 이미지, 링크 정리)
-- SmarComm 대시보드 개발중 페이지 정리
-- Mindle MY 페이지 실 기능 구현 (저장 트렌드, 알림, 관심사)
-- Mindle 아티클/리포트 상세 페이지
-- 각 브랜드 사이트 콘텐츠 채우기
+- 각 브랜드 사이트 콘텐츠 보강 (히어로 이미지, 텍스트)
+- SmarComm 비로그인 랜딩 실제 솔루션 소개로 개선
+- 모바일 반응형 나머지 점검 (Intra 사이드바, SmarComm 대시보드)
 
 ### 중기 (Phase 2)
 - Competition 모듈 (MADLeague 경연)
@@ -79,6 +83,13 @@
 - B2B SaaS 얼리어답터 모집
 
 ---
+
+## 참고 사이트
+- 풀링포레스트 (https://www.pooolingforest.com/) — WIO/SmarComm 랜딩 디자인 참고
+  - 프로세스 단계: 고객/회사 역할 구분 카드
+  - 자체 도구 소개: P-Grid, P-Canvas, P-Shield 앱 UI 목업
+  - 무료 PoC 제안 섹션
+  - 다크 모노톤 + 시안 액센트
 
 ## 핵심 문서 참조 순서
 1. `CLAUDE.md` — 개발 규칙

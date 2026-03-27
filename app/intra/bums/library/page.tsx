@@ -5,7 +5,7 @@ import { Plus, Search, Star, X, Upload, File, Image, FileText, Film, Link2, Tras
 import { useLibrary } from "@/lib/library-context";
 import { useAuth } from "@/lib/auth-context";
 import { libraryCategoryOptions, formatBadgeColor, libraryPermissionLabels } from "@/types/library";
-import type { LibraryCategory, LibraryPermission, LibraryFormat, LibrarySource } from "@/types/library";
+import type { LibraryCategory, LibraryPermission, FileFormat, LibrarySource } from "@/types/library";
 
 const permissionBadge: Record<LibraryPermission, string> = {
     all: "bg-neutral-100 text-neutral-500",
@@ -20,9 +20,9 @@ const sourceBadge: Record<LibrarySource, { label: string; color: string }> = {
     cms: { label: 'CMS', color: 'bg-sky-50 text-sky-600' },
 };
 
-function getFormatFromFile(fileName: string): LibraryFormat {
+function getFormatFromFile(fileName: string): FileFormat {
     const ext = fileName.split('.').pop()?.toLowerCase();
-    const map: Record<string, LibraryFormat> = {
+    const map: Record<string, FileFormat> = {
         pdf: 'PDF', docx: 'DOCX', doc: 'DOCX', pptx: 'PPTX', ppt: 'PPTX',
         xlsx: 'XLSX', xls: 'XLSX', png: 'PNG', jpg: 'JPG', jpeg: 'JPG',
         mp4: 'MP4', mov: 'MP4',
@@ -60,7 +60,7 @@ export default function CmsLibraryPage() {
     const [newCat, setNewCat] = useState<LibraryCategory>("마케팅·콘텐츠");
     const [newPerm, setNewPerm] = useState<LibraryPermission>("staff");
     const [newSource, setNewSource] = useState<LibrarySource>("cms");
-    const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: number; format: LibraryFormat }[]>([]);
+    const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: number; format: FileFormat }[]>([]);
 
     // 드래그앤드롭
     const [isDragging, setIsDragging] = useState(false);

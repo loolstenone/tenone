@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-03-27 (사무실)
+
+### DB
+- Supabase SQL Editor에서 001_brands_and_profiles.sql 실행 (brands 23개 + profiles + RLS)
+- Supabase SQL Editor에서 002_talk_comments_likes.sql 실행 (wio_comments/likes/bookmarks + RLS)
+
+### 파일 변경
+- `app/(TenOne)/universe/page.tsx` — 통계 섹션, 12개 브랜드, Coming Soon, WIO CTA
+- `app/(Mindle)/mindle/my/page.tsx` — 활동 통계 카드 4개
+- `app/(Mindle)/mindle/trends/[id]/page.tsx` — 태그, 반응 바
+- `lib/data.ts` — 브랜드 10→22개 확장
+- `types/brand.ts` — 카테고리 타입 6개 추가
+- `app/(TenOne)/brands/page.tsx` — 카테고리 필터 업데이트
+- `app/(WIO)/wio/app/layout.tsx` — 모바일 반응형 사이드바 (햄버거 토글, 오버레이)
+- `app/(BrandGravity)/brandgravity/page.tsx` — 신규 생성
+- `app/(NamingFactory)/namingfactory/page.tsx` — 신규 생성
+- `app/(EvoSchool)/evschool/page.tsx` — 신규 생성
+- `app/(WIO)/wio/page.tsx` — Getting Started + 자체 도구 섹션 추가
+- `app/login/page.tsx` — "MAD League" → "Ten:One™ Universe" 수정
+- TypeScript 에러 72개 → 0개 수정 (20+ 파일)
+
+### 결정사항
+- 풀링포레스트(pooolingforest.com) 디자인 참고 → WIO/SmarComm 랜딩에 반영
+- 프로세스 단계에 고객/WIO 역할 구분 스타일 채택
+- 자체 도구 소개 섹션 (W-Board, W-Insight, W-Shield) 추가
+
+---
+
 ## 2026-03-27 (집) — WIO 전 모듈 고도화 + 인프라 대수술
 
 ### 문서

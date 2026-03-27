@@ -71,8 +71,9 @@ export default function BoardsManagementPage() {
                 const sites = [...new Set((configData.configs || []).map((c: ConfigRow) => c.site))];
                 const allPosts: PostRow[] = [];
                 await Promise.all(
-                    sites.map(async (site: string) => {
-                        const res = await fetch(`/api/board/posts?site=${site}&limit=500`);
+                    sites.map(async (site: unknown) => {
+                        const siteStr = site as string;
+                        const res = await fetch(`/api/board/posts?site=${siteStr}&limit=500`);
                         if (res.ok) {
                             const d = await res.json();
                             allPosts.push(...(d.posts || []));

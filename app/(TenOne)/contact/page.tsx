@@ -6,7 +6,7 @@ import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 
-type TabType = 'partner' | 'business';
+type TabType = 'partner' | 'business' | 'signup';
 
 function OffOniceToggle() {
     const [isOn, setIsOn] = useState(true);

@@ -349,7 +349,7 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
                             <select value={categoryId} onChange={e => setCategoryId(e.target.value)}
                                 className={inputClass + " rounded-lg"}>
                                 <option value="">선택 안함</option>
-                                {board.categories.map(c => (
+                                {board.categories.map((c: { id: string; name: string }) => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
                             </select>

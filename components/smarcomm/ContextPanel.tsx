@@ -463,16 +463,16 @@ export default function ContextPanel({ isOpen, onClose }: ContextPanelProps) {
             {panelTab === 'glossary' && (() => {
               const keywords = MENU_KEYWORDS[pathname] || MENU_KEYWORDS['/dashboard'] || [];
               const matched = GLOSSARY.filter(term => {
-                const text = `${term.term} ${term.category} ${term.definition}`.toLowerCase();
+                const text = `${term.en} ${term.ko} ${term.category} ${term.definition}`.toLowerCase();
                 return keywords.some(kw => text.includes(kw.toLowerCase()));
               }).slice(0, 8);
               const items = matched.length > 0 ? matched : GLOSSARY.slice(0, 5);
               return (
                 <div className="space-y-1">
                   {items.map((term, idx) => (
-                    <div key={`${term.term}-${idx}`} className="rounded-lg border border-border px-3 py-2">
+                    <div key={`${term.en}-${idx}`} className="rounded-lg border border-border px-3 py-2">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-text">{term.term}</span>
+                        <span className="text-xs font-semibold text-text">{term.en}</span>
                         <span className="rounded bg-surface px-1 py-0.5 text-[8px] text-text-muted">{term.category}</span>
                       </div>
                       <div className="mt-0.5 text-[10px] text-text-muted line-clamp-2">{term.definition}</div>

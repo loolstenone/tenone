@@ -175,7 +175,7 @@ export default function YouInOneHomePage() {
                                         </h3>
                                         <p className="text-sm text-neutral-500 line-clamp-2">{post.summary}</p>
                                         <div className="flex gap-2 mt-3">
-                                            {post.tags?.slice(0, 2).map((tag) => (
+                                            {post.tags?.slice(0, 2).map((tag: string) => (
                                                 <span key={tag} className="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">
                                                     {tag}
                                                 </span>

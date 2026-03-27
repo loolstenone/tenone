@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { User, Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X } from "lucide-react";
+import { User, Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp, Zap, BarChart3 } from "lucide-react";
 import { trends, statusBadge } from "@/lib/mindle/trend-data";
 
 const INTEREST_OPTIONS = ["AI / Tech", "Marketing", "Consumer", "Business", "Content", "Lifestyle", "Startup", "Design", "Finance"];
@@ -52,6 +52,22 @@ export default function MindleMyPage() {
                         <h1 className="text-white text-xl font-bold">{user?.name || "User"}</h1>
                         <p className="text-neutral-400 text-sm">{user?.email}</p>
                     </div>
+                </div>
+
+                {/* Activity Stats */}
+                <div className="grid grid-cols-4 gap-3 mb-8">
+                    {[
+                        { icon: Eye, value: "127", label: "조회한 트렌드", color: "text-neutral-300" },
+                        { icon: Bookmark, value: String(savedIds.length), label: "저장됨", color: "text-[#F5C518]" },
+                        { icon: Bell, value: String(alerts.length), label: "키워드 알림", color: "text-blue-400" },
+                        { icon: TrendingUp, value: "14", label: "이번 주 읽음", color: "text-emerald-400" },
+                    ].map(stat => (
+                        <div key={stat.label} className="p-4 bg-neutral-900/50 border border-neutral-800/50 rounded-xl text-center">
+                            <stat.icon className={`w-4 h-4 mx-auto mb-2 ${stat.color}`} />
+                            <div className="text-lg font-bold text-white">{stat.value}</div>
+                            <div className="text-[10px] text-neutral-500 mt-0.5">{stat.label}</div>
+                        </div>
+                    ))}
                 </div>
 
                 {/* Tabs */}

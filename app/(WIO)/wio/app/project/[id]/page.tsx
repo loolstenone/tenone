@@ -64,7 +64,7 @@ export default function ProjectDetailPage() {
     };
 
     const handleToggleJob = async (job: WIOJob) => {
-        const next = job.status === 'completed' ? 'in_progress' : 'completed';
+        const next = job.status === 'done' ? 'in_progress' : 'done';
         await updateJob(job.id, { status: next as any });
         reload();
     };
@@ -93,7 +93,7 @@ export default function ProjectDetailPage() {
     }
 
     const status = STATUS_LABELS[project.status] || STATUS_LABELS.draft;
-    const completedJobs = jobs.filter(j => j.status === 'completed').length;
+    const completedJobs = jobs.filter(j => j.status === 'done').length;
     const progress = jobs.length > 0 ? Math.round((completedJobs / jobs.length) * 100) : 0;
 
     return (
@@ -124,7 +124,7 @@ export default function ProjectDetailPage() {
                 <div className="p-4 rounded-lg border border-white/5 bg-white/[0.02]">
                     <Calendar className="w-4 h-4 text-slate-500 mb-2" />
                     <p className="text-xs text-slate-500">기간</p>
-                    <p className="text-sm font-medium mt-0.5">{project.startDate || '미정'} ~ {project.deadline || '미정'}</p>
+                    <p className="text-sm font-medium mt-0.5">{project.startedAt || '미정'} ~ {project.deadline || '미정'}</p>
                 </div>
                 <div className="p-4 rounded-lg border border-white/5 bg-white/[0.02]">
                     <DollarSign className="w-4 h-4 text-slate-500 mb-2" />
@@ -206,13 +206,13 @@ export default function ProjectDetailPage() {
                             <button key={job.id} onClick={() => handleToggleJob(job)}
                                 className="flex items-center justify-between w-full p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors text-left">
                                 <div className="flex items-center gap-3">
-                                    {job.status === 'completed' ? (
+                                    {job.status === 'done' ? (
                                         <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                                     ) : (
                                         <div className="w-4 h-4 rounded border border-slate-600 shrink-0" />
                                     )}
                                     <div>
-                                        <p className={`text-sm ${job.status === 'completed' ? 'line-through text-slate-600' : ''}`}>{job.title}</p>
+                                        <p className={`text-sm ${job.status === 'done' ? 'line-through text-slate-600' : ''}`}>{job.title}</p>
                                         <p className="text-[10px] text-slate-500">{job.assigneeId || '미배정'}</p>
                                     </div>
                                 </div>

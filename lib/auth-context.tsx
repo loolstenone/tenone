@@ -35,7 +35,7 @@ function memberToUser(member: Record<string, unknown>): User {
         id: member.id as string,
         name: member.name as string,
         email: member.email as string,
-        role: (member.role as string) || 'Viewer',
+        role: (member.role as User['role']) || 'Viewer',
         accountType,
         primaryType: (member.primary_type as string) || accountType,
         avatarInitials: (member.avatar_initials as string) || ((member.name as string) || '').substring(0, 2).toUpperCase(),
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         validateSession();
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
             console.log('[Auth] onAuthStateChange:', event, session?.user?.email || 'no user');
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {

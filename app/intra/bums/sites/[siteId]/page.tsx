@@ -270,7 +270,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                         .filter((p) => p.boardId === board.id)
                         .sort((a, b) => (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt))
                         .slice(0, 5);
-                    const VisIcon = visibilityIcon[board.visibility];
+                    const VisIcon = visibilityIcon[board.visibility as keyof typeof visibilityIcon];
                     const isOpen = expandedBoard === board.id;
 
                     return (
@@ -293,7 +293,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                                             {skinLabel[board.skinType]}
                                         </span>
                                         <span className="flex items-center gap-0.5 text-xs text-neutral-400">
-                                            <VisIcon className="h-3 w-3" /> {visibilityLabel[board.visibility]}
+                                            <VisIcon className="h-3 w-3" /> {visibilityLabel[board.visibility as keyof typeof visibilityLabel]}
                                         </span>
                                     </div>
                                     <h3 className="text-sm font-medium">{board.name}</h3>
