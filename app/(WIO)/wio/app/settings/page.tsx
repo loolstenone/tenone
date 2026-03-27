@@ -11,6 +11,7 @@ const MODULE_LABELS: Record<string, string> = {
   home: '홈', project: '프로젝트', talk: '소통', finance: '재무', timesheet: '시수',
   people: '인재', sales: '영업', learn: '교육', content: '콘텐츠',
   wiki: '위키', insight: '인사이트', shop: '커머스',
+  competition: '경연', networking: '네트워킹', certificate: '수료증', approval: '결재',
 };
 
 const ROLE_LABELS: Record<string, string> = {
