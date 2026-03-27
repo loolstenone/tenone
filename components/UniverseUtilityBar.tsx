@@ -44,6 +44,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
     const config = { ...defaultConfig, ...props };
     const { isAuthenticated, user, logout, isLoading } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
+    const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const [searchOpen, setSearchOpen] = useState(false);
     const [shareToast, setShareToast] = useState(false);
 
@@ -105,14 +106,14 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                                 LOG IN
                             </Link>
                         ) : (
-                            <button onClick={() => setLoginOpen(true)} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setLoginTab("login"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                                 LOG IN
                             </button>
                         )}
                         {/* 가입 */}
-                        <Link href={config.signupPath || "/signup"} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                        <button onClick={() => { setLoginTab("signup"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                             JOIN
-                        </Link>
+                        </button>
                     </>
                 )}
 
@@ -151,7 +152,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
             )}
 
             {/* 로그인 모달 */}
-            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor={config.accentColor} />
+            <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor={config.accentColor} defaultTab={loginTab} />
         </>
     );
 }

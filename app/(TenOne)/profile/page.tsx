@@ -145,29 +145,30 @@ export default function ProfilePage() {
                         <h2 className="text-sm font-semibold text-neutral-700 mb-5 flex items-center gap-2">
                             <Shield className="h-4 w-4" /> 직원 정보
                         </h2>
+                        <p className="text-[10px] text-neutral-400 mb-4">직원 정보는 관리자만 수정할 수 있습니다.</p>
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label className={labelClass}>사번</label>
-                                    <input value={employeeId} onChange={e => setEmployeeId(e.target.value)} placeholder="TEN-001" className={inputClass} />
+                                    <input value={employeeId} disabled className={disabledClass} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>부서</label>
-                                    <input value={department} onChange={e => setDepartment(e.target.value)} placeholder="크리에이티브팀" className={inputClass} />
+                                    <input value={department} disabled className={disabledClass} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>직위</label>
-                                    <input value={position} onChange={e => setPosition(e.target.value)} placeholder="디렉터" className={inputClass} />
+                                    <input value={position} disabled className={disabledClass} />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>입사일</label>
-                                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputClass} />
+                                    <input value={startDate} disabled className={disabledClass} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>비상연락처</label>
-                                    <input value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} placeholder="가족 연락처" className={inputClass} />
+                                    <input value={emergencyContact} disabled className={disabledClass} />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
