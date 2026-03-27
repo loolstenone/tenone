@@ -106,7 +106,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
       <div className="min-h-screen bg-[#0F0F23] flex items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-slate-500">WIO 로딩 중...</p>
+          <p className="text-xs text-slate-500">Orbi 로딩 중...</p>
         </div>
       </div>
     );
@@ -121,13 +121,13 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
             <Settings className="h-7 w-7 text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">접근 권한이 없습니다</h2>
-          <p className="text-slate-400 text-sm mb-6">WIO는 등록된 구성원만 사용할 수 있습니다.<br />관리자에게 초대를 요청하세요.</p>
+          <p className="text-slate-400 text-sm mb-6">Orbi는 등록된 구성원만 사용할 수 있습니다.<br />관리자에게 초대를 요청하세요.</p>
           <div className="flex gap-3 justify-center">
             <button onClick={() => router.push('/')} className="px-5 py-2.5 text-sm bg-white text-slate-900 rounded-lg hover:bg-slate-100 transition-colors">
               홈으로
             </button>
             <button onClick={() => router.push('/wio')} className="px-5 py-2.5 text-sm border border-slate-700 text-slate-300 rounded-lg hover:border-slate-500 transition-colors">
-              WIO 소개
+              Orbi 소개
             </button>
           </div>
         </div>
@@ -149,11 +149,11 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
       {/* 로고 */}
       <div className="shrink-0 border-b border-white/5 p-3">
         <Link href="/wio/app" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-black text-white">W</div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-black text-white">O</div>
           {(!collapsed || isMobile) && (
             <div className="flex-1">
               <div className="text-xs text-slate-500">{tenant?.name}</div>
-              <div className="text-sm font-bold">{tenant?.serviceName || 'WIO'}</div>
+              <div className="text-sm font-bold">{tenant?.serviceName || 'Orbi'}</div>
             </div>
           )}
           {isMobile && (
@@ -205,7 +205,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
             <button onClick={() => setMobileOpen(true)} className="p-1 text-slate-400 hover:text-white">
               <Menu size={20} />
             </button>
-            <span className="text-sm font-bold">{tenant?.serviceName || 'WIO'}</span>
+            <span className="text-sm font-bold">{tenant?.serviceName || 'Orbi'}</span>
             <div className="w-6" /> {/* spacer */}
           </header>
         )}
