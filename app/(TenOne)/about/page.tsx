@@ -135,13 +135,13 @@ function AboutContent() {
             {/* Tab Navigation */}
             <section className="border-b tn-border sticky top-16 tn-surface z-40">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex gap-0">
+                    <div className="flex gap-0 overflow-x-auto">
                         {tabs.map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 className={`px-6 py-4 text-sm tracking-wide transition-colors border-b-2 ${
                                     activeTab === tab.id
                                         ? 'border-neutral-900 tn-text font-medium'
-                                        : 'border-transparent tn-text-sub hover:text-neutral-700'
+                                        : 'border-transparent tn-text-sub hover:tn-text-sub'
                                 }`}>
                                 {tab.label}
                             </button>
@@ -260,10 +260,10 @@ function AboutContent() {
                                     "나의 작은 세계가 연결되어 하나의 거대한 세계관을 만든다.",
                                 ].map((principle, i) => (
                                     <div key={i} className="flex items-start gap-6 py-4 border-b tn-border last:border-0">
-                                        <span className="text-2xl font-bold text-neutral-200 min-w-[2.5rem] text-right font-mono">
+                                        <span className="text-2xl font-bold tn-text-muted min-w-[2.5rem] text-right font-mono">
                                             {String(i + 1).padStart(2, '0')}
                                         </span>
-                                        <p className="text-neutral-700 leading-relaxed">{principle}</p>
+                                        <p className="tn-text-sub leading-relaxed">{principle}</p>
                                     </div>
                                 ))}
                             </div>
@@ -388,43 +388,135 @@ function AboutContent() {
 
             {/* ===== Brands Tab ===== */}
             {activeTab === 'brands' && (
-                <section className="py-24 px-6">
-                    <div className="max-w-4xl mx-auto">
-                        <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Directory</p>
-                        <h2 className="text-xl md:text-3xl font-light mb-2">
-                            가치로 연결된 <span className="font-bold">브랜드 생태계</span>
-                        </h2>
-                        <p className="tn-text-sub text-sm mb-8">{BRAND_DIRECTORY.length}개 카테고리 · {BRAND_DIRECTORY.reduce((s, sec) => s + sec.brands.length, 0)}개 브랜드</p>
+                <>
+                    {/* Intro */}
+                    <section className="py-24 px-6">
+                        <div className="max-w-4xl mx-auto">
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Brand Roles</p>
+                            <h2 className="text-xl md:text-3xl font-light mb-4">
+                                리더와 팔로어는 <span className="font-bold">역할이지 직급이 아니다</span>
+                            </h2>
+                            <p className="text-sm tn-text-sub leading-relaxed max-w-2xl">
+                                각 브랜드는 상하 관계가 아니라 서로 다른 역할로 시너지를 만듭니다.
+                                상황에 따라 한 브랜드가 엔진이 되기도 하고, 연료가 되기도 하고, 출구가 되기도 합니다.
+                            </p>
+                        </div>
+                    </section>
 
-                        <div className="space-y-10">
-                            {BRAND_DIRECTORY.map((sec, si) => (
-                                <div key={si}>
+                    {/* Role Groups */}
+                    <section className="px-6 pb-16">
+                        <div className="max-w-4xl mx-auto space-y-10">
+                            {[
+                                {
+                                    label: "철학·언어를 만드는 역할",
+                                    brands: [
+                                        { name: "Ten:One™", role: "Universe의 철학과 방향을 정의. 연결의 기회를 만든다", note: "모든 브랜드가 같은 철학 위에 서 있게 하는 역할. 직급이 아니라 나침반" },
+                                        { name: "Protocols", role: "Vrief · GPR · Principle10. 모두가 같은 언어로 일하게 한다", note: "누가 쓰든 같은 방식으로 생각·실행. Universe 공통 문법" },
+                                    ],
+                                },
+                                {
+                                    label: "일이 되게 하는 역할",
+                                    brands: [
+                                        { name: "WIO", role: "모든 사업의 IT 인프라. 입력을 없애고 AI가 채운다", note: "사업이 커질수록 더 필요해지는 역할. 조용히 전체를 받친다" },
+                                        { name: "YouInOne", role: "모든 사업의 팀·협업 구조. 사람이 함께 일하게 한다", note: "WIO(IT)와 쌍으로 움직이는 인간 인프라. 프로젝트마다 최적 크루 구성" },
+                                    ],
+                                },
+                                {
+                                    label: "사람을 모으는 역할",
+                                    brands: [
+                                        { name: "MADLeague", role: "전국 대학생이 모이는 곳. 실전이 사람을 강하게 만든다", note: "가장 넓은 입구. 여기서 모인 사람이 Universe 전체로 흐른다" },
+                                        { name: "Badak", role: "현업이 모이는 곳. 약한 연결이 강력한 기회를 만든다", note: "MADLeague 졸업생의 다음 집. 멘토·클라이언트·크루가 동시에 여기 있다" },
+                                        { name: "0gamja · domo · FWN", role: "중고대학생 · 시니어 · 패션. 각 영역의 특화 입구", note: "Universe 생태계를 더 넓고 다양하게 만드는 역할" },
+                                    ],
+                                },
+                                {
+                                    label: "사람을 키우고 연결하는 역할",
+                                    brands: [
+                                        { name: "HeRo", role: "발굴한 인재를 키워서 세상에 내보낸다", note: "MADLeague·Badak의 출구이자 기업의 입구. 연결이 수익이 된다" },
+                                        { name: "Evolution School · Planner's", role: "역량을 높이는 도구와 교육. 기획자를 기획자답게", note: "HeRo 전 단계. 교육이 인재를 완성한다" },
+                                        { name: "ChangeUp", role: "창업 트랙. 사업가로 데뷔하는 경로", note: "MADLeague의 창업 가지. HeRo 스타트업 연계" },
+                                    ],
+                                },
+                                {
+                                    label: "먼저 보는 역할",
+                                    brands: [
+                                        { name: "Mindle", role: "트렌드를 보이기 전에 먼저 발견하고 해석한다", note: "특정 사업에 속하지 않고 전체를 관통한다. 발견한 것이 전략이 되고 전략이 실행이 된다" },
+                                    ],
+                                },
+                                {
+                                    label: "문제를 풀고 가치를 만드는 역할",
+                                    brands: [
+                                        { name: "SmarComm.", role: "기업의 마케팅 문제를 AI로 푼다", note: "Mindle 트렌드 + YIO 크루 + WIO 인프라가 여기서 만나 실행된다" },
+                                        { name: "Brand Gravity · Naming Factory", role: "브랜드 문제를 푼다. 이름을 짓고 중력을 만든다", note: "SmarComm과 수평 연계. 마케팅+브랜딩 풀패키지" },
+                                        { name: "RooK", role: "AI로 크리에이티브를 실행한다", note: "SmarComm 전략의 실행 파트너. Mindle 트렌드를 콘텐츠로" },
+                                    ],
+                                },
+                                {
+                                    label: "가능성을 키우는 역할",
+                                    brands: [
+                                        { name: "Myverse · MoNTZ · Townity · Scribble", role: "지금은 씨앗. 조건이 맞으면 역할이 커진다", note: "Universe 철학 위에서 실험 중. 검증되면 어떤 역할로도 성장 가능" },
+                                    ],
+                                },
+                            ].map((group, gi) => (
+                                <div key={gi}>
                                     <div className="flex items-center gap-3 mb-4 pb-2 border-b" style={{ borderColor: "var(--tn-border)" }}>
-                                        <span className="text-[10px] font-mono tn-text-sub">{String(si + 1).padStart(2, '0')}</span>
-                                        <h3 className="text-sm font-semibold tracking-wide tn-text uppercase">{sec.title}</h3>
-                                        <span className="text-[10px] tn-text-sub">{sec.brands.length}</span>
+                                        <span className="text-[10px] font-mono tn-text-sub">{String(gi + 1).padStart(2, '0')}</span>
+                                        <h3 className="text-sm font-semibold tracking-wide">{group.label}</h3>
                                     </div>
-                                    <div className="grid gap-px sm:grid-cols-2">
-                                        {sec.brands.map((b, bi) => (
-                                            <div key={bi} className="p-5 border" style={{ borderColor: "color-mix(in srgb, var(--tn-border) 50%, transparent)" }}>
-                                                <div className="flex items-start justify-between mb-1">
-                                                    <span className="font-semibold tn-text text-[15px]">{b.name}</span>
-                                                    {b.domain && (
-                                                        <a href={`https://${b.domain}`} target="_blank" rel="noopener noreferrer"
-                                                            className="text-[11px] tn-text-sub hover:underline">{b.domain}</a>
-                                                    )}
-                                                </div>
-                                                <p className="text-[11px] tn-text-sub mb-2">{b.meaning}</p>
-                                                <p className="text-sm tn-text-sub leading-relaxed mb-1">{b.role}</p>
-                                                <p className="text-xs italic" style={{ color: "var(--tn-accent)" }}>{b.core}</p>
+                                    <div className="grid gap-px sm:grid-cols-2" style={{ backgroundColor: "var(--tn-border)" }}>
+                                        {group.brands.map((b, bi) => (
+                                            <div key={bi} className="p-5" style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
+                                                <span className="font-semibold tn-text text-[15px]">{b.name}</span>
+                                                <p className="text-sm tn-text-sub leading-relaxed mt-1">{b.role}</p>
+                                                <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--tn-text-muted)" }}>{b.note}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </div>
-                </section>
+                    </section>
+
+                    {/* Synergy Flows */}
+                    <section className="tn-bg-alt py-16 md:py-24 px-6">
+                        <div className="max-w-4xl mx-auto">
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Synergy Flows</p>
+                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
+                                역할들이 만나는 <span className="font-bold">시너지 흐름</span>
+                            </h2>
+                            <div className="space-y-8">
+                                {[
+                                    { nodes: ["MADLeague", "HeRo", "Badak", "SmarComm."], sep: ["→", "→", "→", "↻"], desc: "모은다 → 키운다 → 연결한다 → 실행한다 → 다시 멘토로 돌아온다" },
+                                    { nodes: ["Mindle", "SmarComm.", "Brand Gravity", "RooK"], sep: ["→", "+", "+"], desc: "먼저 본다 → 전략을 세운다 → 브랜딩한다 → 실행한다" },
+                                    { nodes: ["WIO", "YouInOne", "전 브랜드"], sep: ["+", "→"], desc: "IT 인프라 + 인간 인프라 → 어떤 사업도 같은 방식으로 움직인다" },
+                                ].map((flow, fi) => (
+                                    <div key={fi} className="p-6 border" style={{ borderColor: "var(--tn-border)" }}>
+                                        <div className="flex items-center gap-2 flex-wrap mb-3">
+                                            {flow.nodes.map((node, ni) => (
+                                                <span key={ni} className="flex items-center gap-2">
+                                                    <span className="text-sm font-medium px-3 py-1 border" style={{ borderColor: "var(--tn-border)" }}>{node}</span>
+                                                    {ni < flow.sep.length && (
+                                                        <span className="text-xs tn-text-sub">{flow.sep[ni]}</span>
+                                                    )}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs tn-text-sub leading-relaxed">{flow.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Closing Principle */}
+                            <div className="mt-16 text-center py-8 border-t" style={{ borderColor: "var(--tn-border)" }}>
+                                <p className="text-lg font-bold mb-2">리더와 팔로어는 역할이지 직급이 아니다</p>
+                                <p className="text-sm tn-text-sub leading-relaxed max-w-xl mx-auto">
+                                    각 브랜드는 상황에 따라 엔진이 되기도 하고, 연료가 되기도 하고, 출구가 되기도 한다.
+                                    중요한 것은 위치가 아니라 지금 어떤 역할을 하고 있느냐다.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </>
             )}
 
             {/* ===== History Tab ===== */}

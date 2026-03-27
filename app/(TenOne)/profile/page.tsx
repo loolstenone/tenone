@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Save, ArrowLeft, Shield, User, Building2, Mail, Lock, X, Eye, EyeOff } from "lucide-react";
+import { Save, ArrowLeft, Shield, User, Building2, Mail, Lock, X, Eye, EyeOff, Bookmark } from "lucide-react";
 import Link from "next/link";
 
 const inputClass = "w-full border tn-border px-4 py-2.5 text-sm tn-text focus:border-neutral-900 focus:outline-none placeholder:tn-text-sub tn-surface";
@@ -11,7 +11,7 @@ const disabledClass = "w-full border tn-border tn-bg-alt px-4 py-2.5 text-sm tn-
 const labelClass = "block text-sm tn-text-sub mb-1.5";
 
 export default function ProfilePage() {
-    const { user, isAuthenticated, isLoading, isStaff, updateProfile, login } = useAuth();
+    const { user, isAuthenticated, isLoading, isStaff, updateProfile } = useAuth();
     const router = useRouter();
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -24,12 +24,7 @@ export default function ProfilePage() {
     const [startDate, setStartDate] = useState('');
     const [emergencyContact, setEmergencyContact] = useState('');
     const [saved, setSaved] = useState(false);
-    const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
-    // 비밀번호 확인 모달
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPw, setShowPw] = useState(false);
-    const [pwError, setPwError] = useState('');
+    // unused states removed (password modal, newsletter)
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) router.replace('/login?redirect=/profile');
@@ -49,25 +44,9 @@ export default function ProfilePage() {
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
-        // 비밀번호 확인 모달 표시
-        setConfirmPassword('');
-        setPwError('');
-        setShowPw(false);
-        setShowPasswordModal(true);
-    };
-
-    const handleConfirmSave = async () => {
         if (!user) return;
-        // 비밀번호 검증
-        const result = await login(user.email, confirmPassword);
-        if (!result.success) {
-            setPwError('비밀번호가 일치하지 않습니다.');
-            return;
-        }
-        // 검증 성공 → 프로필 저장
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || name.slice(0, 2).toUpperCase();
-        updateProfile({ name, company: company || undefined, phone: phone || undefined, bio: bio || undefined, avatarInitials: initials, newsletterSubscribed: subscribeNewsletter });
-        setShowPasswordModal(false);
+        updateProfile({ name, company: company || undefined, phone: phone || undefined, bio: bio || undefined, avatarInitials: initials });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -216,52 +195,7 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* 뉴스레터 구독 — 일반회원 전용 */}
-                {!isStaff && (
-                    <div className="rounded-2xl border tn-border tn-bg-alt p-8 mb-6">
-                        <h2 className="text-sm font-semibold text-neutral-600 mb-4 flex items-center gap-2">
-                            <Mail className="h-4 w-4" /> 뉴스레터
-                        </h2>
-
-                        {subscribeNewsletter ? (
-                            /* 구독 중 */
-                            <div className="flex items-start gap-3">
-                                <div className="mt-0.5 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                    <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-neutral-800 mb-1">뉴스레터 구독 중</p>
-                                    <p className="text-xs tn-text-sub leading-relaxed">
-                                        Universe의 새로운 소식, 프로젝트 업데이트, 이벤트 초대를 이메일로 받고 있습니다.
-                                    </p>
-                                    <p className="text-xs tn-text-sub mt-1.5">수신 이메일: <span className="font-medium text-neutral-600">{user.email}</span></p>
-                                    <button type="button" onClick={() => setSubscribeNewsletter(false)}
-                                        className="mt-3 text-xs tn-text-sub hover:text-red-500 transition-colors underline underline-offset-2">
-                                        구독 해지
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            /* 미구독 — 구독 신청 */
-                            <div className="flex items-start gap-3">
-                                <div className="mt-0.5 w-5 h-5 rounded-full bg-neutral-200 flex items-center justify-center shrink-0">
-                                    <Mail className="w-3 h-3 tn-text-sub" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-neutral-800 mb-1">뉴스레터를 구독하지 않고 있습니다</p>
-                                    <p className="text-xs tn-text-sub leading-relaxed">
-                                        Ten:One™ Universe의 새로운 소식, 프로젝트 업데이트, 이벤트 초대를 이메일로 받아보세요.
-                                        월 1~2회 발송되며, 언제든 구독 해지할 수 있습니다.
-                                    </p>
-                                    <button type="button" onClick={() => setSubscribeNewsletter(true)}
-                                        className="mt-3 flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors">
-                                        <Mail className="h-3.5 w-3.5" /> 뉴스레터 구독 신청
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                {/* 뉴스레터 — 기능 준비 후 활성화 예정 */}
 
                 {/* Save */}
                 <div className="flex items-center justify-between">
@@ -273,49 +207,46 @@ export default function ProfilePage() {
                 </div>
             </form>
 
-            {/* 비밀번호 확인 모달 */}
-            {showPasswordModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="tn-surface rounded-2xl border tn-border w-full max-w-sm p-6 shadow-lg">
-                        <div className="flex items-center justify-between mb-5">
-                            <div className="flex items-center gap-2">
-                                <Lock className="h-4 w-4 tn-text-sub" />
-                                <h2 className="text-sm font-bold">비밀번호 확인</h2>
-                            </div>
-                            <button onClick={() => setShowPasswordModal(false)}>
-                                <X className="h-4 w-4 tn-text-sub hover:text-neutral-700" />
-                            </button>
+            {/* 북마크 목록 */}
+            <BookmarkList userId={user.id} />
+        </div>
+    );
+}
+
+function BookmarkList({ userId }: { userId: string }) {
+    const [bookmarks, setBookmarks] = useState<{ id: string; title: string; board: string; site: string; createdAt: string }[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch(`/api/board/bookmark?userId=${userId}&limit=10`)
+            .then(r => r.ok ? r.json() : { bookmarks: [] })
+            .then(d => setBookmarks(d.bookmarks || []))
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, [userId]);
+
+    if (loading) return null;
+    if (bookmarks.length === 0) return null;
+
+    return (
+        <div className="rounded-2xl border tn-border tn-bg-alt p-8 mt-6">
+            <h2 className="text-sm font-semibold text-neutral-600 mb-4 flex items-center gap-2">
+                <Bookmark className="h-4 w-4" /> 북마크한 글
+            </h2>
+            <div className="space-y-2">
+                {bookmarks.map((bm) => (
+                    <Link key={bm.id} href={`/${bm.board}?postId=${bm.id}`}
+                        className="flex items-center justify-between p-3 rounded-lg border tn-border hover:tn-bg-alt transition-colors group">
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium tn-text truncate group-hover:underline">{bm.title}</p>
+                            <p className="text-[10px] tn-text-sub">{bm.board} · {bm.site}</p>
                         </div>
-                        <p className="text-xs tn-text-sub mb-4">프로필 수정을 위해 현재 비밀번호를 입력해주세요.</p>
-                        <div className="relative mb-3">
-                            <input
-                                type={showPw ? 'text' : 'password'}
-                                value={confirmPassword}
-                                onChange={e => { setConfirmPassword(e.target.value); setPwError(''); }}
-                                onKeyDown={e => e.key === 'Enter' && handleConfirmSave()}
-                                placeholder="비밀번호 입력"
-                                autoFocus
-                                className="w-full border tn-border px-4 py-2.5 text-sm rounded focus:border-neutral-900 focus:outline-none pr-10"
-                            />
-                            <button type="button" onClick={() => setShowPw(!showPw)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 tn-text-sub hover:text-neutral-700">
-                                {showPw ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                            </button>
-                        </div>
-                        {pwError && <p className="text-xs text-red-500 mb-3">{pwError}</p>}
-                        <div className="flex gap-2">
-                            <button onClick={() => setShowPasswordModal(false)}
-                                className="flex-1 px-4 py-2 text-sm border tn-border rounded tn-text-sub hover:border-neutral-400 transition-colors">
-                                취소
-                            </button>
-                            <button onClick={handleConfirmSave}
-                                className="flex-1 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors">
-                                확인 후 저장
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        <span className="text-[10px] tn-text-muted shrink-0 ml-3">
+                            {new Date(bm.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                        </span>
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 }

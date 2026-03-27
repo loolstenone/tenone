@@ -62,14 +62,27 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                         event.preventDefault();
                         const file = item.getAsFile();
                         if (!file) return false;
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const src = e.target?.result as string;
-                            view.dispatch(view.state.tr.replaceSelectionWith(
-                                view.state.schema.nodes.image.create({ src })
-                            ));
-                        };
-                        reader.readAsDataURL(file);
+                        // Storage 업로드 (아임웹 스타일: 붙여넣기 → 자동 업로드 → URL 삽입)
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        fd.append('site', config.site);
+                        fetch('/api/board/upload', { method: 'POST', body: fd })
+                            .then(r => r.ok ? r.json() : Promise.reject())
+                            .then(({ url }) => {
+                                view.dispatch(view.state.tr.replaceSelectionWith(
+                                    view.state.schema.nodes.image.create({ src: url })
+                                ));
+                            })
+                            .catch(() => {
+                                // fallback: base64
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    view.dispatch(view.state.tr.replaceSelectionWith(
+                                        view.state.schema.nodes.image.create({ src: e.target?.result as string })
+                                    ));
+                                };
+                                reader.readAsDataURL(file);
+                            });
                         return true;
                     }
                 }
@@ -81,14 +94,26 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                 const file = files[0];
                 if (!file.type.startsWith("image/")) return false;
                 event.preventDefault();
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const src = e.target?.result as string;
-                    const { tr } = view.state;
-                    const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos || 0;
-                    view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({ src })));
-                };
-                reader.readAsDataURL(file);
+                // Storage 업로드
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('site', config.site);
+                const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos || 0;
+                fetch('/api/board/upload', { method: 'POST', body: fd })
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(({ url }) => {
+                        const { tr } = view.state;
+                        view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({ src: url })));
+                    })
+                    .catch(() => {
+                        // fallback: base64
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const { tr } = view.state;
+                            view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({ src: e.target?.result as string })));
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 return true;
             },
         },

@@ -176,7 +176,8 @@ export default function DashboardOverview() {
               <h3 className="text-sm font-semibold text-text">캠페인</h3>
               <button onClick={() => router.push('/dashboard/campaigns')} className="text-xs text-text-muted hover:text-text">전체 보기 →</button>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-border text-xs text-text-muted">
                   <th className="px-5 py-2.5 text-left font-medium">캠페인명</th>
@@ -203,6 +204,7 @@ export default function DashboardOverview() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* 최근 진단 테이블 */}

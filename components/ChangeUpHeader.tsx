@@ -13,7 +13,6 @@ const navItems = [
     { name: "투자", href: "/invest" },
     { name: "스타트업", href: "/startups" },
     { name: "커뮤니티", href: "/community" },
-    { name: "About", href: "/about" },
 ];
 
 export function ChangeUpHeader() {

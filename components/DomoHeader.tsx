@@ -13,7 +13,6 @@ const navItems = [
     { name: "네트워크", href: "/network" },
     { name: "인사이트", href: "/insights" },
     { name: "이벤트", href: "/events" },
-    { name: "About", href: "/about" },
 ];
 
 export function DomoHeader() {

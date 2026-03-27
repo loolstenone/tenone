@@ -134,13 +134,14 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
             <div className="flex items-center justify-between gap-3 mb-4">
                 {/* 검색 */}
                 <form onSubmit={handleSearch} className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 tn-text-muted" />
                     <input
                         type="text"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         placeholder="검색..."
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400 bg-transparent text-neutral-200 placeholder:text-neutral-500"
+                        className="w-full pl-9 pr-3 py-2 text-sm border tn-border rounded-lg focus:outline-none bg-transparent tn-text"
+                        style={{ borderColor: "var(--tn-border)" }}
                     />
                 </form>
 
@@ -148,28 +149,25 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     {/* 필터 토글 */}
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`p-2 rounded-lg border transition-colors ${
-                            showFilters ? "border-neutral-500 bg-neutral-800" : "border-neutral-600 hover:bg-neutral-800"
-                        }`}
+                        className="p-2.5 min-w-[44px] min-h-[44px] rounded-lg border tn-border transition-colors flex items-center justify-center"
+                        style={{ borderColor: "var(--tn-border)" }}
                     >
-                        <SlidersHorizontal className="h-4 w-4 text-neutral-400" />
+                        <SlidersHorizontal className="h-4 w-4 tn-text-muted" />
                     </button>
 
                     {/* 뷰 전환 */}
-                    <div className="flex border border-neutral-200 rounded-lg overflow-hidden">
+                    <div className="flex border tn-border rounded-lg overflow-hidden" style={{ borderColor: "var(--tn-border)" }}>
                         <button
                             onClick={() => setViewMode("card")}
-                            className={`p-2 transition-colors ${
-                                viewMode === "card" ? "bg-neutral-900 text-white" : "hover:bg-neutral-800"
-                            }`}
+                            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors tn-text"
+                            style={viewMode === "card" ? { backgroundColor: "var(--tn-bg-alt)" } : {}}
                         >
                             <LayoutGrid className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => setViewMode("list")}
-                            className={`p-2 transition-colors ${
-                                viewMode === "list" ? "bg-neutral-900 text-white" : "hover:bg-neutral-800"
-                            }`}
+                            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors tn-text"
+                            style={viewMode === "list" ? { backgroundColor: "var(--tn-bg-alt)" } : {}}
                         >
                             <List className="h-4 w-4" />
                         </button>
@@ -179,13 +177,14 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
 
             {/* 필터 패널 */}
             {showFilters && (
-                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-neutral-800/50 rounded-lg border border-neutral-700/50">
+                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 tn-bg-alt rounded-lg border tn-border" style={{ borderColor: "var(--tn-border)" }}>
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-neutral-500">정렬</span>
+                        <span className="text-xs tn-text-sub">정렬</span>
                         <select
                             value={sort}
                             onChange={(e) => { setSort(e.target.value as SortOption); setPage(1); }}
-                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-neutral-900 text-neutral-200"
+                            className="text-sm border tn-border rounded px-2 py-1 tn-surface tn-text"
+                            style={{ borderColor: "var(--tn-border)" }}
                         >
                             {Object.entries(sortLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
@@ -193,18 +192,19 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                         </select>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-neutral-500">기간</span>
+                        <span className="text-xs tn-text-sub">기간</span>
                         <select
                             value={period}
                             onChange={(e) => { setPeriod(e.target.value as PeriodOption); setPage(1); }}
-                            className="text-sm border border-neutral-600 rounded px-2 py-1 bg-neutral-900 text-neutral-200"
+                            className="text-sm border tn-border rounded px-2 py-1 tn-surface tn-text"
+                            style={{ borderColor: "var(--tn-border)" }}
                         >
                             {Object.entries(periodLabels).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="text-xs text-neutral-400">
+                    <div className="text-xs tn-text-muted">
                         총 {total}건
                     </div>
                 </div>
@@ -213,13 +213,13 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
             {/* 로딩 */}
             {loading && (
                 <div className="flex justify-center py-20">
-                    <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
+                    <div className="h-6 w-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--tn-border)", borderTopColor: "var(--tn-text)" }} />
                 </div>
             )}
 
             {/* 빈 상태 */}
             {!loading && posts.length === 0 && (
-                <div className="text-center py-20 text-neutral-400">
+                <div className="text-center py-20 tn-text-muted">
                     <p className="text-lg mb-1">게시글이 없습니다</p>
                     <p className="text-sm">첫 번째 글을 작성해보세요</p>
                 </div>
@@ -241,9 +241,9 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
 
             {/* 리스트형 뷰 */}
             {!loading && posts.length > 0 && viewMode === "list" && (
-                <div className="border border-neutral-200 rounded-lg overflow-hidden">
+                <div className="border tn-border rounded-lg overflow-hidden" style={{ borderColor: "var(--tn-border)" }}>
                     {/* 리스트 헤더 */}
-                    <div className="flex items-center gap-4 px-4 py-2 bg-neutral-50 border-b border-neutral-200 text-xs text-neutral-500 font-medium">
+                    <div className="flex items-center gap-4 px-4 py-2 tn-bg-alt border-b tn-border text-xs tn-text-sub font-medium" style={{ borderColor: "var(--tn-border)" }}>
                         <div className="hidden md:block w-20">카테고리</div>
                         <div className="flex-1">제목</div>
                         <div className="hidden sm:block w-24 text-center">작성자</div>
@@ -267,7 +267,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     <button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="p-2 rounded hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-2 rounded disabled:opacity-30 disabled:cursor-not-allowed tn-text"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -286,10 +286,10 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                             <button
                                 key={pageNum}
                                 onClick={() => setPage(pageNum)}
-                                className={`min-w-[36px] h-9 rounded text-sm transition-colors ${
+                                className={`min-w-[44px] h-11 rounded text-sm transition-colors ${
                                     page === pageNum
                                         ? "text-white font-medium"
-                                        : "hover:bg-neutral-100 text-neutral-400"
+                                        : "tn-text-muted"
                                 }`}
                                 style={page === pageNum ? { backgroundColor: accentColor } : {}}
                             >
@@ -300,7 +300,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                     <button
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="p-2 rounded hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-2 rounded disabled:opacity-30 disabled:cursor-not-allowed tn-text"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>

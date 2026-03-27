@@ -60,6 +60,7 @@ export default function CompetitionPage() {
   const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<Tab>('all');
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const competitions = MOCK_COMPETITIONS;
   const filtered = tab === 'all' ? competitions : competitions.filter(c => c.status === tab);
@@ -120,7 +121,8 @@ export default function CompetitionPage() {
           const st = STATUS_CONFIG[comp.status];
           const progress = comp.maxTeams > 0 ? Math.round((comp.teamsRegistered / comp.maxTeams) * 100) : 0;
           return (
-            <div key={comp.id} className="border border-white/5 rounded-xl bg-white/[0.02] p-5 hover:border-indigo-500/20 transition-colors cursor-pointer">
+            <div key={comp.id} onClick={() => setSelectedId(selectedId === comp.id ? null : comp.id)}
+              className={`border rounded-xl bg-white/[0.02] p-5 transition-colors cursor-pointer ${selectedId === comp.id ? 'border-indigo-500/40' : 'border-white/5 hover:border-indigo-500/20'}`}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -157,6 +159,45 @@ export default function CompetitionPage() {
                       <Medal className="w-2.5 h-2.5" /> {prize}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* Expanded Detail */}
+              {selectedId === comp.id && (
+                <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div className="bg-white/[0.03] rounded-lg p-3">
+                      <div className="text-xs text-slate-500">팀 규모</div>
+                      <div className="text-sm font-bold text-white mt-0.5">{comp.teamSize}</div>
+                    </div>
+                    <div className="bg-white/[0.03] rounded-lg p-3">
+                      <div className="text-xs text-slate-500">접수 마감</div>
+                      <div className="text-sm font-bold text-white mt-0.5">{comp.deadline}</div>
+                    </div>
+                    <div className="bg-white/[0.03] rounded-lg p-3">
+                      <div className="text-xs text-slate-500">심사일</div>
+                      <div className="text-sm font-bold text-white mt-0.5">{comp.judgeDate}</div>
+                    </div>
+                    <div className="bg-white/[0.03] rounded-lg p-3">
+                      <div className="text-xs text-slate-500">잔여 슬롯</div>
+                      <div className="text-sm font-bold text-indigo-400 mt-0.5">{comp.maxTeams - comp.teamsRegistered}팀</div>
+                    </div>
+                  </div>
+                  {comp.status === 'open' && (
+                    <button className="w-full py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-500 transition-colors">
+                      팀 등록하기
+                    </button>
+                  )}
+                  {comp.status === 'upcoming' && (
+                    <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
+                      모집 시작 시 알림 받기
+                    </button>
+                  )}
+                  {comp.status === 'completed' && (
+                    <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
+                      결과 보기
+                    </button>
+                  )}
                 </div>
               )}
             </div>

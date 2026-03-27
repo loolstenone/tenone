@@ -9,7 +9,6 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "About", href: "/about" },
     { name: "What We Do", href: "/whatwedo" },
     { name: "Portfolio", href: "/portfolio" },
     { name: "People", href: "/people" },

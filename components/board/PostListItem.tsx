@@ -30,12 +30,15 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
     return (
         <article
             onClick={() => onClick?.(post)}
-            className="flex items-center gap-4 px-4 py-3 border-b border-neutral-700/50 hover:bg-neutral-800/50 transition-colors cursor-pointer group"
+            className="flex items-center gap-4 px-4 py-3 border-b tn-border transition-colors cursor-pointer group"
+            style={{ borderColor: "var(--tn-border)" }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--tn-bg-alt)"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
         >
             {/* 카테고리 */}
             <div className="hidden md:block w-20 shrink-0">
                 {post.category && (
-                    <span className="text-xs text-neutral-400">{post.category}</span>
+                    <span className="text-xs tn-text-muted">{post.category}</span>
                 )}
             </div>
 
@@ -50,7 +53,7 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
                             공지
                         </span>
                     )}
-                    <h3 className="text-sm font-medium text-neutral-100 truncate group-hover:text-white transition-colors">
+                    <h3 className="text-sm font-medium tn-text truncate transition-colors">
                         {post.title}
                     </h3>
                     {post.commentCount > 0 && (
@@ -67,17 +70,17 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
             </div>
 
             {/* 작성자 */}
-            <div className="hidden sm:block w-24 shrink-0 text-xs text-neutral-500 text-center truncate">
+            <div className="hidden sm:block w-24 shrink-0 text-xs tn-text-sub text-center truncate">
                 {getAuthorName(post)}
             </div>
 
             {/* 날짜 */}
-            <div className="w-20 shrink-0 text-xs text-neutral-500 text-center">
+            <div className="w-20 shrink-0 text-xs tn-text-sub text-center">
                 {formatDate(post.createdAt)}
             </div>
 
             {/* 통계 */}
-            <div className="hidden lg:flex items-center gap-3 w-28 shrink-0 text-xs text-neutral-500 justify-end">
+            <div className="hidden lg:flex items-center gap-3 w-28 shrink-0 text-xs tn-text-sub justify-end">
                 <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" /> {post.viewCount}
                 </span>

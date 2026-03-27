@@ -1,41 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { Play, ArrowRight } from "lucide-react";
+import { Play, ArrowRight, Film, Image, Music, Palette, Users, Eye, Award, Sparkles } from "lucide-react";
 
 const works = [
-    { id: 1, title: "최초의 AI do LUKI by RooK", category: "AI Idol", image: "🎤" },
-    { id: 2, title: "FEARLESS - 뮤직비디오", category: "Music Video", image: "🎬" },
-    { id: 3, title: "까치호랑이 - 한국 전통 AI 아트", category: "AI Art", image: "🎨" },
-    { id: 4, title: "조선의 바람 - 역사 시리즈", category: "AI Art", image: "⚔️" },
-    { id: 5, title: "사이버펑크 서울", category: "AI Art", image: "🌃" },
-    { id: 6, title: "진주 귀걸이를 한 소녀 - AI 리메이크", category: "Classic Remake", image: "👩" },
-    { id: 7, title: "비열한 저잣거리", category: "AI Film", image: "🎞️" },
-    { id: 8, title: "니에프스의 창 - 최초의 사진 리메이크", category: "Classic Remake", image: "📸" },
+    { id: 1, title: "최초의 AI Idol LUKI by RooK", category: "AI Idol", icon: Music, color: "bg-pink-500/10 text-pink-400" },
+    { id: 2, title: "FEARLESS - 뮤직비디오", category: "Music Video", icon: Film, color: "bg-purple-500/10 text-purple-400" },
+    { id: 3, title: "까치호랑이 - 한국 전통 AI 아트", category: "AI Art", icon: Image, color: "bg-amber-500/10 text-amber-400" },
+    { id: 4, title: "조선의 바람 - 역사 시리즈", category: "AI Art", icon: Palette, color: "bg-red-500/10 text-red-400" },
+    { id: 5, title: "사이버펑크 서울", category: "AI Art", icon: Sparkles, color: "bg-cyan-500/10 text-cyan-400" },
+    { id: 6, title: "진주 귀걸이를 한 소녀 - AI 리메이크", category: "Classic Remake", icon: Image, color: "bg-emerald-500/10 text-emerald-400" },
+    { id: 7, title: "비열한 저잣거리", category: "AI Film", icon: Film, color: "bg-orange-500/10 text-orange-400" },
+    { id: 8, title: "니에프스의 창 - 최초의 사진 리메이크", category: "Classic Remake", icon: Image, color: "bg-blue-500/10 text-blue-400" },
 ];
 
 const freeBoard = [
-    { id: 1, title: "사이버펑크 느와르 액션", image: "🎬", views: 234 },
-    { id: 2, title: "이소룡 피규어 AI 생성", image: "🥋", views: 189 },
-    { id: 3, title: "오피스 액션 피규어", image: "💪", views: 156 },
+    { id: 1, title: "사이버펑크 느와르 액션", category: "AI Film", views: 234 },
+    { id: 2, title: "이소룡 피규어 AI 생성", category: "AI Art", views: 189 },
+    { id: 3, title: "오피스 액션 피규어", category: "AI Art", views: 156 },
 ];
 
 const artists = [
-    { id: 1, name: "미연", role: "Visual Artist", emoji: "👩‍🎨" },
-    { id: 2, name: "하은", role: "Character Designer", emoji: "✏️" },
-    { id: 3, name: "수아", role: "Fashion AI", emoji: "👗" },
-    { id: 4, name: "지우", role: "Portrait Artist", emoji: "🖼️" },
-    { id: 5, name: "다인", role: "K-Girl Group", emoji: "💃" },
-    { id: 6, name: "세라", role: "Concept Artist", emoji: "🎭" },
-    { id: 7, name: "유진", role: "Classical AI", emoji: "🎵" },
-    { id: 8, name: "민서", role: "Digital Human", emoji: "🤖" },
-    { id: 9, name: "하나", role: "Photo Artist", emoji: "📷" },
+    { id: 1, name: "미연", role: "Visual Artist", specialty: "패션·뷰티 비주얼" },
+    { id: 2, name: "하은", role: "Character Designer", specialty: "캐릭터·일러스트" },
+    { id: 3, name: "수아", role: "Fashion AI", specialty: "AI 패션 생성" },
+    { id: 4, name: "지우", role: "Portrait Artist", specialty: "인물·초상화" },
+    { id: 5, name: "다인", role: "K-Girl Group", specialty: "AI 아이돌" },
+    { id: 6, name: "세라", role: "Concept Artist", specialty: "컨셉 아트" },
+    { id: 7, name: "유진", role: "Classical AI", specialty: "클래식 리메이크" },
+    { id: 8, name: "민서", role: "Digital Human", specialty: "디지털 휴먼" },
+    { id: 9, name: "하나", role: "Photo Artist", specialty: "AI 포토그래피" },
 ];
 
 export default function RooKHome() {
     return (
         <div>
-            {/* Hero Section - 다크 */}
+            {/* Hero Section */}
             <section className="relative bg-[#282828] min-h-[80vh] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-[#282828]" />
                 <div className="relative text-center px-6">
@@ -59,6 +59,39 @@ export default function RooKHome() {
                 </div>
             </section>
 
+            {/* Stats + Philosophy */}
+            <section className="py-16 px-6 bg-[#1a1a1a]">
+                <div className="mx-auto max-w-5xl">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/5 rounded-xl overflow-hidden mb-12">
+                        {[
+                            { icon: Film, value: "8+", label: "작품" },
+                            { icon: Users, value: "9", label: "AI Artist" },
+                            { icon: Eye, value: "12K+", label: "총 조회수" },
+                            { icon: Award, value: "3", label: "장르" },
+                        ].map(s => (
+                            <div key={s.label} className="bg-[#1a1a1a] p-5 text-center">
+                                <s.icon className="w-5 h-5 text-[#00d255] mx-auto mb-2" />
+                                <div className="text-xl font-bold text-white">{s.value}</div>
+                                <div className="text-[10px] text-neutral-500 mt-0.5">{s.label}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-6">
+                        {[
+                            { title: "AI Film", desc: "비열한 저잣거리, 사이버펑크 시리즈 등 AI로 제작하는 단편·장편 영상 콘텐츠" },
+                            { title: "AI Art", desc: "까치호랑이, 조선의 바람 등 한국 전통과 현대를 잇는 AI 아트 시리즈" },
+                            { title: "Classic Remake", desc: "진주 귀걸이를 한 소녀, 니에프스의 창 등 명작을 AI로 재해석하는 프로젝트" },
+                        ].map(g => (
+                            <div key={g.title} className="p-5 border border-neutral-800 rounded-xl">
+                                <h3 className="text-sm font-bold text-[#00d255] mb-2">{g.title}</h3>
+                                <p className="text-xs text-neutral-400 leading-relaxed">{g.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Works Section */}
             <section className="py-20 px-6 bg-white">
                 <div className="mx-auto max-w-7xl">
@@ -70,21 +103,22 @@ export default function RooKHome() {
                         밈에서 영화까지, 루크의 창작 영역에는 경계가 없습니다. 하고 싶은 것이라면 무엇이든 도전합니다.
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {works.map((work) => (
-                            <Link
-                                key={work.id}
-                                href="/rook/works"
-                                className="group relative aspect-square bg-neutral-900 rounded-lg overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-[#00d255] transition-all"
-                            >
-                                <span className="text-6xl">{work.image}</span>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                    <div>
-                                        <p className="text-white text-sm font-medium">{work.title}</p>
-                                        <p className="text-[#00d255] text-xs">{work.category}</p>
+                        {works.map((work) => {
+                            const Icon = work.icon;
+                            return (
+                                <Link
+                                    key={work.id}
+                                    href="/rook/works"
+                                    className="group relative aspect-square bg-neutral-900 rounded-lg overflow-hidden flex flex-col items-center justify-center hover:ring-2 hover:ring-[#00d255] transition-all p-4"
+                                >
+                                    <div className={`w-14 h-14 rounded-xl ${work.color} flex items-center justify-center mb-3`}>
+                                        <Icon className="w-6 h-6" />
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
+                                    <p className="text-white text-xs font-medium text-center leading-snug">{work.title}</p>
+                                    <p className="text-[#00d255] text-[10px] mt-1">{work.category}</p>
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
@@ -106,8 +140,9 @@ export default function RooKHome() {
                                 href="/rook/board"
                                 className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                             >
-                                <div className="aspect-video bg-neutral-900 flex items-center justify-center">
-                                    <span className="text-3xl md:text-5xl">{post.image}</span>
+                                <div className="aspect-video bg-neutral-900 flex flex-col items-center justify-center gap-2">
+                                    <Film className="w-8 h-8 text-neutral-600" />
+                                    <span className="text-xs text-neutral-500">{post.category}</span>
                                 </div>
                                 <div className="p-4">
                                     <p className="font-medium group-hover:text-[#00d255] transition-colors">{post.title}</p>
@@ -136,8 +171,11 @@ export default function RooKHome() {
                                 href="/rook/artist"
                                 className="group text-center"
                             >
-                                <div className="aspect-[3/4] bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center group-hover:ring-2 group-hover:ring-[#00d255] transition-all">
-                                    <span className="text-3xl md:text-5xl">{artist.emoji}</span>
+                                <div className="aspect-[3/4] bg-neutral-100 rounded-lg overflow-hidden flex flex-col items-center justify-center group-hover:ring-2 group-hover:ring-[#00d255] transition-all gap-1">
+                                    <div className="w-14 h-14 rounded-full bg-[#00d255]/10 flex items-center justify-center text-lg font-bold text-[#00d255]">
+                                        {artist.name.charAt(0)}
+                                    </div>
+                                    <span className="text-[10px] text-neutral-400 mt-1">{artist.specialty}</span>
                                 </div>
                                 <p className="mt-3 font-medium group-hover:text-[#00d255] transition-colors">{artist.name}</p>
                                 <p className="text-sm text-neutral-500">{artist.role}</p>
@@ -160,7 +198,7 @@ export default function RooKHome() {
                         많은 분들의 관심과 도전 부탁드립니다.
                     </p>
                     <div className="flex items-center justify-center gap-6">
-                        <div className="text-6xl">🎨</div>
+                        <Palette className="w-12 h-12 text-[#00d255]" />
                         <div className="text-left">
                             <p className="text-white text-xl md:text-3xl lg:text-4xl font-bold italic mb-2">I want You</p>
                             <p className="text-white text-xl md:text-3xl lg:text-4xl font-bold italic">For Rookie</p>

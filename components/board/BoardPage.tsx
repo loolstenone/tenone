@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { PenSquare } from "lucide-react";
 import BoardList from "./BoardList";
 import PostDetail from "./PostDetail";
@@ -19,7 +20,15 @@ interface BoardPageProps {
 
 type Mode = "list" | "detail" | "write" | "edit";
 
-export default function BoardPage({
+export default function BoardPage(props: BoardPageProps) {
+    return (
+        <Suspense fallback={<div className="min-h-[50vh]" />}>
+            <BoardPageInner {...props} />
+        </Suspense>
+    );
+}
+
+function BoardPageInner({
     site,
     board,
     title,
@@ -28,11 +37,22 @@ export default function BoardPage({
     showWriteButton = true,
     isGuest = false,
 }: BoardPageProps) {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const [boardConfig, setBoardConfig] = useState<BoardConfig | null>(null);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [mode, setMode] = useState<Mode>("list");
     const [loading, setLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    // URL에서 postId 읽어서 자동 로드
+    useEffect(() => {
+        const postId = searchParams.get('postId');
+        if (postId && mode === 'list') {
+            loadPost(postId);
+        }
+    }, [searchParams]);
 
     // 게시판 설정 로드 (캐시 활용)
     useEffect(() => {
@@ -61,6 +81,8 @@ export default function BoardPage({
                 const data = await res.json();
                 setSelectedPost(data.post || data);
                 setMode("detail");
+                // URL 업데이트 (고유 URL)
+                window.history.pushState(null, '', `${pathname}?postId=${postId}`);
             }
         } catch (err) {
             console.error("게시글 로딩 실패:", err);
@@ -189,7 +211,7 @@ export default function BoardPage({
                         <PostDetail
                             post={selectedPost}
                             accentColor={accentColor}
-                            onBack={() => { setMode("list"); setSelectedPost(null); }}
+                            onBack={() => { setMode("list"); setSelectedPost(null); window.history.pushState(null, '', pathname); }}
                             onNavigate={loadPost}
                             onLike={handleLike}
                             onBookmark={handleBookmark}

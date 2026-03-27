@@ -28,11 +28,15 @@ export default function NetworkingPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewTab, setViewTab] = useState<'all' | 'connected' | 'recommended'>('all');
   const [members] = useState(MOCK_MEMBERS);
 
-  const filtered = members.filter(m =>
-    !searchQuery || m.name.includes(searchQuery) || m.expertise.some(e => e.includes(searchQuery)) || m.company.includes(searchQuery)
-  );
+  const filtered = members.filter(m => {
+    if (viewTab === 'connected' && !m.connected) return false;
+    if (viewTab === 'recommended' && m.connected) return false;
+    if (searchQuery && !m.name.includes(searchQuery) && !m.expertise.some(e => e.includes(searchQuery)) && !m.company.includes(searchQuery)) return false;
+    return true;
+  });
 
   const stats = {
     total: members.length,
@@ -63,6 +67,16 @@ export default function NetworkingPage() {
           <div className="text-[10px] text-slate-500 font-semibold tracking-wider mb-1">대기 요청</div>
           <div className="text-2xl font-bold text-amber-400">{stats.pending}</div>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2">
+        {([['all', '전체'], ['connected', '내 연결'], ['recommended', '추천']] as ['all' | 'connected' | 'recommended', string][]).map(([id, label]) => (
+          <button key={id} onClick={() => setViewTab(id)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${viewTab === id ? 'bg-emerald-600/10 text-emerald-400 font-semibold' : 'text-slate-400 hover:bg-white/5'}`}>
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Search */}

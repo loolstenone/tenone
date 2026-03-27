@@ -168,6 +168,16 @@ export async function fetchPostWithDetails(id: string, userId?: string): Promise
     const post = await fetchPostById(id);
     if (!post) return null;
 
+    // 대표 이미지 자동 채움: 비어있으면 본문 첫 이미지 추출 후 DB 업데이트 (아임웹 스타일)
+    if (!post.representImage && post.content) {
+        const extracted = extractFirstImage(post.content);
+        if (extracted) {
+            post.representImage = extracted;
+            // DB에도 저장 (다음 리스트 조회 시 바로 사용)
+            supabase.from('posts').update({ represent_image: extracted }).eq('id', id).then(() => {});
+        }
+    }
+
     // 첨부파일 조인
     const { data: attachments } = await supabase
         .from('attachments')
@@ -207,7 +217,7 @@ export async function createPost(input: CreatePostInput, authorId?: string): Pro
         excerpt: input.excerpt || extractExcerpt(input.content),
         category: input.category || '',
         tags: input.tags || [],
-        represent_image: input.representImage || '',
+        represent_image: input.representImage || extractFirstImage(input.content) || '',
         status: input.status || 'published',
         is_pinned: input.isPinned || false,
     };
@@ -486,6 +496,21 @@ export async function fetchPopularTags(site: SiteCode, limit = 20): Promise<{ ta
 function extractExcerpt(html: string, maxLength = 200): string {
     const text = html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+}
+
+/** 본문 HTML에서 첫 번째 이미지 URL 추출 (아임웹 스타일 자동 대표이미지) */
+function extractFirstImage(html: string): string {
+    // <img src="..."> 패턴 — base64 data URI는 리스트 응답에 너무 무거우므로 제외
+    const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+    let match;
+    while ((match = imgRegex.exec(html)) !== null) {
+        if (!match[1].startsWith('data:')) return match[1];
+    }
+    // markdown ![alt](url) 패턴
+    const mdMatch = html.match(/!\[[^\]]*\]\(([^)]+)\)/);
+    if (mdMatch?.[1] && !mdMatch[1].startsWith('data:')) return mdMatch[1];
+    // base64 이미지는 리스트 응답에 포함하면 너무 무거우므로 제외
+    return '';
 }
 
 // ── Storage (이미지 업로드) ──

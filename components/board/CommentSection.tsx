@@ -42,26 +42,28 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
 
     return (
         <div className={`${isReply ? "ml-8 md:ml-12" : ""}`}>
-            <div className={`py-4 ${!isReply ? "border-b border-neutral-700/50" : ""}`}>
+            <div className={`py-4 ${!isReply ? "border-b tn-border" : ""}`} style={!isReply ? { borderColor: "var(--tn-border)" } : {}}>
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 mb-2">
-                        {isReply && <CornerDownRight className="h-3 w-3 text-neutral-400" />}
-                        <span className="text-sm font-medium text-neutral-100">
+                        {isReply && <CornerDownRight className="h-3 w-3 tn-text-muted" />}
+                        <span className="text-sm font-medium tn-text">
                             {getAuthorName(comment)}
                         </span>
-                        <span className="text-xs text-neutral-400">
+                        <span className="text-xs tn-text-muted">
                             {formatDate(comment.createdAt)}
                         </span>
                     </div>
                     <div className="relative">
                         <button
                             onClick={() => setShowMenu(!showMenu)}
-                            className="p-1 text-neutral-400 hover:text-neutral-600"
+                            className="p-1 tn-text-muted"
                         >
                             <MoreHorizontal className="h-4 w-4" />
                         </button>
                         {showMenu && (
-                            <div className="absolute right-0 mt-1 py-1 bg-neutral-900 border border-neutral-600 rounded-lg shadow-lg z-10 min-w-[100px]">
+                            <div className="absolute right-0 mt-1 py-1 tn-surface border tn-border rounded-lg shadow-lg z-10 min-w-[100px]"
+                                style={{ borderColor: "var(--tn-border)" }}
+                            >
                                 <button
                                     onClick={() => { onDelete?.(comment.id); setShowMenu(false); }}
                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-500 hover:bg-red-50"
@@ -73,12 +75,12 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                     </div>
                 </div>
 
-                <p className="text-sm text-neutral-700 whitespace-pre-wrap">{comment.content}</p>
+                <p className="text-sm tn-text-sub whitespace-pre-wrap">{comment.content}</p>
 
                 <div className="flex items-center gap-3 mt-2">
                     <button
                         onClick={() => onLike?.(comment.id)}
-                        className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
+                        className="flex items-center gap-1 text-xs tn-text-muted"
                     >
                         <ThumbsUp className={`h-3 w-3 ${comment.isLiked ? "fill-current" : ""}`}
                             style={comment.isLiked ? { color: accentColor } : {}}
@@ -88,7 +90,7 @@ function CommentItem({ comment, accentColor, isReply, onReply, onDelete, onLike 
                     {!isReply && (
                         <button
                             onClick={() => onReply?.(comment.id)}
-                            className="text-xs text-neutral-400 hover:text-neutral-600"
+                            className="text-xs tn-text-muted"
                         >
                             답글
                         </button>
@@ -203,20 +205,20 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
 
     return (
         <section>
-            <h3 className="text-lg font-semibold mb-4">
-                댓글 <span className="text-sm font-normal text-neutral-400">{comments.length}</span>
+            <h3 className="text-lg font-semibold tn-text mb-4">
+                댓글 <span className="text-sm font-normal tn-text-muted">{comments.length}</span>
             </h3>
 
             {/* 댓글 작성 */}
             <form onSubmit={handleSubmit} className="mb-6">
                 {replyTo && (
-                    <div className="flex items-center gap-2 mb-2 text-sm text-neutral-500">
+                    <div className="flex items-center gap-2 mb-2 text-sm tn-text-sub">
                         <CornerDownRight className="h-3 w-3" />
                         <span>{replyTarget ? getAuthorName(replyTarget) : ""}에게 답글 작성 중</span>
                         <button
                             type="button"
                             onClick={() => setReplyTo(null)}
-                            className="text-xs text-neutral-400 hover:text-neutral-600 underline"
+                            className="text-xs tn-text-muted underline"
                         >
                             취소
                         </button>
@@ -231,7 +233,8 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                             value={guestNickname}
                             onChange={(e) => setGuestNickname(e.target.value)}
                             placeholder="닉네임"
-                            className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400"
+                            className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg focus:outline-none bg-transparent tn-text"
+                            style={{ borderColor: "var(--tn-border)" }}
                             maxLength={20}
                         />
                         <input
@@ -239,7 +242,8 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                             value={guestPassword}
                             onChange={(e) => setGuestPassword(e.target.value)}
                             placeholder="비밀번호"
-                            className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:border-neutral-400"
+                            className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg focus:outline-none bg-transparent tn-text"
+                            style={{ borderColor: "var(--tn-border)" }}
                             maxLength={20}
                         />
                     </div>
@@ -252,7 +256,8 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="댓글을 작성하세요..."
                         rows={3}
-                        className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded-lg resize-none focus:outline-none focus:border-neutral-400"
+                        className="flex-1 px-3 py-2 text-sm border tn-border rounded-lg resize-none focus:outline-none bg-transparent tn-text"
+                        style={{ borderColor: "var(--tn-border)" }}
                     />
                     <button
                         type="submit"
@@ -268,10 +273,10 @@ export default function CommentSection({ postId, accentColor = "#171717" }: Comm
             {/* 댓글 목록 */}
             {loading ? (
                 <div className="flex justify-center py-8">
-                    <div className="h-5 w-5 border-2 border-neutral-300 border-t-neutral-700 rounded-full animate-spin" />
+                    <div className="h-5 w-5 border-2 rounded-full animate-spin" style={{ borderColor: "var(--tn-border)", borderTopColor: "var(--tn-text)" }} />
                 </div>
             ) : comments.length === 0 ? (
-                <p className="text-center py-8 text-sm text-neutral-400">
+                <p className="text-center py-8 text-sm tn-text-muted">
                     첫 번째 댓글을 남겨보세요
                 </p>
             ) : (

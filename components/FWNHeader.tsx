@@ -18,7 +18,6 @@ const navItems = [
     { name: "모델", href: "/category/models" },
     { name: "브랜드", href: "/category/brands" },
     { name: "스트리트 런웨이", href: "/category/street" },
-    { name: "About", href: "/about" },
 ];
 
 export function FWNHeader() {

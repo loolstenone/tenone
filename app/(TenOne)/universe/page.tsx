@@ -113,7 +113,7 @@ export default function UniversePage() {
                     </p>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-4 gap-px mt-12" style={{ backgroundColor: "var(--tn-border)" }}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px mt-12" style={{ backgroundColor: "var(--tn-border)" }}>
                         {stats.map(s => (
                             <div key={s.label} className="p-5 text-center" style={{ backgroundColor: "var(--tn-bg)" }}>
                                 <div className="text-2xl sm:text-3xl font-light tracking-tight">{s.value}</div>
@@ -129,7 +129,7 @@ export default function UniversePage() {
                     <p className="text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: "var(--tn-text-sub)" }}>
                         3대 자원 &mdash; 모든 모듈이 지켜야 할 기준
                     </p>
-                    <div className="grid grid-cols-3 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
                         {[
                             { icon: Users, label: "사람", desc: "누가, 몇 명, 어떤 역할", examples: "People · Team · Permission" },
                             { icon: Layers, label: "돈", desc: "얼마, 수익, 비용, 정산", examples: "Finance · Budget · Billing" },
@@ -158,7 +158,7 @@ export default function UniversePage() {
                 </section>
 
                 {/* Two OS */}
-                <section className="grid grid-cols-2 gap-4 mb-16">
+                <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
                     <Link href="/wio" className="group p-6 border transition-all hover:border-indigo-500/60 text-center hover:-translate-y-0.5"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: "transparent" }}>
                         <Sparkles className="w-4 h-4 mx-auto mb-2 text-indigo-400 opacity-60" />
@@ -220,7 +220,7 @@ export default function UniversePage() {
                                     </Link>
                                 )}
                             </div>
-                            <div className="grid grid-cols-2 gap-4 mb-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                                 <div className="border-l-2 border-indigo-500/40 pl-4">
                                     <div className="text-[9px] tracking-[0.15em] uppercase text-indigo-400 mb-2">WIO (IT 솔루션)</div>
                                     {selectedBiz.wio.map(w => (

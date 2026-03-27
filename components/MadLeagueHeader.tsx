@@ -16,7 +16,6 @@ const navItems = [
     { name: "히어로", href: "/hero" },
     { name: "활동인증서", href: "/certificate" },
     { name: "매드 리거", href: "/leaguer" },
-    { name: "About", href: "/about" },
 ];
 
 export function MadLeagueHeader() {

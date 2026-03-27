@@ -11,7 +11,6 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 const navItems = [
     { name: "필찐감자", href: "/writers" },
     { name: "프로그램", href: "/programs" },
-    { name: "About", href: "/about" },
 ];
 
 export function OgamjaHeader() {
@@ -109,7 +108,7 @@ export function OgamjaHeader() {
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">회원가입</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
                             </>
                         )}
                     </div>

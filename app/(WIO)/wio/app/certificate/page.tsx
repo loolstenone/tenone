@@ -96,8 +96,8 @@ export default function CertificatePage() {
       </div>
 
       {/* Certificate List */}
-      <div className="border border-white/5 rounded-xl overflow-hidden">
-        <table className="w-full">
+      <div className="border border-white/5 rounded-xl overflow-hidden overflow-x-auto">
+        <table className="w-full min-w-[700px]">
           <thead>
             <tr className="bg-white/[0.02] border-b border-white/5">
               <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">제목</th>

@@ -4,6 +4,52 @@
 
 ---
 
+## 2026-03-28 (집)
+
+### About 페이지
+- PublicHeader + 7개 브랜드 헤더에서 About 네비 중복 제거
+- Brands 탭 → 역할 기반 7그룹 구조 + Synergy Flows 교체
+
+### 홈페이지
+- Universe 브랜드 쇼케이스 + Latest fallback 추가
+- Works 위젯 represent_image → representImage 필드명 수정
+
+### WIO 게시판 모듈 (대규모)
+- 대표 이미지 자동 추출 (extractFirstImage)
+- 에디터 이미지 paste/drop → Storage 업로드 (base64 제거)
+- /api/board/migrate-images 마이그레이션 API
+- 좋아요/북마크 userId 전송 + 비로그인 토스트
+- 게시글 고유 URL (?postId=)
+- 5개 board 컴포넌트 tn-* 테마 변수 적용
+- PostDetail 본문 레이아웃 개선 (prose + 대표이미지)
+- docs/WIO_Board_Guide.md 작성
+
+### Works 게시물
+- Google Sites History → 20개 게시물 (본문+이미지+날짜)
+- 18개 대표 이미지 (Supabase Storage + OG 이미지)
+
+### SmarComm 랜딩
+- 소셜 프루프 + 신뢰 지표(Trust) 섹션 추가
+
+### 프로필
+- 비밀번호 확인 제거, 뉴스레터 숨김, 북마크 목록 UI
+
+### DB
+- posts UPDATE RLS 정책 완화
+
+### 변경 파일 (주요)
+- app/page.tsx, app/(TenOne)/about/page.tsx
+- components/board/*.tsx (5개 전부)
+- components/PublicHeader.tsx + 7개 브랜드 Header
+- components/UniverseUtilityBar.tsx
+- lib/supabase/board.ts
+- app/api/board/migrate-images/route.ts (신규)
+- app/(SmarComm)/smarcomm/page.tsx
+- app/(TenOne)/profile/page.tsx
+- docs/WIO_Board_Guide.md (신규)
+
+---
+
 ## 2026-03-27 (사무실)
 
 ### DB

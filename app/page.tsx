@@ -6,14 +6,38 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
 import Image from "next/image";
-import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
+
+// ===== Static Latest News (fallback when API empty) =====
+const STATIC_NEWS = [
+    { id: "luki", title: "LUKI", excerpt: "인공지능 4인조 여성 아이돌 데뷔", category: "AI Idol", date: "2025.08", link: "https://youtube.com/@LUKI-AIdol" },
+    { id: "rook", title: "RooK", excerpt: "인공지능 크리에이터 플랫폼 런칭", category: "AI Creator", date: "2025.08", link: "https://rook.co.kr" },
+    { id: "madzine", title: "MADzine", excerpt: "마케팅/광고 매거진 창간", category: "Magazine", date: "2025.04", link: "https://madleague.net/MADzine" },
+    { id: "dam-be", title: "DAM Be", excerpt: "MAD League 캐릭터 개발", category: "Character", date: "2025.03", link: "https://madleague.net" },
+    { id: "jeju", title: "제주 수작 합류", excerpt: "전국 5개 권역 네트워크 완성", category: "Network", date: "2025.01" },
+    { id: "changeup", title: "ChangeUp", excerpt: "인공지능 시대 인재 양성 프로그램", category: "Education", date: "2024.05", link: "https://changeup.company" },
+];
+
+// ===== Universe Brand Showcase =====
+const UNIVERSE_BRANDS = [
+    { name: "Badak", domain: "badak.biz", desc: "마케팅 광고 업계 네트워킹 커뮤니티", href: "/badak" },
+    { name: "MADLeague", domain: "madleague.net", desc: "전국 대학생 프로젝트 연합", href: "/madleague" },
+    { name: "YouInOne", domain: "youinone.com", desc: "프로젝트 그룹", href: "/youinone" },
+    { name: "HeRo", desc: "탤런트 에이전시", href: "/hero" },
+    { name: "SmarComm.", domain: "smarcomm.biz", desc: "AI 마케팅 커뮤니케이션 솔루션", href: "/smarcomm" },
+    { name: "RooK", domain: "rook.co.kr", desc: "인공지능 크리에이터", href: "/rook" },
+    { name: "FWN", domain: "fwn.co.kr", desc: "패션 위크 네트워크", href: "/fwn" },
+    { name: "0gamja", domain: "0gamja.com", desc: "공감 콘텐츠 · 심리 상담", href: "/0gamja" },
+    { name: "Mindle", desc: "트렌드 인텔리전스", href: "/mindle" },
+    { name: "WIO", desc: "통합 운영 플랫폼", href: "/wio" },
+];
 
 interface SimplePost {
     id: string;
     title: string;
     excerpt: string;
     category: string;
-    represent_image: string;
+    representImage: string;
     created_at: string;
     view_count: number;
 }
@@ -41,7 +65,7 @@ export default function HomePage() {
             <PublicHeader />
 
             {/* Hero — 좌측 정렬, 비대칭 */}
-            <section className="min-h-screen flex items-center px-6 lg:px-0">
+            <section className="min-h-[70vh] md:min-h-screen flex items-center px-6 lg:px-0">
                 <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                     <div className="lg:pl-8">
                         <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-6">
@@ -200,11 +224,14 @@ export default function HomePage() {
                             const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
                             return (
                                 <Link key={work.id} href={`/works`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
-                                    <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden">
-                                        {work.represent_image ? (
-                                            <img src={work.represent_image} alt={work.title} className="w-full h-full object-cover" />
+                                    <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden relative">
+                                        {work.representImage ? (
+                                            <img src={work.representImage} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                         ) : (
-                                            <span className="text-lg font-bold tn-text-muted">{work.category || work.title?.substring(0, 2)}</span>
+                                            <>
+                                                <span className="text-[4rem] font-bold opacity-[0.06] absolute">{work.title?.substring(0, 1)}</span>
+                                                <span className="text-xs tracking-wider uppercase tn-text-muted">{work.category}</span>
+                                            </>
                                         )}
                                     </div>
                                     <div>
@@ -222,14 +249,49 @@ export default function HomePage() {
                 </div>
             </section>}
 
-            {/* Latest — 이미지 카드, 라이트 그레이 배경 */}
-            {latestNews.length > 0 && <section className="py-20 md:py-32 px-6 tn-bg-alt">
+            {/* Universe Brands Showcase */}
+            <section className="py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
-                                Latest
-                            </p>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
+                                지금까지 펼쳐진 <span className="font-bold">세계관</span>
+                            </h2>
+                        </div>
+                        <Link href="/about?tab=universe" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
+                            Explore <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
+                        {UNIVERSE_BRANDS.map((brand) => (
+                            <Link key={brand.name} href={brand.href}
+                                className="group p-6 text-center transition-all hover:opacity-100 opacity-80"
+                                style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
+                                <div className="h-10 w-10 mx-auto flex items-center justify-center text-xs font-bold border mb-3"
+                                    style={{ borderColor: "var(--tn-border)" }}>
+                                    {brand.name.slice(0, 2)}
+                                </div>
+                                <h3 className="text-sm font-semibold tn-text">{brand.name}</h3>
+                                <p className="text-[10px] tn-text-sub mt-1">{brand.desc}</p>
+                                {brand.domain && (
+                                    <p className="text-[9px] tn-text-muted mt-1">{brand.domain}</p>
+                                )}
+                            </Link>
+                        ))}
+                    </div>
+                    <Link href="/about?tab=brands" className="md:hidden flex items-center justify-center gap-2 mt-8 text-sm tn-text-sub hover:tn-text">
+                        전체 브랜드 보기 <ArrowRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            </section>
+
+            {/* Latest — 이미지 카드 or Static Fallback */}
+            <section className="py-20 md:py-32 px-6 tn-bg-alt">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex items-end justify-between mb-10 md:mb-16">
+                        <div>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Latest</p>
                             <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
                                 새로운 <span className="font-bold">소식</span>
                             </h2>
@@ -239,27 +301,48 @@ export default function HomePage() {
                         </Link>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {latestNews.map((news) => {
-                            const rawDate = (news.created_at || '').substring(0, 10);
-                            return (
-                                <Link key={news.id} href="/newsroom" className="group block">
-                                    <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
-                                        {news.represent_image ? (
-                                            <img src={news.represent_image} alt={news.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <p className="text-xs tn-text-sub text-center px-4">{news.category || '뉴스'}</p>
-                                        )}
+                    {latestNews.length > 0 ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {latestNews.map((news) => {
+                                const rawDate = (news.created_at || '').substring(0, 10);
+                                return (
+                                    <Link key={news.id} href="/newsroom" className="group block">
+                                        <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
+                                            {news.representImage ? (
+                                                <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <p className="text-xs tn-text-sub text-center px-4">{news.category || '뉴스'}</p>
+                                            )}
+                                        </div>
+                                        <p className="text-xs tn-text-sub">{rawDate}</p>
+                                        <h3 className="font-semibold tn-text mt-1 group-hover:underline">{news.title}</h3>
+                                        <p className="text-sm tn-text-sub mt-1 line-clamp-1">{news.excerpt}</p>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
+                            {STATIC_NEWS.map((news) => (
+                                <div key={news.id} className="p-6" style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-[10px] font-mono tn-text-sub">{news.date}</span>
+                                        <span className="text-[9px] px-2 py-0.5 border tn-border tn-text-sub">{news.category}</span>
                                     </div>
-                                    <p className="text-xs tn-text-sub">{rawDate}</p>
-                                    <h3 className="font-semibold tn-text mt-1 group-hover:underline">{news.title}</h3>
-                                    <p className="text-sm tn-text-sub mt-1 line-clamp-1">{news.excerpt}</p>
-                                </Link>
-                            );
-                        })}
-                    </div>
+                                    <h3 className="text-lg font-bold tn-text">{news.title}</h3>
+                                    <p className="text-sm tn-text-sub mt-1">{news.excerpt}</p>
+                                    {news.link && (
+                                        <a href={news.link} target="_blank" rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-xs tn-text-sub hover:tn-text mt-3 transition-colors">
+                                            Visit <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-            </section>}
+            </section>
 
             {/* CTA — 다크 섹션 */}
             <section className="tn-card py-20 md:py-32 px-6">
@@ -325,7 +408,7 @@ export default function HomePage() {
                             </form>
                             <div className="flex items-center justify-center gap-2 mt-3">
                                 <button type="button" onClick={() => setNlAgree(!nlAgree)}
-                                    className={`w-3.5 h-3.5 border rounded flex items-center justify-center shrink-0 transition-colors ${
+                                    className={`w-5 h-5 border rounded flex items-center justify-center shrink-0 transition-colors ${
                                         nlAgree ? 'bg-[var(--tn-accent)] border-[var(--tn-accent)]' : 'border-[var(--tn-border)] tn-surface'
                                     }`}>
                                     {nlAgree && <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}

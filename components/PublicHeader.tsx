@@ -16,15 +16,6 @@ const publicNav = [
     { name: "Contact", href: "/contact" },
     { name: "Newsroom", href: "/newsroom" },
     // { name: "Newsletter", href: "/newsletter" },  // 임시 숨김
-    {
-        name: "About", href: "/about",
-        sub: [
-            { name: "Philosophy", href: "/about?tab=philosophy" },
-            { name: "Universe", href: "/universe" },
-            { name: "Brands", href: "/brands" },
-            { name: "History", href: "/about?tab=history" },
-        ]
-    },
 ];
 
 export function PublicHeader() {
@@ -86,21 +77,26 @@ export function PublicHeader() {
                 {/* Mobile menu button */}
                 <div className="flex md:hidden items-center gap-2">
                     <ThemeToggle />
-                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 transition-colors" style={{ color: "var(--tn-text)" }}>
+                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2.5 transition-colors" style={{ color: "var(--tn-text)" }}>
                         {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
                 </div>
             </nav>
 
+            {/* Mobile backdrop overlay */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 top-16 bg-black/40 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+            )}
+
             {/* Mobile menu */}
             {mobileMenuOpen && (
-                <div className="md:hidden border-t px-6 py-6 space-y-4"
+                <div className="md:hidden border-t px-6 py-6 space-y-1 relative z-50"
                     style={{ backgroundColor: "var(--tn-bg)", borderColor: "var(--tn-border)" }}>
                     {publicNav.map(item => (
                         <div key={item.name}>
                             <Link href={item.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm transition-colors hover:opacity-70"
+                                className="block py-3 text-sm transition-colors hover:opacity-70"
                                 style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-sub)" }}>
                                 {item.name}
                             </Link>
@@ -137,29 +133,29 @@ export function PublicHeader() {
                             </div>
                             {canAccessIntra && (
                                 <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-1 text-sm transition-colors hover:opacity-70"
+                                    className="flex items-center gap-1 py-2 text-sm transition-colors hover:opacity-70"
                                     style={{ color: "var(--tn-text-sub)" }}>
                                     Intra
                                 </Link>
                             )}
                             <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
+                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 프로필
                             </Link>
                             <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
-                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-muted)" }}>
+                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-muted)" }}>
                                 로그아웃
                             </button>
                         </div>
                     ) : !isLoading ? (
                         <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
                             <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
+                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
                                 로그인
                             </Link>
                             <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
-                                className="block text-sm font-medium transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }}>
-                                회원가입
+                                className="block py-2 text-sm font-medium transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }}>
+                                가입
                             </Link>
                         </div>
                     ) : null}

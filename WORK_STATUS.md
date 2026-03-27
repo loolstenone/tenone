@@ -1,72 +1,63 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-27 (사무실) — 작업 종료
+> 마지막 업데이트: 2026-03-28 (집) — 작업 중
 
-## 오늘 한 작업 (3/27 사무실)
+## 오늘 한 작업 (3/28 집)
 
-### 1. Supabase DB 마이그레이션 ✅
-- SQL Editor에서 001_brands_and_profiles.sql 실행 (brands 23개 + profiles + RLS)
-- SQL Editor에서 002_talk_comments_likes.sql 실행 (wio_comments, wio_likes, wio_bookmarks + RLS)
-- 테이블 생성 및 데이터 입력 검증 완료
+### 1. About 페이지 개선 ✅
+- PublicHeader + 7개 브랜드 헤더에서 About 네비 중복 제거 (UniverseUtilityBar에만 유지)
+- About > Brands 탭 → 역할 기반 7그룹 구조로 교체 (tenone_role_relationship.html 반영)
+- Synergy Flows 섹션 추가 (인재 파이프라인, 트렌드-비즈니스, 인프라 흐름)
 
-### 2. TenOne Universe 페이지 고도화 ✅
-- 통계 섹션 추가 (23 브랜드, 14 WIO 모듈, 3 핵심 자원, ∞ 시너지)
-- 사업 포트폴리오 9개 → 12개 (NamingFactory, ChangeUp, 0gamja 추가)
-- Coming Soon 섹션 (8개 준비중 브랜드: domo, FWN, MoNTZ, Myverse 등)
-- 시너지 체인 설명 텍스트 강화
-- WIO 체험하기 CTA 버튼 추가
+### 2. 홈페이지 콘텐츠 보강 ✅
+- Universe 브랜드 쇼케이스 섹션 추가 (10개 브랜드 그리드)
+- Latest 정적 fallback 뉴스 추가 (LUKI, RooK, MADzine 등 6개)
+- Google Sites 콘텐츠 전체 반영
 
-### 3. Mindle 개선 ✅
-- MY 페이지: 활동 통계 카드 (조회/저장/알림/이번주 읽음)
-- 상세 페이지: 태그 시스템 (#AI/Tech, #Hot Topic, #Mindle Pick)
-- 상세 페이지: 반응 바 (유용해요/의견/북마크/공유)
+### 3. WIO 게시판 모듈 대규모 업그레이드 ✅
+- 대표 이미지 자동 추출 (본문 첫 이미지 → 아임웹 스타일)
+- 에디터 이미지 paste/drop → Supabase Storage 업로드 (base64 → URL)
+- base64 → Storage 마이그레이션 API 생성 (/api/board/migrate-images)
+- 좋아요/북마크 userId 전송 + 비로그인 안내 토스트
+- 게시글 고유 URL (?postId= 파라미터, 직접 링크 가능)
+- 게시판 5개 컴포넌트 테마 가독성 개선 (tn-* CSS 변수 적용)
+- PostDetail 본문 이미지+텍스트 레이아웃 개선 (모바일 대응)
+- WIO 게시판 가이드 문서 작성 (docs/WIO_Board_Guide.md)
 
-### 4. 브랜드 데이터 대규모 확장 ✅
-- lib/data.ts 브랜드 10개 → 22개 (SmarComm, WIO, Mindle, EvoSchool, Planners, BrandGravity, NamingFactory, ChangeUp, domo, MoNTZ, Myverse, Seoul360)
-- types/brand.ts 카테고리 타입 확장 (Marketing, Consulting, Education, Platform, Network, Wellness)
-- Brands 페이지 카테고리 필터 업데이트
+### 4. Works 게시물 20개 완성 ✅
+- Google Sites History 전체 콘텐츠 → Works 게시판 반영
+- 7개 신규 게시물 추가 (DAM Be, 지평주조, Badak, domo, DAM Party S3, 유인원 인수, 전국 네트워크)
+- 기존 13개 본문 텍스트 보강
+- 전체 20개 날짜 원본 매칭 (2021~2025)
+- 18개 대표 이미지 설정 (Supabase Storage + OG 이미지)
 
-### 5. WIO 모바일 반응형 수정 ✅
-- 사이드바: 모바일에서 기본 숨김 → 햄버거 토글로 오버레이 오픈
-- 모바일 헤더 추가 (☰ + 타이틀 바)
-- 경로 변경 시 자동 닫기
-- usePathname으로 안전한 경로 감지
+### 5. SmarComm 랜딩 고도화 ✅
+- 소셜 프루프 섹션 추가 (500+ 진단, 93% 개선, 30초, ₩0)
+- 신뢰 지표(Trust) 섹션 추가 (데이터 기반, 주간 리포트, 성과 보장)
 
-### 6. TypeScript 에러 72개 → 0개 ✅
-- 4개 에이전트 병렬 수정 (WIO, lib, components, app)
-- 주요 수정: JobStatus 'completed'→'done', tenant null check, SiteCode 'changeup' 추가
-- StarfieldPortal function→arrow 변환, SmarCommSidebar context 로컬 정의
-- auth types 확장 (junior-partner, optional v2 fields)
-- 프로덕션 빌드(npm run build) 성공 확인
+### 6. 프로필 페이지 개선 ✅
+- 비밀번호 확인 모달 제거 → 직접 저장
+- 뉴스레터 섹션 숨김
+- 북마크 목록 UI 추가
 
-### 7. 텍스트/버튼 일관성 ✅
-- 로그인 페이지: "MAD League" → "Ten:One™ Universe" 수정
-- 전 사이트 푸터 "© [Brand]. Powered by Ten:One™ Universe." 통일 확인
-- UniverseUtilityBar LOG IN/JOIN 통일 확인
-
-### 8. 브랜드 랜딩 3개 신규 생성 ✅
-- Brand Gravity: 다크 테마, 앰버 액센트, 서비스 카드 4개, Universe 연동 CTA
-- Naming Factory: 화이트 테마, 바이올렛 액센트, 4단계 프로세스, 무료 샘플 CTA
-- Evolution School: 다크 네이비, 시안 액센트, 과정 리스트 6개, 교육→커리어 파이프라인
-
-### 9. WIO 랜딩 고도화 (진행중) 🔧
-- Getting Started 섹션 추가 (풀링포레스트 참고: 4단계 고객/WIO 구분)
-- 자체 도구 섹션 추가 (W-Board, W-Insight, W-Shield)
-- SmarComm 랜딩도 개선 예정 (미완료)
+### 7. RLS 정책 수정 ✅
+- posts UPDATE 정책 완화 (서버사이드 API 업데이트 허용)
 
 ---
 
 ## 다음 할 일
 
 ### 즉시 (이어서)
-- SmarComm 랜딩 페이지 고도화 (풀링포레스트 참고: 프로세스 카드, PoC 섹션)
-- WIO 랜딩 완성 확인 (브라우저 테스트)
-- Vercel 배포
+- 모바일 반응형 점검 결과 반영 (에이전트 실행 중)
+- 게시판 관리자 기능 — BUMS 게시판 관리 페이지 API 연동 (Mock → Supabase)
+  - app/intra/bums/sites/[siteId]/boards/[boardId]/page.tsx 에서 /api/board/posts 연동
+  - 일괄 삭제/상태 변경/이동 기능
 
 ### 단기
-- 각 브랜드 사이트 콘텐츠 보강 (히어로 이미지, 텍스트)
-- SmarComm 비로그인 랜딩 실제 솔루션 소개로 개선
-- 모바일 반응형 나머지 점검 (Intra 사이드바, SmarComm 대시보드)
+- 회원등급별 권한 / 비밀글
+- 이미지 리사이즈/WebP 변환 (업로드 시 자동)
+- 아코디언(FAQ) 게시판 레이아웃
+- 배포 (Vercel/GCP)
 
 ### 중기 (Phase 2)
 - Competition 모듈 (MADLeague 경연)
@@ -74,7 +65,6 @@
 - Certificate 모듈
 - Universe Dashboard (TenOne 크로스 브랜드 관리)
 - WIO Settings CRUD (모듈 ON/OFF, 테마, 멤버 관리)
-- Timesheet → Supabase 실 데이터 연동
 
 ### 장기 (Phase 3~4)
 - AI Assistant (Claude API)
@@ -86,14 +76,4 @@
 
 ## 참고 사이트
 - 풀링포레스트 (https://www.pooolingforest.com/) — WIO/SmarComm 랜딩 디자인 참고
-  - 프로세스 단계: 고객/회사 역할 구분 카드
-  - 자체 도구 소개: P-Grid, P-Canvas, P-Shield 앱 UI 목업
-  - 무료 PoC 제안 섹션
-  - 다크 모노톤 + 시안 액센트
-
-## 핵심 문서 참조 순서
-1. `CLAUDE.md` — 개발 규칙
-2. `WORK_STATUS.md` — 현재 상황 (이 파일)
-3. `docs/WIO_Master_Architecture.md` — WIO 완전 설계서 (단일 진실 소스)
-4. `CHANGELOG.md` — 변경 이력
-5. `ROADMAP.md` — 전체 로드맵
+- 아임웹 게시판 가이드 — WIO 게시판 모듈 기능 기준

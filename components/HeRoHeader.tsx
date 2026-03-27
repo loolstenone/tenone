@@ -14,7 +14,6 @@ const navItems = [
     { name: "멘토링", href: "/mentor" },
     { name: "브랜딩", href: "/branding" },
     { name: "이력서", href: "/resume" },
-    { name: "About", href: "/about" },
 ];
 
 export function HeRoHeader() {
