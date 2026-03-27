@@ -66,8 +66,9 @@ export default function SettingsPage() {
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
 
   if (!tenant) return null;
+  const isDemo = tenant.id === 'demo';
   const plan = PLAN_LABELS[tenant.plan] || PLAN_LABELS.starter;
-  const isAdmin = member?.role === 'owner' || member?.role === 'admin';
+  const isAdmin = !isDemo && (member?.role === 'owner' || member?.role === 'admin');
 
   const TABS = [
     { id: 'general' as Tab, label: '일반', icon: Settings },
@@ -126,7 +127,13 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">설정</h1>
+      <h1 className="text-xl font-bold mb-4">설정</h1>
+
+      {isDemo && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 mb-6 text-sm text-amber-300">
+          데모 모드입니다. 로그인하면 실제 설정을 변경할 수 있습니다.
+        </div>
+      )}
 
       <div className="flex gap-2 mb-6">
         {TABS.map(t => (
