@@ -40,8 +40,9 @@ const defaultConfig: UtilityBarConfig = {
     searchPlaceholder: "Search...",
 };
 
-export function UniverseUtilityBar(props: UtilityBarConfig) {
-    const config = { ...defaultConfig, ...props };
+export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBarConfig }) {
+    const rawConfig = 'config' in props ? props.config : props;
+    const config = { ...defaultConfig, ...rawConfig };
     const { isAuthenticated, user, logout, isLoading } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
@@ -132,14 +133,17 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
             {searchOpen && (
                 <div className="absolute left-0 right-0 top-full z-50 border-b border-current/10" style={{ backgroundColor: "inherit" }}>
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
-                        <div className="flex items-center gap-3">
+                        <form onSubmit={(e) => { e.preventDefault(); /* TODO: 검색 구현 */ }} className="flex items-center gap-3">
                             <Search className="h-4 w-4 opacity-40 shrink-0" />
                             <input type="text" placeholder={config.searchPlaceholder} autoFocus
                                 className="flex-1 bg-transparent text-sm placeholder-current/30 focus:outline-none" />
-                            <button onClick={() => setSearchOpen(false)} className="opacity-40 hover:opacity-100">
+                            <button type="submit" className="opacity-60 hover:opacity-100 text-[11px] font-semibold tracking-wider">
+                                검색
+                            </button>
+                            <button type="button" onClick={() => setSearchOpen(false)} className="opacity-40 hover:opacity-100">
                                 <X className="h-4 w-4" />
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             )}
