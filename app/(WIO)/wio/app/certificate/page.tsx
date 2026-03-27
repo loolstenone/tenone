@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Award, Plus, Download, Eye, Calendar, User, Search, Filter } from 'lucide-react';
 import { useWIO } from '../layout';
 
@@ -36,18 +36,31 @@ export default function CertificatePage() {
   const isDemo = !tenant || tenant.id === 'demo';
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [certificates, setCertificates] = useState<Certificate[]>(isDemo ? MOCK_CERTIFICATES : []);
 
-  const types = ['all', ...new Set(MOCK_CERTIFICATES.map(c => c.type))];
-  const filtered = MOCK_CERTIFICATES.filter(c => {
+  useEffect(() => {
+    if (isDemo) return;
+    fetch(`/api/certificates?brandId=${tenant?.id}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = Array.isArray(data) ? data : data?.data;
+        if (Array.isArray(list) && list.length > 0) setCertificates(list);
+        else setCertificates(MOCK_CERTIFICATES);
+      })
+      .catch(() => setCertificates(MOCK_CERTIFICATES));
+  }, [isDemo, tenant?.id]);
+
+  const types = ['all', ...new Set(certificates.map(c => c.type))];
+  const filtered = certificates.filter(c => {
     if (typeFilter !== 'all' && c.type !== typeFilter) return false;
     if (searchQuery && !c.title.includes(searchQuery) && !c.recipientName.includes(searchQuery) && !c.certNumber.includes(searchQuery)) return false;
     return true;
   });
 
   const stats = {
-    total: MOCK_CERTIFICATES.length,
-    issued: MOCK_CERTIFICATES.filter(c => c.status === 'issued').length,
-    draft: MOCK_CERTIFICATES.filter(c => c.status === 'draft').length,
+    total: certificates.length,
+    issued: certificates.filter(c => c.status === 'issued').length,
+    draft: certificates.filter(c => c.status === 'draft').length,
   };
 
   return (

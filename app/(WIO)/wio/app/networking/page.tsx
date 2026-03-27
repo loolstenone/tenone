@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Network, Plus, Search, MapPin, Briefcase, MessageSquare, UserPlus, Filter, Star } from 'lucide-react';
 import { useWIO } from '../layout';
 
@@ -29,7 +29,19 @@ export default function NetworkingPage() {
   const isDemo = !tenant || tenant.id === 'demo';
   const [searchQuery, setSearchQuery] = useState('');
   const [viewTab, setViewTab] = useState<'all' | 'connected' | 'recommended'>('all');
-  const [members] = useState(MOCK_MEMBERS);
+  const [members, setMembers] = useState<NetworkMember[]>(isDemo ? MOCK_MEMBERS : []);
+
+  useEffect(() => {
+    if (isDemo) return;
+    fetch(`/api/networking?brandId=${tenant?.id}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = Array.isArray(data) ? data : data?.data;
+        if (Array.isArray(list) && list.length > 0) setMembers(list);
+        else setMembers(MOCK_MEMBERS);
+      })
+      .catch(() => setMembers(MOCK_MEMBERS));
+  }, [isDemo, tenant?.id]);
 
   const filtered = members.filter(m => {
     if (viewTab === 'connected' && !m.connected) return false;

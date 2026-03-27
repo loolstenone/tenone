@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Trophy, Plus, Users, Calendar, Clock, ChevronRight, Star, Target, Medal, Filter } from 'lucide-react';
 import { useWIO } from '../layout';
 
@@ -62,7 +62,25 @@ export default function CompetitionPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const competitions = MOCK_COMPETITIONS;
+  const [competitions, setCompetitions] = useState<Competition[]>(isDemo ? MOCK_COMPETITIONS : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  const loadCompetitions = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const brandId = tenant?.id || '';
+      const res = await fetch(`/api/competitions?brandId=${brandId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCompetitions(data.competitions?.length > 0 ? data.competitions : MOCK_COMPETITIONS);
+      }
+    } catch { setCompetitions(MOCK_COMPETITIONS); }
+    finally { setLoading(false); }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadCompetitions(); }, [loadCompetitions]);
+
   const filtered = tab === 'all' ? competitions : competitions.filter(c => c.status === tab);
 
   const stats = {
