@@ -274,36 +274,78 @@ export default function SettingsPage() {
 
       {/* 브랜딩 */}
       {tab === 'branding' && (
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-          <h2 className="text-sm font-semibold mb-4">브랜딩 설정</h2>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 w-28">메인 색상</span>
-              <div className="flex items-center gap-2">
-                <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} disabled={!isAdmin}
-                  className="h-8 w-8 rounded cursor-pointer bg-transparent border-0" />
-                <input value={editColor} onChange={e => setEditColor(e.target.value)} disabled={!isAdmin}
-                  className="w-24 px-2 py-1 bg-white/5 border border-white/10 rounded text-sm font-mono text-slate-400 focus:outline-none disabled:opacity-50" />
+        <div className="space-y-5">
+          {/* 컬러 패턴 선택 */}
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+            <h2 className="text-sm font-semibold mb-1">앱 컬러 패턴</h2>
+            <p className="text-xs text-slate-500 mb-4">브랜드에 맞는 컬러를 선택하세요. 사이드바, 버튼, 액센트에 적용됩니다.</p>
+            <div className="grid grid-cols-5 gap-3">
+              {[
+                { name: 'Indigo', color: '#6366F1', bg: '#1e1b4b', accent: '#818CF8', desc: '기본' },
+                { name: 'Emerald', color: '#10B981', bg: '#022c22', accent: '#34D399', desc: '성장' },
+                { name: 'Amber', color: '#F59E0B', bg: '#1c1917', accent: '#FBBF24', desc: '에너지' },
+                { name: 'Rose', color: '#F43F5E', bg: '#1a0a0e', accent: '#FB7185', desc: '열정' },
+                { name: 'Slate', color: '#64748B', bg: '#0f172a', accent: '#94A3B8', desc: '모던' },
+              ].map(p => (
+                <button key={p.name} onClick={() => isAdmin && setEditColor(p.color)} disabled={!isAdmin}
+                  className={`relative rounded-xl border p-4 text-center transition-all ${editColor === p.color ? 'border-white/30 ring-1 ring-white/20' : 'border-white/5 hover:border-white/15'} disabled:opacity-50`}>
+                  {/* 미리보기 */}
+                  <div className="rounded-lg overflow-hidden mb-3 border border-white/5" style={{ backgroundColor: p.bg }}>
+                    <div className="h-2" style={{ backgroundColor: p.color }} />
+                    <div className="p-2 space-y-1">
+                      <div className="h-1.5 rounded-full w-3/4" style={{ backgroundColor: p.accent, opacity: 0.3 }} />
+                      <div className="h-1.5 rounded-full w-1/2" style={{ backgroundColor: p.accent, opacity: 0.15 }} />
+                      <div className="flex gap-1 mt-1.5">
+                        <div className="h-4 w-4 rounded" style={{ backgroundColor: p.color }} />
+                        <div className="h-4 flex-1 rounded" style={{ backgroundColor: `${p.accent}15` }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold" style={{ color: p.color }}>{p.name}</div>
+                  <div className="text-[10px] text-slate-500">{p.desc}</div>
+                  {editColor === p.color && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: p.color }}>
+                      <Check size={10} className="text-white" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* 커스텀 컬러 */}
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/5">
+              <span className="text-xs text-slate-500">커스텀:</span>
+              <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} disabled={!isAdmin}
+                className="h-7 w-7 rounded cursor-pointer bg-transparent border-0" />
+              <input value={editColor} onChange={e => setEditColor(e.target.value)} disabled={!isAdmin}
+                className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono text-slate-400 focus:outline-none disabled:opacity-50" />
+            </div>
+          </div>
+
+          {/* 기타 브랜딩 */}
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+            <h2 className="text-sm font-semibold mb-4">기타 설정</h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-slate-500 w-28">서비스명</span>
+                <span className="text-sm">{tenant.serviceName}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-slate-500 w-28">Powered by</span>
+                <button onClick={() => isAdmin && setEditPoweredBy(!editPoweredBy)} disabled={!isAdmin}
+                  className={`w-10 h-5 rounded-full transition-colors ${editPoweredBy ? 'bg-indigo-600' : 'bg-slate-700'} disabled:opacity-50`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${editPoweredBy ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 w-28">서비스명</span>
-              <span className="text-sm">{tenant.serviceName}</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 w-28">Powered by</span>
-              <button onClick={() => isAdmin && setEditPoweredBy(!editPoweredBy)} disabled={!isAdmin}
-                className={`w-10 h-5 rounded-full transition-colors ${editPoweredBy ? 'bg-indigo-600' : 'bg-slate-700'} disabled:opacity-50`}>
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${editPoweredBy ? 'translate-x-5' : 'translate-x-0.5'}`} />
-              </button>
-            </div>
-            {isAdmin && (
-              <button onClick={saveBranding} disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition disabled:opacity-50 mt-4">
-                <Save size={14} /> {saving ? '저장 중...' : '저장'}
-              </button>
-            )}
           </div>
+
+          {isAdmin && (
+            <button onClick={saveBranding} disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-2 text-white text-sm rounded-lg hover:opacity-90 transition disabled:opacity-50"
+              style={{ backgroundColor: editColor }}>
+              <Save size={14} /> {saving ? '저장 중...' : '브랜딩 저장'}
+            </button>
+          )}
         </div>
       )}
     </div>
