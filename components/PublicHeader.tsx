@@ -80,7 +80,7 @@ export function PublicHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
                     <ThemeToggle />
-                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: canAccessIntra ? '/intra' : undefined, workspaceLabel: 'INTRA', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
+                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: '/intra', workspaceLabel: 'INTRA', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
                 </div>
 
                 {/* Mobile menu button */}
