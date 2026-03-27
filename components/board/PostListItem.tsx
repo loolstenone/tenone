@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Lock } from "lucide-react";
 import type { Post } from "@/types/board";
 
 interface PostListItemProps {
@@ -52,6 +52,9 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
                         >
                             공지
                         </span>
+                    )}
+                    {post.isSecret && (
+                        <Lock className="h-3.5 w-3.5 shrink-0 tn-text-muted" />
                     )}
                     <h3 className="text-sm font-medium tn-text truncate transition-colors">
                         {post.title}

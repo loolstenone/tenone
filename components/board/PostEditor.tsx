@@ -11,7 +11,7 @@ import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     Heading1, Heading2, Heading3, List, ListOrdered,
     Quote, Code, Minus, Image as ImageIcon, Link as LinkIcon,
-    Undo, Redo, X, Upload, Tag, Eye, Save, Send,
+    Undo, Redo, X, Upload, Tag, Eye, Save, Send, Lock,
 } from "lucide-react";
 import type { CreatePostInput, UpdatePostInput, Post, BoardConfig } from "@/types/board";
 
@@ -33,6 +33,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
     const [representImage, setRepresentImage] = useState(post?.representImage || "");
     const [status, setStatus] = useState<"published" | "draft">(post?.status === "draft" ? "draft" : "published");
     const [isPinned, setIsPinned] = useState(post?.isPinned || false);
+    const [isSecret, setIsSecret] = useState(post?.isSecret || false);
 
     // 비회원
     const [guestNickname, setGuestNickname] = useState("");
@@ -139,7 +140,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
             if (isEdit) {
                 const data: UpdatePostInput = {
                     title, content, excerpt, category,
-                    tags, representImage, status: asStatus, isPinned,
+                    tags, representImage, status: asStatus, isPinned, isSecret,
                 };
                 await onSubmit(data);
             } else {
@@ -147,7 +148,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                     site: config.site,
                     board: config.slug,
                     title, content, excerpt, category,
-                    tags, representImage, status: asStatus, isPinned,
+                    tags, representImage, status: asStatus, isPinned, isSecret,
                     ...(isGuest ? { guestNickname, guestPassword, guestEmail } : {}),
                 };
                 await onSubmit(data);
@@ -315,6 +316,12 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                         <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)}
                             className="rounded border-neutral-300" />
                         공지 고정
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-neutral-500 cursor-pointer">
+                        <input type="checkbox" checked={isSecret} onChange={e => setIsSecret(e.target.checked)}
+                            className="rounded border-neutral-300" />
+                        <Lock size={14} />
+                        비밀글
                     </label>
                 </div>
                 <div className="flex items-center gap-2">

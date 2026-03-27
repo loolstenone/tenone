@@ -27,6 +27,12 @@ export interface BoardSettings {
     theme?: string;
 }
 
+export interface BoardPermissions {
+    read: 'all' | 'member' | 'admin';
+    write: 'all' | 'member' | 'admin';
+    comment: 'all' | 'member' | 'admin';
+}
+
 export interface BoardConfig {
     id: string;
     site: SiteCode;
@@ -35,6 +41,7 @@ export interface BoardConfig {
     description: string;
     categories: string[];
     settings: BoardSettings;
+    permissions: BoardPermissions;
     sortOrder: number;
     createdAt: string;
     updatedAt: string;
@@ -72,6 +79,7 @@ export interface Post {
 
     // 플래그
     isPinned: boolean;
+    isSecret: boolean;
 
     // 날짜
     createdAt: string;
@@ -157,6 +165,7 @@ export interface CreatePostInput {
     representImage?: string;
     status?: PostStatus;
     isPinned?: boolean;
+    isSecret?: boolean;
     // 비회원
     guestNickname?: string;
     guestPassword?: string;
@@ -174,6 +183,7 @@ export interface UpdatePostInput {
     representImage?: string;
     status?: PostStatus;
     isPinned?: boolean;
+    isSecret?: boolean;
     // 비회원 수정 시
     guestPassword?: string;
 }
@@ -220,6 +230,7 @@ export interface AdminPostInput {
     representImage?: string;
     status?: PostStatus;
     isPinned?: boolean;
+    isSecret?: boolean;
     authorType?: 'admin' | 'agent';
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Lock } from "lucide-react";
 import type { Post } from "@/types/board";
 
 interface PostCardProps {
@@ -106,6 +106,11 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                     style={{ backgroundColor: accentColor }}
                 >
                     공지
+                </div>
+            )}
+            {post.isSecret && (
+                <div className="absolute top-2 left-2 p-1 bg-black/50 text-white rounded">
+                    <Lock className="h-3.5 w-3.5" />
                 </div>
             )}
         </article>

@@ -6,6 +6,7 @@ import { PenSquare } from "lucide-react";
 import BoardList from "./BoardList";
 import PostDetail from "./PostDetail";
 import PostEditor from "./PostEditor";
+import PostAccordion from "./PostAccordion";
 import type { Post, BoardConfig, SiteCode, CreatePostInput, UpdatePostInput } from "@/types/board";
 
 interface BoardPageProps {
@@ -16,6 +17,8 @@ interface BoardPageProps {
     accentColor?: string;
     showWriteButton?: boolean;
     isGuest?: boolean;
+    /** 레이아웃: 'default' | 'accordion' (FAQ/QnA용) */
+    layout?: 'default' | 'accordion';
 }
 
 type Mode = "list" | "detail" | "write" | "edit";
@@ -36,6 +39,7 @@ function BoardPageInner({
     accentColor = "#171717",
     showWriteButton = true,
     isGuest = false,
+    layout = 'default',
 }: BoardPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -248,7 +252,8 @@ function BoardPageInner({
                     board={board}
                     boardConfig={boardConfig || undefined}
                     accentColor={accentColor}
-                    onPostClick={(post) => loadPost(post.id)}
+                    layout={layout}
+                    onPostClick={(post) => layout === 'accordion' ? undefined : loadPost(post.id)}
                 />
             </div>
         </div>

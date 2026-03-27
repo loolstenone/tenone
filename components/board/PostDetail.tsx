@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User } from "lucide-react";
+import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User, Lock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import CommentSection from "./CommentSection";
 import type { Post, Attachment } from "@/types/board";
@@ -111,7 +111,8 @@ export default function PostDetail({
                         {post.category}
                     </span>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold tn-text mb-4">
+                <h1 className="text-2xl md:text-3xl font-bold tn-text mb-4 flex items-center gap-2">
+                    {post.isSecret && <Lock className="h-5 w-5 tn-text-muted shrink-0" />}
                     {post.title}
                 </h1>
                 <div className="flex items-center justify-between flex-wrap gap-2 text-sm tn-text-sub pb-4 border-b tn-border">

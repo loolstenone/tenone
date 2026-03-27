@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, LayoutGrid, List, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import PostCard from "./PostCard";
 import PostListItem from "./PostListItem";
+import PostAccordion from "./PostAccordion";
 import type { Post, PostListResponse, BoardConfig, PostListParams, SiteCode } from "@/types/board";
 
 interface BoardListProps {
@@ -11,6 +12,7 @@ interface BoardListProps {
     board: string;
     boardConfig?: BoardConfig;
     accentColor?: string;
+    layout?: 'default' | 'accordion';
     onPostClick?: (post: Post) => void;
 }
 
@@ -32,7 +34,7 @@ const periodLabels: Record<PeriodOption, string> = {
     year: "올해",
 };
 
-export default function BoardList({ site, board, boardConfig, accentColor = "#171717", onPostClick }: BoardListProps) {
+export default function BoardList({ site, board, boardConfig, accentColor = "#171717", layout = 'default', onPostClick }: BoardListProps) {
     const defaultView = boardConfig?.settings?.defaultView || "card";
     const defaultLimit = boardConfig?.settings?.postsPerPage || 12;
 
@@ -225,8 +227,17 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
                 </div>
             )}
 
+            {/* 아코디언(FAQ) 뷰 */}
+            {!loading && posts.length > 0 && layout === 'accordion' && (
+                <div className="border tn-border rounded-lg overflow-hidden" style={{ borderColor: "var(--tn-border)" }}>
+                    {posts.map((post) => (
+                        <PostAccordion key={post.id} post={post} accentColor={accentColor} />
+                    ))}
+                </div>
+            )}
+
             {/* 카드형 뷰 */}
-            {!loading && posts.length > 0 && viewMode === "card" && (
+            {!loading && posts.length > 0 && layout !== 'accordion' && viewMode === "card" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {posts.map((post) => (
                         <PostCard
@@ -240,7 +251,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
             )}
 
             {/* 리스트형 뷰 */}
-            {!loading && posts.length > 0 && viewMode === "list" && (
+            {!loading && posts.length > 0 && layout !== 'accordion' && viewMode === "list" && (
                 <div className="border tn-border rounded-lg overflow-hidden" style={{ borderColor: "var(--tn-border)" }}>
                     {/* 리스트 헤더 */}
                     <div className="flex items-center gap-4 px-4 py-2 tn-bg-alt border-b tn-border text-xs tn-text-sub font-medium" style={{ borderColor: "var(--tn-border)" }}>
