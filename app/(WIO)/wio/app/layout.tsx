@@ -46,7 +46,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         const { data: { user } } = await sb.auth.getUser();
         if (!user) {
           // 데모 모드: 비로그인도 체험 가능 (읽기 전용)
-          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance'], isActive: true } as any);
+          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
           setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
           setLoading(false);
           return;
@@ -66,7 +66,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
         // 여전히 테넌트 없으면 데모 모드로 진입 (DB 미설정)
         if (tenants.length === 0) {
-          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance'], isActive: true } as any);
+          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
           setMember({ id: 'demo', displayName: user.email?.split('@')[0] || '사용자', role: 'admin', email: user.email || '' } as any);
           setLoading(false);
           return;
@@ -85,7 +85,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         setLoading(false);
       } catch {
         // DB 오류 시에도 데모 모드로 진입
-        setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance'], isActive: true } as any);
+        setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
         setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
         setLoading(false);
       }
