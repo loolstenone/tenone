@@ -76,7 +76,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
     if (!isOpen || typeof window === 'undefined') return null;
 
-    const inputClass = "w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400";
+    const inputClass = "w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400";
 
     return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
