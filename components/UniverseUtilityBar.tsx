@@ -67,9 +67,9 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
         <>
             {/* Utility items */}
             <div className="flex items-center gap-4">
-                {/* 인트라 입구 (항상 표시) */}
-                <Link href="/intra" className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                    INTRA
+                {/* About */}
+                <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                    ABOUT
                 </Link>
 
                 {isAuthenticated ? (
@@ -80,7 +80,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig) {
                                 <User className="h-3 w-3" /> {user?.name?.substring(0, 4) || "MY"}
                             </Link>
                         )}
-                        {/* 워크스페이스/인트라 */}
+                        {/* 인트라 (권한 있는 사용자만) */}
                         {config.workspacePath && (
                             <Link href={config.workspacePath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                                 {config.workspaceLabel}

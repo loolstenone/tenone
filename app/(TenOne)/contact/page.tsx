@@ -6,7 +6,7 @@ import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 
-type TabType = 'partner' | 'business' | 'signup';
+type TabType = 'partner' | 'business';
 
 function OffOniceToggle() {
     const [isOn, setIsOn] = useState(true);
@@ -39,27 +39,27 @@ function OffOniceToggle() {
                         : "0 2px 6px rgba(0,0,0,0.15), inset 0 -1px 2px rgba(0,0,0,0.05)",
                 }}
             />
-            {/* Off 텍스트 */}
+            {/* Offline 텍스트 */}
             <span
                 className="absolute text-xs font-bold tracking-wider transition-opacity duration-300"
                 style={{
-                    left: 14,
+                    left: 12,
                     opacity: isOn ? 0.3 : 0.8,
                     color: isOn ? "#666" : "#444",
                 }}
             >
-                Off
+                Offline
             </span>
-            {/* Onice 텍스트 */}
+            {/* Online 텍스트 */}
             <span
                 className="absolute text-xs font-bold tracking-wider transition-opacity duration-300"
                 style={{
-                    left: 52,
+                    left: 58,
                     opacity: isOn ? 1 : 0.3,
                     color: isOn ? "#fff" : "#999",
                 }}
             >
-                Onice
+                Online
             </span>
         </button>
     );
@@ -151,13 +151,6 @@ export default function ContactPage() {
                                 activeTab === 'business' ? "border-neutral-900 tn-text font-medium" : "border-transparent tn-text-sub hover:text-neutral-700"
                             )}>
                             <Briefcase className="h-4 w-4" /> 프로젝트 의뢰
-                        </button>
-                        <button onClick={() => setActiveTab('signup')}
-                            className={clsx(
-                                "flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-colors border-b-2",
-                                activeTab === 'signup' ? "border-neutral-900 tn-text font-medium" : "border-transparent tn-text-sub hover:text-neutral-700"
-                            )}>
-                            <UserPlus className="h-4 w-4" /> 멤버 가입
                         </button>
                     </div>
 

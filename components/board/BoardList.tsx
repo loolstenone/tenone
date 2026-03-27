@@ -179,7 +179,7 @@ export default function BoardList({ site, board, boardConfig, accentColor = "#17
 
             {/* 필터 패널 */}
             {showFilters && (
-                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-neutral-800/50 rounded-lg">
+                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-neutral-800/50 rounded-lg border border-neutral-700/50">
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-neutral-500">정렬</span>
                         <select
