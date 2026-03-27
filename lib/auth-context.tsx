@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } catch {
                 // Supabase 접속 실패 → localStorage 유지 (오프라인 대응)
             } finally {
-                if (!hasLocalData) setIsLoading(false); // localStorage 없었으면 여기서 로딩 해제
+                setIsLoading(false); // 항상 로딩 해제
             }
         }
         validateSession();
