@@ -80,9 +80,9 @@ export function IntraHeader() {
     if (!user) return null;
 
     return (
-        <header className="h-12 border-b border-neutral-100 bg-white flex items-center justify-between px-6 pl-14 lg:pl-6 shrink-0">
+        <header className="h-12 border-b border-neutral-100 bg-white flex items-center justify-between px-3 pl-14 lg:pl-6 lg:px-6 shrink-0">
             {/* Left: 즐겨찾기 바 */}
-            <div className="flex items-center gap-1.5">
+            <div className="hidden sm:flex items-center gap-1.5">
                 {favorites.filter(fav => {
                     const bm = availableBookmarks.find(b => b.id === fav.id);
                     return !bm?.staffOnly || isStaff;
@@ -133,6 +133,10 @@ export function IntraHeader() {
                 </div>
 
                 <span className="text-[10px] text-neutral-300 ml-2">{formatToday()}</span>
+            </div>
+            {/* Mobile: 날짜만 표시 */}
+            <div className="sm:hidden flex items-center">
+                <span className="text-[10px] text-neutral-400">{formatToday()}</span>
             </div>
 
             {/* Right: search, notifications, logout, avatar, portal */}

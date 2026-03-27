@@ -49,14 +49,14 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 {/* Main content */}
                 <div className="flex-1 ml-0 lg:ml-[240px] flex flex-col min-h-screen">
                     <IntraHeader />
-                    <main className="flex-1 p-4 pt-14 lg:px-8 lg:py-6 lg:pt-6 bg-white">
+                    <main className="flex-1 p-3 pt-14 sm:p-4 sm:pt-14 lg:px-8 lg:py-6 lg:pt-6 bg-white">
                         <div className="max-w-[1200px]">
                             {children}
                         </div>
                     </main>
-                    <footer className="border-t border-neutral-100 px-8 py-4 flex items-center justify-between">
-                        <p className="text-xs text-neutral-400">© {new Date().getFullYear()} Ten:One™ Intra Office</p>
-                        <p className="text-xs text-neutral-300">Internal Use Only</p>
+                    <footer className="border-t border-neutral-100 px-4 lg:px-8 py-4 flex items-center justify-between">
+                        <p className="text-[10px] sm:text-xs text-neutral-400">© {new Date().getFullYear()} Ten:One™ Intra</p>
+                        <p className="text-[10px] sm:text-xs text-neutral-300">Internal Use Only</p>
                     </footer>
                 </div>
             </div>
