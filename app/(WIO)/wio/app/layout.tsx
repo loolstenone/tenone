@@ -58,9 +58,8 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         const sb = createClient();
         const { data: { user } } = await sb.auth.getUser();
         if (!user) {
-          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
-          setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
-          setLoading(false);
+          // 비로그인 → WIO 로그인 페이지로
+          router.push('/wio/login');
           return;
         }
 
@@ -76,8 +75,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         }
 
         if (tenants.length === 0) {
-          setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
-          setMember({ id: 'demo', displayName: user.email?.split('@')[0] || '사용자', role: 'admin', email: user.email || '' } as any);
+          // 테넌트에 소속되지 않은 사용자 → 접근 차단
+          setTenant(null);
+          setMember(null);
           setLoading(false);
           return;
         }
@@ -93,8 +93,8 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         setMember(m);
         setLoading(false);
       } catch {
-        setTenant({ id: 'demo', name: 'WIO Demo', slug: 'demo', serviceName: 'Work In One', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
-        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+        setTenant(null);
+        setMember(null);
         setLoading(false);
       }
     };
@@ -107,6 +107,29 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         <div className="text-center">
           <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3" />
           <p className="text-xs text-slate-500">WIO 로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 접근 권한 없음
+  if (!tenant) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="h-14 w-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+            <Settings className="h-7 w-7 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">접근 권한이 없습니다</h2>
+          <p className="text-slate-400 text-sm mb-6">WIO는 등록된 구성원만 사용할 수 있습니다.<br />관리자에게 초대를 요청하세요.</p>
+          <div className="flex gap-3 justify-center">
+            <button onClick={() => router.push('/')} className="px-5 py-2.5 text-sm bg-white text-slate-900 rounded-lg hover:bg-slate-100 transition-colors">
+              홈으로
+            </button>
+            <button onClick={() => router.push('/wio')} className="px-5 py-2.5 text-sm border border-slate-700 text-slate-300 rounded-lg hover:border-slate-500 transition-colors">
+              WIO 소개
+            </button>
+          </div>
         </div>
       </div>
     );
