@@ -186,14 +186,28 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
       {/* 하단 */}
       <div className="shrink-0 border-t border-white/5 p-2 space-y-0.5">
+        {/* 사용자 정보 */}
+        {(isMobile || !collapsed) && (
+          <div className="px-3 py-2 mb-1">
+            <p className="text-xs font-medium text-slate-300 truncate">{member?.displayName || '체험 사용자'}</p>
+            <p className="text-[10px] text-slate-500 truncate">{member?.email || (tenant?.id === 'demo' ? '데모 모드' : member?.role)}</p>
+          </div>
+        )}
         <Link href="/wio/app/settings"
           className={`flex items-center rounded-lg py-2 text-sm text-slate-500 hover:text-white hover:bg-white/5 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
           <Settings size={15} />{(isMobile || !collapsed) && '설정'}
         </Link>
-        <button onClick={handleLogout}
-          className={`flex w-full items-center rounded-lg py-2 text-sm text-slate-500 hover:text-white hover:bg-white/5 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
-          <LogOut size={15} />{(isMobile || !collapsed) && '로그아웃'}
-        </button>
+        {tenant?.id === 'demo' ? (
+          <Link href="/wio/login"
+            className={`flex items-center rounded-lg py-2 text-sm text-indigo-400 hover:text-white hover:bg-indigo-600/10 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
+            <LogOut size={15} />{(isMobile || !collapsed) && '로그인'}
+          </Link>
+        ) : (
+          <button onClick={handleLogout}
+            className={`flex w-full items-center rounded-lg py-2 text-sm text-slate-500 hover:text-white hover:bg-white/5 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
+            <LogOut size={15} />{(isMobile || !collapsed) && '로그아웃'}
+          </button>
+        )}
       </div>
     </>
   );
