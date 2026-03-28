@@ -21,7 +21,7 @@ export const SystemAccessInfo: Record<SystemAccess, { label: string; description
 // ── 인트라 모듈 (v2: DB module_access 기반) ──
 export type IntraModule =
     | 'myverse' | 'townity' | 'project' | 'hero' | 'evolution'
-    | 'smarcomm' | 'wiki' | 'erp' | 'vridge' | 'bums';
+    | 'smarcomm' | 'wiki' | 'erp' | 'vridge' | 'bums' | 'agent';
 
 /** 모듈 메타 정보 */
 export const IntraModuleInfo: Record<IntraModule, { label: string; description: string }> = {
@@ -35,6 +35,7 @@ export const IntraModuleInfo: Record<IntraModule, { label: string; description: 
     erp: { label: 'ERP', description: 'HR, People, Finance, Sales' },
     vridge: { label: 'Vridge', description: '경영 전략, GPR, Principle' },
     bums: { label: 'BUMS', description: '사이트/게시판/콘텐츠 통합 관리' },
+    agent: { label: 'Agent', description: 'Universe AI 에이전트 시스템' },
 };
 
 /**

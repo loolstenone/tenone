@@ -26,6 +26,8 @@ import {
     Compass, HelpCircle,
     // BUMS
     ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle,
+    // Agent
+    Bot,
 } from "lucide-react";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
@@ -390,6 +392,10 @@ const modules: NavModule[] = [
             },
         ],
         dynamic: true, // 사이트 진입 시 동적 메뉴 생성
+    },
+    {
+        name: "Agent", href: "/intra/agent", icon: Bot, intraModule: 'agent' as IntraModule,
+        sections: [],
     },
 ];
 

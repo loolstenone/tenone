@@ -8,8 +8,28 @@ import type { AgentProfile, AgentMessage } from '@/types/agent';
 
 // Anthropic 클라이언트 (API 키가 있을 때만 생성)
 function getAnthropicClient(): Anthropic | null {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
+  let apiKey = process.env.ANTHROPIC_API_KEY;
+
+  // Turbopack/Next.js 16에서 서버 env가 안 읽히는 경우 직접 로드
+  if (!apiKey) {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const envPath = path.join(process.cwd(), '.env.local');
+      if (fs.existsSync(envPath)) {
+        const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+        for (const line of lines) {
+          if (line.startsWith('ANTHROPIC_API_KEY=')) {
+            apiKey = line.split('=').slice(1).join('=').trim();
+            break;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  console.log('[Agent] ANTHROPIC_API_KEY:', apiKey ? `${apiKey.substring(0, 15)}... (${apiKey.length}자)` : 'NOT SET');
+  if (!apiKey || apiKey.trim() === '') return null;
   return new Anthropic({ apiKey });
 }
 

@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ['@anthropic-ai/sdk'],
+  env: {
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  },
 };
 
 export default nextConfig;
