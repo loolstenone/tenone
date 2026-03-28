@@ -58,8 +58,10 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         const sb = createClient();
         const { data: { user } } = await sb.auth.getUser();
         if (!user) {
-          // 비로그인 → WIO 로그인 페이지로
-          router.push('/wio/login');
+          // 비로그인 → Orbi 데모 모드
+          setTenant({ id: 'demo', name: 'Orbi Demo', slug: 'demo', serviceName: 'Orbi', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
+          setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+          setLoading(false);
           return;
         }
 
@@ -75,9 +77,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         }
 
         if (tenants.length === 0) {
-          // 테넌트에 소속되지 않은 사용자 → 접근 차단
-          setTenant(null);
-          setMember(null);
+          // 테넌트에 소속되지 않은 사용자 → Orbi 데모로 fallback
+          setTenant({ id: 'demo', name: 'Orbi Demo', slug: 'demo', serviceName: 'Orbi', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
+          setMember({ id: 'demo', displayName: user.email?.split('@')[0] || '사용자', role: 'admin', email: user.email || '' } as any);
           setLoading(false);
           return;
         }
@@ -93,8 +95,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         setMember(m);
         setLoading(false);
       } catch {
-        setTenant(null);
-        setMember(null);
+        // 에러 시 데모 fallback
+        setTenant({ id: 'demo', name: 'Orbi Demo', slug: 'demo', serviceName: 'Orbi', domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter', maxMembers: 5, modules: ['home','project','talk','people','sales','timesheet','learn','content','wiki','insight','gpr','finance','competition','networking','certificate','approval'], isActive: true } as any);
+        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
         setLoading(false);
       }
     };

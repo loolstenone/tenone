@@ -36,8 +36,11 @@ export function WIOMarketingHeader() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <Link href="/wio/app" className="hidden md:inline-flex items-center gap-1 px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg font-semibold hover:bg-indigo-500 transition-colors">
+                        Orbi 시작하기
+                    </Link>
                     <div className="hidden md:block">
-                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: '/wio/app', workspaceLabel: 'APP', signupPath: '/signup', accentColor: '#6366f1' }} />
+                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: null, workspaceLabel: 'APP', signupPath: '/signup', accentColor: '#6366f1', loginPath: '/wio/login' }} />
                     </div>
                     {/* Mobile hamburger */}
                     <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1 text-slate-400">
