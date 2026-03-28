@@ -257,6 +257,21 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
         {/* 메인 */}
         <main className="min-h-screen transition-all duration-200" style={{ marginLeft: `${sidebarWidth}px`, paddingTop: isMobile ? '48px' : '0' }}>
+          {/* 상단 유저바 */}
+          {!isMobile && (
+            <div className="flex items-center justify-end gap-3 px-6 py-2 border-b border-white/5">
+              <span className="text-xs text-slate-500">{member?.displayName || '체험 사용자'}</span>
+              {tenant?.id === 'demo' ? (
+                <Link href="/wio/login" className="text-xs px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition-colors">
+                  로그인
+                </Link>
+              ) : (
+                <button onClick={handleLogout} className="text-xs px-3 py-1 border border-slate-700 text-slate-400 rounded-md hover:text-white hover:border-slate-500 transition-colors">
+                  로그아웃
+                </button>
+              )}
+            </div>
+          )}
           <div className="p-4 md:p-6">
             {children}
           </div>
