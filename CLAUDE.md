@@ -189,6 +189,28 @@ Ten:One Universe는 여러 브랜드로 구성:
 
 ---
 
+## Universe Operating System (UOS)
+
+> **이것은 일반적인 웹앱이 아니다.** AI 에이전트가 Universe를 운영하는 시스템이다.
+
+### 핵심 원칙 (모든 개발에 적용)
+1. **모든 API = 두 소비자:** 프론트엔드 UI + AI 에이전트. 둘 다 같은 API를 쓴다.
+2. **agent_profiles = 심장:** System Prompt, 지식, 도구가 정의되고 Claude API 호출 시 조립된다.
+3. **agent_messages = 추적:** 모든 에이전트 행위가 로그된다. 추적 가능성이 생명줄.
+4. **모듈 = Tool:** WIO 모듈이 완성되면 자동으로 해당 에이전트의 Tool이 된다.
+5. **기존 프론트 143p는 건드리지 않는다.** 백엔드 API를 만들고 연결만.
+
+### 개발 단계
+- Phase 0: 인프라 기초 (완료)
+- Phase 1: 에이전트 코어 (agent_profiles + Agent Hub + Claude API)
+- Phase 2: 바닥쇠 실전 (첫 독립 에이전트)
+- Phase 3: tenone.biz 모듈 (프론트↔백엔드 연결)
+- Phase 4: 에이전트 확장 (브랜드 에이전트 추가)
+
+### 상세 계획: `docs/Universe_OS_Plan.md` 참조
+
+---
+
 ## 현재 상태
 
 - MVP 단계: 프론트엔드 중심, Mock 데이터 기반
