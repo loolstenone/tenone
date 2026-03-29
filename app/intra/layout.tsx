@@ -11,7 +11,6 @@ import { ShieldAlert, Lock, Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function IntraLoginForm() {
-    const { login, logout } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPw, setShowPw] = useState(false);
@@ -23,16 +22,19 @@ function IntraLoginForm() {
         setError("");
         setSubmitting(true);
         try {
-            // 기존 세션 해지
-            await logout();
-            // auth-context의 login 사용 — onAuthStateChange가 자동 트리거
-            const result = await login(email, password);
-            if (!result.success) {
+            const sb = createClient();
+            // 기존 세션/쿠키 정리
+            await sb.auth.signOut();
+            localStorage.removeItem('tenone-auth-user');
+            // 새로 로그인
+            const { error: authError } = await sb.auth.signInWithPassword({ email, password });
+            if (authError) {
                 setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
                 setSubmitting(false);
                 return;
             }
-            // auth-context가 상태를 업데이트하면 layout이 자동으로 인트라 렌더링
+            // 완전한 페이지 리로드로 auth-context 초기화부터 다시
+            window.location.replace('/intra');
         } catch { setError("오류가 발생했습니다."); setSubmitting(false); }
     };
 
@@ -74,29 +76,16 @@ function IntraLoginForm() {
 }
 
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading, canAccessIntra, user } = useAuth();
+    const { isAuthenticated, isLoading, canAccessIntra } = useAuth();
     const router = useRouter();
-    const [authChecked, setAuthChecked] = useState(false);
 
-    // auth-context 로드 후 추가 대기 — user 데이터가 완전히 세팅될 때까지
-    useEffect(() => {
-        if (!isLoading) {
-            // user가 있으면 즉시, 없으면 짧은 유예
-            const delay = isAuthenticated && !canAccessIntra && user ? 500 : 0;
-            const t = setTimeout(() => setAuthChecked(true), delay);
-            return () => clearTimeout(t);
-        }
-    }, [isLoading, isAuthenticated, canAccessIntra, user]);
-
-    if (isLoading || !authChecked) return (
+    if (isLoading) return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
             <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
         </div>
     );
 
-    if (!isAuthenticated) return <IntraLoginForm />;
-
-    if (!canAccessIntra) {
+    if (!isAuthenticated || !canAccessIntra) {
         return <IntraLoginForm />;
     }
 
