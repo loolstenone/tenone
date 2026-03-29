@@ -76,24 +76,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     if (!isAuthenticated) return <IntraLoginForm />;
 
     if (!canAccessIntra) {
-        // 권한 없는 계정이 로그인됨 → 로그아웃하고 인트라 전용 로그인 폼 표시
-        const handleSwitchAccount = async () => {
-            const sb = createClient();
-            await sb.auth.signOut();
-            window.location.reload();
-        };
-        return (
-            <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
-                <div className="text-center max-w-md">
-                    <ShieldAlert className="h-12 w-12 text-red-500/70 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-white mb-2">접근 권한이 없습니다</h2>
-                    <p className="text-neutral-500 text-sm mb-6">Intra는 내부 구성원 전용입니다.<br/>직원 계정으로 로그인하세요.</p>
-                    <button onClick={handleSwitchAccount} className="px-6 py-2.5 bg-white text-sm text-neutral-900 rounded-lg hover:bg-neutral-200 transition-colors">
-                        직원 계정으로 로그인
-                    </button>
-                </div>
-            </div>
-        );
+        return <IntraLoginForm />;
     }
 
     return (
