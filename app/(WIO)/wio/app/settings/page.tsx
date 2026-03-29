@@ -11,6 +11,7 @@ import {
   Upload, Type, Lock, Globe, Mail, CheckSquare, Database,
 } from 'lucide-react';
 import { useWIO } from '../layout';
+import OrgTreeBuilder from './OrgTreeBuilder';
 import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, removeMember } from '@/lib/supabase/wio';
 import {
   CATEGORY_CATALOG, MODULE_CATALOG, getModulesByCategory,
@@ -821,7 +822,17 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          {/* Main content area: Left panel (60%) + Right panel (40%) */}
+          {/* 조직 모드: OrgTreeBuilder 컴포넌트 사용 */}
+          {settingsMode === 'org' && (
+            <OrgTreeBuilder
+              tenantId={tenant?.id || 'demo'}
+              isDemo={isDemo}
+              showToast={showToast}
+            />
+          )}
+
+          {/* 모듈/워크플로우 모드: 기존 좌우 패널 */}
+          {settingsMode !== 'org' && (
           <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 340px)' }}>
 
             {/* ─── LEFT PANEL: Always shows tracks ─── */}
@@ -830,7 +841,7 @@ export default function SettingsPage() {
             }`}>
               <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-400">
-                  {settingsMode === 'org' ? '조직 트리' : settingsMode === 'module' ? '조직 + 모듈' : '트랙'}
+                  {settingsMode === 'module' ? '조직 + 모듈' : '트랙'}
                 </span>
                 {settingsMode === 'org' && (
                   <button className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition">
@@ -844,8 +855,10 @@ export default function SettingsPage() {
             {/* ─── RIGHT PANEL: Changes by mode ─── */}
             <div className={`flex-1 min-w-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col`}>
 
-              {/* ══ 조직 모드: Right = selected org details ══ */}
-              {settingsMode === 'org' && (
+              {/* ══ 조직 모드: OrgTreeBuilder에서 처리 ══ */}
+
+              {/* ══ 모듈 모드 시작 전 placeholder ══ */}
+              {false && (
                 <>
                   {selectedOrgNode ? (
                     <>
@@ -1168,6 +1181,7 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
+          )}
 
           {/* Bottom bar */}
           <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
