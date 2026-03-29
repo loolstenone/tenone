@@ -1,1325 +1,793 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import {
-    ArrowRight,
-    Lightbulb,
-    Target,
-    Users,
-    Clock,
-    DollarSign,
-    Brain,
-    BarChart3,
-    Sparkles,
-    CheckCircle2,
-    BookOpen,
-    FileText,
-    Calendar,
-    ClipboardList,
-    PenTool,
-    Grid3X3,
-    Award,
-    Eye,
-    Zap,
-    Search,
-    Compass,
-    ChevronDown,
-    ChevronRight,
-    Star,
-    GraduationCap,
-    ArrowDown,
-    Download,
-    TrendingUp,
+  ArrowRight,
+  ArrowDown,
+  AlertTriangle,
+  BookOpen,
+  Target,
+  BarChart3,
+  PenTool,
+  Tablet,
+  Sparkles,
+  Mail,
 } from "lucide-react";
 
-// ===== Planners Tab: Data =====
-const PLANNER_ROLES = [
-    {
-        field: "Business",
-        ko: "사업 기획",
-        desc: "비즈니스 모델을 설계하고 사업 전략을 수립한다",
-        recommend: "창업을 준비하거나, 신사업을 기획하는 분",
-        skills: ["시장 분석 & 기회 포착", "비즈니스 모델 캔버스", "투자 유치 & 피칭"],
-        frameworks: ["Vrief 시장분석", "린 캔버스", "SWOT"],
-    },
-    {
-        field: "Marketing",
-        ko: "마케팅 기획",
-        desc: "시장을 분석하고 고객과의 접점을 설계한다",
-        recommend: "브랜드를 키우거나, 고객을 이해하고 싶은 분",
-        skills: ["고객 여정 맵핑", "캠페인 전략 수립", "데이터 기반 의사결정"],
-        frameworks: ["STP 전략", "4P/4C 믹스", "퍼널 분석"],
-    },
-    {
-        field: "Service",
-        ko: "서비스 기획",
-        desc: "사용자 경험을 설계하고 서비스 흐름을 만든다",
-        recommend: "앱/웹 서비스를 만들거나, UX에 관심 있는 분",
-        skills: ["유저 리서치 & 페르소나", "와이어프레임 설계", "서비스 블루프린트"],
-        frameworks: ["더블 다이아몬드", "유저 스토리 맵", "Vrief UX"],
-    },
-    {
-        field: "Design",
-        ko: "디자인 기획",
-        desc: "시각적 커뮤니케이션을 전략적으로 설계한다",
-        recommend: "디자인에 전략적 사고를 더하고 싶은 분",
-        skills: ["비주얼 전략 수립", "브랜드 아이덴티티 설계", "디자인 시스템 구축"],
-        frameworks: ["무드보드 & 톤매너", "디자인 스프린트", "브랜드 가이드라인"],
-    },
-    {
-        field: "Content",
-        ko: "콘텐츠 기획",
-        desc: "메시지를 기획하고 콘텐츠 전략을 수립한다",
-        recommend: "글, 영상, SNS 콘텐츠를 전략적으로 만들고 싶은 분",
-        skills: ["콘텐츠 캘린더 운영", "스토리텔링 구조 설계", "채널별 최적화"],
-        frameworks: ["Vrief 콘텐츠 파이프라인", "에디토리얼 캘린더", "SEO 전략"],
-    },
-    {
-        field: "Event",
-        ko: "행사 기획",
-        desc: "목적에 맞는 경험을 설계하고 실행한다",
-        recommend: "행사, 세미나, 워크숍을 기획하는 분",
-        skills: ["경험 디자인", "로지스틱스 관리", "스테이크홀더 조율"],
-        frameworks: ["이벤트 타임라인", "체크리스트 관리", "사후 평가 프레임"],
-    },
-];
+// ===== Hero Section =====
+function HeroSection() {
+  return (
+    <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-16 lg:px-24 py-20 md:py-28">
+      <div className="max-w-3xl">
+        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1a1a1a] leading-tight tracking-tight">
+          우리는 모두 기획자다
+        </h1>
+        <p className="font-serif text-2xl md:text-3xl lg:text-4xl text-[#1a1a1a] mt-2 leading-tight tracking-tight">
+          적어도, 자기 인생에서만큼은.
+        </p>
 
-// ===== Planning Tab: Vrief Data =====
-const VRIEF_STAGES = [
-    {
-        stage: "V",
-        title: "Vision",
-        ko: "비전 수립",
-        desc: "어디로 가는지 방향을 잡는다",
-        detail: "이상적인 미래상을 정의하고, 현재와의 차이를 인식한다.",
-        example: {
-            brand: "MADLeague",
-            content: "대학생이 졸업 후에도 함께 성장하는 커뮤니티",
-        },
-    },
-    {
-        stage: "R",
-        title: "Research",
-        ko: "조사 분석",
-        desc: "현실을 정확히 파악한다",
-        detail: "시장, 경쟁사, 사용자를 분석하여 기회와 위협을 식별한다.",
-        example: {
-            brand: "Badak",
-            content: "인재 매칭 시장 분석 -- 기존 플랫폼의 한계 도출",
-        },
-    },
-    {
-        stage: "I",
-        title: "Insight",
-        ko: "가설 검증",
-        desc: "핵심 인사이트를 도출한다",
-        detail: "데이터에서 패턴을 발견하고, 검증 가능한 가설을 세운다.",
-        example: {
-            brand: "SmarComm",
-            content: "중소기업은 마케팅 '실행'보다 '전략'에서 막힌다",
-        },
-    },
-    {
-        stage: "E",
-        title: "Execution",
-        ko: "전략 수립",
-        desc: "실행 가능한 전략을 만든다",
-        detail: "인사이트를 기반으로 구체적인 전략과 액션플랜을 수립한다.",
-        example: {
-            brand: "Evolution School",
-            content: "Vrief 기반 8주 커리큘럼 + 실전 프로젝트 설계",
-        },
-    },
-    {
-        stage: "F",
-        title: "Feedback",
-        ko: "피드백 순환",
-        desc: "실행 결과를 점검하고 개선한다",
-        detail: "실행 후 결과를 측정하고, 다음 사이클에 학습을 반영한다.",
-        example: {
-            brand: "Planner's",
-            content: "수강생 피드백 → 커리큘럼 개선 → 재설계",
-        },
-    },
-];
-
-const PLANNING_SKILLS = [
-    { icon: Brain, title: "논리", en: "Logic", desc: "구조적으로 생각하고 인과관계를 파악한다. 문제를 분해하고 체계적으로 접근한다." },
-    { icon: BarChart3, title: "분석", en: "Analysis", desc: "데이터와 현상을 객관적으로 해석한다. 현실을 정확히 파악하는 것이 기획의 출발점이다." },
-    { icon: Sparkles, title: "창의", en: "Creativity", desc: "새로운 관점으로 해결책을 찾는다. 기존의 틀을 벗어나 가능성을 발견한다." },
-];
-
-// ===== Planner's Planner Tab: Data =====
-const PLAN_DO_SEE = [
-    {
-        phase: "Plan",
-        ko: "기획하다",
-        color: "bg-teal-700",
-        desc: "이상과 현실의 차이를 인식하고, 그 차이를 줄이기 위한 목표를 세운다.",
-        details: ["비전과 미션 정의", "목표(Objective) 설정", "핵심 결과(Key Result) 수립"],
-    },
-    {
-        phase: "Do",
-        ko: "실행하다",
-        color: "bg-teal-600",
-        desc: "치밀하게 실행한다. 모든 활동을 목표 달성에 초점을 맞춘다.",
-        details: ["실행 계획 수립", "일정별 관리", "자원(Time, Cost, People) 배분"],
-    },
-    {
-        phase: "See",
-        ko: "점검하다",
-        color: "bg-teal-500",
-        desc: "지속적으로 점검하고 반영한다. 창의적 점검으로 더 나은 방법을 찾는다.",
-        details: ["진행 상황 모니터링", "성과 분석 및 피드백", "개선점 도출 및 적용"],
-    },
-];
-
-const PROJECT_BOOK_STEPS = [
-    { num: "\u2460", title: "Question", desc: "프로젝트 성공을 위한 핵심 질문을 정리한다", icon: Search },
-    { num: "\u2461", title: "Objective Brief", desc: "목적과 지표를 명확하게 정리한다", icon: Target },
-    { num: "\u2462", title: "Process", desc: "단계별 실행 계획을 수립한다", icon: ClipboardList },
-    { num: "\u2463", title: "Daily", desc: "일별 일정과 핵심 키워드를 관리한다", icon: Calendar },
-    { num: "\u2464", title: "Note", desc: "미팅 기록과 프로젝트 일지를 작성한다", icon: PenTool },
-    { num: "\u2465", title: "Grid", desc: "그래프, 도표, 스케치를 활용한다", icon: Grid3X3 },
-    { num: "\u2466", title: "Result Brief", desc: "성과를 정리하고 개선점을 도출한다", icon: Award },
-];
-
-const PROJECT_CASES = [
-    {
-        title: "MADLeague 시즌 3 운영",
-        category: "커뮤니티",
-        desc: "Plan-Do-See + Project Book으로 100명 규모 대학생 연합 동아리 시즌을 설계하고 운영한 사례",
-        result: "참여율 87%, 만족도 4.6/5.0",
-    },
-    {
-        title: "SmarComm 브랜드 런칭",
-        category: "마케팅",
-        desc: "Vrief 프레임워크로 시장 분석부터 런칭 캠페인까지 전 과정을 기획한 사례",
-        result: "런칭 2주 만에 첫 클라이언트 확보",
-    },
-    {
-        title: "Evolution School 커리큘럼 설계",
-        category: "교육",
-        desc: "GPR + Project Book으로 8주 교육 프로그램을 체계적으로 설계한 사례",
-        result: "수강 완주율 92%",
-    },
-];
-
-// ===== GPR Tab: Data =====
-const GPR_CASCADE = [
-    { level: "인생", period: "Lifetime", desc: "내 삶의 비전과 미션", color: "bg-teal-900", width: "w-full" },
-    { level: "연간", period: "Yearly", desc: "올해의 핵심 목표 3가지", color: "bg-teal-800", width: "w-[90%]" },
-    { level: "분기", period: "Quarterly", desc: "3개월 단위 마일스톤", color: "bg-teal-700", width: "w-[78%]" },
-    { level: "월간", period: "Monthly", desc: "이번 달 집중 과제", color: "bg-teal-600", width: "w-[66%]" },
-    { level: "주간", period: "Weekly", desc: "이번 주 실행 항목", color: "bg-teal-500", width: "w-[54%]" },
-    { level: "오늘", period: "Daily", desc: "오늘의 핵심 액션", color: "bg-teal-400", width: "w-[42%]" },
-];
-
-// ===== Programs Tab: Data =====
-const PROGRAMS = [
-    {
-        title: "Vrief 마스터 클래스",
-        duration: "8주",
-        format: "온라인",
-        target: "기획 역량을 체계적으로 키우고 싶은 실무자",
-        curriculum: ["Vrief 프레임워크 이해", "시장 조사 & 분석 실습", "가설 수립 & 검증", "전략 수립 & 피칭", "실전 프로젝트 (팀)"],
-        price: "49만원",
-        status: "모집중" as const,
-    },
-    {
-        title: "기획자 부트캠프",
-        duration: "4주",
-        format: "오프라인",
-        target: "기획 직무 전환 또는 입문을 준비하는 분",
-        curriculum: ["기획의 본질 & 기획자 마인드셋", "문제 정의 → 전략 수립 워크숍", "프레젠테이션 & 스토리텔링", "포트폴리오 완성"],
-        price: "89만원",
-        status: "마감" as const,
-    },
-    {
-        title: "GPR 인생설계 워크숍",
-        duration: "1일 (8시간)",
-        format: "오프라인",
-        target: "목표 설정에 어려움을 느끼는 누구나",
-        curriculum: ["인생 비전 & 미션 정의", "연간 목표 캐스케이드 설계", "분기/월/주/일 실행 계획", "나만의 GPR 시스템 완성"],
-        price: "15만원",
-        status: "모집중" as const,
-    },
-    {
-        title: "MADLeague 멘토링",
-        duration: "시즌제 (16주)",
-        format: "온/오프라인 병행",
-        target: "대학생 프로젝트 팀 리더 & 기획 담당자",
-        curriculum: ["기획 멘토링 (월 2회)", "프로젝트 리뷰 & 피드백", "네트워킹 세션", "시즌 결과 발표회"],
-        price: "무료 (MADLeague 멤버)",
-        status: "모집중" as const,
-    },
-];
-
-// ===== Testimonials Data =====
-const TESTIMONIALS = [
-    {
-        name: "김서연",
-        org: "MADLeague 4기",
-        text: "Vrief 프레임워크를 배우고 나서 기획서 쓰는 속도가 2배 빨라졌어요. 구조가 머릿속에 잡히니까 글이 술술 나옵니다.",
-        rating: 5,
-    },
-    {
-        name: "박준혁",
-        org: "스타트업 대표",
-        text: "GPR 워크숍이 인생을 바꿨다고 하면 과장일까요. 매일 아침 '오늘의 목표'가 명확해지니 실행력이 완전히 달라졌습니다.",
-        rating: 5,
-    },
-    {
-        name: "이하은",
-        org: "대기업 마케팅팀",
-        text: "기획자 부트캠프에서 배운 Plan-Do-See가 실무에 바로 적용됐습니다. 팀장님도 기획서 퀄리티가 올라갔다고 하시네요.",
-        rating: 5,
-    },
-];
-
-
-function PlannersContent() {
-    const searchParams = useSearchParams();
-    const tabParam = searchParams.get("tab");
-    const [activeTab, setActiveTab] = useState("planners");
-    const [expandedRole, setExpandedRole] = useState<string | null>(null);
-    const [workshopStep, setWorkshopStep] = useState(0);
-    const [workshopBrand, setWorkshopBrand] = useState("");
-    const [gprGoal, setGprGoal] = useState("");
-    const [gprStep, setGprStep] = useState(0);
-
-    useEffect(() => {
-        if (tabParam && ["planners", "planning", "planner-tool", "gpr", "programs"].includes(tabParam)) {
-            setActiveTab(tabParam);
-        }
-    }, [tabParam]);
-
-    const tabs = [
-        { id: "planners", label: "Planner's" },
-        { id: "planning", label: "Planning" },
-        { id: "planner-tool", label: "Planner's Planner" },
-        { id: "gpr", label: "GPR" },
-        { id: "programs", label: "Programs" },
-    ];
-
-    return (
-        <div className="bg-white text-neutral-900">
-            {/* ===== Hero Section ===== */}
-            <section className="relative pt-32 pb-24 px-6 overflow-hidden" style={{ background: "linear-gradient(135deg, #134E4A 0%, #0F766E 40%, #115E59 100%)" }}>
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-20 left-10 w-64 h-64 border border-teal-300 rounded-full" />
-                    <div className="absolute bottom-10 right-20 w-96 h-96 border border-teal-400 rounded-full" />
-                    <div className="absolute top-40 right-40 w-32 h-32 border border-teal-200 rounded-full" />
-                </div>
-                <div className="max-w-7xl mx-auto relative z-10">
-                    <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-6">
-                        Planner&apos;s by Evolution School
-                    </p>
-                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-light leading-tight text-white">
-                        우리는 모두<br />
-                        <span className="font-bold">기획자다</span>
-                    </h1>
-                    <p className="mt-6 text-lg md:text-xl text-teal-300/80 max-w-2xl">
-                        기획은 재능이 아닙니다. <strong className="text-white">훈련</strong>입니다.<br />
-                        적어도 자기 인생에서만큼은, 누구나 기획자가 될 수 있습니다.
-                    </p>
-                    <div className="mt-10 flex flex-wrap items-center gap-4">
-                        <button
-                            onClick={() => setActiveTab("planning")}
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-teal-900 text-sm font-medium tracking-wide hover:bg-teal-50 transition-colors"
-                        >
-                            프레임워크 둘러보기 <ArrowRight className="h-4 w-4" />
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("programs")}
-                            className="inline-flex items-center gap-2 px-8 py-3.5 border border-teal-400 text-teal-300 text-sm tracking-wide hover:bg-teal-800/50 transition-colors"
-                        >
-                            프로그램 신청 <ArrowRight className="h-4 w-4" />
-                        </button>
-                    </div>
-                    <div className="mt-14 flex items-center gap-8 text-sm">
-                        <div className="flex items-center gap-3 text-teal-400">
-                            <span className="font-bold text-white text-lg">Vrief</span>
-                            <span className="text-teal-500">Framework</span>
-                        </div>
-                        <div className="w-px h-6 bg-teal-700" />
-                        <div className="flex items-center gap-3 text-teal-400">
-                            <span className="font-bold text-white text-lg">GPR</span>
-                            <span className="text-teal-500">Goal System</span>
-                        </div>
-                        <div className="w-px h-6 bg-teal-700" />
-                        <div className="flex items-center gap-3 text-teal-400">
-                            <span className="font-bold text-white text-lg">Plan-Do-See</span>
-                            <span className="text-teal-500">Methodology</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Tab Navigation */}
-            <section className="border-b border-neutral-200 sticky top-16 bg-white z-40">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex gap-0 overflow-x-auto">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`px-5 md:px-6 py-4 text-sm tracking-wide transition-colors border-b-2 whitespace-nowrap ${
-                                    activeTab === tab.id
-                                        ? "border-teal-700 text-teal-800 font-medium"
-                                        : "border-transparent text-neutral-400 hover:text-neutral-700"
-                                }`}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== Planner's Tab ===== */}
-            {activeTab === "planners" && (
-                <>
-                    {/* 기획 vs 계획 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
-                            <div>
-                                <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                    Definition
-                                </p>
-                                <h2 className="text-xl md:text-3xl font-light leading-relaxed">
-                                    기획하여<br />
-                                    <span className="font-bold">계획하다</span>
-                                </h2>
-                                <p className="mt-8 text-neutral-500 leading-relaxed">
-                                    기획(企劃)이란 &apos;일을 꾀하여 계획함&apos;이다.
-                                    기획은 <strong className="text-neutral-900">Why</strong>에 해당하고,
-                                    계획은 <strong className="text-neutral-900">How</strong>에 해당한다.
-                                </p>
-                                <p className="mt-4 text-neutral-500 leading-relaxed">
-                                    기획이 방향을 잡는 것이라면, 계획은 그 방향으로 가기 위한 구체적인 수단이다.
-                                    기획 없는 계획은 방향 없는 실행이고, 계획 없는 기획은 실현되지 못한 꿈이다.
-                                </p>
-                            </div>
-                            <div className="space-y-6">
-                                <div className="bg-teal-50 border border-teal-100 p-8">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <Lightbulb className="h-5 w-5 text-teal-700" />
-                                        <h3 className="text-lg font-bold text-teal-800">기획 (Planning)</h3>
-                                    </div>
-                                    <p className="text-sm text-teal-700">
-                                        <strong>Why</strong> -- 왜 하는가?<br />
-                                        방향을 설정하고 목적을 정의한다.
-                                    </p>
-                                </div>
-                                <div className="bg-neutral-50 border border-neutral-200 p-8">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <Target className="h-5 w-5 text-neutral-600" />
-                                        <h3 className="text-lg font-bold text-neutral-700">계획 (Plan)</h3>
-                                    </div>
-                                    <p className="text-sm text-neutral-600">
-                                        <strong>How</strong> -- 어떻게 할 것인가?<br />
-                                        실행 방법과 구체적인 수단을 만든다.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 운영 요소 */}
-                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
-                                Operations
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                기획의 실행을 위한 <span className="font-bold">3가지 자원</span>
-                            </h2>
-                            <div className="grid md:grid-cols-3 gap-px bg-teal-800">
-                                {[
-                                    { icon: Clock, title: "Time", ko: "시간", desc: "주어진 시간 안에 최대의 효과를 만들어내는 것. 일정 관리와 우선순위가 핵심이다." },
-                                    { icon: DollarSign, title: "Cost", ko: "비용", desc: "한정된 자원을 효율적으로 배분하는 것. 예산 관리와 ROI 측정이 필요하다." },
-                                    { icon: Users, title: "People", ko: "사람", desc: "적재적소에 인재를 배치하는 것. 팀 구성과 역할 분담이 성패를 결정한다." },
-                                ].map((item) => (
-                                    <div key={item.title} className="bg-teal-900 p-10">
-                                        <item.icon className="h-8 w-8 text-teal-400 mb-6" />
-                                        <h3 className="text-2xl font-bold">{item.title}</h3>
-                                        <p className="text-sm text-teal-400 mt-1">{item.ko}</p>
-                                        <p className="text-sm text-teal-300/70 mt-4 leading-relaxed">{item.desc}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 기획자 유형 - 아코디언 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Who is Planner?
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-4">
-                                Planner = <span className="font-bold">일이 되게 하는 사람</span>
-                            </h2>
-                            <p className="text-neutral-500 mb-10 md:mb-16 max-w-3xl">
-                                기획은 특정 전공의 영역이 아니라, 문제를 발견하고 해결하려는 모든 사람의 역량이다.
-                                당신은 어떤 유형의 기획자인가?
-                            </p>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {PLANNER_ROLES.map((role) => (
-                                    <div key={role.field} className="border border-neutral-200 hover:border-teal-300 transition-all group">
-                                        <button
-                                            onClick={() => setExpandedRole(expandedRole === role.field ? null : role.field)}
-                                            className="w-full text-left p-8"
-                                        >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="text-lg font-bold text-neutral-900 group-hover:text-teal-800 transition-colors">
-                                                    {role.field}
-                                                </h3>
-                                                {expandedRole === role.field ? (
-                                                    <ChevronDown className="h-4 w-4 text-teal-600" />
-                                                ) : (
-                                                    <ChevronRight className="h-4 w-4 text-neutral-400" />
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-teal-700">{role.ko}</p>
-                                            <p className="text-sm text-neutral-500 mt-3 leading-relaxed">{role.desc}</p>
-                                        </button>
-
-                                        {expandedRole === role.field && (
-                                            <div className="px-8 pb-8 border-t border-neutral-100 pt-6 space-y-5">
-                                                <div>
-                                                    <p className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-2">이런 분에게 추천</p>
-                                                    <p className="text-sm text-neutral-600">{role.recommend}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-2">핵심 역량 3가지</p>
-                                                    <div className="space-y-1.5">
-                                                        {role.skills.map((skill, i) => (
-                                                            <div key={i} className="flex items-center gap-2 text-sm text-neutral-600">
-                                                                <CheckCircle2 className="h-3.5 w-3.5 text-teal-500 shrink-0" />
-                                                                {skill}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-2">관련 프레임워크</p>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {role.frameworks.map((fw, i) => (
-                                                            <span key={i} className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 border border-teal-100">
-                                                                {fw}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* AI 추천 CTA */}
-                    <section className="bg-gradient-to-r from-teal-900 to-teal-800 py-16 px-6">
-                        <div className="max-w-4xl mx-auto text-center">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-700/50 border border-teal-600 text-teal-300 text-xs tracking-wider mb-6">
-                                <Sparkles className="h-3.5 w-3.5" />
-                                COMING SOON -- Myverse WORK 연동
-                            </div>
-                            <h2 className="text-xl md:text-3xl font-light text-white leading-relaxed">
-                                &ldquo;나는 어떤 <span className="font-bold">기획자</span>일까?&rdquo;
-                            </h2>
-                            <p className="mt-4 text-teal-300/80 max-w-xl mx-auto">
-                                AI가 당신의 성향, 경험, 관심사를 분석하여
-                                가장 적합한 기획자 유형과 성장 로드맵을 추천합니다.
-                            </p>
-                            <button className="mt-8 inline-flex items-center gap-2 px-8 py-3.5 bg-white/10 border border-white/20 text-white text-sm tracking-wide hover:bg-white/20 transition-colors cursor-not-allowed opacity-70">
-                                <Brain className="h-4 w-4" />
-                                AI 유형 진단 (준비중)
-                            </button>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            {/* ===== Planning Tab ===== */}
-            {activeTab === "planning" && (
-                <>
-                    {/* Vrief 프레임워크 소개 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Core Framework
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light leading-relaxed max-w-3xl">
-                                Planner&apos;s의 핵심 프레임워크:<br />
-                                <span className="font-bold text-teal-800">Vrief</span>
-                            </h2>
-                            <p className="mt-8 text-neutral-500 leading-relaxed max-w-3xl">
-                                Vrief는 Vision - Research - Insight - Execution - Feedback의 순환 구조다.
-                                모든 기획은 이 다섯 단계를 거치며, 각 단계는 다음 사이클의 출발점이 된다.
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Vrief 5단계 */}
-                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
-                                V - R - I - E - F
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                조사분석 <ArrowRight className="inline h-5 w-5 text-teal-500" /> 가설검증 <ArrowRight className="inline h-5 w-5 text-teal-500" /> <span className="font-bold">전략수립</span>
-                            </h2>
-                            <div className="space-y-4">
-                                {VRIEF_STAGES.map((item, idx) => (
-                                    <div key={item.stage} className="border border-teal-700 p-6 md:p-8 flex flex-col md:flex-row md:items-start gap-6">
-                                        <div className="flex items-center gap-4 md:min-w-[200px]">
-                                            <span className="text-3xl md:text-4xl font-bold text-teal-400">{item.stage}</span>
-                                            <div>
-                                                <h3 className="text-lg font-bold">{item.title}</h3>
-                                                <p className="text-sm text-teal-400">{item.ko}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm text-teal-300/80 leading-relaxed">{item.detail}</p>
-                                            <div className="mt-4 bg-teal-800/50 border border-teal-700 p-4">
-                                                <p className="text-xs text-teal-500 mb-1">실제 사례 -- {item.example.brand}</p>
-                                                <p className="text-sm text-teal-200">{item.example.content}</p>
-                                            </div>
-                                        </div>
-                                        {idx < VRIEF_STAGES.length - 1 && (
-                                            <ArrowDown className="h-4 w-4 text-teal-600 mx-auto md:hidden" />
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Vrief 미니 워크숍 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-3xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Interactive Workshop
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-4">
-                                Vrief로 <span className="font-bold">기획해보기</span>
-                            </h2>
-                            <p className="text-neutral-500 mb-10">
-                                3단계 미니 워크숍으로 Vrief 프레임워크를 직접 경험해보세요.
-                            </p>
-
-                            <div className="border border-neutral-200 bg-neutral-50">
-                                {/* Steps indicator */}
-                                <div className="flex border-b border-neutral-200">
-                                    {["브랜드명 입력", "조사분석 질문", "가설 도출"].map((label, i) => (
-                                        <div
-                                            key={i}
-                                            className={`flex-1 py-3 text-center text-xs font-medium border-b-2 transition-colors ${
-                                                workshopStep === i
-                                                    ? "border-teal-700 text-teal-800 bg-white"
-                                                    : workshopStep > i
-                                                    ? "border-teal-300 text-teal-600 bg-teal-50"
-                                                    : "border-transparent text-neutral-400"
-                                            }`}
-                                        >
-                                            Step {i + 1}: {label}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="p-8">
-                                    {workshopStep === 0 && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-neutral-700 mb-3">
-                                                기획할 브랜드 또는 프로젝트명을 입력하세요
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={workshopBrand}
-                                                onChange={(e) => setWorkshopBrand(e.target.value)}
-                                                placeholder="예: 나만의 카페, 새로운 앱 서비스..."
-                                                className="w-full px-4 py-3 border border-neutral-300 text-sm focus:outline-none focus:border-teal-500 bg-white"
-                                            />
-                                            <button
-                                                onClick={() => workshopBrand.trim() && setWorkshopStep(1)}
-                                                disabled={!workshopBrand.trim()}
-                                                className="mt-6 px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                            >
-                                                다음 단계 <ArrowRight className="inline h-4 w-4 ml-1" />
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {workshopStep === 1 && (
-                                        <div>
-                                            <p className="text-sm text-teal-700 font-medium mb-4">
-                                                &ldquo;{workshopBrand}&rdquo;에 대한 조사분석 질문 (AI 생성 예시)
-                                            </p>
-                                            <div className="space-y-4">
-                                                {[
-                                                    `"${workshopBrand}"의 핵심 타겟 고객은 누구인가? 그들의 가장 큰 불편함은?`,
-                                                    `이 시장에서 기존 경쟁자들이 해결하지 못한 문제는 무엇인가?`,
-                                                    `"${workshopBrand}"만이 제공할 수 있는 고유한 가치는 무엇인가?`,
-                                                ].map((q, i) => (
-                                                    <div key={i} className="flex items-start gap-3 bg-white p-4 border border-neutral-200">
-                                                        <span className="text-teal-600 font-bold text-sm mt-0.5">Q{i + 1}</span>
-                                                        <p className="text-sm text-neutral-700 leading-relaxed">{q}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="mt-6 flex gap-3">
-                                                <button
-                                                    onClick={() => setWorkshopStep(0)}
-                                                    className="px-6 py-2.5 border border-neutral-300 text-neutral-600 text-sm hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    이전
-                                                </button>
-                                                <button
-                                                    onClick={() => setWorkshopStep(2)}
-                                                    className="px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors"
-                                                >
-                                                    가설 도출하기 <ArrowRight className="inline h-4 w-4 ml-1" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {workshopStep === 2 && (
-                                        <div>
-                                            <p className="text-sm text-teal-700 font-medium mb-4">
-                                                도출된 가설 (Mock)
-                                            </p>
-                                            <div className="bg-white border-l-4 border-teal-600 p-6 mb-6">
-                                                <p className="text-sm text-neutral-400 mb-2">핵심 가설</p>
-                                                <p className="text-neutral-800 font-medium leading-relaxed">
-                                                    &ldquo;{workshopBrand}&rdquo;의 타겟 고객은 기존 솔루션의 복잡성에 불만을 가지고 있으며,
-                                                    더 직관적이고 간결한 접근 방식을 원한다.
-                                                </p>
-                                            </div>
-                                            <div className="bg-teal-50 border border-teal-100 p-4 mb-6">
-                                                <p className="text-xs text-teal-600 mb-1">다음 단계 (Vrief E - Execution)</p>
-                                                <p className="text-sm text-teal-800">이 가설을 기반으로 구체적인 전략과 실행 계획을 수립합니다.</p>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => setWorkshopStep(1)}
-                                                    className="px-6 py-2.5 border border-neutral-300 text-neutral-600 text-sm hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    이전
-                                                </button>
-                                                <button
-                                                    onClick={() => { setWorkshopStep(0); setWorkshopBrand(""); }}
-                                                    className="px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors"
-                                                >
-                                                    처음부터 다시하기
-                                                </button>
-                                            </div>
-                                            <p className="mt-6 text-xs text-neutral-400">
-                                                * 실제 AI 연동은 추후 업데이트됩니다. 현재는 UX 데모입니다.
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 필요한 것: 논리 + 분석 + 창의 */}
-                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Required Skills
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                기획자에게 필요한 것:<br />
-                                <span className="font-bold">논리 + 분석 + 창의</span>
-                            </h2>
-                            <div className="grid md:grid-cols-3 gap-8">
-                                {PLANNING_SKILLS.map((skill) => (
-                                    <div key={skill.title} className="bg-white p-10 border border-neutral-200">
-                                        <skill.icon className="h-10 w-10 text-teal-700 mb-6" />
-                                        <h3 className="text-2xl font-bold text-neutral-900">{skill.title}</h3>
-                                        <p className="text-sm text-teal-600 mt-1">{skill.en}</p>
-                                        <p className="text-sm text-neutral-500 mt-4 leading-relaxed">{skill.desc}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            {/* ===== Planner's Planner Tab ===== */}
-            {activeTab === "planner-tool" && (
-                <>
-                    {/* Intro */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                About
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light leading-relaxed max-w-3xl">
-                                플래너를<br />
-                                <span className="font-bold">다시 만들다</span>
-                            </h2>
-                            <p className="mt-8 text-neutral-500 leading-relaxed max-w-3xl">
-                                고등학교 시절부터 시스템 다이어리를 제작해왔다.
-                                수많은 디지털 도구가 있지만, 기획자에게 맞는 도구는 없었다.
-                                그래서 직접 만들기로 했다 -- 기획자를 위한 플래너.
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Plan - Do - See */}
-                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
-                                Methodology
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                모든 업무의 기본 구조: <span className="font-bold">Plan -- Do -- See</span>
-                            </h2>
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {PLAN_DO_SEE.map((phase) => (
-                                    <div key={phase.phase} className="border border-teal-700 p-8">
-                                        <div className={`inline-block px-3 py-1 text-xs font-bold text-white ${phase.color} mb-4`}>
-                                            {phase.phase}
-                                        </div>
-                                        <h3 className="text-xl font-bold">{phase.ko}</h3>
-                                        <p className="text-sm text-teal-300/70 mt-3 leading-relaxed">{phase.desc}</p>
-                                        <ul className="mt-4 space-y-2">
-                                            {phase.details.map((d, i) => (
-                                                <li key={i} className="text-sm text-teal-400 flex items-center gap-2">
-                                                    <span className="w-1 h-1 bg-teal-500 rounded-full" />
-                                                    {d}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Package 구성 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Package
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                <span className="font-bold">Planner&apos;s Planner</span> 구성
-                            </h2>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {[
-                                    { icon: BookOpen, title: "Planner's Planner", desc: "연간 / 월간 / 일 단위 플래너", tag: "Core" },
-                                    { icon: FileText, title: "Project Book", desc: "Frame + Work + Book", tag: "Project" },
-                                    { icon: Calendar, title: "Daily", desc: "일정 및 할 일 목록", tag: "Daily" },
-                                    { icon: Grid3X3, title: "Templates", desc: "130개 이상의 템플릿", tag: "130+" },
-                                ].map((pkg) => (
-                                    <div key={pkg.title} className="border border-neutral-200 p-8 hover:border-teal-300 transition-colors">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <pkg.icon className="h-6 w-6 text-teal-700" />
-                                            <span className="text-xs font-mono text-teal-600 bg-teal-50 px-2 py-0.5">{pkg.tag}</span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-neutral-900">{pkg.title}</h3>
-                                        <p className="text-sm text-neutral-500 mt-2">{pkg.desc}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Project Book 7단계 */}
-                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16 gap-4">
-                                <div>
-                                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                        Project Book
-                                    </p>
-                                    <h2 className="text-xl md:text-3xl font-light mb-4">
-                                        프로젝트 북 <span className="font-bold">7단계</span>
-                                    </h2>
-                                    <p className="text-neutral-500 max-w-3xl">
-                                        복잡한 문제를 구조적으로 해결하기 위한 프레임워크.
-                                        질문에서 시작해 결과 정리까지, 프로젝트의 전 과정을 담는다.
-                                    </p>
-                                </div>
-                                <button className="inline-flex items-center gap-2 px-5 py-2.5 border border-teal-300 text-teal-700 text-sm hover:bg-teal-50 transition-colors shrink-0">
-                                    <Download className="h-4 w-4" />
-                                    템플릿 다운로드 (Mock)
-                                </button>
-                            </div>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {PROJECT_BOOK_STEPS.map((step) => (
-                                    <div key={step.num} className="bg-white p-6 border border-neutral-200">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="text-teal-700 font-bold">{step.num}</span>
-                                            <step.icon className="h-4 w-4 text-teal-600" />
-                                        </div>
-                                        <h3 className="font-bold text-neutral-900">{step.title}</h3>
-                                        <p className="text-xs text-neutral-500 mt-2 leading-relaxed">{step.desc}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 사례 카드 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Case Studies
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                이 프레임워크로 진행한 <span className="font-bold">프로젝트</span>
-                            </h2>
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {PROJECT_CASES.map((c) => (
-                                    <div key={c.title} className="border border-neutral-200 p-8 hover:border-teal-300 transition-colors">
-                                        <span className="text-xs font-mono text-teal-600 bg-teal-50 px-2 py-0.5">{c.category}</span>
-                                        <h3 className="text-lg font-bold text-neutral-900 mt-4">{c.title}</h3>
-                                        <p className="text-sm text-neutral-500 mt-3 leading-relaxed">{c.desc}</p>
-                                        <div className="mt-5 pt-4 border-t border-neutral-100">
-                                            <div className="flex items-center gap-2 text-sm text-teal-700">
-                                                <TrendingUp className="h-4 w-4" />
-                                                <span className="font-medium">{c.result}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Quote */}
-                    <section className="bg-teal-950 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-4xl mx-auto text-center">
-                            <h2 className="text-2xl md:text-3xl font-light leading-relaxed">
-                                &ldquo;생각한 대로 행동하라<br />
-                                그렇지 않으면<br />
-                                <span className="font-bold">행동한 대로 생각하게 된다&rdquo;</span>
-                            </h2>
-                            <p className="mt-8 text-teal-400 text-sm">
-                                자신만의 방법을 찾아라. 그것이 기획이다.
-                            </p>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            {/* ===== GPR Tab ===== */}
-            {activeTab === "gpr" && (
-                <>
-                    {/* GPR 소개 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Goal Framework
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light leading-relaxed max-w-3xl">
-                                <span className="font-bold text-teal-800">GPR</span> -- Goal, Plan, Result
-                            </h2>
-                            <p className="mt-8 text-neutral-500 leading-relaxed max-w-3xl">
-                                목표를 세우고(Goal), 계획을 만들고(Plan), 결과를 측정한다(Result).
-                                GPR은 인생의 비전부터 오늘의 할 일까지를 하나의 체계로 연결하는 프레임워크다.
-                            </p>
-                            <div className="mt-8 flex flex-wrap gap-4">
-                                <div className="flex items-center gap-3 bg-teal-50 border border-teal-100 px-5 py-3">
-                                    <Target className="h-5 w-5 text-teal-700" />
-                                    <div>
-                                        <p className="text-sm font-bold text-teal-800">Goal</p>
-                                        <p className="text-xs text-teal-600">목표를 세운다</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center text-teal-300">
-                                    <ArrowRight className="h-5 w-5" />
-                                </div>
-                                <div className="flex items-center gap-3 bg-teal-50 border border-teal-100 px-5 py-3">
-                                    <ClipboardList className="h-5 w-5 text-teal-700" />
-                                    <div>
-                                        <p className="text-sm font-bold text-teal-800">Plan</p>
-                                        <p className="text-xs text-teal-600">계획을 만든다</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center text-teal-300">
-                                    <ArrowRight className="h-5 w-5" />
-                                </div>
-                                <div className="flex items-center gap-3 bg-teal-50 border border-teal-100 px-5 py-3">
-                                    <Award className="h-5 w-5 text-teal-700" />
-                                    <div>
-                                        <p className="text-sm font-bold text-teal-800">Result</p>
-                                        <p className="text-xs text-teal-600">결과를 측정한다</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 캐스케이드 시각화 */}
-                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-4xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-teal-400 mb-4">
-                                Cascade System
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-4">
-                                인생에서 오늘까지, <span className="font-bold">하나의 흐름</span>
-                            </h2>
-                            <p className="text-teal-300/80 mb-10 md:mb-16">
-                                큰 목표는 작은 목표로, 작은 목표는 오늘의 실행으로 이어진다.
-                            </p>
-                            <div className="space-y-3">
-                                {GPR_CASCADE.map((item, idx) => (
-                                    <div key={item.level} className={`${item.width} mx-auto`}>
-                                        <div className={`${item.color} p-4 md:p-5 flex items-center justify-between`}>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-lg md:text-xl font-bold">{item.level}</span>
-                                                <span className="text-xs text-teal-300 font-mono">{item.period}</span>
-                                            </div>
-                                            <p className="text-sm text-teal-200/80 hidden md:block">{item.desc}</p>
-                                        </div>
-                                        {idx < GPR_CASCADE.length - 1 && (
-                                            <div className="flex justify-center py-1">
-                                                <ArrowDown className="h-4 w-4 text-teal-600" />
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* GPR 인터랙티브 UI */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-3xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Try GPR
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-4">
-                                GPR로 <span className="font-bold">올해 목표 세우기</span>
-                            </h2>
-                            <p className="text-neutral-500 mb-10">
-                                간단한 3단계로 나만의 GPR을 만들어보세요.
-                            </p>
-
-                            <div className="border border-neutral-200 bg-neutral-50">
-                                <div className="flex border-b border-neutral-200">
-                                    {["Goal 설정", "Plan 수립", "Result 정의"].map((label, i) => (
-                                        <div
-                                            key={i}
-                                            className={`flex-1 py-3 text-center text-xs font-medium border-b-2 transition-colors ${
-                                                gprStep === i
-                                                    ? "border-teal-700 text-teal-800 bg-white"
-                                                    : gprStep > i
-                                                    ? "border-teal-300 text-teal-600 bg-teal-50"
-                                                    : "border-transparent text-neutral-400"
-                                            }`}
-                                        >
-                                            {label}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="p-8">
-                                    {gprStep === 0 && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-neutral-700 mb-3">
-                                                올해 이루고 싶은 가장 큰 목표는?
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={gprGoal}
-                                                onChange={(e) => setGprGoal(e.target.value)}
-                                                placeholder="예: 사이드 프로젝트 런칭, 기획 역량 레벨업..."
-                                                className="w-full px-4 py-3 border border-neutral-300 text-sm focus:outline-none focus:border-teal-500 bg-white"
-                                            />
-                                            <button
-                                                onClick={() => gprGoal.trim() && setGprStep(1)}
-                                                disabled={!gprGoal.trim()}
-                                                className="mt-6 px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                            >
-                                                Plan 수립하기 <ArrowRight className="inline h-4 w-4 ml-1" />
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {gprStep === 1 && (
-                                        <div>
-                                            <p className="text-sm text-teal-700 font-medium mb-4">
-                                                &ldquo;{gprGoal}&rdquo;을 위한 분기별 계획 (AI 생성 예시)
-                                            </p>
-                                            <div className="space-y-3">
-                                                {[
-                                                    { q: "Q1 (1-3월)", plan: "기초 역량 학습 & 벤치마킹 (주 10시간)" },
-                                                    { q: "Q2 (4-6월)", plan: "MVP 설계 & 프로토타입 완성" },
-                                                    { q: "Q3 (7-9월)", plan: "베타 테스트 & 피드백 반영" },
-                                                    { q: "Q4 (10-12월)", plan: "정식 런칭 & 성과 정리" },
-                                                ].map((item, i) => (
-                                                    <div key={i} className="flex items-start gap-3 bg-white p-4 border border-neutral-200">
-                                                        <span className="text-xs font-mono font-bold text-teal-600 mt-0.5 min-w-[80px]">{item.q}</span>
-                                                        <p className="text-sm text-neutral-700">{item.plan}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="mt-6 flex gap-3">
-                                                <button
-                                                    onClick={() => setGprStep(0)}
-                                                    className="px-6 py-2.5 border border-neutral-300 text-neutral-600 text-sm hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    이전
-                                                </button>
-                                                <button
-                                                    onClick={() => setGprStep(2)}
-                                                    className="px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors"
-                                                >
-                                                    Result 정의하기 <ArrowRight className="inline h-4 w-4 ml-1" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {gprStep === 2 && (
-                                        <div>
-                                            <p className="text-sm text-teal-700 font-medium mb-4">
-                                                측정 가능한 핵심 결과 (Mock)
-                                            </p>
-                                            <div className="space-y-3 mb-6">
-                                                {[
-                                                    { kr: "KR1", text: "프로젝트 기획서 3편 이상 완성" },
-                                                    { kr: "KR2", text: "사용자 테스트 50명 이상 진행" },
-                                                    { kr: "KR3", text: "분기별 회고 & 개선 보고서 작성" },
-                                                ].map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-3 bg-white p-4 border border-neutral-200">
-                                                        <span className="text-xs font-bold text-white bg-teal-700 px-2 py-0.5">{item.kr}</span>
-                                                        <p className="text-sm text-neutral-700">{item.text}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="bg-teal-50 border border-teal-100 p-4 mb-6 flex items-center gap-3">
-                                                <Sparkles className="h-4 w-4 text-teal-600 shrink-0" />
-                                                <div>
-                                                    <p className="text-xs text-teal-600 font-medium">Myverse DREAM 연동 예정</p>
-                                                    <p className="text-xs text-teal-500">GPR을 Myverse에서 실시간 추적하고 AI 코칭을 받을 수 있습니다.</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => setGprStep(1)}
-                                                    className="px-6 py-2.5 border border-neutral-300 text-neutral-600 text-sm hover:bg-neutral-100 transition-colors"
-                                                >
-                                                    이전
-                                                </button>
-                                                <button
-                                                    onClick={() => { setGprStep(0); setGprGoal(""); }}
-                                                    className="px-6 py-2.5 bg-teal-700 text-white text-sm hover:bg-teal-800 transition-colors"
-                                                >
-                                                    처음부터 다시하기
-                                                </button>
-                                            </div>
-                                            <p className="mt-6 text-xs text-neutral-400">
-                                                * 실제 AI 연동은 추후 업데이트됩니다. 현재는 UX 데모입니다.
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* GPR 핵심 원칙 */}
-                    <section className="bg-neutral-50 py-16 md:py-24 px-6">
-                        <div className="max-w-4xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Principles
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-10 md:mb-16">
-                                GPR의 <span className="font-bold">3가지 원칙</span>
-                            </h2>
-                            <div className="space-y-8">
-                                {[
-                                    { title: "캐스케이드 연결", desc: "인생 목표와 오늘의 할 일이 하나의 선으로 연결되어야 한다. 작은 실행이 큰 비전으로 이어지는 구조." },
-                                    { title: "측정 가능한 결과", desc: "감이 아니라 숫자로 말한다. 모든 목표에는 측정 가능한 Key Result가 있어야 한다." },
-                                    { title: "주기적 점검", desc: "주간 리뷰 → 월간 정리 → 분기 회고. 점검 없는 목표는 희망사항일 뿐이다." },
-                                ].map((item) => (
-                                    <div key={item.title} className="flex gap-6 py-6 border-b border-neutral-200">
-                                        <CheckCircle2 className="h-5 w-5 text-teal-600 mt-1 shrink-0" />
-                                        <div>
-                                            <h3 className="font-bold text-neutral-900">{item.title}</h3>
-                                            <p className="text-sm text-neutral-500 mt-2 leading-relaxed">{item.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            {/* ===== Programs Tab ===== */}
-            {activeTab === "programs" && (
-                <>
-                    {/* 프로그램 목록 */}
-                    <section className="py-24 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-                                Programs
-                            </p>
-                            <h2 className="text-xl md:text-3xl font-light mb-4">
-                                현재 운영 중인 <span className="font-bold">프로그램</span>
-                            </h2>
-                            <p className="text-neutral-500 mb-10 md:mb-16 max-w-3xl">
-                                기획은 훈련입니다. Planner&apos;s의 체계적인 프로그램으로 기획 역량을 키우세요.
-                            </p>
-
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {PROGRAMS.map((prog) => (
-                                    <div key={prog.title} className="border border-neutral-200 hover:border-teal-300 transition-colors">
-                                        <div className="p-8">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`text-xs font-bold px-2.5 py-1 ${
-                                                        prog.status === "모집중"
-                                                            ? "bg-teal-100 text-teal-800"
-                                                            : "bg-neutral-100 text-neutral-500"
-                                                    }`}>
-                                                        {prog.status}
-                                                    </span>
-                                                    <span className="text-xs text-neutral-400 font-mono">{prog.format}</span>
-                                                </div>
-                                                <span className="text-lg font-bold text-teal-800">{prog.price}</span>
-                                            </div>
-                                            <h3 className="text-xl font-bold text-neutral-900">{prog.title}</h3>
-                                            <div className="flex items-center gap-4 mt-2 text-sm text-neutral-400">
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="h-3.5 w-3.5" /> {prog.duration}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-neutral-500 mt-4">{prog.target}</p>
-
-                                            {/* Curriculum */}
-                                            <div className="mt-6 pt-5 border-t border-neutral-100">
-                                                <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">커리큘럼</p>
-                                                <div className="space-y-2">
-                                                    {prog.curriculum.map((item, i) => (
-                                                        <div key={i} className="flex items-center gap-2 text-sm text-neutral-600">
-                                                            <span className="text-xs text-teal-600 font-mono font-bold min-w-[20px]">{String(i + 1).padStart(2, "0")}</span>
-                                                            {item}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                className={`mt-6 w-full py-3 text-sm font-medium transition-colors ${
-                                                    prog.status === "모집중"
-                                                        ? "bg-teal-700 text-white hover:bg-teal-800"
-                                                        : "bg-neutral-100 text-neutral-400 cursor-not-allowed"
-                                                }`}
-                                                disabled={prog.status !== "모집중"}
-                                            >
-                                                {prog.status === "모집중" ? "프로그램 신청하기" : "모집 마감"}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 맞춤 프로그램 */}
-                    <section className="bg-teal-900 text-white py-16 md:py-24 px-6">
-                        <div className="max-w-4xl mx-auto text-center">
-                            <GraduationCap className="h-10 w-10 text-teal-400 mx-auto mb-6" />
-                            <h2 className="text-xl md:text-3xl font-light">
-                                기업/단체 <span className="font-bold">맞춤 프로그램</span>
-                            </h2>
-                            <p className="mt-4 text-teal-300/80 max-w-xl mx-auto">
-                                조직의 니즈에 맞는 기획 교육 프로그램을 설계해드립니다.
-                                Vrief, GPR, Plan-Do-See를 조직에 도입하세요.
-                            </p>
-                            <Link
-                                href="/contact"
-                                className="inline-flex items-center gap-2 mt-8 px-8 py-3.5 bg-white text-teal-900 text-sm font-medium tracking-wide hover:bg-teal-50 transition-colors"
-                            >
-                                문의하기 <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </div>
-                    </section>
-                </>
-            )}
-
-            {/* ===== Testimonials (모든 탭 공통, 탭 컨텐츠 아래) ===== */}
-            <section className="py-16 md:py-24 px-6 bg-neutral-50">
-                <div className="max-w-7xl mx-auto">
-                    <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4 text-center">
-                        Testimonials
-                    </p>
-                    <h2 className="text-xl md:text-3xl font-light text-center mb-10 md:mb-16">
-                        수강생 <span className="font-bold">후기</span>
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {TESTIMONIALS.map((t) => (
-                            <div key={t.name} className="bg-white border border-neutral-200 p-8">
-                                <div className="flex items-center gap-1 mb-4">
-                                    {Array.from({ length: t.rating }).map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 fill-teal-500 text-teal-500" />
-                                    ))}
-                                </div>
-                                <p className="text-sm text-neutral-600 leading-relaxed">&ldquo;{t.text}&rdquo;</p>
-                                <div className="mt-6 pt-4 border-t border-neutral-100">
-                                    <p className="text-sm font-bold text-neutral-900">{t.name}</p>
-                                    <p className="text-xs text-neutral-400 mt-0.5">{t.org}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-10 flex items-center justify-center gap-3">
-                        <span className="text-xs text-teal-600 font-medium bg-teal-50 border border-teal-100 px-3 py-1">Powered by Vrief</span>
-                        <span className="text-xs text-teal-600 font-medium bg-teal-50 border border-teal-100 px-3 py-1">Powered by GPR</span>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA (공통) */}
-            <section className="bg-neutral-900 text-white py-16 md:py-24 px-6">
-                <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-xl md:text-3xl font-light">
-                        <span className="font-bold">기획자의 여정을 함께하세요</span>
-                    </h2>
-                    <p className="mt-4 text-neutral-500">
-                        Planner&apos;s에서 당신만의 기획을 시작하세요.
-                    </p>
-                    <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-                        <button
-                            onClick={() => setActiveTab("programs")}
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-teal-700 text-white text-sm tracking-wide hover:bg-teal-800 transition-colors"
-                        >
-                            프로그램 보기 <ArrowRight className="h-4 w-4" />
-                        </button>
-                        <Link
-                            href="/contact"
-                            className="inline-flex items-center gap-2 px-8 py-3.5 border border-neutral-600 text-neutral-300 text-sm tracking-wide hover:border-neutral-400 hover:text-white transition-colors"
-                        >
-                            Contact Us <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+        <div className="mt-12 md:mt-16 space-y-4 text-[#1a1a1a] text-lg md:text-xl leading-relaxed max-w-2xl">
+          <p className="font-medium">인공지능 시대, 더욱 기획자가 되어야 한다.</p>
+          <div className="mt-6 space-y-3 text-base md:text-lg text-[#444]">
+            <p>AI가 글을 쓰고, 코드를 짜고, 디자인을 만든다.</p>
+            <p>그런데 — 무엇을 쓸지, 왜 만들지, 어디로 갈지는 누가 정하는가?</p>
+            <p className="text-[#1a1a1a] font-medium mt-4">기획자다.</p>
+            <p className="mt-4">AI가 실행을 대신할수록,</p>
+            <p>방향을 정하는 힘이 곧 경쟁력이다.</p>
+          </div>
         </div>
-    );
+
+        <div className="mt-12 flex flex-col sm:flex-row gap-4">
+          <a
+            href="#learn"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a1a] text-white text-sm tracking-wide hover:bg-[#333] transition-colors"
+          >
+            기획자가 되는 법
+            <ArrowRight size={16} />
+          </a>
+          <a
+            href="#tool"
+            className="inline-flex items-center gap-2 px-6 py-3 border border-[#1a1a1a] text-[#1a1a1a] text-sm tracking-wide hover:bg-[#f5f5f5] transition-colors"
+          >
+            도구부터 받기
+            <ArrowRight size={16} />
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-20 flex justify-center">
+        <a href="#learn" className="text-[#999] hover:text-[#1a1a1a] transition-colors">
+          <ArrowDown size={20} className="animate-bounce" />
+        </a>
+      </div>
+    </section>
+  );
 }
 
+// ===== 기획의 기본기 Section =====
+function LearnSection() {
+  return (
+    <section id="learn" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+          기획의 기본기
+        </h2>
+        <p className="mt-4 text-[#666] text-lg">
+          기획과 계획은 다르다. 이 차이를 아는 것이 시작이다.
+        </p>
+
+        {/* 도입부 */}
+        <div className="mt-16 space-y-4 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>기획(企劃)과 계획(計劃).</p>
+          <p>비슷해 보이지만 완전히 다른 일이다.</p>
+          <p className="mt-6">기획은 &ldquo;올바른 일&rdquo;을 찾는 것이고,</p>
+          <p>계획은 &ldquo;일을 올바르게&rdquo; 하는 것이다.</p>
+          <p className="mt-6">순서가 있다.</p>
+          <p>기획이 먼저, 계획이 다음이다.</p>
+        </div>
+
+        {/* 기획 vs 계획 블록 */}
+        <div className="mt-16 grid md:grid-cols-2 gap-8">
+          {/* 기획 블록 */}
+          <div className="border border-[#e0e0e0] p-8 md:p-10 bg-white">
+            <h3 className="font-serif text-2xl text-[#1a1a1a]">기획(企劃)</h3>
+            <p className="mt-4 text-[#1a1a1a] font-medium">&ldquo;왜, 무엇을&rdquo;에 답한다.</p>
+            <div className="mt-6 space-y-3 text-[#444] text-sm md:text-base leading-relaxed">
+              <p>문제의 본질을 찾고, 방향을 정하고, 전략을 세우는 사고 과정.</p>
+              <p>처음부터 파워포인트를 열지 마세요.</p>
+              <p>질문에 답을 충실히 하다 보면 그것 자체가 시나리오가 된다.</p>
+            </div>
+            <p className="mt-8 text-xs text-[#999] uppercase tracking-widest">결과물: 전략과 방향성</p>
+          </div>
+
+          {/* 계획 블록 */}
+          <div className="border border-[#e0e0e0] p-8 md:p-10 bg-white">
+            <h3 className="font-serif text-2xl text-[#1a1a1a]">계획(計劃)</h3>
+            <p className="mt-4 text-[#1a1a1a] font-medium">&ldquo;누가, 언제, 어떻게&rdquo;에 답한다.</p>
+            <div className="mt-6 space-y-3 text-[#444] text-sm md:text-base leading-relaxed">
+              <p>기획에서 정한 방향을 실행 가능한 단위로 쪼개고,</p>
+              <p>담당자와 기한과 자원을 배정하는 실행 설계.</p>
+              <p>수치와 기한이 없으면 계획이 아니라 희망사항이다.</p>
+            </div>
+            <p className="mt-8 text-xs text-[#999] uppercase tracking-widest">결과물: 실행 로드맵</p>
+          </div>
+        </div>
+
+        {/* 경고 블록 */}
+        <div className="mt-12 grid md:grid-cols-2 gap-8">
+          <div className="border-l-2 border-[#1a1a1a] pl-6 py-2">
+            <div className="flex items-center gap-2 text-[#1a1a1a] mb-3">
+              <AlertTriangle size={16} />
+              <span className="text-sm font-medium">실수 1.</span>
+            </div>
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>기획 없이 계획부터 짠다.</p>
+              <p>왜 하는지 모르고 일정표만 채운다.</p>
+              <p className="text-[#1a1a1a]">→ 방향이 틀리면 빠를수록 더 멀어진다.</p>
+            </div>
+          </div>
+          <div className="border-l-2 border-[#1a1a1a] pl-6 py-2">
+            <div className="flex items-center gap-2 text-[#1a1a1a] mb-3">
+              <AlertTriangle size={16} />
+              <span className="text-sm font-medium">실수 2.</span>
+            </div>
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>기획만 하고 계획으로 넘어가지 않는다.</p>
+              <p>전략은 훌륭한데 &ldquo;그래서 누가 언제까지?&rdquo;가 빠진다.</p>
+              <p className="text-[#1a1a1a]">→ 실현되지 않으면 아이디어가 아니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== Vrief Section =====
+function VriefSection() {
+  return (
+    <section id="vrief" className="px-6 md:px-16 lg:px-24 py-20 md:py-28">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+          Vrief — 승리하는 브리프
+        </h2>
+        <p className="mt-4 text-[#666] text-lg">
+          Vision + Brief. 될 수 있는 방법을 찾아가는 과정.
+        </p>
+
+        <div className="mt-12 space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>Vrief는 양식이 아니다.</p>
+          <p>함께 일하는 프로토콜이다.</p>
+          <p className="mt-4 text-[#444]">혼자 빈칸을 채우는 서류가 아니라,</p>
+          <p className="text-[#444]">팀이 같은 방향을 보고 같은 언어로 생각하게 만드는 과정이다.</p>
+        </div>
+
+        {/* 3단계 */}
+        <div className="mt-16 space-y-12">
+          {/* Step 1 */}
+          <div className="border-t border-[#e0e0e0] pt-8">
+            <p className="text-xs text-[#999] uppercase tracking-widest mb-2">Step 1</p>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">조사 분석</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>우리는 누구이고, 상황은 어떠한가.</p>
+              <p>진짜 문제는 무엇인가.</p>
+              <p>— 클라이언트가 말하는 문제가 진짜 문제인가?</p>
+              <p>어떤 방향으로 풀 수 있을까.</p>
+              <p className="mt-4 text-[#1a1a1a] italic">&ldquo;정말 그게 문제일까? 더 나은 방법은 없을까?&rdquo;</p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="border-t border-[#e0e0e0] pt-8">
+            <p className="text-xs text-[#999] uppercase tracking-widest mb-2">Step 2</p>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">가설 검증</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>가설 중 검증된 것은 무엇이고, 틀린 것은 무엇인가.</p>
+              <p>우리만의 차별화된 관점은 무엇인가.</p>
+              <p>소비자의 숨겨진 니즈는 어디에 있는가.</p>
+              <p className="mt-4">여기서 핵심 메시지가 나온다.</p>
+              <p>소비자의 언어로 이야기할 수 있어야 한다.</p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="border-t border-[#e0e0e0] pt-8">
+            <p className="text-xs text-[#999] uppercase tracking-widest mb-2">Step 3</p>
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">전략 수립</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>차별화 전략 + 핵심 메시지.</p>
+              <p>구체적 실행 계획 — 누가, 언제, 어떻게.</p>
+              <p>성과 측정 기준.</p>
+              <p className="mt-4">여기서 나온 것이 실행된다.</p>
+              <p>실현되지 않으면 아이디어가 아니다.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Vrief의 정신 */}
+        <div className="mt-16 border border-[#e0e0e0] p-8 md:p-10 bg-[#FAFAFA]">
+          <div className="space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+            <p>Vrief는 &ldquo;될 수 있는 방법&rdquo;을 찾아가는 과정이다.</p>
+            <p className="mt-4 text-[#444]">제약 앞에서 멈추지 않는다.</p>
+            <p className="text-[#444]">부정적인 결론으로 끝나지 않는다.</p>
+            <p className="text-[#444]">극한까지 방법을 찾고, 차선이라도 만들어낸다.</p>
+            <p className="mt-4 text-[#1a1a1a] font-medium">그것이 기획자의 일이다.</p>
+          </div>
+        </div>
+
+        {/* AI와 함께 쓰는 Vrief */}
+        <div className="mt-16">
+          <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">AI와 함께 쓰는 Vrief</h3>
+          <div className="mt-6 space-y-3 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
+            <p className="text-[#1a1a1a] font-medium">AI가 80%를 채우고, 사람이 20%의 핵심 판단을 한다.</p>
+            <p className="mt-4">Step 1에서 AI가 정보를 수집하고 정리한다.</p>
+            <p>Step 2에서 AI가 가설을 시뮬레이션하고 패턴을 찾는다.</p>
+            <p>Step 3에서 AI가 시나리오를 비교하고 실행 계획을 잡는다.</p>
+            <p className="mt-4">그러나 — &ldquo;이게 진짜 문제인가?&rdquo;를 묻는 것은 사람이다.</p>
+            <p>&ldquo;이 방향이 맞는가?&rdquo;를 결정하는 것도 사람이다.</p>
+            <p className="mt-4 text-[#1a1a1a]">AI 시대일수록 Why와 What을 정하는 기획자의 가치가 올라간다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== GPR Section =====
+function GPRSection() {
+  return (
+    <section id="gpr" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+          GPR — 성장의 나침반
+        </h2>
+        <p className="mt-4 text-[#666] text-lg">
+          Goal · Plan · Result. 목표를 세우고, 실행하고, 돌아본다.
+        </p>
+
+        <div className="mt-12 space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>GPR은 평가 도구가 아니다.</p>
+          <p>성장의 나침반이다.</p>
+          <p className="mt-4 text-[#444]">&ldquo;지금 내가 어디에 있고, 어디로 가고 있는가&rdquo;를</p>
+          <p className="text-[#444]">스스로 알게 해주는 프로토콜.</p>
+          <p className="mt-4 text-[#444]">위에서 내려오는 관리가 아니라</p>
+          <p className="text-[#444]">자기 스스로 방향을 잡는 습관이다.</p>
+        </div>
+
+        {/* 3단계 */}
+        <div className="mt-16 space-y-12">
+          <div className="border-t border-[#d0d0d0] pt-8">
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Goal — 어디로 갈 것인가</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>명확하고 측정 가능한 목표.</p>
+              <p>숫자와 기한이 있어야 한다.</p>
+              <p>&ldquo;열심히 하겠습니다&rdquo;는 Goal이 아니다.</p>
+              <p>&ldquo;3월 말까지 참석률 80%를 달성한다&rdquo;가 Goal이다.</p>
+            </div>
+          </div>
+
+          <div className="border-t border-[#d0d0d0] pt-8">
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Plan — 어떻게 갈 것인가</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>목표를 달성하기 위한 구체적 액션.</p>
+              <p>누가, 무엇을, 언제까지.</p>
+              <p>필요한 리소스와 예상 장애물.</p>
+            </div>
+          </div>
+
+          <div className="border-t border-[#d0d0d0] pt-8">
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Result — 무엇을 배웠는가</h3>
+            <div className="mt-4 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-xl">
+              <p>실행 결과를 기록하고 다음 사이클에 반영한다.</p>
+              <p>Result는 점수가 아니다.</p>
+              <p>&ldquo;이번에 뭘 배웠는가, 다음에 뭘 다르게 할 것인가&rdquo;가 핵심이다.</p>
+              <p>성공도 실패도 기록하면 자산이 된다.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* GPR의 정신 */}
+        <div className="mt-16 border border-[#d0d0d0] p-8 md:p-10 bg-white">
+          <div className="space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed">
+            <p className="font-medium">나의 성장이 우리의 성장이다.</p>
+            <p className="mt-4 text-[#444]">보고가 아니라 공유다.</p>
+            <p className="text-[#444]">평가가 아니라 개선이다.</p>
+            <p className="text-[#444]">기록하지 않으면 흘러간다.</p>
+            <p className="text-[#444]">기록하면 자산이 된다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== Vridge Section =====
+function VridgeSection() {
+  return (
+    <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28">
+      <div className="max-w-4xl mx-auto">
+        <div className="space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>Vrief로 방향을 잡고, GPR로 실행하고 측정한다.</p>
+          <p className="mt-4 text-[#444]">Vrief 전략 수립(Step 3) → GPR Goal이 시작된다</p>
+          <p className="text-[#444]">GPR Result → 다음 Vrief 조사 분석(Step 1)에 피드백으로 들어간다</p>
+          <p className="mt-4">이 순환이 Vridge다.</p>
+          <p className="text-[#444]">일을 시작하는 사고방식과 일을 계속하는 사고방식이</p>
+          <p className="text-[#444]">하나로 이어진다.</p>
+        </div>
+
+        {/* Vridge Diagram */}
+        <div className="mt-16 flex justify-center">
+          <div className="w-full max-w-2xl">
+            {/* Vrief row */}
+            <div className="flex items-center gap-2 md:gap-4 justify-center">
+              <div className="border border-[#1a1a1a] px-3 py-2 md:px-5 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center">
+                <span className="block text-[10px] text-[#999] mb-0.5">Vrief</span>
+                조사 분석
+              </div>
+              <span className="text-[#999]">→</span>
+              <div className="border border-[#1a1a1a] px-3 py-2 md:px-5 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center">
+                <span className="block text-[10px] text-[#999] mb-0.5">Vrief</span>
+                가설 검증
+              </div>
+              <span className="text-[#999]">→</span>
+              <div className="border border-[#1a1a1a] px-3 py-2 md:px-5 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center">
+                <span className="block text-[10px] text-[#999] mb-0.5">Vrief</span>
+                전략 수립
+              </div>
+            </div>
+
+            {/* Arrow down */}
+            <div className="flex justify-end pr-[15%] md:pr-[12%] my-2">
+              <span className="text-[#999] text-lg">↓</span>
+            </div>
+
+            {/* GPR column aligned right */}
+            <div className="flex flex-col items-end pr-[6%] md:pr-[4%] gap-2">
+              <div className="border border-[#1a1a1a] px-4 py-2 md:px-6 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center min-w-[100px] md:min-w-[120px]">
+                <span className="block text-[10px] text-[#999] mb-0.5">GPR</span>
+                Goal
+              </div>
+              <span className="text-[#999]">↓</span>
+              <div className="border border-[#1a1a1a] px-4 py-2 md:px-6 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center min-w-[100px] md:min-w-[120px]">
+                <span className="block text-[10px] text-[#999] mb-0.5">GPR</span>
+                Plan
+              </div>
+              <span className="text-[#999]">↓</span>
+              <div className="border border-[#1a1a1a] px-4 py-2 md:px-6 md:py-3 text-xs md:text-sm text-[#1a1a1a] bg-white text-center min-w-[100px] md:min-w-[120px]">
+                <span className="block text-[10px] text-[#999] mb-0.5">GPR</span>
+                Result
+              </div>
+            </div>
+
+            {/* Feedback arrow */}
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <span className="text-xs text-[#999]">피드백</span>
+              <div className="flex-1 border-t border-dashed border-[#999]" />
+              <span className="text-xs text-[#999]">↻ 조사 분석으로</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== Program Section =====
+function ProgramSection() {
+  const [formData, setFormData] = useState({ name: "", email: "", role: "" });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <section id="program" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+            AI 시대에 살아남는 기획력
+          </h2>
+          <span className="text-xs px-2 py-1 border border-[#ccc] text-[#999] tracking-widest uppercase">
+            Coming Soon
+          </span>
+        </div>
+
+        <div className="mt-12 space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>기획은 가르칠 수 있는 것이 아니라</p>
+          <p>훈련할 수 있는 것이다.</p>
+          <p className="mt-4 font-medium">Planner&apos;s는 세 가지를 훈련한다.</p>
+        </div>
+
+        {/* 커리큘럼 3축 */}
+        <div className="mt-16 grid md:grid-cols-3 gap-8">
+          <div className="border border-[#e0e0e0] p-8 bg-white">
+            <div className="flex items-center gap-3 mb-6">
+              <BookOpen size={18} className="text-[#1a1a1a]" />
+              <p className="text-xs text-[#999] uppercase tracking-widest">1. 사고 체계</p>
+            </div>
+            <h3 className="font-serif text-xl text-[#1a1a1a] mb-4">Vrief</h3>
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>진짜 문제를 찾는 법.</p>
+              <p>가설을 세우고 부수는 법.</p>
+              <p>검증된 것만 전략으로 올리는 법.</p>
+              <p>처음부터 파워포인트를 열지 않는 법.</p>
+            </div>
+          </div>
+
+          <div className="border border-[#e0e0e0] p-8 bg-white">
+            <div className="flex items-center gap-3 mb-6">
+              <Sparkles size={18} className="text-[#1a1a1a]" />
+              <p className="text-xs text-[#999] uppercase tracking-widest">2. 실행 가속</p>
+            </div>
+            <h3 className="font-serif text-xl text-[#1a1a1a] mb-4">AI 활용</h3>
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>AI가 80%를 채운다.</p>
+              <p>사람은 20%의 핵심 판단에 집중한다.</p>
+              <p>정보 수집, 가설 시뮬레이션, 시나리오 비교 —</p>
+              <p>AI가 속도를 내고, 사람이 방향을 잡는다.</p>
+            </div>
+          </div>
+
+          <div className="border border-[#e0e0e0] p-8 bg-white">
+            <div className="flex items-center gap-3 mb-6">
+              <Target size={18} className="text-[#1a1a1a]" />
+              <p className="text-xs text-[#999] uppercase tracking-widest">3. 성과 관리</p>
+            </div>
+            <h3 className="font-serif text-xl text-[#1a1a1a] mb-4">GPR</h3>
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>목표를 세우고, 실행하고, 돌아본다.</p>
+              <p>수치와 기한이 없으면 희망사항이다.</p>
+              <p>성공도 실패도 기록하면 자산이 된다.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 관심 등록 폼 */}
+        <div className="mt-16 border border-[#e0e0e0] p-8 md:p-10 bg-white max-w-lg">
+          {!submitted ? (
+            <>
+              <p className="text-sm text-[#444] mb-6">
+                커리큘럼이 오픈되면 가장 먼저 알려드립니다
+              </p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="이름"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full border border-[#ddd] px-4 py-2.5 text-sm text-[#1a1a1a] placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors"
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="이메일"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full border border-[#ddd] px-4 py-2.5 text-sm text-[#1a1a1a] placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors"
+                  required
+                />
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full border border-[#ddd] px-4 py-2.5 text-sm text-[#1a1a1a] focus:outline-none focus:border-[#1a1a1a] transition-colors appearance-none bg-white"
+                  required
+                >
+                  <option value="" disabled>직군 선택</option>
+                  <option value="student">대학생</option>
+                  <option value="junior">주니어</option>
+                  <option value="professional">현업</option>
+                  <option value="other">기타</option>
+                </select>
+                <button
+                  type="submit"
+                  className="w-full bg-[#1a1a1a] text-white py-2.5 text-sm tracking-wide hover:bg-[#333] transition-colors"
+                >
+                  관심 등록
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-[#1a1a1a] font-medium">등록되었습니다.</p>
+              <p className="text-sm text-[#999] mt-2">오픈 시 가장 먼저 알려드리겠습니다.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Universe 연결 */}
+        <div className="mt-16 space-y-2 text-[#444] text-sm md:text-base leading-relaxed">
+          <p>Planner&apos;s에서 기획력을 키우고,</p>
+          <p>MADLeague에서 실전으로 증명하고,</p>
+          <p>HeRo를 통해 세상에 나간다.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== About Section =====
+function AboutSection() {
+  return (
+    <section id="about" className="px-6 md:px-16 lg:px-24 py-20 md:py-28">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+          Planner&apos;s는
+        </h2>
+
+        <div className="mt-12 space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+          <p>Planner&apos;s는 기획자를 위한 브랜드다.</p>
+          <p className="mt-4 text-[#444]">도구를 주고,</p>
+          <p className="text-[#444]">프레임을 가르치고,</p>
+          <p className="text-[#444]">실전에서 증명한다.</p>
+        </div>
+
+        <div className="mt-12 space-y-3 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
+          <p>2004년, 한 사람이 혼자서 트렌드 분석 사이트를 만들었다.</p>
+          <p>기술이 따라오지 못했다. 혼자서는 한계가 있었다.</p>
+          <p className="mt-4">22년이 지나 AI가 도래했다.</p>
+          <p>그때 시작한 것이 드디어 가능해졌다.</p>
+          <p className="mt-4 text-[#1a1a1a]">Planner&apos;s는 그 22년의 결과물이다.</p>
+          <p>20년 넘게 현장에서 기획하고, 실행하고, 검증한 것들 —</p>
+          <p>Vrief, GPR, Principle 10 —</p>
+          <p>을 누구나 쓸 수 있게 만든 것이다.</p>
+        </div>
+
+        {/* 핵심 믿음 */}
+        <div className="mt-16 border-t border-[#e0e0e0] pt-12">
+          <div className="space-y-3 text-[#1a1a1a] text-base md:text-lg leading-relaxed max-w-2xl">
+            <p className="font-serif text-xl md:text-2xl">&ldquo;우리는 모두 기획자다. 적어도, 자기 인생에서만큼은.&rdquo;</p>
+            <div className="mt-6 space-y-2 text-[#444] text-sm md:text-base">
+              <p>인생의 목표를 세우는 것도 기획이고,</p>
+              <p>이직을 준비하는 것도 기획이고,</p>
+              <p>사업을 시작하는 것도 기획이다.</p>
+              <p className="mt-4">기획자는 연결하고 조직하고 일이 되게 하는 사람이다.</p>
+              <p>당신이 지금 하고 있는 일이 바로 그것이다.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Universe 소개 */}
+        <div className="mt-16 border border-[#e0e0e0] p-8 md:p-10 bg-[#FAFAFA]">
+          <p className="text-[#1a1a1a] text-base md:text-lg mb-6">Planner&apos;s는 Ten:One&#8482; Universe의 일부다.</p>
+          <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+            <p>기획을 배우고 → <span className="text-[#1a1a1a]">Planner&apos;s</span></p>
+            <p>실전 프로젝트를 경험하고 → <span className="text-[#1a1a1a]">MADLeague</span></p>
+            <p>업계 사람들을 만나고 → <span className="text-[#1a1a1a]">Badak</span></p>
+            <p>커리어를 연결하고 → <span className="text-[#1a1a1a]">HeRo</span></p>
+            <p>브랜드를 만든다 → <span className="text-[#1a1a1a]">Brand Gravity</span></p>
+          </div>
+          <div className="mt-6 space-y-2 text-sm text-[#444]">
+            <p>하나의 브랜드가 아니라</p>
+            <p>가치로 연결된 세계관이다.</p>
+          </div>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 mt-6 text-sm text-[#1a1a1a] hover:text-[#444] transition-colors"
+          >
+            Universe 더 보기
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== Planner's Planner Section =====
+function PlannersPlannerSection() {
+  const [aiFormData, setAiFormData] = useState({ name: "", email: "" });
+  const [aiSubmitted, setAiSubmitted] = useState(false);
+
+  const handleAiSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAiSubmitted(true);
+  };
+
+  return (
+    <section id="tool" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight">
+          기획자를 위한 플래너
+        </h2>
+        <p className="mt-4 text-[#666] text-lg">
+          생각을 구조화하는 도구. 종이에서 디지털로, 디지털에서 AI로.
+        </p>
+
+        {/* 5-1. Planner's Planner 2026 */}
+        <div className="mt-16">
+          <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Planner&apos;s Planner 2026</h3>
+          <div className="mt-6 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
+            <p>플래너를 위한 플래너.</p>
+            <p>단순한 일정 관리가 아니다.</p>
+            <p>기획자의 사고를 구조화하는 도구다.</p>
+            <p className="mt-4">Vrief의 3단계(조사 분석 → 가설 검증 → 전략 수립)와</p>
+            <p>GPR의 3단계(Goal → Plan → Result)가</p>
+            <p>플래너 안에 자연스럽게 녹아 있다.</p>
+          </div>
+
+          {/* 라인업 */}
+          <div className="mt-10 grid sm:grid-cols-2 gap-4">
+            {[
+              { name: "All in One", desc: "연간 + 주간 + 프로젝트를 하나에" },
+              { name: "연간 플래너", desc: "1년의 방향을 잡는다" },
+              { name: "주간 플래너", desc: "한 주의 실행을 설계한다" },
+              { name: "프로젝트 북", desc: "Frame + Work + Book. 프로젝트 단위로 기획한다" },
+            ].map((item) => (
+              <div key={item.name} className="border border-[#e0e0e0] p-6 bg-white">
+                <PenTool size={16} className="text-[#999] mb-3" />
+                <p className="text-[#1a1a1a] font-medium text-sm">{item.name}</p>
+                <p className="text-[#666] text-xs mt-1">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* 함께 쓰는 도구 */}
+          <div className="mt-10 space-y-3 text-xs text-[#666] leading-relaxed">
+            <p><span className="text-[#1a1a1a]">노트북 시리즈:</span> 코넬노트 · 리갈패드 · 콘티북 · 격자 · 줄 · 무지</p>
+            <p><span className="text-[#1a1a1a]">프레임워크 템플릿 20종+:</span> 만다라트 · SWOT · OKR · 4분면 · 비즈니스 캔버스 ...</p>
+            <p><span className="text-[#1a1a1a]">스타트업 브리프 7종:</span> 비전략 · 마전략 · 브전략 · 커뮤니케이션 · RFP · 진단</p>
+            <p><span className="text-[#1a1a1a]">아이디어 샤워 시리즈:</span> 앰비언트 미디어 · 비즈니스 카드 · 쇼핑백 · 모두의 캠페인</p>
+          </div>
+        </div>
+
+        {/* 5-2. 디지털 Planner's Planner */}
+        <div className="mt-20 border-t border-[#e0e0e0] pt-12">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">디지털 Planner&apos;s Planner</h3>
+            <span className="text-xs px-2 py-0.5 border border-[#ccc] text-[#999] tracking-widest uppercase">
+              Coming Soon
+            </span>
+          </div>
+          <p className="text-[#666] text-base mt-1">어디서든 기획하라</p>
+
+          <div className="mt-6 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
+            <p>같은 구조, 다른 매체.</p>
+            <p>종이에서 시작한 Planner&apos;s Planner가</p>
+            <p>태블릿과 웹으로 확장된다.</p>
+          </div>
+
+          <div className="mt-8 grid sm:grid-cols-2 gap-6">
+            {/* GoodNotes / Notability */}
+            <div className="border border-[#e0e0e0] p-6 bg-white">
+              <Tablet size={16} className="text-[#999] mb-3" />
+              <p className="text-[#1a1a1a] font-medium text-sm mb-3">GoodNotes / Notability 버전</p>
+              <div className="space-y-2 text-xs text-[#444] leading-relaxed">
+                <p>아이패드에서 손글씨로 기획한다.</p>
+                <p>GoodNotes · Notability 호환 하이퍼링크 PDF.</p>
+                <p>탭 하나로 연간 → 주간 → 프로젝트를 오간다.</p>
+                <p>Vrief 3단계와 GPR이 페이지 구조에 내장되어 있다.</p>
+                <p className="mt-2">펜으로 쓰는 기획의 감각은 그대로,</p>
+                <p>디지털의 검색과 정리가 더해진다.</p>
+              </div>
+            </div>
+
+            {/* 삼성노트 */}
+            <div className="border border-[#e0e0e0] p-6 bg-white">
+              <Tablet size={16} className="text-[#999] mb-3" />
+              <p className="text-[#1a1a1a] font-medium text-sm mb-3">삼성노트 버전</p>
+              <div className="space-y-2 text-xs text-[#444] leading-relaxed">
+                <p>삼성 갤럭시 탭 + S Pen 환경에 최적화.</p>
+                <p>삼성노트 네이티브 호환.</p>
+                <p>같은 구조, 같은 프레임워크.</p>
+                <p>디바이스가 달라도 기획하는 방식은 같다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 5-3. AI Planner's Planner */}
+        <div className="mt-20 border-t border-[#e0e0e0] pt-12">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">AI Planner&apos;s Planner</h3>
+            <span className="text-xs px-2 py-0.5 border border-[#ccc] text-[#999] tracking-widest uppercase">
+              Coming Soon
+            </span>
+          </div>
+          <p className="text-[#666] text-base mt-1">AI가 기획을 돕는다</p>
+
+          <div className="mt-6 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
+            <p>종이 플래너가 구조를 잡아줬다면,</p>
+            <p>AI 플래너는 사고를 가속한다.</p>
+            <p className="mt-4">Vrief의 질문에 AI가 함께 답한다.</p>
+            <p>GPR의 목표를 AI가 함께 추적한다.</p>
+          </div>
+
+          {/* 작동 방식 */}
+          <div className="mt-10 space-y-8">
+            <div className="border-l-2 border-[#1a1a1a] pl-6">
+              <p className="text-xs text-[#999] uppercase tracking-widest mb-1">1</p>
+              <p className="text-[#1a1a1a] font-medium text-sm mb-2">Vrief 어시스턴트</p>
+              <div className="space-y-1 text-xs text-[#444] leading-relaxed">
+                <p>&ldquo;진짜 문제가 뭔가요?&rdquo;라고 AI가 묻는다.</p>
+                <p>조사 분석을 도와주고, 가설을 함께 세우고,</p>
+                <p>검증할 수 있는 방법을 제안한다.</p>
+                <p>기획자가 생각하는 것을 AI가 가속한다.</p>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-[#1a1a1a] pl-6">
+              <p className="text-xs text-[#999] uppercase tracking-widest mb-1">2</p>
+              <p className="text-[#1a1a1a] font-medium text-sm mb-2">GPR 트래커</p>
+              <div className="space-y-1 text-xs text-[#444] leading-relaxed">
+                <p>목표를 입력하면 AI가 실행 계획을 구조화한다.</p>
+                <p>진행 상황을 자동으로 추적하고,</p>
+                <p>Result에서 다음 Goal을 제안한다.</p>
+                <p>Vridge 순환이 자동으로 돌아간다.</p>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-[#1a1a1a] pl-6">
+              <p className="text-xs text-[#999] uppercase tracking-widest mb-1">3</p>
+              <p className="text-[#1a1a1a] font-medium text-sm mb-2">인사이트 연결</p>
+              <div className="space-y-1 text-xs text-[#444] leading-relaxed">
+                <p>기획 과정에서 발견한 것들을 AI가 연결한다.</p>
+                <p>&ldquo;이 가설은 지난 프로젝트의 이 결과와 관련이 있습니다.&rdquo;</p>
+                <p>경험이 쌓일수록 AI가 더 날카로워진다.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 포지셔닝 */}
+          <div className="mt-10 border border-[#e0e0e0] p-8 bg-white max-w-2xl">
+            <div className="space-y-2 text-sm text-[#444] leading-relaxed">
+              <p>AI Planner&apos;s Planner는 AI가 기획을 대신하는 도구가 아니다.</p>
+              <p className="text-[#1a1a1a]">기획자의 사고를 가속하는 도구다.</p>
+              <p className="mt-4">AI가 80%를 채우고,</p>
+              <p>사람이 20%의 핵심 판단 — Why와 What — 을 한다.</p>
+              <p className="mt-4">기획은 여전히 사람의 일이다.</p>
+              <p>다만, 훨씬 빠르고 날카롭게.</p>
+            </div>
+          </div>
+
+          {/* AI 관심 등록 */}
+          <div className="mt-10 max-w-sm">
+            {!aiSubmitted ? (
+              <>
+                <p className="text-sm text-[#444] mb-4">
+                  AI Planner&apos;s Planner가 오픈되면 가장 먼저 알려드립니다
+                </p>
+                <form onSubmit={handleAiSubmit} className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="이메일"
+                    value={aiFormData.email}
+                    onChange={(e) => setAiFormData({ ...aiFormData, email: e.target.value })}
+                    className="flex-1 border border-[#ddd] px-3 py-2 text-sm text-[#1a1a1a] placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#1a1a1a] text-white text-sm hover:bg-[#333] transition-colors"
+                  >
+                    <Mail size={14} />
+                  </button>
+                </form>
+              </>
+            ) : (
+              <p className="text-sm text-[#1a1a1a]">등록되었습니다. 오픈 시 알려드리겠습니다.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== Main Page =====
 export default function PlannersPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen bg-white" />}>
-            <PlannersContent />
-        </Suspense>
-    );
+  return (
+    <main className="bg-white text-[#1a1a1a] min-h-screen">
+      <HeroSection />
+      <LearnSection />
+      <VriefSection />
+      <GPRSection />
+      <VridgeSection />
+      <ProgramSection />
+      <AboutSection />
+      <PlannersPlannerSection />
+    </main>
+  );
 }

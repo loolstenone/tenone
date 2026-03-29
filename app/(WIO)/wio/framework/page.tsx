@@ -1,136 +1,403 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import {
+  ArrowLeft, Users, Clock, DollarSign, ChevronDown, ChevronRight,
+  Cog, ShieldCheck, Layers, ArrowRightLeft, Sparkles, FileText,
+  MessageCircle, Award, Brain, Lock, Eye, Pencil, Trash2, Settings
+} from 'lucide-react';
 import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
-const METHODS = [
-  { code: 'VH', name: 'Vision House', tagline: '조직의 존재 이유와 방향을 설계하는 프레임워크', tag: '전략·비전', color: '#E24B4A',
-    desc: 'Philosophy → Mission → Vision → Goal → Strategy → Core Values → Declaration. 위에서 아래로 일관된 체계를 설계한다.',
-    products: [
-      { name: 'Vision House 워크샵', form: '반일(4시간)', target: '대표/경영진', price: '150만원' },
-      { name: 'Vision House 컨설팅', form: '2주 집중', target: '창업팀/리브랜딩', price: '500만원' },
-      { name: 'Vision House 템플릿 키트', form: '디지털 다운로드', target: '셀프서비스', price: '15만원' },
-      { name: 'Vision House 진단', form: '온라인 설문 + AI 리포트', target: '기존 조직', price: '30만원' },
-    ]},
-  { code: 'P10', name: 'Principle 10', tagline: '조직의 행동 원칙을 설계하고 내재화하는 프로그램', tag: '문화·원칙', color: '#534AB7',
-    desc: '10대 행동 원칙을 고객사에 맞게 설계하고 내재화. "우리는 모두 기획자다" 등 현장에서 검증된 원칙 기반.',
-    products: [
-      { name: 'Principle 설계 워크샵', form: '1일(8시간)', target: '리더+팀원 합동', price: '200만원' },
-      { name: 'Principle 내재화 프로그램', form: '4주', target: '전 조직원', price: '400만원' },
-      { name: 'Culture Book 제작', form: '맞춤 핸드북', target: '조직 전체', price: '300만원' },
-    ]},
-  { code: 'Vr', name: 'Vrief', tagline: '조사분석 → 가설검증 → 전략수립. 기획의 시작을 바꾸는 프레임워크', tag: '기획·실행', color: '#1D9E75',
-    desc: '"처음부터 PPT 열지 마세요. Vrief 질문에 답하면 그것 자체가 제안서의 시나리오가 됩니다."',
-    products: [
-      { name: 'Vrief 실전 워크샵', form: '1일(8시간)', target: '기획팀/마케팅팀', price: '250만원' },
-      { name: 'Vrief for Campus', form: '반일(4시간)', target: '대학생', price: '100만원' },
-      { name: 'Vrief 코칭', form: '4주 실전 동행', target: '에이전시 PM', price: '600만원' },
-      { name: 'Vrief 템플릿 키트', form: '디지털', target: '셀프서비스', price: '10만원' },
-      { name: 'Vrief 온라인 강의', form: 'VOD 5강', target: '전체', price: '5만원' },
-      { name: 'Vrief for AI', form: 'AI+프롬프트', target: '기획자/마케터', price: '15만원' },
-    ]},
-  { code: 'GPR', name: 'GPR', tagline: 'Goal → Plan → Result. 목표를 세우고 피드백하고 성장하는 학습 엔진', tag: '성과·성장', color: '#378ADD',
-    desc: 'OKR·KPI·MBO를 대체하는 것이 아니라, 그 위에서 작동하는 "성과관리 OS".',
-    products: [
-      { name: 'GPR 도입 워크샵', form: '1일(8시간)', target: '조직 리더', price: '250만원' },
-      { name: 'GPR 운영 코칭', form: '12주', target: '전사 도입 기업', price: '800만원' },
-      { name: 'GPR × OKR 통합', form: '반일(4시간)', target: 'OKR 사용 기업', price: '200만원' },
-      { name: 'GPR for 개인', form: '온라인 2시간', target: '개인', price: '5만원' },
-      { name: 'GPR 가이드북', form: 'PDF 전자책', target: '전체', price: '3만원' },
-    ]},
-  { code: 'TW', name: 'Ten:One Wheel', tagline: '신뢰 → 참여 → 프로젝트 → 성공 → 기회 → 성장의 선순환', tag: '성장·구조', color: '#BA7517',
-    desc: '커뮤니티, 네트워크, 에이전시 조직이 지속 성장하는 플라이휠 구조를 설계한다.',
-    products: [
-      { name: '플라이휠 설계 워크샵', form: '1일(8시간)', target: '커뮤니티/네트워크', price: '300만원' },
-      { name: '플라이휠 컨설팅', form: '4주', target: '에이전시', price: '700만원' },
-      { name: '플라이휠 진단', form: '온라인 설문', target: '기존 조직', price: '50만원' },
-    ]},
-  { code: 'WIO', name: 'WIO Protocol', tagline: '하나로 일하기 위한 운영 규칙. 도구 + 프로세스 + 문화 통합', tag: '운영·통합', color: '#D4537E',
-    desc: 'Vision House + Principle 10 + Vrief + GPR + 플라이휠을 하나의 운영 체계로 통합.',
-    products: [
-      { name: 'WIO 도입 컨설팅', form: '8주', target: 'System 구매 고객', price: '2,000만원' },
-      { name: 'WIO 전환 패키지', form: '12주+', target: 'SaaS 탈출 기업', price: '3,000만원' },
-      { name: 'WIO 정기 코칭', form: '월 1회', target: '도입 완료 기업', price: '월 100만원' },
-    ]},
+/* ── 3대 자원 상세 ── */
+const RESOURCE_DETAILS = [
+  {
+    key: 'human', icon: Users, label: '인간', sub: 'Human Resource Core', color: '#7C6AE8',
+    items: [
+      { name: '인사 마스터', desc: '사원번호, 성명, 부서, 직급, 직책, 입사일, 계약유형' },
+      { name: '조직 소속', desc: '트랙 → 부서 → 팀 → 파트 (다중 소속 허용)' },
+      { name: '역량 프로필', desc: '스킬셋, 자격증, 교육이력, 프로젝트 경험' },
+      { name: '근태 기록', desc: '출퇴근, 휴가, 초과근무, 재택근무' },
+      { name: '성과 기록', desc: 'KPI, 평가 결과, 피드백 이력' },
+      { name: '권한 프로필', desc: '시스템 접근 권한, 모듈별 RBAC' },
+    ],
+  },
+  {
+    key: 'time', icon: Clock, label: '시간', sub: 'Time Resource Core', color: '#3B9EE8',
+    items: [
+      { name: '근무 시간', desc: '개인별 근무시간 집계, 초과근무 자동 계산' },
+      { name: '프로젝트 타임라인', desc: '프로젝트별 시작/종료/마일스톤' },
+      { name: '업무 일정', desc: '개인/팀/부서 캘린더, 회의, 데드라인' },
+      { name: 'SLA/납기', desc: '고객 약속 납기, 내부 SLA 추적' },
+      { name: '워크플로우 리드타임', desc: '결재·프로세스별 소요시간 분석' },
+    ],
+  },
+  {
+    key: 'money', icon: DollarSign, label: '돈', sub: 'Financial Resource Core', color: '#2DC98A',
+    items: [
+      { name: '회계 원장 (GL)', desc: '계정과목, 분개, 전표, 재무제표' },
+      { name: '예산', desc: '부서별/프로젝트별 예산 편성·집행·잔액' },
+      { name: '매출/매입', desc: '매출 파이프라인, 매입 관리, 세금계산서' },
+      { name: '급여', desc: '급여 계산, 4대보험, 원천징수, 지급' },
+      { name: '비용', desc: '경비 청구, 법인카드, 출장비, 복리후생' },
+      { name: '자산', desc: '유무형 자산 등록, 감가상각, 재고 평가' },
+    ],
+  },
 ];
 
-const COMBOS = [
-  { name: 'WIO Starter Kit', desc: 'GPR 워크샵 + Vrief 워크샵 + 템플릿 키트', price: '450만원', original: '510만원' },
-  { name: 'WIO Culture Pack', desc: 'Vision House + Principle 설계 + Culture Book', price: '800만원', original: '1,000만원' },
-  { name: 'WIO Full Transform', desc: 'VH + P10 + Vrief + GPR + 플라이휠 + System Pro 1년', price: '5,000만원', original: '6,800만원' },
-  { name: 'WIO for Campus Pack', desc: 'Vrief Campus + GPR 개인 + System Campus 1년', price: '연 2,000만원', original: '' },
+/* ── Culture Engine ── */
+const CULTURE_STEPS = [
+  {
+    icon: FileText, title: '철학 정의',
+    desc: 'Mission, Vision, Core Values, Work Principles, Communication Guidelines를 시스템에 등록합니다.',
+    detail: '핵심가치별 관찰 가능한 행동 지표(behavioral_indicators)와 안티패턴(anti_patterns)까지 정의하여 모호함을 제거합니다.',
+  },
+  {
+    icon: Pencil, title: '양식에 녹이기',
+    desc: '기안서, 보고서, 제안서, 회의록, 피드백 등 모든 양식에 가치 체크포인트를 내장합니다.',
+    detail: '기안서에는 "어떤 핵심가치에 기여하는가" 필수, 보고서는 "결론→근거→제안→리스크" 순서 고정.',
+  },
+  {
+    icon: Cog, title: '프로세스 강제',
+    desc: '결재 흐름에 가치 정합성 AI 자동 스코어링. 회의에는 유형별 시스템 강제 사항을 적용합니다.',
+    detail: '의사결정 회의: 안건별 찬반 투표 필수. 스탠드업: 3문장 강제 + 15분 타이머.',
+  },
+  {
+    icon: Award, title: '평가에 반영',
+    desc: '성과(What) + 가치(How) 동등 평가. 상시 피드백이 분기/연간 평가로 자연스럽게 연결됩니다.',
+    detail: '다면 평가(360도): 자기/상사/동료/부하 + AI 추천 기반 Value Champion 선정.',
+  },
+];
+
+const CULTURE_DASHBOARD = [
+  { metric: '가치 언급 빈도', method: '기안서/보고서에서 핵심가치 태그 사용 빈도' },
+  { metric: '양식 준수율', method: '양식 구조 준수 비율 (AI 자동 판정)' },
+  { metric: '회의 효율성', method: '의사결정 회의의 결정 전환율, 평균 소요시간' },
+  { metric: '피드백 활성도', method: '동료 간 피드백 교환 빈도, 가치 기반 피드백 비율' },
+  { metric: '온보딩 완주율', method: '문화 학습 프로그램 완료율' },
+  { metric: '가치 정합 스코어', method: 'AI 분석 의사결정 가치 정합도 평균' },
+];
+
+/* ── 워크플로우 엔진 ── */
+const WF_COMPONENTS = [
+  { name: '트리거', desc: '문서 작성, 상태 변경, 일정 도래, 외부 웹훅', color: '#E24B4A' },
+  { name: '스텝', desc: '입력, 승인, 알림, 데이터 변환', color: '#534AB7' },
+  { name: '담당자 규칙', desc: '고정 / 조직장 자동 / 라운드로빈', color: '#1D9E75' },
+  { name: '조건 분기', desc: '금액, 유형, 등급에 따라 다른 경로', color: '#378ADD' },
+  { name: '병렬 처리', desc: '동시에 여러 조직에서 병렬 작업', color: '#BA7517' },
+  { name: '타임아웃', desc: '미처리 시 에스컬레이션', color: '#D4537E' },
+  { name: '후속 액션', desc: '데이터 업데이트, 다음 워크플로우, API 호출', color: '#639922' },
+];
+
+/* ── 권한 모델 ── */
+const PERMISSION_LEVELS = [
+  { level: 0, name: 'Super Admin', desc: '시스템 전체', color: '#E24B4A' },
+  { level: 1, name: 'Track Admin', desc: '트랙 내 전체', color: '#534AB7' },
+  { level: 2, name: 'Org Admin', desc: '소속 조직 내 전체', color: '#1D9E75' },
+  { level: 3, name: 'Team Lead', desc: '팀 내 관리 + 하위 열람', color: '#378ADD' },
+  { level: 4, name: 'Member', desc: '자기 업무 + 팀 공유 데이터', color: '#BA7517' },
+  { level: 5, name: 'Viewer', desc: '읽기 전용', color: '#888780' },
+  { level: 6, name: 'External', desc: '파트너, 제한적 접근', color: '#D4537E' },
+];
+
+const PERMISSION_LAYERS = [
+  { layer: 1, name: '시스템 권한', desc: '시스템 관리 메뉴, 전역 설정 변경', icon: Settings },
+  { layer: 2, name: '모듈 권한', desc: '특정 모듈의 CRUD', icon: Layers },
+  { layer: 3, name: '데이터 권한', desc: '볼 수 있는 데이터 범위 (자기/팀/부서/전사)', icon: Eye },
+  { layer: 4, name: '기능 권한', desc: '모듈 내 세부 기능 접근', icon: Lock },
+];
+
+/* ── 크로스-트랙 워크플로우 예시 ── */
+const CROSS_TRACK_EXAMPLES = [
+  {
+    title: '신제품 출시',
+    color: '#534AB7',
+    steps: [
+      '사업부 기획안', '임원 승인', 'R&D 프로토타입 + 디자인 패키지 + 재무 예산 (병렬)',
+      '생산 양산계획', '물류 유통준비', '마케팅 런칭', '영업 판매개시',
+    ],
+  },
+  {
+    title: '대규모 구매',
+    color: '#1D9E75',
+    steps: [
+      '구매요청', '3사 견적비교',
+      '조건 분기: 1억 미만(팀장) / 1~5억(본부장+재무) / 5억 이상(CFO+법무+이사회)',
+      '발주', '입고확인', '회계전표', '대금지급',
+    ],
+  },
+  {
+    title: '직원 온보딩',
+    color: '#378ADD',
+    steps: [
+      'HR 입사확정', '총무 좌석/장비 + 전산 계정생성 + HR 교육등록 + 팀장 멘토지정 (자동 병렬)',
+      'HR 온보딩 완료확인', '전사 알림',
+    ],
+  },
 ];
 
 export default function FrameworkPage() {
+  const [expandedResource, setExpandedResource] = useState<string | null>('human');
+
   return (
     <>
       <WIOMarketingHeader />
 
       <div className="pt-20 pb-16 px-6">
         <div className="mx-auto max-w-5xl">
-          <Link href="/wio" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-white mb-6"><ArrowLeft size={14} /> WIO</Link>
-          <h1 className="text-3xl font-bold mb-2">WIO Method</h1>
-          <p className="text-slate-400 mb-1">일하는 방식을 팝니다.</p>
-          <p className="text-sm text-slate-500 mb-8">6개 방법론 · 25개 상품 · 3만원~5,000만원</p>
+          <Link href="/wio" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-white mb-6">
+            <ArrowLeft size={14} /> WIO
+          </Link>
 
-          <div className="space-y-6">
-            {METHODS.map((m, i) => (
-              <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: m.color }}>
-                <div className="px-5 py-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold" style={{ background: `${m.color}20`, color: m.color }}>{m.code}</div>
-                    <div className="flex-1">
-                      <h2 className="font-bold text-white">{m.name}</h2>
-                      <p className="text-xs text-slate-500">{m.tagline}</p>
-                    </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: `${m.color}15`, color: m.color }}>{m.tag}</span>
-                  </div>
-                  <p className="text-sm text-slate-400 leading-relaxed mb-4">{m.desc}</p>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="text-xs text-slate-600 border-b border-white/5">
-                        <th className="text-left py-2 font-medium">상품</th>
-                        <th className="text-left py-2 font-medium">형태</th>
-                        <th className="text-left py-2 font-medium">대상</th>
-                        <th className="text-right py-2 font-medium">비용</th>
-                      </tr></thead>
-                      <tbody>
-                        {m.products.map((p, j) => (
-                          <tr key={j} className="border-b border-white/5 last:border-0">
-                            <td className="py-2 font-medium text-white">{p.name}</td>
-                            <td className="py-2 text-slate-500">{p.form}</td>
-                            <td className="py-2 text-slate-500">{p.target}</td>
-                            <td className="py-2 text-right text-indigo-300 font-medium">{p.price}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Header */}
+          <div className="mb-16">
+            <div className="inline-flex items-center gap-2 mb-4 rounded-full bg-[#534AB7]/10 border border-[#534AB7]/20 px-4 py-1.5 text-xs text-[#9B8FE8] font-medium">
+              <Sparkles size={12} /> EUS Architecture
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Framework</h1>
+            <p className="text-slate-400">3대 자원 · Culture Engine · 워크플로우 엔진 · 권한 모델</p>
           </div>
 
-          {/* 추천 조합 */}
-          <div className="mt-10 rounded-xl border border-white/5 bg-white/[0.03] p-6">
-            <h2 className="text-lg font-bold text-white mb-4">추천 조합 패키지</h2>
-            <div className="grid gap-3 md:grid-cols-2">
-              {COMBOS.map((c, i) => (
-                <div key={i} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                  <h3 className="font-bold text-white mb-1">{c.name}</h3>
-                  <p className="text-xs text-slate-500 mb-2">{c.desc}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-emerald-400">{c.price}</span>
-                    {c.original && <span className="text-xs text-slate-600 line-through">{c.original}</span>}
+          {/* ═══════ 3대 자원 상세 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#534AB7]" />
+              <h2 className="text-2xl font-bold">3대 자원 관리 체계</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              모든 모듈이 공유하는 코어 데이터 레이어. 인간·시간·돈 각각의 데이터 항목을 표준화하여 모듈 간 데이터 흐름을 보장합니다.
+            </p>
+            <div className="space-y-3">
+              {RESOURCE_DETAILS.map((r) => {
+                const Icon = r.icon;
+                const isOpen = expandedResource === r.key;
+                return (
+                  <div key={r.key} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                    <button
+                      onClick={() => setExpandedResource(isOpen ? null : r.key)}
+                      className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-white/[0.02] transition-colors"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0" style={{ background: `${r.color}15` }}>
+                        <Icon size={20} style={{ color: r.color }} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-white">{r.label} <span className="text-xs font-normal text-slate-500 ml-1">{r.sub}</span></h3>
+                        <p className="text-xs text-slate-600">{r.items.length}개 데이터 항목</p>
+                      </div>
+                      <ChevronDown size={16} className={`text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {isOpen && (
+                      <div className="px-6 pb-5 border-t border-white/5">
+                        <div className="grid gap-3 mt-4 md:grid-cols-2">
+                          {r.items.map((item) => (
+                            <div key={item.name} className="flex items-start gap-3">
+                              <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: r.color }} />
+                              <div>
+                                <div className="text-sm font-medium text-white">{item.name}</div>
+                                <div className="text-xs text-slate-500">{item.desc}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ═══════ Culture Engine ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#D4537E]" />
+              <h2 className="text-2xl font-bold">Culture Engine</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              기업 문화는 포스터나 슬로건이 아니라, 일상 업무의 양식·프로세스·결재 흐름·피드백 구조 안에 녹아 있어야 합니다.
+            </p>
+
+            {/* 4단계 */}
+            <div className="grid gap-4 md:grid-cols-2 mb-10">
+              {CULTURE_STEPS.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#D4537E]/10">
+                        <Icon size={18} className="text-[#D4537E]" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-600">STEP {String(i + 1).padStart(2, '0')}</span>
+                        <h3 className="font-bold text-white text-sm">{s.title}</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-2">{s.desc}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">{s.detail}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Culture Dashboard */}
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6">
+              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                <MessageCircle size={16} className="text-[#D4537E]" />
+                Culture Dashboard — 문화 건강도 측정
+              </h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                {CULTURE_DASHBOARD.map((d) => (
+                  <div key={d.metric} className="flex items-start gap-3 text-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#D4537E] mt-1.5 shrink-0" />
+                    <div>
+                      <span className="font-medium text-white">{d.metric}</span>
+                      <span className="text-slate-500 ml-2">{d.method}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════ 워크플로우 엔진 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#1D9E75]" />
+              <h2 className="text-2xl font-bold">워크플로우 엔진</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              부서를 넘나드는 업무 프로세스를 비주얼하게 설계하고 자동 실행합니다.
+            </p>
+
+            {/* 구성요소 */}
+            <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4 mb-10">
+              {WF_COMPONENTS.map((c) => (
+                <div key={c.name} className="rounded-xl border border-white/5 bg-white/[0.02] p-4" style={{ borderLeftWidth: 3, borderLeftColor: c.color }}>
+                  <h4 className="text-sm font-bold text-white mb-1">{c.name}</h4>
+                  <p className="text-xs text-slate-500">{c.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 크로스-트랙 예시 */}
+            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+              <ArrowRightLeft size={16} className="text-[#1D9E75]" />
+              크로스-트랙 워크플로우 예시
+            </h3>
+            <div className="space-y-4">
+              {CROSS_TRACK_EXAMPLES.map((ex) => (
+                <div key={ex.title} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: ex.color }} />
+                    {ex.title}
+                  </h4>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {ex.steps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="text-xs px-3 py-1.5 rounded-lg border border-white/5 bg-white/[0.03] text-slate-300">
+                          {step}
+                        </span>
+                        {i < ex.steps.length - 1 && <ChevronRight size={12} className="text-slate-600 shrink-0" />}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          <div className="mt-8 text-center text-xs text-slate-600">
-            핵심 차별점: "방법론이 WIO System에 내장되어, 교육받은 그대로 시스템에서 실행"
+          {/* ═══════ 권한 모델 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#378ADD]" />
+              <h2 className="text-2xl font-bold">권한 모델</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              6 Level 계층 + 4 Layer 권한 모델로 세밀한 접근 제어를 구현합니다.
+            </p>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* 6 Level */}
+              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6">
+                <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-[#378ADD]" />
+                  7 Level 권한 계층
+                </h3>
+                <div className="space-y-2">
+                  {PERMISSION_LEVELS.map((p) => (
+                    <div key={p.level} className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0" style={{ background: `${p.color}15`, color: p.color }}>
+                        L{p.level}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-white">{p.name}</span>
+                        <span className="text-xs text-slate-500 ml-2">{p.desc}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4 Layer */}
+              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6">
+                <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                  <Layers size={16} className="text-[#378ADD]" />
+                  4 Layer 권한 모델
+                </h3>
+                <div className="space-y-4">
+                  {PERMISSION_LAYERS.map((l) => {
+                    const Icon = l.icon;
+                    return (
+                      <div key={l.layer} className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#378ADD]/10 shrink-0">
+                          <Icon size={16} className="text-[#378ADD]" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-white">Layer {l.layer}: {l.name}</div>
+                          <div className="text-xs text-slate-500">{l.desc}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════ AI 코칭 ═══════ */}
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#BA7517]" />
+              <h2 className="text-2xl font-bold">AI 코칭</h2>
+            </div>
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Brain size={16} className="text-[#BA7517]" />
+                <h3 className="font-bold text-white">문서 작성 시 실시간 가이드</h3>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { ai: '핵심 요약이 3줄 초과합니다.', rule: '원칙: "결론 먼저, 한 줄로"' },
+                  { ai: '고객 가치가 불명확합니다.', rule: '"고객에게 어떤 변화를 만드는가?" 관점에서 보완하세요.' },
+                  { ai: '비용 대비 효과 분석이 누락되었습니다.', rule: '투자 대비 기대 수익을 추가하세요.' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 rounded-lg bg-[#BA7517]/5 border border-[#BA7517]/10 px-4 py-3">
+                    <Sparkles size={14} className="text-[#BA7517] mt-0.5 shrink-0" />
+                    <div>
+                      <span className="text-sm text-white font-medium">{item.ai}</span>
+                      <span className="text-xs text-slate-500 ml-2">{item.rule}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Back to WIO */}
+          <div className="text-center">
+            <Link href="/wio" className="inline-flex items-center gap-2 text-sm text-[#9B8FE8] hover:text-white transition-colors">
+              <ArrowLeft size={14} /> WIO 홈으로
+            </Link>
           </div>
         </div>
       </div>
