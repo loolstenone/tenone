@@ -75,16 +75,45 @@ function IntraLoginForm() {
 }
 
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading, canAccessIntra } = useAuth();
+    const { isAuthenticated, isLoading, canAccessIntra, user } = useAuth();
     const router = useRouter();
+    const [intraVerified, setIntraVerified] = useState<boolean | null>(null);
 
-    if (isLoading) return (
+    // auth-context와 별도로 직접 DB 확인
+    useEffect(() => {
+        if (isLoading) return;
+        if (!isAuthenticated) { setIntraVerified(false); return; }
+
+        // auth-context가 canAccessIntra를 true로 판단하면 바로 통과
+        if (canAccessIntra) { setIntraVerified(true); return; }
+
+        // canAccessIntra가 false여도 DB에서 직접 확인 (타이밍 이슈 대응)
+        const verify = async () => {
+            try {
+                const sb = createClient();
+                const { data: { user: authUser } } = await sb.auth.getUser();
+                if (!authUser) { setIntraVerified(false); return; }
+                const { data: member } = await sb.from('members')
+                    .select('account_type,role')
+                    .eq('auth_id', authUser.id)
+                    .single();
+                if (member && member.account_type !== 'member') {
+                    setIntraVerified(true);
+                } else {
+                    setIntraVerified(false);
+                }
+            } catch { setIntraVerified(false); }
+        };
+        verify();
+    }, [isLoading, isAuthenticated, canAccessIntra]);
+
+    if (isLoading || intraVerified === null) return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
             <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
         </div>
     );
 
-    if (!isAuthenticated || !canAccessIntra) {
+    if (!intraVerified) {
         return <IntraLoginForm />;
     }
 
