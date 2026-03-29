@@ -23,6 +23,7 @@ function IntraLoginForm() {
         setSubmitting(true);
         try {
             const sb = createClient();
+            await sb.auth.signOut(); // 기존 세션 해지
             const { error: authError } = await sb.auth.signInWithPassword({ email, password });
             if (authError) setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
             else window.location.reload();
