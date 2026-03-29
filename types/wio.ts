@@ -9,9 +9,24 @@ export type JobPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type ProjectMemberRole = 'pm' | 'lead' | 'member' | 'support';
 
 export const WIO_MODULES = [
-  'home', 'project', 'talk', 'finance', 'people',
-  'sales', 'timesheet', 'learn', 'content', 'wiki', 'insight', 'shop',
-  'competition', 'networking', 'certificate', 'approval',
+  // Common
+  'home', 'talk', 'approval', 'mail', 'messenger', 'calendar', 'document', 'notification', 'report', 'ai', 'it',
+  // HR
+  'people', 'recruit', 'attendance', 'payroll', 'evaluation', 'reward', 'org', 'feedback', 'gpr', 'learn',
+  // Business
+  'project', 'sales', 'competition', 'networking',
+  'mkt-strategy', 'mkt-campaign', 'mkt-media', 'mkt-performance', 'mkt-social', 'mkt-influencer',
+  'mkt-creative', 'mkt-automation', 'mkt-datahub', 'mkt-attribution', 'mkt-mmm', 'mkt-abtest', 'mkt-sentiment', 'mkt-ops',
+  'crm-customers', 'crm-support', 'crm-cx', 'crm-membership', 'crm-cdp', 'crm-privacy',
+  // Support
+  'content', 'wiki', 'insight', 'rnd', 'patent', 'dev', 'deploy', 'production', 'process', 'qc', 'equipment',
+  'design', 'design-asset', 'warehouse', 'transport', 'scm', 'data-platform', 'dam',
+  // Finance
+  'finance', 'gl', 'ap', 'ar', 'budget', 'tax', 'asset', 'timesheet', 'certificate', 'audit', 'legal',
+  // Partner
+  'partner', 'partner-portal', 'vendor', 'freelancer',
+  // System
+  'sys-users', 'sys-roles', 'sys-workflow', 'sys-monitor', 'sys-security', 'sys-audit', 'sys-integration', 'sys-culture', 'sys-template',
 ] as const;
 export type WIOModule = typeof WIO_MODULES[number];
 
