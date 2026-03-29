@@ -1,17 +1,20 @@
 "use client";
 
-import { TrendingUp, DollarSign, BarChart3, PieChart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, DollarSign, BarChart3, PieChart, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── P&L Summary ── */
-const plSummary = {
-    revenue: 14350000,
-    cost: 8720000,
-    profit: 5630000,
-    margin: 39.2,
-};
+/* ── 타입 ── */
+interface PLSummary { revenue: number; cost: number; profit: number; margin: number }
+interface BrandRev { name: string; revenue: number; color: string }
+interface SourceRev { name: string; amount: number; pct: number; color: string }
+interface MonthTrend { month: string; revenue: number; cost: number }
+interface DetailRow { date: string; brand: string; source: string; desc: string; amount: number }
 
-/* ── Brand Revenue ── */
-const brandRevenue = [
+/* ── Mock (fallback) ── */
+const mockPL: PLSummary = { revenue: 14350000, cost: 8720000, profit: 5630000, margin: 39.2 };
+
+const mockBrandRevenue: BrandRev[] = [
     { name: "SmarComm", revenue: 5400000, color: "bg-emerald-500" },
     { name: "WIO Orbi", revenue: 2800000, color: "bg-blue-500" },
     { name: "Evolution School", revenue: 2100000, color: "bg-orange-500" },
@@ -21,10 +24,8 @@ const brandRevenue = [
     { name: "Badak", revenue: 320000, color: "bg-amber-500" },
     { name: "기타", revenue: 1100000, color: "bg-neutral-400" },
 ];
-const maxBrandRev = Math.max(...brandRevenue.map((b) => b.revenue));
 
-/* ── Revenue Source ── */
-const revenueSources = [
+const mockRevenueSources: SourceRev[] = [
     { name: "구독", amount: 8900000, pct: 62, color: "bg-blue-500" },
     { name: "교육", amount: 2100000, pct: 15, color: "bg-orange-500" },
     { name: "이벤트", amount: 1200000, pct: 8, color: "bg-violet-500" },
@@ -32,8 +33,7 @@ const revenueSources = [
     { name: "콘텐츠", amount: 1100000, pct: 8, color: "bg-emerald-500" },
 ];
 
-/* ── Monthly Trend ── */
-const monthlyTrend = [
+const mockMonthlyTrend: MonthTrend[] = [
     { month: "10월", revenue: 9800000, cost: 7200000 },
     { month: "11월", revenue: 10500000, cost: 7800000 },
     { month: "12월", revenue: 12100000, cost: 8100000 },
@@ -41,10 +41,8 @@ const monthlyTrend = [
     { month: "2월", revenue: 13000000, cost: 8500000 },
     { month: "3월", revenue: 14350000, cost: 8720000 },
 ];
-const maxMonthly = Math.max(...monthlyTrend.map((m) => m.revenue));
 
-/* ── Detail ── */
-const details = [
+const mockDetails: DetailRow[] = [
     { date: "2026-03-29", brand: "SmarComm", source: "구독", desc: "HSAD Pro 연간 구독", amount: 1788000 },
     { date: "2026-03-28", brand: "WIO Orbi", source: "구독", desc: "넥스트웨이브 Pro 월정액", amount: 149000 },
     { date: "2026-03-28", brand: "Evolution School", source: "교육", desc: "브랜드 전략 마스터 3기 수강료", amount: 890000 },
@@ -55,19 +53,134 @@ const details = [
     { date: "2026-03-25", brand: "MADLeague", source: "이벤트", desc: "DAM Party Season 4", amount: 225000 },
     { date: "2026-03-25", brand: "YouInOne", source: "구독", desc: "Team 플랜 x2", amount: 158000 },
     { date: "2026-03-24", brand: "SmarComm", source: "콘텐츠", desc: "AI 마케팅 리포트 판매", amount: 35000 },
-    { date: "2026-03-24", brand: "Evolution School", source: "교육", desc: "데이터 분석 기초 수강료 x5", amount: 950000 },
-    { date: "2026-03-23", brand: "WIO Orbi", source: "구독", desc: "Business 플랜 갱신", amount: 399000 },
-    { date: "2026-03-23", brand: "HeRo", source: "구독", desc: "Pro 구독 x2", amount: 58000 },
-    { date: "2026-03-22", brand: "SmarComm", source: "구독", desc: "Business 연간 구독", amount: 4788000 },
-    { date: "2026-03-22", brand: "ChangeUp", source: "교육", desc: "스타트업 린 런칭 수강료 x3", amount: 1170000 },
-    { date: "2026-03-21", brand: "Mindle", source: "콘텐츠", desc: "트렌드 리포트 월간 구독", amount: 9900 },
-    { date: "2026-03-21", brand: "Badak", source: "매칭", desc: "네트워크 매칭 수수료", amount: 200000 },
-    { date: "2026-03-20", brand: "MADLeap", source: "교육", desc: "크리에이티브 디렉팅 1기", amount: 1200000 },
-    { date: "2026-03-20", brand: "YouInOne", source: "구독", desc: "Solo 플랜 x5", amount: 95000 },
-    { date: "2026-03-19", brand: "SmarComm", source: "구독", desc: "Pro 월간 갱신 x8", amount: 1192000 },
 ];
 
+const brandColorMap: Record<string, string> = {
+    SmarComm: "bg-emerald-500", "WIO Orbi": "bg-blue-500", "Evolution School": "bg-orange-500",
+    YouInOne: "bg-purple-500", Mindle: "bg-cyan-500", HeRo: "bg-rose-500",
+    Badak: "bg-amber-500", MADLeague: "bg-violet-500", MADLeap: "bg-indigo-500",
+    ChangeUp: "bg-lime-500",
+};
+
+const sourceColorMap: Record<string, string> = {
+    "구독": "bg-blue-500", "교육": "bg-orange-500", "이벤트": "bg-violet-500",
+    "매칭": "bg-rose-500", "콘텐츠": "bg-emerald-500",
+};
+
 export default function UniverseRevenue() {
+    const [loading, setLoading] = useState(true);
+    const [plSummary, setPlSummary] = useState<PLSummary>(mockPL);
+    const [brandRevenue, setBrandRevenue] = useState<BrandRev[]>(mockBrandRevenue);
+    const [revenueSources, setRevenueSources] = useState<SourceRev[]>(mockRevenueSources);
+    const [monthlyTrend, setMonthlyTrend] = useState<MonthTrend[]>(mockMonthlyTrend);
+    const [details, setDetails] = useState<DetailRow[]>(mockDetails);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                const { data: rawRevenue, error } = await supabase
+                    .from("revenue")
+                    .select("amount, brand, source, description, cost, created_at")
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+                if (!rawRevenue || rawRevenue.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                // 전체 매출/비용 계산
+                const totalRevenue = rawRevenue.reduce((s: number, r: { amount: number }) => s + (r.amount || 0), 0);
+                const totalCost = rawRevenue.reduce((s: number, r: { cost?: number }) => s + (r.cost || 0), 0);
+                const profit = totalRevenue - totalCost;
+                const margin = totalRevenue > 0 ? Number(((profit / totalRevenue) * 100).toFixed(1)) : 0;
+
+                setPlSummary({ revenue: totalRevenue, cost: totalCost, profit, margin });
+
+                // 브랜드별 매출
+                const brandMap: Record<string, number> = {};
+                rawRevenue.forEach((r: { brand: string; amount: number }) => {
+                    const b = r.brand || "기타";
+                    brandMap[b] = (brandMap[b] || 0) + (r.amount || 0);
+                });
+                const brandList: BrandRev[] = Object.entries(brandMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, revenue]) => ({
+                        name,
+                        revenue,
+                        color: brandColorMap[name] || "bg-neutral-400",
+                    }));
+                if (brandList.length > 0) setBrandRevenue(brandList);
+
+                // 수익원별
+                const sourceMap: Record<string, number> = {};
+                rawRevenue.forEach((r: { source: string; amount: number }) => {
+                    const src = r.source || "기타";
+                    sourceMap[src] = (sourceMap[src] || 0) + (r.amount || 0);
+                });
+                const sourceList: SourceRev[] = Object.entries(sourceMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, amount]) => ({
+                        name,
+                        amount,
+                        pct: totalRevenue > 0 ? Math.round((amount / totalRevenue) * 100) : 0,
+                        color: sourceColorMap[name] || "bg-neutral-400",
+                    }));
+                if (sourceList.length > 0) setRevenueSources(sourceList);
+
+                // 월별 추이
+                const monthMap: Record<string, { revenue: number; cost: number }> = {};
+                rawRevenue.forEach((r: { created_at: string; amount: number; cost?: number }) => {
+                    const d = new Date(r.created_at);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                    if (!monthMap[key]) monthMap[key] = { revenue: 0, cost: 0 };
+                    monthMap[key].revenue += r.amount || 0;
+                    monthMap[key].cost += r.cost || 0;
+                });
+                const monthList: MonthTrend[] = Object.entries(monthMap)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .slice(-6)
+                    .map(([key, data]) => ({
+                        month: `${parseInt(key.split("-")[1])}월`,
+                        revenue: data.revenue,
+                        cost: data.cost,
+                    }));
+                if (monthList.length > 0) setMonthlyTrend(monthList);
+
+                // 상세 내역 (최근 20건)
+                const detailList: DetailRow[] = rawRevenue.slice(0, 20).map((r: {
+                    created_at: string; brand: string; source: string;
+                    description: string; amount: number;
+                }) => ({
+                    date: r.created_at?.split("T")[0] || "-",
+                    brand: r.brand || "-",
+                    source: r.source || "-",
+                    desc: r.description || "-",
+                    amount: r.amount || 0,
+                }));
+                if (detailList.length > 0) setDetails(detailList);
+            } catch (err) {
+                console.error("Revenue fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    const maxBrandRev = Math.max(...brandRevenue.map((b) => b.revenue), 1);
+    const maxMonthly = Math.max(...monthlyTrend.map((m) => m.revenue), 1);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -103,7 +216,7 @@ export default function UniverseRevenue() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Brand Revenue (horizontal bar) */}
+                {/* Brand Revenue */}
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">브랜드별 매출</h2>
                     <div className="space-y-3">
@@ -120,7 +233,7 @@ export default function UniverseRevenue() {
                     </div>
                 </div>
 
-                {/* Revenue Source (pie representation) */}
+                {/* Revenue Source */}
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">수익원별 비중</h2>
                     <div className="flex h-6 rounded-full overflow-hidden mb-4">

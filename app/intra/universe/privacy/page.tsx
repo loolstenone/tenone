@@ -1,23 +1,28 @@
 "use client";
 
-import { Shield, CheckCircle, Clock, AlertTriangle, Trash2, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, CheckCircle, Clock, AlertTriangle, Trash2, Users, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── Consent Stats ── */
-const consentStats = [
+/* ── 타입 ── */
+interface ConsentStat { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color: string }
+
+/* ── Mock (fallback) ── */
+const mockConsentStats: ConsentStat[] = [
     { label: "마케팅 동의율", value: "68.4%", icon: Users, color: "text-blue-600" },
     { label: "개인정보 처리 동의", value: "100%", icon: Shield, color: "text-green-600" },
     { label: "삭제 요청", value: "3건", icon: Trash2, color: "text-red-500" },
     { label: "처리 완료", value: "12건", icon: CheckCircle, color: "text-neutral-600" },
 ];
 
-/* ── Delete Requests ── */
+/* ── Delete Requests (mock — 테이블 미존재) ── */
 const deleteRequests = [
     { id: "1", name: "정하은", type: "회원", requestDate: "2026-03-25", deadline: "2026-04-24", status: "처리중", reason: "서비스 탈퇴" },
     { id: "2", name: "양현지", type: "게스트", requestDate: "2026-03-27", deadline: "2026-04-26", status: "대기", reason: "정보 삭제 요청" },
     { id: "3", name: "서준호", type: "게스트", requestDate: "2026-03-28", deadline: "2026-04-27", status: "대기", reason: "마케팅 수신 거부 및 삭제" },
 ];
 
-/* ── Auto Delete Log ── */
+/* ── Auto Delete Log (mock — 테이블 미존재) ── */
 const autoDeleteLog = [
     { date: "2026-03-28", name: "김태형", type: "게스트", brand: "MADLeague", reason: "30일 경과 자동삭제" },
     { date: "2026-03-27", name: "이소영", type: "게스트", brand: "Badak", reason: "30일 경과 자동삭제" },
@@ -39,6 +44,52 @@ const complianceItems = [
 ];
 
 export default function UniversePrivacy() {
+    const [loading, setLoading] = useState(true);
+    const [consentStats, setConsentStats] = useState<ConsentStat[]>(mockConsentStats);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                // members에서 마케팅 동의율 계산 (newsletter_subscribed 필드 활용)
+                const { data: members, error } = await supabase
+                    .from("members")
+                    .select("newsletter_subscribed");
+
+                if (error) throw error;
+                if (!members || members.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                const total = members.length;
+                const marketingConsent = members.filter((m: { newsletter_subscribed: boolean }) => m.newsletter_subscribed).length;
+                const consentRate = total > 0 ? ((marketingConsent / total) * 100).toFixed(1) : "0";
+
+                setConsentStats([
+                    { label: "마케팅 동의율", value: `${consentRate}%`, icon: Users, color: "text-blue-600" },
+                    { label: "개인정보 처리 동의", value: "100%", icon: Shield, color: "text-green-600" },
+                    { label: "삭제 요청", value: `${deleteRequests.length}건`, icon: Trash2, color: "text-red-500" },
+                    { label: "처리 완료", value: "12건", icon: CheckCircle, color: "text-neutral-600" },
+                ]);
+            } catch (err) {
+                console.error("Privacy fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -61,7 +112,7 @@ export default function UniversePrivacy() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Delete Requests */}
+                {/* Delete Requests (mock — 삭제 요청 테이블 미존재) */}
                 <div>
                     <h2 className="text-sm font-semibold text-neutral-900 mb-3">삭제 요청 목록</h2>
                     <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
@@ -137,7 +188,7 @@ export default function UniversePrivacy() {
                 </div>
             </div>
 
-            {/* Auto Delete Log */}
+            {/* Auto Delete Log (mock) */}
             <div>
                 <h2 className="text-sm font-semibold text-neutral-900 mb-3">게스트 자동삭제 로그</h2>
                 <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">

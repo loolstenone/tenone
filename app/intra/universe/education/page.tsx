@@ -1,18 +1,29 @@
 "use client";
 
-import { GraduationCap, Users, Award, DollarSign, Search } from "lucide-react";
-import { useState } from "react";
+import { GraduationCap, Users, Award, DollarSign, Search, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── Stats ── */
-const stats = [
+/* ── 타입 ── */
+interface StatItem { label: string; value: string; icon: React.ComponentType<{ className?: string }> }
+interface ProgramRow {
+    id: string; name: string; brand: string; type: string;
+    students: number; completionRate: number; price: number; status: string;
+}
+interface StudentRow {
+    id: string; name: string; program: string; status: string;
+    progress: number; cert: boolean;
+}
+
+/* ── Mock (fallback) ── */
+const mockStats: StatItem[] = [
     { label: "프로그램 수", value: "6개", icon: GraduationCap },
     { label: "수강생", value: "142명", icon: Users },
     { label: "수료율", value: "78%", icon: Award },
     { label: "교육 매출", value: "₩8,400,000", icon: DollarSign },
 ];
 
-/* ── Programs ── */
-const programs = [
+const mockPrograms: ProgramRow[] = [
     { id: "1", name: "AI 마케팅 실전반", brand: "SmarComm", type: "온라인", students: 34, completionRate: 82, price: 490000, status: "진행중" },
     { id: "2", name: "브랜드 전략 마스터", brand: "Evolution School", type: "오프라인", students: 22, completionRate: 91, price: 890000, status: "진행중" },
     { id: "3", name: "HIT 인재 진단 워크숍", brand: "HeRo", type: "블렌디드", students: 18, completionRate: 100, price: 290000, status: "완료" },
@@ -21,8 +32,7 @@ const programs = [
     { id: "6", name: "스타트업 린 런칭", brand: "ChangeUp", type: "온라인", students: 11, completionRate: 72, price: 390000, status: "모집중" },
 ];
 
-/* ── Students ── */
-const students = [
+const mockStudents: StudentRow[] = [
     { id: "1", name: "김민지", program: "AI 마케팅 실전반", status: "수강중", progress: 68, cert: false },
     { id: "2", name: "이준혁", program: "브랜드 전략 마스터", status: "수강중", progress: 45, cert: false },
     { id: "3", name: "박서윤", program: "HIT 인재 진단 워크숍", status: "수료", progress: 100, cert: true },
@@ -45,12 +55,139 @@ const brandColor: Record<string, string> = {
     ChangeUp: "bg-lime-100 text-lime-700",
 };
 
+/* ── 상태 매핑 ── */
+function mapEnrollmentStatus(status: string): string {
+    const map: Record<string, string> = {
+        "in-progress": "수강중", "not-started": "수강중",
+        completed: "수료", dropped: "중단",
+    };
+    return map[status] || status;
+}
+
 export default function UniverseEducation() {
     const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState<StatItem[]>(mockStats);
+    const [programs, setPrograms] = useState<ProgramRow[]>(mockPrograms);
+    const [students, setStudents] = useState<StudentRow[]>(mockStudents);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                // 수강 등록(enrollments) + courses 조인
+                const { data: enrollments, error: eErr } = await supabase
+                    .from("enrollments")
+                    .select("id, status, progress, completed_at, member_id, course_id, course:courses(id, title, category, price)");
+
+                if (eErr) throw eErr;
+
+                // 회원 이름 조회
+                const memberIds = [...new Set((enrollments || []).map((e: { member_id: string }) => e.member_id))];
+                let memberMap: Record<string, string> = {};
+                if (memberIds.length > 0) {
+                    const { data: members } = await supabase
+                        .from("members")
+                        .select("id, name")
+                        .in("id", memberIds);
+                    (members || []).forEach((m: { id: string; name: string }) => {
+                        memberMap[m.id] = m.name;
+                    });
+                }
+
+                if (!enrollments || enrollments.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                // 프로그램별 집계
+                const programMap: Record<string, {
+                    name: string; brand: string; students: number;
+                    completed: number; price: number;
+                }> = {};
+
+                const studentList: StudentRow[] = [];
+
+                enrollments.forEach((e: {
+                    id: string; status: string; progress: number;
+                    completed_at: string | null; member_id: string;
+                    course: { id: string; title: string; category: string; price: number } | null;
+                }) => {
+                    const course = e.course;
+                    if (!course) return;
+
+                    // 프로그램 집계
+                    if (!programMap[course.id]) {
+                        programMap[course.id] = {
+                            name: course.title,
+                            brand: course.category || "기타",
+                            students: 0,
+                            completed: 0,
+                            price: course.price || 0,
+                        };
+                    }
+                    programMap[course.id].students++;
+                    if (e.status === "completed") programMap[course.id].completed++;
+
+                    // 수강생 리스트
+                    studentList.push({
+                        id: e.id,
+                        name: memberMap[e.member_id] || "회원",
+                        program: course.title,
+                        status: mapEnrollmentStatus(e.status),
+                        progress: e.progress ?? (e.status === "completed" ? 100 : 0),
+                        cert: e.status === "completed",
+                    });
+                });
+
+                // 프로그램 목록
+                const programList: ProgramRow[] = Object.entries(programMap).map(([id, p]) => ({
+                    id,
+                    name: p.name,
+                    brand: p.brand,
+                    type: "-",
+                    students: p.students,
+                    completionRate: p.students > 0 ? Math.round((p.completed / p.students) * 100) : 0,
+                    price: p.price,
+                    status: p.completed === p.students ? "완료" : "진행중",
+                }));
+
+                // Stats 계산
+                const totalStudents = enrollments.length;
+                const completedCount = enrollments.filter((e: { status: string }) => e.status === "completed").length;
+                const completionRate = totalStudents > 0 ? Math.round((completedCount / totalStudents) * 100) : 0;
+                const totalRevenue = programList.reduce((s, p) => s + p.price * p.students, 0);
+
+                setStats([
+                    { label: "프로그램 수", value: `${programList.length}개`, icon: GraduationCap },
+                    { label: "수강생", value: `${totalStudents}명`, icon: Users },
+                    { label: "수료율", value: `${completionRate}%`, icon: Award },
+                    { label: "교육 매출", value: `₩${totalRevenue.toLocaleString()}`, icon: DollarSign },
+                ]);
+
+                if (programList.length > 0) setPrograms(programList);
+                if (studentList.length > 0) setStudents(studentList);
+            } catch (err) {
+                console.error("Education fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
 
     const filteredStudents = students.filter((s) =>
         !search || s.name.includes(search) || s.program.includes(search)
     );
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

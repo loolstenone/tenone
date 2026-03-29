@@ -1,18 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Users, Search, Filter, ChevronDown, MoreHorizontal } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Users, Search, Filter, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 /* ── Level 정의 ── */
-const levels = [
-    { id: 0, label: "Level 0 · 게스트", color: "bg-neutral-400", count: 234 },
-    { id: 1, label: "Level 1 · 무료", color: "bg-blue-400", count: 5120 },
-    { id: 2, label: "Level 2 · 활동", color: "bg-green-400", count: 2680 },
-    { id: 3, label: "Level 3 · 구독", color: "bg-violet-400", count: 487 },
-    { id: 4, label: "Level 4 · VIP", color: "bg-amber-400", count: 198 },
-    { id: 5, label: "Level 5 · 파트너", color: "bg-rose-400", count: 528 },
-];
-const totalMembers = levels.reduce((s, l) => s + l.count, 0);
+interface LevelDef {
+    id: number;
+    label: string;
+    color: string;
+    count: number;
+}
 
 /* ── 브랜드 목록 ── */
 const brandOptions = ["MADLeague", "MADLeap", "Badak", "SmarComm", "WIO Orbi", "HeRo", "Planner's", "Evolution School", "Mindle", "RooK", "ChangeUp", "YouInOne"];
@@ -31,8 +29,28 @@ const brandColors: Record<string, string> = {
     YouInOne: "bg-purple-100 text-purple-700",
 };
 
-/* ── Mock Members ── */
-const mockMembers = [
+/* ── Mock Members (fallback) ── */
+const mockLevels: LevelDef[] = [
+    { id: 0, label: "Level 0 · 게스트", color: "bg-neutral-400", count: 234 },
+    { id: 1, label: "Level 1 · 무료", color: "bg-blue-400", count: 5120 },
+    { id: 2, label: "Level 2 · 활동", color: "bg-green-400", count: 2680 },
+    { id: 3, label: "Level 3 · 구독", color: "bg-violet-400", count: 487 },
+    { id: 4, label: "Level 4 · VIP", color: "bg-amber-400", count: 198 },
+    { id: 5, label: "Level 5 · 파트너", color: "bg-rose-400", count: 528 },
+];
+
+interface MemberDisplay {
+    id: string;
+    name: string;
+    email: string;
+    level: number;
+    brands: string[];
+    subs: { service: string; plan: string }[];
+    lastActive: string;
+    cross: string | null;
+}
+
+const mockMembers: MemberDisplay[] = [
     { id: "1", name: "김민지", email: "minji@example.com", level: 4, brands: ["MADLeap", "SmarComm"], subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", cross: null },
     { id: "2", name: "이준혁", email: "junhyuk@example.com", level: 3, brands: ["WIO Orbi"], subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", cross: "SmarComm 미구독" },
     { id: "3", name: "박서윤", email: "seoyoon@example.com", level: 3, brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", cross: "Orbi 미구독" },
@@ -50,19 +68,111 @@ const mockMembers = [
     { id: "15", name: "유하늘", email: "haneul@example.com", level: 5, brands: ["MADLeague", "SmarComm", "WIO Orbi", "HeRo"], subs: [{ service: "SmarComm", plan: "Enterprise" }, { service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", cross: null },
 ];
 
+/* ── customer_level → 숫자 매핑 ── */
+function levelToNumber(grade: string): number {
+    const map: Record<string, number> = {
+        guest: 0, free: 1, member: 1, active: 2, subscriber: 3,
+        crew: 2, madleaguer: 2, alliance: 4, partner: 5, staff: 5, admin: 5,
+    };
+    return map[grade?.toLowerCase()] ?? 1;
+}
+
 export default function UniverseMembers() {
     const [search, setSearch] = useState("");
     const [levelFilter, setLevelFilter] = useState<number | null>(null);
     const [brandFilter, setBrandFilter] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [levels, setLevels] = useState<LevelDef[]>(mockLevels);
+    const [members, setMembers] = useState<MemberDisplay[]>(mockMembers);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                // 회원 목록 조회 (기본 필드)
+                const { data: rawMembers, error } = await supabase
+                    .from("members")
+                    .select("id, name, email, grade, affiliations, is_active, last_login_at, account_type")
+                    .order("created_at", { ascending: false })
+                    .limit(200);
+
+                if (error) throw error;
+                if (!rawMembers || rawMembers.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                // 구독 정보 조회
+                const { data: subsData } = await supabase
+                    .from("subscriptions")
+                    .select("member_id, service, plan")
+                    .eq("status", "active");
+
+                // member_id별 구독 맵
+                const subsMap: Record<string, { service: string; plan: string }[]> = {};
+                (subsData || []).forEach((s: { member_id: string; service: string; plan: string }) => {
+                    if (!subsMap[s.member_id]) subsMap[s.member_id] = [];
+                    subsMap[s.member_id].push({ service: s.service, plan: s.plan });
+                });
+
+                // Level 분포 계산
+                const levelCounts: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                const memberList: MemberDisplay[] = rawMembers.map((m: {
+                    id: string; name: string; email: string; grade: string;
+                    affiliations: string[]; last_login_at: string | null; account_type: string;
+                }) => {
+                    const lvl = levelToNumber(m.account_type || m.grade);
+                    levelCounts[lvl] = (levelCounts[lvl] || 0) + 1;
+                    return {
+                        id: m.id,
+                        name: m.name,
+                        email: m.email,
+                        level: lvl,
+                        brands: m.affiliations || [],
+                        subs: subsMap[m.id] || [],
+                        lastActive: m.last_login_at ? m.last_login_at.split("T")[0] : "-",
+                        cross: null,
+                    };
+                });
+
+                setLevels([
+                    { id: 0, label: "Level 0 · 게스트", color: "bg-neutral-400", count: levelCounts[0] },
+                    { id: 1, label: "Level 1 · 무료", color: "bg-blue-400", count: levelCounts[1] },
+                    { id: 2, label: "Level 2 · 활동", color: "bg-green-400", count: levelCounts[2] },
+                    { id: 3, label: "Level 3 · 구독", color: "bg-violet-400", count: levelCounts[3] },
+                    { id: 4, label: "Level 4 · VIP", color: "bg-amber-400", count: levelCounts[4] },
+                    { id: 5, label: "Level 5 · 파트너", color: "bg-rose-400", count: levelCounts[5] },
+                ]);
+                setMembers(memberList);
+            } catch (err) {
+                console.error("Members fetch error:", err);
+                // mock 유지
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    const totalMembers = levels.reduce((s, l) => s + l.count, 0);
 
     const filtered = useMemo(() => {
-        return mockMembers.filter((m) => {
+        return members.filter((m) => {
             if (search && !m.name.includes(search) && !m.email.includes(search)) return false;
             if (levelFilter !== null && m.level !== levelFilter) return false;
             if (brandFilter && !m.brands.includes(brandFilter)) return false;
             return true;
         });
-    }, [search, levelFilter, brandFilter]);
+    }, [search, levelFilter, brandFilter, members]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -83,7 +193,7 @@ export default function UniverseMembers() {
                 <div className="flex h-6 rounded-full overflow-hidden">
                     {levels.map((l) => (
                         <div key={l.id} className={`${l.color} relative group`}
-                            style={{ width: `${(l.count / totalMembers) * 100}%` }}>
+                            style={{ width: `${totalMembers > 0 ? (l.count / totalMembers) * 100 : 0}%` }}>
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                 {l.label}: {l.count.toLocaleString()}명
                             </div>

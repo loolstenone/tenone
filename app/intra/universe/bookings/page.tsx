@@ -1,18 +1,25 @@
 "use client";
 
-import { Calendar, Users, CheckCircle, XCircle, DollarSign } from "lucide-react";
-import { useState } from "react";
+import { Calendar, Users, CheckCircle, XCircle, DollarSign, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── Stats ── */
-const stats = [
+/* ── 타입 ── */
+interface StatItem { label: string; value: string; icon: React.ComponentType<{ className?: string }> }
+interface BookingRow {
+    id: string; name: string; memberType: string; brand: string;
+    event: string; date: string; location: string; amount: number; status: string;
+}
+
+/* ── Mock (fallback) ── */
+const mockStats: StatItem[] = [
     { label: "이번달 예약", value: "47건", icon: Calendar },
     { label: "확정", value: "38건", icon: CheckCircle },
     { label: "취소율", value: "8.5%", icon: XCircle },
     { label: "예약 매출", value: "₩3,200,000", icon: DollarSign },
 ];
 
-/* ── Bookings ── */
-const bookings = [
+const mockBookings: BookingRow[] = [
     { id: "1", name: "김민지", memberType: "회원", brand: "MADLeap", event: "MADLeap 5기 OT", date: "2026-04-05", location: "강남 센터", amount: 0, status: "확정" },
     { id: "2", name: "이준혁", memberType: "회원", brand: "Evolution School", event: "브랜드 전략 특강", date: "2026-04-08", location: "온라인", amount: 50000, status: "확정" },
     { id: "3", name: "박서윤", memberType: "회원", brand: "SmarComm", event: "AI 마케팅 세미나", date: "2026-04-10", location: "삼성 컨벤션", amount: 30000, status: "대기" },
@@ -25,9 +32,14 @@ const bookings = [
     { id: "10", name: "유하늘", memberType: "회원", brand: "SmarComm", event: "AI 마케팅 세미나", date: "2026-04-10", location: "삼성 컨벤션", amount: 30000, status: "완료" },
 ];
 
-/* ── Mini Calendar (April 2026) ── */
-const calDays = Array.from({ length: 30 }, (_, i) => i + 1);
-const eventDays = new Set([5, 8, 10, 12, 15, 18, 20]);
+/* ── 상태 매핑 ── */
+function mapStatus(status: string): string {
+    const map: Record<string, string> = {
+        confirmed: "확정", pending: "대기", cancelled: "취소",
+        completed: "완료", active: "확정",
+    };
+    return map[status] || status;
+}
 
 const brandColor: Record<string, string> = {
     MADLeap: "bg-indigo-100 text-indigo-700",
@@ -41,8 +53,92 @@ const brandColor: Record<string, string> = {
 
 export default function UniverseBookings() {
     const [statusFilter, setStatusFilter] = useState<string>("");
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState<StatItem[]>(mockStats);
+    const [bookings, setBookings] = useState<BookingRow[]>(mockBookings);
+    const [eventDays, setEventDays] = useState<Set<number>>(new Set([5, 8, 10, 12, 15, 18, 20]));
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                const { data: rawBookings, error } = await supabase
+                    .from("bookings")
+                    .select("id, name, member_type, brand, event, event_date, location, amount, status, member_id, guest_id")
+                    .order("event_date", { ascending: true });
+
+                if (error) throw error;
+                if (!rawBookings || rawBookings.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                // 예약 리스트 변환
+                const bookingList: BookingRow[] = rawBookings.map((b: {
+                    id: string; name: string; member_type?: string; brand: string;
+                    event: string; event_date: string; location: string;
+                    amount: number; status: string; member_id?: string; guest_id?: string;
+                }) => ({
+                    id: b.id,
+                    name: b.name || "-",
+                    memberType: b.member_type || (b.guest_id ? "게스트" : "회원"),
+                    brand: b.brand || "-",
+                    event: b.event || "-",
+                    date: b.event_date?.split("T")[0] || "-",
+                    location: b.location || "-",
+                    amount: b.amount || 0,
+                    status: mapStatus(b.status),
+                }));
+
+                // Stats 계산
+                const thisMonth = new Date();
+                const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+                const monthBookings = bookingList.filter((b) => new Date(b.date) >= monthStart);
+                const confirmed = monthBookings.filter((b) => b.status === "확정" || b.status === "완료").length;
+                const cancelled = monthBookings.filter((b) => b.status === "취소").length;
+                const cancelRate = monthBookings.length > 0 ? ((cancelled / monthBookings.length) * 100).toFixed(1) : "0";
+                const bookingRevenue = monthBookings.reduce((s, b) => s + b.amount, 0);
+
+                setStats([
+                    { label: "이번달 예약", value: `${monthBookings.length}건`, icon: Calendar },
+                    { label: "확정", value: `${confirmed}건`, icon: CheckCircle },
+                    { label: "취소율", value: `${cancelRate}%`, icon: XCircle },
+                    { label: "예약 매출", value: `₩${bookingRevenue.toLocaleString()}`, icon: DollarSign },
+                ]);
+
+                // 캘린더 이벤트 날짜 (다음 달)
+                const days = new Set<number>();
+                bookingList.forEach((b) => {
+                    const d = new Date(b.date);
+                    if (d.getMonth() === thisMonth.getMonth() + 1 || d.getMonth() === thisMonth.getMonth()) {
+                        days.add(d.getDate());
+                    }
+                });
+                if (days.size > 0) setEventDays(days);
+
+                setBookings(bookingList);
+            } catch (err) {
+                console.error("Bookings fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
 
     const filtered = bookings.filter((b) => !statusFilter || b.status === statusFilter);
+
+    /* ── Mini Calendar (April 2026) ── */
+    const calDays = Array.from({ length: 30 }, (_, i) => i + 1);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -151,16 +247,10 @@ export default function UniverseBookings() {
                         </div>
                         <div className="mt-3 space-y-1.5">
                             <p className="text-[10px] text-neutral-400 uppercase tracking-wider">이벤트</p>
-                            {[
-                                { date: "4/5", name: "MADLeap 5기 OT" },
-                                { date: "4/10", name: "AI 마케팅 세미나" },
-                                { date: "4/12", name: "DAM Party S4" },
-                                { date: "4/15", name: "커리어 멘토링 데이" },
-                                { date: "4/18", name: "CEO 라운드테이블" },
-                            ].map((e) => (
-                                <div key={e.date} className="flex items-center gap-2 text-xs">
-                                    <span className="text-neutral-400 w-8 shrink-0">{e.date}</span>
-                                    <span className="text-neutral-700">{e.name}</span>
+                            {bookings.slice(0, 5).map((b) => (
+                                <div key={b.id} className="flex items-center gap-2 text-xs">
+                                    <span className="text-neutral-400 w-12 shrink-0">{b.date.substring(5)}</span>
+                                    <span className="text-neutral-700 truncate">{b.event}</span>
                                 </div>
                             ))}
                         </div>

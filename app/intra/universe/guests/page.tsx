@@ -1,16 +1,24 @@
 "use client";
 
-import { UserPlus, Users, Trash2, ArrowRightCircle, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { UserPlus, Users, Trash2, ArrowRightCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── Stats ── */
-const stats = [
+/* ── 타입 ── */
+interface StatItem { label: string; value: string; icon: React.ComponentType<{ className?: string }> }
+interface GuestRow {
+    id: string; name: string; contact: string; brand: string;
+    purpose: string; marketing: boolean; created: string; autoDelete: string;
+}
+
+/* ── Mock (fallback) ── */
+const mockStats: StatItem[] = [
     { label: "전체 게스트", value: "234명", icon: UserPlus },
     { label: "삭제 예정 (7일 이내)", value: "18명", icon: Trash2 },
     { label: "회원 전환율", value: "12.3%", icon: ArrowRightCircle },
 ];
 
-/* ── Guests ── */
-const guests = [
+const mockGuests: GuestRow[] = [
     { id: "1", name: "장민호", contact: "010-1234-5678", brand: "MADLeague", purpose: "DAM Party 참가", marketing: true, created: "2026-03-15", autoDelete: "2026-04-14" },
     { id: "2", name: "안소희", contact: "sohee@email.com", brand: "ChangeUp", purpose: "스타트업 네트워킹", marketing: true, created: "2026-03-20", autoDelete: "2026-04-19" },
     { id: "3", name: "홍진우", contact: "010-9876-5432", brand: "Badak", purpose: "CEO 라운드테이블", marketing: false, created: "2026-03-22", autoDelete: "2026-04-21" },
@@ -23,27 +31,90 @@ const guests = [
     { id: "10", name: "차은별", contact: "eunbyul@email.com", brand: "RooK", purpose: "AI 크리에이터 데모", marketing: true, created: "2026-03-05", autoDelete: "2026-04-04" },
 ];
 
-const aboutToDelete = guests.filter((g) => {
-    const deleteDate = new Date(g.autoDelete);
-    const now = new Date("2026-03-29");
-    const diff = (deleteDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-    return diff <= 7;
-});
-
 const brandColor: Record<string, string> = {
-    MADLeague: "bg-violet-100 text-violet-700",
-    MADLeap: "bg-indigo-100 text-indigo-700",
-    ChangeUp: "bg-lime-100 text-lime-700",
-    Badak: "bg-amber-100 text-amber-700",
-    "Evolution School": "bg-orange-100 text-orange-700",
-    SmarComm: "bg-emerald-100 text-emerald-700",
-    HeRo: "bg-rose-100 text-rose-700",
-    Mindle: "bg-cyan-100 text-cyan-700",
-    "Planner's": "bg-teal-100 text-teal-700",
-    RooK: "bg-pink-100 text-pink-700",
+    MADLeague: "bg-violet-100 text-violet-700", MADLeap: "bg-indigo-100 text-indigo-700",
+    ChangeUp: "bg-lime-100 text-lime-700", Badak: "bg-amber-100 text-amber-700",
+    "Evolution School": "bg-orange-100 text-orange-700", SmarComm: "bg-emerald-100 text-emerald-700",
+    HeRo: "bg-rose-100 text-rose-700", Mindle: "bg-cyan-100 text-cyan-700",
+    "Planner's": "bg-teal-100 text-teal-700", RooK: "bg-pink-100 text-pink-700",
 };
 
 export default function UniverseGuests() {
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState<StatItem[]>(mockStats);
+    const [guests, setGuests] = useState<GuestRow[]>(mockGuests);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                const { data: rawGuests, error } = await supabase
+                    .from("guests")
+                    .select("id, name, contact, brand, purpose, marketing_consent, created_at, auto_delete_at")
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+                if (!rawGuests || rawGuests.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                const now = new Date();
+                const guestList: GuestRow[] = rawGuests.map((g: {
+                    id: string; name: string; contact: string; brand: string;
+                    purpose: string; marketing_consent: boolean;
+                    created_at: string; auto_delete_at: string;
+                }) => ({
+                    id: g.id,
+                    name: g.name || "-",
+                    contact: g.contact || "-",
+                    brand: g.brand || "-",
+                    purpose: g.purpose || "-",
+                    marketing: g.marketing_consent ?? false,
+                    created: g.created_at?.split("T")[0] || "-",
+                    autoDelete: g.auto_delete_at?.split("T")[0] || "-",
+                }));
+
+                // 7일 이내 삭제 예정
+                const soonDelete = guestList.filter((g) => {
+                    const deleteDate = new Date(g.autoDelete);
+                    const diff = (deleteDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+                    return diff >= 0 && diff <= 7;
+                });
+
+                setStats([
+                    { label: "전체 게스트", value: `${guestList.length}명`, icon: UserPlus },
+                    { label: "삭제 예정 (7일 이내)", value: `${soonDelete.length}명`, icon: Trash2 },
+                    { label: "회원 전환율", value: "12.3%", icon: ArrowRightCircle }, // 전환율은 계산 복잡 → mock 유지
+                ]);
+
+                setGuests(guestList);
+            } catch (err) {
+                console.error("Guests fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    // 7일 이내 자동삭제 대상
+    const aboutToDelete = guests.filter((g) => {
+        const deleteDate = new Date(g.autoDelete);
+        const now = new Date();
+        const diff = (deleteDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+        return diff >= 0 && diff <= 7;
+    });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}

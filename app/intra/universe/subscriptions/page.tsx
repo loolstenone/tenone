@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { CreditCard, TrendingUp, AlertTriangle, ArrowUpRight, Search, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CreditCard, TrendingUp, AlertTriangle, ArrowUpRight, Search, ChevronDown, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-/* ── Service Stats ── */
-const serviceStats = [
+/* ── 타입 ── */
+interface ServiceStat { name: string; subs: number; mrr: number; color: string }
+interface ChurnItem { month: string; churn: number; ltv: number }
+interface CrossSellItem { desc: string; count: number }
+interface SubRow {
+    id: string; name: string; service: string; plan: string;
+    amount: number; start: string; end: string; status: string; autoRenew: boolean;
+}
+
+/* ── Mock (fallback) ── */
+const mockServiceStats: ServiceStat[] = [
     { name: "SmarComm", subs: 120, mrr: 5400000, color: "bg-emerald-500" },
     { name: "WIO Orbi", subs: 45, mrr: 2800000, color: "bg-blue-500" },
     { name: "Mindle Premium", subs: 89, mrr: 700000, color: "bg-cyan-500" },
@@ -12,29 +22,27 @@ const serviceStats = [
     { name: "YouInOne", subs: 110, mrr: 1250000, color: "bg-purple-500" },
     { name: "HeRo Pro", subs: 34, mrr: 650000, color: "bg-rose-500" },
 ];
-const totalSubs = serviceStats.reduce((s, v) => s + v.subs, 0);
-const totalMRR = serviceStats.reduce((s, v) => s + v.mrr, 0);
 
-/* ── Churn / LTV mock ── */
-const churnData = [
-    { month: "10월", churn: 3.2, ltv: 420000 },
-    { month: "11월", churn: 2.8, ltv: 450000 },
-    { month: "12월", churn: 4.1, ltv: 410000 },
-    { month: "1월", churn: 2.5, ltv: 480000 },
-    { month: "2월", churn: 2.1, ltv: 510000 },
-    { month: "3월", churn: 1.9, ltv: 530000 },
+const serviceColors: Record<string, string> = {
+    SmarComm: "bg-emerald-500", "WIO Orbi": "bg-blue-500", Mindle: "bg-cyan-500",
+    "Mindle Premium": "bg-cyan-500", "Evolution School": "bg-orange-500",
+    YouInOne: "bg-purple-500", HeRo: "bg-rose-500", "HeRo Pro": "bg-rose-500",
+};
+
+const mockChurnData: ChurnItem[] = [
+    { month: "10월", churn: 3.2, ltv: 420000 }, { month: "11월", churn: 2.8, ltv: 450000 },
+    { month: "12월", churn: 4.1, ltv: 410000 }, { month: "1월", churn: 2.5, ltv: 480000 },
+    { month: "2월", churn: 2.1, ltv: 510000 }, { month: "3월", churn: 1.9, ltv: 530000 },
 ];
 
-/* ── Cross-sell ── */
-const crossSell = [
+const mockCrossSell: CrossSellItem[] = [
     { desc: "SmarComm 구독 중이지만 Orbi를 사용하지 않는 고객", count: 32 },
     { desc: "Orbi 사용 중 SmarComm 미구독 고객", count: 18 },
     { desc: "Education 수료 후 미구독 전환 고객", count: 45 },
     { desc: "HeRo HIT 검사 완료 후 Pro 미전환", count: 27 },
 ];
 
-/* ── Mock 구독자 ── */
-const mockSubs = [
+const mockSubs: SubRow[] = [
     { id: "1", name: "김민지", service: "SmarComm", plan: "Pro", amount: 149000, start: "2025-09-01", end: "2026-09-01", status: "active", autoRenew: true },
     { id: "2", name: "이준혁", service: "WIO Orbi", plan: "Business", amount: 399000, start: "2025-11-15", end: "2026-11-15", status: "active", autoRenew: true },
     { id: "3", name: "박서윤", service: "Evolution School", plan: "Standard", amount: 89000, start: "2026-01-10", end: "2026-07-10", status: "active", autoRenew: false },
@@ -45,29 +53,99 @@ const mockSubs = [
     { id: "8", name: "강현우", service: "Mindle", plan: "Premium", amount: 9900, start: "2026-03-01", end: "2026-04-01", status: "active", autoRenew: true },
     { id: "9", name: "조민서", service: "Evolution School", plan: "Premium", amount: 149000, start: "2026-02-15", end: "2026-08-15", status: "active", autoRenew: false },
     { id: "10", name: "유하늘", service: "SmarComm", plan: "Enterprise", amount: 990000, start: "2025-06-01", end: "2026-06-01", status: "active", autoRenew: true },
-    { id: "11", name: "유하늘", service: "WIO Orbi", plan: "Business", amount: 399000, start: "2025-06-01", end: "2026-06-01", status: "active", autoRenew: true },
-    { id: "12", name: "정하은", service: "Mindle", plan: "Premium", amount: 9900, start: "2025-12-01", end: "2026-03-01", status: "expired", autoRenew: false },
-    { id: "13", name: "한도윤", service: "SmarComm", plan: "Pro", amount: 149000, start: "2025-07-01", end: "2026-07-01", status: "active", autoRenew: true },
-    { id: "14", name: "오지호", service: "HeRo", plan: "Pro", amount: 29000, start: "2026-03-01", end: "2026-06-01", status: "active", autoRenew: false },
-    { id: "15", name: "배소현", service: "YouInOne", plan: "Solo", amount: 19000, start: "2026-02-01", end: "2026-05-01", status: "active", autoRenew: true },
-    { id: "16", name: "신유진", service: "Evolution School", plan: "Standard", amount: 89000, start: "2025-11-01", end: "2026-05-01", status: "active", autoRenew: true },
-    { id: "17", name: "임채원", service: "Mindle", plan: "Premium", amount: 9900, start: "2026-03-15", end: "2026-04-15", status: "active", autoRenew: true },
-    { id: "18", name: "HSAD", service: "SmarComm", plan: "Pro", amount: 149000, start: "2026-03-29", end: "2027-03-29", status: "active", autoRenew: true },
-    { id: "19", name: "넥스트웨이브", service: "WIO Orbi", plan: "Pro", amount: 149000, start: "2026-02-01", end: "2027-02-01", status: "active", autoRenew: true },
-    { id: "20", name: "크리에이팁", service: "SmarComm", plan: "Starter", amount: 49000, start: "2026-01-01", end: "2026-07-01", status: "active", autoRenew: false },
 ];
 
 export default function UniverseSubscriptions() {
     const [search, setSearch] = useState("");
     const [serviceFilter, setServiceFilter] = useState<string>("");
+    const [loading, setLoading] = useState(true);
+    const [serviceStats, setServiceStats] = useState<ServiceStat[]>(mockServiceStats);
+    const [churnData] = useState<ChurnItem[]>(mockChurnData);
+    const [crossSell] = useState<CrossSellItem[]>(mockCrossSell);
+    const [subs, setSubs] = useState<SubRow[]>(mockSubs);
 
-    const filtered = mockSubs.filter((s) => {
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const supabase = createClient();
+
+                // 구독 데이터 전체 조회
+                const { data: rawSubs, error } = await supabase
+                    .from("subscriptions")
+                    .select("id, member_name, member_id, service, plan, price, start_date, end_date, status, auto_renew")
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+                if (!rawSubs || rawSubs.length === 0) {
+                    setLoading(false);
+                    return;
+                }
+
+                // 서비스별 집계
+                const serviceMap: Record<string, { subs: number; mrr: number }> = {};
+                const subList: SubRow[] = [];
+
+                rawSubs.forEach((s: {
+                    id: string; member_name?: string; service: string; plan: string;
+                    price: number; start_date: string; end_date: string;
+                    status: string; auto_renew: boolean;
+                }) => {
+                    // 구독자 리스트
+                    subList.push({
+                        id: s.id,
+                        name: s.member_name || "-",
+                        service: s.service,
+                        plan: s.plan,
+                        amount: s.price || 0,
+                        start: s.start_date?.split("T")[0] || "-",
+                        end: s.end_date?.split("T")[0] || "-",
+                        status: s.status,
+                        autoRenew: s.auto_renew ?? false,
+                    });
+
+                    // active만 서비스별 집계
+                    if (s.status === "active") {
+                        if (!serviceMap[s.service]) serviceMap[s.service] = { subs: 0, mrr: 0 };
+                        serviceMap[s.service].subs++;
+                        serviceMap[s.service].mrr += s.price || 0;
+                    }
+                });
+
+                const statsList: ServiceStat[] = Object.entries(serviceMap).map(([name, data]) => ({
+                    name,
+                    subs: data.subs,
+                    mrr: data.mrr,
+                    color: serviceColors[name] || "bg-neutral-500",
+                }));
+
+                if (statsList.length > 0) setServiceStats(statsList);
+                if (subList.length > 0) setSubs(subList);
+            } catch (err) {
+                console.error("Subscriptions fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    const filtered = subs.filter((s) => {
         if (search && !s.name.includes(search)) return false;
         if (serviceFilter && s.service !== serviceFilter) return false;
         return true;
     });
 
-    const maxMRR = Math.max(...serviceStats.map((s) => s.mrr));
+    const totalSubs = serviceStats.reduce((s, v) => s + v.subs, 0);
+    const totalMRR = serviceStats.reduce((s, v) => s + v.mrr, 0);
+    const maxMRR = Math.max(...serviceStats.map((s) => s.mrr), 1);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -89,7 +167,6 @@ export default function UniverseSubscriptions() {
                         </div>
                         <p className="text-lg font-bold text-neutral-900">{s.subs}명</p>
                         <p className="text-xs text-neutral-500">MRR ₩{s.mrr.toLocaleString()}</p>
-                        {/* MRR bar */}
                         <div className="mt-2 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                             <div className={`h-full ${s.color} rounded-full`} style={{ width: `${(s.mrr / maxMRR) * 100}%` }} />
                         </div>
@@ -109,15 +186,19 @@ export default function UniverseSubscriptions() {
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
                     <p className="text-xs text-neutral-500">이탈률 (3월)</p>
-                    <p className="text-xl font-bold text-green-600 mt-1 flex items-center gap-1">1.9% <ArrowUpRight className="h-3.5 w-3.5" /></p>
+                    <p className="text-xl font-bold text-green-600 mt-1 flex items-center gap-1">
+                        {churnData[churnData.length - 1]?.churn ?? 0}% <ArrowUpRight className="h-3.5 w-3.5" />
+                    </p>
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
                     <p className="text-xs text-neutral-500">평균 LTV</p>
-                    <p className="text-xl font-bold text-neutral-900 mt-1">₩530,000</p>
+                    <p className="text-xl font-bold text-neutral-900 mt-1">
+                        ₩{(churnData[churnData.length - 1]?.ltv ?? 0).toLocaleString()}
+                    </p>
                 </div>
             </div>
 
-            {/* Churn / LTV Chart (bar) */}
+            {/* Churn / LTV Chart */}
             <div className="bg-white border border-neutral-200 rounded-lg p-4">
                 <h2 className="text-sm font-semibold text-neutral-900 mb-4">이탈률 & LTV 추이</h2>
                 <div className="flex items-end gap-4 h-32">
