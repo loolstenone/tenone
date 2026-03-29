@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Factory, Plus, Calendar, ClipboardList } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 const MOCK_MPS = [
   { id: 'MPS-001', product: '스마트 센서 모듈 A', sku: 'SSM-A100', month: '2026-04', planned: 5000, confirmed: 4200, completed: 0, status: 'scheduled' },
@@ -30,6 +31,42 @@ export default function ProductionPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<'mps' | 'orders'>('mps');
+  const [mps, setMps] = useState(MOCK_MPS);
+  const [workOrders, setWorkOrders] = useState(MOCK_WORK_ORDERS);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 생산계획 로드
+  const loadData = useCallback(async () => {
+    if (isDemo) return;
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_production_plans')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setMps(data.map((r: any) => ({
+          id: r.id,
+          product: r.product_name || '',
+          sku: '',
+          month: r.start_date?.substring(0, 7) || '',
+          planned: r.quantity || 0,
+          confirmed: r.quantity || 0,
+          completed: 0,
+          status: r.status || 'planned',
+        })));
+      }
+      // wio_work_orders 테이블은 아직 없으므로 Mock 유지
+    } catch {
+      // DB 실패 시 Mock 유지
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   return (
     <div>
@@ -67,7 +104,7 @@ export default function ProductionPage() {
               </tr>
             </thead>
             <tbody>
-              {MOCK_MPS.map(m => {
+              {mps.map(m => {
                 const st = STATUS_MAP[m.status];
                 return (
                   <tr key={m.id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
@@ -88,7 +125,7 @@ export default function ProductionPage() {
 
       {tab === 'orders' && (
         <div className="space-y-3">
-          {MOCK_WORK_ORDERS.map(wo => {
+          {workOrders.map(wo => {
             const st = STATUS_MAP[wo.status];
             return (
               <div key={wo.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">

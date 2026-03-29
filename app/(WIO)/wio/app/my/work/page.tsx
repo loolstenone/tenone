@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutGrid, Plus, Clock, AlertTriangle, CheckCircle2, Filter,
   Calendar, Tag, ChevronDown, X, BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -87,12 +88,59 @@ export default function MyWorkPage() {
   const [newDeadline, setNewDeadline] = useState('');
   const [newProject, setNewProject] = useState('브랜드 리뉴얼');
 
-  useEffect(() => {
+  // Supabase에서 내 업무(wio_jobs) 로드
+  const loadTasks = useCallback(async () => {
     if (isDemo) {
       setTasks(DEMO_TASKS);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [isDemo]);
+    try {
+      const sb = createClient();
+      const memberId = member?.id;
+      if (!memberId) { setLoading(false); return; }
+
+      const { data, error } = await sb
+        .from('wio_jobs')
+        .select('*, wio_projects(title)')
+        .eq('assignee_id', memberId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const projectColors: Record<string, string> = {};
+        const colorPool = ['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-violet-500', 'bg-blue-500'];
+        let ci = 0;
+
+        setTasks(data.map((r: any) => {
+          const projName = r.wio_projects?.title || '기타';
+          if (!projectColors[projName]) { projectColors[projName] = colorPool[ci % colorPool.length]; ci++; }
+          // DB status → 칸반 column 매핑
+          const colMap: Record<string, KanbanColumn> = { todo: 'todo', in_progress: 'in_progress', review: 'review', done: 'done', cancelled: 'done' };
+          return {
+            id: r.id,
+            title: r.title || '',
+            project: projName,
+            projectColor: projectColors[projName],
+            deadline: r.due_date || '',
+            priority: (r.priority === 'urgent' ? 'high' : r.priority || 'medium') as Priority,
+            column: colMap[r.status] || 'todo',
+            completedAt: r.completed_at?.split('T')[0],
+            hours: r.actual_hours || undefined,
+          };
+        }));
+      } else {
+        setTasks(DEMO_TASKS);
+      }
+    } catch {
+      setTasks(DEMO_TASKS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, member]);
+
+  useEffect(() => { loadTasks(); }, [loadTasks]);
 
   const filteredTasks = projectFilter === '전체'
     ? tasks

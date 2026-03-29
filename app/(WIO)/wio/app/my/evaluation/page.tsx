@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Target, Star, MessageSquare, Award, TrendingUp, Calendar,
   ChevronDown, ChevronUp, BookOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -71,16 +72,59 @@ export default function MyEvaluationPage() {
   const [idp, setIdp] = useState<typeof MOCK_IDP>([]);
   const [showAllFeedback, setShowAllFeedback] = useState(false);
 
-  useEffect(() => {
+  // Supabase에서 GPR 목표 로드
+  const loadEvaluation = useCallback(async () => {
     if (isDemo) {
       setGoals(MOCK_GOALS);
       setFeedback(MOCK_FEEDBACK);
       setCompetencies(MOCK_COMPETENCIES);
       setEvalHistory(MOCK_EVAL_HISTORY);
       setIdp(MOCK_IDP);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [isDemo]);
+    try {
+      const sb = createClient();
+      const memberId = member?.id;
+      if (!memberId) { setLoading(false); return; }
+
+      // GPR 목표 조회 (개인 레벨)
+      const { data: gprData } = await sb
+        .from('wio_gpr')
+        .select('*')
+        .eq('owner_id', memberId)
+        .eq('level', 'personal')
+        .order('created_at', { ascending: false });
+
+      if (gprData && gprData.length > 0) {
+        setGoals(gprData.map((r: any) => ({
+          id: r.id,
+          title: r.goal || '',
+          weight: 100 / gprData.length, // 균등 배분
+          progress: r.score ?? 0,
+          status: r.status === 'completed' ? '완료' : r.status === 'review' ? '마감 임박' : '진행 중',
+        })));
+      } else {
+        setGoals(MOCK_GOALS);
+      }
+
+      // 피드백·역량·이력·IDP는 아직 전용 테이블 없음 → Mock 유지
+      setFeedback(MOCK_FEEDBACK);
+      setCompetencies(MOCK_COMPETENCIES);
+      setEvalHistory(MOCK_EVAL_HISTORY);
+      setIdp(MOCK_IDP);
+    } catch {
+      setGoals(MOCK_GOALS);
+      setFeedback(MOCK_FEEDBACK);
+      setCompetencies(MOCK_COMPETENCIES);
+      setEvalHistory(MOCK_EVAL_HISTORY);
+      setIdp(MOCK_IDP);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, member]);
+
+  useEffect(() => { loadEvaluation(); }, [loadEvaluation]);
 
   const overallGPR = goals.length > 0
     ? Math.round(goals.reduce((s, g) => s + (g.progress * g.weight / 100), 0))

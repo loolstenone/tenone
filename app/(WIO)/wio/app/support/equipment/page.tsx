@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Wrench, CheckCircle, AlertTriangle, XCircle, Calendar, Plus } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   running: { label: '가동', color: 'text-emerald-400 bg-emerald-500/10' },
@@ -39,9 +40,50 @@ export default function EquipmentPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<'list' | 'schedule' | 'history'>('list');
+  const [equipment, setEquipment] = useState(MOCK_EQUIPMENT);
+  const [failures, setFailures] = useState(MOCK_FAILURES);
+  const [schedule, setSchedule] = useState(MAINTENANCE_SCHEDULE);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const runningCount = MOCK_EQUIPMENT.filter(e => e.status === 'running').length;
-  const brokenCount = MOCK_EQUIPMENT.filter(e => e.status === 'broken').length;
+  // Supabase에서 설비 데이터 로드
+  const loadData = useCallback(async () => {
+    if (isDemo) return;
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_equipment')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setEquipment(data.map((r: any) => ({
+          id: r.id,
+          name: r.name || '',
+          model: r.type || '',
+          manufacturer: '',
+          status: r.status === 'active' ? 'running' : r.status || 'standby',
+          location: '',
+          installDate: r.created_at?.split('T')[0] || '',
+          lastMaintenance: r.last_maintenance || '',
+          nextMaintenance: r.next_maintenance || '',
+          totalHours: 0,
+          failureCount: 0,
+          code: r.code || '',
+        })));
+      }
+      // failures / schedule 전용 테이블은 아직 없으므로 Mock 유지
+    } catch {
+      // DB 실패 시 Mock 유지
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const runningCount = equipment.filter(e => e.status === 'running').length;
+  const brokenCount = equipment.filter(e => e.status === 'broken').length;
 
   return (
     <div>
@@ -59,7 +101,7 @@ export default function EquipmentPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <p className="text-xs text-slate-500">전체 설비</p>
-          <p className="text-2xl font-bold mt-1">{MOCK_EQUIPMENT.length}</p>
+          <p className="text-2xl font-bold mt-1">{equipment.length}</p>
         </div>
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <p className="text-xs text-slate-500">가동중</p>
@@ -71,7 +113,7 @@ export default function EquipmentPage() {
         </div>
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <p className="text-xs text-slate-500">이번 달 보전 예정</p>
-          <p className="text-2xl font-bold mt-1 text-amber-400">{MAINTENANCE_SCHEDULE.length}</p>
+          <p className="text-2xl font-bold mt-1 text-amber-400">{schedule.length}</p>
         </div>
       </div>
 
@@ -91,7 +133,7 @@ export default function EquipmentPage() {
 
       {tab === 'list' && (
         <div className="space-y-2">
-          {MOCK_EQUIPMENT.map(eq => {
+          {equipment.map(eq => {
             const st = STATUS_MAP[eq.status];
             return (
               <div key={eq.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
@@ -123,7 +165,7 @@ export default function EquipmentPage() {
 
       {tab === 'schedule' && (
         <div className="space-y-2">
-          {MAINTENANCE_SCHEDULE.map((ms, i) => (
+          {schedule.map((ms, i) => (
             <div key={i} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4">
               <Calendar size={14} className="text-blue-400 shrink-0" />
               <div className="flex-1 min-w-0">
@@ -141,7 +183,7 @@ export default function EquipmentPage() {
 
       {tab === 'history' && (
         <div className="space-y-2">
-          {MOCK_FAILURES.map((f, i) => (
+          {failures.map((f, i) => (
             <div key={i} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4">
               {f.resolved ? <CheckCircle size={14} className="text-emerald-400 shrink-0" /> : <XCircle size={14} className="text-red-400 shrink-0" />}
               <div className="flex-1 min-w-0">

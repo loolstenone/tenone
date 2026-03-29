@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, TrendingDown, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Tab = 'incoming' | 'process' | 'outgoing';
 
@@ -37,6 +38,56 @@ export default function QCPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<Tab>('incoming');
+  const [incomingData, setIncomingData] = useState(MOCK_INCOMING);
+  const [processData, setProcessData] = useState(MOCK_PROCESS);
+  const [outgoingData, setOutgoingData] = useState(MOCK_OUTGOING);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 품질검사 데이터 로드
+  const loadData = useCallback(async () => {
+    if (isDemo) return;
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_quality_inspections')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // type별 분류
+        const incoming = data.filter((r: any) => r.type === 'incoming');
+        const process = data.filter((r: any) => r.type === 'process');
+        const outgoing = data.filter((r: any) => r.type === 'outgoing');
+        if (incoming.length > 0) {
+          setIncomingData(incoming.map((r: any) => ({
+            id: r.id, item: r.product_id || '', supplier: '', lot: '', qty: 0,
+            inspected: 0, defects: 0, result: r.result || 'pending',
+            date: r.inspected_at?.split('T')[0] || r.created_at?.split('T')[0] || '',
+          })));
+        }
+        if (process.length > 0) {
+          setProcessData(process.map((r: any) => ({
+            id: r.id, line: '', process: '', samples: 0, defects: 0,
+            defectRate: 0, standard: 5.0, result: r.result || 'pending',
+          })));
+        }
+        if (outgoing.length > 0) {
+          setOutgoingData(outgoing.map((r: any) => ({
+            id: r.id, product: r.product_id || '', lot: '', qty: 0,
+            inspected: 0, defects: 0, result: r.result || 'pending',
+            date: r.inspected_at?.split('T')[0] || r.created_at?.split('T')[0] || '',
+          })));
+        }
+      }
+    } catch {
+      // DB 실패 시 Mock 유지
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   return (
     <div>
@@ -83,7 +134,7 @@ export default function QCPage() {
 
       {tab === 'incoming' && (
         <div className="space-y-2">
-          {MOCK_INCOMING.map(i => (
+          {incomingData.map(i => (
             <div key={i.id} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4">
               {i.result === 'pass' ? <CheckCircle size={14} className="text-emerald-400 shrink-0" /> : <AlertTriangle size={14} className="text-red-400 shrink-0" />}
               <div className="flex-1 min-w-0">
@@ -104,7 +155,7 @@ export default function QCPage() {
 
       {tab === 'process' && (
         <div className="space-y-2">
-          {MOCK_PROCESS.map(p => (
+          {processData.map(p => (
             <div key={p.id} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4">
               {p.result === 'pass' ? <CheckCircle size={14} className="text-emerald-400 shrink-0" /> : <AlertTriangle size={14} className="text-red-400 shrink-0" />}
               <div className="flex-1 min-w-0">
@@ -124,7 +175,7 @@ export default function QCPage() {
 
       {tab === 'outgoing' && (
         <div className="space-y-2">
-          {MOCK_OUTGOING.map(o => (
+          {outgoingData.map(o => (
             <div key={o.id} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4">
               <CheckCircle size={14} className="text-emerald-400 shrink-0" />
               <div className="flex-1 min-w-0">

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ClipboardList, FileCheck, Calendar, Target, Bell, ListTodo, Plus,
   CheckCircle2, Clock, Sparkles, ArrowRight, User, Smile, Meh, Frown, Heart, Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -78,15 +79,88 @@ export default function MyHomePage() {
 
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
-  useEffect(() => {
+  // Supabase에서 MY 대시보드 데이터 로드
+  const loadData = useCallback(async () => {
     if (isDemo) {
       setTodos(DEMO_TODOS);
       setSchedules(DEMO_SCHEDULES);
       setApprovals(DEMO_APPROVALS);
       setNotifications(DEMO_NOTIFICATIONS);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [isDemo]);
+    try {
+      const sb = createClient();
+      const memberId = member?.id;
+      const tenantId = member?.tenantId;
+      if (!tenantId) { setLoading(false); return; }
+
+      // 병렬로 4개 테이블 조회
+      const [todosRes, eventsRes, approvalsRes, notifsRes] = await Promise.all([
+        sb.from('wio_todos').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(10),
+        sb.from('wio_events').select('*').eq('tenant_id', tenantId).gte('start_at', new Date().toISOString().split('T')[0]).order('start_at').limit(10),
+        sb.from('wio_approvals').select('*').eq('tenant_id', tenantId).eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
+        sb.from('wio_notifications').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(10),
+      ]);
+
+      // 할일 매핑
+      if (todosRes.data && todosRes.data.length > 0) {
+        setTodos(todosRes.data.map((r: any) => ({ id: r.id, title: r.title, done: r.is_done })));
+      } else {
+        setTodos(DEMO_TODOS);
+      }
+
+      // 오늘 일정 매핑
+      if (eventsRes.data && eventsRes.data.length > 0) {
+        const colors = ['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-violet-500', 'bg-blue-500'];
+        setSchedules(eventsRes.data.map((r: any, i: number) => ({
+          id: r.id,
+          title: r.title,
+          time: r.start_at ? new Date(r.start_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
+          endTime: r.end_at ? new Date(r.end_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
+          color: colors[i % colors.length],
+        })));
+      } else {
+        setSchedules(DEMO_SCHEDULES);
+      }
+
+      // 결재 대기 매핑
+      if (approvalsRes.data && approvalsRes.data.length > 0) {
+        setApprovals(approvalsRes.data.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          requester: r.requester_id || '',
+          date: r.created_at?.split('T')[0] || '',
+          type: r.type === 'expense' ? '지출' : r.type === 'hr' ? '휴가' : '일반',
+        })));
+      } else {
+        setApprovals(DEMO_APPROVALS);
+      }
+
+      // 알림 매핑
+      if (notifsRes.data && notifsRes.data.length > 0) {
+        setNotifications(notifsRes.data.map((r: any) => ({
+          id: r.id,
+          icon: r.type || 'bell',
+          content: r.title || '',
+          time: r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '',
+          read: r.is_read,
+        })));
+      } else {
+        setNotifications(DEMO_NOTIFICATIONS);
+      }
+    } catch {
+      // DB 실패 시 Mock 폴백
+      setTodos(DEMO_TODOS);
+      setSchedules(DEMO_SCHEDULES);
+      setApprovals(DEMO_APPROVALS);
+      setNotifications(DEMO_NOTIFICATIONS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, member]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handleToggleTodo = (id: string) => {
     setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));

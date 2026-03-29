@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   FileText, Plus, Check, X, Clock, ChevronDown, ChevronUp,
   ArrowRight, MessageSquare, Filter, Send, Ban,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -126,19 +127,98 @@ export default function MyApprovalPage() {
   const [showNewDraft, setShowNewDraft] = useState(false);
   const [newDraftType, setNewDraftType] = useState<ApprovalType>('지출');
 
-  useEffect(() => {
+  // Supabase에서 결재 데이터 로드
+  const loadApprovals = useCallback(async () => {
     if (isDemo) {
       setDrafts(MOCK_DRAFTS);
       setIncoming(MOCK_INCOMING);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [isDemo]);
+    try {
+      const sb = createClient();
+      const memberId = member?.id;
+      const tenantId = member?.tenantId;
+      if (!tenantId || !memberId) { setLoading(false); return; }
 
-  const handleApprove = (id: string) => {
+      // 내가 올린 기안 (requester_id = 나)
+      const { data: myDrafts } = await sb
+        .from('wio_approvals')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .eq('requester_id', memberId)
+        .order('created_at', { ascending: false });
+
+      // 나에게 온 결재 (approver_id = 나, status = pending)
+      const { data: myIncoming } = await sb
+        .from('wio_approvals')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .eq('approver_id', memberId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      // 내 기안 매핑
+      const typeMap: Record<string, ApprovalType> = { expense: '지출', hr: '휴가', general: '일반', project: '출장' };
+      if (myDrafts && myDrafts.length > 0) {
+        setDrafts(myDrafts.map((r: any) => ({
+          id: r.id,
+          title: r.title || '',
+          type: typeMap[r.type] || '일반',
+          amount: r.amount || undefined,
+          status: (r.status || 'pending') as ApprovalStatus,
+          date: r.created_at?.split('T')[0] || '',
+          approvalLine: r.approver_id
+            ? [{ name: r.approver_id, role: '결재자', status: (r.status || 'pending') as ApprovalStatus }]
+            : [],
+        })));
+      } else {
+        setDrafts(MOCK_DRAFTS);
+      }
+
+      // 나에게 온 결재 매핑
+      if (myIncoming && myIncoming.length > 0) {
+        setIncoming(myIncoming.map((r: any) => ({
+          id: r.id,
+          title: r.title || '',
+          type: typeMap[r.type] || '일반',
+          requester: r.requester_id || '',
+          amount: r.amount || undefined,
+          date: r.created_at?.split('T')[0] || '',
+          comment: r.content || '',
+        })));
+      } else {
+        setIncoming(MOCK_INCOMING);
+      }
+    } catch {
+      setDrafts(MOCK_DRAFTS);
+      setIncoming(MOCK_INCOMING);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, member]);
+
+  useEffect(() => { loadApprovals(); }, [loadApprovals]);
+
+  // 결재 승인
+  const handleApprove = async (id: string) => {
+    if (!isDemo) {
+      try {
+        const sb = createClient();
+        await sb.from('wio_approvals').update({ status: 'approved', approved_at: new Date().toISOString() }).eq('id', id);
+      } catch { /* 실패 시 무시 */ }
+    }
     setIncoming(prev => prev.filter(i => i.id !== id));
   };
 
-  const handleReject = (id: string) => {
+  // 결재 반려
+  const handleReject = async (id: string) => {
+    if (!isDemo) {
+      try {
+        const sb = createClient();
+        await sb.from('wio_approvals').update({ status: 'rejected' }).eq('id', id);
+      } catch { /* 실패 시 무시 */ }
+    }
     setIncoming(prev => prev.filter(i => i.id !== id));
   };
 
