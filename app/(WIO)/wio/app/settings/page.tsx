@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Settings, Users, Palette, Building2, Save, Check, Plus, Trash2,
   ChevronUp, ChevronDown, Pencil, ToggleLeft, ToggleRight, Search,
-  GitBranch, GripVertical, UserPlus, ArrowRight,
+  GitBranch, GripVertical, UserPlus, ArrowRight, ChevronRight,
+  Layers, Building, Zap, Clock, Shield, Play, FileText, Wrench,
+  User,
 } from 'lucide-react';
 import { useWIO } from '../layout';
 import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, removeMember } from '@/lib/supabase/wio';
@@ -21,79 +23,183 @@ const ROLE_LABELS: Record<string, string> = {
 
 type SettingsTab = 'modules' | 'tracks' | 'theme' | 'org' | 'members';
 
-/* ── Mock track data for workflow design ── */
-interface TrackDept {
-  name: string;
-  role: string;
-  skills: string;
-  members: { name: string; role: string }[];
-}
-interface TrackApproval {
-  order: number;
-  role: string;
-  name: string;
-}
-interface WorkflowTrack {
+/* ═══════════════════════════════════════════════════════════
+   EUS 8.1 — 3-Layer Workflow Mock Data
+   ═══════════════════════════════════════════════════════════ */
+
+// Layer 1: 전사 워크플로우
+interface CompanyWorkflow {
   id: string;
   name: string;
-  departments: TrackDept[];
-  approvalLine: TrackApproval[];
-  modules: string[];
+  trigger: string;
+  involvedTracks: string[];
+  sla: string;
+  status: 'active' | 'draft';
+  steps: { order: number; name: string; role: string; track: string }[];
 }
 
-const MOCK_TRACKS: WorkflowTrack[] = [
+const COMPANY_WORKFLOWS: CompanyWorkflow[] = [
   {
-    id: 'track-ops', name: '운영·관리',
-    departments: [
-      { name: '경영지원팀', role: '운영 총괄', skills: '전략기획, 재무분석', members: [{ name: '김운영', role: '팀장' }, { name: '이지원', role: '매니저' }] },
-      { name: 'HR팀', role: '인사 관리', skills: '채용, 평가, 조직개발', members: [{ name: '박인사', role: '팀장' }, { name: '최교육', role: '담당자' }] },
+    id: 'cw-approval', name: '전자결재', trigger: '결재 요청 시', involvedTracks: ['전 트랙'], sla: '48시간 이내',
+    status: 'active',
+    steps: [
+      { order: 1, name: '기안 작성', role: '담당자', track: '해당 부서' },
+      { order: 2, name: '팀장 승인', role: '팀장', track: '해당 부서' },
+      { order: 3, name: '본부장 승인', role: '본부장', track: '운영·관리' },
+      { order: 4, name: '최종 승인', role: '대표', track: '운영·관리' },
     ],
-    approvalLine: [{ order: 1, role: '담당자', name: '이지원' }, { order: 2, role: '팀장', name: '김운영' }, { order: 3, role: '본부장', name: '정대표' }],
-    modules: ['people', 'attendance', 'payroll', 'evaluation', 'org', 'approval'],
   },
   {
-    id: 'track-biz', name: '사업',
-    departments: [
-      { name: '마케팅본부', role: '마케팅 전략/실행', skills: '디지털마케팅, 브랜딩', members: [{ name: '강마케', role: '본부장' }, { name: '윤캠페', role: '매니저' }, { name: '임소셜', role: '담당자' }] },
-      { name: '영업본부', role: '영업/BD', skills: '세일즈, 고객관리', members: [{ name: '한영업', role: '본부장' }, { name: '오딜러', role: '매니저' }] },
-      { name: '사업개발', role: '신사업 기획', skills: '사업기획, 시장분석', members: [{ name: '서기획', role: '팀장' }] },
-      { name: '고객관리', role: 'CRM/CS', skills: '고객응대, 데이터분석', members: [{ name: '노고객', role: '팀장' }, { name: '배응대', role: '담당자' }, { name: '장분석', role: '담당자' }] },
+    id: 'cw-recruit', name: '채용', trigger: '채용 요청 시', involvedTracks: ['운영·관리', '해당 부서'], sla: '30일 이내',
+    status: 'active',
+    steps: [
+      { order: 1, name: '채용 요청', role: '부서장', track: '해당 부서' },
+      { order: 2, name: 'JD 작성/공고', role: 'HR 담당', track: '운영·관리' },
+      { order: 3, name: '서류 심사', role: 'HR 담당', track: '운영·관리' },
+      { order: 4, name: '면접 진행', role: '면접관', track: '해당 부서' },
+      { order: 5, name: '최종 합격', role: 'HR 팀장', track: '운영·관리' },
     ],
-    approvalLine: [{ order: 1, role: '담당자', name: '윤캠페' }, { order: 2, role: '팀장', name: '강마케' }, { order: 3, role: '본부장', name: '정대표' }],
-    modules: ['mkt-strategy', 'mkt-campaign', 'sales', 'crm-customers', 'crm-support', 'project'],
   },
   {
-    id: 'track-support', name: '지원',
-    departments: [
-      { name: '개발팀', role: '제품 개발', skills: '풀스택, DevOps', members: [{ name: '류개발', role: '팀장' }, { name: '권백엔', role: '시니어' }] },
-      { name: '디자인팀', role: 'UX/UI', skills: '디자인시스템, 프로토타이핑', members: [{ name: '안디자', role: '팀장' }] },
+    id: 'cw-onboard', name: '온보딩', trigger: '입사일 기준', involvedTracks: ['운영·관리', '시스템', '해당 부서'], sla: '입사 후 7일',
+    status: 'active',
+    steps: [
+      { order: 1, name: '계정 생성', role: 'IT 관리자', track: '시스템' },
+      { order: 2, name: '장비 지급', role: 'IT 관리자', track: '시스템' },
+      { order: 3, name: 'HR 서류', role: 'HR 담당', track: '운영·관리' },
+      { order: 4, name: '부서 배정', role: '부서장', track: '해당 부서' },
+      { order: 5, name: '멘토 배정', role: '부서장', track: '해당 부서' },
     ],
-    approvalLine: [{ order: 1, role: '담당자', name: '권백엔' }, { order: 2, role: '팀장', name: '류개발' }, { order: 3, role: 'CTO', name: '정대표' }],
-    modules: ['dev', 'deploy', 'design', 'design-asset', 'wiki', 'content'],
   },
   {
-    id: 'track-partner', name: '파트너',
-    departments: [
-      { name: '파트너팀', role: '파트너 관리', skills: '제휴, 계약관리', members: [{ name: '문파트', role: '팀장' }, { name: '홍제휴', role: '담당자' }] },
+    id: 'cw-resign', name: '퇴직', trigger: '퇴직 신청 시', involvedTracks: ['운영·관리', '시스템'], sla: '30일 전 통보',
+    status: 'active',
+    steps: [
+      { order: 1, name: '퇴직 신청', role: '본인', track: '해당 부서' },
+      { order: 2, name: '면담/인수인계', role: '부서장', track: '해당 부서' },
+      { order: 3, name: '계정 정리', role: 'IT 관리자', track: '시스템' },
+      { order: 4, name: '퇴직 처리', role: 'HR 담당', track: '운영·관리' },
     ],
-    approvalLine: [{ order: 1, role: '담당자', name: '홍제휴' }, { order: 2, role: '팀장', name: '문파트' }, { order: 3, role: '본부장', name: '정대표' }],
-    modules: ['partner', 'partner-portal', 'vendor', 'freelancer'],
   },
   {
-    id: 'track-common', name: '공통',
-    departments: [],
-    approvalLine: [{ order: 1, role: '담당자', name: '-' }, { order: 2, role: '팀장', name: '-' }],
-    modules: ['talk', 'messenger', 'calendar', 'document', 'approval', 'ai'],
+    id: 'cw-purchase', name: '구매', trigger: '구매 요청 시', involvedTracks: ['생산', '운영·관리'], sla: '5영업일',
+    status: 'active',
+    steps: [
+      { order: 1, name: '구매 요청', role: '담당자', track: '해당 부서' },
+      { order: 2, name: '예산 확인', role: '재무 담당', track: '운영·관리' },
+      { order: 3, name: '견적 비교', role: '구매 담당', track: '생산' },
+      { order: 4, name: '발주', role: '구매 담당', track: '생산' },
+    ],
   },
   {
-    id: 'track-system', name: '시스템',
-    departments: [
-      { name: 'IT운영', role: '인프라/보안', skills: '시스템관리, 보안', members: [{ name: '전시스', role: '팀장' }] },
+    id: 'cw-budget', name: '예산', trigger: '분기/연간 예산 편성', involvedTracks: ['전 트랙', '운영·관리'], sla: '분기 시작 1개월 전',
+    status: 'active',
+    steps: [
+      { order: 1, name: '부서별 예산 제출', role: '부서장', track: '전 트랙' },
+      { order: 2, name: '검토/조정', role: '재무팀', track: '운영·관리' },
+      { order: 3, name: '경영진 승인', role: '대표', track: '운영·관리' },
+      { order: 4, name: '배정/집행', role: '재무팀', track: '운영·관리' },
     ],
-    approvalLine: [{ order: 1, role: '담당자', name: '전시스' }, { order: 2, role: 'CTO', name: '정대표' }],
-    modules: ['sys-users', 'sys-roles', 'sys-workflow', 'sys-monitor', 'sys-security'],
+  },
+  {
+    id: 'cw-eval', name: '평가', trigger: '평가 기간 도래', involvedTracks: ['전 트랙', '운영·관리'], sla: '평가 기간 2주',
+    status: 'active',
+    steps: [
+      { order: 1, name: '자기 평가', role: '전 직원', track: '전 트랙' },
+      { order: 2, name: '동료 평가', role: '전 직원', track: '전 트랙' },
+      { order: 3, name: '상사 평가', role: '팀장/본부장', track: '전 트랙' },
+      { order: 4, name: '보정/확정', role: 'HR 팀', track: '운영·관리' },
+    ],
+  },
+  {
+    id: 'cw-reward', name: '보상', trigger: '평가 확정 후', involvedTracks: ['운영·관리'], sla: '평가 후 1개월',
+    status: 'draft',
+    steps: [
+      { order: 1, name: '보상 기준 설정', role: 'HR 팀', track: '운영·관리' },
+      { order: 2, name: '개인별 산정', role: 'HR 팀', track: '운영·관리' },
+      { order: 3, name: '경영진 승인', role: '대표', track: '운영·관리' },
+      { order: 4, name: '급여 반영', role: '재무팀', track: '운영·관리' },
+    ],
+  },
+  {
+    id: 'cw-newprod', name: '신제품출시', trigger: '출시 기획 승인 시', involvedTracks: ['사업', '생산', '지원'], sla: '프로젝트별',
+    status: 'draft',
+    steps: [
+      { order: 1, name: '기획/컨셉', role: '기획팀', track: '사업' },
+      { order: 2, name: '디자인/개발', role: '개발/디자인팀', track: '지원' },
+      { order: 3, name: '생산/QA', role: '생산팀', track: '생산' },
+      { order: 4, name: '마케팅/런칭', role: '마케팅팀', track: '사업' },
+    ],
+  },
+  {
+    id: 'cw-compliance', name: '컴플라이언스', trigger: '규정 위반 감지', involvedTracks: ['전 트랙', '운영·관리'], sla: '즉시',
+    status: 'active',
+    steps: [
+      { order: 1, name: '위반 감지/신고', role: '전 직원', track: '전 트랙' },
+      { order: 2, name: '조사', role: '법무/감사', track: '운영·관리' },
+      { order: 3, name: '시정 조치', role: '해당 부서장', track: '해당 부서' },
+      { order: 4, name: '결과 보고', role: '법무/감사', track: '운영·관리' },
+    ],
   },
 ];
+
+// Layer 2: 부서별 워크플로우
+interface DeptWorkflow {
+  id: string;
+  name: string;
+  department: string;
+  steps: { order: number; name: string; role: string }[];
+}
+
+const DEPT_WORKFLOW_MAP: Record<string, DeptWorkflow[]> = {
+  '마케팅': [
+    { id: 'dw-campaign', name: '캠페인 실행', department: '마케팅',
+      steps: [{ order: 1, name: '기획', role: '매니저' }, { order: 2, name: '크리에이티브 제작', role: '디자이너' }, { order: 3, name: '매체 집행', role: '미디어 담당' }, { order: 4, name: '성과 분석', role: '데이터 분석가' }] },
+    { id: 'dw-content', name: '콘텐츠 발행', department: '마케팅',
+      steps: [{ order: 1, name: '주제 선정', role: '매니저' }, { order: 2, name: '콘텐츠 작성', role: '작성자' }, { order: 3, name: '검수/승인', role: '팀장' }, { order: 4, name: '발행', role: '담당자' }] },
+  ],
+  '영업': [
+    { id: 'dw-deal', name: '딜 프로세스', department: '영업',
+      steps: [{ order: 1, name: '리드 발굴', role: '영업 담당' }, { order: 2, name: '니즈 파악', role: '영업 담당' }, { order: 3, name: '제안/견적', role: '영업 매니저' }, { order: 4, name: '계약 체결', role: '영업 팀장' }] },
+  ],
+  '개발': [
+    { id: 'dw-sprint', name: '스프린트', department: '개발',
+      steps: [{ order: 1, name: '백로그 정리', role: 'PO' }, { order: 2, name: '스프린트 플래닝', role: '팀 전체' }, { order: 3, name: '개발/리뷰', role: '개발자' }, { order: 4, name: '데모/회고', role: '팀 전체' }] },
+    { id: 'dw-incident', name: '장애 대응', department: '개발',
+      steps: [{ order: 1, name: '장애 감지', role: '모니터링' }, { order: 2, name: '원인 분석', role: '시니어 개발자' }, { order: 3, name: '핫픽스', role: '개발자' }, { order: 4, name: '포스트모템', role: '팀장' }] },
+  ],
+  '디자인': [
+    { id: 'dw-design-req', name: '디자인 요청', department: '디자인',
+      steps: [{ order: 1, name: '요청 접수', role: '디자인 매니저' }, { order: 2, name: '시안 제작', role: '디자이너' }, { order: 3, name: '피드백', role: '요청자' }, { order: 4, name: '최종 납품', role: '디자이너' }] },
+  ],
+  '생산': [
+    { id: 'dw-production', name: '생산 실행', department: '생산',
+      steps: [{ order: 1, name: '작업 지시', role: '생산관리자' }, { order: 2, name: '자재 출고', role: '자재 담당' }, { order: 3, name: '생산 실행', role: '작업자' }, { order: 4, name: '검수', role: '품질 담당' }] },
+    { id: 'dw-defect', name: '불량 처리', department: '생산',
+      steps: [{ order: 1, name: '불량 발견', role: '검사자' }, { order: 2, name: '원인 분석', role: '품질 엔지니어' }, { order: 3, name: '시정 조치', role: '공정 담당' }, { order: 4, name: '재검증', role: '품질 담당' }] },
+  ],
+  '인사': [
+    { id: 'dw-training', name: '교육 운영', department: '인사',
+      steps: [{ order: 1, name: '교육 기획', role: 'HR 매니저' }, { order: 2, name: '일정/강사 확정', role: 'HR 담당' }, { order: 3, name: '수강/수료', role: '수강자' }, { order: 4, name: '효과 측정', role: 'HR 매니저' }] },
+  ],
+  '재무': [
+    { id: 'dw-closing', name: '월 마감', department: '재무',
+      steps: [{ order: 1, name: '전표 마감', role: '회계 담당' }, { order: 2, name: '계정 조정', role: '회계 담당' }, { order: 3, name: '재무제표 작성', role: '재무 매니저' }, { order: 4, name: '검토/확정', role: '재무 팀장' }] },
+  ],
+};
+
+const DEPT_LIST = Object.keys(DEPT_WORKFLOW_MAP);
+
+// Layer 3: 업무 도구
+const PERSONAL_TOOLS = [
+  { key: 'MY-HOME', label: 'My 홈', desc: '개인 대시보드' },
+  { key: 'MY-HR',   label: 'My 인사', desc: '급여·근태·증명서' },
+  { key: 'MY-EVL',  label: 'My 평가', desc: '내 평가·피드백' },
+  { key: 'MY-WRK',  label: 'My 업무', desc: '내 업무 목록' },
+  { key: 'MY-APR',  label: 'My 결재', desc: '내 결재 요청/대기' },
+];
+
+/* ═══════════════════════════════════════════════════════════ */
 
 export default function SettingsPage() {
   const { tenant, member, refreshTenant, reloadConfig: reloadSidebar } = useWIO();
@@ -101,14 +207,16 @@ export default function SettingsPage() {
 
   // Module config
   const [config, setConfig] = useState<OrbiConfig>({ enabledModules: [], categories: [] });
-  const [selectedCategory, setSelectedCategory] = useState('common');
+  const [selectedCategory, setSelectedCategory] = useState('track6-common');
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
   const categoryNameRef = useRef<HTMLInputElement>(null);
   const [moduleSearch, setModuleSearch] = useState('');
 
-  // Track tab
-  const [selectedTrack, setSelectedTrack] = useState('track-biz');
+  // Track tab — 3 layers
+  const [trackLayer, setTrackLayer] = useState<1 | 2 | 3>(1);
+  const [expandedWorkflow, setExpandedWorkflow] = useState<string | null>(null);
+  const [selectedDept, setSelectedDept] = useState(DEPT_LIST[0]);
 
   // Theme
   const [editColor, setEditColor] = useState('#6366F1');
@@ -288,8 +396,6 @@ export default function SettingsPage() {
     { id: 'members', label: '멤버 관리', icon: Users },
   ];
 
-  const currentTrack = MOCK_TRACKS.find(t => t.id === selectedTrack) || MOCK_TRACKS[1];
-
   return (
     <div>
       <h1 className="text-xl font-bold mb-1">설정</h1>
@@ -442,135 +548,312 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ 트랙 설정 (워크플로우 디자인) ═══ */}
+      {/* ═══ 트랙 설정 — EUS 8.1 3-Layer 워크플로우 ═══ */}
       {tab === 'tracks' && (
-        <div className="flex gap-5" style={{ minHeight: 'calc(100vh - 220px)' }}>
-          {/* Left: Track list */}
-          <div className="w-[220px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <span className="text-xs font-semibold text-slate-400">트랙 목록</span>
-              <p className="text-[10px] text-slate-600 mt-0.5">워크플로우 설계 단위</p>
-            </div>
-            <div className="p-2 space-y-0.5">
-              {MOCK_TRACKS.map(track => {
-                const isSelected = selectedTrack === track.id;
-                return (
-                  <button key={track.id}
-                    onClick={() => setSelectedTrack(track.id)}
-                    className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors ${isSelected ? 'bg-indigo-600/10 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'}`}>
-                    <GitBranch size={14} className="shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm truncate block">{track.name}</span>
-                      <span className="text-[10px] text-slate-600">{track.departments.length}개 부서</span>
-                    </div>
-                  </button>
-                );
-              })}
+        <div className="space-y-5">
+          {/* 3-Layer 관계도 — EUS 8.6 */}
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+              <Layers size={14} className="text-indigo-400" /> 3-Layer 워크플로우 구조 (EUS 8.1)
+            </h3>
+            <div className="flex items-stretch gap-3">
+              {/* Layer 1 */}
+              <button onClick={() => setTrackLayer(1)}
+                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 1 ? 'border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 1 ? 'bg-indigo-600/30 text-indigo-400' : 'bg-white/5 text-slate-500'}`}>
+                    <Building size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Layer 1</p>
+                    <p className="text-[10px] text-slate-500">전사 워크플로우</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">경영기획/시스템관리자가 세팅. 전사 공통 프로세스 10종.</p>
+                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
+                  <Shield size={9} /> 경영기획·시스템관리자 전용
+                </div>
+              </button>
+
+              <div className="flex items-center"><ArrowRight size={14} className="text-slate-700" /></div>
+
+              {/* Layer 2 */}
+              <button onClick={() => setTrackLayer(2)}
+                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 2 ? 'border-violet-500/40 bg-violet-500/10 ring-1 ring-violet-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 2 ? 'bg-violet-600/30 text-violet-400' : 'bg-white/5 text-slate-500'}`}>
+                    <GitBranch size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Layer 2</p>
+                    <p className="text-[10px] text-slate-500">부서별 워크플로우</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">부서장이 세팅. 부서 고유 업무 프로세스.</p>
+                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
+                  <Users size={9} /> 부서장 전용
+                </div>
+              </button>
+
+              <div className="flex items-center"><ArrowRight size={14} className="text-slate-700" /></div>
+
+              {/* Layer 3 */}
+              <button onClick={() => setTrackLayer(3)}
+                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 3 ? 'border-emerald-500/40 bg-emerald-500/10 ring-1 ring-emerald-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 3 ? 'bg-emerald-600/30 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
+                    <Wrench size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Layer 3</p>
+                    <p className="text-[10px] text-slate-500">업무 도구</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">부서 공통 도구 + 개인 업무 도구.</p>
+                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
+                  <User size={9} /> 전 직원
+                </div>
+              </button>
             </div>
           </div>
 
-          {/* Right: Track detail */}
-          <div className="flex-1 min-w-0 space-y-5">
-            <div>
-              <h2 className="text-base font-bold">{currentTrack.name} 트랙</h2>
-              <p className="text-xs text-slate-500 mt-0.5">조직 부서 배치, 담당 직원, 결재라인, 연결 모듈</p>
-            </div>
-
-            {/* 조직 부서 배치 */}
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                <Building2 size={14} className="text-indigo-400" /> 조직 부서 배치
-              </h3>
-              {currentTrack.departments.length === 0 ? (
-                <p className="text-xs text-slate-600 py-4 text-center">전사 공통 트랙 — 별도 부서 배치 없음</p>
-              ) : (
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {currentTrack.departments.map((dept, di) => (
-                    <div key={dept.name} className="flex items-center gap-3">
-                      <div className="shrink-0 w-[200px] rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <GripVertical size={12} className="text-slate-700 cursor-grab" />
-                          <span className="text-sm font-semibold text-white">{dept.name}</span>
-                        </div>
-                        <p className="text-[10px] text-indigo-400 mb-1">{dept.role}</p>
-                        <p className="text-[10px] text-slate-600">{dept.skills}</p>
-                        {/* Members */}
-                        <div className="mt-3 pt-2 border-t border-white/5 space-y-1.5">
-                          {dept.members.map(m => (
-                            <div key={m.name} className="flex items-center gap-2">
-                              <div className="h-5 w-5 rounded-full bg-indigo-600/20 flex items-center justify-center text-[9px] font-bold text-indigo-400">
-                                {m.name.charAt(0)}
-                              </div>
-                              <span className="text-[11px] text-slate-300">{m.name}</span>
-                              <span className="text-[9px] text-slate-600 ml-auto">{m.role}</span>
-                            </div>
-                          ))}
-                          <button className="flex items-center gap-1 text-[10px] text-slate-600 hover:text-indigo-400 transition-colors mt-1">
-                            <UserPlus size={10} /> 멤버 추가
-                          </button>
-                        </div>
-                      </div>
-                      {di < currentTrack.departments.length - 1 && (
-                        <ArrowRight size={14} className="text-slate-700 shrink-0" />
-                      )}
-                    </div>
-                  ))}
+          {/* ── Layer 1: 전사 워크플로우 ── */}
+          {trackLayer === 1 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold flex items-center gap-2">
+                    <Building size={16} className="text-indigo-400" /> 전사 워크플로우
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">경영기획/시스템관리자가 세팅하는 전사 공통 프로세스</p>
                 </div>
-              )}
-            </div>
-
-            {/* 결재라인 설정 */}
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                <Trash2 size={14} className="text-violet-400" /> 결재라인 설정
-              </h3>
-              <div className="flex items-center gap-2">
-                {currentTrack.approvalLine.map((step, si) => (
-                  <div key={si} className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                      <div className="h-6 w-6 rounded-full bg-violet-600/20 flex items-center justify-center text-[10px] font-bold text-violet-400">
-                        {step.order}
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-semibold text-white">{step.name}</p>
-                        <p className="text-[9px] text-slate-500">{step.role}</p>
-                      </div>
-                    </div>
-                    {si < currentTrack.approvalLine.length - 1 && (
-                      <ArrowRight size={12} className="text-slate-700 shrink-0" />
-                    )}
-                  </div>
-                ))}
+                <span className="text-[10px] px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  {COMPANY_WORKFLOWS.length}개 워크플로우
+                </span>
               </div>
-            </div>
 
-            {/* 모듈 연결 */}
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                <Settings size={14} className="text-emerald-400" /> 연결된 모듈
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {currentTrack.modules.map(mk => {
-                  const mod = MODULE_CATALOG.find(m => m.key === mk);
-                  if (!mod) return null;
-                  const Icon = mod.icon;
+              <div className="grid gap-3 grid-cols-1 xl:grid-cols-2">
+                {COMPANY_WORKFLOWS.map(wf => {
+                  const isExpanded = expandedWorkflow === wf.id;
                   return (
-                    <div key={mk} className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5">
-                      <Icon size={13} className="text-emerald-400" />
-                      <span className="text-xs text-emerald-300">{mod.label}</span>
+                    <div key={wf.id}
+                      className={`rounded-xl border transition-all ${isExpanded ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-white/5 bg-white/[0.02] hover:border-white/10'}`}>
+                      {/* Card header */}
+                      <button onClick={() => setExpandedWorkflow(isExpanded ? null : wf.id)}
+                        className="w-full flex items-center gap-3 p-4 text-left">
+                        <div className={`shrink-0 h-9 w-9 rounded-lg flex items-center justify-center ${wf.status === 'active' ? 'bg-indigo-600/15 text-indigo-400' : 'bg-amber-600/15 text-amber-400'}`}>
+                          <Zap size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-white">{wf.name}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${wf.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
+                              {wf.status === 'active' ? '활성' : '초안'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-[10px] text-slate-500 flex items-center gap-1"><Play size={8} /> {wf.trigger}</span>
+                            <span className="text-[10px] text-slate-500 flex items-center gap-1"><Clock size={8} /> {wf.sla}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-600">
+                          {wf.involvedTracks.map(t => (
+                            <span key={t} className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">{t}</span>
+                          ))}
+                        </div>
+                        <ChevronRight size={14} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                      </button>
+
+                      {/* Expanded: step flow */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0">
+                          <div className="border-t border-white/5 pt-3">
+                            <p className="text-[10px] text-slate-500 mb-3 font-semibold">단계별 흐름</p>
+                            <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                              {wf.steps.map((step, si) => (
+                                <div key={si} className="flex items-center gap-1 shrink-0">
+                                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[110px]">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <div className="h-5 w-5 rounded-full bg-indigo-600/20 flex items-center justify-center text-[9px] font-bold text-indigo-400">
+                                        {step.order}
+                                      </div>
+                                      <span className="text-[11px] font-semibold text-white">{step.name}</span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-500">{step.role}</p>
+                                    <p className="text-[9px] text-indigo-400/60">{step.track}</p>
+                                  </div>
+                                  {si < wf.steps.length - 1 && (
+                                    <ArrowRight size={10} className="text-slate-700 shrink-0" />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
-                <button className="flex items-center gap-1 rounded-lg border border-dashed border-white/10 px-3 py-1.5 text-xs text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
-                  <Plus size={12} /> 모듈 추가
+              </div>
+            </div>
+          )}
+
+          {/* ── Layer 2: 부서별 워크플로우 ── */}
+          {trackLayer === 2 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold flex items-center gap-2">
+                    <GitBranch size={16} className="text-violet-400" /> 부서별 워크플로우
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">부서장이 세팅하는 부서 고유 업무 프로세스</p>
+                </div>
+              </div>
+
+              {/* Department selector */}
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {DEPT_LIST.map(dept => (
+                  <button key={dept} onClick={() => setSelectedDept(dept)}
+                    className={`shrink-0 px-4 py-2 rounded-lg text-xs transition-colors ${selectedDept === dept ? 'bg-violet-600/15 text-violet-400 font-semibold border border-violet-500/20' : 'text-slate-400 hover:bg-white/5 border border-transparent'}`}>
+                    {dept}
+                  </button>
+                ))}
+              </div>
+
+              {/* Workflows for selected department */}
+              <div className="space-y-3">
+                {(DEPT_WORKFLOW_MAP[selectedDept] || []).map(wf => {
+                  const isExpanded = expandedWorkflow === wf.id;
+                  return (
+                    <div key={wf.id}
+                      className={`rounded-xl border transition-all ${isExpanded ? 'border-violet-500/30 bg-violet-500/5' : 'border-white/5 bg-white/[0.02] hover:border-white/10'}`}>
+                      <button onClick={() => setExpandedWorkflow(isExpanded ? null : wf.id)}
+                        className="w-full flex items-center gap-3 p-4 text-left">
+                        <div className="shrink-0 h-9 w-9 rounded-lg flex items-center justify-center bg-violet-600/15 text-violet-400">
+                          <GitBranch size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-semibold text-white">{wf.name}</span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{wf.steps.length}단계</p>
+                        </div>
+                        <ChevronRight size={14} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0">
+                          <div className="border-t border-white/5 pt-3">
+                            <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                              {wf.steps.map((step, si) => (
+                                <div key={si} className="flex items-center gap-1 shrink-0">
+                                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[100px]">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <div className="h-5 w-5 rounded-full bg-violet-600/20 flex items-center justify-center text-[9px] font-bold text-violet-400">
+                                        {step.order}
+                                      </div>
+                                      <span className="text-[11px] font-semibold text-white">{step.name}</span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-500">{step.role}</p>
+                                  </div>
+                                  {si < wf.steps.length - 1 && (
+                                    <ArrowRight size={10} className="text-slate-700 shrink-0" />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Add workflow button */}
+                <button className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 py-4 text-xs text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
+                  <Plus size={14} /> 워크플로우 추가
                 </button>
               </div>
             </div>
+          )}
 
-            {/* Placeholder notice */}
-            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-300/80">
-              트랙 설정은 현재 미리보기입니다. 부서 드래그, 멤버 배정, 결재라인 편집 기능은 추후 업데이트됩니다.
+          {/* ── Layer 3: 업무 도구 ── */}
+          {trackLayer === 3 && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-base font-bold flex items-center gap-2">
+                  <Wrench size={16} className="text-emerald-400" /> 업무 도구
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">부서 공통 도구와 개인 업무 도구</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Left: 부서 공통 도구 */}
+                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                    <Building size={14} className="text-emerald-400" /> 부서 공통 도구
+                  </h3>
+                  <p className="text-[10px] text-slate-500 mb-4">부서장이 모듈 카탈로그에서 선택하여 활성화</p>
+
+                  <div className="space-y-2">
+                    {/* Show some representative modules from track2-biz as example */}
+                    {MODULE_CATALOG.filter(m => ['mkt-strategy', 'mkt-campaign', 'sales', 'SAL-PIP', 'CRM-CST', 'crm-support', 'BD-PRJ'].includes(m.key)).map(mod => {
+                      const Icon = mod.icon;
+                      const enabled = config.enabledModules.includes(mod.key);
+                      return (
+                        <div key={mod.key}
+                          className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${enabled ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/5 bg-white/[0.01] opacity-50'}`}>
+                          <div className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center ${enabled ? 'bg-emerald-600/15 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
+                            <Icon size={14} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-white">{mod.label}</span>
+                            <p className="text-[9px] text-slate-500">{mod.description}</p>
+                          </div>
+                          <div className={`w-6 h-3.5 rounded-full transition-colors ${enabled ? 'bg-emerald-600' : 'bg-slate-700'}`}>
+                            <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform mt-[2px] ${enabled ? 'translate-x-[12px]' : 'translate-x-[2px]'}`} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <button className="w-full flex items-center justify-center gap-1 rounded-lg border border-dashed border-white/10 py-2.5 text-[10px] text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
+                      <Plus size={11} /> 모듈 카탈로그에서 추가
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right: 개인 업무 도구 */}
+                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                    <User size={14} className="text-sky-400" /> 개인 업무 도구
+                  </h3>
+                  <p className="text-[10px] text-slate-500 mb-4">전 직원에게 자동으로 제공되는 도구 (비활성화 불가)</p>
+
+                  <div className="space-y-2">
+                    {PERSONAL_TOOLS.map(tool => {
+                      const mod = MODULE_CATALOG.find(m => m.key === tool.key);
+                      const Icon = mod?.icon || User;
+                      return (
+                        <div key={tool.key}
+                          className="flex items-center gap-3 rounded-lg border border-sky-500/15 bg-sky-500/5 px-3 py-2.5">
+                          <div className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center bg-sky-600/15 text-sky-400">
+                            <Icon size={14} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-white">{tool.label}</span>
+                            <p className="text-[9px] text-slate-500">{tool.desc}</p>
+                          </div>
+                          <span className="text-[8px] text-sky-500/60 border border-sky-500/15 px-1.5 py-0.5 rounded">자동 제공</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
+          )}
+
+          {/* Placeholder notice */}
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-300/80">
+            트랙 설정은 현재 미리보기입니다. 워크플로우 편집, 단계 추가/삭제, 권한 연동 기능은 추후 업데이트됩니다.
           </div>
         </div>
       )}
