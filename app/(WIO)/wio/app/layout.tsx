@@ -58,6 +58,11 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false);
   const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], tracks: [] });
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
+  const [noWorkspace, setNoWorkspace] = useState(false);
+  const [authUser, setAuthUser] = useState<any>(null);
+  const [inviteCode, setInviteCode] = useState('');
+  const [onboardingLoading, setOnboardingLoading] = useState(false);
+  const [newWsName, setNewWsName] = useState('');
 
   const mode = detectMode(tenant, member);
   const isDemo = mode === 'demo';
@@ -113,10 +118,13 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           return;
         }
 
-        // 직접 Supabase 쿼리 — wio.ts의 별도 인스턴스 대신 같은 클라이언트 사용
+        // 내가 소속된 테넌트만 조회 (wio_members → wio_tenants 조인)
+        const { data: myMemberships } = await sb.from('wio_members').select('tenant_id').eq('user_id', user.id);
+
         let tenants: WIOTenant[] = [];
-        try {
-          const { data: tData } = await sb.from('wio_tenants').select('*').eq('is_active', true);
+        if (myMemberships && myMemberships.length > 0) {
+          const tenantIds = myMemberships.map((m: any) => m.tenant_id);
+          const { data: tData } = await sb.from('wio_tenants').select('*').in('id', tenantIds).eq('is_active', true);
           tenants = (tData || []).map((r: Record<string, unknown>) => {
             const result: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(r)) {
@@ -124,34 +132,22 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
             }
             return result as unknown as WIOTenant;
           });
-        } catch { /* DB table missing */ }
-
-        if (tenants.length === 0) {
-          try {
-            const defaultTenantId = 'a0000000-0000-0000-0000-000000000001';
-            await sb.from('wio_members').insert({ tenant_id: defaultTenantId, user_id: user.id, display_name: user.email?.split('@')[0] || '사용자', role: 'member' });
-            const { data: tData2 } = await sb.from('wio_tenants').select('*').eq('is_active', true);
-            tenants = (tData2 || []).map((r: Record<string, unknown>) => {
-              const result: Record<string, unknown> = {};
-              for (const [key, value] of Object.entries(r)) {
-                result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
-              }
-              return result as unknown as WIOTenant;
-            });
-          } catch { /* ignore */ }
         }
 
+        // 소속 워크스페이스 없음 → 온보딩 상태
         if (tenants.length === 0) {
-          setTenant(demoTenant());
-          setMember({ id: 'demo', displayName: user.email?.split('@')[0] || '사용자', role: 'admin', email: user.email || '' } as any);
+          setNoWorkspace(true);
+          setAuthUser(user);
           setLoading(false);
           return;
         }
 
-        const t = tenants[0];
+        // 선택된 테넌트 (멀티테넌트 시)
+        const selectedId = typeof window !== 'undefined' ? localStorage.getItem('wio-selected-tenant') : null;
+        const t = (selectedId ? tenants.find(tt => tt.id === selectedId) : null) || tenants[0];
         setTenant(t);
 
-        // 같은 sb 클라이언트로 멤버십 조회
+        // 멤버십 조회
         const { data: mData } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
         let m: WIOMember | null = mData ? (() => {
           const result: Record<string, unknown> = {};
@@ -160,18 +156,6 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           }
           return result as unknown as WIOMember;
         })() : null;
-
-        if (!m) {
-          await sb.from('wio_members').insert({ tenant_id: t.id, user_id: user.id, display_name: user.email?.split('@')[0] || '사용자', role: 'member' });
-          const { data: mData2 } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
-          m = mData2 ? (() => {
-            const result: Record<string, unknown> = {};
-            for (const [key, value] of Object.entries(mData2 as Record<string, unknown>)) {
-              result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
-            }
-            return result as unknown as WIOMember;
-          })() : null;
-        }
         setMember(m);
         setLoading(false);
       } catch {
@@ -189,6 +173,92 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         <div className="text-center">
           <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3" />
           <p className="text-xs text-slate-500">Orbi 로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 온보딩: 워크스페이스 없는 로그인 사용자
+  if (noWorkspace && authUser) {
+    const handleCreateWorkspace = async () => {
+      if (!newWsName.trim()) return;
+      setOnboardingLoading(true);
+      try {
+        const sb = createClient();
+        const slug = newWsName.trim().toLowerCase().replace(/[^a-z0-9가-힣]/g, '-').replace(/-+/g, '-');
+        const { data: newTenant } = await sb.from('wio_tenants').insert({
+          name: newWsName.trim(), slug, service_name: newWsName.trim() + ' Office',
+          plan: 'free', max_members: 5, modules: ['home','project','talk','people','gpr'],
+          is_active: true, primary_color: '#6366F1', powered_by: true,
+        }).select().single();
+        if (newTenant) {
+          await sb.from('wio_members').insert({ tenant_id: newTenant.id, user_id: authUser.id, display_name: authUser.email?.split('@')[0] || '사용자', role: 'owner' });
+          window.location.reload();
+        }
+      } catch { /* ignore */ }
+      setOnboardingLoading(false);
+    };
+    const handleJoinByCode = async () => {
+      if (!inviteCode.trim()) return;
+      setOnboardingLoading(true);
+      try {
+        const sb = createClient();
+        const { data: t } = await sb.from('wio_tenants').select('id,name').eq('slug', inviteCode.trim().toLowerCase()).single();
+        if (t) {
+          await sb.from('wio_members').insert({ tenant_id: t.id, user_id: authUser.id, display_name: authUser.email?.split('@')[0] || '사용자', role: 'member' });
+          window.location.reload();
+        }
+      } catch { /* ignore */ }
+      setOnboardingLoading(false);
+    };
+    const handleGoDemo = () => {
+      setNoWorkspace(false);
+      setTenant(demoTenant());
+      setMember({ id: 'demo', displayName: authUser.email?.split('@')[0] || '사용자', role: 'member', email: authUser.email || '' } as any);
+    };
+
+    return (
+      <div className="min-h-screen bg-[#0F0F23] flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="h-14 w-14 rounded-2xl bg-indigo-600/10 flex items-center justify-center mx-auto mb-4">
+              <Settings className="h-7 w-7 text-indigo-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">워크스페이스가 없습니다</h2>
+            <p className="text-sm text-slate-500">{authUser.email}으로 로그인됨</p>
+          </div>
+          <div className="space-y-4">
+            {/* 새 워크스페이스 만들기 */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <h3 className="text-sm font-semibold text-white mb-3">새 워크스페이스 만들기</h3>
+              <div className="flex gap-2">
+                <input type="text" placeholder="회사/팀 이름" value={newWsName} onChange={e => setNewWsName(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50" />
+                <button onClick={handleCreateWorkspace} disabled={onboardingLoading || !newWsName.trim()}
+                  className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 disabled:opacity-30 transition-colors">
+                  {onboardingLoading ? '...' : '만들기'}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-600 mt-2">Free 플랜 (5명, 기본 모듈)</p>
+            </div>
+            {/* 초대 코드 입력 */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <h3 className="text-sm font-semibold text-white mb-3">초대 코드로 합류</h3>
+              <div className="flex gap-2">
+                <input type="text" placeholder="워크스페이스 코드 (slug)" value={inviteCode} onChange={e => setInviteCode(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50" />
+                <button onClick={handleJoinByCode} disabled={onboardingLoading || !inviteCode.trim()}
+                  className="px-4 py-2 border border-indigo-500/30 text-indigo-400 text-sm rounded-lg hover:bg-indigo-500/10 disabled:opacity-30 transition-colors">
+                  {onboardingLoading ? '...' : '합류'}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-600 mt-2">관리자에게 코드를 받으세요</p>
+            </div>
+            {/* 데모 */}
+            <button onClick={handleGoDemo} className="w-full py-3 text-sm text-slate-500 hover:text-slate-300 transition-colors">
+              데모 둘러보기 →
+            </button>
+          </div>
         </div>
       </div>
     );
