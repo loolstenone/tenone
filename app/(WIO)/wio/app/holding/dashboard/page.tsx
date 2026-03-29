@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Users, DollarSign,
   AlertTriangle, ArrowUpRight, ArrowDownRight, Building2, Briefcase,
   BarChart3, Activity, Shield, RefreshCw, ChevronDown,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Mock: BU 데이터 ── */
 interface BUData {
@@ -53,7 +54,29 @@ const SYNERGY = {
 };
 
 export default function HoldingDashboardPage() {
-  const { isMaster, isDemo } = useWIO();
+  const { tenant, isMaster, isDemo } = useWIO();
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 지주사 대시보드 데이터 로드
+  const loadHoldingData = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const [brandsRes, biRes] = await Promise.all([
+        sb.from('wio_holding_brands').select('*').eq('tenant_id', tenant!.id),
+        sb.from('wio_bi_snapshots').select('*').eq('tenant_id', tenant!.id).order('snapshot_date', { ascending: false }).limit(6),
+      ]);
+      // TODO: 실제 데이터 매핑 구현 (현재 Mock 폴백)
+      if (brandsRes.error) throw brandsRes.error;
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadHoldingData(); }, [loadHoldingData]);
 
   if (!isMaster && !isDemo) {
     return (

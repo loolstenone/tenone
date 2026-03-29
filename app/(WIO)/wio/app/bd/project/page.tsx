@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Rocket, Lightbulb, Search, CheckCircle2, Play, X, Plus,
   TrendingUp, AlertTriangle, DollarSign, Target, Users, BarChart3,
   ChevronRight, GripVertical,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type BDStage = 'idea' | 'analysis' | 'validation' | 'approval' | 'execution';
@@ -76,8 +77,44 @@ function ScoreBadge({ score }: { score: number }) {
 }
 
 export default function BDProjectPage() {
-  const { isDemo } = useWIO();
-  const [projects] = useState<BDProject[]>(MOCK_PROJECTS);
+  const { tenant, isDemo } = useWIO();
+  const [projects, setProjects] = useState<BDProject[]>(isDemo ? MOCK_PROJECTS : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 신사업 프로젝트 로드
+  const loadProjects = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_bd_projects')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setProjects(data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          description: row.description || '',
+          marketSize: row.market_size || '',
+          feasibilityScore: row.feasibility_score ?? 0,
+          stage: row.stage || 'idea',
+          owner: row.owner || '',
+          analysis: row.analysis || { marketSize: '', competition: 'medium', investment: '', expectedROI: '', risks: [] },
+        })));
+      } else {
+        setProjects(MOCK_PROJECTS);
+      }
+    } catch {
+      setProjects(MOCK_PROJECTS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadProjects(); }, [loadProjects]);
   const [selected, setSelected] = useState<BDProject | null>(null);
   const [viewMode, setViewMode] = useState<'pipeline' | 'list'>('pipeline');
 

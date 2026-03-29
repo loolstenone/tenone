@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, ChevronRight, ChevronDown, Users, Edit2, X, Search,
   UserCheck, History, BarChart3, FolderTree,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type OrgLevel = 'track' | 'division' | 'team' | 'part';
@@ -132,8 +133,36 @@ const ORDER_COLORS: Record<string, string> = { '승진': 'text-violet-400 bg-vio
 /* ── Component ── */
 export default function OrgSetupPage() {
   const { tenant, isDemo } = useWIO();
-  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
-  const [orgTree] = useState(buildOrg);
+  const [orgTree, setOrgTree] = useState<OrgNode[]>(isDemo ? buildOrg() : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 조직 트리 로드
+  const loadOrg = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_departments')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // TODO: flat 행 → 트리 구조 변환 구현
+        // 현재는 Mock 폴백
+        setOrgTree(buildOrg());
+      } else {
+        setOrgTree(buildOrg());
+      }
+    } catch {
+      setOrgTree(buildOrg());
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadOrg(); }, [loadOrg]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['T1', 'T2', 'T3']));
   const [selected, setSelected] = useState<OrgNode | null>(null);
   const [showModal, setShowModal] = useState(false);

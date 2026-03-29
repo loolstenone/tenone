@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   ClipboardList, UserCheck, BarChart3, ArrowRightLeft, History,
   AlertTriangle, Plus, Calendar, Flag, ChevronDown, ChevronUp, CheckCircle2
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Priority = 'urgent' | 'high' | 'medium' | 'low';
 type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
@@ -92,15 +93,45 @@ export default function WorkPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 업무 데이터 로드
+  const loadWork = useCallback(async () => {
     if (isDemo) {
       setTeam(MOCK_TEAM);
       setHandovers(MOCK_HANDOVER);
       setCompleted(MOCK_COMPLETED);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_work_assignments')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // TODO: DB 행을 TeamMember 구조로 매핑
+        setTeam(MOCK_TEAM); // 임시 폴백 — 실제 매핑 구현 필요
+      } else {
+        setTeam(MOCK_TEAM);
+      }
+      setHandovers(MOCK_HANDOVER);
+      setCompleted(MOCK_COMPLETED);
+    } catch {
+      setTeam(MOCK_TEAM);
+      setHandovers(MOCK_HANDOVER);
+      setCompleted(MOCK_COMPLETED);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadWork();
+  }, [tenant, loadWork]);
 
   const getWorkload = (m: TeamMember) => {
     const active = m.tasks.filter(t => t.status !== 'done').length;

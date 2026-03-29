@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart3, Search, GitBranch, TrendingUp, Lightbulb, FileText,
   ArrowUpRight, ArrowDownRight, Minus, ChevronRight, AlertCircle, CheckCircle2,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── 4단계 분석 프레임워크 ── */
 type AnalysisTab = 'descriptive' | 'diagnostic' | 'predictive' | 'prescriptive';
@@ -83,6 +84,30 @@ function ChangeIndicator({ value }: { value: number }) {
 export default function AnalyticsPage() {
   const { tenant, isDemo } = useWIO();
   const [tab, setTab] = useState<AnalysisTab>('descriptive');
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 BI 스냅샷 기반 분석 데이터 로드
+  const loadAnalytics = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_bi_snapshots')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('snapshot_date', { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      // TODO: data → 분석 뷰 매핑 구현 (현재 Mock 폴백)
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
 
   return (
     <div>

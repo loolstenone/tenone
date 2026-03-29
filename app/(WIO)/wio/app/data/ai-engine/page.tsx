@@ -53,6 +53,8 @@ const NL_RESPONSES: Record<string, string> = {
   default: '지난 분기 마케팅 ROI는 324%로, 전분기(287%) 대비 12.9% 상승했습니다.\n\n주요 요인:\n- 콘텐츠 마케팅 전환율 28% 향상\n- 유료 광고 CPA 15% 절감\n- SNS 오가닉 도달률 2배 증가\n\n권고: 콘텐츠 마케팅 예산을 20% 증액하면 다음 분기 ROI 350% 달성 가능합니다.',
 };
 
+// TODO: AI 분석 엔진은 별도 AI 백엔드 연동 필요. 현재 Mock 유지.
+// 향후 wio_bi_snapshots 테이블에서 이상탐지 + 예측 데이터 로드 예정.
 export default function AIEnginePage() {
   const { tenant, isDemo } = useWIO();
   const [query, setQuery] = useState('지난 분기 마케팅 ROI');

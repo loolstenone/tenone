@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Heart, Send, Award, Gift, Star, ThumbsUp,
   Lightbulb, HandHelping, Trophy, Flame, Gem,
   ChevronDown, ChevronUp, Vote
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type RecognitionType = 'praise' | 'thanks' | 'idea' | 'help';
 type BadgeId = 'mvp' | 'value_champion' | 'innovator' | 'tenure';
@@ -75,16 +76,57 @@ export default function RecognitionPage() {
 
   const totalPoints = 2450;
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 인정/포상 데이터 로드
+  const loadRecognitions = useCallback(async () => {
     if (isDemo) {
       setRecognitions(MOCK_RECOGNITIONS);
       setBadges(MOCK_BADGES);
       setPointHistory(MOCK_POINT_HISTORY);
       setCandidates(MVP_CANDIDATES);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_recognitions')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setRecognitions(data.map((row: any) => ({
+          id: row.id,
+          from: row.from_name || '',
+          to: row.to_name || '',
+          type: row.type || 'praise',
+          message: row.message || '',
+          value: row.core_value || '',
+          points: row.points ?? 0,
+          date: row.created_at ? row.created_at.split('T')[0] : '',
+        })));
+      } else {
+        setRecognitions(MOCK_RECOGNITIONS);
+      }
+      // 뱃지, 포인트, MVP는 아직 별도 테이블 없으므로 Mock 유지
+      setBadges(MOCK_BADGES);
+      setPointHistory(MOCK_POINT_HISTORY);
+      setCandidates(MVP_CANDIDATES);
+    } catch {
+      setRecognitions(MOCK_RECOGNITIONS);
+      setBadges(MOCK_BADGES);
+      setPointHistory(MOCK_POINT_HISTORY);
+      setCandidates(MVP_CANDIDATES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadRecognitions();
+  }, [tenant, loadRecognitions]);
 
   if (loading) {
     return (

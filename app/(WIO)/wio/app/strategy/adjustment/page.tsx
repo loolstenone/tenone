@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   SlidersHorizontal, TrendingUp, TrendingDown, Users, DollarSign, BarChart3,
   ArrowUpDown, Clock, ChevronRight,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type BU = {
@@ -71,10 +72,51 @@ const fmtB = (n: number) => {
 };
 
 export default function AdjustmentPage() {
-  const { isDemo } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  const [bus, setBus] = useState<BU[]>(isDemo ? MOCK_BUS : []);
+  const [logs, setLogs] = useState<AdjustmentLog[]>(isDemo ? MOCK_LOGS : []);
+  const [loading, setLoading] = useState(!isDemo);
   const [budgets, setBudgets] = useState<Record<string, number>>(
     Object.fromEntries(MOCK_BUS.map(b => [b.id, b.budget]))
   );
+
+  // Supabase에서 전략 BU 데이터 로드
+  const loadData = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_strategies')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // BU 비교 데이터가 있으면 매핑
+        const mapped: BU[] = data.map((row: any) => ({
+          id: row.id,
+          name: row.title || '',
+          revenue: row.revenue ?? 0,
+          profit: row.profit ?? 0,
+          growthRate: row.growth_rate ?? 0,
+          headcount: row.headcount ?? 0,
+          budget: row.budget ?? 0,
+        }));
+        setBus(mapped);
+        setBudgets(Object.fromEntries(mapped.map(b => [b.id, b.budget])));
+      } else {
+        setBus(MOCK_BUS);
+        setBudgets(Object.fromEntries(MOCK_BUS.map(b => [b.id, b.budget])));
+      }
+    } catch {
+      setBus(MOCK_BUS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadData(); }, [loadData]);
   const totalBudget = Object.values(budgets).reduce((s, v) => s + v, 0);
 
   return (

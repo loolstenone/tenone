@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Settings, Shield, Mail, Database, Globe, Lock, Clock, Key,
   Plus, Trash2, Edit2, Check, X, Save, Upload, Eye, EyeOff,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type ConfigTab = 'basic' | 'security' | 'email' | 'codes';
@@ -97,7 +98,6 @@ const FISCAL_MONTHS = ['01', '04', '07', '10'];
 
 export default function ConfigPage() {
   const { tenant, isDemo } = useWIO();
-  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
   const [tab, setTab] = useState<ConfigTab>('basic');
   const [basic, setBasic] = useState(MOCK_BASIC);
   const [security, setSecurity] = useState(MOCK_SECURITY);
@@ -106,6 +106,30 @@ export default function ConfigPage() {
   const [codes] = useState(MOCK_CODES);
   const [codeCategory, setCodeCategory] = useState('부서코드');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 시스템 설정 로드
+  const loadConfig = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_system_config')
+        .select('*')
+        .eq('tenant_id', tenant!.id);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // TODO: data → 설정 항목 매핑 구현 (현재 Mock 폴백)
+      }
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadConfig(); }, [loadConfig]);
 
   if (!tenant) return null;
 

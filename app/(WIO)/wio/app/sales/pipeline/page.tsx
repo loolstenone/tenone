@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, X, Building2, User, Calendar, Percent, DollarSign,
   ChevronRight, GripVertical, Phone, Mail, StickyNote, Clock,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost';
@@ -54,9 +55,47 @@ const MOCK_DEALS: Deal[] = [
 const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
 
 export default function PipelinePage() {
-  const { isDemo } = useWIO();
-  // TODO: Supabase 영업 파이프라인 테이블 생성 후 연동 (현재 Mock 폴백)
-  const [deals, setDeals] = useState<Deal[]>(MOCK_DEALS);
+  const { tenant, isDemo } = useWIO();
+  const [deals, setDeals] = useState<Deal[]>(isDemo ? MOCK_DEALS : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 파이프라인 로드
+  const loadDeals = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_sales_pipeline')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setDeals(data.map((row: any) => ({
+          id: row.id,
+          company: row.company || '',
+          contact: row.contact_name || '',
+          phone: row.phone || '',
+          email: row.email || '',
+          amount: row.amount ?? 0,
+          probability: row.probability ?? 0,
+          stage: row.stage || 'lead',
+          dueDate: row.due_date ? row.due_date.split('T')[0] : '',
+          notes: row.notes || '',
+          history: Array.isArray(row.history) ? row.history : [],
+        })));
+      } else {
+        setDeals(MOCK_DEALS);
+      }
+    } catch {
+      setDeals(MOCK_DEALS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadDeals(); }, [loadDeals]);
   const [selected, setSelected] = useState<Deal | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newDeal, setNewDeal] = useState({ company: '', contact: '', amount: '', probability: '50', stage: 'lead' as DealStage, dueDate: '' });

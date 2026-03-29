@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   DollarSign, Calculator, PieChart, History, Plus,
   ChevronDown, ChevronUp, TrendingUp, Award
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type IncentiveType = 'performance' | 'project' | 'special';
 type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
@@ -57,14 +58,58 @@ export default function IncentivePage() {
   const [showForm, setShowForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 인센티브 정책 + 지급 이력 로드
+  const loadIncentives = useCallback(async () => {
     if (isDemo) {
       setPolicies(MOCK_POLICIES);
       setHistory(MOCK_HISTORY);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const [policiesRes, recordsRes] = await Promise.all([
+        sb.from('wio_incentive_policies').select('*').eq('tenant_id', tenant!.id),
+        sb.from('wio_incentive_records').select('*').eq('tenant_id', tenant!.id).order('created_at', { ascending: false }),
+      ]);
+      if (policiesRes.data && policiesRes.data.length > 0) {
+        setPolicies(policiesRes.data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          type: row.type || 'performance',
+          formula: row.formula || '',
+          period: row.period || '',
+          basePay: row.base_pay ?? 0,
+        })));
+      } else {
+        setPolicies(MOCK_POLICIES);
+      }
+      if (recordsRes.data && recordsRes.data.length > 0) {
+        setHistory(recordsRes.data.map((row: any) => ({
+          id: row.id,
+          name: row.policy_name || '',
+          recipient: row.recipient || '',
+          grade: row.grade || 'B',
+          amount: row.amount ?? 0,
+          date: row.paid_at ? row.paid_at.split('T')[0] : '',
+          period: row.period || '',
+        })));
+      } else {
+        setHistory(MOCK_HISTORY);
+      }
+    } catch {
+      setPolicies(MOCK_POLICIES);
+      setHistory(MOCK_HISTORY);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadIncentives();
+  }, [tenant, loadIncentives]);
 
   const selectedPolicy = policies.find(p => p.id === simPolicy);
   const simAmount = selectedPolicy

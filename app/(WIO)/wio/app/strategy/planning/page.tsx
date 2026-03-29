@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Target, Compass, Lightbulb, TrendingUp, Shield, AlertTriangle, Eye, Zap,
   ChevronRight, Calendar,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── SWOT ── */
 const SWOT = {
@@ -60,7 +61,57 @@ function getBarStyle(start: string, end: string) {
 }
 
 export default function PlanningPage() {
-  const { isDemo } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  const [initiatives, setInitiatives] = useState<Initiative[]>(isDemo ? INITIATIVES : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 전략 이니셔티브 로드
+  const loadStrategies = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_strategies')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setInitiatives(data.map((row: any) => ({
+          id: row.id,
+          title: row.title || '',
+          description: row.description || '',
+          owner: row.owner || '',
+          startDate: row.start_date ? row.start_date.slice(0, 7) : '',
+          endDate: row.end_date ? row.end_date.slice(0, 7) : '',
+          progress: row.progress ?? 0,
+          status: row.status || 'on_track',
+        })));
+      } else {
+        // 데이터 없으면 Mock 폴백
+        setInitiatives(INITIATIVES);
+      }
+    } catch {
+      setInitiatives(INITIATIVES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadStrategies(); }, [loadStrategies]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div><h1 className="text-xl font-bold">경영 기획</h1></div>
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -94,7 +145,7 @@ export default function PlanningPage() {
       <div>
         <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><Lightbulb size={16} className="text-amber-400" />2026 전략 이니셔티브</h2>
         <div className="grid grid-cols-2 gap-3">
-          {INITIATIVES.map(init => (
+          {initiatives.map(init => (
             <div key={init.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="text-sm font-semibold flex-1">{init.title}</h3>
@@ -155,7 +206,7 @@ export default function PlanningPage() {
           </div>
           {/* Bars */}
           <div className="space-y-3">
-            {INITIATIVES.map(init => {
+            {initiatives.map(init => {
               const style = getBarStyle(init.startDate, init.endDate);
               return (
                 <div key={init.id} className="relative">

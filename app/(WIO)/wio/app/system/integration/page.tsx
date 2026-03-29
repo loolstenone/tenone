@@ -6,6 +6,7 @@ import {
   Calendar, MessageCircle, Hash, GitBranch, BookOpen, Palette, Clock, Zap,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 // ─── 타입 ─────────────────────────────────────────────────────
 
@@ -118,7 +119,34 @@ export default function IntegrationPage() {
   const [webhookInput, setWebhookInput] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
 
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant?.id === 'demo';
+
+  // Supabase에서 연동 설정 로드
+  const loadIntegrations = useCallback(async () => {
+    if (isDemo) return;
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_integrations')
+        .select('*')
+        .eq('tenant_id', tenant!.id);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // DB 연동 설정이 있으면 상태 반영
+        setIntegrations(prev => prev.map(int => {
+          const dbRow = data.find((d: any) => d.provider === int.provider);
+          if (dbRow) {
+            return { ...int, status: dbRow.status || int.status, lastSync: dbRow.last_sync || int.lastSync };
+          }
+          return int;
+        }));
+      }
+    } catch {
+      // Mock 폴백
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadIntegrations(); }, [loadIntegrations]);
 
   // ─── 연동 상태 실시간 확인 ──────────────────────────
 

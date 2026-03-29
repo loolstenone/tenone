@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart3, DollarSign, Users, TrendingUp, TrendingDown, Target,
   Briefcase, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── 권한별 뷰 ── */
 type RoleView = 'ceo' | 'head' | 'lead' | 'member';
@@ -94,7 +95,32 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 export default function BIPage() {
   const { tenant, isDemo } = useWIO();
   const [roleView, setRoleView] = useState<RoleView>('ceo');
+  const [loading, setLoading] = useState(!isDemo);
   const kpis = KPI_DATA[roleView];
+
+  // Supabase에서 BI 스냅샷 로드
+  const loadBI = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_bi_snapshots')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('snapshot_date', { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      // BI 스냅샷 데이터가 있으면 KPI에 반영 가능 — 현재는 Mock 폴백
+      // TODO: data → KPI_DATA 매핑 구현
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadBI(); }, [loadBI]);
 
   return (
     <div>

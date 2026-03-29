@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   ShoppingCart, Package, Building2, DollarSign, Plus,
   ChevronRight, CheckCircle2, Clock, FileText, ArrowRight
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type RequestStatus = 'requested' | 'quoted' | 'approved' | 'ordered' | 'received';
 type SupplierGrade = 'A' | 'B' | 'C' | 'D';
@@ -79,15 +80,54 @@ export default function ProcurementPage() {
   const [showForm, setShowForm] = useState(false);
   const [activeView, setActiveView] = useState<'list' | 'pipeline'>('list');
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 구매요청 + 공급업체 로드
+  const loadProcurement = useCallback(async () => {
     if (isDemo) {
       setRequests(MOCK_REQUESTS);
       setSuppliers(MOCK_SUPPLIERS);
       setPriceCompare(MOCK_PRICE_COMPARE);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const [poRes, supRes] = await Promise.all([
+        sb.from('wio_purchase_orders').select('*').eq('tenant_id', tenant!.id).order('created_at', { ascending: false }),
+        sb.from('wio_suppliers').select('*').eq('tenant_id', tenant!.id),
+      ]);
+      if (poRes.data && poRes.data.length > 0) {
+        setRequests(poRes.data.map((row: any) => ({
+          id: row.id, item: row.item || '', qty: row.qty ?? 0, unit: row.unit || '',
+          budget: row.budget ?? 0, deadline: row.deadline ? row.deadline.split('T')[0] : '',
+          reason: row.reason || '', status: row.status || 'requested',
+          requester: row.requester || '', date: row.created_at ? row.created_at.split('T')[0] : '',
+        })));
+      } else {
+        setRequests(MOCK_REQUESTS);
+      }
+      if (supRes.data && supRes.data.length > 0) {
+        setSuppliers(supRes.data.map((row: any) => ({
+          id: row.id, name: row.name || '', category: row.category || '',
+          grade: row.grade || 'C', score: row.score ?? 0, contact: row.contact || '',
+        })));
+      } else {
+        setSuppliers(MOCK_SUPPLIERS);
+      }
+      setPriceCompare(MOCK_PRICE_COMPARE); // 단가비교는 집계 데이터이므로 Mock 유지
+    } catch {
+      setRequests(MOCK_REQUESTS);
+      setSuppliers(MOCK_SUPPLIERS);
+      setPriceCompare(MOCK_PRICE_COMPARE);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadProcurement();
+  }, [tenant, loadProcurement]);
 
   if (loading) {
     return (

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, FileText, Send, Eye, Download, ChevronDown, X, Check, Clock, AlertCircle,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired';
@@ -52,9 +53,46 @@ function calcQuote(q: Quote) {
 }
 
 export default function QuotePage() {
-  const { isDemo } = useWIO();
-  // TODO: Supabase 견적 테이블 생성 후 연동 (현재 Mock 폴백)
-  const [quotes] = useState<Quote[]>(MOCK_QUOTES);
+  const { tenant, isDemo } = useWIO();
+  const [quotes, setQuotes] = useState<Quote[]>(isDemo ? MOCK_QUOTES : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 견적 로드
+  const loadQuotes = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_quotes')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setQuotes(data.map((row: any) => ({
+          id: row.id,
+          number: row.quote_number || '',
+          customer: row.customer || '',
+          items: Array.isArray(row.items) ? row.items : [],
+          taxRate: row.tax_rate ?? 10,
+          status: row.status || 'draft',
+          validUntil: row.valid_until ? row.valid_until.split('T')[0] : '',
+          sentDate: row.sent_date ? row.sent_date.split('T')[0] : null,
+          viewedDate: row.viewed_date ? row.viewed_date.split('T')[0] : null,
+          createdAt: row.created_at ? row.created_at.split('T')[0] : '',
+        })));
+      } else {
+        setQuotes(MOCK_QUOTES);
+      }
+    } catch {
+      setQuotes(MOCK_QUOTES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadQuotes(); }, [loadQuotes]);
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all');
   const [selected, setSelected] = useState<Quote | null>(null);
   const [editMode, setEditMode] = useState(false);

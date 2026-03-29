@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Palette, Heart, TrendingUp, Star, Users, Eye, Megaphone,
   DollarSign, ExternalLink, Shield, BarChart3, Sliders,
   Target, Award, Share2, Search as SearchIcon, ChevronRight,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Mock: 브랜드 KPI ── */
 interface BrandKPI {
@@ -141,8 +142,30 @@ function RadarChart({ brand }: { brand: BrandKPI }) {
 }
 
 export default function BrandHubPage() {
-  const { isMaster, isDemo } = useWIO();
+  const { tenant, isMaster, isDemo } = useWIO();
   const [selectedBrand, setSelectedBrand] = useState<string>(MOCK_BRANDS[0].id);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 브랜드 허브 데이터 로드
+  const loadBrands = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_holding_brands')
+        .select('*')
+        .eq('tenant_id', tenant!.id);
+      if (error) throw error;
+      // TODO: data → MOCK_BRANDS 매핑 (현재 Mock 폴백)
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadBrands(); }, [loadBrands]);
 
   if (!isMaster && !isDemo) {
     return (

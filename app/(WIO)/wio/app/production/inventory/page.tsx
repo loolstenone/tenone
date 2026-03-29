@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Warehouse, PackageSearch, ArrowDownToLine, ArrowUpFromLine,
   BarChart3, ClipboardCheck, AlertTriangle, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type StockStatus = 'normal' | 'low' | 'overstock' | 'out';
 type IOType = 'in' | 'out';
@@ -69,14 +70,53 @@ export default function InventoryPage() {
   const [ioTab, setIoTab] = useState<'all' | 'in' | 'out'>('all');
   const [showAudit, setShowAudit] = useState(false);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 재고 + 입출고 로드
+  const loadInventory = useCallback(async () => {
     if (isDemo) {
       setItems(MOCK_ITEMS);
       setIoRecords(MOCK_IO);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const [invRes, movRes] = await Promise.all([
+        sb.from('wio_inventory').select('*').eq('tenant_id', tenant!.id),
+        sb.from('wio_inventory_movements').select('*').eq('tenant_id', tenant!.id).order('created_at', { ascending: false }).limit(20),
+      ]);
+      if (invRes.data && invRes.data.length > 0) {
+        setItems(invRes.data.map((row: any) => ({
+          id: row.id, name: row.name || '', sku: row.sku || '',
+          current: row.current_qty ?? 0, safety: row.safety_qty ?? 0,
+          location: row.location || '', status: row.status || 'normal',
+          unit: row.unit || '', abc: row.abc_class || 'C', value: row.value ?? 0,
+        })));
+      } else {
+        setItems(MOCK_ITEMS);
+      }
+      if (movRes.data && movRes.data.length > 0) {
+        setIoRecords(movRes.data.map((row: any) => ({
+          id: row.id, type: row.type || 'in',
+          date: row.created_at ? row.created_at.split('T')[0] : '',
+          item: row.item_name || '', qty: row.qty ?? 0,
+          ref: row.reference || '', unit: row.unit || '',
+        })));
+      } else {
+        setIoRecords(MOCK_IO);
+      }
+    } catch {
+      setItems(MOCK_ITEMS);
+      setIoRecords(MOCK_IO);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadInventory();
+  }, [tenant, loadInventory]);
 
   const lowStockItems = items.filter(i => i.status === 'low' || i.status === 'out');
   const abcGroups = {

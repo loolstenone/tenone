@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Target, ChevronRight, ChevronDown, TrendingUp, TrendingDown, Users, Star,
   DollarSign, BarChart3, UserMinus, FolderCheck,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type KPINode = {
@@ -121,8 +122,62 @@ function TreeNode({ node, depth = 0 }: { node: KPINode; depth?: number }) {
 }
 
 export default function KPIPage() {
-  const { isDemo } = useWIO();
+  const { tenant, isDemo } = useWIO();
   const [quarter, setQuarter] = useState<Quarter>('Q1');
+  const [kpiTree, setKpiTree] = useState<KPINode[]>(isDemo ? KPI_TREE : []);
+  const [dashboardKpis, setDashboardKpis] = useState(isDemo ? DASHBOARD_KPIS : DASHBOARD_KPIS);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 KPI 데이터 로드
+  const loadKPIs = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_kpi_targets')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // KPI 데이터가 있으면 트리 구조로 매핑
+        const mapped: KPINode[] = data
+          .filter((r: any) => !r.parent_id)
+          .map((row: any) => ({
+            id: row.id,
+            title: row.title || '',
+            target: row.target_value || '',
+            current: row.current_value || '',
+            progress: row.progress ?? 0,
+            owner: row.owner || '',
+            children: data
+              .filter((c: any) => c.parent_id === row.id)
+              .map((c: any) => ({
+                id: c.id,
+                title: c.title || '',
+                target: c.target_value || '',
+                current: c.current_value || '',
+                progress: c.progress ?? 0,
+                owner: c.owner || '',
+              })),
+          }));
+        if (mapped.length > 0) {
+          setKpiTree(mapped);
+        } else {
+          setKpiTree(KPI_TREE);
+        }
+      } else {
+        setKpiTree(KPI_TREE);
+      }
+    } catch {
+      setKpiTree(KPI_TREE);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadKPIs(); }, [loadKPIs]);
 
   return (
     <div className="space-y-6">
@@ -132,9 +187,17 @@ export default function KPIPage() {
         <p className="text-xs text-slate-500 mt-0.5">STR-KPI · 2026년 목표 캐스케이드</p>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">KPI 데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* Dashboard KPIs */}
-      <div className="grid grid-cols-3 gap-3">
-        {DASHBOARD_KPIS.map(kpi => {
+      {!loading && <div className="grid grid-cols-3 gap-3">
+        {dashboardKpis.map(kpi => {
           const Icon = kpi.icon;
           return (
             <div key={kpi.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
@@ -158,8 +221,9 @@ export default function KPIPage() {
             </div>
           );
         })}
-      </div>
+      </div>}
 
+      {!loading && <>
       {/* Quarter tabs */}
       <div>
         <div className="flex gap-2 mb-3">
@@ -180,9 +244,10 @@ export default function KPIPage() {
       <div>
         <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><Target size={16} className="text-indigo-400" />목표 캐스케이드 (전사 → 본부 → 팀 → 개인)</h2>
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
-          {KPI_TREE.map(node => <TreeNode key={node.id} node={node} />)}
+          {kpiTree.map(node => <TreeNode key={node.id} node={node} />)}
         </div>
       </div>
+      </>}
     </div>
   );
 }

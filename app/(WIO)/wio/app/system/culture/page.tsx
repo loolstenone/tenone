@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Heart, Target, Star, TrendingUp, Users, FileText, Award, Edit3, Save } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type CoreValue = {
   id: string; name: string; description: string; icon: typeof Heart;
@@ -46,12 +47,36 @@ const MOCK_DASHBOARD = {
 
 export default function CulturePage() {
   const { tenant } = useWIO();
+  const isDemo = !tenant || tenant.id === 'demo';
   const [mission, setMission] = useState(MOCK_MISSION);
   const [vision, setVision] = useState(MOCK_VISION);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 조직문화 데이터 로드
+  const loadCulture = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const [valuesRes, metricsRes] = await Promise.all([
+        sb.from('wio_culture_values').select('*').eq('tenant_id', tenant!.id),
+        sb.from('wio_culture_metrics').select('*').eq('tenant_id', tenant!.id),
+      ]);
+      if (valuesRes.data && valuesRes.data.length > 0) {
+        // TODO: data → mission/vision/values 매핑 구현
+      }
+      // TODO: metricsRes → 문화 지표 매핑
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadCulture(); }, [loadCulture]);
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   return (
     <div>

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Package, Truck, CheckCircle2, Clock, Filter, X, FileText, CreditCard, ArrowRight,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ── */
 type OrderStatus = 'confirmed' | 'in_progress' | 'delivered' | 'completed';
@@ -50,13 +51,51 @@ const fmtKRW = (n: number) => {
 };
 
 export default function OrderPage() {
-  const { isDemo } = useWIO();
-  // TODO: Supabase 수주 테이블 생성 후 연동 (현재 Mock 폴백)
+  const { tenant, isDemo } = useWIO();
+  const [orders, setOrders] = useState<Order[]>(isDemo ? MOCK_ORDERS : []);
+  const [loading, setLoading] = useState(!isDemo);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [selected, setSelected] = useState<Order | null>(null);
 
-  const filtered = statusFilter === 'all' ? MOCK_ORDERS : MOCK_ORDERS.filter(o => o.status === statusFilter);
-  const totalAmount = MOCK_ORDERS.filter(o => o.status !== 'completed').reduce((s, o) => s + o.amount, 0);
+  // Supabase에서 수주 로드
+  const loadOrders = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_orders')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setOrders(data.map((row: any) => ({
+          id: row.id,
+          orderNumber: row.order_number || '',
+          customer: row.customer || '',
+          amount: row.amount ?? 0,
+          deliveryDate: row.delivery_date ? row.delivery_date.split('T')[0] : '',
+          status: row.status || 'confirmed',
+          contractRef: row.contract_ref || '',
+          items: Array.isArray(row.items) ? row.items : [],
+          paymentStatus: row.payment_status || 'pending',
+          createdAt: row.created_at ? row.created_at.split('T')[0] : '',
+        })));
+      } else {
+        setOrders(MOCK_ORDERS);
+      }
+    } catch {
+      setOrders(MOCK_ORDERS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadOrders(); }, [loadOrders]);
+
+  const filtered = statusFilter === 'all' ? orders : orders.filter(o => o.status === statusFilter);
+  const totalAmount = orders.filter(o => o.status !== 'completed').reduce((s, o) => s + o.amount, 0);
 
   return (
     <div>
@@ -72,8 +111,8 @@ export default function OrderPage() {
       <div className="grid grid-cols-4 gap-3 mb-4">
         {(['confirmed', 'in_progress', 'delivered', 'completed'] as OrderStatus[]).map(s => {
           const st = STATUS_MAP[s];
-          const cnt = MOCK_ORDERS.filter(o => o.status === s).length;
-          const amt = MOCK_ORDERS.filter(o => o.status === s).reduce((sum, o) => sum + o.amount, 0);
+          const cnt = orders.filter(o => o.status === s).length;
+          const amt = orders.filter(o => o.status === s).reduce((sum, o) => sum + o.amount, 0);
           return (
             <div key={s} onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
               className={`rounded-xl border p-3 cursor-pointer transition-colors ${statusFilter === s ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.04]'}`}>

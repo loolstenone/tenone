@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, Search, Filter, Eye, Star, AlertTriangle,
   FileText, Sparkles, ExternalLink, Calendar, Tag, Shield,
   ChevronDown, BarChart3, Globe, Zap,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Mock: 시장 트렌드 ── */
 const MOCK_TRENDS = [
@@ -58,10 +59,33 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default function MarketIntelPage() {
-  const { isMaster, isDemo } = useWIO();
+  const { tenant, isMaster, isDemo } = useWIO();
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [minRelevance, setMinRelevance] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 시장 인텔리전스 로드
+  const loadMarketIntel = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_market_intel')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      // TODO: data → MOCK_TRENDS/MOCK_COMPETITORS 매핑 (현재 Mock 폴백)
+    } catch {
+      // Mock 폴백
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadMarketIntel(); }, [loadMarketIntel]);
 
   if (!isMaster && !isDemo) {
     return (

@@ -69,7 +69,7 @@ export default function WorkflowPage() {
     try {
       const sb = createClient();
       const { data, error } = await sb
-        .from('workflows')
+        .from('wio_workflow_definitions')
         .select('*')
         .eq('tenant_id', tenant!.id)
         .order('created_at', { ascending: false });

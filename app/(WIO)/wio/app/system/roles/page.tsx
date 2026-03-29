@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Shield, Plus, Users, Check, X } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Permission = 'create' | 'read' | 'update' | 'delete';
 type Role = {
@@ -39,14 +40,47 @@ const PERM_LABELS: Record<Permission, string> = { create: 'C', read: 'R', update
 
 export default function RolesPage() {
   const { tenant } = useWIO();
-  const [roles, setRoles] = useState(MOCK_ROLES);
+  const isDemo = !tenant || tenant.id === 'demo';
+  const [roles, setRoles] = useState(isDemo ? MOCK_ROLES : MOCK_ROLES);
+  const [loading, setLoading] = useState(!isDemo);
   const [selectedRole, setSelectedRole] = useState<string>('r1');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
 
+  // Supabase에서 역할/권한 로드
+  const loadRoles = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_role_permissions')
+        .select('*')
+        .eq('tenant_id', tenant!.id);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setRoles(data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          description: row.description || '',
+          memberCount: row.member_count ?? 0,
+          isSystem: row.is_system ?? false,
+          permissions: row.permissions || {},
+        })));
+      } else {
+        setRoles(MOCK_ROLES);
+      }
+    } catch {
+      setRoles(MOCK_ROLES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadRoles(); }, [loadRoles]);
+
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const currentRole = roles.find(r => r.id === selectedRole);
 

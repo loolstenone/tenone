@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Search, FileText, BookOpen, Megaphone, StickyNote, Tag, User,
   Calendar, Eye, TrendingUp, Filter, Sparkles, Clock,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── 콘텐츠 유형 ── */
 type ContentType = 'all' | 'post' | 'document' | 'wiki' | 'marketing';
@@ -56,15 +57,55 @@ const MOCK_CONTENTS: ContentItem[] = [
 ];
 
 /* ── 인기 콘텐츠 Top 10 ── */
-const TOP_CONTENTS = [...MOCK_CONTENTS].sort((a, b) => b.views - a.views).slice(0, 10);
+/* 인기 콘텐츠는 컴포넌트 안에서 계산 */
 
 export default function ContentHubPage() {
   const { tenant, isDemo } = useWIO();
+  const [contents, setContents] = useState<ContentItem[]>(isDemo ? MOCK_CONTENTS : []);
+  const [loading, setLoading] = useState(!isDemo);
   const [typeFilter, setTypeFilter] = useState<ContentType>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Supabase에서 콘텐츠 허브 로드
+  const loadContents = useCallback(async () => {
+    if (isDemo) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('wio_content_hub')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setContents(data.map((row: any) => ({
+          id: row.id,
+          title: row.title || '',
+          type: row.type || 'post',
+          author: row.author || '',
+          date: row.created_at ? row.created_at.split('T')[0] : '',
+          tags: Array.isArray(row.tags) ? row.tags : [],
+          aiTags: Array.isArray(row.ai_tags) ? row.ai_tags : [],
+          preview: row.preview || '',
+          views: row.views ?? 0,
+        })));
+      } else {
+        setContents(MOCK_CONTENTS);
+      }
+    } catch {
+      setContents(MOCK_CONTENTS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadContents(); }, [loadContents]);
+
+  const TOP_CONTENTS = useMemo(() => [...contents].sort((a, b) => b.views - a.views).slice(0, 10), [contents]);
+
   const filtered = useMemo(() => {
-    return MOCK_CONTENTS.filter(c => {
+    return contents.filter(c => {
       if (typeFilter !== 'all' && c.type !== typeFilter) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -72,7 +113,7 @@ export default function ContentHubPage() {
       }
       return true;
     });
-  }, [typeFilter, searchQuery]);
+  }, [typeFilter, searchQuery, contents]);
 
   return (
     <div>
@@ -184,7 +225,7 @@ export default function ContentHubPage() {
               <h3 className="text-sm font-semibold">최근 업데이트</h3>
             </div>
             <div className="space-y-2">
-              {MOCK_CONTENTS.slice(0, 5).map(c => (
+              {contents.slice(0, 5).map(c => (
                 <div key={c.id} className="flex items-start gap-2 cursor-pointer hover:bg-white/[0.03] rounded-lg px-2 py-1.5 -mx-2 transition-all">
                   <div className="w-1 h-1 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
                   <div className="flex-1 min-w-0">
