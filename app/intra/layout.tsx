@@ -7,15 +7,21 @@ import { LibraryProvider } from "@/lib/library-context";
 import { PointProvider } from "@/lib/point-context";
 import { IntraSidebar } from "@/components/IntraSidebar";
 import { IntraHeader } from "@/components/IntraHeader";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Lock, Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-// Google SSO 모델: 별도 로그인 폼 없음. /login으로 통일.
+// 독립 인트라 로그인+권한 체크 (auth-context 미사용)
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const [status, setStatus] = useState<'loading' | 'ok' | 'no-auth' | 'no-access'>('loading');
+    const [status, setStatus] = useState<'loading' | 'ok' | 'login' | 'no-access'>('loading');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPw, setShowPw] = useState(false);
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
     const checked = useRef(false);
 
+    // 최초 1회: Supabase 세션 확인 → 권한 판단
     useEffect(() => {
         if (checked.current) return;
         checked.current = true;
@@ -24,14 +30,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
                 const { data: { user } } = await sb.auth.getUser();
+                if (!user) { setStatus('login'); return; }
 
-                if (!user) {
-                    // 미로그인 → /login으로 리다이렉트
-                    window.location.href = '/login?redirect=/intra';
-                    return;
-                }
-
-                // 로그인됨 → members에서 권한 확인
                 const { data: member } = await sb.from('members')
                     .select('account_type,role')
                     .eq('auth_id', user.id)
@@ -42,12 +42,38 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 } else {
                     setStatus('no-access');
                 }
-            } catch {
-                setStatus('no-access');
-            }
+            } catch { setStatus('login'); }
         };
         check();
     }, []);
+
+    // 로그인 핸들러 (auth-context 미사용, Supabase 직접)
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSubmitting(true);
+        try {
+            const sb = createClient();
+            const { data, error: authError } = await sb.auth.signInWithPassword({ email, password });
+            if (authError || !data.session) {
+                setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
+                setSubmitting(false);
+                return;
+            }
+            // 권한 확인
+            const { data: member } = await sb.from('members')
+                .select('account_type,role')
+                .eq('auth_id', data.user.id)
+                .single();
+
+            if (member && member.account_type !== 'member') {
+                setStatus('ok');
+            } else {
+                setError("접근 권한이 없습니다. 직원 계정으로 로그인하세요.");
+                setSubmitting(false);
+            }
+        } catch { setError("오류가 발생했습니다."); setSubmitting(false); }
+    };
 
     if (status === 'loading') return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
@@ -55,17 +81,44 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         </div>
     );
 
-    if (status === 'no-access') {
+    if (status === 'login' || status === 'no-access') {
         return (
             <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
-                <div className="text-center max-w-md">
-                    <ShieldAlert className="h-12 w-12 text-red-500/70 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-white mb-2">접근 권한이 없습니다</h2>
-                    <p className="text-neutral-500 text-sm mb-6">Intra는 내부 구성원 전용입니다.</p>
-                    <div className="flex gap-3 justify-center">
-                        <a href="/" className="px-5 py-2.5 text-sm border border-neutral-700 text-neutral-300 rounded-lg hover:border-neutral-500 transition-colors">홈으로</a>
-                        <a href="/login?redirect=/intra" className="px-5 py-2.5 text-sm bg-white text-neutral-900 rounded-lg hover:bg-neutral-200 transition-colors">다른 계정으로 로그인</a>
+                <div className="w-full max-w-sm">
+                    <div className="text-center mb-8">
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                            <a href="/" className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors" title="홈으로">
+                                <Home className="h-5 w-5 text-neutral-500" />
+                            </a>
+                            <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10">
+                                <Lock className="h-6 w-6 text-neutral-400" />
+                            </div>
+                        </div>
+                        <h1 className="text-lg font-bold text-white tracking-tight">Ten:One™ Intra</h1>
+                        <p className="text-xs text-neutral-500 mt-1">내부 구성원 전용</p>
                     </div>
+                    {status === 'no-access' && (
+                        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <p className="text-xs text-red-400 text-center">접근 권한이 없습니다. 직원 계정으로 로그인하세요.</p>
+                        </div>
+                    )}
+                    <form onSubmit={handleLogin} className="space-y-3">
+                        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/20" />
+                        <div className="relative">
+                            <input type={showPw ? "text" : "password"} placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/20 pr-10" />
+                            <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-400">
+                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+                        {error && <p className="text-xs text-red-400">{error}</p>}
+                        <button type="submit" disabled={submitting || !email || !password}
+                            className="w-full py-3 bg-white text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                            {submitting ? "인증 중..." : "로그인"}
+                        </button>
+                    </form>
+                    <p className="text-center text-[10px] text-neutral-700 mt-8">Ten:One™ Universe Operating System</p>
                 </div>
             </div>
         );
