@@ -13,19 +13,49 @@ import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
 import type { WIOTenant, WIOMember, WIOModule } from '@/types/wio';
 
-const MODULE_ICONS: Record<string, any> = {
-  home: LayoutDashboard, project: FolderKanban, talk: MessageSquare,
-  finance: Receipt, people: Users, sales: TrendingUp, timesheet: Clock,
-  learn: BookOpen, content: FileText, wiki: Library, insight: BarChart3, gpr: Target,
-  competition: Trophy, networking: Network, certificate: Award, approval: Stamp,
-};
-
-const MODULE_LABELS: Record<string, string> = {
-  home: '홈', project: '프로젝트', talk: '소통',
-  finance: '재무', people: '인재', sales: '영업', timesheet: '시수',
-  learn: '교육', content: '콘텐츠', wiki: '위키', insight: '인사이트', gpr: 'GPR',
-  competition: '경연', networking: '네트워킹', certificate: '수료증', approval: '결재',
-};
+const TRACKS = [
+  {
+    id: 'common', name: '공통', icon: LayoutDashboard,
+    modules: [
+      { key: 'home', label: '홈', icon: LayoutDashboard, href: '/wio/app' },
+      { key: 'talk', label: '소통', icon: MessageSquare, href: '/wio/app/talk' },
+      { key: 'approval', label: '결재', icon: Stamp, href: '/wio/app/approval' },
+    ]
+  },
+  {
+    id: 'hr', name: '인사·조직', icon: Users,
+    modules: [
+      { key: 'people', label: '인재', icon: Users, href: '/wio/app/people' },
+      { key: 'gpr', label: 'GPR', icon: Target, href: '/wio/app/gpr' },
+      { key: 'learn', label: '교육', icon: BookOpen, href: '/wio/app/learn' },
+    ]
+  },
+  {
+    id: 'business', name: '사업', icon: TrendingUp,
+    modules: [
+      { key: 'project', label: '프로젝트', icon: FolderKanban, href: '/wio/app/project' },
+      { key: 'sales', label: '영업', icon: TrendingUp, href: '/wio/app/sales' },
+      { key: 'competition', label: '경연', icon: Trophy, href: '/wio/app/competition' },
+      { key: 'networking', label: '네트워킹', icon: Network, href: '/wio/app/networking' },
+    ]
+  },
+  {
+    id: 'support', name: '지원', icon: FileText,
+    modules: [
+      { key: 'content', label: '콘텐츠', icon: FileText, href: '/wio/app/content' },
+      { key: 'wiki', label: '위키', icon: Library, href: '/wio/app/wiki' },
+      { key: 'insight', label: '인사이트', icon: BarChart3, href: '/wio/app/insight' },
+    ]
+  },
+  {
+    id: 'finance', name: '재무', icon: Receipt,
+    modules: [
+      { key: 'finance', label: '재무', icon: Receipt, href: '/wio/app/finance' },
+      { key: 'timesheet', label: '시수', icon: Clock, href: '/wio/app/timesheet' },
+      { key: 'certificate', label: '수료증', icon: Award, href: '/wio/app/certificate' },
+    ]
+  },
+];
 
 interface WIOContext { tenant: WIOTenant | null; member: WIOMember | null; refreshTenant?: () => void; }
 const WIOCtx = createContext<WIOContext>({ tenant: null, member: null });
@@ -167,19 +197,37 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         </Link>
       </div>
 
-      {/* 모듈 메뉴 */}
+      {/* 모듈 메뉴 — EUS 6-Track */}
       <nav className="flex-1 overflow-y-auto p-2">
-        {activeModules.map(mod => {
-          const Icon = MODULE_ICONS[mod] || LayoutDashboard;
-          const label = MODULE_LABELS[mod] || mod;
-          const href = `/wio/app/${mod === 'home' ? '' : mod}`;
-          const isActive = mod === 'home' ? pathname === '/wio/app' || pathname === '/wio/app/' : pathname.startsWith(`/wio/app/${mod}`);
+        {TRACKS.map((track, ti) => {
+          const visibleModules = track.modules.filter(m => activeModules.includes(m.key as WIOModule));
+          if (visibleModules.length === 0) return null;
           return (
-            <Link key={mod} href={href}
-              className={`flex items-center rounded-lg py-2 text-sm transition-colors mb-0.5 ${(!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'} ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
-              <Icon size={(!isMobile && collapsed) ? 17 : 15} />
-              {(isMobile || !collapsed) && <span>{label}</span>}
-            </Link>
+            <div key={track.id} className={ti > 0 ? 'mt-3' : ''}>
+              {/* 트랙 헤더 — 확장 상태에서만 표시 */}
+              {(isMobile || !collapsed) && (
+                <div className="px-3 pt-1 pb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{track.name}</span>
+                </div>
+              )}
+              {/* 축소 상태에서는 구분선으로 대체 */}
+              {!isMobile && collapsed && ti > 0 && (
+                <div className="mx-2 mb-1 border-t border-white/5" />
+              )}
+              {visibleModules.map(mod => {
+                const Icon = mod.icon;
+                const isActive = mod.key === 'home'
+                  ? pathname === '/wio/app' || pathname === '/wio/app/'
+                  : pathname.startsWith(`/wio/app/${mod.key}`);
+                return (
+                  <Link key={mod.key} href={mod.href}
+                    className={`flex items-center rounded-lg py-2 text-sm transition-colors mb-0.5 ${(!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'} ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                    <Icon size={(!isMobile && collapsed) ? 17 : 15} />
+                    {(isMobile || !collapsed) && <span>{mod.label}</span>}
+                  </Link>
+                );
+              })}
+            </div>
           );
         })}
       </nav>
