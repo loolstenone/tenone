@@ -17,7 +17,7 @@ export type SiteCode =
 // ── 게시판 설정 ──
 
 export interface BoardSettings {
-    defaultView: 'card' | 'list';
+    defaultView: 'card' | 'list' | 'gallery' | 'magazine';
     postsPerPage: number;
     pagination: 'page' | 'infinite';
     allowGuestPost: boolean;

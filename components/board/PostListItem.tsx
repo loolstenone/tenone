@@ -9,13 +9,18 @@ interface PostListItemProps {
     onClick?: (post: Post) => void;
 }
 
-function formatDate(dateStr: string): string {
+function formatRelativeDate(dateStr: string): string {
     const date = new Date(dateStr);
     const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    if (isToday) {
-        return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-    }
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "방금 전";
+    if (minutes < 60) return `${minutes}분 전`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}시간 전`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "어제";
+    if (days < 7) return `${days}일 전`;
     return date.toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
@@ -24,13 +29,18 @@ function getAuthorName(post: Post): string {
     return post.authorName || "관리자";
 }
 
+function getAuthorInitial(post: Post): string {
+    const name = getAuthorName(post);
+    return name.charAt(0).toUpperCase();
+}
+
 export default function PostListItem({ post, accentColor = "#171717", onClick }: PostListItemProps) {
     const isNew = Date.now() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000;
 
     return (
         <article
             onClick={() => onClick?.(post)}
-            className="flex items-center gap-4 px-4 py-3 border-b tn-border transition-colors cursor-pointer group"
+            className="flex items-center gap-4 px-4 py-3 border-b transition-colors cursor-pointer group"
             style={{ borderColor: "var(--tn-border)" }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--tn-bg-alt)"}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
@@ -73,13 +83,23 @@ export default function PostListItem({ post, accentColor = "#171717", onClick }:
             </div>
 
             {/* 작성자 */}
-            <div className="hidden sm:block w-24 shrink-0 text-xs tn-text-sub text-center truncate">
-                {getAuthorName(post)}
+            <div className="hidden sm:flex items-center gap-1.5 w-28 shrink-0 text-xs tn-text-sub justify-center">
+                {post.authorAvatar ? (
+                    <img src={post.authorAvatar} alt="" className="w-4 h-4 rounded-full object-cover" loading="lazy" />
+                ) : (
+                    <span
+                        className="flex items-center justify-center w-4 h-4 rounded-full text-[8px] font-bold text-white"
+                        style={{ backgroundColor: accentColor }}
+                    >
+                        {getAuthorInitial(post)}
+                    </span>
+                )}
+                <span className="truncate">{getAuthorName(post)}</span>
             </div>
 
             {/* 날짜 */}
             <div className="w-20 shrink-0 text-xs tn-text-sub text-center">
-                {formatDate(post.createdAt)}
+                {formatRelativeDate(post.createdAt)}
             </div>
 
             {/* 통계 */}

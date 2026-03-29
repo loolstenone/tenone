@@ -493,6 +493,35 @@ export async function fetchPopularTags(site: SiteCode, limit = 20): Promise<{ ta
         .slice(0, limit);
 }
 
+// ── Related Posts ──
+
+export async function fetchRelatedPosts(
+    postId: string,
+    site: SiteCode,
+    board: string,
+    category?: string,
+    limit = 3
+): Promise<Post[]> {
+    let query = supabase
+        .from('posts')
+        .select('id, site, board, title, excerpt, category, represent_image, author_name, tags, view_count, like_count, comment_count, created_at')
+        .eq('site', site)
+        .eq('board', board)
+        .eq('status', 'published')
+        .neq('id', postId)
+        .limit(limit);
+
+    if (category) {
+        query = query.eq('category', category);
+    }
+
+    query = query.order('created_at', { ascending: false });
+
+    const { data, error } = await query;
+    if (error) return [];
+    return (data || []).map(toPost);
+}
+
 // ── 유틸 ──
 
 function extractExcerpt(html: string, maxLength = 200): string {

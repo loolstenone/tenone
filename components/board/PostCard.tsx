@@ -9,13 +9,19 @@ interface PostCardProps {
     onClick?: (post: Post) => void;
 }
 
-function formatDate(dateStr: string): string {
+function formatRelativeDate(dateStr: string): string {
     const date = new Date(dateStr);
     const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    if (isToday) {
-        return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-    }
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "방금 전";
+    if (minutes < 60) return `${minutes}분 전`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}시간 전`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "어제";
+    if (days < 7) return `${days}일 전`;
+    if (days < 30) return `${Math.floor(days / 7)}주 전`;
     return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
@@ -24,14 +30,20 @@ function getAuthorName(post: Post): string {
     return post.authorName || "관리자";
 }
 
+function getAuthorInitial(post: Post): string {
+    const name = getAuthorName(post);
+    return name.charAt(0).toUpperCase();
+}
+
 export default function PostCard({ post, accentColor = "#171717", onClick }: PostCardProps) {
     const isNew = Date.now() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000;
 
     return (
         <article
             onClick={() => onClick?.(post)}
-            className="group relative tn-surface border tn-border rounded-lg overflow-hidden transition-all cursor-pointer"
-            style={{ borderColor: "var(--tn-border)" }}
+            className="group relative border rounded-lg overflow-hidden transition-all duration-200 cursor-pointer
+                hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5"
+            style={{ borderColor: "var(--tn-border)", backgroundColor: "var(--tn-surface)" }}
         >
             {/* 대표 이미지 */}
             {post.representImage ? (
@@ -39,7 +51,9 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                     <img
                         src={post.representImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        style={{ backgroundColor: "var(--tn-bg-alt)" }}
                     />
                 </div>
             ) : (
@@ -71,7 +85,7 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                     )}
                 </div>
 
-                <h3 className="font-medium tn-text line-clamp-2 transition-colors">
+                <h3 className="font-medium tn-text line-clamp-2 transition-colors leading-snug">
                     {post.title}
                     {post.commentCount > 0 && (
                         <span className="ml-1 text-sm" style={{ color: accentColor }}>
@@ -85,16 +99,28 @@ export default function PostCard({ post, accentColor = "#171717", onClick }: Pos
                 )}
 
                 <div className="flex items-center justify-between mt-3 text-xs tn-text-sub">
-                    <span>{getAuthorName(post)} · {formatDate(post.createdAt)}</span>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        {/* Author avatar */}
+                        {post.authorAvatar ? (
+                            <img src={post.authorAvatar} alt="" className="w-5 h-5 rounded-full object-cover" loading="lazy" />
+                        ) : (
+                            <span
+                                className="flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-bold text-white"
+                                style={{ backgroundColor: accentColor }}
+                            >
+                                {getAuthorInitial(post)}
+                            </span>
+                        )}
+                        <span>{getAuthorName(post)}</span>
+                        <span className="tn-text-muted">&middot;</span>
+                        <span className="tn-text-muted">{formatRelativeDate(post.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 tn-text-muted">
                         <span className="flex items-center gap-1">
                             <Eye className="h-3 w-3" /> {post.viewCount}
                         </span>
                         <span className="flex items-center gap-1">
                             <ThumbsUp className="h-3 w-3" /> {post.likeCount}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <MessageCircle className="h-3 w-3" /> {post.commentCount}
                         </span>
                     </div>
                 </div>

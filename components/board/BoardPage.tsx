@@ -167,6 +167,7 @@ function BoardPageInner({
     const defaultConfig: BoardConfig = boardConfig || {
         id: "", site, slug: board, name: displayTitle, description: displayDesc,
         categories: [], settings: { defaultView: "card", postsPerPage: 12, pagination: "page", allowGuestPost: false, allowGuestComment: true, requireApproval: false, useRepresentImage: true },
+        permissions: { read: "all", write: "member", comment: "all" },
         sortOrder: 0, createdAt: "", updatedAt: "",
     };
 

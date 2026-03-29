@@ -1,10 +1,17 @@
 /**
  * 북마크 토글 API
  * POST /api/board/bookmark  { postId: '...', userId: '...' }
+ * Returns { bookmarked: boolean, count: number }
  * GET  /api/board/bookmark?userId=...&page=1&limit=12
  */
 import { NextRequest, NextResponse } from 'next/server';
 import * as boardDb from '@/lib/supabase/board';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -34,7 +41,16 @@ export async function POST(request: NextRequest) {
         }
 
         const bookmarked = await boardDb.toggleBookmark(userId, postId);
-        return NextResponse.json({ bookmarked });
+
+        // Fetch updated count
+        const { data } = await supabase
+            .from('posts')
+            .select('bookmark_count')
+            .eq('id', postId)
+            .single();
+        const count = data?.bookmark_count ?? 0;
+
+        return NextResponse.json({ bookmarked, count });
     } catch (error) {
         console.error('toggleBookmark error:', error);
         return NextResponse.json({ error: 'Failed to toggle bookmark' }, { status: 500 });
