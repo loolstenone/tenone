@@ -6,6 +6,12 @@ export const metadata: Metadata = {
     title: { default: "Mindle — Bloom insights from signals", template: "%s | Mindle" },
     description: "AI-powered trend analysis platform. From data crawling to insight curation.",
     icons: { icon: "/brands/mindle/favicon.png" },
+    openGraph: {
+        title: "Mindle — Bloom insights from signals",
+        description: "AI-powered trend analysis platform. From data crawling to insight curation.",
+        siteName: 'Ten:One™ Universe',
+        type: 'website',
+    },
 };
 
 export default function MindleLayout({ children }: { children: React.ReactNode }) {

@@ -101,8 +101,8 @@ export default function BadakHome() {
           </p>
 
           {/* 다음 DAM Party CTA */}
-          <div className="mb-10 inline-flex items-center gap-3 rounded-full bg-white/5 border border-white/10 px-5 py-2.5 text-sm">
-            <Calendar size={16} className="text-amber-400" />
+          <div className="mb-10 inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 rounded-2xl sm:rounded-full bg-white/5 border border-white/10 px-4 sm:px-5 py-2.5 text-sm">
+            <Calendar size={16} className="text-amber-400 shrink-0" />
             <span className="text-neutral-300">다음 DAM Party</span>
             <span className="font-bold text-white">4월 12일 (토) 성수</span>
             <Link href="/badak/meetups" className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
@@ -206,7 +206,7 @@ export default function BadakHome() {
             ))}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {RECOMMENDED_PROFILES.map(p => (
               <div key={p.id} className="group flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 hover:border-amber-300 transition-colors">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-sm font-bold text-white shrink-0">
@@ -215,12 +215,12 @@ export default function BadakHome() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-neutral-900 text-sm">{p.name}</span>
-                    <span className="text-[11px] text-neutral-400">{p.years}년차</span>
+                    <span className="text-xs text-neutral-400">{p.years}년차</span>
                   </div>
                   <div className="text-xs text-neutral-500 truncate">{p.role} @ {p.company}</div>
-                  <span className="mt-1 inline-block text-[11px] rounded bg-amber-50 text-amber-700 px-1.5 py-0.5">{p.tag}</span>
+                  <span className="mt-1 inline-block text-xs rounded bg-amber-50 text-amber-700 px-1.5 py-0.5">{p.tag}</span>
                 </div>
-                <Link href="/badak/explore" className="shrink-0 rounded-lg border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-colors">
+                <Link href="/badak/explore" className="shrink-0 rounded-lg border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-colors min-h-[44px] flex items-center">
                   커넥트
                 </Link>
               </div>

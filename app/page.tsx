@@ -218,7 +218,7 @@ export default function HomePage() {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         {latestWorks.map((work) => {
                             const rawDate = (work.created_at || '').substring(0, 7);
                             const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
@@ -263,19 +263,19 @@ export default function HomePage() {
                             Explore <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
                         {UNIVERSE_BRANDS.map((brand) => (
                             <Link key={brand.name} href={brand.href}
-                                className="group p-6 text-center transition-all hover:opacity-100 opacity-80"
+                                className="group p-4 sm:p-6 text-center transition-all hover:opacity-100 opacity-80"
                                 style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
                                 <div className="h-10 w-10 mx-auto flex items-center justify-center text-xs font-bold border mb-3"
                                     style={{ borderColor: "var(--tn-border)" }}>
                                     {brand.name.slice(0, 2)}
                                 </div>
                                 <h3 className="text-sm font-semibold tn-text">{brand.name}</h3>
-                                <p className="text-[10px] tn-text-sub mt-1">{brand.desc}</p>
+                                <p className="text-[11px] tn-text-sub mt-1">{brand.desc}</p>
                                 {brand.domain && (
-                                    <p className="text-[9px] tn-text-muted mt-1">{brand.domain}</p>
+                                    <p className="text-[10px] tn-text-muted mt-1">{brand.domain}</p>
                                 )}
                             </Link>
                         ))}
@@ -408,12 +408,12 @@ export default function HomePage() {
                             </form>
                             <div className="flex items-center justify-center gap-2 mt-3">
                                 <button type="button" onClick={() => setNlAgree(!nlAgree)}
-                                    className={`w-5 h-5 border rounded flex items-center justify-center shrink-0 transition-colors ${
+                                    className={`w-6 h-6 min-w-[24px] border rounded flex items-center justify-center shrink-0 transition-colors ${
                                         nlAgree ? 'bg-[var(--tn-accent)] border-[var(--tn-accent)]' : 'border-[var(--tn-border)] tn-surface'
                                     }`}>
-                                    {nlAgree && <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                                    {nlAgree && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                                 </button>
-                                <p className="text-[10px] tn-text-sub">이메일 수집 및 뉴스레터 수신에 동의합니다</p>
+                                <p className="text-xs tn-text-sub">이메일 수집 및 뉴스레터 수신에 동의합니다</p>
                             </div>
                         </>
                     )}

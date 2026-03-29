@@ -12,7 +12,8 @@ export const metadata: Metadata = {
     openGraph: {
         title: site.meta.title,
         description: site.meta.description,
-        siteName: site.name,
+        siteName: 'Ten:One™ Universe',
+        type: 'website',
         ...(site.meta.ogImage && { images: [site.meta.ogImage] }),
     },
 };

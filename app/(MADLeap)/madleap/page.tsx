@@ -152,10 +152,10 @@ export default function MadLeapHome() {
 
                 <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
                     {/* Recruitment badge */}
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#4361ee]/20 border border-[#4361ee]/40 rounded-full mb-8 animate-pulse">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-[#4361ee]/20 border border-[#4361ee]/40 rounded-full mb-8 animate-pulse">
                         <Sparkles className="h-4 w-4 text-[#4361ee]" />
                         <span className="text-sm font-medium text-[#4361ee]">5기 리퍼 모집중</span>
-                        <span className="text-xs text-white/50">|</span>
+                        <span className="text-xs text-white/50 hidden sm:inline">|</span>
                         <span className="text-xs text-white/60">{recruitmentInfo.period}</span>
                     </div>
 
@@ -197,11 +197,11 @@ export default function MadLeapHome() {
                     </div>
 
                     {/* Mini stats */}
-                    <div className="mt-12 grid grid-cols-4 gap-4 max-w-md mx-auto">
+                    <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-md mx-auto">
                         {stats.map((s) => (
                             <div key={s.label} className="text-center">
                                 <div className="text-xl md:text-2xl font-black text-white">{s.value}</div>
-                                <div className="text-[10px] md:text-xs text-white/40 mt-0.5">{s.label}</div>
+                                <div className="text-xs text-white/40 mt-0.5">{s.label}</div>
                             </div>
                         ))}
                     </div>

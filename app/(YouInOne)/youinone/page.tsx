@@ -2,247 +2,424 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Lightbulb, Target, Users, ChevronRight } from "lucide-react";
-import { useState as useStateYi, useEffect as useEffectYi } from "react";
+import {
+  ArrowRight,
+  ChevronRight,
+  Users,
+  Rocket,
+  Target,
+  Globe,
+  GraduationCap,
+  Briefcase,
+  Heart,
+  Store,
+  Lightbulb,
+  Share2,
+  CheckCircle2,
+  Zap,
+} from "lucide-react";
 
+/* ── 타이핑 효과 ── */
 const typedTexts = [
-    "사회 문제를 해결합니다",
-    "기업의 성장을 돕습니다",
-    "아이디어를 현실로 만듭니다",
-    "연대의 힘을 믿습니다",
+  "혼자면 꿈이지만, 함께하면 미래가 된다",
+  "세대를 넘어, 경험을 연결한다",
+  "아이디어에서 실행까지, 함께 달린다",
 ];
 
-function useTypedText(texts: string[], speed = 80, pause = 2000) {
-    const [display, setDisplay] = useState("");
-    const [textIdx, setTextIdx] = useState(0);
-    const [charIdx, setCharIdx] = useState(0);
-    const [deleting, setDeleting] = useState(false);
+function useTypedText(texts: string[], speed = 80, pause = 2500) {
+  const [display, setDisplay] = useState("");
+  const [textIdx, setTextIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
 
-    useEffect(() => {
-        const current = texts[textIdx];
-        if (!deleting && charIdx < current.length) {
-            const t = setTimeout(() => setCharIdx((c) => c + 1), speed);
-            return () => clearTimeout(t);
-        }
-        if (!deleting && charIdx === current.length) {
-            const t = setTimeout(() => setDeleting(true), pause);
-            return () => clearTimeout(t);
-        }
-        if (deleting && charIdx > 0) {
-            const t = setTimeout(() => setCharIdx((c) => c - 1), speed / 2);
-            return () => clearTimeout(t);
-        }
-        if (deleting && charIdx === 0) {
-            setDeleting(false);
-            setTextIdx((i) => (i + 1) % texts.length);
-        }
-    }, [charIdx, deleting, textIdx, texts, speed, pause]);
+  useEffect(() => {
+    const current = texts[textIdx];
+    if (!deleting && charIdx < current.length) {
+      const t = setTimeout(() => setCharIdx((c) => c + 1), speed);
+      return () => clearTimeout(t);
+    }
+    if (!deleting && charIdx === current.length) {
+      const t = setTimeout(() => setDeleting(true), pause);
+      return () => clearTimeout(t);
+    }
+    if (deleting && charIdx > 0) {
+      const t = setTimeout(() => setCharIdx((c) => c - 1), speed / 2);
+      return () => clearTimeout(t);
+    }
+    if (deleting && charIdx === 0) {
+      setDeleting(false);
+      setTextIdx((i) => (i + 1) % texts.length);
+    }
+  }, [charIdx, deleting, textIdx, texts, speed, pause]);
 
-    useEffect(() => {
-        setDisplay(texts[textIdx].slice(0, charIdx));
-    }, [charIdx, textIdx, texts]);
+  useEffect(() => {
+    setDisplay(texts[textIdx].slice(0, charIdx));
+  }, [charIdx, textIdx, texts]);
 
-    return display;
+  return display;
 }
 
+/* ── 진행 중 프로젝트 ── */
+const projects = [
+  {
+    opus: "Op.01",
+    title: "로컬 소상공인 디지털 전환 프로젝트",
+    desc: "전통시장 소상공인들의 온라인 진출을 돕는 디지털 마케팅 + 브랜딩 프로젝트. 대학생 마케터와 시니어 경영 컨설턴트가 팀을 이루어 실행합니다.",
+    crew: ["대학생 마케터 3명", "시니어 컨설턴트 2명", "소상공인 5곳"],
+    status: "진행 중",
+    progress: 65,
+    color: "from-green-500 to-emerald-600",
+  },
+  {
+    opus: "Op.02",
+    title: "시니어 IT 리스킬링 프로그램",
+    desc: "은퇴 후 새로운 커리어를 준비하는 시니어를 위한 AI/디지털 교육 프로그램. 직장인 멘토와 대학생 튜터가 함께합니다.",
+    crew: ["시니어 수강생 15명", "직장인 멘토 4명", "대학생 튜터 6명"],
+    status: "진행 중",
+    progress: 40,
+    color: "from-green-500 to-teal-600",
+  },
+  {
+    opus: "Op.03",
+    title: "사회문제 해결 아이디어톤",
+    desc: "세대 간 협업으로 지역 사회 문제를 해결하는 아이디어 대회. 기획부터 프로토타입까지 8주 프로그램.",
+    crew: ["참가팀 8개", "심사위원 5명", "멘토 10명"],
+    status: "모집 중",
+    progress: 15,
+    color: "from-emerald-500 to-green-600",
+  },
+];
+
+/* ── 크루 구성 ── */
+const crewTypes = [
+  {
+    icon: GraduationCap,
+    label: "대학생",
+    desc: "창의적 아이디어와 디지털 네이티브 역량",
+    count: "45명",
+  },
+  {
+    icon: Briefcase,
+    label: "직장인",
+    desc: "실무 경험과 전문성 기반 멘토링",
+    count: "28명",
+  },
+  {
+    icon: Heart,
+    label: "시니어",
+    desc: "30년+ 경험의 전략적 사고와 네트워크",
+    count: "18명",
+  },
+  {
+    icon: Store,
+    label: "소상공인",
+    desc: "현장의 문제와 니즈를 직접 제시",
+    count: "12곳",
+  },
+];
+
+/* ── 참여 방법 ── */
+const processSteps = [
+  {
+    step: "01",
+    icon: Lightbulb,
+    title: "프로젝트 발제",
+    desc: "해결하고 싶은 문제나 아이디어를 제안합니다",
+  },
+  {
+    step: "02",
+    icon: Users,
+    title: "크루 모집",
+    desc: "세대와 전문성이 다른 크루를 구성합니다",
+  },
+  {
+    step: "03",
+    icon: Rocket,
+    title: "실행",
+    desc: "8~12주간 집중 실행. 멘토가 함께합니다",
+  },
+  {
+    step: "04",
+    icon: Share2,
+    title: "성과 공유",
+    desc: "결과를 공유하고 다음 프로젝트로 연결합니다",
+  },
+];
+
 export default function YouInOneHomePage() {
-    const typed = useTypedText(typedTexts);
-    const [portfolios, setPortfolios] = useStateYi<any[]>([]);
-    const [notices, setNotices] = useStateYi<any[]>([]);
+  const typed = useTypedText(typedTexts);
 
-    useEffectYi(() => {
-        fetch('/api/board/posts?site=youinone&board=portfolio&limit=3&status=published').then(r => r.json()).then(d => setPortfolios(d.posts || [])).catch(() => {});
-        fetch('/api/board/posts?site=youinone&board=notice&limit=3&status=published').then(r => r.json()).then(d => setNotices(d.posts || [])).catch(() => {});
-    }, []);
-
-    return (
-        <div>
-            {/* Hero */}
-            <section className="relative bg-[#171717] text-white min-h-[90vh] flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#E53935]/10 to-transparent" />
-                <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-                    <p className="text-[#E53935] font-bold text-sm tracking-widest uppercase mb-6">
-                        Project Group
-                    </p>
-                    <h1 className="text-2xl sm:text-4xl lg:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
-                        We are Project Group<br />
-                        to solve <span className="text-[#E53935]">Problems</span>
-                    </h1>
-                    <div className="h-10 flex items-center justify-center mb-8">
-                        <p className="text-lg sm:text-xl text-neutral-400">
-                            {typed}
-                            <span className="animate-pulse text-[#E53935]">|</span>
-                        </p>
-                    </div>
-                    <p className="text-neutral-400 mb-10 leading-relaxed max-w-2xl mx-auto">
-                        아이디어와 전략으로 기업과 사회의 문제를 해결합니다.<br />
-                        소규모 기업 연합 얼라이언스로 연대하여 더 큰 가치를 만듭니다.
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link
-                            href="/youinone/about"
-                            className="px-8 py-3 bg-[#E53935] text-white font-semibold hover:bg-[#C62828] transition-colors rounded"
-                        >
-                            더 알아보기
-                        </Link>
-                        <Link
-                            href="/youinone/alliance"
-                            className="px-8 py-3 border border-white/30 text-white font-semibold hover:bg-white/10 transition-colors rounded"
-                        >
-                            얼라이언스 참여
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* Core Values */}
-            <section className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-14">
-                        <h2 className="text-xl md:text-3xl font-bold text-[#171717] mb-3">Idea + Strategy</h2>
-                        <p className="text-neutral-500">문제 해결을 위한 유인원의 핵심 접근법</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                icon: Lightbulb,
-                                title: "Idea",
-                                subtitle: "사회문제 해결",
-                                desc: "사회와 기업이 직면한 문제를 창의적인 아이디어로 정의하고, 실현 가능한 솔루션으로 발전시킵니다.",
-                                href: "/youinone/whatwedo",
-                            },
-                            {
-                                icon: Target,
-                                title: "Strategy",
-                                subtitle: "기업 얼라이언스",
-                                desc: "소규모 기업들이 연합하여 서로의 강점을 활용합니다. 혼자서는 어려운 프로젝트도 함께라면 가능합니다.",
-                                href: "/youinone/alliance",
-                            },
-                            {
-                                icon: Users,
-                                title: "People",
-                                subtitle: "전문가 네트워크",
-                                desc: "마케팅, 브랜딩, 콘텐츠, 교육 분야의 전문가들이 프로젝트에 최적화된 팀을 구성합니다.",
-                                href: "/youinone/people",
-                            },
-                        ].map((card) => (
-                            <Link
-                                key={card.title}
-                                href={card.href}
-                                className="group p-8 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all"
-                            >
-                                <div className="inline-flex p-3 rounded-lg mb-5 bg-neutral-50 text-[#171717] group-hover:bg-[#E53935]/10 group-hover:text-[#E53935] transition-colors">
-                                    <card.icon className="h-6 w-6" />
-                                </div>
-                                <h3 className="text-xl font-bold text-[#171717] mb-1 group-hover:text-[#E53935] transition-colors">
-                                    {card.title}
-                                </h3>
-                                <p className="text-xs text-[#E53935] font-medium mb-3">{card.subtitle}</p>
-                                <p className="text-sm text-neutral-500 leading-relaxed mb-4">
-                                    {card.desc}
-                                </p>
-                                <span className="inline-flex items-center gap-1 text-sm font-medium text-[#E53935]">
-                                    자세히 보기 <ArrowRight className="h-4 w-4" />
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Recent Portfolio */}
-            <section className="py-16 px-6 bg-neutral-50">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-bold text-[#171717]">프로젝트</h2>
-                        <Link href="/youinone/portfolio" className="text-sm text-[#E53935] hover:underline flex items-center gap-1">
-                            전체보기 <ChevronRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {portfolios.length > 0 ? (
-                            portfolios.map((post) => (
-                                <div
-                                    key={post.id}
-                                    className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#E53935]/30 transition-all"
-                                >
-                                    <div className="aspect-[16/10] bg-gradient-to-br from-[#171717] to-neutral-700 flex items-center justify-center">
-                                        <span className="text-xl md:text-3xl font-bold text-white/10">YIO</span>
-                                    </div>
-                                    <div className="p-5">
-                                        <h3 className="font-bold text-[#171717] mb-2 group-hover:text-[#E53935] transition-colors">
-                                            {post.title}
-                                        </h3>
-                                        <p className="text-sm text-neutral-500 line-clamp-2">{post.summary}</p>
-                                        <div className="flex gap-2 mt-3">
-                                            {post.tags?.slice(0, 2).map((tag: string) => (
-                                                <span key={tag} className="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-neutral-400 col-span-3">등록된 프로젝트가 없습니다.</p>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* Notice */}
-            <section className="py-16 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-bold text-[#171717]">공지사항</h2>
-                    </div>
-                    {notices.length > 0 ? (
-                        <div className="space-y-3">
-                            {notices.map((post) => (
-                                <div
-                                    key={post.id}
-                                    className="flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg hover:border-[#E53935]/30 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        {post.isPinned && (
-                                            <span className="px-2 py-0.5 bg-[#E53935] text-white text-[10px] font-bold rounded">
-                                                필독
-                                            </span>
-                                        )}
-                                        <span className="text-sm font-medium text-neutral-800">{post.title}</span>
-                                    </div>
-                                    <span className="text-xs text-neutral-400 shrink-0 ml-4">
-                                        {post.publishedAt || post.createdAt}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-neutral-400">등록된 공지사항이 없습니다.</p>
-                    )}
-                </div>
-            </section>
-
-            {/* CTA */}
-            <section className="py-20 px-6 bg-[#171717] text-white text-center">
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-xl md:text-3xl font-bold mb-4">
-                        유인원과 함께<br />
-                        세상에 질문을 던져보세요
-                    </h2>
-                    <p className="text-neutral-400 mb-8 leading-relaxed">
-                        아이디어가 있다면 전략은 우리가 만들어 드립니다.<br />
-                        기업과 사회의 문제, 함께 해결합시다.
-                    </p>
-                    <Link
-                        href="/youinone/contact"
-                        className="inline-block px-10 py-3 bg-[#E53935] text-white font-semibold hover:bg-[#C62828] transition-colors rounded"
-                    >
-                        문의하기
-                    </Link>
-                </div>
-            </section>
+  return (
+    <div className="bg-[#0A0F0A] min-h-screen">
+      {/* ── Hero ── */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-emerald-950/20" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[100px]" />
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium mb-6">
+            <Zap className="w-3 h-3" />
+            Project Group of Thinking Apes
+          </div>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white leading-[0.95] mb-6 tracking-tight">
+            혼자면 꿈이지만,
+            <br />
+            <span className="text-green-400">함께하면 미래</span>가 된다
+          </h1>
+          <div className="h-10 flex items-center justify-center mb-8">
+            <p className="text-lg sm:text-xl text-neutral-400">
+              {typed}
+              <span className="animate-pulse text-green-400">|</span>
+            </p>
+          </div>
+          <p className="text-neutral-500 mb-10 leading-relaxed max-w-xl mx-auto text-sm">
+            대학생, 직장인, 시니어, 소상공인이 세대를 넘어 함께 모여
+            <br />
+            아이디어와 전략으로 세상의 문제를 해결합니다.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/youinone/about"
+              className="px-8 py-3 bg-green-500 text-white font-semibold hover:bg-green-400 transition-colors rounded-lg flex items-center gap-2"
+            >
+              더 알아보기 <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/youinone/projects"
+              className="px-8 py-3 border border-green-500/30 text-green-400 font-semibold hover:bg-green-500/10 transition-colors rounded-lg"
+            >
+              프로젝트 보기
+            </Link>
+          </div>
         </div>
-    );
+      </section>
+
+      {/* ── 진행 중 프로젝트 ── */}
+      <section className="py-16 px-6 border-t border-green-500/10">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">
+                진행 중 프로젝트
+              </h2>
+              <p className="text-neutral-500 text-sm">
+                세대 간 협업으로 만들어가는 프로젝트
+              </p>
+            </div>
+            <Link
+              href="/youinone/projects"
+              className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 transition-colors"
+            >
+              전체 보기 <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {projects.map((project) => (
+              <div
+                key={project.opus}
+                className="group bg-white/[0.03] border border-white/5 rounded-xl overflow-hidden hover:border-green-500/20 transition-all"
+              >
+                {/* 프로젝트 헤더 */}
+                <div
+                  className={`h-2 bg-gradient-to-r ${project.color}`}
+                  style={{ width: `${project.progress}%` }}
+                />
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-green-400 text-xs font-bold font-mono tracking-wider">
+                      {project.opus}
+                    </span>
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        project.status === "모집 중"
+                          ? "bg-amber-500/20 text-amber-400"
+                          : "bg-green-500/20 text-green-400"
+                      }`}
+                    >
+                      {project.status}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white text-sm mb-2 group-hover:text-green-300 transition-colors leading-snug">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-neutral-500 leading-relaxed mb-4 line-clamp-2">
+                    {project.desc}
+                  </p>
+                  {/* 크루 */}
+                  <div className="space-y-1">
+                    {project.crew.map((c, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-1.5 text-[10px] text-neutral-500"
+                      >
+                        <Users className="w-2.5 h-2.5 text-green-500/50" />
+                        {c}
+                      </div>
+                    ))}
+                  </div>
+                  {/* 진행률 */}
+                  <div className="mt-4 flex items-center gap-2">
+                    <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full bg-gradient-to-r ${project.color} rounded-full`}
+                        style={{ width: `${project.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-green-400/60 font-mono">
+                      {project.progress}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 크루 구성 ── */}
+      <section className="py-16 px-6 border-t border-green-500/10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-xl font-bold text-white mb-2">크루 구성</h2>
+            <p className="text-neutral-500 text-sm">
+              다양한 세대와 배경의 사람들이 하나의 팀이 됩니다
+            </p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {crewTypes.map((crew) => (
+              <div
+                key={crew.label}
+                className="bg-white/[0.03] border border-white/5 rounded-xl p-5 text-center hover:border-green-500/20 transition-all"
+              >
+                <div className="w-12 h-12 mx-auto mb-3 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <crew.icon className="w-5 h-5 text-green-400" />
+                </div>
+                <p className="text-2xl font-black text-white mb-1">
+                  {crew.count}
+                </p>
+                <p className="text-sm font-bold text-green-400 mb-1">
+                  {crew.label}
+                </p>
+                <p className="text-[10px] text-neutral-500 leading-relaxed">
+                  {crew.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 참여 방법 ── */}
+      <section className="py-16 px-6 border-t border-green-500/10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-xl font-bold text-white mb-2">참여 방법</h2>
+            <p className="text-neutral-500 text-sm">
+              아이디어부터 성과 공유까지, 4단계 프로세스
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {processSteps.map((step, i) => (
+              <div
+                key={step.step}
+                className="relative bg-white/[0.03] border border-white/5 rounded-xl p-5 hover:border-green-500/20 transition-all"
+              >
+                <span className="text-3xl font-black text-green-500/20 absolute top-3 right-4">
+                  {step.step}
+                </span>
+                <div className="w-10 h-10 mb-4 bg-green-500/10 rounded-lg flex items-center justify-center">
+                  <step.icon className="w-5 h-5 text-green-400" />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1">
+                  {step.title}
+                </h3>
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  {step.desc}
+                </p>
+                {i < processSteps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-2 text-green-500/20">
+                    <ChevronRight className="w-4 h-4" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Ten:One Universe 연결 ── */}
+      <section className="px-6 py-12 border-t border-green-500/10">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-center gap-2 mb-6">
+            <Globe className="w-4 h-4 text-green-500/30" />
+            <span className="text-xs font-semibold text-green-500/30 uppercase tracking-wider">
+              Ten:One Universe
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                name: "MAD League",
+                desc: "대학생 크루의 동아리 연합 네트워크",
+                href: "/madleague",
+                color: "from-amber-500/10 to-transparent",
+              },
+              {
+                name: "domo",
+                desc: "시니어 비즈니스 네트워킹",
+                href: "/domo",
+                color: "from-stone-500/10 to-transparent",
+              },
+              {
+                name: "Evolution School",
+                desc: "리스킬링 교육 프로그램 연계",
+                href: "/evolution",
+                color: "from-blue-500/10 to-transparent",
+              },
+            ].map((brand) => (
+              <Link
+                key={brand.name}
+                href={brand.href}
+                className={`group p-5 rounded-xl bg-gradient-to-br ${brand.color} border border-white/5 hover:border-green-500/20 transition-all`}
+              >
+                <h4 className="font-bold text-white text-sm group-hover:text-green-300 transition-colors">
+                  {brand.name}
+                </h4>
+                <p className="text-xs text-neutral-500 mt-1">{brand.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-20 px-6 border-t border-green-500/10 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-xl md:text-3xl font-bold text-white mb-4">
+            함께 만들어 갈 미래,
+            <br />
+            지금 합류하세요
+          </h2>
+          <p className="text-neutral-500 mb-8 leading-relaxed text-sm">
+            세대를 넘어, 경험을 연결하여 더 큰 가치를 만듭니다.
+            <br />
+            프로젝트 발제부터 크루 참여까지, 누구나 시작할 수 있습니다.
+          </p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <Link
+              href="/youinone/projects"
+              className="px-8 py-3 bg-green-500 text-white font-semibold hover:bg-green-400 transition-colors rounded-lg"
+            >
+              프로젝트 참여하기
+            </Link>
+            <Link
+              href="/youinone/contact"
+              className="px-8 py-3 border border-green-500/30 text-green-400 font-semibold hover:bg-green-500/10 transition-colors rounded-lg"
+            >
+              문의하기
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

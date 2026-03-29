@@ -7,13 +7,14 @@ import { siteConfigs } from "@/lib/site-config";
 const site = siteConfigs.badak;
 
 export const metadata: Metadata = {
-    title: { default: "Badak - 마케팅 광고 네트워킹 커뮤니티", template: `%s | ${site.name}` },
+    title: { default: "Badak — 마케팅/광고 업계 네트워킹", template: `%s | ${site.name}` },
     description: site.meta.description,
     icons: { icon: site.faviconUrl, apple: site.appleTouchIcon },
     openGraph: {
-        title: "Badak - 마케팅 광고 네트워킹 커뮤니티",
+        title: "Badak — 마케팅/광고 업계 네트워킹 커뮤니티",
         description: site.meta.description,
-        siteName: site.name,
+        siteName: 'Ten:One™ Universe',
+        type: 'website',
     },
 };
 

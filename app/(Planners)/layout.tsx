@@ -7,9 +7,10 @@ export const metadata: Metadata = {
     description: "기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.",
     icons: { icon: "/favicon.ico" },
     openGraph: {
-        title: "Planner's — 우리는 모두 기획자다",
-        description: "기획은 꾀하는 것이고, 계획은 세우는 것이다.",
-        siteName: "Planner's",
+        title: "Planner's — 기획 프레임워크",
+        description: "기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.",
+        siteName: 'Ten:One™ Universe',
+        type: 'website',
     },
 };
 

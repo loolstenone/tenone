@@ -262,7 +262,7 @@ export default function WIOHome() {
             <h2 className="text-3xl md:text-4xl font-bold mb-3">기업 문화를 시스템에 녹이다</h2>
             <p className="text-slate-400">포스터가 아니라, 일하는 구조 안에 철학을 내재화합니다</p>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
             {[
               { step: '01', title: '철학 정의', desc: 'Mission, Vision, Core Values를 시스템에 등록', color: '#E24B4A' },
               { step: '02', title: '양식에 녹이기', desc: '기안서·보고서·피드백 양식에 가치 체크포인트 내장', color: '#534AB7' },
@@ -292,11 +292,12 @@ export default function WIOHome() {
             <h2 className="text-3xl md:text-4xl font-bold mb-3">합리적인 가격</h2>
             <p className="text-slate-400">규모에 맞는 플랜을 선택하세요</p>
           </div>
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 min-w-0">
             {PRICING.map((p) => (
               <div
                 key={p.tier}
-                className={`rounded-2xl border p-6 transition-all ${
+                className={`rounded-2xl border p-5 sm:p-6 transition-all ${
                   p.highlight
                     ? 'border-[#534AB7]/50 bg-[#534AB7]/10 scale-[1.02]'
                     : 'border-white/5 bg-white/[0.02]'
@@ -322,6 +323,7 @@ export default function WIOHome() {
               </div>
             ))}
           </div>
+          </div>
         </div>
       </section>
 
@@ -344,8 +346,8 @@ export default function WIOHome() {
 
       {/* ═══════ Footer ═══════ */}
       <footer className="border-t border-white/5 py-8 px-6">
-        <div className="mx-auto max-w-5xl flex items-center justify-between">
-          <div>
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-center sm:text-left">
             <div className="text-sm font-bold"><span className="text-[#9B8FE8]">W</span>IO <span className="text-slate-600">Enterprise Unified System</span></div>
             <div className="text-xs text-slate-600 mt-1">Powered by <a href="https://tenone.biz" className="hover:text-slate-400">Ten:One&trade;</a></div>
           </div>
