@@ -7,7 +7,7 @@ import { LibraryProvider } from "@/lib/library-context";
 import { PointProvider } from "@/lib/point-context";
 import { IntraSidebar } from "@/components/IntraSidebar";
 import { IntraHeader } from "@/components/IntraHeader";
-import { ShieldAlert, Lock, Eye, EyeOff } from "lucide-react";
+import { ShieldAlert, Lock, Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function IntraLoginForm() {
@@ -41,8 +41,13 @@ function IntraLoginForm() {
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10 mb-4">
-                        <Lock className="h-6 w-6 text-neutral-400" />
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <a href="/" className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors" title="홈으로">
+                            <Home className="h-5 w-5 text-neutral-500" />
+                        </a>
+                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10">
+                            <Lock className="h-6 w-6 text-neutral-400" />
+                        </div>
                     </div>
                     <h1 className="text-lg font-bold text-white tracking-tight">Ten:One™ Intra</h1>
                     <p className="text-xs text-neutral-500 mt-1">내부 구성원 전용</p>
