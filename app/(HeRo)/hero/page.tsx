@@ -1,310 +1,415 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
-    Search,
-    TrendingUp,
-    Users,
-    Sparkles,
-    FileText,
-    ArrowRight,
-    Star,
-    Target,
-    Zap,
+  ArrowRight,
+  Search,
+  FileText,
+  Briefcase,
+  Users,
+  Building2,
+  TrendingUp,
+  Star,
+  Target,
+  Zap,
+  ChevronRight,
+  Award,
+  UserCheck,
+  Handshake,
+  GraduationCap,
+  CheckCircle2,
 } from "lucide-react";
 
-const features = [
-    {
-        icon: Search,
-        title: "HIT 프로그램",
-        desc: "Hidden Intelligence Talent. 숨겨진 인재를 발굴하는 통합 진단 프로그램.",
-        href: "/hero/hit",
-        color: "bg-amber-50 text-amber-600",
-    },
-    {
-        icon: TrendingUp,
-        title: "커리어 로드맵",
-        desc: "C-Level을 향한 체계적인 성장 경로를 설계합니다.",
-        href: "/hero/career",
-        color: "bg-orange-50 text-orange-600",
-    },
-    {
-        icon: Users,
-        title: "멘토링",
-        desc: "현직 전문가 멘토단과 1:1 매칭으로 실전 조언을 받습니다.",
-        href: "/hero/mentor",
-        color: "bg-yellow-50 text-yellow-600",
-    },
-    {
-        icon: Sparkles,
-        title: "퍼스널 브랜딩",
-        desc: "나만의 브랜드를 기획하고 포트폴리오를 제작합니다.",
-        href: "/hero/branding",
-        color: "bg-amber-50 text-amber-600",
-    },
+/* ── 인재 파이프라인 단계 ── */
+const pipeline = [
+  {
+    stage: "MAD League",
+    label: "발굴",
+    desc: "대학 동아리 연합에서 잠재력 있는 인재를 발견합니다",
+    icon: GraduationCap,
+    color: "bg-orange-100 text-[#D85A30]",
+    ring: "ring-[#D85A30]/20",
+  },
+  {
+    stage: "HeRo",
+    label: "육성",
+    desc: "HIT 진단 + 멘토링 + 커리어 로드맵으로 키웁니다",
+    icon: TrendingUp,
+    color: "bg-orange-100 text-[#D85A30]",
+    ring: "ring-[#D85A30]/40",
+  },
+  {
+    stage: "기업 연결",
+    label: "매칭",
+    desc: "검증된 인재를 파트너 기업에 연결합니다",
+    icon: Building2,
+    color: "bg-orange-100 text-[#D85A30]",
+    ring: "ring-[#D85A30]/60",
+  },
 ];
 
-const successStories = [
-    {
-        name: "김전략",
-        role: "전략 기획 → 스타트업 CEO",
-        quote: "HIT 진단으로 제 강점을 정확히 파악하고, 멘토링을 통해 창업의 방향을 잡았습니다.",
-        score: 95,
-    },
-    {
-        name: "박마케터",
-        role: "마케팅 인턴 → 브랜드 디렉터",
-        quote: "커리어 로드맵 덕분에 3년 안에 디렉터로 성장할 수 있었습니다.",
-        score: 91,
-    },
-    {
-        name: "이개발자",
-        role: "주니어 → 테크 리드",
-        quote: "퍼스널 브랜딩 프로그램이 취업 시장에서 차별화되는 무기가 되었습니다.",
-        score: 88,
-    },
+/* ── 서비스 3종 ── */
+const services = [
+  {
+    icon: Search,
+    title: "HIT 프로그램",
+    sub: "Hidden Intelligence Talent",
+    desc: "숨겨진 잠재력을 진단하는 통합 역량 평가. AI 기반 분석으로 강점과 성장 포인트를 정밀하게 파악합니다.",
+    href: "/hero/hit",
+    badge: "인재 발굴",
+  },
+  {
+    icon: FileText,
+    title: "Resume Lab",
+    sub: "AI 이력서 & 포트폴리오",
+    desc: "AI가 이력서를 분석하고, 직무별 맞춤 포트폴리오를 자동 생성합니다. 합격률을 극대화하세요.",
+    href: "/hero/resume",
+    badge: "퍼스널 브랜딩",
+  },
+  {
+    icon: Briefcase,
+    title: "Career Path",
+    sub: "C-Level 커리어 로드맵",
+    desc: "CMO, CTO, CSO, CBO — 목표 C-Level까지의 체계적 성장 경로를 설계하고 추적합니다.",
+    href: "/hero/career",
+    badge: "커리어 성장",
+  },
 ];
 
+/* ── 최근 매칭 성과 ── */
+const recentMatches = [
+  {
+    talent: "김서연",
+    from: "MAD League 5기",
+    role: "브랜드 마케터",
+    company: "스타트업 A사",
+    status: "입사 확정",
+    score: 94,
+  },
+  {
+    talent: "박준호",
+    from: "MAD League 4기",
+    role: "프로덕트 디자이너",
+    company: "IT 대기업 B사",
+    status: "최종 합격",
+    score: 91,
+  },
+  {
+    talent: "이하나",
+    from: "MAD League 5기",
+    role: "데이터 분석가",
+    company: "핀테크 C사",
+    status: "인턴 전환",
+    score: 88,
+  },
+  {
+    talent: "최민수",
+    from: "MAD League 3기",
+    role: "풀스택 개발자",
+    company: "AI 스타트업 D사",
+    status: "입사 확정",
+    score: 96,
+  },
+];
+
+/* ── 통계 ── */
 const stats = [
-    { label: "인재 발굴", value: "500+", unit: "명" },
-    { label: "멘토 매칭", value: "200+", unit: "건" },
-    { label: "커리어 성장률", value: "87", unit: "%" },
-    { label: "만족도", value: "4.8", unit: "/5" },
+  { icon: Handshake, value: "100+", label: "매칭 성사", unit: "건" },
+  { icon: Building2, value: "50+", label: "파트너 기업", unit: "개" },
+  { icon: Users, value: "500+", label: "등록 인재", unit: "명" },
+  { icon: Award, value: "92%", label: "매칭 만족도", unit: "" },
+];
+
+/* ── 파트너 기업 (가상) ── */
+const partners = [
+  "카카오", "네이버", "라인", "쿠팡", "토스", "당근",
+  "무신사", "마켓컬리", "리디", "왓챠",
+];
+
+/* ── Universe 연결 ── */
+const universeLinks = [
+  { brand: "MAD League", desc: "대학 동아리 연합 — 인재 소스", href: "/madleague", color: "bg-violet-100 text-violet-700" },
+  { brand: "Badak", desc: "네트워킹 플랫폼 — 기업 연결", href: "/badak", color: "bg-emerald-100 text-emerald-700" },
+  { brand: "ChangeUp", desc: "창업 교육 — 기업가 육성", href: "/changeup", color: "bg-teal-100 text-teal-700" },
+  { brand: "RooK", desc: "AI 크리에이터 — 크리에이티브 인재", href: "/rook", color: "bg-blue-100 text-blue-700" },
 ];
 
 export default function HeRoHomePage() {
-    return (
-        <div>
-            {/* Hero Section */}
-            <section className="relative bg-gradient-to-br from-amber-50 via-white to-orange-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 md:py-24 lg:py-32">
-                    <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-6">
-                            <Target className="h-5 w-5 text-amber-500" />
-                            <span className="text-sm font-medium text-amber-600 uppercase tracking-wider">
-                                Hidden Intelligence &amp; Real Opportunity
-                            </span>
-                        </div>
-                        <h1 className="text-2xl md:text-4xl lg:text-6xl font-extrabold tracking-tight mb-6">
-                            숨겨진 인재를<br />
-                            <span className="text-amber-500">발굴</span>하고{" "}
-                            <span className="text-amber-500">성장</span>시킵니다
-                        </h1>
-                        <p className="text-lg text-neutral-600 mb-8 max-w-2xl">
-                            HeRo는 인재의 잠재력을 발견하고, 체계적인 성장 프로그램을 통해
-                            꿈을 현실로 만드는 인재 발굴 · 성장 플랫폼입니다.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <Link
-                                href="/hero/hit"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"
-                            >
-                                HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
-                            </Link>
-                            <Link
-                                href="/hero/about"
-                                className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors rounded-lg"
-                            >
-                                HeRo 알아보기
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  const [hoveredPipeline, setHoveredPipeline] = useState<number | null>(null);
 
-            {/* Stats */}
-            <section className="border-y border-neutral-200 bg-white">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <p className="text-xl md:text-3xl font-extrabold text-amber-500">
-                                    {stat.value}
-                                    <span className="text-lg text-neutral-400 ml-1">{stat.unit}</span>
-                                </p>
-                                <p className="text-sm text-neutral-500 mt-1">{stat.label}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+  return (
+    <div>
+      {/* ━━ Hero Section ━━ */}
+      <section className="relative bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#D85A30]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-20 md:py-28 lg:py-36">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-[#D85A30]/10 px-4 py-1.5 rounded-full mb-6">
+              <Target className="h-4 w-4 text-[#D85A30]" />
+              <span className="text-sm font-semibold text-[#D85A30] tracking-wide">
+                Hidden Intelligence & Real Opportunity
+              </span>
+            </div>
 
-            {/* Features */}
-            <section className="bg-white">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-12">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">HeRo 프로그램</h2>
-                        <p className="text-neutral-500">인재 발굴부터 성장까지, 체계적인 프로그램을 제공합니다</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features.map((feature) => (
-                            <Link
-                                key={feature.href}
-                                href={feature.href}
-                                className="group border border-neutral-200 rounded-xl p-6 hover:border-amber-300 hover:shadow-lg transition-all"
-                            >
-                                <div className={`w-12 h-12 rounded-lg ${feature.color} flex items-center justify-center mb-4`}>
-                                    <feature.icon className="h-6 w-6" />
-                                </div>
-                                <h3 className="text-lg font-bold mb-2 group-hover:text-amber-600 transition-colors">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-sm text-neutral-500 leading-relaxed">{feature.desc}</p>
-                                <div className="mt-4 flex items-center gap-1 text-sm text-amber-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                    자세히 보기 <ArrowRight className="h-3 w-3" />
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
+              <span className="text-[#D85A30]">발굴</span>하고,{" "}
+              <span className="text-[#D85A30]">키우고</span>,{" "}
+              <span className="text-[#D85A30]">연결</span>한다
+            </h1>
 
-            {/* Career Roadmap Preview */}
-            <section className="bg-neutral-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
-                        <div>
-                            <h2 className="text-xl md:text-3xl font-bold mb-4">커리어 로드맵</h2>
-                            <p className="text-neutral-600 mb-6">
-                                C-Level을 향한 성장 경로를 설계합니다. CMO, CTO, CSO, CBO 등
-                                다양한 트랙에서 나만의 커리어 경로를 찾으세요.
-                            </p>
-                            <div className="space-y-3 mb-8">
-                                {["CMO — 마케팅/브랜드", "CTO — 기술/개발", "CSO — 전략/기획", "CBO — 사업/영업"].map((track) => (
-                                    <div key={track} className="flex items-center gap-3">
-                                        <Zap className="h-4 w-4 text-amber-500" />
-                                        <span className="text-sm font-medium">{track}</span>
-                                    </div>
-                                ))}
-                            </div>
-                            <Link
-                                href="/hero/career"
-                                className="inline-flex items-center gap-2 text-amber-600 font-medium hover:text-amber-700"
-                            >
-                                로드맵 보기 <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </div>
-                        <div className="bg-white border border-neutral-200 rounded-xl p-8">
-                            <div className="space-y-6">
-                                {[
-                                    { level: "인턴", status: "완료", active: false },
-                                    { level: "매니저", status: "완료", active: false },
-                                    { level: "디렉터", status: "진행 중", active: true },
-                                    { level: "C-Level", status: "목표", active: false },
-                                ].map((step, i) => (
-                                    <div key={step.level} className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${step.active ? "bg-amber-500 text-white" : i < 2 ? "bg-neutral-900 text-white" : "bg-neutral-200 text-neutral-400"}`}>
-                                            {i + 1}
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-semibold">{step.level}</p>
-                                            <p className={`text-xs ${step.active ? "text-amber-500" : "text-neutral-400"}`}>{step.status}</p>
-                                        </div>
-                                        {i < 3 && <div className="w-px h-8 bg-neutral-200 ml-5 absolute" />}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <p className="text-lg md:text-xl text-neutral-600 leading-relaxed mb-10 max-w-2xl">
+              HeRo는 숨겨진 인재를 발견하고, 체계적인 프로그램으로 성장시키며,
+              최적의 기업과 연결하는 <strong>인재 파이프라인 플랫폼</strong>입니다.
+            </p>
 
-            {/* Mentor Highlights */}
-            <section className="bg-white">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-12">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">멘토 하이라이트</h2>
-                        <p className="text-neutral-500">현직 전문가들이 당신의 성장을 돕습니다</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[
-                            { name: "김전략", field: "경영전략", career: "전 삼성전자 전략기획실", tags: ["전략", "M&A"] },
-                            { name: "박브랜드", field: "브랜드/마케팅", career: "전 나이키코리아 마케팅 디렉터", tags: ["브랜드", "글로벌"] },
-                            { name: "최리더", field: "리더십/HR", career: "전 구글코리아 HR Director", tags: ["리더십", "코칭"] },
-                        ].map((mentor) => (
-                            <div key={mentor.name} className="border border-neutral-200 rounded-xl p-6 hover:border-amber-300 transition-colors">
-                                <div className="w-14 h-14 bg-amber-50 text-amber-600 flex items-center justify-center rounded-full text-lg font-bold mb-4">
-                                    {mentor.name.charAt(0)}
-                                </div>
-                                <h3 className="text-base font-bold mb-1">{mentor.name}</h3>
-                                <p className="text-xs text-amber-600 mb-1">{mentor.field}</p>
-                                <p className="text-xs text-neutral-500 mb-3">{mentor.career}</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {mentor.tags.map((tag) => (
-                                        <span key={tag} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="text-center mt-8">
-                        <Link
-                            href="/hero/mentor"
-                            className="inline-flex items-center gap-2 text-amber-600 font-medium hover:text-amber-700"
-                        >
-                            전체 멘토 보기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* Success Stories */}
-            <section className="bg-neutral-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-12">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">성공 사례</h2>
-                        <p className="text-neutral-500">HeRo와 함께 성장한 인재들의 이야기</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {successStories.map((story) => (
-                            <div key={story.name} className="bg-white border border-neutral-200 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-neutral-900 text-white flex items-center justify-center rounded-full text-sm font-bold">
-                                        {story.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold">{story.name}</p>
-                                        <p className="text-xs text-amber-600">{story.role}</p>
-                                    </div>
-                                    <div className="ml-auto flex items-center gap-1">
-                                        <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                                        <span className="text-xs font-bold text-neutral-600">{story.score}</span>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-neutral-600 leading-relaxed">
-                                    &ldquo;{story.quote}&rdquo;
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA */}
-            <section className="bg-amber-500">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
-                    <h2 className="text-xl md:text-3xl font-bold text-white mb-4">HeRo가 되어보세요</h2>
-                    <p className="text-amber-100 mb-8 max-w-xl mx-auto">
-                        숨겨진 당신의 잠재력을 발견하고, 체계적인 성장 프로그램으로 꿈을 현실로 만드세요.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                        <Link
-                            href="/hero/hit"
-                            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-amber-600 font-bold hover:bg-amber-50 transition-colors rounded-lg"
-                        >
-                            HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link
-                            href="/signup"
-                            className="inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white font-bold hover:bg-amber-600 transition-colors rounded-lg"
-                        >
-                            회원가입
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/hero/hit"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#D85A30] text-white font-bold hover:bg-[#C04E28] transition-colors rounded-xl shadow-lg shadow-[#D85A30]/20"
+              >
+                HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/hero/about"
+                className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-neutral-300 text-neutral-700 font-bold hover:border-[#D85A30] hover:text-[#D85A30] transition-colors rounded-xl"
+              >
+                HeRo 알아보기
+              </Link>
+            </div>
+          </div>
         </div>
-    );
+      </section>
+
+      {/* ━━ Stats Bar ━━ */}
+      <section className="bg-[#D85A30]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+            {stats.map((s) => (
+              <div key={s.label} className="flex flex-col items-center">
+                <s.icon className="h-5 w-5 mb-2 text-white/80" />
+                <p className="text-2xl md:text-4xl font-black">
+                  {s.value}
+                  {s.unit && <span className="text-base font-normal text-white/70 ml-1">{s.unit}</span>}
+                </p>
+                <p className="text-sm text-white/80 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ 인재 파이프라인 시각화 ━━ */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">인재 파이프라인</h2>
+            <p className="text-neutral-500 max-w-xl mx-auto">
+              MAD League에서 발굴된 인재가 HeRo를 거쳐 기업에 연결되는 완전한 인재 여정
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            {pipeline.map((step, i) => (
+              <div
+                key={step.stage}
+                className={`relative border-2 rounded-2xl p-8 transition-all cursor-default ${
+                  hoveredPipeline === i
+                    ? "border-[#D85A30] shadow-xl shadow-[#D85A30]/10 scale-[1.02]"
+                    : "border-neutral-200 hover:border-[#D85A30]/40"
+                }`}
+                onMouseEnter={() => setHoveredPipeline(i)}
+                onMouseLeave={() => setHoveredPipeline(null)}
+              >
+                {/* Step number */}
+                <div className="absolute -top-4 left-6 bg-[#D85A30] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                  {i + 1}
+                </div>
+
+                <div className={`w-14 h-14 rounded-2xl ${step.color} flex items-center justify-center mb-5`}>
+                  <step.icon className="h-7 w-7" />
+                </div>
+
+                <p className="text-xs font-bold text-[#D85A30] uppercase tracking-wider mb-1">{step.label}</p>
+                <h3 className="text-xl font-bold mb-2">{step.stage}</h3>
+                <p className="text-sm text-neutral-500 leading-relaxed">{step.desc}</p>
+
+                {/* Arrow connector */}
+                {i < 2 && (
+                  <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
+                    <ChevronRight className="h-6 w-6 text-[#D85A30]" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ 서비스 3종 ━━ */}
+      <section className="bg-neutral-50 py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">핵심 서비스</h2>
+            <p className="text-neutral-500">인재의 잠재력을 극대화하는 세 가지 솔루션</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {services.map((svc) => (
+              <Link
+                key={svc.href}
+                href={svc.href}
+                className="group bg-white border border-neutral-200 rounded-2xl p-8 hover:border-[#D85A30] hover:shadow-xl hover:shadow-[#D85A30]/5 transition-all"
+              >
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-[#D85A30]/10 text-[#D85A30] flex items-center justify-center">
+                    <svc.icon className="h-6 w-6" />
+                  </div>
+                  <span className="text-xs font-bold text-[#D85A30] bg-[#D85A30]/10 px-2.5 py-1 rounded-full">
+                    {svc.badge}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold mb-1 group-hover:text-[#D85A30] transition-colors">{svc.title}</h3>
+                <p className="text-xs text-neutral-400 mb-3">{svc.sub}</p>
+                <p className="text-sm text-neutral-500 leading-relaxed">{svc.desc}</p>
+                <div className="mt-5 flex items-center gap-1 text-sm text-[#D85A30] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                  자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ 최근 매칭 성과 ━━ */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-10 gap-4">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">최근 매칭 성과</h2>
+              <p className="text-neutral-500">HeRo를 통해 기업과 연결된 인재들</p>
+            </div>
+            <Link
+              href="/hero/career"
+              className="inline-flex items-center gap-1 text-sm text-[#D85A30] font-semibold hover:gap-2 transition-all"
+            >
+              전체 성과 보기 <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {recentMatches.map((m) => (
+              <div
+                key={m.talent}
+                className="border border-neutral-200 rounded-2xl p-6 hover:border-[#D85A30]/40 hover:shadow-md transition-all"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-full bg-[#D85A30] text-white flex items-center justify-center font-bold text-lg">
+                    {m.talent.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{m.talent}</p>
+                    <p className="text-xs text-neutral-400">{m.from}</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">포지션</span>
+                    <span className="font-medium">{m.role}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">기업</span>
+                    <span className="font-medium">{m.company}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">HIT 점수</span>
+                    <span className="font-bold text-[#D85A30]">{m.score}점</span>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span className="text-xs font-semibold text-emerald-600">{m.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ 파트너 기업 ━━ */}
+      <section className="bg-neutral-50 py-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">파트너 기업</h2>
+            <p className="text-neutral-500">HeRo 인재와 함께하는 기업들</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4">
+            {partners.map((p) => (
+              <div
+                key={p}
+                className="px-6 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-600 hover:border-[#D85A30]/40 hover:text-[#D85A30] transition-colors"
+              >
+                {p}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ Ten:One Universe 연결 ━━ */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ten:One Universe</h2>
+            <p className="text-neutral-500">HeRo가 연결하는 생태계</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {universeLinks.map((u) => (
+              <Link
+                key={u.brand}
+                href={u.href}
+                className="group border border-neutral-200 rounded-2xl p-6 hover:shadow-lg transition-all"
+              >
+                <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold mb-4 ${u.color}`}>
+                  {u.brand}
+                </div>
+                <p className="text-sm text-neutral-600 group-hover:text-neutral-900 transition-colors">{u.desc}</p>
+                <div className="mt-3 flex items-center gap-1 text-xs text-[#D85A30] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  방문하기 <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━ CTA ━━ */}
+      <section className="bg-gradient-to-r from-[#D85A30] to-[#E8764A]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 text-center">
+          <UserCheck className="h-10 w-10 text-white/80 mx-auto mb-4" />
+          <h2 className="text-2xl md:text-4xl font-black text-white mb-4">
+            당신의 HeRo 여정을 시작하세요
+          </h2>
+          <p className="text-white/80 mb-10 max-w-xl mx-auto text-lg">
+            숨겨진 잠재력을 발견하고, 꿈의 커리어를 향해 나아가세요.
+            HeRo가 처음부터 끝까지 함께합니다.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/hero/hit"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#D85A30] font-bold hover:bg-orange-50 transition-colors rounded-xl"
+            >
+              HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-white text-white font-bold hover:bg-white/10 transition-colors rounded-xl"
+            >
+              회원가입
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

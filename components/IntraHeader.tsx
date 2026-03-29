@@ -227,7 +227,7 @@ export function IntraHeader() {
                                     </>)}
                                 </div>
                                 <div className="border-t border-neutral-100 py-1">
-                                    <button onClick={() => { setProfileOpen(false); logout(); window.location.href = '/intra'; }}
+                                    <button onClick={() => { setProfileOpen(false); sessionStorage.removeItem('tenone_intra_verified'); logout(); window.location.href = '/intra'; }}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-400 hover:text-red-600 hover:bg-neutral-50 transition-colors w-full">
                                         <LogOut className="h-3.5 w-3.5" /> Logout
                                     </button>
@@ -238,7 +238,7 @@ export function IntraHeader() {
                 </div>
 
                 {/* 로그아웃 */}
-                <button onClick={() => { logout(); window.location.href = '/intra'; }}
+                <button onClick={() => { sessionStorage.removeItem('tenone_intra_verified'); logout(); window.location.href = '/intra'; }}
                     className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded hover:bg-neutral-50" title="로그아웃">
                     <LogOut className="h-4 w-4" />
                 </button>

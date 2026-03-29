@@ -729,7 +729,7 @@ export function IntraSidebar() {
                             <p className="text-[11px] font-medium text-neutral-200 truncate">{user.name}</p>
                             <p className="text-[9px] text-neutral-500 truncate">{user.role}</p>
                         </div>
-                        <button onClick={() => { router.push('/'); setTimeout(() => logout(), 100); }}
+                        <button onClick={() => { sessionStorage.removeItem('tenone_intra_verified'); router.push('/'); setTimeout(() => logout(), 100); }}
                             className="p-1 text-neutral-600 hover:text-white transition-colors shrink-0" title="로그아웃">
                             <LogOut className="h-3.5 w-3.5" />
                         </button>
