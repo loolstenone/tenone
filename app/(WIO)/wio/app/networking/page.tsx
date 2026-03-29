@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Network, Plus, Search, MapPin, Briefcase, MessageSquare, UserPlus, Filter, Star } from 'lucide-react';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 interface NetworkMember {
   id: string;
@@ -15,6 +16,7 @@ interface NetworkMember {
   mutualCount: number;
 }
 
+// 데모 폴백 데이터
 const MOCK_MEMBERS: NetworkMember[] = [
   { id: 'n1', name: '김마케팅', title: 'CMO', company: '브랜드컴퍼니', location: '서울 강남', expertise: ['브랜딩', '퍼포먼스', 'B2B'], connected: true, mutualCount: 5 },
   { id: 'n2', name: '이기획', title: 'PM', company: '스타트업허브', location: '서울 성수', expertise: ['기획', 'UX', '프로덕트'], connected: false, mutualCount: 3 },
@@ -24,24 +26,53 @@ const MOCK_MEMBERS: NetworkMember[] = [
   { id: 'n6', name: '한콘텐츠', title: 'Editor', company: 'Mindle', location: '서울 마포', expertise: ['콘텐츠', '트렌드', 'SNS'], connected: true, mutualCount: 6 },
 ];
 
+// DB 행 → NetworkMember 매핑 (networking_events 테이블 기반)
+function mapEventToMember(row: any): NetworkMember {
+  return {
+    id: row.id,
+    name: row.name || row.host_name || '',
+    title: row.title || '',
+    company: row.company || row.organization || '',
+    location: row.location || '',
+    expertise: Array.isArray(row.expertise) ? row.expertise : (Array.isArray(row.tags) ? row.tags : []),
+    connected: row.connected ?? false,
+    mutualCount: row.mutual_count ?? 0,
+  };
+}
+
 export default function NetworkingPage() {
-  const { tenant } = useWIO();
+  const { tenant, member } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [searchQuery, setSearchQuery] = useState('');
   const [viewTab, setViewTab] = useState<'all' | 'connected' | 'recommended'>('all');
   const [members, setMembers] = useState<NetworkMember[]>(isDemo ? MOCK_MEMBERS : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  useEffect(() => {
+  // Supabase에서 네트워킹 데이터 로드
+  const loadMembers = useCallback(async () => {
     if (isDemo) return;
-    fetch(`/api/networking?brandId=${tenant?.id}`)
-      .then(res => res.json())
-      .then(data => {
-        const list = Array.isArray(data) ? data : data?.data;
-        if (Array.isArray(list) && list.length > 0) setMembers(list);
-        else setMembers(MOCK_MEMBERS);
-      })
-      .catch(() => setMembers(MOCK_MEMBERS));
-  }, [isDemo, tenant?.id]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('networking_events')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setMembers(data.map(mapEventToMember));
+      } else {
+        setMembers(MOCK_MEMBERS);
+      }
+    } catch {
+      setMembers(MOCK_MEMBERS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadMembers(); }, [loadMembers]);
 
   const filtered = members.filter(m => {
     if (viewTab === 'connected' && !m.connected) return false;
@@ -99,43 +130,53 @@ export default function NetworkingPage() {
           className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
       </div>
 
-      {/* Member Grid */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map(m => (
-          <div key={m.id} className="border border-white/5 rounded-xl bg-white/[0.02] p-5 hover:border-emerald-500/20 transition-colors">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
-                {m.name.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-white">{m.name}</h3>
-                <p className="text-xs text-slate-500">{m.title} · {m.company}</p>
-              </div>
-              {m.connected && <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-3">
-              <MapPin className="w-3 h-3" /> {m.location}
-              {m.mutualCount > 0 && <span className="ml-2">· 공통 {m.mutualCount}명</span>}
-            </div>
-            <div className="flex flex-wrap gap-1 mb-4">
-              {m.expertise.map(e => (
-                <span key={e} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400">{e}</span>
-              ))}
-            </div>
-            {m.connected ? (
-              <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white/5 text-slate-400 rounded-lg text-xs hover:bg-white/10 transition-colors">
-                <MessageSquare className="w-3 h-3" /> 메시지
-              </button>
-            ) : (
-              <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-600/30 transition-colors border border-emerald-500/20">
-                <UserPlus className="w-3 h-3" /> 연결 요청
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">네트워킹 데이터 로딩 중...</p>
+        </div>
+      )}
 
-      {filtered.length === 0 && (
+      {/* Member Grid */}
+      {!loading && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map(m => (
+            <div key={m.id} className="border border-white/5 rounded-xl bg-white/[0.02] p-5 hover:border-emerald-500/20 transition-colors">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                  {m.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-white">{m.name}</h3>
+                  <p className="text-xs text-slate-500">{m.title} · {m.company}</p>
+                </div>
+                {m.connected && <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-3">
+                <MapPin className="w-3 h-3" /> {m.location}
+                {m.mutualCount > 0 && <span className="ml-2">· 공통 {m.mutualCount}명</span>}
+              </div>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {m.expertise.map(e => (
+                  <span key={e} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400">{e}</span>
+                ))}
+              </div>
+              {m.connected ? (
+                <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white/5 text-slate-400 rounded-lg text-xs hover:bg-white/10 transition-colors">
+                  <MessageSquare className="w-3 h-3" /> 메시지
+                </button>
+              ) : (
+                <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-600/30 transition-colors border border-emerald-500/20">
+                  <UserPlus className="w-3 h-3" /> 연결 요청
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && filtered.length === 0 && (
         <div className="text-center py-16 text-slate-600">
           <Network className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm">검색 결과가 없습니다</p>

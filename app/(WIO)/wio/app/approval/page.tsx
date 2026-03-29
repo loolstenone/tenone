@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Stamp, Plus, Clock, Check, X, FileText, ChevronRight, Filter, AlertCircle } from 'lucide-react';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'draft';
 type ApprovalType = '지출' | '휴가' | '구매' | '계약' | '기타';
@@ -27,6 +28,7 @@ const STATUS_CONFIG: Record<ApprovalStatus, { label: string; color: string; icon
   draft: { label: '초안', color: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: FileText },
 };
 
+// 데모 폴백 데이터
 const MOCK_APPROVALS: ApprovalItem[] = [
   { id: 'a1', title: 'MADLeague S7 시상금 집행', type: '지출', requester: '전천일', amount: 3500000, status: 'pending', createdAt: '2026-03-25',
     description: 'MADLeague 시즌7 대상(200만) + 최우수상(100만) + 우수상(50만) 시상금', approvers: [{ name: '김관리', status: 'approved' }, { name: '이재무', status: 'pending' }] },
@@ -40,22 +42,82 @@ const MOCK_APPROVALS: ApprovalItem[] = [
     description: '개발팀 32인치 모니터 2대', approvers: [{ name: '전천일', status: 'rejected' }] },
 ];
 
+// DB 행 → ApprovalItem 매핑
+function mapRow(row: any): ApprovalItem {
+  return {
+    id: row.id,
+    title: row.title || '',
+    type: row.type || '기타',
+    requester: row.requester_name || row.requester_id || '',
+    amount: row.amount ?? undefined,
+    status: row.status || 'pending',
+    createdAt: row.created_at ? row.created_at.split('T')[0] : '',
+    description: row.description || '',
+    approvers: Array.isArray(row.approvers) ? row.approvers : [],
+  };
+}
+
 export default function ApprovalPage() {
   const { tenant, member } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<Tab>('received');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [approvals, setApprovals] = useState<ApprovalItem[]>(isDemo ? MOCK_APPROVALS : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 결재 목록 로드
+  const loadApprovals = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('approval_requests')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setApprovals(data.map(mapRow));
+      } else {
+        // 데이터 없으면 Mock 폴백
+        setApprovals(MOCK_APPROVALS);
+      }
+    } catch {
+      setApprovals(MOCK_APPROVALS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadApprovals(); }, [loadApprovals]);
+
+  // 결재 승인/반려
+  const handleAction = async (id: string, action: 'approved' | 'rejected') => {
+    if (isDemo) return;
+    try {
+      const sb = createClient();
+      const { error } = await sb
+        .from('approval_requests')
+        .update({ status: action, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('tenant_id', tenant!.id);
+      if (!error) {
+        setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: action } : a));
+      }
+    } catch { /* 실패 시 무시 */ }
+  };
 
   const types: ApprovalType[] = ['지출', '휴가', '구매', '계약', '기타'];
-  const filtered = MOCK_APPROVALS.filter(a => {
+  const filtered = approvals.filter(a => {
     if (typeFilter !== 'all' && a.type !== typeFilter) return false;
     return true;
   });
 
   const stats = {
-    pending: MOCK_APPROVALS.filter(a => a.status === 'pending').length,
-    approved: MOCK_APPROVALS.filter(a => a.status === 'approved').length,
-    rejected: MOCK_APPROVALS.filter(a => a.status === 'rejected').length,
+    pending: approvals.filter(a => a.status === 'pending').length,
+    approved: approvals.filter(a => a.status === 'approved').length,
+    rejected: approvals.filter(a => a.status === 'rejected').length,
   };
 
   return (
@@ -103,52 +165,62 @@ export default function ApprovalPage() {
         </select>
       </div>
 
-      {/* Approval List */}
-      <div className="space-y-3">
-        {filtered.map(item => {
-          const st = STATUS_CONFIG[item.status];
-          const StatusIcon = st.icon;
-          return (
-            <div key={item.id} className="border border-white/5 rounded-xl bg-white/[0.02] p-5 hover:border-indigo-500/20 transition-colors cursor-pointer">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${st.color}`}>
-                      <StatusIcon className="w-2.5 h-2.5 inline mr-0.5" />{st.label}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-500">{item.type}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-white">{item.title}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />
-              </div>
-              <div className="flex items-center justify-between mt-3">
-                <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span>요청: {item.requester}</span>
-                  <span>{item.createdAt}</span>
-                  {item.amount && <span className="text-indigo-400 font-mono">₩{(item.amount / 10000).toFixed(0)}만</span>}
-                </div>
-                <div className="flex items-center gap-1">
-                  {item.approvers.map((ap, i) => {
-                    const apSt = STATUS_CONFIG[ap.status];
-                    return (
-                      <span key={i} className={`text-[9px] px-1.5 py-0.5 rounded ${apSt.color}`}>{ap.name}</span>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">결재 목록 로딩 중...</p>
+        </div>
+      )}
 
-        {filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-600">
-            <Stamp className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">결재 내역이 없습니다</p>
-          </div>
-        )}
-      </div>
+      {/* Approval List */}
+      {!loading && (
+        <div className="space-y-3">
+          {filtered.map(item => {
+            const st = STATUS_CONFIG[item.status];
+            const StatusIcon = st.icon;
+            return (
+              <div key={item.id} className="border border-white/5 rounded-xl bg-white/[0.02] p-5 hover:border-indigo-500/20 transition-colors cursor-pointer">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${st.color}`}>
+                        <StatusIcon className="w-2.5 h-2.5 inline mr-0.5" />{st.label}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-500">{item.type}</span>
+                    </div>
+                    <h3 className="text-sm font-bold text-white">{item.title}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <span>요청: {item.requester}</span>
+                    <span>{item.createdAt}</span>
+                    {item.amount && <span className="text-indigo-400 font-mono">₩{(item.amount / 10000).toFixed(0)}만</span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {item.approvers.map((ap, i) => {
+                      const apSt = STATUS_CONFIG[ap.status];
+                      return (
+                        <span key={i} className={`text-[9px] px-1.5 py-0.5 rounded ${apSt.color}`}>{ap.name}</span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {filtered.length === 0 && (
+            <div className="text-center py-16 text-slate-600">
+              <Stamp className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">결재 내역이 없습니다</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

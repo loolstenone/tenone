@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Trophy, Plus, Users, Calendar, Clock, ChevronRight, Star, Target, Medal, Filter } from 'lucide-react';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type CompStatus = 'upcoming' | 'open' | 'judging' | 'completed';
 type Tab = 'all' | 'upcoming' | 'open' | 'judging' | 'completed';
@@ -28,6 +29,7 @@ const STATUS_CONFIG: Record<CompStatus, { label: string; color: string }> = {
   completed: { label: '완료', color: 'text-slate-400 bg-slate-500/10 border-slate-500/20' },
 };
 
+// 데모 폴백 데이터
 const MOCK_COMPETITIONS: Competition[] = [
   {
     id: 'c1', title: 'MADLeague Season 7 — 통합 마케팅 PT', description: '실제 기업 브랜드의 마케팅 과제를 해결하는 팀 대항 PT 경연',
@@ -55,6 +57,23 @@ const MOCK_COMPETITIONS: Competition[] = [
   },
 ];
 
+// DB 행 → Competition 매핑
+function mapRow(row: any): Competition {
+  return {
+    id: row.id,
+    title: row.title || '',
+    description: row.description || '',
+    status: row.status || 'upcoming',
+    teamSize: row.team_size || '',
+    deadline: row.deadline ? row.deadline.split('T')[0] : '',
+    judgeDate: row.judge_date ? row.judge_date.split('T')[0] : '',
+    teamsRegistered: row.teams_registered ?? 0,
+    maxTeams: row.max_teams ?? 0,
+    prizes: Array.isArray(row.prizes) ? row.prizes : [],
+    categories: Array.isArray(row.categories) ? row.categories : [],
+  };
+}
+
 export default function CompetitionPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
@@ -65,18 +84,44 @@ export default function CompetitionPage() {
   const [competitions, setCompetitions] = useState<Competition[]>(isDemo ? MOCK_COMPETITIONS : []);
   const [loading, setLoading] = useState(!isDemo);
 
+  // Supabase에서 경연 목록 + 팀 수 로드
   const loadCompetitions = useCallback(async () => {
     if (isDemo) return;
     setLoading(true);
     try {
-      const brandId = tenant?.id || '';
-      const res = await fetch(`/api/competitions?brandId=${brandId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setCompetitions(data.competitions?.length > 0 ? data.competitions : MOCK_COMPETITIONS);
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('competitions')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // 각 경연의 등록 팀 수를 competition_teams에서 카운트
+        const comps = data.map(mapRow);
+        const compIds = data.map(d => d.id);
+        const { data: teams } = await sb
+          .from('competition_teams')
+          .select('competition_id')
+          .in('competition_id', compIds);
+        if (teams) {
+          const countMap: Record<string, number> = {};
+          teams.forEach((t: any) => {
+            countMap[t.competition_id] = (countMap[t.competition_id] || 0) + 1;
+          });
+          comps.forEach(c => {
+            if (countMap[c.id] !== undefined) c.teamsRegistered = countMap[c.id];
+          });
+        }
+        setCompetitions(comps);
+      } else {
+        setCompetitions(MOCK_COMPETITIONS);
       }
-    } catch { setCompetitions(MOCK_COMPETITIONS); }
-    finally { setLoading(false); }
+    } catch {
+      setCompetitions(MOCK_COMPETITIONS);
+    } finally {
+      setLoading(false);
+    }
   }, [isDemo, tenant]);
 
   useEffect(() => { loadCompetitions(); }, [loadCompetitions]);
@@ -133,102 +178,112 @@ export default function CompetitionPage() {
         ))}
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">경연 목록 로딩 중...</p>
+        </div>
+      )}
+
       {/* Competition List */}
-      <div className="space-y-3">
-        {filtered.map(comp => {
-          const st = STATUS_CONFIG[comp.status];
-          const progress = comp.maxTeams > 0 ? Math.round((comp.teamsRegistered / comp.maxTeams) * 100) : 0;
-          return (
-            <div key={comp.id} onClick={() => setSelectedId(selectedId === comp.id ? null : comp.id)}
-              className={`border rounded-xl bg-white/[0.02] p-5 transition-colors cursor-pointer ${selectedId === comp.id ? 'border-indigo-500/40' : 'border-white/5 hover:border-indigo-500/20'}`}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${st.color}`}>{st.label}</span>
-                    {comp.categories.map(cat => (
-                      <span key={cat} className="text-[10px] text-slate-600 px-1.5 py-0.5 rounded bg-white/5">{cat}</span>
+      {!loading && (
+        <div className="space-y-3">
+          {filtered.map(comp => {
+            const st = STATUS_CONFIG[comp.status];
+            const progress = comp.maxTeams > 0 ? Math.round((comp.teamsRegistered / comp.maxTeams) * 100) : 0;
+            return (
+              <div key={comp.id} onClick={() => setSelectedId(selectedId === comp.id ? null : comp.id)}
+                className={`border rounded-xl bg-white/[0.02] p-5 transition-colors cursor-pointer ${selectedId === comp.id ? 'border-indigo-500/40' : 'border-white/5 hover:border-indigo-500/20'}`}>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${st.color}`}>{st.label}</span>
+                      {comp.categories.map(cat => (
+                        <span key={cat} className="text-[10px] text-slate-600 px-1.5 py-0.5 rounded bg-white/5">{cat}</span>
+                      ))}
+                    </div>
+                    <h3 className="text-base font-bold text-white">{comp.title}</h3>
+                    <p className="text-sm text-slate-500 mt-1">{comp.description}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-600 shrink-0 mt-1" />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mb-3">
+                  <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {comp.teamSize}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> 마감 {comp.deadline}</span>
+                  <span className="flex items-center gap-1"><Target className="w-3 h-3" /> 심사 {comp.judgeDate}</span>
+                </div>
+
+                {/* Team Progress */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  </div>
+                  <span className="text-xs text-slate-400 shrink-0">{comp.teamsRegistered}/{comp.maxTeams}팀</span>
+                </div>
+
+                {/* Prizes */}
+                {comp.prizes.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {comp.prizes.map((prize, i) => (
+                      <span key={i} className="flex items-center gap-1 text-[10px] text-amber-400/70 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
+                        <Medal className="w-2.5 h-2.5" /> {prize}
+                      </span>
                     ))}
                   </div>
-                  <h3 className="text-base font-bold text-white">{comp.title}</h3>
-                  <p className="text-sm text-slate-500 mt-1">{comp.description}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-600 shrink-0 mt-1" />
-              </div>
+                )}
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mb-3">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {comp.teamSize}</span>
-                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> 마감 {comp.deadline}</span>
-                <span className="flex items-center gap-1"><Target className="w-3 h-3" /> 심사 {comp.judgeDate}</span>
-              </div>
-
-              {/* Team Progress */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
-                </div>
-                <span className="text-xs text-slate-400 shrink-0">{comp.teamsRegistered}/{comp.maxTeams}팀</span>
-              </div>
-
-              {/* Prizes */}
-              {comp.prizes.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {comp.prizes.map((prize, i) => (
-                    <span key={i} className="flex items-center gap-1 text-[10px] text-amber-400/70 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
-                      <Medal className="w-2.5 h-2.5" /> {prize}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Expanded Detail */}
-              {selectedId === comp.id && (
-                <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                    <div className="bg-white/[0.03] rounded-lg p-3">
-                      <div className="text-xs text-slate-500">팀 규모</div>
-                      <div className="text-sm font-bold text-white mt-0.5">{comp.teamSize}</div>
+                {/* Expanded Detail */}
+                {selectedId === comp.id && (
+                  <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                      <div className="bg-white/[0.03] rounded-lg p-3">
+                        <div className="text-xs text-slate-500">팀 규모</div>
+                        <div className="text-sm font-bold text-white mt-0.5">{comp.teamSize}</div>
+                      </div>
+                      <div className="bg-white/[0.03] rounded-lg p-3">
+                        <div className="text-xs text-slate-500">접수 마감</div>
+                        <div className="text-sm font-bold text-white mt-0.5">{comp.deadline}</div>
+                      </div>
+                      <div className="bg-white/[0.03] rounded-lg p-3">
+                        <div className="text-xs text-slate-500">심사일</div>
+                        <div className="text-sm font-bold text-white mt-0.5">{comp.judgeDate}</div>
+                      </div>
+                      <div className="bg-white/[0.03] rounded-lg p-3">
+                        <div className="text-xs text-slate-500">잔여 슬롯</div>
+                        <div className="text-sm font-bold text-indigo-400 mt-0.5">{comp.maxTeams - comp.teamsRegistered}팀</div>
+                      </div>
                     </div>
-                    <div className="bg-white/[0.03] rounded-lg p-3">
-                      <div className="text-xs text-slate-500">접수 마감</div>
-                      <div className="text-sm font-bold text-white mt-0.5">{comp.deadline}</div>
-                    </div>
-                    <div className="bg-white/[0.03] rounded-lg p-3">
-                      <div className="text-xs text-slate-500">심사일</div>
-                      <div className="text-sm font-bold text-white mt-0.5">{comp.judgeDate}</div>
-                    </div>
-                    <div className="bg-white/[0.03] rounded-lg p-3">
-                      <div className="text-xs text-slate-500">잔여 슬롯</div>
-                      <div className="text-sm font-bold text-indigo-400 mt-0.5">{comp.maxTeams - comp.teamsRegistered}팀</div>
-                    </div>
+                    {comp.status === 'open' && (
+                      <button className="w-full py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-500 transition-colors">
+                        팀 등록하기
+                      </button>
+                    )}
+                    {comp.status === 'upcoming' && (
+                      <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
+                        모집 시작 시 알림 받기
+                      </button>
+                    )}
+                    {comp.status === 'completed' && (
+                      <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
+                        결과 보기
+                      </button>
+                    )}
                   </div>
-                  {comp.status === 'open' && (
-                    <button className="w-full py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-500 transition-colors">
-                      팀 등록하기
-                    </button>
-                  )}
-                  {comp.status === 'upcoming' && (
-                    <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
-                      모집 시작 시 알림 받기
-                    </button>
-                  )}
-                  {comp.status === 'completed' && (
-                    <button className="w-full py-2.5 bg-white/5 text-slate-400 text-sm rounded-lg border border-white/10">
-                      결과 보기
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          })}
 
-        {filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-600">
-            <Trophy className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">해당 상태의 경연이 없습니다</p>
-          </div>
-        )}
-      </div>
+          {filtered.length === 0 && (
+            <div className="text-center py-16 text-slate-600">
+              <Trophy className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">해당 상태의 경연이 없습니다</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

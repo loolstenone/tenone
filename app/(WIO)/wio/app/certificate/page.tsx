@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Award, Plus, Download, Eye, Calendar, User, Search, Filter } from 'lucide-react';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type CertStatus = 'issued' | 'draft' | 'revoked';
 
@@ -23,6 +24,7 @@ const STATUS_CONFIG: Record<CertStatus, { label: string; color: string }> = {
   revoked: { label: '취소', color: 'text-red-400 bg-red-500/10' },
 };
 
+// 데모 폴백 데이터
 const MOCK_CERTIFICATES: Certificate[] = [
   { id: 'cert1', title: 'MADLeague Season 6 수료증', recipientName: '김마케팅', issuedDate: '2025-12-01', type: '수료증', status: 'issued', courseOrEvent: 'MADLeague S6', certNumber: 'ML-S6-001' },
   { id: 'cert2', title: 'Evolution School 마케팅 과정 수료', recipientName: '이기획', issuedDate: '2026-01-15', type: '수료증', status: 'issued', courseOrEvent: '마케팅 실전 과정', certNumber: 'ES-MKT-023' },
@@ -31,24 +33,53 @@ const MOCK_CERTIFICATES: Certificate[] = [
   { id: 'cert5', title: 'MADLeague Season 7 참가 확인서', recipientName: '정광고', issuedDate: '', type: '참가확인서', status: 'draft', courseOrEvent: 'MADLeague S7', certNumber: 'ML-S7-TBD' },
 ];
 
+// DB 행 → Certificate 매핑
+function mapRow(row: any): Certificate {
+  return {
+    id: row.id,
+    title: row.title || '',
+    recipientName: row.recipient_name || '',
+    issuedDate: row.issued_date ? row.issued_date.split('T')[0] : '',
+    type: row.type || '수료증',
+    status: row.status || 'draft',
+    courseOrEvent: row.course_or_event || row.course || '',
+    certNumber: row.cert_number || '',
+  };
+}
+
 export default function CertificatePage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [certificates, setCertificates] = useState<Certificate[]>(isDemo ? MOCK_CERTIFICATES : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  useEffect(() => {
+  // Supabase에서 수료증 목록 로드
+  const loadCertificates = useCallback(async () => {
     if (isDemo) return;
-    fetch(`/api/certificates?brandId=${tenant?.id}`)
-      .then(res => res.json())
-      .then(data => {
-        const list = Array.isArray(data) ? data : data?.data;
-        if (Array.isArray(list) && list.length > 0) setCertificates(list);
-        else setCertificates(MOCK_CERTIFICATES);
-      })
-      .catch(() => setCertificates(MOCK_CERTIFICATES));
-  }, [isDemo, tenant?.id]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('certificates')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setCertificates(data.map(mapRow));
+      } else {
+        setCertificates(MOCK_CERTIFICATES);
+      }
+    } catch {
+      setCertificates(MOCK_CERTIFICATES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadCertificates(); }, [loadCertificates]);
 
   const types = ['all', ...new Set(certificates.map(c => c.type))];
   const filtered = certificates.filter(c => {
@@ -108,39 +139,49 @@ export default function CertificatePage() {
         </div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">수료증 목록 로딩 중...</p>
+        </div>
+      )}
+
       {/* Certificate List */}
-      <div className="border border-white/5 rounded-xl overflow-hidden overflow-x-auto">
-        <table className="w-full min-w-[700px]">
-          <thead>
-            <tr className="bg-white/[0.02] border-b border-white/5">
-              <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">제목</th>
-              <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">수여자</th>
-              <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">유형</th>
-              <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">발급일</th>
-              <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">상태</th>
-              <th className="py-3 px-4 text-xs text-slate-500 font-semibold text-right">번호</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(cert => {
-              const st = STATUS_CONFIG[cert.status];
-              return (
-                <tr key={cert.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer">
-                  <td className="py-3 px-4 text-sm font-medium text-white">{cert.title}</td>
-                  <td className="py-3 px-4 text-sm text-slate-400">{cert.recipientName}</td>
-                  <td className="py-3 px-4"><span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400">{cert.type}</span></td>
-                  <td className="py-3 px-4 text-sm text-slate-500">{cert.issuedDate || '—'}</td>
-                  <td className="py-3 px-4"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${st.color}`}>{st.label}</span></td>
-                  <td className="py-3 px-4 text-right text-xs text-slate-600 font-mono">{cert.certNumber}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-slate-600"><Award className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm">결과 없음</p></div>
-        )}
-      </div>
+      {!loading && (
+        <div className="border border-white/5 rounded-xl overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[700px]">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/5">
+                <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">제목</th>
+                <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">수여자</th>
+                <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">유형</th>
+                <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">발급일</th>
+                <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">상태</th>
+                <th className="py-3 px-4 text-xs text-slate-500 font-semibold text-right">번호</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(cert => {
+                const st = STATUS_CONFIG[cert.status];
+                return (
+                  <tr key={cert.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer">
+                    <td className="py-3 px-4 text-sm font-medium text-white">{cert.title}</td>
+                    <td className="py-3 px-4 text-sm text-slate-400">{cert.recipientName}</td>
+                    <td className="py-3 px-4"><span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400">{cert.type}</span></td>
+                    <td className="py-3 px-4 text-sm text-slate-500">{cert.issuedDate || '—'}</td>
+                    <td className="py-3 px-4"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${st.color}`}>{st.label}</span></td>
+                    <td className="py-3 px-4 text-right text-xs text-slate-600 font-mono">{cert.certNumber}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-slate-600"><Award className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm">결과 없음</p></div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

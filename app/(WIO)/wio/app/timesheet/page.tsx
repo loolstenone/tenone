@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, Calendar, Check, AlertCircle, ChevronLeft, ChevronRight, Sparkles, Save } from 'lucide-react';
 import { useWIO } from '../layout';
-import { fetchTimesheets, upsertTimesheet } from '@/lib/supabase/wio';
+import { fetchTimesheets, upsertTimesheet, fetchProjects } from '@/lib/supabase/wio';
 import type { WIOProject } from '@/types/wio';
 
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -54,6 +54,20 @@ export default function WIOTimesheetPage() {
 
     const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
 
+    // DB에서 프로젝트 목록 로드
+    const loadProjects = useCallback(async () => {
+        if (isDemo || !tenant) return;
+        try {
+            const realProjects = await fetchProjects(tenant.id);
+            if (realProjects.length > 0) {
+                setProjects(realProjects.map(p => ({ id: p.id, title: p.title, code: p.code })));
+            }
+            // 데이터 없으면 Mock 프로젝트 유지
+        } catch {
+            // DB 실패 시 Mock 유지
+        }
+    }, [isDemo, tenant]);
+
     // DB에서 타임시트 로드
     const loadTimesheets = useCallback(async () => {
         if (isDemo || !tenant || !member) return;
@@ -80,6 +94,7 @@ export default function WIOTimesheetPage() {
         }
     }, [isDemo, tenant, member, weekOffset]);
 
+    useEffect(() => { loadProjects(); }, [loadProjects]);
     useEffect(() => { loadTimesheets(); }, [loadTimesheets]);
 
     const updateHour = (projectId: string, dayIndex: number, value: number) => {
