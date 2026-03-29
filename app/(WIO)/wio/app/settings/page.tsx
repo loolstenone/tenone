@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Settings, Users, Palette, Building2, Save, Check, Plus, Trash2,
   ChevronUp, ChevronDown, Pencil, ToggleLeft, ToggleRight, Search,
-  GitBranch, GripVertical, UserPlus, ArrowRight, ChevronRight,
-  Layers, Building, Zap, Clock, Shield, Play, FileText, Wrench,
-  User,
+  GripVertical, UserPlus, ArrowRight, ChevronRight,
+  Building, Zap, Clock, Shield, Play,
+  User, Eye, X, Undo2, History, Download, Circle, Square, Diamond,
+  Timer, Bell, Workflow, MousePointer, Grip, CircleDot, Blocks,
 } from 'lucide-react';
 import { useWIO } from '../layout';
 import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, removeMember } from '@/lib/supabase/wio';
@@ -21,182 +22,417 @@ const ROLE_LABELS: Record<string, string> = {
   owner: '소유자', admin: '관리자', manager: '매니저', member: '멤버', guest: '게스트',
 };
 
-type SettingsTab = 'modules' | 'tracks' | 'theme' | 'org' | 'members';
+type SettingsTab = 'modules' | 'visual' | 'theme' | 'org' | 'members';
+type VisualMode = 'org' | 'module' | 'workflow';
 
 /* ═══════════════════════════════════════════════════════════
-   EUS 8.1 — 3-Layer Workflow Mock Data
+   비주얼 세팅 Mock Data — EUS v2.0 Part 15.6
    ═══════════════════════════════════════════════════════════ */
 
-// Layer 1: 전사 워크플로우
-interface CompanyWorkflow {
+// ── Track definitions ──
+interface TrackDef {
   id: string;
   name: string;
-  trigger: string;
-  involvedTracks: string[];
-  sla: string;
-  status: 'active' | 'draft';
-  steps: { order: number; name: string; role: string; track: string }[];
+  color: string;
+  colorBg: string;
+  colorBorder: string;
 }
 
-const COMPANY_WORKFLOWS: CompanyWorkflow[] = [
-  {
-    id: 'cw-approval', name: '전자결재', trigger: '결재 요청 시', involvedTracks: ['전 트랙'], sla: '48시간 이내',
-    status: 'active',
-    steps: [
-      { order: 1, name: '기안 작성', role: '담당자', track: '해당 부서' },
-      { order: 2, name: '팀장 승인', role: '팀장', track: '해당 부서' },
-      { order: 3, name: '본부장 승인', role: '본부장', track: '운영·관리' },
-      { order: 4, name: '최종 승인', role: '대표', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-recruit', name: '채용', trigger: '채용 요청 시', involvedTracks: ['운영·관리', '해당 부서'], sla: '30일 이내',
-    status: 'active',
-    steps: [
-      { order: 1, name: '채용 요청', role: '부서장', track: '해당 부서' },
-      { order: 2, name: 'JD 작성/공고', role: 'HR 담당', track: '운영·관리' },
-      { order: 3, name: '서류 심사', role: 'HR 담당', track: '운영·관리' },
-      { order: 4, name: '면접 진행', role: '면접관', track: '해당 부서' },
-      { order: 5, name: '최종 합격', role: 'HR 팀장', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-onboard', name: '온보딩', trigger: '입사일 기준', involvedTracks: ['운영·관리', '시스템', '해당 부서'], sla: '입사 후 7일',
-    status: 'active',
-    steps: [
-      { order: 1, name: '계정 생성', role: 'IT 관리자', track: '시스템' },
-      { order: 2, name: '장비 지급', role: 'IT 관리자', track: '시스템' },
-      { order: 3, name: 'HR 서류', role: 'HR 담당', track: '운영·관리' },
-      { order: 4, name: '부서 배정', role: '부서장', track: '해당 부서' },
-      { order: 5, name: '멘토 배정', role: '부서장', track: '해당 부서' },
-    ],
-  },
-  {
-    id: 'cw-resign', name: '퇴직', trigger: '퇴직 신청 시', involvedTracks: ['운영·관리', '시스템'], sla: '30일 전 통보',
-    status: 'active',
-    steps: [
-      { order: 1, name: '퇴직 신청', role: '본인', track: '해당 부서' },
-      { order: 2, name: '면담/인수인계', role: '부서장', track: '해당 부서' },
-      { order: 3, name: '계정 정리', role: 'IT 관리자', track: '시스템' },
-      { order: 4, name: '퇴직 처리', role: 'HR 담당', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-purchase', name: '구매', trigger: '구매 요청 시', involvedTracks: ['생산', '운영·관리'], sla: '5영업일',
-    status: 'active',
-    steps: [
-      { order: 1, name: '구매 요청', role: '담당자', track: '해당 부서' },
-      { order: 2, name: '예산 확인', role: '재무 담당', track: '운영·관리' },
-      { order: 3, name: '견적 비교', role: '구매 담당', track: '생산' },
-      { order: 4, name: '발주', role: '구매 담당', track: '생산' },
-    ],
-  },
-  {
-    id: 'cw-budget', name: '예산', trigger: '분기/연간 예산 편성', involvedTracks: ['전 트랙', '운영·관리'], sla: '분기 시작 1개월 전',
-    status: 'active',
-    steps: [
-      { order: 1, name: '부서별 예산 제출', role: '부서장', track: '전 트랙' },
-      { order: 2, name: '검토/조정', role: '재무팀', track: '운영·관리' },
-      { order: 3, name: '경영진 승인', role: '대표', track: '운영·관리' },
-      { order: 4, name: '배정/집행', role: '재무팀', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-eval', name: '평가', trigger: '평가 기간 도래', involvedTracks: ['전 트랙', '운영·관리'], sla: '평가 기간 2주',
-    status: 'active',
-    steps: [
-      { order: 1, name: '자기 평가', role: '전 직원', track: '전 트랙' },
-      { order: 2, name: '동료 평가', role: '전 직원', track: '전 트랙' },
-      { order: 3, name: '상사 평가', role: '팀장/본부장', track: '전 트랙' },
-      { order: 4, name: '보정/확정', role: 'HR 팀', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-reward', name: '보상', trigger: '평가 확정 후', involvedTracks: ['운영·관리'], sla: '평가 후 1개월',
-    status: 'draft',
-    steps: [
-      { order: 1, name: '보상 기준 설정', role: 'HR 팀', track: '운영·관리' },
-      { order: 2, name: '개인별 산정', role: 'HR 팀', track: '운영·관리' },
-      { order: 3, name: '경영진 승인', role: '대표', track: '운영·관리' },
-      { order: 4, name: '급여 반영', role: '재무팀', track: '운영·관리' },
-    ],
-  },
-  {
-    id: 'cw-newprod', name: '신제품출시', trigger: '출시 기획 승인 시', involvedTracks: ['사업', '생산', '지원'], sla: '프로젝트별',
-    status: 'draft',
-    steps: [
-      { order: 1, name: '기획/컨셉', role: '기획팀', track: '사업' },
-      { order: 2, name: '디자인/개발', role: '개발/디자인팀', track: '지원' },
-      { order: 3, name: '생산/QA', role: '생산팀', track: '생산' },
-      { order: 4, name: '마케팅/런칭', role: '마케팅팀', track: '사업' },
-    ],
-  },
-  {
-    id: 'cw-compliance', name: '컴플라이언스', trigger: '규정 위반 감지', involvedTracks: ['전 트랙', '운영·관리'], sla: '즉시',
-    status: 'active',
-    steps: [
-      { order: 1, name: '위반 감지/신고', role: '전 직원', track: '전 트랙' },
-      { order: 2, name: '조사', role: '법무/감사', track: '운영·관리' },
-      { order: 3, name: '시정 조치', role: '해당 부서장', track: '해당 부서' },
-      { order: 4, name: '결과 보고', role: '법무/감사', track: '운영·관리' },
-    ],
-  },
+const TRACKS: TrackDef[] = [
+  { id: 'track1', name: 'Track 1 운영·관리', color: 'text-blue-400', colorBg: 'bg-blue-500/10', colorBorder: 'border-blue-500/20' },
+  { id: 'track2', name: 'Track 2 사업', color: 'text-green-400', colorBg: 'bg-green-500/10', colorBorder: 'border-green-500/20' },
+  { id: 'track3', name: 'Track 3 생산', color: 'text-orange-400', colorBg: 'bg-orange-500/10', colorBorder: 'border-orange-500/20' },
+  { id: 'track4', name: 'Track 4 지원', color: 'text-purple-400', colorBg: 'bg-purple-500/10', colorBorder: 'border-purple-500/20' },
+  { id: 'track5', name: 'Track 5 파트너', color: 'text-cyan-400', colorBg: 'bg-cyan-500/10', colorBorder: 'border-cyan-500/20' },
+  { id: 'track6', name: 'Track 6 공통', color: 'text-slate-400', colorBg: 'bg-slate-500/10', colorBorder: 'border-slate-500/20' },
+  { id: 'track7', name: 'Track 7 시스템', color: 'text-rose-400', colorBg: 'bg-rose-500/10', colorBorder: 'border-rose-500/20' },
 ];
 
-// Layer 2: 부서별 워크플로우
-interface DeptWorkflow {
+// ── Org tree ──
+interface OrgNode {
   id: string;
   name: string;
-  department: string;
-  steps: { order: number; name: string; role: string }[];
+  type: '본부' | '팀' | '파트';
+  head: string;
+  memberCount: number;
+  trackId: string;
+  children?: OrgNode[];
+  members?: { id: string; name: string; role: string; level: 'Team Lead' | 'Sub-Lead' | 'Member' }[];
 }
 
-const DEPT_WORKFLOW_MAP: Record<string, DeptWorkflow[]> = {
-  '마케팅': [
-    { id: 'dw-campaign', name: '캠페인 실행', department: '마케팅',
-      steps: [{ order: 1, name: '기획', role: '매니저' }, { order: 2, name: '크리에이티브 제작', role: '디자이너' }, { order: 3, name: '매체 집행', role: '미디어 담당' }, { order: 4, name: '성과 분석', role: '데이터 분석가' }] },
-    { id: 'dw-content', name: '콘텐츠 발행', department: '마케팅',
-      steps: [{ order: 1, name: '주제 선정', role: '매니저' }, { order: 2, name: '콘텐츠 작성', role: '작성자' }, { order: 3, name: '검수/승인', role: '팀장' }, { order: 4, name: '발행', role: '담당자' }] },
+const MOCK_ORG_TREE: Record<string, OrgNode[]> = {
+  track1: [
+    {
+      id: 'org-ops-hq', name: '경영관리본부', type: '본부', head: '김경영', memberCount: 18, trackId: 'track1',
+      members: [
+        { id: 'm1', name: '김경영', role: '본부장', level: 'Team Lead' },
+      ],
+      children: [
+        {
+          id: 'org-hr', name: '인사팀', type: '팀', head: '이인사', memberCount: 5, trackId: 'track1',
+          members: [
+            { id: 'm2', name: '이인사', role: '팀장', level: 'Team Lead' },
+            { id: 'm3', name: '박채용', role: '사원', level: 'Member' },
+            { id: 'm4', name: '최교육', role: '사원', level: 'Member' },
+            { id: 'm5', name: '정복지', role: '사원', level: 'Member' },
+            { id: 'm6', name: '한근태', role: '파트장', level: 'Sub-Lead' },
+          ],
+          children: [
+            {
+              id: 'org-hr-recruit', name: '채용파트', type: '파트', head: '한근태', memberCount: 2, trackId: 'track1',
+              members: [
+                { id: 'm6', name: '한근태', role: '파트장', level: 'Sub-Lead' },
+                { id: 'm3', name: '박채용', role: '사원', level: 'Member' },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'org-fin', name: '재무팀', type: '팀', head: '강재무', memberCount: 4, trackId: 'track1',
+          members: [
+            { id: 'm7', name: '강재무', role: '팀장', level: 'Team Lead' },
+            { id: 'm8', name: '윤회계', role: '사원', level: 'Member' },
+            { id: 'm9', name: '장세무', role: '사원', level: 'Member' },
+            { id: 'm10', name: '임자산', role: '사원', level: 'Member' },
+          ],
+        },
+        {
+          id: 'org-strategy', name: '전략기획팀', type: '팀', head: '문전략', memberCount: 3, trackId: 'track1',
+          members: [
+            { id: 'm11', name: '문전략', role: '팀장', level: 'Team Lead' },
+            { id: 'm12', name: '서기획', role: '사원', level: 'Member' },
+            { id: 'm13', name: '노분석', role: '사원', level: 'Member' },
+          ],
+        },
+      ],
+    },
   ],
-  '영업': [
-    { id: 'dw-deal', name: '딜 프로세스', department: '영업',
-      steps: [{ order: 1, name: '리드 발굴', role: '영업 담당' }, { order: 2, name: '니즈 파악', role: '영업 담당' }, { order: 3, name: '제안/견적', role: '영업 매니저' }, { order: 4, name: '계약 체결', role: '영업 팀장' }] },
+  track2: [
+    {
+      id: 'org-biz-hq', name: '사업본부', type: '본부', head: '정사업', memberCount: 22, trackId: 'track2',
+      members: [{ id: 'm20', name: '정사업', role: '본부장', level: 'Team Lead' }],
+      children: [
+        {
+          id: 'org-mkt', name: '마케팅팀', type: '팀', head: '오마케', memberCount: 7, trackId: 'track2',
+          members: [
+            { id: 'm21', name: '오마케', role: '팀장', level: 'Team Lead' },
+            { id: 'm22', name: '김콘텐', role: '사원', level: 'Member' },
+            { id: 'm23', name: '이소셜', role: '사원', level: 'Member' },
+            { id: 'm24', name: '박퍼포', role: '사원', level: 'Member' },
+          ],
+        },
+        {
+          id: 'org-sales', name: '영업팀', type: '팀', head: '유영업', memberCount: 8, trackId: 'track2',
+          members: [
+            { id: 'm25', name: '유영업', role: '팀장', level: 'Team Lead' },
+            { id: 'm26', name: '신리드', role: '사원', level: 'Member' },
+            { id: 'm27', name: '홍계약', role: '사원', level: 'Member' },
+          ],
+        },
+        {
+          id: 'org-crm', name: 'CRM팀', type: '팀', head: '안고객', memberCount: 4, trackId: 'track2',
+          members: [
+            { id: 'm28', name: '안고객', role: '팀장', level: 'Team Lead' },
+            { id: 'm29', name: '배서비', role: '사원', level: 'Member' },
+          ],
+        },
+      ],
+    },
   ],
-  '개발': [
-    { id: 'dw-sprint', name: '스프린트', department: '개발',
-      steps: [{ order: 1, name: '백로그 정리', role: 'PO' }, { order: 2, name: '스프린트 플래닝', role: '팀 전체' }, { order: 3, name: '개발/리뷰', role: '개발자' }, { order: 4, name: '데모/회고', role: '팀 전체' }] },
-    { id: 'dw-incident', name: '장애 대응', department: '개발',
-      steps: [{ order: 1, name: '장애 감지', role: '모니터링' }, { order: 2, name: '원인 분석', role: '시니어 개발자' }, { order: 3, name: '핫픽스', role: '개발자' }, { order: 4, name: '포스트모템', role: '팀장' }] },
+  track3: [
+    {
+      id: 'org-prod-hq', name: '생산본부', type: '본부', head: '류생산', memberCount: 15, trackId: 'track3',
+      members: [{ id: 'm30', name: '류생산', role: '본부장', level: 'Team Lead' }],
+      children: [
+        {
+          id: 'org-manufacture', name: '제조팀', type: '팀', head: '백제조', memberCount: 8, trackId: 'track3',
+          members: [
+            { id: 'm31', name: '백제조', role: '팀장', level: 'Team Lead' },
+            { id: 'm32', name: '피품질', role: '사원', level: 'Member' },
+          ],
+        },
+        {
+          id: 'org-logistics', name: '물류팀', type: '팀', head: '조물류', memberCount: 5, trackId: 'track3',
+          members: [
+            { id: 'm33', name: '조물류', role: '팀장', level: 'Team Lead' },
+            { id: 'm34', name: '권운송', role: '사원', level: 'Member' },
+          ],
+        },
+      ],
+    },
   ],
-  '디자인': [
-    { id: 'dw-design-req', name: '디자인 요청', department: '디자인',
-      steps: [{ order: 1, name: '요청 접수', role: '디자인 매니저' }, { order: 2, name: '시안 제작', role: '디자이너' }, { order: 3, name: '피드백', role: '요청자' }, { order: 4, name: '최종 납품', role: '디자이너' }] },
+  track4: [
+    {
+      id: 'org-support-hq', name: '지원본부', type: '본부', head: '차지원', memberCount: 20, trackId: 'track4',
+      members: [{ id: 'm40', name: '차지원', role: '본부장', level: 'Team Lead' }],
+      children: [
+        {
+          id: 'org-dev', name: '개발팀', type: '팀', head: '탁개발', memberCount: 10, trackId: 'track4',
+          members: [
+            { id: 'm41', name: '탁개발', role: '팀장', level: 'Team Lead' },
+            { id: 'm42', name: '심백엔', role: '사원', level: 'Member' },
+            { id: 'm43', name: '엄프론', role: '사원', level: 'Member' },
+          ],
+        },
+        {
+          id: 'org-design', name: '디자인팀', type: '팀', head: '공디자', memberCount: 5, trackId: 'track4',
+          members: [
+            { id: 'm44', name: '공디자', role: '팀장', level: 'Team Lead' },
+            { id: 'm45', name: '양UI', role: '사원', level: 'Member' },
+          ],
+        },
+      ],
+    },
   ],
-  '생산': [
-    { id: 'dw-production', name: '생산 실행', department: '생산',
-      steps: [{ order: 1, name: '작업 지시', role: '생산관리자' }, { order: 2, name: '자재 출고', role: '자재 담당' }, { order: 3, name: '생산 실행', role: '작업자' }, { order: 4, name: '검수', role: '품질 담당' }] },
-    { id: 'dw-defect', name: '불량 처리', department: '생산',
-      steps: [{ order: 1, name: '불량 발견', role: '검사자' }, { order: 2, name: '원인 분석', role: '품질 엔지니어' }, { order: 3, name: '시정 조치', role: '공정 담당' }, { order: 4, name: '재검증', role: '품질 담당' }] },
+  track5: [
+    {
+      id: 'org-partner-hq', name: '파트너관리', type: '본부', head: '임파트', memberCount: 3, trackId: 'track5',
+      members: [{ id: 'm50', name: '임파트', role: '본부장', level: 'Team Lead' }],
+      children: [],
+    },
   ],
-  '인사': [
-    { id: 'dw-training', name: '교육 운영', department: '인사',
-      steps: [{ order: 1, name: '교육 기획', role: 'HR 매니저' }, { order: 2, name: '일정/강사 확정', role: 'HR 담당' }, { order: 3, name: '수강/수료', role: '수강자' }, { order: 4, name: '효과 측정', role: 'HR 매니저' }] },
-  ],
-  '재무': [
-    { id: 'dw-closing', name: '월 마감', department: '재무',
-      steps: [{ order: 1, name: '전표 마감', role: '회계 담당' }, { order: 2, name: '계정 조정', role: '회계 담당' }, { order: 3, name: '재무제표 작성', role: '재무 매니저' }, { order: 4, name: '검토/확정', role: '재무 팀장' }] },
+  track6: [],
+  track7: [
+    {
+      id: 'org-system-hq', name: '시스템관리', type: '본부', head: '전시스', memberCount: 4, trackId: 'track7',
+      members: [{ id: 'm60', name: '전시스', role: '본부장', level: 'Team Lead' }],
+      children: [
+        {
+          id: 'org-it', name: 'IT인프라팀', type: '팀', head: '성인프', memberCount: 3, trackId: 'track7',
+          members: [
+            { id: 'm61', name: '성인프', role: '팀장', level: 'Team Lead' },
+            { id: 'm62', name: '구보안', role: '사원', level: 'Member' },
+          ],
+        },
+      ],
+    },
   ],
 };
 
-const DEPT_LIST = Object.keys(DEPT_WORKFLOW_MAP);
+// ── Module palette blocks ──
+interface ModuleBlock {
+  code: string;
+  name: string;
+  trackId: string;
+  trackColor: string; // ■파랑=운영 ■초록=사업 ■주황=생산 ■보라=지원 ■회색=공통
+}
 
-// Layer 3: 업무 도구
-const PERSONAL_TOOLS = [
-  { key: 'MY-HOME', label: 'My 홈', desc: '개인 대시보드' },
-  { key: 'MY-HR',   label: 'My 인사', desc: '급여·근태·증명서' },
-  { key: 'MY-EVL',  label: 'My 평가', desc: '내 평가·피드백' },
-  { key: 'MY-WRK',  label: 'My 업무', desc: '내 업무 목록' },
-  { key: 'MY-APR',  label: 'My 결재', desc: '내 결재 요청/대기' },
+const MODULE_BLOCKS: ModuleBlock[] = [
+  // Track 1 운영 (파랑)
+  { code: 'HR', name: '인사', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'FIN', name: '재무', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'STR', name: '전략', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'GPR', name: 'GPR', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'PAY', name: '급여', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'EVL', name: '평가', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'ATT', name: '근태', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'LRN', name: '교육', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'AUD', name: '감사', trackId: 'track1', trackColor: 'bg-blue-500' },
+  { code: 'LEG', name: '법무', trackId: 'track1', trackColor: 'bg-blue-500' },
+  // Track 2 사업 (초록)
+  { code: 'MKT', name: '마케팅', trackId: 'track2', trackColor: 'bg-green-500' },
+  { code: 'SAL', name: '영업', trackId: 'track2', trackColor: 'bg-green-500' },
+  { code: 'CRM', name: 'CRM', trackId: 'track2', trackColor: 'bg-green-500' },
+  { code: 'BD', name: '사업개발', trackId: 'track2', trackColor: 'bg-green-500' },
+  { code: 'CMP', name: '캠페인', trackId: 'track2', trackColor: 'bg-green-500' },
+  { code: 'CDP', name: 'CDP', trackId: 'track2', trackColor: 'bg-green-500' },
+  // Track 3 생산 (주황)
+  { code: 'PRD', name: '제조', trackId: 'track3', trackColor: 'bg-orange-500' },
+  { code: 'PRC', name: '구매', trackId: 'track3', trackColor: 'bg-orange-500' },
+  { code: 'INV', name: '재고', trackId: 'track3', trackColor: 'bg-orange-500' },
+  { code: 'QC', name: '품질', trackId: 'track3', trackColor: 'bg-orange-500' },
+  { code: 'LOG', name: '물류', trackId: 'track3', trackColor: 'bg-orange-500' },
+  // Track 4 지원 (보라)
+  { code: 'DEV', name: '개발', trackId: 'track4', trackColor: 'bg-purple-500' },
+  { code: 'DSN', name: '디자인', trackId: 'track4', trackColor: 'bg-purple-500' },
+  { code: 'RND', name: 'R&D', trackId: 'track4', trackColor: 'bg-purple-500' },
+  { code: 'CNT', name: '콘텐츠', trackId: 'track4', trackColor: 'bg-purple-500' },
+  { code: 'DAM', name: 'DAM', trackId: 'track4', trackColor: 'bg-purple-500' },
+  // Track 6 공통 (회색)
+  { code: 'TLK', name: '게시판', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'APR', name: '결재', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'PRJ', name: '프로젝트', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'MSG', name: '메신저', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'WIK', name: '위키', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'AI', name: 'AI', trackId: 'track6', trackColor: 'bg-slate-500' },
+  { code: 'CAL', name: '캘린더', trackId: 'track6', trackColor: 'bg-slate-500' },
+  // Track 7 시스템 (로즈)
+  { code: 'USR', name: '사용자', trackId: 'track7', trackColor: 'bg-rose-500' },
+  { code: 'ROL', name: '권한', trackId: 'track7', trackColor: 'bg-rose-500' },
+  { code: 'SEC', name: '보안', trackId: 'track7', trackColor: 'bg-rose-500' },
+  { code: 'MON', name: '모니터', trackId: 'track7', trackColor: 'bg-rose-500' },
+];
+
+// ── Assigned modules per org ──
+const MOCK_ASSIGNED_MODULES: Record<string, string[]> = {
+  'org-hr': ['HR', 'EVL', 'ATT', 'PAY', 'LRN'],
+  'org-fin': ['FIN', 'AUD', 'LEG'],
+  'org-strategy': ['STR', 'GPR'],
+  'org-mkt': ['MKT', 'CMP', 'CNT'],
+  'org-sales': ['SAL', 'CRM'],
+  'org-crm': ['CRM', 'CDP'],
+  'org-manufacture': ['PRD', 'QC', 'INV'],
+  'org-logistics': ['LOG', 'PRC'],
+  'org-dev': ['DEV', 'RND'],
+  'org-design': ['DSN', 'DAM', 'CNT'],
+  'org-it': ['USR', 'ROL', 'SEC', 'MON'],
+};
+
+// ── Workflow nodes ──
+type WfNodeType = 'start' | 'end' | 'task' | 'condition' | 'approval' | 'parallel' | 'timer' | 'action' | 'notify';
+
+interface WfNode {
+  id: string;
+  type: WfNodeType;
+  label: string;
+  x: number;
+  y: number;
+  assignee?: string;
+  timeout?: string;
+  escalation?: string;
+}
+
+interface WfEdge {
+  from: string;
+  to: string;
+  condition?: string;
+}
+
+interface WorkflowTemplate {
+  id: string;
+  name: string;
+  description: string;
+  nodes: WfNode[];
+  edges: WfEdge[];
+}
+
+const WF_NODE_TYPES: { type: WfNodeType; icon: string; label: string; shape: string }[] = [
+  { type: 'start', icon: '○', label: '시작', shape: 'rounded-full' },
+  { type: 'end', icon: '○', label: '종료', shape: 'rounded-full' },
+  { type: 'task', icon: '□', label: '작업', shape: 'rounded-lg' },
+  { type: 'condition', icon: '◇', label: '조건분기', shape: 'rounded-lg rotate-45' },
+  { type: 'approval', icon: '▮', label: '승인', shape: 'rounded-lg' },
+  { type: 'parallel', icon: '═', label: '병렬', shape: 'rounded-lg' },
+  { type: 'timer', icon: '⏱', label: '타이머', shape: 'rounded-lg' },
+  { type: 'action', icon: '⚡', label: '자동액션', shape: 'rounded-lg' },
+  { type: 'notify', icon: '🔔', label: '알림', shape: 'rounded-lg' },
+];
+
+// 결재 flow example
+const APPROVAL_FLOW_TEMPLATE: WorkflowTemplate = {
+  id: 'tpl-approval',
+  name: '전자결재',
+  description: '표준 4단계 결재 프로세스 (기안→팀장→본부장→최종)',
+  nodes: [
+    { id: 'n1', type: 'start', label: '기안 시작', x: 60, y: 200 },
+    { id: 'n2', type: 'task', label: '기안 작성', x: 200, y: 200, assignee: '담당자' },
+    { id: 'n3', type: 'approval', label: '팀장 승인', x: 380, y: 200, assignee: '팀장', timeout: '24시간' },
+    { id: 'n4', type: 'condition', label: '금액 확인', x: 560, y: 200 },
+    { id: 'n5', type: 'approval', label: '본부장 승인', x: 740, y: 120, assignee: '본부장', timeout: '48시간', escalation: '대표이사' },
+    { id: 'n6', type: 'notify', label: '알림 발송', x: 740, y: 280 },
+    { id: 'n7', type: 'approval', label: '최종 승인', x: 920, y: 200, assignee: '대표', timeout: '72시간' },
+    { id: 'n8', type: 'action', label: '결재 완료 처리', x: 1100, y: 200 },
+    { id: 'n9', type: 'end', label: '완료', x: 1260, y: 200 },
+  ],
+  edges: [
+    { from: 'n1', to: 'n2' },
+    { from: 'n2', to: 'n3' },
+    { from: 'n3', to: 'n4' },
+    { from: 'n4', to: 'n5', condition: '100만원 이상' },
+    { from: 'n4', to: 'n6', condition: '100만원 미만' },
+    { from: 'n5', to: 'n7' },
+    { from: 'n6', to: 'n8' },
+    { from: 'n7', to: 'n8' },
+    { from: 'n8', to: 'n9' },
+  ],
+};
+
+const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+  APPROVAL_FLOW_TEMPLATE,
+  {
+    id: 'tpl-recruit', name: '채용', description: '채용 요청→서류→면접→합격 프로세스',
+    nodes: [
+      { id: 'r1', type: 'start', label: '채용 요청', x: 60, y: 150 },
+      { id: 'r2', type: 'task', label: 'JD 작성', x: 200, y: 150, assignee: 'HR' },
+      { id: 'r3', type: 'task', label: '서류 심사', x: 380, y: 150, assignee: 'HR' },
+      { id: 'r4', type: 'task', label: '면접', x: 560, y: 150, assignee: '면접관' },
+      { id: 'r5', type: 'approval', label: '최종 합격', x: 740, y: 150, assignee: 'HR팀장' },
+      { id: 'r6', type: 'end', label: '완료', x: 900, y: 150 },
+    ],
+    edges: [
+      { from: 'r1', to: 'r2' }, { from: 'r2', to: 'r3' }, { from: 'r3', to: 'r4' },
+      { from: 'r4', to: 'r5' }, { from: 'r5', to: 'r6' },
+    ],
+  },
+  {
+    id: 'tpl-purchase', name: '구매', description: '구매 요청→예산→견적→발주',
+    nodes: [
+      { id: 'p1', type: 'start', label: '구매 요청', x: 60, y: 150 },
+      { id: 'p2', type: 'approval', label: '예산 확인', x: 220, y: 150, assignee: '재무' },
+      { id: 'p3', type: 'task', label: '견적 비교', x: 400, y: 150, assignee: '구매 담당' },
+      { id: 'p4', type: 'task', label: '발주', x: 580, y: 150, assignee: '구매 담당' },
+      { id: 'p5', type: 'end', label: '완료', x: 740, y: 150 },
+    ],
+    edges: [
+      { from: 'p1', to: 'p2' }, { from: 'p2', to: 'p3' }, { from: 'p3', to: 'p4' }, { from: 'p4', to: 'p5' },
+    ],
+  },
+  {
+    id: 'tpl-onboard', name: '온보딩', description: '입사 후 계정→장비→서류→부서 배정',
+    nodes: [
+      { id: 'o1', type: 'start', label: '입사', x: 60, y: 150 },
+      { id: 'o2', type: 'parallel', label: '병렬 처리', x: 220, y: 150 },
+      { id: 'o3', type: 'task', label: '계정 생성', x: 400, y: 80, assignee: 'IT' },
+      { id: 'o4', type: 'task', label: '장비 지급', x: 400, y: 220, assignee: 'IT' },
+      { id: 'o5', type: 'task', label: '부서 배정', x: 580, y: 150, assignee: '부서장' },
+      { id: 'o6', type: 'end', label: '완료', x: 740, y: 150 },
+    ],
+    edges: [
+      { from: 'o1', to: 'o2' }, { from: 'o2', to: 'o3' }, { from: 'o2', to: 'o4' },
+      { from: 'o3', to: 'o5' }, { from: 'o4', to: 'o5' }, { from: 'o5', to: 'o6' },
+    ],
+  },
+  {
+    id: 'tpl-resign', name: '퇴직', description: '퇴직 신청→면담→인수인계→계정 정리',
+    nodes: [
+      { id: 'q1', type: 'start', label: '퇴직 신청', x: 60, y: 150 },
+      { id: 'q2', type: 'task', label: '면담', x: 220, y: 150, assignee: '부서장' },
+      { id: 'q3', type: 'task', label: '인수인계', x: 400, y: 150, assignee: '담당자' },
+      { id: 'q4', type: 'action', label: '계정 비활성화', x: 580, y: 150 },
+      { id: 'q5', type: 'end', label: '완료', x: 740, y: 150 },
+    ],
+    edges: [
+      { from: 'q1', to: 'q2' }, { from: 'q2', to: 'q3' }, { from: 'q3', to: 'q4' }, { from: 'q4', to: 'q5' },
+    ],
+  },
+  {
+    id: 'tpl-budget', name: '예산', description: '예산 편성→검토→승인→배정',
+    nodes: [
+      { id: 'b1', type: 'start', label: '예산 제출', x: 60, y: 150 },
+      { id: 'b2', type: 'task', label: '검토/조정', x: 220, y: 150, assignee: '재무팀' },
+      { id: 'b3', type: 'approval', label: '경영진 승인', x: 400, y: 150, assignee: '대표' },
+      { id: 'b4', type: 'action', label: '배정/집행', x: 580, y: 150 },
+      { id: 'b5', type: 'end', label: '완료', x: 740, y: 150 },
+    ],
+    edges: [
+      { from: 'b1', to: 'b2' }, { from: 'b2', to: 'b3' }, { from: 'b3', to: 'b4' }, { from: 'b4', to: 'b5' },
+    ],
+  },
+  {
+    id: 'tpl-eval', name: '평가', description: '자기평가→동료평가→상사평가→보정',
+    nodes: [
+      { id: 'e1', type: 'start', label: '평가 시작', x: 60, y: 150 },
+      { id: 'e2', type: 'task', label: '자기평가', x: 220, y: 150, assignee: '전 직원' },
+      { id: 'e3', type: 'task', label: '동료평가', x: 400, y: 150, assignee: '전 직원' },
+      { id: 'e4', type: 'task', label: '상사평가', x: 580, y: 150, assignee: '팀장/본부장' },
+      { id: 'e5', type: 'approval', label: '보정/확정', x: 760, y: 150, assignee: 'HR팀' },
+      { id: 'e6', type: 'end', label: '완료', x: 920, y: 150 },
+    ],
+    edges: [
+      { from: 'e1', to: 'e2' }, { from: 'e2', to: 'e3' }, { from: 'e3', to: 'e4' },
+      { from: 'e4', to: 'e5' }, { from: 'e5', to: 'e6' },
+    ],
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════ */
@@ -213,10 +449,24 @@ export default function SettingsPage() {
   const categoryNameRef = useRef<HTMLInputElement>(null);
   const [moduleSearch, setModuleSearch] = useState('');
 
-  // Track tab — 3 layers
-  const [trackLayer, setTrackLayer] = useState<1 | 2 | 3>(1);
-  const [expandedWorkflow, setExpandedWorkflow] = useState<string | null>(null);
-  const [selectedDept, setSelectedDept] = useState(DEPT_LIST[0]);
+  // Visual settings (3-mode)
+  const [visualMode, setVisualMode] = useState<VisualMode>('org');
+  const [expandedTracks, setExpandedTracks] = useState<string[]>(['track1']);
+  const [expandedOrgs, setExpandedOrgs] = useState<string[]>([]);
+  const [selectedOrgNode, setSelectedOrgNode] = useState<OrgNode | null>(null);
+  const [moduleFilterTrack, setModuleFilterTrack] = useState<string | null>(null);
+  const [modulePaletteSearch, setModulePaletteSearch] = useState('');
+  const [assignedModules, setAssignedModules] = useState<Record<string, string[]>>(MOCK_ASSIGNED_MODULES);
+  const [draggedModule, setDraggedModule] = useState<string | null>(null);
+  const [dragOverOrg, setDragOverOrg] = useState<string | null>(null);
+
+  // Workflow mode
+  const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate>(APPROVAL_FLOW_TEMPLATE);
+  const [selectedWfNode, setSelectedWfNode] = useState<WfNode | null>(null);
+  const [selectedWfEdge, setSelectedWfEdge] = useState<WfEdge | null>(null);
+  const [testRunning, setTestRunning] = useState(false);
+  const [testStep, setTestStep] = useState(-1);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // Theme
   const [editColor, setEditColor] = useState('#6366F1');
@@ -245,7 +495,6 @@ export default function SettingsPage() {
     }
     const cfg = loadOrbiConfig();
     setConfig(cfg);
-    // if no category configs, initialize
     if (cfg.categories.length === 0) {
       const defaultCats = CATEGORY_CATALOG.map((c, i) => ({
         id: c.id, name: c.name, order: i, enabled: true,
@@ -260,7 +509,6 @@ export default function SettingsPage() {
     }
   }, [tenant, tab]);
 
-  // Focus category name input when editing
   useEffect(() => {
     if (editingCategoryName && categoryNameRef.current) categoryNameRef.current.focus();
   }, [editingCategoryName]);
@@ -349,7 +597,6 @@ export default function SettingsPage() {
     return config.enabledModules.filter(k => catMods.includes(k)).length;
   }
 
-  // sort categories by order
   const sortedCategories = [...(config.categories.length > 0 ? config.categories : CATEGORY_CATALOG.map((c, i) => ({ id: c.id, name: c.name, order: i, enabled: true })))].sort((a, b) => a.order - b.order);
 
   // ── Org save ──
@@ -388,12 +635,140 @@ export default function SettingsPage() {
     if (ok) { setMembers(prev => prev.filter(m => m.id !== memberId)); showToast('멤버 제거됨'); }
   }
 
+  // ── Visual mode helpers ──
+  function toggleTrack(trackId: string) {
+    setExpandedTracks(prev => prev.includes(trackId) ? prev.filter(t => t !== trackId) : [...prev, trackId]);
+  }
+  function toggleOrg(orgId: string) {
+    setExpandedOrgs(prev => prev.includes(orgId) ? prev.filter(o => o !== orgId) : [...prev, orgId]);
+  }
+
+  function getAssignedCount(orgId: string): number {
+    return assignedModules[orgId]?.length || 0;
+  }
+
+  function handleDropModule(orgId: string) {
+    if (!draggedModule) return;
+    setAssignedModules(prev => {
+      const current = prev[orgId] || [];
+      if (current.includes(draggedModule)) return prev;
+      return { ...prev, [orgId]: [...current, draggedModule] };
+    });
+    setDraggedModule(null);
+    setDragOverOrg(null);
+    showToast('모듈 할당됨');
+  }
+
+  function removeModuleFromOrg(orgId: string, moduleCode: string) {
+    setAssignedModules(prev => {
+      const current = prev[orgId] || [];
+      return { ...prev, [orgId]: current.filter(c => c !== moduleCode) };
+    });
+    showToast('모듈 제거됨');
+  }
+
+  // ── Workflow test run ──
+  function startTestRun() {
+    setTestRunning(true);
+    setTestStep(0);
+    const nodes = selectedTemplate.nodes;
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      if (step >= nodes.length) {
+        clearInterval(interval);
+        setTestRunning(false);
+        setTestStep(-1);
+        showToast('테스트 실행 완료');
+      } else {
+        setTestStep(step);
+      }
+    }, 800);
+  }
+
+  // ── Node rendering helpers ──
+  function getNodeColor(type: WfNodeType): string {
+    switch (type) {
+      case 'start': return 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400';
+      case 'end': return 'bg-red-500/20 border-red-500/40 text-red-400';
+      case 'task': return 'bg-blue-500/20 border-blue-500/40 text-blue-400';
+      case 'condition': return 'bg-amber-500/20 border-amber-500/40 text-amber-400';
+      case 'approval': return 'bg-violet-500/20 border-violet-500/40 text-violet-400';
+      case 'parallel': return 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400';
+      case 'timer': return 'bg-orange-500/20 border-orange-500/40 text-orange-400';
+      case 'action': return 'bg-yellow-500/20 border-yellow-500/40 text-yellow-400';
+      case 'notify': return 'bg-pink-500/20 border-pink-500/40 text-pink-400';
+    }
+  }
+
+  function getNodeIcon(type: WfNodeType) {
+    switch (type) {
+      case 'start': return <Circle size={14} />;
+      case 'end': return <CircleDot size={14} />;
+      case 'task': return <Square size={14} />;
+      case 'condition': return <Diamond size={14} />;
+      case 'approval': return <Shield size={14} />;
+      case 'parallel': return <Grip size={14} />;
+      case 'timer': return <Timer size={14} />;
+      case 'action': return <Zap size={14} />;
+      case 'notify': return <Bell size={14} />;
+    }
+  }
+
+  // ── Org tree renderer ──
+  function renderOrgTree(nodes: OrgNode[], depth: number = 0, track: TrackDef) {
+    return nodes.map(node => {
+      const isExpanded = expandedOrgs.includes(node.id);
+      const isSelected = selectedOrgNode?.id === node.id;
+      const isDragOver = dragOverOrg === node.id;
+      const assignedCount = getAssignedCount(node.id);
+
+      return (
+        <div key={node.id} style={{ paddingLeft: depth * 16 }}>
+          <div
+            className={`flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer transition-all text-xs
+              ${isSelected ? `${track.colorBg} ${track.colorBorder} border` : 'hover:bg-white/5 border border-transparent'}
+              ${isDragOver ? 'ring-2 ring-indigo-500/50 bg-indigo-500/10' : ''}`}
+            onClick={() => { setSelectedOrgNode(node); if (node.children?.length) toggleOrg(node.id); }}
+            onDragOver={e => { e.preventDefault(); setDragOverOrg(node.id); }}
+            onDragLeave={() => setDragOverOrg(null)}
+            onDrop={e => { e.preventDefault(); handleDropModule(node.id); }}
+          >
+            {node.children && node.children.length > 0 ? (
+              <ChevronRight size={12} className={`text-slate-600 transition-transform shrink-0 ${isExpanded ? 'rotate-90' : ''}`} />
+            ) : (
+              <span className="w-3 shrink-0" />
+            )}
+            <span className={`text-[9px] px-1 py-0.5 rounded ${track.colorBg} ${track.color}`}>
+              {node.type}
+            </span>
+            <span className="font-medium text-white truncate">{node.name}</span>
+            <span className="text-[10px] text-slate-600 ml-auto shrink-0">{node.head}</span>
+            <span className="text-[10px] text-slate-600 shrink-0">{node.memberCount}명</span>
+            {visualMode === 'module' && assignedCount > 0 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 shrink-0">
+                {assignedCount}
+              </span>
+            )}
+          </div>
+          {isExpanded && node.children && renderOrgTree(node.children, depth + 1, track)}
+        </div>
+      );
+    });
+  }
+
   const TABS: { id: SettingsTab; label: string; icon: typeof Settings }[] = [
     { id: 'modules', label: '모듈 설정', icon: Settings },
-    { id: 'tracks', label: '트랙 설정', icon: GitBranch },
+    { id: 'visual', label: '비주얼 세팅', icon: Eye },
     { id: 'theme', label: '테마', icon: Palette },
     { id: 'org', label: '조직 정보', icon: Building2 },
     { id: 'members', label: '멤버 관리', icon: Users },
+  ];
+
+  const VISUAL_MODES: { id: VisualMode; label: string; icon: typeof Building; desc: string }[] = [
+    { id: 'org', label: '조직 모드', icon: Building, desc: '조직 구조 설계' },
+    { id: 'module', label: '모듈 모드', icon: Blocks, desc: '모듈 레고 배치' },
+    { id: 'workflow', label: '워크플로우 모드', icon: Workflow, desc: '업무 흐름 설계' },
   ];
 
   return (
@@ -458,7 +833,6 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <span className={`text-[10px] ${count > 0 ? 'text-indigo-400' : 'text-slate-600'}`}>{count}</span>
-                    {/* Reorder + rename buttons */}
                     <div className="hidden group-hover:flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
                       <button onClick={() => moveCategory(cc.id, -1)} disabled={idx === 0}
                         className="p-0.5 text-slate-600 hover:text-white disabled:opacity-20 transition"><ChevronUp size={12} /></button>
@@ -486,20 +860,17 @@ export default function SettingsPage() {
 
               return (
                 <>
-                  {/* Category header */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h2 className="text-base font-bold">{getCategoryName(selectedCategory)}</h2>
                       <p className="text-xs text-slate-500 mt-0.5">{categoryModules.length}개 모듈 중 {enabledCountForCategory(selectedCategory)}개 활성</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {/* Search */}
                       <div className="relative">
                         <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600" />
                         <input value={moduleSearch} onChange={e => setModuleSearch(e.target.value)} placeholder="검색..."
                           className="pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none w-40" />
                       </div>
-                      {/* Toggle all */}
                       <button onClick={() => allEnabled ? disableAllInCategory(selectedCategory) : enableAllInCategory(selectedCategory)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${allEnabled ? 'bg-slate-700/50 text-slate-400 hover:bg-slate-700' : 'bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20'}`}>
                         {allEnabled ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
@@ -508,7 +879,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Module grid */}
                   <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                     {filtered.map(mod => {
                       const enabled = config.enabledModules.includes(mod.key);
@@ -533,7 +903,6 @@ export default function SettingsPage() {
                             </div>
                             <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{mod.description}</p>
                           </div>
-                          {/* Toggle indicator */}
                           <div className={`absolute top-3 right-3 w-8 h-4.5 rounded-full transition-colors ${enabled ? 'bg-indigo-600' : 'bg-slate-700'}`}>
                             <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform mt-[2px] ${enabled ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                           </div>
@@ -548,312 +917,497 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ 트랙 설정 — EUS 8.1 3-Layer 워크플로우 ═══ */}
-      {tab === 'tracks' && (
-        <div className="space-y-5">
-          {/* 3-Layer 관계도 — EUS 8.6 */}
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <Layers size={14} className="text-indigo-400" /> 3-Layer 워크플로우 구조 (EUS 8.1)
-            </h3>
-            <div className="flex items-stretch gap-3">
-              {/* Layer 1 */}
-              <button onClick={() => setTrackLayer(1)}
-                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 1 ? 'border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 1 ? 'bg-indigo-600/30 text-indigo-400' : 'bg-white/5 text-slate-500'}`}>
-                    <Building size={14} />
-                  </div>
+      {/* ═══ 비주얼 세팅 — EUS v2.0 Part 15.6 3-Mode System ═══ */}
+      {tab === 'visual' && (
+        <div className="space-y-4">
+          {/* Mode toggle */}
+          <div className="flex items-center gap-2">
+            {VISUAL_MODES.map((vm, i) => (
+              <div key={vm.id} className="flex items-center gap-2">
+                <button onClick={() => setVisualMode(vm.id)}
+                  className={`flex items-center gap-2 rounded-xl border px-5 py-3 transition-all ${
+                    visualMode === vm.id
+                      ? 'border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20'
+                      : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                  }`}>
+                  <vm.icon size={16} className={visualMode === vm.id ? 'text-indigo-400' : 'text-slate-500'} />
                   <div>
-                    <p className="text-xs font-bold text-white">Layer 1</p>
-                    <p className="text-[10px] text-slate-500">전사 워크플로우</p>
+                    <p className={`text-sm font-semibold ${visualMode === vm.id ? 'text-white' : 'text-slate-400'}`}>{vm.label}</p>
+                    <p className="text-[10px] text-slate-600">{vm.desc}</p>
                   </div>
-                </div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">경영기획/시스템관리자가 세팅. 전사 공통 프로세스 10종.</p>
-                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
-                  <Shield size={9} /> 경영기획·시스템관리자 전용
-                </div>
-              </button>
-
-              <div className="flex items-center"><ArrowRight size={14} className="text-slate-700" /></div>
-
-              {/* Layer 2 */}
-              <button onClick={() => setTrackLayer(2)}
-                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 2 ? 'border-violet-500/40 bg-violet-500/10 ring-1 ring-violet-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 2 ? 'bg-violet-600/30 text-violet-400' : 'bg-white/5 text-slate-500'}`}>
-                    <GitBranch size={14} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white">Layer 2</p>
-                    <p className="text-[10px] text-slate-500">부서별 워크플로우</p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">부서장이 세팅. 부서 고유 업무 프로세스.</p>
-                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
-                  <Users size={9} /> 부서장 전용
-                </div>
-              </button>
-
-              <div className="flex items-center"><ArrowRight size={14} className="text-slate-700" /></div>
-
-              {/* Layer 3 */}
-              <button onClick={() => setTrackLayer(3)}
-                className={`flex-1 rounded-xl border p-4 text-left transition-all ${trackLayer === 3 ? 'border-emerald-500/40 bg-emerald-500/10 ring-1 ring-emerald-500/20' : 'border-white/10 bg-white/[0.02] hover:border-white/20'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${trackLayer === 3 ? 'bg-emerald-600/30 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
-                    <Wrench size={14} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white">Layer 3</p>
-                    <p className="text-[10px] text-slate-500">업무 도구</p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">부서 공통 도구 + 개인 업무 도구.</p>
-                <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-600">
-                  <User size={9} /> 전 직원
-                </div>
-              </button>
-            </div>
+                </button>
+                {i < VISUAL_MODES.length - 1 && <ArrowRight size={14} className="text-slate-700" />}
+              </div>
+            ))}
           </div>
 
-          {/* ── Layer 1: 전사 워크플로우 ── */}
-          {trackLayer === 1 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold flex items-center gap-2">
-                    <Building size={16} className="text-indigo-400" /> 전사 워크플로우
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">경영기획/시스템관리자가 세팅하는 전사 공통 프로세스</p>
+          {/* Seeding order indicator */}
+          <div className="flex items-center gap-2 text-[10px] text-slate-600">
+            <span className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              {visualMode === 'org' ? '1' : visualMode === 'module' ? '2' : '3'}/4
+            </span>
+            <span className={visualMode === 'org' ? 'text-indigo-400 font-semibold' : ''}>조직 모드</span>
+            <ArrowRight size={10} />
+            <span className={visualMode === 'module' ? 'text-indigo-400 font-semibold' : ''}>모듈 모드</span>
+            <ArrowRight size={10} />
+            <span className={visualMode === 'workflow' ? 'text-indigo-400 font-semibold' : ''}>워크플로우 모드</span>
+            <ArrowRight size={10} />
+            <span>미리보기</span>
+          </div>
+
+          {/* ══ Mode 1: 조직 모드 ══ */}
+          {visualMode === 'org' && (
+            <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 320px)' }}>
+              {/* Left: Track / Org tree */}
+              <div className="w-[380px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-400">조직 트리</span>
+                  <button className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition">
+                    <Plus size={11} /> 부서 추가
+                  </button>
                 </div>
-                <span className="text-[10px] px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  {COMPANY_WORKFLOWS.length}개 워크플로우
-                </span>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {TRACKS.map(track => {
+                    const isExpanded = expandedTracks.includes(track.id);
+                    const orgNodes = MOCK_ORG_TREE[track.id] || [];
+                    return (
+                      <div key={track.id}>
+                        <button onClick={() => toggleTrack(track.id)}
+                          className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/5 ${track.color}`}>
+                          <ChevronRight size={12} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          <div className={`w-2 h-2 rounded-full ${track.colorBg.replace('/10', '')}`} />
+                          {track.name}
+                          <span className="ml-auto text-[10px] text-slate-600 font-normal">{orgNodes.length > 0 ? `${orgNodes.reduce((sum, n) => sum + n.memberCount, 0)}명` : '-'}</span>
+                        </button>
+                        {isExpanded && orgNodes.length > 0 && (
+                          <div className="ml-2 mt-0.5 space-y-0.5">
+                            {renderOrgTree(orgNodes, 0, track)}
+                          </div>
+                        )}
+                        {isExpanded && orgNodes.length === 0 && (
+                          <div className="ml-6 py-2 text-[10px] text-slate-600">조직 없음</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="grid gap-3 grid-cols-1 xl:grid-cols-2">
-                {COMPANY_WORKFLOWS.map(wf => {
-                  const isExpanded = expandedWorkflow === wf.id;
-                  return (
-                    <div key={wf.id}
-                      className={`rounded-xl border transition-all ${isExpanded ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-white/5 bg-white/[0.02] hover:border-white/10'}`}>
-                      {/* Card header */}
-                      <button onClick={() => setExpandedWorkflow(isExpanded ? null : wf.id)}
-                        className="w-full flex items-center gap-3 p-4 text-left">
-                        <div className={`shrink-0 h-9 w-9 rounded-lg flex items-center justify-center ${wf.status === 'active' ? 'bg-indigo-600/15 text-indigo-400' : 'bg-amber-600/15 text-amber-400'}`}>
-                          <Zap size={16} />
+              {/* Right: Selected org detail */}
+              <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                {selectedOrgNode ? (
+                  <>
+                    <div className="px-5 py-4 border-b border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-600/15 flex items-center justify-center">
+                          <Building size={18} className="text-indigo-400" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-white">{wf.name}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${wf.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
-                              {wf.status === 'active' ? '활성' : '초안'}
+                        <div>
+                          <h3 className="text-sm font-bold text-white">{selectedOrgNode.name}</h3>
+                          <div className="flex items-center gap-3 mt-0.5">
+                            <span className="text-[10px] text-slate-500">{selectedOrgNode.type}</span>
+                            <span className="text-[10px] text-slate-500">|</span>
+                            <span className="text-[10px] text-slate-500">장: {selectedOrgNode.head}</span>
+                            <span className="text-[10px] text-slate-500">|</span>
+                            <span className="text-[10px] text-slate-500">{selectedOrgNode.memberCount}명</span>
+                          </div>
+                        </div>
+                        <div className="ml-auto flex items-center gap-1">
+                          <button className="text-[10px] px-2 py-1 rounded-lg bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20 transition">
+                            <UserPlus size={11} className="inline mr-1" /> 멤버 추가
+                          </button>
+                          <button className="text-[10px] px-2 py-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 transition">
+                            장 지정
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Members list */}
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <p className="text-xs font-semibold text-slate-400 mb-3">멤버 목록</p>
+                      <div className="space-y-1">
+                        {(selectedOrgNode.members || []).map((m, i) => (
+                          <div key={m.id + i}
+                            className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 cursor-grab hover:bg-white/5 transition group">
+                            <GripVertical size={12} className="text-slate-700 group-hover:text-slate-500" />
+                            <div className="h-7 w-7 rounded-full bg-indigo-600/20 flex items-center justify-center text-[10px] font-bold text-indigo-400">
+                              {m.name.charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-medium text-white">{m.name}</span>
+                              <span className="text-[10px] text-slate-500 ml-2">{m.role}</span>
+                            </div>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                              m.level === 'Team Lead' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
+                              m.level === 'Sub-Lead' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
+                              'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                            }`}>
+                              {m.level}
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] text-slate-500 flex items-center gap-1"><Play size={8} /> {wf.trigger}</span>
-                            <span className="text-[10px] text-slate-500 flex items-center gap-1"><Clock size={8} /> {wf.sla}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-600">
-                          {wf.involvedTracks.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">{t}</span>
-                          ))}
-                        </div>
-                        <ChevronRight size={14} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                      </button>
-
-                      {/* Expanded: step flow */}
-                      {isExpanded && (
-                        <div className="px-4 pb-4 pt-0">
-                          <div className="border-t border-white/5 pt-3">
-                            <p className="text-[10px] text-slate-500 mb-3 font-semibold">단계별 흐름</p>
-                            <div className="flex items-center gap-1 overflow-x-auto pb-1">
-                              {wf.steps.map((step, si) => (
-                                <div key={si} className="flex items-center gap-1 shrink-0">
-                                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[110px]">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                      <div className="h-5 w-5 rounded-full bg-indigo-600/20 flex items-center justify-center text-[9px] font-bold text-indigo-400">
-                                        {step.order}
-                                      </div>
-                                      <span className="text-[11px] font-semibold text-white">{step.name}</span>
-                                    </div>
-                                    <p className="text-[9px] text-slate-500">{step.role}</p>
-                                    <p className="text-[9px] text-indigo-400/60">{step.track}</p>
-                                  </div>
-                                  {si < wf.steps.length - 1 && (
-                                    <ArrowRight size={10} className="text-slate-700 shrink-0" />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                        ))}
+                        {(!selectedOrgNode.members || selectedOrgNode.members.length === 0) && (
+                          <p className="text-center py-6 text-[10px] text-slate-600">멤버가 없습니다</p>
+                        )}
+                      </div>
                     </div>
-                  );
-                })}
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-slate-600">
+                    <div className="text-center">
+                      <Building size={32} className="mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">왼쪽에서 조직을 선택하세요</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* ── Layer 2: 부서별 워크플로우 ── */}
-          {trackLayer === 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold flex items-center gap-2">
-                    <GitBranch size={16} className="text-violet-400" /> 부서별 워크플로우
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">부서장이 세팅하는 부서 고유 업무 프로세스</p>
+          {/* ══ Mode 2: 모듈 모드 (레고) ══ */}
+          {visualMode === 'module' && (
+            <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 320px)' }}>
+              {/* Left: Org tree (same as Mode 1) */}
+              <div className="w-[320px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/5">
+                  <span className="text-xs font-semibold text-slate-400">조직 트리</span>
                 </div>
-              </div>
-
-              {/* Department selector */}
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                {DEPT_LIST.map(dept => (
-                  <button key={dept} onClick={() => setSelectedDept(dept)}
-                    className={`shrink-0 px-4 py-2 rounded-lg text-xs transition-colors ${selectedDept === dept ? 'bg-violet-600/15 text-violet-400 font-semibold border border-violet-500/20' : 'text-slate-400 hover:bg-white/5 border border-transparent'}`}>
-                    {dept}
-                  </button>
-                ))}
-              </div>
-
-              {/* Workflows for selected department */}
-              <div className="space-y-3">
-                {(DEPT_WORKFLOW_MAP[selectedDept] || []).map(wf => {
-                  const isExpanded = expandedWorkflow === wf.id;
-                  return (
-                    <div key={wf.id}
-                      className={`rounded-xl border transition-all ${isExpanded ? 'border-violet-500/30 bg-violet-500/5' : 'border-white/5 bg-white/[0.02] hover:border-white/10'}`}>
-                      <button onClick={() => setExpandedWorkflow(isExpanded ? null : wf.id)}
-                        className="w-full flex items-center gap-3 p-4 text-left">
-                        <div className="shrink-0 h-9 w-9 rounded-lg flex items-center justify-center bg-violet-600/15 text-violet-400">
-                          <GitBranch size={16} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className="text-sm font-semibold text-white">{wf.name}</span>
-                          <p className="text-[10px] text-slate-500 mt-0.5">{wf.steps.length}단계</p>
-                        </div>
-                        <ChevronRight size={14} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                      </button>
-
-                      {isExpanded && (
-                        <div className="px-4 pb-4 pt-0">
-                          <div className="border-t border-white/5 pt-3">
-                            <div className="flex items-center gap-1 overflow-x-auto pb-1">
-                              {wf.steps.map((step, si) => (
-                                <div key={si} className="flex items-center gap-1 shrink-0">
-                                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[100px]">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                      <div className="h-5 w-5 rounded-full bg-violet-600/20 flex items-center justify-center text-[9px] font-bold text-violet-400">
-                                        {step.order}
-                                      </div>
-                                      <span className="text-[11px] font-semibold text-white">{step.name}</span>
-                                    </div>
-                                    <p className="text-[9px] text-slate-500">{step.role}</p>
-                                  </div>
-                                  {si < wf.steps.length - 1 && (
-                                    <ArrowRight size={10} className="text-slate-700 shrink-0" />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {TRACKS.map(track => {
+                    const isExpanded = expandedTracks.includes(track.id);
+                    const orgNodes = MOCK_ORG_TREE[track.id] || [];
+                    return (
+                      <div key={track.id}>
+                        <button onClick={() => toggleTrack(track.id)}
+                          className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/5 ${track.color}`}>
+                          <ChevronRight size={12} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          <div className={`w-2 h-2 rounded-full ${track.colorBg.replace('/10', '')}`} />
+                          {track.name}
+                        </button>
+                        {isExpanded && orgNodes.length > 0 && (
+                          <div className="ml-2 mt-0.5 space-y-0.5">
+                            {renderOrgTree(orgNodes, 0, track)}
                           </div>
-                        </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Selected org assigned modules */}
+                {selectedOrgNode && (
+                  <div className="border-t border-white/5 p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 mb-2">
+                      {selectedOrgNode.name} 할당 모듈 ({getAssignedCount(selectedOrgNode.id)})
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {(assignedModules[selectedOrgNode.id] || []).map(code => {
+                        const block = MODULE_BLOCKS.find(b => b.code === code);
+                        if (!block) return null;
+                        return (
+                          <div key={code}
+                            className="group flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px]">
+                            <div className={`w-1.5 h-1.5 rounded-sm ${block.trackColor}`} />
+                            <span className="text-white font-medium">{block.code}</span>
+                            <button onClick={() => removeModuleFromOrg(selectedOrgNode.id, code)}
+                              className="hidden group-hover:block text-slate-600 hover:text-red-400 transition">
+                              <X size={10} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                      {getAssignedCount(selectedOrgNode.id) === 0 && (
+                        <span className="text-[10px] text-slate-600">오른쪽에서 드래그하여 추가</span>
                       )}
                     </div>
-                  );
-                })}
-
-                {/* Add workflow button */}
-                <button className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 py-4 text-xs text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
-                  <Plus size={14} /> 워크플로우 추가
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── Layer 3: 업무 도구 ── */}
-          {trackLayer === 3 && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-base font-bold flex items-center gap-2">
-                  <Wrench size={16} className="text-emerald-400" /> 업무 도구
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">부서 공통 도구와 개인 업무 도구</p>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Left: 부서 공통 도구 */}
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-                  <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
-                    <Building size={14} className="text-emerald-400" /> 부서 공통 도구
-                  </h3>
-                  <p className="text-[10px] text-slate-500 mb-4">부서장이 모듈 카탈로그에서 선택하여 활성화</p>
-
-                  <div className="space-y-2">
-                    {/* Show some representative modules from track2-biz as example */}
-                    {MODULE_CATALOG.filter(m => ['mkt-strategy', 'mkt-campaign', 'sales', 'SAL-PIP', 'CRM-CST', 'crm-support', 'BD-PRJ'].includes(m.key)).map(mod => {
-                      const Icon = mod.icon;
-                      const enabled = config.enabledModules.includes(mod.key);
-                      return (
-                        <div key={mod.key}
-                          className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${enabled ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/5 bg-white/[0.01] opacity-50'}`}>
-                          <div className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center ${enabled ? 'bg-emerald-600/15 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
-                            <Icon size={14} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-xs font-medium text-white">{mod.label}</span>
-                            <p className="text-[9px] text-slate-500">{mod.description}</p>
-                          </div>
-                          <div className={`w-6 h-3.5 rounded-full transition-colors ${enabled ? 'bg-emerald-600' : 'bg-slate-700'}`}>
-                            <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform mt-[2px] ${enabled ? 'translate-x-[12px]' : 'translate-x-[2px]'}`} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <button className="w-full flex items-center justify-center gap-1 rounded-lg border border-dashed border-white/10 py-2.5 text-[10px] text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
-                      <Plus size={11} /> 모듈 카탈로그에서 추가
+              {/* Right: Module palette */}
+              <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-400">모듈 팔레트</span>
+                  <div className="relative flex-1 max-w-[200px]">
+                    <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-600" />
+                    <input value={modulePaletteSearch} onChange={e => setModulePaletteSearch(e.target.value)}
+                      placeholder="모듈 검색..."
+                      className="w-full pl-7 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[11px] text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
+                  </div>
+                  <div className="flex items-center gap-1 ml-auto">
+                    <button onClick={() => setModuleFilterTrack(null)}
+                      className={`text-[10px] px-2 py-1 rounded-md transition ${!moduleFilterTrack ? 'bg-indigo-500/15 text-indigo-400' : 'text-slate-500 hover:bg-white/5'}`}>
+                      전체
                     </button>
+                    {TRACKS.filter(t => t.id !== 'track5').map(t => (
+                      <button key={t.id} onClick={() => setModuleFilterTrack(t.id)}
+                        className={`text-[10px] px-2 py-1 rounded-md transition ${moduleFilterTrack === t.id ? `${t.colorBg} ${t.color}` : 'text-slate-500 hover:bg-white/5'}`}>
+                        {t.name.split(' ').pop()}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Right: 개인 업무 도구 */}
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-                  <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
-                    <User size={14} className="text-sky-400" /> 개인 업무 도구
-                  </h3>
-                  <p className="text-[10px] text-slate-500 mb-4">전 직원에게 자동으로 제공되는 도구 (비활성화 불가)</p>
+                <div className="flex-1 overflow-y-auto p-4">
+                  {/* Color legend */}
+                  <div className="flex items-center gap-3 mb-4 text-[10px] text-slate-500">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500" /> 운영</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500" /> 사업</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-orange-500" /> 생산</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-500" /> 지원</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-slate-500" /> 공통</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-500" /> 시스템</span>
+                  </div>
 
-                  <div className="space-y-2">
-                    {PERSONAL_TOOLS.map(tool => {
-                      const mod = MODULE_CATALOG.find(m => m.key === tool.key);
-                      const Icon = mod?.icon || User;
-                      return (
-                        <div key={tool.key}
-                          className="flex items-center gap-3 rounded-lg border border-sky-500/15 bg-sky-500/5 px-3 py-2.5">
-                          <div className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center bg-sky-600/15 text-sky-400">
-                            <Icon size={14} />
+                  {/* Module blocks grid */}
+                  <div className="grid grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+                    {MODULE_BLOCKS
+                      .filter(b => !moduleFilterTrack || b.trackId === moduleFilterTrack)
+                      .filter(b => !modulePaletteSearch || b.name.includes(modulePaletteSearch) || b.code.includes(modulePaletteSearch.toUpperCase()))
+                      .map(block => {
+                        const isAssigned = selectedOrgNode && (assignedModules[selectedOrgNode.id] || []).includes(block.code);
+                        return (
+                          <div key={block.code}
+                            draggable
+                            onDragStart={() => setDraggedModule(block.code)}
+                            onDragEnd={() => { setDraggedModule(null); setDragOverOrg(null); }}
+                            className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-3 cursor-grab transition-all hover:border-white/20 active:scale-95 ${
+                              isAssigned
+                                ? 'border-indigo-500/30 bg-indigo-500/5 opacity-50'
+                                : 'border-white/5 bg-white/[0.02] hover:bg-white/5'
+                            }`}>
+                            <div className={`w-3 h-3 rounded-md ${block.trackColor}`} />
+                            <span className="text-[11px] font-bold text-white">{block.code}</span>
+                            <span className="text-[9px] text-slate-500">{block.name}</span>
+                            {isAssigned && (
+                              <span className="absolute top-1 right-1 text-[8px] text-indigo-400">
+                                <Check size={10} />
+                              </span>
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-xs font-medium text-white">{tool.label}</span>
-                            <p className="text-[9px] text-slate-500">{tool.desc}</p>
-                          </div>
-                          <span className="text-[8px] text-sky-500/60 border border-sky-500/15 px-1.5 py-0.5 rounded">자동 제공</span>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Placeholder notice */}
-          <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-300/80">
-            트랙 설정은 현재 미리보기입니다. 워크플로우 편집, 단계 추가/삭제, 권한 연동 기능은 추후 업데이트됩니다.
+          {/* ══ Mode 3: 워크플로우 모드 ══ */}
+          {visualMode === 'workflow' && (
+            <div className="space-y-4">
+              {/* Template selector + node palette */}
+              <div className="flex gap-4">
+                {/* Template library */}
+                <div className="w-[260px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <span className="text-xs font-semibold text-slate-400">템플릿 라이브러리</span>
+                    <span className="ml-2 text-[10px] text-slate-600">{WORKFLOW_TEMPLATES.length}개</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {WORKFLOW_TEMPLATES.map(tpl => (
+                      <button key={tpl.id} onClick={() => { setSelectedTemplate(tpl); setSelectedWfNode(null); setSelectedWfEdge(null); }}
+                        className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors ${
+                          selectedTemplate.id === tpl.id
+                            ? 'bg-indigo-500/10 border border-indigo-500/20'
+                            : 'hover:bg-white/5 border border-transparent'
+                        }`}>
+                        <p className="text-xs font-semibold text-white">{tpl.name}</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">{tpl.description}</p>
+                        <p className="text-[9px] text-slate-600 mt-1">{tpl.nodes.length}개 노드</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Canvas + node types */}
+                <div className="flex-1 space-y-3">
+                  {/* Node type palette */}
+                  <div className="flex items-center gap-1.5 p-2 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <span className="text-[10px] text-slate-500 mr-2">노드:</span>
+                    {WF_NODE_TYPES.map(nt => (
+                      <div key={nt.type}
+                        className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 cursor-grab text-[10px] text-slate-400 hover:bg-white/5 hover:text-white transition">
+                        <span>{nt.icon}</span>
+                        <span>{nt.label}</span>
+                      </div>
+                    ))}
+                    <div className="ml-auto flex items-center gap-2">
+                      <button onClick={startTestRun} disabled={testRunning}
+                        className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition disabled:opacity-50">
+                        <Play size={10} /> {testRunning ? '실행 중...' : '테스트 실행'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Canvas area */}
+                  <div ref={canvasRef}
+                    className="relative rounded-xl border border-white/5 bg-[#0a0a1a] overflow-x-auto"
+                    style={{ height: 'calc(100vh - 440px)', minHeight: 350 }}>
+                    {/* Grid background */}
+                    <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="1" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#grid)" />
+
+                      {/* Edges (SVG lines) */}
+                      {selectedTemplate.edges.map((edge, i) => {
+                        const fromNode = selectedTemplate.nodes.find(n => n.id === edge.from);
+                        const toNode = selectedTemplate.nodes.find(n => n.id === edge.to);
+                        if (!fromNode || !toNode) return null;
+                        const isSelected = selectedWfEdge?.from === edge.from && selectedWfEdge?.to === edge.to;
+                        const midX = (fromNode.x + 60 + toNode.x) / 2;
+                        return (
+                          <g key={i} onClick={() => { setSelectedWfEdge(edge); setSelectedWfNode(null); }} className="cursor-pointer">
+                            <path
+                              d={`M ${fromNode.x + 60} ${fromNode.y} C ${midX} ${fromNode.y}, ${midX} ${toNode.y}, ${toNode.x} ${toNode.y}`}
+                              fill="none"
+                              stroke={isSelected ? '#818cf8' : 'rgba(255,255,255,0.1)'}
+                              strokeWidth={isSelected ? 2 : 1.5}
+                              markerEnd="url(#arrowhead)"
+                            />
+                            {edge.condition && (
+                              <text x={midX} y={Math.min(fromNode.y, toNode.y) - 8}
+                                fill={isSelected ? '#818cf8' : 'rgba(255,255,255,0.25)'}
+                                fontSize="9" textAnchor="middle">
+                                {edge.condition}
+                              </text>
+                            )}
+                          </g>
+                        );
+                      })}
+
+                      <defs>
+                        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                          <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.15)" />
+                        </marker>
+                      </defs>
+                    </svg>
+
+                    {/* Nodes */}
+                    {selectedTemplate.nodes.map((node, i) => {
+                      const isSelected = selectedWfNode?.id === node.id;
+                      const isTestActive = testRunning && testStep === i;
+                      return (
+                        <div key={node.id}
+                          onClick={() => { setSelectedWfNode(node); setSelectedWfEdge(null); }}
+                          className={`absolute flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer transition-all select-none ${getNodeColor(node.type)} ${
+                            isSelected ? 'ring-2 ring-indigo-500/60 scale-105' : ''
+                          } ${isTestActive ? 'ring-2 ring-emerald-400 animate-pulse' : ''}`}
+                          style={{ left: node.x - 50, top: node.y - 18, minWidth: 100 }}>
+                          {getNodeIcon(node.type)}
+                          <div>
+                            <p className="text-[11px] font-semibold">{node.label}</p>
+                            {node.assignee && <p className="text-[9px] opacity-60">{node.assignee}</p>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Properties panel */}
+                <div className="w-[240px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <span className="text-xs font-semibold text-slate-400">속성</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                    {selectedWfNode ? (
+                      <>
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-1">노드 타입</label>
+                          <div className={`rounded-lg border px-2 py-1.5 text-xs ${getNodeColor(selectedWfNode.type)}`}>
+                            {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.icon} {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.label}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-1">라벨</label>
+                          <input value={selectedWfNode.label} readOnly
+                            className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                        </div>
+                        {selectedWfNode.assignee && (
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">담당자 규칙</label>
+                            <input value={selectedWfNode.assignee} readOnly
+                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                          </div>
+                        )}
+                        {selectedWfNode.timeout && (
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">타임아웃</label>
+                            <input value={selectedWfNode.timeout} readOnly
+                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                          </div>
+                        )}
+                        {selectedWfNode.escalation && (
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">에스컬레이션</label>
+                            <input value={selectedWfNode.escalation} readOnly
+                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                          </div>
+                        )}
+                      </>
+                    ) : selectedWfEdge ? (
+                      <>
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-1">연결선</label>
+                          <div className="text-xs text-white">
+                            {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.from)?.label}
+                            {' → '}
+                            {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.to)?.label}
+                          </div>
+                        </div>
+                        {selectedWfEdge.condition && (
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">조건</label>
+                            <input value={selectedWfEdge.condition} readOnly
+                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-1">조건 타입</label>
+                          <select className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none">
+                            <option className="bg-[#0F0F23]">금액 기준</option>
+                            <option className="bg-[#0F0F23]">유형 기준</option>
+                            <option className="bg-[#0F0F23]">직급 기준</option>
+                            <option className="bg-[#0F0F23]">부서 기준</option>
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-[10px] text-slate-600">
+                        <MousePointer size={20} className="mx-auto mb-2 opacity-30" />
+                        노드 또는 연결선을 클릭하세요
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom bar */}
+          <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+            <button onClick={() => showToast('저장되었습니다')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-500 transition">
+              <Save size={13} /> 저장
+            </button>
+            <button onClick={() => showToast('되돌리기 완료')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white/5 text-slate-400 text-xs rounded-lg hover:bg-white/10 transition border border-white/10">
+              <Undo2 size={13} /> 되돌리기
+            </button>
+            <button onClick={() => showToast('변경이력 표시')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white/5 text-slate-400 text-xs rounded-lg hover:bg-white/10 transition border border-white/10">
+              <History size={13} /> 변경이력
+            </button>
+            <button onClick={() => showToast('내보내기 완료')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white/5 text-slate-400 text-xs rounded-lg hover:bg-white/10 transition border border-white/10">
+              <Download size={13} /> 내보내기
+            </button>
           </div>
         </div>
       )}

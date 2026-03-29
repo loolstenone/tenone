@@ -19,7 +19,7 @@ import {
   Vote, ListChecks, Briefcase, ChartLine, Boxes, Compass,
   Medal, Lightbulb, ShieldCheck,
   Settings, House, User, ClipboardCheck, Kanban, ReceiptText,
-  BadgeDollarSign,
+  BadgeDollarSign, CalendarRange,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -71,6 +71,7 @@ export const MODULE_CATALOG: WIOModuleDef[] = [
   { key: 'COM-PRJ',      label: '프로젝트협업', icon: FolderKanban,    href: '/wio/app/project',           category: 'track6-common', description: '프로젝트 생성, 진행 관리, 협업' },
   { key: 'COM-APR',      label: '전자결재',     icon: Stamp,           href: '/wio/app/approval',          category: 'track6-common', description: '전자 결재, 품의서, 결재라인' },
   { key: 'wiki',         label: '위키',         icon: Library,         href: '/wio/app/wiki',              category: 'track6-common', description: '사내 위키, 지식 베이스' },
+  { key: 'work-calendar', label: '업무 캘린더', icon: CalendarRange,   href: '/wio/app/comm/work-calendar', category: 'track6-common', description: '업무 일정 관리 + 상향 집계' },
 
   // ═══════════════════════════════════════════════════
   // Track 1 — 운영·관리 (경영전략 + 인사 + 재무 + 법무)
