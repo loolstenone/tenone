@@ -4,16 +4,24 @@ import { useState, useEffect, createContext, useContext, useCallback } from 'rea
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ChevronLeft, ChevronRight, LogOut, Settings, Menu, X,
+  ChevronLeft, ChevronRight, LogOut, Settings, Menu, X, KeyRound, ExternalLink,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
 import {
-  TRACK_CATALOG, MODULE_CATALOG, getModulesByTrack,
+  TRACK_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByTrack,
   loadOrbiConfig, loadAccordionState, saveAccordionState,
   type OrbiConfig,
 } from '@/lib/wio-modules';
 import type { WIOTenant, WIOMember } from '@/types/wio';
+
+/* ── Mode detection helpers ── */
+type OrbiMode = 'demo' | 'saas' | 'master';
+function detectMode(tenant: WIOTenant | null, member: WIOMember | null): OrbiMode {
+  if (!tenant || tenant.id === 'demo') return 'demo';
+  if (member?.role === 'owner' && tenant.slug === 'tenone') return 'master';
+  return 'saas';
+}
 
 /* ── Context ── */
 interface WIOContext {
@@ -22,8 +30,11 @@ interface WIOContext {
   refreshTenant?: () => void;
   orbiConfig: OrbiConfig;
   reloadConfig: () => void;
+  mode: OrbiMode;
+  isDemo: boolean;
+  isMaster: boolean;
 }
-const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], tracks: [] }, reloadConfig: () => {} });
+const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], tracks: [] }, reloadConfig: () => {}, mode: 'demo', isDemo: true, isMaster: false });
 export const useWIO = () => useContext(WIOCtx);
 
 /* ── Demo tenant builder ── */
@@ -31,7 +42,7 @@ function demoTenant(): WIOTenant {
   return {
     id: 'demo', name: 'Orbi Demo', slug: 'demo', serviceName: 'Orbi',
     domain: '', primaryColor: '#6366F1', poweredBy: true, plan: 'starter',
-    maxMembers: 5, modules: MODULE_CATALOG.map(m => m.key) as any,
+    maxMembers: 5, modules: ALL_MODULE_KEYS as any,
     isActive: true, logoUrl: null, ownerId: '', createdAt: '', updatedAt: '',
   } as WIOTenant;
 }
@@ -46,6 +57,11 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [openTracks, setOpenTracks] = useState<string[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], tracks: [] });
+  const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
+
+  const mode = detectMode(tenant, member);
+  const isDemo = mode === 'demo';
+  const isMaster = mode === 'master';
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false);
@@ -237,13 +253,25 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
   const SidebarContent = () => (
     <>
-      {/* Logo */}
+      {/* Logo + Mode Badge */}
       <div className="shrink-0 border-b border-white/5 p-3">
         <Link href="/wio/app" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-black text-white">O</div>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black text-white ${isMaster ? 'bg-amber-600' : 'bg-indigo-600'}`}>O</div>
           {(!collapsed || isMobile) && (
-            <div className="flex-1">
-              <div className="text-xs text-slate-500">{tenant?.name}</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500 truncate">{isMaster ? 'Ten:One\u2122' : tenant?.name}</span>
+                {isDemo && <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">DEMO</span>}
+                {isMaster && <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 flex items-center gap-0.5"><KeyRound size={8} />MASTER</span>}
+                {!isDemo && !isMaster && (
+                  <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
+                    tenant?.plan === 'pro' ? 'bg-violet-500/15 text-violet-400 border-violet-500/20' :
+                    tenant?.plan === 'enterprise' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' :
+                    tenant?.plan === 'growth' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' :
+                    'bg-slate-500/15 text-slate-400 border-slate-500/20'
+                  }`}>{(tenant?.plan || 'starter').toUpperCase()}</span>
+                )}
+              </div>
               <div className="text-sm font-bold">{tenant?.serviceName || 'Orbi'}</div>
             </div>
           )}
@@ -338,14 +366,20 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         {(isMobile || !collapsed) && (
           <div className="px-3 py-2 mb-1">
             <p className="text-xs font-medium text-slate-300 truncate">{member?.displayName || '체험 사용자'}</p>
-            <p className="text-[10px] text-slate-500 truncate">{member?.email || (tenant?.id === 'demo' ? '데모 모드' : member?.role)}</p>
+            <p className="text-[10px] text-slate-500 truncate">{(member as any)?.email || (isDemo ? '데모 모드' : isMaster ? '마스터 관리자' : member?.role)}</p>
           </div>
+        )}
+        {isMaster && (
+          <Link href="/wio/app/admin"
+            className={`flex items-center rounded-lg py-2 text-sm text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
+            <KeyRound size={15} />{(isMobile || !collapsed) && '관리자'}
+          </Link>
         )}
         <Link href="/wio/app/settings"
           className={`flex items-center rounded-lg py-2 text-sm text-slate-500 hover:text-white hover:bg-white/5 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
           <Settings size={15} />{(isMobile || !collapsed) && '설정'}
         </Link>
-        {tenant?.id === 'demo' ? (
+        {isDemo ? (
           <Link href="/wio/login"
             className={`flex items-center rounded-lg py-2 text-sm text-indigo-400 hover:text-white hover:bg-indigo-600/10 ${(!isMobile && collapsed) ? 'justify-center' : 'gap-2.5 px-3'}`}>
             <LogOut size={15} />{(isMobile || !collapsed) && '로그인'}
@@ -362,7 +396,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
   return (
     <WIOCtx.Provider value={{
-      tenant, member, orbiConfig, reloadConfig,
+      tenant, member, orbiConfig, reloadConfig, mode, isDemo, isMaster,
       refreshTenant: async () => {
         if (tenant) {
           const { fetchTenant } = await import('@/lib/supabase/wio');
@@ -410,11 +444,26 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           {!isMobile && (
             <div className="flex items-center justify-end gap-3 px-6 py-2 border-b border-white/5">
               <span className="text-xs text-slate-500">{member?.displayName || '체험 사용자'}</span>
-              {tenant?.id === 'demo' ? (
+              {isDemo ? (
                 <Link href="/wio/login" className="text-xs px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition-colors">로그인</Link>
               ) : (
                 <button onClick={handleLogout} className="text-xs px-3 py-1 border border-slate-700 text-slate-400 rounded-md hover:text-white hover:border-slate-500 transition-colors">로그아웃</button>
               )}
+            </div>
+          )}
+          {/* Demo floating banner */}
+          {isDemo && !demoBannerDismissed && (
+            <div className="sticky top-0 z-30 mx-4 md:mx-6 mt-2">
+              <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 flex items-center gap-3 shadow-lg shadow-indigo-500/20">
+                <span className="text-sm">&#x1F3AF;</span>
+                <p className="flex-1 text-sm text-white/90">데모 버전입니다 &mdash; 실제 데이터가 아닌 샘플 데이터입니다</p>
+                <Link href="/wio/pricing" className="shrink-0 flex items-center gap-1 text-sm font-semibold text-white hover:text-white/80 transition-colors">
+                  구독하기 <ExternalLink size={13} />
+                </Link>
+                <button onClick={() => setDemoBannerDismissed(true)} className="shrink-0 p-1 text-white/60 hover:text-white transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
           )}
           <div className="p-4 md:p-6">{children}</div>

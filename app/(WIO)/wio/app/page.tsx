@@ -17,6 +17,36 @@ const PRINCIPLES = [
   '사람·돈·시간. 이 세 가지가 모든 일의 기준이다.',
 ];
 
+/* ── Demo mock data ── */
+const DEMO_PROJECTS: WIOProject[] = [
+  { id: 'd1', tenantId: 'demo', code: 'PRJ-001', title: '2025 브랜드 리뉴얼', description: null, type: 'client', status: 'in_progress', pmId: null, clientName: '(주)스타트업코리아', budget: 45000000, revenue: 50000000, startedAt: '2025-01-15', deadline: '2025-06-30', completedAt: null, createdAt: '2025-01-10', updatedAt: '2025-03-20' },
+  { id: 'd2', tenantId: 'demo', code: 'PRJ-002', title: '모바일 앱 MVP 개발', description: null, type: 'internal', status: 'in_progress', pmId: null, clientName: null, budget: 30000000, revenue: 0, startedAt: '2025-02-01', deadline: '2025-05-31', completedAt: null, createdAt: '2025-01-28', updatedAt: '2025-03-18' },
+  { id: 'd3', tenantId: 'demo', code: 'PRJ-003', title: 'SNS 마케팅 캠페인', description: null, type: 'client', status: 'in_progress', pmId: null, clientName: '뷰티브랜드X', budget: 15000000, revenue: 18000000, startedAt: '2025-03-01', deadline: '2025-04-30', completedAt: null, createdAt: '2025-02-25', updatedAt: '2025-03-22' },
+  { id: 'd4', tenantId: 'demo', code: 'PRJ-004', title: '사내 ERP 고도화', description: null, type: 'internal', status: 'in_progress', pmId: null, clientName: null, budget: 20000000, revenue: 0, startedAt: '2025-01-01', deadline: '2025-12-31', completedAt: null, createdAt: '2024-12-15', updatedAt: '2025-03-10' },
+  { id: 'd5', tenantId: 'demo', code: 'PRJ-005', title: 'UI/UX 디자인 시스템', description: null, type: 'internal', status: 'in_progress', pmId: null, clientName: null, budget: 8000000, revenue: 0, startedAt: '2025-02-15', deadline: '2025-07-31', completedAt: null, createdAt: '2025-02-10', updatedAt: '2025-03-15' },
+  { id: 'd6', tenantId: 'demo', code: 'PRJ-006', title: '고객사 웹사이트 리디자인', description: null, type: 'client', status: 'completed', pmId: null, clientName: '테크솔루션', budget: 25000000, revenue: 28000000, startedAt: '2024-10-01', deadline: '2025-01-31', completedAt: '2025-01-28', createdAt: '2024-09-20', updatedAt: '2025-01-28' },
+  { id: 'd7', tenantId: 'demo', code: 'PRJ-007', title: '데이터 분석 파이프라인', description: null, type: 'internal', status: 'completed', pmId: null, clientName: null, budget: 12000000, revenue: 0, startedAt: '2024-11-01', deadline: '2025-02-28', completedAt: '2025-02-20', createdAt: '2024-10-25', updatedAt: '2025-02-20' },
+  { id: 'd8', tenantId: 'demo', code: 'PRJ-008', title: '채용 플랫폼 연동', description: null, type: 'client', status: 'completed', pmId: null, clientName: 'HR테크', budget: 18000000, revenue: 22000000, startedAt: '2024-09-01', deadline: '2024-12-31', completedAt: '2024-12-28', createdAt: '2024-08-20', updatedAt: '2024-12-28' },
+  { id: 'd9', tenantId: 'demo', code: 'PRJ-009', title: '보안 감사 대응', description: null, type: 'internal', status: 'completed', pmId: null, clientName: null, budget: 5000000, revenue: 0, startedAt: '2025-01-15', deadline: '2025-02-28', completedAt: '2025-02-25', createdAt: '2025-01-10', updatedAt: '2025-02-25' },
+  { id: 'd10', tenantId: 'demo', code: 'PRJ-010', title: '이커머스 결제 모듈', description: null, type: 'client', status: 'completed', pmId: null, clientName: '쇼핑몰S', budget: 35000000, revenue: 40000000, startedAt: '2024-08-01', deadline: '2024-11-30', completedAt: '2024-11-25', createdAt: '2024-07-20', updatedAt: '2024-11-25' },
+  { id: 'd11', tenantId: 'demo', code: 'PRJ-011', title: 'API 게이트웨이 설계', description: null, type: 'internal', status: 'completed', pmId: null, clientName: null, budget: 10000000, revenue: 0, startedAt: '2024-12-01', deadline: '2025-03-15', completedAt: '2025-03-12', createdAt: '2024-11-25', updatedAt: '2025-03-12' },
+  { id: 'd12', tenantId: 'demo', code: 'PRJ-012', title: '콘텐츠 관리 시스템', description: null, type: 'client', status: 'completed', pmId: null, clientName: '미디어랩', budget: 22000000, revenue: 25000000, startedAt: '2024-07-01', deadline: '2024-10-31', completedAt: '2024-10-28', createdAt: '2024-06-20', updatedAt: '2024-10-28' },
+];
+
+const DEMO_TODOS = [
+  { id: 'dt1', title: '프로젝트 주간 리포트 작성', isDone: true },
+  { id: 'dt2', title: '디자인 시스템 컴포넌트 리뷰', isDone: true },
+  { id: 'dt3', title: '고객사 미팅 준비 자료 정리', isDone: true },
+  { id: 'dt4', title: '신규 채용 면접 피드백 제출', isDone: false },
+  { id: 'dt5', title: 'Q2 OKR 초안 작성', isDone: false },
+];
+
+const DEMO_NOTIFICATIONS = [
+  { id: 'dn1', title: '프로젝트 마감 임박', body: 'SNS 마케팅 캠페인 마감이 5일 남았습니다', isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: 'dn2', title: '새 댓글', body: '김민수님이 브랜드 리뉴얼 게시글에 댓글을 남겼습니다', isRead: false, createdAt: new Date(Date.now() - 7200000).toISOString() },
+  { id: 'dn3', title: '결재 승인 완료', body: '출장비 청구서가 승인되었습니다', isRead: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
+];
+
 function SkeletonCard() {
   return (
     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 animate-pulse">
@@ -38,7 +68,7 @@ function SkeletonList() {
 }
 
 export default function WIOHomePage() {
-  const { tenant, member } = useWIO();
+  const { tenant, member, isDemo } = useWIO();
   const [projects, setProjects] = useState<WIOProject[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -57,27 +87,48 @@ export default function WIOHomePage() {
 
   useEffect(() => {
     if (!tenant || !member) return;
+    if (isDemo) {
+      setProjects(DEMO_PROJECTS);
+      setTodos(DEMO_TODOS);
+      setNotifications(DEMO_NOTIFICATIONS);
+      setGprs([{ id: 'dg1', score: 78 }]);
+      setLoading(false);
+      return;
+    }
     Promise.all([
       fetchProjects(tenant.id).then(setProjects),
       fetchTodos(member.id).then(setTodos),
       fetchNotifications(member.id, 5).then(setNotifications),
       fetchGPRs(tenant.id, { ownerId: member.id }).then(setGprs),
     ]).finally(() => setLoading(false));
-  }, [tenant, member]);
+  }, [tenant, member, isDemo]);
 
   const handleAddTodo = async () => {
     if (!tenant || !member || !newTodo.trim()) return;
+    if (isDemo) {
+      setTodos(prev => [{ id: `dt-${Date.now()}`, title: newTodo.trim(), isDone: false }, ...prev]);
+      setNewTodo('');
+      return;
+    }
     await createTodo({ tenantId: tenant.id, memberId: member.id, title: newTodo.trim() });
     setNewTodo('');
     fetchTodos(member.id).then(setTodos);
   };
 
   const handleToggle = async (id: string, isDone: boolean) => {
+    if (isDemo) {
+      setTodos(prev => prev.map(t => t.id === id ? { ...t, isDone: !isDone } : t));
+      return;
+    }
     await toggleTodo(id, !isDone);
     fetchTodos(member!.id).then(setTodos);
   };
 
   const handleReadNotif = async (id: string) => {
+    if (isDemo) {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      return;
+    }
     await markNotificationRead(id);
     fetchNotifications(member!.id, 5).then(setNotifications);
   };
@@ -142,7 +193,7 @@ export default function WIOHomePage() {
           { icon: FolderKanban, label: '프로젝트', value: projects.length, color: 'text-indigo-400', href: '/wio/app/project' },
           { icon: Clock, label: '진행 중', value: inProgress, color: 'text-amber-400', href: '/wio/app/project' },
           { icon: CheckCircle2, label: '완료', value: completed, color: 'text-emerald-400', href: '/wio/app/project' },
-          { icon: Target, label: '내 GPR', value: gprs.length, color: 'text-violet-400', href: '/wio/app/gpr' },
+          { icon: Target, label: '내 GPR', value: isDemo ? '78%' : gprs.length, color: 'text-violet-400', href: '/wio/app/gpr' },
         ].map((s, i) => (
           <Link key={i} href={s.href} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 hover:bg-white/[0.04] transition-all group">
             <div className="flex items-center gap-2 mb-2"><s.icon size={16} className={s.color} /><span className="text-xs text-slate-500">{s.label}</span></div>
