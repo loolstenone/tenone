@@ -79,15 +79,12 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     const router = useRouter();
     const [intraVerified, setIntraVerified] = useState<boolean | null>(null);
 
-    // auth-context와 별도로 직접 DB 확인
+    // auth-context와 별도로 직접 DB 확인 — 한번 true면 유지
     useEffect(() => {
+        // 이미 검증됨 → 재검증 안 함
+        if (intraVerified === true) return;
         if (isLoading) return;
-        if (!isAuthenticated) { setIntraVerified(false); return; }
 
-        // auth-context가 canAccessIntra를 true로 판단하면 바로 통과
-        if (canAccessIntra) { setIntraVerified(true); return; }
-
-        // canAccessIntra가 false여도 DB에서 직접 확인 (타이밍 이슈 대응)
         const verify = async () => {
             try {
                 const sb = createClient();
@@ -105,7 +102,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             } catch { setIntraVerified(false); }
         };
         verify();
-    }, [isLoading, isAuthenticated, canAccessIntra]);
+    }, [isLoading, intraVerified]);
 
     if (isLoading || intraVerified === null) return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
