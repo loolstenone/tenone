@@ -156,6 +156,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [member, setMember] = useState<WIOMember | null>(null);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const [openTracks, setOpenTracks] = useState<string[]>(['common']);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // 모바일 감지
@@ -285,24 +286,28 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         </Link>
       </div>
 
-      {/* 모듈 메뉴 — EUS 6-Track */}
+      {/* 모듈 메뉴 — EUS 7-Track 아코디언 */}
       <nav className="flex-1 overflow-y-auto p-2">
         {TRACKS.map((track, ti) => {
           const visibleModules = track.modules.filter(m => activeModules.includes(m.key as WIOModule));
           if (visibleModules.length === 0) return null;
+          const hasActiveChild = visibleModules.some(mod => mod.key === 'home' ? (pathname === '/wio/app' || pathname === '/wio/app/') : pathname.startsWith(mod.href));
+          const isOpen = openTracks.includes(track.id) || hasActiveChild;
+          const TrackIcon = track.icon;
           return (
-            <div key={track.id} className={ti > 0 ? 'mt-3' : ''}>
-              {/* 트랙 헤더 — 확장 상태에서만 표시 */}
-              {(isMobile || !collapsed) && (
-                <div className="px-3 pt-1 pb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{track.name}</span>
-                </div>
+            <div key={track.id} className={ti > 0 ? 'mt-1' : ''}>
+              {/* 트랙 헤더 — 클릭으로 펼침/접힘 */}
+              {(isMobile || !collapsed) ? (
+                <button onClick={() => setOpenTracks(prev => prev.includes(track.id) ? prev.filter(t => t !== track.id) : [...prev, track.id])}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold tracking-wider transition-colors ${isOpen ? 'text-white bg-white/[0.04]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}`}>
+                  <span className="flex items-center gap-2"><TrackIcon size={14} />{track.name}</span>
+                  <ChevronRight size={12} className={`transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+                </button>
+              ) : (
+                collapsed && ti > 0 && <div className="mx-2 mb-1 border-t border-white/5" />
               )}
-              {/* 축소 상태에서는 구분선으로 대체 */}
-              {!isMobile && collapsed && ti > 0 && (
-                <div className="mx-2 mb-1 border-t border-white/5" />
-              )}
-              {visibleModules.map(mod => {
+              {/* 모듈 목록 — 열린 트랙만 표시 */}
+              {(isOpen || (!isMobile && collapsed)) && visibleModules.map(mod => {
                 const Icon = mod.icon;
                 const isActive = mod.key === 'home'
                   ? pathname === '/wio/app' || pathname === '/wio/app/'
