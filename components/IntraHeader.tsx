@@ -243,9 +243,9 @@ export function IntraHeader() {
                     <LogOut className="h-4 w-4" />
                 </button>
 
-                {/* 퍼블릭 사이트로 나가기 */}
-                <Link href="/" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50" title="퍼블릭 사이트로 나가기">
-                    <PortalIcon direction="exit" size={36} />
+                {/* 홈으로 */}
+                <Link href="/" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors rounded hover:bg-neutral-50" title="홈으로">
+                    <Home className="h-4 w-4" />
                 </Link>
             </div>
         </header>
