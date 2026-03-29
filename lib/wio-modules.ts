@@ -15,6 +15,7 @@ import {
   Mail, Send, Calendar, FileStack, Bell, ClipboardList, Cpu, Monitor,
   Lock, ScrollText, Plug, Heart, Database,
   Microscope, Fingerprint, Code, Rocket, Factory, Cog, CheckSquare, Palette, Image, Warehouse, Link2, HardDrive, Film,
+  Vote, ListChecks,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -58,6 +59,8 @@ export const MODULE_CATALOG: WIOModuleDef[] = [
   { key: 'report',       label: '리포트',   icon: ClipboardList,   href: '/wio/app/comm/report',       track: 'common', description: '업무 리포트, 보고서' },
   { key: 'ai',           label: 'AI',       icon: Bot,             href: '/wio/app/comm/ai',           track: 'common', description: 'AI 어시스턴트, 자동화' },
   { key: 'it',           label: '전산',     icon: Monitor,         href: '/wio/app/comm/it',           track: 'common', description: 'IT 자산, 장비 관리' },
+  { key: 'survey',       label: '설문조사', icon: ListChecks,      href: '/wio/app/survey',            track: 'common', description: '설문 생성, 응답 수집, 결과 분석' },
+  { key: 'vote',         label: '투표',     icon: Vote,            href: '/wio/app/vote',              track: 'common', description: '찬반/선택/순위 투표' },
 
   // ─── 인사·조직 (HR) ───
   { key: 'people',       label: '인재',     icon: Users,           href: '/wio/app/people',            track: 'hr', description: '직원 프로필, 역량 관리' },
