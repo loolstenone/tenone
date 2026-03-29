@@ -60,22 +60,26 @@
 
 ---
 
-## 다음 할 일
+## 다음 할 일 (사무실에서 이어서)
 
-### 즉시
-- 설정 페이지 OrgTreeBuilder 컴포넌트 안정적 통합 (빌드 에러 해결)
+### 즉시 — Orbi 개선 (docs/Orbi_Improvement_Plan.md 참조)
+1. COM-AI → Agent Hub 연동 (Claude API 실연결)
+2. 설정 모듈/워크플로우/권한 모드 실DB 전환 (localStorage → Supabase)
+3. SYS-USR 사용자 관리 실DB (wio_members CRUD)
 
-### 단기
-- 나머지 74개 모듈 실DB 연동 (테이블은 존재, 페이지 연결만)
-- 워크플로우 엔진 실작동 (Mock → 실행)
-- Culture Engine 실작동 (양식 연동)
-- 외부 API 키 설정 (Google/Slack/Kakao 실연동)
+### 단기 — TenOne 고도화
+4. TenOne 게시판 고도화 (Works/Newsroom 리치에디터 + 이미지)
+5. 읽음 확인 (COM-MSG)
+6. 프로젝트 내 SNS형 타임라인 피드
+7. COM-WCL 업무 캘린더 실DB
+8. MY-HR 내 인사 실DB
 
-### 중기
-- 바당쇠 (KakaoTalk 봇) 구현
-- 모바일 앱 (Myverse React Native)
-- B2B SaaS 얼리어답터 모집
-- 성능 최적화 (이미지 WebP, 번들 사이즈)
+### 중기 — WIO for Agency
+9. 마케팅 14개 모듈 실DB (SmarComm 연계)
+10. CRM 6개 모듈 실DB
+11. 화상회의 (Zoom/Meet 딥링크)
+12. 외부 게스트 초대 플로우
+13. AI 프로젝트 설계
 
 ---
 
