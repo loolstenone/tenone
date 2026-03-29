@@ -8,6 +8,7 @@ import {
   Building, Zap, Clock, Shield, Play,
   User, Eye, X, Undo2, History, Download, Circle, Square, Diamond,
   Timer, Bell, Workflow, MousePointer, Grip, CircleDot, Blocks,
+  Upload, Type, Lock, Globe, Mail, CheckSquare, Database,
 } from 'lucide-react';
 import { useWIO } from '../layout';
 import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, removeMember } from '@/lib/supabase/wio';
@@ -22,11 +23,11 @@ const ROLE_LABELS: Record<string, string> = {
   owner: '소유자', admin: '관리자', manager: '매니저', member: '멤버', guest: '게스트',
 };
 
-type SettingsTab = 'modules' | 'visual' | 'theme' | 'org' | 'members';
-type VisualMode = 'org' | 'module' | 'workflow';
+type SettingsTab = 'settings' | 'permissions' | 'theme' | 'system';
+type SettingsMode = 'org' | 'module' | 'workflow';
 
 /* ═══════════════════════════════════════════════════════════
-   비주얼 세팅 Mock Data — EUS v2.0 Part 15.6
+   Mock Data — EUS v2.0 Part 15.6
    ═══════════════════════════════════════════════════════════ */
 
 // ── Track definitions ──
@@ -214,7 +215,7 @@ interface ModuleBlock {
   code: string;
   name: string;
   trackId: string;
-  trackColor: string; // ■파랑=운영 ■초록=사업 ■주황=생산 ■보라=지원 ■회색=공통
+  trackColor: string;
 }
 
 const MODULE_BLOCKS: ModuleBlock[] = [
@@ -306,22 +307,20 @@ interface WorkflowTemplate {
   edges: WfEdge[];
 }
 
-const WF_NODE_TYPES: { type: WfNodeType; icon: string; label: string; shape: string }[] = [
-  { type: 'start', icon: '○', label: '시작', shape: 'rounded-full' },
-  { type: 'end', icon: '○', label: '종료', shape: 'rounded-full' },
-  { type: 'task', icon: '□', label: '작업', shape: 'rounded-lg' },
-  { type: 'condition', icon: '◇', label: '조건분기', shape: 'rounded-lg rotate-45' },
-  { type: 'approval', icon: '▮', label: '승인', shape: 'rounded-lg' },
-  { type: 'parallel', icon: '═', label: '병렬', shape: 'rounded-lg' },
-  { type: 'timer', icon: '⏱', label: '타이머', shape: 'rounded-lg' },
-  { type: 'action', icon: '⚡', label: '자동액션', shape: 'rounded-lg' },
-  { type: 'notify', icon: '🔔', label: '알림', shape: 'rounded-lg' },
+const WF_NODE_TYPES: { type: WfNodeType; icon: string; label: string }[] = [
+  { type: 'start', icon: '○', label: '시작' },
+  { type: 'end', icon: '○', label: '종료' },
+  { type: 'task', icon: '□', label: '작업' },
+  { type: 'condition', icon: '◇', label: '조건분기' },
+  { type: 'approval', icon: '▮', label: '승인' },
+  { type: 'parallel', icon: '═', label: '병렬' },
+  { type: 'timer', icon: '⏱', label: '타이머' },
+  { type: 'action', icon: '⚡', label: '자동액션' },
+  { type: 'notify', icon: '🔔', label: '알림' },
 ];
 
-// 결재 flow example
 const APPROVAL_FLOW_TEMPLATE: WorkflowTemplate = {
-  id: 'tpl-approval',
-  name: '전자결재',
+  id: 'tpl-approval', name: '전자결재',
   description: '표준 4단계 결재 프로세스 (기안→팀장→본부장→최종)',
   nodes: [
     { id: 'n1', type: 'start', label: '기안 시작', x: 60, y: 200 },
@@ -335,15 +334,9 @@ const APPROVAL_FLOW_TEMPLATE: WorkflowTemplate = {
     { id: 'n9', type: 'end', label: '완료', x: 1260, y: 200 },
   ],
   edges: [
-    { from: 'n1', to: 'n2' },
-    { from: 'n2', to: 'n3' },
-    { from: 'n3', to: 'n4' },
-    { from: 'n4', to: 'n5', condition: '100만원 이상' },
-    { from: 'n4', to: 'n6', condition: '100만원 미만' },
-    { from: 'n5', to: 'n7' },
-    { from: 'n6', to: 'n8' },
-    { from: 'n7', to: 'n8' },
-    { from: 'n8', to: 'n9' },
+    { from: 'n1', to: 'n2' }, { from: 'n2', to: 'n3' }, { from: 'n3', to: 'n4' },
+    { from: 'n4', to: 'n5', condition: '100만원 이상' }, { from: 'n4', to: 'n6', condition: '100만원 미만' },
+    { from: 'n5', to: 'n7' }, { from: 'n6', to: 'n8' }, { from: 'n7', to: 'n8' }, { from: 'n8', to: 'n9' },
   ],
 };
 
@@ -435,22 +428,51 @@ const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   },
 ];
 
+// ── Permission roles ──
+interface PermissionRole {
+  id: string;
+  name: string;
+  description: string;
+  dataScope: 'all' | 'division' | 'team' | 'self';
+  modules: Record<string, { read: boolean; write: boolean; delete: boolean; admin: boolean }>;
+}
+
+const MOCK_PERMISSION_ROLES: PermissionRole[] = [
+  {
+    id: 'super-admin', name: 'Super Admin', description: '전체 시스템 관리자. 모든 권한 보유',
+    dataScope: 'all',
+    modules: Object.fromEntries(MODULE_BLOCKS.map(m => [m.code, { read: true, write: true, delete: true, admin: true }])),
+  },
+  {
+    id: 'track-admin', name: 'Track Admin', description: '트랙(본부) 단위 관리자',
+    dataScope: 'division',
+    modules: Object.fromEntries(MODULE_BLOCKS.map(m => [m.code, { read: true, write: true, delete: true, admin: false }])),
+  },
+  {
+    id: 'org-admin', name: 'Org Admin', description: '부서 단위 관리자',
+    dataScope: 'team',
+    modules: Object.fromEntries(MODULE_BLOCKS.map(m => [m.code, { read: true, write: true, delete: false, admin: false }])),
+  },
+  {
+    id: 'team-lead', name: 'Team Lead', description: '팀장급. 팀 데이터 접근',
+    dataScope: 'team',
+    modules: Object.fromEntries(MODULE_BLOCKS.map(m => [m.code, { read: true, write: true, delete: false, admin: false }])),
+  },
+  {
+    id: 'member', name: 'Member', description: '일반 멤버. 본인 데이터만 접근',
+    dataScope: 'self',
+    modules: Object.fromEntries(MODULE_BLOCKS.map(m => [m.code, { read: true, write: false, delete: false, admin: false }])),
+  },
+];
+
 /* ═══════════════════════════════════════════════════════════ */
 
 export default function SettingsPage() {
   const { tenant, member, refreshTenant, reloadConfig: reloadSidebar } = useWIO();
-  const [tab, setTab] = useState<SettingsTab>('modules');
+  const [tab, setTab] = useState<SettingsTab>('settings');
 
-  // Module config
-  const [config, setConfig] = useState<OrbiConfig>({ enabledModules: [], categories: [] });
-  const [selectedCategory, setSelectedCategory] = useState('track6-common');
-  const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
-  const [categoryNameInput, setCategoryNameInput] = useState('');
-  const categoryNameRef = useRef<HTMLInputElement>(null);
-  const [moduleSearch, setModuleSearch] = useState('');
-
-  // Visual settings (3-mode)
-  const [visualMode, setVisualMode] = useState<VisualMode>('org');
+  // Settings tab: 3-mode
+  const [settingsMode, setSettingsMode] = useState<SettingsMode>('org');
   const [expandedTracks, setExpandedTracks] = useState<string[]>(['track1']);
   const [expandedOrgs, setExpandedOrgs] = useState<string[]>([]);
   const [selectedOrgNode, setSelectedOrgNode] = useState<OrgNode | null>(null);
@@ -468,15 +490,18 @@ export default function SettingsPage() {
   const [testStep, setTestStep] = useState(-1);
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  // Permissions tab
+  const [permRoles, setPermRoles] = useState<PermissionRole[]>(MOCK_PERMISSION_ROLES);
+  const [selectedRole, setSelectedRole] = useState<string>('super-admin');
+  const [simUser, setSimUser] = useState('');
+
   // Theme
   const [editColor, setEditColor] = useState('#6366F1');
 
-  // Org
+  // System tab (org info + members)
   const [editName, setEditName] = useState('');
   const [editServiceName, setEditServiceName] = useState('');
   const [editDomain, setEditDomain] = useState('');
-
-  // Members
   const [members, setMembers] = useState<WIOMember[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
@@ -493,111 +518,18 @@ export default function SettingsPage() {
       setEditDomain(tenant.domain || '');
       setEditColor(tenant.primaryColor);
     }
-    const cfg = loadOrbiConfig();
-    setConfig(cfg);
-    if (cfg.categories.length === 0) {
-      const defaultCats = CATEGORY_CATALOG.map((c, i) => ({
-        id: c.id, name: c.name, order: i, enabled: true,
-      }));
-      setConfig(prev => ({ ...prev, categories: defaultCats }));
-    }
   }, [tenant]);
 
   useEffect(() => {
-    if (tenant && tab === 'members' && tenant.id !== 'demo') {
+    if (tenant && tab === 'system' && tenant.id !== 'demo') {
       fetchTenantMembers(tenant.id).then(setMembers);
     }
   }, [tenant, tab]);
-
-  useEffect(() => {
-    if (editingCategoryName && categoryNameRef.current) categoryNameRef.current.focus();
-  }, [editingCategoryName]);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
 
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
-
-  // ── Module config handlers ──
-  function toggleModule(key: string) {
-    setConfig(prev => {
-      const next = prev.enabledModules.includes(key)
-        ? prev.enabledModules.filter(k => k !== key)
-        : [...prev.enabledModules, key];
-      const updated = { ...prev, enabledModules: next };
-      saveOrbiConfig(updated);
-      reloadSidebar();
-      return updated;
-    });
-  }
-
-  function enableAllInCategory(categoryId: string) {
-    const catMods = getModulesByCategory(categoryId).map(m => m.key);
-    setConfig(prev => {
-      const next = [...new Set([...prev.enabledModules, ...catMods])];
-      const updated = { ...prev, enabledModules: next };
-      saveOrbiConfig(updated);
-      reloadSidebar();
-      return updated;
-    });
-  }
-
-  function disableAllInCategory(categoryId: string) {
-    const catMods = getModulesByCategory(categoryId).map(m => m.key);
-    setConfig(prev => {
-      const next = prev.enabledModules.filter(k => !catMods.includes(k) || k === 'home');
-      const updated = { ...prev, enabledModules: next };
-      saveOrbiConfig(updated);
-      reloadSidebar();
-      return updated;
-    });
-  }
-
-  function moveCategory(categoryId: string, dir: -1 | 1) {
-    setConfig(prev => {
-      const sorted = [...prev.categories].sort((a, b) => a.order - b.order);
-      const idx = sorted.findIndex(c => c.id === categoryId);
-      if (idx < 0) return prev;
-      const swapIdx = idx + dir;
-      if (swapIdx < 0 || swapIdx >= sorted.length) return prev;
-      const newOrder = [...sorted];
-      [newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]];
-      const updated = {
-        ...prev,
-        categories: newOrder.map((c, i) => ({ ...c, order: i })),
-      };
-      saveOrbiConfig(updated);
-      reloadSidebar();
-      return updated;
-    });
-  }
-
-  function renameCategory(categoryId: string, newName: string) {
-    setConfig(prev => {
-      const updated = {
-        ...prev,
-        categories: prev.categories.map(c => c.id === categoryId ? { ...c, name: newName } : c),
-      };
-      saveOrbiConfig(updated);
-      reloadSidebar();
-      return updated;
-    });
-    setEditingCategoryName(null);
-  }
-
-  function getCategoryName(categoryId: string): string {
-    const cc = config.categories.find(c => c.id === categoryId);
-    if (cc) return cc.name;
-    const cat = CATEGORY_CATALOG.find(c => c.id === categoryId);
-    return cat?.name || categoryId;
-  }
-
-  function enabledCountForCategory(categoryId: string): number {
-    const catMods = getModulesByCategory(categoryId).map(m => m.key);
-    return config.enabledModules.filter(k => catMods.includes(k)).length;
-  }
-
-  const sortedCategories = [...(config.categories.length > 0 ? config.categories : CATEGORY_CATALOG.map((c, i) => ({ id: c.id, name: c.name, order: i, enabled: true })))].sort((a, b) => a.order - b.order);
 
   // ── Org save ──
   async function saveOrg() {
@@ -635,7 +567,7 @@ export default function SettingsPage() {
     if (ok) { setMembers(prev => prev.filter(m => m.id !== memberId)); showToast('멤버 제거됨'); }
   }
 
-  // ── Visual mode helpers ──
+  // ── Track / Org tree helpers ──
   function toggleTrack(trackId: string) {
     setExpandedTracks(prev => prev.includes(trackId) ? prev.filter(t => t !== trackId) : [...prev, trackId]);
   }
@@ -715,8 +647,22 @@ export default function SettingsPage() {
     }
   }
 
+  // ── Permission toggle ──
+  function togglePermission(roleId: string, moduleCode: string, field: 'read' | 'write' | 'delete' | 'admin') {
+    setPermRoles(prev => prev.map(r => {
+      if (r.id !== roleId) return r;
+      const mod = { ...r.modules[moduleCode] };
+      mod[field] = !mod[field];
+      return { ...r, modules: { ...r.modules, [moduleCode]: mod } };
+    }));
+  }
+
+  function setDataScope(roleId: string, scope: PermissionRole['dataScope']) {
+    setPermRoles(prev => prev.map(r => r.id === roleId ? { ...r, dataScope: scope } : r));
+  }
+
   // ── Org tree renderer ──
-  function renderOrgTree(nodes: OrgNode[], depth: number = 0, track: TrackDef) {
+  function renderOrgTree(nodes: OrgNode[], depth: number, track: TrackDef) {
     return nodes.map(node => {
       const isExpanded = expandedOrgs.includes(node.id);
       const isSelected = selectedOrgNode?.id === node.id;
@@ -745,31 +691,84 @@ export default function SettingsPage() {
             <span className="font-medium text-white truncate">{node.name}</span>
             <span className="text-[10px] text-slate-600 ml-auto shrink-0">{node.head}</span>
             <span className="text-[10px] text-slate-600 shrink-0">{node.memberCount}명</span>
-            {visualMode === 'module' && assignedCount > 0 && (
+            {settingsMode === 'module' && assignedCount > 0 && (
               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 shrink-0">
                 {assignedCount}
               </span>
             )}
           </div>
+          {/* Module pills under org in module mode */}
+          {settingsMode === 'module' && isSelected && assignedCount > 0 && (
+            <div className="flex flex-wrap gap-1 ml-8 mt-1 mb-1">
+              {(assignedModules[node.id] || []).map(code => {
+                const block = MODULE_BLOCKS.find(b => b.code === code);
+                if (!block) return null;
+                return (
+                  <div key={code} className="group flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] border border-white/10 bg-white/[0.03]">
+                    <div className={`w-1.5 h-1.5 rounded-sm ${block.trackColor}`} />
+                    <span className="text-white/70">{block.code}</span>
+                    <button onClick={(e) => { e.stopPropagation(); removeModuleFromOrg(node.id, code); }}
+                      className="hidden group-hover:block text-slate-600 hover:text-red-400 ml-0.5">
+                      <X size={8} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           {isExpanded && node.children && renderOrgTree(node.children, depth + 1, track)}
         </div>
       );
     });
   }
 
+  // ── Render track accordion (shared for left panel in all 3 modes) ──
+  function renderTrackAccordion() {
+    return (
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {TRACKS.map(track => {
+          const isExpanded = expandedTracks.includes(track.id);
+          const orgNodes = MOCK_ORG_TREE[track.id] || [];
+          return (
+            <div key={track.id}>
+              <button onClick={() => toggleTrack(track.id)}
+                className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/5 ${track.color}`}>
+                <ChevronRight size={12} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                <div className={`w-2 h-2 rounded-full ${track.colorBg.replace('/10', '')}`} />
+                {track.name}
+                <span className="ml-auto text-[10px] text-slate-600 font-normal">
+                  {orgNodes.length > 0 ? `${orgNodes.reduce((sum, n) => sum + n.memberCount, 0)}명` : '-'}
+                </span>
+              </button>
+              {isExpanded && orgNodes.length > 0 && (
+                <div className="ml-2 mt-0.5 space-y-0.5">
+                  {renderOrgTree(orgNodes, 0, track)}
+                </div>
+              )}
+              {isExpanded && orgNodes.length === 0 && (
+                <div className="ml-6 py-2 text-[10px] text-slate-600">조직 없음</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   const TABS: { id: SettingsTab; label: string; icon: typeof Settings }[] = [
-    { id: 'modules', label: '모듈 설정', icon: Settings },
-    { id: 'visual', label: '비주얼 세팅', icon: Eye },
+    { id: 'settings', label: '세팅', icon: Settings },
+    { id: 'permissions', label: '권한', icon: Shield },
     { id: 'theme', label: '테마', icon: Palette },
-    { id: 'org', label: '조직 정보', icon: Building2 },
-    { id: 'members', label: '멤버 관리', icon: Users },
+    { id: 'system', label: '시스템', icon: Building2 },
   ];
 
-  const VISUAL_MODES: { id: VisualMode; label: string; icon: typeof Building; desc: string }[] = [
+  const MODE_BUTTONS: { id: SettingsMode; label: string; icon: typeof Building; desc: string }[] = [
     { id: 'org', label: '조직 모드', icon: Building, desc: '조직 구조 설계' },
-    { id: 'module', label: '모듈 모드', icon: Blocks, desc: '모듈 레고 배치' },
+    { id: 'module', label: '모듈 모드', icon: Blocks, desc: '모듈 배치' },
     { id: 'workflow', label: '워크플로우 모드', icon: Workflow, desc: '업무 흐름 설계' },
   ];
+
+  const currentRole = permRoles.find(r => r.id === selectedRole);
 
   return (
     <div>
@@ -778,7 +777,7 @@ export default function SettingsPage() {
 
       {isDemo && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 mb-5 text-sm text-amber-300">
-          데모 모드입니다. 모듈 설정은 브라우저에 저장됩니다.
+          데모 모드입니다. 변경 사항은 브라우저에 저장됩니다.
         </div>
       )}
 
@@ -799,441 +798,216 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ 모듈 설정 ═══ */}
-      {tab === 'modules' && (
-        <div className="flex gap-5" style={{ minHeight: 'calc(100vh - 220px)' }}>
-          {/* Left: Category list */}
-          <div className="w-[250px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <span className="text-xs font-semibold text-slate-400">카테고리</span>
-            </div>
-            <div className="p-2 space-y-0.5">
-              {sortedCategories.map((cc, idx) => {
-                const catDef = CATEGORY_CATALOG.find(c => c.id === cc.id);
-                if (!catDef) return null;
-                const CatIcon = catDef.icon;
-                const count = enabledCountForCategory(cc.id);
-                const isSelected = selectedCategory === cc.id;
-
-                return (
-                  <div key={cc.id}
-                    className={`group flex items-center gap-2 rounded-lg px-3 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-600/10 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'}`}
-                    onClick={() => setSelectedCategory(cc.id)}>
-                    <CatIcon size={15} className="shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      {editingCategoryName === cc.id ? (
-                        <input ref={categoryNameRef} value={categoryNameInput}
-                          onChange={e => setCategoryNameInput(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') renameCategory(cc.id, categoryNameInput); if (e.key === 'Escape') setEditingCategoryName(null); }}
-                          onBlur={() => renameCategory(cc.id, categoryNameInput)}
-                          className="w-full bg-transparent border-b border-indigo-500 text-sm text-white outline-none py-0"
-                          onClick={e => e.stopPropagation()} />
-                      ) : (
-                        <span className="text-sm truncate block">{cc.name}</span>
-                      )}
-                    </div>
-                    <span className={`text-[10px] ${count > 0 ? 'text-indigo-400' : 'text-slate-600'}`}>{count}</span>
-                    <div className="hidden group-hover:flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => moveCategory(cc.id, -1)} disabled={idx === 0}
-                        className="p-0.5 text-slate-600 hover:text-white disabled:opacity-20 transition"><ChevronUp size={12} /></button>
-                      <button onClick={() => moveCategory(cc.id, 1)} disabled={idx === sortedCategories.length - 1}
-                        className="p-0.5 text-slate-600 hover:text-white disabled:opacity-20 transition"><ChevronDown size={12} /></button>
-                      <button onClick={() => { setEditingCategoryName(cc.id); setCategoryNameInput(cc.name); }}
-                        className="p-0.5 text-slate-600 hover:text-white transition"><Pencil size={11} /></button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right: Module catalog for selected category */}
-          <div className="flex-1 min-w-0">
-            {(() => {
-              const catDef = CATEGORY_CATALOG.find(c => c.id === selectedCategory);
-              if (!catDef) return null;
-              const categoryModules = getModulesByCategory(selectedCategory);
-              const allEnabled = categoryModules.every(m => config.enabledModules.includes(m.key));
-              const filtered = moduleSearch
-                ? categoryModules.filter(m => m.label.includes(moduleSearch) || m.description.includes(moduleSearch) || m.key.includes(moduleSearch))
-                : categoryModules;
-
-              return (
-                <>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-base font-bold">{getCategoryName(selectedCategory)}</h2>
-                      <p className="text-xs text-slate-500 mt-0.5">{categoryModules.length}개 모듈 중 {enabledCountForCategory(selectedCategory)}개 활성</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600" />
-                        <input value={moduleSearch} onChange={e => setModuleSearch(e.target.value)} placeholder="검색..."
-                          className="pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none w-40" />
-                      </div>
-                      <button onClick={() => allEnabled ? disableAllInCategory(selectedCategory) : enableAllInCategory(selectedCategory)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${allEnabled ? 'bg-slate-700/50 text-slate-400 hover:bg-slate-700' : 'bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20'}`}>
-                        {allEnabled ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
-                        {allEnabled ? '전체 해제' : '전체 활성'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                    {filtered.map(mod => {
-                      const enabled = config.enabledModules.includes(mod.key);
-                      const isHome = mod.key === 'home';
-                      const Icon = mod.icon;
-                      return (
-                        <button key={mod.key}
-                          onClick={() => !isHome && toggleModule(mod.key)}
-                          disabled={isHome}
-                          className={`relative flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
-                            enabled
-                              ? 'border-indigo-500/30 bg-indigo-500/5 hover:border-indigo-500/50'
-                              : 'border-white/5 bg-white/[0.01] opacity-50 hover:opacity-70 hover:border-white/10'
-                          } ${isHome ? 'cursor-default' : 'cursor-pointer'}`}>
-                          <div className={`shrink-0 flex h-9 w-9 items-center justify-center rounded-lg ${enabled ? 'bg-indigo-600/15 text-indigo-400' : 'bg-white/5 text-slate-500'}`}>
-                            <Icon size={17} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-sm font-semibold ${enabled ? 'text-white' : 'text-slate-400'}`}>{mod.label}</span>
-                              {isHome && <span className="text-[9px] text-slate-600 border border-slate-700 px-1.5 py-0.5 rounded">필수</span>}
-                            </div>
-                            <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{mod.description}</p>
-                          </div>
-                          <div className={`absolute top-3 right-3 w-8 h-4.5 rounded-full transition-colors ${enabled ? 'bg-indigo-600' : 'bg-slate-700'}`}>
-                            <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform mt-[2px] ${enabled ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* ═══ 비주얼 세팅 — EUS v2.0 Part 15.6 3-Mode System ═══ */}
-      {tab === 'visual' && (
+      {/* ═══════════════════════════════════════════════
+          TAB 1: 세팅 (3 modes on ONE page)
+          ═══════════════════════════════════════════════ */}
+      {tab === 'settings' && (
         <div className="space-y-4">
-          {/* Mode toggle */}
+          {/* Mode toggle buttons */}
           <div className="flex items-center gap-2">
-            {VISUAL_MODES.map((vm, i) => (
-              <div key={vm.id} className="flex items-center gap-2">
-                <button onClick={() => setVisualMode(vm.id)}
-                  className={`flex items-center gap-2 rounded-xl border px-5 py-3 transition-all ${
-                    visualMode === vm.id
-                      ? 'border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20'
-                  }`}>
-                  <vm.icon size={16} className={visualMode === vm.id ? 'text-indigo-400' : 'text-slate-500'} />
-                  <div>
-                    <p className={`text-sm font-semibold ${visualMode === vm.id ? 'text-white' : 'text-slate-400'}`}>{vm.label}</p>
-                    <p className="text-[10px] text-slate-600">{vm.desc}</p>
-                  </div>
-                </button>
-                {i < VISUAL_MODES.length - 1 && <ArrowRight size={14} className="text-slate-700" />}
-              </div>
+            {MODE_BUTTONS.map((vm) => (
+              <button key={vm.id} onClick={() => setSettingsMode(vm.id)}
+                className={`flex items-center gap-2 rounded-xl border px-5 py-3 transition-all ${
+                  settingsMode === vm.id
+                    ? 'border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20'
+                    : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                }`}>
+                <vm.icon size={16} className={settingsMode === vm.id ? 'text-indigo-400' : 'text-slate-500'} />
+                <div>
+                  <p className={`text-sm font-semibold ${settingsMode === vm.id ? 'text-white' : 'text-slate-400'}`}>{vm.label}</p>
+                  <p className="text-[10px] text-slate-600">{vm.desc}</p>
+                </div>
+              </button>
             ))}
           </div>
 
-          {/* Seeding order indicator */}
-          <div className="flex items-center gap-2 text-[10px] text-slate-600">
-            <span className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              {visualMode === 'org' ? '1' : visualMode === 'module' ? '2' : '3'}/4
-            </span>
-            <span className={visualMode === 'org' ? 'text-indigo-400 font-semibold' : ''}>조직 모드</span>
-            <ArrowRight size={10} />
-            <span className={visualMode === 'module' ? 'text-indigo-400 font-semibold' : ''}>모듈 모드</span>
-            <ArrowRight size={10} />
-            <span className={visualMode === 'workflow' ? 'text-indigo-400 font-semibold' : ''}>워크플로우 모드</span>
-            <ArrowRight size={10} />
-            <span>미리보기</span>
-          </div>
+          {/* Main content area: Left panel (60%) + Right panel (40%) */}
+          <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 340px)' }}>
 
-          {/* ══ Mode 1: 조직 모드 ══ */}
-          {visualMode === 'org' && (
-            <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 320px)' }}>
-              {/* Left: Track / Org tree */}
-              <div className="w-[380px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">조직 트리</span>
+            {/* ─── LEFT PANEL: Always shows tracks ─── */}
+            <div className={`shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col ${
+              settingsMode === 'workflow' ? 'w-[240px]' : 'w-[60%]'
+            }`}>
+              <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-400">
+                  {settingsMode === 'org' ? '조직 트리' : settingsMode === 'module' ? '조직 + 모듈' : '트랙'}
+                </span>
+                {settingsMode === 'org' && (
                   <button className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition">
                     <Plus size={11} /> 부서 추가
                   </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                  {TRACKS.map(track => {
-                    const isExpanded = expandedTracks.includes(track.id);
-                    const orgNodes = MOCK_ORG_TREE[track.id] || [];
-                    return (
-                      <div key={track.id}>
-                        <button onClick={() => toggleTrack(track.id)}
-                          className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/5 ${track.color}`}>
-                          <ChevronRight size={12} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                          <div className={`w-2 h-2 rounded-full ${track.colorBg.replace('/10', '')}`} />
-                          {track.name}
-                          <span className="ml-auto text-[10px] text-slate-600 font-normal">{orgNodes.length > 0 ? `${orgNodes.reduce((sum, n) => sum + n.memberCount, 0)}명` : '-'}</span>
-                        </button>
-                        {isExpanded && orgNodes.length > 0 && (
-                          <div className="ml-2 mt-0.5 space-y-0.5">
-                            {renderOrgTree(orgNodes, 0, track)}
-                          </div>
-                        )}
-                        {isExpanded && orgNodes.length === 0 && (
-                          <div className="ml-6 py-2 text-[10px] text-slate-600">조직 없음</div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right: Selected org detail */}
-              <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                {selectedOrgNode ? (
-                  <>
-                    <div className="px-5 py-4 border-b border-white/5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-indigo-600/15 flex items-center justify-center">
-                          <Building size={18} className="text-indigo-400" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-white">{selectedOrgNode.name}</h3>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-[10px] text-slate-500">{selectedOrgNode.type}</span>
-                            <span className="text-[10px] text-slate-500">|</span>
-                            <span className="text-[10px] text-slate-500">장: {selectedOrgNode.head}</span>
-                            <span className="text-[10px] text-slate-500">|</span>
-                            <span className="text-[10px] text-slate-500">{selectedOrgNode.memberCount}명</span>
-                          </div>
-                        </div>
-                        <div className="ml-auto flex items-center gap-1">
-                          <button className="text-[10px] px-2 py-1 rounded-lg bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20 transition">
-                            <UserPlus size={11} className="inline mr-1" /> 멤버 추가
-                          </button>
-                          <button className="text-[10px] px-2 py-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 transition">
-                            장 지정
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Members list */}
-                    <div className="flex-1 overflow-y-auto p-4">
-                      <p className="text-xs font-semibold text-slate-400 mb-3">멤버 목록</p>
-                      <div className="space-y-1">
-                        {(selectedOrgNode.members || []).map((m, i) => (
-                          <div key={m.id + i}
-                            className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 cursor-grab hover:bg-white/5 transition group">
-                            <GripVertical size={12} className="text-slate-700 group-hover:text-slate-500" />
-                            <div className="h-7 w-7 rounded-full bg-indigo-600/20 flex items-center justify-center text-[10px] font-bold text-indigo-400">
-                              {m.name.charAt(0)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <span className="text-xs font-medium text-white">{m.name}</span>
-                              <span className="text-[10px] text-slate-500 ml-2">{m.role}</span>
-                            </div>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                              m.level === 'Team Lead' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
-                              m.level === 'Sub-Lead' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
-                              'bg-slate-500/10 text-slate-400 border border-slate-500/20'
-                            }`}>
-                              {m.level}
-                            </span>
-                          </div>
-                        ))}
-                        {(!selectedOrgNode.members || selectedOrgNode.members.length === 0) && (
-                          <p className="text-center py-6 text-[10px] text-slate-600">멤버가 없습니다</p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-slate-600">
-                    <div className="text-center">
-                      <Building size={32} className="mx-auto mb-2 opacity-30" />
-                      <p className="text-sm">왼쪽에서 조직을 선택하세요</p>
-                    </div>
-                  </div>
                 )}
               </div>
+              {renderTrackAccordion()}
             </div>
-          )}
 
-          {/* ══ Mode 2: 모듈 모드 (레고) ══ */}
-          {visualMode === 'module' && (
-            <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 320px)' }}>
-              {/* Left: Org tree (same as Mode 1) */}
-              <div className="w-[320px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                <div className="px-4 py-3 border-b border-white/5">
-                  <span className="text-xs font-semibold text-slate-400">조직 트리</span>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                  {TRACKS.map(track => {
-                    const isExpanded = expandedTracks.includes(track.id);
-                    const orgNodes = MOCK_ORG_TREE[track.id] || [];
-                    return (
-                      <div key={track.id}>
-                        <button onClick={() => toggleTrack(track.id)}
-                          className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/5 ${track.color}`}>
-                          <ChevronRight size={12} className={`text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                          <div className={`w-2 h-2 rounded-full ${track.colorBg.replace('/10', '')}`} />
-                          {track.name}
-                        </button>
-                        {isExpanded && orgNodes.length > 0 && (
-                          <div className="ml-2 mt-0.5 space-y-0.5">
-                            {renderOrgTree(orgNodes, 0, track)}
+            {/* ─── RIGHT PANEL: Changes by mode ─── */}
+            <div className={`flex-1 min-w-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col`}>
+
+              {/* ══ 조직 모드: Right = selected org details ══ */}
+              {settingsMode === 'org' && (
+                <>
+                  {selectedOrgNode ? (
+                    <>
+                      <div className="px-5 py-4 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-indigo-600/15 flex items-center justify-center">
+                            <Building size={18} className="text-indigo-400" />
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Selected org assigned modules */}
-                {selectedOrgNode && (
-                  <div className="border-t border-white/5 p-3">
-                    <p className="text-[10px] font-semibold text-slate-400 mb-2">
-                      {selectedOrgNode.name} 할당 모듈 ({getAssignedCount(selectedOrgNode.id)})
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {(assignedModules[selectedOrgNode.id] || []).map(code => {
-                        const block = MODULE_BLOCKS.find(b => b.code === code);
-                        if (!block) return null;
-                        return (
-                          <div key={code}
-                            className="group flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px]">
-                            <div className={`w-1.5 h-1.5 rounded-sm ${block.trackColor}`} />
-                            <span className="text-white font-medium">{block.code}</span>
-                            <button onClick={() => removeModuleFromOrg(selectedOrgNode.id, code)}
-                              className="hidden group-hover:block text-slate-600 hover:text-red-400 transition">
-                              <X size={10} />
+                          <div>
+                            <h3 className="text-sm font-bold text-white">{selectedOrgNode.name}</h3>
+                            <div className="flex items-center gap-3 mt-0.5">
+                              <span className="text-[10px] text-slate-500">{selectedOrgNode.type}</span>
+                              <span className="text-[10px] text-slate-500">|</span>
+                              <span className="text-[10px] text-slate-500">장: {selectedOrgNode.head}</span>
+                              <span className="text-[10px] text-slate-500">|</span>
+                              <span className="text-[10px] text-slate-500">{selectedOrgNode.memberCount}명</span>
+                            </div>
+                          </div>
+                          <div className="ml-auto flex items-center gap-1">
+                            <button className="text-[10px] px-2 py-1 rounded-lg bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20 transition">
+                              <UserPlus size={11} className="inline mr-1" /> 직원 추가
+                            </button>
+                            <button className="text-[10px] px-2 py-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 transition">
+                              장 지정
                             </button>
                           </div>
-                        );
-                      })}
-                      {getAssignedCount(selectedOrgNode.id) === 0 && (
-                        <span className="text-[10px] text-slate-600">오른쪽에서 드래그하여 추가</span>
-                      )}
+                        </div>
+                      </div>
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <p className="text-xs font-semibold text-slate-400 mb-3">멤버 목록</p>
+                        <div className="space-y-1">
+                          {(selectedOrgNode.members || []).map((m, i) => (
+                            <div key={m.id + i}
+                              className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/5 transition group">
+                              <GripVertical size={12} className="text-slate-700 group-hover:text-slate-500 cursor-grab" />
+                              <div className="h-7 w-7 rounded-full bg-indigo-600/20 flex items-center justify-center text-[10px] font-bold text-indigo-400">
+                                {m.name.charAt(0)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-medium text-white">{m.name}</span>
+                                <span className="text-[10px] text-slate-500 ml-2">{m.role}</span>
+                              </div>
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                                m.level === 'Team Lead' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
+                                m.level === 'Sub-Lead' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
+                                'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                              }`}>
+                                {m.level}
+                              </span>
+                            </div>
+                          ))}
+                          {(!selectedOrgNode.members || selectedOrgNode.members.length === 0) && (
+                            <p className="text-center py-6 text-[10px] text-slate-600">멤버가 없습니다</p>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-slate-600">
+                      <div className="text-center">
+                        <Building size={32} className="mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">왼쪽에서 조직을 선택하세요</p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ══ 모듈 모드: Right = Module palette ══ */}
+              {settingsMode === 'module' && (
+                <>
+                  <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3">
+                    <span className="text-xs font-semibold text-slate-400">모듈 팔레트</span>
+                    <div className="relative flex-1 max-w-[200px]">
+                      <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-600" />
+                      <input value={modulePaletteSearch} onChange={e => setModulePaletteSearch(e.target.value)}
+                        placeholder="모듈 검색..."
+                        className="w-full pl-7 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[11px] text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
+                    </div>
+                    <div className="flex items-center gap-1 ml-auto">
+                      <button onClick={() => setModuleFilterTrack(null)}
+                        className={`text-[10px] px-2 py-1 rounded-md transition ${!moduleFilterTrack ? 'bg-indigo-500/15 text-indigo-400' : 'text-slate-500 hover:bg-white/5'}`}>
+                        전체
+                      </button>
+                      {TRACKS.filter(t => t.id !== 'track5').map(t => (
+                        <button key={t.id} onClick={() => setModuleFilterTrack(t.id)}
+                          className={`text-[10px] px-2 py-1 rounded-md transition ${moduleFilterTrack === t.id ? `${t.colorBg} ${t.color}` : 'text-slate-500 hover:bg-white/5'}`}>
+                          {t.name.split(' ').pop()}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Right: Module palette */}
-              <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3">
-                  <span className="text-xs font-semibold text-slate-400">모듈 팔레트</span>
-                  <div className="relative flex-1 max-w-[200px]">
-                    <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-600" />
-                    <input value={modulePaletteSearch} onChange={e => setModulePaletteSearch(e.target.value)}
-                      placeholder="모듈 검색..."
-                      className="w-full pl-7 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[11px] text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
-                  </div>
-                  <div className="flex items-center gap-1 ml-auto">
-                    <button onClick={() => setModuleFilterTrack(null)}
-                      className={`text-[10px] px-2 py-1 rounded-md transition ${!moduleFilterTrack ? 'bg-indigo-500/15 text-indigo-400' : 'text-slate-500 hover:bg-white/5'}`}>
-                      전체
-                    </button>
-                    {TRACKS.filter(t => t.id !== 'track5').map(t => (
-                      <button key={t.id} onClick={() => setModuleFilterTrack(t.id)}
-                        className={`text-[10px] px-2 py-1 rounded-md transition ${moduleFilterTrack === t.id ? `${t.colorBg} ${t.color}` : 'text-slate-500 hover:bg-white/5'}`}>
-                        {t.name.split(' ').pop()}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    {/* Color legend */}
+                    <div className="flex items-center gap-3 mb-4 text-[10px] text-slate-500">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500" /> 운영</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500" /> 사업</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-orange-500" /> 생산</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-500" /> 지원</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-slate-500" /> 공통</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-500" /> 시스템</span>
+                    </div>
 
-                <div className="flex-1 overflow-y-auto p-4">
-                  {/* Color legend */}
-                  <div className="flex items-center gap-3 mb-4 text-[10px] text-slate-500">
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500" /> 운영</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500" /> 사업</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-orange-500" /> 생산</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-500" /> 지원</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-slate-500" /> 공통</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-500" /> 시스템</span>
+                    <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                      {MODULE_BLOCKS
+                        .filter(b => !moduleFilterTrack || b.trackId === moduleFilterTrack)
+                        .filter(b => !modulePaletteSearch || b.name.includes(modulePaletteSearch) || b.code.includes(modulePaletteSearch.toUpperCase()))
+                        .map(block => {
+                          const isAssigned = selectedOrgNode && (assignedModules[selectedOrgNode.id] || []).includes(block.code);
+                          return (
+                            <div key={block.code}
+                              draggable
+                              onDragStart={() => setDraggedModule(block.code)}
+                              onDragEnd={() => { setDraggedModule(null); setDragOverOrg(null); }}
+                              onClick={() => {
+                                if (selectedOrgNode && !isAssigned) {
+                                  setAssignedModules(prev => ({
+                                    ...prev,
+                                    [selectedOrgNode.id]: [...(prev[selectedOrgNode.id] || []), block.code],
+                                  }));
+                                  showToast(`${block.name} 할당됨`);
+                                }
+                              }}
+                              className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-3 cursor-grab transition-all hover:border-white/20 active:scale-95 ${
+                                isAssigned
+                                  ? 'border-indigo-500/30 bg-indigo-500/5 opacity-50'
+                                  : 'border-white/5 bg-white/[0.02] hover:bg-white/5'
+                              }`}>
+                              <div className={`w-3 h-3 rounded-md ${block.trackColor}`} />
+                              <span className="text-[11px] font-bold text-white">{block.code}</span>
+                              <span className="text-[9px] text-slate-500">{block.name}</span>
+                              {isAssigned && (
+                                <span className="absolute top-1 right-1 text-indigo-400">
+                                  <Check size={10} />
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
                   </div>
+                </>
+              )}
 
-                  {/* Module blocks grid */}
-                  <div className="grid grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-                    {MODULE_BLOCKS
-                      .filter(b => !moduleFilterTrack || b.trackId === moduleFilterTrack)
-                      .filter(b => !modulePaletteSearch || b.name.includes(modulePaletteSearch) || b.code.includes(modulePaletteSearch.toUpperCase()))
-                      .map(block => {
-                        const isAssigned = selectedOrgNode && (assignedModules[selectedOrgNode.id] || []).includes(block.code);
-                        return (
-                          <div key={block.code}
-                            draggable
-                            onDragStart={() => setDraggedModule(block.code)}
-                            onDragEnd={() => { setDraggedModule(null); setDragOverOrg(null); }}
-                            className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-3 cursor-grab transition-all hover:border-white/20 active:scale-95 ${
-                              isAssigned
-                                ? 'border-indigo-500/30 bg-indigo-500/5 opacity-50'
-                                : 'border-white/5 bg-white/[0.02] hover:bg-white/5'
-                            }`}>
-                            <div className={`w-3 h-3 rounded-md ${block.trackColor}`} />
-                            <span className="text-[11px] font-bold text-white">{block.code}</span>
-                            <span className="text-[9px] text-slate-500">{block.name}</span>
-                            {isAssigned && (
-                              <span className="absolute top-1 right-1 text-[8px] text-indigo-400">
-                                <Check size={10} />
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ══ Mode 3: 워크플로우 모드 ══ */}
-          {visualMode === 'workflow' && (
-            <div className="space-y-4">
-              {/* Template selector + node palette */}
-              <div className="flex gap-4">
-                {/* Template library */}
-                <div className="w-[260px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                  <div className="px-4 py-3 border-b border-white/5">
-                    <span className="text-xs font-semibold text-slate-400">템플릿 라이브러리</span>
-                    <span className="ml-2 text-[10px] text-slate-600">{WORKFLOW_TEMPLATES.length}개</span>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {/* ══ 워크플로우 모드: Right = workflow canvas ══ */}
+              {settingsMode === 'workflow' && (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Template selector at top */}
+                  <div className="px-4 py-3 border-b border-white/5 flex items-center gap-2 overflow-x-auto">
+                    <span className="text-[10px] text-slate-500 shrink-0">템플릿:</span>
                     {WORKFLOW_TEMPLATES.map(tpl => (
                       <button key={tpl.id} onClick={() => { setSelectedTemplate(tpl); setSelectedWfNode(null); setSelectedWfEdge(null); }}
-                        className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors ${
+                        className={`shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition ${
                           selectedTemplate.id === tpl.id
-                            ? 'bg-indigo-500/10 border border-indigo-500/20'
-                            : 'hover:bg-white/5 border border-transparent'
+                            ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                            : 'text-slate-400 hover:bg-white/5 border border-transparent'
                         }`}>
-                        <p className="text-xs font-semibold text-white">{tpl.name}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{tpl.description}</p>
-                        <p className="text-[9px] text-slate-600 mt-1">{tpl.nodes.length}개 노드</p>
+                        {tpl.name}
                       </button>
                     ))}
-                  </div>
-                </div>
-
-                {/* Canvas + node types */}
-                <div className="flex-1 space-y-3">
-                  {/* Node type palette */}
-                  <div className="flex items-center gap-1.5 p-2 rounded-xl border border-white/5 bg-white/[0.02]">
-                    <span className="text-[10px] text-slate-500 mr-2">노드:</span>
-                    {WF_NODE_TYPES.map(nt => (
-                      <div key={nt.type}
-                        className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 cursor-grab text-[10px] text-slate-400 hover:bg-white/5 hover:text-white transition">
-                        <span>{nt.icon}</span>
-                        <span>{nt.label}</span>
-                      </div>
-                    ))}
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto shrink-0">
                       <button onClick={startTestRun} disabled={testRunning}
                         className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition disabled:opacity-50">
                         <Play size={10} /> {testRunning ? '실행 중...' : '테스트 실행'}
@@ -1241,154 +1015,159 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Canvas area */}
-                  <div ref={canvasRef}
-                    className="relative rounded-xl border border-white/5 bg-[#0a0a1a] overflow-x-auto"
-                    style={{ height: 'calc(100vh - 440px)', minHeight: 350 }}>
-                    {/* Grid background */}
-                    <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                      <defs>
-                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="1" />
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill="url(#grid)" />
+                  {/* Node type palette */}
+                  <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/5">
+                    <span className="text-[10px] text-slate-500 mr-1">노드:</span>
+                    {WF_NODE_TYPES.map(nt => (
+                      <div key={nt.type}
+                        className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 cursor-grab text-[10px] text-slate-400 hover:bg-white/5 hover:text-white transition">
+                        <span>{nt.icon}</span>
+                        <span>{nt.label}</span>
+                      </div>
+                    ))}
+                  </div>
 
-                      {/* Edges (SVG lines) */}
-                      {selectedTemplate.edges.map((edge, i) => {
-                        const fromNode = selectedTemplate.nodes.find(n => n.id === edge.from);
-                        const toNode = selectedTemplate.nodes.find(n => n.id === edge.to);
-                        if (!fromNode || !toNode) return null;
-                        const isSelected = selectedWfEdge?.from === edge.from && selectedWfEdge?.to === edge.to;
-                        const midX = (fromNode.x + 60 + toNode.x) / 2;
+                  {/* Canvas + properties side panel */}
+                  <div className="flex-1 flex overflow-hidden">
+                    {/* Canvas area */}
+                    <div ref={canvasRef}
+                      className="flex-1 relative bg-[#0a0a1a] overflow-auto"
+                      style={{ minHeight: 350 }}>
+                      <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="1" />
+                          </pattern>
+                          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.15)" />
+                          </marker>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+
+                        {selectedTemplate.edges.map((edge, i) => {
+                          const fromNode = selectedTemplate.nodes.find(n => n.id === edge.from);
+                          const toNode = selectedTemplate.nodes.find(n => n.id === edge.to);
+                          if (!fromNode || !toNode) return null;
+                          const isSelected = selectedWfEdge?.from === edge.from && selectedWfEdge?.to === edge.to;
+                          const midX = (fromNode.x + 60 + toNode.x) / 2;
+                          return (
+                            <g key={i} onClick={() => { setSelectedWfEdge(edge); setSelectedWfNode(null); }} className="cursor-pointer">
+                              <path
+                                d={`M ${fromNode.x + 60} ${fromNode.y} C ${midX} ${fromNode.y}, ${midX} ${toNode.y}, ${toNode.x} ${toNode.y}`}
+                                fill="none"
+                                stroke={isSelected ? '#818cf8' : 'rgba(255,255,255,0.1)'}
+                                strokeWidth={isSelected ? 2 : 1.5}
+                                markerEnd="url(#arrowhead)"
+                              />
+                              {edge.condition && (
+                                <text x={midX} y={Math.min(fromNode.y, toNode.y) - 8}
+                                  fill={isSelected ? '#818cf8' : 'rgba(255,255,255,0.25)'}
+                                  fontSize="9" textAnchor="middle">
+                                  {edge.condition}
+                                </text>
+                              )}
+                            </g>
+                          );
+                        })}
+                      </svg>
+
+                      {selectedTemplate.nodes.map((node, i) => {
+                        const isSelected = selectedWfNode?.id === node.id;
+                        const isTestActive = testRunning && testStep === i;
                         return (
-                          <g key={i} onClick={() => { setSelectedWfEdge(edge); setSelectedWfNode(null); }} className="cursor-pointer">
-                            <path
-                              d={`M ${fromNode.x + 60} ${fromNode.y} C ${midX} ${fromNode.y}, ${midX} ${toNode.y}, ${toNode.x} ${toNode.y}`}
-                              fill="none"
-                              stroke={isSelected ? '#818cf8' : 'rgba(255,255,255,0.1)'}
-                              strokeWidth={isSelected ? 2 : 1.5}
-                              markerEnd="url(#arrowhead)"
-                            />
-                            {edge.condition && (
-                              <text x={midX} y={Math.min(fromNode.y, toNode.y) - 8}
-                                fill={isSelected ? '#818cf8' : 'rgba(255,255,255,0.25)'}
-                                fontSize="9" textAnchor="middle">
-                                {edge.condition}
-                              </text>
-                            )}
-                          </g>
+                          <div key={node.id}
+                            onClick={() => { setSelectedWfNode(node); setSelectedWfEdge(null); }}
+                            className={`absolute flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer transition-all select-none ${getNodeColor(node.type)} ${
+                              isSelected ? 'ring-2 ring-indigo-500/60 scale-105' : ''
+                            } ${isTestActive ? 'ring-2 ring-emerald-400 animate-pulse' : ''}`}
+                            style={{ left: node.x - 50, top: node.y - 18, minWidth: 100 }}>
+                            {getNodeIcon(node.type)}
+                            <div>
+                              <p className="text-[11px] font-semibold">{node.label}</p>
+                              {node.assignee && <p className="text-[9px] opacity-60">{node.assignee}</p>}
+                            </div>
+                          </div>
                         );
                       })}
+                    </div>
 
-                      <defs>
-                        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                          <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.15)" />
-                        </marker>
-                      </defs>
-                    </svg>
-
-                    {/* Nodes */}
-                    {selectedTemplate.nodes.map((node, i) => {
-                      const isSelected = selectedWfNode?.id === node.id;
-                      const isTestActive = testRunning && testStep === i;
-                      return (
-                        <div key={node.id}
-                          onClick={() => { setSelectedWfNode(node); setSelectedWfEdge(null); }}
-                          className={`absolute flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer transition-all select-none ${getNodeColor(node.type)} ${
-                            isSelected ? 'ring-2 ring-indigo-500/60 scale-105' : ''
-                          } ${isTestActive ? 'ring-2 ring-emerald-400 animate-pulse' : ''}`}
-                          style={{ left: node.x - 50, top: node.y - 18, minWidth: 100 }}>
-                          {getNodeIcon(node.type)}
+                    {/* Properties slide-in panel */}
+                    <div className="w-[220px] shrink-0 border-l border-white/5 bg-white/[0.01] overflow-y-auto p-3 space-y-3">
+                      <p className="text-xs font-semibold text-slate-400">속성</p>
+                      {selectedWfNode ? (
+                        <>
                           <div>
-                            <p className="text-[11px] font-semibold">{node.label}</p>
-                            {node.assignee && <p className="text-[9px] opacity-60">{node.assignee}</p>}
+                            <label className="block text-[10px] text-slate-500 mb-1">노드 타입</label>
+                            <div className={`rounded-lg border px-2 py-1.5 text-xs ${getNodeColor(selectedWfNode.type)}`}>
+                              {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.icon} {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.label}
+                            </div>
                           </div>
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">라벨</label>
+                            <input value={selectedWfNode.label} readOnly
+                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                          </div>
+                          {selectedWfNode.assignee && (
+                            <div>
+                              <label className="block text-[10px] text-slate-500 mb-1">담당자 규칙</label>
+                              <input value={selectedWfNode.assignee} readOnly
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                            </div>
+                          )}
+                          {selectedWfNode.timeout && (
+                            <div>
+                              <label className="block text-[10px] text-slate-500 mb-1">타임아웃</label>
+                              <input value={selectedWfNode.timeout} readOnly
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                            </div>
+                          )}
+                          {selectedWfNode.escalation && (
+                            <div>
+                              <label className="block text-[10px] text-slate-500 mb-1">에스컬레이션</label>
+                              <input value={selectedWfNode.escalation} readOnly
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                            </div>
+                          )}
+                        </>
+                      ) : selectedWfEdge ? (
+                        <>
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">연결선</label>
+                            <div className="text-xs text-white">
+                              {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.from)?.label}
+                              {' → '}
+                              {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.to)?.label}
+                            </div>
+                          </div>
+                          {selectedWfEdge.condition && (
+                            <div>
+                              <label className="block text-[10px] text-slate-500 mb-1">조건</label>
+                              <input value={selectedWfEdge.condition} readOnly
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
+                            </div>
+                          )}
+                          <div>
+                            <label className="block text-[10px] text-slate-500 mb-1">조건 타입</label>
+                            <select className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none">
+                              <option className="bg-[#0F0F23]">금액 기준</option>
+                              <option className="bg-[#0F0F23]">유형 기준</option>
+                              <option className="bg-[#0F0F23]">직급 기준</option>
+                              <option className="bg-[#0F0F23]">부서 기준</option>
+                            </select>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-8 text-[10px] text-slate-600">
+                          <MousePointer size={20} className="mx-auto mb-2 opacity-30" />
+                          노드 또는 연결선을 클릭하세요
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {/* Properties panel */}
-                <div className="w-[240px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
-                  <div className="px-4 py-3 border-b border-white/5">
-                    <span className="text-xs font-semibold text-slate-400">속성</span>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                    {selectedWfNode ? (
-                      <>
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">노드 타입</label>
-                          <div className={`rounded-lg border px-2 py-1.5 text-xs ${getNodeColor(selectedWfNode.type)}`}>
-                            {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.icon} {WF_NODE_TYPES.find(t => t.type === selectedWfNode.type)?.label}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">라벨</label>
-                          <input value={selectedWfNode.label} readOnly
-                            className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
-                        </div>
-                        {selectedWfNode.assignee && (
-                          <div>
-                            <label className="block text-[10px] text-slate-500 mb-1">담당자 규칙</label>
-                            <input value={selectedWfNode.assignee} readOnly
-                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
-                          </div>
-                        )}
-                        {selectedWfNode.timeout && (
-                          <div>
-                            <label className="block text-[10px] text-slate-500 mb-1">타임아웃</label>
-                            <input value={selectedWfNode.timeout} readOnly
-                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
-                          </div>
-                        )}
-                        {selectedWfNode.escalation && (
-                          <div>
-                            <label className="block text-[10px] text-slate-500 mb-1">에스컬레이션</label>
-                            <input value={selectedWfNode.escalation} readOnly
-                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
-                          </div>
-                        )}
-                      </>
-                    ) : selectedWfEdge ? (
-                      <>
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">연결선</label>
-                          <div className="text-xs text-white">
-                            {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.from)?.label}
-                            {' → '}
-                            {selectedTemplate.nodes.find(n => n.id === selectedWfEdge.to)?.label}
-                          </div>
-                        </div>
-                        {selectedWfEdge.condition && (
-                          <div>
-                            <label className="block text-[10px] text-slate-500 mb-1">조건</label>
-                            <input value={selectedWfEdge.condition} readOnly
-                              className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none" />
-                          </div>
-                        )}
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">조건 타입</label>
-                          <select className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none">
-                            <option className="bg-[#0F0F23]">금액 기준</option>
-                            <option className="bg-[#0F0F23]">유형 기준</option>
-                            <option className="bg-[#0F0F23]">직급 기준</option>
-                            <option className="bg-[#0F0F23]">부서 기준</option>
-                          </select>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-8 text-[10px] text-slate-600">
-                        <MousePointer size={20} className="mx-auto mb-2 opacity-30" />
-                        노드 또는 연결선을 클릭하세요
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Bottom bar */}
           <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
@@ -1412,9 +1191,190 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ 테마 ═══ */}
+
+      {/* ═══════════════════════════════════════════════
+          TAB 2: 권한
+          ═══════════════════════════════════════════════ */}
+      {tab === 'permissions' && (
+        <div className="space-y-5">
+          {/* Role templates */}
+          <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 280px)' }}>
+            {/* Left: Role list */}
+            <div className="w-[260px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex flex-col">
+              <div className="px-4 py-3 border-b border-white/5">
+                <span className="text-xs font-semibold text-slate-400">역할 템플릿</span>
+                <span className="ml-2 text-[10px] text-slate-600">{permRoles.length}개</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {permRoles.map(r => (
+                  <button key={r.id} onClick={() => setSelectedRole(r.id)}
+                    className={`w-full text-left rounded-lg px-3 py-3 transition-colors ${
+                      selectedRole === r.id
+                        ? 'bg-indigo-500/10 border border-indigo-500/20'
+                        : 'hover:bg-white/5 border border-transparent'
+                    }`}>
+                    <div className="flex items-center gap-2">
+                      <Shield size={13} className={selectedRole === r.id ? 'text-indigo-400' : 'text-slate-500'} />
+                      <span className="text-xs font-semibold text-white">{r.name}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1 ml-5">{r.description}</p>
+                    <div className="flex items-center gap-2 mt-2 ml-5">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                        r.dataScope === 'all' ? 'bg-violet-500/10 text-violet-400' :
+                        r.dataScope === 'division' ? 'bg-blue-500/10 text-blue-400' :
+                        r.dataScope === 'team' ? 'bg-green-500/10 text-green-400' :
+                        'bg-slate-500/10 text-slate-400'
+                      }`}>
+                        {r.dataScope === 'all' ? '전체' : r.dataScope === 'division' ? '본부' : r.dataScope === 'team' ? '팀' : '본인'}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Permission matrix + simulator */}
+            <div className="flex-1 min-w-0 space-y-4 overflow-y-auto">
+              {currentRole && (
+                <>
+                  {/* Data scope selector */}
+                  <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                    <h3 className="text-xs font-semibold text-slate-400 mb-3">데이터 범위</h3>
+                    <div className="flex gap-2">
+                      {(['all', 'division', 'team', 'self'] as const).map(scope => (
+                        <button key={scope} onClick={() => setDataScope(currentRole.id, scope)}
+                          className={`text-[11px] px-3 py-2 rounded-lg border transition ${
+                            currentRole.dataScope === scope
+                              ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400'
+                              : 'border-white/10 bg-white/[0.02] text-slate-400 hover:bg-white/5'
+                          }`}>
+                          {scope === 'all' ? '전체 데이터' : scope === 'division' ? '본부 데이터' : scope === 'team' ? '팀 데이터' : '본인 데이터'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Module access matrix */}
+                  <div className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                    <div className="px-4 py-3 border-b border-white/5">
+                      <span className="text-xs font-semibold text-slate-400">모듈 접근 권한</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-white/5">
+                            <th className="text-left px-4 py-2 text-slate-500 font-medium w-32">모듈</th>
+                            <th className="px-4 py-2 text-slate-500 font-medium text-center w-20">읽기</th>
+                            <th className="px-4 py-2 text-slate-500 font-medium text-center w-20">쓰기</th>
+                            <th className="px-4 py-2 text-slate-500 font-medium text-center w-20">삭제</th>
+                            <th className="px-4 py-2 text-slate-500 font-medium text-center w-20">관리</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {MODULE_BLOCKS.slice(0, 15).map(mod => {
+                            const perm = currentRole.modules[mod.code];
+                            if (!perm) return null;
+                            return (
+                              <tr key={mod.code} className="border-b border-white/5 hover:bg-white/[0.02]">
+                                <td className="px-4 py-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-sm ${mod.trackColor}`} />
+                                    <span className="text-white font-medium">{mod.code}</span>
+                                    <span className="text-slate-500">{mod.name}</span>
+                                  </div>
+                                </td>
+                                {(['read', 'write', 'delete', 'admin'] as const).map(field => (
+                                  <td key={field} className="px-4 py-2 text-center">
+                                    <button onClick={() => togglePermission(currentRole.id, mod.code, field)}
+                                      className={`w-5 h-5 rounded border flex items-center justify-center transition ${
+                                        perm[field]
+                                          ? 'bg-indigo-600 border-indigo-500 text-white'
+                                          : 'border-white/10 bg-white/5 text-transparent hover:border-white/20'
+                                      }`}>
+                                      <Check size={10} />
+                                    </button>
+                                  </td>
+                                ))}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Permission simulator */}
+                  <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                    <h3 className="text-xs font-semibold text-slate-400 mb-3">
+                      <Eye size={12} className="inline mr-1" />
+                      권한 시뮬레이터
+                    </h3>
+                    <p className="text-[10px] text-slate-500 mb-3">이 역할의 사용자가 무엇을 볼 수 있는지 미리 확인</p>
+                    <div className="flex gap-2 mb-4">
+                      <div className="relative flex-1">
+                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600" />
+                        <input value={simUser} onChange={e => setSimUser(e.target.value)}
+                          placeholder="사용자 이름으로 검색..."
+                          className="w-full pl-8 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
+                      </div>
+                      <button onClick={() => showToast('시뮬레이션 실행')}
+                        className="px-4 py-2 bg-indigo-600/10 text-indigo-400 text-xs rounded-lg hover:bg-indigo-600/20 transition border border-indigo-500/20">
+                        <Play size={11} className="inline mr-1" /> 시뮬레이션
+                      </button>
+                    </div>
+                    {/* Preview result */}
+                    <div className="rounded-lg border border-white/5 bg-[#0a0a1a] p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="h-8 w-8 rounded-full bg-indigo-600/20 flex items-center justify-center text-xs font-bold text-indigo-400">
+                          {currentRole.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-white">{currentRole.name}</p>
+                          <p className="text-[10px] text-slate-500">
+                            데이터 범위: {currentRole.dataScope === 'all' ? '전체' : currentRole.dataScope === 'division' ? '본부' : currentRole.dataScope === 'team' ? '팀' : '본인'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2">
+                          <p className="text-[10px] text-emerald-400 font-semibold mb-1">접근 가능</p>
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(currentRole.modules).filter(([, v]) => v.read).slice(0, 8).map(([code]) => (
+                              <span key={code} className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">{code}</span>
+                            ))}
+                            {Object.entries(currentRole.modules).filter(([, v]) => v.read).length > 8 && (
+                              <span className="text-[9px] text-emerald-400">+{Object.entries(currentRole.modules).filter(([, v]) => v.read).length - 8}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-2">
+                          <p className="text-[10px] text-red-400 font-semibold mb-1">접근 불가</p>
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(currentRole.modules).filter(([, v]) => !v.read).slice(0, 8).map(([code]) => (
+                              <span key={code} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">{code}</span>
+                            ))}
+                            {Object.entries(currentRole.modules).filter(([, v]) => !v.read).length === 0 && (
+                              <span className="text-[9px] text-slate-600">없음</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* ═══════════════════════════════════════════════
+          TAB 3: 테마
+          ═══════════════════════════════════════════════ */}
       {tab === 'theme' && (
         <div className="max-w-2xl space-y-5">
+          {/* Color picker */}
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
             <h2 className="text-sm font-semibold mb-1">앱 컬러 패턴</h2>
             <p className="text-xs text-slate-500 mb-4">브랜드에 맞는 컬러를 선택하세요.</p>
@@ -1457,6 +1417,36 @@ export default function SettingsPage() {
                 className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono text-slate-400 focus:outline-none" />
             </div>
           </div>
+
+          {/* Logo upload area */}
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+            <h2 className="text-sm font-semibold mb-1">브랜딩</h2>
+            <p className="text-xs text-slate-500 mb-4">로고, 파비콘, 폰트를 설정하세요.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg border border-dashed border-white/10 p-6 text-center hover:border-white/20 transition cursor-pointer">
+                <Upload size={24} className="mx-auto mb-2 text-slate-600" />
+                <p className="text-xs text-slate-400">로고 업로드</p>
+                <p className="text-[10px] text-slate-600 mt-1">PNG, SVG 권장 (최대 2MB)</p>
+              </div>
+              <div className="rounded-lg border border-dashed border-white/10 p-6 text-center hover:border-white/20 transition cursor-pointer">
+                <Upload size={24} className="mx-auto mb-2 text-slate-600" />
+                <p className="text-xs text-slate-400">파비콘 업로드</p>
+                <p className="text-[10px] text-slate-600 mt-1">32x32 ICO/PNG</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-xs text-slate-500 mb-2">
+                <Type size={12} className="inline mr-1" /> 폰트 선택
+              </label>
+              <select className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none">
+                <option className="bg-[#0F0F23]">Pretendard (기본)</option>
+                <option className="bg-[#0F0F23]">Noto Sans KR</option>
+                <option className="bg-[#0F0F23]">Spoqa Han Sans Neo</option>
+                <option className="bg-[#0F0F23]">Inter</option>
+              </select>
+            </div>
+          </div>
+
           {!isDemo && (
             <button onClick={saveTheme} disabled={saving}
               className="flex items-center gap-1.5 px-4 py-2 text-white text-sm rounded-lg hover:opacity-90 transition disabled:opacity-50"
@@ -1467,25 +1457,33 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ 조직 정보 ═══ */}
-      {tab === 'org' && (
-        <div className="max-w-lg">
+
+      {/* ═══════════════════════════════════════════════
+          TAB 4: 시스템 (조직 정보 + 멤버 관리 합침)
+          ═══════════════════════════════════════════════ */}
+      {tab === 'system' && (
+        <div className="max-w-3xl space-y-5">
+          {/* Company info */}
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5 space-y-4">
-            <h2 className="text-sm font-semibold mb-2">조직 정보</h2>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">조직 이름</label>
-              <input value={editName} onChange={e => setEditName(e.target.value)} disabled={isDemo}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
-            </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">서비스명</label>
-              <input value={editServiceName} onChange={e => setEditServiceName(e.target.value)} disabled={isDemo}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
-            </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">커스텀 도메인</label>
-              <input value={editDomain} onChange={e => setEditDomain(e.target.value)} disabled={isDemo} placeholder="example.com"
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <Building2 size={14} className="text-slate-400" /> 조직 정보
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">조직 이름</label>
+                <input value={editName} onChange={e => setEditName(e.target.value)} disabled={isDemo}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">서비스명</label>
+                <input value={editServiceName} onChange={e => setEditServiceName(e.target.value)} disabled={isDemo}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">커스텀 도메인</label>
+                <input value={editDomain} onChange={e => setEditDomain(e.target.value)} disabled={isDemo} placeholder="example.com"
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none disabled:opacity-50" />
+              </div>
             </div>
             {!isDemo && (
               <div className="pt-2">
@@ -1496,41 +1494,44 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-        </div>
-      )}
 
-      {/* ═══ 멤버 관리 ═══ */}
-      {tab === 'members' && (
-        <div className="max-w-2xl space-y-4">
-          {isDemo && (
-            <div className="rounded-lg border border-slate-700 bg-white/[0.02] px-4 py-6 text-center">
-              <Users size={24} className="text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">로그인 후 멤버를 관리할 수 있습니다.</p>
+          {/* Member management */}
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Users size={14} className="text-slate-400" /> 멤버 관리
+              </h2>
             </div>
-          )}
-          {!isDemo && (
-            <>
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                <h3 className="text-sm font-semibold mb-3">멤버 초대</h3>
-                <div className="flex gap-2">
-                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="이메일 주소"
-                    className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
-                  <select value={inviteRole} onChange={e => setInviteRole(e.target.value)}
-                    className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none">
-                    <option value="member" className="bg-[#0F0F23]">멤버</option>
-                    <option value="manager" className="bg-[#0F0F23]">매니저</option>
-                    <option value="admin" className="bg-[#0F0F23]">관리자</option>
-                  </select>
-                  <button onClick={handleInvite} disabled={inviting || !inviteEmail}
-                    className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition disabled:opacity-50">
-                    <Plus size={14} /> {inviting ? '...' : '초대'}
-                  </button>
-                </div>
+
+            {isDemo ? (
+              <div className="px-4 py-8 text-center">
+                <Users size={24} className="text-slate-600 mx-auto mb-2" />
+                <p className="text-sm text-slate-400">로그인 후 멤버를 관리할 수 있습니다.</p>
               </div>
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
-                <div className="px-5 py-3 border-b border-white/5">
-                  <span className="text-sm font-semibold">멤버 ({members.length}명)</span>
+            ) : (
+              <>
+                {/* Invite */}
+                <div className="px-5 py-4 border-b border-white/5 bg-white/[0.01]">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                      <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="이메일 주소"
+                        className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none" />
+                    </div>
+                    <select value={inviteRole} onChange={e => setInviteRole(e.target.value)}
+                      className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none">
+                      <option value="member" className="bg-[#0F0F23]">멤버</option>
+                      <option value="manager" className="bg-[#0F0F23]">매니저</option>
+                      <option value="admin" className="bg-[#0F0F23]">관리자</option>
+                    </select>
+                    <button onClick={handleInvite} disabled={inviting || !inviteEmail}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition disabled:opacity-50">
+                      <Plus size={14} /> {inviting ? '...' : '초대'}
+                    </button>
+                  </div>
                 </div>
+
+                {/* Member list */}
                 <div className="divide-y divide-white/5">
                   {members.map((m: any) => (
                     <div key={m.id} className="flex items-center gap-3 px-5 py-3">
@@ -1560,9 +1561,9 @@ export default function SettingsPage() {
                   ))}
                   {members.length === 0 && <p className="text-center py-6 text-slate-500 text-sm">멤버가 없습니다.</p>}
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
