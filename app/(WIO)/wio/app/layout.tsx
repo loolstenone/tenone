@@ -156,7 +156,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [member, setMember] = useState<WIOMember | null>(null);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
-  const [openTracks, setOpenTracks] = useState<string[]>(['common']);
+  const [openTracks, setOpenTracks] = useState<string[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // 모바일 감지
@@ -291,23 +291,22 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         {TRACKS.map((track, ti) => {
           const visibleModules = track.modules.filter(m => activeModules.includes(m.key as WIOModule));
           if (visibleModules.length === 0) return null;
-          const hasActiveChild = visibleModules.some(mod => mod.key === 'home' ? (pathname === '/wio/app' || pathname === '/wio/app/') : pathname.startsWith(mod.href));
-          const isOpen = openTracks.includes(track.id) || hasActiveChild;
+          const isOpen = openTracks.includes(track.id);
           const TrackIcon = track.icon;
           return (
             <div key={track.id} className={ti > 0 ? 'mt-1' : ''}>
               {/* 트랙 헤더 — 클릭으로 펼침/접힘 */}
               {(isMobile || !collapsed) ? (
                 <button onClick={() => setOpenTracks(prev => prev.includes(track.id) ? prev.filter(t => t !== track.id) : [...prev, track.id])}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold tracking-wider transition-colors ${isOpen ? 'text-white bg-white/[0.04]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}`}>
-                  <span className="flex items-center gap-2"><TrackIcon size={14} />{track.name}</span>
-                  <ChevronRight size={12} className={`transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[11px] font-bold tracking-wide transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'}`}>
+                  <span className="flex items-center gap-2"><TrackIcon size={15} />{track.name} <span className="text-[9px] font-normal text-slate-600">{visibleModules.length}</span></span>
+                  <ChevronRight size={12} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
                 </button>
               ) : (
                 collapsed && ti > 0 && <div className="mx-2 mb-1 border-t border-white/5" />
               )}
-              {/* 모듈 목록 — 열린 트랙만 표시 */}
-              {(isOpen || (!isMobile && collapsed)) && visibleModules.map(mod => {
+              {/* 모듈 목록 — 열린 트랙만 표시, 들여쓰기 */}
+              {(isOpen || (!isMobile && collapsed)) && <div className={!isMobile && !collapsed ? 'ml-2 border-l border-white/5 pl-1' : ''}>{visibleModules.map(mod => {
                 const Icon = mod.icon;
                 const isActive = mod.key === 'home'
                   ? pathname === '/wio/app' || pathname === '/wio/app/'
@@ -319,7 +318,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
                     {(isMobile || !collapsed) && <span>{mod.label}</span>}
                   </Link>
                 );
-              })}
+              })}</div>}
             </div>
           );
         })}
