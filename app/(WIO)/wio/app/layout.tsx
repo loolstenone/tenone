@@ -97,14 +97,31 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           return;
         }
 
+        // 직접 Supabase 쿼리 — wio.ts의 별도 인스턴스 대신 같은 클라이언트 사용
         let tenants: WIOTenant[] = [];
-        try { tenants = await fetchMyTenants(); } catch { /* DB table missing */ }
+        try {
+          const { data: tData } = await sb.from('wio_tenants').select('*').eq('is_active', true);
+          tenants = (tData || []).map((r: Record<string, unknown>) => {
+            const result: Record<string, unknown> = {};
+            for (const [key, value] of Object.entries(r)) {
+              result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+            }
+            return result as unknown as WIOTenant;
+          });
+        } catch { /* DB table missing */ }
 
         if (tenants.length === 0) {
           try {
             const defaultTenantId = 'a0000000-0000-0000-0000-000000000001';
-            await addMember(defaultTenantId, user.id, user.email?.split('@')[0] || '사용자', 'member');
-            tenants = await fetchMyTenants();
+            await sb.from('wio_members').insert({ tenant_id: defaultTenantId, user_id: user.id, display_name: user.email?.split('@')[0] || '사용자', role: 'member' });
+            const { data: tData2 } = await sb.from('wio_tenants').select('*').eq('is_active', true);
+            tenants = (tData2 || []).map((r: Record<string, unknown>) => {
+              const result: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(r)) {
+                result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+              }
+              return result as unknown as WIOTenant;
+            });
           } catch { /* ignore */ }
         }
 
@@ -117,10 +134,27 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
         const t = tenants[0];
         setTenant(t);
-        let m = await fetchMyMembership(t.id);
+
+        // 같은 sb 클라이언트로 멤버십 조회
+        const { data: mData } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
+        let m: WIOMember | null = mData ? (() => {
+          const result: Record<string, unknown> = {};
+          for (const [key, value] of Object.entries(mData as Record<string, unknown>)) {
+            result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+          }
+          return result as unknown as WIOMember;
+        })() : null;
+
         if (!m) {
-          await addMember(t.id, user.id, user.email?.split('@')[0] || '사용자', 'member');
-          m = await fetchMyMembership(t.id);
+          await sb.from('wio_members').insert({ tenant_id: t.id, user_id: user.id, display_name: user.email?.split('@')[0] || '사용자', role: 'member' });
+          const { data: mData2 } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
+          m = mData2 ? (() => {
+            const result: Record<string, unknown> = {};
+            for (const [key, value] of Object.entries(mData2 as Record<string, unknown>)) {
+              result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+            }
+            return result as unknown as WIOMember;
+          })() : null;
         }
         setMember(m);
         setLoading(false);
