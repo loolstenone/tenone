@@ -11,6 +11,7 @@ import { ShieldAlert, Lock, Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function IntraLoginForm() {
+    const { login, logout } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPw, setShowPw] = useState(false);
@@ -22,19 +23,17 @@ function IntraLoginForm() {
         setError("");
         setSubmitting(true);
         try {
-            const sb = createClient();
-            await sb.auth.signOut();
-            const { data, error: authError } = await sb.auth.signInWithPassword({ email, password });
-            if (authError || !data.session) {
+            // 기존 세션 해지
+            await logout();
+            // auth-context의 login 사용 — onAuthStateChange가 자동 트리거
+            const result = await login(email, password);
+            if (!result.success) {
                 setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
                 setSubmitting(false);
                 return;
             }
-            // 세션 저장 완료 대기 후 리로드
-            await new Promise(r => setTimeout(r, 500));
-            window.location.href = '/intra';
-        } catch { setError("오류가 발생했습니다."); }
-        setSubmitting(false);
+            // auth-context가 상태를 업데이트하면 layout이 자동으로 인트라 렌더링
+        } catch { setError("오류가 발생했습니다."); setSubmitting(false); }
     };
 
     return (
