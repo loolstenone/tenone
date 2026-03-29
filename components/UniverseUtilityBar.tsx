@@ -27,6 +27,8 @@ export interface UtilityBarConfig {
     searchPlaceholder?: string;
     /** 로그인 페이지 경로 (설정 시 모달 대신 페이지 이동) */
     loginPath?: string;
+    /** 인증 UI 완전 숨김 (기업 전용 사이트) */
+    hideAuth?: boolean;
 }
 
 const defaultConfig: UtilityBarConfig = {
@@ -69,12 +71,14 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
         <>
             {/* Utility items */}
             <div className="flex items-center gap-4">
-                {/* About */}
-                <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                    ABOUT
-                </Link>
+                {/* About (hideAuth 모드에서는 메인 메뉴에 있으므로 숨김) */}
+                {!config.hideAuth && (
+                    <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                        ABOUT
+                    </Link>
+                )}
 
-                {isAuthenticated ? (
+                {!config.hideAuth && isAuthenticated ? (
                     <>
                         {/* 프로필 */}
                         {config.profilePath && (
@@ -99,7 +103,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             <LogOut className="h-3.5 w-3.5" />
                         </button>
                     </>
-                ) : (
+                ) : !config.hideAuth && !isAuthenticated ? (
                     <>
                         {/* 로그인 */}
                         {config.loginPath ? (
@@ -116,7 +120,7 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             JOIN
                         </button>
                     </>
-                )}
+                ) : null}
 
                 {/* 공유 */}
                 <button onClick={handleShare} className="opacity-50 hover:opacity-100 transition-opacity" title="공유">

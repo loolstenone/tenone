@@ -15,7 +15,7 @@ const publicNav = [
     { name: "Works", href: "/works" },
     { name: "Contact", href: "/contact" },
     { name: "Newsroom", href: "/newsroom" },
-    // { name: "Newsletter", href: "/newsletter" },  // 임시 숨김
+    { name: "About", href: "/about" },
 ];
 
 export function PublicHeader() {
@@ -71,7 +71,7 @@ export function PublicHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
                     <ThemeToggle />
-                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: canAccessIntra ? '/intra' : null, workspaceLabel: 'INTRA', accentColor: isDark ? '#fff' : '#000', loginPath: undefined }} />
+                    <UniverseUtilityBar config={{ aboutPath: '/about', hideAuth: true, accentColor: isDark ? '#fff' : '#000' }} />
                 </div>
 
                 {/* Mobile menu button */}

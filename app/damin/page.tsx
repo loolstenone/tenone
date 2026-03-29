@@ -99,28 +99,7 @@ export default function DaminPage() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px bg-white/5" />
-          <span className="text-[10px] text-neutral-600">또는</span>
-          <div className="flex-1 h-px bg-white/5" />
-        </div>
-
-        {/* OAuth */}
-        <div className="space-y-2">
-          <button
-            onClick={() => handleOAuth("google")}
-            className="w-full py-2.5 border border-white/10 rounded-lg text-sm text-neutral-400 hover:text-white hover:border-white/20 transition-colors"
-          >
-            Google 계정으로 로그인
-          </button>
-          <button
-            onClick={() => handleOAuth("kakao")}
-            className="w-full py-2.5 border border-white/10 rounded-lg text-sm text-neutral-400 hover:text-white hover:border-white/20 transition-colors"
-          >
-            카카오 계정으로 로그인
-          </button>
-        </div>
+        {/* 직원 전용 — 소셜 로그인 없음 */}
 
         {/* Footer */}
         <p className="text-center text-[10px] text-neutral-700 mt-8">
