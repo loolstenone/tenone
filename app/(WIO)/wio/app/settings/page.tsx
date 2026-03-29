@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Settings, Users, Palette, Building2, Save, Check, Plus, Trash2,
   ChevronUp, ChevronDown, Pencil, ToggleLeft, ToggleRight, Search,
+  GitBranch, GripVertical, UserPlus, ArrowRight,
 } from 'lucide-react';
 import { useWIO } from '../layout';
 import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, removeMember } from '@/lib/supabase/wio';
 import {
-  TRACK_CATALOG, getModulesByTrack,
+  CATEGORY_CATALOG, MODULE_CATALOG, getModulesByCategory,
   loadOrbiConfig, saveOrbiConfig,
   type OrbiConfig,
 } from '@/lib/wio-modules';
@@ -18,19 +19,96 @@ const ROLE_LABELS: Record<string, string> = {
   owner: '소유자', admin: '관리자', manager: '매니저', member: '멤버', guest: '게스트',
 };
 
-type SettingsTab = 'modules' | 'theme' | 'org' | 'members';
+type SettingsTab = 'modules' | 'tracks' | 'theme' | 'org' | 'members';
+
+/* ── Mock track data for workflow design ── */
+interface TrackDept {
+  name: string;
+  role: string;
+  skills: string;
+  members: { name: string; role: string }[];
+}
+interface TrackApproval {
+  order: number;
+  role: string;
+  name: string;
+}
+interface WorkflowTrack {
+  id: string;
+  name: string;
+  departments: TrackDept[];
+  approvalLine: TrackApproval[];
+  modules: string[];
+}
+
+const MOCK_TRACKS: WorkflowTrack[] = [
+  {
+    id: 'track-ops', name: '운영·관리',
+    departments: [
+      { name: '경영지원팀', role: '운영 총괄', skills: '전략기획, 재무분석', members: [{ name: '김운영', role: '팀장' }, { name: '이지원', role: '매니저' }] },
+      { name: 'HR팀', role: '인사 관리', skills: '채용, 평가, 조직개발', members: [{ name: '박인사', role: '팀장' }, { name: '최교육', role: '담당자' }] },
+    ],
+    approvalLine: [{ order: 1, role: '담당자', name: '이지원' }, { order: 2, role: '팀장', name: '김운영' }, { order: 3, role: '본부장', name: '정대표' }],
+    modules: ['people', 'attendance', 'payroll', 'evaluation', 'org', 'approval'],
+  },
+  {
+    id: 'track-biz', name: '사업',
+    departments: [
+      { name: '마케팅본부', role: '마케팅 전략/실행', skills: '디지털마케팅, 브랜딩', members: [{ name: '강마케', role: '본부장' }, { name: '윤캠페', role: '매니저' }, { name: '임소셜', role: '담당자' }] },
+      { name: '영업본부', role: '영업/BD', skills: '세일즈, 고객관리', members: [{ name: '한영업', role: '본부장' }, { name: '오딜러', role: '매니저' }] },
+      { name: '사업개발', role: '신사업 기획', skills: '사업기획, 시장분석', members: [{ name: '서기획', role: '팀장' }] },
+      { name: '고객관리', role: 'CRM/CS', skills: '고객응대, 데이터분석', members: [{ name: '노고객', role: '팀장' }, { name: '배응대', role: '담당자' }, { name: '장분석', role: '담당자' }] },
+    ],
+    approvalLine: [{ order: 1, role: '담당자', name: '윤캠페' }, { order: 2, role: '팀장', name: '강마케' }, { order: 3, role: '본부장', name: '정대표' }],
+    modules: ['mkt-strategy', 'mkt-campaign', 'sales', 'crm-customers', 'crm-support', 'project'],
+  },
+  {
+    id: 'track-support', name: '지원',
+    departments: [
+      { name: '개발팀', role: '제품 개발', skills: '풀스택, DevOps', members: [{ name: '류개발', role: '팀장' }, { name: '권백엔', role: '시니어' }] },
+      { name: '디자인팀', role: 'UX/UI', skills: '디자인시스템, 프로토타이핑', members: [{ name: '안디자', role: '팀장' }] },
+    ],
+    approvalLine: [{ order: 1, role: '담당자', name: '권백엔' }, { order: 2, role: '팀장', name: '류개발' }, { order: 3, role: 'CTO', name: '정대표' }],
+    modules: ['dev', 'deploy', 'design', 'design-asset', 'wiki', 'content'],
+  },
+  {
+    id: 'track-partner', name: '파트너',
+    departments: [
+      { name: '파트너팀', role: '파트너 관리', skills: '제휴, 계약관리', members: [{ name: '문파트', role: '팀장' }, { name: '홍제휴', role: '담당자' }] },
+    ],
+    approvalLine: [{ order: 1, role: '담당자', name: '홍제휴' }, { order: 2, role: '팀장', name: '문파트' }, { order: 3, role: '본부장', name: '정대표' }],
+    modules: ['partner', 'partner-portal', 'vendor', 'freelancer'],
+  },
+  {
+    id: 'track-common', name: '공통',
+    departments: [],
+    approvalLine: [{ order: 1, role: '담당자', name: '-' }, { order: 2, role: '팀장', name: '-' }],
+    modules: ['talk', 'messenger', 'calendar', 'document', 'approval', 'ai'],
+  },
+  {
+    id: 'track-system', name: '시스템',
+    departments: [
+      { name: 'IT운영', role: '인프라/보안', skills: '시스템관리, 보안', members: [{ name: '전시스', role: '팀장' }] },
+    ],
+    approvalLine: [{ order: 1, role: '담당자', name: '전시스' }, { order: 2, role: 'CTO', name: '정대표' }],
+    modules: ['sys-users', 'sys-roles', 'sys-workflow', 'sys-monitor', 'sys-security'],
+  },
+];
 
 export default function SettingsPage() {
   const { tenant, member, refreshTenant, reloadConfig: reloadSidebar } = useWIO();
   const [tab, setTab] = useState<SettingsTab>('modules');
 
   // Module config
-  const [config, setConfig] = useState<OrbiConfig>({ enabledModules: [], tracks: [] });
-  const [selectedTrack, setSelectedTrack] = useState('common');
-  const [editingTrackName, setEditingTrackName] = useState<string | null>(null);
-  const [trackNameInput, setTrackNameInput] = useState('');
-  const trackNameRef = useRef<HTMLInputElement>(null);
+  const [config, setConfig] = useState<OrbiConfig>({ enabledModules: [], categories: [] });
+  const [selectedCategory, setSelectedCategory] = useState('common');
+  const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
+  const [categoryNameInput, setCategoryNameInput] = useState('');
+  const categoryNameRef = useRef<HTMLInputElement>(null);
   const [moduleSearch, setModuleSearch] = useState('');
+
+  // Track tab
+  const [selectedTrack, setSelectedTrack] = useState('track-biz');
 
   // Theme
   const [editColor, setEditColor] = useState('#6366F1');
@@ -59,12 +137,12 @@ export default function SettingsPage() {
     }
     const cfg = loadOrbiConfig();
     setConfig(cfg);
-    // if no track configs, initialize
-    if (cfg.tracks.length === 0) {
-      const defaultTracks = TRACK_CATALOG.map((t, i) => ({
-        id: t.id, name: t.name, order: i, enabled: true,
+    // if no category configs, initialize
+    if (cfg.categories.length === 0) {
+      const defaultCats = CATEGORY_CATALOG.map((c, i) => ({
+        id: c.id, name: c.name, order: i, enabled: true,
       }));
-      setConfig(prev => ({ ...prev, tracks: defaultTracks }));
+      setConfig(prev => ({ ...prev, categories: defaultCats }));
     }
   }, [tenant]);
 
@@ -74,10 +152,10 @@ export default function SettingsPage() {
     }
   }, [tenant, tab]);
 
-  // Focus track name input when editing
+  // Focus category name input when editing
   useEffect(() => {
-    if (editingTrackName && trackNameRef.current) trackNameRef.current.focus();
-  }, [editingTrackName]);
+    if (editingCategoryName && categoryNameRef.current) categoryNameRef.current.focus();
+  }, [editingCategoryName]);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
 
@@ -97,10 +175,10 @@ export default function SettingsPage() {
     });
   }
 
-  function enableAllInTrack(trackId: string) {
-    const trackMods = getModulesByTrack(trackId).map(m => m.key);
+  function enableAllInCategory(categoryId: string) {
+    const catMods = getModulesByCategory(categoryId).map(m => m.key);
     setConfig(prev => {
-      const next = [...new Set([...prev.enabledModules, ...trackMods])];
+      const next = [...new Set([...prev.enabledModules, ...catMods])];
       const updated = { ...prev, enabledModules: next };
       saveOrbiConfig(updated);
       reloadSidebar();
@@ -108,10 +186,10 @@ export default function SettingsPage() {
     });
   }
 
-  function disableAllInTrack(trackId: string) {
-    const trackMods = getModulesByTrack(trackId).map(m => m.key);
+  function disableAllInCategory(categoryId: string) {
+    const catMods = getModulesByCategory(categoryId).map(m => m.key);
     setConfig(prev => {
-      const next = prev.enabledModules.filter(k => !trackMods.includes(k) || k === 'home');
+      const next = prev.enabledModules.filter(k => !catMods.includes(k) || k === 'home');
       const updated = { ...prev, enabledModules: next };
       saveOrbiConfig(updated);
       reloadSidebar();
@@ -119,10 +197,10 @@ export default function SettingsPage() {
     });
   }
 
-  function moveTrack(trackId: string, dir: -1 | 1) {
+  function moveCategory(categoryId: string, dir: -1 | 1) {
     setConfig(prev => {
-      const sorted = [...prev.tracks].sort((a, b) => a.order - b.order);
-      const idx = sorted.findIndex(t => t.id === trackId);
+      const sorted = [...prev.categories].sort((a, b) => a.order - b.order);
+      const idx = sorted.findIndex(c => c.id === categoryId);
       if (idx < 0) return prev;
       const swapIdx = idx + dir;
       if (swapIdx < 0 || swapIdx >= sorted.length) return prev;
@@ -130,7 +208,7 @@ export default function SettingsPage() {
       [newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]];
       const updated = {
         ...prev,
-        tracks: newOrder.map((t, i) => ({ ...t, order: i })),
+        categories: newOrder.map((c, i) => ({ ...c, order: i })),
       };
       saveOrbiConfig(updated);
       reloadSidebar();
@@ -138,33 +216,33 @@ export default function SettingsPage() {
     });
   }
 
-  function renameTrack(trackId: string, newName: string) {
+  function renameCategory(categoryId: string, newName: string) {
     setConfig(prev => {
       const updated = {
         ...prev,
-        tracks: prev.tracks.map(t => t.id === trackId ? { ...t, name: newName } : t),
+        categories: prev.categories.map(c => c.id === categoryId ? { ...c, name: newName } : c),
       };
       saveOrbiConfig(updated);
       reloadSidebar();
       return updated;
     });
-    setEditingTrackName(null);
+    setEditingCategoryName(null);
   }
 
-  function getTrackName(trackId: string): string {
-    const tc = config.tracks.find(t => t.id === trackId);
-    if (tc) return tc.name;
-    const cat = TRACK_CATALOG.find(t => t.id === trackId);
-    return cat?.name || trackId;
+  function getCategoryName(categoryId: string): string {
+    const cc = config.categories.find(c => c.id === categoryId);
+    if (cc) return cc.name;
+    const cat = CATEGORY_CATALOG.find(c => c.id === categoryId);
+    return cat?.name || categoryId;
   }
 
-  function enabledCountForTrack(trackId: string): number {
-    const trackMods = getModulesByTrack(trackId).map(m => m.key);
-    return config.enabledModules.filter(k => trackMods.includes(k)).length;
+  function enabledCountForCategory(categoryId: string): number {
+    const catMods = getModulesByCategory(categoryId).map(m => m.key);
+    return config.enabledModules.filter(k => catMods.includes(k)).length;
   }
 
-  // sort tracks by order
-  const sortedTracks = [...(config.tracks.length > 0 ? config.tracks : TRACK_CATALOG.map((t, i) => ({ id: t.id, name: t.name, order: i, enabled: true })))].sort((a, b) => a.order - b.order);
+  // sort categories by order
+  const sortedCategories = [...(config.categories.length > 0 ? config.categories : CATEGORY_CATALOG.map((c, i) => ({ id: c.id, name: c.name, order: i, enabled: true })))].sort((a, b) => a.order - b.order);
 
   // ── Org save ──
   async function saveOrg() {
@@ -204,10 +282,13 @@ export default function SettingsPage() {
 
   const TABS: { id: SettingsTab; label: string; icon: typeof Settings }[] = [
     { id: 'modules', label: '모듈 설정', icon: Settings },
+    { id: 'tracks', label: '트랙 설정', icon: GitBranch },
     { id: 'theme', label: '테마', icon: Palette },
     { id: 'org', label: '조직 정보', icon: Building2 },
     { id: 'members', label: '멤버 관리', icon: Users },
   ];
+
+  const currentTrack = MOCK_TRACKS.find(t => t.id === selectedTrack) || MOCK_TRACKS[1];
 
   return (
     <div>
@@ -240,44 +321,44 @@ export default function SettingsPage() {
       {/* ═══ 모듈 설정 ═══ */}
       {tab === 'modules' && (
         <div className="flex gap-5" style={{ minHeight: 'calc(100vh - 220px)' }}>
-          {/* Left: Track list */}
+          {/* Left: Category list */}
           <div className="w-[250px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
             <div className="px-4 py-3 border-b border-white/5">
-              <span className="text-xs font-semibold text-slate-400">트랙</span>
+              <span className="text-xs font-semibold text-slate-400">카테고리</span>
             </div>
             <div className="p-2 space-y-0.5">
-              {sortedTracks.map((tc, idx) => {
-                const catTrack = TRACK_CATALOG.find(t => t.id === tc.id);
-                if (!catTrack) return null;
-                const TrackIcon = catTrack.icon;
-                const count = enabledCountForTrack(tc.id);
-                const isSelected = selectedTrack === tc.id;
+              {sortedCategories.map((cc, idx) => {
+                const catDef = CATEGORY_CATALOG.find(c => c.id === cc.id);
+                if (!catDef) return null;
+                const CatIcon = catDef.icon;
+                const count = enabledCountForCategory(cc.id);
+                const isSelected = selectedCategory === cc.id;
 
                 return (
-                  <div key={tc.id}
+                  <div key={cc.id}
                     className={`group flex items-center gap-2 rounded-lg px-3 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-600/10 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'}`}
-                    onClick={() => setSelectedTrack(tc.id)}>
-                    <TrackIcon size={15} className="shrink-0" />
+                    onClick={() => setSelectedCategory(cc.id)}>
+                    <CatIcon size={15} className="shrink-0" />
                     <div className="flex-1 min-w-0">
-                      {editingTrackName === tc.id ? (
-                        <input ref={trackNameRef} value={trackNameInput}
-                          onChange={e => setTrackNameInput(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') renameTrack(tc.id, trackNameInput); if (e.key === 'Escape') setEditingTrackName(null); }}
-                          onBlur={() => renameTrack(tc.id, trackNameInput)}
+                      {editingCategoryName === cc.id ? (
+                        <input ref={categoryNameRef} value={categoryNameInput}
+                          onChange={e => setCategoryNameInput(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') renameCategory(cc.id, categoryNameInput); if (e.key === 'Escape') setEditingCategoryName(null); }}
+                          onBlur={() => renameCategory(cc.id, categoryNameInput)}
                           className="w-full bg-transparent border-b border-indigo-500 text-sm text-white outline-none py-0"
                           onClick={e => e.stopPropagation()} />
                       ) : (
-                        <span className="text-sm truncate block">{tc.name}</span>
+                        <span className="text-sm truncate block">{cc.name}</span>
                       )}
                     </div>
                     <span className={`text-[10px] ${count > 0 ? 'text-indigo-400' : 'text-slate-600'}`}>{count}</span>
                     {/* Reorder + rename buttons */}
                     <div className="hidden group-hover:flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => moveTrack(tc.id, -1)} disabled={idx === 0}
+                      <button onClick={() => moveCategory(cc.id, -1)} disabled={idx === 0}
                         className="p-0.5 text-slate-600 hover:text-white disabled:opacity-20 transition"><ChevronUp size={12} /></button>
-                      <button onClick={() => moveTrack(tc.id, 1)} disabled={idx === sortedTracks.length - 1}
+                      <button onClick={() => moveCategory(cc.id, 1)} disabled={idx === sortedCategories.length - 1}
                         className="p-0.5 text-slate-600 hover:text-white disabled:opacity-20 transition"><ChevronDown size={12} /></button>
-                      <button onClick={() => { setEditingTrackName(tc.id); setTrackNameInput(tc.name); }}
+                      <button onClick={() => { setEditingCategoryName(cc.id); setCategoryNameInput(cc.name); }}
                         className="p-0.5 text-slate-600 hover:text-white transition"><Pencil size={11} /></button>
                     </div>
                   </div>
@@ -286,24 +367,24 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Right: Module catalog for selected track */}
+          {/* Right: Module catalog for selected category */}
           <div className="flex-1 min-w-0">
             {(() => {
-              const catTrack = TRACK_CATALOG.find(t => t.id === selectedTrack);
-              if (!catTrack) return null;
-              const trackModules = getModulesByTrack(selectedTrack);
-              const allEnabled = trackModules.every(m => config.enabledModules.includes(m.key));
+              const catDef = CATEGORY_CATALOG.find(c => c.id === selectedCategory);
+              if (!catDef) return null;
+              const categoryModules = getModulesByCategory(selectedCategory);
+              const allEnabled = categoryModules.every(m => config.enabledModules.includes(m.key));
               const filtered = moduleSearch
-                ? trackModules.filter(m => m.label.includes(moduleSearch) || m.description.includes(moduleSearch) || m.key.includes(moduleSearch))
-                : trackModules;
+                ? categoryModules.filter(m => m.label.includes(moduleSearch) || m.description.includes(moduleSearch) || m.key.includes(moduleSearch))
+                : categoryModules;
 
               return (
                 <>
-                  {/* Track header */}
+                  {/* Category header */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h2 className="text-base font-bold">{getTrackName(selectedTrack)}</h2>
-                      <p className="text-xs text-slate-500 mt-0.5">{trackModules.length}개 모듈 중 {enabledCountForTrack(selectedTrack)}개 활성</p>
+                      <h2 className="text-base font-bold">{getCategoryName(selectedCategory)}</h2>
+                      <p className="text-xs text-slate-500 mt-0.5">{categoryModules.length}개 모듈 중 {enabledCountForCategory(selectedCategory)}개 활성</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* Search */}
@@ -313,7 +394,7 @@ export default function SettingsPage() {
                           className="pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none w-40" />
                       </div>
                       {/* Toggle all */}
-                      <button onClick={() => allEnabled ? disableAllInTrack(selectedTrack) : enableAllInTrack(selectedTrack)}
+                      <button onClick={() => allEnabled ? disableAllInCategory(selectedCategory) : enableAllInCategory(selectedCategory)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${allEnabled ? 'bg-slate-700/50 text-slate-400 hover:bg-slate-700' : 'bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20'}`}>
                         {allEnabled ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
                         {allEnabled ? '전체 해제' : '전체 활성'}
@@ -357,6 +438,139 @@ export default function SettingsPage() {
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ 트랙 설정 (워크플로우 디자인) ═══ */}
+      {tab === 'tracks' && (
+        <div className="flex gap-5" style={{ minHeight: 'calc(100vh - 220px)' }}>
+          {/* Left: Track list */}
+          <div className="w-[220px] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/5">
+              <span className="text-xs font-semibold text-slate-400">트랙 목록</span>
+              <p className="text-[10px] text-slate-600 mt-0.5">워크플로우 설계 단위</p>
+            </div>
+            <div className="p-2 space-y-0.5">
+              {MOCK_TRACKS.map(track => {
+                const isSelected = selectedTrack === track.id;
+                return (
+                  <button key={track.id}
+                    onClick={() => setSelectedTrack(track.id)}
+                    className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors ${isSelected ? 'bg-indigo-600/10 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'}`}>
+                    <GitBranch size={14} className="shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm truncate block">{track.name}</span>
+                      <span className="text-[10px] text-slate-600">{track.departments.length}개 부서</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right: Track detail */}
+          <div className="flex-1 min-w-0 space-y-5">
+            <div>
+              <h2 className="text-base font-bold">{currentTrack.name} 트랙</h2>
+              <p className="text-xs text-slate-500 mt-0.5">조직 부서 배치, 담당 직원, 결재라인, 연결 모듈</p>
+            </div>
+
+            {/* 조직 부서 배치 */}
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Building2 size={14} className="text-indigo-400" /> 조직 부서 배치
+              </h3>
+              {currentTrack.departments.length === 0 ? (
+                <p className="text-xs text-slate-600 py-4 text-center">전사 공통 트랙 — 별도 부서 배치 없음</p>
+              ) : (
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {currentTrack.departments.map((dept, di) => (
+                    <div key={dept.name} className="flex items-center gap-3">
+                      <div className="shrink-0 w-[200px] rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <GripVertical size={12} className="text-slate-700 cursor-grab" />
+                          <span className="text-sm font-semibold text-white">{dept.name}</span>
+                        </div>
+                        <p className="text-[10px] text-indigo-400 mb-1">{dept.role}</p>
+                        <p className="text-[10px] text-slate-600">{dept.skills}</p>
+                        {/* Members */}
+                        <div className="mt-3 pt-2 border-t border-white/5 space-y-1.5">
+                          {dept.members.map(m => (
+                            <div key={m.name} className="flex items-center gap-2">
+                              <div className="h-5 w-5 rounded-full bg-indigo-600/20 flex items-center justify-center text-[9px] font-bold text-indigo-400">
+                                {m.name.charAt(0)}
+                              </div>
+                              <span className="text-[11px] text-slate-300">{m.name}</span>
+                              <span className="text-[9px] text-slate-600 ml-auto">{m.role}</span>
+                            </div>
+                          ))}
+                          <button className="flex items-center gap-1 text-[10px] text-slate-600 hover:text-indigo-400 transition-colors mt-1">
+                            <UserPlus size={10} /> 멤버 추가
+                          </button>
+                        </div>
+                      </div>
+                      {di < currentTrack.departments.length - 1 && (
+                        <ArrowRight size={14} className="text-slate-700 shrink-0" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 결재라인 설정 */}
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Trash2 size={14} className="text-violet-400" /> 결재라인 설정
+              </h3>
+              <div className="flex items-center gap-2">
+                {currentTrack.approvalLine.map((step, si) => (
+                  <div key={si} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
+                      <div className="h-6 w-6 rounded-full bg-violet-600/20 flex items-center justify-center text-[10px] font-bold text-violet-400">
+                        {step.order}
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-white">{step.name}</p>
+                        <p className="text-[9px] text-slate-500">{step.role}</p>
+                      </div>
+                    </div>
+                    {si < currentTrack.approvalLine.length - 1 && (
+                      <ArrowRight size={12} className="text-slate-700 shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 모듈 연결 */}
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Settings size={14} className="text-emerald-400" /> 연결된 모듈
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {currentTrack.modules.map(mk => {
+                  const mod = MODULE_CATALOG.find(m => m.key === mk);
+                  if (!mod) return null;
+                  const Icon = mod.icon;
+                  return (
+                    <div key={mk} className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5">
+                      <Icon size={13} className="text-emerald-400" />
+                      <span className="text-xs text-emerald-300">{mod.label}</span>
+                    </div>
+                  );
+                })}
+                <button className="flex items-center gap-1 rounded-lg border border-dashed border-white/10 px-3 py-1.5 text-xs text-slate-600 hover:text-slate-400 hover:border-white/20 transition-colors">
+                  <Plus size={12} /> 모듈 추가
+                </button>
+              </div>
+            </div>
+
+            {/* Placeholder notice */}
+            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-300/80">
+              트랙 설정은 현재 미리보기입니다. 부서 드래그, 멤버 배정, 결재라인 편집 기능은 추후 업데이트됩니다.
+            </div>
           </div>
         </div>
       )}

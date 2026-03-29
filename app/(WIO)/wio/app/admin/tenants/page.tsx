@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useWIO } from '../../layout';
 import { createClient } from '@/lib/supabase/client';
-import { TRACK_CATALOG, getModulesByTrack, ALL_MODULE_KEYS } from '@/lib/wio-modules';
+import { CATEGORY_CATALOG, getModulesByCategory, ALL_MODULE_KEYS } from '@/lib/wio-modules';
 
 type ViewMode = 'list' | 'detail' | 'create';
 
@@ -362,14 +362,14 @@ export default function TenantManagementPage() {
               <button onClick={() => setForm(p => ({ ...p, modules: [...ALL_MODULE_KEYS] }))}
                 className="text-xs text-indigo-400 hover:text-indigo-300">전체 선택</button>
             </div>
-            {TRACK_CATALOG.map(track => {
-              const mods = getModulesByTrack(track.id);
-              const TrackIcon = track.icon;
+            {CATEGORY_CATALOG.map(cat => {
+              const mods = getModulesByCategory(cat.id);
+              const CatIcon = cat.icon;
               return (
-                <div key={track.id}>
+                <div key={cat.id}>
                   <div className="flex items-center gap-2 mb-2">
-                    <TrackIcon size={13} className="text-slate-500" />
-                    <span className="text-xs font-semibold text-slate-400">{track.name}</span>
+                    <CatIcon size={13} className="text-slate-500" />
+                    <span className="text-xs font-semibold text-slate-400">{cat.name}</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {mods.map(m => {

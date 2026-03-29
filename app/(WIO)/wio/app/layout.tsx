@@ -9,7 +9,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
 import {
-  TRACK_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByTrack,
+  CATEGORY_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByCategory,
   loadOrbiConfig, loadAccordionState, saveAccordionState,
   type OrbiConfig,
 } from '@/lib/wio-modules';
@@ -34,7 +34,7 @@ interface WIOContext {
   isDemo: boolean;
   isMaster: boolean;
 }
-const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], tracks: [] }, reloadConfig: () => {}, mode: 'demo', isDemo: true, isMaster: false });
+const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], categories: [] }, reloadConfig: () => {}, mode: 'demo', isDemo: true, isMaster: false });
 export const useWIO = () => useContext(WIOCtx);
 
 /* ── Demo tenant builder ── */
@@ -54,9 +54,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [member, setMember] = useState<WIOMember | null>(null);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
-  const [openTracks, setOpenTracks] = useState<string[]>([]);
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], tracks: [] });
+  const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], categories: [] });
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
   const [noWorkspace, setNoWorkspace] = useState(false);
   const [authUser, setAuthUser] = useState<any>(null);
@@ -102,7 +102,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   // Load accordion state
   useEffect(() => {
     const saved = loadAccordionState();
-    setOpenTracks(saved);
+    setOpenCategories(saved);
   }, []);
 
   // Init tenant
@@ -291,28 +291,28 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
     router.push('/wio');
   };
 
-  function toggleTrack(trackId: string) {
-    setOpenTracks(prev => {
-      const next = prev.includes(trackId) ? prev.filter(t => t !== trackId) : [...prev, trackId];
+  function toggleCategory(categoryId: string) {
+    setOpenCategories(prev => {
+      const next = prev.includes(categoryId) ? prev.filter(c => c !== categoryId) : [...prev, categoryId];
       saveAccordionState(next);
       return next;
     });
   }
 
-  // Get track display name from config
-  function getTrackName(trackId: string): string {
-    const tc = orbiConfig.tracks.find(t => t.id === trackId);
-    if (tc) return tc.name;
-    const cat = TRACK_CATALOG.find(t => t.id === trackId);
-    return cat?.name || trackId;
+  // Get category display name from config
+  function getCategoryName(categoryId: string): string {
+    const cc = orbiConfig.categories.find(c => c.id === categoryId);
+    if (cc) return cc.name;
+    const cat = CATEGORY_CATALOG.find(c => c.id === categoryId);
+    return cat?.name || categoryId;
   }
 
-  // Sort tracks by config order
-  const sortedTrackIds = (() => {
-    if (orbiConfig.tracks.length > 0) {
-      return [...orbiConfig.tracks].sort((a, b) => a.order - b.order).map(t => t.id);
+  // Sort categories by config order
+  const sortedCategoryIds = (() => {
+    if (orbiConfig.categories.length > 0) {
+      return [...orbiConfig.categories].sort((a, b) => a.order - b.order).map(c => c.id);
     }
-    return TRACK_CATALOG.map(t => t.id);
+    return CATEGORY_CATALOG.map(c => c.id);
   })();
 
   // Build active sidebar items: only enabled modules, grouped by track
@@ -377,38 +377,38 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
             )}
           </div>
         ) : (
-          /* ── Configured: show modules grouped by track ── */
-          sortedTrackIds.map((trackId, ti) => {
-            const catTrack = TRACK_CATALOG.find(t => t.id === trackId);
-            if (!catTrack) return null;
-            const trackModules = getModulesByTrack(trackId).filter(m => enabledModuleKeys.includes(m.key));
-            if (trackModules.length === 0) return null;
+          /* ── Configured: show modules grouped by category ── */
+          sortedCategoryIds.map((categoryId, ci) => {
+            const catDef = CATEGORY_CATALOG.find(c => c.id === categoryId);
+            if (!catDef) return null;
+            const categoryModules = getModulesByCategory(categoryId).filter(m => enabledModuleKeys.includes(m.key));
+            if (categoryModules.length === 0) return null;
 
-            const isOpen = openTracks.includes(trackId);
-            const TrackIcon = catTrack.icon;
-            const trackName = getTrackName(trackId);
+            const isOpen = openCategories.includes(categoryId);
+            const CatIcon = catDef.icon;
+            const categoryName = getCategoryName(categoryId);
 
             return (
-              <div key={trackId} className={ti > 0 ? 'mt-1' : ''}>
-                {/* Track header */}
+              <div key={categoryId} className={ci > 0 ? 'mt-1' : ''}>
+                {/* Category header */}
                 {(isMobile || !collapsed) ? (
-                  <button onClick={() => toggleTrack(trackId)}
+                  <button onClick={() => toggleCategory(categoryId)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[11px] font-bold tracking-wide transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'}`}>
                     <span className="flex items-center gap-2">
-                      <TrackIcon size={15} />
-                      {trackName}
-                      <span className="text-[9px] font-normal text-slate-600">{trackModules.length}</span>
+                      <CatIcon size={15} />
+                      {categoryName}
+                      <span className="text-[9px] font-normal text-slate-600">{categoryModules.length}</span>
                     </span>
                     <ChevronRight size={12} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
                   </button>
                 ) : (
-                  collapsed && ti > 0 && <div className="mx-2 mb-1 border-t border-white/5" />
+                  collapsed && ci > 0 && <div className="mx-2 mb-1 border-t border-white/5" />
                 )}
 
                 {/* Module list */}
                 {(isOpen || (!isMobile && collapsed)) && (
                   <div className={!isMobile && !collapsed ? 'ml-2 border-l border-white/5 pl-1' : ''}>
-                    {trackModules.map(mod => {
+                    {categoryModules.map(mod => {
                       const Icon = mod.icon;
                       const isActive = mod.key === 'home'
                         ? pathname === '/wio/app' || pathname === '/wio/app/'
