@@ -1,31 +1,79 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { LibraryProvider } from "@/lib/library-context";
 import { PointProvider } from "@/lib/point-context";
 import { IntraSidebar } from "@/components/IntraSidebar";
 import { IntraHeader } from "@/components/IntraHeader";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Lock, Eye, EyeOff } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+
+function IntraLoginForm() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPw, setShowPw] = useState(false);
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSubmitting(true);
+        try {
+            const sb = createClient();
+            const { error: authError } = await sb.auth.signInWithPassword({ email, password });
+            if (authError) setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
+            else window.location.reload();
+        } catch { setError("오류가 발생했습니다."); }
+        setSubmitting(false);
+    };
+
+    return (
+        <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
+            <div className="w-full max-w-sm">
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-white/5 border border-white/10 mb-4">
+                        <Lock className="h-6 w-6 text-neutral-400" />
+                    </div>
+                    <h1 className="text-lg font-bold text-white tracking-tight">Ten:One™ Intra</h1>
+                    <p className="text-xs text-neutral-500 mt-1">내부 구성원 전용</p>
+                </div>
+                <form onSubmit={handleLogin} className="space-y-3">
+                    <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/20" />
+                    <div className="relative">
+                        <input type={showPw ? "text" : "password"} placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/20 pr-10" />
+                        <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-400">
+                            {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                    </div>
+                    {error && <p className="text-xs text-red-400">{error}</p>}
+                    <button type="submit" disabled={submitting || !email || !password}
+                        className="w-full py-3 bg-white text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                        {submitting ? "인증 중..." : "로그인"}
+                    </button>
+                </form>
+                <p className="text-center text-[10px] text-neutral-700 mt-8">Ten:One™ Universe Operating System</p>
+            </div>
+        </div>
+    );
+}
 
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading, canAccessIntra } = useAuth();
     const router = useRouter();
 
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) router.replace('/login?redirect=/intra');
-    }, [isLoading, isAuthenticated, router]);
-
     if (isLoading) return (
-        <div className="h-full bg-white flex items-center justify-center">
-            <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+        <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+            <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
         </div>
     );
 
-    if (!isAuthenticated) return null;
+    if (!isAuthenticated) return <IntraLoginForm />;
 
-    // 일반회원(member)은 Intra 접근 불가. 나머지(staff/partner/junior-partner/crew)는 접근 가능.
     if (!canAccessIntra) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center px-4">
