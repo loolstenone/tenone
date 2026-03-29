@@ -151,15 +151,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         } catch { /* ignore */ }
 
-        // 2단계: Supabase 세션 검증 (비동기)
+        // 2단계: Supabase 세션 검증 (비동기, 5초 타임아웃)
         async function validateSession() {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const sessionResult = await Promise.race([
+                    supabase.auth.getSession(),
+                    new Promise<null>(r => setTimeout(() => r(null), 5000))
+                ]);
+                const session = sessionResult && 'data' in (sessionResult as any) ? (sessionResult as any).data.session : null;
                 if (session?.user) {
-                    // 유효한 세션 → 최신 프로필 동기화
-                    await syncUserFromSession(session.user);
+                    // 유효한 세션 → 최신 프로필 동기화 (3초 타임아웃)
+                    await Promise.race([
+                        syncUserFromSession(session.user),
+                        new Promise(r => setTimeout(r, 3000))
+                    ]);
                 } else {
-                    // 세션 없음 → localStorage에 남은 stale 데이터 정리
+                    // 세션 없음 or 타임아웃 → localStorage에 남은 stale 데이터 정리
                     const stored = localStorage.getItem(STORAGE_KEY);
                     if (stored) {
                         setUser(null);
