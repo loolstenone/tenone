@@ -14,6 +14,7 @@ import {
   type OrbiConfig,
 } from '@/lib/wio-modules';
 import type { WIOTenant, WIOMember } from '@/types/wio';
+import { checkModuleAccess } from '@/lib/rbac';
 
 /* ── Mode detection helpers ── */
 type OrbiMode = 'demo' | 'saas' | 'master';
@@ -381,7 +382,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           sortedCategoryIds.map((categoryId, ci) => {
             const catDef = CATEGORY_CATALOG.find(c => c.id === categoryId);
             if (!catDef) return null;
-            const categoryModules = getModulesByCategory(categoryId).filter(m => enabledModuleKeys.includes(m.key));
+            const categoryModules = getModulesByCategory(categoryId).filter(m =>
+              enabledModuleKeys.includes(m.key) && checkModuleAccess(member, m.key, isDemo)
+            );
             if (categoryModules.length === 0) return null;
 
             const isOpen = openCategories.includes(categoryId);

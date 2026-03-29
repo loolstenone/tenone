@@ -1,19 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
   CheckSquare,
   Square,
-  Sun,
   Moon,
-  ChevronDown,
+  Plus,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { fetchTasks, updateTask, createTask } from "@/lib/myverse-supabase";
+import type { MyverseTask } from "@/lib/myverse-supabase";
 
-/* ── Mock Data ── */
-const TODAY = "2026년 3월 28일 토요일";
+/* ── 날짜 포맷 ── */
+function todayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
 
+function formatDateKR() {
+  const d = new Date();
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
+}
+
+/* ── Mock 스케줄 (추후 캘린더 연동) ── */
 const SCHEDULE = [
   { id: 1, title: "Morning Routine & 독서", start: 8, end: 9, color: "bg-indigo-500/30 border-indigo-500/50" },
   { id: 2, title: "프로젝트 A 개발", start: 10, end: 12, color: "bg-purple-500/30 border-purple-500/50" },
@@ -21,26 +33,70 @@ const SCHEDULE = [
   { id: 4, title: "운동 & 산책", start: 18, end: 19, color: "bg-emerald-500/30 border-emerald-500/50" },
 ];
 
-const TODOS = [
-  { id: 1, title: "포트폴리오 사이트 디자인 수정", deadline: "오늘", done: true },
-  { id: 2, title: "독서 노트 정리 (Chapter 5)", deadline: "오늘", done: true },
-  { id: 3, title: "블로그 글 초안 작성", deadline: "내일", done: false },
-  { id: 4, title: "운동 루틴 계획 세우기", deadline: "오늘", done: false },
-  { id: 5, title: "주간 회고 작성", deadline: "일요일", done: false },
-];
-
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 8); // 8AM ~ 10PM
+const HOURS = Array.from({ length: 15 }, (_, i) => i + 8);
 
 export default function PlanPage() {
-  const [todos, setTodos] = useState(TODOS);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [todos, setTodos] = useState<MyverseTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newTitle, setNewTitle] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
 
-  const toggleTodo = (id: number) => {
+  // 초기 데이터 로드
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+
+      // 오늘 할 일 + 미완료 할 일 조회
+      const { tasks } = await fetchTasks(user.id);
+      setTodos(tasks);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  // 할 일 토글
+  const toggleTodo = async (task: MyverseTask) => {
+    const newStatus = task.status === "done" ? "todo" : "done";
+    const completedAt = newStatus === "done" ? new Date().toISOString() : null;
+
+    // UI 즉시 반영
     setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+      prev.map((t) => (t.id === task.id ? { ...t, status: newStatus, completed_at: completedAt } : t))
     );
+
+    // DB 저장
+    await updateTask(task.id, { status: newStatus, completed_at: completedAt });
   };
 
-  const doneCount = todos.filter((t) => t.done).length;
+  // 새 할 일 추가
+  const handleAdd = async () => {
+    if (!newTitle.trim() || !userId) return;
+    const { task } = await createTask(userId, {
+      title: newTitle.trim(),
+      due_date: todayStr(),
+      status: "todo",
+      priority: "medium",
+    });
+    if (task) {
+      setTodos((prev) => [task, ...prev]);
+    }
+    setNewTitle("");
+    setShowAdd(false);
+  };
+
+  const doneCount = todos.filter((t) => t.status === "done").length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen px-4 py-6 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto">
@@ -50,7 +106,7 @@ export default function PlanPage() {
           <Calendar className="h-4 w-4" />
           내 하루
         </div>
-        <h1 className="text-2xl font-bold">{TODAY}</h1>
+        <h1 className="text-2xl font-bold">{formatDateKR()}</h1>
         <p className="text-sm text-neutral-500 mt-1">
           일정 {SCHEDULE.length}개 / 할 일 {doneCount}/{todos.length} 완료
         </p>
@@ -72,19 +128,14 @@ export default function PlanPage() {
 
             return (
               <div key={hour} className="flex min-h-[44px]">
-                {/* 시간 라벨 */}
                 <div className="w-14 shrink-0 text-xs text-neutral-500 pt-0.5 text-right pr-3">
                   {isInEvent ? "" : `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? "PM" : "AM"}`}
                 </div>
-
-                {/* 라인 */}
                 <div className="relative w-px bg-white/10 mr-3">
                   {!isInEvent && (
                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white/20" />
                   )}
                 </div>
-
-                {/* 이벤트 영역 */}
                 <div className="flex-1 pb-1">
                   {event && (
                     <div
@@ -116,27 +167,58 @@ export default function PlanPage() {
             <CheckSquare className="h-4 w-4 text-neutral-400" />
             <span className="text-sm font-semibold text-neutral-300">할 일</span>
           </div>
-          <span className="text-xs text-neutral-500">
-            {doneCount}/{todos.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-neutral-500">
+              {doneCount}/{todos.length}
+            </span>
+            <button
+              onClick={() => setShowAdd(!showAdd)}
+              className="p-1 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* 프로그레스 */}
-        <div className="h-1.5 rounded-full bg-white/5 mb-4 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
-            style={{ width: `${(doneCount / todos.length) * 100}%` }}
-          />
-        </div>
+        {todos.length > 0 && (
+          <div className="h-1.5 rounded-full bg-white/5 mb-4 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+              style={{ width: `${(doneCount / todos.length) * 100}%` }}
+            />
+          </div>
+        )}
+
+        {/* 새 할 일 입력 */}
+        {showAdd && (
+          <div className="flex gap-2 mb-3">
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder="새 할 일..."
+              autoFocus
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50"
+            />
+            <button
+              onClick={handleAdd}
+              disabled={!newTitle.trim()}
+              className="px-3 py-2 bg-indigo-500 rounded-lg text-sm font-medium disabled:opacity-30"
+            >
+              추가
+            </button>
+          </div>
+        )}
 
         <div className="space-y-2">
-          {todos.map((todo) => (
+          {todos.length > 0 ? todos.map((todo) => (
             <button
               key={todo.id}
-              onClick={() => toggleTodo(todo.id)}
+              onClick={() => toggleTodo(todo)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors text-left"
             >
-              {todo.done ? (
+              {todo.status === "done" ? (
                 <CheckSquare className="h-4 w-4 text-indigo-400 shrink-0" />
               ) : (
                 <Square className="h-4 w-4 text-neutral-600 shrink-0" />
@@ -144,7 +226,7 @@ export default function PlanPage() {
               <div className="flex-1 min-w-0">
                 <p
                   className={`text-sm ${
-                    todo.done
+                    todo.status === "done"
                       ? "line-through text-neutral-500"
                       : "text-neutral-200"
                   }`}
@@ -154,15 +236,19 @@ export default function PlanPage() {
               </div>
               <span
                 className={`text-xs shrink-0 ${
-                  todo.deadline === "오늘" && !todo.done
+                  todo.due_date === todayStr() && todo.status !== "done"
                     ? "text-amber-400"
                     : "text-neutral-600"
                 }`}
               >
-                {todo.deadline}
+                {todo.due_date === todayStr() ? "오늘" : todo.due_date || ""}
               </span>
             </button>
-          ))}
+          )) : (
+            <p className="text-sm text-slate-500 bg-white/[0.03] rounded-lg px-3 py-4 text-center">
+              할 일이 없어요. + 버튼을 눌러 추가하세요.
+            </p>
+          )}
         </div>
       </section>
 

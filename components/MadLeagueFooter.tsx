@@ -5,11 +5,11 @@ import { Instagram, Youtube, Mail } from "lucide-react";
 
 
 const quickLinks = [
-    { name: "경쟁 PT", href: "/pt" },
+    { name: "소개", href: "/about" },
     { name: "프로그램", href: "/program" },
-    { name: "매드 진", href: "/madzine" },
-    { name: "히어로", href: "/hero" },
-    { name: "About", href: "/about" },
+    { name: "경쟁PT", href: "/pt" },
+    { name: "MADzine", href: "/madzine" },
+    { name: "리퍼", href: "/leaguer" },
 ];
 
 export function MadLeagueFooter() {
@@ -20,7 +20,7 @@ export function MadLeagueFooter() {
                     {/* Logo & Description */}
                     <div>
                         <Link href="/" className="flex items-center gap-1 mb-4">
-                            <span className="bg-[#D32F2F] text-white font-extrabold text-base px-2 py-0.5 tracking-tight">
+                            <span className="bg-[#0F5132] text-white font-extrabold text-base px-2 py-0.5 tracking-tight">
                                 MAD
                             </span>
                             <span className="text-white font-bold text-base tracking-tight">

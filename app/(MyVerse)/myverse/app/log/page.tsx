@@ -1,104 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, Smile, Lock, Users, Globe, Send, Instagram, Linkedin, Twitter, ImageIcon, Heart, MessageCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { fetchLogs, createLog } from '@/lib/myverse-supabase';
+import type { MyverseLog } from '@/lib/myverse-supabase';
 
 /* ── Types ── */
 type Visibility = 'private' | 'shared' | 'public';
 
-interface LogEntry {
-  id: string;
-  time: string;
-  content: string;
-  mood?: string;
-  image?: string;
-  visibility: Visibility;
-  likes: number;
-}
-
-/* ── Mock Data ── */
-const MOCK_LOGS: LogEntry[] = [
-  {
-    id: '1',
-    time: '14:32',
-    content: '\uce74\ud398\uc5d0\uc11c \uae30\ud68d\uc11c \uc791\uc131 \uc644\ub8cc. \uc624\ub298 \uc9d1\uc911\ub825 \ucd5c\uace0\uc600\ub2e4 \u2615',
-    mood: '\ud83d\udd25',
-    visibility: 'public',
-    likes: 3,
-  },
-  {
-    id: '2',
-    time: '12:15',
-    content: '\uc810\uc2ec \uba54\ub274 \uace0\ubbfc\ud558\ub2e4\uac00 \uc0c8\ub85c\uc6b4 \ub77c\uba58\uc9d1 \ubc1c\uacac \ud83c\udf5c',
-    image: 'ramen',
-    mood: '\ud83d\ude0a',
-    visibility: 'shared',
-    likes: 7,
-  },
-  {
-    id: '3',
-    time: '09:45',
-    content: '\uc544\uce68 \ub7ec\ub2dd 5km \uc644\uc8fc! \uc2a4\ud2b8\ub9ad 12\uc77c\uc9f8 \ud83c\udfc3',
-    mood: '\ud83d\udd25',
-    visibility: 'public',
-    likes: 12,
-  },
-  {
-    id: '4',
-    time: '\uc5b4\uc81c 22:10',
-    content: '\uc624\ub298 \ud558\ub8e8 \ub3cc\uc544\ubcf4\uba70 \uac10\uc0ac\ud55c \uc810 3\uac00\uc9c0 \uc801\uc5b4\ubcf4\uae30',
-    mood: '\ud83d\ude0a',
-    visibility: 'private',
-    likes: 0,
-  },
-  {
-    id: '5',
-    time: '\uc5b4\uc81c 18:30',
-    content: '\ud300 \ud68c\uc2dd \uc0ac\uc9c4 \ud83c\udf7b \ub2e4\ub4e4 \uc218\uace0\ud588\uc5b4\uc694!',
-    image: 'team',
-    mood: '\ud83d\ude0a',
-    visibility: 'shared',
-    likes: 15,
-  },
-];
-
+/* ── 기분 옵션 ── */
 const MOOD_OPTIONS = ['\ud83d\ude0a', '\ud83d\ude10', '\ud83d\ude14', '\ud83d\udd25', '\ud83d\ude0d', '\ud83e\udd14'];
 
 const VIS_OPTIONS: { key: Visibility; icon: typeof Lock; label: string }[] = [
-  { key: 'private', icon: Lock, label: '\ub098\ub9cc' },
-  { key: 'shared', icon: Users, label: '\uce5c\uad6c' },
-  { key: 'public', icon: Globe, label: '\uc804\uccb4' },
+  { key: 'private', icon: Lock, label: '나만' },
+  { key: 'shared', icon: Users, label: '친구' },
+  { key: 'public', icon: Globe, label: '전체' },
 ];
 
 export default function LogPage() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [text, setText] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('private');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [showMoodPicker, setShowMoodPicker] = useState(false);
-  const [logs, setLogs] = useState<LogEntry[]>(MOCK_LOGS);
+  const [logs, setLogs] = useState<MyverseLog[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = () => {
-    if (!text.trim()) return;
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const newLog: LogEntry = {
-      id: Date.now().toString(),
-      time: timeStr,
-      content: text.trim(),
-      mood: selectedMood ?? undefined,
-      visibility,
-      likes: 0,
+  // 초기 데이터 로드
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+
+      const { logs: dbLogs } = await fetchLogs(user.id, 30);
+      if (dbLogs.length > 0) {
+        setLogs(dbLogs);
+      }
+      setLoading(false);
     };
-    setLogs([newLog, ...logs]);
+    load();
+  }, []);
+
+  // 새 로그 등록
+  const handleSubmit = async () => {
+    if (!text.trim() || !userId) return;
+
+    // Supabase에 저장
+    const { log: newLog } = await createLog(userId, {
+      content: text.trim(),
+      emotion: selectedMood ?? undefined,
+      visibility,
+      log_type: 'text',
+    });
+
+    if (newLog) {
+      setLogs([newLog, ...logs]);
+    }
+
     setText('');
     setSelectedMood(null);
   };
 
   const showToast = (platform: string) => {
-    setToast(`AI\uac00 ${platform}\uc6a9 \uce21\uc158\uc744 \uc900\ube44\ud558\uace0 \uc788\uc5b4\uc694...`);
+    setToast(`AI가 ${platform}용 캡션을 준비하고 있어요...`);
     setTimeout(() => setToast(null), 2500);
   };
+
+  // 시간 포맷
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}분 전`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}시간 전`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return '어제';
+    return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+  };
+
+  if (loading) {
+    return (
+      <div className="px-5 py-6 flex items-center justify-center min-h-[60vh]">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 py-6 space-y-5">
@@ -110,7 +102,7 @@ export default function LogPage() {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="\uc624\ub298 \ubb50 \ud588\uc5b4?"
+          placeholder="오늘 뭐 했어?"
           rows={3}
           className="w-full bg-transparent text-sm text-white placeholder-slate-500 resize-none focus:outline-none"
         />
@@ -123,7 +115,7 @@ export default function LogPage() {
               onClick={() => setSelectedMood(null)}
               className="text-xs text-slate-500 hover:text-slate-300"
             >
-              \u2715
+              ✕
             </button>
           </div>
         )}
@@ -187,31 +179,31 @@ export default function LogPage() {
             className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
           >
             <Send className="w-3.5 h-3.5" />
-            \ub4f1\ub85d
+            등록
           </button>
         </div>
       </div>
 
       {/* Timeline */}
       <div className="space-y-3">
-        {logs.map((log) => {
-          const VisIcon = VIS_OPTIONS.find((v) => v.key === log.visibility)!.icon;
+        {logs.length > 0 ? logs.map((log) => {
+          const VisIcon = VIS_OPTIONS.find((v) => v.key === log.visibility)?.icon || Lock;
           return (
             <div key={log.id} className="bg-white/5 rounded-2xl p-4 space-y-3">
               {/* Header row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
-                  <span>{log.time}</span>
+                  <span>{formatTime(log.created_at)}</span>
                   <VisIcon className="w-3 h-3" />
                 </div>
-                {log.mood && <span className="text-base">{log.mood}</span>}
+                {log.emotion && <span className="text-base">{log.emotion}</span>}
               </div>
 
               {/* Content */}
               <p className="text-sm leading-relaxed">{log.content}</p>
 
               {/* Image placeholder */}
-              {log.image && (
+              {log.image_url && (
                 <div className="w-full h-40 bg-white/5 rounded-xl flex items-center justify-center">
                   <ImageIcon className="w-8 h-8 text-slate-600" />
                 </div>
@@ -222,7 +214,6 @@ export default function LogPage() {
                 <div className="flex items-center gap-3">
                   <button className="flex items-center gap-1 text-xs text-slate-500 hover:text-rose-400 transition-colors">
                     <Heart className="w-3.5 h-3.5" />
-                    {log.likes > 0 && <span>{log.likes}</span>}
                   </button>
                   <button className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors">
                     <MessageCircle className="w-3.5 h-3.5" />
@@ -253,7 +244,11 @@ export default function LogPage() {
               </div>
             </div>
           );
-        })}
+        }) : (
+          <p className="text-sm text-slate-500 bg-white/5 rounded-2xl px-4 py-6 text-center">
+            아직 기록이 없어요. 오늘 하루를 남겨보세요.
+          </p>
+        )}
       </div>
 
       {/* Toast */}

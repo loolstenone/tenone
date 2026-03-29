@@ -1,170 +1,269 @@
 "use client";
 
-import { Target, Flame, TrendingUp, MapPin, Building2 } from "lucide-react";
+import {
+  Target,
+  Swords,
+  Link2,
+  MapPin,
+  Users,
+  Shield,
+  ChevronRight,
+  Building2,
+  Quote,
+} from "lucide-react";
 
-const timeline = [
-    { year: "2019", title: "MAD League 창립", desc: "서울 권역 3개 대학 연합 마케팅 동아리로 시작" },
-    { year: "2020", title: "제1회 경쟁 PT 개최", desc: "온라인 경쟁 PT 최초 개최, 5개 팀 참가" },
-    { year: "2021", title: "전국 확대", desc: "수도권 중심에서 전국 5개 권역으로 확장" },
-    { year: "2022", title: "HeRo 프로그램 런칭", desc: "인재 발굴 및 성장 지원 프로그램 시작" },
-    { year: "2023", title: "파트너 기업 연계", desc: "지평주조, 스타트업 등 기업 파트너십 확대" },
-    { year: "2024", title: "프로그램 다각화", desc: "부트캠프, 워크숍 등 다양한 교육 프로그램 추가" },
-    { year: "2025", title: "MAD League 7기 활동", desc: "전국 15개 대학, 200명 이상의 리거 활동" },
-    { year: "2026", title: "MAD League 8기 모집", desc: "디지털 플랫폼 강화, Ten:One Universe 편입" },
+const coreValues = [
+  {
+    icon: Swords,
+    title: "실전",
+    desc: "이론이 아니라 실전이다. 진짜 기업 과제, 진짜 경쟁, 진짜 결과.",
+  },
+  {
+    icon: Target,
+    title: "경쟁",
+    desc: "건전한 경쟁이 성장을 만든다. 서로를 이기려 하면서 함께 올라간다.",
+  },
+  {
+    icon: Link2,
+    title: "연결",
+    desc: "서울부터 제주까지. 학교와 지역의 벽을 넘어 전국이 하나로 연결된다.",
+  },
 ];
 
-const regions = [
-    { name: "서울/경기", universities: ["서울대", "연세대", "고려대", "성균관대", "한양대", "중앙대"], count: 8 },
-    { name: "경상", universities: ["부산대", "경북대", "영남대"], count: 4 },
-    { name: "전라", universities: ["전남대", "전북대", "조선대"], count: 3 },
-    { name: "충청", universities: ["충남대", "충북대", "한밭대"], count: 3 },
-    { name: "강원/제주", universities: ["강원대", "제주대"], count: 2 },
+const timeline = [
+  {
+    year: "2022",
+    title: "MADLeap 출범",
+    desc: "서울 권역 대학생 마케팅 동아리 연합 출범. 제1회 경쟁PT 개최.",
+    highlight: true,
+  },
+  {
+    year: "2023",
+    title: "PAM 합류 — 부산 권역",
+    desc: "부산/경남 권역 PAM이 매드리그에 합류. 제1회 DAM Party 개최.",
+    highlight: false,
+  },
+  {
+    year: "2024",
+    title: "ADlle · ABC 합류",
+    desc: "대구 ADlle, 광주 ABC 합류로 4개 권역 체제 완성. Creazy Challenge 시작.",
+    highlight: false,
+  },
+  {
+    year: "2025",
+    title: "SUZAK 합류 — 전국 5개 권역",
+    desc: "제주 SUZAK 합류. 전국 5개 권역, 200명 이상 리퍼. MADzine Vol.6 발행.",
+    highlight: true,
+  },
+];
+
+const structure = [
+  {
+    title: "매드리그 사무국",
+    desc: "전체 운영 총괄. 경쟁PT 기획, DAM Party 운영, 파트너십 관리.",
+    icon: Shield,
+  },
+  {
+    title: "5개 권역 동아리",
+    desc: "MADLeap(서울), PAM(부산), ADlle(대구), ABC(광주), SUZAK(제주). 각 권역 자율 운영 + 리그 공동 프로그램.",
+    icon: MapPin,
+  },
+  {
+    title: "리퍼(Leaguer)",
+    desc: "매드리그 소속 대학생 멤버. 경쟁PT, 프로그램, 네트워킹에 참여.",
+    icon: Users,
+  },
 ];
 
 export default function AboutPage() {
-    return (
-        <div>
-            {/* Hero */}
-            <section className="bg-[#212121] text-white py-16 md:py-24 px-6">
-                <div className="max-w-4xl mx-auto text-center">
-                    <span className="text-[#D32F2F] font-bold text-sm tracking-widest uppercase mb-3 block">
-                        About MAD League
-                    </span>
-                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6">
-                        MAD League
-                    </h1>
-                    <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
-                        Match, Act, Develop.<br />
-                        경쟁을 통한 성장 플랫폼.
-                    </p>
-                </div>
-            </section>
-
-            {/* 비전/미션 */}
-            <section className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="p-8 border border-neutral-200 rounded-xl text-center">
-                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-50 text-[#D32F2F] mb-4">
-                                <Target className="h-7 w-7" />
-                            </div>
-                            <h3 className="text-lg font-bold text-neutral-900 mb-2">Match</h3>
-                            <p className="text-sm text-neutral-500 leading-relaxed">
-                                전국의 열정 있는 대학생들을 연결합니다. 학교와 지역의 경계를 넘어 최고의 팀을 구성합니다.
-                            </p>
-                        </div>
-                        <div className="p-8 border border-neutral-200 rounded-xl text-center">
-                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-orange-50 text-orange-600 mb-4">
-                                <Flame className="h-7 w-7" />
-                            </div>
-                            <h3 className="text-lg font-bold text-neutral-900 mb-2">Act</h3>
-                            <p className="text-sm text-neutral-500 leading-relaxed">
-                                실전 과제를 통해 행동합니다. 이론이 아닌 실전, 관찰이 아닌 참여를 통해 성장합니다.
-                            </p>
-                        </div>
-                        <div className="p-8 border border-neutral-200 rounded-xl text-center">
-                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-50 text-amber-600 mb-4">
-                                <TrendingUp className="h-7 w-7" />
-                            </div>
-                            <h3 className="text-lg font-bold text-neutral-900 mb-2">Develop</h3>
-                            <p className="text-sm text-neutral-500 leading-relaxed">
-                                경쟁을 통해 발전합니다. 건전한 경쟁 속에서 역량을 키우고 마케팅 전문가로 성장합니다.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 미션 */}
-            <section className="py-16 px-6 bg-neutral-50">
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-6">Our Mission</h2>
-                    <p className="text-lg text-neutral-600 leading-relaxed">
-                        대학생들에게 실전 마케팅 경험의 장을 제공하여,
-                        창의적이고 실행력 있는 차세대 마케터를 양성합니다.
-                        전국 네트워크를 기반으로 지역과 학교의 경계를 넘는 협업과 경쟁의 문화를 만들어갑니다.
-                    </p>
-                </div>
-            </section>
-
-            {/* 연혁 */}
-            <section className="py-20 px-6">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-12 text-center">연혁</h2>
-                    <div className="relative">
-                        {/* Timeline line */}
-                        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-neutral-200 -translate-x-1/2" />
-
-                        <div className="space-y-8">
-                            {timeline.map((item, i) => (
-                                <div
-                                    key={item.year}
-                                    className={`relative flex items-start gap-6 ${
-                                        i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                                    }`}
-                                >
-                                    {/* Dot */}
-                                    <div className="absolute left-4 md:left-1/2 w-3 h-3 rounded-full bg-[#D32F2F] border-2 border-white -translate-x-1/2 mt-1.5 z-10" />
-
-                                    {/* Content */}
-                                    <div className={`ml-10 md:ml-0 md:w-1/2 ${
-                                        i % 2 === 0 ? "md:pr-10 md:text-right" : "md:pl-10"
-                                    }`}>
-                                        <span className="text-[#D32F2F] font-bold text-sm">{item.year}</span>
-                                        <h3 className="font-bold text-neutral-900 mt-1">{item.title}</h3>
-                                        <p className="text-sm text-neutral-500 mt-1">{item.desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 전국 네트워크 */}
-            <section className="py-20 px-6 bg-neutral-50">
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-4 text-center">전국 5개 권역 네트워크</h2>
-                    <p className="text-neutral-500 text-center mb-12">전국 20여 개 대학의 마케팅 동아리와 함께합니다</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                        {regions.map((region) => (
-                            <div key={region.name} className="bg-white p-5 rounded-xl border border-neutral-200">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <MapPin className="h-4 w-4 text-[#D32F2F]" />
-                                    <h3 className="font-bold text-neutral-900">{region.name}</h3>
-                                </div>
-                                <p className="text-xs text-neutral-400 mb-2">{region.count}개 대학</p>
-                                <div className="space-y-1">
-                                    {region.universities.map((uni) => (
-                                        <p key={uni} className="text-xs text-neutral-500">{uni}</p>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* 파트너/후원사 */}
-            <section className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-4 text-center">파트너 & 후원</h2>
-                    <p className="text-neutral-500 text-center mb-12">MAD League와 함께하는 파트너사</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {["지평주조", "Ten:One", "파트너사 A", "파트너사 B", "파트너사 C", "파트너사 D"].map((partner) => (
-                            <div
-                                key={partner}
-                                className="aspect-[3/2] bg-neutral-50 border border-neutral-200 rounded-lg flex items-center justify-center"
-                            >
-                                <div className="text-center">
-                                    <Building2 className="h-6 w-6 text-neutral-300 mx-auto mb-1" />
-                                    <span className="text-xs text-neutral-400 font-medium">{partner}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+  return (
+    <div>
+      {/* ── Hero ── */}
+      <section className="bg-[#0a1f14] text-white py-20 md:py-32 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="text-emerald-400 font-bold text-sm tracking-widest uppercase mb-4 block">
+            Our Story
+          </span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6">
+            2022년, 매드립에서 시작해<br />
+            <span className="text-emerald-400">전국 연합이 되기까지</span>
+          </h1>
+          <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
+            작은 대학 동아리의 경쟁PT가, 전국 5개 권역 200명 이상의 리퍼가
+            부딪히는 실전 마케팅 리그가 되었다.
+          </p>
         </div>
-    );
+      </section>
+
+      {/* ── 핵심 가치 ── */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-4 text-center">
+            핵심 가치
+          </h2>
+          <p className="text-neutral-500 text-center mb-14 text-lg">
+            매드리그를 움직이는 세 가지 원칙
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {coreValues.map((v) => (
+              <div
+                key={v.title}
+                className="p-8 bg-white border-2 border-neutral-100 rounded-2xl text-center hover:border-[#0F5132]/20 transition-colors"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0F5132]/10 text-[#0F5132] mb-5">
+                  <v.icon className="h-7 w-7" />
+                </div>
+                <h3 className="text-xl font-black text-neutral-900 mb-3">{v.title}</h3>
+                <p className="text-neutral-500 leading-relaxed">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 철학 Quote ── */}
+      <section className="py-16 px-6 bg-[#0F5132]">
+        <div className="max-w-3xl mx-auto text-center">
+          <Quote className="h-10 w-10 text-emerald-300/40 mx-auto mb-6" />
+          <blockquote className="text-2xl md:text-3xl font-black text-white leading-snug mb-4">
+            리더와 팔로어는 역할이지<br />직급이 아니다
+          </blockquote>
+          <p className="text-emerald-200/80 text-lg">
+            매드리그에서는 누구나 리더가 되고, 누구나 팔로어가 된다.
+            중요한 건 그 순간에 맡은 역할에 최선을 다하는 것.
+          </p>
+        </div>
+      </section>
+
+      {/* ── 타임라인 ── */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-14 text-center">
+            성장의 타임라인
+          </h2>
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-neutral-200 -translate-x-1/2" />
+
+            <div className="space-y-10">
+              {timeline.map((item, i) => (
+                <div
+                  key={item.year}
+                  className={`relative flex items-start gap-8 ${
+                    i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
+                >
+                  {/* Dot */}
+                  <div className={`absolute left-6 md:left-1/2 w-4 h-4 rounded-full border-4 border-white -translate-x-1/2 mt-1.5 z-10 ${
+                    item.highlight ? "bg-[#0F5132]" : "bg-neutral-300"
+                  }`} />
+
+                  {/* Content */}
+                  <div className={`ml-14 md:ml-0 md:w-1/2 ${
+                    i % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"
+                  }`}>
+                    <span className={`inline-block px-3 py-0.5 rounded-full text-sm font-black mb-2 ${
+                      item.highlight
+                        ? "bg-[#0F5132]/10 text-[#0F5132]"
+                        : "bg-neutral-100 text-neutral-500"
+                    }`}>
+                      {item.year}
+                    </span>
+                    <h3 className="text-lg font-bold text-neutral-900 mt-1">{item.title}</h3>
+                    <p className="text-sm text-neutral-500 mt-1 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 운영 구조 ── */}
+      <section className="py-20 px-6 bg-neutral-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-4 text-center">
+            운영 구조
+          </h2>
+          <p className="text-neutral-500 text-center mb-14 text-lg">
+            사무국 + 5개 권역 자율 운영 체제
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {structure.map((s) => (
+              <div
+                key={s.title}
+                className="bg-white rounded-2xl border border-neutral-200 p-8"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#0F5132]/10 flex items-center justify-center mb-5">
+                  <s.icon className="h-6 w-6 text-[#0F5132]" />
+                </div>
+                <h3 className="text-lg font-bold text-neutral-900 mb-3">{s.title}</h3>
+                <p className="text-sm text-neutral-500 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5개 권역 맵 ── */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-4 text-center">
+            전국 5개 권역 네트워크
+          </h2>
+          <p className="text-neutral-500 text-center mb-14 text-lg">
+            각 권역은 독립적으로 운영되면서, 매드리그 공동 프로그램에 참여한다
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {[
+              { name: "MADLeap", city: "서울/경기", color: "bg-emerald-600", unis: ["연세대", "중앙대", "숭실대", "한양대 에리카"], count: "8개 대학" },
+              { name: "PAM", city: "부산/경남", color: "bg-sky-600", unis: ["부산대", "경성대", "동아대"], count: "4개 대학" },
+              { name: "ADlle", city: "대구/경북", color: "bg-orange-600", unis: ["경북대", "영남대", "계명대"], count: "3개 대학" },
+              { name: "ABC", city: "광주/전남", color: "bg-purple-600", unis: ["전남대", "조선대", "광주대"], count: "3개 대학" },
+              { name: "SUZAK", city: "제주", color: "bg-rose-600", unis: ["제주대"], count: "1개 대학" },
+            ].map((r) => (
+              <div
+                key={r.name}
+                className="bg-white border border-neutral-200 rounded-2xl p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={`w-8 h-8 rounded-lg ${r.color} flex items-center justify-center`}>
+                    <MapPin className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 text-sm">{r.name}</h3>
+                    <p className="text-xs text-neutral-400">{r.city}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-[#0F5132] font-semibold mb-2">{r.count}</p>
+                <div className="space-y-1">
+                  {r.unis.map((u) => (
+                    <p key={u} className="text-xs text-neutral-500">{u}</p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 파트너 ── */}
+      <section className="py-16 px-6 bg-neutral-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-xl font-bold text-neutral-900 mb-8 text-center">파트너 & 후원</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {["Ten:One", "Badak", "SmarComm", "HeRo"].map((name) => (
+              <div
+                key={name}
+                className="bg-white border border-neutral-200 rounded-xl p-6 text-center"
+              >
+                <Building2 className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
+                <span className="font-bold text-neutral-700 text-sm">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

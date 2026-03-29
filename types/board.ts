@@ -11,6 +11,7 @@ export type SiteCode =
     | 'fwn'
     | 'badak'
     | 'hero'
+    | 'rook'
     | 'ogamja'
     | 'changeup';
 

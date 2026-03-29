@@ -9,13 +9,12 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "경쟁 PT", href: "/pt" },
+    { name: "소개", href: "/about" },
     { name: "프로그램", href: "/program" },
-    { name: "Idea Movement", href: "/idea-movement" },
-    { name: "매드 진", href: "/madzine" },
-    { name: "히어로", href: "/hero" },
-    { name: "활동인증서", href: "/certificate" },
-    { name: "매드 리거", href: "/leaguer" },
+    { name: "경쟁PT", href: "/pt" },
+    { name: "MADzine", href: "/madzine" },
+    { name: "리퍼", href: "/leaguer" },
+    { name: "커뮤니티", href: "/idea-movement" },
 ];
 
 export function MadLeagueHeader() {
@@ -34,7 +33,7 @@ export function MadLeagueHeader() {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-1 shrink-0">
-                    <span className="bg-[#D32F2F] text-white font-extrabold text-lg px-2 py-0.5 tracking-tight">
+                    <span className="bg-[#0F5132] text-white font-extrabold text-lg px-2 py-0.5 tracking-tight">
                         MAD
                     </span>
                     <span className="text-white font-bold text-lg tracking-tight">
@@ -65,7 +64,7 @@ export function MadLeagueHeader() {
                     <UniverseUtilityBar
                         aboutPath="/madleague/about"
                         profilePath="/madleague/my"
-                        accentColor="#D32F2F"
+                        accentColor="#0F5132"
                         signupPath="/signup"
                     />
                 </div>
@@ -105,7 +104,7 @@ export function MadLeagueHeader() {
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#D32F2F] text-white hover:bg-[#B71C1C] rounded">가입</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#0F5132] text-white hover:bg-[#0a3d24] rounded">가입</Link>
                             </>
                         )}
                     </div>

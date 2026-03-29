@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Briefcase,
   ChevronDown,
@@ -11,85 +11,24 @@ import {
   FolderKanban,
   Globe2,
 } from "lucide-react";
-
-/* ── Mock Data ── */
-interface Task {
-  id: number;
-  title: string;
-  done: boolean;
-}
-
-interface Project {
-  id: number;
-  title: string;
-  status: "진행중" | "완료";
-  progress: number;
-  tasks: Task[];
-  org?: string;
-  isOrbi?: boolean;
-}
-
-const MY_PROJECTS: Project[] = [
-  {
-    id: 1,
-    title: "개인 포트폴리오 리뉴얼",
-    status: "진행중",
-    progress: 70,
-    tasks: [
-      { id: 1, title: "디자인 시안 확정", done: true },
-      { id: 2, title: "메인 페이지 퍼블리싱", done: true },
-      { id: 3, title: "프로젝트 상세 페이지", done: false },
-      { id: 4, title: "반응형 QA", done: false },
-    ],
-  },
-  {
-    id: 2,
-    title: "사이드 프로젝트 - 습관 트래커 앱",
-    status: "진행중",
-    progress: 35,
-    tasks: [
-      { id: 1, title: "DB 스키마 설계", done: true },
-      { id: 2, title: "API 엔드포인트 구현", done: false },
-      { id: 3, title: "UI 컴포넌트 개발", done: false },
-    ],
-  },
-];
-
-const ORBI_PROJECTS: Project[] = [
-  {
-    id: 3,
-    title: "WIO 대시보드 v2",
-    status: "진행중",
-    progress: 55,
-    org: "Ten:One",
-    isOrbi: true,
-    tasks: [
-      { id: 1, title: "Timesheet 모듈 연동", done: true },
-      { id: 2, title: "Finance 리포트 차트", done: true },
-      { id: 3, title: "알림 시스템 구현", done: false },
-      { id: 4, title: "권한 관리 페이지", done: false },
-      { id: 5, title: "배포 & QA", done: false },
-    ],
-  },
-  {
-    id: 4,
-    title: "MAD League 커뮤니티 플랫폼",
-    status: "완료",
-    progress: 100,
-    org: "MAD League",
-    isOrbi: true,
-    tasks: [
-      { id: 1, title: "멤버 프로필 시스템", done: true },
-      { id: 2, title: "프로젝트 보드", done: true },
-      { id: 3, title: "채팅 기능", done: true },
-    ],
-  },
-];
+import { createClient } from "@/lib/supabase/client";
+import { fetchProjects, fetchTasks, createProject, updateTask } from "@/lib/myverse-supabase";
+import type { MyverseProject, MyverseTask } from "@/lib/myverse-supabase";
 
 /* ── 프로젝트 카드 컴포넌트 ── */
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({
+  project,
+  tasks,
+  onToggleTask,
+}: {
+  project: MyverseProject;
+  tasks: MyverseTask[];
+  onToggleTask: (task: MyverseTask) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
-  const doneTasks = project.tasks.filter((t) => t.done).length;
+  const doneTasks = tasks.filter((t) => t.status === "done").length;
+  const progress = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
+  const isOrbi = !!project.orbi_project_id;
 
   return (
     <div className="rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden">
@@ -107,34 +46,25 @@ function ProjectCard({ project }: { project: Project }) {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* 상태 뱃지 */}
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                  project.status === "완료"
+                  project.status === "completed"
                     ? "bg-emerald-500/15 text-emerald-400"
                     : "bg-amber-500/15 text-amber-400"
                 }`}
               >
-                {project.status === "완료" ? (
+                {project.status === "completed" ? (
                   <CheckCircle2 className="h-2.5 w-2.5" />
                 ) : (
                   <Circle className="h-2.5 w-2.5" />
                 )}
-                {project.status}
+                {project.status === "completed" ? "완료" : "진행중"}
               </span>
 
-              {/* Orbi 뱃지 */}
-              {project.isOrbi && (
+              {isOrbi && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 text-[10px] font-medium">
                   <Globe2 className="h-2.5 w-2.5" />
                   Orbi
-                </span>
-              )}
-
-              {/* 조직명 */}
-              {project.org && (
-                <span className="text-[10px] text-neutral-500">
-                  {project.org}
                 </span>
               )}
             </div>
@@ -152,15 +82,15 @@ function ProjectCard({ project }: { project: Project }) {
           <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-700 ${
-                project.isOrbi
+                isOrbi
                   ? "bg-gradient-to-r from-orange-500 to-amber-500"
                   : "bg-gradient-to-r from-indigo-500 to-cyan-500"
               }`}
-              style={{ width: `${project.progress}%` }}
+              style={{ width: `${progress}%` }}
             />
           </div>
           <span className="text-xs text-neutral-500 w-8 text-right">
-            {project.progress}%
+            {progress}%
           </span>
         </div>
       </button>
@@ -173,28 +103,34 @@ function ProjectCard({ project }: { project: Project }) {
               Tasks
             </span>
             <span className="text-[10px] text-neutral-500">
-              {doneTasks}/{project.tasks.length}
+              {doneTasks}/{tasks.length}
             </span>
           </div>
           <div className="space-y-1.5">
-            {project.tasks.map((task) => (
-              <div key={task.id} className="flex items-center gap-2.5">
-                {task.done ? (
+            {tasks.length > 0 ? tasks.map((task) => (
+              <button
+                key={task.id}
+                onClick={() => onToggleTask(task)}
+                className="w-full flex items-center gap-2.5 text-left"
+              >
+                {task.status === "done" ? (
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                 ) : (
                   <Circle className="h-3.5 w-3.5 text-neutral-600 shrink-0" />
                 )}
                 <span
                   className={`text-xs ${
-                    task.done
+                    task.status === "done"
                       ? "text-neutral-500 line-through"
                       : "text-neutral-300"
                   }`}
                 >
                   {task.title}
                 </span>
-              </div>
-            ))}
+              </button>
+            )) : (
+              <p className="text-xs text-slate-500">태스크 없음</p>
+            )}
           </div>
         </div>
       )}
@@ -204,6 +140,56 @@ function ProjectCard({ project }: { project: Project }) {
 
 /* ── 메인 페이지 ── */
 export default function WorkPage() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<MyverseProject[]>([]);
+  const [tasks, setTasks] = useState<MyverseTask[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+
+      const [projectsRes, tasksRes] = await Promise.all([
+        fetchProjects(user.id),
+        fetchTasks(user.id),
+      ]);
+
+      setProjects(projectsRes.projects);
+      setTasks(tasksRes.tasks);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  // 태스크 토글
+  const handleToggleTask = async (task: MyverseTask) => {
+    const newStatus = task.status === "done" ? "todo" : "done";
+    const completedAt = newStatus === "done" ? new Date().toISOString() : null;
+
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus, completed_at: completedAt } : t));
+    await updateTask(task.id, { status: newStatus, completed_at: completedAt });
+  };
+
+  // 개인 프로젝트 vs Orbi 프로젝트
+  const myProjects = projects.filter(p => !p.orbi_project_id);
+  const orbiProjects = projects.filter(p => !!p.orbi_project_id);
+
+  // 프로젝트별 태스크
+  const getProjectTasks = (projectId: string) =>
+    tasks.filter(t => t.project_id === projectId);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen px-4 py-6 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto">
       {/* 헤더 */}
@@ -224,36 +210,54 @@ export default function WorkPage() {
             내 프로젝트
           </span>
           <span className="text-xs text-neutral-600 ml-auto">
-            {MY_PROJECTS.length}개
+            {myProjects.length}개
           </span>
         </div>
 
-        <div className="space-y-3">
-          {MY_PROJECTS.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+        {myProjects.length > 0 ? (
+          <div className="space-y-3">
+            {myProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                tasks={getProjectTasks(project.id)}
+                onToggleTask={handleToggleTask}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500 bg-white/[0.03] border border-white/5 rounded-xl p-4 text-center">
+            아직 프로젝트가 없어요.
+          </p>
+        )}
       </section>
 
       {/* 섹션 2: Orbi 프로젝트 */}
-      <section className="mb-8">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 rounded-full bg-orange-500" />
-          <Globe2 className="h-4 w-4 text-neutral-400" />
-          <span className="text-sm font-semibold text-neutral-300">
-            Orbi 프로젝트
-          </span>
-          <span className="text-xs text-neutral-600 ml-auto">
-            {ORBI_PROJECTS.length}개
-          </span>
-        </div>
+      {orbiProjects.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-2 h-2 rounded-full bg-orange-500" />
+            <Globe2 className="h-4 w-4 text-neutral-400" />
+            <span className="text-sm font-semibold text-neutral-300">
+              Orbi 프로젝트
+            </span>
+            <span className="text-xs text-neutral-600 ml-auto">
+              {orbiProjects.length}개
+            </span>
+          </div>
 
-        <div className="space-y-3">
-          {ORBI_PROJECTS.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      </section>
+          <div className="space-y-3">
+            {orbiProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                tasks={getProjectTasks(project.id)}
+                onToggleTask={handleToggleTask}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* + 새 프로젝트 버튼 */}
       <button className="w-full py-3.5 rounded-xl border border-dashed border-white/10 text-sm text-neutral-400 hover:bg-white/[0.03] hover:text-neutral-300 hover:border-white/20 transition-all flex items-center justify-center gap-2">
