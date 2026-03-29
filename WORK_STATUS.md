@@ -1,79 +1,85 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-28 (집) — 작업 중
+> 마지막 업데이트: 2026-03-30 (집)
 
-## 오늘 한 작업 (3/28 집)
+## 오늘 한 작업 (3/29~3/30 집)
 
-### 1. About 페이지 개선 ✅
-- PublicHeader + 7개 브랜드 헤더에서 About 네비 중복 제거 (UniverseUtilityBar에만 유지)
-- About > Brands 탭 → 역할 기반 7그룹 구조로 교체 (tenone_role_relationship.html 반영)
-- Synergy Flows 섹션 추가 (인재 파이프라인, 트렌드-비즈니스, 인프라 흐름)
+### 1. WIO EUS v2.0 전체 반영 ✅
+- docs/WIO_EUS_v2.md (1,514줄) 저장
+- Part VIII 고도화 설계 10개 섹션 반영
+- 7대 폭발 클러스터 + 8대 설계 원칙 반영
+- 모듈 카탈로그 ~120개로 확장
 
-### 2. 홈페이지 콘텐츠 보강 ✅
-- Universe 브랜드 쇼케이스 섹션 추가 (10개 브랜드 그리드)
-- Latest 정적 fallback 뉴스 추가 (LUKI, RooK, MADzine 등 6개)
-- Google Sites 콘텐츠 전체 반영
+### 2. WIO Orbi 100+ 모듈 페이지 ✅
+- Sprint 1~6: 28개 신규 모듈 페이지 (MY 5 + RBAC 4 + 영업 7 + HR 5 + BI 4 + 지주사 3)
+- 기존 96 + 신규 28 = 124+ 페이지
+- 전 모듈 isDemo 패턴 통일 + Supabase 연동 (46/120 실쿼리)
 
-### 3. WIO 게시판 모듈 대규모 업그레이드 ✅
-- 대표 이미지 자동 추출 (본문 첫 이미지 → 아임웹 스타일)
-- 에디터 이미지 paste/drop → Supabase Storage 업로드 (base64 → URL)
-- base64 → Storage 마이그레이션 API 생성 (/api/board/migrate-images)
-- 좋아요/북마크 userId 전송 + 비로그인 안내 토스트
-- 게시글 고유 URL (?postId= 파라미터, 직접 링크 가능)
-- 게시판 5개 컴포넌트 테마 가독성 개선 (tn-* CSS 변수 적용)
-- PostDetail 본문 이미지+텍스트 레이아웃 개선 (모바일 대응)
-- WIO 게시판 가이드 문서 작성 (docs/WIO_Board_Guide.md)
+### 3. 핵심 엔진 3종 ✅
+- lib/rbac.ts: 6단계 권한 (super_admin→guest), 사이드바 RBAC 미들웨어
+- lib/workflow-engine.ts: 워크플로우 실행/스텝진행/SLA체크
+- lib/culture-engine.ts: 가치정합성체크/문화건강도
 
-### 4. Works 게시물 20개 완성 ✅
-- Google Sites History 전체 콘텐츠 → Works 게시판 반영
-- 7개 신규 게시물 추가 (DAM Be, 지평주조, Badak, domo, DAM Party S3, 유인원 인수, 전국 네트워크)
-- 기존 13개 본문 텍스트 보강
-- 전체 20개 날짜 원본 매칭 (2021~2025)
-- 18개 대표 이미지 설정 (Supabase Storage + OG 이미지)
+### 4. 설정 페이지 EUS 기준 재구성 ✅
+- 4탭: 세팅(3모드) | 권한 | 테마 | 시스템
+- 조직 모드: 트리빌더 + 인력배치 + 정원
+- 모듈 모드: 레고 블록 팔레트
+- 워크플로우 모드: 노드 플로우 빌더
 
-### 5. SmarComm 랜딩 고도화 ✅
-- 소셜 프루프 섹션 추가 (500+ 진단, 93% 개선, 30초, ₩0)
-- 신뢰 지표(Trust) 섹션 추가 (데이터 기반, 주간 리포트, 성과 보장)
+### 5. 조직도 + 인력 배치 ✅
+- DB 6테이블: wio_headcount, wio_personnel_orders, wio_org_change_history, wio_org_simulations, wio_handover_checklists, wio_user_assignments
+- OrgTreeBuilder 컴포넌트 (1,252줄, Supabase CRUD)
+- HR-ORG 4탭 고도화 (조직도3뷰 + 정원 + 발령 + 이력)
+- docs/WIO_OrgDesign_v1.md 설계 문서
 
-### 6. 프로필 페이지 개선 ✅
-- 비밀번호 확인 모달 제거 → 직접 저장
-- 뉴스레터 섹션 숨김
-- 북마크 목록 UI 추가
+### 6. Part VIII 신규 5페이지 ✅
+- AI×모듈 매트릭스, E2E 데이터 흐름도, SaaS 과금 v2.0, 업종별 프리셋 4종, 마이그레이션 전략
 
-### 7. RLS 정책 수정 ✅
-- posts UPDATE 정책 완화 (서버사이드 API 업데이트 허용)
+### 7. COM-WCL 업무 캘린더 ✅
+- 4뷰(주간/월간/분기/연간) × 4범위(내업무/팀/부문/전사)
+- ★상향 집계 + ⚠자동 에스컬레이션
+
+### 8. 브랜드 사이트 전면 고도화 ✅
+- MADLeap: 5페이지 (홈/소개/포트폴리오/스터디룸/커뮤니티)
+- MADLeague: 5페이지 (홈/소개/프로그램/경쟁PT/헤더)
+- Badak: 모임 + 커뮤니티4탭 + 헤더
+- Planners: Vrief/GPR 중심 전면 리라이트
+- HeRo/RooK/ChangeUp/0gamja: 홈 고도화
+- Mindle/domo/FWN/YouInOne: 홈 고도화
+
+### 9. 인프라 ✅
+- 인트라 로그인 근본 해결 (auth-context 의존 제거, sessionStorage 캐시)
+- Agent Hub + 7 에이전트 (Claude 실응답)
+- 인트라 유니버스 대시보드 실DB 연동 (8페이지)
+- 외부 API 연동 (Google Calendar + Kakao + Slack)
+- 모바일 반응형 수정 + SEO 메타데이터 + sitemap
+- board_configs 25개 등록 (6개 사이트)
+- Myverse 7탭 Supabase 연동
+- DB 33+6=39개 신규 테이블 (총 90+ 테이블)
+- Vercel 프로덕션 배포 10+ 회
 
 ---
 
 ## 다음 할 일
 
-### 즉시 (이어서)
-- 모바일 반응형 점검 결과 반영 (에이전트 실행 중)
-- 게시판 관리자 기능 — BUMS 게시판 관리 페이지 API 연동 (Mock → Supabase)
-  - app/intra/bums/sites/[siteId]/boards/[boardId]/page.tsx 에서 /api/board/posts 연동
-  - 일괄 삭제/상태 변경/이동 기능
+### 즉시
+- 설정 페이지 OrgTreeBuilder 컴포넌트 안정적 통합 (빌드 에러 해결)
 
 ### 단기
-- 회원등급별 권한 / 비밀글
-- 이미지 리사이즈/WebP 변환 (업로드 시 자동)
-- 아코디언(FAQ) 게시판 레이아웃
-- 배포 (Vercel/GCP)
+- 나머지 74개 모듈 실DB 연동 (테이블은 존재, 페이지 연결만)
+- 워크플로우 엔진 실작동 (Mock → 실행)
+- Culture Engine 실작동 (양식 연동)
+- 외부 API 키 설정 (Google/Slack/Kakao 실연동)
 
-### 중기 (Phase 2)
-- Competition 모듈 (MADLeague 경연)
-- Networking 모듈 (Badak)
-- Certificate 모듈
-- Universe Dashboard (TenOne 크로스 브랜드 관리)
-- WIO Settings CRUD (모듈 ON/OFF, 테마, 멤버 관리)
-
-### 장기 (Phase 3~4)
-- AI Assistant (Claude API)
-- AI Crawler (TrendHunter 통합)
-- 외부 연동 (Google Calendar, Slack, 바로빌)
+### 중기
+- 바당쇠 (KakaoTalk 봇) 구현
+- 모바일 앱 (Myverse React Native)
 - B2B SaaS 얼리어답터 모집
+- 성능 최적화 (이미지 WebP, 번들 사이즈)
 
 ---
 
-## 참고 사이트
-- 풀링포레스트 (https://www.pooolingforest.com/) — WIO/SmarComm 랜딩 디자인 참고
-- 아임웹 게시판 가이드 — WIO 게시판 모듈 기능 기준
+## 참고
+- WIO EUS 문서: docs/WIO_EUS_v2.md (단일 진실 소스)
+- 조직도 설계: docs/WIO_OrgDesign_v1.md
+- Universe OS 계획: docs/Universe_OS_Plan.md

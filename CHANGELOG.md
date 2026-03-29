@@ -4,6 +4,53 @@
 
 ---
 
+## 2026-03-29~30 (집)
+
+### WIO EUS v2.0
+- docs/WIO_EUS_v2.md 전체 반영 (Part VIII 고도화 10섹션)
+- 모듈 카탈로그 ~120개 확장, 카테고리 9→EUS 7트랙 기반
+- 3계층 워크플로우 (전사/부서/개인 도구)
+
+### WIO Orbi 모듈 대규모 확장
+- 124+ 페이지 (Sprint 1~6: MY5 + RBAC4 + 영업7 + HR5 + BI4 + 지주사3)
+- 46/120 모듈 Supabase 실DB 연동
+- DB 39개 신규 테이블 (총 90+)
+
+### 핵심 엔진
+- lib/rbac.ts (6단계 권한 + 사이드바 미들웨어)
+- lib/workflow-engine.ts (실행/SLA/인스턴스)
+- lib/culture-engine.ts (가치정합/건강도)
+
+### 설정 페이지 재구성
+- 4탭: 세팅(3모드) | 권한 | 테마 | 시스템
+- OrgTreeBuilder 컴포넌트 (1,252줄, Supabase CRUD)
+
+### 조직도 + 인력 배치
+- DB 6테이블 + docs/WIO_OrgDesign_v1.md
+- HR-ORG 4탭 (조직도3뷰 + 정원 + 발령 + 이력)
+
+### Part VIII 신규 페이지
+- AI매트릭스, E2E흐름도, SaaS과금, 업종프리셋, 마이그레이션
+
+### COM-WCL 업무 캘린더
+- 4뷰×4범위 + ★상향 집계
+
+### 브랜드 사이트 (12개 브랜드 고도화)
+- MADLeap(5p), MADLeague(5p), Badak(모임+커뮤니티), Planners(전면)
+- HeRo, RooK, ChangeUp, 0gamja, Mindle, domo, FWN, YouInOne
+
+### 인프라
+- 인트라 로그인 근본 해결 (sessionStorage + 타임아웃)
+- Agent Hub + 7 에이전트 (Claude 실응답)
+- 인트라 유니버스 대시보드 실DB (8p)
+- 외부 API (Google Calendar + Kakao + Slack)
+- 모바일 + SEO + sitemap
+- board_configs 25개 (6사이트)
+- Myverse 7탭 Supabase 연동
+- Vercel 배포 10+회
+
+---
+
 ## 2026-03-28 (집)
 
 ### About 페이지
