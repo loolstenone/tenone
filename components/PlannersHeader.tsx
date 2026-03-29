@@ -9,9 +9,11 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "Planner's", href: "/" },
-    { name: "Planning", href: "/?tab=planning" },
-    { name: "Planner's Planner", href: "/?tab=planner-tool" },
+    { name: "Planner's", href: "/planners" },
+    { name: "Planning", href: "/planners?tab=planning" },
+    { name: "Planner's Planner", href: "/planners?tab=planner-tool" },
+    { name: "GPR", href: "/planners?tab=gpr" },
+    { name: "Programs", href: "/planners?tab=programs" },
 ];
 
 export function PlannersHeader() {
@@ -20,8 +22,8 @@ export function PlannersHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/") return pathname === "/";
-        return pathname.startsWith(href);
+        if (href === "/planners") return pathname === "/planners" && !pathname.includes("?");
+        return href.includes("?") ? false : pathname.startsWith(href);
     };
 
     return (
@@ -29,7 +31,7 @@ export function PlannersHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-teal-900 text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="shrink-0 flex items-center gap-2">
+                <Link href="/planners" className="shrink-0 flex items-center gap-2">
                     <span className="text-lg font-bold tracking-tight text-white">
                         Planner&apos;s
                     </span>
@@ -92,7 +94,7 @@ export function PlannersHeader() {
                     ))}
                     <div className="pt-2 border-t border-teal-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
+                            <Link href="/profile" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
