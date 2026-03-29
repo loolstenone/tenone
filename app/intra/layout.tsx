@@ -29,18 +29,24 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         const check = async () => {
             try {
                 const sb = createClient();
-                const { data: { user } } = await sb.auth.getUser();
+                // 3초 타임아웃 — 응답 없으면 로그인 폼
+                const userResult = await Promise.race([
+                    sb.auth.getUser(),
+                    new Promise<null>(r => setTimeout(() => r(null), 3000))
+                ]);
+                const user = userResult && 'data' in userResult ? (userResult as any).data?.user : null;
                 if (!user) { setStatus('login'); return; }
 
-                const { data: member } = await sb.from('members')
-                    .select('account_type,role')
-                    .eq('auth_id', user.id)
-                    .single();
+                const memberResult = await Promise.race([
+                    sb.from('members').select('account_type,role').eq('auth_id', user.id).single(),
+                    new Promise<null>(r => setTimeout(() => r(null), 3000))
+                ]);
+                const member = memberResult && 'data' in memberResult ? (memberResult as any).data : null;
 
                 if (member && member.account_type !== 'member') {
                     setStatus('ok');
                 } else {
-                    setStatus('no-access');
+                    setStatus('login');
                 }
             } catch { setStatus('login'); }
         };
