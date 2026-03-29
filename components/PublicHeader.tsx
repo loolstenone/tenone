@@ -71,7 +71,7 @@ export function PublicHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
                     <ThemeToggle />
-                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: '/intra', workspaceLabel: 'INTRA', signupPath: '/signup', accentColor: isDark ? '#fff' : '#000' }} />
+                    <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/profile', workspacePath: canAccessIntra ? '/intra' : null, workspaceLabel: 'INTRA', accentColor: isDark ? '#fff' : '#000', loginPath: undefined }} />
                 </div>
 
                 {/* Mobile menu button */}
@@ -146,17 +146,6 @@ export function PublicHeader() {
                                 className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-muted)" }}>
                                 로그아웃
                             </button>
-                        </div>
-                    ) : !isLoading ? (
-                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
-                            <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
-                                로그인
-                            </Link>
-                            <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
-                                className="block py-2 text-sm font-medium transition-colors hover:opacity-70" style={{ color: "var(--tn-text)" }}>
-                                가입
-                            </Link>
                         </div>
                     ) : null}
                 </div>
