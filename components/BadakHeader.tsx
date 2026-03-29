@@ -11,8 +11,9 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 const PREFIX = '/badak';
 const navItems = [
     { name: "탐색", href: `${PREFIX}/explore` },
-    { name: "이바닥 스타", href: `${PREFIX}/stars` },
+    { name: "모임", href: `${PREFIX}/meetups` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
+    { name: "이바닥 스타", href: `${PREFIX}/stars` },
     { name: "바닥이란", href: `${PREFIX}/about` },
 ];
 
