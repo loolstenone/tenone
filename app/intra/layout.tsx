@@ -64,10 +64,21 @@ function IntraLoginForm() {
 }
 
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading, canAccessIntra } = useAuth();
+    const { isAuthenticated, isLoading, canAccessIntra, user } = useAuth();
     const router = useRouter();
+    const [authChecked, setAuthChecked] = useState(false);
 
-    if (isLoading) return (
+    // auth-context 로드 후 추가 대기 — user 데이터가 완전히 세팅될 때까지
+    useEffect(() => {
+        if (!isLoading) {
+            // user가 있으면 즉시, 없으면 짧은 유예
+            const delay = isAuthenticated && !canAccessIntra && user ? 500 : 0;
+            const t = setTimeout(() => setAuthChecked(true), delay);
+            return () => clearTimeout(t);
+        }
+    }, [isLoading, isAuthenticated, canAccessIntra, user]);
+
+    if (isLoading || !authChecked) return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
             <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
         </div>
