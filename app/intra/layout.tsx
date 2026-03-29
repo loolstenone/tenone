@@ -23,10 +23,8 @@ function IntraLoginForm() {
         setSubmitting(true);
         try {
             const sb = createClient();
-            // 기존 세션/쿠키 정리
-            await sb.auth.signOut();
+            // 새 로그인 (기존 세션 자동 교체, signOut 하지 않음)
             localStorage.removeItem('tenone-auth-user');
-            // 새로 로그인
             const { error: authError } = await sb.auth.signInWithPassword({ email, password });
             if (authError) {
                 setError("인증 실패. 이메일과 비밀번호를 확인하세요.");

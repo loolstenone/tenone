@@ -25,7 +25,7 @@ export default function WIOLoginPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     const sb = createClient();
-    await sb.auth.signOut();
+    // signOut 하지 않음 — 다른 사이트 세션 유지
     const { data: authData, error: err } = await sb.auth.signInWithPassword({ email, password });
     if (err) { setError('이메일 또는 비밀번호가 올바르지 않습니다.'); setLoading(false); return; }
 
