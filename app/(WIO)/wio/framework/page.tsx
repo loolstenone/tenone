@@ -5,7 +5,9 @@ import Link from 'next/link';
 import {
   ArrowLeft, Users, Clock, DollarSign, ChevronDown, ChevronRight,
   Cog, ShieldCheck, Layers, ArrowRightLeft, Sparkles, FileText,
-  MessageCircle, Award, Brain, Lock, Eye, Pencil, Trash2, Settings
+  MessageCircle, Award, Brain, Lock, Eye, Pencil, Trash2, Settings,
+  Server, Database, Globe, Shield, Monitor, Smartphone, Palette,
+  Accessibility, Zap, Target, BarChart3, Rocket, Calendar, CheckCircle2
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
 
@@ -134,6 +136,72 @@ const CROSS_TRACK_EXAMPLES = [
       'HR 온보딩 완료확인', '전사 알림',
     ],
   },
+];
+
+/* ── Part 13: 기술 아키텍처 ── */
+const TECH_STACK = [
+  { layer: 'Frontend', color: '#534AB7', items: ['Next.js 16 (App Router)', 'React 19', 'TypeScript (strict)', 'Tailwind CSS v4'] },
+  { layer: 'Backend', color: '#1D9E75', items: ['Supabase (PostgreSQL)', 'Edge Functions', 'Realtime Subscriptions', 'Row Level Security'] },
+  { layer: 'AI/ML', color: '#E24B4A', items: ['Claude API (Anthropic)', 'OpenAI Embeddings', 'Supabase pgvector', 'Custom ML Pipeline'] },
+  { layer: 'Infra', color: '#378ADD', items: ['Google Cloud Run', 'Cloud SQL (failover)', 'Cloud CDN', 'Cloud Armor (WAF)'] },
+  { layer: 'DevOps', color: '#BA7517', items: ['GitHub Actions (CI/CD)', 'Docker (Standalone)', 'Terraform (IaC)', 'Sentry (Monitoring)'] },
+];
+
+/* ── Part 14: 보안 설계 ── */
+const SECURITY_LAYERS = [
+  {
+    layer: 1, name: '네트워크 보안', color: '#E24B4A', icon: Globe,
+    items: ['Cloud Armor WAF', 'DDoS 방어', 'SSL/TLS 1.3', 'VPC 격리'],
+  },
+  {
+    layer: 2, name: '애플리케이션 보안', color: '#534AB7', icon: Monitor,
+    items: ['OWASP Top 10 대응', 'CSRF/XSS 방어', 'Rate Limiting', 'Input Validation'],
+  },
+  {
+    layer: 3, name: '데이터 보안', color: '#1D9E75', icon: Database,
+    items: ['AES-256 암호화 (저장)', 'TLS 1.3 (전송)', 'RLS (행 수준 보안)', '가명/익명 처리'],
+  },
+  {
+    layer: 4, name: '운영 보안', color: '#378ADD', icon: ShieldCheck,
+    items: ['2FA 필수', 'RBAC 7 Level', '감사 로그 전수 기록', '보안 감사 (연 1회)'],
+  },
+];
+
+/* ── Part 15: UI/UX 원칙 ── */
+const UX_PRINCIPLES = [
+  { num: 1, title: '일관성 (Consistency)', desc: '모든 모듈이 동일한 레이아웃, 네비게이션, 인터랙션 패턴을 공유합니다.', icon: Layers },
+  { num: 2, title: '최소 입력 (Minimal Input)', desc: 'AI가 80%를 채우고, 사용자는 확인/수정만 합니다. 자동완성, 추천, 프리셋 적극 활용.', icon: Zap },
+  { num: 3, title: '접근성 (Accessibility)', desc: 'WCAG 2.1 AA 준수. 키보드 네비게이션, 스크린리더, 고대비 모드 지원.', icon: Accessibility },
+  { num: 4, title: '모바일 우선 (Mobile First)', desc: '모든 화면이 모바일에서 먼저 설계되고, 데스크톱으로 확장됩니다.', icon: Smartphone },
+  { num: 5, title: '맥락적 도움 (Contextual Help)', desc: '매 화면에 인라인 가이드, 툴팁, AI 어시스턴트가 함께합니다.', icon: Brain },
+];
+
+/* ── Part 16: 개발 로드맵 ── */
+const DEV_ROADMAP = [
+  {
+    phase: 'Phase 1', name: '코어 인프라', period: 'M1~M3', color: '#E24B4A',
+    items: ['인증/권한 시스템', '조직 관리', '3대 자원 코어', 'Culture Engine 기초'],
+  },
+  {
+    phase: 'Phase 2', name: '핵심 모듈', period: 'M4~M6', color: '#534AB7',
+    items: ['전자결재', 'HR 모듈 (채용~평가)', '회계/재무', '워크플로우 엔진'],
+  },
+  {
+    phase: 'Phase 3', name: '사업 모듈', period: 'M7~M9', color: '#1D9E75',
+    items: ['CRM/영업', '마케팅 자동화', '매체 데이터 허브', 'AI 분석 엔진'],
+  },
+  {
+    phase: 'Phase 4', name: '고도화', period: 'M10~M12', color: '#378ADD',
+    items: ['AI 코칭 고도화', '멀티테넌시 완성', '외부 연동 마켓플레이스', '엔터프라이즈 기능'],
+  },
+];
+
+/* ── Part 17: 핵심 성공 지표 ── */
+const SUCCESS_KPIS = [
+  { category: '도입/확산', kpis: [{ name: '활성 사용률', target: '80%+', desc: '월간 활성 사용자/전체 사용자' }, { name: '모듈 활용도', target: '5개+', desc: '조직 평균 활성 모듈 수' }] },
+  { category: '효율성', kpis: [{ name: '프로세스 단축', target: '40%+', desc: '워크플로우 평균 리드타임 감소' }, { name: '수작업 감소', target: '60%+', desc: 'AI 자동화로 대체된 수작업 비율' }] },
+  { category: '품질', kpis: [{ name: '시스템 가동률', target: '99.9%', desc: 'SLA 기준' }, { name: '사용자 만족도', target: 'NPS 50+', desc: '분기별 설문' }] },
+  { category: '비즈니스', kpis: [{ name: 'MRR 성장률', target: '15%+/월', desc: '월 반복 매출 성장' }, { name: '고객 유지율', target: '95%+', desc: '연간 갱신율' }] },
 ];
 
 export default function FrameworkPage() {
@@ -390,6 +458,171 @@ export default function FrameworkPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* ═══════ Part 13: 기술 아키텍처 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#534AB7]" />
+              <h2 className="text-2xl font-bold">기술 아키텍처</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              검증된 오픈소스 + 클라우드 네이티브 스택으로 구축합니다.
+            </p>
+            <div className="space-y-3">
+              {TECH_STACK.map((layer) => (
+                <div key={layer.layer} className="rounded-xl border border-white/5 bg-white/[0.02] p-5" style={{ borderLeftWidth: 3, borderLeftColor: layer.color }}>
+                  <h3 className="text-sm font-bold text-white mb-3">{layer.layer}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {layer.items.map((item) => (
+                      <span key={item} className="text-xs px-3 py-1.5 rounded-lg border border-white/5 bg-white/[0.03] text-slate-300">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 rounded-xl border border-[#534AB7]/20 bg-[#534AB7]/5 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Server size={16} className="text-[#9B8FE8]" />
+                <span className="text-sm font-bold text-white">아키텍처 원칙</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-3">
+                {['서버리스 우선 (Serverless First)', '이벤트 드리븐 (Event Driven)', '멀티테넌트 (brand_id 기반 RLS)'].map((p) => (
+                  <div key={p} className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#534AB7]" />
+                    {p}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════ Part 14: 보안 설계 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#E24B4A]" />
+              <h2 className="text-2xl font-bold">보안 설계</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 max-w-2xl">
+              네트워크부터 운영까지, 4개 레이어의 다층 보안 방어 체계.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {SECURITY_LAYERS.map((sec) => {
+                const Icon = sec.icon;
+                return (
+                  <div key={sec.layer} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${sec.color}10` }}>
+                        <Icon size={18} style={{ color: sec.color }} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${sec.color}20`, color: sec.color }}>
+                          Layer {sec.layer}
+                        </span>
+                        <h3 className="text-sm font-bold text-white">{sec.name}</h3>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {sec.items.map((item) => (
+                        <div key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                          <Shield size={10} style={{ color: sec.color }} />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ═══════ Part 15: UI/UX 설계 원칙 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#1D9E75]" />
+              <h2 className="text-2xl font-bold">UI/UX 설계 원칙</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {UX_PRINCIPLES.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <div key={p.num} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#1D9E75]/10">
+                        <Icon size={18} className="text-[#1D9E75]" />
+                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#1D9E75]/20 text-[#1D9E75]">
+                        {String(p.num).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-2">{p.title}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{p.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ═══════ Part 16: 개발 로드맵 ═══════ */}
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#378ADD]" />
+              <h2 className="text-2xl font-bold">개발 로드맵</h2>
+            </div>
+            <div className="space-y-4">
+              {DEV_ROADMAP.map((phase) => (
+                <div key={phase.phase} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Rocket size={16} style={{ color: phase.color }} />
+                      <span className="text-sm font-bold text-white">{phase.phase}: {phase.name}</span>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded" style={{ background: `${phase.color}15`, color: phase.color }}>
+                      <Calendar size={10} className="inline mr-1" />{phase.period}
+                    </span>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-4">
+                    {phase.items.map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                        <CheckCircle2 size={12} style={{ color: phase.color }} />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ═══════ Part 17: 핵심 성공 지표 ═══════ */}
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-[#BA7517]" />
+              <h2 className="text-2xl font-bold">핵심 성공 지표 (KPI)</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {SUCCESS_KPIS.map((cat) => (
+                <div key={cat.category} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                    <Target size={14} className="text-[#BA7517]" />
+                    {cat.category}
+                  </h3>
+                  <div className="space-y-3">
+                    {cat.kpis.map((kpi) => (
+                      <div key={kpi.name} className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm text-white font-medium">{kpi.name}</div>
+                          <div className="text-xs text-slate-600">{kpi.desc}</div>
+                        </div>
+                        <span className="text-sm font-bold text-[#BA7517] shrink-0 ml-4">{kpi.target}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
