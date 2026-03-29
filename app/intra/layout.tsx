@@ -23,15 +23,16 @@ function IntraLoginForm() {
         setSubmitting(true);
         try {
             const sb = createClient();
-            // 새 로그인 (기존 세션 자동 교체, signOut 하지 않음)
             localStorage.removeItem('tenone-auth-user');
-            const { error: authError } = await sb.auth.signInWithPassword({ email, password });
-            if (authError) {
+            const { data, error: authError } = await sb.auth.signInWithPassword({ email, password });
+            if (authError || !data.session) {
                 setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
                 setSubmitting(false);
                 return;
             }
-            // 완전한 페이지 리로드로 auth-context 초기화부터 다시
+            // 세션이 쿠키에 확실히 저장될 때까지 대기
+            await sb.auth.getSession();
+            await new Promise(r => setTimeout(r, 1000));
             window.location.replace('/intra');
         } catch { setError("오류가 발생했습니다."); setSubmitting(false); }
     };
