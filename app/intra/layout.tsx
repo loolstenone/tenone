@@ -23,10 +23,16 @@ function IntraLoginForm() {
         setSubmitting(true);
         try {
             const sb = createClient();
-            await sb.auth.signOut(); // 기존 세션 해지
-            const { error: authError } = await sb.auth.signInWithPassword({ email, password });
-            if (authError) setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
-            else window.location.reload();
+            await sb.auth.signOut();
+            const { data, error: authError } = await sb.auth.signInWithPassword({ email, password });
+            if (authError || !data.session) {
+                setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
+                setSubmitting(false);
+                return;
+            }
+            // 세션 저장 완료 대기 후 리로드
+            await new Promise(r => setTimeout(r, 500));
+            window.location.href = '/intra';
         } catch { setError("오류가 발생했습니다."); }
         setSubmitting(false);
     };
