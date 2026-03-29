@@ -7,6 +7,7 @@ import {
   ChevronLeft, X, Check, CheckCheck, AtSign
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ───── Types ───── */
 type ConvType = 'dm' | 'group' | 'channel';
@@ -160,8 +161,77 @@ export default function MessengerPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [loading, setLoading] = useState(false);
+
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
+
+  // Supabase에서 대화방 + 메시지 로드
+  useEffect(() => {
+    if (isDemo) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const sb = createClient();
+        // 대화방 목록 로드
+        const { data: convData, error: convErr } = await sb
+          .from('conversations')
+          .select('*')
+          .eq('tenant_id', tenant!.id)
+          .order('updated_at', { ascending: false });
+        if (convErr) throw convErr;
+        if (!cancelled && convData && convData.length > 0) {
+          setConversations(convData.map((row: any): Conversation => ({
+            id: row.id,
+            name: row.name || '',
+            type: row.type || 'dm',
+            members: Array.isArray(row.members) ? row.members : [],
+            lastMessage: row.last_message || '',
+            lastTime: row.last_time || '',
+            lastDate: row.updated_at ? row.updated_at.split('T')[0] : '',
+            unread: row.unread_count ?? 0,
+            online: row.online ?? false,
+            typing: null,
+          })));
+          // 첫 번째 대화방의 메시지 로드
+          const firstId = convData[0].id;
+          const { data: msgData } = await sb
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', firstId)
+            .order('created_at', { ascending: true });
+          if (!cancelled && msgData && msgData.length > 0) {
+            setMessages(prev => ({
+              ...prev,
+              [firstId]: msgData.map((m: any): Message => ({
+                id: m.id,
+                convId: m.conversation_id,
+                sender: m.sender_name || '',
+                senderInitial: (m.sender_name || '')[0] || '',
+                type: m.type || 'text',
+                text: m.content || '',
+                fileName: m.file_name,
+                fileSize: m.file_size,
+                imageUrl: m.image_url,
+                time: m.created_at ? new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '',
+                date: m.created_at ? m.created_at.split('T')[0] : '',
+                isMine: m.is_mine ?? false,
+                read: m.read ?? false,
+              })),
+            }));
+            setActiveConv(firstId);
+          }
+        }
+        // 데이터 없으면 Mock 폴백 (초기값 유지)
+      } catch {
+        // 에러 시 Mock 폴백 (초기값 유지)
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isDemo, tenant]);
 
   const currentConv = conversations.find(c => c.id === activeConv);
   const currentMessages = messages[activeConv] || [];

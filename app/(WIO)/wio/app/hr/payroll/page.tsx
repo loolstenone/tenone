@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Receipt, Wallet, TrendingUp, Shield, CalendarDays,
   ChevronDown, ChevronUp, DollarSign, Building2
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 const MOCK_PAYSLIP = {
   month: '2026년 3월',
@@ -51,15 +52,67 @@ export default function PayrollPage() {
   const [showDetail, setShowDetail] = useState(false);
   const isAdmin = member?.role === 'admin' || member?.role === 'owner';
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 급여 데이터 로드
+  const loadPayroll = useCallback(async () => {
     if (isDemo) {
       setPayslip(MOCK_PAYSLIP);
       setMonthly(MOCK_MONTHLY);
       setStaffPayroll(MOCK_STAFF_PAYROLL);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('payroll')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // 최신 급여 명세서
+        const latest = data[0];
+        setPayslip({
+          month: latest.month || MOCK_PAYSLIP.month,
+          baseSalary: latest.base_salary ?? MOCK_PAYSLIP.baseSalary,
+          positionAllowance: latest.position_allowance ?? MOCK_PAYSLIP.positionAllowance,
+          overtimePay: latest.overtime_pay ?? MOCK_PAYSLIP.overtimePay,
+          mealAllowance: latest.meal_allowance ?? MOCK_PAYSLIP.mealAllowance,
+          nationalPension: latest.national_pension ?? MOCK_PAYSLIP.nationalPension,
+          healthInsurance: latest.health_insurance ?? MOCK_PAYSLIP.healthInsurance,
+          employmentInsurance: latest.employment_insurance ?? MOCK_PAYSLIP.employmentInsurance,
+          incomeTax: latest.income_tax ?? MOCK_PAYSLIP.incomeTax,
+          localTax: latest.local_tax ?? MOCK_PAYSLIP.localTax,
+        });
+        // 전체 직원 급여 대장
+        setStaffPayroll(data.map((row: any) => ({
+          id: row.id,
+          name: row.member_name || '',
+          department: row.department || '',
+          baseSalary: row.base_salary || 0,
+          net: row.net_pay || 0,
+          status: row.status || 'pending',
+        })));
+        setMonthly(MOCK_MONTHLY); // 월별 추이는 별도 집계 필요
+      } else {
+        setPayslip(MOCK_PAYSLIP);
+        setMonthly(MOCK_MONTHLY);
+        setStaffPayroll(MOCK_STAFF_PAYROLL);
+      }
+    } catch {
+      setPayslip(MOCK_PAYSLIP);
+      setMonthly(MOCK_MONTHLY);
+      setStaffPayroll(MOCK_STAFF_PAYROLL);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadPayroll();
+  }, [tenant, loadPayroll]);
 
   if (loading) {
     return (

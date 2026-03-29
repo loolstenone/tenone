@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Monitor, Armchair, Car, Code2, Filter } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Asset = {
   id: string;
@@ -37,16 +38,55 @@ const MOCK_ASSETS: Asset[] = [
 
 export default function AssetPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [filter, setFilter] = useState<string>('all');
+  const [assets, setAssets] = useState<Asset[]>(isDemo ? MOCK_ASSETS : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const filtered = filter === 'all' ? MOCK_ASSETS : MOCK_ASSETS.filter(a => a.category === filter);
-  const totalCost = MOCK_ASSETS.reduce((s, a) => s + a.cost, 0);
-  const totalDepreciation = MOCK_ASSETS.reduce((s, a) => s + a.depreciation, 0);
-  const totalBookValue = MOCK_ASSETS.reduce((s, a) => s + a.bookValue, 0);
+  // Supabase에서 자산 데이터 로드
+  const loadAssets = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('assets')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setAssets(data.map((row: any) => ({
+          id: row.id,
+          code: row.code || '',
+          name: row.name || '',
+          category: row.category || 'IT장비',
+          acquiredDate: row.acquired_date ? row.acquired_date.split('T')[0] : '',
+          cost: row.cost || 0,
+          depreciation: row.depreciation || 0,
+          bookValue: row.book_value || 0,
+          usefulLife: row.useful_life || 3,
+          location: row.location || '',
+        })));
+      } else {
+        setAssets(MOCK_ASSETS);
+      }
+    } catch {
+      setAssets(MOCK_ASSETS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadAssets(); }, [loadAssets]);
+
+  const filtered = filter === 'all' ? assets : assets.filter(a => a.category === filter);
+  const totalCost = assets.reduce((s, a) => s + a.cost, 0);
+  const totalDepreciation = assets.reduce((s, a) => s + a.depreciation, 0);
+  const totalBookValue = assets.reduce((s, a) => s + a.bookValue, 0);
 
   const categorySummary = Object.entries(CATEGORY_MAP).map(([cat, info]) => {
-    const items = MOCK_ASSETS.filter(a => a.category === cat);
+    const items = assets.filter(a => a.category === cat);
     return { category: cat, count: items.length, bookValue: items.reduce((s, a) => s + a.bookValue, 0), ...info };
   });
 
@@ -59,8 +99,16 @@ export default function AssetPage() {
         </div>
       </div>
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 요약 카드 */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      {!loading && <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <div className="text-xs text-slate-500 mb-1">총 취득가</div>
           <div className="text-lg font-bold">{totalCost.toLocaleString()}원</div>
@@ -73,8 +121,9 @@ export default function AssetPage() {
           <div className="text-xs text-slate-500 mb-1">장부가 합계</div>
           <div className="text-lg font-bold text-indigo-400">{totalBookValue.toLocaleString()}원</div>
         </div>
-      </div>
+      </div>}
 
+      {!loading && <>
       {/* 유형별 분류 */}
       <div className="grid grid-cols-4 gap-3 mb-6">
         {categorySummary.map(c => {
@@ -129,7 +178,7 @@ export default function AssetPage() {
       <div className="mt-6 rounded-xl border border-white/5 bg-white/[0.02] p-4">
         <h3 className="text-sm font-semibold mb-3">감가상각 스케줄 (정액법)</h3>
         <div className="space-y-2">
-          {MOCK_ASSETS.slice(0, 4).map(a => {
+          {assets.slice(0, 4).map(a => {
             const annualDep = Math.round(a.cost / a.usefulLife);
             const elapsed = Math.round(a.depreciation / annualDep);
             return (
@@ -144,6 +193,7 @@ export default function AssetPage() {
           })}
         </div>
       </div>
+      </>}
     </div>
   );
 }

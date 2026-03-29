@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Target, BarChart3, Star, Users, MessageSquare,
   ChevronDown, ChevronUp, TrendingUp, Award
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
 type EvalTab = 'self' | 'manager' | 'peer' | 'subordinate';
@@ -67,16 +68,52 @@ export default function EvaluationPage() {
   const [activeTab, setActiveTab] = useState<EvalTab>('self');
   const [showFeedback, setShowFeedback] = useState(false);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 평가 데이터 로드
+  const loadEvaluations = useCallback(async () => {
     if (isDemo) {
       setGoals(MOCK_GOALS);
       setCoreValues(CORE_VALUES);
       setMultiEval(MOCK_MULTI);
       setFeedbackHistory(MOCK_FEEDBACK_HISTORY);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('evaluations')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // DB 데이터에서 평가 항목 매핑
+        const row = data[0]; // 최신 평가 기간
+        setGoals(Array.isArray(row.goals) ? row.goals : MOCK_GOALS);
+        setCoreValues(Array.isArray(row.core_values) ? row.core_values : CORE_VALUES);
+        setMultiEval(row.multi_eval || MOCK_MULTI);
+        setFeedbackHistory(Array.isArray(row.feedback_history) ? row.feedback_history : MOCK_FEEDBACK_HISTORY);
+      } else {
+        setGoals(MOCK_GOALS);
+        setCoreValues(CORE_VALUES);
+        setMultiEval(MOCK_MULTI);
+        setFeedbackHistory(MOCK_FEEDBACK_HISTORY);
+      }
+    } catch {
+      setGoals(MOCK_GOALS);
+      setCoreValues(CORE_VALUES);
+      setMultiEval(MOCK_MULTI);
+      setFeedbackHistory(MOCK_FEEDBACK_HISTORY);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadEvaluations();
+  }, [tenant, loadEvaluations]);
 
   const weightedScore = goals.reduce((s, g) => s + (g.achievement * g.weight / 100), 0);
   const avgCoreValue = coreValues.length > 0 ? (coreValues.reduce((s, c) => s + c.score, 0) / coreValues.length).toFixed(1) : '0';

@@ -96,7 +96,8 @@ const TIMEZONES = ['Asia/Seoul', 'Asia/Tokyo', 'America/New_York', 'Europe/Londo
 const FISCAL_MONTHS = ['01', '04', '07', '10'];
 
 export default function ConfigPage() {
-  const { tenant } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
   const [tab, setTab] = useState<ConfigTab>('basic');
   const [basic, setBasic] = useState(MOCK_BASIC);
   const [security, setSecurity] = useState(MOCK_SECURITY);
@@ -107,7 +108,6 @@ export default function ConfigPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const codeCategories = [...new Set(codes.map(c => c.category))];
   const filteredCodes = codes.filter(c => c.category === codeCategory);

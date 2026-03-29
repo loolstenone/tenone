@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = 
 
 export default function CampaignPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [filter, setFilter] = useState<string>('all');
 
   const campaigns = isDemo ? MOCK_CAMPAIGNS : MOCK_CAMPAIGNS;

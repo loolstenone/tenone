@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Network, Users, ChevronRight, ChevronDown, Plus, Pencil,
   Building2, User, ArrowRight, Calendar
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 interface OrgUnit {
   id: string;
@@ -120,14 +121,62 @@ export default function OrgPage() {
   const [form, setForm] = useState({ name: '', type: 'team', head: '' });
   const isAdmin = member?.role === 'admin' || member?.role === 'owner';
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 조직 데이터 로드
+  const loadOrg = useCallback(async () => {
     if (isDemo) {
       setOrg(MOCK_ORG);
       setTransfers(MOCK_TRANSFERS);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('org_units')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // 플랫 목록을 트리로 변환 (parent_id 기반)
+        const flat = data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          type: row.type || 'team',
+          head: row.head_name || '',
+          headCount: row.head_count || 0,
+          parentId: row.parent_id || null,
+        }));
+        // 간단한 트리 빌드
+        const byId = new Map(flat.map((n: any) => [n.id, { ...n, children: [] as OrgUnit[] }]));
+        const roots: OrgUnit[] = [];
+        flat.forEach((n: any) => {
+          const node = byId.get(n.id)!;
+          if (n.parentId && byId.has(n.parentId)) {
+            byId.get(n.parentId)!.children!.push(node);
+          } else {
+            roots.push(node);
+          }
+        });
+        setOrg(roots.length > 0 ? roots : MOCK_ORG);
+        setTransfers(MOCK_TRANSFERS); // 인사발령 이력은 별도 테이블 필요
+      } else {
+        setOrg(MOCK_ORG);
+        setTransfers(MOCK_TRANSFERS);
+      }
+    } catch {
+      setOrg(MOCK_ORG);
+      setTransfers(MOCK_TRANSFERS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadOrg();
+  }, [tenant, loadOrg]);
 
   const handleCreateOrg = () => {
     if (!form.name.trim()) return;

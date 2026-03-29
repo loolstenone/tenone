@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BookOpen, Plus, ChevronRight, ChevronDown } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type JournalEntry = {
   id: string;
@@ -97,9 +98,44 @@ function AccountTreeNode({ node, level = 0 }: { node: AccountNode; level?: numbe
 
 export default function GLPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<'entries' | 'chart' | 'trial'>('entries');
   const [showForm, setShowForm] = useState(false);
+  const [entries, setEntries] = useState<JournalEntry[]>(isDemo ? MOCK_ENTRIES : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 전표 데이터 로드
+  const loadEntries = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('journals')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setEntries(data.map((row: any) => ({
+          id: row.id || '',
+          date: row.date ? row.date.split('T')[0] : '',
+          description: row.description || '',
+          debit: Array.isArray(row.debit) ? row.debit : [],
+          credit: Array.isArray(row.credit) ? row.credit : [],
+          status: row.status || 'draft',
+        })));
+      } else {
+        setEntries(MOCK_ENTRIES);
+      }
+    } catch {
+      setEntries(MOCK_ENTRIES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadEntries(); }, [loadEntries]);
 
   const trialBalance = ACCOUNT_TREE.map(cat => ({
     name: cat.name,
@@ -161,10 +197,18 @@ export default function GLPage() {
         </div>
       )}
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 전표 목록 */}
-      {tab === 'entries' && (
+      {!loading && tab === 'entries' && (
         <div className="space-y-2">
-          {MOCK_ENTRIES.map(e => (
+          {entries.map(e => (
             <div key={e.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">

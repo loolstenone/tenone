@@ -55,6 +55,7 @@ const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.to
 
 export default function PipelinePage() {
   const { isDemo } = useWIO();
+  // TODO: Supabase 영업 파이프라인 테이블 생성 후 연동 (현재 Mock 폴백)
   const [deals, setDeals] = useState<Deal[]>(MOCK_DEALS);
   const [selected, setSelected] = useState<Deal | null>(null);
   const [showAdd, setShowAdd] = useState(false);

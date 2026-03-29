@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GitBranch, Plus, Play, Pause, ArrowRight, CheckCircle2, Circle, Clock, Zap } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type WFStatus = 'active' | 'draft' | 'disabled';
 type StepStatus = 'completed' | 'current' | 'pending';
@@ -56,11 +57,47 @@ const STEP_COLORS: Record<StepStatus, string> = { completed: 'text-emerald-400',
 
 export default function WorkflowPage() {
   const { tenant } = useWIO();
-  const [workflows] = useState(MOCK_WORKFLOWS);
+  const isDemo = !tenant || tenant.id === 'demo';
+  const [workflows, setWorkflows] = useState<Workflow[]>(isDemo ? MOCK_WORKFLOWS : []);
   const [selectedWF, setSelectedWF] = useState<string>('wf1');
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 워크플로우 데이터 로드
+  const loadWorkflows = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('workflows')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setWorkflows(data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          trigger: row.trigger || '',
+          steps: Array.isArray(row.steps) ? row.steps : [],
+          status: row.status || 'draft',
+          executions: row.executions || 0,
+          lastRun: row.last_run ? row.last_run.split('T')[0] : undefined,
+          description: row.description || '',
+        })));
+      } else {
+        setWorkflows(MOCK_WORKFLOWS);
+      }
+    } catch {
+      setWorkflows(MOCK_WORKFLOWS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadWorkflows(); }, [loadWorkflows]);
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const currentWF = workflows.find(w => w.id === selectedWF);
 
@@ -79,8 +116,16 @@ export default function WorkflowPage() {
         </div>
       )}
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">워크플로우 로딩 중...</p>
+        </div>
+      )}
+
       {/* 워크플로우 카드 목록 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {!loading && <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {workflows.map(wf => (
           <button key={wf.id} onClick={() => setSelectedWF(wf.id)}
             className={`w-full text-left rounded-xl border p-4 transition-colors ${selectedWF === wf.id ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.04]'}`}>
@@ -97,7 +142,7 @@ export default function WorkflowPage() {
             </div>
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* 워크플로우 시각화 */}
       {currentWF && (

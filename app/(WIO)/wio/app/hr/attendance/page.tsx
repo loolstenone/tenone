@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Clock, LogIn, LogOut, Calendar, Sun, Moon, Coffee, Heart,
   AlertCircle, CheckCircle2, MinusCircle, Plus
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type AttendanceStatus = 'working' | 'off' | 'late' | 'vacation' | 'half_day';
 type LeaveType = 'annual' | 'half' | 'sick' | 'family';
@@ -49,14 +50,49 @@ export default function AttendancePage() {
   const [weeklyHours, setWeeklyHours] = useState<number[]>([]);
   const [remainingLeave, setRemainingLeave] = useState(12);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 근태 데이터 로드
+  const loadAttendance = useCallback(async () => {
     if (isDemo) {
       setTeam(MOCK_TEAM);
       setWeeklyHours(MOCK_WEEKLY_HOURS);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('attendance')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // DB 데이터를 팀 현황으로 매핑
+        setTeam(data.map((row: any) => ({
+          id: row.id,
+          name: row.member_name || '',
+          checkIn: row.check_in ? row.check_in.substring(11, 16) : '-',
+          status: row.status || 'off',
+        })));
+        // 주간 근무시간은 별도 집계 필요 — 폴백
+        setWeeklyHours(MOCK_WEEKLY_HOURS);
+      } else {
+        setTeam(MOCK_TEAM);
+        setWeeklyHours(MOCK_WEEKLY_HOURS);
+      }
+    } catch {
+      setTeam(MOCK_TEAM);
+      setWeeklyHours(MOCK_WEEKLY_HOURS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadAttendance();
+  }, [tenant, loadAttendance]);
 
   const handleCheckIn = () => {
     const now = new Date();

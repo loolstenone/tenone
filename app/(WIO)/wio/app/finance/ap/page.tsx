@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ShoppingCart, Plus, ArrowRight, Building2 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type PurchaseOrder = {
   id: string;
@@ -39,9 +40,46 @@ const VENDOR_SUMMARY = [
 
 export default function APPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [showForm, setShowForm] = useState(false);
   const [tab, setTab] = useState<'orders' | 'vendors'>('orders');
+  const [orders, setOrders] = useState<PurchaseOrder[]>(isDemo ? MOCK_PO : []);
+  const [loading, setLoading] = useState(!isDemo);
+
+  // Supabase에서 매입 데이터 로드 (invoices where type='ap')
+  const loadAP = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('invoices')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .eq('type', 'ap')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setOrders(data.map((row: any) => ({
+          id: row.id,
+          date: row.date ? row.date.split('T')[0] : '',
+          vendor: row.vendor || row.counterpart || '',
+          items: row.items || row.description || '',
+          amount: row.amount || 0,
+          stage: row.stage || row.status || 'request',
+          dueDate: row.due_date ? row.due_date.split('T')[0] : '',
+        })));
+      } else {
+        setOrders(MOCK_PO);
+      }
+    } catch {
+      setOrders(MOCK_PO);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadAP(); }, [loadAP]);
 
   const STAGES = ['request', 'order', 'received', 'paid'];
 
@@ -61,7 +99,7 @@ export default function APPage() {
       <div className="grid grid-cols-4 gap-3 mb-6">
         {STAGES.map((s, i) => {
           const info = STAGE_MAP[s];
-          const count = MOCK_PO.filter(p => p.stage === s).length;
+          const count = orders.filter(p => p.stage === s).length;
           return (
             <div key={s} className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
               <div className={`text-lg font-bold ${info.color.split(' ')[0]}`}>{count}</div>
@@ -102,10 +140,18 @@ export default function APPage() {
         </div>
       )}
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 구매요청 목록 */}
-      {tab === 'orders' && (
+      {!loading && tab === 'orders' && (
         <div className="space-y-2">
-          {MOCK_PO.map(po => {
+          {orders.map(po => {
             const stage = STAGE_MAP[po.stage];
             return (
               <div key={po.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">

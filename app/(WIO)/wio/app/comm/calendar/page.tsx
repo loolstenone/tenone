@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Calendar, Plus, ChevronLeft, ChevronRight, Clock, Users, X,
   MapPin, Repeat, Bell, Trash2, Edit3, List, LayoutGrid, Columns, AlignJustify
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ───── Types ───── */
 type ViewMode = 'month' | 'week' | 'day' | 'list';
@@ -97,8 +98,50 @@ export default function CalendarPage() {
   const [formRepeat, setFormRepeat] = useState<CalEvent['repeat']>('none');
   const [formReminder, setFormReminder] = useState<CalEvent['reminder']>('none');
 
+  const [loading, setLoading] = useState(false);
+
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
+
+  // Supabase에서 일정 로드
+  useEffect(() => {
+    if (isDemo) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const sb = createClient();
+        const { data, error } = await sb
+          .from('events')
+          .select('*')
+          .eq('tenant_id', tenant!.id)
+          .order('date', { ascending: true });
+        if (error) throw error;
+        if (!cancelled && data && data.length > 0) {
+          setEvents(data.map((row: any): CalEvent => ({
+            id: row.id,
+            title: row.title || '',
+            date: row.date || '',
+            startTime: row.start_time || '09:00',
+            endTime: row.end_time || '10:00',
+            allDay: row.all_day ?? false,
+            location: row.location,
+            description: row.description,
+            attendees: Array.isArray(row.attendees) ? row.attendees : [],
+            color: EVENT_COLORS[row.color_index ?? 0] || EVENT_COLORS[0],
+            repeat: row.repeat || 'none',
+            reminder: row.reminder || 'none',
+          })));
+        }
+        // 데이터 없으면 Mock 폴백 (초기값 유지)
+      } catch {
+        // 에러 시 Mock 폴백 (초기값 유지)
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isDemo, tenant]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();

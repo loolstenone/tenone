@@ -25,7 +25,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = 
 
 export default function DataHubPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
 
   const sources = isDemo ? MOCK_SOURCES : MOCK_SOURCES;
   const totalRecords = sources.reduce((s, d) => s + d.records, 0);

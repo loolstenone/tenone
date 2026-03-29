@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   MessageCircle, Send, ThumbsUp, Lightbulb, HandHelping, Heart,
   Tag, Search, Bell, BarChart3, ChevronDown
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type FeedbackType = 'praise' | 'constructive' | 'request' | 'thanks';
 type CoreValue = 'innovation' | 'collaboration' | 'growth' | 'responsibility' | 'customer';
@@ -83,16 +84,69 @@ export default function FeedbackPage() {
   // Nudge
   const [sentThisWeek, setSentThisWeek] = useState(0);
 
-  useEffect(() => {
-    if (!tenant) return;
+  // Supabase에서 피드백 데이터 로드
+  const loadFeedback = useCallback(async () => {
     if (isDemo) {
       setReceived(MOCK_RECEIVED);
       setSent(MOCK_SENT);
       setValueDist(MOCK_VALUE_DIST);
       setSentThisWeek(1);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('feedback')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // 받은/보낸 피드백 분리
+        const myId = member?.id;
+        const rcv = data.filter((r: any) => r.to_member_id === myId).map((r: any) => ({
+          id: r.id, from: r.from_name || '', type: r.type || 'praise',
+          value: r.core_value || 'collaboration', content: r.content || '',
+          date: r.created_at ? r.created_at.split('T')[0] : '',
+        }));
+        const snt = data.filter((r: any) => r.from_member_id === myId).map((r: any) => ({
+          id: r.id, to: r.to_name || '', type: r.type || 'praise',
+          value: r.core_value || 'collaboration', content: r.content || '',
+          date: r.created_at ? r.created_at.split('T')[0] : '',
+        }));
+        setReceived(rcv.length > 0 ? rcv : MOCK_RECEIVED);
+        setSent(snt.length > 0 ? snt : MOCK_SENT);
+        // 가치 분포 집계
+        const dist: Record<string, number> = {};
+        data.forEach((r: any) => { dist[r.core_value || 'collaboration'] = (dist[r.core_value || 'collaboration'] || 0) + 1; });
+        setValueDist(Object.keys(dist).length > 0 ? dist as typeof MOCK_VALUE_DIST : MOCK_VALUE_DIST);
+        setSentThisWeek(snt.filter((s: any) => {
+          const d = new Date(s.date);
+          const now = new Date();
+          return d >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+        }).length);
+      } else {
+        setReceived(MOCK_RECEIVED);
+        setSent(MOCK_SENT);
+        setValueDist(MOCK_VALUE_DIST);
+        setSentThisWeek(1);
+      }
+    } catch {
+      setReceived(MOCK_RECEIVED);
+      setSent(MOCK_SENT);
+      setValueDist(MOCK_VALUE_DIST);
+      setSentThisWeek(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant, member]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadFeedback();
+  }, [tenant, loadFeedback]);
 
   const handleSubmitFeedback = () => {
     if (!formTarget || !formContent.trim()) return;

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Briefcase, Plus, Users, CalendarCheck, UserCheck, ChevronDown, ChevronUp,
   Clock, CheckCircle2, XCircle, FileText, Filter
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type JobStatus = 'open' | 'screening' | 'interviewing' | 'closed';
 type ApplicantStage = 'document' | 'interview' | 'final' | 'accepted' | 'rejected';
@@ -83,14 +84,48 @@ export default function RecruitPage() {
   // Form state
   const [form, setForm] = useState({ title: '', department: '', grade: '', description: '', deadline: '' });
 
-  useEffect(() => {
-    if (!tenant) return;
-    // Demo: mock data, Real: Supabase (tables don't exist yet)
+  // Supabase에서 채용 공고 로드
+  const loadJobs = useCallback(async () => {
     if (isDemo) {
       setJobs(MOCK_JOBS);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [tenant, isDemo]);
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('job_postings')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setJobs(data.map((row: any) => ({
+          id: row.id,
+          title: row.title || '',
+          department: row.department || '',
+          grade: row.grade || '',
+          description: row.description || '',
+          deadline: row.deadline ? row.deadline.split('T')[0] : '',
+          status: row.status || 'open',
+          applicants: Array.isArray(row.applicants) ? row.applicants : [],
+        })));
+      } else {
+        // 데이터 없으면 Mock 폴백
+        setJobs(MOCK_JOBS);
+      }
+    } catch {
+      setJobs(MOCK_JOBS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => {
+    if (!tenant) return;
+    loadJobs();
+  }, [tenant, loadJobs]);
 
   const handleCreate = () => {
     if (!form.title.trim() || !form.department.trim()) return;

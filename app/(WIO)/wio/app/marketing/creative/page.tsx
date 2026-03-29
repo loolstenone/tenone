@@ -27,7 +27,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 export default function CreativePage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
 
   const creatives = isDemo ? MOCK_CREATIVES : MOCK_CREATIVES;
 

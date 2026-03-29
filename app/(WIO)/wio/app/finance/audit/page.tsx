@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Shield, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type AuditPlan = {
   id: string;
@@ -74,11 +75,46 @@ const MOCK_AUDITS: AuditPlan[] = [
 
 export default function AuditPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [expandedId, setExpandedId] = useState<string | null>('AUD-001');
+  const [audits, setAudits] = useState<AuditPlan[]>(isDemo ? MOCK_AUDITS : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const totalFindings = MOCK_AUDITS.reduce((s, a) => s + a.findings.length, 0);
-  const openFindings = MOCK_AUDITS.flatMap(a => a.findings).filter(f => f.followUpStatus !== 'resolved').length;
+  // Supabase에서 감사 로그 로드
+  const loadAudits = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('audit_logs')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setAudits(data.map((row: any) => ({
+          id: row.id,
+          target: row.target || '',
+          period: row.period || '',
+          auditor: row.auditor || '',
+          status: row.status || 'planned',
+          findings: Array.isArray(row.findings) ? row.findings : [],
+        })));
+      } else {
+        setAudits(MOCK_AUDITS);
+      }
+    } catch {
+      setAudits(MOCK_AUDITS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadAudits(); }, [loadAudits]);
+
+  const totalFindings = audits.reduce((s, a) => s + a.findings.length, 0);
+  const openFindings = audits.flatMap(a => a.findings).filter(f => f.followUpStatus !== 'resolved').length;
 
   return (
     <div>
@@ -89,11 +125,19 @@ export default function AuditPage() {
         </div>
       </div>
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 요약 */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <div className="text-xs text-slate-500 mb-1">감사 건수</div>
-          <div className="text-lg font-bold">{MOCK_AUDITS.length}건</div>
+          <div className="text-lg font-bold">{audits.length}건</div>
         </div>
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <div className="text-xs text-slate-500 mb-1">지적사항</div>
@@ -106,8 +150,8 @@ export default function AuditPage() {
       </div>
 
       {/* 감사 목록 */}
-      <div className="space-y-3">
-        {MOCK_AUDITS.map(audit => {
+      {!loading && <div className="space-y-3">
+        {audits.map(audit => {
           const st = STATUS_MAP[audit.status];
           const isExpanded = expandedId === audit.id;
           return (
@@ -167,7 +211,7 @@ export default function AuditPage() {
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

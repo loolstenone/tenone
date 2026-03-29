@@ -19,7 +19,7 @@ const SUGGESTIONS = [
 
 export default function PerformancePage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [period, setPeriod] = useState<'today' | 'week' | 'month'>('month');
 
   const channels = isDemo ? MOCK_CHANNELS : MOCK_CHANNELS;

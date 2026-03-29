@@ -53,6 +53,7 @@ function calcQuote(q: Quote) {
 
 export default function QuotePage() {
   const { isDemo } = useWIO();
+  // TODO: Supabase 견적 테이블 생성 후 연동 (현재 Mock 폴백)
   const [quotes] = useState<Quote[]>(MOCK_QUOTES);
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all');
   const [selected, setSelected] = useState<Quote | null>(null);

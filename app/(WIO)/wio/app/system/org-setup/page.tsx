@@ -131,7 +131,8 @@ const ORDER_COLORS: Record<string, string> = { '승진': 'text-violet-400 bg-vio
 
 /* ── Component ── */
 export default function OrgSetupPage() {
-  const { tenant } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
   const [orgTree] = useState(buildOrg);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['T1', 'T2', 'T3']));
   const [selected, setSelected] = useState<OrgNode | null>(null);
@@ -139,7 +140,6 @@ export default function OrgSetupPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const toggle = (id: string) => {
     setExpanded(prev => {

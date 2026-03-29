@@ -42,7 +42,7 @@ const SENTIMENT_BG: Record<string, string> = { positive: 'bg-emerald-500', neutr
 
 export default function SentimentPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
 
   return (
     <div>

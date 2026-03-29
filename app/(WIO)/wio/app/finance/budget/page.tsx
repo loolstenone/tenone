@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type BudgetItem = {
   department: string;
@@ -22,11 +23,44 @@ const MOCK_BUDGET: BudgetItem[] = [
 
 export default function BudgetPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
+  const [budgetData, setBudgetData] = useState<BudgetItem[]>(isDemo ? MOCK_BUDGET : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const totalAllocated = MOCK_BUDGET.reduce((s, b) => s + b.allocated, 0);
-  const totalSpent = MOCK_BUDGET.reduce((s, b) => s + b.spent, 0);
-  const overBudget = MOCK_BUDGET.filter(b => b.spent > b.allocated);
+  // Supabase에서 예산 데이터 로드
+  const loadBudget = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('budgets')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setBudgetData(data.map((row: any) => ({
+          department: row.department || '',
+          allocated: row.allocated || 0,
+          spent: row.spent || 0,
+          category: row.category || '',
+        })));
+      } else {
+        setBudgetData(MOCK_BUDGET);
+      }
+    } catch {
+      setBudgetData(MOCK_BUDGET);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadBudget(); }, [loadBudget]);
+
+  const totalAllocated = budgetData.reduce((s, b) => s + b.allocated, 0);
+  const totalSpent = budgetData.reduce((s, b) => s + b.spent, 0);
+  const overBudget = budgetData.filter(b => b.spent > b.allocated);
 
   return (
     <div>
@@ -53,8 +87,16 @@ export default function BudgetPage() {
         </div>
       </div>
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 예산 초과 알림 */}
-      {overBudget.length > 0 && (
+      {!loading && overBudget.length > 0 && (
         <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/[0.03] p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={16} className="text-red-400" />
@@ -69,10 +111,10 @@ export default function BudgetPage() {
       )}
 
       {/* 부서별 바 차트 */}
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 mb-4">
+      {!loading && <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 mb-4">
         <h3 className="text-sm font-semibold mb-4">부서별 예산 vs 집행</h3>
         <div className="space-y-4">
-          {MOCK_BUDGET.map(b => {
+          {budgetData.map(b => {
             const pct = Math.min((b.spent / b.allocated) * 100, 100);
             const overPct = b.spent > b.allocated ? ((b.spent - b.allocated) / b.allocated) * 100 : 0;
             const isOver = b.spent > b.allocated;
@@ -102,7 +144,7 @@ export default function BudgetPage() {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* 예산 테이블 */}
       <div className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
@@ -118,7 +160,7 @@ export default function BudgetPage() {
             </tr>
           </thead>
           <tbody>
-            {MOCK_BUDGET.map(b => {
+            {budgetData.map(b => {
               const remaining = b.allocated - b.spent;
               const pct = Math.round((b.spent / b.allocated) * 100);
               const isOver = remaining < 0;

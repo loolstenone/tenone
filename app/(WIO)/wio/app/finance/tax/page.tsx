@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Calculator, Receipt } from 'lucide-react';
 import { useWIO } from '../../layout';
+// TODO: Supabase 테이블 생성 후 연동 예정
 
 type VatReport = {
   month: string;
@@ -48,8 +49,9 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 export default function TaxPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<'vat' | 'invoices' | 'corporate'>('vat');
+  // TODO: Supabase 세무 테이블 생성 후 연동 (현재 Mock 폴백)
 
   const estimatedCorporateTax = 68000000;
   const taxableIncome = 340000000;

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bell, Stamp, FolderKanban, MessageSquare, AlertTriangle, Settings, Check, CheckCheck } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type NotiType = 'approval' | 'project' | 'feedback' | 'system';
 type Tab = 'all' | 'unread';
@@ -35,8 +36,44 @@ export default function NotificationPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<SettingsConfig>({ approval: true, project: true, feedback: true, system: true });
 
+  const [loading, setLoading] = useState(false);
+
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
+
+  // Supabase에서 알림 로드
+  useEffect(() => {
+    if (isDemo) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const sb = createClient();
+        const { data, error } = await sb
+          .from('notifications')
+          .select('*')
+          .eq('tenant_id', tenant!.id)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!cancelled && data && data.length > 0) {
+          setNotis(data.map((row: any): Noti => ({
+            id: row.id,
+            type: row.type || 'system',
+            title: row.title || '',
+            body: row.body || row.message || '',
+            time: row.time_label || (row.created_at ? new Date(row.created_at).toLocaleString('ko-KR') : ''),
+            read: row.read ?? false,
+          })));
+        }
+        // 데이터 없으면 Mock 폴백 (초기값 유지)
+      } catch {
+        // 에러 시 Mock 폴백 (초기값 유지)
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isDemo, tenant]);
 
   const filtered = tab === 'unread' ? notis.filter(n => !n.read) : notis;
   const unreadCount = notis.filter(n => !n.read).length;

@@ -29,7 +29,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 export default function SocialPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [view, setView] = useState<'accounts' | 'calendar'>('accounts');
 
   const accounts = isDemo ? MOCK_ACCOUNTS : MOCK_ACCOUNTS;

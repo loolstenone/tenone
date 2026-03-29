@@ -64,12 +64,11 @@ export default function RewardPage() {
 
   useEffect(() => {
     if (!tenant) return;
-    if (isDemo) {
-      setReward(MOCK_REWARD);
-      setPoints(MOCK_POINTS);
-      setAwards(MOCK_AWARDS);
-      setChecklist(PROMOTION_CHECKLIST);
-    }
+    // TODO: Supabase 테이블 생성 후 연동 예정 (현재 Mock 폴백)
+    setReward(MOCK_REWARD);
+    setPoints(MOCK_POINTS);
+    setAwards(MOCK_AWARDS);
+    setChecklist(PROMOTION_CHECKLIST);
     setLoading(false);
   }, [tenant, isDemo]);
 

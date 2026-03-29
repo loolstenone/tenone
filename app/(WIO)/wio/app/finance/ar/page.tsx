@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, AlertCircle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Invoice = {
   id: string;
@@ -39,12 +40,50 @@ const CLIENT_SUMMARY = [
 
 export default function ARPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [tab, setTab] = useState<'pipeline' | 'clients'>('pipeline');
+  const [invoices, setInvoices] = useState<Invoice[]>(isDemo ? MOCK_INVOICES : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const totalReceivable = MOCK_INVOICES.filter(i => i.stage !== 'completed').reduce((s, i) => s + i.amount, 0);
-  const overdueAmount = MOCK_INVOICES.filter(i => i.overdue).reduce((s, i) => s + i.amount, 0);
-  const completedAmount = MOCK_INVOICES.filter(i => i.stage === 'completed').reduce((s, i) => s + i.amount, 0);
+  // Supabase에서 매출 데이터 로드 (invoices where type='ar')
+  const loadAR = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('invoices')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .eq('type', 'ar')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setInvoices(data.map((row: any) => ({
+          id: row.id,
+          date: row.date ? row.date.split('T')[0] : '',
+          client: row.client || row.counterpart || '',
+          description: row.description || '',
+          amount: row.amount || 0,
+          stage: row.stage || row.status || 'billed',
+          dueDate: row.due_date ? row.due_date.split('T')[0] : '',
+          overdue: row.overdue ?? false,
+        })));
+      } else {
+        setInvoices(MOCK_INVOICES);
+      }
+    } catch {
+      setInvoices(MOCK_INVOICES);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadAR(); }, [loadAR]);
+
+  const totalReceivable = invoices.filter(i => i.stage !== 'completed').reduce((s, i) => s + i.amount, 0);
+  const overdueAmount = invoices.filter(i => i.overdue).reduce((s, i) => s + i.amount, 0);
+  const completedAmount = invoices.filter(i => i.stage === 'completed').reduce((s, i) => s + i.amount, 0);
 
   return (
     <div>
@@ -83,10 +122,18 @@ export default function ARPage() {
         ))}
       </div>
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 파이프라인 */}
-      {tab === 'pipeline' && (
+      {!loading && tab === 'pipeline' && (
         <div className="space-y-2">
-          {MOCK_INVOICES.map(inv => {
+          {invoices.map(inv => {
             const stage = STAGE_MAP[inv.stage];
             return (
               <div key={inv.id} className={`rounded-xl border p-4 ${inv.overdue ? 'border-red-500/20 bg-red-500/[0.03]' : 'border-white/5 bg-white/[0.02]'}`}>

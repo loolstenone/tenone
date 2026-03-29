@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FileText, FolderOpen, Plus, Search, Clock, User, ChevronRight, X, File, FileSpreadsheet, Presentation } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type DocType = 'doc' | 'sheet' | 'slide' | 'pdf';
 type Folder = 'all' | 'company' | 'dept' | 'personal';
@@ -36,8 +37,46 @@ export default function DocumentPage() {
   const [newCategory, setNewCategory] = useState<Folder>('personal');
   const [newBody, setNewBody] = useState('');
 
+  const [loading, setLoading] = useState(false);
+
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
+
+  // Supabase에서 문서 로드
+  useEffect(() => {
+    if (isDemo) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const sb = createClient();
+        const { data, error } = await sb
+          .from('documents')
+          .select('*')
+          .eq('tenant_id', tenant!.id)
+          .order('updated_at', { ascending: false });
+        if (error) throw error;
+        if (!cancelled && data && data.length > 0) {
+          setDocs(data.map((row: any): Doc => ({
+            id: row.id,
+            title: row.title || '',
+            author: row.author_name || row.author_id || '',
+            updatedAt: row.updated_at ? row.updated_at.split('T')[0] : '',
+            type: row.type || 'doc',
+            folder: row.folder || 'personal',
+            size: row.size || '0KB',
+            versions: row.versions ?? 1,
+          })));
+        }
+        // 데이터 없으면 Mock 폴백 (초기값 유지)
+      } catch {
+        // 에러 시 Mock 폴백 (초기값 유지)
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isDemo, tenant]);
 
   const FOLDERS: { id: Folder; label: string; icon: typeof FolderOpen }[] = [
     { id: 'all', label: '전체', icon: FolderOpen },

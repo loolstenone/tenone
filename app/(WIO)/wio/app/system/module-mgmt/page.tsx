@@ -85,14 +85,14 @@ const PRESETS: Record<string, { label: string; modules: string[] }> = {
 };
 
 export default function ModuleMgmtPage() {
-  const { tenant } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
   const [depts, setDepts] = useState(INIT_DEPTS);
   const [selectedDeptId, setSelectedDeptId] = useState(INIT_DEPTS[0].id);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | ModuleCategory>('all');
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const selectedDept = depts.find(d => d.id === selectedDeptId)!;
 

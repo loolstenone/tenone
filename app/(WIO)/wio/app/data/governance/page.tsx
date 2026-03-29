@@ -122,13 +122,13 @@ const MOCK_RETENTION: RetentionPolicy[] = [
 ];
 
 export default function DataGovernancePage() {
-  const { tenant } = useWIO();
+  const { tenant, isDemo } = useWIO();
+  // isDemo일 때 mock 데이터 사용, 아닐 때 Supabase fetch (TODO: DB 연동)
   const [searchQuery, setSearchQuery] = useState('');
   const [sensitivityFilter, setSensitivityFilter] = useState<'all' | SensitivityLevel>('all');
   const [showPIIOnly, setShowPIIOnly] = useState(false);
 
   if (!tenant) return null;
-  const isDemo = tenant.id === 'demo';
 
   const filteredTables = MOCK_TABLES
     .filter(t => sensitivityFilter === 'all' || t.sensitivity === sensitivityFilter)

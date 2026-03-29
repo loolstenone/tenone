@@ -51,6 +51,7 @@ const fmtKRW = (n: number) => {
 
 export default function OrderPage() {
   const { isDemo } = useWIO();
+  // TODO: Supabase 수주 테이블 생성 후 연동 (현재 Mock 폴백)
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [selected, setSelected] = useState<Order | null>(null);
 

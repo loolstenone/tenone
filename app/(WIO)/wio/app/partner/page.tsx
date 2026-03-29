@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Star, Filter, Building2, Handshake, Briefcase, GraduationCap } from 'lucide-react';
 import { useWIO } from '../layout';
+import { createClient } from '@/lib/supabase/client';
 
 type Partner = {
   id: string;
@@ -43,11 +44,49 @@ const MOCK_PARTNERS: Partner[] = [
 
 export default function PartnerPage() {
   const { tenant } = useWIO();
-  const isDemo = tenant?.id === 'demo';
+  const isDemo = !tenant || tenant.id === 'demo';
   const [showForm, setShowForm] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
+  const [partners, setPartners] = useState<Partner[]>(isDemo ? MOCK_PARTNERS : []);
+  const [loading, setLoading] = useState(!isDemo);
 
-  const filtered = filterType === 'all' ? MOCK_PARTNERS : MOCK_PARTNERS.filter(p => p.type === filterType);
+  // Supabase에서 파트너 데이터 로드
+  const loadPartners = useCallback(async () => {
+    if (isDemo) return;
+    setLoading(true);
+    try {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from('partners')
+        .select('*')
+        .eq('tenant_id', tenant!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setPartners(data.map((row: any) => ({
+          id: row.id,
+          name: row.name || '',
+          type: row.type || '협력사',
+          grade: row.grade || 'B',
+          score: row.score || 0,
+          contact: row.contact || '',
+          email: row.email || '',
+          description: row.description || '',
+          since: row.since || '',
+        })));
+      } else {
+        setPartners(MOCK_PARTNERS);
+      }
+    } catch {
+      setPartners(MOCK_PARTNERS);
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemo, tenant]);
+
+  useEffect(() => { loadPartners(); }, [loadPartners]);
+
+  const filtered = filterType === 'all' ? partners : partners.filter(p => p.type === filterType);
 
   return (
     <div>
@@ -65,11 +104,11 @@ export default function PartnerPage() {
       <div className="flex gap-2 mb-4 flex-wrap">
         <button onClick={() => setFilterType('all')}
           className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${filterType === 'all' ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5'}`}>
-          전체 ({MOCK_PARTNERS.length})
+          전체 ({partners.length})
         </button>
         {Object.entries(TYPE_MAP).map(([key, val]) => {
           const Icon = val.icon;
-          const count = MOCK_PARTNERS.filter(p => p.type === key).length;
+          const count = partners.filter(p => p.type === key).length;
           return (
             <button key={key} onClick={() => setFilterType(key)}
               className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs transition-colors ${filterType === key ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5'}`}>
@@ -104,8 +143,16 @@ export default function PartnerPage() {
         </div>
       )}
 
+      {/* 로딩 */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="h-6 w-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">데이터 로딩 중...</p>
+        </div>
+      )}
+
       {/* 파트너 목록 */}
-      <div className="space-y-2">
+      {!loading && <div className="space-y-2">
         {filtered.map(p => {
           const typeInfo = TYPE_MAP[p.type];
           const TypeIcon = typeInfo.icon;
@@ -139,7 +186,7 @@ export default function PartnerPage() {
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }
