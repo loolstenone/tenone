@@ -7,7 +7,14 @@ import {
   LayoutDashboard, FolderKanban, MessageSquare, Receipt,
   Users, TrendingUp, BookOpen, FileText, Library, BarChart3, Clock,
   ChevronLeft, ChevronRight, LogOut, Settings, Target,
-  Trophy, Network, Award, Stamp, Menu, X
+  Trophy, Network, Award, Stamp, Menu, X,
+  UserPlus, CalendarCheck, Wallet, Star, GitBranch, MessageCircle,
+  ShoppingCart, CreditCard, DollarSign, Landmark, Shield, Scale, FileCheck,
+  Megaphone, BarChart2, Globe, Zap, PenTool, Bot, Share2, Layers, PieChart, Eye, Gauge, Activity,
+  Handshake, Building, Truck, Package,
+  Mail, Send, Calendar, FileStack, Bell, ClipboardList, Cpu, Monitor,
+  Lock, ScrollText, Plug, Heart, FileTemplate, Database,
+  Microscope, Fingerprint, Code, Rocket, Factory, Cog, CheckSquare, Palette, Image, Warehouse, Map, Link2, HardDrive, Film
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
@@ -20,12 +27,27 @@ const TRACKS = [
       { key: 'home', label: '홈', icon: LayoutDashboard, href: '/wio/app' },
       { key: 'talk', label: '소통', icon: MessageSquare, href: '/wio/app/talk' },
       { key: 'approval', label: '결재', icon: Stamp, href: '/wio/app/approval' },
+      { key: 'mail', label: '메일', icon: Mail, href: '/wio/app/comm/mail' },
+      { key: 'messenger', label: '메신저', icon: Send, href: '/wio/app/comm/messenger' },
+      { key: 'calendar', label: '캘린더', icon: Calendar, href: '/wio/app/comm/calendar' },
+      { key: 'document', label: '문서', icon: FileStack, href: '/wio/app/comm/document' },
+      { key: 'notification', label: '알림', icon: Bell, href: '/wio/app/comm/notification' },
+      { key: 'report', label: '리포트', icon: ClipboardList, href: '/wio/app/comm/report' },
+      { key: 'ai', label: 'AI', icon: Bot, href: '/wio/app/comm/ai' },
+      { key: 'it', label: '전산', icon: Monitor, href: '/wio/app/comm/it' },
     ]
   },
   {
     id: 'hr', name: '인사·조직', icon: Users,
     modules: [
       { key: 'people', label: '인재', icon: Users, href: '/wio/app/people' },
+      { key: 'recruit', label: '채용', icon: UserPlus, href: '/wio/app/hr/recruit' },
+      { key: 'attendance', label: '근태', icon: CalendarCheck, href: '/wio/app/hr/attendance' },
+      { key: 'payroll', label: '급여', icon: Wallet, href: '/wio/app/hr/payroll' },
+      { key: 'evaluation', label: '평가', icon: Star, href: '/wio/app/hr/evaluation' },
+      { key: 'reward', label: '보상', icon: Award, href: '/wio/app/hr/reward' },
+      { key: 'org', label: '조직', icon: GitBranch, href: '/wio/app/hr/org' },
+      { key: 'feedback', label: '피드백', icon: MessageCircle, href: '/wio/app/hr/feedback' },
       { key: 'gpr', label: 'GPR', icon: Target, href: '/wio/app/gpr' },
       { key: 'learn', label: '교육', icon: BookOpen, href: '/wio/app/learn' },
     ]
@@ -37,6 +59,26 @@ const TRACKS = [
       { key: 'sales', label: '영업', icon: TrendingUp, href: '/wio/app/sales' },
       { key: 'competition', label: '경연', icon: Trophy, href: '/wio/app/competition' },
       { key: 'networking', label: '네트워킹', icon: Network, href: '/wio/app/networking' },
+      { key: 'mkt-strategy', label: '마케팅전략', icon: Megaphone, href: '/wio/app/marketing/strategy' },
+      { key: 'mkt-campaign', label: '캠페인', icon: Zap, href: '/wio/app/marketing/campaign' },
+      { key: 'mkt-media', label: '매체', icon: Globe, href: '/wio/app/marketing/media' },
+      { key: 'mkt-performance', label: '퍼포먼스', icon: BarChart2, href: '/wio/app/marketing/performance' },
+      { key: 'mkt-social', label: '소셜', icon: Share2, href: '/wio/app/marketing/social' },
+      { key: 'mkt-influencer', label: '인플루언서', icon: Star, href: '/wio/app/marketing/influencer' },
+      { key: 'mkt-creative', label: '크리에이티브', icon: PenTool, href: '/wio/app/marketing/creative' },
+      { key: 'mkt-automation', label: '자동화', icon: Bot, href: '/wio/app/marketing/automation' },
+      { key: 'mkt-datahub', label: '데이터허브', icon: Layers, href: '/wio/app/marketing/data-hub' },
+      { key: 'mkt-attribution', label: '어트리뷰션', icon: PieChart, href: '/wio/app/marketing/attribution' },
+      { key: 'mkt-mmm', label: '미디어믹스', icon: Gauge, href: '/wio/app/marketing/mmm' },
+      { key: 'mkt-abtest', label: 'A/B테스트', icon: Activity, href: '/wio/app/marketing/abtest' },
+      { key: 'mkt-sentiment', label: '감성분석', icon: Eye, href: '/wio/app/marketing/sentiment' },
+      { key: 'mkt-ops', label: '마케팅운영', icon: Cog, href: '/wio/app/marketing/ops' },
+      { key: 'crm-customers', label: '고객관리', icon: Users, href: '/wio/app/crm/customers' },
+      { key: 'crm-support', label: '고객지원', icon: MessageCircle, href: '/wio/app/crm/support' },
+      { key: 'crm-cx', label: '고객경험', icon: Heart, href: '/wio/app/crm/cx' },
+      { key: 'crm-membership', label: '멤버십', icon: Award, href: '/wio/app/crm/membership' },
+      { key: 'crm-cdp', label: 'CDP', icon: Database, href: '/wio/app/crm/cdp' },
+      { key: 'crm-privacy', label: '개인정보', icon: Shield, href: '/wio/app/crm/privacy' },
     ]
   },
   {
@@ -45,14 +87,60 @@ const TRACKS = [
       { key: 'content', label: '콘텐츠', icon: FileText, href: '/wio/app/content' },
       { key: 'wiki', label: '위키', icon: Library, href: '/wio/app/wiki' },
       { key: 'insight', label: '인사이트', icon: BarChart3, href: '/wio/app/insight' },
+      { key: 'rnd', label: 'R&D', icon: Microscope, href: '/wio/app/support/rnd' },
+      { key: 'patent', label: '특허', icon: Fingerprint, href: '/wio/app/support/patent' },
+      { key: 'dev', label: '개발', icon: Code, href: '/wio/app/support/dev' },
+      { key: 'deploy', label: '배포', icon: Rocket, href: '/wio/app/support/deploy' },
+      { key: 'production', label: '생산', icon: Factory, href: '/wio/app/support/production' },
+      { key: 'process', label: '공정', icon: Cog, href: '/wio/app/support/process' },
+      { key: 'qc', label: '품질', icon: CheckSquare, href: '/wio/app/support/qc' },
+      { key: 'equipment', label: '설비', icon: Cpu, href: '/wio/app/support/equipment' },
+      { key: 'design', label: '디자인', icon: Palette, href: '/wio/app/support/design' },
+      { key: 'design-asset', label: '디자인자산', icon: Image, href: '/wio/app/support/design-asset' },
+      { key: 'warehouse', label: '창고', icon: Warehouse, href: '/wio/app/support/warehouse' },
+      { key: 'transport', label: '운송', icon: Truck, href: '/wio/app/support/transport' },
+      { key: 'scm', label: '공급망', icon: Link2, href: '/wio/app/support/scm' },
+      { key: 'data-platform', label: '데이터플랫폼', icon: HardDrive, href: '/wio/app/support/data-platform' },
+      { key: 'dam', label: 'DAM', icon: Film, href: '/wio/app/support/dam' },
     ]
   },
   {
-    id: 'finance', name: '재무', icon: Receipt,
+    id: 'finance', name: '재무·법무', icon: Receipt,
     modules: [
       { key: 'finance', label: '재무', icon: Receipt, href: '/wio/app/finance' },
+      { key: 'gl', label: '총계정원장', icon: Landmark, href: '/wio/app/finance/gl' },
+      { key: 'ap', label: '매입', icon: ShoppingCart, href: '/wio/app/finance/ap' },
+      { key: 'ar', label: '매출', icon: CreditCard, href: '/wio/app/finance/ar' },
+      { key: 'budget', label: '예산', icon: DollarSign, href: '/wio/app/finance/budget' },
+      { key: 'tax', label: '세무', icon: FileCheck, href: '/wio/app/finance/tax' },
+      { key: 'asset', label: '자산', icon: Package, href: '/wio/app/finance/asset' },
       { key: 'timesheet', label: '시수', icon: Clock, href: '/wio/app/timesheet' },
       { key: 'certificate', label: '수료증', icon: Award, href: '/wio/app/certificate' },
+      { key: 'audit', label: '감사', icon: Shield, href: '/wio/app/finance/audit' },
+      { key: 'legal', label: '계약', icon: Scale, href: '/wio/app/finance/legal' },
+    ]
+  },
+  {
+    id: 'partner', name: '파트너', icon: Handshake,
+    modules: [
+      { key: 'partner', label: '파트너관리', icon: Handshake, href: '/wio/app/partner' },
+      { key: 'partner-portal', label: '포털', icon: Building, href: '/wio/app/partner/portal' },
+      { key: 'vendor', label: '벤더', icon: Truck, href: '/wio/app/partner/vendor' },
+      { key: 'freelancer', label: '프리랜서', icon: Users, href: '/wio/app/partner/freelancer' },
+    ]
+  },
+  {
+    id: 'system', name: '시스템', icon: Monitor,
+    modules: [
+      { key: 'sys-users', label: '사용자', icon: Users, href: '/wio/app/system/users' },
+      { key: 'sys-roles', label: '역할/권한', icon: Shield, href: '/wio/app/system/roles' },
+      { key: 'sys-workflow', label: '워크플로우', icon: GitBranch, href: '/wio/app/system/workflow' },
+      { key: 'sys-monitor', label: '모니터링', icon: Activity, href: '/wio/app/system/monitor' },
+      { key: 'sys-security', label: '보안', icon: Lock, href: '/wio/app/system/security' },
+      { key: 'sys-audit', label: '감사로그', icon: ScrollText, href: '/wio/app/system/audit-log' },
+      { key: 'sys-integration', label: '외부연동', icon: Plug, href: '/wio/app/system/integration' },
+      { key: 'sys-culture', label: 'Culture', icon: Heart, href: '/wio/app/system/culture' },
+      { key: 'sys-template', label: '양식', icon: FileText, href: '/wio/app/system/template' },
     ]
   },
 ];
