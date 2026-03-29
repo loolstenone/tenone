@@ -21,7 +21,7 @@ export const SystemAccessInfo: Record<SystemAccess, { label: string; description
 // ── 인트라 모듈 (v2: DB module_access 기반) ──
 export type IntraModule =
     | 'myverse' | 'townity' | 'project' | 'hero' | 'evolution'
-    | 'smarcomm' | 'wiki' | 'erp' | 'vridge' | 'bums' | 'agent';
+    | 'smarcomm' | 'wiki' | 'erp' | 'vridge' | 'bums' | 'agent' | 'universe';
 
 /** 모듈 메타 정보 */
 export const IntraModuleInfo: Record<IntraModule, { label: string; description: string }> = {
@@ -36,6 +36,7 @@ export const IntraModuleInfo: Record<IntraModule, { label: string; description: 
     vridge: { label: 'Vridge', description: '경영 전략, GPR, Principle' },
     bums: { label: 'BUMS', description: '사이트/게시판/콘텐츠 통합 관리' },
     agent: { label: 'Agent', description: 'Universe AI 에이전트 시스템' },
+    universe: { label: 'Universe', description: '유니버스 통합 관리 대시보드' },
 };
 
 /**
@@ -43,7 +44,7 @@ export const IntraModuleInfo: Record<IntraModule, { label: string; description: 
  * 실제 권한은 DB module_access[] 필드가 우선
  */
 export const defaultModuleAccess: Record<AccountType, IntraModule[]> = {
-    staff: ['myverse', 'townity', 'project', 'hero', 'evolution', 'smarcomm', 'wiki', 'erp', 'vridge', 'bums'],
+    staff: ['myverse', 'townity', 'project', 'hero', 'evolution', 'smarcomm', 'wiki', 'erp', 'vridge', 'bums', 'universe'],
     partner: ['myverse', 'townity', 'project', 'hero', 'evolution', 'wiki'],
     'junior-partner': ['myverse', 'townity', 'hero', 'evolution'],
     alliance: ['myverse', 'townity', 'hero', 'evolution'],

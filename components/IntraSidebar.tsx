@@ -394,6 +394,23 @@ const modules: NavModule[] = [
         dynamic: true, // 사이트 진입 시 동적 메뉴 생성
     },
     {
+        name: "Universe", href: "/intra/universe", icon: Globe, intraModule: 'universe' as IntraModule,
+        sections: [
+            {
+                items: [
+                    { name: "유니버스 대시보드", href: "/intra/universe", icon: Globe },
+                    { name: "통합 회원", href: "/intra/universe/members", icon: Users },
+                    { name: "구독 관리", href: "/intra/universe/subscriptions", icon: CreditCard },
+                    { name: "교육 관리", href: "/intra/universe/education", icon: GraduationCap },
+                    { name: "예약/이벤트", href: "/intra/universe/bookings", icon: Calendar },
+                    { name: "손익 관리", href: "/intra/universe/revenue", icon: TrendingUp },
+                    { name: "게스트 관리", href: "/intra/universe/guests", icon: UserPlus },
+                    { name: "개인정보", href: "/intra/universe/privacy", icon: Shield },
+                ],
+            },
+        ],
+    },
+    {
         name: "Agent", href: "/intra/agent", icon: Bot, intraModule: 'agent' as IntraModule,
         sections: [],
     },
