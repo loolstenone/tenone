@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Camera, Calendar, Tag, Moon, Smartphone, ArrowRight, Shield, Sparkles, Bot } from "lucide-react";
+import { Camera, Calendar, Tag, Moon, Smartphone, ArrowRight, Shield, Sparkles, Bot, Share2 as Share, Zap, Fingerprint, Link2, Download, Star } from "lucide-react";
 
 export default function MyVersePage() {
     return (
@@ -25,9 +25,9 @@ export default function MyVersePage() {
                     </h1>
 
                     <p className="mt-6 text-lg text-neutral-500 max-w-xl mx-auto leading-relaxed">
-                        사진 찍으면 AI가 정리한다.
+                        사진이나 메모를 AI가 정리해준다.
                         <br />
-                        서비스가 죽어도 내 기록은 남는다.
+                        서비스는 사라져도 내 기록은 남는다.
                     </p>
 
                     <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
@@ -43,31 +43,78 @@ export default function MyVersePage() {
                 </div>
             </section>
 
-            {/* ═══ 핵심 플로우 ═══ */}
+            {/* ═══ HOW IT WORKS — 3단계 플로우 ═══ */}
             <section className="py-20 lg:py-28 bg-neutral-50">
                 <div className="mx-auto max-w-5xl px-6">
-                    <div className="text-center mb-14">
+                    <div className="text-center mb-16">
                         <p className="text-indigo-600 font-semibold text-sm mb-2">HOW IT WORKS</p>
-                        <h2 className="text-3xl sm:text-4xl font-bold">사진 한 장이 기록이 된다</h2>
-                        <p className="mt-3 text-neutral-500">입력을 없앤다. AI가 80%를 채운다.</p>
+                        <h2 className="text-3xl sm:text-4xl font-bold">나의 흔적이 기록이 된다</h2>
                     </div>
 
-                    <div className="grid md:grid-cols-4 gap-6">
-                        {[
-                            { icon: Camera, step: "01", title: "사진을 찍는다", desc: "앱 카메라로 촬영하거나 갤러리에서 선택" },
-                            { icon: Calendar, step: "02", title: "AI가 캘린더와 대조", desc: '"서울숲 카페, 오후 2시, 수진이랑 점심"' },
-                            { icon: Tag, step: "03", title: "자동 태그 + LOG 저장", desc: "장소, 사람, 감정이 태그로 붙은 채 저장" },
-                            { icon: Moon, step: "04", title: "하루 요약", desc: "저녁에 AI가 오늘을 한 줄로 정리" },
-                        ].map(s => (
-                            <div key={s.step} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
-                                    <s.icon className="h-6 w-6 text-indigo-600" />
+                    {/* Flow 1: 기록 */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-bold">1</span>
+                            <h3 className="text-xl font-bold">기록한다</h3>
+                        </div>
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Camera, title: "사진을 찍는다", desc: "사진이나 메모를 남긴다" },
+                                { icon: Calendar, title: "AI가 캘린더와 대조", desc: "일정과 기록을 자동 매칭" },
+                                { icon: Tag, title: "자동 태그 + LOG 저장", desc: "장소, 사람, 감정 태그" },
+                                { icon: Moon, title: "하루 요약", desc: "AI가 오늘을 한 줄로 정리" },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100">
+                                    <s.icon className="h-5 w-5 text-indigo-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
                                 </div>
-                                <span className="text-xs font-bold text-indigo-400">{s.step}</span>
-                                <h3 className="text-base font-bold mt-1 mb-2">{s.title}</h3>
-                                <p className="text-sm text-neutral-500 leading-relaxed">{s.desc}</p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Flow 2: 공유 */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white text-sm font-bold">2</span>
+                            <h3 className="text-xl font-bold">공유한다</h3>
+                        </div>
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Camera, title: "사진이나 메모를 남긴다", desc: "나의 기록에서 시작" },
+                                { icon: Share, title: "공유할 콘텐츠 선택", desc: "내가 공유하고 싶은 것만" },
+                                { icon: Zap, title: "AI가 한번에 공유", desc: "인스타그램, 스레드, X" },
+                                { icon: Fingerprint, title: "나의 정체성이 된다", desc: "흔적이 모여 나를 만든다" },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100">
+                                    <s.icon className="h-5 w-5 text-purple-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Flow 3: 수집 */}
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-600 text-white text-sm font-bold">3</span>
+                            <h3 className="text-xl font-bold">모은다</h3>
+                        </div>
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Link2, title: "나의 계정을 연결", desc: "소셜, 클라우드 계정 연동" },
+                                { icon: Download, title: "과거 흔적을 모은다", desc: "디지털 흔적을 한 곳에" },
+                                { icon: Bot, title: "AI가 관리해준다", desc: "자동 분류, 정리, 보관" },
+                                { icon: Star, title: "기록이 역사가 된다", desc: "나의 인생 타임라인" },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100">
+                                    <s.icon className="h-5 w-5 text-pink-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
@@ -80,9 +127,9 @@ export default function MyVersePage() {
                         <div>
                             <p className="text-indigo-600 font-semibold text-sm mb-2">PERSONAL BLACKBOX</p>
                             <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                                내 모든 기록의
+                                나의 디지털 흔적이
                                 <br />
-                                <span className="text-indigo-600">원본이 여기에</span>
+                                <span className="text-indigo-600">여기에 모인다</span>
                             </h2>
                             <p className="mt-4 text-neutral-500 leading-relaxed">
                                 인스타, 페이스북, X에 올린 기록은 플랫폼 것입니다.
