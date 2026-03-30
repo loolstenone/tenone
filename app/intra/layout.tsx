@@ -136,10 +136,10 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                     ? (memberResult as { data: any }).data : null;
 
                 if (member && member.account_type !== "member") {
-                    // 검증 캐시 저장 후 페이지 리로드 — 모든 race condition 제거
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
-                    window.location.reload();
-                    return; // reload 후 더 이상 실행 안 함
+                    setStatus("ok");
+                    setSubmitting(false);
+                    return;
                 } else if (!member) {
                     setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
                     setSubmitting(false);
