@@ -107,7 +107,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         verify();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // 로그인 핸들러 — Supabase 직접 호출, 성공 시 reload
+    // 로그인 핸들러 — 단순화. signIn 성공 → 강제 location 이동 (SPA 상태 초기화)
     const handleLogin = useCallback(
         async (e: React.FormEvent) => {
             e.preventDefault();
@@ -127,18 +127,30 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                     return;
                 }
 
-                // 권한 확인 (5초 타임아웃)
-                const memberResult = await Promise.race([
-                    sb.from("members").select("account_type,role").eq("auth_id", data.user.id).single(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
-                ]);
-                const member = memberResult && typeof memberResult === "object" && "data" in memberResult
-                    ? (memberResult as { data: any }).data : null;
+                // 권한 확인 — 직접 fetch로 (Supabase client 경쟁 상태 우회)
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/members?auth_id=eq.${data.user.id}&select=account_type,role`,
+                    {
+                        headers: {
+                            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                            'Authorization': `Bearer ${data.session.access_token}`,
+                        },
+                    }
+                );
+
+                if (!res.ok) {
+                    setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
+                    setSubmitting(false);
+                    return;
+                }
+
+                const members = await res.json();
+                const member = Array.isArray(members) && members.length > 0 ? members[0] : null;
 
                 if (member && member.account_type !== "member") {
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
-                    setStatus("ok");
-                    setSubmitting(false);
+                    // 전체 앱 상태를 깨끗하게 초기화하기 위해 location 이동
+                    window.location.href = window.location.pathname;
                     return;
                 } else if (!member) {
                     setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
