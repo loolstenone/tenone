@@ -2,16 +2,13 @@
  * WIO 솔루션 Supabase CRUD
  * 멀티테넌트: 모든 쿼리에 tenant_id 필터
  */
-import { createClient as createBrowserClient } from '@supabase/supabase-js';
+import { createClient } from './client';
 import type {
   WIOTenant, WIOMember, WIOProject, WIOJob, WIOTimesheet, WIOProjectMember,
   ProjectStatus, JobStatus,
 } from '@/types/wio';
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 // ── 유틸 ──
 function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {

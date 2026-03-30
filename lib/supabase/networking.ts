@@ -2,17 +2,14 @@
  * Networking 모듈 Supabase CRUD
  * networking_events, networking_rsvps
  */
-import { createClient as createBrowserClient } from '@supabase/supabase-js';
+import { createClient } from './client';
 import type {
   NetworkingEvent, NetworkingRsvp,
   CreateNetworkingEventInput, UpdateNetworkingEventInput,
   CreateRsvpInput, UpdateRsvpInput,
 } from '@/types/networking';
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 // ── 유틸 ──
 

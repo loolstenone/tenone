@@ -2,12 +2,9 @@
  * WIO Competition 모듈 Supabase CRUD
  * competitions, competition_teams
  */
-import { createClient as createBrowserClient } from '@supabase/supabase-js';
+import { createClient } from './client';
 
-const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 // ── 유틸 ──
 
