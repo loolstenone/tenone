@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Bot, Camera, Calendar, Tag, Moon, Share2, Zap, Link2, Download, Smartphone, Shield, Sparkles, Mail, MessageCircle } from "lucide-react";
+import { ArrowRight, Bot, Camera, Calendar, Tag, Moon, Share2, Zap, Link2, Download, Smartphone, Shield, Sparkles, Mail, MessageCircle, Fingerprint, Star } from "lucide-react";
 
 /* ── fade-in ── */
 function useFadeIn() {
@@ -125,46 +125,76 @@ export default function MyVersePage() {
             {/* ═══ 3. HOW IT WORKS ═══ */}
             <section className="py-24 lg:py-32 px-5">
                 <div ref={s3.ref} className={`${s3.className} max-w-5xl mx-auto`}>
-                    <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-3">HOW IT WORKS</p>
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-14">나의 흔적이 기록이 된다</h2>
+                    <div className="text-center mb-16">
+                        <p className="text-indigo-600 font-semibold text-sm mb-2">HOW IT WORKS</p>
+                        <h2 className="text-3xl sm:text-4xl font-bold">나의 흔적이 기록이 된다</h2>
+                    </div>
 
-                    {[
-                        { n: '1', title: '기록한다', tag: '사진 한 장이면 된다. 나머지는 AI가.', cols: 4, cards: [
-                            { icon: Camera, t: '사진이나 메모를 남긴다', s: '찍는 순간, 기록이 시작된다' },
-                            { icon: Calendar, t: 'AI가 캘린더와 대조', s: '일정과 기록을 자동 매칭' },
-                            { icon: Tag, t: '자동 태그 + LOG 저장', s: '장소, 사람, 감정 태그' },
-                            { icon: Moon, t: '하루 요약', s: 'AI가 오늘을 한 줄로 정리' },
-                        ]},
-                        { n: '2', title: '공유한다', tag: '내가 원하는 것만, 원하는 사람에게만.', cols: 3, cards: [
-                            { icon: Share2, t: '공유할 콘텐츠 선택', s: '원하는 것만 골라서' },
-                            { icon: Zap, t: 'AI가 한번에 공유', s: '인스타그램, 스레드, X' },
-                            { icon: Link2, t: 'URL로 어디든', s: '링크 하나로 공유' },
-                        ]},
-                        { n: '3', title: '모은다', tag: '흩어진 10년을 한 곳에. 다시는 잃지 않는다.', cols: 3, cards: [
-                            { icon: Link2, t: '나의 계정을 연결', s: '소셜, 클라우드 연동' },
-                            { icon: Download, t: '과거 흔적을 모은다', s: '디지털 흔적을 한 곳에' },
-                            { icon: Bot, t: 'AI가 관리해준다', s: '자동 분류, 정리, 보관' },
-                        ]},
-                    ].map(step => (
-                        <div key={step.n} className="mb-14 last:mb-0">
-                            <div className="flex items-center gap-3 mb-2">
-                                <span className="text-4xl font-black text-neutral-200">{step.n}</span>
-                                <div>
-                                    <h3 className="text-xl font-bold">{step.title}</h3>
-                                    <p className="text-sm text-neutral-500">{step.tag}</p>
-                                </div>
-                            </div>
-                            <div className={`grid sm:grid-cols-${step.cols} gap-3 mt-4`}>
-                                {step.cards.map(c => (
-                                    <div key={c.t} className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-                                        <c.icon className="h-5 w-5 text-indigo-600 mb-3" />
-                                        <h4 className="text-sm font-semibold mb-1">{c.t}</h4>
-                                        <p className="text-xs text-neutral-500">{c.s}</p>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* Flow 1: 기록 */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-bold">1</span>
+                            <h3 className="text-xl font-bold">기록한다</h3>
                         </div>
-                    ))}
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Camera, title: '사진이나 메모를 남긴다', desc: '찍는 순간, 기록이 시작된다' },
+                                { icon: Calendar, title: 'AI가 캘린더와 대조', desc: '일정과 기록을 자동 매칭' },
+                                { icon: Tag, title: '자동 태그 + LOG 저장', desc: '장소, 사람, 감정 태그' },
+                                { icon: Moon, title: '하루 요약', desc: 'AI가 오늘을 한 줄로 정리' },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100 shadow-sm">
+                                    <s.icon className="h-5 w-5 text-indigo-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Flow 2: 공유 */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white text-sm font-bold">2</span>
+                            <h3 className="text-xl font-bold">공유한다</h3>
+                        </div>
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Camera, title: '사진이나 메모를 남긴다', desc: '나의 기록에서 시작' },
+                                { icon: Share2, title: '공유할 콘텐츠 선택', desc: '내가 공유하고 싶은 것만' },
+                                { icon: Zap, title: 'AI가 한번에 공유', desc: '인스타그램, 스레드, X' },
+                                { icon: Fingerprint, title: '나의 정체성이 된다', desc: '흔적이 모여 나를 만든다' },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100 shadow-sm">
+                                    <s.icon className="h-5 w-5 text-purple-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Flow 3: 모은다 */}
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-600 text-white text-sm font-bold">3</span>
+                            <h3 className="text-xl font-bold">모은다</h3>
+                        </div>
+                        <div className="grid sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Link2, title: '나의 계정을 연결', desc: '소셜, 클라우드 계정 연동' },
+                                { icon: Download, title: '과거 흔적을 모은다', desc: '디지털 흔적을 한 곳에' },
+                                { icon: Bot, title: 'AI가 관리해준다', desc: '자동 분류, 정리, 보관' },
+                                { icon: Star, title: '기록이 역사가 된다', desc: '나의 인생 타임라인' },
+                            ].map(s => (
+                                <div key={s.title} className="bg-white rounded-xl p-5 border border-neutral-100 shadow-sm">
+                                    <s.icon className="h-5 w-5 text-pink-600 mb-3" />
+                                    <h4 className="text-sm font-bold mb-1">{s.title}</h4>
+                                    <p className="text-xs text-neutral-500">{s.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </section>
 
