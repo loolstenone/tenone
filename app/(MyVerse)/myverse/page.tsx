@@ -11,10 +11,9 @@ export default function MyVersePage() {
             <section className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white" />
                 <div className="relative mx-auto max-w-5xl px-6 py-28 lg:py-36 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 text-indigo-600 text-sm font-medium mb-8">
-                        <Sparkles className="h-4 w-4" />
-                        Personal Blackbox
-                    </div>
+                    <p className="text-sm text-neutral-400 mb-8">
+                        안녕! 싸이월드, 카카오스토리 <span className="text-neutral-300">ㅠㅠ</span>
+                    </p>
 
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.15]">
                         나의 디지털 흔적은
