@@ -22,7 +22,7 @@ export function MyVerseHeader() {
                 <div className="hidden sm:flex items-center gap-4">
                     <Link href="/myverse/contact"
                         className="text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition">
-                        Early Access
+                        Personal Blackbox
                     </Link>
                 </div>
 
@@ -36,7 +36,7 @@ export function MyVerseHeader() {
                 <div className="sm:hidden bg-white border-t border-neutral-100 px-6 py-4 space-y-3">
                     <Link href="/myverse/contact" onClick={() => setMobileOpen(false)}
                         className="block text-sm font-semibold text-indigo-600">
-                        Early Access 신청
+                        Personal Blackbox 신청
                     </Link>
                 </div>
             )}

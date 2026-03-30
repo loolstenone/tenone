@@ -32,7 +32,7 @@ export default function MyVersePage() {
                     <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
                         <Link href="/myverse/contact"
                             className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25">
-                            Early Access 신청 <ArrowRight className="h-4 w-4" />
+                            Personal Blackbox 신청 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
 
@@ -303,7 +303,7 @@ export default function MyVersePage() {
                     </p>
                     <Link href="/myverse/contact"
                         className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition shadow-lg shadow-indigo-500/25 text-lg">
-                        Early Access 신청 <ArrowRight className="h-5 w-5" />
+                        Personal Blackbox 신청 <ArrowRight className="h-5 w-5" />
                     </Link>
                     <p className="mt-5 text-sm text-neutral-400">
                         iOS + Android &middot; 곧 출시 &middot; WIO by Ten:One&#8482;
