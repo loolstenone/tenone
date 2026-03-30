@@ -107,7 +107,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         verify();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // 로그인 핸들러 — 단순화. signIn 성공 → 강제 location 이동 (SPA 상태 초기화)
+    // 로그인 핸들러 — signIn만 하고 즉시 페이지 이동. 권한 확인은 verify()가 담당.
     const handleLogin = useCallback(
         async (e: React.FormEvent) => {
             e.preventDefault();
@@ -116,52 +116,22 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
             try {
                 const sb = createClient();
-                const { data, error: authError } = await sb.auth.signInWithPassword({
+                const { error: authError } = await sb.auth.signInWithPassword({
                     email,
                     password,
                 });
 
-                if (authError || !data.session) {
+                if (authError) {
                     setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
                     setSubmitting(false);
                     return;
                 }
 
-                // 권한 확인 — 직접 fetch로 (Supabase client 경쟁 상태 우회)
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/members?auth_id=eq.${data.user.id}&select=account_type,role`,
-                    {
-                        headers: {
-                            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                            'Authorization': `Bearer ${data.session.access_token}`,
-                        },
-                    }
-                );
-
-                if (!res.ok) {
-                    setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
-                    setSubmitting(false);
-                    return;
-                }
-
-                const members = await res.json();
-                const member = Array.isArray(members) && members.length > 0 ? members[0] : null;
-
-                if (member && member.account_type !== "member") {
-                    sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
-                    // 전체 앱 상태를 깨끗하게 초기화하기 위해 location 이동
-                    window.location.href = window.location.pathname;
-                    return;
-                } else if (!member) {
-                    setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
-                    setSubmitting(false);
-                } else {
-                    setError("접근 권한이 없습니다. 직원 계정으로 로그인하세요.");
-                    setSubmitting(false);
-                }
+                // signIn 성공 → 즉시 페이지 이동 (새 페이지에서 verify()가 권한 확인)
+                window.location.href = window.location.pathname;
             } catch (err) {
                 console.error("login error:", err);
-                setError("오류가 발생했습니다. 네트워크를 확인해주세요.");
+                setError("오류가 발생했습니다.");
                 setSubmitting(false);
             }
         },
