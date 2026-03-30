@@ -4,7 +4,22 @@
 
 ---
 
-## 2026-03-30 (사무실)
+## 2026-03-30 (사무실, 야간 퇴근 전)
+
+### Myverse 개발 전략 검토
+- Myverse_Dev_Guide_v3_final.md (v3) 전체 분석
+- 결정사항:
+  - 별도 레포 분리 개발 (React Native Expo + 별도 Supabase)
+  - 웹은 소개/랜딩만, 모든 기능은 앱
+  - 공유 URL 짧게 (my.tenone.biz/s/{id} 방향)
+  - Mac 구매 검토 (iOS 네이티브 빌드 필요)
+- TenOne 인증 시스템 전체 분석 — 현재 안정화됨 확인
+  - GoTrueClient 싱글톤 통합(11976ed) 이후 문제 없음
+  - Myverse는 별도 Supabase라 TenOne 인증과 무관
+
+---
+
+## 2026-03-30 (사무실, 오전~오후)
 
 ### WIO Glossary v1 → 7계층 체계 정렬
 - types/wio.ts: WIO_SERVICES 16개, WIOPreset 타입
