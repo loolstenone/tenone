@@ -127,24 +127,29 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                     return;
                 }
 
-                // 권한 확인
-                const { data: member } = await sb
-                    .from("members")
-                    .select("account_type,role")
-                    .eq("auth_id", data.user.id)
-                    .single();
+                // 권한 확인 (5초 타임아웃)
+                const memberResult = await Promise.race([
+                    sb.from("members").select("account_type,role").eq("auth_id", data.user.id).single(),
+                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
+                ]);
+                const member = memberResult && typeof memberResult === "object" && "data" in memberResult
+                    ? (memberResult as { data: any }).data : null;
 
                 if (member && member.account_type !== "member") {
                     // 검증 캐시 저장 후 페이지 리로드 — 모든 race condition 제거
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                     window.location.reload();
                     return; // reload 후 더 이상 실행 안 함
+                } else if (!member) {
+                    setError("권한 확인에 실패했습니다. 다시 시도해주세요.");
+                    setSubmitting(false);
                 } else {
                     setError("접근 권한이 없습니다. 직원 계정으로 로그인하세요.");
                     setSubmitting(false);
                 }
-            } catch {
-                setError("오류가 발생했습니다.");
+            } catch (err) {
+                console.error("login error:", err);
+                setError("오류가 발생했습니다. 네트워크를 확인해주세요.");
                 setSubmitting(false);
             }
         },
