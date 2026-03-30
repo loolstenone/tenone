@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User, Lock, X } from "lucide-react";
+import { ArrowLeft, Eye, ThumbsUp, Bookmark, Share2, ChevronUp, ChevronDown, Download, Calendar, User, Lock, X, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import CommentSection from "./CommentSection";
 import type { Post, Attachment } from "@/types/board";
@@ -15,6 +15,7 @@ interface PostDetailProps {
     onNavigate?: (postId: string) => void;
     onLike?: () => void;
     onBookmark?: () => void;
+    onEdit?: () => void;
 }
 
 function formatFullDate(dateStr: string): string {
@@ -66,6 +67,7 @@ export default function PostDetail({
     onNavigate,
     onLike,
     onBookmark,
+    onEdit,
 }: PostDetailProps) {
     const { user } = useAuth();
     const [liked, setLiked] = useState(post.isLiked || false);
@@ -325,6 +327,16 @@ export default function PostDetail({
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">공유</span>
                 </button>
+                {onEdit && user && (
+                    <button
+                        onClick={onEdit}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full border tn-text-sub transition-all duration-200 hover:scale-105"
+                        style={{ borderColor: "var(--tn-border)" }}
+                    >
+                        <Pencil className="h-4 w-4" />
+                        <span className="text-sm">수정</span>
+                    </button>
+                )}
             </div>
 
             {/* 이전/다음 글 */}

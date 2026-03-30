@@ -1,193 +1,206 @@
-# TenOne Universe — 프로젝트 현황 보고서
+# Ten:One Universe — 개발 현황 리포트
 
-> 기준일: 2026-03-30
-> 프로젝트: C:\Projects\TenOne
-> 배포: https://tenone.biz (Vercel)
-> 기술 스택: Next.js 16 + React 19 + TypeScript + Tailwind CSS v4 + Supabase
+> 날짜: 2026-03-30
+> 총 코드: 156,269줄 (TSX/TS)
+> 총 페이지: 383개 | DB 테이블: 142개 | API: 58개 | 컴포넌트: 75개
 
 ---
 
-## 1. 전체 규모
+## 1. 전체 요약
+
+| 지표 | 수치 |
+|------|------|
+| 브랜드 사이트 | 26개 |
+| 전체 페이지 | 383개 |
+| API 엔드포인트 | 58개 |
+| Supabase 테이블 | 142개 |
+| 타입 정의 파일 | 21개 |
+| 컴포넌트 | 75개 |
+| Lib 모듈 | 49개 (root 30 + supabase 19) |
+| 문서 | 25개 |
+
+---
+
+## 2. 브랜드별 개발 현황
+
+### Tier 1 — 풀 시스템 (Supabase 실연동)
+
+| 브랜드 | 페이지 | DB 테이블 | Supabase | 상태 |
+|--------|--------|-----------|----------|------|
+| **WIO (Orbi)** | 141 | 90+ | O | 서비스 계층 도입, 120+ 모듈, RBAC/워크플로우/Culture 엔진 |
+| **MyVerse** | 14 | 8 | O | 7탭 앱 (AI/Dream/Log/Plan/Verse/Work), 개인 블랙박스 |
+
+### Tier 2 — 대규모 사이트 (Mock 기반)
+
+| 브랜드 | 페이지 | 레이아웃 | 상태 |
+|--------|--------|----------|------|
+| **SmarComm** | 46 | O | 대시보드/캠페인/리드/분석/스캔 + 16개 lib 모듈 |
+| **TenOne 포탈** | 14 | O | 퍼블릭(Works/Newsroom/About/Universe) + 인트라 |
+| **Badak** | 14 | O | 커뮤니티/탐색/모임 + DB 4테이블 |
+| **MADLeague** | 11 | O | 홈/소개/프로그램/경쟁PT + 헤더/푸터 |
+| **TrendHunter** | 11 | O | 크롤러/트렌드분석 + DB 9테이블 |
+| **Mindle** | 10 | O | AI 콘텐츠 큐레이션 |
+
+### Tier 3 — 중규모 사이트
+
+| 브랜드 | 페이지 | 상태 |
+|--------|--------|------|
+| **HeRo** | 8 | HIT 통합검사 + 이력서 + 커리어 매칭 |
+| **YouInOne** | 8 | 프로젝트 그룹 + 시수 관리 |
+| **ChangeUp** | 7 | 창업 교육 프로그램 |
+| **RooK** | 7 | AI 크리에이터 플랫폼 |
+| **Seoul/360** | 6 | 서울 지하철 관광 가이드 |
+| **MADLeap** | 6 | 대학생 포트폴리오/스터디 |
+| **Domo** | 6 | 시니어 비즈맨 네트워킹 |
+| **0gamja** | 5 | AI 콘텐츠 플랫폼 |
+| **FWN** | 4 | 패션 브랜드 |
+
+### Tier 4 — 소규모/랜딩
+
+| 브랜드 | 페이지 | 상태 |
+|--------|--------|------|
+| Jakka | 3 | 작가 플랫폼 |
+| MoNTZ | 2 | 포토그래피 |
+| Planners | 1 | Vrief/GPR 기반 기획 |
+| EvoSchool | 1 | 교육 플랫폼 |
+| BrandGravity | 1 | 브랜딩 컨설팅 |
+| NamingFactory | 1 | 네이밍 서비스 |
+| NatureBox | 1 | 자연함 브랜드 |
+| Mullaesian | 1 | 문래동 브랜드 |
+| Townity | 1 | 커뮤니티 |
+
+---
+
+## 3. WIO (Orbi) 상세 현황
+
+### 서비스 계층 (Glossary v1 기준)
+
+| 서비스 | 모듈 수 | DB 연동 | 상태 |
+|--------|---------|---------|------|
+| Talk | 11 | 부분(게시판) | 메신저/캘린더/문서/알림/위키/설문/투표 |
+| Project | 1 | O | 프로젝트 CRUD + 타임라인 피드 |
+| Task | 1 | O | 업무관리 (wio_jobs) |
+| Approval | 1 | O | 전자결재 |
+| Workflow | 1 | 부분 | 비주얼 빌더 |
+| People | 7 | 부분 | 인재/채용/근태/조직/교육/인정/피드백 |
+| Goal | 7 | 부분 | 경영기획/KPI/GPR/평가/보상/인센티브 |
+| Finance | 12 | 부분 | 재무/원장/매입/매출/예산/세무/자산/급여 |
+| Timesheet | 1 | O | 시수 기록 (wio_timesheets) |
+| Marketing | 18 | 1/18 | campaign만 실DB, 나머지 Mock |
+| CRM | 13 | X | 전체 Mock |
+| AI | 1 | O | Agent Hub 실연결 (Claude API) |
+| 생산 | 9 | X | Mock |
+| 지원 | 15 | X | Mock |
+| 파트너 | 4 | X | Mock |
+| 시스템 | 13 | 부분 | 사용자 CRUD 실DB |
+
+### 핵심 엔진
+
+| 엔진 | 파일 | 상태 |
+|------|------|------|
+| RBAC | lib/rbac.ts | 실작동 (6단계 권한) |
+| Workflow Engine | lib/workflow-engine.ts | 실작동 |
+| Culture Engine | lib/culture-engine.ts | 실작동 |
+| Agent Hub | lib/agent/claude.ts | 실작동 (Claude API) |
+| Rule Engine | - | 설계 완료, 구현 대기 |
+| Event Bus | - | 설계 완료, 구현 대기 |
+
+---
+
+## 4. 인프라 현황
+
+### Supabase
 
 | 항목 | 수치 |
 |------|------|
-| 총 페이지 수 | **499** |
-| Git 커밋 수 | **324** |
-| Supabase DB 테이블 | **90+** |
-| SQL 마이그레이션 파일 | **21** |
-| WIO Orbi 모듈 페이지 | **125** |
-| Orbi 실DB 연동 모듈 | **56** (45%) |
-| AI 에이전트 | **7** (Claude 실응답) |
-| 브랜드 사이트 | **15+** |
-| 게시판 등록 | **25** (6개 사이트) |
+| SQL 마이그레이션 파일 | 21개 |
+| 총 테이블 | 142개 |
+| WIO 전용 테이블 | 90+ |
+| 브랜드 전용 테이블 | Badak 4, TrendHunter 9, MyVerse 8, HeRo 3 |
+| 게시판 테이블 | 6개 (posts, comments, likes, bookmarks, files, board_configs) |
+| 마케팅 테이블 | 4개 (campaigns, leads, content, stats) |
+| 에이전트 테이블 | 2개 (agent_profiles, agent_messages) |
+
+### API 라우트
+
+| 모듈 | 엔드포인트 |
+|------|-----------|
+| Board 시스템 | 9개 (게시판 CRUD + 업로드 + 좋아요/북마크) |
+| Agent 시스템 | 5개 (hub/messages/profiles) |
+| 외부 연동 | 6개 (Google Calendar, Slack, Kakao) |
+| 마케팅 | campaigns, leads, content |
+| 경연/네트워킹/수료증 | 각 3~4개 |
+| 기타 | points, approvals, members, projects 등 |
+
+### 외부 연동
+
+| 서비스 | 파일 | 상태 |
+|--------|------|------|
+| Google Calendar | lib/integrations/google-calendar.ts | 구현 완료 |
+| Slack | lib/integrations/slack.ts | 구현 완료 |
+| Kakao | lib/integrations/kakao.ts | 구현 완료 |
+| Claude AI | lib/agent/claude.ts | 실작동 |
 
 ---
 
-## 2. 서비스별 현황
+## 5. 컴포넌트 현황
 
-### 2.1 TenOne (기업 소개)
-- URL: tenone.biz
-- 페이지: 홈, Works(20개 게시물), Newsroom, Contact, About(Universe/Brands/History), Profile
-- 상태: ✅ 완성. 로그인/가입 숨김 (기업 소개용)
-- 게시판: Works, Newsroom (Supabase 실연동)
-
-### 2.2 TenOne Intra (직원 전용)
-- URL: tenone.biz/intra
-- 접근: 직원 로그인 전용 (sessionStorage 캐시, auth-context 독립)
-- 모듈: ERP, BUMS, Marketing, Studio, Wiki, Agent, Universe(8페이지)
-- Universe 대시보드: 회원/구독/교육/예약/매출/게스트/개인정보 실DB 연동
-
-### 2.3 WIO (Enterprise Unified System)
-- URL: tenone.biz/wio
-
-**소개 페이지 (마케팅):**
-| 페이지 | URL | 상태 |
-|--------|-----|------|
-| 랜딩 | /wio | ✅ 6트랙, 3대자원, 가격표 |
-| Framework | /wio/framework | ✅ 17파트 |
-| Solutions | /wio/solutions | ✅ ~110 모듈 카탈로그 |
-| Setup | /wio/setup | ✅ 5단계 |
-| Evaluation | /wio/evaluation | ✅ |
-| CRM | /wio/crm | ✅ 3층 Golden Record |
-| Marketing | /wio/marketing | ✅ |
-| Data | /wio/data | ✅ CDO Office |
-| Pricing | /wio/pricing | ✅ 4단 (Starter~Custom) |
-| AI Matrix | /wio/ai-matrix | ✅ 20모듈×6 AI유형 |
-| E2E Flows | /wio/e2e-flows | ✅ 4개 흐름도 |
-| Presets | /wio/presets | ✅ 업종별 4종 |
-| Migration | /wio/migration | ✅ 순차 전환 6단계 |
-
-**Orbi APP (실제 사용):**
-| 카테고리 | 모듈 수 | 실DB |
-|---------|---------|------|
-| Track 6 공통 | 19 | 12 |
-| Track 1 운영·관리 | 22 | 15 |
-| Track 2 사업 | 28 | 10 |
-| Track 3 생산 | 9 | 5 |
-| Track 4 지원 | 8 | 1 |
-| Track 5 파트너 | 4 | 1 |
-| Track 7 시스템 | 14 | 8 |
-| 개인 (MY) | 5 | 4 |
-| 지주사 (HLD) | 3 | 3 |
-| 기타 (설문/투표) | 2 | 0 |
-| **합계** | **125** | **56 (45%)** |
-
-**핵심 엔진:**
-| 엔진 | 파일 | 상태 |
-|------|------|------|
-| RBAC | lib/rbac.ts | ✅ 사이드바 미들웨어 적용 |
-| 워크플로우 | lib/workflow-engine.ts | ✅ 결재 연동 실작동 |
-| Culture Engine | lib/culture-engine.ts | ✅ 시스템 Culture 페이지 연동 |
-
-**설정 페이지:**
-| 탭 | 내용 | 상태 |
-|---|------|------|
-| 세팅 (조직 모드) | OrgTreeBuilder — 조직 트리 CRUD + 인력 배치 | ✅ Supabase |
-| 세팅 (모듈 모드) | 레고 블록 팔레트 + 끼워넣기 | ✅ Mock |
-| 세팅 (워크플로우 모드) | 노드 플로우 빌더 + 7 결재 템플릿 | ✅ Mock |
-| 권한 | 5 역할 템플릿 + 모듈 접근 매트릭스 | ✅ Mock |
-| 테마 | 5 프리셋 + 커스텀 컬러 | ✅ |
-| 시스템 | 조직정보 + 멤버 관리 | ✅ |
-
-### 2.4 Myverse (개인 앱)
-- URL: tenone.biz/myverse/app
-- 7탭: ME, LOG, PLAN, DREAM, WORK, AI, VERSE
-- 상태: ✅ 전탭 Supabase 연동 (myverse_* 8테이블)
-
-### 2.5 브랜드 사이트
-
-| 브랜드 | URL | 페이지 수 | 고도화 | 게시판 |
-|--------|-----|----------|--------|--------|
-| MADLeap | /madleap | 6 | ✅ 전면 | 5개 (free/qna/review/recruit/community) |
-| MADLeague | /madleague | 11 | ✅ 전면 | 4개 (notice/competition/madzine/gallery) |
-| Badak | /badak | 14 | ✅ 전면 | 5개 (industry/free/jobs/mentoring/community) |
-| SmarComm | /smarcomm | 46 | ✅ 랜딩+대시보드 | 3개 (cases/blog/faq) |
-| HeRo | /hero | 8 | ✅ 홈 | - |
-| Planner's | /planners | 1 | ✅ 전면 리라이트 | - |
-| RooK | /rook | 7 | ✅ 홈 | 3개 (works/challenge/feedback) |
-| Mindle | /mindle | 10 | ✅ 홈 | - |
-| ChangeUp | /changeup | 7 | ✅ 홈 | 1개 (community) |
-| 0gamja | /0gamja | 5 | ✅ 홈 | - |
-| YouInOne | /youinone | 8 | ✅ 홈 | - |
-| domo | /domo | 6 | ✅ 홈 | - |
-| FWN | /fwn | 5 | ✅ 홈 | - |
-| Badak Stars | /badak/stars | 2 | ✅ | - |
+| 분류 | 수량 |
+|------|------|
+| 브랜드 헤더/푸터 | 26쌍 |
+| 게시판 컴포넌트 | 9개 (BoardPage, PostEditor, PostDetail, PostCard 등) |
+| SmarComm 전용 | 15개 |
+| 워크플로우 | 6개 |
+| 앱 셸/네비게이션 | 6개 (IntraHeader, IntraSidebar, MarketingSidebar 등) |
+| 공통 UI | 13개 (BrandCard, LoginModal, Logo 등) |
 
 ---
 
-## 3. 인프라 현황
+## 6. 오늘 작업 (2026-03-30 사무실)
 
-### 3.1 Supabase DB
-- 프로젝트: ziotlxkdctlhiwkgmmsh
-- 테이블: 90+ (RLS 전체 적용)
-- 주요 그룹: members, posts, board_configs, wio_*, myverse_*, agent_*, guests, subscriptions, bookings, revenue, enrollments
+| 작업 | 상태 |
+|------|------|
+| COM-AI → Agent Hub 실연결 | 완료 |
+| WIO Glossary v1 → 7계층 정렬 (사이드바 + 설정) | 완료 |
+| SYS-USR 사용자 관리 실DB | 완료 |
+| 프로젝트 타임라인 피드 | 완료 |
+| COM-WCL 업무 캘린더 실DB | 완료 |
+| MY-HR 내 인사 실DB | 완료 |
+| 마케팅 campaign 실DB | 완료 |
 
-### 3.2 인증
-- Supabase Auth (이메일/비밀번호 + 카카오 OAuth)
-- 인트라: 독립 인증 (auth-context 비의존, sessionStorage 캐시)
-- WIO Orbi: 3모드 (데모/SaaS/마스터)
-
-### 3.3 Agent Hub
-- 7 에이전트: Compass, MADLeague, Badak, SmarComm, HeRo, Mindle, WIO
-- Claude API 실응답 (ANTHROPIC_API_KEY 설정됨)
-- agent_profiles + agent_messages 테이블
-
-### 3.4 외부 연동 (코드 준비, 키 미설정)
-- Google Calendar: lib/integrations/google-calendar.ts + API routes
-- Kakao: lib/integrations/kakao.ts + API routes
-- Slack: lib/integrations/slack.ts + API routes
-
-### 3.5 배포
-- Vercel 프로덕션: tenone.biz
-- 도메인: youinone.com (alias)
-- 빌드: Next.js 16 Turbopack, ~500 페이지 정적 생성
+### 변경 파일 요약
+- `types/wio.ts` — WIO_SERVICES 타입 추가
+- `lib/wio-modules.ts` — SERVICE_CATALOG 16개, 모듈별 service 필드
+- `app/(WIO)/wio/app/layout.tsx` — 사이드바 서비스 기반 재구성
+- `app/(WIO)/wio/app/settings/page.tsx` — 서비스 모드 탭 추가
+- `app/(WIO)/wio/app/comm/ai/page.tsx` — Agent Hub 실연결
+- `app/(WIO)/wio/app/system/users/page.tsx` — wio_members CRUD
+- `app/(WIO)/wio/app/project/[id]/page.tsx` — 타임라인 피드 탭
+- `app/(WIO)/wio/app/comm/work-calendar/page.tsx` — wio_jobs 실DB
+- `app/(WIO)/wio/app/my/hr/page.tsx` — wio_members 프로필 연동
+- `app/(WIO)/wio/app/marketing/campaign/page.tsx` — fetchCampaigns 연결
+- `docs/WIO_Glossary_v1.md` — 용어 사전
 
 ---
 
-## 4. 문서
+## 7. 다음 우선순위
 
-| 문서 | 경로 | 내용 |
-|------|------|------|
-| CLAUDE.md | 프로젝트 루트 | 프로젝트 가이드 + UOS + 동기화 규칙 |
-| WIO EUS v2.0 | docs/WIO_EUS_v2.md | WIO 통합 기획서 (1,514줄, 27챕터) |
-| 조직도 설계 | docs/WIO_OrgDesign_v1.md | 조직도 + 인력 배치 상세 설계 |
-| Universe OS | docs/Universe_OS_Plan.md | AI 에이전트 시스템 계획 |
-| 게시판 가이드 | docs/WIO_Board_Guide.md | WIO 게시판 모듈 가이드 |
-| WORK_STATUS.md | 프로젝트 루트 | 작업 현황 (최신: 3/30) |
-| CHANGELOG.md | 프로젝트 루트 | 변경 이력 |
-| ROADMAP.md | 프로젝트 루트 | 로드맵 |
+### 즉시
+1. 마케팅/CRM DB 테이블 생성 + 나머지 모듈 실DB
+2. 설정 서비스/모듈 → Supabase 저장 (localStorage → DB)
 
----
+### 단기
+3. 화상회의 딥링크 (Zoom/Meet)
+4. 외부 게스트 초대 플로우
+5. AI 프로젝트 설계 (자동 기획서)
 
-## 5. 완성도 요약
-
-```
-페이지 UI        ████████████████████ 100%  (499페이지)
-WIO 모듈 UI      ████████████████████ 100%  (125페이지)
-실DB 연동         █████████░░░░░░░░░░░  45%  (56/125 Orbi)
-핵심 엔진         ████████████████████ 100%  (RBAC+워크플로우+Culture)
-브랜드 고도화     ████████████████████ 100%  (15개 브랜드)
-인증              ████████████████░░░░  80%  (인트라 해결, 크로스탭 이슈 잔존)
-Agent             ████████████████████ 100%  (7개 에이전트 실응답)
-SEO               ████████████████████ 100%  (메타데이터 + sitemap)
-모바일            ████████████████░░░░  80%  (주요 페이지 수정 완료)
-외부 API          ████░░░░░░░░░░░░░░░░  20%  (코드 준비, 키 미설정)
-```
+### 중기
+6. Myverse ↔ Orbi 통합 인증
+7. 브랜드 사이트 Supabase 연동 확대
+8. Rule Engine + Event Bus 구현
+9. SmarComm 독립 배포 (Vercel + Supabase)
 
 ---
 
-## 6. 남은 작업
-
-| # | 작업 | 우선순위 |
-|---|------|---------|
-| 1 | 나머지 69개 모듈 실DB 연동 | 🟡 |
-| 2 | 외부 API 키 설정 (고객 도입 시) | 🟢 |
-| 3 | 바당쇠 KakaoTalk 봇 | 🟢 |
-| 4 | 모바일 앱 (Myverse React Native) | 🟢 |
-| 5 | B2B SaaS 얼리어답터 모집 | 🟢 |
-| 6 | 성능 최적화 (이미지 WebP, 번들) | 🟢 |
-
----
-
-*Generated: 2026-03-30*
-*TenOne Universe — Powered by Claude Code*
+*Ten:One Universe Development Status Report v1.0*
+*Generated: 2026-03-30 by Claude Code*

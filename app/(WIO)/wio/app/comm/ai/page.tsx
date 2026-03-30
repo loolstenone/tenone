@@ -1,58 +1,173 @@
 'use client';
 
-import { useState } from 'react';
-import { Bot, Send, FileText, Languages, BarChart3, Clock, Plus, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Bot, Send, FileText, Languages, BarChart3, Plus, Sparkles, Loader2, AlertCircle, Trash2 } from 'lucide-react';
 import { useWIO } from '../../layout';
 
-type Conversation = { id: string; title: string; lastMessage: string; time: string; messageCount: number };
-type Message = { id: string; role: 'user' | 'assistant'; text: string; time: string };
+type Conversation = {
+  id: string;
+  title: string;
+  messages: Message[];
+  agentName: string;
+  createdAt: string;
+};
 
-const MOCK_CONVERSATIONS: Conversation[] = [
-  { id: 'c1', title: '3월 매출 데이터 분석', lastMessage: '3월 매출은 전월 대비 18% 증가했으며...', time: '14:20', messageCount: 6 },
-  { id: 'c2', title: '프로젝트 제안서 요약', lastMessage: '핵심 요약: 1) 시장 기회 분석...', time: '11:30', messageCount: 4 },
-  { id: 'c3', title: '영문 이메일 번역', lastMessage: '번역 완료했습니다. 확인해 주세요.', time: '어제', messageCount: 3 },
-  { id: 'c4', title: 'WIO 기능 비교표 생성', lastMessage: '요청하신 비교표를 생성했습니다.', time: '2일 전', messageCount: 5 },
-  { id: 'c5', title: '회의록 정리', lastMessage: '회의 주요 결정사항을 정리했습니다.', time: '3일 전', messageCount: 2 },
-];
-
-const MOCK_MESSAGES: Record<string, Message[]> = {
-  c1: [
-    { id: 'am1', role: 'user', text: '3월 매출 데이터를 분석해줘', time: '14:10' },
-    { id: 'am2', role: 'assistant', text: '3월 매출 데이터를 분석했습니다.\n\n- 총 매출: 2.4억원 (전월 대비 +18%)\n- 주요 성장 부문: SaaS 구독 (+25%), 컨설팅 (+12%)\n- 신규 고객: 12사 (전월 8사)\n- MRR: 8,500만원\n\n특히 SaaS 구독 매출의 성장이 두드러지며, WIO 도입 기업이 증가한 것이 주요 요인입니다.', time: '14:12' },
-    { id: 'am3', role: 'user', text: '경쟁사 대비 어떤 포지션이야?', time: '14:15' },
-    { id: 'am4', role: 'assistant', text: '시장 포지셔닝 분석 결과:\n\n1. 가격 경쟁력: 중상위 (경쟁사 대비 10-15% 저렴)\n2. 기능 커버리지: 상위 (통합 솔루션 강점)\n3. 고객 만족도: 4.2/5 (업계 평균 3.8)\n4. 성장률: 업계 평균 대비 1.5배\n\n차별화 포인트는 "올인원 통합 플랫폼"과 "AI 자동화" 기능입니다.', time: '14:18' },
-  ],
-  c2: [
-    { id: 'am5', role: 'user', text: 'MAD League 프로젝트 제안서 핵심만 요약해줘', time: '11:20' },
-    { id: 'am6', role: 'assistant', text: '핵심 요약:\n\n1. 시장 기회: 대학생 커뮤니티 시장 연 3,000억 규모\n2. 차별점: 실전 프로젝트 기반 대학 연합 네트워크\n3. 수익 모델: 기업 채용 연계 + 프로젝트 매칭 수수료\n4. 목표: 1년 내 50개 대학, 5,000명 멤버\n5. 필요 투자: 초기 2억 (플랫폼 + 마케팅)', time: '11:25' },
-  ],
+type Message = {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  time: string;
+  confidence?: number;
+  agentName?: string;
 };
 
 const QUICK_COMMANDS = [
-  { icon: FileText, label: '문서 요약', prompt: '다음 문서를 요약해줘:' },
-  { icon: Languages, label: '번역', prompt: '다음을 영어로 번역해줘:' },
-  { icon: BarChart3, label: '데이터 분석', prompt: '다음 데이터를 분석해줘:' },
+  { icon: FileText, label: '문서 요약', prompt: '다음 문서를 요약해줘:\n\n' },
+  { icon: Languages, label: '번역', prompt: '다음을 영어로 번역해줘:\n\n' },
+  { icon: BarChart3, label: '데이터 분석', prompt: '다음 데이터를 분석해줘:\n\n' },
 ];
+
+function generateId() {
+  return `conv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function timeStr() {
+  return new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function createNewConversation(): Conversation {
+  return {
+    id: generateId(),
+    title: '새 대화',
+    messages: [],
+    agentName: 'compass',
+    createdAt: new Date().toISOString(),
+  };
+}
 
 export default function AIPage() {
   const { tenant } = useWIO();
-  const [conversations] = useState(MOCK_CONVERSATIONS);
-  const [messages, setMessages] = useState(MOCK_MESSAGES);
-  const [selectedConv, setSelectedConv] = useState<string>('c1');
+  const [conversations, setConversations] = useState<Conversation[]>(() => [createNewConversation()]);
+  const [selectedId, setSelectedId] = useState<string>(() => conversations[0]?.id || '');
   const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selected = conversations.find(c => c.id === selectedId);
+  const currentMessages = selected?.messages || [];
+
+  // 스크롤 자동 이동
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [currentMessages.length, isLoading]);
+
+  // 새 대화 생성
+  const handleNewConversation = useCallback(() => {
+    const conv = createNewConversation();
+    setConversations(prev => [conv, ...prev]);
+    setSelectedId(conv.id);
+    setNewMessage('');
+    setError(null);
+    inputRef.current?.focus();
+  }, []);
+
+  // 대화 삭제
+  const handleDeleteConversation = useCallback((convId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setConversations(prev => {
+      const next = prev.filter(c => c.id !== convId);
+      if (next.length === 0) {
+        const newConv = createNewConversation();
+        setSelectedId(newConv.id);
+        return [newConv];
+      }
+      if (selectedId === convId) {
+        setSelectedId(next[0].id);
+      }
+      return next;
+    });
+  }, [selectedId]);
+
+  // 메시지 전송 → Agent Hub API
+  const handleSend = useCallback(async () => {
+    const text = newMessage.trim();
+    if (!text || isLoading) return;
+
+    setError(null);
+    const userMsg: Message = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      text,
+      time: timeStr(),
+    };
+
+    // 첫 메시지면 대화 제목 자동 설정
+    setConversations(prev => prev.map(c => {
+      if (c.id !== selectedId) return c;
+      const isFirst = c.messages.length === 0;
+      return {
+        ...c,
+        title: isFirst ? text.slice(0, 30) + (text.length > 30 ? '...' : '') : c.title,
+        messages: [...c.messages, userMsg],
+      };
+    }));
+    setNewMessage('');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/agent/hub', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          agentName: selected?.agentName || 'compass',
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.error || `서버 오류 (${res.status})`);
+      }
+
+      const aiMsg: Message = {
+        id: json.messageId || `msg-${Date.now() + 1}`,
+        role: 'assistant',
+        text: json.response || '응답을 받지 못했습니다.',
+        time: timeStr(),
+        confidence: json.confidence,
+        agentName: json.agentName,
+      };
+
+      setConversations(prev => prev.map(c => {
+        if (c.id !== selectedId) return c;
+        return { ...c, messages: [...c.messages, aiMsg] };
+      }));
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : '알 수 없는 오류';
+      setError(errMsg);
+
+      // 에러 메시지도 대화에 표시
+      const errorMsg: Message = {
+        id: `msg-err-${Date.now()}`,
+        role: 'assistant',
+        text: `⚠️ 오류: ${errMsg}`,
+        time: timeStr(),
+      };
+      setConversations(prev => prev.map(c => {
+        if (c.id !== selectedId) return c;
+        return { ...c, messages: [...c.messages, errorMsg] };
+      }));
+    } finally {
+      setIsLoading(false);
+      inputRef.current?.focus();
+    }
+  }, [newMessage, isLoading, selectedId, selected?.agentName]);
 
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
-
-  const currentMessages = messages[selectedConv] || [];
-
-  const handleSend = () => {
-    if (!newMessage.trim()) return;
-    const userMsg: Message = { id: `msg${Date.now()}`, role: 'user', text: newMessage.trim(), time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) };
-    const aiMsg: Message = { id: `msg${Date.now() + 1}`, role: 'assistant', text: '요청을 처리 중입니다. 데모 모드에서는 실제 AI 응답이 생성되지 않습니다. 실제 환경에서는 Agent Hub와 연동하여 지능적인 응답을 제공합니다.', time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) };
-    setMessages(prev => ({ ...prev, [selectedConv]: [...(prev[selectedConv] || []), userMsg, aiMsg] }));
-    setNewMessage('');
-  };
 
   return (
     <div>
@@ -60,14 +175,14 @@ export default function AIPage() {
 
       {isDemo && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 mb-4 text-sm text-amber-300">
-          데모 모드입니다. 실제 AI 응답은 생성되지 않습니다.
+          데모 모드 — Agent Hub 연동 시 실제 AI 응답이 생성됩니다.
         </div>
       )}
 
       {/* 빠른 명령 */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 flex-wrap">
         {QUICK_COMMANDS.map(cmd => (
-          <button key={cmd.label} onClick={() => setNewMessage(cmd.prompt)}
+          <button key={cmd.label} onClick={() => { setNewMessage(cmd.prompt); inputRef.current?.focus(); }}
             className="flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-sm text-slate-400 hover:text-white hover:border-white/10 transition-all">
             <cmd.icon size={14} /> {cmd.label}
           </button>
@@ -79,25 +194,52 @@ export default function AIPage() {
         <div className="lg:col-span-1 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col overflow-hidden">
           <div className="p-3 border-b border-white/5 flex items-center justify-between">
             <span className="text-sm font-semibold">대화 목록</span>
-            <button className="text-slate-400 hover:text-white"><Plus size={15} /></button>
+            <button onClick={handleNewConversation} className="text-slate-400 hover:text-white transition-colors" title="새 대화">
+              <Plus size={15} />
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto">
             {conversations.map(conv => (
-              <button key={conv.id} onClick={() => setSelectedConv(conv.id)}
-                className={`w-full text-left px-4 py-3 transition-colors ${selectedConv === conv.id ? 'bg-indigo-600/10' : 'hover:bg-white/[0.04]'}`}>
+              <div key={conv.id} onClick={() => { setSelectedId(conv.id); setError(null); }}
+                className={`w-full text-left px-4 py-3 transition-colors group relative cursor-pointer ${selectedId === conv.id ? 'bg-indigo-600/10' : 'hover:bg-white/[0.04]'}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium truncate">{conv.title}</span>
-                  <span className="text-[10px] text-slate-600 shrink-0">{conv.time}</span>
+                  <span className="text-sm font-medium truncate pr-6">{conv.title}</span>
+                  <span className="text-[10px] text-slate-600 shrink-0">
+                    {conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].time : ''}
+                  </span>
                 </div>
-                <div className="text-xs text-slate-500 truncate mt-0.5">{conv.lastMessage}</div>
-              </button>
+                {conv.messages.length > 0 && (
+                  <div className="text-xs text-slate-500 truncate mt-0.5">
+                    {conv.messages[conv.messages.length - 1].text.slice(0, 50)}
+                  </div>
+                )}
+                {conv.messages.length === 0 && (
+                  <div className="text-xs text-slate-600 mt-0.5">대화를 시작하세요</div>
+                )}
+                <button
+                  onClick={(e) => handleDeleteConversation(conv.id, e)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-400 transition-all"
+                  title="대화 삭제"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             ))}
           </div>
         </div>
 
         {/* 채팅 영역 */}
         <div className="lg:col-span-3 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col overflow-hidden">
+          {/* 메시지 영역 */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {currentMessages.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-3">
+                <Bot size={40} className="text-slate-600" />
+                <p className="text-sm">AI 어시스턴트에게 질문하세요</p>
+                <p className="text-xs text-slate-600">Agent Hub를 통해 최적의 에이전트가 응답합니다</p>
+              </div>
+            )}
+
             {currentMessages.map(msg => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} gap-2`}>
                 {msg.role === 'assistant' && (
@@ -107,18 +249,63 @@ export default function AIPage() {
                 )}
                 <div className={`max-w-[75%] rounded-xl px-4 py-3 ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white/[0.06] text-slate-200'}`}>
                   <div className="text-sm whitespace-pre-wrap">{msg.text}</div>
-                  <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-indigo-200' : 'text-slate-500'}`}>{msg.time}</div>
+                  <div className={`flex items-center gap-2 mt-1`}>
+                    <span className={`text-[10px] ${msg.role === 'user' ? 'text-indigo-200' : 'text-slate-500'}`}>{msg.time}</span>
+                    {msg.agentName && (
+                      <span className="text-[10px] text-indigo-400/60 bg-indigo-500/10 rounded px-1.5 py-0.5">{msg.agentName}</span>
+                    )}
+                    {msg.confidence != null && msg.confidence > 0 && (
+                      <span className="text-[10px] text-slate-500">{Math.round(msg.confidence * 100)}%</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
+
+            {/* 로딩 인디케이터 */}
+            {isLoading && (
+              <div className="flex justify-start gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 shrink-0 mt-1">
+                  <Sparkles size={12} />
+                </div>
+                <div className="rounded-xl px-4 py-3 bg-white/[0.06] text-slate-400">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>AI가 응답을 생성하고 있습니다...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={chatEndRef} />
           </div>
+
+          {/* 에러 배너 */}
+          {error && (
+            <div className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+              <AlertCircle size={13} />
+              <span className="truncate">{error}</span>
+              <button onClick={() => setError(null)} className="ml-auto text-red-500 hover:text-red-300 shrink-0">닫기</button>
+            </div>
+          )}
+
+          {/* 입력 영역 */}
           <div className="p-3 border-t border-white/5 flex gap-2">
-            <input value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="AI에게 질문하세요..."
-              onKeyDown={e => e.key === 'Enter' && handleSend()}
-              className="flex-1 rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none" />
-            <button onClick={handleSend} disabled={!newMessage.trim()}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors">
-              <Send size={15} />
+            <input
+              ref={inputRef}
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              placeholder="AI에게 질문하세요..."
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+              disabled={isLoading}
+              className="flex-1 rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!newMessage.trim() || isLoading}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+            >
+              {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
             </button>
           </div>
         </div>

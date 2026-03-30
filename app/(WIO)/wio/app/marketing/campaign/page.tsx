@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Megaphone, Plus, Calendar, TrendingUp, Pause, CheckCircle2, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Megaphone, Plus, Calendar, TrendingUp, Pause, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { fetchCampaigns } from '@/lib/supabase/marketing';
 
 const LIFECYCLE_STEPS = ['기획', '승인', '소재제작', '매체세팅', '검수', '라이브', '최적화', '중간보고', '종료', '결산'];
 
@@ -28,8 +29,26 @@ export default function CampaignPage() {
   const { tenant } = useWIO();
   const isDemo = !tenant || tenant.id === 'demo';
   const [filter, setFilter] = useState<string>('all');
+  const [campaigns, setCampaigns] = useState(MOCK_CAMPAIGNS);
+  const [loading, setLoading] = useState(false);
 
-  const campaigns = isDemo ? MOCK_CAMPAIGNS : MOCK_CAMPAIGNS;
+  useEffect(() => {
+    if (isDemo) { setCampaigns(MOCK_CAMPAIGNS); return; }
+    setLoading(true);
+    fetchCampaigns()
+      .then(data => {
+        if (data.length > 0) {
+          setCampaigns(data.map((c: any, i: number) => ({
+            id: i + 1, name: c.name, type: c.type?.toLowerCase() || 'brand',
+            startDate: c.startDate, endDate: c.endDate || '', budget: c.budget,
+            spent: c.spent, step: 0, status: c.status?.toLowerCase() === 'active' ? 'live' : c.status?.toLowerCase() || 'draft',
+            impressions: 0, clicks: 0, conversions: 0,
+          })));
+        }
+      })
+      .catch(() => {}) // Mock 폴백
+      .finally(() => setLoading(false));
+  }, [isDemo]);
   const filtered = filter === 'all' ? campaigns : campaigns.filter(c => c.status === filter);
 
   return (

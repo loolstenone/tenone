@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   CalendarRange, ChevronLeft, ChevronRight, Star, AlertTriangle,
   CheckSquare, Square, Clock, Users, ArrowUpRight, Building2,
   Layers, User, TrendingUp, Filter, ChevronDown,
 } from 'lucide-react';
 import { useWIO } from '../../layout';
+import { createClient } from '@/lib/supabase/client';
 
 /* ───── Types ───── */
 type ViewTab = 'week' | 'month' | 'quarter' | 'year';
@@ -144,6 +145,39 @@ export default function WorkCalendarPage() {
 
   if (!tenant) return null;
   const isDemo = tenant.id === 'demo';
+
+  // Supabase에서 실데이터 로드 (비데모 모드)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (isDemo) return;
+    (async () => {
+      try {
+        const sb = createClient();
+        const { data } = await sb
+          .from('wio_jobs')
+          .select('*, project:wio_projects(title, code)')
+          .eq('tenant_id', tenant.id)
+          .order('due_date', { ascending: true });
+        if (data && data.length > 0) {
+          const mapped: WorkTask[] = data.map((j: any) => ({
+            id: j.id,
+            title: j.title,
+            project: j.project?.title || j.project?.code || '-',
+            projectColor: 'indigo',
+            date: j.due_date || j.created_at?.split('T')[0] || TODAY,
+            dueDate: j.due_date || undefined,
+            status: j.status === 'done' ? 'done' : j.status === 'in_progress' ? 'progress' : j.due_date && j.due_date < TODAY ? 'overdue' : 'todo',
+            star: 0 as StarLevel,
+            assignee: '나',
+            team: '-',
+            dept: '-',
+            progress: j.status === 'done' ? 100 : j.status === 'in_progress' ? 50 : 0,
+          }));
+          setTasks(mapped);
+        }
+      } catch { /* Mock 폴백 */ }
+    })();
+  }, [isDemo, tenant.id]);
 
   /* ── Filter tasks by scope ── */
   const filteredTasks = useMemo(() => {

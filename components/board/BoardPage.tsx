@@ -220,6 +220,7 @@ function BoardPageInner({
                             onNavigate={loadPost}
                             onLike={handleLike}
                             onBookmark={handleBookmark}
+                            onEdit={() => setMode("edit")}
                         />
                     )}
                 </div>

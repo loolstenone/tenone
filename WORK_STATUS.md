@@ -1,89 +1,86 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-30 (집)
+> 마지막 업데이트: 2026-03-30 (사무실)
 
-## 오늘 한 작업 (3/29~3/30 집)
+## 오늘 한 작업 (3/30 사무실)
 
-### 1. WIO EUS v2.0 전체 반영 ✅
-- docs/WIO_EUS_v2.md (1,514줄) 저장
-- Part VIII 고도화 설계 10개 섹션 반영
-- 7대 폭발 클러스터 + 8대 설계 원칙 반영
-- 모듈 카탈로그 ~120개로 확장
+### 1. COM-AI → Agent Hub 실연결 ✅
+- `app/(WIO)/wio/app/comm/ai/page.tsx` 전면 교체
+- Mock 제거 → `POST /api/agent/hub` 실호출 (Claude API)
+- 대화 생성/삭제/전환, 로딩 스피너, 에러 배너, 에이전트명/신뢰도 배지
 
-### 2. WIO Orbi 100+ 모듈 페이지 ✅
-- Sprint 1~6: 28개 신규 모듈 페이지 (MY 5 + RBAC 4 + 영업 7 + HR 5 + BI 4 + 지주사 3)
-- 기존 96 + 신규 28 = 124+ 페이지
-- 전 모듈 isDemo 패턴 통일 + Supabase 연동 (46/120 실쿼리)
+### 2. WIO Glossary v1 → 7계층 체계 정렬 ✅
+- `docs/WIO_Glossary_v1.md` 저장 (L1~L7, 12서비스, 16모듈 매핑)
+- `types/wio.ts` — WIO_SERVICES, WIOService, WIOPreset 타입
+- `lib/wio-modules.ts` — SERVICE_CATALOG 16개, 모듈 80개에 service 필드, 프리셋/헬퍼
+- `app/(WIO)/wio/app/layout.tsx` — 사이드바 Track→모듈 → 서비스→모듈 구조 전면 교체
+- `app/(WIO)/wio/app/settings/page.tsx` — 서비스 모드 탭 추가 (프리셋 + 서비스 토글)
 
-### 3. 핵심 엔진 3종 ✅
-- lib/rbac.ts: 6단계 권한 (super_admin→guest), 사이드바 RBAC 미들웨어
-- lib/workflow-engine.ts: 워크플로우 실행/스텝진행/SLA체크
-- lib/culture-engine.ts: 가치정합성체크/문화건강도
+### 3. SYS-USR 사용자 관리 실DB ✅
+- `app/(WIO)/wio/app/system/users/page.tsx` — Mock → Supabase wio_members CRUD
+- 역할 변경, 활성/비활성 토글, 사용자 초대 (inviteMember)
 
-### 4. 설정 페이지 EUS 기준 재구성 ✅
-- 4탭: 세팅(3모드) | 권한 | 테마 | 시스템
-- 조직 모드: 트리빌더 + 인력배치 + 정원
-- 모듈 모드: 레고 블록 팔레트
-- 워크플로우 모드: 노드 플로우 빌더
+### 4. 프로젝트 타임라인 피드 ✅
+- `app/(WIO)/wio/app/project/[id]/page.tsx` — 4탭(개요/타임라인/업무/인원)
+- SNS형 피드: 글쓰기, 좋아요, 댓글 스레드, 시스템 알림
 
-### 5. 조직도 + 인력 배치 ✅
-- DB 6테이블: wio_headcount, wio_personnel_orders, wio_org_change_history, wio_org_simulations, wio_handover_checklists, wio_user_assignments
-- OrgTreeBuilder 컴포넌트 (1,252줄, Supabase CRUD)
-- HR-ORG 4탭 고도화 (조직도3뷰 + 정원 + 발령 + 이력)
-- docs/WIO_OrgDesign_v1.md 설계 문서
+### 5. COM-WCL 업무 캘린더 실DB ✅
+- `app/(WIO)/wio/app/comm/work-calendar/page.tsx` — wio_jobs 테이블 연동
+- isDemo Mock 폴백 유지
 
-### 6. Part VIII 신규 5페이지 ✅
-- AI×모듈 매트릭스, E2E 데이터 흐름도, SaaS 과금 v2.0, 업종별 프리셋 4종, 마이그레이션 전략
+### 6. MY-HR 내 인사 실DB ✅
+- `app/(WIO)/wio/app/my/hr/page.tsx` — wio_members 프로필 연동
+- 근속기간 자동 계산, 이름/부서/직급 실데이터
 
-### 7. COM-WCL 업무 캘린더 ✅
-- 4뷰(주간/월간/분기/연간) × 4범위(내업무/팀/부문/전사)
-- ★상향 집계 + ⚠자동 에스컬레이션
+### 7. 마케팅 campaign 실DB ✅
+- `app/(WIO)/wio/app/marketing/campaign/page.tsx` — fetchCampaigns 연결
 
-### 8. 브랜드 사이트 전면 고도화 ✅
-- MADLeap: 5페이지 (홈/소개/포트폴리오/스터디룸/커뮤니티)
-- MADLeague: 5페이지 (홈/소개/프로그램/경쟁PT/헤더)
-- Badak: 모임 + 커뮤니티4탭 + 헤더
-- Planners: Vrief/GPR 중심 전면 리라이트
-- HeRo/RooK/ChangeUp/0gamja: 홈 고도화
-- Mindle/domo/FWN/YouInOne: 홈 고도화
+### 8. TenOne 게시판 수정 기능 ✅
+- `app/api/board/posts/[id]/route.ts` — PATCH 핸들러 추가
+- `components/board/PostDetail.tsx` — 수정 버튼 (로그인 사용자에게 표시)
+- `components/board/BoardPage.tsx` — onEdit 전달
 
-### 9. 인프라 ✅
-- 인트라 로그인 근본 해결 (auth-context 의존 제거, sessionStorage 캐시)
-- Agent Hub + 7 에이전트 (Claude 실응답)
-- 인트라 유니버스 대시보드 실DB 연동 (8페이지)
-- 외부 API 연동 (Google Calendar + Kakao + Slack)
-- 모바일 반응형 수정 + SEO 메타데이터 + sitemap
-- board_configs 25개 등록 (6개 사이트)
-- Myverse 7탭 Supabase 연동
-- DB 33+6=39개 신규 테이블 (총 90+ 테이블)
-- Vercel 프로덕션 배포 10+ 회
+### 9. TenOne 뉴스룸 재설계 ✅
+- `app/(TenOne)/newsroom/page.tsx` — 유니버스 콘텐츠 허브로 전면 교체
+- `components/newsroom/NewsTicker.tsx` — LIVE 티커 바 (브랜드별 컬러 배지 + 제목 스크롤)
+- `components/newsroom/NewsroomFeed.tsx` — 카드 그리드 (브랜드 필터 + 최신/인기 정렬)
+- `app/api/newsroom/feed/route.ts` — 유니버스 전체 게시글 조회 API
+- `lib/brand-meta.ts` — SiteCode → 브랜드 메타 매핑
+- `app/page.tsx` — 홈 "새로운 소식"도 뉴스룸 피드 API 통일
+
+### 10. Contact 관리자 + 정리 ✅
+- `app/intra/bums/inquiry/page.tsx` — "Coming Soon" → 풀 CRUD (테이블 + 상세 패널 + 상태 관리)
+- `app/(TenOne)/contact/page.tsx` — 회원가입 탭 제거
+
+### 11. MyVerse 랜딩 페이지 ✅
+- `app/(MyVerse)/myverse/page.tsx` — 기획서 v2 기반 전면 재작성
+- 7섹션: Hero/Problem/Flow/AppPreview/AI/Pricing/CTA
+- `docs/Myverse_*.md` 3개 기획서 저장
+- myverse.tenone.biz CNAME 설정 확인
 
 ---
 
-## 다음 할 일 (사무실에서 이어서)
+## 다음 할 일 (집에서 이어서)
 
-### 즉시 — Orbi 개선 (docs/Orbi_Improvement_Plan.md 참조)
-1. COM-AI → Agent Hub 연동 (Claude API 실연결)
-2. 설정 모듈/워크플로우/권한 모드 실DB 전환 (localStorage → Supabase)
-3. SYS-USR 사용자 관리 실DB (wio_members CRUD)
+### 즉시
+1. Vercel 배포 + 프로덕션 확인 (수정 버튼, 뉴스룸 티커, MyVerse 랜딩)
+2. CRM DB 테이블 생성 + 모듈 실DB 연결
+3. 마케팅 나머지 13개 모듈 DB 테이블 생성
 
-### 단기 — TenOne 고도화
-4. TenOne 게시판 고도화 (Works/Newsroom 리치에디터 + 이미지)
-5. 읽음 확인 (COM-MSG)
-6. 프로젝트 내 SNS형 타임라인 피드
-7. COM-WCL 업무 캘린더 실DB
-8. MY-HR 내 인사 실DB
+### 단기
+4. MyVerse 앱 프로젝트 초기화 (Expo + React Native)
+5. 설정 서비스/모듈 → Supabase 저장 (localStorage → DB)
+6. 뉴스룸 상세 페이지 — 타 브랜드 게시물 외부 링크 처리
 
-### 중기 — WIO for Agency
-9. 마케팅 14개 모듈 실DB (SmarComm 연계)
-10. CRM 6개 모듈 실DB
-11. 화상회의 (Zoom/Meet 딥링크)
-12. 외부 게스트 초대 플로우
-13. AI 프로젝트 설계
+### 중기
+7. Rule Engine + Event Bus 구현
+8. SmarComm 독립 배포 (Vercel + Supabase)
+9. 화상회의 딥링크 (Zoom/Meet)
 
 ---
 
 ## 참고
-- WIO EUS 문서: docs/WIO_EUS_v2.md (단일 진실 소스)
-- 조직도 설계: docs/WIO_OrgDesign_v1.md
-- Universe OS 계획: docs/Universe_OS_Plan.md
+- WIO Glossary: docs/WIO_Glossary_v1.md (7계층 체계 단일 진실 소스)
+- WIO EUS: docs/WIO_EUS_v2.md
+- MyVerse 기획서: docs/Myverse_Dev_Guide_v2.md (개발 가이드)
+- 개발 현황: docs/PROJECT_STATUS.md

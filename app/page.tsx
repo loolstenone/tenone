@@ -54,10 +54,14 @@ export default function HomePage() {
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(d => setLatestWorks(d.posts || []))
             .catch(() => console.warn('[Home] Works fetch failed — using empty state'));
-        fetch('/api/board/posts?site=tenone&board=newsroom&limit=4&status=published')
+        fetch('/api/newsroom/feed?sort=latest&limit=4')
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-            .then(d => setLatestNews(d.posts || []))
-            .catch(() => console.warn('[Home] Newsroom fetch failed — using empty state'));
+            .then(d => setLatestNews((d.posts || []).map((p: any) => ({
+                id: p.id, title: p.title, excerpt: p.excerpt || '',
+                category: p.category || p.site || '', representImage: p.represent_image || '',
+                created_at: p.created_at, view_count: p.view_count || 0,
+            }))))
+            .catch(() => console.warn('[Home] Newsroom feed fetch failed — using empty state'));
     }, []);
 
     return (
@@ -306,7 +310,7 @@ export default function HomePage() {
                             {latestNews.map((news) => {
                                 const rawDate = (news.created_at || '').substring(0, 10);
                                 return (
-                                    <Link key={news.id} href="/newsroom" className="group block">
+                                    <Link key={news.id} href={`/newsroom?postId=${news.id}`} className="group block">
                                         <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
                                             {news.representImage ? (
                                                 <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />

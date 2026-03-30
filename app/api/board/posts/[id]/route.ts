@@ -47,6 +47,21 @@ export async function PUT(
     }
 }
 
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+    try {
+        const body = await request.json() as UpdatePostInput;
+        const post = await boardDb.updatePost(id, body);
+        return NextResponse.json(post);
+    } catch (error) {
+        console.error('updatePost error:', error);
+        return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }

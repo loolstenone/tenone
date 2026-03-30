@@ -89,9 +89,36 @@ export default function MyHRPage() {
       setSalary(MOCK_SALARY);
       setTraining(MOCK_TRAINING);
       setCerts(MOCK_CERTS);
+      setLoading(false);
+      return;
+    }
+    // 실DB: wio_members에서 현재 사용자 프로필 로드
+    if (member) {
+      setProfile({
+        name: member.displayName || '-',
+        department: member.department || '미배정',
+        position: member.jobTitle || '-',
+        employeeNo: `EMP-${member.id.substring(0, 8).toUpperCase()}`,
+        joinDate: member.joinedAt?.split('T')[0] || '-',
+        tenure: (() => {
+          if (!member.joinedAt) return '-';
+          const diff = Date.now() - new Date(member.joinedAt).getTime();
+          const years = Math.floor(diff / (365.25 * 86400000));
+          const months = Math.floor((diff % (365.25 * 86400000)) / (30.44 * 86400000));
+          return `${years}년 ${months}개월`;
+        })(),
+        email: (member as any).email || '-',
+        phone: '-',
+      });
+      // 근태/급여 등은 아직 DB 테이블 없으므로 빈 상태
+      setAttendance(MOCK_ATTENDANCE); // TODO: 실DB 연동 시 교체
+      setWeekly(MOCK_WEEKLY);
+      setSalary(MOCK_SALARY);
+      setTraining(MOCK_TRAINING);
+      setCerts(MOCK_CERTS);
     }
     setLoading(false);
-  }, [isDemo]);
+  }, [isDemo, member]);
 
   if (loading) {
     return (

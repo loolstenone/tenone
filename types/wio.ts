@@ -30,6 +30,22 @@ export const WIO_MODULES = [
 ] as const;
 export type WIOModule = typeof WIO_MODULES[number];
 
+/* ── L4 서비스 (사용자 언어) ── */
+export const WIO_SERVICES = [
+  // 12 기본 서비스 (Glossary §4)
+  'talk', 'project', 'task', 'approval', 'workflow',
+  'people', 'goal', 'finance', 'timesheet',
+  'marketing', 'crm',
+  // 관통 서비스
+  'ai',
+  // 트랙 서비스 (비핵심)
+  'production', 'support', 'partner', 'system',
+] as const;
+export type WIOService = typeof WIO_SERVICES[number];
+
+/* ── 업종 프리셋 ── */
+export type WIOPreset = 'minimal' | 'standard' | 'full' | 'custom';
+
 export interface WIOTenant {
   id: string;
   name: string;
@@ -53,6 +69,7 @@ export interface WIOMember {
   tenantId: string;
   userId: string;
   displayName: string;
+  email?: string;
   role: WIORole;
   jobTitle: string | null;
   department: string | null;

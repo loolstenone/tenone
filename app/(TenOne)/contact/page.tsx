@@ -6,7 +6,7 @@ import { Mail, MapPin, UserPlus, Briefcase, MessageCircle, Handshake, ArrowRight
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 
-type TabType = 'partner' | 'business' | 'signup';
+type TabType = 'partner' | 'business';
 
 function OffOniceToggle() {
     const [isOn, setIsOn] = useState(true);
@@ -225,58 +225,6 @@ export default function ContactPage() {
                         </form>
                     )}
 
-                    {/* 멤버 가입 */}
-                    {activeTab === 'signup' && (
-                        <div className="space-y-6">
-                            <div className="mb-6">
-                                <h3 className="text-xl font-bold">Become a Member</h3>
-                                <p className="text-sm tn-text-sub mt-1">Ten:One™ 사이트의 멤버로 가입하고 다양한 소식을 받아보세요.</p>
-                            </div>
-
-                            <div className="border tn-border p-8 text-center">
-                                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "var(--tn-surface)" }}>
-                                    {isAuthenticated ? <CheckCircle className="h-7 w-7 text-green-500" /> : <UserPlus className="h-7 w-7 tn-text-sub" />}
-                                </div>
-                                {isAuthenticated ? (
-                                    <>
-                                        <h4 className="text-lg font-bold mb-2">이미 멤버입니다</h4>
-                                        <p className="text-sm tn-text-sub leading-relaxed mb-6">
-                                            이미 Ten:One™ Universe의 멤버로 가입되어 있습니다.<br />
-                                            파트너 신청이나 프로젝트 의뢰를 진행해보세요.
-                                        </p>
-                                        <button type="button" onClick={() => setActiveTab('partner')}
-                                            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-medium transition-colors"
-                                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                            파트너 신청하기 <ArrowRight className="h-4 w-4" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h4 className="text-lg font-bold mb-2">멤버 가입</h4>
-                                        <p className="text-sm tn-text-sub leading-relaxed mb-6">
-                                            멤버로 가입하면 Ten:One™ Universe의 최신 소식,<br />
-                                            Works 업데이트, 이벤트 초대 등을 받아볼 수 있습니다.
-                                        </p>
-                                        <Link href="/signup"
-                                            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-medium transition-colors"
-                                            style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
-                                            가입 페이지로 이동 <ArrowRight className="h-4 w-4" />
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
-
-                            <div className="tn-bg-alt border tn-border p-6">
-                                <p className="text-sm font-medium text-neutral-700 mb-3">멤버 혜택</p>
-                                <ul className="space-y-2 text-sm tn-text-sub">
-                                    <li className="flex items-start gap-2"><span className="tn-text-muted mt-0.5">·</span> Newsroom 및 Works 최신 소식 알림</li>
-                                    <li className="flex items-start gap-2"><span className="tn-text-muted mt-0.5">·</span> MAD League, Badak 등 이벤트 우선 초대</li>
-                                    <li className="flex items-start gap-2"><span className="tn-text-muted mt-0.5">·</span> Ten:One™ 뉴스레터 구독</li>
-                                    <li className="flex items-start gap-2"><span className="tn-text-muted mt-0.5">·</span> 파트너 전환 시 우대</li>
-                                </ul>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </section>
         </div>

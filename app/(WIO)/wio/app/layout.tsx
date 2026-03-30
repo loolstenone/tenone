@@ -10,8 +10,9 @@ import { createClient } from '@/lib/supabase/client';
 import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio';
 import {
   CATEGORY_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByCategory,
+  SERVICE_CATALOG, getModulesByService, getServiceDef,
   loadOrbiConfig, loadAccordionState, saveAccordionState,
-  type OrbiConfig,
+  type OrbiConfig, type WIOServiceDef, type WIOModuleDef,
 } from '@/lib/wio-modules';
 import type { WIOTenant, WIOMember } from '@/types/wio';
 import { checkModuleAccess } from '@/lib/rbac';
@@ -35,7 +36,7 @@ interface WIOContext {
   isDemo: boolean;
   isMaster: boolean;
 }
-const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], categories: [] }, reloadConfig: () => {}, mode: 'demo', isDemo: true, isMaster: false });
+const WIOCtx = createContext<WIOContext>({ tenant: null, member: null, orbiConfig: { enabledModules: [], enabledServices: [], categories: [] }, reloadConfig: () => {}, mode: 'demo', isDemo: true, isMaster: false });
 export const useWIO = () => useContext(WIOCtx);
 
 /* ── Demo tenant builder ── */
@@ -57,7 +58,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const [collapsed, setCollapsed] = useState(false);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], categories: [] });
+  const [orbiConfig, setOrbiConfig] = useState<OrbiConfig>({ enabledModules: [], enabledServices: [], categories: [] });
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
   const [noWorkspace, setNoWorkspace] = useState(false);
   const [authUser, setAuthUser] = useState<any>(null);
@@ -284,7 +285,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   }
 
   const sidebarWidth = isMobile ? 0 : (collapsed ? 56 : 220);
-  const hasModulesConfigured = orbiConfig.enabledModules.length > 0;
+  const hasModulesConfigured = isDemo || orbiConfig.enabledModules.length > 0 || orbiConfig.enabledServices.length > 0;
 
   const handleLogout = async () => {
     const sb = createClient();
@@ -300,27 +301,38 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
     });
   }
 
-  // Get category display name from config
-  function getCategoryName(categoryId: string): string {
-    const cc = orbiConfig.categories.find(c => c.id === categoryId);
-    if (cc) return cc.name;
-    const cat = CATEGORY_CATALOG.find(c => c.id === categoryId);
-    return cat?.name || categoryId;
-  }
-
-  // Sort categories by config order
-  const sortedCategoryIds = (() => {
-    if (orbiConfig.categories.length > 0) {
-      return [...orbiConfig.categories].sort((a, b) => a.order - b.order).map(c => c.id);
-    }
-    return CATEGORY_CATALOG.map(c => c.id);
+  // Build active sidebar items
+  const enabledModuleKeys = (() => {
+    if (isDemo) return ALL_MODULE_KEYS as unknown as string[];
+    if (orbiConfig.enabledModules.length > 0) return [...new Set(['home', ...orbiConfig.enabledModules])];
+    return ['home'];
   })();
 
-  // Build active sidebar items: only enabled modules, grouped by track
-  // "home" is always included
-  const enabledModuleKeys = hasModulesConfigured
-    ? [...new Set(['home', ...orbiConfig.enabledModules])]
-    : ['home'];
+  // Determine which services to show
+  const enabledServiceIds: string[] = (() => {
+    if (isDemo) return SERVICE_CATALOG.map(s => s.id);
+    if (orbiConfig.enabledServices.length > 0) return orbiConfig.enabledServices;
+    if (!hasModulesConfigured) return [];
+    // enabledModules에서 서비스 추론 (하위호환)
+    const inferred = new Set<string>();
+    for (const key of enabledModuleKeys) {
+      const mod = MODULE_CATALOG.find(m => m.key === key);
+      if (mod?.service && !mod.service.startsWith('_')) inferred.add(mod.service);
+    }
+    return Array.from(inferred);
+  })();
+
+  // 서비스별 필터된 모듈 계산
+  function getFilteredServiceModules(serviceId: string): WIOModuleDef[] {
+    return getModulesByService(serviceId).filter(m =>
+      enabledModuleKeys.includes(m.key) && checkModuleAccess(member, m.key, isDemo)
+    );
+  }
+
+  // My 모듈 (항상 표시)
+  const myModules = MODULE_CATALOG.filter(m => m.service === '_my' && checkModuleAccess(member, m.key, isDemo));
+  // Holding 모듈 (master만)
+  const holdingModules = isMaster ? MODULE_CATALOG.filter(m => m.service === '_holding') : [];
 
   const SidebarContent = () => (
     <>
@@ -377,62 +389,156 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
               </Link>
             )}
           </div>
-        ) : (
-          /* ── Configured: show modules grouped by category ── */
-          sortedCategoryIds.map((categoryId, ci) => {
-            const catDef = CATEGORY_CATALOG.find(c => c.id === categoryId);
-            if (!catDef) return null;
-            const categoryModules = getModulesByCategory(categoryId).filter(m =>
-              enabledModuleKeys.includes(m.key) && checkModuleAccess(member, m.key, isDemo)
-            );
-            if (categoryModules.length === 0) return null;
-
-            const isOpen = openCategories.includes(categoryId);
-            const CatIcon = catDef.icon;
-            const categoryName = getCategoryName(categoryId);
-
+        ) : (<>
+          {/* ── Home (항상 표시) ── */}
+          {(() => {
+            const homeMod = MODULE_CATALOG.find(m => m.key === 'home');
+            if (!homeMod) return null;
+            const Icon = homeMod.icon;
+            const isActive = pathname === '/wio/app' || pathname === '/wio/app/';
             return (
-              <div key={categoryId} className={ci > 0 ? 'mt-1' : ''}>
-                {/* Category header */}
-                {(isMobile || !collapsed) ? (
-                  <button onClick={() => toggleCategory(categoryId)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[11px] font-bold tracking-wide transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'}`}>
-                    <span className="flex items-center gap-2">
-                      <CatIcon size={15} />
-                      {categoryName}
-                      <span className="text-[9px] font-normal text-slate-600">{categoryModules.length}</span>
-                    </span>
-                    <ChevronRight size={12} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
-                  </button>
-                ) : (
-                  collapsed && ci > 0 && <div className="mx-2 mb-1 border-t border-white/5" />
-                )}
-
-                {/* Module list */}
-                {(isOpen || (!isMobile && collapsed)) && (
-                  <div className={!isMobile && !collapsed ? 'ml-2 border-l border-white/5 pl-1' : ''}>
-                    {categoryModules.map(mod => {
-                      const Icon = mod.icon;
-                      const isActive = mod.key === 'home'
-                        ? pathname === '/wio/app' || pathname === '/wio/app/'
-                        : pathname.startsWith(mod.href);
-                      return (
-                        <Link key={mod.key} href={mod.href}
-                          className={`flex items-center rounded-lg py-2 text-sm transition-colors mb-0.5 ${
-                            (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
-                          } ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
-                          <Icon size={(!isMobile && collapsed) ? 17 : 15} />
-                          {(isMobile || !collapsed) && <span>{mod.label}</span>}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <Link key="home" href={homeMod.href}
+                className={`flex items-center rounded-lg py-2 text-sm transition-colors mb-1 ${
+                  (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
+                } ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                <Icon size={(!isMobile && collapsed) ? 17 : 15} />
+                {(isMobile || !collapsed) && <span>{homeMod.label}</span>}
+              </Link>
             );
-          })
-        )}
+          })()}
+
+          {/* ── 서비스 기반 메뉴 ── */}
+          {SERVICE_CATALOG
+            .filter(svc => enabledServiceIds.includes(svc.id))
+            .sort((a, b) => a.order - b.order)
+            .map((svc) => {
+              const svcModules = getFilteredServiceModules(svc.id);
+              if (svcModules.length === 0) return null;
+
+              const SvcIcon = svc.icon;
+
+              // 단일 모듈 서비스 → 직접 링크 (아코디언 없음)
+              if (svcModules.length === 1) {
+                const mod = svcModules[0];
+                const Icon = mod.icon;
+                const isActive = pathname.startsWith(mod.href);
+                return (
+                  <Link key={svc.id} href={mod.href}
+                    className={`flex items-center rounded-lg py-2 text-sm transition-colors mb-0.5 ${
+                      (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
+                    } ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                    <SvcIcon size={(!isMobile && collapsed) ? 17 : 15} />
+                    {(isMobile || !collapsed) && <span>{svc.label}</span>}
+                  </Link>
+                );
+              }
+
+              // 다중 모듈 서비스 → 아코디언
+              const isOpen = openCategories.includes(svc.id);
+              return (
+                <div key={svc.id} className="mt-0.5">
+                  {(isMobile || !collapsed) ? (
+                    <button onClick={() => toggleCategory(svc.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'}`}>
+                      <span className="flex items-center gap-2">
+                        <SvcIcon size={15} />
+                        <span className="font-medium">{svc.label}</span>
+                      </span>
+                      <ChevronRight size={12} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                    </button>
+                  ) : (
+                    <div className="flex justify-center py-1">
+                      <SvcIcon size={17} className="text-slate-500" />
+                    </div>
+                  )}
+                  {(isOpen || (!isMobile && collapsed)) && (
+                    <div className={!isMobile && !collapsed ? 'ml-2 border-l border-white/5 pl-1' : ''}>
+                      {svcModules.map(mod => {
+                        const Icon = mod.icon;
+                        const isActive = pathname.startsWith(mod.href);
+                        return (
+                          <Link key={mod.key} href={mod.href}
+                            className={`flex items-center rounded-lg py-1.5 text-[13px] transition-colors mb-0.5 ${
+                              (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
+                            } ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}>
+                            <Icon size={(!isMobile && collapsed) ? 15 : 13} />
+                            {(isMobile || !collapsed) && <span>{mod.label}</span>}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+          {/* ── My 섹션 (항상 표시) ── */}
+          {myModules.length > 0 && (
+            <div key="_my" className="mt-3 pt-2 border-t border-white/5">
+              {(isMobile || !collapsed) ? (
+                <button onClick={() => toggleCategory('_my')}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${openCategories.includes('_my') ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'}`}>
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">My</span>
+                  </span>
+                  <ChevronRight size={12} className={`transition-transform duration-200 ${openCategories.includes('_my') ? 'rotate-90' : ''}`} />
+                </button>
+              ) : null}
+              {(openCategories.includes('_my') || (!isMobile && collapsed)) && (
+                <div className={!isMobile && !collapsed ? 'ml-2 border-l border-white/5 pl-1' : ''}>
+                  {myModules.map(mod => {
+                    const Icon = mod.icon;
+                    const isActive = pathname.startsWith(mod.href);
+                    return (
+                      <Link key={mod.key} href={mod.href}
+                        className={`flex items-center rounded-lg py-1.5 text-[13px] transition-colors mb-0.5 ${
+                          (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
+                        } ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-semibold' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon size={(!isMobile && collapsed) ? 15 : 13} />
+                        {(isMobile || !collapsed) && <span>{mod.label}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Holding 섹션 (master만) ── */}
+          {holdingModules.length > 0 && (
+            <div key="_holding" className="mt-2 pt-2 border-t border-amber-500/10">
+              {(isMobile || !collapsed) ? (
+                <button onClick={() => toggleCategory('_holding')}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${openCategories.includes('_holding') ? 'text-amber-400 bg-amber-500/10' : 'text-amber-500/60 hover:text-amber-400 hover:bg-amber-500/5'}`}>
+                  <span className="flex items-center gap-2">
+                    <KeyRound size={15} />
+                    <span className="font-medium">Holding</span>
+                  </span>
+                  <ChevronRight size={12} className={`transition-transform duration-200 ${openCategories.includes('_holding') ? 'rotate-90' : ''}`} />
+                </button>
+              ) : null}
+              {(openCategories.includes('_holding') || (!isMobile && collapsed)) && (
+                <div className={!isMobile && !collapsed ? 'ml-2 border-l border-amber-500/10 pl-1' : ''}>
+                  {holdingModules.map(mod => {
+                    const Icon = mod.icon;
+                    const isActive = pathname.startsWith(mod.href);
+                    return (
+                      <Link key={mod.key} href={mod.href}
+                        className={`flex items-center rounded-lg py-1.5 text-[13px] transition-colors mb-0.5 ${
+                          (!isMobile && collapsed) ? 'justify-center px-0' : 'gap-2.5 px-3'
+                        } ${isActive ? 'bg-amber-600/10 text-amber-400 font-semibold' : 'text-slate-500 hover:bg-amber-500/5 hover:text-amber-300'}`}>
+                        <Icon size={(!isMobile && collapsed) ? 15 : 13} />
+                        {(isMobile || !collapsed) && <span>{mod.label}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </>)}
       </nav>
+
 
       {/* Bottom */}
       <div className="shrink-0 border-t border-white/5 p-2 space-y-0.5">

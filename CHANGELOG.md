@@ -4,6 +4,54 @@
 
 ---
 
+## 2026-03-30 (사무실)
+
+### WIO Glossary v1 → 7계층 체계 정렬
+- types/wio.ts: WIO_SERVICES 16개, WIOPreset 타입
+- lib/wio-modules.ts: SERVICE_CATALOG, 모듈별 service 필드, 프리셋, 헬퍼
+- layout.tsx: 사이드바 Track→모듈 → 서비스→모듈 전면 교체
+- settings: 서비스 모드 탭 (프리셋 선택 + 서비스 토글)
+
+### COM-AI → Agent Hub 실연결
+- comm/ai/page.tsx: Mock → POST /api/agent/hub (Claude API)
+
+### SYS-USR 사용자 관리 실DB
+- system/users/page.tsx: wio_members CRUD (역할 변경, 초대, 활성/비활성)
+
+### 프로젝트 타임라인 피드
+- project/[id]/page.tsx: SNS형 피드 탭 (글쓰기, 좋아요, 댓글, 시스템 알림)
+
+### COM-WCL + MY-HR 실DB
+- work-calendar: wio_jobs 연동
+- my/hr: wio_members 프로필 연동
+
+### TenOne 게시판 수정 기능
+- api/board/posts/[id]: PATCH 핸들러 추가
+- PostDetail: 수정 버튼 (로그인 사용자)
+- BoardPage: onEdit 전달
+
+### TenOne 뉴스룸 재설계
+- newsroom/page.tsx: 유니버스 콘텐츠 허브 (BoardPage → Aggregator)
+- NewsTicker: LIVE 티커 바 (브랜드별 제목 스크롤)
+- NewsroomFeed: 카드 그리드 (브랜드 필터 + 최신/인기)
+- api/newsroom/feed: 전 사이트 게시글 조회 API
+- brand-meta.ts: SiteCode → 브랜드 메타 매핑
+- page.tsx(홈): "새로운 소식" 뉴스룸 API 통일
+
+### Contact 관리자 + 정리
+- inquiry/page.tsx: Coming Soon → 풀 CRUD
+- contact/page.tsx: 회원가입 탭 제거
+
+### MyVerse 랜딩 페이지
+- myverse/page.tsx: 기획서 v2 기반 전면 재작성 (7섹션)
+- docs: Myverse 기획서 3개 저장
+
+### 변경 파일 (27개)
+- 수정 20개 + 신규 7개 (newsroom API/컴포넌트, brand-meta, docs 4개)
+- +1,834줄 / -741줄
+
+---
+
 ## 2026-03-29~30 (집)
 
 ### WIO EUS v2.0
