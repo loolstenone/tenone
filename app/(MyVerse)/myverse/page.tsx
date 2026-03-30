@@ -114,8 +114,10 @@ export default function MyVersePage() {
                             </div>
                         ))}
                     </div>
-                    <p className="text-center text-neutral-500 mt-10 text-sm font-medium">
+                    <p className="text-center text-neutral-500 mt-10 text-sm font-medium leading-relaxed">
                         플랫폼이 닫히면, 알려주지도 않는다.
+                        <br />
+                        <span className="text-neutral-400">서비스가 사라지면, 나의 추억도.</span>
                     </p>
                 </div>
             </section>
