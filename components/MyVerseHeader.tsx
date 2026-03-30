@@ -2,122 +2,44 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import clsx from "clsx";
-import { Menu, X, Orbit, User } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
-import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
-
-const navItems = [
-    { name: "철학", href: "/philosophy" },
-    { name: "서비스", href: "/service" },
-    { name: "기술", href: "/technology" },
-    { name: "로드맵", href: "/roadmap" },
-    { name: "팀", href: "/team" },
-];
+import { Menu, X, Orbit } from "lucide-react";
 
 export function MyVerseHeader() {
-    const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
-
-    const isActive = (href: string) => pathname === href;
 
     return (
-        <>
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0D17]/95 backdrop-blur-md border-b border-white/5">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-100">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="shrink-0 flex items-center gap-2">
-                    <Orbit className="h-5 w-5 text-indigo-400" />
-                    <span className="text-white font-semibold text-lg tracking-tight">
-                        My <span className="text-indigo-400">Universe</span>
+                <Link href="/myverse" className="shrink-0 flex items-center gap-2">
+                    <Orbit className="h-5 w-5 text-indigo-600" />
+                    <span className="text-neutral-900 font-bold text-lg tracking-tight">
+                        Myverse
                     </span>
                 </Link>
 
-                {/* Desktop Nav */}
-                <div className="hidden lg:flex items-center gap-1">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={clsx(
-                                "text-sm font-medium px-3 py-1.5 rounded transition-colors whitespace-nowrap",
-                                isActive(item.href)
-                                    ? "text-white bg-white/10"
-                                    : "text-neutral-400 hover:text-white"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                </div>
-
                 {/* Right side */}
-                <div className="hidden lg:flex ml-auto items-center gap-3">
-                    <UniverseUtilityBar
-                        aboutPath="/myverse/about"
-                        profilePath="/myverse/my"
-                        accentColor="#1a1a2e"
-                        signupPath="/signup"
-                    />
-                    <Link
-                        href="/contact"
-                        className="text-sm font-medium px-4 py-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-colors"
-                    >
+                <div className="hidden sm:flex items-center gap-4">
+                    <Link href="/myverse/contact"
+                        className="text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition">
                         Early Access
                     </Link>
                 </div>
 
-                {/* Mobile menu button */}
-                <button
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    className="lg:hidden p-2 text-neutral-400 hover:text-white"
-                >
+                {/* Mobile */}
+                <button onClick={() => setMobileOpen(!mobileOpen)} className="sm:hidden p-2 text-neutral-500">
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
             </nav>
 
-            {/* Mobile menu */}
             {mobileOpen && (
-                <div className="lg:hidden bg-[#0B0D17] border-t border-white/5 px-6 py-4 space-y-2">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium py-2 transition-colors",
-                                isActive(item.href)
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-2 mt-2 border-t border-white/5 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">가입</Link>
-                            </>
-                        )}
-                    </div>
-                    <Link
-                        href="/contact"
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-sm font-medium py-2 text-indigo-400 hover:text-indigo-300 transition-colors"
-                    >
-                        Early Access
+                <div className="sm:hidden bg-white border-t border-neutral-100 px-6 py-4 space-y-3">
+                    <Link href="/myverse/contact" onClick={() => setMobileOpen(false)}
+                        className="block text-sm font-semibold text-indigo-600">
+                        Early Access 신청
                     </Link>
                 </div>
             )}
         </header>
-        </>
     );
 }

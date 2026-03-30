@@ -23,7 +23,7 @@ export default function MyVerseLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen bg-[#0B0D17] text-white flex flex-col">
+        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
             <MyVerseHeader />
             <main className="flex-1 pt-14">
                 {children}
