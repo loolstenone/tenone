@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Plus, Mail, Shield, UserPlus, MoreHorizontal, Crown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface Member {
   email: string;

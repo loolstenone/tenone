@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { TrendHunterLogo } from "@/components/TrendHunterLogo";
+import { TrendHunterLogo } from "@/features/trendhunter/TrendHunterLogo";
 
 const menuLinks = [
     { name: "Weekly", href: "/trendhunter/weekly" },

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useWorkflow } from "@/lib/workflow-context";
-import { KanbanBoard } from "@/components/smarcomm/workflow/KanbanBoard";
-import { TaskModal } from "@/components/smarcomm/workflow/TaskModal";
+import { KanbanBoard } from "@/features/smarcomm/workflow/KanbanBoard";
+import { TaskModal } from "@/features/smarcomm/workflow/TaskModal";
 import { WorkflowTask, TaskStatus } from "@/types/workflow";
 import { workflowChannels } from "@/lib/smarcomm/workflow-data";
 import { Plus, Filter } from "lucide-react";
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 export default function KanbanPage() {
   const { tasks, moveTask, addTask, updateTask, deleteTask } = useWorkflow();

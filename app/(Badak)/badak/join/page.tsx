@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ChevronRight, ChevronLeft, User, Briefcase, Search, Gift } from 'lucide-react';
 import { JOB_FUNCTIONS, INDUSTRIES, JOB_LEVELS, LOOKING_FOR_TAGS, CAN_OFFER_TAGS } from '@/lib/badak-constants';
 import { upsertBadakProfile, fetchBadakProfile } from '@/lib/supabase/badak';
-import TagPicker from '@/components/badak/TagPicker';
+import TagPicker from '@/features/badak/TagPicker';
 
 export default function JoinPage() {
   const router = useRouter();

@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle, X, Gauge, Zap, Timer, Lightbulb, Loader2 } from 'lucide-react';
 import { getScanLog } from '@/lib/smarcomm/scan-data';
-import GaugeChart from '@/components/smarcomm/GaugeChart';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import RadarChart from '@/components/smarcomm/RadarChart';
+import GaugeChart from '@/features/smarcomm/GaugeChart';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import RadarChart from '@/features/smarcomm/RadarChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type ViewMode = 'list' | 'result' | 'compare';
 type Status = 'pass' | 'warning' | 'fail';

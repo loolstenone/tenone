@@ -6,7 +6,7 @@ import {
   ArrowLeft, Sparkles, Brain, BarChart3, Lightbulb, PenTool,
   ShieldCheck, MessageCircle, Filter, Info
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── AI 유형 정의 ── */
 const AI_TYPES = [

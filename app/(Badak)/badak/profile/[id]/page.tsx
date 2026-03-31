@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { MessageCircle, Check, Clock, X } from 'lucide-react';
 import { fetchBadakProfile, createConnection, checkConnectionStatus } from '@/lib/supabase/badak';
-import ProfileCard from '@/components/badak/ProfileCard';
+import ProfileCard from '@/features/badak/ProfileCard';
 import type { BadakProfile } from '@/types/badak';
 import Link from 'next/link';
 

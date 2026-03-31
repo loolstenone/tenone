@@ -1,5 +1,5 @@
-import { NatureBoxHeader } from "@/components/NatureBoxHeader";
-import { NatureBoxFooter } from "@/components/NatureBoxFooter";
+import { NatureBoxHeader } from "@/features/naturebox/NatureBoxHeader";
+import { NatureBoxFooter } from "@/features/naturebox/NatureBoxFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

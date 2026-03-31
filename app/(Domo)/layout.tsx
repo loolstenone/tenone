@@ -1,5 +1,5 @@
-import { DomoHeader } from "@/components/DomoHeader";
-import { DomoFooter } from "@/components/DomoFooter";
+import { DomoHeader } from "@/features/domo/DomoHeader";
+import { DomoFooter } from "@/features/domo/DomoFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

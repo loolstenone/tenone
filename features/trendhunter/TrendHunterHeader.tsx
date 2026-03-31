@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { TrendHunterLogo } from "@/components/TrendHunterLogo";
+import { TrendHunterLogo } from "@/features/trendhunter/TrendHunterLogo";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [

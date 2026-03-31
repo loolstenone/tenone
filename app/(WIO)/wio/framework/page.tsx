@@ -9,7 +9,7 @@ import {
   Server, Database, Globe, Shield, Monitor, Smartphone, Palette,
   Accessibility, Zap, Target, BarChart3, Rocket, Calendar, CheckCircle2
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 3대 자원 상세 ── */
 const RESOURCE_DETAILS = [

@@ -1,6 +1,6 @@
-import { PublicHeader } from "@/components/PublicHeader";
-import { PublicFooter } from "@/components/PublicFooter";
-import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
+import { PublicHeader } from "@/features/tenone/PublicHeader";
+import { PublicFooter } from "@/features/tenone/PublicFooter";
+import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

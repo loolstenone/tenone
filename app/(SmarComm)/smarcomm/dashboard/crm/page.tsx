@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { Search, Plus, Bell, Mail, MessageSquare, ChevronRight } from 'lucide-react';
 import { MOCK_LEADS, getLeadStatusLabel, getLeadStatusColor } from '@/lib/smarcomm/dashboard-data';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 export default function CRMPage() {
   const router = useRouter();

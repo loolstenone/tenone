@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { MOCK_CALENDAR } from '@/lib/smarcomm/dashboard-data';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // 2026년 3월

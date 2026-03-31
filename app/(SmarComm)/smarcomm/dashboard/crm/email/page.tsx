@@ -2,8 +2,8 @@
 
 import { Plus, Mail, Send, Clock, Eye, MousePointerClick } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface EmailCampaign {
   id: string;

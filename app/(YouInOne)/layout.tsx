@@ -1,5 +1,5 @@
-import { YouInOneHeader } from "@/components/YouInOneHeader";
-import { YouInOneFooter } from "@/components/YouInOneFooter";
+import { YouInOneHeader } from "@/features/youinone/YouInOneHeader";
+import { YouInOneFooter } from "@/features/youinone/YouInOneFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

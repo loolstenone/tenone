@@ -5,8 +5,8 @@ import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-reac
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type SettingsTab = 'workspace' | 'members' | 'palette' | 'plan' | 'integrations';
 

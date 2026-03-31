@@ -1,5 +1,5 @@
-import { MadLeapHeader } from "@/components/MadLeapHeader";
-import { MadLeapFooter } from "@/components/MadLeapFooter";
+import { MadLeapHeader } from "@/features/madleap/MadLeapHeader";
+import { MadLeapFooter } from "@/features/madleap/MadLeapFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

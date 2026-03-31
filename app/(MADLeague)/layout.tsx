@@ -1,5 +1,5 @@
-import { MadLeagueHeader } from "@/components/MadLeagueHeader";
-import { MadLeagueFooter } from "@/components/MadLeagueFooter";
+import { MadLeagueHeader } from "@/features/madleague/MadLeagueHeader";
+import { MadLeagueFooter } from "@/features/madleague/MadLeagueFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

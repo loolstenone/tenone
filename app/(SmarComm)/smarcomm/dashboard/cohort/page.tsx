@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Plus, Users, Download, Search, ChevronRight } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface Cohort {
   id: string;

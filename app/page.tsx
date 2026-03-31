@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PublicHeader } from "@/components/PublicHeader";
-import { PublicFooter } from "@/components/PublicFooter";
-import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
+import { PublicHeader } from "@/features/tenone/PublicHeader";
+import { PublicFooter } from "@/features/tenone/PublicFooter";
+import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
 

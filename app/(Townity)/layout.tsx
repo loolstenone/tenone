@@ -1,5 +1,5 @@
-import { TownityHeader } from "@/components/TownityHeader";
-import { TownityFooter } from "@/components/TownityFooter";
+import { TownityHeader } from "@/features/townity/TownityHeader";
+import { TownityFooter } from "@/features/townity/TownityFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

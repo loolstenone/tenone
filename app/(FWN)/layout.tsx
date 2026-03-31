@@ -1,5 +1,5 @@
-import { FWNHeader } from "@/components/FWNHeader";
-import { FWNFooter } from "@/components/FWNFooter";
+import { FWNHeader } from "@/features/fwn/FWNHeader";
+import { FWNFooter } from "@/features/fwn/FWNFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

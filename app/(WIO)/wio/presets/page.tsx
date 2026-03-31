@@ -6,7 +6,7 @@ import {
   ArrowLeft, Sparkles, Palette, Factory, Monitor, ShoppingCart,
   Check, ArrowRight, Layers, Workflow, Star, Plug
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 프리셋 데이터 ── */
 type Preset = {

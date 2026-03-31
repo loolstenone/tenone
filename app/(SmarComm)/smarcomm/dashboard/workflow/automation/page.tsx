@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useWorkflow } from "@/lib/workflow-context";
-import { AutomationCard } from "@/components/smarcomm/workflow/AutomationCard";
-import { AutomationBuilder } from "@/components/smarcomm/workflow/AutomationBuilder";
+import { AutomationCard } from "@/features/smarcomm/workflow/AutomationCard";
+import { AutomationBuilder } from "@/features/smarcomm/workflow/AutomationBuilder";
 import { AutomationRule } from "@/types/workflow";
 import { Plus, Zap, Power, AlertCircle } from "lucide-react";
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 export default function AutomationPage() {
   const { automations, addAutomation, updateAutomation, toggleAutomation, deleteAutomation } = useWorkflow();

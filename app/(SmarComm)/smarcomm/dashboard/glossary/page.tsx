@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Search, Plus, BookOpen, X } from 'lucide-react';
 import { GLOSSARY, CATEGORIES, type GlossaryTerm } from '@/lib/smarcomm/glossary-data';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
 
 export default function GlossaryPage() {
   const [search, setSearch] = useState('');

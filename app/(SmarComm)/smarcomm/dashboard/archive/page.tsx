@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Search, Image, Type, Video, Filter, Download, Eye, Trash2, Plus } from 'lucide-react';
 import { MOCK_CREATIVES } from '@/lib/smarcomm/dashboard-data';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 const TYPE_ICON = { text: Type, banner: Image, video: Video };
 const TYPE_LABEL = { text: '텍스트', banner: '이미지', video: '영상' };

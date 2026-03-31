@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Globe, Settings, FileText, Bot, Calculator, CheckCircle2, AlertCircle } from 'lucide-react';
-import Header from '@/components/smarcomm/Header';
+import Header from '@/features/smarcomm/Header';
 import { saveScanUrl } from '@/lib/smarcomm/scan-data';
 
 const STEPS = [

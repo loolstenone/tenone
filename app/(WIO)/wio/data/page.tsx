@@ -7,7 +7,7 @@ import {
   Database, Users, Shield, Eye, Search, AlertTriangle, Target,
   Layers, ArrowRight, ChevronRight, Cpu, LineChart
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 4-Level Analytics ── */
 const ANALYTICS_LEVELS = [

@@ -8,7 +8,7 @@ import {
   Video, ShoppingBag, Newspaper, Radio, Users, FileText,
   BarChart3, ArrowRight, Database, Layers, Zap, Target
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 매체 분류 ── */
 const MEDIA_CATEGORIES = [

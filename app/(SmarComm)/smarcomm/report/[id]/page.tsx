@@ -9,10 +9,10 @@ import {
   Download, Share2, Printer, Gauge, Zap, Timer,
   Lightbulb, Loader2
 } from 'lucide-react';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
-import GaugeChart from '@/components/smarcomm/GaugeChart';
-import RadarChart from '@/components/smarcomm/RadarChart';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
+import GaugeChart from '@/features/smarcomm/GaugeChart';
+import RadarChart from '@/features/smarcomm/RadarChart';
 import { useAuth } from '@/lib/auth-context';
 import { analyzeBrandPersonality } from '@/lib/smarcomm/brand-personality';
 

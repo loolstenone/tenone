@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, SlidersHorizontal, X, Users, UserPlus, Sparkles } from 'lucide-react';
 import { JOB_FUNCTIONS, INDUSTRIES, JOB_LEVELS, LOOKING_FOR_TAGS, CAN_OFFER_TAGS } from '@/lib/badak-constants';
 import { fetchBadakProfiles } from '@/lib/supabase/badak';
-import ProfileCard from '@/components/badak/ProfileCard';
+import ProfileCard from '@/features/badak/ProfileCard';
 import type { BadakProfile } from '@/types/badak';
 
 /* ── Mock: 카테고리 통계 ── */

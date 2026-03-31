@@ -6,10 +6,10 @@ import { useAuth } from '@/lib/auth-context';
 import { useSite } from '@/lib/site-context';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { PublicHeader } from '@/components/PublicHeader';
-import { PublicFooter } from '@/components/PublicFooter';
-import { MadLeagueHeader } from '@/components/MadLeagueHeader';
-import { MadLeagueFooter } from '@/components/MadLeagueFooter';
+import { PublicHeader } from '@/features/tenone/PublicHeader';
+import { PublicFooter } from '@/features/tenone/PublicFooter';
+import { MadLeagueHeader } from '@/features/madleague/MadLeagueHeader';
+import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { PublicHeader } from "@/components/PublicHeader";
-import { PublicFooter } from "@/components/PublicFooter";
+import { PublicHeader } from "@/features/tenone/PublicHeader";
+import { PublicFooter } from "@/features/tenone/PublicFooter";
 import { CheckCircle2, ArrowRight, FolderKanban, Target, Users, Sparkles } from "lucide-react";
 
 const interests = [

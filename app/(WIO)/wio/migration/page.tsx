@@ -7,7 +7,7 @@ import {
   Zap, Layers, RefreshCw, Clock, Shield, Database,
   CheckCircle2, FileCheck, Users, HardDrive, ChevronRight
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 3가지 전환 방식 ── */
 const MIGRATION_TYPES = [

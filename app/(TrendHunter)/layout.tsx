@@ -1,5 +1,5 @@
-import { TrendHunterHeader } from "@/components/TrendHunterHeader";
-import { TrendHunterFooter } from "@/components/TrendHunterFooter";
+import { TrendHunterHeader } from "@/features/trendhunter/TrendHunterHeader";
+import { TrendHunterFooter } from "@/features/trendhunter/TrendHunterFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useWorkflow } from "@/lib/workflow-context";
-import { ProjectCard } from "@/components/smarcomm/workflow/ProjectCard";
+import { ProjectCard } from "@/features/smarcomm/workflow/ProjectCard";
 import { workflowChannels } from "@/lib/smarcomm/workflow-data";
 import { Filter, FolderKanban } from "lucide-react";
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 export default function ProjectsPage() {
   const { projects } = useWorkflow();

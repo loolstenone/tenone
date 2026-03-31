@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Send, Check, Building2, Users, Briefcase, GraduationCap } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 const interests = [
     { id: 'solution', label: '솔루션 구축', icon: Building2 },

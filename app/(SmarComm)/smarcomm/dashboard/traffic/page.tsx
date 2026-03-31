@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { Globe, TrendingUp, TrendingDown, Users, Clock, Monitor, Smartphone, ArrowRight, ExternalLink } from 'lucide-react';
-import LineChart from '@/components/smarcomm/charts/LineChart';
-import BarChart from '@/components/smarcomm/charts/BarChart';
-import DonutChart from '@/components/smarcomm/charts/DonutChart';
+import LineChart from '@/features/smarcomm/charts/LineChart';
+import BarChart from '@/features/smarcomm/charts/BarChart';
+import DonutChart from '@/features/smarcomm/charts/DonutChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 
 // Mock 트래픽 데이터 (GA4 연동 시 실제 데이터로 대체)

@@ -1,5 +1,5 @@
-import { BadakHeader } from "@/components/BadakHeader";
-import { BadakFooter } from "@/components/BadakFooter";
+import { BadakHeader } from "@/features/badak/BadakHeader";
+import { BadakFooter } from "@/features/badak/BadakFooter";
 import { StarfieldWrapper } from "@/components/StarfieldWrapper";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";

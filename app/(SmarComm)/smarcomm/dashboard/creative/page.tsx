@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Palette, Type, Image, Video, Plus, Sparkles, ChevronRight, Copy, Check, Loader2 } from 'lucide-react';
 import { MOCK_CREATIVES } from '@/lib/smarcomm/dashboard-data';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 const TYPE_ICON = { text: Type, banner: Image, video: Video };
 const TYPE_LABEL = { text: '텍스트 카피', banner: '배너/이미지', video: '영상' };

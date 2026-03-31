@@ -1,5 +1,5 @@
-import { ChangeUpHeader } from "@/components/ChangeUpHeader";
-import { ChangeUpFooter } from "@/components/ChangeUpFooter";
+import { ChangeUpHeader } from "@/features/changeup/ChangeUpHeader";
+import { ChangeUpFooter } from "@/features/changeup/ChangeUpFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

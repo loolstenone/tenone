@@ -7,7 +7,7 @@ import {
   Handshake, MessageSquare, Settings, Zap, Brain, Shield, LayoutGrid,
   ChevronRight, Sparkles, Target, BarChart3, BookOpen
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 3대 자원 ── */
 const RESOURCES = [
