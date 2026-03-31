@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useIdentityAdapter } from "@/lib/identity-context";
 import {
     LayoutDashboard, User, Users, BookOpen, FileText, MessageSquareText,
     LogOut, Home, ChevronDown, ChevronRight, Menu, X as XIcon,
@@ -431,6 +432,7 @@ export function IntraSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { user, isStaff, hasAccess, hasModuleAccess, logout } = useAuth();
+    const { accessibleModules, isSuperAdmin, identityLoaded } = useIdentityAdapter();
     const getSiteById = (_id: string): any => null;
     const getBoardsBySite = (_id: string): any[] => [];
     const getPostsByBoard = (_id: string): any[] => [];
@@ -504,10 +506,16 @@ export function IntraSidebar() {
         return pathname === href || pathname.startsWith(href + '/');
     };
 
-    // Filter modules by access (SystemAccess + IntraModule)
+    // Filter modules by access (3계층 Identity 우선 → 레거시 fallback)
     const visibleModules = modules.filter(mod => {
-        // People 유형 기반 제어 (intraModule)
-        if (mod.intraModule && !hasModuleAccess(mod.intraModule)) return false;
+        // 3계층 Identity가 로드된 경우: accessibleModules 기반 필터링
+        if (identityLoaded && accessibleModules.length > 0) {
+            if (isSuperAdmin) return true; // super_admin은 전체 접근
+            if (mod.intraModule && !accessibleModules.includes(mod.intraModule)) return false;
+        } else {
+            // 레거시 fallback: auth-context의 hasModuleAccess
+            if (mod.intraModule && !hasModuleAccess(mod.intraModule)) return false;
+        }
         // SystemAccess 기반 세부 제어 (ERP/Project)
         if (mod.access && !hasAccess(mod.access)) return false;
         return true;
