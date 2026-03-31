@@ -1,8 +1,19 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-30 (집, 야간 퇴근)
+> 마지막 업데이트: 2026-03-31 (집)
 
-## 오늘 한 작업 (3/30 집)
+## 오늘 한 작업 (3/31 집)
+
+### TenOne 사이트 고도화 — DB 전체 연결
+1. WIO OrbiConfig DB sync (localStorage → Supabase user_settings) ✅
+2. TypeScript 56 에러 → 0 ✅ (strict mode 전체 클린)
+3. Marketing 3 페이지 추가 ✅ — Performance, Influencers, Social (Supabase CRUD)
+4. 005_tenone_portal.sql ✅ — brands 테이블 포털 컬럼 확장 + history_events 20개 시드
+5. lib/supabase/tenone.ts ✅ — fetchPortalBrands(), fetchHistoryEvents()
+6. app/(TenOne)/brands/page.tsx ✅ — Supabase DB-first + lib/data.ts fallback
+7. app/(TenOne)/history/page.tsx ✅ — Supabase DB-first + lib/data.ts fallback
+
+## 이전 작업 (3/30 집, 야간)
 
 ### DB 안정화 + 실연동
 1. posts 400 Bad Request 수정 ✅
@@ -48,16 +59,20 @@
 
 ## 다음 할 일
 
-### 즉시 — Myverse 앱 (Android)
-1. Expo Go 로딩 이슈 해결 — 번들 로딩 후 흰 화면/무한 로딩 간헐 발생. `adb reverse tcp:8081 tcp:8081` + Expo Go 캐시 초기화로 해결되지만 불안정. 원인: expo run:android가 index.js 엔트리를 기대 vs expo-router/entry 충돌 가능성. `C:\Projects\myverse\android` 폴더 삭제 후 Expo Go 방식으로 통일 필요.
-2. Myverse 전용 Supabase 프로젝트 생성
-3. 온보딩 실연결 + ME 탭 실데이터 + 캘린더 연동
-4. LOG 핵심 (카메라/갤러리, AI 분류, 사진 자동 수집)
+### 즉시 — Supabase 마이그레이션 실행 (수동)
+1. Supabase 대시보드에서 005_tenone_portal.sql 실행 필요 (brands 컬럼 추가 + history_events 생성)
+2. 확인: brands 페이지 → DB 데이터 로드되는지 체크 (fallback은 lib/data.ts)
 
-### 중기 — TenOne 고도화
-5. 설정 서비스/모듈 → Supabase 저장 (localStorage → DB)
-6. 마케팅 13모듈 Supabase CRUD + Context 실DB 전환
-7. 모바일 반응형 점검 / npm run build 에러 0개
+### 다음 — TenOne 고도화
+3. npm run build 에러 0개 확인 + Vercel 배포
+4. 모바일 반응형 점검 (인트라 페이지)
+5. newsletter pastIssues → Supabase 뉴스레터 아카이브 테이블 연결 (현재 하드코딩 6개)
+6. contact 페이지 → /api/contact API 실제 이메일 발송 연결 확인
+
+### Myverse 앱 (Android) — 대기
+7. Expo Go 로딩 이슈 해결 (android 폴더 삭제 후 재구성)
+8. Myverse 전용 Supabase 프로젝트 생성
+9. 온보딩 실연결 + ME 탭 실데이터 + 캘린더 연동
 
 ---
 

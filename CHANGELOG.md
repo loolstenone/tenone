@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-03-31 (집)
+
+### TenOne 포털 DB 전체 연결
+
+**컨텍스트 전환**: 이전 대화에서 컨텍스트 소진 → 새 대화로 이어서 진행
+
+#### TS 에러 0개 달성 + Marketing 3 페이지
+- `lib/wio-modules.ts`: OrbiConfig DB sync — `saveOrbiConfigAsync`, `loadOrbiConfigAsync` 추가
+- `app/(WIO)/wio/app/settings/page.tsx`: DB 저장으로 전환
+- TypeScript 56 에러 → 0 (strict mode 클린):
+  - `types/gpr.ts`: category, target, metric 옵셔널 필드 추가
+  - `lib/gpr-context.tsx`: rowToGoal level/kpi 매핑 추가
+  - `lib/staff-context.tsx`: SystemAccess import + 캐스팅
+  - `lib/agent/router.ts`: rook: 'content' 추가
+  - `components/PublicHeader.tsx`: NavItem 타입 추가
+  - 기타 implicit any 5개 파일 일괄 수정
+- `app/intra/marketing/performance/page.tsx` 신규 — KPI 대시보드
+- `app/intra/marketing/influencers/page.tsx` 신규 — 인플루언서 CRUD
+- `app/intra/marketing/social/page.tsx` 신규 — 소셜 계정+콘텐츠 캘린더
+- `components/IntraSidebar.tsx`: Performance, Influencers, Social 사이드바 추가
+
+#### TenOne 포털 DB 연결
+- `supabase/migrations/005_tenone_portal.sql` 신규:
+  - brands 테이블 포털 컬럼 추가 (category/description/tagline/domain/logo_url/thumbnail_url/website_url/tags[]/founded_date/display_status)
+  - 19개 브랜드 시드 데이터 UPDATE
+  - history_events 테이블 생성 + RLS
+  - 20개 역사 이벤트 시드 (h1-h20, 2019-2025)
+- `lib/supabase/tenone.ts` 신규 — fetchPortalBrands(), fetchHistoryEvents()
+- `app/(TenOne)/brands/page.tsx`: Supabase DB-first + lib/data.ts fallback
+- `app/(TenOne)/history/page.tsx`: Supabase DB-first + lib/data.ts fallback
+
+### 변경 파일
+- 신규 4개: 005_tenone_portal.sql, tenone.ts, performance/page.tsx, influencers/page.tsx, social/page.tsx
+- 수정: brands/page.tsx, history/page.tsx, wio-modules.ts, IntraSidebar.tsx, wio/settings/page.tsx, types/gpr.ts, gpr-context.tsx, staff-context.tsx, agent/router.ts, PublicHeader.tsx, board.ts 외 다수
+
+---
+
 ## 2026-03-30 (집, 야간)
 
 ### Myverse 앱 Android 실행 + UI 리디자인
