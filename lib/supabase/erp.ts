@@ -13,10 +13,10 @@ export async function fetchApprovals(options?: {
     requesterId?: string;
     limit?: number;
 }) {
-    let query = supabase.from('approvals').select('*, requester:members!approvals_requester_id_fkey(name)', { count: 'exact' });
+    let query = supabase.from('approvals').select('*, drafter:members!approvals_drafter_id_fkey(name)', { count: 'exact' });
 
     if (options?.status && options.status !== 'all') query = query.eq('status', options.status);
-    if (options?.requesterId) query = query.eq('requester_id', options.requesterId);
+    if (options?.requesterId) query = query.eq('drafter_id', options.requesterId);
 
     query = query.order('created_at', { ascending: false });
     if (options?.limit) query = query.limit(options.limit);
