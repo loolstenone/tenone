@@ -4,6 +4,47 @@
 
 ---
 
+## 2026-03-30 (집, 야간)
+
+### Myverse 앱 Android 실행 + UI 리디자인
+- Android Studio Panda2 설치 (winget), SDK 35, cmdline-tools
+- Pixel 7 에뮬레이터 생성 (API 35, x86_64), JAVA_HOME/ANDROID_HOME 환경변수 설정
+- Expo Go로 앱 실행 성공 (온보딩 화면 표시 확인)
+  - `adb reverse tcp:8081 tcp:8081` 포트 포워딩 필요
+  - `expo run:android` prebuild 잔재(android/ 폴더, index.js 엔트리 충돌) 정리 필요
+- UI 리디자인 — Reflectly 수준 업그레이드
+  - 이모지(📷😄🔒) → `lucide-react-native` 벡터 아이콘 전면 교체
+  - `app/(auth)/onboarding.tsx`: 불꽃 오브 + 프로그레스 바 + Calendar/Camera/Zap 아이콘
+  - `app/(tabs)/index.tsx`: ME탭 — 불꽃 애니메이션, 기분 카드, 캘린더 카드, 빈 상태
+  - `app/(tabs)/log.tsx`: LOG탭 — 사진/메모 액션 카드, 타임라인 빈 상태, 그라디언트 CTA
+  - `app/log/new.tsx`: 무드 컬러 원(5색), Blackbox 토글, 사진 추가 영역
+
+### 변경 파일 (4개, C:\Projects\myverse)
+- 수정 4개 (onboarding.tsx, index.tsx, log.tsx, new.tsx)
+
+---
+
+## 2026-03-30 (집, 저녁)
+
+### DB 안정화 + 실연동 5건
+- posts 400 Bad Request 수정: `lib/supabase/board.ts` L107 tags 필터 수정
+- GoTrueClient 싱글톤 확인: 재발 없음
+- CRM DB 테이블 + 실DB 연동
+  - `supabase/migrations/003_crm_tables.sql` (신규): crm_people, crm_organizations, crm_org_contacts, crm_deals, crm_activities
+  - `lib/supabase/crm.ts` (신규 ~430줄): CRUD 전체, fetchCrmStats
+  - `lib/crm-context.tsx` (수정): Mock 초기화 → useEffect DB fetch, async CRUD
+- 마케팅 13모듈 DB 테이블
+  - `supabase/migrations/004_marketing_modules.sql` (신규): 15테이블, RLS 일괄
+- 뉴스룸 상세 페이지 개선
+  - `app/(TenOne)/newsroom/[id]/page.tsx` (수정): 브랜드 배지, 외부 바로가기
+  - `components/newsroom/NewsroomFeed.tsx` (수정): 통합 라우팅 `/newsroom/${id}`
+
+### 변경 파일 (6개)
+- 수정 3개 + 신규 3개
+- +750줄
+
+---
+
 ## 2026-03-30 (사무실, 야간 퇴근 전)
 
 ### Myverse 개발 전략 검토

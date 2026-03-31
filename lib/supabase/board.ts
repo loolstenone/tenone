@@ -104,7 +104,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
     if (category) query = query.eq('category', category);
     if (status) query = query.eq('status', status);
     else query = query.eq('status', 'published');
-    if (tag) query = query.contains('tags', JSON.stringify([tag]));
+    if (tag) query = query.contains('tags', [tag]);
 
     // 검색 (제목 + 본문)
     if (search) {
