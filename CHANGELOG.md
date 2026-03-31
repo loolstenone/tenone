@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-03-31 (사무실, 2차)
+
+### localStorage → Supabase DB 마이그레이션 완료
+
+**수정 파일:**
+- `lib/supabase/settings.ts` — member_id/settings JSONB 스키마 전면 재작성 (기존 user_id/app/key/value → 중첩 JSONB). getAppSettings/setAppSettings 추가
+- `lib/wio-modules.ts` — loadOrbiConfigDB / saveOrbiConfigDB / loadAccordionStateDB / saveAccordionStateDB 4개 async DB 함수 추가
+- `app/(WIO)/wio/app/layout.tsx` — orbi config + accordion 상태 DB-first 로드
+- `app/(WIO)/wio/app/settings/page.tsx` — 저장 시 saveOrbiConfigDB 호출
+- `lib/library-context.tsx` — bookmarks/user_items mount 시 DB 로드, 변경 시 DB + localStorage 동시 저장 (mounted ref로 초기 로드 중 저장 방지)
+- `lib/smarcomm/chart-palette.ts` — loadChartPaletteFromDB() 추가, setChartPalette()이 DB에도 저장
+- `lib/smarcomm/scan-data.ts` — competitors/compare_log DB 헬퍼 (saveCompetitorList, loadCompetitorListFromDB, saveCompareLog, loadCompareLogFromDB) 추가
+- `app/(SmarComm)/smarcomm/dashboard/scan/page.tsx` — mount 시 DB에서 경쟁사·비교이력 로드, company 설정 getSetting으로 조회
+- `app/(SmarComm)/smarcomm/dashboard/glossary/page.tsx` — custom_glossary DB 연동
+- `app/(SmarComm)/smarcomm/dashboard/profile/page.tsx` — company 설정 DB 저장/로드
+
+**결정사항:**
+- 모든 사용자 설정: `user_settings` 테이블 단일 행, `{ [app]: { [key]: value } }` 중첩 JSONB
+- localStorage는 오프라인 fallback으로 유지
+- 빌드 2회 성공 (exit code 0), TypeScript 오류 없음
+
+---
+
 ## 2026-03-30 (사무실, 야간 퇴근 전)
 
 ### Myverse 개발 전략 검토
