@@ -12,6 +12,7 @@ import {
     FolderKanban, ClipboardList, Clock, UserPlus, Palette, Plus,
     Workflow, Calendar, Contact, Globe, FolderOpen,
     Megaphone, TrendingUp, Handshake, Activity, BarChart3, Building2, Tags, Upload,
+    Share2, Star, Gauge,
     // ERP - HR
     UserCheck, Target, GitBranch, GraduationCap, DollarSign, CreditCard, Receipt,
     Briefcase, CalendarCheck, Wallet, Award, FileCheck, Heart,
@@ -179,6 +180,9 @@ const modules: NavModule[] = [
                     { name: "Activities", href: "/intra/marketing/activities", icon: Activity },
                     { name: "Contacts", href: "/intra/marketing/crm/people", icon: Contact, staffOnly: true },
                     { name: "Analytics", href: "/intra/marketing/analytics", icon: BarChart3, staffOnly: true },
+                    { name: "Performance", href: "/intra/marketing/performance", icon: Gauge, staffOnly: true },
+                    { name: "Influencers", href: "/intra/marketing/influencers", icon: Star, staffOnly: true },
+                    { name: "Social", href: "/intra/marketing/social", icon: Share2, staffOnly: true },
                 ],
             },
             {
