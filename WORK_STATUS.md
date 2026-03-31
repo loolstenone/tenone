@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-31 (사무실)
+> 마지막 업데이트: 2026-03-31 (사무실, 2차)
 
 ## 오늘 한 작업 (3/31)
 
@@ -23,6 +23,14 @@
 - **Priority 2**: features/[brand] 폴더 분리 — 46개 컴포넌트 이동, import 경로 전체 업데이트 ✅
 - **Priority 3**: next.config.ts 캐시 헤더 설정 (마케팅 1h, 인트라 no-store, API no-store) ✅
 
+### settings localStorage → Supabase DB 마이그레이션 (완료)
+- lib/supabase/settings.ts: member_id/settings JSONB 스키마 전면 재작성 ✅
+- lib/wio-modules.ts: loadOrbiConfigDB / saveOrbiConfigDB / loadAccordionStateDB / saveAccordionStateDB ✅
+- wio/app/layout.tsx + settings/page.tsx: DB-first 전환 ✅
+- lib/library-context.tsx: bookmarks/user_items DB 연동 ✅
+- lib/smarcomm/chart-palette.ts + scan-data.ts: DB 헬퍼 추가 ✅
+- smarcomm/dashboard/scan, glossary, profile 페이지: DB 연동 ✅
+
 ---
 
 ## 다음 할 일
@@ -32,7 +40,7 @@
 2. Multiple GoTrueClient — 모니터링 계속 (11976ed 커밋 이후 안정)
 
 ### 단기 — TenOne
-3. 설정 서비스/모듈 → Supabase 저장 (localStorage → DB)
+3. ~~설정 서비스/모듈 → Supabase 저장 (localStorage → DB)~~ ✅ 완료
 4. Rule Engine + Event Bus 구현 (Universe OS Phase 2)
 5. SmarComm 독립 배포
 
