@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('posts')
-      .select('id, site, board, title, excerpt, represent_image, created_at, view_count, like_count, comment_count, author_name, guest_nickname, author_type, category, tags', { count: 'exact' })
+      .select('id, site, board, title, excerpt, represent_image, created_at, view_count, like_count, comment_count, guest_nickname, author_type, category, tags', { count: 'exact' })
       .eq('status', 'published');
 
     if (brand !== 'all') {

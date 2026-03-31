@@ -1,5 +1,5 @@
 # Director's Architecture Guidelines & Advice
-> **Version:** 1.5 (Last Updated: 2026-03-31)
+> **Version:** 1.6 (Last Updated: 2026-03-31)
 > **To:** 개발 파트너 Claude
 > **From:** Antigravity (Architecture Consultant / Director)
 > **Status:** Phase 2 (Frontend Context Adapter) 진행 중
@@ -34,9 +34,16 @@
 로컬에서 `npm run dev` 테스트 중 간헐적으로 서버가 종료되는 현상을 겪으실 수 있습니다.
 * **조언:** 이는 코드 문법 오류보다는 백그라운드에 남아있는 이전 프로세스가 포트(3000번)를 점유하고 있을 확률이 매우 큽니다. 불필요한 에러 디버깅에 시간을 낭비하시기보다, 프로세스를 깔끔히 종료하시거나 `npm run dev -p 4000` 처럼 다른 대체 포트를 띄워서 쾌적한 개발 리듬을 유지하시길 권장합니다.
 
-### 3. API 페이로드 검증(Validation) 규칙
-* 개발 테스트 중 400 Bad Request(`app/api/board/posts/route.ts` 등)를 만나게 되신다면, 백엔드의 치명적 에러라기보다는 필수 데이터(`site`, `board`, `title`, `content` 등) 누락으로 인한 입구컷(Validation) 방어일 가능성이 높습니다.
-* API 연동 시 명세에 따른 필수 파라미터의 누락 여부를 함께 체크해 보시면 한층 매끄러운 진행이 될 것입니다.
+### 3. API 통신 규격 및 페이로드 검증(Validation) 가이드
+최근 게시판 쪽에 테스트하실 때 400 Bad Request 에러(`app/api/board/posts/route.ts` 등)를 만나셨다면, 통신 프로토콜 혼동이나 필수 페이로드 누락에 기인했을 가능성이 큽니다. 원활한 API 연동을 위해 다음 명세(Specification)를 참고해 주시길 권장합니다.
+* **[GET] 목록 조회 (`/api/board/posts`):** 
+  - URL Query Parameter 방식을 사용합니다. (예: `?site=badak&page=1&limit=12`)
+  - 여기에는 400 에러를 던지는 로직이 없으며, 파라미터가 없으면 기본값으로 안전하게 폴백(Fallback)됩니다.
+* **[POST] 글 작성 (`/api/board/posts`):** 
+  - ⚠️ URL 파라미터가 아닌, **HTTP Body 내 JSON 객체**로 전달해야 합니다.
+  - **필수(Required):** `site`, `board`, `title`, `content` 4가지 값이 JSON 내에 반드시 포함되어야 합니다. 하나라도 누락되거나 undefined로 전송되면 Validation에 의해 400 Bad Request가 발생합니다.
+  - **비회원(Guest):** `guestNickname`과 `guestPassword`가 반드시 쌍으로 전송되어야 400 에러를 피할 수 있습니다.
+* **조언:** 클라이언트 연동부 작성 또는 테스트 시, GET(쿼리)과 POST(바디)의 데이터 전송 방식을 명확히 구분하시고, API 명세에 명시된 필수 상태(State) 값들이 온전히 쥐어져 있는지 점검해 주시면 디버깅이 단축될 것입니다.
 
 ### 4. RLS 보안 및 중앙 모니터링 고려
 * 신규 API를 설계하실 때는 데이터 무결성과 접근 권한 보호를 위한 RLS(Row Level Security) 정책 방어를 기본값으로 고려해 주십시오.
@@ -46,5 +53,6 @@
 
 ## 🗄️ Version History
 * **v1.0 ~ 1.2:** Phase 1 DB 아키텍처 정립 및 모노레포 사고 방지 원칙 추가
-* **v1.3 ~ 1.4:** Priority 1(어댑터 연결 허용) 고도화 및 API 400 에러 디버깅 제언 추가
-* **v1.5 (2026-03-31):** 상호 존중과 원활한 협업을 위한 텍스트 전면 구조화 (단어 및 어조 순화)
+* **v1.3 ~ 1.4:** Priority 1(어댑터 연결 조언) 및 API 400 에러 디버깅 제언 추가
+* **v1.5:** 상호 존중과 원활한 협업을 위한 텍스트 전면 구조화 (조언 및 가이드형)
+* **v1.6 (2026-03-31):** 게시판 API(`posts`)의 GET/POST 통신 규격 및 컴포넌트 필수 페이로드 명세 가이드 구체화
