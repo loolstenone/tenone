@@ -1,23 +1,13 @@
 "use client";
 
-import { useBumsFilter } from "../layout";
-import { CalendarClock } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function ReservationsPage() {
-    const { selectedSiteId } = useBumsFilter();
-
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-xl font-bold tracking-tight">예약 관리</h1>
-                <p className="text-sm text-neutral-500 mt-1">예약 현황을 확인하고 관리합니다.</p>
-            </div>
-
-            <div className="bg-white border border-neutral-100 p-12 text-center">
-                <CalendarClock className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
-                <h2 className="text-lg font-semibold text-neutral-400">준비 중입니다</h2>
-                <p className="text-sm text-neutral-400 mt-2">이 기능은 곧 제공됩니다.</p>
-            </div>
-        </div>
-    );
+/** 예약 관리 → Universe 예약/이벤트로 통합 */
+export default function BumsReservationsRedirect() {
+    const router = useRouter();
+    useEffect(() => {
+        router.replace("/intra/universe/bookings");
+    }, [router]);
+    return null;
 }

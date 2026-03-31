@@ -370,45 +370,56 @@ const modules: NavModule[] = [
         ],
     },
     {
-        name: "BUMS", href: "/intra/bums", icon: FileText, intraModule: 'bums' as IntraModule,
-        sections: [
-            {
-                items: [
-                    { name: "대시보드", href: "/intra/bums/dashboard", icon: LayoutDashboard },
-                    { name: "통계", href: "/intra/bums/stats", icon: BarChart3 },
-                    { name: "고객 관리", href: "/intra/bums/customers", icon: Users },
-                    { name: "고객문의", href: "/intra/bums/inquiry", icon: MessageCircle },
-                    { name: "쇼핑 관리", href: "/intra/bums/shop", icon: ShoppingCart },
-                    { name: "예약 관리", href: "/intra/bums/reservations", icon: CalendarClock },
-                    { name: "프로모션", href: "/intra/bums/promotion", icon: Gift },
-                    { name: "마케팅 관리", href: "/intra/bums/marketing", icon: Megaphone },
-                    { name: "사이트 관리", href: "/intra/bums/sites", icon: Globe },
-                    { name: "게시판 관리", href: "/intra/bums/boards", icon: LayoutGrid },
-                    { name: "콘텐츠 관리", href: "/intra/bums/content", icon: PenSquare },
-                    { name: "뉴스레터 관리", href: "/intra/bums/newsletter", icon: MessageSquareText },
-                    { name: "전체 일정 관리", href: "/intra/bums/schedule", icon: Calendar },
-                    { name: "라이브러리 관리", href: "/intra/bums/library", icon: FolderOpen },
-                ],
-            },
-        ],
-        dynamic: true, // 사이트 진입 시 동적 메뉴 생성
-    },
-    {
         name: "Universe", href: "/intra/universe", icon: Globe, intraModule: 'universe' as IntraModule,
         sections: [
             {
                 items: [
-                    { name: "유니버스 대시보드", href: "/intra/universe", icon: Globe },
+                    { name: "대시보드", href: "/intra/universe", icon: LayoutDashboard },
+                ],
+            },
+            {
+                label: "MEMBERS",
+                items: [
                     { name: "통합 회원", href: "/intra/universe/members", icon: Users },
-                    { name: "구독 관리", href: "/intra/universe/subscriptions", icon: CreditCard },
-                    { name: "교육 관리", href: "/intra/universe/education", icon: GraduationCap },
-                    { name: "예약/이벤트", href: "/intra/universe/bookings", icon: Calendar },
-                    { name: "손익 관리", href: "/intra/universe/revenue", icon: TrendingUp },
                     { name: "게스트 관리", href: "/intra/universe/guests", icon: UserPlus },
                     { name: "개인정보", href: "/intra/universe/privacy", icon: Shield },
                 ],
             },
+            {
+                label: "SITES",
+                items: [
+                    { name: "사이트 관리", href: "/intra/bums/sites", icon: Globe },
+                    { name: "게시판 관리", href: "/intra/bums/boards", icon: LayoutGrid },
+                    { name: "콘텐츠 관리", href: "/intra/bums/content", icon: PenSquare },
+                    { name: "뉴스레터", href: "/intra/bums/newsletter", icon: MessageSquareText },
+                ],
+            },
+            {
+                label: "COMMERCE",
+                items: [
+                    { name: "구독 관리", href: "/intra/universe/subscriptions", icon: CreditCard },
+                    { name: "쇼핑 관리", href: "/intra/bums/shop", icon: ShoppingCart },
+                    { name: "예약/이벤트", href: "/intra/universe/bookings", icon: Calendar },
+                    { name: "프로모션", href: "/intra/bums/promotion", icon: Gift },
+                ],
+            },
+            {
+                label: "OPERATIONS",
+                items: [
+                    { name: "손익 관리", href: "/intra/universe/revenue", icon: TrendingUp },
+                    { name: "통계", href: "/intra/bums/stats", icon: BarChart3 },
+                    { name: "고객문의", href: "/intra/bums/inquiry", icon: MessageCircle },
+                    { name: "라이브러리", href: "/intra/bums/library", icon: FolderOpen },
+                ],
+            },
+            {
+                label: "EDUCATION",
+                items: [
+                    { name: "교육 관리", href: "/intra/universe/education", icon: GraduationCap },
+                ],
+            },
         ],
+        dynamic: true,
     },
     {
         name: "Agent", href: "/intra/agent", icon: Bot, intraModule: 'agent' as IntraModule,
