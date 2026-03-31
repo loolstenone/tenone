@@ -121,7 +121,7 @@ export default function SocialPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                     { label: '계정 수', value: accounts.length },
                     { label: '총 팔로워', value: `${(totalFollowers / 1000).toFixed(1)}K` },
