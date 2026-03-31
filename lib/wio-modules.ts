@@ -414,6 +414,54 @@ export function saveAccordionState(openServices: string[]) {
   localStorage.setItem(STORAGE_KEY_ACCORDION_SVC, JSON.stringify(openServices));
 }
 
+/* ── DB 연동: 비동기 load/save (DB-first + localStorage fallback) ── */
+const DB_APP = 'wio';
+const DB_KEY_CONFIG = 'orbi_config';
+const DB_KEY_ACCORDION = 'accordion_state';
+
+export async function loadOrbiConfigDB(): Promise<OrbiConfig> {
+  try {
+    const { getAppSettings } = await import('@/lib/supabase/settings');
+    const saved = await getAppSettings<OrbiConfig>(DB_APP + ':' + DB_KEY_CONFIG);
+    if (saved && saved.enabledModules) {
+      // localStorage도 동기화
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_MODULES, JSON.stringify(saved.enabledModules));
+        localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(saved.categories));
+        localStorage.setItem(STORAGE_KEY_SERVICES, JSON.stringify(saved.enabledServices));
+      }
+      return saved;
+    }
+  } catch { /* fallback */ }
+  return loadOrbiConfig();
+}
+
+export async function saveOrbiConfigDB(config: OrbiConfig): Promise<void> {
+  // localStorage 즉시 반영
+  saveOrbiConfig(config);
+  try {
+    const { setAppSettings } = await import('@/lib/supabase/settings');
+    await setAppSettings(DB_APP + ':' + DB_KEY_CONFIG, config as unknown as Record<string, unknown>);
+  } catch { /* 무시 */ }
+}
+
+export async function loadAccordionStateDB(): Promise<string[]> {
+  try {
+    const { getSetting } = await import('@/lib/supabase/settings');
+    const saved = await getSetting<string[]>(DB_APP, DB_KEY_ACCORDION, STORAGE_KEY_ACCORDION_SVC);
+    if (saved && Array.isArray(saved)) return saved;
+  } catch { /* fallback */ }
+  return loadAccordionState();
+}
+
+export async function saveAccordionStateDB(openServices: string[]): Promise<void> {
+  saveAccordionState(openServices);
+  try {
+    const { setSetting } = await import('@/lib/supabase/settings');
+    await setSetting(DB_APP, DB_KEY_ACCORDION, openServices, STORAGE_KEY_ACCORDION_SVC);
+  } catch { /* 무시 */ }
+}
+
 /* ── Backward compat aliases (deprecated, will remove) ── */
 export const TRACK_CATALOG = CATEGORY_CATALOG;
 export const getModulesByTrack = getModulesByCategory;

@@ -17,6 +17,7 @@ import {
   CATEGORY_CATALOG, MODULE_CATALOG, getModulesByCategory,
   SERVICE_CATALOG, SERVICE_PRESETS, getModulesByService,
   loadOrbiConfig, saveOrbiConfig,
+  loadOrbiConfigDB, saveOrbiConfigDB,
   type OrbiConfig,
 } from '@/lib/wio-modules';
 import type { WIOMember } from '@/types/wio';
@@ -865,7 +866,7 @@ export default function SettingsPage() {
                     const config = loadOrbiConfig();
                     config.enabledServices = enabledServices;
                     config.enabledModules = moduleKeys;
-                    saveOrbiConfig(config);
+                    saveOrbiConfigDB(config);
                     reloadSidebar();
                     showToast('서비스 설정이 저장되었습니다');
                   }}
