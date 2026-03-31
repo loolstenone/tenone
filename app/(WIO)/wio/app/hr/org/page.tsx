@@ -1129,7 +1129,7 @@ export default function OrgPage() {
           head: row.head_name || '', headId: row.head_id || '', headCount: row.head_count || 0,
           capacity: row.capacity || 0, parentId: row.parent_id || null,
         }));
-        const byId = new Map(flat.map((n: any) => [n.id, { ...n, children: [] as OrgUnit[] }]));
+        const byId = new Map<string, OrgUnit>(flat.map((n: any) => [n.id, { ...n, children: [] as OrgUnit[] } as OrgUnit]));
         const roots: OrgUnit[] = [];
         flat.forEach((n: any) => {
           const node = byId.get(n.id)!;

@@ -408,14 +408,14 @@ export default function ApprovalPage() {
         const items = data.map(mapRow);
         setApprovals(items);
         // 워크플로우 인스턴스 로드
-        const instanceIds = items.filter(a => a.workflowInstanceId).map(a => a.workflowInstanceId!);
+        const instanceIds = items.filter((a: ApprovalItem) => a.workflowInstanceId).map((a: ApprovalItem) => a.workflowInstanceId!);
         if (instanceIds.length > 0) {
           const instanceMap: Record<string, WorkflowInstance> = {};
-          await Promise.all(instanceIds.map(async (iid) => {
+          await Promise.all(instanceIds.map(async (iid: string) => {
             const inst = await getInstance(iid);
             if (inst) {
               // approvalId 매핑: context에서 찾기 또는 item에서 찾기
-              const matchItem = items.find(a => a.workflowInstanceId === iid);
+              const matchItem = items.find((a: ApprovalItem) => a.workflowInstanceId === iid);
               if (matchItem) instanceMap[matchItem.id] = inst;
             }
           }));

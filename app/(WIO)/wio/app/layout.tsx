@@ -11,7 +11,7 @@ import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio
 import {
   CATEGORY_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByCategory,
   SERVICE_CATALOG, getModulesByService, getServiceDef,
-  loadOrbiConfig, loadAccordionState, saveAccordionState,
+  loadOrbiConfig, loadOrbiConfigAsync, loadAccordionState, saveAccordionState,
   type OrbiConfig, type WIOServiceDef, type WIOModuleDef,
 } from '@/lib/wio-modules';
 import type { WIOTenant, WIOMember } from '@/types/wio';
@@ -82,10 +82,11 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   // Close mobile sidebar on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Load orbi config from localStorage
+  // Load orbi config — localStorage 즉시 표시 후 DB 동기화
   const reloadConfig = useCallback(() => {
-    const cfg = loadOrbiConfig();
+    const cfg = loadOrbiConfig(); // 즉시 localStorage
     setOrbiConfig(cfg);
+    loadOrbiConfigAsync().then(dbCfg => setOrbiConfig(dbCfg)).catch(() => {}); // DB 비동기 반영
   }, []);
 
   useEffect(() => {

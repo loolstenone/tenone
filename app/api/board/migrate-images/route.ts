@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const results: { id: string; title?: string; imagesConverted: number; representImageSet: boolean }[] = [];
+    const results: { id: string; title?: string; imagesConverted: number; representImageSet: boolean; firstUrl?: string }[] = [];
 
     for (const post of (posts || [])) {
         let content = post.content as string;

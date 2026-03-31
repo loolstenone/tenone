@@ -215,7 +215,7 @@ export async function registerTeam(input: RegisterTeamInput): Promise<Competitio
             .select('teams_registered')
             .eq('id', input.competitionId)
             .single()
-            .then(({ data: comp }) => {
+            .then(({ data: comp }: { data: { teams_registered: number } | null }) => {
                 if (comp) {
                     supabase
                         .from('competitions')

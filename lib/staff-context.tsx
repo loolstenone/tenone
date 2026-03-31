@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { StaffMember, StaffRole, StaffStatus, Division } from '@/types/staff';
+import { StaffMember, StaffRole, StaffStatus, Division, SystemAccess } from '@/types/staff';
 import { initialStaff } from '@/lib/staff-data';
 import { isMockAllowed } from '@/lib/env';
 import { createClient } from '@/lib/supabase/client';
@@ -29,7 +29,7 @@ function memberToStaff(r: Record<string, unknown>): StaffMember {
         name: (r.name as string) || '',
         email: (r.email as string) || '',
         role: ((r.role as StaffRole) || 'Viewer'),
-        accessLevel: (r.system_access as string[]) || [],
+        accessLevel: ((r.system_access as SystemAccess[]) || []),
         division: (r.department as string)?.includes('경영') ? 'Management' as Division
             : (r.department as string)?.includes('사업') ? 'Business' as Division
             : (r.department as string)?.includes('제작') ? 'Production' as Division

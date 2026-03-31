@@ -71,6 +71,7 @@ function getDefaultBoard(site: SiteCode): string {
         fwn: 'community',
         badak: 'industry',
         hero: 'talent',
+        rook: 'content',
         ogamja: 'content',
         changeup: 'community',
     };

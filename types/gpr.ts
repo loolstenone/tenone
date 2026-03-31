@@ -25,6 +25,9 @@ export interface GprGoal {
     supervisorComment?: string;
     supervisorId?: string;
     evaluatedAt?: string;
+    category?: string;
+    target?: string;
+    metric?: string;
     // 메타
     period: string;
     createdAt: string;

@@ -25,7 +25,7 @@ export default function MyVerseAppLayout({
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: { data: { user: { id: string } | null } }) => {
       if (!data.user) {
         router.replace('/myverse');
       } else {

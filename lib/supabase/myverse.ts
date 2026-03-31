@@ -37,8 +37,8 @@ export async function fetchMyApprovals(memberId: string) {
             pending: myPending,
             myDrafts: myDrafts || [],
             pendingCount: myPending.length,
-            inProgressCount: myDrafts?.filter(d => d.status === 'in-progress').length || 0,
-            draftsCount: myDrafts?.filter(d => d.status === 'pending').length || 0,
+            inProgressCount: myDrafts?.filter((d: any) => d.status === 'in-progress').length || 0,
+            draftsCount: myDrafts?.filter((d: any) => d.status === 'pending').length || 0,
         };
     } catch {
         return { pending: [], myDrafts: [], pendingCount: 0, inProgressCount: 0, draftsCount: 0 };

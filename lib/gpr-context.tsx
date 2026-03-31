@@ -28,6 +28,8 @@ function rowToGoal(r: Record<string, unknown>): GprGoal {
         staffId: (r.member_id as string) || (r.staff_id as string) || '',
         title: (r.title as string) || '',
         description: (r.description as string) || '',
+        level: ((r.level as string) || 'GPR-I') as import('@/types/gpr').GoalLevel,
+        kpi: (r.kpi as string) || '',
         category: (r.category as string) || 'Performance',
         weight: (r.weight as number) || 0,
         target: (r.target as string) || '',

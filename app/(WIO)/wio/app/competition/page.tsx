@@ -99,17 +99,17 @@ export default function CompetitionPage() {
       if (data && data.length > 0) {
         // 각 경연의 등록 팀 수를 competition_teams에서 카운트
         const comps = data.map(mapRow);
-        const compIds = data.map(d => d.id);
+        const compIds = data.map((d: any) => d.id);
         const { data: teams } = await sb
           .from('competition_teams')
           .select('competition_id')
           .in('competition_id', compIds);
         if (teams) {
           const countMap: Record<string, number> = {};
-          teams.forEach((t: any) => {
+          teams.forEach((t: { competition_id: string }) => {
             countMap[t.competition_id] = (countMap[t.competition_id] || 0) + 1;
           });
-          comps.forEach(c => {
+          comps.forEach((c: Competition) => {
             if (countMap[c.id] !== undefined) c.teamsRegistered = countMap[c.id];
           });
         }

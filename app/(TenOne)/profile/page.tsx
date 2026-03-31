@@ -36,7 +36,6 @@ export default function ProfilePage() {
             setCompany(user.company ?? '');
             setPhone(user.phone ?? '');
             setBio(user.bio ?? '');
-            setSubscribeNewsletter(user.newsletterSubscribed ?? false);
         }
     }, [user]);
 

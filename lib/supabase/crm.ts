@@ -204,7 +204,7 @@ export async function fetchOrgById(id: string): Promise<Organization | null> {
         .eq('organization_id', id);
 
     const org = rowToOrg(data);
-    org.contactIds = (contacts || []).map(c => c.person_id);
+    org.contactIds = (contacts || []).map((c: any) => c.person_id);
     return org;
 }
 
@@ -369,11 +369,11 @@ export async function fetchCrmStats(brandId = 'tenone') {
 
     const dealRows = deals.data || [];
     const pipelineValue = dealRows
-        .filter(d => !['Won', 'Lost'].includes(d.stage))
-        .reduce((sum, d) => sum + Number(d.value), 0);
+        .filter((d: any) => !['Won', 'Lost'].includes(d.stage))
+        .reduce((sum: number, d: any) => sum + Number(d.value), 0);
     const wonValue = dealRows
-        .filter(d => d.stage === 'Won')
-        .reduce((sum, d) => sum + Number(d.value), 0);
+        .filter((d: any) => d.stage === 'Won')
+        .reduce((sum: number, d: any) => sum + Number(d.value), 0);
 
     return {
         totalPeople: people.count || 0,

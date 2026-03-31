@@ -341,6 +341,11 @@ const STORAGE_KEY_ACCORDION = 'wio-orbi-accordion-state';
 const STORAGE_KEY_SERVICES = 'wio-orbi-enabled-services';
 const STORAGE_KEY_ACCORDION_SVC = 'wio-orbi-accordion-services';
 
+/* ── DB key constants ── */
+const DB_APP = 'wio';
+const DB_KEY_CONFIG = 'orbi-config';
+const DB_KEY_ACCORDION = 'orbi-accordion';
+
 export interface CategoryConfig {
   id: string;
   name: string;       // customized name
@@ -399,6 +404,27 @@ export function saveOrbiConfig(config: OrbiConfig) {
   localStorage.setItem(STORAGE_KEY_SERVICES, JSON.stringify(config.enabledServices));
 }
 
+/* ── DB 저장 (localStorage 동기 + DB 비동기) ── */
+export async function saveOrbiConfigAsync(config: OrbiConfig) {
+  saveOrbiConfig(config); // 즉시 localStorage 반영
+  const { setSetting } = await import('@/lib/supabase/settings');
+  await setSetting(DB_APP, DB_KEY_CONFIG, config);
+}
+
+/* ── DB 로드 (DB 우선 → localStorage fallback) ── */
+export async function loadOrbiConfigAsync(): Promise<OrbiConfig> {
+  try {
+    const { getSetting } = await import('@/lib/supabase/settings');
+    const dbConfig = await getSetting<OrbiConfig>(DB_APP, DB_KEY_CONFIG);
+    if (dbConfig && (dbConfig.enabledModules || dbConfig.enabledServices)) {
+      // DB에서 불러온 값을 localStorage에도 동기화
+      saveOrbiConfig(dbConfig);
+      return dbConfig;
+    }
+  } catch { /* DB 실패 → localStorage fallback */ }
+  return loadOrbiConfig();
+}
+
 /* ── Accordion state (서비스 기반) ── */
 export function loadAccordionState(): string[] {
   if (typeof window === 'undefined') return [];
@@ -412,6 +438,10 @@ export function loadAccordionState(): string[] {
 export function saveAccordionState(openServices: string[]) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY_ACCORDION_SVC, JSON.stringify(openServices));
+  // DB에도 비동기 저장 (fire-and-forget)
+  import('@/lib/supabase/settings').then(({ setSetting }) => {
+    setSetting(DB_APP, DB_KEY_ACCORDION, openServices).catch(() => {});
+  });
 }
 
 /* ── Backward compat aliases (deprecated, will remove) ── */

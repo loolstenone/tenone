@@ -52,7 +52,7 @@ export async function fetchBoardConfigs(site?: SiteCode, slug?: string): Promise
     if (slug) query = query.eq('slug', slug);
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map(r => {
+    return (data || []).map((r: any) => {
         const c = snakeToCamel(r) as unknown as BoardConfig;
         return c;
     });
@@ -181,7 +181,7 @@ export async function fetchPostWithDetails(id: string, userId?: string): Promise
         .from('attachments')
         .select('*')
         .eq('post_id', id);
-    post.attachments = (attachments || []).map(a => snakeToCamel(a) as unknown as Attachment);
+    post.attachments = (attachments || []).map((a: any) => snakeToCamel(a) as unknown as Attachment);
 
     // 좋아요/북마크 상태 (로그인 유저)
     if (userId) {
@@ -298,15 +298,15 @@ export async function fetchComments(postId: string, userId?: string): Promise<Co
 
     // 좋아요 상태
     if (userId && comments.length > 0) {
-        const commentIds = comments.map(c => c.id);
+        const commentIds = comments.map((c: any) => c.id);
         const { data: likes } = await supabase
             .from('likes')
             .select('target_id')
             .eq('user_id', userId)
             .eq('target_type', 'comment')
             .in('target_id', commentIds);
-        const likedIds = new Set((likes || []).map(l => l.target_id));
-        comments.forEach(c => { c.isLiked = likedIds.has(c.id); });
+        const likedIds = new Set((likes || []).map((l: any) => l.target_id));
+        comments.forEach((c: any) => { c.isLiked = likedIds.has(c.id); });
     }
 
     // 대댓글 트리 구성
@@ -420,9 +420,9 @@ export async function fetchBookmarks(userId: string, page = 1, limit = 12): Prom
 
     const total = count || 0;
     const posts = (data || [])
-        .map(row => row.posts)
+        .map((row: any) => row.posts)
         .filter(Boolean)
-        .map(p => toPost(p as unknown as Record<string, unknown>));
+        .map((p: any) => toPost(p as unknown as Record<string, unknown>));
 
     return { posts, total, page, limit, totalPages: Math.ceil(total / limit) };
 }
