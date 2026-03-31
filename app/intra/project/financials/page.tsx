@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DollarSign,
   TrendingUp,
@@ -13,6 +13,7 @@ import {
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import type { ProjectFinancials } from "@/types/project";
+import * as projectsDb from "@/lib/supabase/projects";
 
 // ── 포맷 헬퍼 ──
 const krw = (n: number) => new Intl.NumberFormat("ko-KR").format(n) + "원";
@@ -157,6 +158,37 @@ const typeBadge: Record<string, string> = {
 export default function FinancialsPage() {
   const { isStaff } = useAuth();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [projectList, setProjectList] = useState<ProjectPL[]>(projects);
+
+  // DB에서 프로젝트 재무 로드 (기본 수치만, 상세 내역은 mock 유지)
+  useEffect(() => {
+    projectsDb.fetchProjects({ limit: 50 })
+      .then(({ projects: dbProjects }) => {
+        if (dbProjects.length > 0) {
+          setProjectList(dbProjects.map((p: any) => {
+            // mock에서 동일 code의 상세 데이터 찾기
+            const mockMatch = projects.find(m => m.code === p.code);
+            return {
+              code: p.code || p.id,
+              name: p.name,
+              type: (p.type === 'client' ? '클라이언트' : p.type === 'community' ? '커뮤니티' : '내부') as ProjectPL['type'],
+              financials: {
+                billing: p.billing || mockMatch?.financials.billing || 0,
+                exCost: p.ex_cost || mockMatch?.financials.exCost || 0,
+                revenue: p.revenue || mockMatch?.financials.revenue || 0,
+                inCost: p.in_cost || mockMatch?.financials.inCost || 0,
+                profit: p.profit || mockMatch?.financials.profit || 0,
+              },
+              billingDetail: mockMatch?.billingDetail || [],
+              exCostDetail: mockMatch?.exCostDetail || [],
+              inCostDetail: mockMatch?.inCostDetail || [],
+              staffCosts: mockMatch?.staffCosts || [],
+            };
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function toggle(code: string) {
     setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
@@ -181,25 +213,25 @@ export default function FinancialsPage() {
         {[
           {
             label: "총 취급액 (Billing)",
-            value: krw(totals.billing),
+            value: krw(projectList.reduce((s, p) => s + p.financials.billing, 0)),
             icon: DollarSign,
             color: "text-neutral-900",
           },
           {
             label: "총 매출총이익 (Revenue)",
-            value: krw(totals.revenue),
+            value: krw(projectList.reduce((s, p) => s + p.financials.revenue, 0)),
             icon: TrendingUp,
             color: "text-neutral-900",
           },
           {
             label: "매출총이익률",
-            value: pct(totals.revenue, totals.billing) + "%",
+            value: pct(projectList.reduce((s, p) => s + p.financials.revenue, 0), projectList.reduce((s, p) => s + p.financials.billing, 0)) + "%",
             icon: BarChart3,
             color: "text-neutral-900",
           },
           {
             label: "총 영업이익 (Profit)",
-            value: krw(totals.profit),
+            value: krw(projectList.reduce((s, p) => s + p.financials.profit, 0)),
             icon: TrendingUp,
             color: "text-green-600",
           },
@@ -234,7 +266,7 @@ export default function FinancialsPage() {
             </tr>
           </thead>
           <tbody>
-            {projects.map((proj) => {
+            {projectList.map((proj) => {
               const isOpen = expanded[proj.code] ?? false;
               const f = proj.financials;
               const profitRate = pct(f.profit, f.billing);

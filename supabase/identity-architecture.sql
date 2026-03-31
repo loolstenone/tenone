@@ -254,21 +254,28 @@ $$ LANGUAGE sql STABLE SECURITY DEFINER;
 -- ============================================================================
 
 -- ── members.account_type → member_roles (universe 역할) ──
-INSERT INTO member_roles (member_id, role, context, granted_at)
-SELECT id,
-    CASE account_type
-        WHEN 'staff' THEN 'staff'
-        WHEN 'partner' THEN 'partner'
-        WHEN 'junior-partner' THEN 'junior_partner'
-        WHEN 'crew' THEN 'crew'
-        WHEN 'member' THEN 'member'
-        ELSE 'member'
-    END,
-    'universe',
-    COALESCE(created_at, now())
-FROM members
-WHERE account_type IS NOT NULL
-ON CONFLICT (member_id, role, context) DO NOTHING;
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='account_type') THEN 
+        EXECUTE '
+            INSERT INTO member_roles (member_id, role, context, granted_at)
+            SELECT id,
+                CASE account_type
+                    WHEN ''staff'' THEN ''staff''
+                    WHEN ''partner'' THEN ''partner''
+                    WHEN ''junior-partner'' THEN ''junior_partner''
+                    WHEN ''crew'' THEN ''crew''
+                    WHEN ''member'' THEN ''member''
+                    ELSE ''member''
+                END,
+                ''universe'',
+                COALESCE(created_at, now())
+            FROM members
+            WHERE account_type IS NOT NULL
+            ON CONFLICT (member_id, role, context) DO NOTHING;
+        ';
+    END IF; 
+END $$;
 
 -- ── CEO를 super_admin으로 추가 ──
 INSERT INTO member_roles (member_id, role, context)
@@ -278,18 +285,32 @@ WHERE email = 'cjeon@tenone.biz'
 ON CONFLICT (member_id, role, context) DO NOTHING;
 
 -- ── members.affiliations[] → member_roles (브랜드 역할) ──
-INSERT INTO member_roles (member_id, role, context, granted_at)
-SELECT m.id, 'member', unnest(m.affiliations), COALESCE(m.created_at, now())
-FROM members m
-WHERE m.affiliations IS NOT NULL AND array_length(m.affiliations, 1) > 0
-ON CONFLICT (member_id, role, context) DO NOTHING;
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='affiliations') THEN 
+        EXECUTE '
+            INSERT INTO member_roles (member_id, role, context, granted_at)
+            SELECT m.id, ''member'', unnest(m.affiliations), COALESCE(m.created_at, now())
+            FROM members m
+            WHERE m.affiliations IS NOT NULL AND array_length(m.affiliations, 1) > 0
+            ON CONFLICT (member_id, role, context) DO NOTHING;
+        ';
+    END IF; 
+END $$;
 
 -- ── members.newsletter_subscribed → member_preferences ──
-INSERT INTO member_preferences (member_id, brand_id, newsletter_subscribed)
-SELECT id, 'tenone', COALESCE(newsletter_subscribed, false)
-FROM members
-WHERE id IS NOT NULL
-ON CONFLICT (member_id, brand_id) DO NOTHING;
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='newsletter_subscribed') THEN 
+        EXECUTE '
+            INSERT INTO member_preferences (member_id, brand_id, newsletter_subscribed)
+            SELECT id, ''tenone'', COALESCE(newsletter_subscribed, false)
+            FROM members
+            WHERE id IS NOT NULL
+            ON CONFLICT (member_id, brand_id) DO NOTHING;
+        ';
+    END IF; 
+END $$;
 
 -- ── JWT 일괄 갱신 (전체 멤버) ──
 DO $$

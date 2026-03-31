@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import * as myverseDb from "@/lib/supabase/myverse";
 import { FolderKanban, Plus, ChevronDown, ChevronRight, Clock, Calendar, Users, Briefcase, CheckCircle2, X } from "lucide-react";
 import clsx from "clsx";
 import type { JobType, JobDetail } from "@/types/project";
@@ -72,7 +73,31 @@ let jobCounter = 100;
 export default function MyProjectsPage() {
     const { user, isStaff } = useAuth();
     const [projects, setProjects] = useState(myProjects);
-    const [expandedProject, setExpandedProject] = useState<string | null>('PRJ-2026-0001');
+    const [expandedProject, setExpandedProject] = useState<string | null>(null);
+
+    // DB에서 내 프로젝트 로드
+    useEffect(() => {
+        if (!user) return;
+        myverseDb.fetchMyProjects(user.id)
+            .then(dbProjects => {
+                if (dbProjects.length > 0) {
+                    setProjects(dbProjects.map((p: any) => ({
+                        code: p.code || p.id,
+                        name: p.name,
+                        type: (p.type || '내부') as MyProject['type'],
+                        status: (p.status === '완료' ? '완료' : p.status === '기획' ? '기획' : '진행') as MyProject['status'],
+                        pm: p.pm || '-',
+                        myRole: p.role || '팀원',
+                        startDate: p.start_date || '',
+                        endDate: p.end_date || '',
+                        jobs: [],
+                    })));
+                    setExpandedProject(null);
+                }
+            })
+            .catch(() => {});
+    }, [user]);
+
     const [showJobModal, setShowJobModal] = useState<string | null>(null);
     const [newJob, setNewJob] = useState({ name: '', type: 'PR' as JobType, detail: 'PL' as JobDetail, assignee: '', startDate: '', dueDate: '', estimatedHours: '' });
 

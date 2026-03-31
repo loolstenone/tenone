@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Target, Plus, Edit2, ChevronRight, ChevronDown, CheckCircle2,
   Users, Star, Save, Clock, MessageSquare, AlertTriangle, BookOpen,
@@ -9,6 +9,8 @@ import {
 import Link from "next/link";
 import clsx from "clsx";
 import { PageHeader, Card, SectionTitle } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 // ── Types ──
 
@@ -333,8 +335,37 @@ function ProgressBar({ value, className }: { value: number; className?: string }
 // ══════════════════════════════════════
 
 export default function MyGPRPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"goals" | "self" | "manager" | "review">("goals");
   const [goals, setGoals] = useState(initialGoals);
+
+  // DB에서 GPR 목표 로드
+  useEffect(() => {
+    if (!user) return;
+    const quarter = "2026 Q1";
+    erpDb.fetchGprGoals({ memberId: user.id, quarter })
+      .then(data => {
+        if (data.length > 0) {
+          setGoals(data.map((g: any) => ({
+            id: g.id,
+            goal: g.goal || '',
+            plans: Array.isArray(g.plans) ? g.plans : [],
+            result: g.result || '',
+            progress: g.progress || 0,
+            status: (g.status || '진행중') as GoalItem['status'],
+            selfWhat: g.self_what,
+            selfWhatComment: g.self_what_comment,
+            selfHow: g.self_how,
+            selfAttitude: g.self_attitude,
+            mgrWhat: g.mgr_what,
+            mgrWhatComment: g.mgr_what_comment,
+            mgrHow: g.mgr_how,
+            mgrAttitude: g.mgr_attitude,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [user]);
   const [subs, setSubs] = useState(subordinates);
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [expandedSub, setExpandedSub] = useState<string | null>(null);
