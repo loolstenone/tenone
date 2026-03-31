@@ -253,3 +253,49 @@ export async function updateMember(id: string, input: Record<string, unknown>) {
     if (error) throw error;
     return data;
 }
+
+// ── Approval Templates (결재라인 설정) ──
+
+export async function fetchApprovalTemplates(brandId = 'tenone') {
+    const { data, error } = await supabase
+        .from('approval_templates')
+        .select('*')
+        .eq('brand_id', brandId)
+        .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+}
+
+export async function createApprovalTemplate(input: {
+    name: string; type: string; factor: string; steps: { role: string }[]; brandId?: string;
+}) {
+    const { data, error } = await supabase
+        .from('approval_templates')
+        .insert({
+            brand_id: input.brandId || 'tenone',
+            name: input.name,
+            type: input.type,
+            factor: input.factor,
+            steps: input.steps,
+        })
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+export async function deleteApprovalTemplate(id: string) {
+    const { error } = await supabase.from('approval_templates').delete().eq('id', id);
+    if (error) throw error;
+}
+
+export async function toggleApprovalTemplate(id: string, active: boolean) {
+    const { data, error } = await supabase
+        .from('approval_templates')
+        .update({ active, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}

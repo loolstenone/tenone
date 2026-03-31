@@ -3,7 +3,7 @@
  * GET /api/newsroom/feed?sort=latest|popular&brand=all|tenone|...&limit=20&page=1
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * limit;
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     let query = supabase
       .from('posts')
