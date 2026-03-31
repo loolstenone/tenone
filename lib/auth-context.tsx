@@ -5,6 +5,8 @@ import { User, SystemAccess, IntraModule } from '@/types/auth';
 import { validateCredentials, registerMember } from '@/lib/auth-data';
 import { isMockAllowed } from '@/lib/env';
 import { createClient } from '@/lib/supabase/client';
+import { permissionsFromJWT } from '@/lib/supabase/identity';
+import type { JWTAppMetadata } from '@/types/identity';
 
 interface AuthContextType {
     user: User | null;
@@ -113,6 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     .select()
                     .single();
                 member = newMember;
+
+                // 3계층: member_roles에도 기본 역할 추가 (트리거가 JWT 갱신)
+                if (newMember) {
+                    supabase.from('member_roles').insert({
+                        member_id: newMember.id,
+                        role: 'member',
+                        context: 'universe',
+                    }).then(() => {});
+                }
             }
 
             if (member) {

@@ -69,7 +69,37 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
                 console.log("[Intra] Session found:", user.email);
 
-                // 2) members 권한 확인 — 5초 타임아웃
+                // 2-A) JWT app_metadata에서 빠른 권한 판단 (DB 조회 없음)
+                const appMeta = user.app_metadata;
+                if (appMeta?.is_staff === true || appMeta?.is_super_admin === true) {
+                    console.log("[Intra] JWT fast-path: staff/admin access granted");
+                    sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
+                    setStatus("ok");
+                    return;
+                }
+                // JWT에 roles가 있으면 인트라 접근 가능 역할 확인
+                if (appMeta?.roles && Array.isArray(appMeta.roles)) {
+                    const canIntra = (appMeta.roles as string[]).some((r: string) =>
+                        r.startsWith('staff:') || r.startsWith('super_admin:')
+                        || r.startsWith('partner:') || r.startsWith('junior_partner:')
+                        || r.startsWith('crew:')
+                    );
+                    if (canIntra) {
+                        console.log("[Intra] JWT fast-path: role-based access granted");
+                        sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
+                        setStatus("ok");
+                        return;
+                    }
+                    // JWT에 roles가 있지만 인트라 권한 없음
+                    if (appMeta.roles.length > 0) {
+                        console.log("[Intra] JWT: no intra access in roles");
+                        sessionStorage.removeItem(INTRA_VERIFIED_KEY);
+                        setStatus("no-access");
+                        return;
+                    }
+                }
+
+                // 2-B) JWT에 roles가 없으면 기존 방식 fallback (members 테이블)
                 const memberResult = await Promise.race([
                     sb
                         .from("members")
@@ -85,18 +115,15 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         : null;
 
                 if (member && member.account_type !== "member") {
-                    console.log("[Intra] Access granted:", member.account_type);
+                    console.log("[Intra] Legacy access granted:", member.account_type);
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                     setStatus("ok");
                 } else if (member && member.account_type === "member") {
-                    // 로그인은 됐지만 일반 회원 → 접근 불가
                     console.log("[Intra] No access: account_type =", member.account_type);
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("no-access");
                 } else {
-                    // member 조회 실패 (타임아웃 등)
                     console.log("[Intra] Member lookup failed, isCached:", isCached);
-                    // 캐시가 있었으면 유지, 없었으면 로그인 폼
                     if (!isCached) {
                         sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                         setStatus("login");
