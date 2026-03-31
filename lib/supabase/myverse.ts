@@ -9,28 +9,34 @@ const supabase = createClient();
 // ── 결재 현황 ──
 export async function fetchMyApprovals(memberId: string) {
     try {
-        // 결재 대기 (내가 결재해야 할 건)
+        // 결재 대기 (내가 결재해야 할 건 — approval_line JSONB에서 검색)
         const { data: pending } = await supabase
             .from('approvals')
             .select('*')
-            .contains('approvers', [memberId])
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
-            .limit(10);
+            .limit(20);
+
+        // approval_line에 내 ID가 포함된 건만 필터
+        const myPending = (pending || []).filter((a: any) => {
+            const line = a.approval_line;
+            if (!line) return false;
+            return JSON.stringify(line).includes(memberId);
+        });
 
         // 내가 기안한 건 (진행 중)
         const { data: myDrafts } = await supabase
             .from('approvals')
             .select('*')
-            .eq('requester_id', memberId)
+            .eq('drafter_id', memberId)
             .in('status', ['pending', 'in-progress'])
             .order('created_at', { ascending: false })
             .limit(10);
 
         return {
-            pending: pending || [],
+            pending: myPending,
             myDrafts: myDrafts || [],
-            pendingCount: pending?.length || 0,
+            pendingCount: myPending.length,
             inProgressCount: myDrafts?.filter(d => d.status === 'in-progress').length || 0,
             draftsCount: myDrafts?.filter(d => d.status === 'pending').length || 0,
         };
