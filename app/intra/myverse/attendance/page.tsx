@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CalendarDays,
   Palmtree,
@@ -9,6 +9,8 @@ import {
   Plus,
 } from "lucide-react";
 import { PageHeader, StatCard, Card } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 type LeaveStatus = "승인" | "대기" | "반려";
 type DayType = "work" | "leave" | "half" | "holiday" | "weekend" | "none";
@@ -64,10 +66,28 @@ const dayColor: Record<DayType, string> = {
 };
 
 export default function MyAttendancePage() {
+  const { user } = useAuth();
   const [clockedIn, setClockedIn] = useState(true);
-  const todayIn = "08:55";
-  const todayOut = "-";
-  const todayStatus = "정상";
+  const [todayIn, setTodayIn] = useState("08:55");
+  const [todayOut, setTodayOut] = useState("-");
+  const [todayStatus, setTodayStatus] = useState("정상");
+
+  // DB에서 오늘 근태 로드
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    erpDb.fetchAttendance({ memberId: user.id, from: today, to: today })
+      .then(data => {
+        if (data.length > 0) {
+          const t = data[0] as any;
+          if (t.check_in) setTodayIn(new Date(t.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+          if (t.check_out) setTodayOut(new Date(t.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+          if (t.type) setTodayStatus(t.type === 'normal' ? '정상' : t.type);
+          setClockedIn(!!t.check_in && !t.check_out);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   return (
     <div className="max-w-4xl">

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     FileSignature, Plus, CheckCircle2, XCircle, Clock, FileText, ChevronRight, ChevronDown,
-    User, Check, X, Circle,
+    User, Check, X, Circle, Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { PageHeader, PrimaryButton, Badge, Card } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 type ApprovalStatus = "대기" | "진행중" | "완료" | "반려";
 type ApprovalFactor = "일반" | "프로젝트" | "타임시트" | "경비" | "구매" | "인사" | "계약";
@@ -192,14 +194,63 @@ function ApprovalStepper({ steps }: { steps: ApprovalStep[] }) {
     );
 }
 
+function dbRowToApproval(a: Record<string, unknown>): ApprovalItem {
+    const statusMap: Record<string, ApprovalStatus> = {
+        pending: '대기', 'in-progress': '진행중', approved: '완료', rejected: '반려', completed: '완료',
+    };
+    return {
+        id: a.id as string,
+        docNo: (a.doc_no as string) || (a.id as string).slice(0, 13),
+        title: (a.title as string) || '',
+        drafter: (a.drafter_name as string) || '알 수 없음',
+        approver: '',
+        date: ((a.submitted_at || a.created_at) as string || '').slice(0, 10),
+        status: statusMap[(a.status as string)] || '대기',
+        type: (a.type as string) || '기안',
+        factor: ((a.factor as string) || '일반') as ApprovalFactor,
+        approvalLine: [],
+    };
+}
+
 export default function MyApprovalPage() {
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<TabKey>("pending");
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const [items, setItems] = useState({
         pending: pendingItems,
         drafted: draftedItems,
         completed: completedItems,
     });
+
+    // DB 우선 로드
+    useEffect(() => {
+        if (!user) { setLoading(false); return; }
+        (async () => {
+            try {
+                const [pendingRes, draftedRes, completedRes] = await Promise.all([
+                    erpDb.fetchApprovals({ status: 'pending' }),
+                    erpDb.fetchApprovals({ requesterId: user.id }),
+                    erpDb.fetchApprovals({ status: 'approved', limit: 20 }),
+                ]);
+                const hasPending = pendingRes.approvals.length > 0;
+                const hasDrafted = draftedRes.approvals.length > 0;
+                const hasCompleted = completedRes.approvals.length > 0;
+
+                if (hasPending || hasDrafted || hasCompleted) {
+                    setItems({
+                        pending: hasPending ? pendingRes.approvals.map(dbRowToApproval) : pendingItems,
+                        drafted: hasDrafted ? draftedRes.approvals.map(dbRowToApproval) : draftedItems,
+                        completed: hasCompleted ? completedRes.approvals.map(dbRowToApproval) : completedItems,
+                    });
+                }
+            } catch {
+                // Mock fallback
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [user]);
 
     const handleApprove = (id: string) => {
         setItems((prev) => ({

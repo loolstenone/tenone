@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Download,
   ChevronDown,
@@ -8,6 +8,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageHeader, Card, SectionTitle } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface PayItem {
   label: string;
@@ -52,7 +54,27 @@ function monthLabel(m: string) {
 }
 
 export default function MyPayrollPage() {
+  const { user } = useAuth();
   const [showBreakdown, setShowBreakdown] = useState(true);
+  const [dbNetPay, setDbNetPay] = useState<number | null>(null);
+  const [dbHistory, setDbHistory] = useState<typeof recentHistory | null>(null);
+
+  // DB에서 급여 로드
+  useEffect(() => {
+    if (!user) return;
+    erpDb.fetchPayroll({ memberId: user.id })
+      .then(data => {
+        if (data.length > 0) {
+          setDbHistory(data.map((p: any) => ({
+            month: p.year_month,
+            net: p.net_pay || 0,
+          })));
+          // 최신 달 net_pay 설정
+          setDbNetPay(data[0]?.net_pay || null);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   return (
     <div className="max-w-4xl">
