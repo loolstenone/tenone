@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Save, LogOut, ExternalLink, UserPlus, Mail, Palette } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { CHART_PALETTES, getChartPalette, setChartPalette, type ChartPalette } from '@/lib/smarcomm/chart-palette';
+import { CHART_PALETTES, getChartPalette, setChartPalette, loadChartPaletteFromDB, type ChartPalette } from '@/lib/smarcomm/chart-palette';
+import { getSetting, setSetting } from '@/lib/supabase/settings';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
@@ -25,19 +26,20 @@ export default function ProfilePage() {
   const { user, logout } = useAuth();
 
   useEffect(() => {
-    const data = localStorage.getItem('smarcomm_company');
-    if (data) {
-      const parsed = JSON.parse(data);
-      setCompanyName(parsed.name || '');
-      setIndustry(parsed.industry || '');
-      setSiteUrl(parsed.siteUrl || '');
-      setGoal(parsed.goal || '');
-    }
-    setSelectedPalette(getChartPalette().id);
+    getSetting<{ name?: string; industry?: string; siteUrl?: string; goal?: string }>('smarcomm', 'company', 'smarcomm_company').then(data => {
+      if (data) {
+        setCompanyName(data.name || '');
+        setIndustry(data.industry || '');
+        setSiteUrl(data.siteUrl || '');
+        setGoal(data.goal || '');
+      }
+    });
+    loadChartPaletteFromDB().then(() => setSelectedPalette(getChartPalette().id));
   }, []);
 
   const handleSave = () => {
-    localStorage.setItem('smarcomm_company', JSON.stringify({ name: companyName, industry, siteUrl, goal, logo: '' }));
+    const company = { name: companyName, industry, siteUrl, goal, logo: '' };
+    setSetting('smarcomm', 'company', company, 'smarcomm_company');
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

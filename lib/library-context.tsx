@@ -1,10 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import type { LibraryItem, LibraryBookmark, LibrarySource, LibraryCategory, LibraryPermission } from '@/types/library';
 import { initialLibraryItems, initialBookmarks } from '@/lib/library-data';
 import type { AccountType } from '@/types/auth';
 import { isMockAllowed } from '@/lib/env';
+import { getSetting, setSetting } from '@/lib/supabase/settings';
+
+const DB_APP = 'library';
+const DB_KEY_BOOKMARKS = 'bookmarks';
+const DB_KEY_ITEMS = 'user_items';
 
 /** accountType → 볼 수 있는 permission 레벨 */
 const permissionAccess: Record<AccountType, LibraryPermission[]> = {
@@ -54,7 +59,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         const saved = localStorage.getItem(ITEMS_KEY);
         if (saved) {
             const savedItems: LibraryItem[] = JSON.parse(saved);
-            if (!mockOk) return savedItems; // 프로덕션: localStorage 데이터만
+            if (!mockOk) return savedItems;
             const userItems = savedItems.filter(i => !initialLibraryItems.find(init => init.id === i.id));
             return [...userItems, ...initialLibraryItems];
         }
@@ -65,14 +70,38 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
         const saved = localStorage.getItem(BOOKMARKS_KEY);
         return saved ? JSON.parse(saved) : defaultBookmarks;
     });
+    const mounted = useRef(false);
 
-    // localStorage 동기화
+    // DB에서 초기 로드 (mount 시 1회)
     useEffect(() => {
+        getSetting<LibraryBookmark[]>(DB_APP, DB_KEY_BOOKMARKS, BOOKMARKS_KEY).then(dbBm => {
+            if (dbBm && dbBm.length > 0) setBookmarks(dbBm);
+        });
+        getSetting<LibraryItem[]>(DB_APP, DB_KEY_ITEMS, ITEMS_KEY).then(dbItems => {
+            if (dbItems && dbItems.length > 0) {
+                setItems(prev => {
+                    const userItems = dbItems.filter(i => !initialLibraryItems.find(init => init.id === i.id));
+                    const initIds = new Set(initialLibraryItems.map(i => i.id));
+                    const existingInit = prev.filter(i => initIds.has(i.id));
+                    return [...userItems, ...existingInit];
+                });
+            }
+            mounted.current = true;
+        });
+    }, []);
+
+    // DB + localStorage 동기화 (초기 로드 후에만)
+    useEffect(() => {
+        if (!mounted.current) return;
         localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+        setSetting(DB_APP, DB_KEY_BOOKMARKS, bookmarks, BOOKMARKS_KEY);
     }, [bookmarks]);
 
     useEffect(() => {
-        localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+        if (!mounted.current) return;
+        const userItems = items.filter(i => !initialLibraryItems.find(init => init.id === i.id));
+        localStorage.setItem(ITEMS_KEY, JSON.stringify(userItems));
+        setSetting(DB_APP, DB_KEY_ITEMS, userItems, ITEMS_KEY);
     }, [items]);
 
     const addItem = useCallback((item: LibraryItem) => {
