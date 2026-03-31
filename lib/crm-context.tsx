@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { Person, Organization, Deal, Activity, DealStage } from '@/types/crm';
 import { initialPeople, initialOrganizations, initialDeals, initialActivities } from '@/lib/crm-data';
 import * as crmDB from '@/lib/supabase/crm';
+import { isMockAllowed } from '@/lib/env';
 
 interface CrmContextType {
     people: Person[];
@@ -33,14 +34,15 @@ interface CrmContextType {
 const CrmContext = createContext<CrmContextType | undefined>(undefined);
 
 export function CrmProvider({ children }: { children: ReactNode }) {
-    const [people, setPeople] = useState<Person[]>(initialPeople);
-    const [organizations, setOrganizations] = useState<Organization[]>(initialOrganizations);
-    const [deals, setDeals] = useState<Deal[]>(initialDeals);
-    const [activities, setActivities] = useState<Activity[]>(initialActivities);
+    const mockOk = isMockAllowed();
+    const [people, setPeople] = useState<Person[]>(mockOk ? initialPeople : []);
+    const [organizations, setOrganizations] = useState<Organization[]>(mockOk ? initialOrganizations : []);
+    const [deals, setDeals] = useState<Deal[]>(mockOk ? initialDeals : []);
+    const [activities, setActivities] = useState<Activity[]>(mockOk ? initialActivities : []);
     const [loading, setLoading] = useState(true);
     const [dbConnected, setDbConnected] = useState(false);
 
-    // DB 우선 로드, 실패 시 Mock fallback
+    // DB 우선 로드, 실패 시 프로덕션=빈 배열 / 개발=Mock
     useEffect(() => {
         async function loadFromDB() {
             try {
@@ -53,14 +55,14 @@ export function CrmProvider({ children }: { children: ReactNode }) {
                 const dbPeople = dbPeopleResult.people;
 
                 if (dbPeople.length > 0 || dbOrgs.length > 0 || dbDeals.length > 0 || dbActivities.length > 0) {
-                    setPeople(dbPeople.length > 0 ? dbPeople : initialPeople);
-                    setOrganizations(dbOrgs.length > 0 ? dbOrgs : initialOrganizations);
-                    setDeals(dbDeals.length > 0 ? dbDeals : initialDeals);
-                    setActivities(dbActivities.length > 0 ? dbActivities : initialActivities);
+                    setPeople(dbPeople.length > 0 ? dbPeople : []);
+                    setOrganizations(dbOrgs.length > 0 ? dbOrgs : []);
+                    setDeals(dbDeals.length > 0 ? dbDeals : []);
+                    setActivities(dbActivities.length > 0 ? dbActivities : []);
                     setDbConnected(true);
                 }
             } catch {
-                // DB 연결 실패 → Mock 데이터 유지
+                // DB 연결 실패 → 프로덕션: 빈 상태, 개발: Mock 유지
             }
             setLoading(false);
         }

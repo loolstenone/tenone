@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 import type { PointLog, MemberPointSummary, PointCategory } from '@/types/point';
 import { getGradeByPoints, defaultPointValues } from '@/types/point';
 import { initialPointLogs, initialMemberPoints } from '@/lib/point-data';
+import { isMockAllowed } from '@/lib/env';
 
 interface PointContextType {
     logs: PointLog[];
@@ -34,8 +35,9 @@ interface PointContextType {
 const PointContext = createContext<PointContextType | undefined>(undefined);
 
 export function PointProvider({ children }: { children: ReactNode }) {
-    const [logs, setLogs] = useState<PointLog[]>(initialPointLogs);
-    const [memberPoints, setMemberPoints] = useState<MemberPointSummary[]>(initialMemberPoints);
+    const mockOk = isMockAllowed();
+    const [logs, setLogs] = useState<PointLog[]>(mockOk ? initialPointLogs : []);
+    const [memberPoints, setMemberPoints] = useState<MemberPointSummary[]>(mockOk ? initialMemberPoints : []);
 
     const updateMemberSummary = useCallback((memberId: string, memberName: string, points: number, department?: string, position?: string) => {
         setMemberPoints(prev => {

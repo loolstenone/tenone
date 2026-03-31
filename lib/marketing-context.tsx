@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { Campaign, Lead, ContentPost, LeadStage } from '@/types/marketing';
 import { initialCampaigns, initialLeads, initialContentPosts } from '@/lib/marketing-data';
 import * as marketingDB from '@/lib/supabase/marketing';
+import { isMockAllowed } from '@/lib/env';
 
 interface MarketingContextType {
     campaigns: Campaign[];
@@ -26,13 +27,14 @@ interface MarketingContextType {
 const MarketingContext = createContext<MarketingContextType | undefined>(undefined);
 
 export function MarketingProvider({ children }: { children: ReactNode }) {
-    const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
-    const [leads, setLeads] = useState<Lead[]>(initialLeads);
-    const [contentPosts, setContentPosts] = useState<ContentPost[]>(initialContentPosts);
+    const mockOk = isMockAllowed();
+    const [campaigns, setCampaigns] = useState<Campaign[]>(mockOk ? initialCampaigns : []);
+    const [leads, setLeads] = useState<Lead[]>(mockOk ? initialLeads : []);
+    const [contentPosts, setContentPosts] = useState<ContentPost[]>(mockOk ? initialContentPosts : []);
     const [loading, setLoading] = useState(true);
     const [dbConnected, setDbConnected] = useState(false);
 
-    // DB 우선 로드, 실패 시 Mock fallback
+    // DB 우선 로드, 실패 시 프로덕션=빈 배열 / 개발=Mock
     useEffect(() => {
         async function loadFromDB() {
             try {
@@ -42,13 +44,13 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
                     marketingDB.fetchContentPosts(),
                 ]);
                 if (dbCampaigns.length > 0 || dbLeads.length > 0 || dbContent.length > 0) {
-                    setCampaigns(dbCampaigns.length > 0 ? dbCampaigns : initialCampaigns);
-                    setLeads(dbLeads.length > 0 ? dbLeads : initialLeads);
-                    setContentPosts(dbContent.length > 0 ? dbContent : initialContentPosts);
+                    setCampaigns(dbCampaigns.length > 0 ? dbCampaigns : []);
+                    setLeads(dbLeads.length > 0 ? dbLeads : []);
+                    setContentPosts(dbContent.length > 0 ? dbContent : []);
                     setDbConnected(true);
                 }
             } catch {
-                // DB 연결 실패 → Mock 데이터 유지
+                // DB 연결 실패 → 프로덕션: 빈 상태 유지, 개발: Mock 유지
             }
             setLoading(false);
         }

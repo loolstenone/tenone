@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { StaffMember } from '@/types/staff';
 import { initialStaff } from '@/lib/staff-data';
+import { isMockAllowed } from '@/lib/env';
 
 interface StaffContextType {
     staff: StaffMember[];
@@ -16,7 +17,7 @@ interface StaffContextType {
 const StaffContext = createContext<StaffContextType | undefined>(undefined);
 
 export function StaffProvider({ children }: { children: ReactNode }) {
-    const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
+    const [staff, setStaff] = useState<StaffMember[]>(isMockAllowed() ? initialStaff : []);
 
     const addStaff = useCallback((member: StaffMember) => setStaff(prev => [member, ...prev]), []);
     const updateStaff = useCallback((id: string, updates: Partial<StaffMember>) => {
