@@ -83,6 +83,8 @@ export interface User {
     department?: string;
     employeeId?: string;
     position?: string;
+    hireDate?: string;
+    employmentType?: string;
     createdAt?: string;
     newsletterSubscribed?: boolean;
 

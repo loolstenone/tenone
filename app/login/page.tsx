@@ -340,13 +340,36 @@ function LoginForm() {
 export default function LoginPage() {
     const { isMadLeague } = useSite();
     const [isSmarComm, setIsSmarComm] = useState<boolean | null>(null);
+    const [domainChecked, setDomainChecked] = useState(false);
 
     useEffect(() => {
-        setIsSmarComm(typeof window !== 'undefined' && window.location.hostname.includes('smarcomm'));
+        const host = window.location.hostname;
+        setIsSmarComm(host.includes('smarcomm'));
+
+        // 외부 도메인(smarcomm.biz, badak.biz 등)에서 접속 시 SSO 자동 시도
+        const isTenone = host === 'tenone.biz' || host.endsWith('.tenone.biz') || host === 'localhost';
+        if (!isTenone) {
+            // tenone.biz에 세션이 있으면 자동 로그인 시도 (한 번만)
+            const ssoAttempted = sessionStorage.getItem('sso_attempted');
+            if (!ssoAttempted) {
+                sessionStorage.setItem('sso_attempted', '1');
+                const searchParams = new URLSearchParams(window.location.search);
+                // SSO 에러로 돌아온 경우는 스킵 (무한루프 방지)
+                if (!searchParams.get('error')?.startsWith('sso_')) {
+                    const finalPath = searchParams.get('redirect') || '/';
+                    const ssoUrl = new URL('https://tenone.biz/api/sso/initiate');
+                    ssoUrl.searchParams.set('origin', window.location.origin);
+                    ssoUrl.searchParams.set('final', finalPath);
+                    window.location.href = ssoUrl.toString();
+                    return;
+                }
+            }
+        }
+        setDomainChecked(true);
     }, []);
 
     // 도메인 감지 전 — 중립 로딩 (깜빡임 방지)
-    if (isSmarComm === null) {
+    if (!domainChecked || isSmarComm === null) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />

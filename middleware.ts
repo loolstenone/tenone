@@ -44,6 +44,14 @@ export async function middleware(request: NextRequest) {
     // 1. Supabase 세션 갱신 (모든 요청에서)
     let response = NextResponse.next({ request });
 
+    // 도메인별 쿠키 범위 결정
+    const hostname = request.headers.get('host') || '';
+    const reqDomain = hostname.split(':')[0];
+    const isTenoneFamily = reqDomain === 'tenone.biz' || reqDomain.endsWith('.tenone.biz');
+    const isProduction = process.env.VERCEL_ENV === 'production';
+    // *.tenone.biz → .tenone.biz 공유 쿠키 / 타 루트 도메인 → 도메인 미지정 (해당 도메인 전용)
+    const cookieDomain = isProduction && isTenoneFamily ? '.tenone.biz' : undefined;
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -53,9 +61,15 @@ export async function middleware(request: NextRequest) {
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         request.cookies.set(name, value);
-                        response.cookies.set(name, value, options);
+                        response.cookies.set(name, value, {
+                            ...options,
+                            ...(cookieDomain && { domain: cookieDomain }),
+                        });
                     });
                 },
+            },
+            auth: {
+                storageKey: 'tenone-auth',
             },
         }
     );
@@ -63,9 +77,7 @@ export async function middleware(request: NextRequest) {
     await supabase.auth.getUser();
 
     // 2. 도메인 → 프리픽스 리라이트
-    const hostname = request.headers.get('host') || '';
-    const domain = hostname.split(':')[0];
-    const prefix = domainPrefixMap[domain];
+    const prefix = domainPrefixMap[reqDomain];
 
     if (!prefix) return response;
 

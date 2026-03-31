@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
+import { requireAuth } from '@/lib/supabase/api-utils';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,12 +35,17 @@ const BASE_SYSTEM = `당신은 🔩 바닥쇠입니다. Ten:One™ Universe의 B
  * 바닥쇠 AI 응답 엔드포인트
  */
 export async function POST(request: NextRequest) {
-    try {
+    // 세션 인증 또는 전용 API Key
+    const { error: authErr } = await requireAuth();
+    if (authErr) {
         const authHeader = request.headers.get('Authorization');
         const apiKey = process.env.TRENDHUNTER_API_KEY;
-        if (apiKey && authHeader !== `Bearer ${apiKey}`) {
+        if (!apiKey || authHeader !== `Bearer ${apiKey}`) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    }
+
+    try {
 
         const { topic, query, sender } = await request.json();
 

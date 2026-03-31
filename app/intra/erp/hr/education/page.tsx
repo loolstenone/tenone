@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { GraduationCap, Award, Clock, Plus, BookOpen, Users, AlertCircle, Search, Download } from "lucide-react";
+import { GraduationCap, Award, Clock, Plus, BookOpen, Users, AlertCircle, Search, Download, Inbox } from "lucide-react";
+import { isMockAllowed } from "@/lib/env";
 
 interface StaffEducation {
     name: string;
@@ -13,7 +14,7 @@ interface StaffEducation {
     mandatory?: boolean;
 }
 
-const mockData: StaffEducation[] = [
+const MOCK_EDUCATION: StaffEducation[] = isMockAllowed() ? [
     { name: "Cheonil Jeon", department: "경영기획", courseName: "VRIEF Orientation", category: "필수", hours: 4, status: "수료", mandatory: true },
     { name: "Cheonil Jeon", department: "경영기획", courseName: "GPR 프레임워크 이해", category: "필수", hours: 6, status: "수료", mandatory: true },
     { name: "Cheonil Jeon", department: "경영기획", courseName: "Mind Set: 본질·속도·이행", category: "필수", hours: 4, status: "진행중", mandatory: true },
@@ -26,11 +27,11 @@ const mockData: StaffEducation[] = [
     { name: "박영상", department: "콘텐츠제작", courseName: "프로젝트 매니지먼트 심화", category: "직무", hours: 30, status: "진행중" },
     { name: "이수진", department: "디자인", courseName: "VRIEF Orientation", category: "필수", hours: 4, status: "수료", mandatory: true },
     { name: "이수진", department: "디자인", courseName: "비즈니스 영어 회화", category: "어학", hours: 48, status: "예정" },
-];
+] : [];
 
 // 필수과정 이수 현황
 const mandatoryCourses = ["VRIEF Orientation", "GPR 프레임워크 이해", "Mind Set: 본질·속도·이행", "Ten:One™ Universe 세계관 입문", "정보보안 & 개인정보보호", "직장 내 괴롭힘 예방 교육"];
-const staffNames = [...new Set(mockData.map(d => d.name))];
+const staffNames = [...new Set(MOCK_EDUCATION.map(d => d.name))];
 
 const categoryColor: Record<string, string> = {
     "필수": "bg-red-50 text-red-600",
@@ -53,14 +54,14 @@ export default function EducationAdminPage() {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<string>("all");
 
-    const totalCompleted = mockData.filter(e => e.status === "수료").length;
-    const totalInProgress = mockData.filter(e => e.status === "진행중").length;
+    const totalCompleted = MOCK_EDUCATION.filter(e => e.status === "수료").length;
+    const totalInProgress = MOCK_EDUCATION.filter(e => e.status === "진행중").length;
     const mandatoryIncomplete = staffNames.filter(name => {
-        const completed = mockData.filter(d => d.name === name && d.mandatory && d.status === "수료");
+        const completed = MOCK_EDUCATION.filter(d => d.name === name && d.mandatory && d.status === "수료");
         return completed.length < mandatoryCourses.length;
     }).length;
 
-    const filtered = mockData
+    const filtered = MOCK_EDUCATION
         .filter(e => tab === "mandatory" ? e.mandatory : true)
         .filter(e => filter === "all" || e.category === filter)
         .filter(e => !search || e.name.includes(search) || e.department.includes(search) || e.courseName.includes(search));

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, BarChart3, User, Globe, Search } from "lucide-react";
 import clsx from "clsx";
+import { isMockAllowed } from "@/lib/env";
 
 interface Newsletter {
     id: string;
@@ -27,14 +28,14 @@ interface Subscriber {
     source?: string; // 가입경로
 }
 
-const mockNewsletters: Newsletter[] = [
+const mockNewsletters: Newsletter[] = !isMockAllowed() ? [] : [
     { id: 'nl1', title: 'MADLeague 인사이트 투어링 — 영양군에서 만난 기획의 본질', status: '발송완료', sentDate: '2026-03-15', recipients: 342, openRate: 48.2, clickRate: 12.5 },
     { id: 'nl2', title: 'LUKI 2nd Single 비하인드 — AI 아이돌은 어떻게 만들어지는가', status: '발송완료', sentDate: '2026-03-01', recipients: 328, openRate: 52.1, clickRate: 15.3 },
     { id: 'nl3', title: 'Badak 3월 밋업 리캡 — 퍼포먼스 마케팅의 미래', status: '예약', scheduledDate: '2026-03-29', recipients: 355 },
     { id: 'nl4', title: '리제로스 시즌2 개막 안내', status: '작성중', recipients: 0 },
 ];
 
-const mockSubscribers: Subscriber[] = [
+const mockSubscribers: Subscriber[] = !isMockAllowed() ? [] : [
     // 회원 구독자
     { id: 's1', email: 'cheonil.jeon@gmail.com', name: '전천일', type: 'member', subscribedAt: '2025-03-15', status: 'active', source: '회원가입' },
     { id: 's2', email: 'hong@univ.ac.kr', name: '홍길동', type: 'member', subscribedAt: '2026-01-10', status: 'active', source: '회원가입' },

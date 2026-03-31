@@ -5,6 +5,8 @@ import { User, SystemAccess, IntraModule } from '@/types/auth';
 import { validateCredentials, registerMember } from '@/lib/auth-data';
 import { isMockAllowed } from '@/lib/env';
 import { createClient } from '@/lib/supabase/client';
+import { permissionsFromJWT } from '@/lib/supabase/identity';
+import type { JWTAppMetadata } from '@/types/identity';
 
 interface AuthContextType {
     user: User | null;
@@ -56,6 +58,8 @@ function memberToUser(member: Record<string, unknown>): User {
         department: member.department as string | undefined,
         employeeId: member.employee_id as string | undefined,
         position: member.position as string | undefined,
+        hireDate: member.hire_date as string | undefined,
+        employmentType: member.employment_type as string | undefined,
         phone: member.phone as string | undefined,
         bio: member.bio as string | undefined,
         company: member.company as string | undefined,
@@ -111,6 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     .select()
                     .single();
                 member = newMember;
+
+                // 3계층: member_roles에도 기본 역할 추가 (트리거가 JWT 갱신)
+                if (newMember) {
+                    supabase.from('member_roles').insert({
+                        member_id: newMember.id,
+                        role: 'member',
+                        context: 'universe',
+                    }).then(() => {});
+                }
             }
 
             if (member) {
@@ -398,13 +411,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await supabase.auth.signOut({ scope: 'local' });
         } catch { /* ignore */ }
-        // Supabase SSR 쿠키 강제 제거
+        // Supabase SSR 쿠키 + tenone-auth 쿠키 강제 제거
         document.cookie.split(';').forEach(c => {
             const name = c.split('=')[0].trim();
-            if (name.startsWith('sb-')) {
+            if (name.startsWith('sb-') || name.startsWith('tenone-auth')) {
+                // 현재 도메인 + .tenone.biz 양쪽 모두 삭제 시도
                 document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.tenone.biz`;
             }
         });
+        // 인트라 검증 캐시도 클리어
+        try { sessionStorage.removeItem('tenone_intra_verified'); } catch { /* ignore */ }
     }, [supabase]);
 
     const isStaff = user?.accountType === 'staff';

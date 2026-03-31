@@ -58,7 +58,8 @@ export async function fetchMembers(options?: {
         query = query.eq('intra_access', options.intraAccess);
     }
     if (options?.search) {
-        query = query.or(`name.ilike.%${options.search}%,email.ilike.%${options.search}%`);
+        const s = options.search.replace(/[\\%_(),."']/g, '').trim().slice(0, 200);
+        if (s) query = query.or(`name.ilike.%${s}%,email.ilike.%${s}%`);
     }
 
     query = query.order('created_at', { ascending: false });

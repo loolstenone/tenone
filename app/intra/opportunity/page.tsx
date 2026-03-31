@@ -7,6 +7,7 @@ import {
     Globe, Briefcase, Award, Users, ArrowRight, Tag,
 } from "lucide-react";
 import clsx from "clsx";
+import { isMockAllowed } from "@/lib/env";
 
 type OpportunitySource = 'narjangter' | 'competition' | 'government' | 'referral' | 'website' | 'openchat' | 'other';
 type OpportunityStatus = 'new' | 'reviewing' | 'bidding' | 'won' | 'lost' | 'expired';
@@ -50,7 +51,7 @@ const statusConfig: Record<OpportunityStatus, { label: string; color: string; bg
     expired: { label: '만료', color: 'text-neutral-400', bg: 'bg-neutral-50' },
 };
 
-const mockData: Opportunity[] = [
+const mockData: Opportunity[] = !isMockAllowed() ? [] : [
     {
         id: 'opp-1', title: '2026 충남 청년 마케팅 지원사업 (마케팅 컨설팅)', source: 'government',
         description: '충남 소재 청년 창업기업 대상 마케팅 컨설팅 및 콘텐츠 제작 지원. 총 20개사 선정.',

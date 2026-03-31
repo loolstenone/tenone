@@ -80,7 +80,10 @@ export async function fetchBadakProfiles(params: ProfileSearchParams = {}): Prom
   if (jobLevel) query = query.eq('job_level', jobLevel);
   if (lookingFor) query = query.contains('looking_for', [lookingFor]);
   if (canOffer) query = query.contains('can_offer', [canOffer]);
-  if (search) query = query.or(`display_name.ilike.%${search}%,bio.ilike.%${search}%`);
+  if (search) {
+    const s = search.replace(/[\\%_(),."']/g, '').trim().slice(0, 200);
+    if (s) query = query.or(`display_name.ilike.%${s}%,bio.ilike.%${s}%`);
+  }
 
   const { data, count, error } = await query;
   if (error) { console.error('fetchBadakProfiles error:', error); return { profiles: [], total: 0 }; }
@@ -132,7 +135,9 @@ export async function fetchMyConnections(userId: string, type: 'sent' | 'receive
   } else if (type === 'received') {
     query = query.eq('target_id', userId).eq('status', 'pending');
   } else {
-    query = query.or(`requester_id.eq.${userId},target_id.eq.${userId}`).eq('status', 'accepted');
+    // UUID 검증 후 필터 적용 (인젝션 방지)
+    const safeId = /^[0-9a-f-]{36}$/i.test(userId) ? userId : '00000000-0000-0000-0000-000000000000';
+    query = query.or(`requester_id.eq.${safeId},target_id.eq.${safeId}`).eq('status', 'accepted');
   }
 
   const { data, error } = await query;
@@ -141,10 +146,13 @@ export async function fetchMyConnections(userId: string, type: 'sent' | 'receive
 }
 
 export async function checkConnectionStatus(requesterId: string, targetId: string): Promise<'none' | 'pending' | 'accepted' | 'declined'> {
+  const nil = '00000000-0000-0000-0000-000000000000';
+  const rId = /^[0-9a-f-]{36}$/i.test(requesterId) ? requesterId : nil;
+  const tId = /^[0-9a-f-]{36}$/i.test(targetId) ? targetId : nil;
   const { data } = await supabase
     .from('badak_connections')
     .select('status')
-    .or(`and(requester_id.eq.${requesterId},target_id.eq.${targetId}),and(requester_id.eq.${targetId},target_id.eq.${requesterId})`)
+    .or(`and(requester_id.eq.${rId},target_id.eq.${tId}),and(requester_id.eq.${tId},target_id.eq.${rId})`)
     .limit(1)
     .single();
   if (!data) return 'none';

@@ -70,11 +70,14 @@ export default function NewsroomFeed() {
         setPosts(prev => reset ? data.posts : [...prev, ...data.posts]);
         setHasMore(data.hasMore);
       } else if (p === 1) {
-        setPosts(MOCK_POSTS);
+        // 개발 환경에서만 Mock fallback
+        const { isMockAllowed } = await import('@/lib/env');
+        if (isMockAllowed()) { setPosts(MOCK_POSTS); }
         setHasMore(false);
       }
     } catch {
-      if (p === 1) setPosts(MOCK_POSTS);
+      const { isMockAllowed } = await import('@/lib/env');
+      if (p === 1 && isMockAllowed()) setPosts(MOCK_POSTS);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -132,16 +135,12 @@ export default function NewsroomFeed() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {posts.map(post => {
               const meta = getBrandMeta(post.site);
-              const href = post.site === 'tenone'
-                ? `/newsroom?postId=${post.id}`
-                : `${meta.boardPath}?postId=${post.id}`;
-              const isExternal = post.site !== 'tenone';
+              const href = `/newsroom/${post.id}`;
 
               return (
                 <Link
                   key={post.id}
                   href={href}
-                  target={isExternal ? '_blank' : undefined}
                   className="group rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden hover:border-neutral-600 transition-all duration-200 hover:-translate-y-0.5"
                 >
                   {/* 대표 이미지 */}

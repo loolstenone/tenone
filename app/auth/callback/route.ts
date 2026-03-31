@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+// Vercel 프리뷰/로컬에서는 .tenone.biz 도메인 쿠키 불필요
+const cookieDomain = process.env.VERCEL_ENV === 'production' ? '.tenone.biz' : undefined;
+
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
@@ -24,9 +27,15 @@ export async function GET(request: NextRequest) {
                     getAll() { return cookieStore.getAll(); },
                     setAll(cookiesToSet) {
                         cookiesToSet.forEach(({ name, value, options }) => {
-                            cookieStore.set(name, value, options);
+                            cookieStore.set(name, value, {
+                                ...options,
+                                ...(cookieDomain && { domain: cookieDomain }),
+                            });
                         });
                     },
+                },
+                auth: {
+                    storageKey: 'tenone-auth',
                 },
             }
         );

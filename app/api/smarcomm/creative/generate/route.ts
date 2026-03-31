@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { requireAuth } from '@/lib/supabase/api-utils';
 
 interface GenerateRequest {
   type: 'text' | 'banner' | 'video';
@@ -120,6 +121,9 @@ function generateFallback(req: GenerateRequest): { title: string; body: string; 
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
   try {
     const body = await request.json() as GenerateRequest;
 
