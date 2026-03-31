@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { historyEvents, brands } from "@/lib/data";
-import { Clock } from "lucide-react";
-
-const years = [...new Set(historyEvents.map(e => e.year))].sort();
+import { useState, useEffect } from "react";
+import { historyEvents as staticEvents, brands as staticBrands } from "@/lib/data";
+import { fetchHistoryEvents, fetchPortalBrands } from "@/lib/supabase/tenone";
+import { HistoryEvent, Brand } from "@/types/brand";
 
 export default function HistoryPage() {
+    const [events, setEvents] = useState<HistoryEvent[]>(staticEvents);
+    const [brands, setBrands] = useState<Brand[]>(staticBrands);
     const [yearFilter, setYearFilter] = useState('All');
-    const filtered = yearFilter === 'All' ? historyEvents : historyEvents.filter(e => e.year === yearFilter);
+
+    useEffect(() => {
+        fetchHistoryEvents().then(data => { if (data.length > 0) setEvents(data); });
+        fetchPortalBrands().then(data => { if (data.length > 0) setBrands(data); });
+    }, []);
+
+    const years = [...new Set(events.map(e => e.year))].sort();
+    const filtered = yearFilter === 'All' ? events : events.filter(e => e.year === yearFilter);
     const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
 
     const getBrandName = (brandId?: string) => brandId ? brands.find(b => b.id === brandId)?.name : undefined;

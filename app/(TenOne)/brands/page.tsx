@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { brands } from "@/lib/data";
+import { brands as staticBrands } from "@/lib/data";
+import { fetchPortalBrands } from "@/lib/supabase/tenone";
+import { Brand } from "@/types/brand";
 import { ExternalLink, ArrowRight } from "lucide-react";
 
 const categories = ['All', 'Corporate', 'Platform', 'Marketing', 'Consulting', 'Education', 'Community', 'Project Group', 'Network', 'Content', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Startup', 'Wellness'];
@@ -14,8 +16,13 @@ const statusColor: Record<string, string> = {
 };
 
 export default function BrandsPage() {
+    const [brands, setBrands] = useState<Brand[]>(staticBrands);
     const [category, setCategory] = useState('All');
     const filtered = category === 'All' ? brands : brands.filter(b => b.category === category);
+
+    useEffect(() => {
+        fetchPortalBrands().then(data => { if (data.length > 0) setBrands(data); });
+    }, []);
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
