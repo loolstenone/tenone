@@ -9,6 +9,33 @@ const nextConfig: NextConfig = {
   env: {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   },
+  async headers() {
+    return [
+      // 마케팅/랜딩 페이지 — 1시간 캐시 (ISR 대체)
+      {
+        source: '/(about|brands|history|universe|works)',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' }],
+      },
+      {
+        source: '/wio/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' }],
+      },
+      {
+        source: '/(badak|hero|rook|madleague|madleap|changeup|youinone|mindle)/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=1800, stale-while-revalidate=86400' }],
+      },
+      // 인트라/마이버스 — SSR (캐시 없음)
+      {
+        source: '/intra/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
+      },
+      // API — 캐시 없음
+      {
+        source: '/api/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, max-age=0' }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
