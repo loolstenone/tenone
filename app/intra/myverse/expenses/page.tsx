@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Upload,
@@ -9,6 +9,8 @@ import {
   Package,
 } from "lucide-react";
 import { PageHeader, StatCard, Card, Badge, PrimaryButton, SectionTitle } from "@/components/intra/IntraUI";
+import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 type ExpenseStatus = "승인대기" | "승인" | "지급완료";
 type ExpenseCategory = "교통" | "식비" | "사무용품";
@@ -53,14 +55,35 @@ function formatKRW(n: number) {
 }
 
 export default function MyExpensesPage() {
+  const { user } = useAuth();
+  const [expenseList, setExpenseList] = useState<ExpenseItem[]>(expenses);
   const [showForm, setShowForm] = useState(false);
   const [formDate, setFormDate] = useState("");
   const [formDesc, setFormDesc] = useState("");
   const [formAmount, setFormAmount] = useState("");
   const [formCategory, setFormCategory] = useState<ExpenseCategory>("교통");
 
-  const pendingCount = expenses.filter((e) => e.status === "승인대기").length;
-  const thisMonthTotal = 350000;
+  // DB 우선 로드
+  useEffect(() => {
+    if (!user) return;
+    erpDb.fetchExpenses({ memberId: user.id, limit: 30 })
+      .then(data => {
+        if (data.length > 0) {
+          setExpenseList(data.map((e: any) => ({
+            id: e.id,
+            date: (e.expense_date || '').slice(0, 10),
+            description: e.description || '',
+            amount: e.amount || 0,
+            category: (e.category || '교통') as ExpenseCategory,
+            status: e.status === 'approved' ? '승인' : e.status === 'paid' ? '지급완료' : '승인대기',
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
+  const pendingCount = expenseList.filter((e) => e.status === "승인대기").length;
+  const thisMonthTotal = expenseList.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="max-w-4xl">
@@ -162,7 +185,7 @@ export default function MyExpensesPage() {
         <Card className="mb-6" padding={false}><div className="p-4">
           <SectionTitle title="경비 내역" />
           <div className="space-y-2">
-            {expenses.map((exp) => {
+            {expenseList.map((exp) => {
               const Icon = categoryIcon[exp.category];
               return (
                 <div
