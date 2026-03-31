@@ -44,6 +44,10 @@ export async function middleware(request: NextRequest) {
     // 1. Supabase 세션 갱신 (모든 요청에서)
     let response = NextResponse.next({ request });
 
+    // Vercel 프리뷰/로컬에서는 .tenone.biz 도메인 쿠키 불필요
+    const isProduction = process.env.VERCEL_ENV === 'production';
+    const cookieDomain = isProduction ? '.tenone.biz' : undefined;
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -53,9 +57,15 @@ export async function middleware(request: NextRequest) {
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         request.cookies.set(name, value);
-                        response.cookies.set(name, value, options);
+                        response.cookies.set(name, value, {
+                            ...options,
+                            ...(cookieDomain && { domain: cookieDomain }),
+                        });
                     });
                 },
+            },
+            auth: {
+                storageKey: 'tenone-auth',
             },
         }
     );
