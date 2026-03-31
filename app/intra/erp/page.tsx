@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Users, ClipboardList, Target, TrendingUp } from "lucide-react";
+import { Users, ClipboardList, Target, TrendingUp, Loader2 } from "lucide-react";
 import { useStaff } from "@/lib/staff-context";
 import { useGpr } from "@/lib/gpr-context";
 
 export default function ErpDashboard() {
-    const { staff } = useStaff();
-    const { goals } = useGpr();
+    const { staff, loading: staffLoading } = useStaff();
+    const { goals, loading: goalsLoading } = useGpr();
 
+    const loading = staffLoading || goalsLoading;
     const activeStaff = staff.filter(s => s.status === 'Active');
     const completedGoals = goals.filter(g => g.status === 'Completed');
     const pendingGoals = goals.filter(g => g.status === 'In Progress');
@@ -19,6 +20,15 @@ export default function ErpDashboard() {
         { name: "In Progress", value: pendingGoals.length, icon: ClipboardList, href: "/intra/erp/hr/gpr/goals", change: `${pendingGoals.length} 진행 중` },
         { name: "GPR", value: `${Math.round((completedGoals.length / Math.max(goals.length, 1)) * 100)}%`, icon: TrendingUp, href: "/intra/erp/hr/gpr", change: "Goal completion rate" },
     ];
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+                <span className="ml-2 text-sm text-neutral-500">데이터 로딩 중...</span>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">

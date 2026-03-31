@@ -210,7 +210,7 @@ BEGIN
     UPDATE members SET
         roles = COALESCE(legacy_roles, ARRAY[]::TEXT[]),
         affiliations = COALESCE(legacy_affiliations, ARRAY[]::TEXT[]),
-        account_type = legacy_account_type,
+        account_type = legacy_account_type::account_type,
         intra_access = (legacy_account_type != 'member'),
         updated_at = now()
     WHERE id = target_member_id;
@@ -347,11 +347,27 @@ CREATE TABLE IF NOT EXISTS tenone_staff_profiles (
 );
 
 -- ── HR 필드 이관 (members → tenone_staff_profiles) ──
-INSERT INTO tenone_staff_profiles (member_id, department, position, employee_id, hire_date, employment_type)
-SELECT id, department, position, employee_id, hire_date::DATE, employment_type
-FROM members
-WHERE (department IS NOT NULL OR position IS NOT NULL OR employee_id IS NOT NULL OR hire_date IS NOT NULL)
-ON CONFLICT (member_id) DO NOTHING;
+-- hire_date, employment_type는 members에 없을 수 있으므로 조건부 처리
+DO $$
+BEGIN
+    -- hire_date 컬럼이 members에 있는 경우
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='hire_date') THEN
+        EXECUTE '
+            INSERT INTO tenone_staff_profiles (member_id, department, position, employee_id, hire_date, employment_type)
+            SELECT id, department, position, employee_id, hire_date::DATE, employment_type
+            FROM members
+            WHERE (department IS NOT NULL OR position IS NOT NULL OR employee_id IS NOT NULL OR hire_date IS NOT NULL)
+            ON CONFLICT (member_id) DO NOTHING
+        ';
+    ELSE
+        -- hire_date 없으면 나머지 필드만 이관
+        INSERT INTO tenone_staff_profiles (member_id, department, position, employee_id)
+        SELECT id, department, position, employee_id
+        FROM members
+        WHERE (department IS NOT NULL OR position IS NOT NULL OR employee_id IS NOT NULL)
+        ON CONFLICT (member_id) DO NOTHING;
+    END IF;
+END $$;
 
 -- ── SmarComm Profile ──
 CREATE TABLE IF NOT EXISTS smarcomm_profiles (
