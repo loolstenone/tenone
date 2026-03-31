@@ -28,7 +28,7 @@ export default function ApprovalPendingPage() {
                 setItems(approvals.map((a: Record<string, unknown>) => ({
                     docNo: (a.id as string) || '',
                     title: (a.title as string) || '',
-                    drafter: ((a.requester as Record<string, unknown>)?.name as string) || '알 수 없음',
+                    drafter: ((a.drafter as Record<string, unknown>)?.name as string) || (a.drafter_name as string) || '알 수 없음',
                     draftDate: ((a.created_at as string) || '').slice(0, 10),
                     type: (a.type as string) || '기안',
                     status: '승인대기',
