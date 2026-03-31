@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, CheckCircle2, ArrowRight, Calendar, ExternalLink, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, CheckCircle2, ArrowRight, Calendar, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { createClient } from "@/lib/supabase/client";
 
-const pastIssues = [
+interface NewsletterIssue {
+    id: number;
+    title: string;
+    date: string;
+    category: string;
+    url?: string;
+}
+
+const STATIC_ISSUES: NewsletterIssue[] = [
     { id: 1, title: "MADLeague 인사이트 투어링 — 영양군에서 만난 기획의 본질", date: "2026-03-15", category: "MADLeague" },
     { id: 2, title: "LUKI 2nd Single 비하인드 — AI 아이돌은 어떻게 만들어지는가", date: "2026-03-01", category: "LUKI" },
     { id: 3, title: "Badak 3월 밋업 리캡 — 퍼포먼스 마케팅의 미래", date: "2026-02-15", category: "Badak" },
@@ -28,11 +37,17 @@ export default function NewsletterPage() {
     const [guestName, setGuestName] = useState("");
     const [subscribed, setSubscribed] = useState(false);
     const [agreePrivacy, setAgreePrivacy] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [pastIssues, setPastIssues] = useState<NewsletterIssue[]>(STATIC_ISSUES);
 
-    // 로그인 회원이면 이미 구독 중인지 확인
     const isMemberSubscribed = isAuthenticated && user?.newsletterSubscribed;
 
-    const [submitting, setSubmitting] = useState(false);
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('newsletter_issues').select('id, title, date, category, url')
+            .eq('published', true).order('date', { ascending: false }).limit(12)
+            .then(({ data }) => { if (data && data.length > 0) setPastIssues(data); });
+    }, []);
 
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -144,8 +159,8 @@ export default function NewsletterPage() {
             <div>
                 <h2 className="text-sm font-bold mb-6">지난 뉴스레터</h2>
                 <div className="space-y-3">
-                    {pastIssues.map(issue => (
-                        <div key={issue.id} className="border tn-border tn-surface p-5 hover:border-neutral-400 transition-colors cursor-pointer group">
+                    {pastIssues.map(issue => {
+                        const inner = (
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-2">
@@ -158,10 +173,20 @@ export default function NewsletterPage() {
                                     </div>
                                     <h3 className="text-sm font-medium group-hover:text-neutral-600 transition-colors">{issue.title}</h3>
                                 </div>
-                                <ExternalLink className="h-4 w-4 tn-text-muted group-hover:tn-text-sub transition-colors shrink-0 mt-1" />
+                                {issue.url && <ExternalLink className="h-4 w-4 tn-text-muted group-hover:tn-text-sub transition-colors shrink-0 mt-1" />}
                             </div>
-                        </div>
-                    ))}
+                        );
+                        return issue.url ? (
+                            <a key={issue.id} href={issue.url} target="_blank" rel="noopener noreferrer"
+                                className="block border tn-border tn-surface p-5 hover:border-neutral-400 transition-colors group">
+                                {inner}
+                            </a>
+                        ) : (
+                            <div key={issue.id} className="border tn-border tn-surface p-5 hover:border-neutral-400 transition-colors group">
+                                {inner}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </div>
