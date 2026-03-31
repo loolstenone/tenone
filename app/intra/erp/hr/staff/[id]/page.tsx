@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStaff } from "@/lib/staff-context";
 import { brandOptions } from "@/lib/staff-data";
+import * as erpDb from "@/lib/supabase/erp";
 import Link from "next/link";
 import { ArrowLeft, Save, User, Shield, Target, TrendingUp, Calendar } from "lucide-react";
 
@@ -31,6 +32,20 @@ const mockGprGoals: GprGoal[] = [
     { id: 'g5', title: 'VRIEF 프레임워크 매드리그 교육 적용', type: 'Quarterly', status: 'In Progress', progress: 40, description: '매드리그 대학생 대상 VRIEF 3Step 교육 프로그램 운영' },
 ];
 
+function mapDbGoal(g: Record<string, unknown>): GprGoal {
+    const statusMap: Record<string, GprGoal['status']> = {
+        Draft: 'Not Started', 'In Progress': 'In Progress', Completed: 'Completed',
+    };
+    return {
+        id: g.id as string,
+        title: g.title as string,
+        type: (g.category as string) === 'Growth' ? 'Personal' : 'Quarterly',
+        status: statusMap[(g.status as string)] || 'In Progress',
+        progress: (g.progress as number) || 0,
+        description: (g.description as string) || '',
+    };
+}
+
 export default function StaffDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -38,7 +53,20 @@ export default function StaffDetailPage() {
     const [tab, setTab] = useState<Tab>('profile');
     const [saved, setSaved] = useState(false);
 
+    const [gprGoals, setGprGoals] = useState<GprGoal[]>(mockGprGoals);
+
     const member = getStaffById(params.id as string);
+
+    // DB에서 GPR 목표 로드
+    useEffect(() => {
+        if (!params.id) return;
+        erpDb.fetchGprGoals({ memberId: params.id as string })
+            .then(data => {
+                if (data.length > 0) setGprGoals(data.map(mapDbGoal));
+            })
+            .catch(() => {});
+    }, [params.id]);
+
     if (!member) return <div className="text-neutral-400 text-center py-20">직원을 찾을 수 없습니다.</div>;
 
     // Personal editable fields
@@ -147,22 +175,22 @@ export default function StaffDetailPage() {
                     {/* GPR Summary */}
                     <div className="grid grid-cols-3 gap-4">
                         <div className="border border-neutral-200 bg-white p-4 text-center">
-                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.type === 'Yearly').length}</p>
+                            <p className="text-2xl font-bold">{gprGoals.filter(g => g.type === 'Yearly').length}</p>
                             <p className="text-xs text-neutral-500 mt-1">Yearly Goals</p>
                         </div>
                         <div className="border border-neutral-200 bg-white p-4 text-center">
-                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.type === 'Quarterly').length}</p>
+                            <p className="text-2xl font-bold">{gprGoals.filter(g => g.type === 'Quarterly').length}</p>
                             <p className="text-xs text-neutral-500 mt-1">Quarterly Goals</p>
                         </div>
                         <div className="border border-neutral-200 bg-white p-4 text-center">
-                            <p className="text-2xl font-bold">{mockGprGoals.filter(g => g.status === 'Completed').length}/{mockGprGoals.length}</p>
+                            <p className="text-2xl font-bold">{gprGoals.filter(g => g.status === 'Completed').length}/{gprGoals.length}</p>
                             <p className="text-xs text-neutral-500 mt-1">Completed</p>
                         </div>
                     </div>
 
                     {/* GPR Levels */}
                     {(['Yearly', 'Quarterly', 'Personal'] as const).map(type => {
-                        const goals = mockGprGoals.filter(g => g.type === type);
+                        const goals = gprGoals.filter(g => g.type === type);
                         if (goals.length === 0) return null;
                         const typeLabels = { Yearly: 'GPR III — 연간 목표', Quarterly: 'GPR II — 분기 목표', Personal: 'GPR I — 개인 업무 목표' };
                         const typeIcons = { Yearly: Calendar, Quarterly: TrendingUp, Personal: Target };

@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import type { PointLog, MemberPointSummary, PointCategory } from '@/types/point';
 import { getGradeByPoints, defaultPointValues } from '@/types/point';
 import { initialPointLogs, initialMemberPoints } from '@/lib/point-data';
 import { isMockAllowed } from '@/lib/env';
+import { createClient } from '@/lib/supabase/client';
 
 interface PointContextType {
     logs: PointLog[];
@@ -38,6 +39,74 @@ export function PointProvider({ children }: { children: ReactNode }) {
     const mockOk = isMockAllowed();
     const [logs, setLogs] = useState<PointLog[]>(mockOk ? initialPointLogs : []);
     const [memberPoints, setMemberPoints] = useState<MemberPointSummary[]>(mockOk ? initialMemberPoints : []);
+
+    // DB 우선 로드 (point_logs + members.total_points)
+    useEffect(() => {
+        (async () => {
+            try {
+                const supabase = createClient();
+
+                // 전체 멤버 포인트 요약
+                const { data: members } = await supabase
+                    .from('members')
+                    .select('id, name, department, position, total_points, grade')
+                    .not('total_points', 'is', null)
+                    .order('total_points', { ascending: false });
+
+                if (members && members.length > 0) {
+                    const now = new Date();
+                    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+
+                    // 이번 달 포인트 로그
+                    const { data: monthLogs } = await supabase
+                        .from('point_logs')
+                        .select('member_id, points')
+                        .gte('created_at', monthStart);
+
+                    const monthMap: Record<string, number> = {};
+                    (monthLogs || []).forEach((l: any) => {
+                        monthMap[l.member_id] = (monthMap[l.member_id] || 0) + l.points;
+                    });
+
+                    setMemberPoints(members.map((m: any) => ({
+                        memberId: m.id,
+                        memberName: m.name,
+                        department: m.department || '-',
+                        position: m.position || '-',
+                        totalPoints: m.total_points || 0,
+                        grade: getGradeByPoints(m.total_points || 0),
+                        thisMonthPoints: monthMap[m.id] || 0,
+                        thisQuarterPoints: 0,
+                        lastActivity: '-',
+                    })));
+                }
+
+                // 최근 포인트 로그 (최대 100건)
+                const { data: dbLogs } = await supabase
+                    .from('point_logs')
+                    .select('*, member:members!point_logs_member_id_fkey(name)')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (dbLogs && dbLogs.length > 0) {
+                    setLogs(dbLogs.map((l: any) => ({
+                        id: l.id,
+                        memberId: l.member_id,
+                        memberName: l.member?.name || '알 수 없음',
+                        category: (l.source_type || 'admin_adjust') as PointCategory,
+                        points: l.points,
+                        balance: 0,
+                        description: l.reason,
+                        referenceId: l.source_id,
+                        createdAt: (l.created_at || '').split('T')[0],
+                        createdBy: '시스템',
+                    })));
+                }
+            } catch (err) {
+                console.warn('[Points] DB 로드 실패, Mock 유지:', err);
+            }
+        })();
+    }, []);
 
     const updateMemberSummary = useCallback((memberId: string, memberName: string, points: number, department?: string, position?: string) => {
         setMemberPoints(prev => {
