@@ -1,8 +1,22 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-31 (집)
+> 마지막 업데이트: 2026-04-01 (집)
 
-## 오늘 한 작업 (3/31 집)
+## 오늘 한 작업 (4/1 집)
+
+### 인트라 메뉴 stub 3개 완성
+1. `bums/stats` ✅ — 사이트별 게시글·조회수·좋아요·댓글 집계 + 회원/구독자 수 KPI (Supabase 실연동)
+2. `bums/promotion` ✅ — 할인코드 CRUD (percent/fixed, 사용제한, 유효기간, 코드 복사)
+3. `bums/shop` ✅ — 상품 관리 + 주문 관리 탭, 인라인 상태 변경
+4. `supabase/migrations/007_shop_promotions.sql` ✅ — shop_products, shop_orders, promotions 테이블
+
+### 전체 인트라 메뉴 현황 파악
+- 총 ~160개 페이지, stub 3개 완성 → 0개
+- mock 데이터 사용 중인 페이지: 38개 (Supabase 연결 필요)
+
+---
+
+## 이전 작업 (3/31 집)
 
 ### TenOne 사이트 고도화 — DB 전체 연결
 1. WIO OrbiConfig DB sync (localStorage → Supabase user_settings) ✅
@@ -60,14 +74,31 @@
 ## 다음 할 일
 
 ### 즉시 — Supabase 마이그레이션 실행 (수동)
-1. Supabase 대시보드에서 005_tenone_portal.sql 실행 필요 (brands 컬럼 추가 + history_events 생성)
-2. 확인: brands 페이지 → DB 데이터 로드되는지 체크 (fallback은 lib/data.ts)
+1. Supabase 대시보드에서 005_tenone_portal.sql 실행 (brands 컬럼 추가 + history_events)
+2. Supabase 대시보드에서 007_shop_promotions.sql 실행 (shop_products, shop_orders, promotions)
 
-### 다음 — TenOne 고도화
-3. npm run build 에러 0개 확인 + Vercel 배포
-4. 모바일 반응형 점검 (인트라 페이지)
-5. newsletter pastIssues → Supabase 뉴스레터 아카이브 테이블 연결 (현재 하드코딩 6개)
-6. contact 페이지 → /api/contact API 실제 이메일 발송 연결 확인
+### 인트라 mock→Supabase 연결 — 우선순위 순
+> 38개 페이지가 mock 데이터 사용 중. 모듈별로 진행.
+
+**Universe 모듈 (8개, 실사용 가능성 높음)**
+3. `universe/members` → profiles 테이블 연결 (현재 mock 20명)
+4. `universe/subscriptions` → newsletter_subscribers 연결
+5. `universe/guests` → 별도 guest_access 테이블 설계 필요
+6. `universe/bookings` → bookings 테이블 생성 + 연결
+7. `universe/revenue` → 수익 집계 뷰 생성 필요
+
+**Project 모듈 (4개)**
+8. `project/management` → Supabase projects 테이블 연결
+9. `project/jobs` → project_jobs 테이블 연결
+10. `project/timesheet` → timesheets 테이블 연결
+
+**ERP Finance (4개)**
+11. `erp/finance/card` → 법인카드 내역 테이블
+12. `erp/finance/billing` → 청구/지급 테이블
+
+### 기타
+- newsletter pastIssues → Supabase 아카이브 테이블 연결 (현재 하드코딩 6개)
+- contact 페이지 → /api/contact 이메일 발송 확인
 
 ### Myverse 앱 (Android) — 대기
 7. Expo Go 로딩 이슈 해결 (android 폴더 삭제 후 재구성)

@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-04-01 (집)
+
+### 인트라 stub 3페이지 완성 + shop/promotion DB
+
+#### 완성된 페이지
+- `app/intra/bums/stats/page.tsx`: Supabase posts 집계 (조회수/좋아요/댓글), profiles/newsletter_subscribers 카운트, 사이트별 bar chart
+- `app/intra/bums/promotion/page.tsx`: promotions 테이블 CRUD, 할인코드 복사, 사용률 progress bar, 상태 인라인 변경
+- `app/intra/bums/shop/page.tsx`: 상품/주문 탭, shop_products·shop_orders 연결, 인라인 상태 변경
+
+#### DB 마이그레이션
+- `supabase/migrations/007_shop_promotions.sql` 신규: shop_products, shop_orders, promotions 테이블 + RLS
+
+### 전체 인트라 현황 스캔 완료
+- stub 0개 (3개 → 완성)
+- mock 데이터 사용 페이지 38개 파악 — Universe/Project/ERP Finance 순으로 연결 예정
+
+---
+
 ## 2026-03-31 (집)
 
 ### TenOne 포털 DB 전체 연결
