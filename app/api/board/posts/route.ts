@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as boardDb from '@/lib/supabase/board';
 import type { CreatePostInput, PostListParams, SiteCode } from '@/types/board';
+import { isAdminRequest, getAuthenticatedClient } from '@/lib/supabase/api-utils';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -15,6 +16,7 @@ export async function GET(request: NextRequest) {
         board: searchParams.get('board') || undefined,
         category: searchParams.get('category') || undefined,
         tag: searchParams.get('tag') || undefined,
+        status: (searchParams.get('status') as PostListParams['status']) || undefined,
         search: searchParams.get('search') || undefined,
         sort: (searchParams.get('sort') as PostListParams['sort']) || 'latest',
         period: (searchParams.get('period') as PostListParams['period']) || 'all',
@@ -43,40 +45,33 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 인증 확인
-        let authorId: string | undefined;
-        const authHeader = request.headers.get('authorization');
+        // Admin API Key → 에이전트/관리자 글 작성
+        if (isAdminRequest(request)) {
+            const post = await boardDb.createPost({
+                ...body,
+                status: body.status || 'published',
+            }, undefined);
 
-        if (authHeader?.startsWith('Bearer ')) {
-            const token = authHeader.slice(7);
-            // Admin API Key 체크
-            if (token === process.env.ADMIN_API_KEY) {
-                // AI 에이전트 / 관리자 → author_type = 'agent'
-                const post = await boardDb.createPost({
-                    ...body,
-                    status: body.status || 'published',
-                }, undefined);
+            const { createClient: createSupabase } = await import('@/lib/supabase/server');
+            const supabase = await createSupabase();
+            await supabase.from('posts').update({
+                author_type: 'agent',
+            }).eq('id', post.id);
 
-                // author_type 직접 설정
-                const { createClient: createSupabase } = await import('@/lib/supabase/client');
-                const supabase = createSupabase();
-                await supabase.from('posts').update({
-                    author_type: 'agent',
-                }).eq('id', post.id);
-
-                return NextResponse.json(post, { status: 201 });
-            }
+            return NextResponse.json(post, { status: 201 });
         }
 
-        // 일반 유저 (Supabase auth)
-        // TODO: Supabase server-side auth에서 user 가져오기
-        // 현재는 body에 authorId가 있으면 사용
-        if (body.guestNickname) {
+        // 인증된 사용자
+        const { user } = await getAuthenticatedClient();
+        let authorId: string | undefined = user?.id;
+
+        if (!authorId && body.guestNickname) {
             // 비회원 글 작성
             if (!body.guestPassword) {
                 return NextResponse.json({ error: 'Guest password required' }, { status: 400 });
             }
-            // TODO: bcrypt 해시
+        } else if (!authorId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const post = await boardDb.createPost(body, authorId);

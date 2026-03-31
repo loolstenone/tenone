@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { brands, events } from "@/lib/data";
+import { brands, events as rawEvents } from "@/lib/data";
+import { isMockAllowed } from "@/lib/env";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, Filter } from "lucide-react";
 import clsx from "clsx";
 
+const events = isMockAllowed() ? rawEvents : [];
+
 export default function SchedulePage() {
     const [view, setView] = useState<'month' | 'list'>('month');
-    const [currentDate, setCurrentDate] = useState(new Date(2025, 7, 1)); // Start from Aug 2025 where mock data is
+    const [currentDate, setCurrentDate] = useState(new Date()); // 현재 날짜 기준
 
     // Calendar Logic
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();

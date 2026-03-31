@@ -56,6 +56,8 @@ function memberToUser(member: Record<string, unknown>): User {
         department: member.department as string | undefined,
         employeeId: member.employee_id as string | undefined,
         position: member.position as string | undefined,
+        hireDate: member.hire_date as string | undefined,
+        employmentType: member.employment_type as string | undefined,
         phone: member.phone as string | undefined,
         bio: member.bio as string | undefined,
         company: member.company as string | undefined,

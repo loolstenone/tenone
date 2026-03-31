@@ -1,11 +1,12 @@
 /**
  * Networking Events API
- * GET  /api/networking?brandId=
- * POST /api/networking
+ * GET  /api/networking?brandId=  (공개)
+ * POST /api/networking           (인증 필요)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import * as networkingDb from '@/lib/supabase/networking';
 import type { CreateNetworkingEventInput } from '@/types/networking';
+import { requireAuth } from '@/lib/supabase/api-utils';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -21,6 +22,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
   try {
     const body = await request.json() as CreateNetworkingEventInput;
 

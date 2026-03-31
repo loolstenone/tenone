@@ -108,7 +108,8 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
 
     // 검색 (제목 + 본문)
     if (search) {
-        query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+        const s = search.replace(/[\\%_(),."']/g, '').trim().slice(0, 200);
+        if (s) query = query.or(`title.ilike.%${s}%,content.ilike.%${s}%`);
     }
 
     // 기간 필터

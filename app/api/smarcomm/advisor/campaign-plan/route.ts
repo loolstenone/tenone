@@ -3,8 +3,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import { buildCampaignPrompt, generateFallbackPlan } from '@/lib/smarcomm/campaign-plan';
 import type { AnalysisResult } from '@/lib/smarcomm/seo-analyzer';
 import type { CampaignPlan } from '@/lib/smarcomm/campaign-plan';
+import { requireAuth } from '@/lib/supabase/api-utils';
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
   try {
     const body = await request.json();
     const { scanResult } = body as { scanResult: AnalysisResult };

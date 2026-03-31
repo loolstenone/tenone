@@ -7,11 +7,14 @@
  * - 미지정 시 compass 에이전트가 라우팅 판단
  */
 import { NextRequest } from 'next/server';
-import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
+import { successResponse, errorResponse, requireAuthOrAdmin } from '@/lib/supabase/api-utils';
 import { invokeAgent, getAgentProfile } from '@/lib/agent/claude';
 import type { AgentHubRequest, AgentHubResponse } from '@/types/agent';
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await requireAuthOrAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const body: AgentHubRequest = await request.json();
     const { message, agentName, userId, correlationId } = body;
