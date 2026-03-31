@@ -49,10 +49,10 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 1) getUser — 3초 타임아웃
+                // 1) getUser — 5초 타임아웃 (3초는 느린 네트워크에서 부족)
                 const userResult = await Promise.race([
                     sb.auth.getUser(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 3000)),
+                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
                 ]);
 
                 const user =
@@ -61,19 +61,22 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         : null;
 
                 if (!user) {
+                    console.log("[Intra] No session found, showing login");
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("login");
                     return;
                 }
 
-                // 2) members 권한 확인 — 3초 타임아웃
+                console.log("[Intra] Session found:", user.email);
+
+                // 2) members 권한 확인 — 5초 타임아웃
                 const memberResult = await Promise.race([
                     sb
                         .from("members")
                         .select("account_type,role")
                         .eq("auth_id", user.id)
                         .single(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 3000)),
+                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
                 ]);
 
                 const member =
@@ -82,21 +85,25 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         : null;
 
                 if (member && member.account_type !== "member") {
+                    console.log("[Intra] Access granted:", member.account_type);
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                     setStatus("ok");
                 } else if (member && member.account_type === "member") {
                     // 로그인은 됐지만 일반 회원 → 접근 불가
+                    console.log("[Intra] No access: account_type =", member.account_type);
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("no-access");
                 } else {
                     // member 조회 실패 (타임아웃 등)
+                    console.log("[Intra] Member lookup failed, isCached:", isCached);
                     // 캐시가 있었으면 유지, 없었으면 로그인 폼
                     if (!isCached) {
                         sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                         setStatus("login");
                     }
                 }
-            } catch {
+            } catch (err) {
+                console.error("[Intra] verify error:", err);
                 if (!isCached) {
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("login");
@@ -116,13 +123,23 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
             try {
                 const sb = createClient();
-                const { error: authError } = await sb.auth.signInWithPassword({
-                    email,
-                    password,
-                });
+
+                // 10초 타임아웃
+                const signInResult = await Promise.race([
+                    sb.auth.signInWithPassword({ email, password }),
+                    new Promise<{ error: { message: string } }>((resolve) =>
+                        setTimeout(() => resolve({ error: { message: 'timeout' } }), 10000)
+                    ),
+                ]);
+
+                const authError = signInResult && 'error' in signInResult ? signInResult.error : null;
 
                 if (authError) {
-                    setError("인증 실패. 이메일과 비밀번호를 확인하세요.");
+                    const msg = authError.message === 'timeout'
+                        ? "서버 응답이 지연되고 있습니다. 잠시 후 다시 시도하세요."
+                        : "인증 실패. 이메일과 비밀번호를 확인하세요.";
+                    console.error("[Intra Login] error:", authError.message);
+                    setError(msg);
                     setSubmitting(false);
                     return;
                 }
@@ -130,8 +147,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 // signIn 성공 → 즉시 페이지 이동 (새 페이지에서 verify()가 권한 확인)
                 window.location.href = window.location.pathname;
             } catch (err) {
-                console.error("login error:", err);
-                setError("오류가 발생했습니다.");
+                console.error("[Intra Login] exception:", err);
+                setError("오류가 발생했습니다. 새로고침 후 다시 시도하세요.");
                 setSubmitting(false);
             }
         },

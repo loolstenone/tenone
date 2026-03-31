@@ -400,13 +400,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await supabase.auth.signOut({ scope: 'local' });
         } catch { /* ignore */ }
-        // Supabase SSR 쿠키 강제 제거
+        // Supabase SSR 쿠키 + tenone-auth 쿠키 강제 제거
         document.cookie.split(';').forEach(c => {
             const name = c.split('=')[0].trim();
-            if (name.startsWith('sb-')) {
+            if (name.startsWith('sb-') || name.startsWith('tenone-auth')) {
+                // 현재 도메인 + .tenone.biz 양쪽 모두 삭제 시도
                 document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.tenone.biz`;
             }
         });
+        // 인트라 검증 캐시도 클리어
+        try { sessionStorage.removeItem('tenone_intra_verified'); } catch { /* ignore */ }
     }, [supabase]);
 
     const isStaff = user?.accountType === 'staff';
