@@ -735,7 +735,12 @@ CREATE INDEX IF NOT EXISTS idx_posts_board ON posts(site, board);
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author_id);
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_likes_target ON likes(target_type, target_id);
-CREATE INDEX IF NOT EXISTS idx_approvals_requester ON approvals(requester_id);
+-- approvals 인덱스: 컬럼 존재 시에만 생성
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='approvals' AND column_name='requester_id') THEN
+        CREATE INDEX IF NOT EXISTS idx_approvals_requester ON approvals(requester_id);
+    END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_timesheets_member_date ON timesheets(member_id, date);
 CREATE INDEX IF NOT EXISTS idx_user_settings_lookup ON user_settings(user_id, app, key);
 CREATE INDEX IF NOT EXISTS idx_crm_people_brand ON crm_people(brand_id);
