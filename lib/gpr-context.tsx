@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { GprGoal, GoalStatus, EvaluationRating } from '@/types/gpr';
 import { initialGprGoals } from '@/lib/gpr-data';
+import { isMockAllowed } from '@/lib/env';
 
 interface GprContextType {
     goals: GprGoal[];
@@ -19,7 +20,7 @@ interface GprContextType {
 const GprContext = createContext<GprContextType | undefined>(undefined);
 
 export function GprProvider({ children }: { children: ReactNode }) {
-    const [goals, setGoals] = useState<GprGoal[]>(initialGprGoals);
+    const [goals, setGoals] = useState<GprGoal[]>(isMockAllowed() ? initialGprGoals : []);
     const now = () => new Date().toISOString().split('T')[0];
 
     const addGoal = useCallback((goal: GprGoal) => setGoals(prev => [goal, ...prev]), []);

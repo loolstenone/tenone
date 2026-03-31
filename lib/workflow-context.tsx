@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { WorkflowTask, PipelineItem, BrandProject, AutomationRule, TaskStatus, PipelineStage } from '@/types/workflow';
 import { initialTasks, initialPipelineItems, initialProjects, initialAutomations } from '@/lib/workflow-data';
+import { isMockAllowed } from '@/lib/env';
 
 interface WorkflowContextType {
     // Tasks
@@ -34,10 +35,11 @@ interface WorkflowContextType {
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
 
 export function WorkflowProvider({ children }: { children: ReactNode }) {
-    const [tasks, setTasks] = useState<WorkflowTask[]>(initialTasks);
-    const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>(initialPipelineItems);
-    const [projects, setProjects] = useState<BrandProject[]>(initialProjects);
-    const [automations, setAutomations] = useState<AutomationRule[]>(initialAutomations);
+    const mockOk = isMockAllowed();
+    const [tasks, setTasks] = useState<WorkflowTask[]>(mockOk ? initialTasks : []);
+    const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>(mockOk ? initialPipelineItems : []);
+    const [projects, setProjects] = useState<BrandProject[]>(mockOk ? initialProjects : []);
+    const [automations, setAutomations] = useState<AutomationRule[]>(mockOk ? initialAutomations : []);
 
     // Tasks
     const addTask = useCallback((task: WorkflowTask) => setTasks(prev => [task, ...prev]), []);

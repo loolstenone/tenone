@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import type { LibraryItem, LibraryBookmark, LibrarySource, LibraryCategory, LibraryPermission } from '@/types/library';
 import { initialLibraryItems, initialBookmarks } from '@/lib/library-data';
 import type { AccountType } from '@/types/auth';
+import { isMockAllowed } from '@/lib/env';
 
 /** accountType → 볼 수 있는 permission 레벨 */
 const permissionAccess: Record<AccountType, LibraryPermission[]> = {
@@ -44,21 +45,25 @@ interface LibraryContextType {
 const LibraryContext = createContext<LibraryContextType | undefined>(undefined);
 
 export function LibraryProvider({ children }: { children: ReactNode }) {
+    const mockOk = isMockAllowed();
+    const defaultItems = mockOk ? initialLibraryItems : [];
+    const defaultBookmarks = mockOk ? initialBookmarks : [];
+
     const [items, setItems] = useState<LibraryItem[]>(() => {
-        if (typeof window === 'undefined') return initialLibraryItems;
+        if (typeof window === 'undefined') return defaultItems;
         const saved = localStorage.getItem(ITEMS_KEY);
         if (saved) {
             const savedItems: LibraryItem[] = JSON.parse(saved);
-            // 사용자 추가 아이템(my-로 시작하는 동적 ID) + 초기 데이터 병합
+            if (!mockOk) return savedItems; // 프로덕션: localStorage 데이터만
             const userItems = savedItems.filter(i => !initialLibraryItems.find(init => init.id === i.id));
             return [...userItems, ...initialLibraryItems];
         }
-        return initialLibraryItems;
+        return defaultItems;
     });
     const [bookmarks, setBookmarks] = useState<LibraryBookmark[]>(() => {
-        if (typeof window === 'undefined') return initialBookmarks;
+        if (typeof window === 'undefined') return defaultBookmarks;
         const saved = localStorage.getItem(BOOKMARKS_KEY);
-        return saved ? JSON.parse(saved) : initialBookmarks;
+        return saved ? JSON.parse(saved) : defaultBookmarks;
     });
 
     // localStorage 동기화

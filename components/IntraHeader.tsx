@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { PortalIcon } from "@/components/icons/PortalIcon";
+import { getSetting, setSetting } from "@/lib/supabase/settings";
 import {
     Search, Bell, LogOut, ChevronDown, User, Users, Target, CalendarCheck,
     CreditCard, Wallet, Star, Plus, X, MessageSquareText, ListTodo, Stamp,
@@ -55,17 +56,22 @@ export function IntraHeader() {
     const [favoritesEditOpen, setFavoritesEditOpen] = useState(false);
     const [favorites, setFavorites] = useState(defaultFavorites);
 
-    // localStorage에서 즐겨찾기 로드
+    // 즐겨찾기 로드: localStorage 즉시 → DB 비동기
     useEffect(() => {
         try {
             const stored = localStorage.getItem(FAVORITES_KEY);
             if (stored) setFavorites(JSON.parse(stored));
         } catch { /* ignore */ }
+
+        getSetting<typeof defaultFavorites>('tenone', 'header_favorites', FAVORITES_KEY)
+            .then(result => { if (result && Array.isArray(result)) setFavorites(result); })
+            .catch(() => {});
     }, []);
 
     const saveFavorites = (newFavs: typeof defaultFavorites) => {
         setFavorites(newFavs);
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
+        setSetting('tenone', 'header_favorites', newFavs, FAVORITES_KEY).catch(() => {});
     };
 
     const toggleFavorite = (item: typeof availableBookmarks[0]) => {
