@@ -148,11 +148,16 @@ DROP POLICY IF EXISTS "mkt_performance_write" ON mkt_performance;
 CREATE POLICY "mkt_performance_write" ON mkt_performance FOR ALL USING (true);
 
 -- ── 시드 데이터: comm_events 샘플 ──────────────────────────
-INSERT INTO comm_events (title, event_date, event_time, event_type) VALUES
-    ('주간 팀 회의', CURRENT_DATE, '10:00', '회의'),
-    ('MADLeap 5기 정기 모임', CURRENT_DATE, '14:00', '행사'),
-    ('CJ ENM 콜라보 미팅', CURRENT_DATE + 1, '11:00', '미팅'),
-    ('콘텐츠 파이프라인 리뷰', CURRENT_DATE + 1, '15:00', '리뷰'),
-    ('월간 경영 보고', CURRENT_DATE + 3, '09:30', '회의'),
-    ('LUKI 2nd Single 컨셉 회의', CURRENT_DATE + 2, '14:00', '회의')
-ON CONFLICT DO NOTHING;
+-- tenant_id가 NOT NULL인 기존 스키마 대응
+INSERT INTO comm_events (tenant_id, title, event_date, event_time, event_type)
+SELECT b.id, v.title, v.event_date, v.event_time, v.event_type
+FROM (SELECT id FROM brands WHERE slug = 'tenone' LIMIT 1) b,
+(VALUES
+    ('주간 팀 회의', CURRENT_DATE, '10:00'::TIME, '회의'),
+    ('MADLeap 5기 정기 모임', CURRENT_DATE, '14:00'::TIME, '행사'),
+    ('CJ ENM 콜라보 미팅', CURRENT_DATE + 1, '11:00'::TIME, '미팅'),
+    ('콘텐츠 파이프라인 리뷰', CURRENT_DATE + 1, '15:00'::TIME, '리뷰'),
+    ('월간 경영 보고', CURRENT_DATE + 3, '09:30'::TIME, '회의'),
+    ('LUKI 2nd Single 컨셉 회의', CURRENT_DATE + 2, '14:00'::TIME, '회의')
+) AS v(title, event_date, event_time, event_type)
+WHERE NOT EXISTS (SELECT 1 FROM comm_events WHERE comm_events.title = v.title AND comm_events.event_date = v.event_date);
