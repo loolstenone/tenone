@@ -34,7 +34,6 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     const [showPw, setShowPw] = useState(false);
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [serverWaking, setServerWaking] = useState(false); // cold start 경고
     const verifyStarted = useRef(false);
 
     // 세션 검증 (마운트 시 1회)
@@ -50,20 +49,10 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 1) getUser — 8초 타임아웃 (cold start 고려, 5초는 부족할 수 있음)
-                // 3초 경과 시 cold start 경고 표시
-                const wakeTimer = setTimeout(() => setServerWaking(true), 3000);
-                const userResult = await Promise.race([
-                    sb.auth.getUser(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 8000)),
-                ]);
-                clearTimeout(wakeTimer);
-                setServerWaking(false);
-
-                const user =
-                    userResult && typeof userResult === "object" && "data" in userResult
-                        ? (userResult as { data: { user: any } }).data?.user
-                        : null;
+                // 1) getSession() — 쿠키/로컬스토리지에서 즉시 읽음 (네트워크 없음, cold start 무관)
+                // 미들웨어가 이미 getSession()으로 쿠키를 갱신해두므로 여기서는 빠름
+                const { data: sessionData } = await sb.auth.getSession();
+                const user = sessionData?.session?.user ?? null;
 
                 if (!user) {
                     console.log("[Intra] No session found, showing login");
@@ -204,11 +193,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     // ── 로딩 ──
     if (status === "loading") {
         return (
-            <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center gap-3">
+            <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
                 <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
-                {serverWaking && (
-                    <p className="text-xs text-neutral-500">서버 연결 중...</p>
-                )}
             </div>
         );
     }
@@ -243,15 +229,6 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                             <p className="text-xs text-red-400 text-center">
                                 접근 권한이 없습니다. 직원 계정으로 로그인하세요.
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Cold start 경고 */}
-                    {serverWaking && (
-                        <div className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                            <p className="text-xs text-yellow-400 text-center">
-                                서버 연결 중... 처음 접속 시 잠시 걸릴 수 있습니다.
                             </p>
                         </div>
                     )}
