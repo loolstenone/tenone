@@ -79,23 +79,26 @@ export default function CommPage() {
                 }
             }).catch(() => {/* keep mock */});
 
-        // 사내 일정 (Supabase comm_events)
+        // 사내 일정 (Supabase comm_events — Prod: start_at, end_at, description)
         supabase.from('comm_events').select('*')
-            .gte('event_date', new Date().toISOString().split('T')[0])
-            .order('event_date', { ascending: true })
-            .order('event_time', { ascending: true })
+            .gte('start_at', new Date().toISOString())
+            .order('start_at', { ascending: true })
             .limit(6)
             .then(({ data }: { data: any[] | null }) => {
                 if (data && data.length > 0) {
                     const today = new Date().toISOString().split('T')[0];
                     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-                    setEvents(data.map((e: any) => ({
-                        id: e.id,
-                        title: e.title,
-                        time: e.event_time?.slice(0, 5) || '',
-                        date: e.event_date === today ? '오늘' : e.event_date === tomorrow ? '내일' : e.event_date,
-                        type: e.event_type || '',
-                    })));
+                    setEvents(data.map((e: any) => {
+                        const start = new Date(e.start_at);
+                        const dateStr = start.toISOString().split('T')[0];
+                        return {
+                            id: e.id,
+                            title: e.title,
+                            time: start.toTimeString().slice(0, 5),
+                            date: dateStr === today ? '오늘' : dateStr === tomorrow ? '내일' : dateStr,
+                            type: e.description || '',
+                        };
+                    }));
                 }
             });
     }, []);

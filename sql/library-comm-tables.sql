@@ -83,33 +83,12 @@ DROP POLICY IF EXISTS "library_bookmarks_write" ON library_bookmarks;
 CREATE POLICY "library_bookmarks_write" ON library_bookmarks FOR ALL USING (true);
 
 -- ── comm_events (사내 일정) ────────────────────────────────
-CREATE TABLE IF NOT EXISTS comm_events (
-    id SERIAL PRIMARY KEY,
-    title TEXT NOT NULL,
-    event_date DATE NOT NULL,
-    event_time TIME,
-    event_type TEXT DEFAULT '',            -- '회의', '행사', '미팅', '리뷰' 등
-    description TEXT,
-    location TEXT,
-    brand_id TEXT DEFAULT 'tenone',
-    created_by TEXT,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
-);
+-- Prod 스키마: id(uuid), tenant_id(uuid NOT NULL), title(text NOT NULL),
+--   description, start_at(timestamptz NOT NULL), end_at, all_day(bool),
+--   location, color, attendees(array), recurrence, reminder(int)
+-- 테이블 이미 존재 → CREATE 스킵, RLS만 적용
 
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_date DATE;
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_time TIME;
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_type TEXT DEFAULT '';
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS description TEXT;
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS location TEXT;
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS created_by TEXT;
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
-ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
-
-CREATE INDEX IF NOT EXISTS idx_comm_events_date ON comm_events(event_date);
-CREATE INDEX IF NOT EXISTS idx_comm_events_brand ON comm_events(brand_id);
+CREATE INDEX IF NOT EXISTS idx_comm_events_start ON comm_events(start_at);
 
 ALTER TABLE comm_events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "comm_events_read" ON comm_events;
@@ -148,16 +127,15 @@ DROP POLICY IF EXISTS "mkt_performance_write" ON mkt_performance;
 CREATE POLICY "mkt_performance_write" ON mkt_performance FOR ALL USING (true);
 
 -- ── 시드 데이터: comm_events 샘플 ──────────────────────────
--- tenant_id가 NOT NULL인 기존 스키마 대응
-INSERT INTO comm_events (tenant_id, title, event_date, event_time, event_type)
-SELECT t.id, v.title, v.event_date, v.event_time, v.event_type
+INSERT INTO comm_events (tenant_id, title, start_at, end_at, description)
+SELECT t.id, v.title, v.start_at, v.end_at, v.description
 FROM (SELECT id FROM wio_tenants WHERE slug = 'tenone' LIMIT 1) t,
 (VALUES
-    ('주간 팀 회의', CURRENT_DATE, '10:00'::TIME, '회의'),
-    ('MADLeap 5기 정기 모임', CURRENT_DATE, '14:00'::TIME, '행사'),
-    ('CJ ENM 콜라보 미팅', CURRENT_DATE + 1, '11:00'::TIME, '미팅'),
-    ('콘텐츠 파이프라인 리뷰', CURRENT_DATE + 1, '15:00'::TIME, '리뷰'),
-    ('월간 경영 보고', CURRENT_DATE + 3, '09:30'::TIME, '회의'),
-    ('LUKI 2nd Single 컨셉 회의', CURRENT_DATE + 2, '14:00'::TIME, '회의')
-) AS v(title, event_date, event_time, event_type)
-WHERE NOT EXISTS (SELECT 1 FROM comm_events WHERE comm_events.title = v.title AND comm_events.event_date = v.event_date);
+    ('주간 팀 회의',              (CURRENT_DATE + '10:00'::TIME)::TIMESTAMPTZ, (CURRENT_DATE + '11:00'::TIME)::TIMESTAMPTZ, '회의'),
+    ('MADLeap 5기 정기 모임',     (CURRENT_DATE + '14:00'::TIME)::TIMESTAMPTZ, (CURRENT_DATE + '16:00'::TIME)::TIMESTAMPTZ, '행사'),
+    ('CJ ENM 콜라보 미팅',       ((CURRENT_DATE + 1) + '11:00'::TIME)::TIMESTAMPTZ, ((CURRENT_DATE + 1) + '12:00'::TIME)::TIMESTAMPTZ, '미팅'),
+    ('콘텐츠 파이프라인 리뷰',    ((CURRENT_DATE + 1) + '15:00'::TIME)::TIMESTAMPTZ, ((CURRENT_DATE + 1) + '16:00'::TIME)::TIMESTAMPTZ, '리뷰'),
+    ('월간 경영 보고',            ((CURRENT_DATE + 3) + '09:30'::TIME)::TIMESTAMPTZ, ((CURRENT_DATE + 3) + '11:00'::TIME)::TIMESTAMPTZ, '회의'),
+    ('LUKI 2nd Single 컨셉 회의', ((CURRENT_DATE + 2) + '14:00'::TIME)::TIMESTAMPTZ, ((CURRENT_DATE + 2) + '15:30'::TIME)::TIMESTAMPTZ, '회의')
+) AS v(title, start_at, end_at, description)
+WHERE NOT EXISTS (SELECT 1 FROM comm_events WHERE comm_events.title = v.title AND comm_events.start_at = v.start_at);
