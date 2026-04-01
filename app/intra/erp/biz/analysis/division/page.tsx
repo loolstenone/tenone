@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -19,14 +20,46 @@ interface DivisionData {
   perCapita: number;
 }
 
-const divisions: DivisionData[] = [
+const mockDivisions: DivisionData[] = [
   { name: "관리부문", billing: 20_000_000, grossProfit: 6_000_000, operatingProfit: 2_500_000, profitRate: 12.5, prevProfitRate: 11.8, headcount: 5, perCapita: 4_000_000 },
   { name: "사업부문", billing: 58_000_000, grossProfit: 17_000_000, operatingProfit: 8_000_000, profitRate: 13.8, prevProfitRate: 14.2, headcount: 16, perCapita: 3_625_000 },
   { name: "제작부문", billing: 17_000_000, grossProfit: 6_000_000, operatingProfit: 2_500_000, profitRate: 14.7, prevProfitRate: 14.7, headcount: 14, perCapita: 1_214_286 },
   { name: "지원부문", billing: 10_000_000, grossProfit: 3_000_000, operatingProfit: 2_000_000, profitRate: 20.0, prevProfitRate: 18.5, headcount: 10, perCapita: 1_000_000 },
 ];
 
-const maxBilling = Math.max(...divisions.map((d) => d.billing));
+function buildDivisionData(rows: Record<string, unknown>[]): DivisionData[] {
+  // Group by division, accumulate two most-recent quarters for prev/current comparison
+  const quarterMap: Record<string, Record<string, unknown>[]> = {};
+  rows.forEach(r => {
+    const div = (r.division as string) || "기타";
+    if (!quarterMap[div]) quarterMap[div] = [];
+    quarterMap[div].push(r);
+  });
+  return Object.entries(quarterMap).map(([name, qRows]) => {
+    // Sort by quarter desc — first is current, second is previous
+    qRows.sort((a, b) => ((b.quarter as string) || "").localeCompare((a.quarter as string) || ""));
+    const cur = qRows[0];
+    const prev = qRows[1];
+    const billing = (cur.billing as number) || 0;
+    const gp = (cur.gross_profit as number) || 0;
+    const op = (cur.operating_profit as number) || 0;
+    const headcount = (cur.headcount as number) || 0;
+    const profitRate = billing > 0 ? Math.round((op / billing) * 1000) / 10 : 0;
+    const prevBilling = prev ? ((prev.billing as number) || 0) : billing;
+    const prevOp = prev ? ((prev.operating_profit as number) || 0) : op;
+    const prevProfitRate = prevBilling > 0 ? Math.round((prevOp / prevBilling) * 1000) / 10 : profitRate;
+    return {
+      name,
+      billing,
+      grossProfit: gp,
+      operatingProfit: op,
+      profitRate,
+      prevProfitRate,
+      headcount,
+      perCapita: headcount > 0 ? Math.round(billing / headcount) : 0,
+    };
+  });
+}
 
 function TrendIcon({ current, prev }: { current: number; prev: number }) {
   if (current > prev) return <TrendingUp size={12} className="text-green-600" />;
@@ -44,12 +77,29 @@ function TrendLabel({ current, prev }: { current: number; prev: number }) {
 export default function DivisionProfitPage() {
   const { user } = useAuth();
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
+  const [divisions, setDivisions] = useState<DivisionData[]>(mockDivisions);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    erpDb.fetchBizPlans().then((rows) => {
+      if (!cancelled && rows.length > 0) {
+        const built = buildDivisionData(rows as Record<string, unknown>[]);
+        if (built.length > 0) setDivisions(built);
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const maxBilling = Math.max(...divisions.map((d) => d.billing));
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
         <h1 className="text-xl font-bold text-neutral-900">부문별 이익률</h1>
-        <p className="text-sm text-neutral-500">2026년 2월 기준</p>
+        <p className="text-sm text-neutral-500">부문별 수익성 분석</p>
       </div>
 
       {/* Division Cards */}

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { DollarSign, TrendingUp, Target, Percent } from "lucide-react";
+import { useState, useEffect } from "react";
+import { DollarSign, TrendingUp, Target, Percent, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
+import * as projectsDb from "@/lib/supabase/projects";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -19,7 +21,7 @@ interface MonthlyPL {
   isActual: boolean;
 }
 
-const monthlyData: MonthlyPL[] = [
+const mockMonthlyData: MonthlyPL[] = [
   { month: "1월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: true },
   { month: "2월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: true },
   { month: "3월", billing: 35_000_000, exCost: 23_000_000, grossProfit: 12_000_000, inCost: 7_000_000, operatingProfit: 5_000_000, profitRate: 14.3, isActual: false },
@@ -34,22 +36,43 @@ const monthlyData: MonthlyPL[] = [
   { month: "12월", billing: 40_000_000, exCost: 26_000_000, grossProfit: 14_000_000, inCost: 7_500_000, operatingProfit: 6_500_000, profitRate: 16.3, isActual: false },
 ];
 
-const ytdActual = monthlyData.filter((m) => m.isActual);
-const ytdBilling = ytdActual.reduce((s, m) => s + m.billing, 0);
-const ytdGross = ytdActual.reduce((s, m) => s + m.grossProfit, 0);
-const ytdOp = ytdActual.reduce((s, m) => s + m.operatingProfit, 0);
-const ytdRate = ((ytdOp / ytdBilling) * 100).toFixed(1);
+interface YtdSummary { billing: number; grossProfit: number; operatingProfit: number; }
+
+const mockYtd: YtdSummary = (() => {
+  const actual = mockMonthlyData.filter(m => m.isActual);
+  return { billing: actual.reduce((s, m) => s + m.billing, 0), grossProfit: actual.reduce((s, m) => s + m.grossProfit, 0), operatingProfit: actual.reduce((s, m) => s + m.operatingProfit, 0) };
+})();
 
 export default function PLDashboardPage() {
   const { user } = useAuth();
   const [showYoY, setShowYoY] = useState(false);
+  const [ytd, setYtd] = useState<YtdSummary>(mockYtd);
+  const [monthlyData] = useState<MonthlyPL[]>(mockMonthlyData);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    projectsDb.fetchProjects({ limit: 200 }).then(({ projects: rows }) => {
+      if (!cancelled && rows.length > 0) {
+        const totalBilling = rows.reduce((s: number, r: Record<string, unknown>) => s + ((r.billing as number) || 0), 0);
+        const totalRevenue = rows.reduce((s: number, r: Record<string, unknown>) => s + ((r.revenue as number) || 0), 0);
+        const totalProfit = rows.reduce((s: number, r: Record<string, unknown>) => s + ((r.profit as number) || 0), 0);
+        if (totalBilling > 0) setYtd({ billing: totalBilling, grossProfit: totalBilling - totalRevenue, operatingProfit: totalProfit });
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const ytdRate = ytd.billing > 0 ? ((ytd.operatingProfit / ytd.billing) * 100).toFixed(1) : "0.0";
 
   const summaryCards = [
-    { label: "YTD 매출", value: krw(ytdBilling), icon: DollarSign },
-    { label: "YTD 매총", value: krw(ytdGross), icon: TrendingUp },
-    { label: "YTD 영업이익", value: krw(ytdOp), icon: Target },
+    { label: "YTD 매출", value: krw(ytd.billing), icon: DollarSign },
+    { label: "YTD 매총", value: krw(ytd.grossProfit), icon: TrendingUp },
+    { label: "YTD 영업이익", value: krw(ytd.operatingProfit), icon: Target },
     { label: "이익률", value: `${ytdRate}%`, icon: Percent },
   ];
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-6xl">
