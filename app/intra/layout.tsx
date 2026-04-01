@@ -176,18 +176,16 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         [email, password],
     );
 
-    // 로그아웃 핸들러 (IntraHeader/IntraSidebar에서 auth-context logout 사용 시
-    // sessionStorage도 같이 클리어되도록 storage 이벤트 감지)
+    // 실제 Supabase SIGNED_OUT 이벤트만 감지 (auth-context localStorage 의존 제거)
     useEffect(() => {
-        const handleStorage = (e: StorageEvent) => {
-            // auth-context가 localStorage에서 유저 정보를 삭제하면 → 로그인 폼으로
-            if (e.key === "tenone_auth_user" && !e.newValue) {
+        const sb = createClient();
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string) => {
+            if (event === 'SIGNED_OUT') {
                 sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                 setStatus("login");
             }
-        };
-        window.addEventListener("storage", handleStorage);
-        return () => window.removeEventListener("storage", handleStorage);
+        });
+        return () => subscription.unsubscribe();
     }, []);
 
     // ── 로딩 ──
