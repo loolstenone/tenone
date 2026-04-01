@@ -31,6 +31,9 @@ CREATE INDEX IF NOT EXISTS idx_partners_active   ON partners(is_active);
 CREATE INDEX IF NOT EXISTS idx_partners_brand    ON partners(brand_id);
 CREATE INDEX IF NOT EXISTS idx_partners_skills   ON partners USING gin(skills);
 
+-- 기존 테이블에 누락 컬럼 추가
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+
 -- RLS
 ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
 
