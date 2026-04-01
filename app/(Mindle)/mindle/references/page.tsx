@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { ExternalLink, Star, Bookmark, Globe, Newspaper, Radio, Pen } from "lucide-react";
 
-const categories = ["All", "Newsletter", "Media", "Tool", "Community", "Research"];
+const categories = ["전체", "뉴스레터", "미디어", "도구", "커뮤니티", "리서치"];
+const categoryMap: Record<string, string> = {
+    "전체": "All",
+    "뉴스레터": "Newsletter",
+    "미디어": "Media",
+    "도구": "Tool",
+    "커뮤니티": "Community",
+    "리서치": "Research",
+};
 
 const references = [
     { id: "r1", name: "TrendHunter", url: "trendhunter.com", desc: "World's largest trend platform. AI-powered innovation and consumer insights.", category: "Media", featured: true, tags: ["AI", "Innovation"] },
@@ -29,9 +37,9 @@ const catIcons: Record<string, React.ElementType> = {
 };
 
 export default function MindleReferencesPage() {
-    const [selectedCat, setSelectedCat] = useState("All");
+    const [selectedCat, setSelectedCat] = useState("전체");
 
-    const filtered = selectedCat === "All" ? references : references.filter(r => r.category === selectedCat);
+    const filtered = selectedCat === "전체" ? references : references.filter(r => r.category === categoryMap[selectedCat]);
     const featuredRefs = references.filter(r => r.featured);
 
     return (
@@ -39,13 +47,13 @@ export default function MindleReferencesPage() {
             <div className="mx-auto max-w-5xl px-6">
                 {/* Header */}
                 <section className="py-8 border-b border-neutral-800/50">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">References</h1>
-                    <p className="text-neutral-500 text-sm">Curated sources we track and recommend for trend intelligence.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">레퍼런스</h1>
+                    <p className="text-neutral-500 text-sm">트렌드 인텔리전스를 위해 추적하고 추천하는 엄선된 소스.</p>
                 </section>
 
                 {/* Featured */}
                 <section className="py-6 border-b border-neutral-800/30">
-                    <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">EDITOR&apos;S PICKS</h2>
+                    <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">에디터 픽</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {featuredRefs.map(r => (
                             <a key={r.id} href={`https://${r.url}`} target="_blank" rel="noopener noreferrer"
@@ -91,7 +99,7 @@ export default function MindleReferencesPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className="text-white font-bold text-sm group-hover:text-[#F5C518] transition-colors">{r.name}</span>
-                                            <span className="text-[10px] text-neutral-700">{r.category.toUpperCase()}</span>
+                                            <span className="text-[10px] text-neutral-700">{Object.entries(categoryMap).find(([,v])=>v===r.category)?.[0] || r.category}</span>
                                             {r.featured && <Star className="w-2.5 h-2.5 text-[#F5C518]" />}
                                         </div>
                                         <p className="text-neutral-500 text-[12px] leading-relaxed mb-1.5 line-clamp-1">{r.desc}</p>

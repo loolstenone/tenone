@@ -49,7 +49,7 @@ export default function MindleMyPage() {
                         <User className="w-7 h-7 text-[#F5C518]" />
                     </div>
                     <div>
-                        <h1 className="text-white text-xl font-bold">{user?.name || "User"}</h1>
+                        <h1 className="text-white text-xl font-bold">{user?.name || "사용자"}</h1>
                         <p className="text-neutral-400 text-sm">{user?.email}</p>
                     </div>
                 </div>

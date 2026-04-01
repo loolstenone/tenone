@@ -6,12 +6,12 @@ import { Clock, Eye, Search, LayoutGrid, List, ArrowUpRight } from "lucide-react
 import { featured, trends, categories, statusBadge } from "@/lib/mindle/trend-data";
 
 export default function MindleTrendsPage() {
-    const [selectedCat, setSelectedCat] = useState("All");
+    const [selectedCat, setSelectedCat] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
     const filtered = trends.filter(t => {
-        const matchCat = selectedCat === "All" || t.category === selectedCat;
+        const matchCat = selectedCat === "전체" || t.category === selectedCat;
         const matchSearch = !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });
@@ -25,7 +25,7 @@ export default function MindleTrendsPage() {
                         <div className="lg:col-span-3 h-56 sm:h-72 rounded-xl bg-gradient-to-br from-neutral-800/40 to-neutral-900 flex items-center justify-center">
                             <div className="text-center text-neutral-700">
                                 <div className="text-4xl mb-1">📊</div>
-                                <span className="text-xs">Featured</span>
+                                <span className="text-xs">주요 트렌드</span>
                             </div>
                         </div>
                         <div className="lg:col-span-2 flex flex-col justify-center">
@@ -66,7 +66,7 @@ export default function MindleTrendsPage() {
                     <div className="flex items-center gap-2">
                         <div className="relative">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-600" />
-                            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            <input type="text" placeholder="검색..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-8 pr-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded text-[12px] text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 w-40" />
                         </div>
                         <div className="flex border border-neutral-800 rounded overflow-hidden">
@@ -129,7 +129,7 @@ export default function MindleTrendsPage() {
                                             <div className="flex items-center gap-2 text-[10px] text-neutral-600">
                                                 <span>{t.date}</span>
                                                 <span>{t.readTime}</span>
-                                                <span>{t.views.toLocaleString()} views</span>
+                                                <span>{t.views.toLocaleString()} 조회</span>
                                             </div>
                                         </div>
                                     </article>
@@ -140,7 +140,7 @@ export default function MindleTrendsPage() {
 
                     {filtered.length === 0 && (
                         <div className="text-center py-16 text-neutral-600">
-                            <p className="text-sm">No trends match your filter.</p>
+                            <p className="text-sm">검색 결과가 없습니다.</p>
                         </div>
                     )}
                 </section>

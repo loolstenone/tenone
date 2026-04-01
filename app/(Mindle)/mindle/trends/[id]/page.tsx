@@ -14,8 +14,8 @@ export default function TrendDetailPage() {
         return (
             <div className="bg-[#0A0A0A] min-h-[60vh] flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-neutral-400 mb-4">Article not found</p>
-                    <Link href="/mindle/trends" className="text-[#F5C518] text-sm hover:underline">Back to Trends</Link>
+                    <p className="text-neutral-400 mb-4">아티클을 찾을 수 없습니다</p>
+                    <Link href="/mindle/trends" className="text-[#F5C518] text-sm hover:underline">트렌드로 돌아가기</Link>
                 </div>
             </div>
         );
@@ -30,7 +30,7 @@ export default function TrendDetailPage() {
                 {/* Back */}
                 <button onClick={() => router.back()}
                     className="flex items-center gap-1.5 text-neutral-500 text-sm mb-8 hover:text-white transition-colors">
-                    <ArrowLeft className="w-4 h-4" /> Trends
+                    <ArrowLeft className="w-4 h-4" /> 트렌드
                 </button>
 
                 {/* Header */}
@@ -51,10 +51,10 @@ export default function TrendDetailPage() {
                             <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{article.views.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button className="p-2 rounded-lg border border-neutral-800 text-neutral-500 hover:text-[#F5C518] hover:border-[#F5C518]/30 transition-colors" title="Bookmark">
+                            <button className="p-2 rounded-lg border border-neutral-800 text-neutral-500 hover:text-[#F5C518] hover:border-[#F5C518]/30 transition-colors" title="저장">
                                 <Bookmark className="w-4 h-4" />
                             </button>
-                            <button className="p-2 rounded-lg border border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-600 transition-colors" title="Share">
+                            <button className="p-2 rounded-lg border border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-600 transition-colors" title="공유">
                                 <Share2 className="w-4 h-4" />
                             </button>
                         </div>
@@ -64,7 +64,7 @@ export default function TrendDetailPage() {
                 {/* Tags */}
                 <div className="flex items-center gap-2 mb-6 flex-wrap">
                     <Tag className="w-3 h-3 text-neutral-600" />
-                    {[article.category, ...(article.status === 'trending' ? ['Hot Topic'] : []), 'Mindle Pick'].map(tag => (
+                    {[article.category, ...(article.status === 'trending' ? ['핫토픽'] : []), 'Mindle 픽'].map(tag => (
                         <span key={tag} className="text-[10px] px-2.5 py-1 bg-neutral-900 border border-neutral-800 rounded-full text-neutral-400 hover:border-[#F5C518]/30 hover:text-[#F5C518] transition-colors cursor-pointer">
                             #{tag}
                         </span>
@@ -105,10 +105,10 @@ export default function TrendDetailPage() {
                         </button>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="p-2 text-neutral-500 hover:text-[#F5C518] transition-colors" title="Bookmark">
+                        <button className="p-2 text-neutral-500 hover:text-[#F5C518] transition-colors" title="저장">
                             <Bookmark className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-neutral-500 hover:text-white transition-colors" title="Share">
+                        <button className="p-2 text-neutral-500 hover:text-white transition-colors" title="공유">
                             <Share2 className="w-4 h-4" />
                         </button>
                     </div>
@@ -117,7 +117,7 @@ export default function TrendDetailPage() {
                 {/* Related */}
                 {related.length > 0 && (
                     <section className="border-t border-neutral-800/50 pt-8">
-                        <h3 className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-5">Related Trends</h3>
+                        <h3 className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-5">관련 트렌드</h3>
                         <div className="space-y-4">
                             {related.map(r => (
                                 <Link key={r.id} href={`/mindle/trends/${r.id}`}

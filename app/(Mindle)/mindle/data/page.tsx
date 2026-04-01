@@ -56,8 +56,8 @@ export default function MindleDataPage() {
                 <section className="py-8 border-b border-neutral-800/50">
                     <div className="flex items-start justify-between">
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Data</h1>
-                            <p className="text-neutral-500 text-sm">Real-time keyword tracking across multiple platforms.</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">데이터</h1>
+                            <p className="text-neutral-500 text-sm">멀티 플랫폼 실시간 키워드 트래킹.</p>
                         </div>
                         <div className="flex border border-neutral-800 rounded-lg overflow-hidden">
                             {periods.map(p => (
@@ -73,19 +73,19 @@ export default function MindleDataPage() {
                 {/* Stats Cards */}
                 <section className="py-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-neutral-800/30">
                     <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4">
-                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">KEYWORDS TRACKED</div>
+                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">추적 키워드</div>
                         <div className="text-2xl font-bold text-white">{keywords.length}</div>
                     </div>
                     <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4">
-                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">TOTAL MENTIONS</div>
+                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">총 언급량</div>
                         <div className="text-2xl font-bold text-white">{totalCollected.toLocaleString()}</div>
                     </div>
                     <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4">
-                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">TRENDING</div>
+                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">급상승</div>
                         <div className="text-2xl font-bold text-[#F5C518]">{keywords.filter(k => k.status === "trending").length}</div>
                     </div>
                     <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4">
-                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">PLATFORMS</div>
+                        <div className="text-[10px] text-neutral-500 font-semibold tracking-wider mb-1">플랫폼</div>
                         <div className="text-2xl font-bold text-white">{platforms.length}</div>
                     </div>
                 </section>
@@ -93,16 +93,16 @@ export default function MindleDataPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 py-6">
                     {/* Keyword Table — Left 2/3 */}
                     <div className="lg:col-span-2">
-                        <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">KEYWORD RANKING — {period}</h2>
+                        <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">키워드 랭킹 — {period}</h2>
                         <div className="border border-neutral-800/50 rounded-xl overflow-hidden">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-neutral-800/50 text-[10px] text-neutral-600 font-semibold tracking-wider">
                                         <th className="text-left py-2.5 px-4 w-10">#</th>
-                                        <th className="text-left py-2.5 px-2">KEYWORD</th>
-                                        <th className="text-left py-2.5 px-2 hidden sm:table-cell">CATEGORY</th>
-                                        <th className="text-right py-2.5 px-2">VOLUME</th>
-                                        <th className="text-right py-2.5 px-4">CHANGE</th>
+                                        <th className="text-left py-2.5 px-2">키워드</th>
+                                        <th className="text-left py-2.5 px-2 hidden sm:table-cell">카테고리</th>
+                                        <th className="text-right py-2.5 px-2">언급량</th>
+                                        <th className="text-right py-2.5 px-4">변화율</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -134,7 +134,7 @@ export default function MindleDataPage() {
                     <div className="space-y-6">
                         {/* Collection Sources */}
                         <div>
-                            <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">COLLECTION SOURCES</h2>
+                            <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">수집 소스</h2>
                             <div className="space-y-3">
                                 {platforms.map((p) => {
                                     const Icon = p.icon;
@@ -159,7 +159,7 @@ export default function MindleDataPage() {
 
                         {/* Hot Movers */}
                         <div>
-                            <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">BIGGEST MOVERS</h2>
+                            <h2 className="text-xs font-bold text-neutral-500 tracking-wider mb-4">급등 키워드</h2>
                             <div className="space-y-2">
                                 {keywords.filter(k => k.change > 50).sort((a, b) => b.change - a.change).slice(0, 5).map(kw => (
                                     <div key={kw.keyword} className="flex items-center justify-between py-2 px-3 bg-neutral-900/30 rounded-lg border border-neutral-800/30">
