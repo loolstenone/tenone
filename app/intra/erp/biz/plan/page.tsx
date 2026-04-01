@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Target, TrendingUp, DollarSign, Percent, FileEdit } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Target, TrendingUp, DollarSign, Percent, FileEdit, Loader2 } from "lucide-react";
 import clsx from "clsx";
-import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -17,29 +17,71 @@ interface QuarterRow {
   operatingProfit: number;
 }
 
-const quarterData: QuarterRow[] = [
+const mockData: QuarterRow[] = [
   { quarter: "Q1", billing: 120_000_000, exCost: 78_000_000, grossProfit: 42_000_000, inCost: 22_000_000, operatingProfit: 20_000_000 },
   { quarter: "Q2", billing: 130_000_000, exCost: 84_000_000, grossProfit: 46_000_000, inCost: 24_000_000, operatingProfit: 22_000_000 },
   { quarter: "Q3", billing: 125_000_000, exCost: 81_000_000, grossProfit: 44_000_000, inCost: 23_000_000, operatingProfit: 21_000_000 },
   { quarter: "Q4", billing: 125_000_000, exCost: 82_000_000, grossProfit: 43_000_000, inCost: 22_000_000, operatingProfit: 21_000_000 },
 ];
 
-const totalRow = quarterData.reduce(
-  (acc, r) => ({
-    billing: acc.billing + r.billing,
-    exCost: acc.exCost + r.exCost,
-    grossProfit: acc.grossProfit + r.grossProfit,
-    inCost: acc.inCost + r.inCost,
-    operatingProfit: acc.operatingProfit + r.operatingProfit,
-  }),
-  { billing: 0, exCost: 0, grossProfit: 0, inCost: 0, operatingProfit: 0 }
-);
+function dbRowsToQuarters(rows: Record<string, unknown>[]): QuarterRow[] {
+  const map: Record<string, QuarterRow> = {};
+  rows.forEach(r => {
+    const q = (r.quarter as string) || "";
+    if (!map[q]) map[q] = { quarter: q, billing: 0, exCost: 0, grossProfit: 0, inCost: 0, operatingProfit: 0 };
+    map[q].billing += (r.billing as number) || 0;
+    map[q].exCost += (r.ex_cost as number) || 0;
+    map[q].grossProfit += (r.gross_profit as number) || 0;
+    map[q].inCost += (r.in_cost as number) || 0;
+    map[q].operatingProfit += (r.operating_profit as number) || 0;
+  });
+  return ["Q1", "Q2", "Q3", "Q4"].map(q => map[q] || { quarter: q, billing: 0, exCost: 0, grossProfit: 0, inCost: 0, operatingProfit: 0 });
+}
 
 export default function AnnualPlanPage() {
-  const { user } = useAuth();
+  const [quarterData, setQuarterData] = useState<QuarterRow[]>(mockData);
+  const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"확정" | "수립중">("확정");
 
-  const profitRate = ((totalRow.operatingProfit / totalRow.billing) * 100).toFixed(1);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await erpDb.fetchBizPlans();
+        if (!cancelled && rows.length > 0) {
+          setQuarterData(dbRowsToQuarters(rows as Record<string, unknown>[]));
+        }
+      } catch {
+        // mock 유지
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+      </div>
+    );
+  }
+
+  const totalRow = quarterData.reduce(
+    (acc, r) => ({
+      billing: acc.billing + r.billing,
+      exCost: acc.exCost + r.exCost,
+      grossProfit: acc.grossProfit + r.grossProfit,
+      inCost: acc.inCost + r.inCost,
+      operatingProfit: acc.operatingProfit + r.operatingProfit,
+    }),
+    { billing: 0, exCost: 0, grossProfit: 0, inCost: 0, operatingProfit: 0 }
+  );
+
+  const profitRate = totalRow.billing > 0
+    ? ((totalRow.operatingProfit / totalRow.billing) * 100).toFixed(1)
+    : "0.0";
 
   const summaryCards = [
     { label: "목표 매출 (Billing)", value: krw(totalRow.billing), icon: DollarSign },
@@ -55,17 +97,11 @@ export default function AnnualPlanPage() {
           <h1 className="text-xl font-bold text-neutral-900">연간 경영계획</h1>
           <p className="text-sm text-neutral-500">2026년도 경영계획</p>
         </div>
-        <span
-          className={clsx(
-            "rounded-full px-3 py-1 text-xs font-medium",
-            status === "확정" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-          )}
-        >
+        <span className={clsx("rounded-full px-3 py-1 text-xs font-medium", status === "확정" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700")}>
           {status}
         </span>
       </div>
 
-      {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {summaryCards.map((c) => (
           <div key={c.label} className="border border-neutral-200 bg-white p-4">
@@ -78,7 +114,6 @@ export default function AnnualPlanPage() {
         ))}
       </div>
 
-      {/* Quarterly Table */}
       <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead>

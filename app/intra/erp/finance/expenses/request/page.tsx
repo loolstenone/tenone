@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { FileText, Plus, Clock, Check, X as XIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Plus, Loader2 } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
+import { useAuth } from "@/lib/auth-context";
 
 interface ExpenseRequest {
     id: string;
@@ -29,7 +31,58 @@ const statusColor: Record<string, string> = {
 
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
+function dbRowToRequest(r: Record<string, unknown>): ExpenseRequest {
+    const statusMap: Record<string, ExpenseRequest["status"]> = {
+        pending: "결재대기",
+        approved: "결재완료",
+        rejected: "반려",
+        draft: "임시저장",
+    };
+    return {
+        id: r.id as string,
+        title: (r.title as string) || "-",
+        date: ((r.expense_date as string) || (r.created_at as string) || "").slice(0, 10),
+        totalAmount: (r.amount as number) || 0,
+        items: 1,
+        purpose: (r.description as string) || "-",
+        status: statusMap[(r.status as string) || "pending"] || "결재대기",
+        approver: "-",
+    };
+}
+
 export default function ExpenseRequestPage() {
+    const { user } = useAuth();
+    const [requests, setRequests] = useState<ExpenseRequest[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const dbExpenses = await erpDb.fetchExpenses({ memberId: user?.id, limit: 50 });
+                if (!cancelled) {
+                    setRequests(dbExpenses.length > 0
+                        ? dbExpenses.map(e => dbRowToRequest(e as Record<string, unknown>))
+                        : mockRequests
+                    );
+                }
+            } catch {
+                if (!cancelled) setRequests(mockRequests);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user?.id]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
@@ -42,8 +95,14 @@ export default function ExpenseRequestPage() {
                 </button>
             </div>
 
+            {requests.length === 0 && (
+                <div className="border border-neutral-200 bg-white p-12 text-center text-sm text-neutral-400">
+                    등록된 경비 품의서가 없습니다
+                </div>
+            )}
+
             <div className="space-y-3">
-                {mockRequests.map(r => (
+                {requests.map(r => (
                     <div key={r.id} className="border border-neutral-200 bg-white p-5 hover:border-neutral-300 transition-colors cursor-pointer group">
                         <div className="flex items-start justify-between">
                             <div>
