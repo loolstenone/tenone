@@ -10,8 +10,19 @@
 - biz/analysis/page → fetchProjects() — YTD 실적 요약 카드 (매출/매총/영업이익) ✅
 - project/management/jobs → fetchAllJobs() 신규 추가, Job 목록 실DB 연동 ✅
 - erp/project/rates → fetchPayrollWithMembers() 신규 추가, 실제단가 탭 실DB 연동 ✅
+- opportunity/page → fetchTenOneOpportunities() 연결 (wio_opportunities 테이블) ✅
+- erp/hr/certificates → approvals 테이블(type=certificate) 발급 이력 연동 ✅
+- myverse/todo → wio_todos 테이블 연동 (fetchTenOneMembership + fetchTodos) ✅
+- lib/supabase/wio.ts: fetchTenOneOpportunities(), fetchTenOneMembership() 추가 ✅
 - lib/supabase/projects.ts: fetchAllJobs() 추가 ✅
 - lib/supabase/erp.ts: fetchPayrollWithMembers() 추가 ✅
+
+### 인트라 DB 현실화 완료 현황 (전체)
+연결 완료: approval progress/completed, expenses, biz plan, finance reports, card/billing/payment/incentive,
+project management/detail/jobs, timesheet, gpr, payroll, attendance, myverse/approval/expenses/gpr/points/projects/payroll/todo,
+biz analysis(division/cost/손익), comm(notice/free/calendar), opportunity, certificates, rates
+미연결(DB 테이블 없음): biz/manage/actual/gap, talent/clubs/delegation/family/education, org chart,
+partner-pool, vendors, bidding, hero/*, wiki/*, studio/*, settings/*
 
 ---
 

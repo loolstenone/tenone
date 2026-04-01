@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-01 (오후 — 사무실 3차)
+
+### 인트라 추가 DB 현실화 (3개 페이지 + 2개 함수)
+
+**수정 파일:**
+- `app/intra/opportunity/page.tsx` — fetchTenOneOpportunities() → 영업 기회 파이프라인 DB 연결
+- `app/intra/erp/hr/certificates/page.tsx` — approvals(type=certificate) → 제증명서 발급 이력 DB 연결
+- `app/intra/myverse/todo/page.tsx` — fetchTenOneMembership() + fetchTodos() → wio_todos DB 연결
+- `lib/supabase/wio.ts` — fetchTenOneOpportunities(), fetchTenOneMembership() 신규 추가
+
+**커밋:**
+- `a097536` feat: Opportunity + 제증명서 페이지 DB 연결
+- `8e044bb` feat: myverse/todo — wio_todos DB 연결 + fetchTenOneMembership() 추가
+
+---
+
 ## 2026-04-01 (오후 — 사무실 2차)
 
 ### 인트라 추가 DB 현실화 (5개 페이지 + 2개 함수)
