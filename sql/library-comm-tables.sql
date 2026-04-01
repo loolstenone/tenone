@@ -52,6 +52,10 @@ CREATE TABLE IF NOT EXISTS library_bookmarks (
     UNIQUE(user_id, item_id)
 );
 
+ALTER TABLE library_bookmarks ADD COLUMN IF NOT EXISTS user_id TEXT NOT NULL DEFAULT '';
+ALTER TABLE library_bookmarks ADD COLUMN IF NOT EXISTS item_id TEXT NOT NULL DEFAULT '';
+ALTER TABLE library_bookmarks ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'cms';
+
 CREATE INDEX IF NOT EXISTS idx_library_bookmarks_user ON library_bookmarks(user_id);
 CREATE INDEX IF NOT EXISTS idx_library_bookmarks_item ON library_bookmarks(item_id);
 
