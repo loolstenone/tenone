@@ -38,7 +38,8 @@ function SmarCommLoginForm() {
 
     const handleSocialLogin = async (provider: 'google' | 'kakao') => {
         const sb = createClient();
-        const pendingRedirect = searchParams.get('redirect') || '/dashboard';
+        const rawPending = searchParams.get('redirect') || '/dashboard';
+        const pendingRedirect = rawPending === '/workspace' ? '/dashboard' : rawPending;
         if (pendingRedirect !== '/') {
             document.cookie = `auth_redirect=${encodeURIComponent(pendingRedirect)};path=/;max-age=300;SameSite=Lax`;
         }
@@ -52,7 +53,9 @@ function SmarCommLoginForm() {
     };
     const handleGoogle = () => handleSocialLogin('google');
     const handleKakao = () => handleSocialLogin('kakao');
-    const redirectTo = searchParams.get('redirect') || '/';
+    const rawRedirect = searchParams.get('redirect') || '/dashboard';
+    // /workspace는 설명 페이지 → 실제 작업공간인 /dashboard로 교체
+    const redirectTo = rawRedirect === '/workspace' ? '/dashboard' : rawRedirect;
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -86,7 +89,7 @@ function SmarCommLoginForm() {
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" className="w-full bg-neutral-900 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">→) 로그인</button>
+                        <button type="submit" className="w-full bg-neutral-900 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">로그인</button>
                     </form>
                     <div className="mt-6">
                         <div className="relative mb-4">
