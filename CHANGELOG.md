@@ -4,7 +4,31 @@
 
 ---
 
-## 2026-04-02 (사무실)
+## 2026-04-02 (사무실, 오후)
+
+### A1: L1 site_configs DB 연동
+
+**신규 파일:**
+- `sql/site-configs-table.sql` — CREATE TABLE + features 컬럼 + 24개 사이트 시드
+- `lib/supabase/site-configs.ts` — getSiteConfig, getSiteConfigServer(ISR 10분), getAllSiteConfigs, upsertSiteConfig
+- `scripts/run-site-configs.js` — site_configs SQL 실행 스크립트
+- `docs/TenOne_Universe_Architecture_v1.md` — 텐원 정리 통합 아키텍처 문서
+
+**수정 파일:**
+- `app/intra/bums/sites/page.tsx` — DB 연동 전면 리팩터. DB/static 하이브리드, 실 upsert 저장, 에러 표시, DB 배지
+- `.env.local` — SUPABASE_ACCESS_TOKEN 갱신
+
+**DB 변경:**
+- `site_configs` 테이블 생성 (Prod Supabase) — 24개 사이트 입력 확인
+- Korea360 반영 (site_id=seoul360, name=Korea360, domain=korea360.net)
+
+**결정사항:**
+- Korea360이 맞고 seoul360.net은 없다 (코드 site_id는 seoul360 유지, 향후 리네이밍)
+- 아키텍처 문서 분석 완료 — 보완점 5가지는 다음 작업에서 논의
+
+---
+
+## 2026-04-02 (사무실, 오전)
 
 ### 버그 수정 6건 + 레이아웃 2건
 
