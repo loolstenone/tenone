@@ -19,7 +19,7 @@ export default function BrandsPage() {
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
-            <div className="mx-auto max-w-5xl px-6 pt-24 pb-16 space-y-8">
+            <div className="mx-auto max-w-7xl px-6 pt-16 pb-16 space-y-8">
                 <div>
                     <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "var(--tn-text-sub)" }}>Brand Portfolio</p>
                     <h1 className="text-3xl font-light tracking-tight mb-2">Brands</h1>

@@ -34,6 +34,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     const [showPw, setShowPw] = useState(false);
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [serverWaking, setServerWaking] = useState(false); // cold start 경고
     const verifyStarted = useRef(false);
 
     // 세션 검증 (마운트 시 1회)
@@ -49,11 +50,15 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 1) getUser — 5초 타임아웃 (3초는 느린 네트워크에서 부족)
+                // 1) getUser — 8초 타임아웃 (cold start 고려, 5초는 부족할 수 있음)
+                // 3초 경과 시 cold start 경고 표시
+                const wakeTimer = setTimeout(() => setServerWaking(true), 3000);
                 const userResult = await Promise.race([
                     sb.auth.getUser(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
+                    new Promise<null>((r) => setTimeout(() => r(null), 8000)),
                 ]);
+                clearTimeout(wakeTimer);
+                setServerWaking(false);
 
                 const user =
                     userResult && typeof userResult === "object" && "data" in userResult
@@ -151,11 +156,11 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 10초 타임아웃
+                // 20초 타임아웃 (cold start 시 10~15초 걸릴 수 있음)
                 const signInResult = await Promise.race([
                     sb.auth.signInWithPassword({ email, password }),
                     new Promise<{ error: { message: string } }>((resolve) =>
-                        setTimeout(() => resolve({ error: { message: 'timeout' } }), 10000)
+                        setTimeout(() => resolve({ error: { message: 'timeout' } }), 20000)
                     ),
                 ]);
 
@@ -163,8 +168,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
                 if (authError) {
                     const msg = authError.message === 'timeout'
-                        ? "서버 응답이 지연되고 있습니다. 잠시 후 다시 시도하세요."
-                        : "인증 실패. 이메일과 비밀번호를 확인하세요.";
+                        ? "서버 연결에 시간이 걸리고 있습니다. 버튼을 다시 눌러주세요."
+                        : "이메일 또는 비밀번호를 확인하세요.";
                     console.error("[Intra Login] error:", authError.message);
                     setError(msg);
                     setSubmitting(false);
@@ -199,8 +204,11 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     // ── 로딩 ──
     if (status === "loading") {
         return (
-            <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+            <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center gap-3">
                 <div className="h-8 w-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+                {serverWaking && (
+                    <p className="text-xs text-neutral-500">서버 연결 중...</p>
+                )}
             </div>
         );
     }
@@ -235,6 +243,15 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                             <p className="text-xs text-red-400 text-center">
                                 접근 권한이 없습니다. 직원 계정으로 로그인하세요.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Cold start 경고 */}
+                    {serverWaking && (
+                        <div className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                            <p className="text-xs text-yellow-400 text-center">
+                                서버 연결 중... 처음 접속 시 잠시 걸릴 수 있습니다.
                             </p>
                         </div>
                     )}
