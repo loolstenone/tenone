@@ -23,8 +23,7 @@ export default function MyversePointsPage() {
 
     if (!user) return null;
 
-    // 현재 사용자의 memberId 매핑 (Mock: staff-001)
-    const memberId = 'staff-001';
+    const memberId = user.id;
     const summary = getMemberSummary(memberId);
     const logs = getLogsByMember(memberId);
     const leaderboard = getLeaderboard().slice(0, 10);

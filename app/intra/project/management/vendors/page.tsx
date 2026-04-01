@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Star, ChevronDown, ChevronRight, Edit2, Building2, Phone, Mail, CreditCard, FileText, MoreVertical } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import clsx from "clsx";
 
 type VendorCategory = '제작사' | '매체사' | '프리랜서' | '렙사' | '인쇄사' | '이벤트사' | '촬영스튜디오' | '음향스튜디오' | 'IT/개발사' | '디자인스튜디오' | '기타';
@@ -140,6 +141,33 @@ function RatingStars({ value, size = "sm" }: { value: number; size?: "sm" | "xs"
 
 export default function VendorsPage() {
     const [vendors, setVendors] = useState(initialVendors);
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('project_vendors').select('*').order('name')
+            .then(({ data }) => {
+                if (data && data.length > 0) {
+                    setVendors(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        category: r.category as VendorCategory,
+                        name: r.name as string,
+                        contactPerson: (r.contact_person as string) || '',
+                        phone: (r.phone as string) || '',
+                        email: (r.email as string) || '',
+                        bizNumber: (r.biz_number as string) || '',
+                        bankInfo: (r.bank_info as string) || '',
+                        dealCount: (r.deal_count as number) || 0,
+                        avgRating: (r.avg_rating as number) || 0,
+                        status: (r.status as VendorStatus) || '활성',
+                        address: r.address as string | undefined,
+                        note: r.note as string | undefined,
+                        evaluations: (r.evaluations as VendorEvaluation[]) || [],
+                        registeredAt: (r.registered_at as string)?.slice(0, 10) || '',
+                    })));
+                }
+            })
+            .catch(() => {/* keep initialVendors */});
+    }, []);
     const [search, setSearch] = useState("");
     const [catFilter, setCatFilter] = useState("전체");
     const [statusFilter, setStatusFilter] = useState("전체");

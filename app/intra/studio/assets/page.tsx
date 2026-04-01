@@ -1,14 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { brands, assets } from "@/lib/data";
+import { useState, useEffect } from "react";
+import { brands, assets as mockAssets } from "@/lib/data";
+import { fetchLibraryItems } from "@/lib/supabase/library";
+import type { Asset } from "@/types/asset";
 import { Search, Filter, Folder, FileText, Image as ImageIcon, Video, Terminal } from "lucide-react";
 import clsx from "clsx";
-import Image from "next/image";
+
+const formatToType = (fmt: string): Asset['type'] => {
+    if (['PNG', 'JPG'].includes(fmt)) return 'Image';
+    if (fmt === 'MP4') return 'Video';
+    if (['PDF', 'DOCX', 'PPTX', 'XLSX'].includes(fmt)) return 'Document';
+    return 'Document';
+};
 
 export default function AssetsPage() {
     const [selectedType, setSelectedType] = useState<string>('All');
     const [selectedBrand, setSelectedBrand] = useState<string>('All');
+    const [assets, setAssets] = useState<Asset[]>(mockAssets);
+
+    useEffect(() => {
+        fetchLibraryItems({ source: 'cms' })
+            .then(items => {
+                if (items.length > 0) {
+                    setAssets(items.map(item => ({
+                        id: item.id,
+                        title: item.title,
+                        type: formatToType(item.format),
+                        brandId: item.projectCode || 'tenone',
+                        url: item.fileUrl || '',
+                        size: item.fileSize,
+                        createdAt: item.createdAt,
+                    })));
+                }
+            })
+            .catch(() => {/* keep mockAssets */});
+    }, []);
 
     const filteredAssets = assets.filter(asset => {
         const typeMatch = selectedType === 'All' || asset.type === selectedType;

@@ -1,19 +1,21 @@
 "use client";
 
-import { Gavel, Plus, Calendar, DollarSign } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Gavel, Plus, Calendar, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Bid {
     id: string;
     title: string;
     client: string;
-    type: "공개입찰" | "제한입찰" | "수의계약";
+    type: string;
     submitDeadline: string;
     estimatedAmount: number;
-    status: "준비중" | "제출완료" | "낙찰" | "유찰" | "심사중";
+    status: string;
     assignee: string;
 }
 
-const mockBids: Bid[] = [
+const FALLBACK: Bid[] = [
     { id: "1", title: "2026 OO기관 홍보영상 제작", client: "OO기관", type: "공개입찰", submitDeadline: "2026-03-25", estimatedAmount: 80000000, status: "준비중", assignee: "Sarah Kim" },
     { id: "2", title: "XX대학교 브랜드 필름", client: "XX대학교", type: "제한입찰", submitDeadline: "2026-03-20", estimatedAmount: 30000000, status: "제출완료", assignee: "김콘텐" },
     { id: "3", title: "YY그룹 사내 교육 콘텐츠", client: "YY그룹", type: "수의계약", submitDeadline: "2026-03-15", estimatedAmount: 50000000, status: "낙찰", assignee: "Cheonil Jeon" },
@@ -25,6 +27,38 @@ const statusColor: Record<string, string> = { "준비중": "bg-yellow-50 text-ye
 function formatKRW(n: number) { return (n / 10000).toFixed(0) + "만원"; }
 
 export default function BiddingPage() {
+    const [bids, setBids] = useState<Bid[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('project_bids').select('*').order('created_at', { ascending: false })
+            .then(({ data }) => {
+                if (data && data.length > 0) {
+                    setBids(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        title: r.title as string,
+                        client: r.client as string,
+                        type: r.type as string,
+                        submitDeadline: (r.submit_deadline as string)?.slice(0, 10) || '',
+                        estimatedAmount: r.estimated_amount as number,
+                        status: r.status as string,
+                        assignee: r.assignee as string,
+                    })));
+                } else {
+                    setBids(FALLBACK);
+                }
+            })
+            .catch(() => setBids(FALLBACK))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return (
+        <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+        </div>
+    );
+
     return (
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
@@ -39,10 +73,10 @@ export default function BiddingPage() {
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: "준비중", value: mockBids.filter(b => b.status === "준비중").length },
-                    { label: "제출완료", value: mockBids.filter(b => b.status === "제출완료").length },
-                    { label: "낙찰", value: mockBids.filter(b => b.status === "낙찰").length },
-                    { label: "유찰", value: mockBids.filter(b => b.status === "유찰").length },
+                    { label: "준비중", value: bids.filter(b => b.status === "준비중").length },
+                    { label: "제출완료", value: bids.filter(b => b.status === "제출완료").length },
+                    { label: "낙찰", value: bids.filter(b => b.status === "낙찰").length },
+                    { label: "유찰", value: bids.filter(b => b.status === "유찰").length },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
@@ -52,14 +86,14 @@ export default function BiddingPage() {
             </div>
 
             <div className="space-y-3">
-                {mockBids.map(b => (
+                {bids.map(b => (
                     <div key={b.id} className="border border-neutral-200 bg-white p-5 hover:border-neutral-300 transition-colors cursor-pointer">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <h3 className="text-sm font-bold">{b.title}</h3>
-                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[b.type]}`}>{b.type}</span>
-                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[b.status]}`}>{b.status}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[b.type] || 'bg-neutral-100 text-neutral-500'}`}>{b.type}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[b.status] || 'bg-neutral-100 text-neutral-500'}`}>{b.status}</span>
                                 </div>
                                 <div className="flex items-center gap-4 text-xs text-neutral-400 mt-1">
                                     <span>발주처: {b.client}</span>
