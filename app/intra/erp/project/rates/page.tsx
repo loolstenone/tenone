@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { DollarSign, Edit2, Save, Info } from "lucide-react";
+import { useState, useEffect } from "react";
+import { DollarSign, Edit2, Save, Info, Loader2 } from "lucide-react";
 import clsx from "clsx";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface StandardRate {
     position: string;
@@ -30,7 +31,7 @@ const initialStandardRates: StandardRate[] = [
     { position: '인턴', hourlyRate: 30000 },
 ];
 
-const initialActualRates: ActualRate[] = [
+const mockActualRates: ActualRate[] = [
     { id: 'a1', name: 'Cheonil Jeon', position: '대표', department: '경영기획', monthlySalary: 10000000, workHoursPerMonth: 176, hourlyRate: 56818 },
     { id: 'a2', name: 'Sarah Kim', position: '이사', department: '사업총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
     { id: 'a3', name: '김인사', position: '이사', department: '인사총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
@@ -48,9 +49,37 @@ function formatKRW(n: number) { return new Intl.NumberFormat('ko-KR').format(n);
 export default function RatesPage() {
     const [tab, setTab] = useState<'standard' | 'actual'>('standard');
     const [standardRates, setStandardRates] = useState(initialStandardRates);
-    const [actualRates] = useState(initialActualRates);
+    const [actualRates, setActualRates] = useState<ActualRate[]>(mockActualRates);
     const [editingIdx, setEditingIdx] = useState<number | null>(null);
     const [editValue, setEditValue] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        erpDb.fetchPayrollWithMembers().then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                const mapped: ActualRate[] = rows
+                    .filter(r => r.member)
+                    .map((r) => {
+                        const member = r.member as Record<string, unknown>;
+                        const gross = (r.gross_salary as number) || (r.base_salary as number) || 0;
+                        const workHours = 176;
+                        return {
+                            id: (r.id as string) || (r.member_id as string),
+                            name: (member.name as string) || "",
+                            position: (member.position as string) || "",
+                            department: (member.department as string) || "",
+                            monthlySalary: gross,
+                            workHoursPerMonth: workHours,
+                            hourlyRate: workHours > 0 ? Math.round(gross / workHours) : 0,
+                        };
+                    })
+                    .filter(r => r.monthlySalary > 0);
+                if (mapped.length > 0) setActualRates(mapped);
+            }
+        }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const saveStandardRate = (idx: number) => {
         const val = Number(editValue);

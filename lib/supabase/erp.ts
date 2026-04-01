@@ -208,6 +208,25 @@ export async function upsertPayroll(input: Record<string, unknown>) {
     return data;
 }
 
+export async function fetchPayrollWithMembers(yearMonth?: string) {
+    let query = supabase
+        .from('payroll')
+        .select('*, member:members(name, position, department)')
+        .order('year_month', { ascending: false });
+    if (yearMonth) query = query.eq('year_month', yearMonth);
+    const { data, error } = await query;
+    if (error) throw error;
+    // Deduplicate: keep latest per member
+    const seen = new Set<string>();
+    const result: Record<string, unknown>[] = [];
+    for (const row of (data || [])) {
+        const r = row as Record<string, unknown>;
+        const mid = r.member_id as string;
+        if (!seen.has(mid)) { seen.add(mid); result.push(r); }
+    }
+    return result;
+}
+
 // ── Biz Plans (사업계획) ──
 
 export async function fetchBizPlans(params?: { quarter?: string; division?: string }) {
