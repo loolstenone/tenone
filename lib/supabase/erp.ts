@@ -391,6 +391,30 @@ export async function fetchIncentives(params?: { memberId?: string; limit?: numb
     return data || [];
 }
 
+// ── Monthly Forecasts (월별 추정/실적) ──
+
+export async function fetchMonthlyForecasts(params: { year: number; month?: number; brandId?: string }) {
+    let query = supabase.from('monthly_forecasts').select('*')
+        .eq('brand_id', params.brandId || 'tenone')
+        .eq('year', params.year)
+        .order('month')
+        .order('item');
+    if (params.month) query = query.eq('month', params.month);
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []) as Record<string, unknown>[];
+}
+
+export async function upsertMonthlyForecast(input: Record<string, unknown>) {
+    const { data, error } = await supabase
+        .from('monthly_forecasts')
+        .upsert({ ...input, updated_at: new Date().toISOString() }, { onConflict: 'year,month,item,brand_id' })
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
 // ── GPR Staff Data (평가/인센티브 관리 페이지용) ──
 // staff members + 해당 분기 gpr_goals + 최근 payroll을 한 번에 조회
 

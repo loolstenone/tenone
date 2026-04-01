@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
 import clsx from "clsx";
-import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
 
 const months = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
+
+const ITEMS = ["매출", "외부비", "매총", "내부비", "영업이익"];
 
 interface ActualRow {
   item: string;
@@ -21,30 +23,75 @@ interface ActualRow {
   gapFcPct: string;
 }
 
-const actualData: ActualRow[] = [
+const mockActualData: ActualRow[] = [
   { item: "매출", plan: 40_000_000, forecast: 38_000_000, actual: 35_000_000, gapPlan: -5_000_000, gapPlanPct: "-12.5%", gapFc: -3_000_000, gapFcPct: "-7.9%" },
   { item: "외부비", plan: 26_000_000, forecast: 25_000_000, actual: 23_000_000, gapPlan: -3_000_000, gapPlanPct: "-11.5%", gapFc: -2_000_000, gapFcPct: "-8.0%" },
-  { item: "매출총이익", plan: 14_000_000, forecast: 13_000_000, actual: 12_000_000, gapPlan: -2_000_000, gapPlanPct: "-14.3%", gapFc: -1_000_000, gapFcPct: "-7.7%" },
+  { item: "매총", plan: 14_000_000, forecast: 13_000_000, actual: 12_000_000, gapPlan: -2_000_000, gapPlanPct: "-14.3%", gapFc: -1_000_000, gapFcPct: "-7.7%" },
   { item: "내부비", plan: 7_500_000, forecast: 7_200_000, actual: 7_000_000, gapPlan: -500_000, gapPlanPct: "-6.7%", gapFc: -200_000, gapFcPct: "-2.8%" },
   { item: "영업이익", plan: 6_500_000, forecast: 5_800_000, actual: 5_000_000, gapPlan: -1_500_000, gapPlanPct: "-23.1%", gapFc: -800_000, gapFcPct: "-13.8%" },
 ];
 
+function pct(a: number, b: number) {
+  if (!b) return "-";
+  return `${((a / b) * 100).toFixed(1)}%`;
+}
+
 type Status = "미확정" | "확정";
 
 export default function ActualConfirmPage() {
-  const { user } = useAuth();
-  const [monthIdx, setMonthIdx] = useState(1); // 2월
+  const now = new Date();
+  const [monthIdx, setMonthIdx] = useState(Math.max(0, now.getMonth() - 1));
   const [status, setStatus] = useState<Status>("미확정");
+  const [actualData, setActualData] = useState<ActualRow[]>(mockActualData);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await erpDb.fetchMonthlyForecasts({ year: now.getFullYear(), month: monthIdx + 1 });
+        if (!cancelled && rows.length > 0) {
+          if ((rows[0].actual_confirmed as boolean)) setStatus("확정");
+
+          const mapped: ActualRow[] = ITEMS.map(item => {
+            // item 이름 매칭 (DB는 "매출 (Billing)" 형식일 수 있음)
+            const r = rows.find(x => (x.item as string).includes(item)) as Record<string, unknown> | undefined;
+            const plan = (r?.plan as number) || 0;
+            const forecast = (r?.forecast_2 as number) || (r?.forecast_1 as number) || 0;
+            const actual = (r?.actual as number) || 0;
+            const gapPlan = actual - plan;
+            const gapFc = actual - forecast;
+            return {
+              item,
+              plan,
+              forecast,
+              actual,
+              gapPlan,
+              gapPlanPct: plan ? pct(gapPlan, plan) : "-",
+              gapFc,
+              gapFcPct: forecast ? pct(gapFc, forecast) : "-",
+            };
+          });
+          if (!cancelled) setActualData(mapped);
+        }
+      } catch { /* mock 유지 */ } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [monthIdx]);
 
   const prevMonth = () => setMonthIdx((p) => Math.max(0, p - 1));
   const nextMonth = () => setMonthIdx((p) => Math.min(11, p + 1));
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-neutral-900">실적 확정</h1>
-          <p className="text-sm text-neutral-500">2026년 {months[monthIdx]} 실적</p>
+          <p className="text-sm text-neutral-500">{now.getFullYear()}년 {months[monthIdx]} 실적</p>
         </div>
         <span
           className={clsx(
