@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Globe, Clock, RefreshCw, ExternalLink, Plus, FileBarChart, ArrowRight, AlertTriangle, CheckCircle2, XCircle, X, Gauge, Zap, Timer, Lightbulb, Loader2 } from 'lucide-react';
-import { getScanLog } from '@/lib/smarcomm/scan-data';
-import GaugeChart from '@/components/smarcomm/GaugeChart';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import RadarChart from '@/components/smarcomm/RadarChart';
-import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import { getScanLog, loadScanLogFromDB, saveCompetitorList, loadCompetitorListFromDB, saveCompareLog, loadCompareLogFromDB, getCompareLog, type CompareEntry } from '@/lib/smarcomm/scan-data';
+import GaugeChart from '@/features/smarcomm/GaugeChart';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import RadarChart from '@/features/smarcomm/RadarChart';
+import { getChartColors, loadChartPaletteFromDB } from '@/lib/smarcomm/chart-palette';
+import { getSetting } from '@/lib/supabase/settings';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type ViewMode = 'list' | 'result' | 'compare';
 type Status = 'pass' | 'warning' | 'fail';
@@ -55,10 +56,7 @@ export default function ScanPage() {
   const [error, setError] = useState('');
   const [historyPage, setHistoryPage] = useState(1);
   const [compHistoryPage, setCompHistoryPage] = useState(1);
-  const [compareHistory, setCompareHistory] = useState<{ url: string; score: number; seo: number; geo: number; date: string }[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try { return JSON.parse(localStorage.getItem('smarcomm_compare_log') || '[]'); } catch { return []; }
-  });
+  const [compareHistory, setCompareHistory] = useState<CompareEntry[]>(() => getCompareLog());
   const [competitors, setCompetitors] = useState<string[]>([]);
   const [newCompetitor, setNewCompetitor] = useState('');
   const [generatingPlan, setGeneratingPlan] = useState(false);
@@ -86,17 +84,17 @@ export default function ScanPage() {
     setGeneratingPlan(false);
   };
 
-  // 경쟁사 목록 localStorage 로드
+  // DB에서 초기 데이터 로드
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('smarcomm_competitors');
-      if (saved) setCompetitors(JSON.parse(saved));
-    } catch {}
+    loadCompetitorListFromDB().then(list => { if (list.length > 0) setCompetitors(list); });
+    loadCompareLogFromDB().then(log => { if (log.length > 0) setCompareHistory(log); });
+    loadScanLogFromDB();
+    loadChartPaletteFromDB();
   }, []);
 
   const saveCompetitors = (list: string[]) => {
     setCompetitors(list);
-    localStorage.setItem('smarcomm_competitors', JSON.stringify(list));
+    saveCompetitorList(list);
   };
 
   const addCompetitor = () => {
@@ -113,13 +111,9 @@ export default function ScanPage() {
   // 내 사이트 (설정에서 가져오기)
   const [mySiteUrl, setMySiteUrl] = useState('');
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('smarcomm_company');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.siteUrl) setMySiteUrl(parsed.siteUrl);
-      }
-    } catch {}
+    getSetting<{ siteUrl?: string }>('smarcomm', 'company', 'smarcomm_company').then(data => {
+      if (data?.siteUrl) setMySiteUrl(data.siteUrl);
+    });
   }, []);
 
   const handleScan = async (targetUrl: string) => {
@@ -152,7 +146,7 @@ export default function ScanPage() {
         const newEntry = { url: data.url, score: data.totalScore, seo: data.seoScore, geo: data.geoScore, date: new Date().toISOString() };
         setCompareHistory(prev => {
           const updated = [newEntry, ...prev.filter(h => h.url !== data.url)];
-          localStorage.setItem('smarcomm_compare_log', JSON.stringify(updated));
+          saveCompareLog(updated);
           return updated;
         });
       }
@@ -180,7 +174,7 @@ export default function ScanPage() {
         const newEntry = { url: data.url, score: data.totalScore, seo: data.seoScore, geo: data.geoScore, date: new Date().toISOString() };
         setCompareHistory(prev => {
           const updated = [newEntry, ...prev.filter(h => h.url !== data.url)];
-          localStorage.setItem('smarcomm_compare_log', JSON.stringify(updated));
+          saveCompareLog(updated);
           return updated;
         });
       }

@@ -1,5 +1,5 @@
-import { MyVerseHeader } from "@/components/MyVerseHeader";
-import { MyVerseFooter } from "@/components/MyVerseFooter";
+import { MyVerseHeader } from "@/features/myverse/MyVerseHeader";
+import { MyVerseFooter } from "@/features/myverse/MyVerseFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

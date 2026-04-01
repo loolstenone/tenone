@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, TrendingUp, TrendingDown, MessageSquare, Search, Users, Target, Plus, Globe, HelpCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
-import DonutChart from '@/components/smarcomm/charts/DonutChart';
-import LineChart from '@/components/smarcomm/charts/LineChart';
-import BarChart from '@/components/smarcomm/charts/BarChart';
+import DonutChart from '@/features/smarcomm/charts/DonutChart';
+import LineChart from '@/features/smarcomm/charts/LineChart';
+import BarChart from '@/features/smarcomm/charts/BarChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type GeoTab = 'overview' | 'competitors' | 'brand';
 

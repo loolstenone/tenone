@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { SmarCommPreviewGate } from '@/components/SmarCommPreviewGate';
+import { SmarCommPreviewGate } from '@/features/smarcomm/SmarCommPreviewGate';
 
 const site = siteConfigs.smarcomm;
 const PREVIEW_KEY = 'tenone1001';

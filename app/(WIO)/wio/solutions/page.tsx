@@ -6,7 +6,7 @@ import {
   ArrowLeft, Search, Building2, Briefcase, Wrench, Handshake,
   MessageSquare, Settings, Users, Clock, DollarSign, ChevronDown, X
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── Resource 배지 ── */
 const RESOURCE_BADGE: Record<string, { label: string; color: string }> = {

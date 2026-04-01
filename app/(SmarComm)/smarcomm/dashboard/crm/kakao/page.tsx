@@ -1,8 +1,8 @@
 'use client';
 
 import { Plus, MessageSquare, Send, Users } from 'lucide-react';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface KakaoMessage {
   id: string;

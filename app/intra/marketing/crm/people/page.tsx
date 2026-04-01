@@ -1,18 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { useCrm } from "@/lib/crm-context";
+import { useState, useEffect } from "react";
+import { fetchPeople, createPerson, updatePerson as updatePersonDb } from "@/lib/supabase/crm";
+import { initialPeople } from "@/lib/crm-data";
 import { PersonModal } from "@/components/crm/PersonModal";
 import { Person } from "@/types/crm";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Loader2 } from "lucide-react";
 
 export default function PeoplePage() {
-    const { people, addPerson, updatePerson } = useCrm();
+    const [people, setPeople] = useState<Person[]>([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPerson, setEditingPerson] = useState<Person | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        fetchPeople({ limit: 200 })
+            .then(res => {
+                if (cancelled) return;
+                setPeople(res.people.length > 0 ? res.people : initialPeople);
+            })
+            .catch(() => {
+                if (!cancelled) setPeople(initialPeople);
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const filtered = people.filter(p => {
         if (typeFilter !== 'all' && p.type !== typeFilter) return false;
@@ -21,9 +38,23 @@ export default function PeoplePage() {
         return true;
     });
 
-    const handleSave = (person: Person) => {
-        if (editingPerson) updatePerson(person.id, person);
-        else addPerson(person);
+    const handleSave = async (person: Person) => {
+        try {
+            if (editingPerson) {
+                const updated = await updatePersonDb(person.id, person);
+                setPeople(prev => prev.map(p => p.id === updated.id ? updated : p));
+            } else {
+                const created = await createPerson({ ...person, brandId: 'tenone' });
+                setPeople(prev => [created, ...prev]);
+            }
+        } catch {
+            // DB 저장 실패 시 로컬 상태만 업데이트
+            if (editingPerson) {
+                setPeople(prev => prev.map(p => p.id === person.id ? person : p));
+            } else {
+                setPeople(prev => [{ ...person, id: crypto.randomUUID() }, ...prev]);
+            }
+        }
     };
 
     return (
@@ -63,39 +94,45 @@ export default function PeoplePage() {
             </div>
 
             <div className="border border-neutral-200 bg-white overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-neutral-200 text-xs text-neutral-500 uppercase tracking-wider">
-                            <th className="px-6 py-3 text-left">Name</th>
-                            <th className="px-4 py-3 text-left">Type</th>
-                            <th className="px-4 py-3 text-left">Company</th>
-                            <th className="px-4 py-3 text-left">Source</th>
-                            <th className="px-4 py-3 text-left">Status</th>
-                            <th className="px-4 py-3 text-left">Last Contact</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-100">
-                        {filtered.map(person => (
-                            <tr key={person.id} onClick={() => { setEditingPerson(person); setIsModalOpen(true); }} className="hover:bg-neutral-50 cursor-pointer transition-colors">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white">{person.avatarInitials}</div>
-                                        <div>
-                                            <p className="text-sm font-medium">{person.name}</p>
-                                            <p className="text-xs text-neutral-400">{person.email}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-4 py-4 text-xs font-medium text-neutral-600">{person.type}</td>
-                                <td className="px-4 py-4 text-sm text-neutral-500">{person.company ?? '-'}</td>
-                                <td className="px-4 py-4 text-xs text-neutral-400">{person.source}</td>
-                                <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{person.status}</span></td>
-                                <td className="px-4 py-4 text-xs text-neutral-400">{person.lastContacted ?? '-'}</td>
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                    </div>
+                ) : (
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-neutral-200 text-xs text-neutral-500 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left">Name</th>
+                                <th className="px-4 py-3 text-left">Type</th>
+                                <th className="px-4 py-3 text-left">Company</th>
+                                <th className="px-4 py-3 text-left">Source</th>
+                                <th className="px-4 py-3 text-left">Status</th>
+                                <th className="px-4 py-3 text-left">Last Contact</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {filtered.length === 0 && <div className="text-center py-12 text-neutral-400">No contacts found.</div>}
+                        </thead>
+                        <tbody className="divide-y divide-neutral-100">
+                            {filtered.map(person => (
+                                <tr key={person.id} onClick={() => { setEditingPerson(person); setIsModalOpen(true); }} className="hover:bg-neutral-50 cursor-pointer transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white">{person.avatarInitials}</div>
+                                            <div>
+                                                <p className="text-sm font-medium">{person.name}</p>
+                                                <p className="text-xs text-neutral-400">{person.email}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 text-xs font-medium text-neutral-600">{person.type}</td>
+                                    <td className="px-4 py-4 text-sm text-neutral-500">{person.company ?? '-'}</td>
+                                    <td className="px-4 py-4 text-xs text-neutral-400">{person.source}</td>
+                                    <td className="px-4 py-4"><span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{person.status}</span></td>
+                                    <td className="px-4 py-4 text-xs text-neutral-400">{person.lastContacted ?? '-'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+                {!loading && filtered.length === 0 && <div className="text-center py-12 text-neutral-400">No contacts found.</div>}
             </div>
 
             <PersonModal person={editingPerson} isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingPerson(null); }} onSave={handleSave} />

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useCrm } from "@/lib/crm-context";
-import { DealStage } from "@/types/crm";
+import { useState, useEffect } from "react";
+import { fetchDeals, updateDeal } from "@/lib/supabase/crm";
+import { initialDeals, initialOrganizations } from "@/lib/crm-data";
+import { fetchOrganizations } from "@/lib/supabase/crm";
+import { Deal, DealStage, Organization } from "@/types/crm";
+import { Loader2 } from "lucide-react";
 
 const stages: { key: DealStage; label: string }[] = [
     { key: 'Lead', label: 'Lead' },
@@ -14,12 +17,38 @@ const stages: { key: DealStage; label: string }[] = [
 ];
 
 export default function DealsPage() {
-    const { deals, moveDeal, getOrgById } = useCrm();
+    const [deals, setDeals] = useState<Deal[]>([]);
+    const [orgs, setOrgs] = useState<Organization[]>([]);
+    const [loading, setLoading] = useState(true);
     const [dragOver, setDragOver] = useState<DealStage | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchDeals(), fetchOrganizations()])
+            .then(([d, o]) => {
+                if (cancelled) return;
+                setDeals(d.length > 0 ? d : initialDeals);
+                setOrgs(o.length > 0 ? o : initialOrganizations);
+            })
+            .catch(() => {
+                if (!cancelled) { setDeals(initialDeals); setOrgs(initialOrganizations); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const getOrgById = (id?: string) => orgs.find(o => o.id === id);
+
+    const moveDeal = async (id: string, stage: DealStage) => {
+        setDeals(prev => prev.map(d => d.id === id ? { ...d, stage } : d));
+        try { await updateDeal(id, { stage }); } catch { /* local state already updated */ }
+    };
 
     const handleDragStart = (e: React.DragEvent, dealId: string) => { e.dataTransfer.setData('text/plain', dealId); };
     const handleDrop = (e: React.DragEvent, stage: DealStage) => { e.preventDefault(); setDragOver(null); const id = e.dataTransfer.getData('text/plain'); if (id) moveDeal(id, stage); };
     const handleDragOver = (e: React.DragEvent, stage: DealStage) => { e.preventDefault(); setDragOver(stage); };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">

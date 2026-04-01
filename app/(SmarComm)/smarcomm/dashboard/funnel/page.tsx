@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, Download, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
-import LineChart from '@/components/smarcomm/charts/LineChart';
-import BarChart from '@/components/smarcomm/charts/BarChart';
+import LineChart from '@/features/smarcomm/charts/LineChart';
+import BarChart from '@/features/smarcomm/charts/BarChart';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
-import GaugeChart from '@/components/smarcomm/GaugeChart';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
+import GaugeChart from '@/features/smarcomm/GaugeChart';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 
 // 퍼널 분석 6단계 정의

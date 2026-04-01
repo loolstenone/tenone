@@ -7,7 +7,7 @@ import {
   ArrowRight, ChevronRight, Fingerprint, Building2, Globe,
   Star, Award, Crown, Gem, UserCheck, Lock, Eye, FileCheck
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 3-Layer CRM ── */
 const CRM_LAYERS = [

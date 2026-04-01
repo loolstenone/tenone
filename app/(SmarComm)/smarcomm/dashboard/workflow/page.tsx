@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight } from "lucide-react";
 import { useWorkflow } from "@/lib/workflow-context";
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 const modules = [
   { name: "콘텐츠 파이프라인", description: "소재 제작 파이프라인을 단계별로 추적합니다.", href: "/dashboard/workflow/pipeline", icon: GitBranch },

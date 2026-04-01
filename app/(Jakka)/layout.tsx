@@ -1,5 +1,5 @@
-import { JakkaHeader } from "@/components/JakkaHeader";
-import { JakkaFooter } from "@/components/JakkaFooter";
+import { JakkaHeader } from "@/features/jakka/JakkaHeader";
+import { JakkaFooter } from "@/features/jakka/JakkaFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

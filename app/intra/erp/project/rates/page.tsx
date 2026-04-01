@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { DollarSign, Edit2, Save, Info } from "lucide-react";
+import { useState, useEffect } from "react";
+import { DollarSign, Edit2, Save, Info, Loader2, Check } from "lucide-react";
 import clsx from "clsx";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface StandardRate {
     position: string;
@@ -30,7 +31,7 @@ const initialStandardRates: StandardRate[] = [
     { position: '인턴', hourlyRate: 30000 },
 ];
 
-const initialActualRates: ActualRate[] = [
+const mockActualRates: ActualRate[] = [
     { id: 'a1', name: 'Cheonil Jeon', position: '대표', department: '경영기획', monthlySalary: 10000000, workHoursPerMonth: 176, hourlyRate: 56818 },
     { id: 'a2', name: 'Sarah Kim', position: '이사', department: '사업총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
     { id: 'a3', name: '김인사', position: '이사', department: '인사총괄', monthlySalary: 7000000, workHoursPerMonth: 176, hourlyRate: 39773 },
@@ -48,14 +49,56 @@ function formatKRW(n: number) { return new Intl.NumberFormat('ko-KR').format(n);
 export default function RatesPage() {
     const [tab, setTab] = useState<'standard' | 'actual'>('standard');
     const [standardRates, setStandardRates] = useState(initialStandardRates);
-    const [actualRates] = useState(initialActualRates);
+    const [actualRates, setActualRates] = useState<ActualRate[]>(mockActualRates);
     const [editingIdx, setEditingIdx] = useState<number | null>(null);
     const [editValue, setEditValue] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    const saveStandardRate = (idx: number) => {
+    useEffect(() => {
+        let cancelled = false;
+        // 표준단가 로드
+        erpDb.fetchStandardRates().then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                setStandardRates(rows.map(r => ({
+                    position: (r.position as string),
+                    hourlyRate: (r.hourly_rate as number) || 0,
+                })));
+            }
+        }).catch(() => {});
+        // 실제단가 로드
+        erpDb.fetchPayrollWithMembers().then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                const mapped: ActualRate[] = rows
+                    .filter(r => r.member)
+                    .map((r) => {
+                        const member = r.member as Record<string, unknown>;
+                        const gross = (r.gross_salary as number) || (r.base_salary as number) || 0;
+                        const workHours = 176;
+                        return {
+                            id: (r.id as string) || (r.member_id as string),
+                            name: (member.name as string) || "",
+                            position: (member.position as string) || "",
+                            department: (member.department as string) || "",
+                            monthlySalary: gross,
+                            workHoursPerMonth: workHours,
+                            hourlyRate: workHours > 0 ? Math.round(gross / workHours) : 0,
+                        };
+                    })
+                    .filter(r => r.monthlySalary > 0);
+                if (mapped.length > 0) setActualRates(mapped);
+            }
+        }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const saveStandardRate = async (idx: number) => {
         const val = Number(editValue);
         if (val > 0) {
+            const position = standardRates[idx].position;
             setStandardRates(prev => prev.map((r, i) => i === idx ? { ...r, hourlyRate: val } : r));
+            setSaving(true);
+            erpDb.upsertStandardRate(position, val).catch(() => {}).finally(() => setSaving(false));
         }
         setEditingIdx(null);
     };
@@ -96,6 +139,7 @@ export default function RatesPage() {
                 <div>
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs text-neutral-500">직급별 시간당 표준 단가 → <span className="font-medium">예상 손익</span>에 적용</p>
+                        {saving && <span className="text-xs text-neutral-400 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> 저장 중...</span>}
                     </div>
                     <div className="border border-neutral-200 bg-white">
                         <div className="grid grid-cols-4 gap-2 px-4 py-2 border-b border-neutral-100 text-[11px] text-neutral-400 uppercase tracking-wider">

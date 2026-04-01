@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Bell, MessageSquare, Calendar, BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-const recentNotices = [
-    { id: 1, title: "2026년 1분기 GPR 자기 평가 마감 안내", date: "2026-03-15", badge: "HR" },
-    { id: 2, title: "MADLeague 인사이트 투어링 참가자 모집", date: "2026-03-10", badge: "중요" },
-    { id: 3, title: "VRIEF 프레임워크 교육 일정 안내 (4월)", date: "2026-03-08", badge: "교육" },
+interface PostPreview { id: string; title: string; date: string; badge?: string; author?: string; comment_count?: number; }
+
+const mockNotices: PostPreview[] = [
+    { id: "1", title: "2026년 1분기 GPR 자기 평가 마감 안내", date: "2026-03-15", badge: "HR" },
+    { id: "2", title: "MADLeague 인사이트 투어링 참가자 모집", date: "2026-03-10", badge: "중요" },
+    { id: "3", title: "VRIEF 프레임워크 교육 일정 안내 (4월)", date: "2026-03-08", badge: "교육" },
 ];
 
-const recentFree = [
-    { id: 1, title: "LUKI 2nd Single 어떻게 생각하세요?", author: "Sarah Kim", date: "2026-03-18", comments: 2 },
-    { id: 2, title: "금요일 점심 같이 드실 분", author: "김준호", date: "2026-03-19", comments: 0 },
+const mockFree: PostPreview[] = [
+    { id: "1", title: "LUKI 2nd Single 어떻게 생각하세요?", author: "Sarah Kim", date: "2026-03-18" },
+    { id: "2", title: "금요일 점심 같이 드실 분", author: "김준호", date: "2026-03-19" },
 ];
 
 const upcomingEvents = [
@@ -24,15 +26,54 @@ const upcomingEvents = [
 ];
 
 const wikiLinks = [
-    { name: "Culture", desc: "Core Value & Principle 10", href: "/intra/comm/wiki/culture" },
-    { name: "Onboarding", desc: "신규 입사자 가이드", href: "/intra/comm/wiki/onboarding" },
-    { name: "Education", desc: "교육 프로그램", href: "/intra/comm/wiki/education" },
-    { name: "Handbook", desc: "업무 매뉴얼", href: "/intra/comm/wiki/handbook" },
-    { name: "FAQ", desc: "자주 묻는 질문", href: "/intra/comm/wiki/faq" },
+    { name: "Culture", desc: "Core Value & Principle 10", href: "/intra/wiki/culture" },
+    { name: "Onboarding", desc: "신규 입사자 가이드", href: "/intra/wiki/onboarding" },
+    { name: "Education", desc: "교육 프로그램", href: "/intra/wiki/education" },
+    { name: "Handbook", desc: "업무 매뉴얼", href: "/intra/wiki/handbook" },
+    { name: "FAQ", desc: "자주 묻는 질문", href: "/intra/wiki/faq" },
 ];
+
+function fmtDate(s: string) {
+    return s?.slice(0, 10) || "";
+}
 
 export default function CommPage() {
     const { user } = useAuth();
+    const [notices, setNotices] = useState<PostPreview[]>(mockNotices);
+    const [freePosts, setFreePosts] = useState<PostPreview[]>(mockFree);
+
+    useEffect(() => {
+        // 공지사항 최근 3건
+        fetch("/api/board/posts?site=tenone&board=notice&limit=3&status=published")
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                const posts = data?.posts || data?.data;
+                if (Array.isArray(posts) && posts.length > 0) {
+                    setNotices(posts.map((p: Record<string, unknown>) => ({
+                        id: p.id as string,
+                        title: p.title as string,
+                        date: fmtDate(p.created_at as string),
+                        badge: (p.category as string) || undefined,
+                    })));
+                }
+            }).catch(() => {/* keep mock */});
+
+        // 자유게시판 최근 3건
+        fetch("/api/board/posts?site=tenone&board=free&limit=3&status=published")
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                const posts = data?.posts || data?.data;
+                if (Array.isArray(posts) && posts.length > 0) {
+                    setFreePosts(posts.map((p: Record<string, unknown>) => ({
+                        id: p.id as string,
+                        title: p.title as string,
+                        date: fmtDate(p.created_at as string),
+                        author: (p.author_name as string) || undefined,
+                        comment_count: (p.comment_count as number) || 0,
+                    })));
+                }
+            }).catch(() => {/* keep mock */});
+    }, []);
 
     return (
         <div className="space-y-8">
@@ -54,10 +95,10 @@ export default function CommPage() {
                         </Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
-                        {recentNotices.map(n => (
+                        {notices.map(n => (
                             <li key={n.id} className="px-6 py-3 hover:bg-neutral-50 cursor-pointer transition-colors">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{n.badge}</span>
+                                    {n.badge && <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{n.badge}</span>}
                                     <span className="text-xs text-neutral-400">{n.date}</span>
                                 </div>
                                 <p className="text-sm">{n.title}</p>
@@ -106,15 +147,15 @@ export default function CommPage() {
                         </Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
-                        {recentFree.map(p => (
+                        {freePosts.map(p => (
                             <li key={p.id} className="px-6 py-3 hover:bg-neutral-50 cursor-pointer transition-colors">
                                 <p className="text-sm mb-1">{p.title}</p>
                                 <div className="flex items-center gap-3 text-xs text-neutral-400">
-                                    <span>{p.author}</span>
+                                    {p.author && <span>{p.author}</span>}
                                     <span>{p.date}</span>
-                                    {p.comments > 0 && (
+                                    {(p.comment_count || 0) > 0 && (
                                         <span className="flex items-center gap-1">
-                                            <MessageSquare className="h-3 w-3" /> {p.comments}
+                                            <MessageSquare className="h-3 w-3" /> {p.comment_count}
                                         </span>
                                     )}
                                 </div>

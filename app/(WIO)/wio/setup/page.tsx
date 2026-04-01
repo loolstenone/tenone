@@ -6,7 +6,7 @@ import {
   ArrowLeft, ArrowRight, Sparkles, CheckCircle2, ChevronDown,
   LayoutGrid, Users, Shield, Settings, Workflow, Rocket
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 const STEPS = [
   {

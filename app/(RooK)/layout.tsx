@@ -1,5 +1,5 @@
-import { RooKHeader } from "@/components/RooKHeader";
-import { RooKFooter } from "@/components/RooKFooter";
+import { RooKHeader } from "@/features/rook/RooKHeader";
+import { RooKFooter } from "@/features/rook/RooKFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

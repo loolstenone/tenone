@@ -16,7 +16,8 @@ import { fetchTenantMembers, updateTenant, inviteMember, updateMemberRole, remov
 import {
   CATEGORY_CATALOG, MODULE_CATALOG, getModulesByCategory,
   SERVICE_CATALOG, SERVICE_PRESETS, getModulesByService,
-  loadOrbiConfig, saveOrbiConfigAsync,
+  loadOrbiConfig, saveOrbiConfig,
+  loadOrbiConfigDB, saveOrbiConfigDB,
   type OrbiConfig,
 } from '@/lib/wio-modules';
 import type { WIOMember } from '@/types/wio';
@@ -865,7 +866,7 @@ export default function SettingsPage() {
                     const config = loadOrbiConfig();
                     config.enabledServices = enabledServices;
                     config.enabledModules = moduleKeys;
-                    saveOrbiConfigAsync(config).catch(() => {});
+                    saveOrbiConfigDB(config);
                     reloadSidebar();
                     showToast('서비스 설정이 저장되었습니다');
                   }}
@@ -935,6 +936,11 @@ export default function SettingsPage() {
                 <span className="text-xs font-semibold text-slate-400">
                   {settingsMode === 'module' ? '조직 + 모듈' : '트랙'}
                 </span>
+                {settingsMode === 'org' && (
+                  <button className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition">
+                    <Plus size={11} /> 부서 추가
+                  </button>
+                )}
               </div>
               {renderTrackAccordion()}
             </div>
@@ -955,13 +961,13 @@ export default function SettingsPage() {
                             <Building size={18} className="text-indigo-400" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-white">{selectedOrgNode!.name}</h3>
+                            <h3 className="text-sm font-bold text-white">{selectedOrgNode.name}</h3>
                             <div className="flex items-center gap-3 mt-0.5">
-                              <span className="text-[10px] text-slate-500">{selectedOrgNode!.type}</span>
+                              <span className="text-[10px] text-slate-500">{selectedOrgNode.type}</span>
                               <span className="text-[10px] text-slate-500">|</span>
-                              <span className="text-[10px] text-slate-500">장: {selectedOrgNode!.head}</span>
+                              <span className="text-[10px] text-slate-500">장: {selectedOrgNode.head}</span>
                               <span className="text-[10px] text-slate-500">|</span>
-                              <span className="text-[10px] text-slate-500">{selectedOrgNode!.memberCount}명</span>
+                              <span className="text-[10px] text-slate-500">{selectedOrgNode.memberCount}명</span>
                             </div>
                           </div>
                           <div className="ml-auto flex items-center gap-1">
@@ -977,7 +983,7 @@ export default function SettingsPage() {
                       <div className="flex-1 overflow-y-auto p-4">
                         <p className="text-xs font-semibold text-slate-400 mb-3">멤버 목록</p>
                         <div className="space-y-1">
-                          {(selectedOrgNode!.members || []).map((m, i) => (
+                          {(selectedOrgNode.members || []).map((m, i) => (
                             <div key={m.id + i}
                               className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/5 transition group">
                               <GripVertical size={12} className="text-slate-700 group-hover:text-slate-500 cursor-grab" />
@@ -997,7 +1003,7 @@ export default function SettingsPage() {
                               </span>
                             </div>
                           ))}
-                          {(!(selectedOrgNode!.members?.length)) && (
+                          {(!selectedOrgNode.members || selectedOrgNode.members.length === 0) && (
                             <p className="text-center py-6 text-[10px] text-slate-600">멤버가 없습니다</p>
                           )}
                         </div>

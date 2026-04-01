@@ -6,9 +6,9 @@ import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Targe
 import type { CampaignPlan } from '@/lib/smarcomm/campaign-plan';
 import { type CampaignExecution, createExecution, saveExecution, loadExecution, calculateScoreChanges, generateAlerts, generateImprovementSuggestions } from '@/lib/smarcomm/campaign-tracker';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import BarChart from '@/components/smarcomm/charts/BarChart';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import BarChart from '@/features/smarcomm/charts/BarChart';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type InsightSeverity = 'danger' | 'warning' | 'opportunity' | 'suggestion';
 type FunnelStageKey = 'awareness' | 'interest' | 'consideration' | 'purchase' | 'retention' | 'advocacy';

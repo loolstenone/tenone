@@ -6,8 +6,8 @@ import {
   GitBranch, Activity, FileBarChart, BookOpen, Route,
   ChevronRight, BarChart3, Sparkles, Shield
 } from 'lucide-react';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
 
 const FEATURES = [
   {

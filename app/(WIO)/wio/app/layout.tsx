@@ -11,7 +11,8 @@ import { fetchMyTenants, fetchMyMembership, addMember } from '@/lib/supabase/wio
 import {
   CATEGORY_CATALOG, MODULE_CATALOG, ALL_MODULE_KEYS, getModulesByCategory,
   SERVICE_CATALOG, getModulesByService, getServiceDef,
-  loadOrbiConfig, loadOrbiConfigAsync, loadAccordionState, saveAccordionState,
+  loadOrbiConfig, loadAccordionState, saveAccordionState,
+  loadOrbiConfigDB, loadAccordionStateDB, saveAccordionStateDB,
   type OrbiConfig, type WIOServiceDef, type WIOModuleDef,
 } from '@/lib/wio-modules';
 import type { WIOTenant, WIOMember } from '@/types/wio';
@@ -82,16 +83,16 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   // Close mobile sidebar on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Load orbi config — localStorage 즉시 표시 후 DB 동기화
+  // Load orbi config (DB-first + localStorage fallback)
   const reloadConfig = useCallback(() => {
-    const cfg = loadOrbiConfig(); // 즉시 localStorage
+    const cfg = loadOrbiConfig();
     setOrbiConfig(cfg);
-    loadOrbiConfigAsync().then(dbCfg => setOrbiConfig(dbCfg)).catch(() => {}); // DB 비동기 반영
   }, []);
 
   useEffect(() => {
-    reloadConfig();
-    // Listen for storage changes from settings page
+    // DB에서 먼저 로드 (비동기)
+    loadOrbiConfigDB().then(cfg => setOrbiConfig(cfg)).catch(() => reloadConfig());
+    // localStorage 변경 감지 (같은 탭 외 변경)
     const handler = (e: StorageEvent) => {
       if (e.key?.startsWith('wio-orbi-')) reloadConfig();
     };
@@ -99,13 +100,14 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
     return () => window.removeEventListener('storage', handler);
   }, [reloadConfig]);
 
-  // Reload config when returning to layout from settings (same tab)
+  // pathname 변경 시 재로드 (설정 페이지에서 돌아올 때)
   useEffect(() => { reloadConfig(); }, [pathname, reloadConfig]);
 
-  // Load accordion state
+  // Load accordion state (DB-first)
   useEffect(() => {
-    const saved = loadAccordionState();
-    setOpenCategories(saved);
+    loadAccordionStateDB().then(saved => setOpenCategories(saved)).catch(() => {
+      setOpenCategories(loadAccordionState());
+    });
   }, []);
 
   // Init tenant
@@ -297,7 +299,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   function toggleCategory(categoryId: string) {
     setOpenCategories(prev => {
       const next = prev.includes(categoryId) ? prev.filter(c => c !== categoryId) : [...prev, categoryId];
-      saveAccordionState(next);
+      saveAccordionStateDB(next);
       return next;
     });
   }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Check, ArrowRight, Sparkles, Building2, Zap, Crown, Settings, Gift, Server, Mail, HardDrive } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── SaaS 과금 플랜 (v2.0) ── */
 const PLANS = [

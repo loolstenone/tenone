@@ -496,6 +496,18 @@ export async function fetchOpportunities(tenantId: string, status?: string): Pro
   return (data || []).map((r: any) => snakeToCamel(r));
 }
 
+export async function fetchTenOneOpportunities(status?: string): Promise<any[]> {
+  const { data: tenant } = await supabase.from('wio_tenants').select('id').eq('slug', 'tenone').single();
+  if (!tenant) return [];
+  return fetchOpportunities(tenant.id as string, status);
+}
+
+export async function fetchTenOneMembership(): Promise<any | null> {
+  const { data: tenant } = await supabase.from('wio_tenants').select('id').eq('slug', 'tenone').single();
+  if (!tenant) return null;
+  return fetchMyMembership(tenant.id as string);
+}
+
 export async function createOpportunity(opp: { tenantId: string; title: string; source?: string; url?: string; description?: string; estimatedValue?: number; deadline?: string }): Promise<boolean> {
   const { error } = await supabase.from('wio_opportunities').insert(camelToSnake(opp as any));
   return !error;

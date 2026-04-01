@@ -1,6 +1,8 @@
 "use client";
 
-import { DollarSign, Plus, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { DollarSign, Plus, Loader2 } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface Payment {
     id: string;
@@ -26,10 +28,54 @@ const statusColor: Record<string, string> = {
     "미지급": "bg-red-50 text-red-600",
 };
 
+const statusMap: Record<string, Payment["status"]> = {
+    paid: "지급완료",
+    scheduled: "지급예정",
+    unpaid: "미지급",
+    pending: "지급예정",
+};
+
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
+function dbRowToPayment(r: Record<string, unknown>): Payment {
+    return {
+        id: r.id as string,
+        vendor: (r.vendor_name as string) || (r.vendor as string) || "-",
+        description: (r.description as string) || "-",
+        amount: (r.amount as number) || 0,
+        dueDate: ((r.due_date as string) || "-").slice(0, 10),
+        type: (r.type as string) === "reverse" ? "역발행" : "정발행",
+        status: statusMap[(r.status as string) || "unpaid"] || "미지급",
+    };
+}
+
 export default function PaymentPage() {
-    const unpaid = mockPayments.filter(p => p.status !== "지급완료").reduce((s, p) => s + p.amount, 0);
+    const [payments, setPayments] = useState<Payment[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const rows = await erpDb.fetchPayments({ limit: 50 });
+                if (!cancelled) {
+                    setPayments(rows.length > 0 ? rows.map(r => dbRowToPayment(r as Record<string, unknown>)) : mockPayments);
+                }
+            } catch {
+                if (!cancelled) setPayments(mockPayments);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    if (loading) {
+        return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+    }
+
+    const unpaid = payments.filter(p => p.status !== "지급완료").reduce((s, p) => s + p.amount, 0);
+    const paid = payments.filter(p => p.status === "지급완료").reduce((s, p) => s + p.amount, 0);
 
     return (
         <div className="max-w-5xl">
@@ -46,8 +92,8 @@ export default function PaymentPage() {
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[
                     { label: "미지급 합계", value: formatKRW(unpaid) },
-                    { label: "이번 달 지급 완료", value: formatKRW(3500000) },
-                    { label: "미지급 건수", value: `${mockPayments.filter(p => p.status === "미지급").length}건` },
+                    { label: "지급 완료", value: formatKRW(paid) },
+                    { label: "미지급 건수", value: `${payments.filter(p => p.status === "미지급").length}건` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
@@ -57,34 +103,38 @@ export default function PaymentPage() {
             </div>
 
             <div className="border border-neutral-200 bg-white">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b border-neutral-100 text-xs text-neutral-400">
-                            <th className="text-left p-3 font-medium">거래처</th>
-                            <th className="text-left p-3 font-medium">내용</th>
-                            <th className="text-right p-3 font-medium">금액</th>
-                            <th className="text-center p-3 font-medium">발행유형</th>
-                            <th className="text-left p-3 font-medium">지급일</th>
-                            <th className="text-center p-3 font-medium">상태</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mockPayments.map(p => (
-                            <tr key={p.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
-                                <td className="p-3 font-medium">{p.vendor}</td>
-                                <td className="p-3 text-neutral-600">{p.description}</td>
-                                <td className="p-3 text-right font-medium">{formatKRW(p.amount)}</td>
-                                <td className="p-3 text-center">
-                                    <span className={`text-xs px-2 py-0.5 rounded ${p.type === "정발행" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>{p.type}</span>
-                                </td>
-                                <td className="p-3 text-neutral-500 text-xs">{p.dueDate}</td>
-                                <td className="p-3 text-center">
-                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
-                                </td>
+                {payments.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-neutral-400">지급 내역이 없습니다</div>
+                ) : (
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-neutral-100 text-xs text-neutral-400">
+                                <th className="text-left p-3 font-medium">거래처</th>
+                                <th className="text-left p-3 font-medium">내용</th>
+                                <th className="text-right p-3 font-medium">금액</th>
+                                <th className="text-center p-3 font-medium">발행유형</th>
+                                <th className="text-left p-3 font-medium">지급일</th>
+                                <th className="text-center p-3 font-medium">상태</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {payments.map(p => (
+                                <tr key={p.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
+                                    <td className="p-3 font-medium">{p.vendor}</td>
+                                    <td className="p-3 text-neutral-600">{p.description}</td>
+                                    <td className="p-3 text-right font-medium">{formatKRW(p.amount)}</td>
+                                    <td className="p-3 text-center">
+                                        <span className={`text-xs px-2 py-0.5 rounded ${p.type === "정발행" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>{p.type}</span>
+                                    </td>
+                                    <td className="p-3 text-neutral-500 text-xs">{p.dueDate}</td>
+                                    <td className="p-3 text-center">
+                                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
         </div>
     );

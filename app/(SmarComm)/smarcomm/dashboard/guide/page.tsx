@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ExternalLink, BookOpen, Lightbulb } from 'lucide-react';
 import { GUIDES } from '@/lib/smarcomm/guide-data';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
 
 export default function GuidePage() {
   const [activeGuideId, setActiveGuideId] = useState(GUIDES[0].id);

@@ -1,5 +1,5 @@
-import { HeRoHeader } from "@/components/HeRoHeader";
-import { HeRoFooter } from "@/components/HeRoFooter";
+import { HeRoHeader } from "@/features/hero/HeRoHeader";
+import { HeRoFooter } from "@/features/hero/HeRoFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

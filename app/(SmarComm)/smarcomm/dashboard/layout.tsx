@@ -4,8 +4,8 @@ import { useEffect, useState, createContext } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, ChevronDown, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import DashboardSidebar from '@/components/smarcomm/DashboardSidebar';
-import ContextPanel from '@/components/smarcomm/ContextPanel';
+import DashboardSidebar from '@/features/smarcomm/DashboardSidebar';
+import ContextPanel from '@/features/smarcomm/ContextPanel';
 import { useAuth } from '@/lib/auth-context';
 import { WorkflowProvider } from '@/lib/smarcomm/workflow-context';
 
@@ -78,6 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleLogout = async () => {
     await logout();
+    router.push('/');
   };
 
   return (

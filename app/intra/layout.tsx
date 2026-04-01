@@ -49,16 +49,10 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 1) getUser — 5초 타임아웃 (3초는 느린 네트워크에서 부족)
-                const userResult = await Promise.race([
-                    sb.auth.getUser(),
-                    new Promise<null>((r) => setTimeout(() => r(null), 5000)),
-                ]);
-
-                const user =
-                    userResult && typeof userResult === "object" && "data" in userResult
-                        ? (userResult as { data: { user: any } }).data?.user
-                        : null;
+                // 1) getSession() — 쿠키/로컬스토리지에서 즉시 읽음 (네트워크 없음, cold start 무관)
+                // 미들웨어가 이미 getSession()으로 쿠키를 갱신해두므로 여기서는 빠름
+                const { data: sessionData } = await sb.auth.getSession();
+                const user = sessionData?.session?.user ?? null;
 
                 if (!user) {
                     console.log("[Intra] No session found, showing login");
@@ -151,11 +145,11 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
             try {
                 const sb = createClient();
 
-                // 10초 타임아웃
+                // 20초 타임아웃 (cold start 시 10~15초 걸릴 수 있음)
                 const signInResult = await Promise.race([
                     sb.auth.signInWithPassword({ email, password }),
                     new Promise<{ error: { message: string } }>((resolve) =>
-                        setTimeout(() => resolve({ error: { message: 'timeout' } }), 10000)
+                        setTimeout(() => resolve({ error: { message: 'timeout' } }), 20000)
                     ),
                 ]);
 
@@ -163,8 +157,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
                 if (authError) {
                     const msg = authError.message === 'timeout'
-                        ? "서버 응답이 지연되고 있습니다. 잠시 후 다시 시도하세요."
-                        : "인증 실패. 이메일과 비밀번호를 확인하세요.";
+                        ? "서버 연결에 시간이 걸리고 있습니다. 버튼을 다시 눌러주세요."
+                        : "이메일 또는 비밀번호를 확인하세요.";
                     console.error("[Intra Login] error:", authError.message);
                     setError(msg);
                     setSubmitting(false);

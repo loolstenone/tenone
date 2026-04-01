@@ -1,5 +1,5 @@
-import { OgamjaHeader } from "@/components/OgamjaHeader";
-import { OgamjaFooter } from "@/components/OgamjaFooter";
+import { OgamjaHeader } from "@/features/ogamja/OgamjaHeader";
+import { OgamjaFooter } from "@/features/ogamja/OgamjaFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

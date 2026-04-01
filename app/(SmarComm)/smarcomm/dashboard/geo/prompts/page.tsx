@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Search, MessageSquare, CheckCircle2, XCircle, Plus, Play, Pause, Clock, AlertTriangle, Trash2 } from 'lucide-react';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type PromptTab = 'research' | 'tracking';
 

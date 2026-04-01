@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 import {
   FileText, Sparkles, Search, RefreshCw, Plus, Filter,
 } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import BarChart from '@/components/smarcomm/charts/BarChart';
-import NextStepCTA from '@/components/smarcomm/NextStepCTA';
+import BarChart from '@/features/smarcomm/charts/BarChart';
+import NextStepCTA from '@/features/smarcomm/NextStepCTA';
 import { useWorkflow } from '@/lib/smarcomm/workflow-context';
 import { PipelineStage } from '@/types/workflow';
 import { workflowChannels } from '@/lib/smarcomm/workflow-data';

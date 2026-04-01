@@ -1,4 +1,9 @@
 // 차트 컬러 팔레트 시스템
+import { getSetting, setSetting } from '@/lib/supabase/settings';
+
+const DB_APP = 'smarcomm';
+const DB_KEY_PALETTE = 'chart_palette';
+const LS_KEY = 'smarcomm_chart_palette';
 
 export interface ChartPalette {
   id: string;
@@ -48,7 +53,7 @@ export const CHART_PALETTES: ChartPalette[] = [
 
 export function getChartPalette(): ChartPalette {
   if (typeof window === 'undefined') return CHART_PALETTES[0];
-  const saved = localStorage.getItem('smarcomm_chart_palette');
+  const saved = localStorage.getItem(LS_KEY);
   if (saved) {
     const found = CHART_PALETTES.find(p => p.id === saved);
     if (found) return found;
@@ -57,7 +62,14 @@ export function getChartPalette(): ChartPalette {
 }
 
 export function setChartPalette(id: string) {
-  localStorage.setItem('smarcomm_chart_palette', id);
+  if (typeof window !== 'undefined') localStorage.setItem(LS_KEY, id);
+  setSetting(DB_APP, DB_KEY_PALETTE, id, LS_KEY);
+}
+
+/** mount 시 DB에서 팔레트 로드 → localStorage 동기화 */
+export async function loadChartPaletteFromDB(): Promise<void> {
+  const id = await getSetting<string>(DB_APP, DB_KEY_PALETTE, LS_KEY);
+  if (id && typeof window !== 'undefined') localStorage.setItem(LS_KEY, id);
 }
 
 export function getChartColors(count: number = 7): string[] {

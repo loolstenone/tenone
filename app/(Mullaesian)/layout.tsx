@@ -1,5 +1,5 @@
-import { MullaesianHeader } from "@/components/MullaesianHeader";
-import { MullaesianFooter } from "@/components/MullaesianFooter";
+import { MullaesianHeader } from "@/features/mullaesian/MullaesianHeader";
+import { MullaesianFooter } from "@/features/mullaesian/MullaesianFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

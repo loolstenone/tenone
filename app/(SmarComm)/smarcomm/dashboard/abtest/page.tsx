@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Plus, CheckCircle2, BarChart3, Search, ChevronRight } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface ABTest {
   id: string;

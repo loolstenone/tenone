@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { Check, X } from 'lucide-react';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
 
 const TIERS = [
   {

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import {
     ArrowLeft, Plus, Calendar, Users, Briefcase, TrendingUp,
-    CheckCircle2, X, Clock, User,
+    CheckCircle2, X, Clock, User, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import * as projectsDb from "@/lib/supabase/projects";
 
 /* ═══════════════════════════════════════════════
    Types
@@ -246,6 +247,8 @@ export default function ProjectDetailPage() {
 
     const [activeTab, setActiveTab] = useState<Tab>("개요");
     const [showJobModal, setShowJobModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [project, setProject] = useState<ProjectData | null>(projectsDB[code] ?? null);
 
     // Job 등록 모달 state
     const [jobName, setJobName] = useState("");
@@ -257,7 +260,72 @@ export default function ProjectDetailPage() {
     const [jobEstHours, setJobEstHours] = useState("");
     const [jobEstAmount, setJobEstAmount] = useState("");
 
-    const project = projectsDB[code];
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const dbProject = await projectsDb.fetchProjectByCode(code);
+                if (!cancelled && dbProject) {
+                    const [dbJobs, dbMembers] = await Promise.all([
+                        projectsDb.fetchJobs(dbProject.id).catch(() => []),
+                        projectsDb.fetchProjectMembers(dbProject.id).catch(() => []),
+                    ]);
+                    const mapped: ProjectData = {
+                        code: dbProject.code,
+                        name: dbProject.name,
+                        type: (dbProject.type as ProjectType) || "내부",
+                        status: (dbProject.status as ProjectStatus) || "기획",
+                        pm: dbProject.pm?.name ?? (dbProject as any).pm_name ?? "-",
+                        startDate: (dbProject.start_date ?? (dbProject as any).startDate ?? "").slice(0, 10),
+                        endDate: (dbProject.end_date ?? (dbProject as any).endDate ?? "").slice(0, 10),
+                        memberCount: dbMembers.length || (dbProject as any).member_count || 0,
+                        approved: (dbProject as any).approved ?? false,
+                        description: (dbProject as any).description ?? "",
+                        milestones: (dbProject as any).milestones ?? [],
+                        estBilling: (dbProject as any).billing ?? (dbProject as any).est_billing ?? 0,
+                        estExCost: (dbProject as any).ex_cost ?? (dbProject as any).est_ex_cost ?? 0,
+                        estGrossProfit: (dbProject as any).gross_profit ?? (dbProject as any).est_gross_profit ?? 0,
+                        actualBilling: (dbProject as any).actual_billing,
+                        actualGrossProfit: (dbProject as any).actual_gross_profit,
+                        jobs: dbJobs.map((j: any) => ({
+                            code: j.code ?? j.id,
+                            name: j.name,
+                            type: (j.type ?? "PR") as JobType,
+                            detail: (j.detail ?? "PL") as JobDetail,
+                            assignee: j.assignee ?? "-",
+                            startDate: (j.start_date ?? j.startDate ?? "").slice(0, 10),
+                            endDate: (j.end_date ?? j.endDate ?? "").slice(0, 10),
+                            estimatedHours: j.estimated_hours ?? j.estimatedHours ?? 0,
+                            actualHours: j.actual_hours ?? j.actualHours ?? 0,
+                            status: (j.status ?? "대기") as JobStatus,
+                            estimatedAmount: j.estimated_amount ?? j.estimatedAmount,
+                        })),
+                        staff: dbMembers.map((m: any) => ({
+                            name: m.member?.name ?? "-",
+                            role: m.role ?? "-",
+                            estimatedHours: m.estimated_hours ?? 0,
+                            actualHours: m.actual_hours ?? 0,
+                            period: `${(m.start_date ?? "").slice(0, 7)} ~ ${(m.end_date ?? "").slice(0, 7)}`,
+                        })),
+                    };
+                    setProject(mapped);
+                }
+            } catch {
+                // mock 유지
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [code]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     if (!project) {
         return (

@@ -97,7 +97,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
 
     let query = supabase
         .from('posts')
-        .select('id, site, board, title, excerpt, category, status, author_type, represent_image, tags, is_pinned, is_secret, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
+        .select('id, site, board, title, excerpt, category, status, author_type, represent_image, tags, is_pinned, view_count, like_count, comment_count, bookmark_count, created_at', { count: 'exact' })
         .eq('site', site);
 
     if (board) query = query.eq('board', board);
@@ -218,7 +218,6 @@ export async function createPost(input: CreatePostInput, authorId?: string): Pro
         represent_image: input.representImage || extractFirstImage(input.content) || '',
         status: input.status || 'published',
         is_pinned: input.isPinned || false,
-        is_secret: input.isSecret || false,
     };
 
     if (authorId) {
@@ -252,7 +251,6 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<Po
     if (input.representImage !== undefined) row.represent_image = input.representImage;
     if (input.status !== undefined) row.status = input.status;
     if (input.isPinned !== undefined) row.is_pinned = input.isPinned;
-    if (input.isSecret !== undefined) row.is_secret = input.isSecret;
     row.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -502,7 +500,7 @@ export async function fetchRelatedPosts(
 ): Promise<Post[]> {
     let query = supabase
         .from('posts')
-        .select('id, site, board, title, excerpt, category, represent_image, author_name, tags, view_count, like_count, comment_count, created_at')
+        .select('id, site, board, title, excerpt, category, represent_image, author_type, guest_nickname, tags, view_count, like_count, comment_count, created_at')
         .eq('site', site)
         .eq('board', board)
         .eq('status', 'published')

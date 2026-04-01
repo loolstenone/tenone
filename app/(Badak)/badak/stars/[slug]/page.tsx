@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { fetchStarBySlug } from '@/lib/supabase/badak';
-import ProfileCard from '@/components/badak/ProfileCard';
+import ProfileCard from '@/features/badak/ProfileCard';
 import type { BadakStar } from '@/types/badak';
 
 export default function StarDetailPage() {

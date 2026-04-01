@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
 import clsx from "clsx";
-import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
 
 const months = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
+
+const ITEMS = ["매출 (Billing)", "외부비 (Ex-Cost)", "매출총이익", "내부비", "영업이익"];
 
 interface ForecastRow {
   item: string;
@@ -19,7 +21,7 @@ interface ForecastRow {
   gap: number;
 }
 
-const forecastData: ForecastRow[] = [
+const mockForecast: ForecastRow[] = [
   { item: "매출 (Billing)", plan: 42_000_000, fc1: 38_000_000, fc2: 40_000_000, prevActual: 35_000_000, gap: -2_000_000 },
   { item: "외부비 (Ex-Cost)", plan: 27_000_000, fc1: 25_000_000, fc2: 26_000_000, prevActual: 23_000_000, gap: -1_000_000 },
   { item: "매출총이익", plan: 15_000_000, fc1: 13_000_000, fc2: 14_000_000, prevActual: 12_000_000, gap: -1_000_000 },
@@ -29,14 +31,62 @@ const forecastData: ForecastRow[] = [
 
 type Status = "작성중" | "검토요청" | "승인완료";
 
+const statusFromDb: Record<string, Status> = {
+  draft: "작성중", review: "검토요청", confirmed: "승인완료",
+};
+
 export default function MonthlyForecastPage() {
-  const { user } = useAuth();
-  const [monthIdx, setMonthIdx] = useState(2); // 3월
-  const [round, setRound] = useState(2); // 2차
+  const now = new Date();
+  const [monthIdx, setMonthIdx] = useState(now.getMonth());
+  const [round, setRound] = useState(2);
   const [status, setStatus] = useState<Status>("작성중");
+  const [forecastData, setForecastData] = useState<ForecastRow[]>(mockForecast);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await erpDb.fetchMonthlyForecasts({ year: now.getFullYear(), month: monthIdx + 1 });
+        if (!cancelled && rows.length > 0) {
+          // 이전 달 실적 (prevActual) — 한 달 전 actual
+          const prevMonth = monthIdx === 0 ? 12 : monthIdx;
+          const prevYear = monthIdx === 0 ? now.getFullYear() - 1 : now.getFullYear();
+          const prevRows = await erpDb.fetchMonthlyForecasts({ year: prevYear, month: prevMonth });
+          const prevMap: Record<string, number> = {};
+          prevRows.forEach(r => { prevMap[r.item as string] = (r.actual as number) || 0; });
+
+          // 현재 round는 첫 번째 행에서 읽기
+          const firstRow = rows[0];
+          if (firstRow.round) setRound(firstRow.round as number);
+          if (firstRow.status) setStatus(statusFromDb[firstRow.status as string] || "작성중");
+
+          const mapped: ForecastRow[] = ITEMS.map(item => {
+            const r = rows.find(x => x.item === item) as Record<string, unknown> | undefined;
+            const plan = (r?.plan as number) || 0;
+            const fc2 = (r?.forecast_2 as number) || 0;
+            return {
+              item,
+              plan,
+              fc1: (r?.forecast_1 as number) || 0,
+              fc2,
+              prevActual: prevMap[item] || 0,
+              gap: fc2 - plan,
+            };
+          });
+          if (!cancelled) setForecastData(mapped);
+        }
+      } catch { /* mock 유지 */ } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [monthIdx]);
 
   const prevMonth = () => setMonthIdx((p) => Math.max(0, p - 1));
   const nextMonth = () => setMonthIdx((p) => Math.min(11, p + 1));
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-5xl">
@@ -44,7 +94,7 @@ export default function MonthlyForecastPage() {
         <div>
           <h1 className="text-xl font-bold text-neutral-900">월별 추정</h1>
           <p className="text-sm text-neutral-500">
-            2026년 {months[monthIdx]} {round}차 추정
+            {now.getFullYear()}년 {months[monthIdx]} {round}차 추정
           </p>
         </div>
         <span

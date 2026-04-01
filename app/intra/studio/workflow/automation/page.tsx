@@ -1,16 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import { useWorkflow } from "@/lib/workflow-context";
+import { useState, useEffect } from "react";
+import { fetchAutomations, toggleAutomationEnabled } from "@/lib/supabase/workflow";
+import { initialAutomations } from "@/lib/workflow-data";
 import { AutomationCard } from "@/components/workflow/AutomationCard";
 import { AutomationBuilder } from "@/components/workflow/AutomationBuilder";
 import { AutomationRule } from "@/types/workflow";
-import { Plus, Zap, Power, AlertCircle } from "lucide-react";
+import { Plus, Zap, Power, AlertCircle, Loader2 } from "lucide-react";
 
 export default function AutomationPage() {
-    const { automations, addAutomation, updateAutomation, toggleAutomation, deleteAutomation } = useWorkflow();
+    const [automations, setAutomations] = useState<AutomationRule[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isBuilderOpen, setIsBuilderOpen] = useState(false);
     const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchAutomations()
+            .then(a => { if (!cancelled) setAutomations(a.length > 0 ? a : initialAutomations); })
+            .catch(() => { if (!cancelled) setAutomations(initialAutomations); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const addAutomation = (rule: AutomationRule) => {
+        setAutomations(prev => [rule, ...prev]);
+    };
+
+    const updateAutomation = (id: string, updates: Partial<AutomationRule>) => {
+        setAutomations(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
+    };
+
+    const toggleAutomation = (id: string) => {
+        setAutomations(prev => prev.map(a => a.id === id ? { ...a, enabled: !a.enabled } : a));
+        const rule = automations.find(a => a.id === id);
+        if (rule) toggleAutomationEnabled(id, !rule.enabled).catch(() => {});
+    };
+
+    const deleteAutomation = (id: string) => {
+        setAutomations(prev => prev.filter(a => a.id !== id));
+    };
 
     const activeCount = automations.filter(a => a.enabled).length;
 
@@ -26,6 +55,8 @@ export default function AutomationPage() {
             addAutomation(rule);
         }
     };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="max-w-4xl">

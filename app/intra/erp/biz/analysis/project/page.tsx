@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Trophy, ArrowUp, ArrowDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Trophy, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import * as projectsDb from "@/lib/supabase/projects";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -27,15 +28,49 @@ const projects: ProjectPL[] = [
   { rank: 5, code: "PRJ-2026-0004", name: "MADLeap 프로그램", type: "교육/커뮤니티", billing: 40_000_000, grossProfit: 11_000_000, operatingProfit: 6_000_000, profitRate: 15.0 },
 ];
 
-const avgRate = (projects.reduce((s, p) => s + p.profitRate, 0) / projects.length).toFixed(1);
-const topProject = projects[0];
-const bottomProject = projects[projects.length - 1];
+const mockProjects = projects;
 
 export default function ProjectProfitPage() {
   const { user } = useAuth();
   const [sortBy, setSortBy] = useState<"profitRate" | "billing" | "operatingProfit">("profitRate");
+  const [projectData, setProjectData] = useState<ProjectPL[]>(mockProjects);
+  const [loading, setLoading] = useState(true);
 
-  const sorted = [...projects].sort((a, b) => b[sortBy] - a[sortBy]).map((p, i) => ({ ...p, rank: i + 1 }));
+  useEffect(() => {
+    let cancelled = false;
+    projectsDb.fetchProjects({ limit: 100 }).then(({ projects: rows }) => {
+      if (!cancelled && rows.length > 0) {
+        const mapped: ProjectPL[] = rows
+          .filter((r: Record<string, unknown>) => (r.billing as number) > 0)
+          .map((r: Record<string, unknown>, i: number) => {
+            const billing = (r.billing as number) || 0;
+            const revenue = (r.revenue as number) || 0;
+            const profit = (r.profit as number) || 0;
+            const grossProfit = billing - revenue;
+            const profitRate = billing > 0 ? Math.round((profit / billing) * 1000) / 10 : 0;
+            return {
+              rank: i + 1,
+              code: (r.code as string) || "",
+              name: (r.name as string) || "",
+              type: (r.type as string) || "",
+              billing,
+              grossProfit,
+              operatingProfit: profit,
+              profitRate,
+            };
+          });
+        if (mapped.length > 0) setProjectData(mapped);
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const sorted = [...projectData].sort((a, b) => b[sortBy] - a[sortBy]).map((p, i) => ({ ...p, rank: i + 1 }));
+  const avgRate = projectData.length > 0 ? (projectData.reduce((s, p) => s + p.profitRate, 0) / projectData.length).toFixed(1) : "0";
+  const topProject = sorted[0];
+  const bottomProject = sorted[sorted.length - 1];
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-5xl">

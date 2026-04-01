@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { getPublishedPosts, BLOG_CATEGORIES } from '@/lib/smarcomm/blog-data';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
 
 export default function BlogPage() {
   const [category, setCategory] = useState('전체');

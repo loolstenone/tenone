@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Settings, Trash2, Pencil, ChevronRight, CheckCircle2, X } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
 
 type DraftType = "기안" | "품의" | "보고";
 type ApprovalFactor = "일반" | "프로젝트" | "타임시트" | "경비" | "구매" | "인사" | "계약";
@@ -56,19 +57,41 @@ export default function ApprovalLinePage() {
     const [newType, setNewType] = useState<DraftType>("기안");
     const [newFactor, setNewFactor] = useState<ApprovalFactor>("일반");
     const [newSteps, setNewSteps] = useState("기안자, 팀장, 부서장");
+    const [dbConnected, setDbConnected] = useState(false);
 
-    const handleAdd = () => {
+    // DB에서 템플릿 로드
+    useEffect(() => {
+        erpDb.fetchApprovalTemplates()
+            .then(data => {
+                if (data.length > 0) {
+                    setTemplates(data.map((t: any) => ({
+                        id: t.id,
+                        name: t.name,
+                        type: t.type as DraftType,
+                        factor: t.factor as ApprovalFactor,
+                        steps: Array.isArray(t.steps) ? t.steps : [],
+                        active: t.active ?? true,
+                    })));
+                    setDbConnected(true);
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    const handleAdd = async () => {
         if (!newName.trim()) return;
         const steps = newSteps.split(",").map(s => ({ role: s.trim() })).filter(s => s.role);
-        const newTemplate: ApprovalTemplate = {
-            id: String(Date.now()),
-            name: newName,
-            type: newType,
-            factor: newFactor,
-            steps,
-            active: true,
-        };
-        setTemplates(prev => [...prev, newTemplate]);
+        if (dbConnected) {
+            try {
+                const saved = await erpDb.createApprovalTemplate({ name: newName, type: newType, factor: newFactor, steps });
+                setTemplates(prev => [...prev, { id: saved.id, name: saved.name, type: saved.type as DraftType, factor: saved.factor as ApprovalFactor, steps: saved.steps, active: saved.active }]);
+            } catch {
+                // fallback to local
+                setTemplates(prev => [...prev, { id: String(Date.now()), name: newName, type: newType, factor: newFactor, steps, active: true }]);
+            }
+        } else {
+            setTemplates(prev => [...prev, { id: String(Date.now()), name: newName, type: newType, factor: newFactor, steps, active: true }]);
+        }
         setShowModal(false);
         setNewName("");
         setNewSteps("기안자, 팀장, 부서장");

@@ -21,7 +21,7 @@ const domainPrefixMap: Record<string, string> = {
     'fwn.co.kr': '/fwn',
     'www.fwn.co.kr': '/fwn',
     'montz.tenone.biz': '/montz',
-    'trendhunter.tenone.biz': '/trendhunter',
+    'trendhunter.tenone.biz': '/mindle',
     'mindle.tenone.biz': '/mindle',
     'myverse.tenone.biz': '/myverse',
     'badak.biz': '/badak',
@@ -73,8 +73,9 @@ export async function middleware(request: NextRequest) {
             },
         }
     );
-    // getUser()를 호출해야 세션 쿠키가 갱신됨
-    await supabase.auth.getUser();
+    // getSession()으로 쿠키 갱신 (getUser()는 매 요청마다 Supabase 서버 호출 → cold start 블로킹)
+    // 보안 검증이 필요한 경우는 API Route에서 getUser() 직접 호출
+    await supabase.auth.getSession();
 
     // 2. 도메인 → 프리픽스 리라이트
     const prefix = domainPrefixMap[reqDomain];

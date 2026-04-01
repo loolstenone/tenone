@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Plus, Search, Filter, ExternalLink, Calendar, DollarSign, MapPin,
     ChevronRight, X, Clock, CheckCircle2, XCircle, Eye, TrendingUp,
-    Globe, Briefcase, Award, Users, ArrowRight, Tag,
+    Globe, Briefcase, Award, Users, ArrowRight, Tag, Loader2,
 } from "lucide-react";
 import clsx from "clsx";
 import { isMockAllowed } from "@/lib/env";
+import { fetchTenOneOpportunities } from "@/lib/supabase/wio";
 
 type OpportunitySource = 'narjangter' | 'competition' | 'government' | 'referral' | 'website' | 'openchat' | 'other';
 type OpportunityStatus = 'new' | 'reviewing' | 'bidding' | 'won' | 'lost' | 'expired';
@@ -123,9 +124,44 @@ function ScoreBadge({ score }: { score?: number }) {
 type ViewMode = 'pipeline' | 'list';
 type TabKey = 'all' | 'new' | 'reviewing' | 'bidding' | 'won' | 'lost';
 
+function mapDbToOpportunity(r: Record<string, unknown>): Opportunity {
+    const assigned = r.assigned as Record<string, unknown> | null;
+    const tags = Array.isArray(r.tags) ? r.tags as string[] : [];
+    return {
+        id: (r.id as string) || "",
+        title: (r.title as string) || "",
+        source: ((r.source as OpportunitySource) || 'other'),
+        sourceUrl: (r.sourceUrl as string) || (r.url as string) || undefined,
+        description: (r.description as string) || undefined,
+        budgetMin: (r.estimatedValue as number) || undefined,
+        budgetMax: undefined,
+        deadline: (r.deadline as string) || undefined,
+        region: (r.region as string) || undefined,
+        category: (r.category as string) || undefined,
+        tags,
+        status: ((r.status as OpportunityStatus) || 'new'),
+        assignedTo: assigned ? ((assigned.displayName as string) || undefined) : undefined,
+        relevanceScore: (r.relevanceScore as number) || undefined,
+        contactName: (r.contactName as string) || undefined,
+        contactEmail: (r.contactEmail as string) || undefined,
+        createdAt: (r.createdAt as string) || (r.created_at as string) || "",
+    };
+}
+
 export default function OpportunityPage() {
-    const [data] = useState(mockData);
+    const [data, setData] = useState<Opportunity[]>(mockData);
+    const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<ViewMode>('pipeline');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchTenOneOpportunities().then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                setData(rows.map(r => mapDbToOpportunity(r as Record<string, unknown>)));
+            }
+        }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
     const [activeTab, setActiveTab] = useState<TabKey>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [sourceFilter, setSourceFilter] = useState<OpportunitySource | 'all'>('all');
@@ -154,6 +190,8 @@ export default function OpportunityPage() {
         { key: 'won', label: '수주', count: countByStatus('won') },
         { key: 'lost', label: '실패/만료', count: countByStatus('lost') + countByStatus('expired') },
     ];
+
+    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="max-w-6xl">

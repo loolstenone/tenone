@@ -1,24 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Upload, User, ArrowRight } from "lucide-react";
+import { Send, Upload, User, ArrowRight, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { createApproval } from "@/lib/supabase/erp";
+import { createClient } from "@/lib/supabase/client";
 
 const approvalLine = [
-    { role: "기안자", name: "나 (Cheonil Jeon)" },
+    { role: "기안자", name: "나" },
     { role: "1차 결재", name: "Sarah Kim" },
-    { role: "최종 결재", name: "Cheonil Jeon" },
+    { role: "최종 결재", name: "대표" },
 ];
 
 export default function ExpenditureDraftPage() {
+    const router = useRouter();
     const [expType, setExpType] = useState("구매");
     const [subject, setSubject] = useState("");
     const [amount, setAmount] = useState("");
     const [vendor, setVendor] = useState("");
     const [reason, setReason] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert("품의서가 제출되었습니다.");
+        setSubmitting(true);
+        try {
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            const email = session?.user?.email;
+            let drafterId: string | null = null;
+            if (email) {
+                const { data: m } = await supabase.from("members").select("id").eq("email", email).single();
+                drafterId = m?.id || null;
+            }
+            await createApproval({
+                type: "expenditure",
+                subtype: expType,
+                title: subject,
+                amount: Number(amount.replace(/,/g, "")) || 0,
+                vendor,
+                description: reason,
+                status: "pending",
+                drafter_id: drafterId,
+            });
+            router.push("/intra/erp/approval");
+        } catch {
+            alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -126,9 +156,10 @@ export default function ExpenditureDraftPage() {
                 <div className="flex justify-end">
                     <button
                         type="submit"
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-neutral-800 rounded-lg hover:bg-neutral-700 transition-colors"
+                        disabled={submitting}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-neutral-800 rounded-lg hover:bg-neutral-700 transition-colors disabled:opacity-50"
                     >
-                        <Send className="w-3.5 h-3.5" />
+                        {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                         품의서 제출
                     </button>
                 </div>

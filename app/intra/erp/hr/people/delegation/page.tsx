@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRightLeft, Plus, X, Check, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRightLeft, Plus, X, Check, Clock, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Delegation {
     id: string;
@@ -14,7 +15,7 @@ interface Delegation {
     reason: string;
 }
 
-const mockDelegations: Delegation[] = [
+const initialDelegations: Delegation[] = [
     { id: "1", from: "Cheonil Jeon", to: "Sarah Kim", scope: "프로젝트 결재", startDate: "2026-03-18", endDate: "2026-03-25", status: "활성", reason: "출장" },
     { id: "2", from: "Cheonil Jeon", to: "김인사", scope: "인사 승인", startDate: "2026-03-10", endDate: "2026-03-15", status: "만료", reason: "휴가" },
 ];
@@ -26,7 +27,40 @@ const statusColor: Record<string, string> = {
 };
 
 export default function DelegationPage() {
+    const [delegations, setDelegations] = useState<Delegation[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('delegations').select('*').order('start_date', { ascending: false });
+                if (!cancelled && data && data.length > 0 && !error) {
+                    setDelegations(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        from: (r.from_name as string) || '',
+                        to: (r.to_name as string) || '',
+                        scope: (r.scope as string) || '',
+                        startDate: ((r.start_date as string) || '').split('T')[0],
+                        endDate: ((r.end_date as string) || '').split('T')[0],
+                        status: ((r.status as string) || '대기') as Delegation['status'],
+                        reason: (r.reason as string) || '',
+                    })));
+                } else if (!cancelled) {
+                    setDelegations(initialDelegations);
+                }
+            } catch {
+                if (!cancelled) setDelegations(initialDelegations);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="max-w-4xl">
@@ -54,7 +88,7 @@ export default function DelegationPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockDelegations.map(d => (
+                        {delegations.map(d => (
                             <tr key={d.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                 <td className="p-3 font-medium">{d.from}</td>
                                 <td className="p-3">{d.to}</td>

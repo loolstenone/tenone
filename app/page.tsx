@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PublicHeader } from "@/components/PublicHeader";
-import { PublicFooter } from "@/components/PublicFooter";
-import { TenOneThemeWrapper } from "@/components/TenOneThemeWrapper";
+import { PublicHeader } from "@/features/tenone/PublicHeader";
+import { PublicFooter } from "@/features/tenone/PublicFooter";
+import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
 
@@ -227,7 +227,7 @@ export default function HomePage() {
                             const rawDate = (work.created_at || '').substring(0, 7);
                             const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
                             return (
-                                <Link key={work.id} href={`/works`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
+                                <Link key={work.id} href={`/works/${work.id}`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
                                     <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden relative">
                                         {work.representImage ? (
                                             <img src={work.representImage} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -310,7 +310,7 @@ export default function HomePage() {
                             {latestNews.map((news) => {
                                 const rawDate = (news.created_at || '').substring(0, 10);
                                 return (
-                                    <Link key={news.id} href={`/newsroom?postId=${news.id}`} className="group block">
+                                    <Link key={news.id} href={`/newsroom/${news.id}`} className="group block">
                                         <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
                                             {news.representImage ? (
                                                 <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />

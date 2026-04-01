@@ -1,26 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Target, CheckCircle2, Clock, Users } from "lucide-react";
-import { getMemberStats } from "@/lib/supabase/members";
+import { Target, CheckCircle2, Clock, Users, Loader2 } from "lucide-react";
+import { fetchStaffGprData } from "@/lib/supabase/erp";
 
 interface EvalRecord {
     name: string;
     department: string;
     position: string;
-    selfRate: number;
-    managerRate: number | null;
+    selfRate: string;
+    managerRate: string | null;
     finalGrade: string | null;
     status: "자기평가완료" | "매니저평가중" | "확정" | "미제출";
 }
 
 const mockEvals: EvalRecord[] = [
-    { name: "Cheonil Jeon", department: "경영기획", position: "대표", selfRate: 75, managerRate: null, finalGrade: null, status: "자기평가완료" },
-    { name: "Sarah Kim", department: "브랜드관리", position: "매니저", selfRate: 60, managerRate: 55, finalGrade: "C+", status: "확정" },
-    { name: "김준호", department: "커뮤니티운영", position: "주임", selfRate: 0, managerRate: null, finalGrade: null, status: "미제출" },
-    { name: "박영상", department: "콘텐츠제작", position: "선임", selfRate: 70, managerRate: 65, finalGrade: "B", status: "확정" },
-    { name: "이수진", department: "디자인", position: "사원", selfRate: 50, managerRate: null, finalGrade: null, status: "매니저평가중" },
-    { name: "최민호", department: "AI크리에이티브", position: "선임", selfRate: 0, managerRate: null, finalGrade: null, status: "미제출" },
+    { name: "Cheonil Jeon", department: "경영기획", position: "대표", selfRate: "75%", managerRate: null, finalGrade: null, status: "자기평가완료" },
+    { name: "Sarah Kim", department: "브랜드관리", position: "매니저", selfRate: "60%", managerRate: "55%", finalGrade: "C+", status: "확정" },
+    { name: "김준호", department: "커뮤니티운영", position: "주임", selfRate: "-", managerRate: null, finalGrade: null, status: "미제출" },
+    { name: "박영상", department: "콘텐츠제작", position: "선임", selfRate: "70%", managerRate: "65%", finalGrade: "B", status: "확정" },
+    { name: "이수진", department: "디자인", position: "사원", selfRate: "50%", managerRate: null, finalGrade: null, status: "매니저평가중" },
+    { name: "최민호", department: "AI크리에이티브", position: "선임", selfRate: "-", managerRate: null, finalGrade: null, status: "미제출" },
 ];
 
 const statusColor: Record<string, string> = {
@@ -30,20 +30,60 @@ const statusColor: Record<string, string> = {
     "미제출": "bg-red-50 text-red-600",
 };
 
+function deriveStatus(goals: Record<string, unknown>[]): EvalRecord["status"] {
+    if (!goals.length) return "미제출";
+    const g = goals[0];
+    if (g.agreed_at || g.evaluated_at) return "확정";
+    if (g.supervisor_rating) return "매니저평가중";
+    if (g.self_evaluated_at || g.self_rating) return "자기평가완료";
+    return "미제출";
+}
+
+function dbRowToEval(m: Record<string, unknown>): EvalRecord {
+    const goals = (m.goals as Record<string, unknown>[]) || [];
+    const g = goals[0] || {};
+    const status = deriveStatus(goals);
+    const finalGrade = (g.supervisor_rating as string) || null;
+    return {
+        name: (m.name as string) || "-",
+        department: (m.department as string) || "-",
+        position: (m.position as string) || "-",
+        selfRate: g.self_rating ? `${g.self_rating}%` : "-",
+        managerRate: g.supervisor_rating ? `${g.supervisor_rating}` : null,
+        finalGrade,
+        status,
+    };
+}
+
 export default function GPREvaluationPage() {
     const [filter, setFilter] = useState("all");
-    const [dbMemberTotal, setDbMemberTotal] = useState<number | null>(null);
+    const [evals, setEvals] = useState<EvalRecord[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getMemberStats()
-            .then(stats => setDbMemberTotal(stats.total))
-            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+        let cancelled = false;
+        (async () => {
+            try {
+                const rows = await fetchStaffGprData();
+                if (!cancelled) {
+                    setEvals(rows.length > 0 ? rows.map(r => dbRowToEval(r)) : mockEvals);
+                }
+            } catch {
+                if (!cancelled) setEvals(mockEvals);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
     }, []);
 
-    const confirmed = mockEvals.filter(e => e.status === "확정").length;
-    const pending = mockEvals.filter(e => e.status !== "확정").length;
+    if (loading) {
+        return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+    }
 
-    const filtered = filter === "all" ? mockEvals : mockEvals.filter(e => e.status === filter);
+    const confirmed = evals.filter(e => e.status === "확정").length;
+    const pending = evals.filter(e => e.status !== "확정").length;
+    const filtered = filter === "all" ? evals : evals.filter(e => e.status === filter);
 
     return (
         <div className="max-w-5xl">
@@ -52,10 +92,10 @@ export default function GPREvaluationPage() {
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: "전체 대상", value: `${dbMemberTotal ?? mockEvals.length}명`, icon: Users },
+                    { label: "전체 대상", value: `${evals.length}명`, icon: Users },
                     { label: "평가 확정", value: `${confirmed}명`, icon: CheckCircle2 },
                     { label: "진행중", value: `${pending}명`, icon: Clock },
-                    { label: "미제출", value: `${mockEvals.filter(e => e.status === "미제출").length}명`, icon: Target },
+                    { label: "미제출", value: `${evals.filter(e => e.status === "미제출").length}명`, icon: Target },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-1">
@@ -96,8 +136,8 @@ export default function GPREvaluationPage() {
                                 <td className="p-3 font-medium">{e.name}</td>
                                 <td className="p-3 text-neutral-500 text-xs">{e.department}</td>
                                 <td className="p-3 text-neutral-500 text-xs">{e.position}</td>
-                                <td className="p-3 text-center">{e.selfRate > 0 ? `${e.selfRate}%` : "-"}</td>
-                                <td className="p-3 text-center">{e.managerRate !== null ? `${e.managerRate}%` : "-"}</td>
+                                <td className="p-3 text-center text-neutral-600">{e.selfRate}</td>
+                                <td className="p-3 text-center text-neutral-600">{e.managerRate ?? "-"}</td>
                                 <td className="p-3 text-center font-bold">{e.finalGrade || "-"}</td>
                                 <td className="p-3 text-center">
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[e.status]}`}>{e.status}</span>
@@ -117,6 +157,9 @@ export default function GPREvaluationPage() {
                         ))}
                     </tbody>
                 </table>
+                {filtered.length === 0 && (
+                    <div className="py-12 text-center text-sm text-neutral-400">해당하는 평가 항목이 없습니다</div>
+                )}
             </div>
         </div>
     );

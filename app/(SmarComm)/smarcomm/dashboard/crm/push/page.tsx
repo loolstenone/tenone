@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Bell, Plus, Send, Clock, Users, BarChart3 } from 'lucide-react';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 interface PushCampaign {
   id: string;

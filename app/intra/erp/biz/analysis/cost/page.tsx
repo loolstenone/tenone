@@ -1,31 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { PieChart, Layers, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PieChart, Layers, TrendingUp, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
 
-// External cost breakdown
 interface CostItem {
   name: string;
   amount: number;
   ratio: number;
 }
-
-const externalCosts: CostItem[] = [
-  { name: "제작외주", amount: 10_350_000, ratio: 45 },
-  { name: "매체비", amount: 8_050_000, ratio: 35 },
-  { name: "기타", amount: 4_600_000, ratio: 20 },
-];
-
-const internalCosts: CostItem[] = [
-  { name: "인건비", amount: 4_200_000, ratio: 60 },
-  { name: "공통비", amount: 1_750_000, ratio: 25 },
-  { name: "제경비", amount: 1_050_000, ratio: 15 },
-];
 
 interface MonthlyCostRow {
   month: string;
@@ -34,12 +22,6 @@ interface MonthlyCostRow {
   total: number;
 }
 
-const monthlyCosts: MonthlyCostRow[] = [
-  { month: "1월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
-  { month: "2월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
-  { month: "3월", exCost: 26_000_000, inCost: 7_800_000, total: 33_800_000 },
-];
-
 interface AllocationRow {
   division: string;
   commonCost: number;
@@ -47,21 +29,116 @@ interface AllocationRow {
   headcount: number;
 }
 
-const allocations: AllocationRow[] = [
+const mockExternalCosts: CostItem[] = [
+  { name: "제작외주", amount: 10_350_000, ratio: 45 },
+  { name: "매체비", amount: 8_050_000, ratio: 35 },
+  { name: "기타", amount: 4_600_000, ratio: 20 },
+];
+
+const mockInternalCosts: CostItem[] = [
+  { name: "인건비", amount: 4_200_000, ratio: 60 },
+  { name: "공통비", amount: 1_750_000, ratio: 25 },
+  { name: "제경비", amount: 1_050_000, ratio: 15 },
+];
+
+const mockMonthlyCosts: MonthlyCostRow[] = [
+  { month: "1월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
+  { month: "2월", exCost: 23_000_000, inCost: 7_000_000, total: 30_000_000 },
+  { month: "3월", exCost: 26_000_000, inCost: 7_800_000, total: 33_800_000 },
+];
+
+const mockAllocations: AllocationRow[] = [
   { division: "사업부문", commonCost: 875_000, ratio: 40, headcount: 16 },
   { division: "제작부문", commonCost: 656_000, ratio: 30, headcount: 14 },
   { division: "지원부문", commonCost: 438_000, ratio: 20, headcount: 10 },
   { division: "관리부문", commonCost: 219_000, ratio: 10, headcount: 5 },
 ];
 
+// Map expense category → external or internal bucket
+const EXTERNAL_TYPES = ["외주비", "제작외주", "매체비", "광고비", "행사비"];
+const INTERNAL_TYPES = ["인건비", "공통비", "제경비", "복리후생", "교육훈련"];
+
+function buildCostBreakdown(rows: Record<string, unknown>[]) {
+  const exMap: Record<string, number> = {};
+  const inMap: Record<string, number> = {};
+  const monthlyMap: Record<string, { ex: number; in: number }> = {};
+
+  rows.forEach(r => {
+    const amount = (r.amount as number) || 0;
+    const category = (r.category as string) || (r.expense_type as string) || "기타";
+    const dateStr = (r.expense_date as string) || "";
+    const month = dateStr.slice(0, 7); // "YYYY-MM"
+
+    const isExternal = EXTERNAL_TYPES.some(t => category.includes(t));
+    const isInternal = INTERNAL_TYPES.some(t => category.includes(t));
+
+    if (isExternal) {
+      exMap[category] = (exMap[category] || 0) + amount;
+    } else if (isInternal) {
+      inMap[category] = (inMap[category] || 0) + amount;
+    } else {
+      exMap["기타"] = (exMap["기타"] || 0) + amount;
+    }
+
+    if (month) {
+      if (!monthlyMap[month]) monthlyMap[month] = { ex: 0, in: 0 };
+      if (isInternal) monthlyMap[month].in += amount;
+      else monthlyMap[month].ex += amount;
+    }
+  });
+
+  const toItems = (map: Record<string, number>): CostItem[] => {
+    const total = Object.values(map).reduce((s, v) => s + v, 0);
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, amount]) => ({
+        name,
+        amount,
+        ratio: total > 0 ? Math.round((amount / total) * 100) : 0,
+      }));
+  };
+
+  const monthly: MonthlyCostRow[] = Object.entries(monthlyMap)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6)
+    .map(([m, v]) => ({
+      month: `${parseInt(m.slice(5))}월`,
+      exCost: v.ex,
+      inCost: v.in,
+      total: v.ex + v.in,
+    }));
+
+  return { exItems: toItems(exMap), inItems: toItems(inMap), monthly };
+}
+
 const barColors = ["bg-neutral-700", "bg-neutral-400", "bg-neutral-200"];
 
 export default function CostAnalysisPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"external" | "internal">("external");
+  const [externalCosts, setExternalCosts] = useState<CostItem[]>(mockExternalCosts);
+  const [internalCosts, setInternalCosts] = useState<CostItem[]>(mockInternalCosts);
+  const [monthlyCosts, setMonthlyCosts] = useState<MonthlyCostRow[]>(mockMonthlyCosts);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    erpDb.fetchExpenses({ limit: 200 }).then((rows) => {
+      if (!cancelled && rows.length > 0) {
+        const { exItems, inItems, monthly } = buildCostBreakdown(rows as Record<string, unknown>[]);
+        if (exItems.length > 0) setExternalCosts(exItems);
+        if (inItems.length > 0) setInternalCosts(inItems);
+        if (monthly.length > 0) setMonthlyCosts(monthly);
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const allocations: AllocationRow[] = mockAllocations;
   const activeCosts = tab === "external" ? externalCosts : internalCosts;
   const totalCost = activeCosts.reduce((s, c) => s + c.amount, 0);
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="max-w-5xl">

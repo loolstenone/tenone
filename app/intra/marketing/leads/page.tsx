@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useMarketing } from "@/lib/marketing-context";
-import { LeadStage } from "@/types/marketing";
+import { useState, useEffect } from "react";
+import { fetchLeads, updateLead } from "@/lib/supabase/marketing";
+import { initialLeads } from "@/lib/marketing-data";
+import { Lead, LeadStage } from "@/types/marketing";
+import { Loader2 } from "lucide-react";
 
 const stages: { key: LeadStage; label: string }[] = [
     { key: 'New', label: 'New' },
@@ -15,11 +17,33 @@ const stages: { key: LeadStage; label: string }[] = [
 ];
 
 export default function LeadsPage() {
-    const { leads, moveLead } = useMarketing();
+    const [leads, setLeads] = useState<Lead[]>([]);
+    const [loading, setLoading] = useState(true);
     const [dragOver, setDragOver] = useState<LeadStage | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchLeads()
+            .then(data => {
+                if (cancelled) return;
+                setLeads(data.length > 0 ? data : initialLeads);
+            })
+            .catch(() => {
+                if (!cancelled) setLeads(initialLeads);
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const moveLead = async (id: string, stage: LeadStage) => {
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, stage } : l));
+        try { await updateLead(id, { stage }); } catch { /* local state already updated */ }
+    };
 
     const handleDragStart = (e: React.DragEvent, id: string) => { e.dataTransfer.setData('text/plain', id); };
     const handleDrop = (e: React.DragEvent, stage: LeadStage) => { e.preventDefault(); setDragOver(null); const id = e.dataTransfer.getData('text/plain'); if (id) moveLead(id, stage); };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">

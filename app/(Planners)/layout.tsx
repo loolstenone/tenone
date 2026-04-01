@@ -1,5 +1,5 @@
-import { PlannersHeader } from "@/components/PlannersHeader";
-import { PlannersFooter } from "@/components/PlannersFooter";
+import { PlannersHeader } from "@/features/planners/PlannersHeader";
+import { PlannersFooter } from "@/features/planners/PlannersFooter";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

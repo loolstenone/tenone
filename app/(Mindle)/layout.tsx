@@ -1,5 +1,5 @@
-import { MindleHeader } from "@/components/MindleHeader";
-import { MindleFooter } from "@/components/MindleFooter";
+import { MindleHeader } from "@/features/mindle/MindleHeader";
+import { MindleFooter } from "@/features/mindle/MindleFooter";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

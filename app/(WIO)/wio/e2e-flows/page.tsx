@@ -7,7 +7,7 @@ import {
   Users, Megaphone, FileCheck, Package, CreditCard, BarChart3,
   UserPlus, GraduationCap, Target
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── 노드 타입 ── */
 type FlowNode = {

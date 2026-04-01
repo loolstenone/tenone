@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Users, Search, Plus, Star, Mail, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Search, Plus, Star, Mail, ExternalLink, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Talent {
     id: string;
@@ -14,7 +15,7 @@ interface Talent {
     status: "활성" | "대기" | "비활성";
 }
 
-const mockTalents: Talent[] = [
+const initialTalents: Talent[] = [
     { id: "1", name: "박영상", specialty: "영상 PD / 편집", source: "프리랜서", skills: ["Premiere", "After Effects", "DaVinci"], rating: 5, lastContact: "2026-03-15", status: "활성" },
     { id: "2", name: "이디자인", specialty: "그래픽 디자이너", source: "외부", skills: ["Figma", "Illustrator", "Photoshop"], rating: 4, lastContact: "2026-02-20", status: "활성" },
     { id: "3", name: "김개발", specialty: "풀스택 개발", source: "추천", skills: ["React", "Node.js", "Python"], rating: 5, lastContact: "2026-03-01", status: "대기" },
@@ -36,10 +37,44 @@ const statusColor: Record<string, string> = {
 };
 
 export default function TalentPoolPage() {
+    const [talents, setTalents] = useState<Talent[]>([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const filtered = mockTalents.filter(t =>
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('talent_pool').select('*').order('name');
+                if (!cancelled && data && data.length > 0 && !error) {
+                    setTalents(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        name: (r.name as string) || '',
+                        specialty: (r.specialty as string) || '',
+                        source: ((r.source as string) || '외부') as Talent['source'],
+                        skills: (r.skills as string[]) || [],
+                        rating: (r.rating as number) || 3,
+                        lastContact: ((r.last_contact as string) || '').split('T')[0],
+                        status: ((r.status as string) || '활성') as Talent['status'],
+                    })));
+                } else if (!cancelled) {
+                    setTalents(initialTalents);
+                }
+            } catch {
+                if (!cancelled) setTalents(initialTalents);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    const filtered = talents.filter(t =>
         t.name.includes(search) || t.specialty.includes(search) || t.skills.some(s => s.toLowerCase().includes(search.toLowerCase()))
     );
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="max-w-5xl">
@@ -55,10 +90,10 @@ export default function TalentPoolPage() {
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: "전체 인재", value: `${mockTalents.length}명` },
-                    { label: "활성", value: `${mockTalents.filter(t => t.status === "활성").length}명` },
-                    { label: "프리랜서", value: `${mockTalents.filter(t => t.source === "프리랜서").length}명` },
-                    { label: "외부", value: `${mockTalents.filter(t => t.source === "외부").length}명` },
+                    { label: "전체 인재", value: `${talents.length}명` },
+                    { label: "활성", value: `${talents.filter(t => t.status === "활성").length}명` },
+                    { label: "프리랜서", value: `${talents.filter(t => t.source === "프리랜서").length}명` },
+                    { label: "외부", value: `${talents.filter(t => t.source === "외부").length}명` },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>

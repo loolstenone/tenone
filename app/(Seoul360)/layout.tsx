@@ -1,5 +1,5 @@
-import { Seoul360Header } from "@/components/Seoul360Header";
-import { Seoul360Footer } from "@/components/Seoul360Footer";
+import { Seoul360Header } from "@/features/seoul360/Seoul360Header";
+import { Seoul360Footer } from "@/features/seoul360/Seoul360Footer";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

@@ -6,97 +6,163 @@
 
 ## 2026-04-01 (집)
 
-### 인트라 stub 3페이지 완성 + shop/promotion DB
+### 인트라 stub 3페이지 완성
 
-#### 완성된 페이지
-- `app/intra/bums/stats/page.tsx`: Supabase posts 집계 (조회수/좋아요/댓글), profiles/newsletter_subscribers 카운트, 사이트별 bar chart
-- `app/intra/bums/promotion/page.tsx`: promotions 테이블 CRUD, 할인코드 복사, 사용률 progress bar, 상태 인라인 변경
-- `app/intra/bums/shop/page.tsx`: 상품/주문 탭, shop_products·shop_orders 연결, 인라인 상태 변경
-
-#### DB 마이그레이션
-- `supabase/migrations/007_shop_promotions.sql` 신규: shop_products, shop_orders, promotions 테이블 + RLS
-
-### 전체 인트라 현황 스캔 완료
-- stub 0개 (3개 → 완성)
-- mock 데이터 사용 페이지 38개 파악 — Universe/Project/ERP Finance 순으로 연결 예정
+- bums/stats: Supabase posts 집계, 사이트별 bar chart
+- bums/promotion: promotions CRUD, 할인코드 복사
+- bums/shop: 상품/주문 탭, shop_products/shop_orders 연결
+- supabase/migrations/007_shop_promotions.sql 신규
 
 ---
 
-## 2026-03-31 (집)
+## 2026-04-01 (오후 — 사무실 6차)
 
-### TenOne 포털 DB 전체 연결
+### Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 Supabase 전환
 
-**컨텍스트 전환**: 이전 대화에서 컨텍스트 소진 → 새 대화로 이어서 진행
+**수정 파일:**
+- `app/intra/marketing/organizations/page.tsx` — fetchOrganizations() + mock fallback
+- `app/intra/marketing/deals/page.tsx` — fetchDeals() + updateDeal() + fetchOrganizations()
+- `app/intra/marketing/activities/page.tsx` — Promise.all([fetchActivities, fetchPeople, fetchOrganizations])
+- `app/intra/marketing/crm/segments/page.tsx` — fetchPeople({limit:500}) for segment counts
+- `app/intra/marketing/campaigns/page.tsx` — fetchCampaigns() + mock fallback
+- `app/intra/marketing/leads/page.tsx` — fetchLeads() + updateLead()
+- `app/intra/marketing/content/page.tsx` — fetchContentPosts() + mock fallback
+- `app/intra/marketing/analytics/page.tsx` — Promise.all([fetchCampaigns, fetchLeads, fetchContentPosts])
+- `app/intra/marketing/page.tsx` — Promise.all for dashboard stats
+- `app/intra/erp/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped()
+- `app/intra/erp/hr/gpr/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped()
+- `app/intra/erp/hr/gpr/goals/page.tsx` — DB fetch + createGprGoal()
+- `app/intra/erp/hr/gpr/evaluation/page.tsx` — DB fetch + local state eval
+- `app/intra/erp/hr/staff/[id]/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped({memberId})
+- `app/intra/erp/hr/staff/register/page.tsx` — mock useStaff 제거, DB-only
+- `app/intra/erp/hr/talent/page.tsx` — talent_pool 테이블 fetch + mock fallback
+- `app/intra/erp/hr/talent/pipeline/page.tsx` — talent_candidates 테이블 fetch + mock fallback
+- `app/intra/erp/hr/talent/programs/page.tsx` — talent_programs 테이블 fetch + mock fallback
+- `app/intra/erp/hr/people/clubs/page.tsx` — madleague_clubs 테이블 fetch + mock fallback
+- `app/intra/erp/hr/people/delegation/page.tsx` — delegations 테이블 fetch + mock fallback
+- `app/intra/erp/hr/family/page.tsx` — family_members 테이블 fetch + mock fallback
+- `app/intra/studio/workflow/page.tsx` — 4개 테이블 Promise.all fetch
+- `app/intra/studio/workflow/kanban/page.tsx` — fetchWorkflowTasks() + DB persistence mutations
+- `app/intra/studio/workflow/pipeline/page.tsx` — fetchPipelineItems() + updatePipelineStage()
+- `app/intra/studio/workflow/projects/page.tsx` — fetchBrandProjects()
+- `app/intra/studio/workflow/automation/page.tsx` — fetchAutomations() + toggleAutomationEnabled()
+- `lib/supabase/erp.ts` — rowToStaffMember, fetchStaffMembers, rowToGprGoal, fetchGprGoalsTyped 추가
+- `lib/supabase/workflow.ts` — **신규 생성** (4개 테이블 CRUD 함수)
+- `sql/workflow-tables.sql` — **신규 생성** (workflow_tasks, content_pipeline, workflow_automations)
+- `sql/badaksoe-rooms-table.sql` — **신규 생성**
+- `sql/partner-pool-table.sql` — tenant_id INSERT 오류 수정
 
-#### TS 에러 0개 달성 + Marketing 3 페이지
-- `lib/wio-modules.ts`: OrbiConfig DB sync — `saveOrbiConfigAsync`, `loadOrbiConfigAsync` 추가
-- `app/(WIO)/wio/app/settings/page.tsx`: DB 저장으로 전환
-- TypeScript 56 에러 → 0 (strict mode 클린):
-  - `types/gpr.ts`: category, target, metric 옵셔널 필드 추가
-  - `lib/gpr-context.tsx`: rowToGoal level/kpi 매핑 추가
-  - `lib/staff-context.tsx`: SystemAccess import + 캐스팅
-  - `lib/agent/router.ts`: rook: 'content' 추가
-  - `components/PublicHeader.tsx`: NavItem 타입 추가
-  - 기타 implicit any 5개 파일 일괄 수정
-- `app/intra/marketing/performance/page.tsx` 신규 — KPI 대시보드
-- `app/intra/marketing/influencers/page.tsx` 신규 — 인플루언서 CRUD
-- `app/intra/marketing/social/page.tsx` 신규 — 소셜 계정+콘텐츠 캘린더
-- `components/IntraSidebar.tsx`: Performance, Influencers, Social 사이드바 추가
-
-#### TenOne 포털 DB 연결
-- `supabase/migrations/005_tenone_portal.sql` 신규:
-  - brands 테이블 포털 컬럼 추가 (category/description/tagline/domain/logo_url/thumbnail_url/website_url/tags[]/founded_date/display_status)
-  - 19개 브랜드 시드 데이터 UPDATE
-  - history_events 테이블 생성 + RLS
-  - 20개 역사 이벤트 시드 (h1-h20, 2019-2025)
-- `lib/supabase/tenone.ts` 신규 — fetchPortalBrands(), fetchHistoryEvents()
-- `app/(TenOne)/brands/page.tsx`: Supabase DB-first + lib/data.ts fallback
-- `app/(TenOne)/history/page.tsx`: Supabase DB-first + lib/data.ts fallback
-
-### 변경 파일
-- 신규 4개: 005_tenone_portal.sql, tenone.ts, performance/page.tsx, influencers/page.tsx, social/page.tsx
-- 수정: brands/page.tsx, history/page.tsx, wio-modules.ts, IntraSidebar.tsx, wio/settings/page.tsx, types/gpr.ts, gpr-context.tsx, staff-context.tsx, agent/router.ts, PublicHeader.tsx, board.ts 외 다수
-
----
-
-## 2026-03-30 (집, 야간)
-
-### Myverse 앱 Android 실행 + UI 리디자인
-- Android Studio Panda2 설치 (winget), SDK 35, cmdline-tools
-- Pixel 7 에뮬레이터 생성 (API 35, x86_64), JAVA_HOME/ANDROID_HOME 환경변수 설정
-- Expo Go로 앱 실행 성공 (온보딩 화면 표시 확인)
-  - `adb reverse tcp:8081 tcp:8081` 포트 포워딩 필요
-  - `expo run:android` prebuild 잔재(android/ 폴더, index.js 엔트리 충돌) 정리 필요
-- UI 리디자인 — Reflectly 수준 업그레이드
-  - 이모지(📷😄🔒) → `lucide-react-native` 벡터 아이콘 전면 교체
-  - `app/(auth)/onboarding.tsx`: 불꽃 오브 + 프로그레스 바 + Calendar/Camera/Zap 아이콘
-  - `app/(tabs)/index.tsx`: ME탭 — 불꽃 애니메이션, 기분 카드, 캘린더 카드, 빈 상태
-  - `app/(tabs)/log.tsx`: LOG탭 — 사진/메모 액션 카드, 타임라인 빈 상태, 그라디언트 CTA
-  - `app/log/new.tsx`: 무드 컬러 원(5색), Blackbox 토글, 사진 추가 영역
-
-### 변경 파일 (4개, C:\Projects\myverse)
-- 수정 4개 (onboarding.tsx, index.tsx, log.tsx, new.tsx)
+**커밋:** `74a1d81` feat: Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 Supabase 전환
 
 ---
 
-## 2026-03-30 (집, 저녁)
+## 2026-04-01 (오후 — 사무실 4차)
 
-### DB 안정화 + 실연동 5건
-- posts 400 Bad Request 수정: `lib/supabase/board.ts` L107 tags 필터 수정
-- GoTrueClient 싱글톤 확인: 재발 없음
-- CRM DB 테이블 + 실DB 연동
-  - `supabase/migrations/003_crm_tables.sql` (신규): crm_people, crm_organizations, crm_org_contacts, crm_deals, crm_activities
-  - `lib/supabase/crm.ts` (신규 ~430줄): CRUD 전체, fetchCrmStats
-  - `lib/crm-context.tsx` (수정): Mock 초기화 → useEffect DB fetch, async CRUD
-- 마케팅 13모듈 DB 테이블
-  - `supabase/migrations/004_marketing_modules.sql` (신규): 15테이블, RLS 일괄
-- 뉴스룸 상세 페이지 개선
-  - `app/(TenOne)/newsroom/[id]/page.tsx` (수정): 브랜드 배지, 외부 바로가기
-  - `components/newsroom/NewsroomFeed.tsx` (수정): 통합 라우팅 `/newsroom/${id}`
+### 인트라 biz/manage DB 연결 + 표준단가 저장 기능
 
-### 변경 파일 (6개)
-- 수정 3개 + 신규 3개
-- +750줄
+**수정 파일:**
+- `app/intra/erp/biz/manage/page.tsx` — fetchMonthlyForecasts() → 월별 추정 DB 연동
+- `app/intra/erp/biz/manage/actual/page.tsx` — fetchMonthlyForecasts() → 실적 확정 DB 연동
+- `app/intra/erp/biz/manage/gap/page.tsx` — fetchMonthlyForecasts() → Gap 분석 DB 연동
+- `app/intra/erp/project/rates/page.tsx` — fetchStandardRates() + upsertStandardRate() → 표준단가 편집 저장
+- `lib/supabase/erp.ts` — 4개 함수 신규 추가
+- `sql/monthly-forecasts-table.sql` — 신규 (year/month/item 기반 P&L 추정/실적)
+- `sql/standard-rates-table.sql` — 신규 (직급별 표준단가 + 기본 시드)
+
+**커밋:**
+- `6a3a10a` feat: biz/manage 3개 페이지 DB 연결 + monthly_forecasts SQL
+- `8265ce1` feat: 투입인원단가 표준단가 DB 저장 기능 추가
+
+---
+
+## 2026-04-01 (오후 — 사무실 3차)
+
+### 인트라 추가 DB 현실화 (3개 페이지 + 2개 함수)
+
+**수정 파일:**
+- `app/intra/opportunity/page.tsx` — fetchTenOneOpportunities() → 영업 기회 파이프라인 DB 연결
+- `app/intra/erp/hr/certificates/page.tsx` — approvals(type=certificate) → 제증명서 발급 이력 DB 연결
+- `app/intra/myverse/todo/page.tsx` — fetchTenOneMembership() + fetchTodos() → wio_todos DB 연결
+- `lib/supabase/wio.ts` — fetchTenOneOpportunities(), fetchTenOneMembership() 신규 추가
+
+**커밋:**
+- `a097536` feat: Opportunity + 제증명서 페이지 DB 연결
+- `8e044bb` feat: myverse/todo — wio_todos DB 연결 + fetchTenOneMembership() 추가
+
+---
+
+## 2026-04-01 (오후 — 사무실 2차)
+
+### 인트라 추가 DB 현실화 (5개 페이지 + 2개 함수)
+
+**수정 파일:**
+- `app/intra/erp/biz/analysis/division/page.tsx` — fetchBizPlans() → 부문 이익률, buildDivisionData()로 전분기 trend 계산
+- `app/intra/erp/biz/analysis/cost/page.tsx` — fetchExpenses() → 외부비/내부비 구성, 월별 비용 추이
+- `app/intra/erp/biz/analysis/page.tsx` — fetchProjects() → YTD 실적 요약 카드
+- `app/intra/project/management/jobs/page.tsx` — fetchAllJobs() → Job 목록 실DB 연동
+- `app/intra/erp/project/rates/page.tsx` — fetchPayrollWithMembers() → 실제단가 탭 실DB 연동
+- `lib/supabase/projects.ts` — fetchAllJobs() 신규 추가 (projects JOIN)
+- `lib/supabase/erp.ts` — fetchPayrollWithMembers() 신규 추가 (payroll + members JOIN)
+
+**커밋:**
+- `d05e74f` feat: biz/analysis 3개 페이지 DB 연결
+- `ca53090` feat: Job 관리 페이지 DB 연결 + fetchAllJobs() 추가
+- `a8d3a90` feat: 투입인원단가 페이지 — fetchPayrollWithMembers DB 연결
+
+---
+
+## 2026-04-01 (오전 — 사무실 1차)
+
+### 인트라 ERP 전체 페이지 DB 현실화
+
+**수정 파일:**
+- `middleware.ts` — getUser() → getSession() (cold start 블로킹 해결)
+- `app/intra/layout.tsx` — 타임아웃 8s, cold start 경고 3s 타이머
+- `components/IntraHeader.tsx`, `smarcomm/dashboard/layout.tsx` — 로그아웃 → 홈 랜딩
+- `components/newsroom/NewsroomFeed.tsx` — FWN 스타일 리디자인
+- `components/newsroom/NewsTicker.tsx` — FLASH 배지, 테두리 수정
+- `app/(TenOne)/newsroom/page.tsx`, `history/page.tsx`, `brands/page.tsx` — max-w 통일
+- `app/(TrendHunter)/trendhunter/**` — 11개 → Mindle 리다이렉트
+- `components/board/BoardWidget.tsx` — 신규 퍼블릭 위젯 컴포넌트
+- `app/(Badak)/badak/page.tsx` — BoardWidget 삽입
+- `app/intra/erp/approval/progress/page.tsx` — fetchApprovals() 연동
+- `app/intra/erp/approval/completed/page.tsx` — fetchApprovals() 연동
+- `app/intra/erp/finance/expenses/request/page.tsx` — fetchExpenses() 연동
+- `app/intra/erp/biz/plan/page.tsx` — fetchBizPlans() 연동
+- `app/intra/erp/finance/reports/page.tsx` — fetchExpenses() + getProjectStats() 연동
+- `app/intra/erp/finance/card/page.tsx` — fetchCardUsage() 연동
+- `app/intra/erp/finance/billing/page.tsx` — fetchInvoices() 연동
+- `app/intra/erp/finance/billing/payment/page.tsx` — fetchPayments() 연동
+- `app/intra/erp/hr/gpr/rewards/page.tsx` — fetchIncentives() 연동
+- `app/intra/project/management/[code]/page.tsx` — fetchProjectByCode+fetchJobs+fetchProjectMembers 연동
+- `lib/supabase/erp.ts` — invoices, card_usage, payments, incentives 함수 추가
+
+**결정 사항:**
+- 모든 페이지 패턴: DB 우선 시도 → 실패/빈 응답 시 mock fallback
+- Supabase에 신규 테이블(invoices, payments, card_usage, incentives) 생성 필요 (현재 mock fallback 중)
+
+---
+
+## 2026-03-31 (사무실, 2차)
+
+### localStorage → Supabase DB 마이그레이션 완료
+
+**수정 파일:**
+- `lib/supabase/settings.ts` — member_id/settings JSONB 스키마 전면 재작성 (기존 user_id/app/key/value → 중첩 JSONB). getAppSettings/setAppSettings 추가
+- `lib/wio-modules.ts` — loadOrbiConfigDB / saveOrbiConfigDB / loadAccordionStateDB / saveAccordionStateDB 4개 async DB 함수 추가
+- `app/(WIO)/wio/app/layout.tsx` — orbi config + accordion 상태 DB-first 로드
+- `app/(WIO)/wio/app/settings/page.tsx` — 저장 시 saveOrbiConfigDB 호출
+- `lib/library-context.tsx` — bookmarks/user_items mount 시 DB 로드, 변경 시 DB + localStorage 동시 저장 (mounted ref로 초기 로드 중 저장 방지)
+- `lib/smarcomm/chart-palette.ts` — loadChartPaletteFromDB() 추가, setChartPalette()이 DB에도 저장
+- `lib/smarcomm/scan-data.ts` — competitors/compare_log DB 헬퍼 (saveCompetitorList, loadCompetitorListFromDB, saveCompareLog, loadCompareLogFromDB) 추가
+- `app/(SmarComm)/smarcomm/dashboard/scan/page.tsx` — mount 시 DB에서 경쟁사·비교이력 로드, company 설정 getSetting으로 조회
+- `app/(SmarComm)/smarcomm/dashboard/glossary/page.tsx` — custom_glossary DB 연동
+- `app/(SmarComm)/smarcomm/dashboard/profile/page.tsx` — company 설정 DB 저장/로드
+
+**결정사항:**
+- 모든 사용자 설정: `user_settings` 테이블 단일 행, `{ [app]: { [key]: value } }` 중첩 JSONB
+- localStorage는 오프라인 fallback으로 유지
+- 빌드 2회 성공 (exit code 0), TypeScript 오류 없음
 
 ---
 

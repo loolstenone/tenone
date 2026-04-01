@@ -1,20 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, BookOpen, X } from 'lucide-react';
 import { GLOSSARY, CATEGORIES, type GlossaryTerm } from '@/lib/smarcomm/glossary-data';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import { getSetting, setSetting } from '@/lib/supabase/settings';
+
+const DB_APP = 'smarcomm';
+const DB_KEY = 'custom_glossary';
+const LS_KEY = 'smarcomm_custom_glossary';
 
 export default function GlossaryPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('전체');
   const [customTerms, setCustomTerms] = useState<GlossaryTerm[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('smarcomm_custom_glossary');
+      const saved = localStorage.getItem(LS_KEY);
       return saved ? JSON.parse(saved) : [];
     }
     return [];
   });
+
+  useEffect(() => {
+    getSetting<GlossaryTerm[]>(DB_APP, DB_KEY, LS_KEY).then(dbTerms => {
+      if (dbTerms && dbTerms.length > 0) setCustomTerms(dbTerms);
+    });
+  }, []);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEn, setNewEn] = useState('');
   const [newKo, setNewKo] = useState('');
@@ -50,7 +61,7 @@ export default function GlossaryPage() {
     const newTerm: GlossaryTerm = { en: newEn, ko: newKo, definition: newDef, category: newCat };
     const updated = [...customTerms, newTerm];
     setCustomTerms(updated);
-    localStorage.setItem('smarcomm_custom_glossary', JSON.stringify(updated));
+    setSetting(DB_APP, DB_KEY, updated, LS_KEY);
     setNewEn(''); setNewKo(''); setNewDef(''); setNewCat('기타');
     setShowAddForm(false);
   };
@@ -58,7 +69,7 @@ export default function GlossaryPage() {
   const handleRemoveCustom = (index: number) => {
     const updated = customTerms.filter((_, i) => i !== index);
     setCustomTerms(updated);
-    localStorage.setItem('smarcomm_custom_glossary', JSON.stringify(updated));
+    setSetting(DB_APP, DB_KEY, updated, LS_KEY);
   };
 
   return (

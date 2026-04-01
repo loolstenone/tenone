@@ -11,8 +11,8 @@ import {
   FileBarChart, Target, ArrowRight, Shield, Zap,
   CheckCircle2, Eye, PenTool, Sparkles
 } from 'lucide-react';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
 
 const HEADLINES = [
   { main: 'AI가 추천하는 브랜드,', accent: '당신인가요?' },

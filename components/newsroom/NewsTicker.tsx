@@ -54,12 +54,12 @@ export default function NewsTicker() {
   const doubled = [...items, ...items];
 
   return (
-    <div className="relative w-full overflow-hidden bg-neutral-900 border-y border-neutral-800">
+    <div className="relative w-full overflow-hidden border" style={{ backgroundColor: 'var(--tn-surface)', borderColor: 'var(--tn-border)' }}>
       <div className="flex items-center">
-        {/* LIVE 배지 */}
-        <div className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-neutral-800 border-r border-neutral-700 z-10">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-neutral-400 tracking-wider">LIVE</span>
+        {/* FLASH 배지 */}
+        <div className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 border-r z-10" style={{ backgroundColor: 'var(--tn-text)', borderColor: 'var(--tn-border)' }}>
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+          <span className="text-[10px] font-black tracking-widest" style={{ color: 'var(--tn-bg)' }}>FLASH</span>
         </div>
 
         {/* 스크롤 영역 */}

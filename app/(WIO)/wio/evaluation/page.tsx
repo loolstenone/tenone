@@ -7,7 +7,7 @@ import {
   Award, TrendingUp, ChevronRight, Star, Trophy, Gift, Heart,
   Zap, Bell, ArrowUpRight
 } from 'lucide-react';
-import { WIOMarketingHeader } from '@/components/WIOMarketingHeader';
+import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
 
 /* ── Evaluation Cycle ── */
 const EVAL_CYCLE = [

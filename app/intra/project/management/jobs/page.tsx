@@ -1,6 +1,8 @@
 "use client";
 
-import { Briefcase, Plus, Clock, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Briefcase, Plus, Clock, User, Loader2 } from "lucide-react";
+import * as projectsDb from "@/lib/supabase/projects";
 
 interface Job {
     id: string;
@@ -29,7 +31,45 @@ const statusColor: Record<string, string> = {
     "검토중": "bg-yellow-50 text-yellow-600",
 };
 
+// DB type → 한국어 status mapping
+function mapStatus(type?: string): Job["status"] {
+    if (!type) return "대기";
+    if (type === "completed") return "완료";
+    if (type === "in_progress" || type === "active") return "진행중";
+    if (type === "review") return "검토중";
+    return "대기";
+}
+
 export default function JobsPage() {
+    const [jobs, setJobs] = useState<Job[]>(mockJobs);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        projectsDb.fetchAllJobs(100).then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                const mapped: Job[] = rows.map((r) => {
+                    const proj = r.project as Record<string, unknown> | null;
+                    return {
+                        id: (r.id as string) || "",
+                        code: (r.code as string) || "",
+                        name: (r.name as string) || "",
+                        project: proj ? ((proj.name as string) || (proj.code as string) || "") : "",
+                        assignee: (r.assignee as string) || "-",
+                        startDate: (r.start_date as string) || "",
+                        endDate: (r.end_date as string) || "",
+                        hours: (r.estimated_hours as number) || 0,
+                        status: mapStatus(r.status as string),
+                    };
+                });
+                setJobs(mapped);
+            }
+        }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+
     return (
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
@@ -56,7 +96,7 @@ export default function JobsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockJobs.map(j => (
+                        {jobs.map(j => (
                             <tr key={j.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
                                 <td className="p-3 font-mono text-xs text-neutral-400">{j.code}</td>
                                 <td className="p-3 font-medium">{j.name}</td>

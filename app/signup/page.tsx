@@ -7,9 +7,9 @@ import { validatePassword } from '@/lib/auth-data';
 import { UserPlus, Eye, EyeOff, User, Building2, Mail, Lock, CheckCircle2 } from 'lucide-react';
 import { useSite } from '@/lib/site-context';
 import Link from 'next/link';
-import { PublicHeader } from '@/components/PublicHeader';
-import { PublicFooter } from '@/components/PublicFooter';
-import SmarCommHeader from '@/components/SmarCommHeader';
+import { PublicHeader } from '@/features/tenone/PublicHeader';
+import { PublicFooter } from '@/features/tenone/PublicFooter';
+import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
 
 // --- SmarComm 전용 회원가입 컴포넌트 ---

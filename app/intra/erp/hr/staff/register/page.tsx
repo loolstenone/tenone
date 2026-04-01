@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStaff } from "@/lib/staff-context";
 import { StaffRole, Division, SystemAccess } from "@/types/staff";
 import { divisions, positions, accessOptions, divisionDefaultAccess, brandOptions } from "@/lib/staff-data";
 import * as membersDb from "@/lib/supabase/members";
@@ -15,7 +14,6 @@ const labelClass = "block text-sm text-neutral-500 mb-1.5";
 
 export default function StaffRegisterPage() {
     const router = useRouter();
-    const { addStaff } = useStaff();
     const [form, setForm] = useState({
         name: '', email: '', employeeId: '',
         division: '' as Division | '',
@@ -72,15 +70,6 @@ export default function StaffRegisterPage() {
 
         const initials = form.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || form.name.slice(0, 2).toUpperCase();
         const now = new Date().toISOString().split('T')[0];
-
-        // Mock 저장 (기존 호환)
-        addStaff({
-            id: `s${Date.now()}`, employeeId: form.employeeId, name: form.name, email: form.email,
-            role: form.role, accessLevel: form.accessLevel, division: form.division as Division,
-            department: form.department, position: form.position,
-            brandAssociation: form.brandAssociation, startDate: form.startDate, status: 'Active',
-            phone: form.phone || undefined, avatarInitials: initials, createdAt: now, updatedAt: now,
-        });
 
         // DB 저장 (Supabase members 테이블)
         try {

@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 import {
   Search, TrendingUp, TrendingDown, ArrowRight, ExternalLink,
   BarChart3, Megaphone, Palette, DollarSign, Globe,
@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { getScanLog } from '@/lib/smarcomm/scan-data';
 import { MOCK_CAMPAIGNS, MOCK_CREATIVES, MOCK_SALES, formatCurrency, getStatusLabel, getStatusColor } from '@/lib/smarcomm/dashboard-data';
-import LineChart from '@/components/smarcomm/charts/LineChart';
-import DonutChart from '@/components/smarcomm/charts/DonutChart';
-import QuickStartModal from '@/components/smarcomm/QuickStartModal';
+import LineChart from '@/features/smarcomm/charts/LineChart';
+import DonutChart from '@/features/smarcomm/charts/DonutChart';
+import QuickStartModal from '@/features/smarcomm/QuickStartModal';
 import { getChartColors } from '@/lib/smarcomm/chart-palette';
 
 type Tab = 'overview' | 'scan' | 'campaigns' | 'creative' | 'sales';

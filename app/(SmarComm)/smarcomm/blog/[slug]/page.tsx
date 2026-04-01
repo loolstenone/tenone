@@ -4,8 +4,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Tag } from 'lucide-react';
 import { getPostBySlug, getPublishedPosts } from '@/lib/smarcomm/blog-data';
-import Header from '@/components/smarcomm/Header';
-import Footer from '@/components/smarcomm/Footer';
+import Header from '@/features/smarcomm/Header';
+import Footer from '@/features/smarcomm/Footer';
 
 export default function BlogPostPage() {
   const params = useParams();

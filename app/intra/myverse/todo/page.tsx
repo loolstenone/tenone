@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, ChevronDown, ChevronRight, Clock, History } from "lucide-react";
 import clsx from "clsx";
 import { PageHeader, PrimaryButton, Badge, Card } from "@/components/intra/IntraUI";
+import { fetchTodos, fetchTenOneMembership } from "@/lib/supabase/wio";
 
 type TodoCategory = '일반' | '프로젝트' | '기타';
 type TodoPriority = '높음' | '중간' | '낮음';
@@ -37,6 +38,7 @@ let counter = 100;
 
 export default function TodoPage() {
     const [todos, setTodos] = useState<TodoItem[]>(initialTodos);
+    const [wioMemberId, setWioMemberId] = useState<string | null>(null);
     const [filter, setFilter] = useState<'전체' | TodoCategory>('전체');
     const [statusFilter, setStatusFilter] = useState<'전체' | TodoStatus>('전체');
     const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -47,6 +49,31 @@ export default function TodoPage() {
     const [newPriority, setNewPriority] = useState<TodoPriority>('중간');
     const [newDue, setNewDue] = useState('');
     const [newDesc, setNewDesc] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchTenOneMembership().then((member) => {
+            if (!member || cancelled) return;
+            setWioMemberId(member.id);
+            fetchTodos(member.id).then((rows) => {
+                if (cancelled || !rows.length) return;
+                const mapped: TodoItem[] = rows.map((r: Record<string, unknown>) => ({
+                    id: (r.id as string) || "",
+                    title: (r.title as string) || "",
+                    category: ((r.category as TodoCategory) || '일반'),
+                    priority: ((r.priority as TodoPriority) || '중간'),
+                    status: (r.isDone as boolean) ? '완료' : ((r.status as TodoStatus) || '대기'),
+                    dueDate: (r.dueDate as string) || (r.due_date as string) || "",
+                    project: (r.projectId as string) || undefined,
+                    description: (r.description as string) || undefined,
+                    history: [],
+                    createdAt: (r.createdAt as string) || "",
+                }));
+                setTodos(mapped);
+            });
+        }).catch(() => {});
+        return () => { cancelled = true; };
+    }, []);
 
     const filtered = todos.filter(t => {
         if (filter !== '전체' && t.category !== filter) return false;

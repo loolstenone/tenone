@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Plus, Edit3, Trash2, Eye, EyeOff, Globe, FileText, Users, Settings, BarChart3, Search, ExternalLink } from 'lucide-react';
 import { BLOG_POSTS, type BlogPost } from '@/lib/smarcomm/blog-data';
-import PageTopBar from '@/components/smarcomm/PageTopBar';
-import GuideHelpButton from '@/components/smarcomm/GuideHelpButton';
+import PageTopBar from '@/features/smarcomm/PageTopBar';
+import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
 
 type AdminTab = 'blog' | 'pages' | 'members' | 'seo' | 'settings';
 

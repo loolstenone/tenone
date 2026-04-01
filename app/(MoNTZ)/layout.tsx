@@ -1,5 +1,5 @@
-import { MoNTZHeader } from "@/components/MoNTZHeader";
-import { MoNTZFooter } from "@/components/MoNTZFooter";
+import { MoNTZHeader } from "@/features/montz/MoNTZHeader";
+import { MoNTZFooter } from "@/features/montz/MoNTZFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 

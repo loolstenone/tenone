@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useWorkflow } from "@/lib/workflow-context";
+import { useState, useEffect } from "react";
+import { fetchBrandProjects } from "@/lib/supabase/workflow";
+import { initialProjects } from "@/lib/workflow-data";
 import { ProjectCard } from "@/components/workflow/ProjectCard";
+import type { BrandProject } from "@/types/workflow";
 import { brands } from "@/lib/data";
-import { Filter, FolderKanban } from "lucide-react";
+import { Filter, FolderKanban, Loader2 } from "lucide-react";
 
 export default function ProjectsPage() {
-    const { projects } = useWorkflow();
+    const [projects, setProjects] = useState<BrandProject[]>([]);
+    const [loading, setLoading] = useState(true);
     const [brandFilter, setBrandFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchBrandProjects()
+            .then(p => { if (!cancelled) setProjects(p.length > 0 ? p : initialProjects); })
+            .catch(() => { if (!cancelled) setProjects(initialProjects); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const filteredProjects = projects.filter(p => {
         if (brandFilter !== 'all' && p.brandId !== brandFilter) return false;
@@ -19,6 +31,8 @@ export default function ProjectsPage() {
 
     const activeCount = projects.filter(p => p.status === 'Active').length;
     const avgProgress = Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length);
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">
