@@ -2,7 +2,20 @@
 
 > 마지막 업데이트: 2026-04-01
 
-## 오늘 한 작업 (4/1)
+## 오늘 한 작업 (4/1 오후 — 사무실 2차)
+
+### 인트라 ERP 추가 DB 현실화
+- biz/analysis/division → fetchBizPlans() — 부문 이익률, 전분기 대비 트렌드 ✅
+- biz/analysis/cost → fetchExpenses() — 외부비/내부비 구성, 월별 비용 추이 ✅
+- biz/analysis/page → fetchProjects() — YTD 실적 요약 카드 (매출/매총/영업이익) ✅
+- project/management/jobs → fetchAllJobs() 신규 추가, Job 목록 실DB 연동 ✅
+- erp/project/rates → fetchPayrollWithMembers() 신규 추가, 실제단가 탭 실DB 연동 ✅
+- lib/supabase/projects.ts: fetchAllJobs() 추가 ✅
+- lib/supabase/erp.ts: fetchPayrollWithMembers() 추가 ✅
+
+---
+
+## 오늘 한 작업 (4/1 오전 — 사무실 1차)
 
 ### 인트라 ERP 전체 페이지 DB 현실화 (4/1)
 - middleware: getUser() → getSession() (cold start 해결) ✅
@@ -55,13 +68,15 @@
 
 ### 인트라 DB 현실화 — 남은 것
 1. **ERP HR 보조 페이지**: talent(인재풀), delegation(위임), family(가족), clubs(동아리)
-   → 각 페이지에 DB fallback 패턴 적용 (우선순위 낮음)
+   → DB 테이블 없음, 우선순위 낮음
 2. **Supabase 실DB에 신규 테이블 생성** (현재 없어서 mock fallback 중):
    - `invoices` — 청구서
    - `payments` — 지급관리
    - `card_usage` — 법인카드
    - `incentives` — 보상/성과급
-3. **ERP 마케팅 분석 페이지**: erp/gpr/incentive, erp/gpr/evaluation DB 연동
+3. **biz/manage/actual, gap, page**: monthly_forecasts 테이블 없음 → 미착수
+4. **erp/project/rates**: 표준단가 편집 → DB 저장 기능 (현재는 상태만)
+5. **마케팅/스튜디오/히어로 페이지**: DB 테이블 부재 또는 context 이미 연동됨
 
 ### 즉시
 4. **Prod DB**: `sql/approval_templates.sql` 실행 완료 ✅

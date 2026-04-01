@@ -4,7 +4,27 @@
 
 ---
 
-## 2026-04-01
+## 2026-04-01 (오후 — 사무실 2차)
+
+### 인트라 추가 DB 현실화 (5개 페이지 + 2개 함수)
+
+**수정 파일:**
+- `app/intra/erp/biz/analysis/division/page.tsx` — fetchBizPlans() → 부문 이익률, buildDivisionData()로 전분기 trend 계산
+- `app/intra/erp/biz/analysis/cost/page.tsx` — fetchExpenses() → 외부비/내부비 구성, 월별 비용 추이
+- `app/intra/erp/biz/analysis/page.tsx` — fetchProjects() → YTD 실적 요약 카드
+- `app/intra/project/management/jobs/page.tsx` — fetchAllJobs() → Job 목록 실DB 연동
+- `app/intra/erp/project/rates/page.tsx` — fetchPayrollWithMembers() → 실제단가 탭 실DB 연동
+- `lib/supabase/projects.ts` — fetchAllJobs() 신규 추가 (projects JOIN)
+- `lib/supabase/erp.ts` — fetchPayrollWithMembers() 신규 추가 (payroll + members JOIN)
+
+**커밋:**
+- `d05e74f` feat: biz/analysis 3개 페이지 DB 연결
+- `ca53090` feat: Job 관리 페이지 DB 연결 + fetchAllJobs() 추가
+- `a8d3a90` feat: 투입인원단가 페이지 — fetchPayrollWithMembers DB 연결
+
+---
+
+## 2026-04-01 (오전 — 사무실 1차)
 
 ### 인트라 ERP 전체 페이지 DB 현실화
 
