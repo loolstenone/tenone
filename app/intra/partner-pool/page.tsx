@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchPartners, createPartner } from "@/lib/supabase/erp";
 import {
-    Plus, Search, Star, Building2, User, MapPin, ExternalLink, X,
-    Briefcase, Phone, Mail, Globe, Tag, Filter,
+    Plus, Search, Star, Building2, User, ExternalLink, X,
+    Briefcase, Phone, Mail, Loader2,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -53,13 +54,76 @@ function StarRating({ rating }: { rating: number }) {
     );
 }
 
+function rowToPartner(r: Record<string, unknown>): Partner {
+    return {
+        id: r.id as string,
+        type: (r.type as PartnerType) || 'freelancer',
+        name: r.name as string,
+        contactName: r.contact_name as string | undefined,
+        email: r.email as string | undefined,
+        phone: r.phone as string | undefined,
+        skills: (r.skills as string[]) || [],
+        speciality: r.speciality as string | undefined,
+        portfolioUrl: r.portfolio_url as string | undefined,
+        rating: Number(r.rating) || 0,
+        totalProjects: Number(r.total_projects) || 0,
+        rateType: r.rate_type as RateType | undefined,
+        rateAmount: r.rate_amount as number | undefined,
+        isActive: Boolean(r.is_active),
+        notes: r.notes as string | undefined,
+        createdAt: ((r.created_at as string) || '').split('T')[0],
+    };
+}
+
 export default function PartnerPoolPage() {
-    const [partners] = useState(mockPartners);
+    const [partners, setPartners] = useState<Partner[]>(mockPartners);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<'all' | PartnerType>('all');
     const [skillFilter, setSkillFilter] = useState<string>('all');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchPartners()
+            .then(rows => {
+                if (cancelled) return;
+                if (rows.length > 0) setPartners(rows.map(rowToPartner));
+            })
+            .catch(() => {})
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
     const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
     const [showAdd, setShowAdd] = useState(false);
+    const [addForm, setAddForm] = useState({ type: 'freelancer' as PartnerType, name: '', speciality: '', email: '', phone: '', rateType: 'project' as RateType, rateAmount: '', selectedSkills: [] as string[] });
+    const [saving, setSaving] = useState(false);
+
+    const handleAdd = async () => {
+        if (!addForm.name.trim()) return;
+        setSaving(true);
+        try {
+            const row = await createPartner({
+                type: addForm.type,
+                name: addForm.name.trim(),
+                speciality: addForm.speciality || null,
+                email: addForm.email || null,
+                phone: addForm.phone || null,
+                skills: addForm.selectedSkills,
+                rate_type: addForm.rateType,
+                rate_amount: addForm.rateAmount ? parseInt(addForm.rateAmount) : null,
+                rating: 0,
+                total_projects: 0,
+                is_active: true,
+            });
+            setPartners(prev => [rowToPartner(row), ...prev]);
+            setShowAdd(false);
+            setAddForm({ type: 'freelancer', name: '', speciality: '', email: '', phone: '', rateType: 'project', rateAmount: '', selectedSkills: [] });
+        } catch {
+            // silent fail
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const filtered = partners.filter(p => {
         if (typeFilter !== 'all' && p.type !== typeFilter) return false;
@@ -132,7 +196,11 @@ export default function PartnerPoolPage() {
 
             {/* Partner List */}
             <div className="space-y-2">
-                {filtered.length === 0 ? (
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                    </div>
+                ) : filtered.length === 0 ? (
                     <div className="border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400">파트너가 없습니다.</div>
                 ) : filtered.map(p => (
                     <button key={p.id} onClick={() => setSelectedPartner(p)}
@@ -230,42 +298,43 @@ export default function PartnerPoolPage() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">유형 *</label>
-                                    <select className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none bg-white">
+                                    <select value={addForm.type} onChange={e => setAddForm(f => ({ ...f, type: e.target.value as PartnerType }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none bg-white">
                                         <option value="company">회사</option>
                                         <option value="freelancer">프리랜서</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">이름 *</label>
-                                    <input className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
+                                    <input value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-xs text-neutral-500 mb-1">전문 분야</label>
-                                <input className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" placeholder="예: 브랜드 디자인, 영상 제작" />
+                                <input value={addForm.speciality} onChange={e => setAddForm(f => ({ ...f, speciality: e.target.value }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" placeholder="예: 브랜드 디자인, 영상 제작" />
                             </div>
                             <div>
                                 <label className="block text-xs text-neutral-500 mb-1">역량 (클릭 선택)</label>
                                 <div className="flex gap-1.5 flex-wrap">
                                     {skillOptions.map(s => (
-                                        <button key={s} className="px-2 py-1 text-xs border border-neutral-200 rounded hover:bg-neutral-100 transition-colors">{s}</button>
+                                        <button key={s} type="button" onClick={() => setAddForm(f => ({ ...f, selectedSkills: f.selectedSkills.includes(s) ? f.selectedSkills.filter(x => x !== s) : [...f.selectedSkills, s] }))}
+                                            className={clsx("px-2 py-1 text-xs border rounded transition-colors", addForm.selectedSkills.includes(s) ? "bg-neutral-900 text-white border-neutral-900" : "border-neutral-200 hover:bg-neutral-100")}>{s}</button>
                                     ))}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">이메일</label>
-                                    <input type="email" className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
+                                    <input type="email" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">연락처</label>
-                                    <input className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
+                                    <input value={addForm.phone} onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">단가 유형</label>
-                                    <select className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none bg-white">
+                                    <select value={addForm.rateType} onChange={e => setAddForm(f => ({ ...f, rateType: e.target.value as RateType }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none bg-white">
                                         <option value="project">건당</option>
                                         <option value="hourly">시급</option>
                                         <option value="monthly">월정액</option>
@@ -273,17 +342,16 @@ export default function PartnerPoolPage() {
                                 </div>
                                 <div>
                                     <label className="block text-xs text-neutral-500 mb-1">단가 (원)</label>
-                                    <input type="number" className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
+                                    <input type="number" value={addForm.rateAmount} onChange={e => setAddForm(f => ({ ...f, rateAmount: e.target.value }))} className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs text-neutral-500 mb-1">포트폴리오 URL</label>
-                                <input className="w-full border border-neutral-200 px-3 py-2 text-sm rounded focus:outline-none" placeholder="https://" />
                             </div>
                         </div>
                         <div className="p-5 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">등록</button>
+                            <button onClick={handleAdd} disabled={!addForm.name.trim() || saving} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50 flex items-center gap-1.5">
+                                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                                등록
+                            </button>
                         </div>
                     </div>
                 </div>

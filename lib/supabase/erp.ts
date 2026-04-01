@@ -479,3 +479,27 @@ export async function fetchStaffGprData(quarter?: string) {
         return { ...m, goals: mGoals, latestPay: latestPay || null };
     });
 }
+
+// ── Partner Pool ──
+
+export async function fetchPartners(params: { brandId?: string; type?: string; search?: string; skill?: string } = {}) {
+    const { brandId = 'tenone', type, search, skill } = params;
+    let query = supabase.from('partners').select('*').eq('brand_id', brandId).order('rating', { ascending: false });
+    if (type && type !== 'all') query = query.eq('type', type);
+    if (skill && skill !== 'all') query = query.contains('skills', [skill]);
+    if (search) {
+        const s = search.replace(/[\\%_(),."']/g, '').trim().slice(0, 200);
+        if (s) query = query.or(`name.ilike.%${s}%,speciality.ilike.%${s}%`);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []) as Record<string, unknown>[];
+}
+
+export async function createPartner(input: Record<string, unknown>) {
+    const { data, error } = await supabase.from('partners')
+        .insert({ ...input, brand_id: input.brand_id || 'tenone', updated_at: new Date().toISOString() })
+        .select().single();
+    if (error) throw error;
+    return data as Record<string, unknown>;
+}
