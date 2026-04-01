@@ -3,12 +3,12 @@ import { MindleFooter } from "@/features/mindle/MindleFooter";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: { default: "Mindle — Bloom insights from signals", template: "%s | Mindle" },
-    description: "AI-powered trend analysis platform. From data crawling to insight curation.",
+    title: { default: "Mindle — 보이기 전에, 먼저 본다", template: "%s | Mindle" },
+    description: "AI가 분석하는 트렌드 인텔리전스 플랫폼. 신호에서 인사이트를 피워냅니다.",
     icons: { icon: "/brands/mindle/favicon.png" },
     openGraph: {
-        title: "Mindle — Bloom insights from signals",
-        description: "AI-powered trend analysis platform. From data crawling to insight curation.",
+        title: "Mindle — 보이기 전에, 먼저 본다",
+        description: "AI가 분석하는 트렌드 인텔리전스 플랫폼. 신호에서 인사이트를 피워냅니다.",
         siteName: 'Ten:One™ Universe',
         type: 'website',
     },

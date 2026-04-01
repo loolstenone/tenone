@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,7 +24,17 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // auth-context isAuthenticated 변경 시 닫기
     useEffect(() => { if (isAuthenticated && isOpen) onClose(); }, [isAuthenticated, isOpen, onClose]);
+    // Supabase SIGNED_IN 즉시 감지 → auth-context 업데이트 기다리지 않고 바로 닫기
+    useEffect(() => {
+        if (!isOpen) return;
+        const sb = createClient();
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string) => {
+            if (event === 'SIGNED_IN') onClose();
+        });
+        return () => subscription.unsubscribe();
+    }, [isOpen, onClose]);
     useEffect(() => { if (isOpen) setTab(defaultTab); }, [isOpen, defaultTab]);
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -140,7 +150,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
                                 style={{ backgroundColor: accentColor }}>
                                 {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    : <><LogIn className="w-4 h-4" /> 로그인</>}
+                                    : "로그인"}
                             </button>
                         </form>
                     )}
@@ -164,7 +174,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
                                 style={{ backgroundColor: accentColor }}>
                                 {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    : <><UserPlus className="w-4 h-4" /> 가입하기</>}
+                                    : "가입하기"}
                             </button>
                         </form>
                     )}

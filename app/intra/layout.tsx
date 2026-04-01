@@ -176,13 +176,20 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
         [email, password],
     );
 
-    // 실제 Supabase SIGNED_OUT 이벤트만 감지 (auth-context localStorage 의존 제거)
+    // auth 이벤트 감지: SIGNED_OUT → 로그인 폼, TOKEN_REFRESHED/SIGNED_IN → JWT fast-path 재시도
     useEffect(() => {
         const sb = createClient();
-        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string) => {
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string, session) => {
             if (event === 'SIGNED_OUT') {
                 sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                 setStatus("login");
+            } else if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && session?.user) {
+                // 토큰 갱신 후 새 JWT에서 is_staff 확인 → race condition 해소
+                const appMeta = session.user.app_metadata;
+                if (appMeta?.is_staff === true || appMeta?.is_super_admin === true) {
+                    sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
+                    setStatus("ok");
+                }
             }
         });
         return () => subscription.unsubscribe();

@@ -7,11 +7,11 @@ import { Menu, X } from "lucide-react";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "TRENDS", href: "/mindle/trends" },
-    { name: "REPORTS", href: "/mindle/reports" },
-    { name: "DATA", href: "/mindle/data" },
-    { name: "REFERENCES", href: "/mindle/references" },
-    { name: "NEWSLETTER", href: "/mindle/newsletter" },
+    { name: "트렌드", href: "/mindle/trends" },
+    { name: "리포트", href: "/mindle/reports" },
+    { name: "데이터", href: "/mindle/data" },
+    { name: "레퍼런스", href: "/mindle/references" },
+    { name: "뉴스레터", href: "/mindle/newsletter" },
 ];
 
 export function MindleHeader() {

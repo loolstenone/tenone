@@ -108,16 +108,16 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                         {/* 로그인 */}
                         {config.loginPath ? (
                             <Link href={config.loginPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                                LOG IN
+                                로그인
                             </Link>
                         ) : (
                             <button onClick={() => { setLoginTab("login"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                                LOG IN
+                                로그인
                             </button>
                         )}
                         {/* 가입 */}
                         <button onClick={() => { setLoginTab("signup"); setLoginOpen(true); }} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                            JOIN
+                            가입
                         </button>
                     </>
                 ) : null}

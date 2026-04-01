@@ -10,28 +10,28 @@ export function MindleFooter() {
                     <div className="md:col-span-1">
                         <div className="mb-3 text-xl font-bold"><span className="text-[#F5C518]">Mindle</span> <span className="text-white text-sm font-normal">Whole See</span></div>
                         <p className="text-sm leading-relaxed text-neutral-500">
-                            Bloom insights from signals.
+                            신호에서 인사이트를 피워냅니다.
                         </p>
                     </div>
                     <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">CONTENTS</h3>
+                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">콘텐츠</h3>
                         <div className="space-y-2">
-                            <Link href="/mindle/trends" className="block text-sm hover:text-[#F5C518] transition-colors">Trends</Link>
-                            <Link href="/mindle/reports" className="block text-sm hover:text-[#F5C518] transition-colors">Reports</Link>
-                            <Link href="/mindle/data" className="block text-sm hover:text-[#F5C518] transition-colors">Data</Link>
-                            <Link href="/mindle/references" className="block text-sm hover:text-[#F5C518] transition-colors">References</Link>
+                            <Link href="/mindle/trends" className="block text-sm hover:text-[#F5C518] transition-colors">트렌드</Link>
+                            <Link href="/mindle/reports" className="block text-sm hover:text-[#F5C518] transition-colors">리포트</Link>
+                            <Link href="/mindle/data" className="block text-sm hover:text-[#F5C518] transition-colors">데이터</Link>
+                            <Link href="/mindle/references" className="block text-sm hover:text-[#F5C518] transition-colors">레퍼런스</Link>
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">ABOUT</h3>
+                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">소개</h3>
                         <div className="space-y-2">
-                            <Link href="/mindle/about" className="block text-sm hover:text-[#F5C518] transition-colors">About Mindle</Link>
-                            <Link href="/mindle/newsletter" className="block text-sm hover:text-[#F5C518] transition-colors">Newsletter</Link>
-                            <a href="https://tenone.biz/contact" className="block text-sm hover:text-[#F5C518] transition-colors">Contact</a>
+                            <Link href="/mindle/about" className="block text-sm hover:text-[#F5C518] transition-colors">Mindle 소개</Link>
+                            <Link href="/mindle/newsletter" className="block text-sm hover:text-[#F5C518] transition-colors">뉴스레터</Link>
+                            <a href="https://tenone.biz/contact" className="block text-sm hover:text-[#F5C518] transition-colors">문의</a>
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">UNIVERSE</h3>
+                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">유니버스</h3>
                         <div className="space-y-2">
                             <a href="https://tenone.biz" className="block text-sm hover:text-[#F5C518] transition-colors">TenOne.biz</a>
                             <a href="https://badak.biz" className="block text-sm hover:text-[#F5C518] transition-colors">Badak.biz</a>

@@ -1,6 +1,6 @@
 const https = require('https');
 
-const PAT = process.env.SUPABASE_ACCESS_TOKEN || 'sbp_90bb7c58ad501107c9f350cf8db042c438569acc';
+const PAT = process.env.SUPABASE_ACCESS_TOKEN || 'sbp_36c62ea88ada59834815c671dc114306aa202b77';
 const PROJECT = 'ziotlxkdctlhiwkgmmsh';
 
 async function runSQL(query) {

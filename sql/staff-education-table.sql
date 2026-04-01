@@ -5,7 +5,7 @@
 
 CREATE TABLE IF NOT EXISTS staff_education (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id   TEXT NOT NULL,
+    member_id   TEXT NOT NULL DEFAULT '',
     member_name TEXT NOT NULL,
     department  TEXT NOT NULL DEFAULT '',
     course_name TEXT NOT NULL,
