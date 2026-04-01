@@ -48,8 +48,8 @@ export default function ApprovalCompletedPage() {
                     erpDb.fetchApprovals({ status: 'rejected' }),
                 ]);
                 const all = [
-                    ...approvedRes.approvals.map(a => dbRowToItem(a as Record<string, unknown>)),
-                    ...rejectedRes.approvals.map(a => dbRowToItem(a as Record<string, unknown>)),
+                    ...approvedRes.approvals.map((a: any) => dbRowToItem(a as Record<string, unknown>)),
+                    ...rejectedRes.approvals.map((a: any) => dbRowToItem(a as Record<string, unknown>)),
                 ].sort((a, b) => b.completedDate.localeCompare(a.completedDate));
 
                 if (!cancelled) {

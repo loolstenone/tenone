@@ -344,8 +344,8 @@ export default function ProjectDetailPage() {
     const accuracy = project.actualBilling ? Math.round((project.actualBilling / project.estBilling) * 100) : null;
 
     function nextJobCode(): string {
-        const prefix = `${project.code}-${jobType}-${jobDetail}`;
-        const existing = project.jobs.filter((j) => j.code.startsWith(prefix));
+        const prefix = `${project!.code}-${jobType}-${jobDetail}`;
+        const existing = project!.jobs.filter((j) => j.code.startsWith(prefix));
         const next = String(existing.length + 1).padStart(4, "0");
         return `${prefix}${next}`;
     }

@@ -62,7 +62,7 @@ export default function BillingPage() {
             try {
                 const rows = await erpDb.fetchInvoices({ limit: 50 });
                 if (!cancelled) {
-                    setInvoices(rows.length > 0 ? rows.map(r => dbRowToInvoice(r as Record<string, unknown>)) : mockInvoices);
+                    setInvoices(rows.length > 0 ? rows.map((r: any) => dbRowToInvoice(r as Record<string, unknown>)) : mockInvoices);
                 }
             } catch {
                 if (!cancelled) setInvoices(mockInvoices);

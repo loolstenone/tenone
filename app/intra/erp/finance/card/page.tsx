@@ -53,7 +53,7 @@ export default function CardPage() {
             try {
                 const rows = await erpDb.fetchCardUsage({ limit: 50 });
                 if (!cancelled) {
-                    setUsage(rows.length > 0 ? rows.map(r => dbRowToUsage(r as Record<string, unknown>)) : mockUsage);
+                    setUsage(rows.length > 0 ? rows.map((r: any) => dbRowToUsage(r as Record<string, unknown>)) : mockUsage);
                 }
             } catch {
                 if (!cancelled) setUsage(mockUsage);

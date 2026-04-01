@@ -62,7 +62,7 @@ export default function ExpenseRequestPage() {
                 const dbExpenses = await erpDb.fetchExpenses({ memberId: user?.id, limit: 50 });
                 if (!cancelled) {
                     setRequests(dbExpenses.length > 0
-                        ? dbExpenses.map(e => dbRowToRequest(e as Record<string, unknown>))
+                        ? dbExpenses.map((e: any) => dbRowToRequest(e as Record<string, unknown>))
                         : mockRequests
                     );
                 }

@@ -73,7 +73,7 @@ export default function ApprovalProgressPage() {
             try {
                 const { approvals } = await erpDb.fetchApprovals({ status: 'pending' });
                 if (!cancelled && approvals.length > 0) {
-                    setItems(approvals.map(a => dbRowToItem(a as Record<string, unknown>)));
+                    setItems(approvals.map((a: any) => dbRowToItem(a as Record<string, unknown>)));
                 } else if (!cancelled) {
                     setItems(mockItems);
                 }

@@ -53,7 +53,7 @@ export default function RewardsPage() {
             try {
                 const rows = await erpDb.fetchIncentives({ memberId: user?.id, limit: 20 });
                 if (!cancelled) {
-                    setRewards(rows.length > 0 ? rows.map(r => dbRowToReward(r as Record<string, unknown>)) : mockRewards);
+                    setRewards(rows.length > 0 ? rows.map((r: any) => dbRowToReward(r as Record<string, unknown>)) : mockRewards);
                 }
             } catch {
                 if (!cancelled) setRewards(mockRewards);

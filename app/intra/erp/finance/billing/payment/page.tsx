@@ -59,7 +59,7 @@ export default function PaymentPage() {
             try {
                 const rows = await erpDb.fetchPayments({ limit: 50 });
                 if (!cancelled) {
-                    setPayments(rows.length > 0 ? rows.map(r => dbRowToPayment(r as Record<string, unknown>)) : mockPayments);
+                    setPayments(rows.length > 0 ? rows.map((r: any) => dbRowToPayment(r as Record<string, unknown>)) : mockPayments);
                 }
             } catch {
                 if (!cancelled) setPayments(mockPayments);
