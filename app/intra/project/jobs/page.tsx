@@ -83,6 +83,11 @@ export default function MyProjectsPage() {
     const [showJobModal, setShowJobModal] = useState<string | null>(null);
     const [newJob, setNewJob] = useState({ name: '', type: 'PR' as JobType, detail: 'PL' as JobDetail, startDate: '', dueDate: '', estimatedHours: '' });
     const [jobMembers, setJobMembers] = useState<{ name: string; hours: string; startDate: string; endDate: string }[]>([]);
+    const [viewMode, setViewMode] = useState<'project' | 'all'>('project');
+    const [showLegend, setShowLegend] = useState(false);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'전체' | '대기' | '진행중' | '완료' | '보류'>('전체');
+    const [typeFilter, setTypeFilter] = useState<'전체' | 'PR' | 'ME' | 'PT'>('전체');
 
     // DB 로드 (프로젝트 + Job)
     useEffect(() => {
@@ -196,11 +201,6 @@ export default function MyProjectsPage() {
     };
 
     const allJobs = projects.flatMap(p => p.jobs.map(j => ({ ...j, projectCode: p.code, projectName: p.name })));
-    const [viewMode, setViewMode] = useState<'project' | 'all'>('project');
-    const [showLegend, setShowLegend] = useState(false);
-    const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'전체' | '대기' | '진행중' | '완료' | '보류'>('전체');
-    const [typeFilter, setTypeFilter] = useState<'전체' | 'PR' | 'ME' | 'PT'>('전체');
 
     const totalJobs = allJobs.length;
     const activeJobs = allJobs.filter(j => j.status === '진행중').length;

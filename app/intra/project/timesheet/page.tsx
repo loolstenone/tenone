@@ -361,6 +361,12 @@ export default function TimesheetPage() {
 
   const monthLabel = `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월`;
 
+  // 필터링된 프로젝트
+  const filteredProjects = useMemo(() => {
+    if (selectedProject === "all") return tsProjects;
+    return tsProjects.filter((p) => p.code === selectedProject);
+  }, [selectedProject, tsProjects]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -369,12 +375,6 @@ export default function TimesheetPage() {
       </div>
     );
   }
-
-  // 필터링된 프로젝트
-  const filteredProjects = useMemo(() => {
-    if (selectedProject === "all") return tsProjects;
-    return tsProjects.filter((p) => p.code === selectedProject);
-  }, [selectedProject, tsProjects]);
 
   // 전체 집계
   const totalStats = useMemo(() => {
