@@ -97,10 +97,12 @@ export default function PartnerPoolPage() {
     const [showAdd, setShowAdd] = useState(false);
     const [addForm, setAddForm] = useState({ type: 'freelancer' as PartnerType, name: '', speciality: '', email: '', phone: '', rateType: 'project' as RateType, rateAmount: '', selectedSkills: [] as string[] });
     const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const handleAdd = async () => {
         if (!addForm.name.trim()) return;
         setSaving(true);
+        setSaveError(null);
         try {
             const row = await createPartner({
                 type: addForm.type,
@@ -117,9 +119,11 @@ export default function PartnerPoolPage() {
             });
             setPartners(prev => [rowToPartner(row), ...prev]);
             setShowAdd(false);
+            setSaveError(null);
             setAddForm({ type: 'freelancer', name: '', speciality: '', email: '', phone: '', rateType: 'project', rateAmount: '', selectedSkills: [] });
-        } catch {
-            // silent fail
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : '등록에 실패했습니다.';
+            setSaveError(msg);
         } finally {
             setSaving(false);
         }
@@ -346,12 +350,17 @@ export default function PartnerPoolPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-5 border-t border-neutral-100 flex justify-end gap-2">
-                            <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm text-neutral-500">취소</button>
-                            <button onClick={handleAdd} disabled={!addForm.name.trim() || saving} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50 flex items-center gap-1.5">
-                                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                                등록
-                            </button>
+                        <div className="p-5 border-t border-neutral-100">
+                            {saveError && (
+                                <p className="text-xs text-red-500 mb-3">{saveError}</p>
+                            )}
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => { setShowAdd(false); setSaveError(null); }} className="px-4 py-2 text-sm text-neutral-500">취소</button>
+                                <button onClick={handleAdd} disabled={!addForm.name.trim() || saving} className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50 flex items-center gap-1.5">
+                                    {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                                    등록
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

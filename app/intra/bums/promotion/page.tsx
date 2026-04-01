@@ -45,11 +45,16 @@ export default function PromotionPage() {
 
     async function fetchPromos() {
         setLoading(true);
-        let q = supabase.from('promotions').select('*').order('created_at', { ascending: false });
-        if (selectedSiteId !== 'all') q = q.eq('site', selectedSiteId);
-        const { data } = await q;
-        setPromos((data || []) as Promotion[]);
-        setLoading(false);
+        try {
+            let q = supabase.from('promotions').select('*').order('created_at', { ascending: false });
+            if (selectedSiteId !== 'all') q = q.eq('site', selectedSiteId);
+            const { data } = await q;
+            setPromos((data || []) as Promotion[]);
+        } catch {
+            setPromos([]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     async function handleAdd(e: React.FormEvent) {

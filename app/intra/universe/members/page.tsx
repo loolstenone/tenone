@@ -264,7 +264,8 @@ export default function UniverseMembers() {
                                     <td className="px-4 py-3 text-neutral-500 text-xs">{m.email}</td>
                                     <td className="px-4 py-3">
                                         <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full ${
-                                            m.level >= 4 ? "bg-amber-100 text-amber-700" :
+                                            m.level === 5 ? "bg-rose-100 text-rose-700" :
+                                            m.level === 4 ? "bg-amber-100 text-amber-700" :
                                             m.level === 3 ? "bg-violet-100 text-violet-700" :
                                             m.level === 2 ? "bg-green-100 text-green-700" :
                                             m.level === 1 ? "bg-blue-100 text-blue-700" :

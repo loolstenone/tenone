@@ -571,14 +571,24 @@ export async function fetchPartners(params: { brandId?: string; type?: string; s
 }
 
 export async function createPartner(input: Record<string, unknown>) {
-    // tenant_id 조회 (NOT NULL 제약)
+    // tenant_id 조회 (nullable — 없어도 insert 가능)
     let tenantId = input.tenant_id;
     if (!tenantId) {
-        const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'tenone').single();
-        tenantId = brand?.id;
+        try {
+            const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'tenone').single();
+            tenantId = brand?.id ?? null;
+        } catch {
+            tenantId = null;
+        }
     }
+    const payload: Record<string, unknown> = {
+        ...input,
+        brand_id: input.brand_id || 'tenone',
+        updated_at: new Date().toISOString(),
+    };
+    if (tenantId) payload.tenant_id = tenantId;
     const { data, error } = await supabase.from('partners')
-        .insert({ ...input, tenant_id: tenantId, brand_id: input.brand_id || 'tenone', updated_at: new Date().toISOString() })
+        .insert(payload)
         .select().single();
     if (error) throw error;
     return data as Record<string, unknown>;

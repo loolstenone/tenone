@@ -291,8 +291,8 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                     <IntraSidebar />
                     <div className="flex-1 ml-0 lg:ml-[240px] flex flex-col min-h-screen">
                         <IntraHeader />
-                        <main className="flex-1 p-3 pt-14 sm:p-4 sm:pt-14 lg:px-8 lg:py-6 lg:pt-6 bg-white">
-                            <div className="max-w-[1200px]">{children}</div>
+                        <main className="flex-1 p-3 pt-14 sm:p-4 sm:pt-14 lg:px-8 lg:py-6 lg:pt-6 bg-white overflow-x-hidden">
+                            <div className="w-full max-w-[1200px]">{children}</div>
                         </main>
                         <footer className="border-t border-neutral-100 px-4 lg:px-8 py-4 flex items-center justify-between">
                             <p className="text-[10px] sm:text-xs text-neutral-400">
