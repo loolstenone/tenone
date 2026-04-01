@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Plus, Search, Star, X, Upload, File, Image, FileText, Film, Link2, Trash2, FolderOpen } from "lucide-react";
-import { useLibrary } from "@/lib/library-context";
 import { useAuth } from "@/lib/auth-context";
 import { libraryCategoryOptions, formatBadgeColor, libraryPermissionLabels } from "@/types/library";
-import type { LibraryCategory, LibraryPermission, FileFormat, LibrarySource } from "@/types/library";
+import type { LibraryItem, LibraryCategory, LibraryPermission, FileFormat, LibrarySource } from "@/types/library";
+import { fetchLibraryItems, fetchLibraryBookmarks, createLibraryItem, toggleLibraryBookmark } from "@/lib/supabase/library";
+import { initialLibraryItems, initialBookmarks } from "@/lib/library-data";
 
 const permissionBadge: Record<LibraryPermission, string> = {
     all: "bg-neutral-100 text-neutral-500",
@@ -42,10 +43,33 @@ const formatIcon: Record<string, typeof File> = {
 };
 
 export default function CmsLibraryPage() {
-    const { items, isBookmarked, toggleBookmark, addItem, deleteItem } = useLibrary();
     const { user } = useAuth();
     const userId = "user-ceo";
     const accountType = user?.accountType || 'member';
+
+    const [items, setItems] = useState<LibraryItem[]>(initialLibraryItems);
+    const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(new Set(initialBookmarks.filter(b => b.userId === userId).map(b => b.itemId)));
+
+    useEffect(() => {
+        fetchLibraryItems().then(rows => { if (rows.length > 0) setItems(rows); }).catch(() => {});
+        fetchLibraryBookmarks(userId).then(bms => { if (bms.length > 0) setBookmarkIds(new Set(bms.map(b => b.itemId))); }).catch(() => {});
+    }, []);
+
+    const isBookmarked = useCallback((uid: string, itemId: string) => bookmarkIds.has(itemId), [bookmarkIds]);
+
+    const handleToggleBookmark = useCallback(async (uid: string, itemId: string, source: LibrarySource) => {
+        setBookmarkIds(prev => {
+            const next = new Set(prev);
+            if (next.has(itemId)) next.delete(itemId); else next.add(itemId);
+            return next;
+        });
+        toggleLibraryBookmark(uid, itemId, source).catch(() => {});
+    }, []);
+
+    const addItem = useCallback((item: LibraryItem) => {
+        setItems(prev => [item, ...prev]);
+        createLibraryItem(item).catch(() => {});
+    }, []);
 
     // 전체 소스 통합 표시
     const [search, setSearch] = useState("");
@@ -272,7 +296,7 @@ export default function CmsLibraryPage() {
                                 return (
                                     <tr key={item.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                         <td className="p-3">
-                                            <button onClick={() => toggleBookmark(userId, item.id, item.source)} className="p-0.5 hover:bg-amber-50 rounded">
+                                            <button onClick={() => handleToggleBookmark(userId, item.id, item.source)} className="p-0.5 hover:bg-amber-50 rounded">
                                                 <Star className={`h-3.5 w-3.5 ${isBookmarked(userId, item.id) ? "text-amber-400 fill-amber-400" : "text-neutral-200"}`} />
                                             </button>
                                         </td>

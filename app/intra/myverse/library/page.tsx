@@ -1,19 +1,46 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Plus, Search, Bookmark, Star, FolderOpen, X, FileText } from "lucide-react";
-import { useLibrary } from "@/lib/library-context";
 import { useAuth } from "@/lib/auth-context";
 import { libraryCategoryOptions, formatBadgeColor } from "@/types/library";
-import type { LibraryCategory, LibraryItem } from "@/types/library";
+import type { LibraryCategory, LibraryItem, LibrarySource } from "@/types/library";
+import { fetchLibraryItems, fetchLibraryBookmarks, createLibraryItem, toggleLibraryBookmark } from "@/lib/supabase/library";
+import { initialLibraryItems, initialBookmarks } from "@/lib/library-data";
 
 type TabKey = "my" | "bookmarks";
 
 export default function MyverseLibraryPage() {
-    const { getMyLibrary, getAllBookmarkedItems, isBookmarked, toggleBookmark, addItem, filterByPermission } = useLibrary();
     const { user } = useAuth();
-    const userId = "user-ceo"; // Mock current user
+    const userId = "user-ceo";
     const accountType = user?.accountType || 'member';
+
+    const [allItems, setAllItems] = useState<LibraryItem[]>(initialLibraryItems);
+    const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(new Set(initialBookmarks.filter(b => b.userId === userId).map(b => b.itemId)));
+
+    useEffect(() => {
+        fetchLibraryItems().then(rows => { if (rows.length > 0) setAllItems(rows); }).catch(() => {});
+        fetchLibraryBookmarks(userId).then(bms => { if (bms.length > 0) setBookmarkIds(new Set(bms.map(b => b.itemId))); }).catch(() => {});
+    }, []);
+
+    const myItems = useMemo(() => allItems.filter(i => i.source === 'myverse' && i.authorId === userId), [allItems]);
+    const allBookmarkItems = useMemo(() => allItems.filter(i => bookmarkIds.has(i.id)), [allItems, bookmarkIds]);
+
+    const isBookmarked = useCallback((uid: string, itemId: string) => bookmarkIds.has(itemId), [bookmarkIds]);
+
+    const handleToggleBookmark = useCallback(async (uid: string, itemId: string, source: LibrarySource) => {
+        setBookmarkIds(prev => {
+            const next = new Set(prev);
+            if (next.has(itemId)) next.delete(itemId); else next.add(itemId);
+            return next;
+        });
+        toggleLibraryBookmark(uid, itemId, source).catch(() => {});
+    }, []);
+
+    const addItem = useCallback((item: LibraryItem) => {
+        setAllItems(prev => [item, ...prev]);
+        createLibraryItem(item).catch(() => {});
+    }, []);
 
     const [activeTab, setActiveTab] = useState<TabKey>("my");
     const [search, setSearch] = useState("");
@@ -26,9 +53,7 @@ export default function MyverseLibraryPage() {
     const [newCat, setNewCat] = useState<LibraryCategory>("전략·기획");
     const [newTags, setNewTags] = useState("");
 
-    const myItems = getMyLibrary(userId);
-    const allBookmarks = filterByPermission(getAllBookmarkedItems(userId), accountType);
-    const currentItems = activeTab === "my" ? myItems : allBookmarks;
+    const currentItems = activeTab === "my" ? myItems : allBookmarkItems;
 
     const filtered = useMemo(() => {
         return currentItems.filter(item => {
@@ -77,7 +102,7 @@ export default function MyverseLibraryPage() {
                 </button>
                 <button onClick={() => setActiveTab("bookmarks")}
                     className={`flex-1 rounded px-3 py-2 text-xs font-medium transition-colors ${activeTab === "bookmarks" ? "bg-white text-neutral-800 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}>
-                    즐겨찾기 <span className="ml-1 text-[10px] text-neutral-400">{allBookmarks.length}</span>
+                    즐겨찾기 <span className="ml-1 text-[10px] text-neutral-400">{allBookmarkItems.length}</span>
                 </button>
             </div>
 
@@ -125,7 +150,7 @@ export default function MyverseLibraryPage() {
                                     </div>
                                 </div>
                                 {activeTab === "bookmarks" && (
-                                    <button onClick={() => toggleBookmark(userId, item.id, item.source)} className="shrink-0 p-1.5 hover:bg-amber-50 rounded transition-colors">
+                                    <button onClick={() => handleToggleBookmark(userId, item.id, item.source)} className="shrink-0 p-1.5 hover:bg-amber-50 rounded transition-colors">
                                         <Star className={`h-4 w-4 ${isBookmarked(userId, item.id) ? "text-amber-400 fill-amber-400" : "text-neutral-300"}`} />
                                     </button>
                                 )}

@@ -445,9 +445,6 @@ export function saveAccordionState(openServices: string[]) {
 }
 
 /* ── DB 연동: 비동기 load/save (DB-first + localStorage fallback) ── */
-const DB_APP = 'wio';
-const DB_KEY_CONFIG = 'orbi_config';
-const DB_KEY_ACCORDION = 'accordion_state';
 
 export async function loadOrbiConfigDB(): Promise<OrbiConfig> {
   try {

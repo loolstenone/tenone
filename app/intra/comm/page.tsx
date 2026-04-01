@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Bell, MessageSquare, Calendar, BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 interface PostPreview { id: string; title: string; date: string; badge?: string; author?: string; comment_count?: number; }
+interface CommEvent { id: number; title: string; time: string; date: string; type: string; }
 
 const mockNotices: PostPreview[] = [
     { id: "1", title: "2026년 1분기 GPR 자기 평가 마감 안내", date: "2026-03-15", badge: "HR" },
@@ -18,7 +20,7 @@ const mockFree: PostPreview[] = [
     { id: "2", title: "금요일 점심 같이 드실 분", author: "김준호", date: "2026-03-19" },
 ];
 
-const upcomingEvents = [
+const mockEvents: CommEvent[] = [
     { id: 1, title: "주간 팀 회의", time: "10:00", date: "오늘", type: "회의" },
     { id: 2, title: "MADLeap 5기 정기 모임", time: "14:00", date: "오늘", type: "행사" },
     { id: 3, title: "CJ ENM 콜라보 미팅", time: "11:00", date: "내일", type: "미팅" },
@@ -41,8 +43,11 @@ export default function CommPage() {
     const { user } = useAuth();
     const [notices, setNotices] = useState<PostPreview[]>(mockNotices);
     const [freePosts, setFreePosts] = useState<PostPreview[]>(mockFree);
+    const [events, setEvents] = useState<CommEvent[]>(mockEvents);
 
     useEffect(() => {
+        const supabase = createClient();
+
         // 공지사항 최근 3건
         fetch("/api/board/posts?site=tenone&board=notice&limit=3&status=published")
             .then(r => r.ok ? r.json() : null)
@@ -73,6 +78,26 @@ export default function CommPage() {
                     })));
                 }
             }).catch(() => {/* keep mock */});
+
+        // 사내 일정 (Supabase comm_events)
+        supabase.from('comm_events').select('*')
+            .gte('event_date', new Date().toISOString().split('T')[0])
+            .order('event_date', { ascending: true })
+            .order('event_time', { ascending: true })
+            .limit(6)
+            .then(({ data }: { data: any[] | null }) => {
+                if (data && data.length > 0) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                    setEvents(data.map((e: any) => ({
+                        id: e.id,
+                        title: e.title,
+                        time: e.event_time?.slice(0, 5) || '',
+                        date: e.event_date === today ? '오늘' : e.event_date === tomorrow ? '내일' : e.event_date,
+                        type: e.event_type || '',
+                    })));
+                }
+            });
     }, []);
 
     return (
@@ -119,7 +144,7 @@ export default function CommPage() {
                         </Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
-                        {upcomingEvents.map(ev => (
+                        {events.map(ev => (
                             <li key={ev.id} className="px-6 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
                                 <div className="text-right w-12">
                                     <p className="text-xs text-neutral-400">{ev.date}</p>

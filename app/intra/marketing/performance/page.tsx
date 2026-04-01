@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useMarketing } from "@/lib/marketing-context";
+import { fetchCampaigns, fetchLeads } from "@/lib/supabase/marketing";
+import { initialCampaigns, initialLeads } from "@/lib/marketing-data";
+import type { Campaign, Lead } from "@/types/marketing";
 import { BarChart3, TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 
 interface PerfSnapshot {
@@ -25,12 +27,17 @@ function Trend({ value, target }: { value: number; target: number }) {
 }
 
 export default function PerformancePage() {
-    const { campaigns, leads } = useMarketing();
+    const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+    const [leads, setLeads] = useState<Lead[]>(initialLeads);
     const [snapshots, setSnapshots] = useState<PerfSnapshot[]>([]);
     const [loading, setLoading] = useState(true);
     const supabase = createClient();
 
-    useEffect(() => { fetchSnapshots(); }, []);
+    useEffect(() => {
+        fetchCampaigns().then(rows => { if (rows.length > 0) setCampaigns(rows); }).catch(() => {});
+        fetchLeads().then(rows => { if (rows.length > 0) setLeads(rows); }).catch(() => {});
+        fetchSnapshots();
+    }, []);
 
     async function fetchSnapshots() {
         setLoading(true);
