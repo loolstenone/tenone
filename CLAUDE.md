@@ -24,6 +24,21 @@ npm run deploy:dev # GCP 개발 배포
 npm run deploy:prod # GCP 프로덕션 배포
 ```
 
+## Supabase SQL 직접 실행
+
+> **Claude가 SQL을 직접 실행한다. 사용자가 Dashboard에서 수동으로 실행할 필요 없다.**
+
+- **PAT**: `.env.local`의 `SUPABASE_ACCESS_TOKEN` (Supabase Management API용)
+- **실행 스크립트**: `scripts/run-sql.js` — `queries` 배열에 SQL 추가 후 `node scripts/run-sql.js`
+- **API**: `POST https://api.supabase.com/v1/projects/ziotlxkdctlhiwkgmmsh/database/query`
+  - DDL(CREATE TABLE 등) 성공 응답: HTTP 201, body `[]`
+  - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
+
+**새 테이블 필요 시 워크플로우:**
+1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + 시드)
+2. `scripts/run-sql.js`에 쿼리 추가하거나 직접 curl/node로 실행
+3. 사용자에게 Dashboard 접속 요청 불필요 — Claude가 직접 처리
+
 ## 프로젝트 구조
 
 ```

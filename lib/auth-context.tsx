@@ -2,8 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, SystemAccess, IntraModule } from '@/types/auth';
-import { validateCredentials, registerMember } from '@/lib/auth-data';
-import { isMockAllowed } from '@/lib/env';
 import { createClient } from '@/lib/supabase/client';
 import { permissionsFromJWT } from '@/lib/supabase/identity';
 import type { JWTAppMetadata } from '@/types/identity';
@@ -242,18 +240,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             if (error) console.error('[Auth] Supabase login error:', error.message);
         } catch {
-            // Supabase 실패 시 Mock fallback
+            // Supabase 접속 실패
         }
 
-        // Fallback: Mock 인증 (개발 환경에서만)
-        if (isMockAllowed()) {
-            const validatedUser = validateCredentials(email, password);
-            if (validatedUser) {
-                setUser(validatedUser);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(validatedUser));
-                return { success: true, user: validatedUser };
-            }
-        }
         return { success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' };
     }, [supabase, syncUserFromSession]);
 
@@ -310,18 +299,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return { success: false, error: error.message };
             }
         } catch {
-            // Supabase 실패 시 Mock fallback
+            // Supabase 접속 실패
         }
 
-        // 2. Fallback: Mock 가입 (개발 환경에서만)
-        if (isMockAllowed()) {
-            const result = registerMember(name, email, password, undefined, newsletterSubscribed);
-            if (result.success && result.user) {
-                setUser(result.user);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(result.user));
-            }
-            return { success: result.success, error: result.error };
-        }
         return { success: false, error: '회원가입에 실패했습니다. 다시 시도해주세요.' };
     }, [supabase]);
 

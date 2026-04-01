@@ -139,6 +139,13 @@ body {
   overflow: hidden;
 }
 
+/* 모바일 테이블 가로 스크롤 — 인트라 카드/컨테이너 안 테이블 */
+@media (max-width: 1023px) {
+  main.bg-white .border.border-neutral-200.bg-white:has(table) {
+    overflow-x: auto;
+  }
+}
+
 /* 인트라 영역 shadow 제거 */
 main.bg-white .shadow,
 main.bg-white .shadow-sm,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import {
   Plus,
   ChevronRight,
@@ -57,6 +58,33 @@ const initialDepartments: Department[] = [
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('wio_departments').select('id, name, parent_id, level').order('level').order('sort_order')
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const byParent = new Map<string | null, typeof data>();
+          data.forEach(r => {
+            const key = r.parent_id as string | null;
+            if (!byParent.has(key)) byParent.set(key, []);
+            byParent.get(key)!.push(r);
+          });
+          const roots = byParent.get(null) || [];
+          setDepartments(roots.map(r => ({
+            id: r.id as string,
+            name: r.name as string,
+            type: 'division' as const,
+            children: (byParent.get(r.id as string) || []).map(c => ({
+              id: c.id as string,
+              name: c.name as string,
+              type: 'team' as const,
+            })),
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [expanded, setExpanded] = useState<Set<string>>(
     new Set(initialDepartments.map((d) => d.id))
   );
