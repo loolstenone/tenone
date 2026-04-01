@@ -2,6 +2,18 @@
 
 > 마지막 업데이트: 2026-04-01
 
+## 오늘 한 작업 (4/1 오후 — 사무실 5차)
+
+### Universe OS Phase 1 — agent DB 테이블 생성 SQL
+- Phase 1 코드(lib/agent/claude.ts, /api/agent/hub, /api/agent/profiles, /api/agent/messages, app/intra/agent/page.tsx) 전부 완성 확인 ✅
+- sql/agent-tables.sql 신규 생성 — **Prod SQL 에디터에서 직접 실행 필요 ⚠️**
+  - agent_profiles (name/display_name/layer/agent_type/model_id/system_prompt/temperature/max_tokens/tools/risk_level/can_invoke/is_active)
+  - agent_messages (from_agent/to_agent/message_type/payload/risk_level/confidence/correlation_id/user_id)
+  - RLS: auth_is_staff() 기반
+  - 초기 시드 3종: compass(L0 메타), madleague(L2 브랜드), badaksoe(L2 브랜드)
+
+---
+
 ## 오늘 한 작업 (4/1 오후 — 사무실 4차)
 
 ### 인트라 DB 현실화 추가 (4/1 오후 4차)
@@ -116,8 +128,9 @@ partner-pool, vendors, bidding, hero/*, wiki/*, studio/*, settings/*
 
 ### 단기 — TenOne
 6. ~~설정 서비스/모듈 → Supabase 저장 (localStorage → DB)~~ ✅ 완료
-7. Rule Engine + Event Bus 구현 (Universe OS Phase 2)
-8. SmarComm 독립 배포
+7. **Universe OS Phase 1 DB 활성화**: `sql/agent-tables.sql` Prod 실행 → agent_profiles/agent_messages 테이블 생성 ← **다음 즉시**
+8. **Universe OS Phase 2**: badaksoe_rooms 테이블 + /api/agent/badaksoe 엔드포인트 (Phase 1 DB 실행 후)
+9. SmarComm 독립 배포
 
 ### 단기 — 사이트 구조 개편
 6. **TrendHunter → Mindle 통합 후 삭제**
