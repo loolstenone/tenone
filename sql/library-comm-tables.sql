@@ -150,7 +150,7 @@ CREATE POLICY "mkt_performance_write" ON mkt_performance FOR ALL USING (true);
 -- ── 시드 데이터: comm_events 샘플 ──────────────────────────
 -- tenant_id가 NOT NULL인 기존 스키마 대응
 INSERT INTO comm_events (tenant_id, title, event_date, event_time, event_type)
-SELECT b.id, v.title, v.event_date, v.event_time, v.event_type
+SELECT b.id::uuid, v.title, v.event_date, v.event_time, v.event_type
 FROM (SELECT id FROM brands WHERE name ILIKE '%tenone%' OR name ILIKE '%ten:one%' LIMIT 1) b,
 (VALUES
     ('주간 팀 회의', CURRENT_DATE, '10:00'::TIME, '회의'),
