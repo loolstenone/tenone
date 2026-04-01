@@ -72,6 +72,16 @@ export async function fetchJobs(projectId: string) {
     return data || [];
 }
 
+export async function fetchAllJobs(limit = 100) {
+    const { data, error } = await supabase
+        .from('jobs')
+        .select('*, project:projects(name, code, status)')
+        .order('seq')
+        .limit(limit);
+    if (error) throw error;
+    return (data || []) as Record<string, unknown>[];
+}
+
 export async function createJob(job: Record<string, unknown>) {
     const { data, error } = await supabase
         .from('jobs')
