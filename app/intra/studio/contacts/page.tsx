@@ -1,16 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { brands, contacts } from "@/lib/data";
+import { useState, useEffect } from "react";
+import { brands, contacts as mockContacts } from "@/lib/data";
+import { fetchPeople } from "@/lib/supabase/crm";
+import type { Contact } from "@/types/contact";
 import { Search, Filter, Plus, Mail, Phone, MoreHorizontal, User } from "lucide-react";
 import clsx from "clsx";
-// Note: We might need to update the import path if ContactImportModal is not in /components
 import { ContactImportModal } from "@/components/ContactImportModal";
 
 export default function ContactsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedRole, setSelectedRole] = useState("All");
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [contacts, setContacts] = useState<Contact[]>(mockContacts);
+
+    useEffect(() => {
+        fetchPeople({ limit: 100 })
+            .then(({ people }) => {
+                if (people.length > 0) {
+                    setContacts(people.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        role: (p.type as Contact['role']) || 'Partner',
+                        company: p.company,
+                        email: p.email,
+                        phone: p.phone,
+                        status: (p.status as Contact['status']) || 'Active',
+                        brandAssociation: p.brandAssociation,
+                        lastContacted: p.lastContacted,
+                        notes: p.notes,
+                    })));
+                }
+            })
+            .catch(() => {/* keep mockContacts */});
+    }, []);
 
     const filteredContacts = contacts.filter(contact => {
         const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
