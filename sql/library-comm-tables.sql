@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS library_items (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 기존 테이블에 brand_id 누락 시 추가
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+
 -- 인덱스
 CREATE INDEX IF NOT EXISTS idx_library_items_source ON library_items(source);
 CREATE INDEX IF NOT EXISTS idx_library_items_author_id ON library_items(author_id);
@@ -73,6 +76,8 @@ CREATE TABLE IF NOT EXISTS comm_events (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+
 CREATE INDEX IF NOT EXISTS idx_comm_events_date ON comm_events(event_date);
 CREATE INDEX IF NOT EXISTS idx_comm_events_brand ON comm_events(brand_id);
 
@@ -94,6 +99,8 @@ CREATE TABLE IF NOT EXISTS mkt_performance (
     brand_id TEXT DEFAULT 'tenone',
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
 
 CREATE INDEX IF NOT EXISTS idx_mkt_performance_channel ON mkt_performance(channel);
 CREATE INDEX IF NOT EXISTS idx_mkt_performance_period ON mkt_performance(period);
