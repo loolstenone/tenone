@@ -19,8 +19,10 @@ CREATE INDEX IF NOT EXISTS idx_shop_products_site ON shop_products(site);
 CREATE INDEX IF NOT EXISTS idx_shop_products_status ON shop_products(status);
 
 ALTER TABLE shop_products ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "shop_products_read_all" ON shop_products FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "shop_products_write_admin" ON shop_products FOR ALL
+DROP POLICY IF EXISTS "shop_products_read_all" ON shop_products;
+CREATE POLICY "shop_products_read_all" ON shop_products FOR SELECT USING (true);
+DROP POLICY IF EXISTS "shop_products_write_admin" ON shop_products;
+CREATE POLICY "shop_products_write_admin" ON shop_products FOR ALL
   USING (auth.jwt() ->> 'role' IN ('super_admin', 'admin'));
 
 -- 2. shop_orders
@@ -44,10 +46,13 @@ CREATE INDEX IF NOT EXISTS idx_shop_orders_site ON shop_orders(site);
 CREATE INDEX IF NOT EXISTS idx_shop_orders_status ON shop_orders(status);
 
 ALTER TABLE shop_orders ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "shop_orders_read_admin" ON shop_orders FOR SELECT
+DROP POLICY IF EXISTS "shop_orders_read_admin" ON shop_orders;
+CREATE POLICY "shop_orders_read_admin" ON shop_orders FOR SELECT
   USING (auth.jwt() ->> 'role' IN ('super_admin', 'admin'));
-CREATE POLICY IF NOT EXISTS "shop_orders_write_all" ON shop_orders FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "shop_orders_update_admin" ON shop_orders FOR UPDATE
+DROP POLICY IF EXISTS "shop_orders_write_all" ON shop_orders;
+CREATE POLICY "shop_orders_write_all" ON shop_orders FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "shop_orders_update_admin" ON shop_orders;
+CREATE POLICY "shop_orders_update_admin" ON shop_orders FOR UPDATE
   USING (auth.jwt() ->> 'role' IN ('super_admin', 'admin'));
 
 -- 3. promotions
@@ -72,6 +77,8 @@ CREATE INDEX IF NOT EXISTS idx_promotions_code ON promotions(code);
 CREATE INDEX IF NOT EXISTS idx_promotions_status ON promotions(status);
 
 ALTER TABLE promotions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "promotions_read_active" ON promotions FOR SELECT USING (status = 'active');
-CREATE POLICY IF NOT EXISTS "promotions_write_admin" ON promotions FOR ALL
+DROP POLICY IF EXISTS "promotions_read_active" ON promotions;
+CREATE POLICY "promotions_read_active" ON promotions FOR SELECT USING (status = 'active');
+DROP POLICY IF EXISTS "promotions_write_admin" ON promotions;
+CREATE POLICY "promotions_write_admin" ON promotions FOR ALL
   USING (auth.jwt() ->> 'role' IN ('super_admin', 'admin'));
