@@ -5,3 +5,4 @@ export { default as PostDetail } from './PostDetail';
 export { default as CommentSection } from './CommentSection';
 export { default as BoardPage } from './BoardPage';
 export { default as PostEditor } from './PostEditor';
+export { default as BoardWidget } from './BoardWidget';

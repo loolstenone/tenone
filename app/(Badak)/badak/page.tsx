@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { fetchStars, fetchBadakStats } from '@/lib/supabase/badak';
 import type { BadakStar } from '@/types/badak';
+import { BoardWidget } from '@/components/board';
 
 /* ── Mock: 다음 모임 ── */
 const UPCOMING_MEETUPS = [
@@ -347,6 +348,21 @@ export default function BadakHome() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ===== 커뮤니티 최신 글 ===== */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-4xl px-6">
+          <BoardWidget
+            site="badak"
+            board="community"
+            title="커뮤니티 최신 글"
+            moreHref="/badak/community"
+            limit={5}
+            layout="list"
+            accentColor="#d97706"
+          />
         </div>
       </section>
 
