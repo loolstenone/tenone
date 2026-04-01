@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { CircleDollarSign, Plus, Search, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CircleDollarSign, Plus, Loader2 } from "lucide-react";
+import * as erpDb from "@/lib/supabase/erp";
 
 interface Invoice {
     id: string;
@@ -29,10 +30,55 @@ const statusColor: Record<string, string> = {
     "연체": "bg-red-50 text-red-600",
 };
 
+const statusMap: Record<string, Invoice["status"]> = {
+    issued: "발행",
+    paid: "입금완료",
+    draft: "미발행",
+    overdue: "연체",
+};
+
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
+function dbRowToInvoice(r: Record<string, unknown>): Invoice {
+    return {
+        id: r.id as string,
+        invoiceNo: (r.invoice_no as string) || "-",
+        client: (r.client_name as string) || (r.client as string) || "-",
+        project: (r.project_name as string) || (r.project as string) || "-",
+        amount: (r.amount as number) || 0,
+        issueDate: ((r.issue_date as string) || "-").slice(0, 10),
+        dueDate: ((r.due_date as string) || "-").slice(0, 10),
+        status: statusMap[(r.status as string) || "draft"] || "미발행",
+    };
+}
+
 export default function BillingPage() {
-    const totalOutstanding = mockInvoices.filter(i => i.status === "발행" || i.status === "연체").reduce((s, i) => s + i.amount, 0);
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const rows = await erpDb.fetchInvoices({ limit: 50 });
+                if (!cancelled) {
+                    setInvoices(rows.length > 0 ? rows.map(r => dbRowToInvoice(r as Record<string, unknown>)) : mockInvoices);
+                }
+            } catch {
+                if (!cancelled) setInvoices(mockInvoices);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    if (loading) {
+        return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+    }
+
+    const totalOutstanding = invoices.filter(i => i.status === "발행" || i.status === "연체").reduce((s, i) => s + i.amount, 0);
+    const thisMonthPaid = invoices.filter(i => i.status === "입금완료").reduce((s, i) => s + i.amount, 0);
 
     return (
         <div className="max-w-5xl">
@@ -49,9 +95,9 @@ export default function BillingPage() {
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
                     { label: "미수금 합계", value: formatKRW(totalOutstanding) },
-                    { label: "발행 건", value: `${mockInvoices.filter(i => i.status === "발행").length}건` },
-                    { label: "연체 건", value: `${mockInvoices.filter(i => i.status === "연체").length}건` },
-                    { label: "이번 달 입금", value: formatKRW(5000000) },
+                    { label: "발행 건", value: `${invoices.filter(i => i.status === "발행").length}건` },
+                    { label: "연체 건", value: `${invoices.filter(i => i.status === "연체").length}건` },
+                    { label: "입금 완료", value: formatKRW(thisMonthPaid) },
                 ].map(s => (
                     <div key={s.label} className="border border-neutral-200 bg-white p-4">
                         <p className="text-xs text-neutral-400 mb-1">{s.label}</p>
@@ -61,34 +107,38 @@ export default function BillingPage() {
             </div>
 
             <div className="border border-neutral-200 bg-white">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b border-neutral-100 text-xs text-neutral-400">
-                            <th className="text-left p-3 font-medium">청구번호</th>
-                            <th className="text-left p-3 font-medium">거래처</th>
-                            <th className="text-left p-3 font-medium">프로젝트</th>
-                            <th className="text-right p-3 font-medium">금액</th>
-                            <th className="text-left p-3 font-medium">발행일</th>
-                            <th className="text-left p-3 font-medium">만기일</th>
-                            <th className="text-center p-3 font-medium">상태</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mockInvoices.map(inv => (
-                            <tr key={inv.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
-                                <td className="p-3 font-mono text-xs">{inv.invoiceNo}</td>
-                                <td className="p-3 font-medium">{inv.client}</td>
-                                <td className="p-3 text-neutral-500">{inv.project}</td>
-                                <td className="p-3 text-right font-medium">{formatKRW(inv.amount)}</td>
-                                <td className="p-3 text-neutral-500 text-xs">{inv.issueDate}</td>
-                                <td className="p-3 text-neutral-500 text-xs">{inv.dueDate}</td>
-                                <td className="p-3 text-center">
-                                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[inv.status]}`}>{inv.status}</span>
-                                </td>
+                {invoices.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-neutral-400">청구서가 없습니다</div>
+                ) : (
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-neutral-100 text-xs text-neutral-400">
+                                <th className="text-left p-3 font-medium">청구번호</th>
+                                <th className="text-left p-3 font-medium">거래처</th>
+                                <th className="text-left p-3 font-medium">프로젝트</th>
+                                <th className="text-right p-3 font-medium">금액</th>
+                                <th className="text-left p-3 font-medium">발행일</th>
+                                <th className="text-left p-3 font-medium">만기일</th>
+                                <th className="text-center p-3 font-medium">상태</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {invoices.map(inv => (
+                                <tr key={inv.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
+                                    <td className="p-3 font-mono text-xs">{inv.invoiceNo}</td>
+                                    <td className="p-3 font-medium">{inv.client}</td>
+                                    <td className="p-3 text-neutral-500">{inv.project}</td>
+                                    <td className="p-3 text-right font-medium">{formatKRW(inv.amount)}</td>
+                                    <td className="p-3 text-neutral-500 text-xs">{inv.issueDate}</td>
+                                    <td className="p-3 text-neutral-500 text-xs">{inv.dueDate}</td>
+                                    <td className="p-3 text-center">
+                                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[inv.status]}`}>{inv.status}</span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
         </div>
     );

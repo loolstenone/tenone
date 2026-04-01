@@ -299,3 +299,42 @@ export async function toggleApprovalTemplate(id: string, active: boolean) {
     if (error) throw error;
     return data;
 }
+
+// ── Invoices (청구서) ──
+
+export async function fetchInvoices(params?: { status?: string; limit?: number }) {
+    let query = supabase.from('invoices').select('*').order('issue_date', { ascending: false });
+    if (params?.status && params.status !== 'all') query = query.eq('status', params.status);
+    if (params?.limit) query = query.limit(params.limit);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+}
+
+export async function createInvoice(input: Record<string, unknown>) {
+    const { data, error } = await supabase.from('invoices').insert(input).select().single();
+    if (error) throw error;
+    return data;
+}
+
+export async function updateInvoiceStatus(id: string, status: string) {
+    const { data, error } = await supabase
+        .from('invoices')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+// ── Corporate Cards (법인카드) ──
+
+export async function fetchCardUsage(params?: { memberId?: string; limit?: number }) {
+    let query = supabase.from('card_usage').select('*').order('used_at', { ascending: false });
+    if (params?.memberId) query = query.eq('member_id', params.memberId);
+    if (params?.limit) query = query.limit(params.limit);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+}
