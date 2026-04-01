@@ -147,6 +147,44 @@ export async function upsertTimesheet(ts: Record<string, unknown>) {
     return data;
 }
 
+// ── Member Active Jobs (타임시트용) ──
+
+export async function fetchMemberActiveJobs(memberId: string) {
+    const { data: pm } = await supabase
+        .from('project_members')
+        .select('project_id')
+        .eq('member_id', memberId);
+
+    const projectIds = ((pm || []) as Record<string, unknown>[]).map(m => m.project_id as string);
+    if (!projectIds.length) return { projects: [], jobs: [] };
+
+    const [projRes, jobsRes] = await Promise.all([
+        supabase.from('projects')
+            .select('id, code, name, status, start_date, end_date')
+            .in('id', projectIds)
+            .order('code'),
+        supabase.from('jobs')
+            .select('id, project_id, code, name, type, detail, estimated_hours')
+            .in('project_id', projectIds)
+            .order('seq'),
+    ]);
+
+    return {
+        projects: (projRes.data || []) as Record<string, unknown>[],
+        jobs: (jobsRes.data || []) as Record<string, unknown>[],
+    };
+}
+
+export async function fetchAllTimesheetsForMember(memberId: string) {
+    const { data, error } = await supabase
+        .from('timesheets')
+        .select('job_id, work_date, hours')
+        .eq('member_id', memberId)
+        .order('work_date', { ascending: true });
+    if (error) throw error;
+    return (data || []) as { job_id: string; work_date: string; hours: number }[];
+}
+
 // ── 통계 ──
 
 export async function getProjectStats() {

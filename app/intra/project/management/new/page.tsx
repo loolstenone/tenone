@@ -2,15 +2,19 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
     ArrowLeft, ChevronDown, ChevronRight, Plus, Trash2, Save, Send,
-    Info, Search, X, DollarSign, Users, FileText, CheckCircle
+    Info, Search, X, DollarSign, Users, FileText, CheckCircle, Loader2
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { categoryLabels, subTypeByCategory, type ProjectCategory, type ProjectSubType } from "@/types/project";
+import { fetchStaff } from "@/lib/supabase/erp";
+import { createProject } from "@/lib/supabase/projects";
+import { createClient } from "@/lib/supabase/client";
 
-// ─── Staff mock (50명) ───
-const staffList = [
+// ─── Staff mock fallback ───
+const staffListMock = [
     { id: "s1", name: "Cheonil Jeon", dept: "경영기획", position: "대표" },
     { id: "s2", name: "Sarah Kim", dept: "사업총괄", position: "이사" },
     { id: "s3", name: "김인사", dept: "인사총괄", position: "이사" },
@@ -63,11 +67,7 @@ const staffList = [
     { id: "s50", name: "감커뮤", dept: "네트워크사업", position: "사원" },
 ];
 
-// 승인자 목록 (사업부장급)
-const approverList = [
-    { id: "s2", name: "Sarah Kim", dept: "사업총괄", position: "이사" },
-    { id: "s1", name: "Cheonil Jeon", dept: "경영기획", position: "대표" },
-];
+type StaffRow = { id: string; name: string; dept: string; position: string };
 
 type MemberRole = "기획" | "디자인" | "개발" | "마케팅" | "콘텐츠" | "기타";
 
@@ -122,6 +122,21 @@ function Section({ title, icon: Icon, defaultOpen = false, children }: {
 // ═══════════════════════════════════════════
 export default function ProjectNewPage() {
     const { user } = useAuth();
+    const router = useRouter();
+    const [staffList, setStaffList] = useState<StaffRow[]>(staffListMock);
+
+    useEffect(() => {
+        fetchStaff().then(rows => {
+            if (rows.length > 0) {
+                setStaffList(rows.map((r: Record<string, unknown>) => ({
+                    id: r.id as string,
+                    name: r.name as string,
+                    dept: r.department as string || "",
+                    position: r.position as string || "",
+                })));
+            }
+        }).catch(() => {/* keep mock */});
+    }, []);
 
     // ── Section 1: 기본 정보 ──
     const [projectName, setProjectName] = useState("");
@@ -190,6 +205,7 @@ export default function ProjectNewPage() {
     const [approvalMemo, setApprovalMemo] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const handleSaveDraft = () => {
         setSaved(true);
@@ -203,10 +219,44 @@ export default function ProjectNewPage() {
         setShowApprovalModal(true);
     };
 
-    const handleApprovalSubmit = () => {
+    const handleApprovalSubmit = async () => {
         if (!approverId) { alert("승인자를 선택하세요."); return; }
-        setShowApprovalModal(false);
-        setSubmitted(true);
+        setSubmitting(true);
+        try {
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            const email = session?.user?.email;
+            let pmId: string | null = null;
+            if (email) {
+                const { data: m } = await supabase.from("members").select("id").eq("email", email).single();
+                pmId = m?.id || null;
+            }
+            // PM from approver selection if no current user found
+            const approver = staffList.find(s => s.id === approverId);
+            await createProject({
+                code: projectCode,
+                name: projectName,
+                type: category || "PR",
+                subtype: subType || null,
+                status: "planning",
+                start_date: startDate,
+                end_date: endDate,
+                description,
+                billing: Number(estBilling.replace(/,/g, "")) || 0,
+                revenue,
+                profit,
+                pm_id: pmId,
+                approver_name: approver?.name || null,
+                approval_memo: approvalMemo || null,
+            });
+            setShowApprovalModal(false);
+            setSubmitted(true);
+            setTimeout(() => router.push("/intra/project/management"), 1500);
+        } catch {
+            alert("프로젝트 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     // 카테고리 변경 시 세부유형 리셋
@@ -234,7 +284,7 @@ export default function ProjectNewPage() {
                     <CheckCircle className="h-4 w-4 text-amber-500" />
                     <div>
                         <p className="text-sm font-medium text-amber-700">등록 요청 완료</p>
-                        <p className="text-xs text-amber-600">승인자({approverList.find(a => a.id === approverId)?.name})에게 결재 요청이 전송되었습니다.</p>
+                        <p className="text-xs text-amber-600">승인자({staffList.find(a => a.id === approverId)?.name})에게 결재 요청이 전송되었습니다.</p>
                     </div>
                 </div>
             )}
@@ -514,7 +564,7 @@ export default function ProjectNewPage() {
                                 <label className="block text-xs text-neutral-500 mb-1">승인자 선택 *</label>
                                 <select className={selectClass} value={approverId} onChange={e => setApproverId(e.target.value)}>
                                     <option value="">승인자 선택</option>
-                                    {approverList.map(a => (
+                                    {staffList.map(a => (
                                         <option key={a.id} value={a.id}>{a.name} ({a.dept} · {a.position})</option>
                                     ))}
                                 </select>
@@ -528,8 +578,11 @@ export default function ProjectNewPage() {
                         <div className="px-5 py-3 border-t border-neutral-100 flex justify-end gap-2">
                             <button onClick={() => setShowApprovalModal(false)}
                                 className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-700">취소</button>
-                            <button onClick={handleApprovalSubmit}
-                                className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">결재 요청</button>
+                            <button onClick={handleApprovalSubmit} disabled={submitting}
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50">
+                                {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                                결재 요청
+                            </button>
                         </div>
                     </div>
                 </div>
