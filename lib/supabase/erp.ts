@@ -338,3 +338,36 @@ export async function fetchCardUsage(params?: { memberId?: string; limit?: numbe
     if (error) throw error;
     return data || [];
 }
+
+// ── Payments (지급관리) ──
+
+export async function fetchPayments(params?: { status?: string; limit?: number }) {
+    let query = supabase.from('payments').select('*').order('due_date', { ascending: true });
+    if (params?.status && params.status !== 'all') query = query.eq('status', params.status);
+    if (params?.limit) query = query.limit(params.limit);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+}
+
+export async function updatePaymentStatus(id: string, status: string) {
+    const { data, error } = await supabase
+        .from('payments')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+// ── Incentives / Rewards ──
+
+export async function fetchIncentives(params?: { memberId?: string; limit?: number }) {
+    let query = supabase.from('incentives').select('*').order('period', { ascending: false });
+    if (params?.memberId) query = query.eq('member_id', params.memberId);
+    if (params?.limit) query = query.limit(params.limit);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+}
