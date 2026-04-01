@@ -391,6 +391,29 @@ export async function fetchIncentives(params?: { memberId?: string; limit?: numb
     return data || [];
 }
 
+// ── Standard Rates (직급별 표준단가) ──
+
+export async function fetchStandardRates(brandId = 'tenone') {
+    const { data, error } = await supabase.from('standard_rates').select('*')
+        .eq('brand_id', brandId)
+        .order('hourly_rate', { ascending: false });
+    if (error) throw error;
+    return (data || []) as Record<string, unknown>[];
+}
+
+export async function upsertStandardRate(position: string, hourlyRate: number, brandId = 'tenone') {
+    const { data, error } = await supabase
+        .from('standard_rates')
+        .upsert({
+            position, hourly_rate: hourlyRate, brand_id: brandId,
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'position,brand_id' })
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
 // ── Monthly Forecasts (월별 추정/실적) ──
 
 export async function fetchMonthlyForecasts(params: { year: number; month?: number; brandId?: string }) {

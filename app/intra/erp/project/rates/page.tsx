@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DollarSign, Edit2, Save, Info, Loader2 } from "lucide-react";
+import { DollarSign, Edit2, Save, Info, Loader2, Check } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";
 
@@ -53,9 +53,20 @@ export default function RatesPage() {
     const [editingIdx, setEditingIdx] = useState<number | null>(null);
     const [editValue, setEditValue] = useState('');
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
+        // 표준단가 로드
+        erpDb.fetchStandardRates().then((rows) => {
+            if (!cancelled && rows.length > 0) {
+                setStandardRates(rows.map(r => ({
+                    position: (r.position as string),
+                    hourlyRate: (r.hourly_rate as number) || 0,
+                })));
+            }
+        }).catch(() => {});
+        // 실제단가 로드
         erpDb.fetchPayrollWithMembers().then((rows) => {
             if (!cancelled && rows.length > 0) {
                 const mapped: ActualRate[] = rows
@@ -81,10 +92,13 @@ export default function RatesPage() {
         return () => { cancelled = true; };
     }, []);
 
-    const saveStandardRate = (idx: number) => {
+    const saveStandardRate = async (idx: number) => {
         const val = Number(editValue);
         if (val > 0) {
+            const position = standardRates[idx].position;
             setStandardRates(prev => prev.map((r, i) => i === idx ? { ...r, hourlyRate: val } : r));
+            setSaving(true);
+            erpDb.upsertStandardRate(position, val).catch(() => {}).finally(() => setSaving(false));
         }
         setEditingIdx(null);
     };
@@ -125,6 +139,7 @@ export default function RatesPage() {
                 <div>
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs text-neutral-500">직급별 시간당 표준 단가 → <span className="font-medium">예상 손익</span>에 적용</p>
+                        {saving && <span className="text-xs text-neutral-400 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> 저장 중...</span>}
                     </div>
                     <div className="border border-neutral-200 bg-white">
                         <div className="grid grid-cols-4 gap-2 px-4 py-2 border-b border-neutral-100 text-[11px] text-neutral-400 uppercase tracking-wider">
