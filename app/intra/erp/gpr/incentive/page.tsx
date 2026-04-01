@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DollarSign, Users, TrendingUp, Award } from "lucide-react";
-import { getProjectStats } from "@/lib/supabase/projects";
+import { DollarSign, Users, TrendingUp, Award, Loader2 } from "lucide-react";
+import { fetchStaffGprData } from "@/lib/supabase/erp";
 
 interface IncentiveRecord {
     name: string;
@@ -45,29 +45,67 @@ const statusColor: Record<string, string> = {
     "미평가": "bg-neutral-100 text-neutral-400",
 };
 
+function dbRowToIncentive(m: Record<string, unknown>): IncentiveRecord {
+    const goals = (m.goals as Record<string, unknown>[]) || [];
+    const pay = m.latestPay as Record<string, unknown> | null;
+    const g = goals[0] || {};
+    const grade = (g.supervisor_rating as string) || "-";
+    const rate = gradeToRate[grade] || 0;
+    const baseSalary = (pay?.base_salary as number) || 0;
+    const amount = baseSalary > 0 && rate > 0 ? Math.round(baseSalary * rate / 100) : 0;
+
+    const status: IncentiveRecord["status"] = grade !== "-"
+        ? (g.agreed_at ? "확정" : "산정중")
+        : "미평가";
+
+    return {
+        name: (m.name as string) || "-",
+        department: (m.department as string) || "-",
+        position: (m.position as string) || "-",
+        gprGrade: grade,
+        baseSalary,
+        incentiveRate: rate,
+        incentiveAmount: amount,
+        status,
+    };
+}
+
 export default function GPRIncentivePage() {
-    const [dbProjectStats, setDbProjectStats] = useState<{ totalRevenue: number; totalProfit: number } | null>(null);
+    const [incentives, setIncentives] = useState<IncentiveRecord[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getProjectStats()
-            .then(stats => setDbProjectStats({ totalRevenue: stats.totalRevenue, totalProfit: stats.totalProfit }))
-            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+        let cancelled = false;
+        (async () => {
+            try {
+                const rows = await fetchStaffGprData();
+                if (!cancelled) {
+                    setIncentives(rows.length > 0 ? rows.map(r => dbRowToIncentive(r)) : mockIncentives);
+                }
+            } catch {
+                if (!cancelled) setIncentives(mockIncentives);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
     }, []);
 
-    const confirmed = mockIncentives.filter(i => i.status === "확정");
+    if (loading) {
+        return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+    }
+
+    const confirmed = incentives.filter(i => i.status === "확정");
     const totalIncentive = confirmed.reduce((s, i) => s + i.incentiveAmount, 0);
 
     return (
         <div className="max-w-5xl">
             <h1 className="text-xl font-bold mb-2">인센티브</h1>
-            <p className="text-sm text-neutral-500 mb-6">
-                GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리
-                {dbProjectStats && <span className="ml-2 text-neutral-400">· 매출 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalRevenue)}원 / 이익 {new Intl.NumberFormat("ko-KR").format(dbProjectStats.totalProfit)}원</span>}
-            </p>
+            <p className="text-sm text-neutral-500 mb-6">GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리</p>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: "전체 대상", value: `${mockIncentives.length}명`, icon: Users },
+                    { label: "전체 대상", value: `${incentives.length}명`, icon: Users },
                     { label: "확정", value: `${confirmed.length}명`, icon: Award },
                     { label: "총 인센티브", value: formatKRW(totalIncentive), icon: DollarSign },
                     { label: "평균 지급률", value: confirmed.length > 0 ? `${Math.round(confirmed.reduce((s, i) => s + i.incentiveRate, 0) / confirmed.length)}%` : "-", icon: TrendingUp },
@@ -82,7 +120,6 @@ export default function GPRIncentivePage() {
                 ))}
             </div>
 
-            {/* Grade → Rate table */}
             <div className="border border-neutral-200 bg-white p-5 mb-6">
                 <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">등급별 인센티브 지급률</h3>
                 <div className="flex gap-2">
@@ -110,7 +147,7 @@ export default function GPRIncentivePage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockIncentives.map(i => (
+                        {incentives.map(i => (
                             <tr key={i.name} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
                                 <td className="p-3 font-medium">{i.name}</td>
                                 <td className="p-3 text-neutral-500 text-xs">{i.department}</td>
@@ -120,7 +157,7 @@ export default function GPRIncentivePage() {
                                         <span className={`text-xs px-2 py-0.5 rounded font-bold ${gradeColor(i.gprGrade)}`}>{i.gprGrade}</span>
                                     ) : <span className="text-neutral-300">-</span>}
                                 </td>
-                                <td className="p-3 text-right text-neutral-600">{formatKRW(i.baseSalary)}</td>
+                                <td className="p-3 text-right text-neutral-600">{i.baseSalary > 0 ? formatKRW(i.baseSalary) : "-"}</td>
                                 <td className="p-3 text-center">{i.incentiveRate > 0 ? `${i.incentiveRate}%` : "-"}</td>
                                 <td className="p-3 text-right font-medium">{formatKRW(i.incentiveAmount)}</td>
                                 <td className="p-3 text-center">

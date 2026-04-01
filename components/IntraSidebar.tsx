@@ -598,10 +598,10 @@ export function IntraSidebar() {
                                                                 className={clsx(
                                                                     "w-full flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
                                                                     isActive(item.href)
-                                                                        ? "text-white font-medium"
-                                                                        : "text-neutral-500 hover:text-white"
+                                                                        ? "text-white font-medium bg-white/5"
+                                                                        : "text-neutral-500 hover:text-white hover:bg-white/[0.03]"
                                                                 )}>
-                                                                <item.icon className="h-3.5 w-3.5 shrink-0" />
+                                                                <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href) ? "text-white" : "text-neutral-600")} />
                                                                 <span className="flex-1 text-left">{item.name}</span>
                                                                 {expandedItems.has(item.name)
                                                                     ? <ChevronDown className="h-2.5 w-2.5 text-neutral-600" />
@@ -613,10 +613,10 @@ export function IntraSidebar() {
                                                                     {item.children.map(child => (
                                                                         <Link key={child.href} href={child.href}
                                                                             className={clsx(
-                                                                                "block px-3 py-1 text-[11px] rounded transition-all",
+                                                                                "block px-3 py-1.5 text-[11px] rounded transition-all",
                                                                                 isActive(child.href, true)
-                                                                                    ? "text-white bg-white/10"
-                                                                                    : "text-neutral-500 hover:text-neutral-300"
+                                                                                    ? "text-white bg-white/10 font-medium"
+                                                                                    : "text-neutral-500 hover:text-neutral-200 hover:bg-white/[0.03]"
                                                                             )}>
                                                                             {child.name}
                                                                         </Link>
@@ -630,9 +630,9 @@ export function IntraSidebar() {
                                                                 "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
                                                                 isActive(item.href)
                                                                     ? "text-white font-medium bg-white/5"
-                                                                    : "text-neutral-500 hover:text-white"
+                                                                    : "text-neutral-500 hover:text-white hover:bg-white/[0.03]"
                                                             )}>
-                                                            <item.icon className="h-3.5 w-3.5 shrink-0" />
+                                                            <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href) ? "text-white" : "text-neutral-600")} />
                                                             {item.name}
                                                         </Link>
                                                     )}

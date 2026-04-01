@@ -371,3 +371,45 @@ export async function fetchIncentives(params?: { memberId?: string; limit?: numb
     if (error) throw error;
     return data || [];
 }
+
+// ── GPR Staff Data (평가/인센티브 관리 페이지용) ──
+// staff members + 해당 분기 gpr_goals + 최근 payroll을 한 번에 조회
+
+function getCurrentQuarter() {
+    const now = new Date();
+    const q = Math.ceil((now.getMonth() + 1) / 3);
+    return `${now.getFullYear()}Q${q}`;
+}
+
+export async function fetchStaffGprData(quarter?: string) {
+    const qtr = quarter || getCurrentQuarter();
+
+    const [membersRes, goalsRes, payrollRes] = await Promise.all([
+        supabase
+            .from('members')
+            .select('id, name, department, position, account_type')
+            .in('account_type', ['staff', 'partner', 'crew', 'junior_partner'])
+            .order('name'),
+        supabase
+            .from('gpr_goals')
+            .select('member_id, self_rating, supervisor_rating, status, self_evaluated_at, evaluated_at, agreed_at')
+            .eq('quarter', qtr),
+        supabase
+            .from('payroll')
+            .select('member_id, base_salary, year_month')
+            .order('year_month', { ascending: false })
+            .limit(200),
+    ]);
+
+    const members = (membersRes.data || []) as Record<string, unknown>[];
+    const goals = (goalsRes.data || []) as Record<string, unknown>[];
+    const payroll = (payrollRes.data || []) as Record<string, unknown>[];
+
+    // 멤버별로 goals + payroll 매핑
+    return members.map(m => {
+        const mGoals = goals.filter(g => g.member_id === m.id);
+        // 최근 payroll 1건
+        const latestPay = payroll.find(p => p.member_id === m.id);
+        return { ...m, goals: mGoals, latestPay: latestPay || null };
+    });
+}
