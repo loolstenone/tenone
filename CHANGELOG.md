@@ -4,6 +4,47 @@
 
 ---
 
+## 2026-04-01 (오후 — 사무실 6차)
+
+### Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 Supabase 전환
+
+**수정 파일:**
+- `app/intra/marketing/organizations/page.tsx` — fetchOrganizations() + mock fallback
+- `app/intra/marketing/deals/page.tsx` — fetchDeals() + updateDeal() + fetchOrganizations()
+- `app/intra/marketing/activities/page.tsx` — Promise.all([fetchActivities, fetchPeople, fetchOrganizations])
+- `app/intra/marketing/crm/segments/page.tsx` — fetchPeople({limit:500}) for segment counts
+- `app/intra/marketing/campaigns/page.tsx` — fetchCampaigns() + mock fallback
+- `app/intra/marketing/leads/page.tsx` — fetchLeads() + updateLead()
+- `app/intra/marketing/content/page.tsx` — fetchContentPosts() + mock fallback
+- `app/intra/marketing/analytics/page.tsx` — Promise.all([fetchCampaigns, fetchLeads, fetchContentPosts])
+- `app/intra/marketing/page.tsx` — Promise.all for dashboard stats
+- `app/intra/erp/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped()
+- `app/intra/erp/hr/gpr/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped()
+- `app/intra/erp/hr/gpr/goals/page.tsx` — DB fetch + createGprGoal()
+- `app/intra/erp/hr/gpr/evaluation/page.tsx` — DB fetch + local state eval
+- `app/intra/erp/hr/staff/[id]/page.tsx` — fetchStaffMembers() + fetchGprGoalsTyped({memberId})
+- `app/intra/erp/hr/staff/register/page.tsx` — mock useStaff 제거, DB-only
+- `app/intra/erp/hr/talent/page.tsx` — talent_pool 테이블 fetch + mock fallback
+- `app/intra/erp/hr/talent/pipeline/page.tsx` — talent_candidates 테이블 fetch + mock fallback
+- `app/intra/erp/hr/talent/programs/page.tsx` — talent_programs 테이블 fetch + mock fallback
+- `app/intra/erp/hr/people/clubs/page.tsx` — madleague_clubs 테이블 fetch + mock fallback
+- `app/intra/erp/hr/people/delegation/page.tsx` — delegations 테이블 fetch + mock fallback
+- `app/intra/erp/hr/family/page.tsx` — family_members 테이블 fetch + mock fallback
+- `app/intra/studio/workflow/page.tsx` — 4개 테이블 Promise.all fetch
+- `app/intra/studio/workflow/kanban/page.tsx` — fetchWorkflowTasks() + DB persistence mutations
+- `app/intra/studio/workflow/pipeline/page.tsx` — fetchPipelineItems() + updatePipelineStage()
+- `app/intra/studio/workflow/projects/page.tsx` — fetchBrandProjects()
+- `app/intra/studio/workflow/automation/page.tsx` — fetchAutomations() + toggleAutomationEnabled()
+- `lib/supabase/erp.ts` — rowToStaffMember, fetchStaffMembers, rowToGprGoal, fetchGprGoalsTyped 추가
+- `lib/supabase/workflow.ts` — **신규 생성** (4개 테이블 CRUD 함수)
+- `sql/workflow-tables.sql` — **신규 생성** (workflow_tasks, content_pipeline, workflow_automations)
+- `sql/badaksoe-rooms-table.sql` — **신규 생성**
+- `sql/partner-pool-table.sql` — tenant_id INSERT 오류 수정
+
+**커밋:** `74a1d81` feat: Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 Supabase 전환
+
+---
+
 ## 2026-04-01 (오후 — 사무실 4차)
 
 ### 인트라 biz/manage DB 연결 + 표준단가 저장 기능

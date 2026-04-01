@@ -2,6 +2,36 @@
 
 > 마지막 업데이트: 2026-04-01
 
+## 오늘 한 작업 (4/1 오후 — 사무실 6차)
+
+### Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 전환
+- **Marketing 9개**: organizations, deals, activities, segments, campaigns, leads, content, analytics, page
+  → 모두 useContext 제거 → Supabase fetch + mock fallback 패턴으로 전환 ✅
+- **ERP HR 11개**: staff/[id], staff/register, gpr/page, gpr/goals, gpr/evaluation,
+  talent, talent/pipeline, talent/programs, clubs, delegation, family
+  → lib/supabase/erp.ts에 rowToStaffMember, fetchStaffMembers, rowToGprGoal, fetchGprGoalsTyped 추가 ✅
+- **Studio Workflow 5개**: page, kanban, pipeline, projects, automation
+  → lib/supabase/workflow.ts 신규 생성 (workflow_tasks, content_pipeline, projects, workflow_automations) ✅
+  → sql/workflow-tables.sql 신규 생성 (Prod 실행 필요 ⚠️)
+- sql/badaksoe-rooms-table.sql 신규 생성 (Prod 실행 필요 ⚠️)
+- Points 2개 (erp/hr/points, myverse/points): point-context가 이미 DB-first 구현 → 변환 불필요 확인 ✅
+
+### DB 현실화 현황 (전체 최신)
+**연결 완료:**
+approval progress/completed, expenses, biz plan, finance reports, card/billing/payment/incentive,
+project management/detail/jobs, timesheet, gpr, payroll, attendance,
+myverse/approval/expenses/gpr/points/projects/payroll/todo,
+biz analysis(division/cost/손익), biz manage(월별추정/실적확정/gap분석), comm(notice/free/calendar),
+opportunity, certificates, rates(표준단가),
+**Marketing 9개 (organizations/deals/activities/segments/campaigns/leads/content/analytics/page)**,
+**ERP HR 11개 (staff+gpr+talent+clubs+delegation+family)**,
+**Studio Workflow 5개 (page+kanban+pipeline+projects+automation)**
+
+**미연결 (정적 콘텐츠 — CMS 대응 예정):**
+wiki/education, wiki/onboarding, wiki/faq, org chart, vendors, bidding, hero/*, settings/*
+
+---
+
 ## 오늘 한 작업 (4/1 오후 — 사무실 5차)
 
 ### Universe OS Phase 1 — agent DB 테이블 생성 SQL
@@ -111,16 +141,25 @@ partner-pool, vendors, bidding, hero/*, wiki/*, studio/*, settings/*
 
 ## 다음 할 일
 
-### 인트라 DB 현실화 — 남은 것
-1. **ERP HR 보조 페이지**: talent(인재풀), delegation(위임), family(가족), clubs(동아리)
-   → DB 테이블 없음, 우선순위 낮음
-2. **Supabase 실DB에 신규 테이블 생성** ← **Prod SQL 에디터에서 직접 실행 필요**:
-   - `sql/erp-finance-tables.sql` — invoices, payments, card_usage, incentives
-   - `sql/monthly-forecasts-table.sql` — monthly_forecasts
-   - `sql/standard-rates-table.sql` — standard_rates (기본 시드 포함)
-3. ~~**biz/manage/actual, gap, page**: monthly_forecasts 테이블 없음~~ → 연결 완료 ✅
-4. ~~**erp/project/rates**: 표준단가 편집 → DB 저장 기능~~ → 완료 ✅
-5. **마케팅/스튜디오/히어로 페이지**: DB 테이블 부재 또는 context 이미 연동됨
+### 즉시 — Prod Supabase SQL 실행 필요 ⚠️
+(Supabase 대시보드 → SQL Editor에서 순서대로 실행)
+1. `sql/erp-finance-tables.sql` — invoices, payments, card_usage, incentives
+2. `sql/monthly-forecasts-table.sql` — monthly_forecasts
+3. `sql/standard-rates-table.sql` — standard_rates (기본 시드 포함)
+4. `sql/agent-tables.sql` — agent_profiles, agent_messages (Universe OS Phase 1)
+5. `sql/workflow-tables.sql` — workflow_tasks, content_pipeline, workflow_automations + projects 컬럼 추가
+6. `sql/badaksoe-rooms-table.sql` — badaksoe_rooms (Universe OS Phase 2)
+
+### 단기 — Universe OS
+- **Phase 1 DB 활성화**: sql/agent-tables.sql 실행 → Agent Hub 페이지 (/intra/agent) 테스트
+- **Phase 2 바당쇠**: /api/agent/badaksoe 엔드포인트 구현
+
+### 단기 — TenOne 서비스
+- **SmarComm 독립 배포**: 별도 Vercel + Supabase 프로젝트 셋업
+- **wiki/education, onboarding, faq**: CMS 전환 (정적 콘텐츠 → DB)
+  → wiki_articles, wiki_courses 테이블 설계 필요
+- **org chart**: 조직도 페이지 DB 연결 (members 테이블 활용)
+- **Myverse 앱**: 맥북 구매 후 → Expo 프로젝트 초기화 + 전용 Supabase 생성
 
 ### 즉시
 4. **Prod DB**: `sql/approval_templates.sql` 실행 완료 ✅

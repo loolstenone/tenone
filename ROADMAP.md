@@ -1,6 +1,6 @@
 # TenOne 프로젝트 로드맵
 
-> 마지막 업데이트: 2026-03-22
+> 마지막 업데이트: 2026-04-01
 > 아키텍처 v3.0 기반 재정비
 
 ## 현재 상태 요약
@@ -8,14 +8,16 @@
 | 영역 | 상태 | 비고 |
 |------|------|------|
 | 퍼블릭 사이트 (11페이지) | ✅ 완성 | 홈/Works/Newsroom/About/Universe 등 |
-| 인트라 9개 모듈 (143페이지) | ✅ UI 완성 | 전부 Mock 데이터 |
+| 인트라 9개 모듈 (143페이지) | ✅ UI 완성 | 대부분 DB 연결 완료 |
 | 사용자 체계 (5단계) | ✅ 구현 | staff/partner/jp/crew/member |
-| 결재 시스템 | ✅ 구현 | Myverse + ERP 결재라인 |
-| 프로젝트/Job 관리 | ✅ 구현 | 등록/상세/손익/인력/파일 |
+| 결재 시스템 | ✅ DB 연결 | Myverse + ERP 결재라인 |
+| 프로젝트/Job 관리 | ✅ DB 연결 | 등록/상세/손익/인력/파일 |
 | 라이브러리 (Wiki/Myverse/CMS) | ✅ 구현 | 권한별 노출, 즐겨찾기 연동 |
-| Townity 공개 대상 | ✅ 구현 | 공지/자유/일정 공개범위 선택 |
-| Backend API | ❌ 없음 | Mock 데이터만 |
-| Database | ❌ 없음 | 스키마 설계 완료 (v3 문서) |
+| Marketing (CRM+캠페인+리드) | ✅ DB 연결 | Supabase 직접 fetch |
+| ERP HR (Staff+GPR+Talent) | ✅ DB 연결 | Supabase 직접 fetch |
+| Studio Workflow (칸반+파이프라인) | ✅ DB 연결 | workflow.ts 신규, SQL 생성 |
+| Universe OS Agent Hub | ⚠️ 코드 완성 | Prod DB 실행 필요 |
+| Backend API | ❌ 없음 | Supabase 직접 호출로 대체 중 |
 | 배포 | ⚠️ 스크립트만 | Cloud Run 미배포 |
 
 ---
@@ -51,18 +53,19 @@
 > Mock → 실제 DB. 사람이 가입하고 데이터가 저장되는 상태.
 
 ### 1-1. Supabase 셋업 (주 1~2)
-- [ ] Supabase 프로젝트 생성
-- [ ] .env.local 환경변수 설정
-- [ ] DB 스키마 생성 (v3 아키텍처 기반)
-  - members, point_logs
-  - projects, jobs, project_members
-  - posts, events
-  - approvals
-  - courses, enrollments
-  - contents
-  - notifications
-  - chat_rooms, chat_messages, chat_room_members
-- [ ] Supabase Auth 설정 (이메일 + 카카오 로그인)
+- [x] Supabase 프로젝트 생성 ✅
+- [x] .env.local 환경변수 설정 ✅
+- [x] DB 스키마 생성 (핵심 테이블) ✅
+  - [x] members, point_logs ✅
+  - [x] projects, jobs, project_members ✅
+  - [x] posts, events ✅
+  - [x] approvals ✅
+  - [x] gpr_goals ✅
+  - [x] partners, brands ✅
+  - [ ] workflow_tasks, content_pipeline, workflow_automations ← SQL 실행 필요 ⚠️
+  - [ ] agent_profiles, agent_messages ← SQL 실행 필요 ⚠️
+- [x] Supabase Auth 설정 (이메일) ✅
+- [ ] 카카오 소셜 로그인
 - [ ] Supabase Storage 버킷 설정 (avatars, files, content-images)
 
 ### 1-2. 인증 전환 (주 1~2)
