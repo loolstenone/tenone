@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronRight, Users, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
+import * as erpDb from "@/lib/supabase/erp";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -73,9 +74,42 @@ const totals = divisions.reduce(
   { billing: 0, grossProfit: 0, operatingProfit: 0, headcount: 0 }
 );
 
+function buildDivisions(rows: Record<string, unknown>[]): DivisionPlan[] {
+  const map: Record<string, DivisionPlan> = {};
+  rows.forEach(r => {
+    const div = (r.division as string) || "기타";
+    if (!map[div]) map[div] = { name: div, billing: 0, grossProfit: 0, operatingProfit: 0, profitRate: 0, headcount: 0, quarters: [] };
+    const q = (r.quarter as string) || "";
+    const billing = (r.billing as number) || 0;
+    const gp = (r.gross_profit as number) || 0;
+    const op = (r.operating_profit as number) || 0;
+    map[div].billing += billing;
+    map[div].grossProfit += gp;
+    map[div].operatingProfit += op;
+    if (q) map[div].quarters.push({ quarter: q, billing, grossProfit: gp, operatingProfit: op });
+  });
+  Object.values(map).forEach(d => {
+    d.profitRate = d.billing > 0 ? Math.round((d.operatingProfit / d.billing) * 1000) / 10 : 0;
+  });
+  return Object.values(map);
+}
+
 export default function DivisionPlanPage() {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [divisionData, setDivisionData] = useState<DivisionPlan[]>(divisions);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    erpDb.fetchBizPlans().then(rows => {
+      if (!cancelled && rows.length > 0) {
+        const built = buildDivisions(rows as Record<string, unknown>[]);
+        if (built.length > 0) setDivisionData(built);
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   const toggle = (name: string) => setExpanded(expanded === name ? null : name);
 
@@ -99,7 +133,7 @@ export default function DivisionPlanPage() {
             </tr>
           </thead>
           <tbody>
-            {divisions.map((div) => (
+            {divisionData.map((div) => (
               <>
                 <tr
                   key={div.name}
@@ -138,16 +172,19 @@ export default function DivisionPlanPage() {
                   ))}
               </>
             ))}
-            <tr className="bg-neutral-50 font-bold">
-              <td className="px-4 py-2.5 text-neutral-900">합계</td>
-              <td className="px-4 py-2.5 text-right text-neutral-900">{krw(totals.billing)}</td>
-              <td className="px-4 py-2.5 text-right text-neutral-900">{krw(totals.grossProfit)}</td>
-              <td className="px-4 py-2.5 text-right text-neutral-900">{krw(totals.operatingProfit)}</td>
-              <td className="px-4 py-2.5 text-right text-neutral-900">
-                {((totals.operatingProfit / totals.billing) * 100).toFixed(1)}%
-              </td>
-              <td className="px-4 py-2.5 text-right text-neutral-900">{totals.headcount}명</td>
-            </tr>
+            {(() => {
+              const t = divisionData.reduce((acc, d) => ({ billing: acc.billing + d.billing, grossProfit: acc.grossProfit + d.grossProfit, operatingProfit: acc.operatingProfit + d.operatingProfit, headcount: acc.headcount + d.headcount }), { billing: 0, grossProfit: 0, operatingProfit: 0, headcount: 0 });
+              return (
+                <tr className="bg-neutral-50 font-bold">
+                  <td className="px-4 py-2.5 text-neutral-900">합계</td>
+                  <td className="px-4 py-2.5 text-right text-neutral-900">{krw(t.billing)}</td>
+                  <td className="px-4 py-2.5 text-right text-neutral-900">{krw(t.grossProfit)}</td>
+                  <td className="px-4 py-2.5 text-right text-neutral-900">{krw(t.operatingProfit)}</td>
+                  <td className="px-4 py-2.5 text-right text-neutral-900">{t.billing > 0 ? ((t.operatingProfit / t.billing) * 100).toFixed(1) : 0}%</td>
+                  <td className="px-4 py-2.5 text-right text-neutral-900">{t.headcount}명</td>
+                </tr>
+              );
+            })()}
           </tbody>
         </table>
       </div>
