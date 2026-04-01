@@ -51,7 +51,7 @@ export default function NewsletterCmsPage() {
     useEffect(() => {
         const supabase = createClient();
         supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false })
-            .then(({ data }) => {
+            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     setSubscribers(data.map((r: Record<string, unknown>) => ({
                         id: r.id as string,

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { usePoints } from "@/lib/point-context";
 import { getDailyQuote } from "@/lib/daily-quotes";
-import { isMockAllowed } from "@/lib/env";
 import * as townityDb from "@/lib/supabase/townity";
 import * as myverseDb from "@/lib/supabase/myverse";
 import {
@@ -19,63 +18,7 @@ import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
 import { gradeConfig, getPointsToNextGrade } from "@/types/point";
 
-// --- Mock 데이터 (개발 환경에서만 사용) ---
-const mockOk = isMockAllowed();
-
-const MOCK_LEAVE = mockOk ? { total: 15, used: 3, remaining: 12, sick: 3, usedSick: 0 } : null;
-
-const MOCK_GPR = mockOk ? {
-    quarter: "2026 Q1", rate: 38, grade: "B+", goals: 5, completed: 2, nextReview: "2026-03-31",
-    items: [
-        { name: "10,000명의 기획자 발굴 네트워크 구축", progress: 25, status: "진행중" },
-        { name: "MADLeague 인사이트 투어링 성공적 운영", progress: 60, status: "진행중" },
-        { name: "LUKI 데뷔 캠페인 완료", progress: 100, status: "완료" },
-    ],
-} : null;
-
-const MOCK_SALARY = mockOk ? {
-    thisMonth: { base: 5000000, bonus: 0, deductions: 820000, net: 4180000, status: "지급예정" },
-    pension: { type: "확정급여(DB)", total: 18500000 },
-} : null;
-
-const MOCK_EXPENSES = mockOk ? {
-    pending: 2, thisMonth: 350000,
-    recentItems: [
-        { date: "2026-03-18", desc: "파트너사 미팅 식비", amount: 85000, status: "승인대기" },
-        { date: "2026-03-15", desc: "출장 교통비", amount: 120000, status: "승인" },
-        { date: "2026-03-10", desc: "사무용품 구매", amount: 45000, status: "지급완료" },
-    ],
-} : null;
-
-const MOCK_PROJECTS = mockOk ? [
-    { name: "LUKI 2nd Single", code: "PRJ-2026-001", role: "기획 총괄", progress: 45, status: "진행중" as const },
-    { name: "MADLeap 5기 운영", code: "PRJ-2026-002", role: "PM", progress: 25, status: "진행중" as const },
-    { name: "Badak 네트워크 확장", code: "PRJ-2026-004", role: "파트너십", progress: 0, status: "계획" as const },
-] : [];
-
-const MOCK_EDUCATION = mockOk ? {
-    mandatory: { total: 6, completed: 2 },
-    recent: [
-        { name: "VRIEF Orientation", status: "수료" as const },
-        { name: "GPR 프레임워크 이해", status: "수료" as const },
-        { name: "Mind Set: 본질·속도·이행", status: "진행중" as const },
-    ],
-} : null;
-
-const MOCK_ATTENDANCE = mockOk ? {
-    thisMonth: { workDays: 14, avgHours: "9h 12m", overtime: "4h 30m" },
-    today: { checkIn: "08:55", checkOut: "-", status: "정상" },
-} : null;
-
-const MOCK_APPROVAL = mockOk ? {
-    pending: 3, inProgress: 2, myDrafts: 1,
-    recent: [
-        { id: "AP-2026-042", title: "MADLeague 인사이트 투어링 예산 품의", type: "품의", date: "2026-03-19", from: "한마케", status: "대기" as const },
-        { id: "AP-2026-041", title: "콘텐츠팀 장비 구매 품의", type: "품의", date: "2026-03-18", from: "김콘텐", status: "대기" as const },
-        { id: "AP-2026-040", title: "3월 주간 업무보고", type: "보고", date: "2026-03-17", from: "Sarah Kim", status: "대기" as const },
-        { id: "AP-2026-038", title: "Badak 밋업 경비 정산", type: "품의", date: "2026-03-15", from: "이수진", status: "승인" as const },
-    ],
-} : null;
+const MOCK_PROJECTS: { name: string; code: string; role: string; progress: number; status: "진행중" | "계획" | "완료" }[] = [];
 
 // 빈 상태 컴포넌트
 function EmptyState({ message }: { message: string }) {
@@ -184,10 +127,10 @@ export default function MyversePage() {
     if (!user) return null;
 
     // 프로필: DB members 테이블 → user 객체에서 직접 사용
-    const hrPosition = user.position || (mockOk ? '대표이사' : '');
-    const hrDepartment = user.department || (mockOk ? '기업 총괄' : '');
-    const hrEmployeeId = user.employeeId || (mockOk ? '2019-0001' : '');
-    const hrHireDate = user.hireDate || (mockOk ? '2019-10-01' : '');
+    const hrPosition = user.position || '';
+    const hrDepartment = user.department || '';
+    const hrEmployeeId = user.employeeId || '';
+    const hrHireDate = user.hireDate || '';
 
     // 근속 기간 계산
     let tenureText = '';
@@ -200,14 +143,13 @@ export default function MyversePage() {
 
     const todayQuote = getDailyQuote(user.id);
 
-    // DB → Mock fallback (개발에서만)
-    const myLeave = MOCK_LEAVE;
-    const myGPR = MOCK_GPR;
-    const mySalary = MOCK_SALARY;
-    const myExpenses = MOCK_EXPENSES;
+    const myLeave = null as { total: number; used: number; remaining: number; sick: number; usedSick: number } | null;
+    const myGPR = null as { quarter: string; rate: number; grade: string; goals: number; completed: number; nextReview: string; items: { name: string; progress: number; status: string }[] } | null;
+    const mySalary = null as { thisMonth: { base: number; bonus: number; deductions: number; net: number; status: string }; pension: { type: string; total: number } } | null;
+    const myExpenses = null as { pending: number; thisMonth: number; recentItems: { date: string; desc: string; amount: number; status: string }[] } | null;
     const myProjects = dbProjects && dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS;
-    const myEducation = dbEducation || MOCK_EDUCATION;
-    const myAttendance = dbAttendance || MOCK_ATTENDANCE;
+    const myEducation = dbEducation || null;
+    const myAttendance = dbAttendance || null;
     const myApproval = dbApprovals && dbApprovals.pendingCount > 0 ? {
         pending: dbApprovals.pendingCount,
         inProgress: dbApprovals.inProgressCount,
@@ -220,22 +162,10 @@ export default function MyversePage() {
             from: a.requester_name || '',
             status: a.status === 'pending' ? '대기' as const : '승인' as const,
         })),
-    } : MOCK_APPROVAL;
+    } : null;
 
-    // 공지/일정: DB 우선, 없으면 Mock fallback (개발에서만)
-    const mockNotices = mockOk ? [
-        { title: "MADLeague 인사이트 투어링 참가자 모집", badge: "중요", date: "03-15" },
-        { title: "LUKI 2nd Single 관련 콘텐츠 가이드라인", badge: "공지", date: "03-12" },
-        { title: "3월 Badak 밋업 일정 확정", badge: "일정", date: "03-10" },
-    ] : [];
-    const notices = dbNotices.length > 0 ? dbNotices : mockNotices;
-
-    const mockSchedule = mockOk ? [
-        { time: "10:00", title: "주간 팀 회의", type: "회의" },
-        { time: "14:00", title: "LUKI 컨셉 회의", type: "프로젝트" },
-        { time: "16:00", title: "Badak 밋업 준비", type: "이벤트" },
-    ] : [];
-    const todaySchedule = dbSchedule.length > 0 ? dbSchedule : mockSchedule;
+    const notices = dbNotices;
+    const todaySchedule = dbSchedule;
 
     return (
         <div>
@@ -315,7 +245,7 @@ export default function MyversePage() {
                         { label: "이번 달 실수령", value: mySalary ? formatKRW(mySalary.thisMonth.net) : '-', sub: mySalary?.thisMonth.status || '-', icon: Wallet },
                         { label: "경비 미처리", value: myExpenses ? `${myExpenses.pending}건` : '-', sub: myExpenses ? formatKRW(myExpenses.thisMonth) : '-', icon: CreditCard },
                     ] : [
-                        { label: "HIT 검사", value: mockOk ? "완료" : "-", sub: mockOk ? "Visionary Strategist" : "-", icon: Target },
+                        { label: "HIT 검사", value: "-", sub: "-", icon: Target },
                         { label: "교육 이수", value: myEducation ? `${myEducation.mandatory.completed}/${myEducation.mandatory.total}` : "-", sub: "-", icon: GraduationCap },
                         { label: "프로젝트", value: myProjects.length > 0 ? `${myProjects.length}건` : "-", sub: "참여 중", icon: FolderKanban },
                     ]),
@@ -342,39 +272,7 @@ export default function MyversePage() {
                         <h3 className="text-xs font-bold flex items-center gap-1.5">🦸 HeRo HIT</h3>
                         <Link href="/intra/hero/hit/report" className="text-[11px] text-neutral-400 hover:text-neutral-900">리포트 →</Link>
                     </div>
-                    {mockOk ? (
-                        <>
-                        <div className="flex items-center gap-4">
-                            <div className="text-center">
-                                <div className="h-14 w-14 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-1">
-                                    <span className="text-lg font-bold text-neutral-700">VS</span>
-                                </div>
-                                <p className="text-[10px] text-neutral-400">Visionary Strategist</p>
-                            </div>
-                            <div className="flex-1 space-y-1.5">
-                                {[
-                                    { label: 'D (주도)', value: 85 },
-                                    { label: 'I (사교)', value: 60 },
-                                    { label: 'S (안정)', value: 30 },
-                                    { label: 'C (신중)', value: 45 },
-                                ].map(d => (
-                                    <div key={d.label} className="flex items-center gap-2">
-                                        <span className="text-[10px] text-neutral-400 w-14 shrink-0">{d.label}</span>
-                                        <div className="flex-1 h-1.5 bg-neutral-100 rounded-full">
-                                            <div className="h-1.5 bg-neutral-400 rounded-full" style={{ width: `${d.value}%` }} />
-                                        </div>
-                                        <span className="text-[10px] text-neutral-500 w-7 text-right">{d.value}%</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex gap-2 mt-3 pt-2 border-t border-neutral-50">
-                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">ENTJ</span>
-                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">전략적 사고</span>
-                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">네트워크 빌딩</span>
-                        </div>
-                        </>
-                    ) : <EmptyState message="HIT 검사 결과가 없습니다" />}
+                    <EmptyState message="HIT 검사 결과가 없습니다" />
                 </div>
 
                 {/* Evolution School 이수 현황 */}
@@ -423,32 +321,7 @@ export default function MyversePage() {
                     <h3 className="text-xs font-bold flex items-center gap-1.5">📋 업무 현황</h3>
                     <Link href="/intra/myverse/todo" className="text-[11px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                 </div>
-                {mockOk ? (
-                    <div className="space-y-1.5">
-                        {[
-                            { title: 'LUKI 2nd Single 컨셉 기획안 작성', cat: '프로젝트' as const, due: '3/25', status: '진행중' as const },
-                            { title: 'Q2 사업계획서 최종 검토', cat: '일반' as const, due: '3/28', status: '진행중' as const },
-                            { title: '뮤직비디오 스토리보드 리뷰', cat: '프로젝트' as const, due: '3/23', status: '진행중' as const },
-                            { title: 'MADLeague 스폰서 제안서', cat: '프로젝트' as const, due: '3/22', status: '승인대기' as const },
-                            { title: 'GPR Q1 자기평가 작성', cat: '기타' as const, due: '3/31', status: '진행중' as const },
-                        ].map((t, i) => (
-                            <div key={i} className="flex items-center gap-2 py-1.5 border-b border-neutral-50 last:border-0">
-                                <span className={`text-[7px] px-1 py-0.5 rounded shrink-0 ${
-                                    t.cat === '일반' ? 'bg-neutral-100 text-neutral-500' :
-                                    t.cat === '프로젝트' ? 'bg-violet-50 text-violet-500' :
-                                    'bg-sky-50 text-sky-500'
-                                }`}>{t.cat}</span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
-                                    t.status === '진행중' ? 'bg-blue-50 text-blue-500' :
-                                    t.status === '승인대기' ? 'bg-amber-50 text-amber-500' :
-                                    'bg-neutral-100 text-neutral-500'
-                                }`}>{t.status}</span>
-                                <span className="text-xs flex-1 truncate">{t.title}</span>
-                                <span className="text-[10px] text-neutral-300 shrink-0">{t.due}</span>
-                            </div>
-                        ))}
-                    </div>
-                ) : <EmptyState message="등록된 업무가 없습니다" />}
+                <EmptyState message="등록된 업무가 없습니다" />
             </div>
 
             {/* ── 직원 전용 섹션 시작 ── */}

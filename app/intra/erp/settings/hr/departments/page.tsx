@@ -62,20 +62,20 @@ export default function DepartmentsPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.from('wio_departments').select('id, name, parent_id, level').order('level').order('sort_order')
-      .then(({ data }) => {
+      .then(({ data }: { data: Record<string, unknown>[] | null }) => {
         if (data && data.length > 0) {
           const byParent = new Map<string | null, typeof data>();
-          data.forEach(r => {
+          data.forEach((r: Record<string, unknown>) => {
             const key = r.parent_id as string | null;
             if (!byParent.has(key)) byParent.set(key, []);
             byParent.get(key)!.push(r);
           });
           const roots = byParent.get(null) || [];
-          setDepartments(roots.map(r => ({
+          setDepartments(roots.map((r: Record<string, unknown>) => ({
             id: r.id as string,
             name: r.name as string,
             type: 'division' as const,
-            children: (byParent.get(r.id as string) || []).map(c => ({
+            children: (byParent.get(r.id as string) || []).map((c: Record<string, unknown>) => ({
               id: c.id as string,
               name: c.name as string,
               type: 'team' as const,
