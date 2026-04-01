@@ -59,3 +59,22 @@ CREATE TABLE IF NOT EXISTS workflow_automations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_wf_auto_enabled ON workflow_automations(enabled);
+
+-- ── RLS ──────────────────────────────────────────────────────────────────────
+ALTER TABLE workflow_tasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "workflow_tasks_read" ON workflow_tasks;
+CREATE POLICY "workflow_tasks_read" ON workflow_tasks FOR SELECT USING (true);
+DROP POLICY IF EXISTS "workflow_tasks_write" ON workflow_tasks;
+CREATE POLICY "workflow_tasks_write" ON workflow_tasks FOR ALL USING (true);
+
+ALTER TABLE content_pipeline ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "content_pipeline_read" ON content_pipeline;
+CREATE POLICY "content_pipeline_read" ON content_pipeline FOR SELECT USING (true);
+DROP POLICY IF EXISTS "content_pipeline_write" ON content_pipeline;
+CREATE POLICY "content_pipeline_write" ON content_pipeline FOR ALL USING (true);
+
+ALTER TABLE workflow_automations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "workflow_automations_read" ON workflow_automations;
+CREATE POLICY "workflow_automations_read" ON workflow_automations FOR SELECT USING (true);
+DROP POLICY IF EXISTS "workflow_automations_write" ON workflow_automations;
+CREATE POLICY "workflow_automations_write" ON workflow_automations FOR ALL USING (true);
