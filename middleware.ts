@@ -9,6 +9,7 @@ const domainPrefixMap: Record<string, string> = {
     'www.youinone.com': '/youinone',
     'smarcomm.biz': '/smarcomm',
     'www.smarcomm.biz': '/smarcomm',
+    'smarcomm.tenone.biz': '/smarcomm',
     'hero.ne.kr': '/hero',
     'www.hero.ne.kr': '/hero',
     'rook.co.kr': '/rook',
