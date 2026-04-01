@@ -26,13 +26,13 @@ CREATE TABLE IF NOT EXISTS partners (
     updated_at      TIMESTAMPTZ DEFAULT now()
 );
 
+-- 기존 테이블에 누락 컬럼 추가 (인덱스보다 먼저 실행)
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+
 CREATE INDEX IF NOT EXISTS idx_partners_type     ON partners(type);
 CREATE INDEX IF NOT EXISTS idx_partners_active   ON partners(is_active);
 CREATE INDEX IF NOT EXISTS idx_partners_brand    ON partners(brand_id);
 CREATE INDEX IF NOT EXISTS idx_partners_skills   ON partners USING gin(skills);
-
--- 기존 테이블에 누락 컬럼 추가
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
 
 -- RLS
 ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
