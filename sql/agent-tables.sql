@@ -77,9 +77,13 @@ DROP POLICY IF EXISTS "am_insert"  ON agent_messages;
 CREATE POLICY "am_insert" ON agent_messages FOR INSERT WITH CHECK (true);  -- 서버에서 항상 삽입 가능
 
 
+-- ── 기존 테이블에 누락된 컬럼 추가 (IF NOT EXISTS로 안전하게) ────────────────────
+ALTER TABLE agent_profiles ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+ALTER TABLE agent_profiles ADD COLUMN IF NOT EXISTS version  TEXT NOT NULL DEFAULT '1.0.0';
+
 -- ── 초기 에이전트 시드 데이터 ─────────────────────────────────────────────────
 
-INSERT INTO agent_profiles (name, display_name, layer, agent_type, model_id, system_prompt, temperature, max_tokens, risk_level, can_invoke, brand_id) VALUES
+INSERT INTO agent_profiles (name, display_name, layer, agent_type, model_id, system_prompt, temperature, max_tokens, risk_level, can_invoke) VALUES
 
 -- L0 메타: 나침반 (Universe 전체 안내자)
 (
@@ -113,8 +117,7 @@ Ten:One Universe는 다음 브랜드들로 구성된 멀티 브랜드 생태계�
     0.3,
     2048,
     'green',
-    ARRAY['madleague', 'badaksoe'],
-    'tenone'
+    ARRAY['madleague', 'badaksoe']
 ),
 
 -- L2 브랜드: MAD 매니저 (MAD League 동아리 연합 관리)
@@ -141,8 +144,7 @@ MAD League는 대학 동아리 연합 커뮤니티입니다.
     0.5,
     2048,
     'green',
-    ARRAY[]::TEXT[],
-    'madleague'
+    ARRAY[]::TEXT[]
 ),
 
 -- L2 브랜드: 바닥쇠 (Badak 네트워킹 커뮤니티 에이전트)
@@ -171,8 +173,7 @@ MAD League는 대학 동아리 연합 커뮤니티입니다.
     0.5,
     2048,
     'green',
-    ARRAY[]::TEXT[],
-    'badak'
+    ARRAY[]::TEXT[]
 )
 
 ON CONFLICT (name) DO NOTHING;
