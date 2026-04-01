@@ -1,19 +1,39 @@
-import { Users, Calendar, FolderOpen, ArrowUpRight, ArrowRight } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Users, Calendar, FolderOpen, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-
-const stats = [
-    { name: "Active Brands", value: "12", icon: Users, change: "+2", href: "/intra/studio/brands" },
-    { name: "Upcoming Events", value: "5", icon: Calendar, change: "This Week", href: "/intra/studio/schedule" },
-    { name: "New Assets", value: "128", icon: FolderOpen, change: "+24 today", href: "/intra/studio/assets" },
-];
-
-const recentActivity = [
-    { id: 1, type: "Release", brand: "LUKI", content: "New Single 'Starlight'", date: "2h ago", status: "Completed" },
-    { id: 2, type: "Upload", brand: "RooK", content: "Concept Art Batch #04", date: "5h ago", status: "Processing" },
-    { id: 3, type: "Event", brand: "MADLeague", content: "Networking Night", date: "1d ago", status: "Scheduled" },
-];
+import { brands } from "@/lib/data";
+import { createClient } from "@/lib/supabase/client";
+import { fetchPipelineItems } from "@/lib/supabase/workflow";
+import type { PipelineItem } from "@/types/workflow";
 
 export default function OfficeDashboard() {
+    const [eventCount, setEventCount] = useState<number | null>(null);
+    const [recentItems, setRecentItems] = useState<PipelineItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const supabase = createClient();
+        Promise.all([
+            supabase.from('comm_events').select('id', { count: 'exact', head: true })
+                .gte('start_at', new Date().toISOString()),
+            fetchPipelineItems(),
+        ]).then(([evRes, items]) => {
+            setEventCount(evRes.count ?? 0);
+            setRecentItems(items.slice(0, 3));
+        }).catch(() => {
+            setEventCount(0);
+            setRecentItems([]);
+        }).finally(() => setLoading(false));
+    }, []);
+
+    const stats = [
+        { name: "Active Brands", value: String(brands.length), icon: Users, change: "Registered", href: "/intra/studio/brands" },
+        { name: "Upcoming Events", value: eventCount === null ? "…" : String(eventCount), icon: Calendar, change: "From now", href: "/intra/studio/schedule" },
+        { name: "Content Items", value: loading ? "…" : String(recentItems.length > 0 ? "DB" : "–"), icon: FolderOpen, change: "In pipeline", href: "/intra/studio/studio" },
+    ];
+
     return (
         <div className="space-y-8">
             <div>
@@ -26,7 +46,7 @@ export default function OfficeDashboard() {
                     <Link
                         key={item.name}
                         href={item.href}
-                        className="group border border-neutral-200 bg-white p-6 hover:border-neutral-900 transition-all"
+                        className="group relative border border-neutral-200 bg-white p-6 hover:border-neutral-900 transition-all"
                     >
                         <div className="flex items-center justify-between">
                             <div>
@@ -39,9 +59,7 @@ export default function OfficeDashboard() {
                         </div>
                         <div className="mt-4 flex items-center text-sm text-neutral-400">
                             <span className="font-medium text-neutral-900 mr-2">{item.change}</span>
-                            <span>vs last period</span>
                         </div>
-                        <ArrowUpRight className="absolute top-4 right-4 h-4 w-4 text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                 ))}
             </div>
@@ -58,46 +76,50 @@ export default function OfficeDashboard() {
                                 <div className="h-2 w-2 rounded-full bg-neutral-900"></div>
                                 <span className="text-sm">All Systems Operational</span>
                             </div>
-                            <span className="text-xs text-neutral-400">Updated 1m ago</span>
+                            <span className="text-xs text-neutral-400">Live</span>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-3 border border-neutral-100 flex justify-between items-center">
-                                <span className="text-xs text-neutral-500">Core Sites</span>
-                                <span className="text-xs font-semibold">8/8</span>
+                                <span className="text-xs text-neutral-500">Brands</span>
+                                <span className="text-xs font-semibold">{brands.length}</span>
                             </div>
                             <div className="p-3 border border-neutral-100 flex justify-between items-center">
-                                <span className="text-xs text-neutral-500">AI Agents</span>
-                                <span className="text-xs font-semibold">2/2</span>
+                                <span className="text-xs text-neutral-500">Upcoming Events</span>
+                                <span className="text-xs font-semibold">{eventCount === null ? "…" : eventCount}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Recent Activity */}
+                {/* Recent Pipeline */}
                 <div className="border border-neutral-200 bg-white">
-                    <div className="px-6 py-4 border-b border-neutral-100">
-                        <h3 className="text-sm font-semibold">Recent Activity</h3>
+                    <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold">Recent Pipeline</h3>
+                        <Link href="/intra/studio/studio" className="text-xs text-neutral-400 hover:text-neutral-900 flex items-center gap-1">
+                            전체보기 <ArrowRight className="h-3 w-3" />
+                        </Link>
                     </div>
-                    <ul className="divide-y divide-neutral-100">
-                        {recentActivity.map((activity) => (
-                            <li key={activity.id} className="px-6 py-4 hover:bg-neutral-50 transition-colors">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">{activity.brand}</span>
-                                            <span className="text-neutral-300">·</span>
-                                            <span className="text-neutral-600">{activity.type}</span>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-5 w-5 animate-spin text-neutral-300" />
+                        </div>
+                    ) : recentItems.length === 0 ? (
+                        <p className="px-6 py-4 text-sm text-neutral-400">콘텐츠 없음</p>
+                    ) : (
+                        <ul className="divide-y divide-neutral-100">
+                            {recentItems.map((item) => (
+                                <li key={item.id} className="px-6 py-4 hover:bg-neutral-50 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium">{item.title}</p>
+                                            <p className="text-xs text-neutral-400 mt-0.5">{item.type} · {item.brandId}</p>
                                         </div>
-                                        <p className="text-sm text-neutral-500 mt-0.5">{activity.content}</p>
+                                        <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5">{item.stage}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-neutral-400">{activity.date}</p>
-                                        <p className="text-xs mt-1 font-medium text-neutral-500">{activity.status}</p>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
         </div>

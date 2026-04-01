@@ -1,20 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { brands, contentItems, ContentItem } from "@/lib/data";
-import { Plus, MoreHorizontal, Calendar, Video, FileText, Type, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { brands } from "@/lib/data";
+import { fetchPipelineItems } from "@/lib/supabase/workflow";
+import { initialPipelineItems } from "@/lib/workflow-data";
+import type { PipelineItem, PipelineStage } from "@/types/workflow";
+import { Plus, MoreHorizontal, Calendar, Video, FileText, Type, Sparkles, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import Link from "next/link";
 
-const STATUSES: ContentItem['status'][] = ['Idea', 'Scripting', 'Production', 'Review', 'Scheduled', 'Published'];
+const STATUSES: PipelineStage[] = ['Idea', 'Scripting', 'Production', 'Review', 'Scheduled', 'Published'];
 
 export default function StudioPage() {
-    // In a real app, this state would be managed by a global store or backend
-    const [items, setItems] = useState<ContentItem[]>(contentItems);
+    const [items, setItems] = useState<PipelineItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchPipelineItems()
+            .then(data => {
+                if (cancelled) return;
+                setItems(data.length > 0 ? data : initialPipelineItems);
+            })
+            .catch(() => { if (!cancelled) setItems(initialPipelineItems); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const getBrandName = (id: string) => brands.find(b => b.id === id)?.name || id;
 
-    const getIcon = (type: ContentItem['type']) => {
+    const getIcon = (type: PipelineItem['type']) => {
         switch (type) {
             case 'Video': return Video;
             case 'Shorts': return Video;
@@ -23,6 +38,12 @@ export default function StudioPage() {
             default: return FileText;
         }
     };
+
+    if (loading) return (
+        <div className="h-[calc(100vh-8rem)] flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+        </div>
+    );
 
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col">
@@ -54,7 +75,7 @@ export default function StudioPage() {
                                     <div className="w-2 h-2 rounded-full bg-neutral-400" />
                                     <span className="font-medium">{status}</span>
                                     <span className="text-xs text-neutral-400 bg-neutral-100 px-1.5 py-0.5">
-                                        {items.filter(i => i.status === status).length}
+                                        {items.filter(i => i.stage === status).length}
                                     </span>
                                 </div>
                                 <button className="text-neutral-400 hover:text-neutral-900">
@@ -64,7 +85,7 @@ export default function StudioPage() {
 
                             {/* Cards Container */}
                             <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-                                {items.filter(i => i.status === status).map(item => {
+                                {items.filter(i => i.stage === status).map(item => {
                                     const Icon = getIcon(item.type);
                                     return (
                                         <div key={item.id} className="group bg-white border border-neutral-200 p-3 hover:border-neutral-400 transition-colors cursor-grab active:cursor-grabbing">

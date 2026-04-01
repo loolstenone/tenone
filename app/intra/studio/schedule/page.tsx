@@ -1,16 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { brands, events as rawEvents } from "@/lib/data";
-import { isMockAllowed } from "@/lib/env";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { brands, events as mockEvents } from "@/lib/data";
+import { createClient } from "@/lib/supabase/client";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock } from "lucide-react";
 import clsx from "clsx";
 
-const events = isMockAllowed() ? rawEvents : [];
+interface ScheduleEvent {
+    id: string | number;
+    title: string;
+    brandId: string;
+    type: string;
+    date: string;
+    time?: string;
+    description?: string;
+    status?: string;
+}
 
 export default function SchedulePage() {
     const [view, setView] = useState<'month' | 'list'>('month');
-    const [currentDate, setCurrentDate] = useState(new Date()); // 현재 날짜 기준
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [events, setEvents] = useState<ScheduleEvent[]>([]);
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('comm_events').select('*').order('start_at', { ascending: true })
+            .then(({ data }) => {
+                if (data && data.length > 0) {
+                    setEvents(data.map((e: Record<string, unknown>) => {
+                        const start = new Date(e.start_at as string);
+                        return {
+                            id: e.id as string,
+                            title: e.title as string,
+                            brandId: 'tenone',
+                            type: (e.description as string) || '일정',
+                            date: start.toISOString().split('T')[0],
+                            time: start.toTimeString().slice(0, 5),
+                            description: (e.description as string) || '',
+                        };
+                    }));
+                } else {
+                    setEvents(mockEvents.map(e => ({ ...e, id: String(e.id) })));
+                }
+            })
+            .catch(() => setEvents(mockEvents.map(e => ({ ...e, id: String(e.id) }))));
+    }, []);
 
     // Calendar Logic
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
