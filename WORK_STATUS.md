@@ -2,6 +2,28 @@
 
 > 마지막 업데이트: 2026-04-01
 
+## 오늘 한 작업 (4/1 오후 — 사무실 4차)
+
+### 인트라 DB 현실화 추가 (4/1 오후 4차)
+- biz/manage/page → fetchMonthlyForecasts() — 월별 추정 실DB 연동 ✅
+- biz/manage/actual → fetchMonthlyForecasts() — 실적 확정 실DB 연동 ✅
+- biz/manage/gap → fetchMonthlyForecasts() — Gap 분석 (매출 항목 집계) 실DB 연동 ✅
+- erp/project/rates → fetchStandardRates() + upsertStandardRate() — 표준단가 편집 DB 저장 ✅
+- lib/supabase/erp.ts: fetchMonthlyForecasts, upsertMonthlyForecast, fetchStandardRates, upsertStandardRate 추가 ✅
+- sql/monthly-forecasts-table.sql: 신규 (year/month/item/plan/forecast_1~3/actual/status) ✅
+- sql/standard-rates-table.sql: 신규 (position/hourly_rate/brand_id + 기본 시드) ✅
+- sql/erp-finance-tables.sql: 기존 완성 (invoices/payments/card_usage/incentives) — Prod 실행 필요 ⚠️
+
+### 인트라 DB 현실화 완료 현황 (전체)
+연결 완료: approval progress/completed, expenses, biz plan, finance reports, card/billing/payment/incentive,
+project management/detail/jobs, timesheet, gpr, payroll, attendance, myverse/approval/expenses/gpr/points/projects/payroll/todo,
+biz analysis(division/cost/손익), biz manage(월별추정/실적확정/gap분석), comm(notice/free/calendar),
+opportunity, certificates, rates(표준단가 DB저장 포함)
+미연결(DB 테이블 없음): talent/clubs/delegation/family/education, org chart,
+partner-pool, vendors, bidding, hero/*, wiki/*, studio/*, settings/*
+
+---
+
 ## 오늘 한 작업 (4/1 오후 — 사무실 2차)
 
 ### 인트라 ERP 추가 DB 현실화
@@ -80,13 +102,12 @@ partner-pool, vendors, bidding, hero/*, wiki/*, studio/*, settings/*
 ### 인트라 DB 현실화 — 남은 것
 1. **ERP HR 보조 페이지**: talent(인재풀), delegation(위임), family(가족), clubs(동아리)
    → DB 테이블 없음, 우선순위 낮음
-2. **Supabase 실DB에 신규 테이블 생성** (현재 없어서 mock fallback 중):
-   - `invoices` — 청구서
-   - `payments` — 지급관리
-   - `card_usage` — 법인카드
-   - `incentives` — 보상/성과급
-3. **biz/manage/actual, gap, page**: monthly_forecasts 테이블 없음 → 미착수
-4. **erp/project/rates**: 표준단가 편집 → DB 저장 기능 (현재는 상태만)
+2. **Supabase 실DB에 신규 테이블 생성** ← **Prod SQL 에디터에서 직접 실행 필요**:
+   - `sql/erp-finance-tables.sql` — invoices, payments, card_usage, incentives
+   - `sql/monthly-forecasts-table.sql` — monthly_forecasts
+   - `sql/standard-rates-table.sql` — standard_rates (기본 시드 포함)
+3. ~~**biz/manage/actual, gap, page**: monthly_forecasts 테이블 없음~~ → 연결 완료 ✅
+4. ~~**erp/project/rates**: 표준단가 편집 → DB 저장 기능~~ → 완료 ✅
 5. **마케팅/스튜디오/히어로 페이지**: DB 테이블 부재 또는 context 이미 연동됨
 
 ### 즉시

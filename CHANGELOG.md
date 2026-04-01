@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-04-01 (오후 — 사무실 4차)
+
+### 인트라 biz/manage DB 연결 + 표준단가 저장 기능
+
+**수정 파일:**
+- `app/intra/erp/biz/manage/page.tsx` — fetchMonthlyForecasts() → 월별 추정 DB 연동
+- `app/intra/erp/biz/manage/actual/page.tsx` — fetchMonthlyForecasts() → 실적 확정 DB 연동
+- `app/intra/erp/biz/manage/gap/page.tsx` — fetchMonthlyForecasts() → Gap 분석 DB 연동
+- `app/intra/erp/project/rates/page.tsx` — fetchStandardRates() + upsertStandardRate() → 표준단가 편집 저장
+- `lib/supabase/erp.ts` — 4개 함수 신규 추가
+- `sql/monthly-forecasts-table.sql` — 신규 (year/month/item 기반 P&L 추정/실적)
+- `sql/standard-rates-table.sql` — 신규 (직급별 표준단가 + 기본 시드)
+
+**커밋:**
+- `6a3a10a` feat: biz/manage 3개 페이지 DB 연결 + monthly_forecasts SQL
+- `8265ce1` feat: 투입인원단가 표준단가 DB 저장 기능 추가
+
+---
+
 ## 2026-04-01 (오후 — 사무실 3차)
 
 ### 인트라 추가 DB 현실화 (3개 페이지 + 2개 함수)
