@@ -26,8 +26,25 @@ CREATE TABLE IF NOT EXISTS library_items (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 기존 테이블에 brand_id 누락 시 추가
+-- 기존 테이블 존재 시 누락 컬럼 추가
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '기타';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'cms';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS format TEXT NOT NULL DEFAULT 'OTHER';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS file_url TEXT;
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS file_size TEXT;
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS author TEXT NOT NULL DEFAULT '';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS author_id TEXT NOT NULL DEFAULT '';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS permission TEXT NOT NULL DEFAULT 'all';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS project_code TEXT;
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS project_name TEXT;
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS bookmark_count INTEGER DEFAULT 0;
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0;
 ALTER TABLE library_items ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE library_items ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
 -- 인덱스
 CREATE INDEX IF NOT EXISTS idx_library_items_source ON library_items(source);
@@ -80,7 +97,16 @@ CREATE TABLE IF NOT EXISTS comm_events (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_date DATE;
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_time TIME;
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS event_type TEXT DEFAULT '';
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS location TEXT;
 ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS created_by TEXT;
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE comm_events ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
 CREATE INDEX IF NOT EXISTS idx_comm_events_date ON comm_events(event_date);
 CREATE INDEX IF NOT EXISTS idx_comm_events_brand ON comm_events(brand_id);
@@ -104,7 +130,13 @@ CREATE TABLE IF NOT EXISTS mkt_performance (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT '';
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS metric_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS value NUMERIC DEFAULT 0;
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS target NUMERIC DEFAULT 0;
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS period TEXT NOT NULL DEFAULT '';
 ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS brand_id TEXT DEFAULT 'tenone';
+ALTER TABLE mkt_performance ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
 CREATE INDEX IF NOT EXISTS idx_mkt_performance_channel ON mkt_performance(channel);
 CREATE INDEX IF NOT EXISTS idx_mkt_performance_period ON mkt_performance(period);
