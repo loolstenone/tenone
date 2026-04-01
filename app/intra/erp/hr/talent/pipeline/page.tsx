@@ -1,6 +1,8 @@
 "use client";
 
-import { GitBranch, Plus, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { GitBranch, Plus, User, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Candidate {
     id: string;
@@ -13,7 +15,7 @@ interface Candidate {
 
 const stages = ["서류접수", "서류심사", "1차면접", "2차면접", "처우협의", "합격"];
 
-const mockCandidates: Candidate[] = [
+const initialCandidates: Candidate[] = [
     { id: "1", name: "김지원", position: "콘텐츠 디렉터", stage: "2차면접", appliedDate: "2026-03-10", source: "직접지원" },
     { id: "2", name: "이서준", position: "AI 엔지니어", stage: "1차면접", appliedDate: "2026-03-12", source: "추천" },
     { id: "3", name: "박하늘", position: "마케팅 매니저", stage: "서류심사", appliedDate: "2026-03-18", source: "채용사이트" },
@@ -31,6 +33,38 @@ const stageColor: Record<string, string> = {
 };
 
 export default function PipelinePage() {
+    const [candidates, setCandidates] = useState<Candidate[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('talent_candidates').select('*').order('created_at', { ascending: false });
+                if (!cancelled && data && data.length > 0 && !error) {
+                    setCandidates(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        name: (r.name as string) || '',
+                        position: (r.position as string) || '',
+                        stage: (r.stage as string) || '서류접수',
+                        appliedDate: ((r.applied_date as string) || '').split('T')[0],
+                        source: (r.source as string) || '',
+                    })));
+                } else if (!cancelled) {
+                    setCandidates(initialCandidates);
+                }
+            } catch {
+                if (!cancelled) setCandidates(initialCandidates);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+
     return (
         <div className="max-w-6xl">
             <div className="flex items-center justify-between mb-6">
@@ -46,15 +80,15 @@ export default function PipelinePage() {
             {/* Kanban */}
             <div className="flex gap-3 overflow-x-auto pb-4">
                 {stages.map(stage => {
-                    const candidates = mockCandidates.filter(c => c.stage === stage);
+                    const stageCandidates = candidates.filter((c: Candidate) => c.stage === stage);
                     return (
                         <div key={stage} className="min-w-[220px] flex-shrink-0">
                             <div className="flex items-center justify-between mb-2 px-1">
                                 <h3 className="text-xs font-bold text-neutral-600">{stage}</h3>
-                                <span className="text-xs text-neutral-400">{candidates.length}</span>
+                                <span className="text-xs text-neutral-400">{stageCandidates.length}</span>
                             </div>
                             <div className="space-y-2">
-                                {candidates.map(c => (
+                                {stageCandidates.map((c: Candidate) => (
                                     <div key={c.id} className={`border rounded p-3 ${stageColor[stage]} hover:shadow-sm transition-shadow cursor-pointer`}>
                                         <div className="flex items-center gap-2 mb-1">
                                             <div className="h-6 w-6 rounded-full bg-neutral-200 flex items-center justify-center">

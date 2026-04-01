@@ -1,30 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import { useGpr } from "@/lib/gpr-context";
-import { useStaff } from "@/lib/staff-context";
+import { useState, useEffect } from "react";
+import { fetchStaffMembers, fetchGprGoalsTyped } from "@/lib/supabase/erp";
+import { initialStaff } from "@/lib/staff-data";
+import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
 import { ratingLabels } from "@/lib/gpr-data";
-import { EvaluationRating } from "@/types/gpr";
-import { Star, MessageSquare } from "lucide-react";
+import type { StaffMember } from "@/types/staff";
+import type { GprGoal, EvaluationRating } from "@/types/gpr";
+import { Star, Loader2 } from "lucide-react";
 
 export default function EvaluationPage() {
-    const { goals, selfEvaluate, supervisorEvaluate } = useGpr();
-    const { staff } = useStaff();
+    const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [goals, setGoals] = useState<GprGoal[]>([]);
+    const [loading, setLoading] = useState(true);
     const [evalModal, setEvalModal] = useState<{ goalId: string; type: 'self' | 'supervisor' } | null>(null);
     const [rating, setRating] = useState<EvaluationRating>(3);
     const [comment, setComment] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchStaffMembers(), fetchGprGoalsTyped()])
+            .then(([s, g]) => {
+                if (cancelled) return;
+                setStaff(s.length > 0 ? s : initialStaff);
+                setGoals(g.length > 0 ? g : initialGoals);
+            })
+            .catch(() => {
+                if (!cancelled) { setStaff(initialStaff); setGoals(initialGoals); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const evaluableGoals = goals.filter(g => ['In Progress', 'Agreed', 'Self Evaluated'].includes(g.status));
     const evaluatedGoals = goals.filter(g => g.status === 'Evaluated');
 
     const handleSubmitEval = () => {
         if (!evalModal) return;
-        if (evalModal.type === 'self') selfEvaluate(evalModal.goalId, rating, comment);
-        else supervisorEvaluate(evalModal.goalId, 's1', rating, comment);
+        setGoals(prev => prev.map(g => {
+            if (g.id !== evalModal.goalId) return g;
+            if (evalModal.type === 'self') return { ...g, selfRating: rating, selfComment: comment, status: 'Self Evaluated' as const };
+            return { ...g, supervisorRating: rating, supervisorComment: comment, status: 'Evaluated' as const };
+        }));
         setEvalModal(null);
         setRating(3);
         setComment('');
     };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">

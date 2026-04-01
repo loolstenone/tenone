@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useStaff } from "@/lib/staff-context";
+import { useParams } from "next/navigation";
+import { fetchStaffMembers, fetchGprGoalsTyped, rowToStaffMember } from "@/lib/supabase/erp";
+import { initialStaff } from "@/lib/staff-data";
 import { brandOptions } from "@/lib/staff-data";
-import * as erpDb from "@/lib/supabase/erp";
+import type { StaffMember } from "@/types/staff";
 import Link from "next/link";
-import { ArrowLeft, Save, User, Shield, Target, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, Save, User, Shield, Target, TrendingUp, Calendar, Loader2 } from "lucide-react";
 
 const inputClass = "w-full border border-neutral-200 bg-white px-4 py-2.5 placeholder-neutral-300 focus:border-neutral-900 focus:outline-none";
 const disabledClass = "w-full border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-neutral-400 cursor-not-allowed";
@@ -14,7 +15,7 @@ const labelClass = "block text-sm text-neutral-500 mb-1.5";
 
 type Tab = 'profile' | 'gpr';
 
-interface GprGoal {
+interface GprGoalLocal {
     id: string;
     title: string;
     type: 'Personal' | 'Quarterly' | 'Yearly';
@@ -24,61 +25,72 @@ interface GprGoal {
     dueDate?: string;
 }
 
-const mockGprGoals: GprGoal[] = [
-    { id: 'g1', title: '10,000명의 기획자 발굴 네트워크 구축', type: 'Yearly', status: 'In Progress', progress: 25, description: 'MADLeague 전국 확장 + Badak 네트워킹 활성화를 통한 기획자 풀 확대', dueDate: '2025-12-31' },
-    { id: 'g2', title: 'MADLeague 인사이트 투어링 성공적 운영', type: 'Quarterly', status: 'In Progress', progress: 60, description: '영양군 지역 활동가와 학생 연계 프로그램 실행', dueDate: '2025-10-15' },
-    { id: 'g3', title: 'LUKI 데뷔 캠페인 완료', type: 'Quarterly', status: 'Completed', progress: 100, description: 'AI 4인조 걸그룹 LUKI 공식 데뷔 및 콘텐츠 배포' },
-    { id: 'g4', title: '주간 콘텐츠 파이프라인 운영', type: 'Personal', status: 'In Progress', progress: 70, description: 'Badak, MADLeague, FWN 채널 주기적 콘텐츠 발행' },
-    { id: 'g5', title: 'VRIEF 프레임워크 매드리그 교육 적용', type: 'Quarterly', status: 'In Progress', progress: 40, description: '매드리그 대학생 대상 VRIEF 3Step 교육 프로그램 운영' },
-];
-
-function mapDbGoal(g: Record<string, unknown>): GprGoal {
-    const statusMap: Record<string, GprGoal['status']> = {
-        Draft: 'Not Started', 'In Progress': 'In Progress', Completed: 'Completed',
-    };
-    return {
-        id: g.id as string,
-        title: g.title as string,
-        type: (g.category as string) === 'Growth' ? 'Personal' : 'Quarterly',
-        status: statusMap[(g.status as string)] || 'In Progress',
-        progress: (g.progress as number) || 0,
-        description: (g.description as string) || '',
-    };
-}
-
 export default function StaffDetailPage() {
     const params = useParams();
-    const router = useRouter();
-    const { getStaffById, updateStaff } = useStaff();
+    const [member, setMember] = useState<StaffMember | null>(null);
+    const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<Tab>('profile');
     const [saved, setSaved] = useState(false);
-
-    const [gprGoals, setGprGoals] = useState<GprGoal[]>(mockGprGoals);
-
-    const member = getStaffById(params.id as string);
-
-    // DB에서 GPR 목표 로드
-    useEffect(() => {
-        if (!params.id) return;
-        erpDb.fetchGprGoals({ memberId: params.id as string })
-            .then(data => {
-                if (data.length > 0) setGprGoals(data.map(mapDbGoal));
-            })
-            .catch(() => {});
-    }, [params.id]);
-
-    if (!member) return <div className="text-neutral-400 text-center py-20">직원을 찾을 수 없습니다.</div>;
+    const [gprGoals, setGprGoals] = useState<GprGoalLocal[]>([]);
 
     // Personal editable fields
-    const [phone, setPhone] = useState(member.phone ?? '');
-    const [emergencyContact, setEmergencyContact] = useState(member.emergencyContact ?? '');
-    const [bio, setBio] = useState(member.bio ?? '');
-    const [goals, setGoals] = useState(member.goals ?? '');
-    const [values, setValues] = useState(member.values ?? '');
+    const [phone, setPhone] = useState('');
+    const [emergencyContact, setEmergencyContact] = useState('');
+    const [bio, setBio] = useState('');
+    const [goals, setGoals] = useState('');
+    const [values, setValues] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+        const id = params.id as string;
+
+        Promise.all([fetchStaffMembers(), fetchGprGoalsTyped({ memberId: id })])
+            .then(([staffList, gprData]) => {
+                if (cancelled) return;
+                const allStaff = staffList.length > 0 ? staffList : initialStaff;
+                const found = allStaff.find(s => s.id === id);
+                if (found) {
+                    setMember(found);
+                    setPhone(found.phone ?? '');
+                    setEmergencyContact(found.emergencyContact ?? '');
+                    setBio(found.bio ?? '');
+                    setGoals(found.goals ?? '');
+                    setValues(found.values ?? '');
+                }
+                if (gprData.length > 0) {
+                    setGprGoals(gprData.map(g => ({
+                        id: g.id,
+                        title: g.title,
+                        type: g.level === 'GPR-III' ? 'Yearly' : g.level === 'GPR-II' ? 'Quarterly' : 'Personal',
+                        status: g.status === 'Completed' ? 'Completed' : g.status === 'Draft' ? 'Not Started' : 'In Progress',
+                        progress: g.progress,
+                        description: g.description,
+                        dueDate: g.dueDate,
+                    })));
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    const found = initialStaff.find(s => s.id === id);
+                    if (found) {
+                        setMember(found);
+                        setPhone(found.phone ?? '');
+                        setEmergencyContact(found.emergencyContact ?? '');
+                        setBio(found.bio ?? '');
+                        setGoals(found.goals ?? '');
+                        setValues(found.values ?? '');
+                    }
+                }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, [params.id]);
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
+    if (!member) return <div className="text-neutral-400 text-center py-20">직원을 찾을 수 없습니다.</div>;
 
     const handleSaveProfile = (e: React.FormEvent) => {
         e.preventDefault();
-        updateStaff(member.id, { phone: phone || undefined, emergencyContact: emergencyContact || undefined, bio: bio || undefined, goals: goals || undefined, values: values || undefined });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -126,7 +138,6 @@ export default function StaffDetailPage() {
             {/* Profile Tab */}
             {tab === 'profile' && (
                 <form onSubmit={handleSaveProfile} className="space-y-6">
-                    {/* 시스템 정보 (읽기 전용) */}
                     <div className="border border-neutral-200 bg-white p-6">
                         <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                             <Shield className="h-4 w-4 text-neutral-400" /> 시스템 정보 (관리자만 수정)
@@ -143,7 +154,6 @@ export default function StaffDetailPage() {
                         </div>
                     </div>
 
-                    {/* 개인 수정 영역 */}
                     <div className="border border-neutral-200 bg-white p-6">
                         <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                             <User className="h-4 w-4 text-neutral-500" /> 개인 정보 (본인 수정)
@@ -172,7 +182,6 @@ export default function StaffDetailPage() {
             {/* GPR Tab */}
             {tab === 'gpr' && (
                 <div className="space-y-6">
-                    {/* GPR Summary */}
                     <div className="grid grid-cols-3 gap-4">
                         <div className="border border-neutral-200 bg-white p-4 text-center">
                             <p className="text-2xl font-bold">{gprGoals.filter(g => g.type === 'Yearly').length}</p>
@@ -188,10 +197,9 @@ export default function StaffDetailPage() {
                         </div>
                     </div>
 
-                    {/* GPR Levels */}
                     {(['Yearly', 'Quarterly', 'Personal'] as const).map(type => {
-                        const goals = gprGoals.filter(g => g.type === type);
-                        if (goals.length === 0) return null;
+                        const typeGoals = gprGoals.filter(g => g.type === type);
+                        if (typeGoals.length === 0) return null;
                         const typeLabels = { Yearly: 'GPR III — 연간 목표', Quarterly: 'GPR II — 분기 목표', Personal: 'GPR I — 개인 업무 목표' };
                         const typeIcons = { Yearly: Calendar, Quarterly: TrendingUp, Personal: Target };
                         const Icon = typeIcons[type];
@@ -201,7 +209,7 @@ export default function StaffDetailPage() {
                                     <Icon className="h-4 w-4" /> {typeLabels[type]}
                                 </h3>
                                 <div className="space-y-3">
-                                    {goals.map(goal => (
+                                    {typeGoals.map(goal => (
                                         <div key={goal.id} className="border border-neutral-200 bg-white p-5 hover:border-neutral-400 transition-colors">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">

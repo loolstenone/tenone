@@ -1,15 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Users, ClipboardList, Target, TrendingUp, Loader2 } from "lucide-react";
-import { useStaff } from "@/lib/staff-context";
-import { useGpr } from "@/lib/gpr-context";
+import { fetchStaffMembers, fetchGprGoalsTyped } from "@/lib/supabase/erp";
+import { initialStaff } from "@/lib/staff-data";
+import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
+import type { StaffMember } from "@/types/staff";
+import type { GprGoal } from "@/types/gpr";
 
 export default function ErpDashboard() {
-    const { staff, loading: staffLoading } = useStaff();
-    const { goals, loading: goalsLoading } = useGpr();
+    const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [goals, setGoals] = useState<GprGoal[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const loading = staffLoading || goalsLoading;
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchStaffMembers(), fetchGprGoalsTyped()])
+            .then(([s, g]) => {
+                if (cancelled) return;
+                setStaff(s.length > 0 ? s : initialStaff);
+                setGoals(g.length > 0 ? g : initialGoals);
+            })
+            .catch(() => {
+                if (!cancelled) { setStaff(initialStaff); setGoals(initialGoals); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
     const activeStaff = staff.filter(s => s.status === 'Active');
     const completedGoals = goals.filter(g => g.status === 'Completed');
     const pendingGoals = goals.filter(g => g.status === 'In Progress');
@@ -62,19 +81,19 @@ export default function ErpDashboard() {
                         <Link href="/intra/erp/hr/staff" className="text-xs text-neutral-400 hover:text-neutral-900">View All</Link>
                     </div>
                     <ul className="divide-y divide-neutral-100">
-                        {staff.slice(0, 5).map(staff => (
-                            <li key={staff.id} className="px-6 py-3 hover:bg-neutral-50 transition-colors">
+                        {staff.slice(0, 5).map(s => (
+                            <li key={s.id} className="px-6 py-3 hover:bg-neutral-50 transition-colors">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="h-8 w-8 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-medium text-neutral-500">
-                                            {staff.name.slice(0, 2)}
+                                            {s.name.slice(0, 2)}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium">{staff.name}</p>
-                                            <p className="text-xs text-neutral-400">{staff.position}</p>
+                                            <p className="text-sm font-medium">{s.name}</p>
+                                            <p className="text-xs text-neutral-400">{s.position}</p>
                                         </div>
                                     </div>
-                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{staff.status}</span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{s.status}</span>
                                 </div>
                             </li>
                         ))}

@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight } from "lucide-react";
-import { useWorkflow } from "@/lib/workflow-context";
+import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight, Loader2 } from "lucide-react";
+import { fetchWorkflowTasks, fetchPipelineItems, fetchBrandProjects, fetchAutomations } from "@/lib/supabase/workflow";
+import { initialTasks, initialPipelineItems, initialProjects, initialAutomations } from "@/lib/workflow-data";
+import type { WorkflowTask, PipelineItem, BrandProject, AutomationRule } from "@/types/workflow";
 
 const modules = [
     {
@@ -32,7 +35,33 @@ const modules = [
 ];
 
 export default function WorkflowDashboard() {
-    const { tasks, pipelineItems, projects, automations } = useWorkflow();
+    const [tasks, setTasks] = useState<WorkflowTask[]>([]);
+    const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>([]);
+    const [projects, setProjects] = useState<BrandProject[]>([]);
+    const [automations, setAutomations] = useState<AutomationRule[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchWorkflowTasks(), fetchPipelineItems(), fetchBrandProjects(), fetchAutomations()])
+            .then(([t, p, pr, a]) => {
+                if (cancelled) return;
+                setTasks(t.length > 0 ? t : initialTasks);
+                setPipelineItems(p.length > 0 ? p : initialPipelineItems);
+                setProjects(pr.length > 0 ? pr : initialProjects);
+                setAutomations(a.length > 0 ? a : initialAutomations);
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setTasks(initialTasks);
+                    setPipelineItems(initialPipelineItems);
+                    setProjects(initialProjects);
+                    setAutomations(initialAutomations);
+                }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const summaryStats = [
         { label: "Active Tasks", value: tasks.filter(t => t.status !== 'Done').length },
@@ -40,6 +69,8 @@ export default function WorkflowDashboard() {
         { label: "Active Projects", value: projects.filter(p => p.status === 'Active').length },
         { label: "Automations", value: automations.filter(a => a.enabled).length },
     ];
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-8">

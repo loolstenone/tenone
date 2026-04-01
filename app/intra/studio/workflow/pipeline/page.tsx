@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useWorkflow } from "@/lib/workflow-context";
-import { PipelineStage } from "@/types/workflow";
+import { useState, useEffect } from "react";
+import { fetchPipelineItems, updatePipelineStage } from "@/lib/supabase/workflow";
+import { initialPipelineItems } from "@/lib/workflow-data";
+import type { PipelineItem, PipelineStage } from "@/types/workflow";
 import { brands } from "@/lib/data";
-import { Sparkles, Filter } from "lucide-react";
+import { Sparkles, Filter, Loader2 } from "lucide-react";
 
 const stages: { key: PipelineStage; label: string }[] = [
     { key: 'Idea', label: 'Idea' },
@@ -16,8 +17,23 @@ const stages: { key: PipelineStage; label: string }[] = [
 ];
 
 export default function PipelinePage() {
-    const { pipelineItems, movePipelineItem } = useWorkflow();
+    const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [brandFilter, setBrandFilter] = useState<string>('all');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchPipelineItems()
+            .then(p => { if (!cancelled) setPipelineItems(p.length > 0 ? p : initialPipelineItems); })
+            .catch(() => { if (!cancelled) setPipelineItems(initialPipelineItems); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const movePipelineItem = (id: string, stage: PipelineStage) => {
+        setPipelineItems(prev => prev.map(p => p.id === id ? { ...p, stage } : p));
+        updatePipelineStage(id, stage).catch(() => {});
+    };
 
     const filteredItems = brandFilter === 'all'
         ? pipelineItems
@@ -44,6 +60,8 @@ export default function PipelinePage() {
     const handleDragLeave = (e: React.DragEvent) => {
         e.currentTarget.classList.remove('ring-2', 'ring-neutral-400');
     };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">

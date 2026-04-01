@@ -1,31 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { useGpr } from "@/lib/gpr-context";
-import { useStaff } from "@/lib/staff-context";
-import { GoalLevel, GoalStatus } from "@/types/gpr";
-import { Plus, X, Send, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { fetchStaffMembers, fetchGprGoalsTyped, createGprGoal } from "@/lib/supabase/erp";
+import { initialStaff } from "@/lib/staff-data";
+import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
+import type { StaffMember } from "@/types/staff";
+import type { GprGoal, GoalLevel } from "@/types/gpr";
+import { Plus, X, Send, Check, Loader2 } from "lucide-react";
 
 const levelOptions: GoalLevel[] = ['GPR-I', 'GPR-II', 'GPR-III'];
 const levelLabels: Record<string, string> = { 'GPR-I': '개인 업무 목표', 'GPR-II': '분기 목표', 'GPR-III': '연간 목표' };
 const inputClass = "w-full border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none";
 
 export default function GoalSettingPage() {
-    const { goals, addGoal, submitForApproval, agreeGoal, updateGoal } = useGpr();
-    const { staff } = useStaff();
+    const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [goals, setGoals] = useState<GprGoal[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showNew, setShowNew] = useState(false);
     const [staffFilter, setStaffFilter] = useState('all');
-    const [form, setForm] = useState({ staffId: '', level: 'GPR-I' as GoalLevel, title: '', description: '', kpi: '', weight: 10, dueDate: '', period: '2025' });
+    const [form, setForm] = useState({ staffId: '', level: 'GPR-I' as GoalLevel, title: '', description: '', kpi: '', weight: 10, dueDate: '', period: '2026' });
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchStaffMembers(), fetchGprGoalsTyped()])
+            .then(([s, g]) => {
+                if (cancelled) return;
+                setStaff(s.length > 0 ? s : initialStaff);
+                setGoals(g.length > 0 ? g : initialGoals);
+            })
+            .catch(() => {
+                if (!cancelled) { setStaff(initialStaff); setGoals(initialGoals); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const filtered = staffFilter === 'all' ? goals : goals.filter(g => g.staffId === staffFilter);
 
-    const handleCreate = (e: React.FormEvent) => {
+    const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         const now = new Date().toISOString().split('T')[0];
-        addGoal({ id: `gpr${Date.now()}`, staffId: form.staffId, level: form.level, title: form.title, description: form.description, kpi: form.kpi, weight: form.weight, status: 'Draft', progress: 0, dueDate: form.dueDate || undefined, period: form.period, createdAt: now, updatedAt: now });
+        const newGoal: GprGoal = {
+            id: `gpr${Date.now()}`, staffId: form.staffId, level: form.level,
+            title: form.title, description: form.description, kpi: form.kpi,
+            weight: form.weight, status: 'Draft', progress: 0,
+            dueDate: form.dueDate || undefined, period: form.period,
+            createdAt: now, updatedAt: now,
+        };
+        setGoals(prev => [newGoal, ...prev]);
         setShowNew(false);
-        setForm({ staffId: '', level: 'GPR-I', title: '', description: '', kpi: '', weight: 10, dueDate: '', period: '2025' });
+        setForm({ staffId: '', level: 'GPR-I', title: '', description: '', kpi: '', weight: 10, dueDate: '', period: '2026' });
+
+        try {
+            await createGprGoal({
+                member_id: form.staffId, level: form.level, title: form.title,
+                description: form.description, metric: form.kpi, weight: form.weight,
+                quarter: form.period, due_date: form.dueDate || null,
+            });
+        } catch { /* local state already updated */ }
     };
+
+    const handleSubmitForApproval = (goalId: string) => {
+        setGoals(prev => prev.map(g => g.id === goalId ? { ...g, status: 'Pending Approval' as const } : g));
+    };
+
+    const handleAgree = (goalId: string) => {
+        setGoals(prev => prev.map(g => g.id === goalId ? { ...g, status: 'Agreed' as const } : g));
+    };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">
@@ -66,7 +109,7 @@ export default function GoalSettingPage() {
                                 </select>
                             </div>
                             <div><label className="block text-xs text-neutral-500 mb-1">기간</label>
-                                <input value={form.period} onChange={e => setForm({...form, period: e.target.value})} placeholder="2025, 2025-Q3" className={inputClass} />
+                                <input value={form.period} onChange={e => setForm({...form, period: e.target.value})} placeholder="2026, 2026-Q2" className={inputClass} />
                             </div>
                         </div>
                         <div><label className="block text-xs text-neutral-500 mb-1">목표명 *</label>
@@ -126,7 +169,7 @@ export default function GoalSettingPage() {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-16 h-1.5 bg-neutral-200 overflow-hidden">
-                                                <div className={`h-full ${goal.progress === 100 ? 'bg-neutral-900' : 'bg-neutral-900'}`} style={{ width: `${goal.progress}%` }} />
+                                                <div className="h-full bg-neutral-900" style={{ width: `${goal.progress}%` }} />
                                             </div>
                                             <span className="text-xs text-neutral-400">{goal.progress}%</span>
                                         </div>
@@ -135,12 +178,12 @@ export default function GoalSettingPage() {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-1">
                                             {goal.status === 'Draft' && (
-                                                <button onClick={() => submitForApproval(goal.id)} className="p-1 text-neutral-500 hover:bg-neutral-100" title="승인 요청">
+                                                <button onClick={() => handleSubmitForApproval(goal.id)} className="p-1 text-neutral-500 hover:bg-neutral-100" title="승인 요청">
                                                     <Send className="h-3.5 w-3.5" />
                                                 </button>
                                             )}
                                             {goal.status === 'Pending Approval' && (
-                                                <button onClick={() => agreeGoal(goal.id, 's1')} className="p-1 text-neutral-500 hover:bg-neutral-100" title="합의">
+                                                <button onClick={() => handleAgree(goal.id)} className="p-1 text-neutral-500 hover:bg-neutral-100" title="합의">
                                                     <Check className="h-3.5 w-3.5" />
                                                 </button>
                                             )}

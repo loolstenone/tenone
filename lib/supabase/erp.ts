@@ -153,6 +153,44 @@ export async function updateExpense(id: string, input: Record<string, unknown>) 
 
 // ── GPR Goals ──
 
+import type { GprGoal, GoalLevel, GoalStatus, EvaluationRating } from '@/types/gpr';
+
+export function rowToGprGoal(r: Record<string, unknown>): GprGoal {
+    return {
+        id: r.id as string,
+        staffId: (r.member_id as string) || '',
+        level: ((r.level as string) || (r.category as string) || 'GPR-I') as GoalLevel,
+        title: (r.title as string) || '',
+        description: (r.description as string) || '',
+        kpi: (r.metric as string) || (r.kpi as string) || '',
+        weight: (r.weight as number) || 10,
+        status: ((r.status as string) || 'Draft') as GoalStatus,
+        progress: (r.progress as number) || 0,
+        dueDate: (r.due_date as string)?.split('T')[0] || undefined,
+        agreedBy: (r.agreed_by as string) || undefined,
+        agreedAt: (r.agreed_at as string)?.split('T')[0] || undefined,
+        selfRating: (r.self_rating as EvaluationRating) || undefined,
+        selfComment: (r.self_comment as string) || undefined,
+        selfEvaluatedAt: (r.self_evaluated_at as string)?.split('T')[0] || undefined,
+        supervisorRating: (r.supervisor_rating as EvaluationRating) || undefined,
+        supervisorComment: (r.supervisor_comment as string) || undefined,
+        supervisorId: (r.supervisor_id as string) || undefined,
+        evaluatedAt: (r.evaluated_at as string)?.split('T')[0] || undefined,
+        period: (r.quarter as string) || (r.period as string) || '',
+        createdAt: ((r.created_at as string) || '').split('T')[0],
+        updatedAt: ((r.updated_at as string) || '').split('T')[0],
+    };
+}
+
+export async function fetchGprGoalsTyped(params?: { memberId?: string; quarter?: string }): Promise<GprGoal[]> {
+    let query = supabase.from('gpr_goals').select('*').order('created_at', { ascending: false });
+    if (params?.memberId) query = query.eq('member_id', params.memberId);
+    if (params?.quarter) query = query.eq('quarter', params.quarter);
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map(r => rowToGprGoal(r as Record<string, unknown>));
+}
+
 export async function fetchGprGoals(params?: { memberId?: string; quarter?: string }) {
     let query = supabase.from('gpr_goals').select('*').order('created_at', { ascending: false });
     if (params?.memberId) query = query.eq('member_id', params.memberId);
@@ -245,6 +283,42 @@ export async function upsertBizPlan(input: Record<string, unknown>) {
 }
 
 // ── Staff / People (직원/외부회원) ──
+
+import type { StaffMember, StaffRole, StaffStatus, Division } from '@/types/staff';
+import type { SystemAccess } from '@/types/auth';
+
+export function rowToStaffMember(r: Record<string, unknown>): StaffMember {
+    const name = (r.name as string) || '';
+    const initials = name.length >= 2 ? name.slice(0, 2) : name;
+    return {
+        id: r.id as string,
+        employeeId: (r.employee_id as string) || '',
+        name,
+        email: (r.email as string) || '',
+        role: ((r.role as string) || 'Viewer') as StaffRole,
+        accessLevel: ((r.system_access as string[]) || []) as SystemAccess[],
+        division: ((r.division as string) || 'Support') as Division,
+        department: (r.department as string) || '',
+        position: (r.position as string) || '',
+        brandAssociation: (r.brand_association as string[]) || [],
+        startDate: ((r.start_date as string) || (r.created_at as string) || '').split('T')[0],
+        status: ((r.status as string) || 'Active') as StaffStatus,
+        phone: (r.phone as string) || undefined,
+        avatarInitials: (r.avatar_initials as string) || initials,
+        emergencyContact: (r.emergency_contact as string) || undefined,
+        bio: (r.bio as string) || undefined,
+        goals: (r.goals as string) || undefined,
+        values: (r.values as string) || undefined,
+        createdAt: ((r.created_at as string) || '').split('T')[0],
+        updatedAt: ((r.updated_at as string) || '').split('T')[0],
+    };
+}
+
+export async function fetchStaffMembers(): Promise<StaffMember[]> {
+    const { data, error } = await supabase.from('members').select('*').eq('account_type', 'staff').order('name');
+    if (error) throw error;
+    return (data || []).map(r => rowToStaffMember(r as Record<string, unknown>));
+}
 
 export async function fetchStaff() {
     const { data, error } = await supabase.from('members').select('*').eq('account_type', 'staff').order('name');
@@ -497,8 +571,14 @@ export async function fetchPartners(params: { brandId?: string; type?: string; s
 }
 
 export async function createPartner(input: Record<string, unknown>) {
+    // tenant_id 조회 (NOT NULL 제약)
+    let tenantId = input.tenant_id;
+    if (!tenantId) {
+        const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'tenone').single();
+        tenantId = brand?.id;
+    }
     const { data, error } = await supabase.from('partners')
-        .insert({ ...input, brand_id: input.brand_id || 'tenone', updated_at: new Date().toISOString() })
+        .insert({ ...input, tenant_id: tenantId, brand_id: input.brand_id || 'tenone', updated_at: new Date().toISOString() })
         .select().single();
     if (error) throw error;
     return data as Record<string, unknown>;

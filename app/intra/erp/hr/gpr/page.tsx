@@ -1,20 +1,40 @@
 "use client";
 
-import { useGpr } from "@/lib/gpr-context";
-import { useStaff } from "@/lib/staff-context";
-import { ratingLabels } from "@/lib/gpr-data";
+import { useState, useEffect } from "react";
+import { fetchStaffMembers, fetchGprGoalsTyped } from "@/lib/supabase/erp";
+import { initialStaff } from "@/lib/staff-data";
+import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
+import type { StaffMember } from "@/types/staff";
+import type { GprGoal } from "@/types/gpr";
 import Link from "next/link";
-import { Target, TrendingUp, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Target, TrendingUp, CheckCircle2, Clock, AlertCircle, Loader2 } from "lucide-react";
 
 export default function GprDashboardPage() {
-    const { goals } = useGpr();
-    const { staff } = useStaff();
+    const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [goals, setGoals] = useState<GprGoal[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchStaffMembers(), fetchGprGoalsTyped()])
+            .then(([s, g]) => {
+                if (cancelled) return;
+                setStaff(s.length > 0 ? s : initialStaff);
+                setGoals(g.length > 0 ? g : initialGoals);
+            })
+            .catch(() => {
+                if (!cancelled) { setStaff(initialStaff); setGoals(initialGoals); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     const totalGoals = goals.length;
     const inProgress = goals.filter(g => g.status === 'In Progress' || g.status === 'Agreed').length;
     const pendingApproval = goals.filter(g => g.status === 'Pending Approval').length;
     const evaluated = goals.filter(g => g.status === 'Evaluated' || g.status === 'Completed').length;
-    const avgProgress = Math.round(goals.reduce((s, g) => s + g.progress, 0) / (totalGoals || 1));
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">

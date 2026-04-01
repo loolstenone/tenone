@@ -1,11 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useMarketing } from "@/lib/marketing-context";
-import { Megaphone, TrendingUp, FileText, BarChart3 } from "lucide-react";
+import { fetchCampaigns, fetchLeads, fetchContentPosts } from "@/lib/supabase/marketing";
+import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
+import { Campaign, Lead, ContentPost } from "@/types/marketing";
+import { Megaphone, TrendingUp, FileText, BarChart3, Loader2 } from "lucide-react";
 
 export default function MarketingDashboard() {
-    const { campaigns, leads, contentPosts } = useMarketing();
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [leads, setLeads] = useState<Lead[]>([]);
+    const [contentPosts, setContentPosts] = useState<ContentPost[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchCampaigns(), fetchLeads(), fetchContentPosts()])
+            .then(([c, l, p]) => {
+                if (cancelled) return;
+                setCampaigns(c.length > 0 ? c : initialCampaigns);
+                setLeads(l.length > 0 ? l : initialLeads);
+                setContentPosts(p.length > 0 ? p : initialContentPosts);
+            })
+            .catch(() => {
+                if (!cancelled) { setCampaigns(initialCampaigns); setLeads(initialLeads); setContentPosts(initialContentPosts); }
+            })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
     const activeCampaigns = campaigns.filter(c => c.status === 'Active').length;
     const activeLeads = leads.filter(l => !['Won', 'Lost'].includes(l.stage)).length;
     const publishedContent = contentPosts.filter(p => p.status === 'Published').length;
@@ -16,6 +39,8 @@ export default function MarketingDashboard() {
         { name: "Published Content", value: publishedContent, icon: FileText, href: "/intra/marketing/content" },
         { name: "Total Leads", value: leads.length, icon: BarChart3, href: "/intra/marketing/analytics" },
     ];
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-8">

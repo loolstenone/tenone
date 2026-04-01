@@ -1,20 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { useWorkflow } from "@/lib/workflow-context";
+import { useState, useEffect } from "react";
+import { fetchWorkflowTasks, createWorkflowTask, updateWorkflowTask, deleteWorkflowTask } from "@/lib/supabase/workflow";
+import { initialTasks } from "@/lib/workflow-data";
 import { KanbanBoard } from "@/components/workflow/KanbanBoard";
 import { TaskModal } from "@/components/workflow/TaskModal";
 import { WorkflowTask, TaskStatus } from "@/types/workflow";
 import { brands } from "@/lib/data";
-import { Plus, Filter } from "lucide-react";
+import { Plus, Filter, Loader2 } from "lucide-react";
 
 export default function KanbanPage() {
-    const { tasks, moveTask, addTask, updateTask, deleteTask } = useWorkflow();
+    const [tasks, setTasks] = useState<WorkflowTask[]>([]);
+    const [loading, setLoading] = useState(true);
     const [editingTask, setEditingTask] = useState<WorkflowTask | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>('Todo');
     const [brandFilter, setBrandFilter] = useState('all');
     const [priorityFilter, setPriorityFilter] = useState('all');
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchWorkflowTasks()
+            .then(t => { if (!cancelled) setTasks(t.length > 0 ? t : initialTasks); })
+            .catch(() => { if (!cancelled) setTasks(initialTasks); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const moveTask = (id: string, status: TaskStatus) => {
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, status, updatedAt: new Date().toISOString().split('T')[0] } : t));
+        updateWorkflowTask(id, { status }).catch(() => {});
+    };
+
+    const addTask = (task: WorkflowTask) => {
+        setTasks(prev => [task, ...prev]);
+        createWorkflowTask(task).catch(() => {});
+    };
+
+    const handleUpdateTask = (id: string, updates: Partial<WorkflowTask>) => {
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString().split('T')[0] } : t));
+        updateWorkflowTask(id, updates).catch(() => {});
+    };
+
+    const handleDeleteTask = (id: string) => {
+        setTasks(prev => prev.filter(t => t.id !== id));
+        deleteWorkflowTask(id).catch(() => {});
+    };
 
     const filteredTasks = tasks.filter(t => {
         if (brandFilter !== 'all' && t.brandId !== brandFilter) return false;
@@ -35,11 +66,13 @@ export default function KanbanPage() {
 
     const handleSaveTask = (task: WorkflowTask) => {
         if (editingTask) {
-            updateTask(task.id, task);
+            handleUpdateTask(task.id, task);
         } else {
             addTask({ ...task, status: newTaskStatus });
         }
     };
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="space-y-6">
@@ -91,7 +124,7 @@ export default function KanbanPage() {
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
                 onSave={handleSaveTask}
-                onDelete={deleteTask}
+                onDelete={handleDeleteTask}
             />
         </div>
     );

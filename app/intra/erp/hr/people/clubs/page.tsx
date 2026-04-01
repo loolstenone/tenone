@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Plus,
@@ -12,7 +12,9 @@ import {
   MapPin,
   Crown,
   ArrowRightLeft,
+  Loader2,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { madleagueClubs } from "@/lib/people-data";
 import type { MadLeagueClub } from "@/types/people";
 
@@ -33,7 +35,7 @@ interface GenerationData {
   members: ClubMember[];
 }
 
-const mockGenerations: Record<string, GenerationData[]> = {
+const initialGenerations: Record<string, GenerationData[]> = {
   madleap: [
     {
       generation: 5,
@@ -121,7 +123,7 @@ const mockGenerations: Record<string, GenerationData[]> = {
 
 // ── helpers ──
 function getClubStats(clubId: string) {
-  const gens = mockGenerations[clubId] || [];
+  const gens = initialGenerations[clubId] || [];
   let active = 0;
   let ob = 0;
   gens.forEach((g) =>
@@ -131,7 +133,7 @@ function getClubStats(clubId: string) {
 }
 
 function getClubPresident(clubId: string): string {
-  const gens = mockGenerations[clubId] || [];
+  const gens = initialGenerations[clubId] || [];
   if (gens.length === 0) return "-";
   const latest = gens[0];
   const president = latest.members.find((m) => m.role === "회장" || m.role === "부회장");
@@ -139,7 +141,7 @@ function getClubPresident(clubId: string): string {
 }
 
 function getCurrentGen(clubId: string): number {
-  const gens = mockGenerations[clubId] || [];
+  const gens = initialGenerations[clubId] || [];
   return gens.length > 0 ? gens[0].generation : 0;
 }
 
@@ -147,12 +149,40 @@ const roleOrder: Record<ClubRole, number> = { 회장: 0, 부회장: 1, 팀장: 2
 
 // ── Component ──
 export default function ClubsPage() {
-  const [clubs, setClubs] = useState<MadLeagueClub[]>(
-    [...madleagueClubs].sort((a, b) => a.order - b.order)
-  );
+  const [clubs, setClubs] = useState<MadLeagueClub[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expandedClub, setExpandedClub] = useState<string | null>(null);
   const [activeGenTab, setActiveGenTab] = useState<Record<string, number>>({});
-  const [memberData, setMemberData] = useState(mockGenerations);
+  const [memberData, setMemberData] = useState<Record<string, GenerationData[]>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.from('madleague_clubs').select('*').order('name');
+        if (!cancelled && data && data.length > 0 && !error) {
+          setClubs(data.map((r: Record<string, unknown>, i: number) => ({
+            id: r.id as string,
+            name: (r.name as string) || '',
+            region: (r.region as string) || '',
+            order: (r.order as number) || i + 1,
+          })));
+        } else if (!cancelled) {
+          setClubs([...madleagueClubs].sort((a, b) => a.order - b.order));
+          setMemberData(initialGenerations);
+        }
+      } catch {
+        if (!cancelled) {
+          setClubs([...madleagueClubs].sort((a, b) => a.order - b.order));
+          setMemberData(initialGenerations);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // add modal
   const [showAddModal, setShowAddModal] = useState(false);
@@ -225,6 +255,8 @@ export default function ClubsPage() {
       }
     }
   }
+
+  if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">

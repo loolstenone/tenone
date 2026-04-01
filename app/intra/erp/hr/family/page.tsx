@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Heart, Plus, Edit2, Trash2, Shield, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, Plus, Edit2, Trash2, Shield, X, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface FamilyMember {
     id: string;
@@ -13,15 +14,46 @@ interface FamilyMember {
     healthInsurance: boolean;
 }
 
-const mockFamily: FamilyMember[] = [
+const initialFamily: FamilyMember[] = [
     { id: "1", name: "김배우자", relation: "배우자", birthDate: "1990-05-15", phone: "010-2345-6789", isDependent: true, healthInsurance: true },
     { id: "2", name: "전자녀1", relation: "자녀", birthDate: "2018-08-20", isDependent: true, healthInsurance: true },
     { id: "3", name: "전어머니", relation: "부모", birthDate: "1960-03-10", isDependent: true, healthInsurance: false },
 ];
 
 export default function FamilyPage() {
-    const [family] = useState(mockFamily);
+    const [family, setFamily] = useState<FamilyMember[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('family_members').select('*').order('name');
+                if (!cancelled && data && data.length > 0 && !error) {
+                    setFamily(data.map((r: Record<string, unknown>) => ({
+                        id: r.id as string,
+                        name: (r.name as string) || '',
+                        relation: (r.relation as string) || '',
+                        birthDate: ((r.birth_date as string) || '').split('T')[0],
+                        phone: (r.phone as string) || undefined,
+                        isDependent: (r.is_dependent as boolean) || false,
+                        healthInsurance: (r.health_insurance as boolean) || false,
+                    })));
+                } else if (!cancelled) {
+                    setFamily(initialFamily);
+                }
+            } catch {
+                if (!cancelled) setFamily(initialFamily);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
     const [showForm, setShowForm] = useState(false);
+
+    if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
         <div className="max-w-4xl">
