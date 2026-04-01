@@ -1,10 +1,28 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-03-31 (사무실, 2차)
+> 마지막 업데이트: 2026-04-01
 
-## 오늘 한 작업 (3/31)
+## 오늘 한 작업 (4/1)
 
-### MyVerse + ERP DB 연동 완료
+### 인트라 ERP 전체 페이지 DB 현실화 (4/1)
+- middleware: getUser() → getSession() (cold start 해결) ✅
+- 로그아웃 → 브랜드 홈 랜딩 (IntraHeader, SmarComm) ✅
+- 뉴스룸 FWN 스타일 리디자인 + max-w 통일 ✅
+- TrendHunter → Mindle 리다이렉트 (11개 파일) ✅
+- BoardWidget 퍼블릭 컴포넌트 추가 ✅
+- **ERP DB 현실화** (mock → DB with fallback):
+  - 결재 진행/완료 → fetchApprovals() ✅
+  - 경비품의서 → fetchExpenses() ✅
+  - 연간 경영계획 → fetchBizPlans() ✅
+  - 경리 리포트 → fetchExpenses() + getProjectStats() ✅
+  - 법인카드 → fetchCardUsage() ✅
+  - 청구관리 → fetchInvoices() ✅
+  - 지급관리 → fetchPayments() ✅
+  - 보상관리 → fetchIncentives() ✅
+  - 프로젝트 상세 → fetchProjectByCode + fetchJobs + fetchProjectMembers ✅
+- erp.ts: invoices, card_usage, payments, incentives 테이블 함수 추가 ✅
+
+### MyVerse + ERP DB 연동 완료 (3/31)
 - myverse/gpr → gpr_goals 테이블 실DB 연동 ✅
 - myverse/projects → fetchMyProjects DB 연동 ✅
 - myverse/payroll, attendance, expenses → 이전 세션 완료 ✅
@@ -35,14 +53,24 @@
 
 ## 다음 할 일
 
+### 인트라 DB 현실화 — 남은 것
+1. **ERP HR 보조 페이지**: talent(인재풀), delegation(위임), family(가족), clubs(동아리)
+   → 각 페이지에 DB fallback 패턴 적용 (우선순위 낮음)
+2. **Supabase 실DB에 신규 테이블 생성** (현재 없어서 mock fallback 중):
+   - `invoices` — 청구서
+   - `payments` — 지급관리
+   - `card_usage` — 법인카드
+   - `incentives` — 보상/성과급
+3. **ERP 마케팅 분석 페이지**: erp/gpr/incentive, erp/gpr/evaluation DB 연동
+
 ### 즉시
-1. **Prod DB**: `sql/approval_templates.sql` 실행 완료 ✅
-2. Multiple GoTrueClient — 모니터링 계속 (11976ed 커밋 이후 안정)
+4. **Prod DB**: `sql/approval_templates.sql` 실행 완료 ✅
+5. Multiple GoTrueClient — 모니터링 계속 (11976ed 커밋 이후 안정)
 
 ### 단기 — TenOne
-3. ~~설정 서비스/모듈 → Supabase 저장 (localStorage → DB)~~ ✅ 완료
-4. Rule Engine + Event Bus 구현 (Universe OS Phase 2)
-5. SmarComm 독립 배포
+6. ~~설정 서비스/모듈 → Supabase 저장 (localStorage → DB)~~ ✅ 완료
+7. Rule Engine + Event Bus 구현 (Universe OS Phase 2)
+8. SmarComm 독립 배포
 
 ### 단기 — 사이트 구조 개편
 6. **TrendHunter → Mindle 통합 후 삭제**

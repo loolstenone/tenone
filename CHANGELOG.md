@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-04-01
+
+### 인트라 ERP 전체 페이지 DB 현실화
+
+**수정 파일:**
+- `middleware.ts` — getUser() → getSession() (cold start 블로킹 해결)
+- `app/intra/layout.tsx` — 타임아웃 8s, cold start 경고 3s 타이머
+- `components/IntraHeader.tsx`, `smarcomm/dashboard/layout.tsx` — 로그아웃 → 홈 랜딩
+- `components/newsroom/NewsroomFeed.tsx` — FWN 스타일 리디자인
+- `components/newsroom/NewsTicker.tsx` — FLASH 배지, 테두리 수정
+- `app/(TenOne)/newsroom/page.tsx`, `history/page.tsx`, `brands/page.tsx` — max-w 통일
+- `app/(TrendHunter)/trendhunter/**` — 11개 → Mindle 리다이렉트
+- `components/board/BoardWidget.tsx` — 신규 퍼블릭 위젯 컴포넌트
+- `app/(Badak)/badak/page.tsx` — BoardWidget 삽입
+- `app/intra/erp/approval/progress/page.tsx` — fetchApprovals() 연동
+- `app/intra/erp/approval/completed/page.tsx` — fetchApprovals() 연동
+- `app/intra/erp/finance/expenses/request/page.tsx` — fetchExpenses() 연동
+- `app/intra/erp/biz/plan/page.tsx` — fetchBizPlans() 연동
+- `app/intra/erp/finance/reports/page.tsx` — fetchExpenses() + getProjectStats() 연동
+- `app/intra/erp/finance/card/page.tsx` — fetchCardUsage() 연동
+- `app/intra/erp/finance/billing/page.tsx` — fetchInvoices() 연동
+- `app/intra/erp/finance/billing/payment/page.tsx` — fetchPayments() 연동
+- `app/intra/erp/hr/gpr/rewards/page.tsx` — fetchIncentives() 연동
+- `app/intra/project/management/[code]/page.tsx` — fetchProjectByCode+fetchJobs+fetchProjectMembers 연동
+- `lib/supabase/erp.ts` — invoices, card_usage, payments, incentives 함수 추가
+
+**결정 사항:**
+- 모든 페이지 패턴: DB 우선 시도 → 실패/빈 응답 시 mock fallback
+- Supabase에 신규 테이블(invoices, payments, card_usage, incentives) 생성 필요 (현재 mock fallback 중)
+
+---
+
 ## 2026-03-31 (사무실, 2차)
 
 ### localStorage → Supabase DB 마이그레이션 완료
