@@ -1,101 +1,101 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-01 (집 + 사무실 머지)
+> 마지막 업데이트: 2026-04-02 (사무실)
 
-## 오늘 한 작업 (4/1 집)
+## 오늘 한 작업 (4/2 사무실)
 
-### 인트라 메뉴 stub 3개 완성
-1. `bums/stats` ✅ — 사이트별 게시글·조회수·좋아요·댓글 집계 + 회원/구독자 수 KPI (Supabase 실연동)
-2. `bums/promotion` ✅ — 할인코드 CRUD (percent/fixed, 사용제한, 유효기간, 코드 복사)
-3. `bums/shop` ✅ — 상품 관리 + 주문 관리 탭, 인라인 상태 변경
-4. `supabase/migrations/007_shop_promotions.sql` ✅ — shop_products, shop_orders, promotions 테이블
+### 버그 수정 — 6건
+1. `app/intra/project/jobs/page.tsx` — React Rules of Hooks 위반 수정. useState 5개가 early return 뒤에 선언돼 있어 크래시. 컴포넌트 최상단으로 이동. ✅
+2. `app/intra/project/timesheet/page.tsx` — useMemo (filteredProjects)가 loading early return 뒤에 선언. loading return 앞으로 이동. ✅
+3. `app/intra/bums/promotion/page.tsx` — fetchPromos()에 try/catch/finally 없음 → DB 에러 시 무한 스피너. finally 추가. ✅
+4. `app/intra/partner-pool/page.tsx` — createPartner 실패 시 silent fail → saveError state 추가, 모달에 오류 메시지 표시. ✅
+5. `lib/supabase/erp.ts` — createPartner: brands 테이블 조회 실패 시 tenantId=null graceful fallback. ✅
+6. `app/intra/universe/members/page.tsx` — Lv5 배지 색상 bg-amber→bg-rose (레전드 dot 색상과 일치). ✅
 
-### 전체 인트라 메뉴 현황 파악
-- 총 ~160개 페이지, stub 3개 완성 → 0개
-- mock 데이터 사용 중인 페이지: 38개 (Supabase 연결 필요)
+### 레이아웃/라우팅 — 2건
+7. `app/intra/layout.tsx` — main 내 children wrapper div에 `w-full` 추가 + `overflow-x-hidden`. ✅
+8. `middleware.ts` — `smarcomm.tenone.biz` → `/smarcomm` 라우팅 추가. ✅
 
----
+### 아키텍처 문서
+9. `docs/Intra_Universe_Architecture.md` — 인트라↔유니버스 연결 설계 문서 신규 작성. 6계층 모델 (L1설정~L6에이전트), 각 계층별 DB/API/데이터흐름/상태 정의. ✅
 
-## 오늘 한 작업 (4/1 오후 — 사무실 6차)
+### 이전 세션 (4/2 새벽)
+10. IntraLayout race condition 해결 — TOKEN_REFRESHED/SIGNED_IN 이벤트에서 JWT is_staff 재확인. ✅
+11. LoginModal 즉시 닫기 — Supabase SIGNED_IN 이벤트 직접 구독. ✅
+12. 로그인 버튼 아이콘 제거 (LogIn/UserPlus → 텍스트만). ✅
+13. UniverseUtilityBar 한국어 (LOG IN→로그인, JOIN→가입). ✅
+14. Mindle 전 페이지(9개 파일) 한국어 전환 완료. ✅
 
-### Intra DB 현실화 — Marketing/ERP/Workflow 26개 페이지 전환
-- **Marketing 9개**: organizations, deals, activities, segments, campaigns, leads, content, analytics, page
-  → 모두 useContext 제거 → Supabase fetch + mock fallback 패턴으로 전환 ✅
-- **ERP HR 11개**: staff/[id], staff/register, gpr/page, gpr/goals, gpr/evaluation,
-  talent, talent/pipeline, talent/programs, clubs, delegation, family
-  → lib/supabase/erp.ts에 rowToStaffMember, fetchStaffMembers, rowToGprGoal, fetchGprGoalsTyped 추가 ✅
-- **Studio Workflow 5개**: page, kanban, pipeline, projects, automation
-  → lib/supabase/workflow.ts 신규 생성 (workflow_tasks, content_pipeline, projects, workflow_automations) ✅
-  → sql/workflow-tables.sql 신규 생성 (Prod 실행 필요 ⚠️)
-- sql/badaksoe-rooms-table.sql 신규 생성 (Prod 실행 필요 ⚠️)
-- Points 2개 (erp/hr/points, myverse/points): point-context가 이미 DB-first 구현 → 변환 불필요 확인 ✅
-
----
-
-## 오늘 한 작업 (4/1 오후 — 사무실 5차)
-
-### Universe OS Phase 1 — agent DB 테이블 생성 SQL
-- Phase 1 코드(lib/agent/claude.ts, /api/agent/hub, /api/agent/profiles, /api/agent/messages, app/intra/agent/page.tsx) 전부 완성 확인 ✅
-- sql/agent-tables.sql 신규 생성 — **Prod SQL 에디터에서 직접 실행 필요 ⚠️**
-  - agent_profiles, agent_messages, RLS, 초기 시드 3종 (compass, madleague, badaksoe)
+### 커밋 히스토리
+- `509dc34` — IntraLayout race condition + LoginModal + Mindle 한국어 (헤더/푸터/레이아웃/홈)
+- `f7c934c` — Mindle 전 페이지 한국어 전환 (9개 파일)
+- `18ba039` — Jobs/Timesheet Rules of Hooks 수정
+- `999a9a5` — 프로모션/파트너/레벨색상/레이아웃 수정
+- `974d420` — smarcomm.tenone.biz 미들웨어 추가
 
 ---
 
-## 오늘 한 작업 (4/1 오후 — 사무실 4차)
+## 미해결 — 버그
 
-### 인트라 DB 현실화 추가
-- biz/manage/page, actual, gap → fetchMonthlyForecasts() ✅
-- erp/project/rates → fetchStandardRates() + upsertStandardRate() ✅
-- sql/monthly-forecasts-table.sql, sql/standard-rates-table.sql 신규 ✅
+| # | 페이지 | 문제 | 난이도 |
+|---|--------|------|--------|
+| B1 | `/intra/bums/boards` | 클라이언트 크래시. 빌드 통과하지만 런타임 에러. 콘솔 로그 확인 필요 | 중 |
+| B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐. DB 인코딩 또는 저장 시 바이너리 변환 문제 | 중 |
+| B3 | Kanban 보드 | 0건 표시. fetchWorkflowTasks가 빈 배열 반환 → Mock fallback 조건 확인 | 하 |
+| B4 | wio.tenone.biz | "Orbi 로딩 중..." 다크 스크린. wio_members 멤버십 확인 필요 | 중 |
 
----
+## 미해결 — 도메인
 
-## 오늘 한 작업 (4/1 오전 — 사무실 1차)
+| # | 작업 | 상태 |
+|---|------|------|
+| D1 | hero.ne.kr → Vercel 도메인 추가 + DNS(A/CNAME) 설정 | Vercel 대시보드 + 도메인 등록업체에서 설정 |
+| D2 | www.smarcomm.biz → Vercel 도메인 추가 | Vercel 대시보드에서 추가 |
 
-### 인트라 ERP 전체 페이지 DB 현실화
-- 결재 진행/완료, 경비품의서, 연간 경영계획, 경리 리포트, 법인카드, 청구/지급, 보상관리, 프로젝트 상세 ✅
-- erp.ts: invoices, card_usage, payments, incentives 함수 추가 ✅
+## 미해결 — 아키텍처 연동 (docs/Intra_Universe_Architecture.md 참조)
 
----
+| # | 계층 | 작업 | 우선순위 |
+|---|------|------|---------|
+| A1 | L1 설정 | `site_configs` 테이블 생성 + 26개 시드 + BUMS 사이트 관리 handleSave 연결 + 브랜드 layout.tsx에서 getSiteConfig() 소비 | ★★★ 즉시 |
+| A2 | L2 콘텐츠 | 뉴스레터 발송 시스템 (Resend 또는 SES) | ★★ 단기 |
+| A3 | L2 콘텐츠 | 콘텐츠 관리 → 브랜드 사이트 아티클 페이지 연결 | ★★ 단기 |
+| A4 | L4 상거래 | subscription_plans + subscriptions 테이블 + 결제 연동 | ★ 중기 |
+| A5 | L6 에이전트 | 에이전트 Tool 연동 (WIO 모듈 API → Tool) | ★ 중기 |
 
-## 이전 작업 (3/31 집)
+## 미해결 — 코드 품질
 
-### TenOne 사이트 고도화 — DB 전체 연결
-1. WIO OrbiConfig DB sync ✅
-2. TypeScript 56 에러 → 0 ✅
-3. Marketing 3 페이지 추가 ✅ — Performance, Influencers, Social
-4. 005_tenone_portal.sql ✅ — brands 컬럼 확장 + history_events 20개
-5. lib/supabase/tenone.ts ✅
-6. brands/page.tsx, history/page.tsx ✅ — Supabase DB-first
+| # | 작업 |
+|---|------|
+| Q1 | 인트라 전체 페이지 Rules of Hooks 스캔 (Jobs/Timesheet 외 추가 위반 가능성) |
+| Q2 | 인트라 전체 fetchXxx 함수 try/finally 패턴 통일 |
+| Q3 | 모바일 반응형 점검 (ROADMAP 0-14) |
 
 ---
 
 ## 다음 할 일
 
-### 즉시 — Prod Supabase SQL 실행 필요 ⚠️
-(Supabase 대시보드 → SQL Editor에서 순서대로 실행)
-1. `sql/erp-finance-tables.sql` — invoices, payments, card_usage, incentives
-2. `sql/monthly-forecasts-table.sql` — monthly_forecasts
-3. `sql/standard-rates-table.sql` — standard_rates (기본 시드 포함)
-4. `sql/agent-tables.sql` — agent_profiles, agent_messages (Universe OS Phase 1)
-5. `sql/workflow-tables.sql` — workflow_tasks, content_pipeline, workflow_automations
-6. `sql/badaksoe-rooms-table.sql` — badaksoe_rooms
-7. `supabase/migrations/007_shop_promotions.sql` — shop_products, shop_orders, promotions
+### 즉시 — A1: L1 site_configs 연동
+1. `sql/site-configs-table.sql` 작성 — site_configs CREATE TABLE + 26개 사이트 시드 (lib/site-config.ts의 기존 데이터 기반)
+2. `scripts/run-sql.js`로 Prod Supabase 실행
+3. `lib/supabase/settings.ts`에 getSiteConfig(), upsertSiteConfig() 추가
+4. `app/intra/bums/sites/page.tsx` — handleSave를 upsertSiteConfig()로 교체
+5. 각 브랜드 layout.tsx에서 generateMetadata()가 DB 조회하도록 변경 (ISR 10분)
+6. 테스트: 인트라에서 HeRo 메타 타이틀 변경 → hero.ne.kr 새로고침 → 반영 확인
 
-### 단기 — Universe OS
-- **Phase 1 DB 활성화**: sql/agent-tables.sql 실행 → Agent Hub 페이지 (/intra/agent) 테스트
-- **Phase 2 바당쇠**: /api/agent/badaksoe 엔드포인트 구현
+### 즉시 — B1: boards 크래시
+- 배포 후 크롬 콘솔 에러 메시지 확인 → 원인 특정
 
-### 단기 — 인트라 mock→Supabase 연결 (잔여)
-> 현재 남은 mock 데이터 페이지: wiki/*, hero/*, settings/* 등
-- wiki/education, onboarding, faq: CMS 전환 (wiki_articles, wiki_courses 테이블 설계)
-- org chart, vendors, bidding: DB 연결
-- Myverse 앱: 맥북 구매 후 → Expo 프로젝트 초기화 + 전용 Supabase 생성
+### Prod SQL 실행 대기 (이전 세션)
+1. `sql/erp-finance-tables.sql`
+2. `sql/monthly-forecasts-table.sql`
+3. `sql/standard-rates-table.sql`
+4. `sql/agent-tables.sql`
+5. `sql/workflow-tables.sql`
+6. `sql/badaksoe-rooms-table.sql`
+7. `supabase/migrations/007_shop_promotions.sql`
 
 ---
 
 ## 참고
-- WIO Glossary: docs/WIO_Glossary_v1.md
-- Director 가이드라인: docs/DIRECTOR_COMMENTS.md
-- MyVerse 기획서: docs/Myverse_Dev_Guide_v3_final.md (G드라이브)
-- 개발 현황: docs/PROJECT_STATUS.md
+- 아키텍처 설계: `docs/Intra_Universe_Architecture.md`
+- WIO 마스터: `docs/WIO_Master_Architecture.md`
+- Universe OS: `docs/Universe_OS_Plan.md`

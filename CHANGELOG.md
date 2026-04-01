@@ -4,6 +4,40 @@
 
 ---
 
+## 2026-04-02 (사무실)
+
+### 버그 수정 6건 + 레이아웃 2건
+
+**수정 파일:**
+- `app/intra/project/jobs/page.tsx` — useState 5개를 early return 앞으로 이동 (Rules of Hooks 위반 → 크래시)
+- `app/intra/project/timesheet/page.tsx` — useMemo를 loading return 앞으로 이동 (같은 위반)
+- `app/intra/bums/promotion/page.tsx` — fetchPromos에 try/catch/finally 추가 (무한 스피너)
+- `app/intra/partner-pool/page.tsx` — saveError state 추가, 모달에 오류 메시지 표시
+- `lib/supabase/erp.ts` — createPartner brands 조회 실패 시 graceful fallback
+- `app/intra/universe/members/page.tsx` — Lv5 배지 amber→rose (레전드 일치)
+- `app/intra/layout.tsx` — max-w div에 w-full 추가, overflow-x-hidden
+- `middleware.ts` — smarcomm.tenone.biz → /smarcomm 라우팅 추가
+
+**커밋:** 18ba039, 999a9a5, 974d420
+
+### 이전 세션 (4/2 새벽)
+- IntraLayout race condition: TOKEN_REFRESHED/SIGNED_IN에서 JWT is_staff 재확인
+- LoginModal: SIGNED_IN 이벤트 즉시 닫기
+- 로그인 버튼 아이콘 제거, UniverseUtilityBar 한국어
+- Mindle 전 페이지(9개) 한국어 전환
+
+**커밋:** 509dc34, f7c934c
+
+### 아키텍처 문서
+- `docs/Intra_Universe_Architecture.md` 신규 — 인트라↔유니버스 6계층 연결 설계
+
+**결정사항:**
+- 인트라↔유니버스 연결은 6계층 모델 (L1설정~L6에이전트)
+- L1 site_configs 연동이 최우선 (공수 최소 + 영향력 최대)
+- Vercel 자동 배포 확인 (deploy.js 불필요)
+
+---
+
 ## 2026-04-01 (집)
 
 ### 인트라 stub 3페이지 완성
