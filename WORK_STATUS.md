@@ -1,6 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션 3)
+> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션 4)
+
+## 오늘 한 작업 (4/2 저녁 세션 4)
+
+### 인트라 디자인 일관성 전수 적용 ✅
+
+**IntraUI.tsx 기준 확립:**
+- PageHeader: border-b-2 (진한 구분선), description text-xs, children=액션버튼
+- TabNav/TabNavCount: 언더라인 스타일 (-mb-[2px]), 기존 pill/segment 스타일 전면 교체
+- TabNavCount: 카운트 배지 포함 신규 컴포넌트 추가
+
+**적용 페이지 (43개):**
+- myverse: library, timesheet, messenger, approval(기준 템플릿)
+- universe: dashboard, subscriptions, bookings, revenue, education
+- bums: sites, newsletter, shop, promotion, stats, inquiry, library, boards, content
+- ERP: erp/page, hr/people, hr/attendance, hr/payroll, hr/gpr, hr/education, hr/talent, gpr 4개, approval 4개, finance 4개, bi, biz 3개, settings/hr, settings/finance
+- agent: Agent Hub
+
+**게시판 DB 구축 (B1 수정):**
+- `sql/board-tables.sql` 생성 및 Prod DB 실행 ✅
+- board_configs + posts + comments + likes + bookmarks 테이블
+- 시드: tenone/madleague/badak 기본 게시판 등록
+- bums/boards + bums/content: PageHeader + TabNav 스타일 적용
+
+**커밋:** `cafee53` — 49개 파일 변경, push 완료
+
+---
 
 ## 오늘 한 작업 (4/2 저녁 세션 3)
 
@@ -83,9 +109,9 @@
 
 | # | 페이지 | 문제 | 난이도 |
 |---|--------|------|--------|
-| B1 | `/intra/bums/boards` | 클라이언트 크래시. 빌드 통과하지만 런타임 에러. 콘솔 로그 확인 필요 | 중 |
+| ~~B1~~ | ~~`/intra/bums/boards`~~ | ✅ **수정완료** — board_configs + posts 테이블 생성, 게시판 시드 등록 | ✅ |
 | B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐 (구형 레코드 한정). 신규 메시지는 정상. ANTHROPIC_API_KEY 환경변수 미설정으로 Mock 응답 중 | 중 |
-| ~~B3~~ | ~~Kanban 보드~~ | ✅ **수정완료** — `rowToTask`에서 DB lowercase status(`todo`, `in_progress`) → TaskStatus PascalCase 매핑 추가 | ✅ |
+| ~~B3~~ | ~~Kanban 보드~~ | ✅ **수정완료** — `rowToTask`에서 DB lowercase status → TaskStatus PascalCase 매핑 추가 | ✅ |
 | B4 | wio.tenone.biz | "Orbi 로딩 중..." 다크 스크린 → **부분수정**: 10초 타임아웃 fallback + 로딩 화면 흰색 전환. 근본 원인 미확인 | 중 |
 
 ## 미해결 — 도메인
@@ -120,12 +146,18 @@
 
 > 기준: ROADMAP.md 재수립 (2026-04-02) — 4대 제품 Intra 통제 체계
 
+### 🎨 인트라 디자인 마무리 (남은 것)
+
+1. **bums/boards** — 로딩 확인 (board_configs 테이블 시드 완료, 화면에 게시판 보이는지 확인)
+2. **universe/revenue** — 그래프 색상 B&W 스타일에 맞게 조정 (현재 컬러풀)
+3. **agent 페이지** — 에이전트별 역할/브랜드 색상 정책 정의
+
 ### 🤖 Bot 개발 (집에서 시작 가능)
 
 1. **쇠봇 Phase 1** — `docs/Bot_Strategy_쇠봇_듣봇.md` 참고
    - open.kakao.com에서 별도 계정 웹 로그인 되는지 확인 (직접 테스트)
    - Playwright 세션 저장 스크립트 작성
-   - `/api/agent/badaksoe` 엔드포인트 구현
+   - `/api/agent/badaksoe` 엔드포인트 이미 구현됨 ✅
    - 수다방 1개 파일럿 테스트
 
 ### 🚨 즉시 — 리스크 제거 + 기반 완성
