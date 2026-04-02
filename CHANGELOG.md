@@ -7,23 +7,30 @@
 ## 2026-04-03 (집, 세션 7)
 
 ### Phase 0: 테넌트 격리 기반 구축
+- 80개 테이블 tenant_id 추가, wio_tenant_configs + wio_feature_flags 생성
+- Identity Architecture Tier 4 문서화
+- CLAUDE.md: WIO 2-Tier, Tech Flywheel, 8원칙
 
-**DB 변경:**
-- `sql/phase0-tenant-id.sql` — 80개 테이블에 `tenant_id TEXT DEFAULT 'tenone'` 추가 + 인덱스 11개
-- `sql/phase0-service-infra.sql` — `wio_tenant_configs`, `wio_feature_flags` 생성 + 시드 8개
-- `wio_subscription_plans`에 `service_type` 컬럼 추가
+### Phase 1: 4대 제품 Intra 통제
+- 뉴스레터 폼 2개 → /api/newsletter DB 연결
+- Mindle trends DB-first 전환 + 시드 12건
+- SmarComm Coming Soon 게이트 제거
+- 10:01 Vrief API (/api/agent/vrief)
 
-**문서 변경:**
-- `CLAUDE.md` — WIO 2-Tier 모델, Tech Flywheel, 8원칙(#8), 테넌트 격리, DB 3분류
-- `ROADMAP.md` — Phase 0 삽입 + 2-Tier 모델
-- `docs/Identity_Architecture.md` — Tier 4 섹션 추가
-- `lib/supabase/erp.ts` — DEFAULT_TENANT 상수 + 안내 주석
+### Phase 2-A: 구독 인프라
+- 구독 CRUD 5개 함수 + hasAccess() 미들웨어 (wio.ts)
+- /api/subscription, /api/subscription/access API
+
+### Phase 3-A: Whole See 크롤러
+- /api/crawler — RSS 소스 크롤 → collected_data 저장
+- collected_data url unique 인덱스 추가
 
 **결정사항:**
-- WIO 서비스 2-Tier: 규격(구독) + 맞춤(용역) 확정
-- Tech Flywheel: 맞춤 개발 → 코어 흡수 → 규격 업그레이드
-- tenant_id(계약 단위) vs brand_id(유니버스 브랜드) 분리 확정
-- Phase 0-C(중복 테이블 통합) 보류 — expenses 스키마가 wio_expenses보다 완성도 높음
+- WIO 2-Tier (규격+맞춤), Tech Flywheel, tenant_id vs brand_id 분리 확정
+- SmarComm pricing: 대행 가격 vs SaaS 가격 별개 — 확정 필요
+- Phase 0-C(중복 테이블 통합) 보류
+
+**커밋:** `bb82636`, `50dff98`, `722b26f`, `fb9358f`
 
 ---
 

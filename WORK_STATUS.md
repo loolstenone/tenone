@@ -1,84 +1,89 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (집, 세션 7)
+> 마지막 업데이트: 2026-04-03 (집, 세션 7 — 작업 중)
 
 ## 오늘 한 작업 (4/3 집 세션 7)
 
 ### Phase 0: 테넌트 격리 기반 구축 ✅
+- 80개 테이블 tenant_id 추가 (격리 미준수 85→5개)
+- wio_tenant_configs, wio_feature_flags 테이블 생성
+- Identity Architecture Tier 4 문서화
+- CLAUDE.md: WIO 2-Tier 모델, Tech Flywheel, 8원칙
 
-**0-A. tenant_id 일괄 추가 (80개 테이블)** ✅
-- 격리 없는 테이블 85개 → 5개(시스템 테이블)로 감소
-- `sql/phase0-tenant-id.sql` — 80개 테이블에 `tenant_id TEXT DEFAULT 'tenone'` 추가
-- 기존 NULL 행 → 'tenone' 일괄 업데이트
-- 핵심 11개 테이블에 인덱스 추가
-- 의도적 제외: brands, site_configs, sso_tokens, wio_subscription_plans, wio_tenants
+### Phase 1: 4대 제품 Intra 통제 ✅
+- 홈페이지 + Mindle 뉴스레터 폼 → /api/newsletter DB 연결
+- Mindle trends 페이지 DB-first 전환 + 시드 12건
+- SmarComm Coming Soon 게이트 제거 (활성화)
+- Agent Hub DB 검증 (8개 에이전트 프로필)
+- /api/agent/vrief — 10:01 AM/PM 브리핑 프로토콜 API
 
-**0-B. 아이덴티티 계층 문서화** ✅
-- `docs/Identity_Architecture.md`에 Tier 4 (테넌트 격리 + WIO 서비스) 섹션 추가
-- tenant_id vs brand_id 관계 명시
-- Phase 0 완료 사항 체크리스트 추가
+### Phase 2-A: 구독 인프라 ✅
+- lib/supabase/wio.ts: 구독 CRUD 5개 함수 + hasAccess() 미들웨어
+- /api/subscription: GET/POST/PATCH
+- /api/subscription/access: 접근 권한 확인 API
+- wio_subscription_plans 11개 플랜 시드 확인 (WIO 5 + SmarComm 4 + Mindle 2)
 
-**0-D. WIO 서비스 인프라 테이블** ✅
-- `sql/phase0-service-infra.sql` — `wio_tenant_configs`, `wio_feature_flags` 생성
-- `wio_subscription_plans`에 `service_type` 컬럼 추가 ('standard' | 'custom')
-- 기본 feature flags 시드 (max_members, max_projects, storage 등 8개)
-- RLS + 인덱스 적용
+### Phase 3-A: Whole See 크롤러 기초 ✅
+- /api/crawler POST — RSS 소스 크롤 → collected_data 저장
+- collected_data에 status/category/published_at 추가 + url unique 인덱스
+- mindle_sources 5개 RSS 소스 시드 확인
 
-**0-C. 중복 테이블 정리 — 보류** ⏸️
-- expenses(5행) vs wio_expenses(0행): 스키마 차이 큼 (expenses가 더 완성도 높음)
-- 원칙: "기존 동작하는 건 건드리지 않는다. 격리 구조만 씌운다."
-- Phase 0-A로 expenses에 tenant_id 추가 완료 → 격리 준비됨
-- 통합은 스키마 정리 후 별도 작업으로
+### Phase 3-B: 바당쇠 ✅ (이전 세션 구현 확인)
+- /api/agent/badaksoe — Room 페르소나 전환 + Claude 에이전트 호출 완성
+- badaksoe_rooms 테이블 + 시드 확인
 
-### 문서 업데이트 ✅
-- `CLAUDE.md` — WIO 2-Tier 모델, Tech Flywheel, 8원칙(#8 신설), 테넌트 격리 아키텍처, DB 3분류
-- `ROADMAP.md` — Phase 0 삽입, 2-Tier 모델 명시
-- `lib/supabase/erp.ts` — tenant_id 안내 주석 + DEFAULT_TENANT 상수 추가
-
-### 이전 세션(세션 6+) 미커밋 코드 포함
-- Scenario E/F: myverse/expenses 폼 연결, erp/finance/expenses 모달, approval↔expense 동기화
-- erp/bi 0으로 나누기 수정
-- approvals 테이블 reference_id/reference_type 컬럼 추가
+### 커밋 기록
+- `bb82636` Phase 0 + Phase 1 (27파일)
+- `50dff98` Mindle trends DB + 10:01 Vrief API
+- `722b26f` Phase 2-A 구독 인프라
+- `fb9358f` Phase 3-A Whole See 크롤러
 
 ---
+
+## 미해결 — 사용자 액션 필요
+
+| # | 작업 | 상태 |
+|---|------|------|
+| U1 | ANTHROPIC_API_KEY Vercel 환경변수 → Redeploy | Vercel에 추가됨, Redeploy 필요 |
+| U2 | PG 선택 (토스페이먼츠/포트원) | 비즈니스 결정 |
+| U3 | SmarComm 가격 체계 확정 (대행 vs SaaS) | 비즈니스 결정 |
+| U4 | WIO pricing 가격 체계 확정 (per-user vs 고정가) | 비즈니스 결정 |
 
 ## 미해결 — 버그
 
 | # | 페이지 | 문제 | 난이도 |
 |---|--------|------|--------|
-| B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐 (구형 레코드 한정). ANTHROPIC_API_KEY 환경변수 미설정으로 Mock 응답 중 | 중 |
+| B2 | Agent Hub 메시지 로그 | 한국어 깨짐 (구형 레코드). ANTHROPIC_API_KEY 설정 후 해소 예상 | 중 |
 
 ## 미해결 — 도메인
 
 | # | 작업 | 상태 |
 |---|------|------|
-| D1 | hero.ne.kr → Vercel 도메인 추가 + DNS 설정 | Vercel 대시보드 + 도메인 등록업체 |
-| D2 | www.smarcomm.biz → Vercel 도메인 추가 | Vercel 대시보드 |
+| D1 | hero.ne.kr → Vercel 도메인 | 대시보드 설정 |
+| D2 | www.smarcomm.biz → Vercel 도메인 | 대시보드 설정 |
 
 ---
 
 ## 다음 할 일
 
-> Phase 0 완료. Phase 1(4대 제품 Intra 통제)로 진행.
+### Phase 2-B: PG 연동 (사용자 결정 후)
+1. PG 선택 확정 → SDK 설치
+2. Mindle 구독 결제 흐름: /mindle/pricing → 결제 → wio_subscriptions
+3. 결제 webhook → 구독 자동 활성화
 
-### Phase 1-A. Mindle 관리 (연료 공급 시스템)
-1. **뉴스레터 구독 DB 연동 확인** — `mindle_subscribers` 테이블 → 홈 폼 연결. `app/(public)/page.tsx`의 뉴스레터 폼이 DB에 저장하는지 확인
-2. **`/intra/bums/newsletter`** — mindle_subscribers CRUD 완성
-3. **트렌드 카드 관리** — `mindle_trends` 테이블 확인 + Intra에서 수동 등록 UI
+### Phase 3-C: 10:01 자동 브리핑 (ANTHROPIC_API_KEY 설정 후)
+1. GCP Scheduler → /api/agent/vrief 자동 호출 (AM/PM)
+2. 카카오톡 전송 연동
 
-### Phase 1-D. Agent Hub 활성화 (운영 엔진)
-1. **ANTHROPIC_API_KEY** — Vercel 환경변수 추가 (사용자가 직접)
-2. **agent-tables.sql** 실행 후 `/intra/agent` 테스트
-
-### 기타
-- OpenClaw: `openclaw auth add --provider anthropic` + `openclaw gateway start` (사용자가 직접)
-- 메뉴명/URL 구조 정리 (사용자가 별도 진행 중)
+### Phase 4 (하반기)
+- Mindle 뉴스레터 1호 발송
+- Badak/MADLeague/HeRo 사이트 공개
+- GPR·Finance 실DB 완성
 
 ---
 
 ## 참고
-- **통합 아키텍처**: `docs/TenOne_Universe_Architecture_v1.md`
-- 6계층 설계: `docs/Intra_Universe_Architecture.md`
+- 통합 아키텍처: `docs/TenOne_Universe_Architecture_v1.md`
 - WIO 마스터: `docs/WIO_Master_Architecture.md`
-- Universe OS: `docs/Universe_OS_Plan.md`
 - 아이덴티티: `docs/Identity_Architecture.md`
+- Universe OS: `docs/Universe_OS_Plan.md`
