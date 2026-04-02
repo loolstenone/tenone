@@ -82,7 +82,7 @@ export default function WIOTimesheetPage() {
                 const hoursMap: Record<string, number[]> = {};
                 // 프로젝트별 시간 매핑
                 entries.forEach(e => {
-                    const pId = e.jobId || 'unknown';
+                    const pId = e.projectId || e.jobId || 'unknown';
                     if (!hoursMap[pId]) hoursMap[pId] = [0, 0, 0, 0, 0];
                     const dayIdx = dates.indexOf(e.workDate);
                     if (dayIdx >= 0) hoursMap[pId][dayIdx] = Number(e.hours) || 0;
@@ -117,7 +117,8 @@ export default function WIOTimesheetPage() {
                     const ok = await upsertTimesheet({
                         tenantId: tenant.id,
                         memberId: member.id,
-                        jobId: projectId,
+                        jobId: null,
+                        projectId,
                         workDate: dates[i],
                         hours: dayHours[i],
                     } as any);

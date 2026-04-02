@@ -126,7 +126,8 @@ export interface WIOTimesheet {
   id: string;
   tenantId: string;
   memberId: string;
-  jobId: string;
+  jobId: string | null;      // nullable — job 없이 project 단위로도 기록 가능
+  projectId: string | null;  // project 단위 시수 기록 시 사용
   workDate: string;
   hours: number;
   note: string | null;

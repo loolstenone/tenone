@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../../layout';
-import { createProject, generateProjectCode } from '@/lib/supabase/wio';
+import { createProject, generateProjectCode, addProjectMember } from '@/lib/supabase/wio';
 import type { ProjectType } from '@/types/wio';
 
 export default function NewProjectPage() {
@@ -39,6 +39,8 @@ export default function NewProjectPage() {
     });
 
     if (result) {
+      // PM(creator)를 프로젝트 멤버에 자동 등록
+      addProjectMember(tenant.id, result.id, member.id, 'pm').catch(() => {});
       router.push(`/wio/app/project/${result.id}`);
     } else {
       alert('프로젝트 생성 실패');

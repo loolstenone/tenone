@@ -211,7 +211,10 @@ export async function fetchTimesheets(tenantId: string, options: { memberId?: st
 
 export async function upsertTimesheet(entry: Partial<WIOTimesheet>): Promise<boolean> {
   const snake = camelToSnake(entry as Record<string, unknown>);
-  const { error } = await supabase.from('wio_timesheets').upsert(snake, { onConflict: 'member_id,job_id,work_date' });
+  // job 단위: job_id 기준 upsert / project 단위: project_id 기준 upsert
+  const conflict = entry.jobId ? 'member_id,job_id,work_date' : 'member_id,project_id,work_date';
+  const { error } = await supabase.from('wio_timesheets').upsert(snake, { onConflict: conflict });
+  if (error) console.error('upsertTimesheet:', error);
   return !error;
 }
 
