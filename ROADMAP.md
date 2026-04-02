@@ -50,27 +50,26 @@ WIO(공장) ──────── MKT-* 인프라 ────────┘
 
 ## 🚨 즉시 (이번 주 — 리스크 제거)
 
-### ① HeRo Mock 데이터 제거 [법적 리스크]
-- [ ] HeRo 파트너 기업 로고 (카카오·네이버·쿠팡·토스 등) 제거 또는 "예시"로 명시
-- [ ] Mock 수치 (매칭 100+건, 파트너 50+개) 제거
-- [ ] `/hero` 파트너 섹션 → "파트너 모집 중" UI로 교체
+### ① HeRo Mock 데이터 제거 [법적 리스크] ✅ 완료
+- [x] HeRo 파트너 기업 로고 (카카오·네이버·쿠팡·토스 등) 제거
+- [x] Mock 수치 (매칭 100+건, 파트너 50+개) 제거
+- [x] `/hero` 파트너 섹션 → "파트너 모집 중" UI로 교체
 
-### ② Prod SQL 6개 실행 [기능 미작동]
-- [ ] `sql/erp-finance-tables.sql` (invoices, payments, card_usage, incentives)
-- [ ] `sql/monthly-forecasts-table.sql`
-- [ ] `sql/standard-rates-table.sql`
-- [ ] `sql/agent-tables.sql` (agent_profiles, agent_messages)
-- [ ] `sql/workflow-tables.sql`
-- [ ] `sql/badaksoe-rooms-table.sql`
+### ② Prod SQL 6개 실행 [기능 미작동] ✅ 완료
+- [x] `sql/erp-finance-tables.sql` (invoices, payments, card_usage, incentives)
+- [x] `sql/monthly-forecasts-table.sql`
+- [x] `sql/standard-rates-table.sql`
+- [x] `sql/agent-tables.sql` (agent_profiles, agent_messages)
+- [x] `sql/workflow-tables.sql`
+- [x] `sql/badaksoe-rooms-table.sql`
 
-### ③ site_configs 완전 연동 [L1 설정 레이어]
-- [ ] `/intra/bums/sites/[siteId]/settings` handleSave → DB upsert 연결
-- [ ] 각 브랜드 `layout.tsx` → `getSiteConfig(siteId)` 동적 metadata 생성
-- [ ] 26개 사이트 시드 데이터 확인 (새벽 작업에서 생성됨)
+### ③ site_configs 완전 연동 [L1 설정 레이어] ✅ 완료
+- [x] `/intra/bums/sites` handleSave → DB upsert (이전 세션 완료)
+- [x] 22개 브랜드 `layout.tsx` → `generateMetadata()` + `getSiteConfigServer(siteId)`
+- [x] 26개 사이트 시드 데이터 확인 (이전 세션 생성)
 
-### ④ Google Sites 잔재 제거 [신뢰·SEO]
-- [ ] `/about` → Next.js 내부 페이지로 교체 (Google Sites 링크 제거)
-- [ ] `/universe`, `/history` 네비게이션 링크 확인 및 수정
+### ④ Google Sites 잔재 제거 [신뢰·SEO] ✅ 완료
+- [x] `/about`, `/universe`, `/history` — 이미 Next.js 내부 페이지, Google Sites 링크 없음 확인
 
 ---
 

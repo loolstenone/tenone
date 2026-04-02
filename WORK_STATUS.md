@@ -1,16 +1,26 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-02 (사무실, 오후 세션)
+> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션)
 
-## 오늘 한 작업 (4/2 오후)
+## 오늘 한 작업 (4/2 저녁)
 
-### A1: L1 site_configs DB 연동 — 4/6 완료
-1. `sql/site-configs-table.sql` — CREATE TABLE + features 컬럼 + 24개 사이트 시드 작성. ✅
-2. Prod Supabase 실행 — 24개 사이트 입력 확인 (PAT 토큰 갱신 포함). ✅
-3. `lib/supabase/site-configs.ts` — getSiteConfig, getSiteConfigServer(ISR 10분), getAllSiteConfigs, upsertSiteConfig 신규 작성. ✅
-4. `app/intra/bums/sites/page.tsx` — DB 연동 전면 리팩터. DB가 있으면 DB 데이터, 없으면 static fallback. handleSave가 실제 upsertSiteConfig() 호출. 저장 상태/에러 표시. DB 연동 배지 표시. ✅
-5. 브랜드 layout.tsx generateMetadata() DB 소비 변경 — ⬜ 미완료
-6. 테스트 — ⬜ 미완료
+### 즉시 작업 4종 완료 ✅
+
+1. **HeRo Mock 데이터 제거** — 파트너 로고(카카오·네이버 등), Mock 수치, 최근 매칭 섹션 제거. "파트너 기업 모집 중" UI로 교체. ✅
+2. **Prod SQL 6개 실행** — erp-finance-tables, monthly-forecasts, standard-rates, agent-tables, workflow-tables, badaksoe-rooms. `scripts/run-sql.js` 작성 + PAT 토큰 `sbp_c219...` 사용. ✅
+3. **22개 브랜드 layout.tsx generateMetadata() 전환** — static metadata → async generateMetadata() + getSiteConfigServer(). DB 우선, static fallback. ✅
+4. **Google Sites 링크 제거** — 코드 전체 검색 결과 Google Sites 링크 없음 확인. /about, /universe, /history 모두 내부 Next.js 페이지. ✅
+
+### 커밋 히스토리 (4/2 저녁)
+- `cc875e5` — feat: 22개 브랜드 layout.tsx generateMetadata() DB 연동 전환
+- `ac4a13b` — fix: HeRo 파트너 기업 Mock 데이터 제거
+- `207e154` — docs: 개발 계획 전면 재수립 — 4대 제품 Intra 통제 체계
+- `8c39f0d` — fix: Multiple GoTrueClient 제거 + 브랜치 정책 master 단일화
+
+### 4/2 오전·오후 세션 (이전)
+- A1: site_configs DB 연동 (테이블·시드·getSiteConfigServer·intra/bums/sites 연동) ✅
+- Multiple GoTrueClient 버그 수정 (chat.ts → singleton 전환) ✅
+- 4대 제품 체계 기반 개발 계획 수립 + ROADMAP/CLAUDE.md 전면 업데이트 ✅
 
 ### 문서
 5. `docs/TenOne_Universe_Architecture_v1.md` — 텐원 정리 아키텍처 문서 프로젝트에 복사. ✅
