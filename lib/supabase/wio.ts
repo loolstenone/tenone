@@ -689,3 +689,93 @@ export async function triggerProjectCompletion(tenantId: string, projectId: stri
 
   return { success: true, actions };
 }
+
+// ══════════════════════════════════════
+// 구독 관리 (Subscription)
+// ══════════════════════════════════════
+
+/** 구독 플랜 목록 조회 */
+export async function fetchSubscriptionPlans(service?: string) {
+  let query = supabase.from('wio_subscription_plans').select('*').eq('is_active', true).order('sort_order');
+  if (service) query = query.eq('service', service);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+/** 구독 목록 조회 */
+export async function fetchSubscriptions(params?: { service?: string; userId?: string; tenantId?: string; status?: string }) {
+  let query = supabase.from('wio_subscriptions').select('*, plan:wio_subscription_plans(display_name, service, plan_key, price_monthly)').order('created_at', { ascending: false });
+  if (params?.service) query = query.eq('service', params.service);
+  if (params?.userId) query = query.eq('user_id', params.userId);
+  if (params?.tenantId) query = query.eq('tenant_id', params.tenantId);
+  if (params?.status) query = query.eq('status', params.status);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+/** 구독 생성 */
+export async function createSubscription(input: {
+  planId: string; userId: string; tenantId?: string; service: string; planKey: string;
+  pricePaid?: number; billingCycle?: string; paymentMethod?: string;
+}) {
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30일 후
+  const { data, error } = await supabase.from('wio_subscriptions').insert({
+    plan_id: input.planId,
+    user_id: input.userId,
+    tenant_id: input.tenantId || null,
+    service: input.service,
+    plan_key: input.planKey,
+    price_paid: input.pricePaid || 0,
+    billing_cycle: input.billingCycle || 'monthly',
+    payment_method: input.paymentMethod || 'none',
+    status: 'active',
+    started_at: now,
+    expires_at: expiresAt,
+    auto_renew: true,
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** 구독 상태 변경 (취소/재활성화) */
+export async function updateSubscriptionStatus(id: string, status: string) {
+  const updates: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+  if (status === 'cancelled') updates.cancelled_at = new Date().toISOString();
+  const { data, error } = await supabase.from('wio_subscriptions').update(updates).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+
+/** 구독 접근 권한 확인 — hasAccess() */
+export async function hasAccess(userId: string, service: string, feature?: string): Promise<{ allowed: boolean; plan: string | null; reason?: string }> {
+  // 1. 활성 구독 확인
+  const { data: subs } = await supabase.from('wio_subscriptions')
+    .select('plan_key, status, expires_at')
+    .eq('user_id', userId).eq('service', service).eq('status', 'active')
+    .gte('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false }).limit(1);
+
+  if (!subs || subs.length === 0) {
+    return { allowed: false, plan: null, reason: 'no_active_subscription' };
+  }
+
+  const sub = subs[0];
+
+  // 2. feature flag 확인 (선택)
+  if (feature) {
+    const { data: plan } = await supabase.from('wio_subscription_plans')
+      .select('id').eq('service', service).eq('plan_key', sub.plan_key).single();
+    if (plan) {
+      const { data: flag } = await supabase.from('wio_feature_flags')
+        .select('enabled, limit_value').eq('plan_id', plan.id).eq('feature_key', feature).single();
+      if (flag && !flag.enabled) {
+        return { allowed: false, plan: sub.plan_key, reason: 'feature_not_included' };
+      }
+    }
+  }
+
+  return { allowed: true, plan: sub.plan_key };
+}
