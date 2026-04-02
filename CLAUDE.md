@@ -154,16 +154,19 @@ Ten:One Universe는 여러 브랜드로 구성:
 > "작업 시작"만 말하면 **어제 퇴근 직전 상태 그대로** 이어서 작업할 수 있어야 한다.
 > 이 규칙의 모든 단계는 **건너뛰기 금지**이며, 순서대로 실행한다.
 
+**브랜치 정책: master 단일 브랜치. 집/사무실 모두 master에서 작업.**
+
 ---
 
 #### "작업 시작" 프로토콜
 
 ```
-1. git pull        ← 다른 장소에서 push한 최신 코드 받기
-2. 상황 파악        ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md 순서로 읽기
-3. 개발 서버 실행    ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
-4. 브리핑 보고      ← 아래 양식으로 사용자에게 보고
-5. 사용자 확인 후 작업 시작
+1. git checkout master          ← 항상 master로 (어떤 브랜치에 있든 무조건)
+2. git pull origin master       ← 최신 코드 받기 (집/사무실 어디서든)
+3. 상황 파악                     ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md 순서로 읽기
+4. 개발 서버 실행                 ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
+5. 브리핑 보고                   ← 아래 양식으로 사용자에게 보고
+6. 사용자 확인 후 작업 시작
 ```
 
 **브리핑 양식:**
@@ -183,8 +186,8 @@ Ten:One Universe는 여러 브랜드로 구성:
 1. 작업 기록        ← WORK_STATUS.md (오늘 한 것 + 다음 할 것)
                      CHANGELOG.md (날짜/장소/파일/결정사항)
                      ROADMAP.md (완료 체크 + 새 항목)
-2. git commit      ← 코드 + 관리 파일 모두
-3. git push        ← 반드시 push까지 (안 하면 다른 장소에서 못 받음)
+2. git add + commit ← 코드 + 관리 파일 모두
+3. git push origin master ← 반드시 push까지 (안 하면 다른 장소에서 못 받음)
 ```
 
 **WORK_STATUS.md "다음 할 일"은 이렇게 쓴다:**
@@ -194,6 +197,7 @@ Ten:One Universe는 여러 브랜드로 구성:
 ---
 
 #### 절대 하지 말 것
+- ❌ master 확인/전환 없이 시작하기 (develop 등 다른 브랜치에서 작업 금지)
 - ❌ pull 안 하고 로컬 파일만 보고 시작하기
 - ❌ 화면 안 보고 코드만 보고 판단하기
 - ❌ push 빼먹기 (다음 장소에서 못 이어감)
