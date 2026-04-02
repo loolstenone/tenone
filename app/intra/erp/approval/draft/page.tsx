@@ -29,7 +29,7 @@ export default function ApprovalDraftPage() {
     };
 
     return (
-        <div className="max-w-3xl">
+        <div>
             <PageHeader title="기안하기" description="새로운 기안 문서를 작성합니다" />
 
             <form onSubmit={handleSubmit} className="space-y-4">

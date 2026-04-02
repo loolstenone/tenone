@@ -77,7 +77,7 @@ export default function MyPayrollPage() {
   }, [user]);
 
   return (
-    <div className="max-w-4xl">
+    <div>
         {/* Header */}
         <PageHeader title="급여" description="급여 명세 · 이력 조회" />
 

@@ -90,7 +90,7 @@ export default function MyAttendancePage() {
   }, [user]);
 
   return (
-    <div className="max-w-4xl">
+    <div>
         {/* Header */}
         <PageHeader title="근태" description="출퇴근 · 휴가 관리" />
 

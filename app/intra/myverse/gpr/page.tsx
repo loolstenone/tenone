@@ -414,7 +414,7 @@ export default function MyGPRPage() {
   ];
 
   return (
-    <div className="max-w-4xl">
+    <div>
       {/* ── Header ── */}
       <PageHeader title="GPR" description={`목표 현황 · 자기평가 · 상사평가 · GPR 리뷰 (${quarter})`}>
         <Link

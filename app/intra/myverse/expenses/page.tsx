@@ -86,7 +86,7 @@ export default function MyExpensesPage() {
   const thisMonthTotal = expenseList.reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="max-w-4xl">
+    <div>
         {/* Header */}
         <PageHeader title="경비" description="경비 청구 · 내역 조회">
           <PrimaryButton onClick={() => setShowForm(!showForm)}>

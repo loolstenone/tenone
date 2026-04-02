@@ -99,7 +99,7 @@ export default function TodoPage() {
     };
 
     return (
-        <div className="max-w-4xl">
+        <div>
             <PageHeader title="Todo" description="업무 관리 · 체크리스트">
                 <PrimaryButton onClick={() => setShowAdd(!showAdd)}>
                     <Plus className="h-4 w-4" /> 새 할 일
