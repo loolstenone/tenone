@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, BarChart3, User, Globe, Search } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
 
@@ -86,15 +87,11 @@ export default function NewsletterCmsPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">뉴스레터 관리</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">뉴스레터 작성 · 발송 · 구독자 관리</p>
-                </div>
+            <PageHeader title="뉴스레터 관리" description="뉴스레터 작성 · 발송 · 구독자 관리">
                 <button className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 새 뉴스레터
                 </button>
-            </div>
+            </PageHeader>
 
             {/* 요약 카드 */}
             <div className="grid grid-cols-5 gap-3 mb-5">

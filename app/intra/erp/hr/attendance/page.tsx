@@ -78,10 +78,10 @@ export default function AttendancePage() {
     return !search || r.name.includes(search) || r.department.includes(search);
   });
 
-  if (loading) return <div className="max-w-6xl"><Spinner /></div>;
+  if (loading) return <Spinner />;
 
   return (
-    <div className="max-w-6xl">
+    <div className="space-y-6">
       <PageHeader title="근태관리" description="출퇴근 · 휴가 관리" />
 
       {/* Tabs */}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -89,14 +90,11 @@ export default function MonthlyForecastPage() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">월별 추정</h1>
-          <p className="text-sm text-neutral-400">
-            {now.getFullYear()}년 {months[monthIdx]} {round}차 추정
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="월별 추정"
+        description={`${now.getFullYear()}년 ${months[monthIdx]} ${round}차 추정`}
+      >
         <span
           className={clsx(
             "rounded-full px-3 py-1 text-xs font-medium",
@@ -107,7 +105,7 @@ export default function MonthlyForecastPage() {
         >
           {status}
         </span>
-      </div>
+      </PageHeader>
 
       {/* Selectors */}
       <div className="mb-4 flex items-center gap-4">

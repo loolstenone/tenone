@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FileSpreadsheet, Download, BarChart3, TrendingUp, Loader2 } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const mockMonthlySummary = [
     { month: "2026-03", revenue: 45000000, expense: 32000000, profit: 13000000 },
@@ -84,16 +85,12 @@ export default function ReportsPage() {
     }
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">경리 리포트</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">개인·조직 단위 재무 현황을 분석합니다.</p>
-                </div>
+        <div className="space-y-6">
+            <PageHeader title="경리 리포트" description="개인·조직 단위 재무 현황을 분석합니다.">
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
                     <Download className="h-3 w-3" /> Excel 내보내기
                 </button>
-            </div>
+            </PageHeader>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[

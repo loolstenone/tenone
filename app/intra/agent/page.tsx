@@ -14,6 +14,7 @@ import {
   Zap,
   Cpu,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import type {
   AgentProfile,
   AgentMessage,
@@ -189,11 +190,7 @@ export default function AgentDashboardPage() {
 
   return (
     <div className="flex flex-col">
-      {/* 페이지 헤더 */}
-      <div className="border-b border-neutral-200 pb-5 mb-6">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Agent Hub</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">AI 에이전트와 대화하고 실행 로그를 확인합니다</p>
-      </div>
+      <PageHeader title="Agent Hub" description="AI 에이전트와 대화하고 실행 로그를 확인합니다" />
 
       {/* 3-panel layout */}
       <div className="flex flex-col lg:flex-row gap-4" style={{ height: "calc(100vh - 220px)", minHeight: 480 }}>

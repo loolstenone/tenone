@@ -8,6 +8,7 @@ import { initialStaff } from "@/lib/staff-data";
 import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
 import type { StaffMember } from "@/types/staff";
 import type { GprGoal } from "@/types/gpr";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function ErpDashboard() {
     const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -51,10 +52,7 @@ export default function ErpDashboard() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">ERP Dashboard</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ HR 관리 포털</p>
-            </div>
+            <PageHeader title="ERP Dashboard" description="Ten:One™ HR 관리 포털" />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map(item => (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useBumsFilter } from "../layout";
 import { MessageCircle, Mail, Building, Search, Clock, CheckCircle, AlertCircle, Eye, ChevronDown, X } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 interface Submission {
@@ -98,10 +99,7 @@ export default function InquiryPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">고객문의 관리</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">Contact 폼을 통해 접수된 문의를 관리합니다.</p>
-      </div>
+      <PageHeader title="고객문의 관리" description="Contact 폼을 통해 접수된 문의를 관리합니다." />
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

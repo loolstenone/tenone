@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TrendingUp, DollarSign, BarChart3, PieChart, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 /* ── 타입 ── */
@@ -183,11 +184,7 @@ export default function UniverseRevenue() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">손익 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">전체 유니버스 P&L 현황</p>
-            </div>
+            <PageHeader title="손익 관리" description="전체 유니버스 P&L 현황" />
 
             {/* P&L Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

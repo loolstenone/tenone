@@ -50,10 +50,10 @@ export default function ApprovalPendingPage() {
         erpDb.updateApprovalStatus(docNo, 'rejected').catch(() => {});
     };
 
-    if (loading) return <div className="max-w-5xl"><Spinner /></div>;
+    if (loading) return <Spinner />;
 
     return (
-        <div className="max-w-5xl">
+        <div className="space-y-6">
             <PageHeader title="결재 대기" description="승인 대기 중인 문서" />
 
             {/* 요약 */}

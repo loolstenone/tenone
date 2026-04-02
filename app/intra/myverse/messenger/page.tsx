@@ -11,6 +11,7 @@ import {
     CheckCheck, AlertCircle, Stamp, FolderKanban, Users, X, Image, FileText
 } from "lucide-react";
 import clsx from "clsx";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    데이터 준비
@@ -693,7 +694,9 @@ export default function MessengerPage() {
        렌더링
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     return (
-        <div className="flex h-[calc(100vh-140px)] -m-8 border-t border-neutral-200 overflow-hidden relative">
+        <>
+        <PageHeader title="메신저" description="팀원 · 조직 · 결재 실시간 소통" />
+        <div className="flex h-[calc(100vh-224px)] -mx-8 -mb-8 overflow-hidden relative border-t border-neutral-200">
 
             {/* ══════════════════════════════════
                 1열: 대화 목록 / 조직도
@@ -1689,5 +1692,6 @@ export default function MessengerPage() {
                 </div>
             )}
         </div>
+        </>
     );
 }

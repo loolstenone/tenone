@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import {
-    FileSignature, Plus, CheckCircle2, XCircle, Clock, FileText, ChevronRight, ChevronDown,
-    User, Check, X, Circle, Loader2,
+    Plus, CheckCircle2, XCircle, ChevronRight, ChevronDown,
+    Check, X, Circle,
 } from "lucide-react";
 import Link from "next/link";
-import { PageHeader, PrimaryButton, Badge, Card } from "@/components/intra/IntraUI";
+import { PageHeader, PrimaryButton, Badge, Card, TabNavCount } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";
 import * as erpDb from "@/lib/supabase/erp";
 
@@ -271,7 +271,7 @@ export default function MyApprovalPage() {
     const currentItems = activeTab === "pending" ? items.pending : activeTab === "drafted" ? items.drafted : items.completed;
 
     return (
-        <div className="max-w-4xl">
+        <div>
             {/* Header */}
             <PageHeader title="결재" description="결재 대기 · 기안 · 처리 내역">
                 <PrimaryButton href="/intra/erp/approval/draft">
@@ -280,17 +280,15 @@ export default function MyApprovalPage() {
             </PageHeader>
 
             {/* Tabs */}
-            <div className="mb-4 flex gap-1 rounded bg-neutral-100 p-1">
-                {tabs.map((tab) => (
-                    <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 rounded px-3 py-2 text-xs font-medium transition-colors ${activeTab === tab.key ? "bg-white text-neutral-800 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}>
-                        {tab.label}
-                        <span className={`ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-xs ${activeTab === tab.key ? "bg-neutral-800 text-white" : "bg-neutral-200 text-neutral-500"}`}>
-                            {tab.key === "pending" ? items.pending.length : tab.key === "drafted" ? items.drafted.length : items.completed.length}
-                        </span>
-                    </button>
-                ))}
-            </div>
+            <TabNavCount
+                tabs={[
+                    { id: "pending", label: "결재 대기", count: items.pending.length },
+                    { id: "drafted", label: "내가 기안", count: items.drafted.length },
+                    { id: "completed", label: "처리 완료", count: items.completed.length },
+                ]}
+                active={activeTab}
+                onChange={(id) => setActiveTab(id as TabKey)}
+            />
 
             {/* Items */}
             <div className="space-y-2">

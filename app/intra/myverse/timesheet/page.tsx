@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import clsx from "clsx";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { jobTypeLabels } from "@/types/project";
 import type { JobType, JobDetail } from "@/types/project";
 import Link from "next/link";
@@ -266,19 +267,13 @@ export default function TimesheetInputPage() {
     }, {} as Record<string, { name: string; jobs: MyJob[] }>);
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">타임시트 입력</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">일별 투입 시수 기록 · 매일 입력 권장</p>
+        <div>
+            <PageHeader title="타임시트 입력" description="일별 투입 시수 기록 · 매일 입력 권장">
+                <div className="text-right">
+                    <p className="text-xs text-neutral-400">이번 주 합계</p>
+                    <p className="text-lg font-bold text-neutral-900">{weekTotal}h</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="text-right">
-                        <p className="text-xs text-neutral-400">이번 주 합계</p>
-                        <p className="text-lg font-bold">{weekTotal}h</p>
-                    </div>
-                </div>
-            </div>
+            </PageHeader>
 
             <div className="bg-amber-50 border border-amber-200 px-4 py-2.5 mb-4 flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />

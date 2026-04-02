@@ -66,10 +66,10 @@ export default function ExpensesPage() {
         ? expenses.filter(e => e.description.includes(search) || e.submitter.includes(search) || e.category.includes(search))
         : expenses;
 
-    if (loading) return <div className="max-w-5xl"><Spinner /></div>;
+    if (loading) return <Spinner />;
 
     return (
-        <div className="max-w-5xl">
+        <div className="space-y-6">
             <PageHeader title="경비처리" description="경비 사용 내역을 관리하고 정산합니다.">
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-3 w-3" /> 경비 등록

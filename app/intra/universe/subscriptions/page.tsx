@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CreditCard, TrendingUp, AlertTriangle, ArrowUpRight, Search, ChevronDown, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 /* ── 타입 ── */
@@ -69,11 +70,25 @@ export default function UniverseSubscriptions() {
             try {
                 const supabase = createClient();
 
-                // 구독 데이터 전체 조회
-                const { data: rawSubs, error } = await supabase
-                    .from("subscriptions")
-                    .select("id, member_name, member_id, service, plan, price, start_date, end_date, status, auto_renew")
+                // wio_subscriptions 먼저, fallback으로 기존 subscriptions
+                let rawSubs: any[] | null = null;
+                let error: any = null;
+
+                const wioRes = await supabase
+                    .from("wio_subscriptions")
+                    .select("id, user_id, service, plan_key, price_paid, started_at, expires_at, status, auto_renew")
                     .order("created_at", { ascending: false });
+
+                if (!wioRes.error && wioRes.data && wioRes.data.length > 0) {
+                    rawSubs = wioRes.data;
+                } else {
+                    const legacyRes = await supabase
+                        .from("subscriptions")
+                        .select("id, member_id, service, plan, price, started_at, expires_at, status, auto_renew")
+                        .order("created_at", { ascending: false });
+                    rawSubs = legacyRes.data;
+                    error = legacyRes.error;
+                }
 
                 if (error) throw error;
                 if (!rawSubs || rawSubs.length === 0) {
@@ -85,20 +100,21 @@ export default function UniverseSubscriptions() {
                 const serviceMap: Record<string, { subs: number; mrr: number }> = {};
                 const subList: SubRow[] = [];
 
-                rawSubs.forEach((s: {
-                    id: string; member_name?: string; service: string; plan: string;
-                    price: number; start_date: string; end_date: string;
-                    status: string; auto_renew: boolean;
-                }) => {
+                rawSubs.forEach((s: any) => {
+                    const plan = s.plan_key || s.plan || '-';
+                    const price = s.price_paid ?? s.price ?? 0;
+                    const startDate = s.started_at?.split("T")[0] || "-";
+                    const endDate = s.expires_at?.split("T")[0] || "-";
+
                     // 구독자 리스트
                     subList.push({
                         id: s.id,
-                        name: s.member_name || "-",
+                        name: s.user_id ? s.user_id.substring(0, 8) + '...' : "-",
                         service: s.service,
-                        plan: s.plan,
-                        amount: s.price || 0,
-                        start: s.start_date?.split("T")[0] || "-",
-                        end: s.end_date?.split("T")[0] || "-",
+                        plan,
+                        amount: price,
+                        start: startDate,
+                        end: endDate,
                         status: s.status,
                         autoRenew: s.auto_renew ?? false,
                     });
@@ -107,7 +123,7 @@ export default function UniverseSubscriptions() {
                     if (s.status === "active") {
                         if (!serviceMap[s.service]) serviceMap[s.service] = { subs: 0, mrr: 0 };
                         serviceMap[s.service].subs++;
-                        serviceMap[s.service].mrr += s.price || 0;
+                        serviceMap[s.service].mrr += price;
                     }
                 });
 
@@ -149,11 +165,7 @@ export default function UniverseSubscriptions() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">구독 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">서비스별 구독 현황 및 크로스셀 분석</p>
-            </div>
+            <PageHeader title="구독 관리" description="서비스별 구독 현황 및 크로스셀 분석" />
 
             {/* Service Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">

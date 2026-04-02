@@ -10,6 +10,7 @@ import * as membersDb from "@/lib/supabase/members";
 import type { MemberRow } from "@/lib/supabase/members";
 import { defaultModuleAccess } from "@/types/auth";
 import type { AccountType, IntraModule } from "@/types/auth";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const typeLabels: Record<string, string> = {
     staff: "직원", partner: "파트너", alliance: "얼라이언스",
@@ -82,11 +83,7 @@ export default function PeoplePage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">회원 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">전체 회원의 역할, 권한, 소속을 통합 관리합니다.</p>
-            </div>
+            <PageHeader title="회원 관리" description="전체 회원의 역할, 권한, 소속을 통합 관리합니다." />
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">

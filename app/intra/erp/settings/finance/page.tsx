@@ -8,6 +8,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Account {
   id: string;
@@ -170,20 +171,14 @@ export default function FinanceSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-neutral-900">계정과목 관리</h2>
-          <p className="mt-1 text-xs text-neutral-500">
-            회계 계정과목 체계를 관리합니다
-          </p>
-        </div>
+      <PageHeader title="계정과목 관리" description="회계 계정과목 체계를 관리합니다">
         <button
           onClick={openAddParent}
           className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 transition-colors"
         >
           <Plus className="h-3 w-3" /> 대분류 추가
         </button>
-      </div>
+      </PageHeader>
 
       <div className="border border-neutral-200 bg-white">
         <div className="grid grid-cols-12 border-b border-neutral-200 px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">

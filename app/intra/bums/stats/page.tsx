@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useBumsFilter } from "../layout";
 import { createClient } from "@/lib/supabase/client";
 import { BarChart3, Eye, ThumbsUp, MessageSquare, FileText, Users, Mail, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { siteConfigs } from "@/lib/site-config";
 
 interface SiteStat {
@@ -92,15 +93,11 @@ export default function StatsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-start justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">통계</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">사이트별 방문자, 게시글, 매출 통계를 분석합니다.</p>
-                </div>
+            <PageHeader title="통계" description="사이트별 방문자, 게시글, 매출 통계를 분석합니다.">
                 <button onClick={fetchStats} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">
                     <RefreshCw className="h-3.5 w-3.5" /> 새로고침
                 </button>
-            </div>
+            </PageHeader>
 
             {loading ? (
                 <div className="flex justify-center py-16">

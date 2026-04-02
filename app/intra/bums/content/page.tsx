@@ -8,6 +8,7 @@ import {
     FileText, Search, Plus, Eye, Pencil, Trash2, Calendar,
     LayoutGrid, List, MessageSquare, Heart, Pin,
 } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 /* ── API 응답용 인터페이스 ── */
@@ -145,19 +146,14 @@ export default function ContentManagementPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">콘텐츠 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">
-                        {selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)}의 게시글을 통합 관리합니다.
-                    </p>
-                </div>
-                <button onClick={() => router.push("/intra/bums/content?new=true")}
-                    className="flex items-center gap-1.5 px-5 py-2.5 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 shadow-sm transition-all">
-                    <Plus className="h-4 w-4" /> 새 글 작성
-                </button>
-            </div>
+            <PageHeader
+                title="콘텐츠 관리"
+                description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시글 통합 관리`}
+            >
+                <PrimaryButton onClick={() => router.push("/intra/bums/content?new=true")}>
+                    <Plus className="h-3.5 w-3.5" /> 새 글 작성
+                </PrimaryButton>
+            </PageHeader>
 
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4">

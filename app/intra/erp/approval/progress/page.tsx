@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { FileText, ArrowRight, User, Loader2 } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface ProgressApproval {
     docNo: string;
@@ -95,11 +96,8 @@ export default function ApprovalProgressPage() {
     }
 
     return (
-        <div className="max-w-5xl">
-            <div className="mb-2">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">결재 진행</h1>
-                <p className="text-sm text-neutral-400">진행 중인 결재 문서</p>
-            </div>
+        <div className="space-y-6">
+            <PageHeader title="결재 진행" description="진행 중인 결재 문서" />
 
             <div className="flex gap-3 mb-4">
                 <div className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200">

@@ -8,6 +8,7 @@ import type { StaffMember } from "@/types/staff";
 import type { GprGoal } from "@/types/gpr";
 import Link from "next/link";
 import { Target, TrendingUp, CheckCircle2, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function GprDashboardPage() {
     const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -38,15 +39,11 @@ export default function GprDashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">GPR</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">Goal — Plan — Result: 목표-계획-결과 관리</p>
-                </div>
+            <PageHeader title="GPR" description="Goal — Plan — Result: 목표-계획-결과 관리">
                 <Link href="/intra/erp/hr/gpr/goals" className="px-4 py-2 bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                     목표 관리
                 </Link>
-            </div>
+            </PageHeader>
 
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4">

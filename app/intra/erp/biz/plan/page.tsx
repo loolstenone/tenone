@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Target, TrendingUp, DollarSign, Percent, FileEdit, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -91,16 +92,12 @@ export default function AnnualPlanPage() {
   ];
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">연간 경영계획</h1>
-          <p className="text-sm text-neutral-400">2026년도 경영계획</p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader title="연간 경영계획" description="2026년도 경영계획">
         <span className={clsx("rounded-full px-3 py-1 text-xs font-medium", status === "확정" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700")}>
           {status}
         </span>
-      </div>
+      </PageHeader>
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {summaryCards.map((c) => (

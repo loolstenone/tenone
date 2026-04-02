@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Users, CheckCircle, XCircle, DollarSign, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -142,11 +143,7 @@ export default function UniverseBookings() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">예약/이벤트</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">이벤트 예약 현황 및 캘린더</p>
-            </div>
+            <PageHeader title="예약/이벤트" description="이벤트 예약 현황 및 캘린더" />
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

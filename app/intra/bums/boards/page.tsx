@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Settings, FileText, Users, Search, Pencil, Trash2, Plus, X,
 } from "lucide-react";
+import { PageHeader, TabNav } from "@/components/intra/IntraUI";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { useBumsFilter } from "../layout";
@@ -151,23 +152,17 @@ export default function BoardsManagementPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">게시판 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">
-                    {selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)}의 게시판, 게시글, 작성자를 통합 관리합니다.
-                </p>
-            </div>
+            <PageHeader
+                title="게시판 관리"
+                description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시판·게시글·작성자 통합 관리`}
+            />
 
             {/* Tabs */}
-            <div className="flex items-center gap-1.5 bg-neutral-100 rounded-xl p-1 w-fit">
-                {tabs.map(tab => (
-                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setCurrentPage(1); }}
-                        className={clsx("flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all",
-                            activeTab === tab.id ? "bg-neutral-900 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-600")}>
-                        <tab.icon className="h-4 w-4" /> {tab.label}
-                    </button>
-                ))}
-            </div>
+            <TabNav
+                tabs={tabs.map(t => ({ id: t.id, label: t.label }))}
+                active={activeTab}
+                onChange={(id) => { setActiveTab(id as TabId); setCurrentPage(1); }}
+            />
 
             {/* Filters */}
             <div className="flex items-center gap-3 flex-wrap">

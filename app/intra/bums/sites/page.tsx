@@ -17,6 +17,7 @@ import {
     Globe, ExternalLink, Search, Settings,
     LayoutGrid, Check, Loader2, AlertCircle, Database,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 interface SiteEntry {
@@ -189,13 +190,7 @@ export default function SitesListPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="border-b border-neutral-100 pb-5 mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">사이트 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">
-                    {allSites.length}개 사이트 — 도메인, SEO, 브랜딩 정보를 관리합니다.
-                </p>
-            </div>
+            <PageHeader title="사이트 관리" description={`${allSites.length}개 사이트 — 도메인, SEO, 브랜딩 정보를 관리합니다.`} />
 
             <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
                 {/* 좌측: 사이트 목록 */}

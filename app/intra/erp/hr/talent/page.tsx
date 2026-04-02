@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Users, Search, Plus, Star, Mail, ExternalLink, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Talent {
     id: string;
@@ -77,16 +78,12 @@ export default function TalentPoolPage() {
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Talent Pool</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">내·외부 인재 풀을 관리합니다.</p>
-                </div>
+        <div className="space-y-6">
+            <PageHeader title="Talent Pool" description="내·외부 인재 풀을 관리합니다.">
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-3 w-3" /> 인재 등록
                 </button>
-            </div>
+            </PageHeader>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[

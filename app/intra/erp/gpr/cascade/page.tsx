@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Target, ChevronDown, ChevronRight, CheckCircle2, Clock, AlertCircle, Building2, Users, User } from "lucide-react";
 import { getMemberStats } from "@/lib/supabase/members";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 type GoalStatus = "확정" | "승인대기" | "초안" | "반려";
 
@@ -121,12 +122,11 @@ export default function GPRCascadePage() {
     };
 
     return (
-        <div className="max-w-5xl">
-            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">목표 캐스케이드</h1>
-            <p className="text-sm text-neutral-400 mb-6">
-                회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름
-                {dbMemberTotal !== null && <span className="ml-2 text-neutral-400">· 전체 멤버 {dbMemberTotal}명</span>}
-            </p>
+        <div className="space-y-6">
+            <PageHeader
+                title="목표 캐스케이드"
+                description={`회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름${dbMemberTotal !== null ? ` · 전체 멤버 ${dbMemberTotal}명` : ""}`}
+            />
 
             {/* Company Level */}
             <div className="border border-neutral-200 bg-white p-5 mb-6">

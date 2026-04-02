@@ -22,12 +22,12 @@ export function PageHeader({
     return (
         <div className={clsx(
             "flex items-start justify-between",
-            separator ? "border-b border-neutral-200 pb-5 mb-6" : "mb-6"
+            separator ? "border-b-2 border-neutral-200 pb-4 mb-6" : "mb-6"
         )}>
             <div>
                 <h1 className="text-lg font-semibold tracking-tight text-neutral-900 leading-snug">{title}</h1>
                 {description && (
-                    <p className="text-sm text-neutral-400 mt-0.5">{description}</p>
+                    <p className="text-xs text-neutral-400 mt-0.5">{description}</p>
                 )}
             </div>
             {children && (
@@ -57,7 +57,7 @@ export function StatCard({
     href?: string;
 }) {
     const inner = (
-        <div className="border border-neutral-150 bg-white p-5 group-hover:border-neutral-300 transition-colors">
+        <div className="border border-neutral-200 bg-white p-5 group-hover:border-neutral-300 transition-colors">
             <div className="flex items-start justify-between">
                 <p className="text-xs text-neutral-400 leading-none">{label}</p>
                 {icon && <span className="text-neutral-300 shrink-0">{icon}</span>}
@@ -136,19 +136,61 @@ export function TabNav({
     onChange: (id: string) => void;
 }) {
     return (
-        <div className="flex items-center gap-0 border-b border-neutral-100 mb-6">
+        <div className="flex items-center gap-0 border-b-2 border-neutral-200 mb-6">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => onChange(tab.id)}
                     className={clsx(
-                        "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                        "px-4 py-2.5 text-sm font-medium border-b-2 -mb-[2px] transition-colors",
                         active === tab.id
                             ? "border-neutral-900 text-neutral-900"
-                            : "border-transparent text-neutral-400 hover:text-neutral-600"
+                            : "border-transparent text-neutral-400 hover:text-neutral-700"
                     )}
                 >
                     {tab.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+/* ────────────────────────────────────────────────
+   탭 네비게이션 (카운트 배지 지원)
+────────────────────────────────────────────────── */
+export function TabNavCount({
+    tabs,
+    active,
+    onChange,
+}: {
+    tabs: { id: string; label: string; count?: number }[];
+    active: string;
+    onChange: (id: string) => void;
+}) {
+    return (
+        <div className="flex items-center gap-0 border-b-2 border-neutral-200 mb-6">
+            {tabs.map(tab => (
+                <button
+                    key={tab.id}
+                    onClick={() => onChange(tab.id)}
+                    className={clsx(
+                        "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-[2px] transition-colors",
+                        active === tab.id
+                            ? "border-neutral-900 text-neutral-900"
+                            : "border-transparent text-neutral-400 hover:text-neutral-700"
+                    )}
+                >
+                    {tab.label}
+                    {tab.count !== undefined && (
+                        <span className={clsx(
+                            "inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full",
+                            active === tab.id
+                                ? "bg-neutral-900 text-white"
+                                : "bg-neutral-100 text-neutral-500"
+                        )}>
+                            {tab.count}
+                        </span>
+                    )}
                 </button>
             ))}
         </div>

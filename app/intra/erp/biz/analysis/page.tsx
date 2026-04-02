@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import * as erpDb from "@/lib/supabase/erp";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -75,12 +76,8 @@ export default function PLDashboardPage() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">손익 현황</h1>
-          <p className="text-sm text-neutral-400">전사 손익 대시보드</p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader title="손익 현황" description="전사 손익 대시보드">
         <button
           onClick={() => setShowYoY(!showYoY)}
           className={clsx(
@@ -90,7 +87,7 @@ export default function PLDashboardPage() {
         >
           전년 대비
         </button>
-      </div>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">

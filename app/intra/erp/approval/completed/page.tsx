@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, FileCheck, Loader2 } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface CompletedApproval {
     docNo: string;
@@ -76,11 +77,8 @@ export default function ApprovalCompletedPage() {
     const rejected = items.filter((i) => i.result === "반려").length;
 
     return (
-        <div className="max-w-5xl">
-            <div className="mb-2">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">결재 완료</h1>
-                <p className="text-sm text-neutral-400">완료된 결재 문서</p>
-            </div>
+        <div className="space-y-6">
+            <PageHeader title="결재 완료" description="완료된 결재 문서" />
 
             <div className="flex gap-3 mb-4">
                 <div className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200">

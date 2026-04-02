@@ -1,6 +1,7 @@
 "use client";
 
 import { GraduationCap, Users, Award, DollarSign, Search, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -191,11 +192,7 @@ export default function UniverseEducation() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">교육 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">프로그램 및 수강생 통합 관리</p>
-            </div>
+            <PageHeader title="교육 관리" description="프로그램 및 수강생 통합 관리" />
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

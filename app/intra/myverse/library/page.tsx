@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Plus, Search, Bookmark, Star, FolderOpen, X, FileText } from "lucide-react";
+import { Plus, Search, Star, X, FileText } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { libraryCategoryOptions, formatBadgeColor } from "@/types/library";
 import type { LibraryCategory, LibraryItem, LibrarySource } from "@/types/library";
 import { fetchLibraryItems, fetchLibraryBookmarks, createLibraryItem, toggleLibraryBookmark } from "@/lib/supabase/library";
 import { initialLibraryItems, initialBookmarks } from "@/lib/library-data";
+import { PageHeader, TabNavCount, PrimaryButton } from "@/components/intra/IntraUI";
 
 type TabKey = "my" | "bookmarks";
 
@@ -83,28 +84,22 @@ export default function MyverseLibraryPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <div className="flex items-center justify-between mb-5">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">내 라이브러리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">개인 학습자료, 보고서, 레퍼런스 관리</p>
-                </div>
-                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
+        <div>
+            <PageHeader title="내 라이브러리" description="개인 학습자료, 보고서, 레퍼런스 관리">
+                <PrimaryButton onClick={() => setShowAdd(true)}>
                     <Plus className="h-3.5 w-3.5" /> 자료 등록
-                </button>
-            </div>
+                </PrimaryButton>
+            </PageHeader>
 
             {/* Tabs */}
-            <div className="mb-4 flex gap-1 rounded bg-neutral-100 p-1">
-                <button onClick={() => setActiveTab("my")}
-                    className={`flex-1 rounded px-3 py-2 text-xs font-medium transition-colors ${activeTab === "my" ? "bg-white text-neutral-800 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}>
-                    내 자료 <span className="ml-1 text-[10px] text-neutral-400">{myItems.length}</span>
-                </button>
-                <button onClick={() => setActiveTab("bookmarks")}
-                    className={`flex-1 rounded px-3 py-2 text-xs font-medium transition-colors ${activeTab === "bookmarks" ? "bg-white text-neutral-800 shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}>
-                    즐겨찾기 <span className="ml-1 text-[10px] text-neutral-400">{allBookmarkItems.length}</span>
-                </button>
-            </div>
+            <TabNavCount
+                tabs={[
+                    { id: "my", label: "내 자료", count: myItems.length },
+                    { id: "bookmarks", label: "즐겨찾기", count: allBookmarkItems.length },
+                ]}
+                active={activeTab}
+                onChange={(id) => setActiveTab(id as TabKey)}
+            />
 
             {/* Search + Category Filter */}
             <div className="mb-4 space-y-2">

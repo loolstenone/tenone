@@ -58,10 +58,10 @@ export default function PayrollAdminPage() {
         ? payroll.filter(p => p.name.includes(search) || p.department.includes(search))
         : payroll;
 
-    if (loading) return <div className="max-w-5xl"><Spinner /></div>;
+    if (loading) return <Spinner />;
 
     return (
-        <div className="max-w-5xl">
+        <div className="space-y-6">
             <PageHeader title="급여 관리" description="전체 구성원의 급여, 퇴직연금을 관리합니다.">
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
                     <Download className="h-3 w-3" /> 급여대장 다운로드

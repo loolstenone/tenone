@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Target, CheckCircle2, Clock, Users, Loader2 } from "lucide-react";
 import { fetchStaffGprData } from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface EvalRecord {
     name: string;
@@ -86,9 +87,8 @@ export default function GPREvaluationPage() {
     const filtered = filter === "all" ? evals : evals.filter(e => e.status === filter);
 
     return (
-        <div className="max-w-5xl">
-            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">GPR 평가</h1>
-            <p className="text-sm text-neutral-400 mb-6">분기별 자기평가 → 매니저평가 → 최종 등급 확정</p>
+        <div className="space-y-6">
+            <PageHeader title="GPR 평가" description="분기별 자기평가 → 매니저평가 → 최종 등급 확정" />
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[

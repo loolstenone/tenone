@@ -5,6 +5,7 @@ import {
     Users, CreditCard, TrendingUp, DollarSign, UserPlus,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
 /* ── 타입 정의 ── */
@@ -284,13 +285,7 @@ export default function UniverseDashboard() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Universe Dashboard</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">Ten:One Universe 전체 현황</p>
-                </div>
-            </div>
+            <PageHeader title="Universe Dashboard" description="Ten:One Universe 전체 현황" />
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

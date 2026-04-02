@@ -114,10 +114,10 @@ export default function GPRDashboardPage() {
     const overallRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
     const quarter = goals.length > 0 ? goals[0].quarter : "2026 Q1";
 
-    if (loading) return <div className="max-w-5xl"><Spinner /></div>;
+    if (loading) return <Spinner />;
 
     return (
-        <div className="max-w-5xl">
+        <div className="space-y-6">
             <PageHeader title="GPR" description="Goal — Plan — Result: 전사 목표-계획-결과 관리">
                 <span className="text-xs text-neutral-400 border border-neutral-200 px-3 py-1.5 rounded">{quarter}</span>
             </PageHeader>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useBumsFilter } from "../layout";
 import { createClient } from "@/lib/supabase/client";
 import { ShoppingCart, Package, Plus, X, Tag, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Product {
     id: string;
@@ -103,11 +104,7 @@ export default function ShopPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-start justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">쇼핑 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">상품, 주문, 결제를 관리합니다.</p>
-                </div>
+            <PageHeader title="쇼핑 관리" description="상품, 주문, 결제를 관리합니다.">
                 <div className="flex items-center gap-2">
                     <button onClick={fetchAll} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">
                         <RefreshCw className="h-3.5 w-3.5" />
@@ -119,7 +116,7 @@ export default function ShopPage() {
                         </button>
                     )}
                 </div>
-            </div>
+            </PageHeader>
 
             {/* 요약 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

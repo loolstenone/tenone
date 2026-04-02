@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Plus, Search, Star, X, Upload, File, Image, FileText, Film, Link2, Trash2, FolderOpen } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";
 import { libraryCategoryOptions, formatBadgeColor, libraryPermissionLabels } from "@/types/library";
 import type { LibraryItem, LibraryCategory, LibraryPermission, FileFormat, LibrarySource } from "@/types/library";
@@ -212,15 +213,11 @@ export default function CmsLibraryPage() {
                 </div>
             )}
 
-            <div className="flex items-center justify-between mb-5">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">라이브러리 관리</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">전체 사이트의 모든 파일을 통합 관리합니다</p>
-                </div>
+            <PageHeader title="라이브러리 관리" description="전체 사이트의 모든 파일을 통합 관리합니다">
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 자료 등록
                 </button>
-            </div>
+            </PageHeader>
 
             {/* 소스별 통계 카드 */}
             <div className="grid grid-cols-4 gap-3 mb-5">

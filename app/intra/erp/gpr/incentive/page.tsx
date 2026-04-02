@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DollarSign, Users, TrendingUp, Award, Loader2 } from "lucide-react";
 import { fetchStaffGprData } from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface IncentiveRecord {
     name: string;
@@ -99,9 +100,8 @@ export default function GPRIncentivePage() {
     const totalIncentive = confirmed.reduce((s, i) => s + i.incentiveAmount, 0);
 
     return (
-        <div className="max-w-5xl">
-            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">인센티브</h1>
-            <p className="text-sm text-neutral-400 mb-6">GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리</p>
+        <div className="space-y-6">
+            <PageHeader title="인센티브" description="GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리" />
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[

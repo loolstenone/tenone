@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Award, Plus, BookOpen, Users, AlertCircle, Search, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface StaffEducation {
     name: string;
@@ -79,19 +80,15 @@ export default function EducationAdminPage() {
         .filter(e => !search || e.name.includes(search) || e.department.includes(search) || e.courseName.includes(search));
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-2">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">교육 관리</h1>
-                <div className="flex gap-2">
-                    <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
-                        <Download className="h-3 w-3" /> 이수 현황 다운로드
-                    </button>
-                    <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                        <Plus className="h-3 w-3" /> 교육 과정 등록
-                    </button>
-                </div>
-            </div>
-            <p className="text-sm text-neutral-500 mb-6">전체 구성원의 교육 이수 현황을 관리합니다.</p>
+        <div className="space-y-6">
+            <PageHeader title="교육 관리" description="전체 구성원의 교육 이수 현황을 관리합니다.">
+                <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
+                    <Download className="h-3 w-3" /> 이수 현황 다운로드
+                </button>
+                <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
+                    <Plus className="h-3 w-3" /> 교육 과정 등록
+                </button>
+            </PageHeader>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
