@@ -9,6 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { postAgentMessage } from '@/lib/supabase/chat';
 
 interface RssItem {
     title: string;
@@ -92,6 +93,15 @@ export async function POST(request: NextRequest) {
                     error_count: (src.error_count || 0) + 1,
                 }).eq('id', src.id);
             }
+        }
+
+        // #트렌드 채널에 수집 결과 게시
+        if (totalCollected > 0) {
+            await postAgentMessage({
+                channelName: '트렌드',
+                agentName: 'Whole See',
+                content: `RSS 크롤 완료: ${sources.length}개 소스에서 ${totalCollected}건 수집${errors.length > 0 ? ` (오류 ${errors.length}건)` : ''}`,
+            });
         }
 
         return NextResponse.json({

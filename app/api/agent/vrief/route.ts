@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { invokeAgent } from '@/lib/agent/claude';
 import { createClient } from '@/lib/supabase/server';
+import { postAgentMessage } from '@/lib/supabase/chat';
 
 const AM_PROMPT = `당신은 열시일분(10:01) 에이전트입니다. 아침 브리핑을 수행합니다.
 
@@ -84,6 +85,13 @@ export async function POST(request: NextRequest) {
             correlation_id: `vrief-${type}-${new Date().toISOString().slice(0, 10)}`,
             confidence: result.confidence,
             metadata: { type, timestamp: new Date().toISOString() },
+        });
+
+        // #브리핑 채널에 자동 게시
+        await postAgentMessage({
+            channelName: '브리핑',
+            agentName: '열시일분',
+            content: `## ${type === 'am' ? 'AM' : 'PM'} 10:01 ${type === 'am' ? '브리핑' : '성과 보고'}\n\n${result.response}`,
         });
 
         return NextResponse.json({

@@ -9,6 +9,9 @@ export interface ChatThread {
     id: string;
     name: string | null;
     is_group: boolean;
+    thread_type?: string; // 'dm' | 'group' | 'channel'
+    description?: string;
+    agent_name?: string;
     participants: string[];
     created_by: string | null;
     created_at: string;
@@ -22,6 +25,7 @@ export interface ChatMessage {
     sender_name: string;
     content: string;
     type: string;
+    sender_type?: string; // 'human' | 'agent' | 'system'
     read_by: string[];
     created_at: string;
 }
@@ -195,4 +199,62 @@ export function getUnreadCount(messages: ChatMessage[], userId: string): number 
 
 export function getLastMessage(messages: ChatMessage[]): ChatMessage | null {
     return messages.length > 0 ? messages[messages.length - 1] : null;
+}
+
+// ── 채널 ──
+
+/** 채널 목록 조회 (thread_type='channel') */
+export async function fetchChannels(): Promise<ChatThread[]> {
+    const { data, error } = await supabase
+        .from('chat_threads')
+        .select('*')
+        .eq('thread_type', 'channel')
+        .order('name');
+    if (error) { console.error('fetchChannels:', error.message); return []; }
+    return data || [];
+}
+
+/** 에이전트가 채널에 메시지 게시 */
+export async function postAgentMessage(params: {
+    channelName: string;
+    agentName: string;
+    content: string;
+}): Promise<ChatMessage | null> {
+    // 채널 스레드 찾기
+    const { data: threads } = await supabase
+        .from('chat_threads')
+        .select('id')
+        .eq('thread_type', 'channel')
+        .eq('name', params.channelName)
+        .limit(1);
+
+    if (!threads || threads.length === 0) {
+        console.error('postAgentMessage: channel not found:', params.channelName);
+        return null;
+    }
+
+    const threadId = threads[0].id;
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+            thread_id: threadId,
+            sender_id: '00000000-0000-0000-0000-000000000000', // 에이전트 시스템 ID
+            sender_name: params.agentName,
+            sender_type: 'agent',
+            content: params.content,
+            type: 'text',
+            read_by: [],
+        })
+        .select()
+        .single();
+
+    if (error) { console.error('postAgentMessage:', error.message); return null; }
+
+    // 스레드 updated_at 갱신
+    await supabase
+        .from('chat_threads')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', threadId);
+
+    return data;
 }

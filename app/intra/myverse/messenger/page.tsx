@@ -170,7 +170,10 @@ export default function MessengerPage() {
     const [newMessage, setNewMessage] = useState('');
     const [chats, setChats] = useState<ChatThread[]>(generateMockChats);
     const [notifications] = useState<Message[]>(generateNotifications);
-    const [activeTab, setActiveTab] = useState<'chats' | 'people'>('chats');
+    const [activeTab, setActiveTab] = useState<'channels' | 'chats' | 'people'>('channels');
+    const [channels, setChannels] = useState<chatDb.ChatThread[]>([]);
+    const [channelMessages, setChannelMessages] = useState<chatDb.ChatMessage[]>([]);
+    const [selectedChannel, setSelectedChannel] = useState<chatDb.ChatThread | null>(null);
 
     // 모바일 뷰 상태
     const [mobileView, setMobileView] = useState<'list' | 'chat' | 'profile'>('list');
@@ -246,6 +249,21 @@ export default function MessengerPage() {
         })();
         return () => { cancelled = true; };
     }, [user?.id]);
+
+    // ── DB: 채널 로드 ──
+    useEffect(() => {
+        chatDb.fetchChannels().then(ch => { if (ch.length > 0) setChannels(ch); });
+    }, []);
+
+    // 채널 선택 시 메시지 로드
+    useEffect(() => {
+        if (!selectedChannel) return;
+        chatDb.fetchMessages(selectedChannel.id, 100).then(setChannelMessages);
+        const unsub = chatDb.subscribeToMessages(selectedChannel.id, (msg) => {
+            setChannelMessages(prev => [...prev, msg]);
+        });
+        return unsub;
+    }, [selectedChannel?.id]);
 
     // ── DB: 전체 스레드 실시간 구독 (새 메시지 → 스레드 목록 갱신) ──
     useEffect(() => {
@@ -403,6 +421,7 @@ export default function MessengerPage() {
 
     const selectChat = (chatId: string) => {
         setSelectedChat(chatId);
+        setSelectedChannel(null); // 채널 선택 해제
         setChatMenuOpen(null);
         setMobileView('chat');
         // DB 모드: 읽음 처리
@@ -711,6 +730,12 @@ export default function MessengerPage() {
             )}>
                 {/* 탭 */}
                 <div className="flex border-b border-neutral-200">
+                    <button onClick={() => setActiveTab('channels')}
+                        className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
+                            activeTab === 'channels' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
+                        )}>
+                        채널
+                    </button>
                     <button onClick={() => setActiveTab('chats')}
                         className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
                             activeTab === 'chats' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
@@ -736,7 +761,32 @@ export default function MessengerPage() {
 
                 {/* 컨텐츠 */}
                 <div className="flex-1 overflow-y-auto">
-                    {activeTab === 'chats' ? (
+                    {activeTab === 'channels' ? (
+                        <div>
+                            <div className="px-3 py-2 text-[10px] text-neutral-400 uppercase tracking-wider">에이전트 채널</div>
+                            {channels.map(ch => (
+                                <button key={ch.id}
+                                    onClick={() => { setSelectedChannel(ch); setSelectedChat(''); setMobileView('chat'); }}
+                                    className={clsx(
+                                        "w-full text-left px-3 py-2.5 border-b border-neutral-50 hover:bg-neutral-50 transition-colors",
+                                        selectedChannel?.id === ch.id && 'bg-neutral-100'
+                                    )}>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-neutral-700"># {ch.name}</span>
+                                        {ch.agent_name && (
+                                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">{ch.agent_name}</span>
+                                        )}
+                                    </div>
+                                    {ch.description && (
+                                        <p className="text-[11px] text-neutral-400 mt-0.5 truncate">{ch.description}</p>
+                                    )}
+                                </button>
+                            ))}
+                            {channels.length === 0 && (
+                                <p className="px-3 py-8 text-center text-xs text-neutral-400">채널이 없습니다</p>
+                            )}
+                        </div>
+                    ) : activeTab === 'chats' ? (
                         <div>
                             {/* 그룹 / 일괄 버튼 */}
                             <div className="flex gap-1.5 px-3 py-1.5 border-b border-neutral-100">
@@ -982,7 +1032,51 @@ export default function MessengerPage() {
                 mobileView === 'chat' ? 'translate-x-0' : mobileView === 'profile' ? '-translate-x-full' : 'translate-x-full',
                 "md:translate-x-0"
             )}>
-                {selectedChat === 'notifications' ? (
+                {selectedChannel ? (
+                    /* ── 채널 뷰 ── */
+                    <>
+                        <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center gap-2.5">
+                            <button onClick={() => { setSelectedChannel(null); setMobileView('list'); }} className="md:hidden p-1 hover:bg-neutral-100">
+                                <ChevronLeft className="h-4 w-4 text-neutral-500" />
+                            </button>
+                            <span className="text-sm font-medium text-neutral-700"># {selectedChannel.name}</span>
+                            {selectedChannel.agent_name && (
+                                <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">{selectedChannel.agent_name}</span>
+                            )}
+                        </div>
+                        {selectedChannel.description && (
+                            <div className="px-4 py-2 bg-white border-b border-neutral-100 text-[11px] text-neutral-400">
+                                {selectedChannel.description}
+                            </div>
+                        )}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {channelMessages.length === 0 && (
+                                <p className="text-center text-xs text-neutral-400 py-8">아직 메시지가 없습니다</p>
+                            )}
+                            {channelMessages.map(msg => (
+                                <div key={msg.id} className="flex gap-2.5">
+                                    <div className={clsx(
+                                        "h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
+                                        msg.sender_type === 'agent' ? 'bg-neutral-800 text-white' : 'bg-neutral-200 text-neutral-600'
+                                    )}>
+                                        {msg.sender_type === 'agent' ? 'AI' : (msg.sender_name || '?').slice(0, 1)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className={clsx("text-[11px] font-medium", msg.sender_type === 'agent' ? 'text-neutral-800' : 'text-neutral-600')}>
+                                                {msg.sender_name || '알 수 없음'}
+                                            </span>
+                                            <span className="text-[10px] text-neutral-300">
+                                                {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-neutral-700 mt-0.5 whitespace-pre-wrap">{msg.content}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : selectedChat === 'notifications' ? (
                     /* ── 알림 뷰 ── */
                     <>
                         <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center gap-2.5">
