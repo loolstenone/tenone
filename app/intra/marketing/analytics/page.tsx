@@ -1,26 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchCampaigns, fetchLeads, fetchContentPosts } from "@/lib/supabase/marketing";
+import { fetchCampaigns, fetchLeads, fetchContentPosts, fetchTrends, type TrendInsight } from "@/lib/supabase/marketing";
 import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
 import { Campaign, Lead, ContentPost } from "@/types/marketing";
-import { BarChart3, TrendingUp, DollarSign, Users, Loader2 } from "lucide-react";
+import { BarChart3, TrendingUp, DollarSign, Users, Loader2, Flame } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function AnalyticsPage() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [leads, setLeads] = useState<Lead[]>([]);
     const [contentPosts, setContentPosts] = useState<ContentPost[]>([]);
+    const [trends, setTrends] = useState<TrendInsight[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         let cancelled = false;
-        Promise.all([fetchCampaigns(), fetchLeads(), fetchContentPosts()])
-            .then(([c, l, p]) => {
+        Promise.all([
+            fetchCampaigns(),
+            fetchLeads(),
+            fetchContentPosts(),
+            fetchTrends({ limit: 5 }).catch(() => []),
+        ])
+            .then(([c, l, p, t]) => {
                 if (cancelled) return;
                 setCampaigns(c.length > 0 ? c : initialCampaigns);
                 setLeads(l.length > 0 ? l : initialLeads);
                 setContentPosts(p.length > 0 ? p : initialContentPosts);
+                setTrends(t as TrendInsight[]);
             })
             .catch(() => {
                 if (!cancelled) { setCampaigns(initialCampaigns); setLeads(initialLeads); setContentPosts(initialContentPosts); }
@@ -75,6 +82,37 @@ export default function AnalyticsPage() {
                     <p className="text-xs text-neutral-400">진행 중 캠페인</p>
                 </div>
             </div>
+
+            {/* Mindle Insight — 실 DB 연동 */}
+            {trends.length > 0 && (
+                <div className="border border-neutral-200 bg-white p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Flame className="h-4 w-4 text-neutral-500" />
+                        <h3 className="text-sm font-semibold">Mindle 트렌드 Insight</h3>
+                        <span className="ml-auto text-xs text-neutral-400">by Mindle DB</span>
+                    </div>
+                    <div className="divide-y divide-neutral-100">
+                        {trends.map(t => (
+                            <div key={t.id} className="py-3 flex items-start gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-neutral-900 truncate">{t.title}</p>
+                                    <p className="text-xs text-neutral-400 mt-0.5 line-clamp-1">{t.summary}</p>
+                                    <div className="flex gap-1.5 mt-1">
+                                        <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5">{t.category}</span>
+                                        {t.tags.slice(0, 2).map(tag => (
+                                            <span key={tag} className="text-[10px] bg-neutral-50 text-neutral-400 px-1.5 py-0.5"># {tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-sm font-bold">{Math.round(t.relevanceScore * 100)}%</p>
+                                    <p className="text-[10px] text-neutral-400">관련도</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-2 gap-6">
                 {/* Lead Funnel */}

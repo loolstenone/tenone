@@ -182,6 +182,49 @@ export async function deleteContentPost(id: string) {
   if (error) throw error;
 }
 
+// ── Content → Campaign 연결 ──────────────────────────
+export async function linkContentToCampaign(contentId: string, campaignId: string | null) {
+  const { error } = await supabase.from('marketing_content').update({ campaign_id: campaignId, updated_at: new Date().toISOString() }).eq('id', contentId);
+  if (error) throw error;
+}
+
+// ── Mindle 트렌드 조회 (Insight 연동) ────────────────
+export interface TrendInsight {
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  tags: string[];
+  relevanceScore: number;
+  isFeatured: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export async function fetchTrends(options?: { limit?: number; category?: string; featured?: boolean }): Promise<TrendInsight[]> {
+  let query = supabase
+    .from('mindle_trends')
+    .select('id, title, summary, category, tags, relevance_score, is_featured, published_at, created_at')
+    .eq('status', 'published')
+    .order('relevance_score', { ascending: false });
+  if (options?.category) query = query.eq('category', options.category);
+  if (options?.featured) query = query.eq('is_featured', true);
+  if (options?.limit) query = query.limit(options.limit);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    summary: r.summary,
+    category: r.category,
+    tags: r.tags || [],
+    relevanceScore: r.relevance_score,
+    isFeatured: r.is_featured,
+    publishedAt: r.published_at,
+    createdAt: r.created_at,
+  }));
+}
+
 // ── Stats ───────────────────────────────────────────
 export async function fetchMarketingStats() {
   const [campaigns, leads, content] = await Promise.all([
