@@ -40,7 +40,7 @@ export default function WorkTypePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-neutral-900">근무형태 설정</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">근무형태 설정</h2>
           <p className="mt-1 text-xs text-neutral-500">
             기본 근무시간 및 근무 정책을 설정합니다
           </p>

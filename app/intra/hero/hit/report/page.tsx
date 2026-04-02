@@ -34,7 +34,7 @@ export default function HitReportPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">HIT 결과 리포트</h1>
+                    <h1 className="text-xl font-semibold mb-1">HIT 결과 리포트</h1>
                     <p className="text-sm text-neutral-500">Cheonil Jeon님의 HeRo 프로필</p>
                 </div>
                 <button
@@ -54,7 +54,7 @@ export default function HitReportPage() {
                     </div>
                     <div>
                         <p className="text-xs text-neutral-400 uppercase tracking-wider mb-1">HeRo Character</p>
-                        <h2 className="text-lg font-bold mb-1">비전을 제시하는 전략가</h2>
+                        <h2 className="text-lg font-semibold mb-1">비전을 제시하는 전략가</h2>
                         <p className="text-xs text-neutral-500 italic">The Visionary Strategist</p>
                         <p className="text-sm text-neutral-600 mt-2">
                             큰 그림을 그리고, 사람을 모으며, 세계관을 설계하는 리더형 인재.

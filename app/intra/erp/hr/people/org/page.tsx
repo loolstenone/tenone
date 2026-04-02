@@ -260,7 +260,7 @@ export default function OrgChartPage() {
             {/* 좌측: 조직도 트리 */}
             <div className="w-[55%] min-w-0">
                 <div className="mb-4">
-                    <h1 className="text-xl font-bold">조직도</h1>
+                    <h1 className="text-xl font-semibold">조직도</h1>
                     <p className="text-xs text-neutral-500 mt-0.5">Ten:One™ 조직 구조 · 총 {totalMembers}명</p>
                 </div>
 
@@ -293,7 +293,7 @@ export default function OrgChartPage() {
                                             {selectedNode.name}
                                         </span>
                                     )}
-                                    <h2 className="text-lg font-bold">{selectedPerson.name}</h2>
+                                    <h2 className="text-lg font-semibold">{selectedPerson.name}</h2>
                                 </div>
                                 <p className="text-xs text-neutral-500 mt-0.5">{selectedPerson.title}</p>
                             </div>

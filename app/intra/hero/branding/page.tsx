@@ -81,7 +81,7 @@ export default function PersonalBrandingPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-6">
-                <h1 className="text-xl font-bold mb-1">퍼스널 브랜딩</h1>
+                <h1 className="text-xl font-semibold mb-1">퍼스널 브랜딩</h1>
                 <p className="text-sm text-neutral-500">나만의 브랜드를 기획합니다</p>
             </div>
 
@@ -93,7 +93,7 @@ export default function PersonalBrandingPage() {
                     </div>
                     <div>
                         <p className="text-xs text-neutral-400 uppercase tracking-wider mb-1">HeRo Character</p>
-                        <h2 className="text-lg font-bold mb-1">비전을 제시하는 전략가</h2>
+                        <h2 className="text-lg font-semibold mb-1">비전을 제시하는 전략가</h2>
                         <p className="text-xs text-neutral-500 italic mb-2">The Visionary Strategist</p>
                         <p className="text-sm text-neutral-600">
                             큰 그림을 그리고, 사람을 모으며, 세계관을 설계하는 리더형 인재.

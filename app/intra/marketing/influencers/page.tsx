@@ -98,7 +98,7 @@ export default function InfluencersPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-xl font-bold">Influencers</h2>
+                    <h2 className="text-xl font-semibold">Influencers</h2>
                     <p className="mt-1 text-sm text-neutral-500">인플루언서 협업 관리</p>
                 </div>
                 <button onClick={() => setShowAdd(true)}

@@ -94,7 +94,7 @@ export default function UniversePrivacy() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-neutral-900 flex items-center gap-2">
                     <Shield className="h-5 w-5" /> 개인정보
                 </h1>
                 <p className="text-sm text-neutral-500 mt-0.5">개인정보 관리 및 컴플라이언스</p>

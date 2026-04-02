@@ -273,7 +273,7 @@ export default function ProjectNewPage() {
                     <ArrowLeft className="h-4 w-4" />
                 </Link>
                 <div>
-                    <h1 className="text-lg font-bold text-neutral-900">프로젝트 등록</h1>
+                    <h1 className="text-lg font-semibold text-neutral-900">프로젝트 등록</h1>
                     <p className="text-xs text-neutral-400">새 프로젝트를 등록합니다. * 표시는 필수 입력 항목</p>
                 </div>
             </div>

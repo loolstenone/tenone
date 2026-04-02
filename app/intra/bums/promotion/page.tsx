@@ -95,7 +95,7 @@ export default function PromotionPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-xl font-bold tracking-tight">프로모션</h1>
+                    <h1 className="text-xl font-semibold tracking-tight">프로모션</h1>
                     <p className="text-sm text-neutral-500 mt-1">할인 코드와 프로모션 이벤트를 관리합니다.</p>
                 </div>
                 <button onClick={() => setShowAdd(true)}

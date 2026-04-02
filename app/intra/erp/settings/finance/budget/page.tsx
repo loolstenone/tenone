@@ -68,7 +68,7 @@ export default function BudgetSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-neutral-900">예산 설정</h2>
+        <h2 className="text-lg font-semibold text-neutral-900">예산 설정</h2>
         <p className="mt-1 text-xs text-neutral-500">
           부서별 연간 예산을 설정하고 집행률을 관리합니다
         </p>

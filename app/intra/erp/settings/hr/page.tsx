@@ -146,7 +146,7 @@ export default function HRSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-neutral-900">직급/직책 관리</h2>
+        <h2 className="text-lg font-semibold text-neutral-900">직급/직책 관리</h2>
         <p className="mt-1 text-xs text-neutral-500">
           조직 내 직급 및 직책 체계를 관리합니다
         </p>

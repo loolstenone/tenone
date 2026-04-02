@@ -122,7 +122,7 @@ export default function GPRCascadePage() {
 
     return (
         <div className="max-w-5xl">
-            <h1 className="text-xl font-bold mb-2">목표 캐스케이드</h1>
+            <h1 className="text-xl font-semibold mb-2">목표 캐스케이드</h1>
             <p className="text-sm text-neutral-500 mb-6">
                 회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름
                 {dbMemberTotal !== null && <span className="ml-2 text-neutral-400">· 전체 멤버 {dbMemberTotal}명</span>}
@@ -132,7 +132,7 @@ export default function GPRCascadePage() {
             <div className="border border-neutral-200 bg-white p-5 mb-6">
                 <div className="flex items-center gap-2 mb-4">
                     <Building2 className="h-4 w-4 text-neutral-400" />
-                    <h2 className="text-sm font-bold">전사 목표 (CEO)</h2>
+                    <h2 className="text-sm font-semibold">전사 목표 (CEO)</h2>
                     <span className="text-xs px-2 py-0.5 bg-neutral-900 text-white ml-auto">2026 Q1</span>
                 </div>
                 <div className="space-y-3">
@@ -240,7 +240,7 @@ export default function GPRCascadePage() {
 
             {/* Flow explanation */}
             <div className="mt-8 border border-neutral-200 bg-neutral-50 p-5">
-                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">GPR 설정 흐름</h3>
+                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">GPR 설정 흐름</h3>
                 <div className="flex items-center gap-3 text-xs text-neutral-600">
                     <span className="bg-white border border-neutral-200 px-3 py-1.5 rounded font-medium">CEO 전사목표 설정</span>
                     <ChevronRight className="h-3 w-3 text-neutral-400" />

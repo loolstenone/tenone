@@ -111,7 +111,7 @@ export default function SocialPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-xl font-bold">Social Media</h2>
+                    <h2 className="text-xl font-semibold">Social Media</h2>
                     <p className="mt-1 text-sm text-neutral-500">소셜 계정 및 콘텐츠 캘린더</p>
                 </div>
                 <button onClick={() => tab === 'accounts' ? setShowAddAccount(true) : setShowAddContent(true)}

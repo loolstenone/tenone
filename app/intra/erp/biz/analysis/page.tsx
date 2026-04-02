@@ -78,7 +78,7 @@ export default function PLDashboardPage() {
     <div className="max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">손익 현황</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">손익 현황</h1>
           <p className="text-sm text-neutral-500">전사 손익 대시보드</p>
         </div>
         <button

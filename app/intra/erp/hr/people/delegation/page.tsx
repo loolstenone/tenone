@@ -66,7 +66,7 @@ export default function DelegationPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">권한위임</h1>
+                    <h1 className="text-xl font-semibold mb-1">권한위임</h1>
                     <p className="text-sm text-neutral-500">결재 및 승인 권한을 위임합니다.</p>
                 </div>
                 <button onClick={() => setShowForm(true)}
@@ -108,7 +108,7 @@ export default function DelegationPage() {
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white w-full max-w-md p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold">권한 위임 등록</h2>
+                            <h2 className="text-lg font-semibold">권한 위임 등록</h2>
                             <button onClick={() => setShowForm(false)} className="text-neutral-400 hover:text-neutral-900"><X className="h-4 w-4" /></button>
                         </div>
                         <div className="space-y-3">

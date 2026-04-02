@@ -386,7 +386,7 @@ export default function ResumePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold">
+          <h1 className="text-xl font-semibold">
             이력서 빌더
           </h1>
           <p className="text-sm text-neutral-500 mt-1">

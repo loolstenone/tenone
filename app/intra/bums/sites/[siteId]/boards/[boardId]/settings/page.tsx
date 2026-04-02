@@ -280,7 +280,7 @@ export default function BoardSettingsPage({ params }: { params: Promise<{ siteId
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {board.name}
                 </button>
-                <h2 className="text-2xl font-bold">게시판 설정</h2>
+                <h2 className="text-2xl font-semibold">게시판 설정</h2>
                 <p className="mt-1 text-sm text-neutral-500">{board.name} 게시판 설정을 관리합니다</p>
             </div>
 

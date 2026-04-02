@@ -151,7 +151,7 @@ export default function CreateBoardPage({ params }: { params: Promise<{ siteId: 
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> 사이트로 돌아가기
                 </button>
-                <h2 className="text-2xl font-bold">게시판 만들기</h2>
+                <h2 className="text-2xl font-semibold">게시판 만들기</h2>
                 <p className="mt-1 text-sm text-neutral-500">새 게시판을 생성합니다</p>
             </div>
 

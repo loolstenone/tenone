@@ -62,7 +62,7 @@ export default function AutomationPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-5">
                 <div>
-                    <h1 className="text-xl font-bold">Automation</h1>
+                    <h1 className="text-xl font-semibold">Automation</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">자동화 규칙을 설정하고 관리합니다</p>
                 </div>
                 <button

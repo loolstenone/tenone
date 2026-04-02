@@ -172,7 +172,7 @@ export default function FinanceSettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-neutral-900">계정과목 관리</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">계정과목 관리</h2>
           <p className="mt-1 text-xs text-neutral-500">
             회계 계정과목 체계를 관리합니다
           </p>

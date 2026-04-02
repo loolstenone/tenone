@@ -129,7 +129,7 @@ export default function BoardPostListPage({ params }: { params: Promise<{ siteId
                 </button>
                 <div className="flex items-start justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold">{boardName}</h2>
+                        <h2 className="text-2xl font-semibold">{boardName}</h2>
                         <p className="text-xs text-neutral-400 mt-1">총 {total}개 게시글</p>
                     </div>
                     <div className="flex items-center gap-2">

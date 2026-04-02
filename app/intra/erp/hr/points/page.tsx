@@ -79,7 +79,7 @@ export default function ERPPointsPage() {
         <div className="max-w-6xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">포인트 관리</h1>
+                    <h1 className="text-lg font-semibold">포인트 관리</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">구성원 포인트 및 등급 관리</p>
                 </div>
                 <button
@@ -239,7 +239,7 @@ export default function ERPPointsPage() {
                 <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
                     <div className="bg-white w-[440px] border border-neutral-200 shadow-lg">
                         <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
-                            <h2 className="text-sm font-bold">포인트 부여</h2>
+                            <h2 className="text-sm font-semibold">포인트 부여</h2>
                             <button onClick={() => setShowAwardModal(false)}><X className="h-4 w-4 text-neutral-400" /></button>
                         </div>
                         <div className="p-5 space-y-4">

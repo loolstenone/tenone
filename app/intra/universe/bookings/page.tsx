@@ -144,7 +144,7 @@ export default function UniverseBookings() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-neutral-900 flex items-center gap-2">
                     <Calendar className="h-5 w-5" /> 예약/이벤트
                 </h1>
                 <p className="text-sm text-neutral-500 mt-0.5">이벤트 예약 현황 및 캘린더</p>

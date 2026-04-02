@@ -47,7 +47,7 @@ export default function SiteContentPage({ params }: { params: Promise<{ siteId: 
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">전체 게시물</h2>
+                <h2 className="text-xl font-semibold">전체 게시물</h2>
                 <p className="text-sm text-neutral-500 mt-1">{site?.name}의 모든 콘텐츠를 관리합니다</p>
             </div>
 

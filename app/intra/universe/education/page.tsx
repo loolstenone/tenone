@@ -193,7 +193,7 @@ export default function UniverseEducation() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-neutral-900 flex items-center gap-2">
                     <GraduationCap className="h-5 w-5" /> 교육 관리
                 </h1>
                 <p className="text-sm text-neutral-500 mt-0.5">프로그램 및 수강생 통합 관리</p>

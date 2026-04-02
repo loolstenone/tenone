@@ -84,7 +84,7 @@ export default function PeoplePage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold tracking-tight">회원 관리</h1>
+                <h1 className="text-xl font-semibold tracking-tight">회원 관리</h1>
                 <p className="text-sm text-neutral-500 mt-1">전체 회원의 역할, 권한, 소속을 통합 관리합니다.</p>
             </div>
 
@@ -182,7 +182,7 @@ export default function PeoplePage() {
                                     {selectedMember.avatar_initials}
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl font-bold tracking-tight">{selectedMember.name}</h2>
+                                    <h2 className="text-xl font-semibold tracking-tight">{selectedMember.name}</h2>
                                     <p className="text-sm text-neutral-500">{selectedMember.email}</p>
                                 </div>
                                 <button onClick={() => { setSelectedMember(null); setEditingType(null); }}
@@ -193,7 +193,7 @@ export default function PeoplePage() {
                         <div className="p-6 space-y-6">
                             {/* 기본 정보 */}
                             <section>
-                                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">기본 정보</h3>
+                                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">기본 정보</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex items-center gap-3">
                                         <Mail className="h-4 w-4 text-neutral-400" />
@@ -224,7 +224,7 @@ export default function PeoplePage() {
 
                             {/* 역할/권한 */}
                             <section>
-                                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">역할 & 권한</h3>
+                                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">역할 & 권한</h3>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm text-neutral-600">주 유형</span>
@@ -273,7 +273,7 @@ export default function PeoplePage() {
 
                             {/* 모듈 접근 */}
                             <section>
-                                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">모듈 접근</h3>
+                                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">모듈 접근</h3>
                                 <div className="flex flex-wrap gap-1.5">
                                     {(selectedMember.module_access || []).map((mod: string) => (
                                         <span key={mod} className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">{mod}</span>
@@ -286,7 +286,7 @@ export default function PeoplePage() {
 
                             {/* 포인트 */}
                             <section>
-                                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">포인트</h3>
+                                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">포인트</h3>
                                 <div className="flex items-center gap-3">
                                     <Award className="h-5 w-5 text-amber-500" />
                                     <span className="text-lg font-bold">{(selectedMember.total_points || 0).toLocaleString()}P</span>
@@ -297,7 +297,7 @@ export default function PeoplePage() {
                             {/* Staff 전용 */}
                             {selectedMember.account_type === 'staff' && (
                                 <section>
-                                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">직원 정보</h3>
+                                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">직원 정보</h3>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span className="text-neutral-500">사번</span>

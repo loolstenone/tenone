@@ -116,7 +116,7 @@ export default function DivisionPlanPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-xl font-bold text-neutral-900">부문별 계획</h1>
+        <h1 className="text-xl font-semibold text-neutral-900">부문별 계획</h1>
         <p className="text-sm text-neutral-500">2026년도 부문별 경영계획</p>
       </div>
 

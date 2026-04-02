@@ -48,7 +48,7 @@ export default function ClosingSettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-neutral-900">결산 설정</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">결산 설정</h2>
           <p className="mt-1 text-xs text-neutral-500">
             회계연도 및 결산 주기를 설정합니다
           </p>

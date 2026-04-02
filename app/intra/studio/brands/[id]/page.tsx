@@ -75,7 +75,7 @@ export default function BrandDetailPage({ params }: Props) {
                 {/* Main Content Area */}
                 <div className="lg:col-span-2 space-y-8">
                     <div>
-                        <h1 className="text-4xl font-bold">{brand.name}</h1>
+                        <h1 className="text-4xl font-semibold">{brand.name}</h1>
                         <p className="mt-4 text-lg text-neutral-500 leading-relaxed">
                             {brand.description}
                         </p>
@@ -92,7 +92,7 @@ export default function BrandDetailPage({ params }: Props) {
 
                     {/* Tabs / Sections */}
                     <div className="border-t border-neutral-200 pt-8">
-                        <h2 className="text-xl font-bold mb-4">Latest Activity</h2>
+                        <h2 className="text-xl font-semibold mb-4">Latest Activity</h2>
                         <div className="border border-neutral-200 bg-white p-8 text-center">
                             <p className="text-neutral-400">No recent activity recorded for this brand.</p>
                             <button className="mt-4 text-neutral-500 hover:text-neutral-900 text-sm font-medium">

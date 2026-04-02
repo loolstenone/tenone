@@ -100,7 +100,7 @@ export default function PayrollAdminPage() {
             {tab === "monthly" && (
                 <Card padding={false}>
                     <div className="flex items-center justify-between p-4 border-b border-neutral-100">
-                        <h2 className="text-sm font-bold">급여 대장</h2>
+                        <h2 className="text-sm font-semibold">급여 대장</h2>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
                             <input value={search} onChange={e => setSearch(e.target.value)}

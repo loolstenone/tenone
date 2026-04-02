@@ -94,7 +94,7 @@ export default function AnnualPlanPage() {
     <div className="max-w-5xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">연간 경영계획</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">연간 경영계획</h1>
           <p className="text-sm text-neutral-500">2026년도 경영계획</p>
         </div>
         <span className={clsx("rounded-full px-3 py-1 text-xs font-medium", status === "확정" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700")}>

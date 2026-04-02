@@ -99,7 +99,7 @@ export default function InquiryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">고객문의 관리</h1>
+        <h1 className="text-xl font-semibold tracking-tight">고객문의 관리</h1>
         <p className="text-sm text-neutral-500 mt-1">Contact 폼을 통해 접수된 문의를 관리합니다.</p>
       </div>
 
@@ -194,7 +194,7 @@ export default function InquiryPage() {
         <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setSelected(null)}>
           <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-bold">문의 상세</h3>
+              <h3 className="font-semibold">문의 상세</h3>
               <button onClick={() => setSelected(null)} className="p-1 hover:bg-neutral-100 rounded"><X size={18} /></button>
             </div>
             <div className="p-4 space-y-4">

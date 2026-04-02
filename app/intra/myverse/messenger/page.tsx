@@ -1320,7 +1320,7 @@ export default function MessengerPage() {
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setShowNewGroupModal(false)}>
                     <div className="bg-white w-[400px] max-w-[95vw] max-h-[500px] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="px-5 py-3 border-b border-neutral-100">
-                            <h3 className="text-sm font-bold">그룹 채팅 만들기</h3>
+                            <h3 className="text-sm font-semibold">그룹 채팅 만들기</h3>
                             <p className="text-xs text-neutral-400">2명 이상 선택하세요</p>
                         </div>
                         <div className="px-5 py-3 border-b border-neutral-100">
@@ -1617,7 +1617,7 @@ export default function MessengerPage() {
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setShowBroadcastModal(false)}>
                     <div className="bg-white w-[420px] max-w-[95vw]" onClick={e => e.stopPropagation()}>
                         <div className="px-5 py-3 border-b border-neutral-100">
-                            <h3 className="text-sm font-bold">일괄 메시지</h3>
+                            <h3 className="text-sm font-semibold">일괄 메시지</h3>
                             <p className="text-xs text-neutral-400">대상을 선택하고 메시지를 보내세요</p>
                         </div>
                         <div className="px-5 py-4 space-y-3">

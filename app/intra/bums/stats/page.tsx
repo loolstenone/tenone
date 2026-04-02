@@ -94,7 +94,7 @@ export default function StatsPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-xl font-bold tracking-tight">통계</h1>
+                    <h1 className="text-xl font-semibold tracking-tight">통계</h1>
                     <p className="text-sm text-neutral-500 mt-1">사이트별 방문자, 게시글, 매출 통계를 분석합니다.</p>
                 </div>
                 <button onClick={fetchStats} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">

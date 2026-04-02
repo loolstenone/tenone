@@ -79,7 +79,7 @@ export default function PerformancePage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-xl font-bold">Performance</h2>
+                    <h2 className="text-xl font-semibold">Performance</h2>
                     <p className="mt-1 text-sm text-neutral-500">채널별 KPI 현황</p>
                 </div>
                 <button onClick={fetchSnapshots} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">

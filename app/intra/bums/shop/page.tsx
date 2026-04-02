@@ -105,7 +105,7 @@ export default function ShopPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-xl font-bold tracking-tight">쇼핑 관리</h1>
+                    <h1 className="text-xl font-semibold tracking-tight">쇼핑 관리</h1>
                     <p className="text-sm text-neutral-500 mt-1">상품, 주문, 결제를 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-2">

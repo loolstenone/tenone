@@ -1103,7 +1103,7 @@ export default function EducationPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <GraduationCap className="w-5 h-5 text-neutral-400" />
-          <h1 className="text-base font-bold text-neutral-900">Education</h1>
+          <h1 className="text-base font-semibold text-neutral-900">Education</h1>
         </div>
         <p className="text-xs text-neutral-400 mt-1">
           Ten:One™ 교육 허브 - 필수, 전문, 심화 과정을 학습하고 퀴즈로 이수합니다

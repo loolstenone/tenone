@@ -52,7 +52,7 @@ export default function EvaluationPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Evaluation</h2>
+                <h2 className="text-xl font-semibold">Evaluation</h2>
                 <p className="mt-2 text-neutral-500">자기 평가 및 상사 평가</p>
             </div>
 
