@@ -1,14 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Clock, Eye, Search, LayoutGrid, List, ArrowUpRight } from "lucide-react";
-import { featured, trends, categories, statusBadge } from "@/lib/mindle/trend-data";
+import { featured as mockFeatured, trends as mockTrends, categories, statusBadge, type TrendArticle } from "@/lib/mindle/trend-data";
+import { createClient } from "@/lib/supabase/client";
+
+function mapDbToTrend(r: Record<string, unknown>): TrendArticle {
+    const score = (r.relevance_score as number) || 5;
+    const status = score >= 9 ? 'trending' : score >= 7.5 ? 'rising' : score >= 6 ? 'signal' : 'fading';
+    return {
+        id: (r.id as string) || '',
+        title: (r.title as string) || '',
+        excerpt: (r.summary as string) || '',
+        category: (r.category as string) || '',
+        status,
+        date: ((r.published_at as string) || '').slice(5, 10).replace('-', '.'),
+        readTime: `${Math.max(3, Math.ceil(((r.full_content as string) || '').length / 300))}분`,
+        views: (r.view_count as number) || 0,
+        author: (r.agent_name as string) || 'Mindle AI',
+        content: (r.full_content as string) || '',
+    };
+}
 
 export default function MindleTrendsPage() {
     const [selectedCat, setSelectedCat] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+    const [featured, setFeatured] = useState<TrendArticle>(mockFeatured);
+    const [trends, setTrends] = useState<TrendArticle[]>(mockTrends);
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('mindle_trends').select('*').eq('status', 'published').order('relevance_score', { ascending: false })
+            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
+                if (data && data.length > 0) {
+                    const mapped = data.map((r: Record<string, unknown>) => mapDbToTrend(r));
+                    const feat = mapped.find((_, i) => !!(data[i] as Record<string, unknown>)?.is_featured) || mapped[0];
+                    setFeatured(feat);
+                    setTrends(mapped.filter((t: TrendArticle) => t.id !== feat.id));
+                }
+            });
+    }, []);
 
     const filtered = trends.filter(t => {
         const matchCat = selectedCat === "전체" || t.category === selectedCat;
