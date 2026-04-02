@@ -8,7 +8,7 @@ import { jobTypeLabels } from "@/types/project";
 import type { JobType, JobDetail } from "@/types/project";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { fetchMemberActiveJobs, fetchAllTimesheetsForMember, upsertTimesheet } from "@/lib/supabase/projects";
+import { fetchMemberActiveJobs, fetchAllTimesheetsForMember, upsertTimesheet, recalcActualHours } from "@/lib/supabase/projects";
 
 interface MyJob {
     projectCode: string;
@@ -246,6 +246,15 @@ export default function TimesheetInputPage() {
                 });
             });
             await Promise.all(saves);
+
+            // 저장된 Job들의 actual_hours 재계산 (project/timesheet 뷰와 동기화)
+            const savedJobIds = [...new Set(
+                activeJobs
+                    .filter(j => j.jobId && week.some(d => getHour(fmt(d), j.jobId) > 0))
+                    .map(j => j.jobId)
+            )];
+            await Promise.allSettled(savedJobIds.map(recalcActualHours));
+
             setSaveMsg("저장되었습니다.");
         } catch {
             setSaveMsg("저장 실패. 다시 시도해주세요.");

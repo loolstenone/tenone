@@ -2,6 +2,9 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { siteConfigs, type SiteIdentifier } from "@/lib/site-config";
+import { fetchBoardConfigs, createPost } from "@/lib/supabase/board";
+import type { SiteCode } from "@/types/board";
 type PostStatus = "draft" | "published" | "scheduled" | "private";
 type EmploymentType = "정규" | "계약" | "인턴" | "프리랜서";
 type BumsBoardPost = any;
@@ -29,12 +32,26 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
     const router = useRouter();
     const searchParams = useSearchParams();
     const postId = searchParams.get("postId");
-    const board: any = null;
-    const site: any = null;
+
+    // Site: static config
+    const staticConfig = siteConfigs[siteId as SiteIdentifier];
+    const site = staticConfig ? { name: staticConfig.name, domain: staticConfig.domain } : null;
+
+    // Board: loaded from DB by id (any — board_configs has extra columns)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [board, setBoard] = useState<any | null>(null);
+    const [boardLoading, setBoardLoading] = useState(true);
+
+    useEffect(() => {
+        fetchBoardConfigs(siteId as SiteCode)
+            .then(boards => setBoard(boards.find(b => b.id === boardId) || null))
+            .catch(() => setBoard(null))
+            .finally(() => setBoardLoading(false));
+    }, [siteId, boardId]);
+
     const existingPost: any = null;
-    const addBoardPost = (_post: BumsBoardPost) => {};
-    const updateBoardPost = (_id: string, _post: BumsBoardPost) => {};
     const isEditMode = !!existingPost;
+    const [publishing, setPublishing] = useState(false);
 
     const [title, setTitle] = useState("");
     const [summary, setSummary] = useState("");
@@ -101,6 +118,9 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
     const [videoUrl, setVideoUrl] = useState("");
     const [videoDuration, setVideoDuration] = useState("");
 
+    if (boardLoading) {
+        return <div className="flex items-center justify-center py-20"><div className="h-5 w-5 border-2 border-neutral-200 border-t-neutral-800 rounded-full animate-spin" /></div>;
+    }
     if (!board || !site) {
         return (
             <div className="flex items-center justify-center py-20 text-neutral-400">
@@ -149,26 +169,53 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
         };
     };
 
-    const handlePublish = () => {
-        if (!title.trim()) return;
-        const post = buildPostData(status === "scheduled" ? "scheduled" : "published");
-        if (isEditMode) {
-            updateBoardPost(existingPost!.id, post);
-        } else {
-            addBoardPost(post);
+    const handlePublish = async () => {
+        if (!title.trim() || publishing) return;
+        setPublishing(true);
+        try {
+            const postStatus = status === "scheduled" ? "scheduled" : "published";
+            const tags = tagInput.split(",").map(t => t.trim()).filter(Boolean);
+            await createPost({
+                site: siteId as SiteCode,
+                board: board!.slug,
+                title: title.trim(),
+                content: body,
+                excerpt: summary.trim() || undefined,
+                tags,
+                representImage: image || undefined,
+                status: (postStatus === 'published' ? 'published' : 'draft') as 'published' | 'draft',
+                isPinned,
+            });
+            router.push(`/intra/bums/sites/${siteId}/boards/${boardId}`);
+        } catch {
+            // 발행 실패 — 폼 유지
+        } finally {
+            setPublishing(false);
         }
-        router.push(`/intra/bums/sites/${siteId}/boards/${boardId}`);
     };
 
-    const handleDraft = () => {
-        if (!title.trim()) return;
-        const post = buildPostData("draft");
-        if (isEditMode) {
-            updateBoardPost(existingPost!.id, post);
-        } else {
-            addBoardPost(post);
+    const handleDraft = async () => {
+        if (!title.trim() || publishing) return;
+        setPublishing(true);
+        try {
+            const tags = tagInput.split(",").map(t => t.trim()).filter(Boolean);
+            await createPost({
+                site: siteId as SiteCode,
+                board: board!.slug,
+                title: title.trim(),
+                content: body,
+                excerpt: summary.trim() || undefined,
+                tags,
+                representImage: image || undefined,
+                status: 'draft',
+                isPinned,
+            });
+            router.push(`/intra/bums/sites/${siteId}/boards/${boardId}`);
+        } catch {
+            // 저장 실패 — 폼 유지
+        } finally {
+            setPublishing(false);
         }
-        router.push(`/intra/bums/sites/${siteId}/boards/${boardId}`);
     };
 
     const Toggle = ({ checked, onChange, label, icon: Icon }: { checked: boolean; onChange: (v: boolean) => void; label: string; icon: React.ComponentType<{ className?: string }> }) => (
@@ -389,12 +436,12 @@ export default function PostEditorPage({ params }: { params: Promise<{ siteId: s
 
                     {/* Action buttons */}
                     <div className="space-y-2">
-                        <button onClick={handlePublish}
-                            className="w-full bg-neutral-900 text-white py-3 text-sm font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm">
-                            {isEditMode ? "수정 완료" : "발행"}
+                        <button onClick={handlePublish} disabled={publishing}
+                            className="w-full bg-neutral-900 text-white py-3 text-sm font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm disabled:opacity-50">
+                            {publishing ? "처리 중..." : isEditMode ? "수정 완료" : "발행"}
                         </button>
-                        <button onClick={handleDraft}
-                            className="w-full border border-neutral-200 py-3 text-sm rounded-lg hover:bg-neutral-50 transition-all">
+                        <button onClick={handleDraft} disabled={publishing}
+                            className="w-full border border-neutral-200 py-3 text-sm rounded-lg hover:bg-neutral-50 transition-all disabled:opacity-50">
                             임시저장
                         </button>
                     </div>

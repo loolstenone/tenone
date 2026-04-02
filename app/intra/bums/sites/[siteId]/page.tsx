@@ -1,8 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { siteConfigs, type SiteIdentifier } from "@/lib/site-config";
+import { fetchBoardConfigs, upsertBoardConfig } from "@/lib/supabase/board";
+import type { SiteCode } from "@/types/board";
 type BoardType = 'general' | 'notice' | 'gallery' | 'video' | 'faq' | 'qna' | 'commerce' | 'recruit' | 'event';
 type SkinType = 'list' | 'card' | 'gallery' | 'video';
 type BoardVisibility = 'public' | 'intra' | 'staff';
@@ -92,10 +95,29 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
     const { siteId } = use(params);
     const router = useRouter();
     const boardPosts: any[] = [];
-    const site: any = null;
-    const siteBoards: any[] = [];
     const sitePosts: any[] = [];
-    const addBoard = (_board: any) => {};
+
+    // Site: static config (DB override not needed for BUMS board management)
+    const staticConfig = siteConfigs[siteId as SiteIdentifier];
+    const site = staticConfig ? {
+        name: staticConfig.name,
+        domain: staticConfig.domain,
+        description: staticConfig.meta.description || staticConfig.tagline || "",
+        status: "active" as const,
+        siteType: "brand" as const,
+    } : null;
+
+    // Boards: loaded from DB (any — board_configs has extra columns beyond BoardConfig type)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [siteBoards, setSiteBoards] = useState<any[]>([]);
+    const [boardsLoading, setBoardsLoading] = useState(true);
+
+    useEffect(() => {
+        fetchBoardConfigs(siteId as SiteCode)
+            .then(boards => setSiteBoards(boards))
+            .catch(() => {})
+            .finally(() => setBoardsLoading(false));
+    }, [siteId]);
 
     // Accordion state
     const [expandedBoard, setExpandedBoard] = useState<string | null>(null);
@@ -106,6 +128,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
     const [boardForm, setBoardForm] = useState({
         name: "", boardType: "general" as BoardType, skinType: "list" as SkinType, visibility: "public" as BoardVisibility,
     });
+    const [addingBoard, setAddingBoard] = useState(false);
 
     // Edit toggle
     const [isEditing, setIsEditing] = useState(false);
@@ -128,49 +151,28 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
 
     /* ── Handlers ── */
 
-    const handleAddBoard = () => {
-        if (!boardForm.name.trim()) return;
-        const now = new Date().toISOString().split("T")[0];
-        const newBoard: BumsBoard = {
-            id: `board-${Date.now()}`,
-            siteId,
-            name: boardForm.name.trim(),
-            slug: boardForm.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-            boardType: boardForm.boardType,
-            skinType: boardForm.skinType,
-            visibility: boardForm.visibility,
-            readPermission: "all",
-            writePermission: "member",
-            commentPermission: "member",
-            allowComments: true,
-            allowAttachments: true,
-            allowSecretPost: false,
-            allowSecretComment: false,
-            allowScheduledPost: false,
-            useCategories: false,
-            categories: [],
-            postsPerPage: 20,
-            sortOrder: "latest",
-            listPermission: "all",
-            options: {
-                secretPostMode: 'optional', secretRequirePassword: false, secretHideTitle: false,
-                secretRequirePasswordOnView: false, newBadgeDuration: 1, writeButtonDisplay: 'always',
-                commentOrder: 'asc', allowFeaturedImage: true, allowTimeRestriction: false,
-                authorDisplayType: 'nickname', titleTemplateLocked: false, bodyPlaceholder: '',
-            },
-            design: {
-                showBoardName: true, showTotalCount: true, showProfileImage: true, showSearchBar: true, showLightbox: true,
-                showAuthor: true, showDate: true, showNumber: true, showCategory: false, showViews: true,
-                showCommentCount: true, showLikes: true, showShare: true, showPrint: true,
-                rowsPerPage: 10, rowSpacing: 20, pinNoticeOnAllPages: false, titleFontSize: 14, metaFontSize: 12,
-                layout: 'list-thumb',
-            },
-            createdAt: now,
-            updatedAt: now,
-        };
-        addBoard(newBoard);
-        setShowAddBoard(false);
-        setBoardForm({ name: "", boardType: "general", skinType: "list", visibility: "public" });
+    const handleAddBoard = async () => {
+        if (!boardForm.name.trim() || addingBoard) return;
+        setAddingBoard(true);
+        try {
+            const slug = boardForm.name.trim().toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/^-|-$/g, "") || `board-${Date.now()}`;
+            const newBoard = await upsertBoardConfig({
+                site: siteId as SiteCode,
+                slug,
+                name: boardForm.name.trim(),
+                boardType: boardForm.boardType,
+                skinType: boardForm.skinType,
+                visibility: boardForm.visibility,
+                categories: [],
+            } as BumsBoard);
+            setSiteBoards(prev => [...prev, newBoard as BumsBoard]);
+            setShowAddBoard(false);
+            setBoardForm({ name: "", boardType: "general", skinType: "list", visibility: "public" });
+        } catch {
+            // 저장 실패 — 폼 유지
+        } finally {
+            setAddingBoard(false);
+        }
     };
 
     return (
@@ -470,10 +472,10 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                                 </button>
                                 <button
                                     onClick={handleAddBoard}
-                                    disabled={!boardForm.name.trim()}
+                                    disabled={!boardForm.name.trim() || addingBoard}
                                     className="px-4 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:opacity-30"
                                 >
-                                    만들기
+                                    {addingBoard ? "저장 중..." : "만들기"}
                                 </button>
                             </div>
                         </div>

@@ -195,6 +195,16 @@ export async function fetchAllTimesheetsForMember(memberId: string) {
     return (data || []) as { job_id: string; work_date: string; hours: number }[];
 }
 
+// 특정 Job의 actual_hours를 timesheets 합계로 재계산하여 jobs 테이블에 반영
+export async function recalcActualHours(jobId: string): Promise<void> {
+    const { data } = await supabase
+        .from('timesheets')
+        .select('hours')
+        .eq('job_id', jobId);
+    const total = (data || []).reduce((s: number, r: { hours: number }) => s + (r.hours || 0), 0);
+    await supabase.from('jobs').update({ actual_hours: total }).eq('id', jobId);
+}
+
 // ── 통계 ──
 
 export async function getProjectStats() {

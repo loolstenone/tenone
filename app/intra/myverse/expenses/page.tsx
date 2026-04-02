@@ -44,11 +44,7 @@ const categoryIcon: Record<ExpenseCategory, typeof Car> = {
   사무용품: Package,
 };
 
-const categoryTotals: { category: ExpenseCategory; total: number }[] = [
-  { category: "교통", total: 120000 },
-  { category: "식비", total: 185000 },
-  { category: "사무용품", total: 45000 },
-];
+const CATEGORIES: ExpenseCategory[] = ["교통", "식비", "사무용품"];
 
 function formatKRW(n: number) {
   return n.toLocaleString("ko-KR") + "원";
@@ -62,6 +58,8 @@ export default function MyExpensesPage() {
   const [formDesc, setFormDesc] = useState("");
   const [formAmount, setFormAmount] = useState("");
   const [formCategory, setFormCategory] = useState<ExpenseCategory>("교통");
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // DB 우선 로드
   useEffect(() => {
@@ -82,8 +80,55 @@ export default function MyExpensesPage() {
       .catch(() => {});
   }, [user]);
 
+  const handleSubmit = async () => {
+    if (!formDate) { setFormError("날짜를 입력하세요."); return; }
+    if (!formDesc.trim()) { setFormError("내용을 입력하세요."); return; }
+    const amt = Number(formAmount);
+    if (!amt || amt <= 0) { setFormError("금액을 입력하세요."); return; }
+    if (!user) return;
+    setSubmitting(true);
+    setFormError("");
+    try {
+      const created = await erpDb.createExpense({
+        member_id: user.id,
+        expense_date: formDate,
+        description: formDesc.trim(),
+        amount: amt,
+        category: formCategory,
+        status: "pending",
+      });
+      // 결재 요청 자동 생성 → ERP 결재함과 동기화
+      await erpDb.createApproval({
+        drafter_id: user.id,
+        title: `[경비] ${formDesc.trim()} — ${amt.toLocaleString()}원`,
+        type: "경비",
+        status: "pending",
+        reference_id: (created as any).id,
+        reference_type: "expense",
+      }).catch(() => {}); // 결재 생성 실패해도 경비는 저장됨
+      setExpenseList(prev => [{
+        id: (created as any).id || String(Date.now()),
+        date: formDate,
+        description: formDesc.trim(),
+        amount: amt,
+        category: formCategory,
+        status: "승인대기",
+      }, ...prev]);
+      setShowForm(false);
+      setFormDate(""); setFormDesc(""); setFormAmount(""); setFormCategory("교통");
+    } catch {
+      setFormError("저장에 실패했습니다. 다시 시도하세요.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const pendingCount = expenseList.filter((e) => e.status === "승인대기").length;
   const thisMonthTotal = expenseList.reduce((sum, e) => sum + e.amount, 0);
+  const categoryTotals = CATEGORIES.map(cat => ({
+    category: cat,
+    total: expenseList.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0),
+  })).filter(ct => ct.total > 0);
 
   return (
     <div>
@@ -174,8 +219,10 @@ export default function MyExpensesPage() {
               >
                 취소
               </button>
-              <button className="rounded-md bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700">
-                청구하기
+              {formError && <p className="text-xs text-red-500 mt-1">{formError}</p>}
+              <button onClick={handleSubmit} disabled={submitting}
+                className="rounded-md bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 disabled:opacity-50">
+                {submitting ? "처리 중..." : "청구하기"}
               </button>
             </div>
           </div></Card>
@@ -226,7 +273,7 @@ export default function MyExpensesPage() {
           <div className="space-y-2">
             {categoryTotals.map((ct) => {
               const Icon = categoryIcon[ct.category];
-              const pct = Math.round((ct.total / thisMonthTotal) * 100);
+              const pct = thisMonthTotal > 0 ? Math.round((ct.total / thisMonthTotal) * 100) : 0;
               return (
                 <div key={ct.category}>
                   <div className="mb-1 flex items-center justify-between">

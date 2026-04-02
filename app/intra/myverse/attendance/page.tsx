@@ -67,10 +67,21 @@ const dayColor: Record<DayType, string> = {
 
 export default function MyAttendancePage() {
   const { user } = useAuth();
-  const [clockedIn, setClockedIn] = useState(true);
-  const [todayIn, setTodayIn] = useState("08:55");
+  const [clockedIn, setClockedIn] = useState(false);
+  const [todayIn, setTodayIn] = useState("-");
   const [todayOut, setTodayOut] = useState("-");
-  const [todayStatus, setTodayStatus] = useState("정상");
+  const [todayStatus, setTodayStatus] = useState("미출근");
+  const [todayHours, setTodayHours] = useState("-");
+  const [checkInIso, setCheckInIso] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const calcDuration = (inIso: string, outIso: string) => {
+    const mins = Math.round((new Date(outIso).getTime() - new Date(inIso).getTime()) / 60000);
+    if (mins <= 0) return "-";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
 
   // DB에서 오늘 근태 로드
   useEffect(() => {
@@ -80,14 +91,49 @@ export default function MyAttendancePage() {
       .then(data => {
         if (data.length > 0) {
           const t = data[0] as any;
-          if (t.check_in) setTodayIn(new Date(t.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
-          if (t.check_out) setTodayOut(new Date(t.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+          if (t.check_in) {
+            setTodayIn(new Date(t.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+            setCheckInIso(t.check_in);
+          }
+          if (t.check_out) {
+            setTodayOut(new Date(t.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+            if (t.check_in) setTodayHours(calcDuration(t.check_in, t.check_out));
+          }
           if (t.type) setTodayStatus(t.type === 'normal' ? '정상' : t.type);
           setClockedIn(!!t.check_in && !t.check_out);
         }
       })
       .catch(() => {});
   }, [user]);
+
+  // 출근/퇴근 → DB upsert
+  const handleClockToggle = async () => {
+    if (!user || saving) return;
+    setSaving(true);
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const timeStr = now.toISOString();
+    try {
+      if (!clockedIn) {
+        // 출근
+        await erpDb.upsertAttendance({ member_id: user.id, date: today, check_in: timeStr, type: 'normal' });
+        setTodayIn(now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+        setCheckInIso(timeStr);
+        setTodayStatus('정상');
+        setClockedIn(true);
+      } else {
+        // 퇴근
+        await erpDb.upsertAttendance({ member_id: user.id, date: today, check_out: timeStr });
+        setTodayOut(now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+        if (checkInIso) setTodayHours(calcDuration(checkInIso, timeStr));
+        setClockedIn(false);
+      }
+    } catch {
+      // 실패 시 상태 원복하지 않음 — 재시도 가능
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div>
@@ -126,15 +172,22 @@ export default function MyAttendancePage() {
               </div>
             </div>
           </div>
+          {todayHours !== "-" && (
+            <div className="mb-3 flex items-center justify-between rounded-md bg-neutral-50 px-3 py-2">
+              <span className="text-xs text-neutral-500">오늘 근무시간</span>
+              <span className="text-xs font-semibold text-neutral-700">{todayHours}</span>
+            </div>
+          )}
           <button
-            onClick={() => setClockedIn(!clockedIn)}
-            className={`w-full rounded-md py-2 text-xs font-medium transition-colors ${
+            onClick={handleClockToggle}
+            disabled={saving}
+            className={`w-full rounded-md py-2 text-xs font-medium transition-colors disabled:opacity-50 ${
               clockedIn
                 ? "bg-neutral-800 text-white hover:bg-neutral-700"
                 : "bg-blue-600 text-white hover:bg-blue-500"
             }`}
           >
-            {clockedIn ? "퇴근하기" : "출근하기"}
+            {saving ? "처리 중..." : clockedIn ? "퇴근하기" : "출근하기"}
           </button>
         </div></Card>
 

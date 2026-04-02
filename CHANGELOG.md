@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-04-03 (집, 세션 7)
+
+### Phase 0: 테넌트 격리 기반 구축
+
+**DB 변경:**
+- `sql/phase0-tenant-id.sql` — 80개 테이블에 `tenant_id TEXT DEFAULT 'tenone'` 추가 + 인덱스 11개
+- `sql/phase0-service-infra.sql` — `wio_tenant_configs`, `wio_feature_flags` 생성 + 시드 8개
+- `wio_subscription_plans`에 `service_type` 컬럼 추가
+
+**문서 변경:**
+- `CLAUDE.md` — WIO 2-Tier 모델, Tech Flywheel, 8원칙(#8), 테넌트 격리, DB 3분류
+- `ROADMAP.md` — Phase 0 삽입 + 2-Tier 모델
+- `docs/Identity_Architecture.md` — Tier 4 섹션 추가
+- `lib/supabase/erp.ts` — DEFAULT_TENANT 상수 + 안내 주석
+
+**결정사항:**
+- WIO 서비스 2-Tier: 규격(구독) + 맞춤(용역) 확정
+- Tech Flywheel: 맞춤 개발 → 코어 흡수 → 규격 업그레이드
+- tenant_id(계약 단위) vs brand_id(유니버스 브랜드) 분리 확정
+- Phase 0-C(중복 테이블 통합) 보류 — expenses 스키마가 wio_expenses보다 완성도 높음
+
+---
+
 ## 2026-04-02 (사무실, 저녁 세션 5 — 작업 종료)
 
 ### 인트라 전체 PageHeader 일관성 적용 (100+ 페이지)

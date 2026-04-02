@@ -144,6 +144,23 @@ export default function MyProjectsPage() {
         return () => { cancelled = true; };
     }, []);
 
+    // Job 상태 변경 → DB 저장
+    const handleJobStatusChange = async (projectCode: string, jobCode: string, newStatus: Job['status']) => {
+        // UI 즉시 반영
+        setProjects(prev => prev.map(p =>
+            p.code !== projectCode ? p : {
+                ...p, jobs: p.jobs.map(j => j.code === jobCode ? { ...j, status: newStatus } : j),
+            }
+        ));
+        // DB 저장 (jobCode가 UUID인 경우에만)
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobCode);
+        if (isUUID) {
+            try { await projectsDb.updateJob(jobCode, { status: newStatus }); } catch (e) {
+                console.error('[Jobs] status update failed:', e);
+            }
+        }
+    };
+
     if (!user) return null;
 
     if (loading) {
@@ -375,7 +392,13 @@ export default function MyProjectsPage() {
                                 <span className="text-neutral-600">{job.actualHours}</span>
                                 <span className="text-neutral-300">/{job.estimatedHours}h</span>
                             </div>
-                            <span className={clsx("col-span-1 text-xs px-1.5 py-0.5 rounded w-fit", jobStatusBadge[job.status])}>{job.status}</span>
+                            <select value={job.status} onChange={e => handleJobStatusChange(job.projectCode, job.code, e.target.value as Job['status'])}
+                                className={clsx("col-span-1 text-xs px-1.5 py-0.5 rounded border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-neutral-300", jobStatusBadge[job.status])}>
+                                <option value="대기">대기</option>
+                                <option value="진행중">진행중</option>
+                                <option value="완료">완료</option>
+                                <option value="보류">보류</option>
+                            </select>
                         </div>
                     ))}
                     {filteredAllJobs.length === 0 && <div className="py-8 text-center text-xs text-neutral-400">조건에 맞는 Job이 없습니다</div>}
@@ -459,7 +482,16 @@ export default function MyProjectsPage() {
                                                     <span className="text-neutral-600">{job.actualHours}</span>
                                                     <span className="text-neutral-300">/{job.estimatedHours}h</span>
                                                 </div>
-                                                <span className={clsx("col-span-1 text-xs px-1.5 py-0.5 rounded w-fit", jobStatusBadge[job.status])}>{job.status}</span>
+                                                <select
+                                                    value={job.status}
+                                                    onChange={e => handleJobStatusChange(project.code, job.code, e.target.value as Job['status'])}
+                                                    className={clsx("col-span-1 text-xs px-1.5 py-0.5 rounded border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-neutral-300", jobStatusBadge[job.status])}
+                                                >
+                                                    <option value="대기">대기</option>
+                                                    <option value="진행중">진행중</option>
+                                                    <option value="완료">완료</option>
+                                                    <option value="보류">보류</option>
+                                                </select>
                                                 <span className="col-span-1"></span>
                                             </div>
                                         ))}

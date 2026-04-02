@@ -147,7 +147,7 @@ export default function BIDashboardPage() {
                 <div className="border border-neutral-200 bg-white p-4">
                     <p className="text-[10px] text-neutral-400 mb-2">영업이익</p>
                     <div className="text-xl font-semibold tracking-tight">{fmtBillion(totalProfit)}</div>
-                    <div className="text-[10px] text-neutral-400 mt-1">이익률 {Math.round((totalProfit / totalRevenue) * 100)}%</div>
+                    <div className="text-[10px] text-neutral-400 mt-1">이익률 {totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0}%</div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
                     <p className="text-[10px] text-neutral-400 mb-2">진행 프로젝트</p>

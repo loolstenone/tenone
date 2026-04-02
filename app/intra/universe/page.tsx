@@ -108,7 +108,8 @@ function Sparkline({ trend }: { trend: number }) {
 }
 
 /* ── 상대 시간 표시 ── */
-function relativeTime(dateStr: string): string {
+function relativeTime(dateStr: string | null | undefined): string {
+    if (!dateStr) return "-";
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return "방금 전";

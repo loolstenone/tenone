@@ -42,12 +42,16 @@ export default function ApprovalPendingPage() {
 
     const handleApprove = (docNo: string) => {
         setItems((prev) => prev.filter((item) => item.docNo !== docNo));
-        erpDb.updateApprovalStatus(docNo, 'approved').catch(() => {});
+        erpDb.updateApprovalStatus(docNo, 'approved')
+            .then(() => erpDb.updateExpenseByApproval(docNo, 'approved'))
+            .catch(() => {});
     };
 
     const handleReject = (docNo: string) => {
         setItems((prev) => prev.filter((item) => item.docNo !== docNo));
-        erpDb.updateApprovalStatus(docNo, 'rejected').catch(() => {});
+        erpDb.updateApprovalStatus(docNo, 'rejected')
+            .then(() => erpDb.updateExpenseByApproval(docNo, 'rejected'))
+            .catch(() => {});
     };
 
     if (loading) return <Spinner />;

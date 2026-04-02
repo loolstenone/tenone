@@ -2181,3 +2181,58 @@ $$ LANGUAGE plpgsql;
 - [ ] 레거시 동기화 트리거 제거 (`trg_sync_legacy_on_role_change`)
 - [ ] auth-context 어댑터 fallback 제거
 - [ ] getRoles() fallback 제거
+
+---
+
+## Tier 4: 테넌트 격리 + WIO 서비스 계층 (2026-04-03 추가)
+
+> 기존 Tier 1~3은 **"누구인가"** (Identity).
+> Tier 4는 **"어떤 서비스를 쓰는가"** (Service Isolation).
+
+### 개념
+
+```
+Tier 1: 여권 (members — Core Identity)
+Tier 2: 뱃지 (member_roles — Universe Roles)
+Tier 3: 행성별 옷 (brand_profiles — Site-Specific)
+Tier 4: 서비스 격리 (tenant_id — Data Isolation)
+```
+
+### tenant_id vs brand_id
+
+```
+tenant_id = 계약 단위 (TenOne, XXXX Corp, VVVV Inc...)
+brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
+```
+
+- 유니버스 내부 브랜드: `tenant_id = 'tenone'` + `brand_id`로 구분
+- 외부 고객: 각자 `tenant_id` 보유 (WIO 구독 or 맞춤 서비스 계약)
+- Universe 분석 레이어 (Mindle/Whole See): 전체 tenant 크로스 분석 (PII 제거)
+
+### WIO 서비스 2-Tier와의 관계
+
+| 서비스 | tenant_id | 격리 방식 |
+|--------|-----------|----------|
+| 규격 서비스 (구독) | 자동 생성 | wio_subscription_plans + feature flags |
+| 맞춤 서비스 (용역) | 수동 생성 | wio_tenant_configs + custom config |
+| TenOne 자사 | 'tenone' (고정) | 모든 기능 접근 (super_admin) |
+
+### wio_members와의 연결
+
+```
+auth.users → profiles (Tier 1 — 인증)
+    ↓
+member_brand_joins (Tier 2 — Universe SSO)
+    ↓
+wio_members (Tier 3/4 — WIO 서비스 사용자)
+    ├── tenant_id: 어느 테넌트 소속인가
+    ├── user_id: auth.users(id)
+    └── role: 해당 테넌트에서의 권한
+```
+
+### Phase 0 완료 사항 (2026-04-03)
+
+- [x] 80개 테이블에 `tenant_id TEXT DEFAULT 'tenone'` 추가
+- [x] 기존 NULL 행 → 'tenone' 일괄 업데이트
+- [x] 핵심 11개 테이블에 tenant_id 인덱스 추가
+- [x] 시스템 테이블 5개 의도적 제외 (brands, site_configs, sso_tokens, wio_subscription_plans, wio_tenants)

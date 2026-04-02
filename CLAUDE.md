@@ -128,6 +128,58 @@ public/            # 정적 파일 (로고, 파비콘)
 **WIO 가격 (확정):**
 | Free(0원/5명) | Starter(4.9만/20명) | Pro(14.9만/100명) | Business(39.9만/무제한) | Enterprise(협의) |
 
+### WIO 서비스 2-Tier 모델
+
+> WIO(= SmarComm 포함)의 모든 서비스는 2가지 형태로 제공된다.
+
+| Tier | 이름 | 설명 | DB 격리 |
+|------|------|------|---------|
+| **규격 서비스** | Subscription | 등급별 기능 제한, 셀프서비스 온보딩, 동일 코드 | `tenant_id` + feature flags |
+| **맞춤 서비스** | Custom Installation | 클라이언트 최적화 용역, WIO팀 직접 설치 | `tenant_id` + custom config |
+
+**맞춤 서비스 목록 (확장됨):**
+- TenOne.biz (첫 번째 고객 = 자사)
+- 이후 외부 고객: XXXX, VVVV, AAAA...
+
+**SmarComm도 동일 구조:**
+- 규격: 구독형 캠페인/자동화/CRM (등급별 제한)
+- 맞춤: 특정 기업 마케팅 스택 최적화 설치
+
+### 기술 환류 원칙 (Tech Flywheel)
+
+> **맞춤 서비스 개발 과정에서 만든 기술적 진보는 모아서 규격 서비스 업그레이드에 활용한다.**
+
+```
+맞춤 서비스 개발 → 기술 진보 발생 → WIO 코어 흡수 → 규격 서비스 업그레이드 → 다음 맞춤은 더 높은 베이스 → (반복)
+```
+
+**흡수 기준:**
+| 구분 | 처리 |
+|------|------|
+| 일반화 가능한 기능 | WIO 코어 흡수 → 규격 서비스 포함 |
+| 특정 고객 데이터/도메인 | 고객 tenant에만 유지 |
+| UI 커스텀 | 테마/config로 추상화 후 흡수 |
+| 고객 전용 비즈니스 로직 | 맞춤 레이어 유지 (흡수 불가) |
+
+### 테넌트 격리 아키텍처
+
+```
+tenant_id = 계약 단위 (TenOne, XXXX Corp, VVVV Inc...)
+brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
+```
+
+- 내부 브랜드: `tenant_id = 'tenone'` + `brand_id`로 구분
+- 외부 고객: 각자 `tenant_id` 보유
+- Universe 분석 레이어 (Mindle/Whole See): 전체 tenant 크로스 분석 (PII 제거)
+
+### DB 테이블 3분류
+
+| 분류 | 접두사 | tenant_id | 외부 판매 |
+|------|--------|-----------|----------|
+| 제품 모듈 (판매용) | `wio_*` | 필수 | O |
+| 내부 운영 (자사) | `wio_*` | tenone 고정 | X (코드는 WIO 소유) |
+| Universe 운영 | `brand_id` 기반 | N/A | X |
+
 ## 브랜드 시스템
 
 Ten:One Universe는 여러 브랜드로 구성:
@@ -238,9 +290,9 @@ Ten:One Universe는 여러 브랜드로 구성:
 
 ---
 
-## 개발 규칙 — 모순 방지 7원칙 (위반 금지)
+## 개발 규칙 — 모순 방지 8원칙 (위반 금지)
 
-> 출처: `TenOne_Universe_Architecture_v1.md` Section 11
+> 출처: `TenOne_Universe_Architecture_v1.md` Section 11 + 2026-04-03 확정
 
 | # | 규칙 | 위반 시 문제 |
 |---|------|------------|
@@ -251,6 +303,7 @@ Ten:One Universe는 여러 브랜드로 구성:
 | 5 | 에이전트는 사람과 같은 API를 쓴다 | 에이전트 전용 API → UI 동기화 깨짐 |
 | 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 | RLS 격리 불가 |
 | 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 | SEO·테마 연동 깨짐 |
+| 8 | 맞춤 서비스 개발 기술은 WIO 코어에 환류한다 (Tech Flywheel) | 기술 자산 사장, 규격 서비스 정체 |
 
 ## 새 테이블 생성 전 체크리스트
 
@@ -258,6 +311,7 @@ Ten:One Universe는 여러 브랜드로 구성:
 - [ ] brand_id 또는 tenant_id 컬럼이 있는가?
 - [ ] RLS 정책이 brand_id/tenant_id 기반인가?
 - [ ] 외부 기업이 써도 작동하는가?
+- [ ] 이 기능이 맞춤 서비스에서 나왔다면, 규격 서비스로 환류 가능한가?
 
 ---
 

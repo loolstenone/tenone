@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, FileText } from "lucide-react";
+import { Plus, Search, FileText, X } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
 import { PageHeader, Card, StatCard, Badge, Spinner } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";
@@ -35,6 +35,15 @@ export default function ExpensesPage() {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [formDate, setFormDate] = useState("");
+    const [formCategory, setFormCategory] = useState("교통");
+    const [formDesc, setFormDesc] = useState("");
+    const [formAmount, setFormAmount] = useState("");
+    const [formPayMethod, setFormPayMethod] = useState("법인카드");
+    const [formSubmitter, setFormSubmitter] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [formError, setFormError] = useState("");
 
     useEffect(() => {
         setLoading(true);
@@ -66,12 +75,52 @@ export default function ExpensesPage() {
         ? expenses.filter(e => e.description.includes(search) || e.submitter.includes(search) || e.category.includes(search))
         : expenses;
 
+    const handleCreate = async () => {
+        if (!formDate) { setFormError("날짜를 입력하세요."); return; }
+        if (!formDesc.trim()) { setFormError("내용을 입력하세요."); return; }
+        const amt = Number(formAmount);
+        if (!amt || amt <= 0) { setFormError("금액을 입력하세요."); return; }
+        setSaving(true);
+        setFormError("");
+        try {
+            const created = await erpDb.createExpense({
+                member_id: user?.id || "",
+                expense_date: formDate,
+                description: formDesc.trim(),
+                amount: amt,
+                category: formCategory,
+                pay_method: formPayMethod,
+                submitter_name: formSubmitter.trim() || undefined,
+                status: "pending",
+            });
+            setExpenses(prev => [{
+                id: (created as any).id || String(Date.now()),
+                date: formDate,
+                category: formCategory,
+                description: formDesc.trim(),
+                amount: amt,
+                payMethod: formPayMethod,
+                status: "pending",
+                submitter: formSubmitter.trim(),
+                receipt: false,
+            }, ...prev]);
+            setShowModal(false);
+            setFormDate(""); setFormDesc(""); setFormAmount(""); setFormCategory("교통");
+            setFormPayMethod("법인카드"); setFormSubmitter("");
+        } catch {
+            setFormError("저장에 실패했습니다.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading) return <Spinner />;
 
     return (
         <div className="space-y-6">
             <PageHeader title="경비처리" description="경비 사용 내역을 관리하고 정산합니다.">
-                <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
+                <button onClick={() => { setShowModal(true); setFormError(""); }}
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-3 w-3" /> 경비 등록
                 </button>
             </PageHeader>
@@ -127,6 +176,70 @@ export default function ExpensesPage() {
                     </tbody>
                 </table>
             </Card>
+
+            {/* 경비 등록 모달 */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-md bg-white shadow-xl">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                            <h2 className="text-sm font-semibold">경비 등록</h2>
+                            <button onClick={() => setShowModal(false)} className="text-neutral-400 hover:text-neutral-700"><X className="h-4 w-4" /></button>
+                        </div>
+                        <div className="p-5 space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">날짜 *</label>
+                                    <input type="date" value={formDate} onChange={e => setFormDate(e.target.value)}
+                                        className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">분류</label>
+                                    <select value={formCategory} onChange={e => setFormCategory(e.target.value)}
+                                        className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400">
+                                        <option>교통</option><option>식비</option><option>사무용품</option><option>기타</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-neutral-600 mb-1">내용 *</label>
+                                <input type="text" value={formDesc} onChange={e => setFormDesc(e.target.value)}
+                                    className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400"
+                                    placeholder="경비 사용 내용" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">금액 (원) *</label>
+                                    <input type="number" min="0" value={formAmount} onChange={e => setFormAmount(e.target.value)}
+                                        className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400"
+                                        placeholder="0" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">결제수단</label>
+                                    <select value={formPayMethod} onChange={e => setFormPayMethod(e.target.value)}
+                                        className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400">
+                                        <option>법인카드</option><option>개인카드</option><option>현금</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-neutral-600 mb-1">신청자</label>
+                                <input type="text" value={formSubmitter} onChange={e => setFormSubmitter(e.target.value)}
+                                    className="w-full border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:border-neutral-400"
+                                    placeholder="이름" />
+                            </div>
+                            {formError && <p className="text-xs text-red-500">{formError}</p>}
+                        </div>
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-neutral-100">
+                            <button onClick={() => setShowModal(false)}
+                                className="px-4 py-2 text-xs text-neutral-500 border border-neutral-200 hover:bg-neutral-50">취소</button>
+                            <button onClick={handleCreate} disabled={saving}
+                                className="px-4 py-2 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-50">
+                                {saving ? "저장 중..." : "등록"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

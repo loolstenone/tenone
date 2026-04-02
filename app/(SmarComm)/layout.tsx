@@ -2,10 +2,7 @@ import './smarcomm.css';
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
-import { cookies } from 'next/headers';
-import { SmarCommPreviewGate } from '@/features/smarcomm/SmarCommPreviewGate';
-
-const PREVIEW_KEY = 'tenone1001';
+// Preview gate removed — SmarComm 활성화 (Phase 1-B, 2026-04-03)
 
 export async function generateMetadata(): Promise<Metadata> {
     const db = await getSiteConfigServer('smarcomm');
@@ -25,16 +22,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SmarCommGroupLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const hasPreview = cookieStore.get('sc_preview')?.value === PREVIEW_KEY;
-
-  if (!hasPreview) {
-    return (
-      <div className="smarcomm-theme">
-        <SmarCommPreviewGate previewKey={PREVIEW_KEY} />
-      </div>
-    );
-  }
-
   return <div className="smarcomm-theme">{children}</div>;
 }

@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
                                     </div>
                                 </div>
                                 <div className="text-right shrink-0">
-                                    <p className="text-sm font-bold">{Math.round(t.relevanceScore * 100)}%</p>
+                                    <p className="text-sm font-bold">{Math.round((t.relevanceScore ?? 0) * 100)}%</p>
                                     <p className="text-[10px] text-neutral-400">관련도</p>
                                 </div>
                             </div>

@@ -406,6 +406,34 @@ export default function MyGPRPage() {
       )
     );
 
+  // 자기평가 DB 저장
+  const [saving, setSaving] = useState(false);
+  const [saveToast, setSaveToast] = useState('');
+  const handleSaveSelfEval = async () => {
+    if (!user || saving) return;
+    setSaving(true);
+    let allOk = true;
+    for (const g of goals) {
+      // DB에 존재하는 goal만 업데이트 (id가 UUID 형식인 경우)
+      if (!g.id || g.id.startsWith('g')) continue; // Mock ID 스킵
+      try {
+        await erpDb.updateGprGoal(g.id, {
+          self_what: g.selfWhat ?? null,
+          self_what_comment: g.selfWhatComment ?? null,
+          self_how: g.selfHow ?? null,
+          self_attitude: g.selfAttitude ?? null,
+          progress: g.progress,
+          result: g.result,
+        });
+      } catch {
+        allOk = false;
+      }
+    }
+    setSaving(false);
+    setSaveToast(allOk ? '자기평가가 저장되었습니다.' : '일부 저장 실패');
+    setTimeout(() => setSaveToast(''), 2500);
+  };
+
   const tabs = [
     { key: "goals" as const, label: "목표 현황" },
     { key: "self" as const, label: "자기평가" },
@@ -630,6 +658,12 @@ export default function MyGPRPage() {
       {/* ══════════════════════════════════════ */}
       {activeTab === "self" && (
         <div className="space-y-4">
+          {/* Save Toast */}
+          {saveToast && (
+            <div className="fixed top-4 right-4 z-50 px-4 py-2 bg-neutral-900 text-white text-xs rounded-lg shadow-lg">
+              {saveToast}
+            </div>
+          )}
           {/* Warning Banner */}
           <div className="bg-amber-50 border border-amber-200 px-4 py-3 flex items-center gap-3">
             <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
@@ -736,9 +770,19 @@ export default function MyGPRPage() {
             />
           </Card>
 
-          <button className="w-full py-2.5 bg-neutral-900 text-white text-xs font-medium rounded hover:bg-neutral-800">
-            자기평가 제출
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSaveSelfEval}
+              disabled={saving}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-neutral-100 text-neutral-700 text-xs font-medium rounded hover:bg-neutral-200 disabled:opacity-50"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {saving ? '저장 중...' : '임시저장'}
+            </button>
+            <button className="flex-1 py-2.5 bg-neutral-900 text-white text-xs font-medium rounded hover:bg-neutral-800">
+              자기평가 제출
+            </button>
+          </div>
         </div>
       )}
 

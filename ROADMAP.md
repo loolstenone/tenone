@@ -45,6 +45,16 @@ WIO(공장) ──────── MKT-* 인프라 ────────┘
 | 5 | 에이전트는 사람과 같은 API를 쓴다 |
 | 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 |
 | 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 |
+| 8 | 맞춤 서비스 개발 기술은 WIO 코어에 환류한다 (Tech Flywheel) |
+
+### WIO 서비스 2-Tier 모델 (2026-04-03 확정)
+```
+WIO / SmarComm
+├── 규격 서비스 (Subscription) — 등급별 기능 제한, 동일 코드, 셀프서비스
+└── 맞춤 서비스 (Custom Installation) — 클라이언트 최적화 용역, 직접 설치
+    └── TenOne.biz (첫 번째 고객=자사), XXXX, VVVV, AAAA...
+```
+**Tech Flywheel**: 맞춤 개발 → 기술 진보 → WIO 코어 흡수 → 규격 서비스 업그레이드 → 반복
 
 ---
 
@@ -73,7 +83,41 @@ WIO(공장) ──────── MKT-* 인프라 ────────┘
 
 ---
 
-## Phase 1: 4대 제품 Intra 통제 레이어 (4월)
+## Phase 0: 테넌트 격리 기반 구축 (4월 1~2주)
+
+> **목표: 외부 고객이 들어와도 데이터가 섞이지 않는 격리 구조 확보**
+> **원칙: 지금 동작하는 코드는 건드리지 않는다. 격리 구조만 씌운다.**
+
+### 0-A. tenant_id 일괄 추가 [8원칙 #6 위반 63개 테이블 정비]
+- [ ] 위반 테이블 목록 확정 (expenses, approvals, members, timesheets, attendance, posts 등 63개)
+- [ ] `sql/phase0-tenant-id.sql` 작성 — `ALTER TABLE ADD COLUMN tenant_id TEXT DEFAULT 'tenone'`
+- [ ] 기존 행 업데이트 — `UPDATE SET tenant_id = 'tenone' WHERE tenant_id IS NULL`
+- [ ] RLS 정책 추가 — tenant_isolation 정책 (기존 정책 유지)
+- [ ] Prod DB 실행 + 검증
+
+### 0-B. 고객 아이덴티티 계층 확정
+- [ ] TIER 1: `auth.users` → `profiles` (인증 + 기본 프로필)
+- [ ] TIER 2: `member_brand_joins` (Universe SSO — 다중 브랜드 가입)
+- [ ] TIER 3: `wio_members` (WIO 서비스 멤버 — tenant_id 기반)
+- [ ] TIER 4: 각 테이블 tenant_id 격리 (데이터 분리)
+- [ ] 아이덴티티 흐름 문서화 (`docs/Identity_Architecture.md`)
+
+### 0-C. 중복 테이블 정리
+- [ ] `expenses` → `wio_expenses` 데이터 마이그레이션 + erp.ts 쿼리 대상 변경
+- [ ] `approvals` → `wio_approvals` 마이그레이션
+- [ ] `timesheets` → `wio_timesheets` 마이그레이션
+- [ ] `chat_threads/messages` → `wio_chat_threads/messages` 통합
+- [ ] 마이그레이션 완료 후 구 테이블 deprecated 표시 (삭제는 Phase 1 이후)
+
+### 0-D. WIO 서비스 인프라
+- [ ] `wio_tenant_configs` 테이블 생성 (맞춤 서비스 설정 저장)
+- [ ] `wio_subscription_plans`에 service_type 컬럼 추가 ('standard' | 'custom')
+- [ ] `wio_feature_flags` 테이블 생성 (규격 서비스 등급별 기능 제한)
+- [ ] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가 (기본값 'tenone', 코드 호환)
+
+---
+
+## Phase 1: 4대 제품 Intra 통제 레이어 (4월 3~4주)
 
 > **목표: Intra 하나에서 Mindle·SmarComm·WIO·AI Agent를 통제할 수 있는 상태**
 

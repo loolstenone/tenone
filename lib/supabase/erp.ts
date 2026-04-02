@@ -1,10 +1,16 @@
 /**
  * ERP Supabase CRUD 함수
  * approvals, timesheets (projects.ts에도 있음), point_logs
+ *
+ * tenant_id 격리: 모든 테이블에 tenant_id TEXT DEFAULT 'tenone' 추가됨 (Phase 0-A, 2026-04-03)
+ * 현재는 TenOne 전용이므로 필터 생략. 외부 고객 추가 시 DEFAULT_TENANT 기반 필터 활성화.
  */
 import { createClient } from './client';
 
 const supabase = createClient();
+
+/** 현재 테넌트 ID — 외부 고객 추가 시 동적으로 변경 */
+export const DEFAULT_TENANT = 'tenone';
 
 // ── Approvals (결재) ──
 
@@ -149,6 +155,15 @@ export async function updateExpense(id: string, input: Record<string, unknown>) 
     const { data, error } = await supabase.from('expenses').update(input).eq('id', id).select().single();
     if (error) throw error;
     return data;
+}
+
+export async function updateExpenseByApproval(approvalId: string, status: string) {
+    // approvals.reference_id → expenses.id 연결: 결재 승인/반려 시 경비 상태 동기화
+    const { data: approval } = await supabase.from('approvals').select('reference_id, reference_type').eq('id', approvalId).single();
+    if (approval?.reference_type === 'expense' && approval?.reference_id) {
+        const expenseStatus = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status;
+        await supabase.from('expenses').update({ status: expenseStatus, updated_at: new Date().toISOString() }).eq('id', approval.reference_id);
+    }
 }
 
 // ── GPR Goals ──

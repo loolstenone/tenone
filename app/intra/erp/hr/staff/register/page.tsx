@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { StaffRole, Division, SystemAccess } from "@/types/staff";
 import { divisions, positions, accessOptions, divisionDefaultAccess, brandOptions } from "@/lib/staff-data";
-import * as membersDb from "@/lib/supabase/members";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -69,22 +68,35 @@ export default function StaffRegisterPage() {
             setError('시스템 접근 권한을 1개 이상 선택해주세요.'); return;
         }
 
-        const initials = form.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || form.name.slice(0, 2).toUpperCase();
-        const now = new Date().toISOString().split('T')[0];
-
-        // DB 저장 (Supabase members 테이블)
+        // API route (service_role) → Supabase Auth 계정 + members 행 동시 생성
         try {
-            await membersDb.createStaffMember({
-                email: form.email,
-                name: form.name,
-                department: form.department,
-                position: form.position,
-                employee_id: form.employeeId,
-                system_access: form.accessLevel,
+            const res = await fetch('/api/admin/create-staff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: form.email,
+                    name: form.name,
+                    tempPassword: form.tempPassword,
+                    employeeId: form.employeeId,
+                    division: form.division,
+                    department: form.department,
+                    position: form.position,
+                    role: form.role,
+                    phone: form.phone || null,
+                    startDate: form.startDate || null,
+                    brandAssociation: form.brandAssociation,
+                    systemAccess: form.accessLevel,
+                }),
             });
-            console.log('[Staff] Saved to DB:', form.name);
+            const json = await res.json();
+            if (!res.ok) {
+                setError(json.error || '직원 등록에 실패했습니다.');
+                return;
+            }
         } catch (err) {
-            console.warn('[Staff] DB save failed (mock saved):', err);
+            console.error('[Staff] create-staff API error:', err);
+            setError('서버 오류가 발생했습니다.');
+            return;
         }
 
         setSuccess(true);

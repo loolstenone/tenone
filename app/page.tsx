@@ -398,7 +398,14 @@ export default function HomePage() {
                         </div>
                     ) : (
                         <>
-                            <form onSubmit={e => { e.preventDefault(); if (nlEmail.trim() && nlAgree) setNlSubscribed(true); }}
+                            <form onSubmit={async e => {
+                                    e.preventDefault();
+                                    if (!nlEmail.trim() || !nlAgree) return;
+                                    try {
+                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim() }) });
+                                        if (res.ok) setNlSubscribed(true);
+                                    } catch { setNlSubscribed(true); }
+                                }}
                                 className="flex flex-col sm:flex-row items-center gap-3 max-w-lg mx-auto">
                                 <input type="email" value={nlEmail} onChange={e => setNlEmail(e.target.value)}
                                     placeholder="이메일 주소를 입력하세요"

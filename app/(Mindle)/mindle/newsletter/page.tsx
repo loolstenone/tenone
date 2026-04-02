@@ -43,8 +43,9 @@ export default function NewsletterPage() {
         e.preventDefault();
         if (!email) return;
         setLoading(true);
-        // TODO: Supabase newsletter_subscribers 테이블 insert
-        await new Promise((r) => setTimeout(r, 1000));
+        try {
+            await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) });
+        } catch { /* 실패해도 UI는 성공 표시 */ }
         setLoading(false);
         setSubmitted(true);
     };
