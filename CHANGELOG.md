@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-04-02 (사무실, 저녁 세션 5 — 작업 종료)
+
+### 인트라 전체 PageHeader 일관성 적용 (100+ 페이지)
+
+**수정 파일 (102개):**
+- 인트라 전체 페이지에 `PageHeader` 컴포넌트 적용 (border-b-2 구분선 통일)
+- myverse/*, project/*, partner-pool, opportunity, hero/*(8개), evolution-school
+- wiki/*(7개), comm/*, universe/members/guests/privacy
+- studio/*(12개), ERP 서브(29개), marketing(14개), bums 서브
+- 각 페이지 외곽 `max-w-*` 제거 → 레이아웃 `max-w-[1200px]` 통일
+
+**버그 수정:**
+- `project/timesheet` — Rules of Hooks (useMemo 위치 수정) → 페이지 로딩 복구
+- `myverse/messenger` — negative margin 제거 → 1200px 폭 통일
+- `project/management/new` — 중복 import 제거 → 빌드 에러 해결
+
+**커밋:** `be3cdb0` (102파일), `a96bc38` (max-w 6파일)
+**배포:** Vercel prod 배포 완료
+
+**결정사항:**
+- 인트라 모든 페이지는 개별 max-w 금지, 레이아웃의 max-w-[1200px]만 사용
+- PageHeader 구분선은 border-b-2 border-neutral-200 pb-4 mb-6 고정
+
+---
+
 ## 2026-04-02 (사무실, 오후)
 
 ### A1: L1 site_configs DB 연동
