@@ -7,18 +7,12 @@ import {
   Search,
   FileText,
   Briefcase,
-  Users,
   Building2,
   TrendingUp,
-  Star,
   Target,
-  Zap,
   ChevronRight,
-  Award,
   UserCheck,
-  Handshake,
   GraduationCap,
-  CheckCircle2,
 } from "lucide-react";
 
 /* ── 인재 파이프라인 단계 ── */
@@ -77,55 +71,8 @@ const services = [
   },
 ];
 
-/* ── 최근 매칭 성과 ── */
-const recentMatches = [
-  {
-    talent: "김서연",
-    from: "MAD League 5기",
-    role: "브랜드 마케터",
-    company: "스타트업 A사",
-    status: "입사 확정",
-    score: 94,
-  },
-  {
-    talent: "박준호",
-    from: "MAD League 4기",
-    role: "프로덕트 디자이너",
-    company: "IT 대기업 B사",
-    status: "최종 합격",
-    score: 91,
-  },
-  {
-    talent: "이하나",
-    from: "MAD League 5기",
-    role: "데이터 분석가",
-    company: "핀테크 C사",
-    status: "인턴 전환",
-    score: 88,
-  },
-  {
-    talent: "최민수",
-    from: "MAD League 3기",
-    role: "풀스택 개발자",
-    company: "AI 스타트업 D사",
-    status: "입사 확정",
-    score: 96,
-  },
-];
 
-/* ── 통계 ── */
-const stats = [
-  { icon: Handshake, value: "100+", label: "매칭 성사", unit: "건" },
-  { icon: Building2, value: "50+", label: "파트너 기업", unit: "개" },
-  { icon: Users, value: "500+", label: "등록 인재", unit: "명" },
-  { icon: Award, value: "92%", label: "매칭 만족도", unit: "" },
-];
-
-/* ── 파트너 기업 (가상) ── */
-const partners = [
-  "카카오", "네이버", "라인", "쿠팡", "토스", "당근",
-  "무신사", "마켓컬리", "리디", "왓챠",
-];
+/* ── 파트너 기업 모집 중 ── */
 
 /* ── Universe 연결 ── */
 const universeLinks = [
@@ -181,23 +128,6 @@ export default function HeRoHomePage() {
         </div>
       </section>
 
-      {/* ━━ Stats Bar ━━ */}
-      <section className="bg-[#D85A30]">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            {stats.map((s) => (
-              <div key={s.label} className="flex flex-col items-center">
-                <s.icon className="h-5 w-5 mb-2 text-white/80" />
-                <p className="text-2xl md:text-4xl font-black">
-                  {s.value}
-                  {s.unit && <span className="text-base font-normal text-white/70 ml-1">{s.unit}</span>}
-                </p>
-                <p className="text-sm text-white/80 mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ━━ 인재 파이프라인 시각화 ━━ */}
       <section className="bg-white py-20">
@@ -281,78 +211,18 @@ export default function HeRoHomePage() {
         </div>
       </section>
 
-      {/* ━━ 최근 매칭 성과 ━━ */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">최근 매칭 성과</h2>
-              <p className="text-neutral-500">HeRo를 통해 기업과 연결된 인재들</p>
-            </div>
-            <Link
-              href="/hero/career"
-              className="inline-flex items-center gap-1 text-sm text-[#D85A30] font-semibold hover:gap-2 transition-all"
-            >
-              전체 성과 보기 <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {recentMatches.map((m) => (
-              <div
-                key={m.talent}
-                className="border border-neutral-200 rounded-2xl p-6 hover:border-[#D85A30]/40 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-full bg-[#D85A30] text-white flex items-center justify-center font-bold text-lg">
-                    {m.talent.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{m.talent}</p>
-                    <p className="text-xs text-neutral-400">{m.from}</p>
-                  </div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">포지션</span>
-                    <span className="font-medium">{m.role}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">기업</span>
-                    <span className="font-medium">{m.company}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">HIT 점수</span>
-                    <span className="font-bold text-[#D85A30]">{m.score}점</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="text-xs font-semibold text-emerald-600">{m.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ━━ 파트너 기업 ━━ */}
+      {/* ━━ 파트너 기업 모집 ━━ */}
       <section className="bg-neutral-50 py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">파트너 기업</h2>
-            <p className="text-neutral-500">HeRo 인재와 함께하는 기업들</p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            {partners.map((p) => (
-              <div
-                key={p}
-                className="px-6 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-600 hover:border-[#D85A30]/40 hover:text-[#D85A30] transition-colors"
-              >
-                {p}
-              </div>
-            ))}
-          </div>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">파트너 기업 모집 중</h2>
+          <p className="text-neutral-500 mb-8">HeRo 인재를 채용하고 싶은 기업이라면 파트너십을 신청해 주세요</p>
+          <Link
+            href="/hero/about"
+            className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-[#D85A30] text-[#D85A30] font-bold hover:bg-[#D85A30] hover:text-white transition-colors rounded-xl"
+          >
+            파트너십 알아보기 <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
