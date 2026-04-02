@@ -1,6 +1,21 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션 2)
+> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션 3)
+
+## 오늘 한 작업 (4/2 저녁 세션 3)
+
+### 버그 수정 ✅
+
+1. **B3 Kanban 0건 수정** — `lib/supabase/workflow.ts` `rowToTask`에 STATUS_MAP/PRIORITY_MAP 추가. DB lowercase(`todo`, `in_progress`) → TaskStatus PascalCase(`Todo`, `In Progress`) 매핑 ✅
+2. **B4 WIO Orbi 로딩 부분수정** — 10초 타임아웃 fallback + 로딩 화면 다크 → 흰색(B&W) ✅
+3. **TS 오류 수정** — `app/intra/layout.tsx` `session` 파라미터 명시적 타입 추가 ✅
+
+### 버그 현황
+
+- B1 (`/intra/bums/boards` 크래시): 코드 분석 완료, 명확한 크래시 원인 미발견. 런타임 콘솔 로그 필요
+- B2 (Agent Hub 인코딩): 구형 레코드만 깨짐. 신규 메시지 정상. ANTHROPIC_API_KEY 환경변수 설정 필요 → Vercel 환경변수에 추가 필요
+
+---
 
 ## 오늘 한 작업 (4/2 저녁 세션 2)
 
@@ -69,9 +84,9 @@
 | # | 페이지 | 문제 | 난이도 |
 |---|--------|------|--------|
 | B1 | `/intra/bums/boards` | 클라이언트 크래시. 빌드 통과하지만 런타임 에러. 콘솔 로그 확인 필요 | 중 |
-| B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐. DB 인코딩 또는 저장 시 바이너리 변환 문제 | 중 |
-| B3 | Kanban 보드 | 0건 표시. fetchWorkflowTasks가 빈 배열 반환 → Mock fallback 조건 확인 | 하 |
-| B4 | wio.tenone.biz | "Orbi 로딩 중..." 다크 스크린. wio_members 멤버십 확인 필요 | 중 |
+| B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐 (구형 레코드 한정). 신규 메시지는 정상. ANTHROPIC_API_KEY 환경변수 미설정으로 Mock 응답 중 | 중 |
+| ~~B3~~ | ~~Kanban 보드~~ | ✅ **수정완료** — `rowToTask`에서 DB lowercase status(`todo`, `in_progress`) → TaskStatus PascalCase 매핑 추가 | ✅ |
+| B4 | wio.tenone.biz | "Orbi 로딩 중..." 다크 스크린 → **부분수정**: 10초 타임아웃 fallback + 로딩 화면 흰색 전환. 근본 원인 미확인 | 중 |
 
 ## 미해결 — 도메인
 

@@ -113,9 +113,16 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   // Init tenant
   useEffect(() => {
     const init = async () => {
+      // 10초 내 완료 안 되면 데모 모드로 fallback
+      const timeout = setTimeout(() => {
+        setTenant(demoTenant());
+        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+        setLoading(false);
+      }, 10000);
       try {
         const sb = createClient();
         const { data: { user } } = await sb.auth.getUser();
+        clearTimeout(timeout);
         if (!user) {
           setTenant(demoTenant());
           setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
@@ -141,6 +148,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
         // 소속 워크스페이스 없음 → 온보딩 상태
         if (tenants.length === 0) {
+          clearTimeout(timeout);
           setNoWorkspace(true);
           setAuthUser(user);
           setLoading(false);
@@ -154,7 +162,7 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
         // 멤버십 조회
         const { data: mData } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
-        let m: WIOMember | null = mData ? (() => {
+        const m: WIOMember | null = mData ? (() => {
           const result: Record<string, unknown> = {};
           for (const [key, value] of Object.entries(mData as Record<string, unknown>)) {
             result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
@@ -162,8 +170,10 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
           return result as unknown as WIOMember;
         })() : null;
         setMember(m);
+        clearTimeout(timeout);
         setLoading(false);
       } catch {
+        clearTimeout(timeout);
         setTenant(demoTenant());
         setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
         setLoading(false);
@@ -174,10 +184,10 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0F0F23] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-slate-500">Orbi 로딩 중...</p>
+          <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs text-neutral-400">Orbi 로딩 중...</p>
         </div>
       </div>
     );

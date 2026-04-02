@@ -179,7 +179,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
     // auth 이벤트 감지: SIGNED_OUT → 로그인 폼, TOKEN_REFRESHED/SIGNED_IN → JWT fast-path 재시도
     useEffect(() => {
         const sb = createClient();
-        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string, session) => {
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string, session: import('@supabase/supabase-js').Session | null) => {
             if (event === 'SIGNED_OUT') {
                 sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                 setStatus("login");

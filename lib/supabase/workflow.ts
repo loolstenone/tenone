@@ -9,13 +9,26 @@ const supabase = createClient();
 
 // ── WorkflowTask ──
 
+const STATUS_MAP: Record<string, TaskStatus> = {
+    'backlog': 'Backlog', 'todo': 'Todo', 'in_progress': 'In Progress',
+    'review': 'Review', 'done': 'Done',
+    'Backlog': 'Backlog', 'Todo': 'Todo', 'In Progress': 'In Progress',
+    'Review': 'Review', 'Done': 'Done',
+};
+const PRIORITY_MAP: Record<string, TaskPriority> = {
+    'low': 'Low', 'medium': 'Medium', 'high': 'High', 'urgent': 'Urgent',
+    'Low': 'Low', 'Medium': 'Medium', 'High': 'High', 'Urgent': 'Urgent',
+};
+
 function rowToTask(r: Record<string, unknown>): WorkflowTask {
+    const rawStatus = r.status as string;
+    const rawPriority = r.priority as string;
     return {
         id: r.id as string,
         title: (r.title as string) || '',
         description: (r.description as string) || '',
-        status: ((r.status as string) || 'Backlog') as TaskStatus,
-        priority: ((r.priority as string) || 'Medium') as TaskPriority,
+        status: (STATUS_MAP[rawStatus] || 'Backlog') as TaskStatus,
+        priority: (PRIORITY_MAP[rawPriority] || 'Medium') as TaskPriority,
         assignee: (r.assignee as string) || '',
         brandId: (r.brand_id as string) || '',
         dueDate: (r.due_date as string)?.split('T')[0] || undefined,
