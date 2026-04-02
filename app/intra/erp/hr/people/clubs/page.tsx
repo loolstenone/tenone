@@ -263,13 +263,8 @@ export default function ClubsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-            <Users size={18} className="text-neutral-600" />
-            MADLeague 동아리 관리
-          </h1>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            전국 대학생 마케팅·광고 동아리 연합
-          </p>
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">MADLeague 동아리 관리</h1>
+          <p className="text-sm text-neutral-400 mt-0.5">전국 대학생 마케팅·광고 동아리 연합</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}

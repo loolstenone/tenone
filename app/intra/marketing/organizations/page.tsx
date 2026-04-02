@@ -27,8 +27,8 @@ export default function OrganizationsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Organizations</h2>
-                <p className="mt-2 text-neutral-500">파트너, 클라이언트, 스폰서 조직을 관리합니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Organizations</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">파트너, 클라이언트, 스폰서 조직을 관리합니다.</p>
             </div>
 
             {loading ? (

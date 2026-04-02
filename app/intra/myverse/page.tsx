@@ -172,7 +172,7 @@ export default function MyversePage() {
             {/* 인사말 + 격언 */}
             <div className="mb-6">
                 <h1 className="text-lg font-semibold tracking-tight text-neutral-900">안녕하세요, {user.name}님</h1>
-                <p className="text-sm text-neutral-500 mt-1 italic">{todayQuote}</p>
+                <p className="text-sm text-neutral-400 mt-0.5 italic">{todayQuote}</p>
             </div>
 
             {/* 전체 현황: 공지 + 일정 (직원만) */}

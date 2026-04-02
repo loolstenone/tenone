@@ -190,22 +190,9 @@ export default function SitesListPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">사이트 관리</h1>
-                    {dbLoaded && (
-                        <span className={clsx(
-                            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full",
-                            dbConfigs.length > 0
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-amber-50 text-amber-600"
-                        )}>
-                            <Database className="h-2.5 w-2.5" />
-                            {dbConfigs.length > 0 ? "DB 연동" : "Static"}
-                        </span>
-                    )}
-                </div>
-                <p className="text-sm text-neutral-500 mt-1">
+            <div className="border-b border-neutral-100 pb-5 mb-6">
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">사이트 관리</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">
                     {allSites.length}개 사이트 — 도메인, SEO, 브랜딩 정보를 관리합니다.
                 </p>
             </div>

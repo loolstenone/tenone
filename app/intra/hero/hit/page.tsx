@@ -96,8 +96,8 @@ export default function HitTestPage() {
                 <div className="w-16 h-16 bg-neutral-900 text-white flex items-center justify-center mx-auto mb-6">
                     <ClipboardCheck className="h-8 w-8" />
                 </div>
-                <h1 className="text-xl font-semibold mb-2">검사 완료!</h1>
-                <p className="text-sm text-neutral-500 mb-8">
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">검사 완료!</h1>
+                <p className="text-sm text-neutral-400 mb-8">
                     결과 리포트를 확인하세요. HIT 기반으로 HeRo 캐릭터가 생성되었습니다.
                 </p>
                 <Link
@@ -113,8 +113,8 @@ export default function HitTestPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold">HIT — HeRo Integrated Test</h1>
-                <p className="text-sm text-neutral-500 mt-1">인성 · 적성 · 역량 · 준비도 통합 진단</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">HIT — HeRo Integrated Test</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">인성 · 적성 · 역량 · 준비도 통합 진단</p>
             </div>
 
             {/* Progress */}

@@ -38,8 +38,8 @@ export default function ActivitiesPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Activities</h2>
-                <p className="mt-2 text-neutral-500">미팅, 전화, 이메일 등 활동 기록을 관리합니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Activities</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">미팅, 전화, 이메일 등 활동 기록을 관리합니다.</p>
             </div>
 
             {loading ? (

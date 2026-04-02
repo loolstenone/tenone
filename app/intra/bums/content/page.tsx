@@ -148,8 +148,8 @@ export default function ContentManagementPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold tracking-tight">콘텐츠 관리</h1>
-                    <p className="text-sm text-neutral-500 mt-1">
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">콘텐츠 관리</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">
                         {selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)}의 게시글을 통합 관리합니다.
                     </p>
                 </div>

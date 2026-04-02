@@ -97,7 +97,7 @@ export default function StaffRegisterPage() {
                     <div className="h-16 w-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
                         <UserPlus className="h-8 w-8 text-neutral-500" />
                     </div>
-                    <h3 className="text-xl font-semibold">직원이 등록되었습니다</h3>
+                    <h3 className="text-lg font-semibold tracking-tight text-neutral-900">직원이 등록되었습니다</h3>
                     <p className="text-sm text-neutral-500 mt-2">{form.name} ({form.employeeId})</p>
                 </div>
             </div>
@@ -111,8 +111,8 @@ export default function StaffRegisterPage() {
             </Link>
 
             <div>
-                <h2 className="text-xl font-semibold">직원 등록</h2>
-                <p className="mt-2 text-neutral-500">새로운 직원을 시스템에 등록합니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">직원 등록</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">새로운 직원을 시스템에 등록합니다.</p>
             </div>
 
             <form onSubmit={handleSubmit}>

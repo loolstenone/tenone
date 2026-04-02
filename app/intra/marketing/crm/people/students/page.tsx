@@ -29,8 +29,8 @@ export default function StudentsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Students</h2>
-                <p className="mt-2 text-neutral-500">MADLeague / MADLeap 대학생 멤버 관리</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Students</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">MADLeague / MADLeap 대학생 멤버 관리</p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">

@@ -38,8 +38,8 @@ export default function ProjectsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Brand Projects</h2>
-                    <p className="mt-2 text-neutral-500">브랜드별 프로젝트 진행 현황을 관리합니다.</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Brand Projects</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">브랜드별 프로젝트 진행 현황을 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Filter className="h-4 w-4 text-neutral-400" />

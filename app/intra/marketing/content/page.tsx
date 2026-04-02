@@ -29,8 +29,8 @@ export default function ContentPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Content</h2>
-                <p className="mt-2 text-neutral-500">채널별 콘텐츠 발행을 관리합니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Content</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">채널별 콘텐츠 발행을 관리합니다.</p>
             </div>
 
             {loading ? (

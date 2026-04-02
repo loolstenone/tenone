@@ -198,8 +198,8 @@ export default function FinancialsPage() {
     <div className="max-w-6xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-semibold">프로젝트 손익</h1>
-        <p className="text-sm text-neutral-500 mt-1">프로젝트별 수익성 관리</p>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 손익</h1>
+        <p className="text-sm text-neutral-400 mt-0.5">프로젝트별 수익성 관리</p>
       </div>
 
       {/* 직원 전용 안내 */}

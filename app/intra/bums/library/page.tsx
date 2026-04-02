@@ -214,7 +214,7 @@ export default function CmsLibraryPage() {
 
             <div className="flex items-center justify-between mb-5">
                 <div>
-                    <h1 className="text-xl font-semibold">라이브러리 관리</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">라이브러리 관리</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">전체 사이트의 모든 파일을 통합 관리합니다</p>
                 </div>
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">

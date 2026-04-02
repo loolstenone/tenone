@@ -77,8 +77,8 @@ export default function CareerRoadmapPage() {
     return (
         <div className="max-w-4xl">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold mb-1">성장 로드맵</h1>
-                <p className="text-sm text-neutral-500">C-Level을 향한 경로 설계</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">성장 로드맵</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">C-Level을 향한 경로 설계</p>
             </div>
 
             {/* Current Position */}

@@ -49,8 +49,8 @@ export default function StudioPage() {
         <div className="h-[calc(100vh-8rem)] flex flex-col">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-xl font-semibold">Content Studio</h2>
-                    <p className="mt-2 text-neutral-500">Manage content pipeline from idea to publication.</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Content Studio</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">Manage content pipeline from idea to publication.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium transition-all">

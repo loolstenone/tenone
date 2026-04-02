@@ -58,8 +58,8 @@ export default function ContactsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-xl font-semibold">Contacts (CRM)</h2>
-                    <p className="mt-2 text-neutral-500">Manage relationships with partners, clients, and influencers.</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Contacts (CRM)</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">Manage relationships with partners, clients, and influencers.</p>
                 </div>
                 <div className="flex gap-2">
                     <button

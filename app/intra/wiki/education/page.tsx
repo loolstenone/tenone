@@ -1100,13 +1100,10 @@ export default function EducationPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <GraduationCap className="w-5 h-5 text-neutral-400" />
-          <h1 className="text-base font-semibold text-neutral-900">Education</h1>
-        </div>
-        <p className="text-xs text-neutral-400 mt-1">
-          Ten:One™ 교육 허브 - 필수, 전문, 심화 과정을 학습하고 퀴즈로 이수합니다
+      <div className="border-b border-neutral-200 pb-5">
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Education</h1>
+        <p className="text-sm text-neutral-400 mt-0.5">
+          Ten:One™ 교육 허브 — 필수, 전문, 심화 과정을 학습하고 퀴즈로 이수합니다
         </p>
       </div>
 

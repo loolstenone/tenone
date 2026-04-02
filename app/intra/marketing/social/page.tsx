@@ -111,8 +111,8 @@ export default function SocialPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Social Media</h2>
-                    <p className="mt-1 text-sm text-neutral-500">소셜 계정 및 콘텐츠 캘린더</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Social Media</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">소셜 계정 및 콘텐츠 캘린더</p>
                 </div>
                 <button onClick={() => tab === 'accounts' ? setShowAddAccount(true) : setShowAddContent(true)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 text-white text-xs hover:bg-neutral-700 transition-colors">

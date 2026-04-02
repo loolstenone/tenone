@@ -74,8 +74,8 @@ export default function RewardsPage() {
 
     return (
         <div className="max-w-4xl">
-            <h1 className="text-xl font-semibold mb-2">보상 관리</h1>
-            <p className="text-sm text-neutral-500 mb-6">성과급, 인센티브, 특별보상 이력을 확인합니다.</p>
+            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">보상 관리</h1>
+            <p className="text-sm text-neutral-400 mb-6">성과급, 인센티브, 특별보상 이력을 확인합니다.</p>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[

@@ -78,8 +78,8 @@ export default function ProgramsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-semibold mb-1">인재 육성 Programs</h1>
-                    <p className="text-sm text-neutral-500">온보딩, 멘토링, 교육, 인턴십 프로그램을 관리합니다.</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">인재 육성 Programs</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">온보딩, 멘토링, 교육, 인턴십 프로그램을 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-3 w-3" /> 프로그램 등록

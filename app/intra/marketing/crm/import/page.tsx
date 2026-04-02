@@ -9,8 +9,8 @@ export default function ImportPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Import</h2>
-                <p className="mt-2 text-neutral-500">외부 데이터를 대량으로 가져옵니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Import</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">외부 데이터를 대량으로 가져옵니다.</p>
             </div>
 
             {/* Upload Area */}

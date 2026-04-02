@@ -453,9 +453,9 @@ export default function CulturePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
+      <div className="border-b border-neutral-200 pb-5">
         <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Culture</h1>
-        <p className="text-xs text-neutral-400 mt-1">
+        <p className="text-sm text-neutral-400 mt-0.5">
           우리는 컬처를 믿고, 컬처로 일합니다
         </p>
       </div>
@@ -487,7 +487,7 @@ export default function CulturePage() {
       </div>
 
       {/* Footer stamp */}
-      <div className="border-t border-neutral-100 pt-4 pb-8">
+      <div className="border-t border-neutral-200 pt-4 pb-8">
         <div className="flex items-center gap-2 text-xs text-neutral-300">
           <Flag size={10} />
           <span>Declared 2019.10.01 &mdash; Ten:One™ Universe</span>

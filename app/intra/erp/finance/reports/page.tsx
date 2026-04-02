@@ -87,8 +87,8 @@ export default function ReportsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-semibold mb-1">경리 리포트</h1>
-                    <p className="text-sm text-neutral-500">개인·조직 단위 재무 현황을 분석합니다.</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">경리 리포트</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">개인·조직 단위 재무 현황을 분석합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
                     <Download className="h-3 w-3" /> Excel 내보내기

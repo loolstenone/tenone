@@ -223,8 +223,8 @@ export default function MyProjectsPage() {
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-semibold">Job 관리</h1>
-                    <p className="text-sm text-neutral-500 mt-1">프로젝트별 Job 등록 · 관리</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Job 관리</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트별 Job 등록 · 관리</p>
                 </div>
                 <div className="flex gap-2 items-center">
                     <div className="flex gap-1 border border-neutral-200 rounded overflow-hidden">

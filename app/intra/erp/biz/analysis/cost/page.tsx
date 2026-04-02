@@ -143,8 +143,8 @@ export default function CostAnalysisPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-xl font-semibold text-neutral-900">비용 분석</h1>
-        <p className="text-sm text-neutral-500">외부비/내부비 구성 및 추이</p>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">비용 분석</h1>
+        <p className="text-sm text-neutral-400">외부비/내부비 구성 및 추이</p>
       </div>
 
       {/* Tab Selector */}

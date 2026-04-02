@@ -174,15 +174,13 @@ function BoardPageInner({
     // 글쓰기 모드
     if (mode === "write") {
         return (
-            <div className="py-8 px-4 md:px-6">
-                <div className="mx-auto max-w-7xl">
-                    <PostEditor
-                        config={defaultConfig}
-                        onSubmit={handleCreate}
-                        onCancel={() => setMode("list")}
-                        isGuest={isGuest}
-                    />
-                </div>
+            <div className="max-w-7xl">
+                <PostEditor
+                    config={defaultConfig}
+                    onSubmit={handleCreate}
+                    onCancel={() => setMode("list")}
+                    isGuest={isGuest}
+                />
             </div>
         );
     }
@@ -190,15 +188,13 @@ function BoardPageInner({
     // 수정 모드
     if (mode === "edit" && selectedPost) {
         return (
-            <div className="py-8 px-4 md:px-6">
-                <div className="mx-auto max-w-7xl">
-                    <PostEditor
-                        config={defaultConfig}
-                        post={selectedPost}
-                        onSubmit={handleUpdate}
-                        onCancel={() => { setMode("detail"); }}
-                    />
-                </div>
+            <div className="max-w-7xl">
+                <PostEditor
+                    config={defaultConfig}
+                    post={selectedPost}
+                    onSubmit={handleUpdate}
+                    onCancel={() => { setMode("detail"); }}
+                />
             </div>
         );
     }
@@ -206,58 +202,56 @@ function BoardPageInner({
     // 상세 보기
     if (mode === "detail" && selectedPost) {
         return (
-            <div className="py-8 px-4 md:px-6">
-                <div className="mx-auto max-w-7xl">
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
-                        </div>
-                    ) : (
-                        <PostDetail
-                            post={selectedPost}
-                            accentColor={accentColor}
-                            onBack={() => { setMode("list"); setSelectedPost(null); window.history.pushState(null, '', pathname); }}
-                            onNavigate={loadPost}
-                            onLike={handleLike}
-                            onBookmark={handleBookmark}
-                            onEdit={() => setMode("edit")}
-                        />
-                    )}
-                </div>
+            <div className="max-w-7xl">
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
+                    </div>
+                ) : (
+                    <PostDetail
+                        post={selectedPost}
+                        accentColor={accentColor}
+                        onBack={() => { setMode("list"); setSelectedPost(null); window.history.pushState(null, '', pathname); }}
+                        onNavigate={loadPost}
+                        onLike={handleLike}
+                        onBookmark={handleBookmark}
+                        onEdit={() => setMode("edit")}
+                    />
+                )}
             </div>
         );
     }
 
     // 목록 보기
     return (
-        <div className="py-8 px-4 md:px-6">
-            <div className="mx-auto max-w-7xl">
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
-                        {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
-                    </div>
-                    {showWriteButton && (
+        <div className="max-w-7xl">
+            <div className="border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between">
+                <div>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
+                    {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
+                </div>
+                {showWriteButton && (
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
                         <button
                             onClick={() => setMode("write")}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-white rounded-lg hover:opacity-90 transition-opacity"
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: accentColor }}
                         >
                             <PenSquare className="h-4 w-4" />
                             글쓰기
                         </button>
-                    )}
-                </div>
-                <BoardList
-                    key={refreshKey}
-                    site={site}
-                    board={board}
-                    boardConfig={boardConfig || undefined}
-                    accentColor={accentColor}
-                    layout={layout}
-                    onPostClick={(post) => layout === 'accordion' ? undefined : loadPost(post.id)}
-                />
+                    </div>
+                )}
             </div>
+            <BoardList
+                key={refreshKey}
+                site={site}
+                board={board}
+                boardConfig={boardConfig || undefined}
+                accentColor={accentColor}
+                layout={layout}
+                onPostClick={(post) => layout === 'accordion' ? undefined : loadPost(post.id)}
+            />
         </div>
     );
 }

@@ -32,7 +32,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
             <div className="h-full bg-neutral-50 flex items-center justify-center px-4">
                 <div className="text-center max-w-md">
                     <ShieldAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-neutral-900 mb-2">ERP 접근 권한이 없습니다</h2>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-2">ERP 접근 권한이 없습니다</h2>
                     <p className="text-neutral-500 text-sm mb-6">ERP는 HR, Finance, Admin 권한이 필요합니다. 관리자에게 요청하세요.</p>
                     <button onClick={() => router.push('/intra')} className="px-6 py-2.5 bg-neutral-900 text-sm text-white hover:bg-neutral-800 transition-colors">
                         Intra로 돌아가기
@@ -43,7 +43,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="h-full bg-neutral-50">
+        <div className="h-full">
             <CrmProvider>
                 <StaffProvider>
                     <GprProvider>

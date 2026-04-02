@@ -693,7 +693,7 @@ export default function MessengerPage() {
        렌더링
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     return (
-        <div className="flex h-[calc(100vh-140px)] -m-8 border-t border-neutral-100 overflow-hidden relative">
+        <div className="flex h-[calc(100vh-140px)] -m-8 border-t border-neutral-200 overflow-hidden relative">
 
             {/* ══════════════════════════════════
                 1열: 대화 목록 / 조직도
@@ -707,7 +707,7 @@ export default function MessengerPage() {
                 mobileView === 'list' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
             )}>
                 {/* 탭 */}
-                <div className="flex border-b border-neutral-100">
+                <div className="flex border-b border-neutral-200">
                     <button onClick={() => setActiveTab('chats')}
                         className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
                             activeTab === 'chats' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
@@ -982,7 +982,7 @@ export default function MessengerPage() {
                 {selectedChat === 'notifications' ? (
                     /* ── 알림 뷰 ── */
                     <>
-                        <div className="px-4 py-2.5 bg-white border-b border-neutral-100 flex items-center gap-2.5">
+                        <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center gap-2.5">
                             <button onClick={goMobileBack} className="md:hidden p-1 hover:bg-neutral-100">
                                 <ChevronLeft className="h-4 w-4 text-neutral-500" />
                             </button>
@@ -1006,7 +1006,7 @@ export default function MessengerPage() {
                     /* ── 대화 뷰 ── */
                     <>
                         {/* 헤더 */}
-                        <div className="px-4 py-2.5 bg-white border-b border-neutral-100 flex items-center justify-between">
+                        <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
                                 <button onClick={goMobileBack} className="md:hidden p-1 hover:bg-neutral-100">
                                     <ChevronLeft className="h-4 w-4 text-neutral-500" />
@@ -1050,7 +1050,7 @@ export default function MessengerPage() {
 
                         {/* 대화 내 검색 바 */}
                         {showChatSearch && (
-                            <div className="px-4 py-2 bg-white border-b border-neutral-100 flex items-center gap-2">
+                            <div className="px-4 py-2 bg-white border-b border-neutral-200 flex items-center gap-2">
                                 <Search className="h-3 w-3 text-neutral-300 shrink-0" />
                                 <input value={chatSearchQuery} onChange={e => setChatSearchQuery(e.target.value)}
                                     placeholder="대화 내 검색..." autoFocus
@@ -1110,7 +1110,7 @@ export default function MessengerPage() {
                         </div>
 
                         {/* 입력 영역 */}
-                        <div className="bg-white border-t border-neutral-100">
+                        <div className="bg-white border-t border-neutral-200">
                             {/* 이모지 피커 */}
                             {showEmoji && (
                                 <div className="px-4 py-2.5 border-b border-neutral-100 bg-neutral-50">

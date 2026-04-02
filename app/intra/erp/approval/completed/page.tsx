@@ -78,8 +78,8 @@ export default function ApprovalCompletedPage() {
     return (
         <div className="max-w-5xl">
             <div className="mb-2">
-                <h1 className="text-xl font-semibold">결재 완료</h1>
-                <p className="text-sm text-neutral-500">완료된 결재 문서</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">결재 완료</h1>
+                <p className="text-sm text-neutral-400">완료된 결재 문서</p>
             </div>
 
             <div className="flex gap-3 mb-4">

@@ -11,8 +11,8 @@ export default function SettingsPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-10 pb-12">
             <div>
-                <h2 className="text-xl font-semibold">Settings</h2>
-                <p className="mt-2 text-neutral-500">Manage your profile and system preferences.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Settings</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">Manage your profile and system preferences.</p>
             </div>
 
             <div className="grid gap-8">

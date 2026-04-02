@@ -92,7 +92,7 @@ export default function BrandDetailPage({ params }: Props) {
 
                     {/* Tabs / Sections */}
                     <div className="border-t border-neutral-200 pt-8">
-                        <h2 className="text-xl font-semibold mb-4">Latest Activity</h2>
+                        <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-4">Latest Activity</h2>
                         <div className="border border-neutral-200 bg-white p-8 text-center">
                             <p className="text-neutral-400">No recent activity recorded for this brand.</p>
                             <button className="mt-4 text-neutral-500 hover:text-neutral-900 text-sm font-medium">

@@ -383,7 +383,7 @@ export default function ProjectDetailPage() {
                         </span>
                     )}
                 </div>
-                <h1 className="text-xl font-semibold">{project.name}</h1>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{project.name}</h1>
                 <div className="flex items-center gap-4 mt-1 text-xs text-neutral-400">
                     <span>PM: {project.pm}</span>
                     <span className="flex items-center gap-0.5"><Calendar className="h-3 w-3" /> {project.startDate} ~ {project.endDate}</span>

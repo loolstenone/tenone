@@ -23,7 +23,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <div className="h-full bg-neutral-50 flex items-center justify-center px-4">
                 <div className="text-center max-w-md">
                     <ShieldAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-neutral-900 mb-2">접근 권한이 없습니다</h2>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-2">접근 권한이 없습니다</h2>
                     <p className="text-neutral-500 text-sm mb-6">관리자에게 권한을 요청하세요.</p>
                     <button onClick={() => window.location.href = '/'} className="px-6 py-2.5 rounded-lg bg-neutral-900 text-sm text-neutral-900 hover:bg-neutral-800 transition-colors">홈으로 돌아가기</button>
                 </div>
@@ -32,7 +32,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div className="h-full bg-neutral-50">
+        <div className="h-full">
             <MarketingProvider>
                 <CrmProvider>
                     {children}

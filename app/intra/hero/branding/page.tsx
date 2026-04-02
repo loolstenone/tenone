@@ -81,8 +81,8 @@ export default function PersonalBrandingPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold mb-1">퍼스널 브랜딩</h1>
-                <p className="text-sm text-neutral-500">나만의 브랜드를 기획합니다</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">퍼스널 브랜딩</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">나만의 브랜드를 기획합니다</p>
             </div>
 
             {/* HeRo Character Card */}

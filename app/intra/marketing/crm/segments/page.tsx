@@ -41,8 +41,8 @@ export default function SegmentsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Segments</h2>
-                <p className="mt-2 text-neutral-500">고객을 세그먼트로 분류하여 관리합니다.</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Segments</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">고객을 세그먼트로 분류하여 관리합니다.</p>
             </div>
 
             {loading ? (

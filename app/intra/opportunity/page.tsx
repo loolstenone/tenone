@@ -198,8 +198,8 @@ export default function OpportunityPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-semibold">Opportunity</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">기회 수집 · 파이프라인 · 프로젝트 전환</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Opportunity</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">기회 수집 · 파이프라인 · 프로젝트 전환</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex border border-neutral-200 rounded overflow-hidden">

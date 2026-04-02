@@ -30,8 +30,8 @@ export default function ApprovalDraftPage() {
     return (
         <div className="max-w-3xl">
             <div className="mb-4">
-                <h1 className="text-xl font-semibold">기안하기</h1>
-                <p className="text-sm text-neutral-500">새로운 기안 문서를 작성합니다</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">기안하기</h1>
+                <p className="text-sm text-neutral-400">새로운 기안 문서를 작성합니다</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

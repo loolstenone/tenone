@@ -99,8 +99,8 @@ export default function InquiryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">고객문의 관리</h1>
-        <p className="text-sm text-neutral-500 mt-1">Contact 폼을 통해 접수된 문의를 관리합니다.</p>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">고객문의 관리</h1>
+        <p className="text-sm text-neutral-400 mt-0.5">Contact 폼을 통해 접수된 문의를 관리합니다.</p>
       </div>
 
       {/* 요약 카드 */}

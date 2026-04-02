@@ -74,8 +74,8 @@ export default function GoalSettingPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Goal Setting</h2>
-                    <p className="mt-2 text-neutral-500">목표 설정, 합의, 추적</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Goal Setting</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">목표 설정, 합의, 추적</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <select value={staffFilter} onChange={e => setStaffFilter(e.target.value)} className="border border-neutral-200 bg-white px-3 py-2 text-sm">

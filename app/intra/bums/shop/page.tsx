@@ -105,8 +105,8 @@ export default function ShopPage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold tracking-tight">쇼핑 관리</h1>
-                    <p className="text-sm text-neutral-500 mt-1">상품, 주문, 결제를 관리합니다.</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">쇼핑 관리</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">상품, 주문, 결제를 관리합니다.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button onClick={fetchAll} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">

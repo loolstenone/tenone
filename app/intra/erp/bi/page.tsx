@@ -131,12 +131,12 @@ export default function BIDashboardPage() {
     return (
         <div className="max-w-7xl">
             {/* 헤더 */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-start justify-between border-b border-neutral-100 pb-5 mb-6">
                 <div>
                     <h1 className="text-lg font-semibold tracking-tight text-neutral-900">BI Dashboard</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">Ten:One™ 전사 경영 현황 · {period}</p>
+                    <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 전사 경영 현황 · {period}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0 ml-4">
                     <span className="text-[10px] text-neutral-400">마지막 업데이트: 2026-03-22 09:00</span>
                 </div>
             </div>
@@ -144,45 +144,30 @@ export default function BIDashboardPage() {
             {/* Row 1: KPI 카드 */}
             <div className="grid grid-cols-5 gap-3 mb-6">
                 <div className="border border-neutral-200 bg-white p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <DollarSign className="h-3.5 w-3.5 text-neutral-400" />
-                        <span className="text-[10px] text-neutral-400">누적 매출</span>
-                    </div>
-                    <div className="text-xl font-bold">{fmtBillion(totalRevenue)}</div>
+                    <p className="text-[10px] text-neutral-400 mb-2">누적 매출</p>
+                    <div className="text-xl font-semibold tracking-tight">{fmtBillion(totalRevenue)}</div>
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-green-600">
                         <ArrowUpRight className="h-3 w-3" /> 목표 대비 {Math.round((totalRevenue / totalTarget) * 100)}%
                     </div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <TrendingUp className="h-3.5 w-3.5 text-neutral-400" />
-                        <span className="text-[10px] text-neutral-400">영업이익</span>
-                    </div>
-                    <div className="text-xl font-bold">{fmtBillion(totalProfit)}</div>
+                    <p className="text-[10px] text-neutral-400 mb-2">영업이익</p>
+                    <div className="text-xl font-semibold tracking-tight">{fmtBillion(totalProfit)}</div>
                     <div className="text-[10px] text-neutral-400 mt-1">이익률 {Math.round((totalProfit / totalRevenue) * 100)}%</div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <FolderKanban className="h-3.5 w-3.5 text-neutral-400" />
-                        <span className="text-[10px] text-neutral-400">진행 프로젝트</span>
-                    </div>
-                    <div className="text-xl font-bold">{dbProjectStats?.inProgress ?? projectStats.inProgress}<span className="text-sm font-normal text-neutral-400">/{dbProjectStats?.total ?? projectStats.total}</span></div>
+                    <p className="text-[10px] text-neutral-400 mb-2">진행 프로젝트</p>
+                    <div className="text-xl font-semibold tracking-tight">{dbProjectStats?.inProgress ?? projectStats.inProgress}<span className="text-sm font-normal text-neutral-400">/{dbProjectStats?.total ?? projectStats.total}</span></div>
                     <div className="text-[10px] text-neutral-400 mt-1">평균 완료율 {projectStats.avgCompletionRate}%</div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <Target className="h-3.5 w-3.5 text-neutral-400" />
-                        <span className="text-[10px] text-neutral-400">Opportunity</span>
-                    </div>
-                    <div className="text-xl font-bold">{opportunityPipeline.total}<span className="text-sm font-normal text-neutral-400">건</span></div>
+                    <p className="text-[10px] text-neutral-400 mb-2">Opportunity</p>
+                    <div className="text-xl font-semibold tracking-tight">{opportunityPipeline.total}<span className="text-sm font-normal text-neutral-400">건</span></div>
                     <div className="text-[10px] text-neutral-400 mt-1">파이프라인 {fmtBillion(opportunityPipeline.totalValue)}</div>
                 </div>
                 <div className="border border-neutral-200 bg-white p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <Users className="h-3.5 w-3.5 text-neutral-400" />
-                        <span className="text-[10px] text-neutral-400">전체 멤버</span>
-                    </div>
-                    <div className="text-xl font-bold">{dbMemberStats?.total ?? memberStats.total}<span className="text-sm font-normal text-neutral-400">명</span></div>
+                    <p className="text-[10px] text-neutral-400 mb-2">전체 멤버</p>
+                    <div className="text-xl font-semibold tracking-tight">{dbMemberStats?.total ?? memberStats.total}<span className="text-sm font-normal text-neutral-400">명</span></div>
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-green-600">
                         <UserPlus className="h-3 w-3" /> 이번 달 +{memberStats.newThisMonth}
                     </div>

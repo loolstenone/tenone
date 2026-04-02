@@ -97,8 +97,8 @@ export default function ApprovalProgressPage() {
     return (
         <div className="max-w-5xl">
             <div className="mb-2">
-                <h1 className="text-xl font-semibold">결재 진행</h1>
-                <p className="text-sm text-neutral-500">진행 중인 결재 문서</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">결재 진행</h1>
+                <p className="text-sm text-neutral-400">진행 중인 결재 문서</p>
             </div>
 
             <div className="flex gap-3 mb-4">

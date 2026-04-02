@@ -386,12 +386,8 @@ export default function ResumePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold">
-            이력서 빌더
-          </h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            광고바닥 이력서 양식 기반 &middot; HeRo 프로필 연동
-          </p>
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">이력서 빌더</h1>
+          <p className="text-sm text-neutral-400 mt-0.5">광고바닥 이력서 양식 기반 &middot; HeRo 프로필 연동</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Progress */}

@@ -60,8 +60,8 @@ export default function AssetsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-xl font-semibold">Assets Library</h2>
-                    <p className="mt-2 text-neutral-500">Manage digital assets, media files, and AI prompts.</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Assets Library</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">Manage digital assets, media files, and AI prompts.</p>
                 </div>
                 <div className="flex gap-2">
                     <button className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium transition-colors">

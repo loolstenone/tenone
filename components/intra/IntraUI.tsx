@@ -22,7 +22,7 @@ export function PageHeader({
     return (
         <div className={clsx(
             "flex items-start justify-between",
-            separator ? "border-b border-neutral-100 pb-5 mb-6" : "mb-6"
+            separator ? "border-b border-neutral-200 pb-5 mb-6" : "mb-6"
         )}>
             <div>
                 <h1 className="text-lg font-semibold tracking-tight text-neutral-900 leading-snug">{title}</h1>
@@ -89,7 +89,7 @@ export function Card({
     padding?: boolean;
 }) {
     return (
-        <div className={clsx("border border-neutral-150 bg-white", padding && "p-5", className)}>
+        <div className={clsx("border border-neutral-200 bg-white", padding && "p-5", className)}>
             {children}
         </div>
     );

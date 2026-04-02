@@ -107,8 +107,8 @@ export default function StaffDetailPage() {
                     {member.avatarInitials}
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-xl font-semibold">{member.name}</h1>
-                    <p className="text-sm text-neutral-500">{member.position} · {member.department}</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{member.name}</h1>
+                    <p className="text-sm text-neutral-400">{member.position} · {member.department}</p>
                     <div className="flex items-center gap-2 mt-2">
                         <span className="text-xs font-mono text-neutral-400">{member.employeeId}</span>
                         <span className="text-xs px-1.5 py-0.5 bg-neutral-100 text-neutral-500 font-medium">{member.role}</span>

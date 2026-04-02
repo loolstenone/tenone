@@ -75,8 +75,8 @@ export default function ProjectProfitPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-xl font-semibold text-neutral-900">프로젝트 수익성</h1>
-        <p className="text-sm text-neutral-500">프로젝트별 손익 랭킹</p>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 수익성</h1>
+        <p className="text-sm text-neutral-400">프로젝트별 손익 랭킹</p>
       </div>
 
       {/* Summary */}

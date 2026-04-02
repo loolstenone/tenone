@@ -98,8 +98,8 @@ export default function DivisionProfitPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-xl font-semibold text-neutral-900">부문별 이익률</h1>
-        <p className="text-sm text-neutral-500">부문별 수익성 분석</p>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">부문별 이익률</h1>
+        <p className="text-sm text-neutral-400">부문별 수익성 분석</p>
       </div>
 
       {/* Division Cards */}

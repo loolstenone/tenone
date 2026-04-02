@@ -122,8 +122,8 @@ export default function GPRCascadePage() {
 
     return (
         <div className="max-w-5xl">
-            <h1 className="text-xl font-semibold mb-2">목표 캐스케이드</h1>
-            <p className="text-sm text-neutral-500 mb-6">
+            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">목표 캐스케이드</h1>
+            <p className="text-sm text-neutral-400 mb-6">
                 회사 → 사업부 → 팀 → 개인으로 이어지는 목표 설정 및 승인 흐름
                 {dbMemberTotal !== null && <span className="ml-2 text-neutral-400">· 전체 멤버 {dbMemberTotal}명</span>}
             </p>

@@ -132,8 +132,8 @@ export default function MyProjectsPage() {
     return (
         <div className="max-w-4xl">
             <div className="mb-5">
-                <h1 className="text-xl font-semibold">프로젝트 관리</h1>
-                <p className="text-xs text-neutral-400 mt-0.5">참여 중인 프로젝트와 Job을 관리합니다</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 관리</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">참여 중인 프로젝트와 Job을 관리합니다</p>
             </div>
 
             {/* 프로젝트 리스트 */}

@@ -152,8 +152,8 @@ export default function BoardsManagementPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-semibold tracking-tight">게시판 관리</h1>
-                <p className="text-sm text-neutral-500 mt-1">
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">게시판 관리</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">
                     {selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)}의 게시판, 게시글, 작성자를 통합 관리합니다.
                 </p>
             </div>
@@ -336,7 +336,7 @@ export default function BoardsManagementPage() {
                                                 <span className="text-xs text-neutral-400">{viewingPost.created_at?.substring(0, 10)}</span>
                                                 <span className="text-xs text-neutral-400">· 조회 {viewingPost.view_count}</span>
                                             </div>
-                                            <h2 className="text-xl font-semibold">{viewingPost.title}</h2>
+                                            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">{viewingPost.title}</h2>
                                             <p className="text-xs text-neutral-400 mt-1">{siteName(viewingPost.site)} · {viewingPost.board}</p>
                                         </div>
                                         <button onClick={() => setViewingPost(null)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="h-5 w-5" /></button>

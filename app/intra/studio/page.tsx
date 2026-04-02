@@ -29,9 +29,9 @@ export default function OfficeDashboard() {
     }, []);
 
     const stats = [
-        { name: "Active Brands", value: String(brands.length), icon: Users, change: "Registered", href: "/intra/studio/brands" },
-        { name: "Upcoming Events", value: eventCount === null ? "…" : String(eventCount), icon: Calendar, change: "From now", href: "/intra/studio/schedule" },
-        { name: "Content Items", value: loading ? "…" : String(recentItems.length > 0 ? "DB" : "–"), icon: FolderOpen, change: "In pipeline", href: "/intra/studio/studio" },
+        { name: "Active Brands", value: String(brands.length), change: "Registered", href: "/intra/studio/brands" },
+        { name: "Upcoming Events", value: eventCount === null ? "…" : String(eventCount), change: "From now", href: "/intra/studio/schedule" },
+        { name: "Content Items", value: loading ? "…" : String(recentItems.length > 0 ? "DB" : "–"), change: "In pipeline", href: "/intra/studio/studio" },
     ];
 
     return (

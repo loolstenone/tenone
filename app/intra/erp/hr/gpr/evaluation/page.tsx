@@ -52,8 +52,8 @@ export default function EvaluationPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Evaluation</h2>
-                <p className="mt-2 text-neutral-500">자기 평가 및 상사 평가</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Evaluation</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">자기 평가 및 상사 평가</p>
             </div>
 
             {/* Pending Evaluation */}

@@ -27,8 +27,8 @@ export default function MentorsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Mentors</h2>
-                <p className="mt-2 text-neutral-500">YouInOne 멘토단 관리</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Mentors</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">YouInOne 멘토단 관리</p>
             </div>
 
             {loading ? (

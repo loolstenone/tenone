@@ -90,8 +90,8 @@ export default function ActualConfirmPage() {
     <div className="max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">실적 확정</h1>
-          <p className="text-sm text-neutral-500">{now.getFullYear()}년 {months[monthIdx]} 실적</p>
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">실적 확정</h1>
+          <p className="text-sm text-neutral-400">{now.getFullYear()}년 {months[monthIdx]} 실적</p>
         </div>
         <span
           className={clsx(

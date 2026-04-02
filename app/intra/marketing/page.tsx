@@ -34,10 +34,10 @@ export default function MarketingDashboard() {
     const publishedContent = contentPosts.filter(p => p.status === 'Published').length;
 
     const stats = [
-        { name: "Active Campaigns", value: activeCampaigns, icon: Megaphone, href: "/intra/marketing/campaigns" },
-        { name: "Active Leads", value: activeLeads, icon: TrendingUp, href: "/intra/marketing/leads" },
-        { name: "Published Content", value: publishedContent, icon: FileText, href: "/intra/marketing/content" },
-        { name: "Total Leads", value: leads.length, icon: BarChart3, href: "/intra/marketing/analytics" },
+        { name: "Active Campaigns", value: activeCampaigns, href: "/intra/marketing/campaigns" },
+        { name: "Active Leads", value: activeLeads, href: "/intra/marketing/leads" },
+        { name: "Published Content", value: publishedContent, href: "/intra/marketing/content" },
+        { name: "Total Leads", value: leads.length, href: "/intra/marketing/analytics" },
     ];
 
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;

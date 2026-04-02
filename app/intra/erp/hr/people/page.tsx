@@ -84,8 +84,8 @@ export default function PeoplePage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-semibold tracking-tight">회원 관리</h1>
-                <p className="text-sm text-neutral-500 mt-1">전체 회원의 역할, 권한, 소속을 통합 관리합니다.</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">회원 관리</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">전체 회원의 역할, 권한, 소속을 통합 관리합니다.</p>
             </div>
 
             {/* Stats */}
@@ -182,8 +182,8 @@ export default function PeoplePage() {
                                     {selectedMember.avatar_initials}
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl font-semibold tracking-tight">{selectedMember.name}</h2>
-                                    <p className="text-sm text-neutral-500">{selectedMember.email}</p>
+                                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">{selectedMember.name}</h2>
+                                    <p className="text-sm text-neutral-400">{selectedMember.email}</p>
                                 </div>
                                 <button onClick={() => { setSelectedMember(null); setEditingType(null); }}
                                     className="text-neutral-400 hover:text-neutral-900 text-xl">✕</button>

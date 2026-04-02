@@ -40,8 +40,8 @@ export default function GprDashboardPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">GPR</h2>
-                    <p className="mt-2 text-neutral-500">Goal — Plan — Result: 목표-계획-결과 관리</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">GPR</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">Goal — Plan — Result: 목표-계획-결과 관리</p>
                 </div>
                 <Link href="/intra/erp/hr/gpr/goals" className="px-4 py-2 bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
                     목표 관리

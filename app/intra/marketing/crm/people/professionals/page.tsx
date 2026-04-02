@@ -27,8 +27,8 @@ export default function ProfessionalsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold">Professionals</h2>
-                <p className="mt-2 text-neutral-500">Badak 네트워크 현업자 관리</p>
+                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Professionals</h2>
+                <p className="mt-0.5 text-sm text-neutral-400">Badak 네트워크 현업자 관리</p>
             </div>
 
             <div className="border border-neutral-200 bg-white overflow-hidden">

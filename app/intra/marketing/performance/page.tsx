@@ -79,8 +79,8 @@ export default function PerformancePage() {
         <div className="space-y-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Performance</h2>
-                    <p className="mt-1 text-sm text-neutral-500">채널별 KPI 현황</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Performance</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">채널별 KPI 현황</p>
                 </div>
                 <button onClick={fetchSnapshots} className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 text-xs hover:bg-neutral-50 transition-colors">
                     <RefreshCw className="h-3.5 w-3.5" /> 새로고침

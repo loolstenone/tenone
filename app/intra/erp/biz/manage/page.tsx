@@ -92,8 +92,8 @@ export default function MonthlyForecastPage() {
     <div className="max-w-5xl">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">월별 추정</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">월별 추정</h1>
+          <p className="text-sm text-neutral-400">
             {now.getFullYear()}년 {months[monthIdx]} {round}차 추정
           </p>
         </div>

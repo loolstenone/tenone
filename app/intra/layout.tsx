@@ -223,9 +223,7 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                                 <Lock className="h-6 w-6 text-neutral-400" />
                             </div>
                         </div>
-                        <h1 className="text-lg font-bold text-white tracking-tight">
-                            Ten:One&trade; Intra
-                        </h1>
+                        <h1 className="text-lg font-semibold text-white tracking-tight">Ten:One&trade; Intra</h1>
                         <p className="text-xs text-neutral-500 mt-1">내부 구성원 전용</p>
                     </div>
 

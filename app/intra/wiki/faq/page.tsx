@@ -391,10 +391,10 @@ export default function FaqPage() {
     return (
         <div className="max-w-4xl">
             {/* Header */}
-            <div className="mb-1">
+            <div className="border-b border-neutral-200 pb-5 mb-6">
                 <h1 className="text-lg font-semibold tracking-tight text-neutral-900">FAQ & 업무 가이드</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다</p>
             </div>
-            <p className="text-xs text-neutral-400 mb-5">자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다</p>
 
             {/* 검색 + 카테고리 필터 */}
             <div className="mb-4 space-y-3">

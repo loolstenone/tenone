@@ -74,8 +74,8 @@ export default function MentorMatchingPage() {
     return (
         <div className="max-w-4xl">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold mb-1">멘토 매칭</h1>
-                <p className="text-sm text-neutral-500">YouInOne 멘토단과 연결합니다</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">멘토 매칭</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">YouInOne 멘토단과 연결합니다</p>
             </div>
 
             {/* My Mentoring Status */}

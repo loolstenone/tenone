@@ -161,10 +161,8 @@ export default function PermissionsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">권한 설정</h2>
-                    <p className="mt-1 text-sm text-neutral-500">
-                        시스템 접근 권한을 관리합니다
-                    </p>
+                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">권한 설정</h2>
+                    <p className="mt-0.5 text-sm text-neutral-400">시스템 접근 권한을 관리합니다</p>
                 </div>
                 <button
                     onClick={handleSave}

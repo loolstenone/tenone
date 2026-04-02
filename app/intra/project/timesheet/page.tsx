@@ -451,9 +451,7 @@ export default function TimesheetPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-lg font-semibold text-neutral-900">타임시트</h1>
-        <p className="text-xs text-neutral-500 mt-0.5">
-          프로젝트 · Job별 투입 시수 집계
-        </p>
+        <p className="text-sm text-neutral-400 mt-0.5">프로젝트 · Job별 투입 시수 집계</p>
       </div>
 
       {/* Summary Cards */}

@@ -34,10 +34,10 @@ export default function ErpDashboard() {
     const pendingGoals = goals.filter(g => g.status === 'In Progress');
 
     const stats = [
-        { name: "Staff", value: staff.length, icon: Users, href: "/intra/erp/hr/staff", change: `${activeStaff.length} Active` },
-        { name: "Goals", value: goals.length, icon: Target, href: "/intra/erp/hr/gpr/goals", change: `${completedGoals.length} Completed` },
-        { name: "In Progress", value: pendingGoals.length, icon: ClipboardList, href: "/intra/erp/hr/gpr/goals", change: `${pendingGoals.length} 진행 중` },
-        { name: "GPR", value: `${Math.round((completedGoals.length / Math.max(goals.length, 1)) * 100)}%`, icon: TrendingUp, href: "/intra/erp/hr/gpr", change: "Goal completion rate" },
+        { name: "Staff", value: staff.length, href: "/intra/erp/hr/staff", change: `${activeStaff.length} Active` },
+        { name: "Goals", value: goals.length, href: "/intra/erp/hr/gpr/goals", change: `${completedGoals.length} Completed` },
+        { name: "In Progress", value: pendingGoals.length, href: "/intra/erp/hr/gpr/goals", change: `${pendingGoals.length} 진행 중` },
+        { name: "GPR", value: `${Math.round((completedGoals.length / Math.max(goals.length, 1)) * 100)}%`, href: "/intra/erp/hr/gpr", change: "Goal completion rate" },
     ];
 
     if (loading) {

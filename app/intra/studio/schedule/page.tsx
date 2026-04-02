@@ -105,7 +105,7 @@ export default function SchedulePage() {
             <div className="flex-1 bg-white border border-neutral-200 overflow-hidden flex flex-col">
                 {/* Calendar Header Nav */}
                 <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
-                    <h3 className="text-xl font-semibold">
+                    <h3 className="text-base font-semibold text-neutral-900">
                         {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                     </h3>
                     <div className="flex items-center gap-2">

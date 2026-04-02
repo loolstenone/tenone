@@ -94,13 +94,11 @@ const sections = [
 
 export default function HandbookPage() {
   return (
-    <div className="space-y-12 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div>
-        <div className="mb-1">
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">핸드북</h1>
-        </div>
-        <p className="text-sm text-neutral-500">
+      <div className="border-b border-neutral-200 pb-5 mb-6">
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">핸드북</h1>
+        <p className="text-sm text-neutral-400 mt-0.5">
           Ten:One™ 임직원이 알아야 할 기본 규정과 정책을 안내합니다.
         </p>
       </div>
