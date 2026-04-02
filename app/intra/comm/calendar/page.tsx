@@ -154,7 +154,7 @@ export default function CalendarPage() {
         const eEnd = e.endDate || e.date;
         return e.date <= monthEnd && eEnd >= monthStart;
       })
-      .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || ""));
+      .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.time || "").localeCompare(b.time || ""));
   }, [events, year, month, daysInMonth]);
 
   // Today's events
@@ -532,7 +532,7 @@ export default function CalendarPage() {
             const mEnd = `${year}-${String(month + 1).padStart(2, "0")}-31`;
             return eDate >= mStart && eDate <= mEnd;
           })
-          .sort((a, b) => a.date.localeCompare(b.date))
+          .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
           .map(e => {
             const cfg = typeConfig[e.type] || typeConfig["일반"];
             return (

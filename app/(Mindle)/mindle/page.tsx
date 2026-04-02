@@ -149,6 +149,8 @@ const categoryColor: Record<string, string> = {
 export default function MindleHomePage() {
   const [copy, setCopy] = useState(insightCopies[0]);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [nlEmail, setNlEmail] = useState("");
+  const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   useEffect(() => {
     setCopy(insightCopies[Math.floor(Math.random() * insightCopies.length)]);
@@ -379,16 +381,48 @@ export default function MindleHomePage() {
           <p className="text-indigo-400/50 text-sm mb-6">
             AI가 분석한 주간 트렌드 리포트를 받아보세요.
           </p>
-          <div className="flex gap-2 max-w-sm mx-auto">
-            <input
-              type="email"
-              placeholder="email@example.com"
-              className="flex-1 px-4 py-2.5 bg-white/5 border border-indigo-500/20 rounded-full text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 transition-colors"
-            />
-            <button className="px-5 py-2.5 bg-indigo-500 text-white font-semibold rounded-full text-sm hover:bg-indigo-400 transition-colors">
-              구독
-            </button>
-          </div>
+          {nlStatus === "done" ? (
+            <p className="text-indigo-300 text-sm">구독이 완료되었습니다!</p>
+          ) : (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!nlEmail.trim()) return;
+                setNlStatus("loading");
+                try {
+                  const res = await fetch("/api/newsletter", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: nlEmail.trim() }),
+                  });
+                  if (!res.ok) throw new Error();
+                  setNlStatus("done");
+                } catch {
+                  setNlStatus("error");
+                }
+              }}
+              className="flex gap-2 max-w-sm mx-auto"
+            >
+              <input
+                type="email"
+                required
+                value={nlEmail}
+                onChange={(e) => { setNlEmail(e.target.value); if (nlStatus === "error") setNlStatus("idle"); }}
+                placeholder="email@example.com"
+                className="flex-1 px-4 py-2.5 bg-white/5 border border-indigo-500/20 rounded-full text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={nlStatus === "loading"}
+                className="px-5 py-2.5 bg-indigo-500 text-white font-semibold rounded-full text-sm hover:bg-indigo-400 transition-colors disabled:opacity-50"
+              >
+                {nlStatus === "loading" ? "..." : "구독"}
+              </button>
+            </form>
+          )}
+          {nlStatus === "error" && (
+            <p className="text-red-400 text-xs mt-2">구독 처리 중 오류가 발생했습니다.</p>
+          )}
         </div>
       </section>
 

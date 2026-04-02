@@ -51,7 +51,7 @@ export default function ApprovalCompletedPage() {
                 const all = [
                     ...approvedRes.approvals.map((a: any) => dbRowToItem(a as Record<string, unknown>)),
                     ...rejectedRes.approvals.map((a: any) => dbRowToItem(a as Record<string, unknown>)),
-                ].sort((a, b) => b.completedDate.localeCompare(a.completedDate));
+                ].sort((a, b) => (b.completedDate || '').localeCompare(a.completedDate || ''));
 
                 if (!cancelled) {
                     setItems(all.length > 0 ? all : mockItems);

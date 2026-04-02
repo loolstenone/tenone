@@ -124,7 +124,7 @@ export default function ContentManagementPage() {
             if (!p.title.toLowerCase().includes(q) && !p.excerpt?.toLowerCase().includes(q)) return false;
         }
         return true;
-    }).sort((a, b) => b.created_at.localeCompare(a.created_at));
+    }).sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
 
     const totalPages = Math.ceil(filtered.length / postsPerPage);
     const pagePosts = filtered.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);

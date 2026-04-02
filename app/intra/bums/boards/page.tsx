@@ -125,7 +125,7 @@ export default function BoardsManagementPage() {
             if (!p.title.toLowerCase().includes(q)) return false;
         }
         return true;
-    }).sort((a, b) => b.created_at.localeCompare(a.created_at));
+    }).sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
 
     const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
     const pagePosts = filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);

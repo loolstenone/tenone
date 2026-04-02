@@ -112,43 +112,60 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
 
   // Init tenant
   useEffect(() => {
+    let cancelled = false;
+    const fallback = () => {
+      if (cancelled) return;
+      setTenant(demoTenant());
+      setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
+      setLoading(false);
+    };
+    // 전체 init 최대 8초 — auth + DB 쿼리 포함
+    const timeout = setTimeout(fallback, 8000);
+
+    const snakeToCamelObj = (r: Record<string, unknown>) => {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(r)) out[k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = v;
+      return out;
+    };
+
     const init = async () => {
-      // 10초 내 완료 안 되면 데모 모드로 fallback
-      const timeout = setTimeout(() => {
-        setTenant(demoTenant());
-        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
-        setLoading(false);
-      }, 10000);
       try {
         const sb = createClient();
-        const { data: { user } } = await sb.auth.getUser();
-        clearTimeout(timeout);
+
+        // 1. Auth — 최대 5초
+        const authResult = await Promise.race([
+          sb.auth.getUser(),
+          new Promise<null>(r => setTimeout(() => r(null), 5000)),
+        ]);
+        if (cancelled) return;
+
+        const user = authResult && 'data' in (authResult as any) ? (authResult as any).data.user : null;
         if (!user) {
-          setTenant(demoTenant());
-          setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
-          setLoading(false);
+          clearTimeout(timeout);
+          fallback();
           return;
         }
 
-        // 내가 소속된 테넌트만 조회 (wio_members → wio_tenants 조인)
-        const { data: myMemberships } = await sb.from('wio_members').select('tenant_id').eq('user_id', user.id);
+        // 2. wio_members 조회 (최대 4초)
+        const membershipsResult = await Promise.race([
+          sb.from('wio_members').select('tenant_id').eq('user_id', user.id),
+          new Promise<{ data: null }>(r => setTimeout(() => r({ data: null }), 4000)),
+        ]);
+        if (cancelled) return;
+        const myMemberships = (membershipsResult as any).data;
 
         let tenants: WIOTenant[] = [];
         if (myMemberships && myMemberships.length > 0) {
           const tenantIds = myMemberships.map((m: any) => m.tenant_id);
           const { data: tData } = await sb.from('wio_tenants').select('*').in('id', tenantIds).eq('is_active', true);
-          tenants = (tData || []).map((r: Record<string, unknown>) => {
-            const result: Record<string, unknown> = {};
-            for (const [key, value] of Object.entries(r)) {
-              result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
-            }
-            return result as unknown as WIOTenant;
-          });
+          if (cancelled) return;
+          tenants = (tData || []).map((r: Record<string, unknown>) => snakeToCamelObj(r) as unknown as WIOTenant);
         }
 
         // 소속 워크스페이스 없음 → 온보딩 상태
         if (tenants.length === 0) {
           clearTimeout(timeout);
+          if (cancelled) return;
           setNoWorkspace(true);
           setAuthUser(user);
           setLoading(false);
@@ -158,28 +175,24 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         // 선택된 테넌트 (멀티테넌트 시)
         const selectedId = typeof window !== 'undefined' ? localStorage.getItem('wio-selected-tenant') : null;
         const t = (selectedId ? tenants.find(tt => tt.id === selectedId) : null) || tenants[0];
-        setTenant(t);
 
         // 멤버십 조회
         const { data: mData } = await sb.from('wio_members').select('*').eq('tenant_id', t.id).eq('user_id', user.id).single();
-        const m: WIOMember | null = mData ? (() => {
-          const result: Record<string, unknown> = {};
-          for (const [key, value] of Object.entries(mData as Record<string, unknown>)) {
-            result[key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
-          }
-          return result as unknown as WIOMember;
-        })() : null;
-        setMember(m);
+        if (cancelled) return;
+        const m: WIOMember | null = mData ? snakeToCamelObj(mData as Record<string, unknown>) as unknown as WIOMember : null;
+
         clearTimeout(timeout);
+        if (cancelled) return;
+        setTenant(t);
+        setMember(m);
         setLoading(false);
       } catch {
         clearTimeout(timeout);
-        setTenant(demoTenant());
-        setMember({ id: 'demo', displayName: '체험 사용자', role: 'member', email: '' } as any);
-        setLoading(false);
+        fallback();
       }
     };
     init();
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [router]);
 
   if (loading) {

@@ -163,7 +163,7 @@ export default function DivisionPlanPage() {
                       <td className="px-4 py-2 text-right text-xs text-neutral-500">{krw(q.grossProfit)}</td>
                       <td className="px-4 py-2 text-right text-xs font-medium text-neutral-600">{krw(q.operatingProfit)}</td>
                       <td className="px-4 py-2 text-right text-xs text-neutral-500">
-                        {((q.operatingProfit / q.billing) * 100).toFixed(1)}%
+                        {q.billing > 0 ? ((q.operatingProfit / q.billing) * 100).toFixed(1) : "0.0"}%
                       </td>
                       <td className="px-4 py-2 text-right text-xs text-neutral-400">-</td>
                     </tr>

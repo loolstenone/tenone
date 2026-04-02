@@ -16,22 +16,22 @@ interface DetailRow { date: string; brand: string; source: string; desc: string;
 const mockPL: PLSummary = { revenue: 14350000, cost: 8720000, profit: 5630000, margin: 39.2 };
 
 const mockBrandRevenue: BrandRev[] = [
-    { name: "SmarComm", revenue: 5400000, color: "bg-emerald-500" },
-    { name: "WIO Orbi", revenue: 2800000, color: "bg-blue-500" },
-    { name: "Evolution School", revenue: 2100000, color: "bg-orange-500" },
-    { name: "YouInOne", revenue: 1250000, color: "bg-purple-500" },
-    { name: "Mindle", revenue: 700000, color: "bg-cyan-500" },
-    { name: "HeRo", revenue: 680000, color: "bg-rose-500" },
-    { name: "Badak", revenue: 320000, color: "bg-amber-500" },
-    { name: "기타", revenue: 1100000, color: "bg-neutral-400" },
+    { name: "SmarComm", revenue: 5400000, color: "bg-neutral-900" },
+    { name: "WIO Orbi", revenue: 2800000, color: "bg-neutral-700" },
+    { name: "Evolution School", revenue: 2100000, color: "bg-neutral-600" },
+    { name: "YouInOne", revenue: 1250000, color: "bg-neutral-500" },
+    { name: "Mindle", revenue: 700000, color: "bg-neutral-400" },
+    { name: "HeRo", revenue: 680000, color: "bg-neutral-400" },
+    { name: "Badak", revenue: 320000, color: "bg-neutral-300" },
+    { name: "기타", revenue: 1100000, color: "bg-neutral-300" },
 ];
 
 const mockRevenueSources: SourceRev[] = [
-    { name: "구독", amount: 8900000, pct: 62, color: "bg-blue-500" },
-    { name: "교육", amount: 2100000, pct: 15, color: "bg-orange-500" },
-    { name: "이벤트", amount: 1200000, pct: 8, color: "bg-violet-500" },
-    { name: "매칭", amount: 1050000, pct: 7, color: "bg-rose-500" },
-    { name: "콘텐츠", amount: 1100000, pct: 8, color: "bg-emerald-500" },
+    { name: "구독", amount: 8900000, pct: 62, color: "bg-neutral-900" },
+    { name: "교육", amount: 2100000, pct: 15, color: "bg-neutral-600" },
+    { name: "이벤트", amount: 1200000, pct: 8, color: "bg-neutral-400" },
+    { name: "매칭", amount: 1050000, pct: 7, color: "bg-neutral-300" },
+    { name: "콘텐츠", amount: 1100000, pct: 8, color: "bg-neutral-200" },
 ];
 
 const mockMonthlyTrend: MonthTrend[] = [
@@ -57,15 +57,15 @@ const mockDetails: DetailRow[] = [
 ];
 
 const brandColorMap: Record<string, string> = {
-    SmarComm: "bg-emerald-500", "WIO Orbi": "bg-blue-500", "Evolution School": "bg-orange-500",
-    YouInOne: "bg-purple-500", Mindle: "bg-cyan-500", HeRo: "bg-rose-500",
-    Badak: "bg-amber-500", MADLeague: "bg-violet-500", MADLeap: "bg-indigo-500",
-    ChangeUp: "bg-lime-500",
+    SmarComm: "bg-neutral-900", "WIO Orbi": "bg-neutral-700", "Evolution School": "bg-neutral-600",
+    YouInOne: "bg-neutral-500", Mindle: "bg-neutral-400", HeRo: "bg-neutral-400",
+    Badak: "bg-neutral-300", MADLeague: "bg-neutral-800", MADLeap: "bg-neutral-700",
+    ChangeUp: "bg-neutral-500",
 };
 
 const sourceColorMap: Record<string, string> = {
-    "구독": "bg-blue-500", "교육": "bg-orange-500", "이벤트": "bg-violet-500",
-    "매칭": "bg-rose-500", "콘텐츠": "bg-emerald-500",
+    "구독": "bg-neutral-900", "교육": "bg-neutral-600", "이벤트": "bg-neutral-400",
+    "매칭": "bg-neutral-300", "콘텐츠": "bg-neutral-200",
 };
 
 export default function UniverseRevenue() {
@@ -199,8 +199,8 @@ export default function UniverseRevenue() {
                     <p className="text-[11px] text-neutral-500">비용</p>
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                    <TrendingUp className="h-4 w-4 text-green-500 mb-2" />
-                    <p className="text-lg font-bold text-green-600">₩{(plSummary.profit / 10000).toFixed(0)}만</p>
+                    <TrendingUp className="h-4 w-4 text-neutral-400 mb-2" />
+                    <p className="text-lg font-bold text-neutral-900">₩{(plSummary.profit / 10000).toFixed(0)}만</p>
                     <p className="text-[11px] text-neutral-500">영업이익</p>
                 </div>
                 <div className="bg-white border border-neutral-200 rounded-lg p-4">
@@ -264,9 +264,9 @@ export default function UniverseRevenue() {
                     {monthlyTrend.map((m) => (
                         <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
                             <div className="w-full flex gap-1.5 items-end justify-center h-32">
-                                <div className="w-6 bg-blue-400 rounded-t" style={{ height: `${(m.revenue / maxMonthly) * 100}%` }}
+                                <div className="w-6 bg-neutral-800 rounded-t" style={{ height: `${(m.revenue / maxMonthly) * 100}%` }}
                                     title={`매출 ₩${m.revenue.toLocaleString()}`} />
-                                <div className="w-6 bg-red-300 rounded-t" style={{ height: `${(m.cost / maxMonthly) * 100}%` }}
+                                <div className="w-6 bg-neutral-300 rounded-t" style={{ height: `${(m.cost / maxMonthly) * 100}%` }}
                                     title={`비용 ₩${m.cost.toLocaleString()}`} />
                             </div>
                             <span className="text-[10px] text-neutral-500">{m.month}</span>
@@ -274,8 +274,8 @@ export default function UniverseRevenue() {
                     ))}
                 </div>
                 <div className="flex gap-4 mt-3 justify-center">
-                    <span className="flex items-center gap-1.5 text-[11px] text-neutral-500"><span className="h-2 w-2 rounded-full bg-blue-400" />매출</span>
-                    <span className="flex items-center gap-1.5 text-[11px] text-neutral-500"><span className="h-2 w-2 rounded-full bg-red-300" />비용</span>
+                    <span className="flex items-center gap-1.5 text-[11px] text-neutral-500"><span className="h-2 w-2 rounded-full bg-neutral-800" />매출</span>
+                    <span className="flex items-center gap-1.5 text-[11px] text-neutral-500"><span className="h-2 w-2 rounded-full bg-neutral-300" />비용</span>
                 </div>
             </div>
 
@@ -300,13 +300,7 @@ export default function UniverseRevenue() {
                                         <td className="px-4 py-3 text-xs text-neutral-500">{d.date}</td>
                                         <td className="px-4 py-3 text-neutral-700">{d.brand}</td>
                                         <td className="px-4 py-3">
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                                d.source === "구독" ? "bg-blue-100 text-blue-700" :
-                                                d.source === "교육" ? "bg-orange-100 text-orange-700" :
-                                                d.source === "이벤트" ? "bg-violet-100 text-violet-700" :
-                                                d.source === "매칭" ? "bg-rose-100 text-rose-700" :
-                                                "bg-emerald-100 text-emerald-700"
-                                            }`}>{d.source}</span>
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600">{d.source}</span>
                                         </td>
                                         <td className="px-4 py-3 text-neutral-700">{d.desc}</td>
                                         <td className="px-4 py-3 text-right font-medium text-neutral-900">₩{d.amount.toLocaleString()}</td>

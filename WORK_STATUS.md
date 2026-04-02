@@ -1,6 +1,37 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-02 (사무실, 저녁 세션 5 — 작업 종료)
+> 마지막 업데이트: 2026-04-02 (집, 세션 6 — 작업 중)
+
+## 오늘 한 작업 (4/2 집 세션 6)
+
+### WIO Scenario 1 — auth.users → members → wio_members FK 체인 수정 ✅
+
+**문제:** `wio_members.user_id`, `members.auth_id`, `profiles.user_id`, `wio_tenants.owner_id` 모두 `auth.users(id)` FK 제약 없음
+
+**수정:**
+1. `sql/wio-fk-fix.sql` — FK 4개 추가 (NOT VALID, auth.users 참조) ✅
+   - `members.auth_id → auth.users(id)` ON DELETE SET NULL
+   - `wio_members.user_id → auth.users(id)` ON DELETE CASCADE
+   - `wio_tenants.owner_id → auth.users(id)` ON DELETE SET NULL
+   - `profiles.user_id → auth.users(id)` ON DELETE CASCADE
+   - `wio_members(tenant_id, user_id)` UNIQUE 제약 추가
+2. `ensure_wio_membership()` DB 함수 생성 (SECURITY DEFINER) ✅
+   - WIO 첫 진입 시 wio_members 행 없으면 자동 생성 (L4 Member)
+3. `lib/supabase/wio.ts` — `ensureWIOMembership()` 함수 추가 ✅
+4. `app/(WIO)/wio/app/layout.tsx` — B4 로딩 버그 수정 ✅
+   - `clearTimeout`이 auth 직후에만 호출돼 DB 쿼리 hang 시 무한 로딩 발생 → `cancelled` 플래그 + `Promise.race` 타임아웃으로 전체 8초 보장
+
+**pg_constraint 검증 완료:**
+```
+members → auth.users (auth_id)
+wio_members → auth.users (user_id)
+wio_members → wio_tenants (tenant_id)
+wio_tenants → auth.users (owner_id)
+profiles → auth.users (user_id)
+profiles → brands (brand_id)
+```
+
+---
 
 ## 오늘 한 작업 (4/2 저녁 세션 5)
 
@@ -107,7 +138,7 @@
 | # | 페이지 | 문제 | 난이도 |
 |---|--------|------|--------|
 | B2 | Agent Hub 메시지 로그 | 한국어 ◆◆◆ 깨짐 (구형 레코드 한정). ANTHROPIC_API_KEY 환경변수 미설정으로 Mock 응답 중 | 중 |
-| B4 | wio.tenone.biz | "Orbi 로딩 중..." — 10초 타임아웃 fallback 적용됨. 근본 원인 미확인 | 중 |
+| B4 | wio.tenone.biz | ~~"Orbi 로딩 중..." — 근본 원인 수정됨 (cancelled 플래그 + Promise.race 8초)~~ ✅ |
 
 ## 미해결 — 도메인
 

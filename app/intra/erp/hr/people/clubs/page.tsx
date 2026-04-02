@@ -202,7 +202,7 @@ export default function ClubsPage() {
     const id = newName.toLowerCase().replace(/[^a-z0-9]/g, "");
     const club: MadLeagueClub = { id, name: newName.trim(), region: newRegion.trim(), order: 0 };
     const gen = parseInt(newGen) || 1;
-    const updated = [...clubs, club].sort((a, b) => a.name.localeCompare(b.name));
+    const updated = [...clubs, club].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     updated.forEach((c, i) => (c.order = i + 1));
     setClubs(updated);
     setMemberData((prev) => ({
@@ -224,7 +224,7 @@ export default function ClubsPage() {
     if (!editClub || !editName.trim() || !editRegion.trim()) return;
     const updated = clubs
       .map((c) => (c.id === editClub.id ? { ...c, name: editName.trim(), region: editRegion.trim() } : c))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     updated.forEach((c, i) => (c.order = i + 1));
     setClubs(updated);
     setEditClub(null);

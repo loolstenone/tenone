@@ -123,7 +123,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
     const todayStr = new Date().toISOString().split("T")[0];
     const todayViews = sitePosts.reduce((s, p) => s + p.viewCount, 0); // mock: total views
     const recentPosts = [...sitePosts]
-        .sort((a, b) => (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt))
+        .sort((a, b) => (b.publishedAt ?? b.createdAt ?? '').localeCompare(a.publishedAt ?? a.createdAt ?? ''))
         .slice(0, 5);
 
     /* ── Handlers ── */
@@ -268,7 +268,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                     const postCount = boardPosts.filter((p) => p.boardId === board.id).length;
                     const boardPostList = boardPosts
                         .filter((p) => p.boardId === board.id)
-                        .sort((a, b) => (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt))
+                        .sort((a, b) => (b.publishedAt ?? b.createdAt ?? '').localeCompare(a.publishedAt ?? a.createdAt ?? ''))
                         .slice(0, 5);
                     const VisIcon = visibilityIcon[board.visibility as keyof typeof visibilityIcon];
                     const isOpen = expandedBoard === board.id;

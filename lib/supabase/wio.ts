@@ -107,6 +107,22 @@ export async function addMember(tenantId: string, userId: string, displayName: s
   return snakeToCamel(data) as unknown as WIOMember;
 }
 
+/**
+ * WIO 첫 진입 시 자동 멤버 배정
+ * DB 함수 ensure_wio_membership 호출 → wio_members 행 없으면 자동 생성 (L4 Member)
+ */
+export async function ensureWIOMembership(tenantId: string, displayName?: string): Promise<WIOMember | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase.rpc('ensure_wio_membership', {
+    p_tenant_id: tenantId,
+    p_user_id: user.id,
+    p_display_name: displayName || null,
+  });
+  if (error) { console.error('ensureWIOMembership:', error); return null; }
+  return data ? snakeToCamel(data as Record<string, unknown>) as unknown as WIOMember : null;
+}
+
 // ══════════════════════════════════════
 // 프로젝트
 // ══════════════════════════════════════

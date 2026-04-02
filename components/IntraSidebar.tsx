@@ -27,7 +27,7 @@ import {
     // Wiki
     Compass, HelpCircle,
     // BUMS
-    ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle,
+    ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
     // Agent
     Bot,
 } from "lucide-react";
@@ -397,6 +397,7 @@ const modules: NavModule[] = [
                     { name: "게시판 관리", href: "/intra/bums/boards", icon: LayoutGrid },
                     { name: "콘텐츠 관리", href: "/intra/bums/content", icon: PenSquare },
                     { name: "뉴스레터", href: "/intra/bums/newsletter", icon: MessageSquareText },
+                    { name: "트렌드 관리", href: "/intra/mindle", icon: Flame },
                 ],
             },
             {

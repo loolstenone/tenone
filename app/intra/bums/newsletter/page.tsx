@@ -1,23 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, BarChart3, User, Globe, Search } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, User, Globe, Search, X, Save } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
 
-interface Newsletter {
+/* ── 타입 ── */
+interface NewsletterIssue {
     id: string;
     title: string;
-    status: '작성중' | '예약' | '발송완료';
-    scheduledDate?: string;
-    sentDate?: string;
-    recipients: number;
-    openRate?: number;
-    clickRate?: number;
+    content: string | null;
+    status: "draft" | "scheduled" | "sent";
+    scheduled_at: string | null;
+    sent_at: string | null;
+    recipient_count: number;
+    open_rate: number | null;
+    click_rate: number | null;
+    created_at: string;
 }
 
-type SubscriberType = 'member' | 'guest';
+type SubscriberType = "member" | "guest";
 
 interface Subscriber {
     id: string;
@@ -25,70 +28,136 @@ interface Subscriber {
     name?: string;
     type: SubscriberType;
     subscribedAt: string;
-    status: 'active' | 'unsubscribed';
-    source?: string; // 가입경로
+    status: "active" | "unsubscribed";
+    source?: string;
 }
 
-const FALLBACK_NEWSLETTERS: Newsletter[] = [
-    { id: 'nl1', title: 'MADLeague 인사이트 투어링 — 영양군에서 만난 기획의 본질', status: '발송완료', sentDate: '2026-03-15', recipients: 342, openRate: 48.2, clickRate: 12.5 },
-    { id: 'nl2', title: 'LUKI 2nd Single 비하인드 — AI 아이돌은 어떻게 만들어지는가', status: '발송완료', sentDate: '2026-03-01', recipients: 328, openRate: 52.1, clickRate: 15.3 },
-    { id: 'nl3', title: 'Badak 3월 밋업 리캡 — 퍼포먼스 마케팅의 미래', status: '예약', scheduledDate: '2026-03-29', recipients: 355 },
-    { id: 'nl4', title: '리제로스 시즌2 개막 안내', status: '작성중', recipients: 0 },
-];
-
+const statusLabel: Record<string, string> = { draft: "작성중", scheduled: "예약", sent: "발송완료" };
 const statusStyle: Record<string, string> = {
-    '작성중': 'bg-neutral-100 text-neutral-500',
-    '예약': 'bg-blue-50 text-blue-600',
-    '발송완료': 'bg-green-50 text-green-600',
+    draft: "bg-neutral-100 text-neutral-500",
+    scheduled: "bg-neutral-200 text-neutral-700",
+    sent: "bg-neutral-900 text-white",
 };
 
-type TypeFilter = '전체' | 'member' | 'guest';
+type TypeFilter = "전체" | "member" | "guest";
 
 export default function NewsletterCmsPage() {
-    const [tab, setTab] = useState<'issues' | 'subscribers'>('issues');
-    const [newsletters] = useState<Newsletter[]>(FALLBACK_NEWSLETTERS);
+    const [tab, setTab] = useState<"issues" | "subscribers">("issues");
+    const [issues, setIssues] = useState<NewsletterIssue[]>([]);
     const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>("전체");
+    const [searchQuery, setSearchQuery] = useState("");
 
-    useEffect(() => {
-        const supabase = createClient();
-        supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false })
-            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
-                if (data && data.length > 0) {
-                    setSubscribers(data.map((r: Record<string, unknown>) => ({
-                        id: r.id as string,
-                        email: r.email as string,
-                        name: (r.name as string) || undefined,
-                        type: 'guest' as SubscriberType,
-                        subscribedAt: (r.created_at as string)?.split('T')[0] || '',
-                        status: (r.is_active as boolean) ? 'active' : 'unsubscribed',
-                        source: (r.source as string) || undefined,
-                    })));
-                }
-            })
-            .catch(() => {});
+    /* 에디터 */
+    const [editing, setEditing] = useState<NewsletterIssue | null>(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editContent, setEditContent] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    const supabase = createClient();
+
+    /* ── 데이터 로드 ── */
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        const [issueRes, subRes] = await Promise.all([
+            supabase.from("newsletter_issues").select("*").order("created_at", { ascending: false }),
+            supabase.from("newsletter_subscribers").select("*").order("created_at", { ascending: false }),
+        ]);
+
+        if (issueRes.data) setIssues(issueRes.data as NewsletterIssue[]);
+
+        if (subRes.data && subRes.data.length > 0) {
+            setSubscribers(
+                (subRes.data as Record<string, unknown>[]).map((r) => ({
+                    id: r.id as string,
+                    email: r.email as string,
+                    name: (r.name as string) || undefined,
+                    type: "guest" as SubscriberType,
+                    subscribedAt: (r.created_at as string)?.split("T")[0] || "",
+                    status: (r.is_active as boolean) !== false ? "active" : "unsubscribed",
+                    source: (r.source as string) || undefined,
+                }))
+            );
+        }
+        setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const [typeFilter, setTypeFilter] = useState<TypeFilter>('전체');
-    const [searchQuery, setSearchQuery] = useState('');
 
-    const activeSubscribers = subscribers.filter(s => s.status === 'active');
-    const memberCount = activeSubscribers.filter(s => s.type === 'member').length;
-    const guestCount = activeSubscribers.filter(s => s.type === 'guest').length;
-    const totalSent = newsletters.filter(n => n.status === '발송완료').length;
-    const avgOpenRate = newsletters.filter(n => n.openRate).reduce((sum, n) => sum + (n.openRate || 0), 0) / (totalSent || 1);
+    useEffect(() => { loadData(); }, [loadData]);
 
-    const filteredSubscribers = subscribers.filter(s => {
-        if (typeFilter !== '전체' && s.type !== typeFilter) return false;
+    /* ── 이슈 CRUD ── */
+    const handleCreate = async () => {
+        const { data } = await supabase
+            .from("newsletter_issues")
+            .insert({ title: "새 뉴스레터", status: "draft", recipient_count: 0 })
+            .select()
+            .single();
+        if (data) {
+            const issue = data as NewsletterIssue;
+            setIssues((prev) => [issue, ...prev]);
+            openEditor(issue);
+        }
+    };
+
+    const openEditor = (issue: NewsletterIssue) => {
+        setEditing(issue);
+        setEditTitle(issue.title);
+        setEditContent(issue.content || "");
+    };
+
+    const handleSave = async () => {
+        if (!editing) return;
+        setSaving(true);
+        await supabase
+            .from("newsletter_issues")
+            .update({ title: editTitle, content: editContent, updated_at: new Date().toISOString() })
+            .eq("id", editing.id);
+        setIssues((prev) =>
+            prev.map((i) => (i.id === editing.id ? { ...i, title: editTitle, content: editContent } : i))
+        );
+        setSaving(false);
+        setEditing(null);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("삭제하시겠습니까?")) return;
+        await supabase.from("newsletter_issues").delete().eq("id", id);
+        setIssues((prev) => prev.filter((i) => i.id !== id));
+    };
+
+    const handleDeleteSubscriber = async (id: string) => {
+        if (!confirm("구독자를 삭제하시겠습니까?")) return;
+        await supabase.from("newsletter_subscribers").delete().eq("id", id);
+        setSubscribers((prev) => prev.filter((s) => s.id !== id));
+    };
+
+    /* ── 통계 ── */
+    const activeSubscribers = subscribers.filter((s) => s.status === "active");
+    const memberCount = activeSubscribers.filter((s) => s.type === "member").length;
+    const guestCount = activeSubscribers.filter((s) => s.type === "guest").length;
+    const sentIssues = issues.filter((n) => n.status === "sent");
+    const avgOpenRate = sentIssues.length > 0
+        ? sentIssues.reduce((sum, n) => sum + (n.open_rate || 0), 0) / sentIssues.length
+        : 0;
+
+    const filteredSubscribers = subscribers.filter((s) => {
+        if (typeFilter !== "전체" && s.type !== typeFilter) return false;
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
-            return s.email.toLowerCase().includes(q) || (s.name || '').toLowerCase().includes(q);
+            return s.email.toLowerCase().includes(q) || (s.name || "").toLowerCase().includes(q);
         }
         return true;
     });
 
+    if (loading) {
+        return <div className="flex justify-center py-20"><div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" /></div>;
+    }
+
     return (
         <div>
             <PageHeader title="뉴스레터 관리" description="뉴스레터 작성 · 발송 · 구독자 관리">
-                <button className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
+                <button onClick={handleCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 새 뉴스레터
                 </button>
             </PageHeader>
@@ -100,12 +169,12 @@ export default function NewsletterCmsPage() {
                     <p className="text-xl font-bold">{activeSubscribers.length}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></p>
                 </div>
                 <div className="border border-neutral-200 bg-white p-3.5">
-                    <div className="flex items-center gap-1.5 mb-1"><User className="h-3.5 w-3.5 text-blue-400" /><span className="text-xs text-neutral-400">회원</span></div>
-                    <p className="text-xl font-bold text-blue-600">{memberCount}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></p>
+                    <div className="flex items-center gap-1.5 mb-1"><User className="h-3.5 w-3.5 text-neutral-400" /><span className="text-xs text-neutral-400">회원</span></div>
+                    <p className="text-xl font-bold">{memberCount}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></p>
                 </div>
                 <div className="border border-neutral-200 bg-white p-3.5">
-                    <div className="flex items-center gap-1.5 mb-1"><Globe className="h-3.5 w-3.5 text-amber-400" /><span className="text-xs text-neutral-400">비회원</span></div>
-                    <p className="text-xl font-bold text-amber-600">{guestCount}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></p>
+                    <div className="flex items-center gap-1.5 mb-1"><Globe className="h-3.5 w-3.5 text-neutral-400" /><span className="text-xs text-neutral-400">비회원</span></div>
+                    <p className="text-xl font-bold">{guestCount}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></p>
                 </div>
                 <div className="border border-neutral-200 bg-white p-3.5">
                     <div className="flex items-center gap-1.5 mb-1"><Eye className="h-3.5 w-3.5 text-neutral-400" /><span className="text-xs text-neutral-400">평균 오픈율</span></div>
@@ -113,16 +182,16 @@ export default function NewsletterCmsPage() {
                 </div>
                 <div className="border border-neutral-200 bg-white p-3.5">
                     <div className="flex items-center gap-1.5 mb-1"><Mail className="h-3.5 w-3.5 text-neutral-400" /><span className="text-xs text-neutral-400">발송 완료</span></div>
-                    <p className="text-xl font-bold">{totalSent}<span className="text-xs font-normal text-neutral-400 ml-1">건</span></p>
+                    <p className="text-xl font-bold">{sentIssues.length}<span className="text-xs font-normal text-neutral-400 ml-1">건</span></p>
                 </div>
             </div>
 
             {/* 탭 */}
             <div className="flex border-b border-neutral-200 mb-5">
-                {[
-                    { key: 'issues' as const, label: '뉴스레터', count: newsletters.length },
-                    { key: 'subscribers' as const, label: '구독자', count: activeSubscribers.length },
-                ].map(t => (
+                {([
+                    { key: "issues" as const, label: "뉴스레터", count: issues.length },
+                    { key: "subscribers" as const, label: "구독자", count: activeSubscribers.length },
+                ]).map((t) => (
                     <button key={t.key} onClick={() => setTab(t.key)}
                         className={clsx("px-4 py-2.5 text-xs font-medium border-b-2 transition-colors",
                             tab === t.key ? "border-neutral-900 text-neutral-900" : "border-transparent text-neutral-400")}>
@@ -132,55 +201,56 @@ export default function NewsletterCmsPage() {
             </div>
 
             {/* 뉴스레터 목록 */}
-            {tab === 'issues' && (
+            {tab === "issues" && (
                 <div className="space-y-2">
-                    {newsletters.map(nl => (
+                    {issues.map((nl) => (
                         <div key={nl.id} className="border border-neutral-200 bg-white p-4 hover:border-neutral-300 transition-colors">
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusStyle[nl.status]}`}>{nl.status}</span>
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusStyle[nl.status]}`}>{statusLabel[nl.status]}</span>
                                         <h3 className="text-xs font-medium truncate">{nl.title}</h3>
                                     </div>
                                     <div className="flex items-center gap-4 text-[11px] text-neutral-400">
-                                        {nl.sentDate && <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" /> 발송: {nl.sentDate}</span>}
-                                        {nl.scheduledDate && <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" /> 예약: {nl.scheduledDate}</span>}
-                                        {nl.recipients > 0 && <span>{nl.recipients}명 수신</span>}
-                                        {nl.openRate && <span>오픈 {nl.openRate}%</span>}
-                                        {nl.clickRate && <span>클릭 {nl.clickRate}%</span>}
+                                        {nl.sent_at && <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" /> 발송: {nl.sent_at.split("T")[0]}</span>}
+                                        {nl.scheduled_at && <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" /> 예약: {nl.scheduled_at.split("T")[0]}</span>}
+                                        {nl.recipient_count > 0 && <span>{nl.recipient_count}명 수신</span>}
+                                        {nl.open_rate != null && <span>오픈 {nl.open_rate}%</span>}
+                                        {nl.click_rate != null && <span>클릭 {nl.click_rate}%</span>}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="수정"><Edit2 className="h-3 w-3 text-neutral-400" /></button>}
-                                    {nl.status === '작성중' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="발송"><Send className="h-3 w-3 text-neutral-400" /></button>}
-                                    {nl.status === '발송완료' && <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="미리보기"><Eye className="h-3 w-3 text-neutral-400" /></button>}
-                                    <button className="p-1.5 hover:bg-red-50 rounded" aria-label="삭제"><Trash2 className="h-3 w-3 text-neutral-300 hover:text-red-500" /></button>
+                                    <button onClick={() => openEditor(nl)} className="p-1.5 hover:bg-neutral-100 rounded" aria-label="수정"><Edit2 className="h-3 w-3 text-neutral-400" /></button>
+                                    {nl.status === "draft" && (
+                                        <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="발송"><Send className="h-3 w-3 text-neutral-400" /></button>
+                                    )}
+                                    <button onClick={() => handleDelete(nl.id)} className="p-1.5 hover:bg-red-50 rounded" aria-label="삭제"><Trash2 className="h-3 w-3 text-neutral-300 hover:text-red-500" /></button>
                                 </div>
                             </div>
                         </div>
                     ))}
+                    {issues.length === 0 && <div className="text-center py-12 text-neutral-400 text-sm">뉴스레터가 없습니다.</div>}
                 </div>
             )}
 
             {/* 구독자 목록 */}
-            {tab === 'subscribers' && (
+            {tab === "subscribers" && (
                 <div>
-                    {/* 필터 */}
                     <div className="flex items-center gap-3 mb-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-300" />
-                            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                            <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="이메일 또는 이름 검색..."
                                 className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
                         </div>
                         <div className="flex gap-1">
-                            {([['전체', '전체'], ['member', '회원'], ['guest', '비회원']] as [TypeFilter, string][]).map(([key, label]) => (
+                            {([["전체", "전체"], ["member", "회원"], ["guest", "비회원"]] as [TypeFilter, string][]).map(([key, label]) => (
                                 <button key={key} onClick={() => setTypeFilter(key)}
                                     className={clsx("px-3 py-1.5 text-xs rounded transition-colors",
                                         typeFilter === key ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200")}>
                                     {label}
                                     <span className="ml-1 text-[10px]">
-                                        ({key === '전체' ? subscribers.length : subscribers.filter(s => s.type === key).length})
+                                        ({key === "전체" ? subscribers.length : subscribers.filter((s) => s.type === key).length})
                                     </span>
                                 </button>
                             ))}
@@ -201,26 +271,24 @@ export default function NewsletterCmsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredSubscribers.map(sub => (
+                                {filteredSubscribers.map((sub) => (
                                     <tr key={sub.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50 transition-colors">
                                         <td className="p-3 font-mono text-neutral-700">{sub.email}</td>
                                         <td className="p-3 text-neutral-600">{sub.name || <span className="text-neutral-300">—</span>}</td>
                                         <td className="p-3 text-center">
-                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                                sub.type === 'member' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
-                                            }`}>
-                                                {sub.type === 'member' ? <><User className="h-2.5 w-2.5" /> 회원</> : <><Globe className="h-2.5 w-2.5" /> 비회원</>}
+                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-600">
+                                                {sub.type === "member" ? <><User className="h-2.5 w-2.5" /> 회원</> : <><Globe className="h-2.5 w-2.5" /> 비회원</>}
                                             </span>
                                         </td>
-                                        <td className="p-3 text-neutral-400">{sub.source || '—'}</td>
+                                        <td className="p-3 text-neutral-400">{sub.source || "—"}</td>
                                         <td className="p-3 text-neutral-400">{sub.subscribedAt}</td>
                                         <td className="p-3 text-center">
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${sub.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-neutral-100 text-neutral-400'}`}>
-                                                {sub.status === 'active' ? '구독중' : '해지'}
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${sub.status === "active" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-400"}`}>
+                                                {sub.status === "active" ? "구독중" : "해지"}
                                             </span>
                                         </td>
                                         <td className="p-3 text-center">
-                                            <button className="p-1 hover:bg-red-50 rounded" aria-label="구독자 삭제"><Trash2 className="h-3 w-3 text-neutral-300" /></button>
+                                            <button onClick={() => handleDeleteSubscriber(sub.id)} className="p-1 hover:bg-red-50 rounded" aria-label="구독자 삭제"><Trash2 className="h-3 w-3 text-neutral-300" /></button>
                                         </td>
                                     </tr>
                                 ))}
@@ -231,6 +299,40 @@ export default function NewsletterCmsPage() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* 에디터 모달 */}
+            {editing && (
+                <>
+                    <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setEditing(null)} />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+                            <div className="p-5 border-b border-neutral-100 flex items-center justify-between shrink-0">
+                                <h2 className="text-sm font-semibold">뉴스레터 편집</h2>
+                                <button onClick={() => setEditing(null)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="h-5 w-5" /></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                                <div>
+                                    <label className="text-xs text-neutral-500 mb-1 block">제목</label>
+                                    <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-neutral-500 mb-1 block">본문</label>
+                                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={12}
+                                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400 resize-none" />
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-neutral-100 flex justify-end gap-2">
+                                <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
+                                <button onClick={handleSave} disabled={saving}
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-50">
+                                    <Save className="h-3.5 w-3.5" /> {saving ? "저장 중..." : "저장"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

@@ -192,7 +192,7 @@ export default function ProjectListPage() {
             }
             const va = a[sortKey] as string;
             const vb = b[sortKey] as string;
-            return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return sortAsc ? (va || '').localeCompare(vb || '') : (vb || '').localeCompare(va || '');
         });
 
     const toggleSort = (key: SortKey) => {

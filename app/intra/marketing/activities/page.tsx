@@ -34,7 +34,7 @@ export default function ActivitiesPage() {
 
     const getPersonById = (id?: string) => people.find(p => p.id === id);
     const getOrgById = (id?: string) => orgs.find(o => o.id === id);
-    const sorted = [...activities].sort((a, b) => b.date.localeCompare(a.date));
+    const sorted = [...activities].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     return (
         <div className="space-y-6">
