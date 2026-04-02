@@ -79,7 +79,7 @@ export default function MyPayrollPage() {
   return (
     <div className="max-w-4xl">
         {/* Header */}
-        <PageHeader title="내 급여" description="급여 명세 · 이력 조회" />
+        <PageHeader title="급여" description="급여 명세 · 이력 조회" />
 
         {/* This Month Summary */}
         <Card className="mb-6">

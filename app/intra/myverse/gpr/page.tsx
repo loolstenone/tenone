@@ -416,7 +416,7 @@ export default function MyGPRPage() {
   return (
     <div className="max-w-4xl">
       {/* ── Header ── */}
-      <PageHeader title="내 GPR" description={`목표 현황 · 자기평가 · 상사평가 · GPR 리뷰 (${quarter})`}>
+      <PageHeader title="GPR" description={`목표 현황 · 자기평가 · 상사평가 · GPR 리뷰 (${quarter})`}>
         <Link
           href="/intra/erp/gpr"
           className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-700"

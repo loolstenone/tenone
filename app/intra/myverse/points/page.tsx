@@ -55,7 +55,7 @@ export default function MyversePointsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-semibold">내 포인트</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">포인트</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">활동에 따라 자동으로 포인트가 적립됩니다</p>
                 </div>
             </div>

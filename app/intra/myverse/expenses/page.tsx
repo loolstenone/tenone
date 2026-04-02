@@ -88,7 +88,7 @@ export default function MyExpensesPage() {
   return (
     <div className="max-w-4xl">
         {/* Header */}
-        <PageHeader title="내 경비" description="경비 청구 · 내역 조회">
+        <PageHeader title="경비" description="경비 청구 · 내역 조회">
           <PrimaryButton onClick={() => setShowForm(!showForm)}>
             <Plus className="h-3.5 w-3.5" />
             경비 청구

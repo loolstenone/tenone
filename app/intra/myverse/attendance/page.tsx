@@ -92,7 +92,7 @@ export default function MyAttendancePage() {
   return (
     <div className="max-w-4xl">
         {/* Header */}
-        <PageHeader title="내 근태" description="출퇴근 · 휴가 관리" />
+        <PageHeader title="근태" description="출퇴근 · 휴가 관리" />
 
         {/* Today Status */}
         <Card className="mb-6" padding={false}><div className="p-4">

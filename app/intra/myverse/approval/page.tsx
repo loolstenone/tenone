@@ -273,7 +273,7 @@ export default function MyApprovalPage() {
     return (
         <div className="max-w-4xl">
             {/* Header */}
-            <PageHeader title="내 결재" description="결재 대기 · 기안 · 처리 내역">
+            <PageHeader title="결재" description="결재 대기 · 기안 · 처리 내역">
                 <PrimaryButton href="/intra/erp/approval/draft">
                     <Plus className="h-4 w-4" />새 기안
                 </PrimaryButton>
