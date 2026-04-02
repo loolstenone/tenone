@@ -185,10 +185,8 @@ export default function UniverseRevenue() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" /> 손익 관리
-                </h1>
-                <p className="text-sm text-neutral-500 mt-0.5">전체 유니버스 P&L 현황</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">손익 관리</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">전체 유니버스 P&L 현황</p>
             </div>
 
             {/* P&L Summary */}

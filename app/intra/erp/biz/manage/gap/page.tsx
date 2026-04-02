@@ -137,7 +137,7 @@ export default function GapAnalysisPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-4">
-        <h1 className="text-xl font-bold text-neutral-900">Gap 분석</h1>
+        <h1 className="text-xl font-semibold text-neutral-900">Gap 분석</h1>
         <p className="text-sm text-neutral-500">계획 vs 추정 vs 실적 비교</p>
       </div>
 

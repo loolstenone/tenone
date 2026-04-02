@@ -148,7 +148,7 @@ export default function PartnerPoolPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">Partner Pool</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Partner Pool</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">외부 협력사 · 프리랜서 등록 · 검색 · 프로젝트 투입</p>
                 </div>
                 <button onClick={() => setShowAdd(true)}
@@ -249,7 +249,7 @@ export default function PartnerPoolPage() {
                                     {selectedPartner.type === 'company' ? <Building2 className="h-6 w-6 text-blue-400" /> : <User className="h-6 w-6 text-green-400" />}
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-bold">{selectedPartner.name}</h2>
+                                    <h2 className="text-sm font-medium text-neutral-700">{selectedPartner.name}</h2>
                                     <p className="text-xs text-neutral-400">{selectedPartner.type === 'company' ? '회사' : '프리랜서'}</p>
                                 </div>
                             </div>
@@ -295,7 +295,7 @@ export default function PartnerPoolPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white w-full max-w-lg mx-4 shadow-xl rounded max-h-[80vh] overflow-y-auto">
                         <div className="p-5 border-b border-neutral-100 flex items-center justify-between">
-                            <h2 className="text-sm font-bold">파트너 등록</h2>
+                            <h2 className="text-sm font-medium text-neutral-700">파트너 등록</h2>
                             <button onClick={() => setShowAdd(false)}><X className="h-4 w-4 text-neutral-400" /></button>
                         </div>
                         <div className="p-5 space-y-3">

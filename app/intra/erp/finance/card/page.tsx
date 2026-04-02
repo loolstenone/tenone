@@ -78,7 +78,7 @@ export default function CardPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">법인카드 관리</h1>
+                    <h1 className="text-xl font-semibold mb-1">법인카드 관리</h1>
                     <p className="text-sm text-neutral-500">법인카드 사용 내역을 확인하고 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
@@ -108,7 +108,7 @@ export default function CardPage() {
 
             <div className="border border-neutral-200 bg-white">
                 <div className="p-4 border-b border-neutral-100">
-                    <h2 className="text-sm font-bold">사용 내역</h2>
+                    <h2 className="text-sm font-semibold">사용 내역</h2>
                 </div>
                 {usage.length === 0 ? (
                     <div className="py-12 text-center text-sm text-neutral-400">사용 내역이 없습니다</div>

@@ -87,7 +87,7 @@ export default function ReportsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">경리 리포트</h1>
+                    <h1 className="text-xl font-semibold mb-1">경리 리포트</h1>
                     <p className="text-sm text-neutral-500">개인·조직 단위 재무 현황을 분석합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:border-neutral-400 transition-colors">
@@ -114,7 +114,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 gap-6">
                 {/* Monthly summary */}
                 <div className="border border-neutral-200 bg-white p-5">
-                    <h2 className="text-sm font-bold mb-4">월별 요약</h2>
+                    <h2 className="text-sm font-semibold mb-4">월별 요약</h2>
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-xs text-neutral-400 border-b border-neutral-100">
@@ -139,7 +139,7 @@ export default function ReportsPage() {
 
                 {/* Expense breakdown */}
                 <div className="border border-neutral-200 bg-white p-5">
-                    <h2 className="text-sm font-bold mb-4">비용 구성</h2>
+                    <h2 className="text-sm font-semibold mb-4">비용 구성</h2>
                     <div className="space-y-3">
                         {expenseByCategory.map(c => (
                             <div key={c.category}>

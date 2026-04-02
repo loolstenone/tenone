@@ -222,8 +222,8 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold">전체 일정</h1>
-          <p className="text-sm text-neutral-500 mt-1">회사 전체 일정 · 이벤트</p>
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">전체 일정</h1>
+          <p className="text-sm text-neutral-400 mt-0.5">회사 전체 일정 · 이벤트</p>
         </div>
         <button
           onClick={() => { setShowEditor(true); setEdDate(selectedDate || todayStr); }}
@@ -571,7 +571,7 @@ export default function CalendarPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md shadow-xl">
             <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
-              <h2 className="text-sm font-bold">일정 등록</h2>
+              <h2 className="text-sm font-medium text-neutral-700">일정 등록</h2>
               <button onClick={() => setShowEditor(false)} className="text-neutral-400 hover:text-neutral-900">
                 <X className="h-4 w-4" />
               </button>

@@ -192,7 +192,7 @@ export default function SitesListPage() {
             {/* Header */}
             <div>
                 <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold tracking-tight">사이트 관리</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">사이트 관리</h1>
                     {dbLoaded && (
                         <span className={clsx(
                             "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full",
@@ -260,7 +260,7 @@ export default function SitesListPage() {
                                     {getSelectedName().charAt(0)}
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold tracking-tight">{getSelectedName()}</h2>
+                                    <h2 className="text-sm font-medium text-neutral-700">{getSelectedName()}</h2>
                                     <a href={`https://${getSelectedDomain()}`} target="_blank" rel="noopener noreferrer"
                                         className="text-xs text-neutral-400 hover:text-neutral-900 flex items-center gap-1 transition-colors">
                                         {getSelectedDomain()} <ExternalLink className="h-3 w-3" />

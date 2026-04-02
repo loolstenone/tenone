@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-    Globe, Users, CreditCard, TrendingUp, DollarSign, UserPlus,
+    Users, CreditCard, TrendingUp, DollarSign, UserPlus,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -287,10 +287,8 @@ export default function UniverseDashboard() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                        <Globe className="h-5 w-5" /> Universe Dashboard
-                    </h1>
-                    <p className="text-sm text-neutral-500 mt-0.5">Ten:One Universe 전체 현황</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Universe Dashboard</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">Ten:One Universe 전체 현황</p>
                 </div>
             </div>
 

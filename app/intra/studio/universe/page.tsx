@@ -67,8 +67,8 @@ export default function UniversePage() {
         <div className="space-y-8 pb-12">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold">Universe</h2>
-                    <p className="mt-2 text-neutral-500">크로스 브랜드 현황 · 타임라인 · 관계도</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Universe</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">크로스 브랜드 현황 · 타임라인 · 관계도</p>
                 </div>
                 <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200 overflow-x-auto">
                     {([

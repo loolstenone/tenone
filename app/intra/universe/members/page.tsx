@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, Search, Filter, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
+import { Search, Filter, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 /* ── Level 정의 ── */
@@ -178,10 +178,8 @@ export default function UniverseMembers() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                    <Users className="h-5 w-5" /> 통합 회원
-                </h1>
-                <p className="text-sm text-neutral-500 mt-0.5">전체 브랜드 통합 회원 관리</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">통합 회원</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">전체 브랜드 통합 회원 관리</p>
             </div>
 
             {/* Level Bar */}

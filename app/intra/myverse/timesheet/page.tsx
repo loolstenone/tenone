@@ -269,8 +269,8 @@ export default function TimesheetInputPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">타임시트 입력</h1>
-                    <p className="text-sm text-neutral-500 mt-1">일별 투입 시수 기록 · 매일 입력 권장</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">타임시트 입력</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">일별 투입 시수 기록 · 매일 입력 권장</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="text-right">
@@ -434,7 +434,7 @@ export default function TimesheetInputPage() {
 
             {/* 진행중 프로젝트 합계 */}
             <div className="border border-neutral-200 bg-white mt-6 p-4">
-                <h3 className="text-sm font-bold mb-3">진행중 프로젝트 합계</h3>
+                <h3 className="text-sm font-medium text-neutral-700 mb-3">진행중 프로젝트 합계</h3>
                 <div className="flex items-center gap-3 mb-2 text-xs text-neutral-400">
                     <span className="w-28 shrink-0">코드</span>
                     <span className="flex-1">프로젝트</span>
@@ -477,7 +477,7 @@ export default function TimesheetInputPage() {
             {/* 종료된 프로젝트 */}
             {completedProjects.length > 0 && (
                 <div className="border border-neutral-200 bg-white mt-4 p-4">
-                    <h3 className="text-sm font-bold mb-3 text-neutral-400">종료된 프로젝트</h3>
+                    <h3 className="text-sm font-medium text-neutral-700 mb-3">종료된 프로젝트</h3>
                     <div className="space-y-2">
                         {completedProjects.map(p => {
                             const rate = p.estimatedHours > 0 ? Math.round((p.actualHours / p.estimatedHours) * 100) : 0;

@@ -151,7 +151,7 @@ export default function GPRDashboardPage() {
                     {/* Company GPR progress */}
                     <Card className="mb-6">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-sm font-bold">전사 GPR 달성률</h2>
+                            <h2 className="text-sm font-medium text-neutral-700">전사 GPR 달성률</h2>
                             <span className="text-xs text-neutral-400">{overallRate}%</span>
                         </div>
                         <div className="h-3 bg-neutral-100 rounded-full mb-4">
@@ -166,7 +166,7 @@ export default function GPRDashboardPage() {
 
                     {/* Division table */}
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-sm font-bold">부서별 GPR 현황</h2>
+                        <h2 className="text-sm font-medium text-neutral-700">부서별 GPR 현황</h2>
                         <Link href="/intra/erp/gpr/cascade" className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 transition-colors">
                             목표 캐스케이드 보기 <ChevronRight className="h-3 w-3" />
                         </Link>
@@ -216,17 +216,17 @@ export default function GPRDashboardPage() {
             <div className="flex gap-3 mt-6">
                 <Link href="/intra/erp/gpr/cascade"
                     className="flex-1 border border-neutral-200 bg-white p-4 hover:border-neutral-400 transition-colors">
-                    <h3 className="text-sm font-bold mb-1">목표 캐스케이드</h3>
+                    <h3 className="text-sm font-medium text-neutral-700 mb-1">목표 캐스케이드</h3>
                     <p className="text-xs text-neutral-400">회사 → 사업부 → 팀 → 개인 목표 설정 및 승인 관리</p>
                 </Link>
                 <Link href="/intra/erp/gpr/evaluation"
                     className="flex-1 border border-neutral-200 bg-white p-4 hover:border-neutral-400 transition-colors">
-                    <h3 className="text-sm font-bold mb-1">평가</h3>
+                    <h3 className="text-sm font-medium text-neutral-700 mb-1">평가</h3>
                     <p className="text-xs text-neutral-400">분기별 성과 평가 및 역량 평가</p>
                 </Link>
                 <Link href="/intra/erp/gpr/incentive"
                     className="flex-1 border border-neutral-200 bg-white p-4 hover:border-neutral-400 transition-colors">
-                    <h3 className="text-sm font-bold mb-1">인센티브</h3>
+                    <h3 className="text-sm font-medium text-neutral-700 mb-1">인센티브</h3>
                     <p className="text-xs text-neutral-400">GPR 결과 기반 인센티브 산정 및 지급</p>
                 </Link>
             </div>

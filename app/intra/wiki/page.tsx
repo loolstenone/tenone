@@ -36,8 +36,8 @@ export default function WikiHomePage() {
     return (
         <div className="max-w-4xl">
             <div className="mb-6">
-                <h1 className="text-xl font-bold">Wiki</h1>
-                <p className="text-sm text-neutral-500 mt-1">교육 · 안내 · 지식 공유</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Wiki</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">교육 · 안내 · 지식 공유</p>
             </div>
 
             {/* 최근 업데이트 */}
@@ -62,7 +62,7 @@ export default function WikiHomePage() {
             {sections.map(section => (
                 <div key={section.label} className="mb-6">
                     <div className="mb-3">
-                        <h2 className="text-sm font-bold">{section.label}</h2>
+                        <h2 className="text-sm font-semibold">{section.label}</h2>
                         <p className="text-xs text-neutral-400">{section.desc}</p>
                     </div>
                     <div className="grid grid-cols-3 gap-3">

@@ -53,8 +53,8 @@ export default function DealsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Deals</h2>
-                <p className="mt-2 text-neutral-500">영업 파이프라인을 관리합니다.</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Deals</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">영업 파이프라인을 관리합니다.</p>
             </div>
 
             <div className="grid grid-cols-6 gap-3 min-h-[500px]">

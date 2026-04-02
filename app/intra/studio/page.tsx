@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Calendar, FolderOpen, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { brands } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
@@ -37,8 +37,8 @@ export default function OfficeDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-xl font-bold">Studio Dashboard</h2>
-                <p className="mt-1 text-sm text-neutral-500">Ten:One™ 콘텐츠 제작 및 브랜드 관리</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Studio Dashboard</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 콘텐츠 제작 및 브랜드 관리</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -46,20 +46,11 @@ export default function OfficeDashboard() {
                     <Link
                         key={item.name}
                         href={item.href}
-                        className="group relative border border-neutral-200 bg-white p-6 hover:border-neutral-900 transition-all"
+                        className="group border border-neutral-200 bg-white p-5 hover:border-neutral-400 transition-colors"
                     >
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-neutral-500">{item.name}</p>
-                                <p className="mt-2 text-3xl font-bold">{item.value}</p>
-                            </div>
-                            <div className="p-3 bg-neutral-100 text-neutral-400">
-                                <item.icon className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <div className="mt-4 flex items-center text-sm text-neutral-400">
-                            <span className="font-medium text-neutral-900 mr-2">{item.change}</span>
-                        </div>
+                        <p className="text-xs text-neutral-400">{item.name}</p>
+                        <p className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">{item.value}</p>
+                        <p className="mt-1.5 text-xs text-neutral-400">{item.change}</p>
                     </Link>
                 ))}
             </div>

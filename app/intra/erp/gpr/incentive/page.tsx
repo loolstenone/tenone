@@ -100,7 +100,7 @@ export default function GPRIncentivePage() {
 
     return (
         <div className="max-w-5xl">
-            <h1 className="text-xl font-bold mb-2">인센티브</h1>
+            <h1 className="text-xl font-semibold mb-2">인센티브</h1>
             <p className="text-sm text-neutral-500 mb-6">GPR 평가 결과에 기반한 인센티브 산정 및 지급 관리</p>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
@@ -121,7 +121,7 @@ export default function GPRIncentivePage() {
             </div>
 
             <div className="border border-neutral-200 bg-white p-5 mb-6">
-                <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">등급별 인센티브 지급률</h3>
+                <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">등급별 인센티브 지급률</h3>
                 <div className="flex gap-2">
                     {Object.entries(gradeToRate).map(([grade, rate]) => (
                         <div key={grade} className="flex-1 text-center bg-neutral-50 rounded p-2">

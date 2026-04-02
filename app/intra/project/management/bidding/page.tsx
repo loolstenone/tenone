@@ -63,7 +63,7 @@ export default function BiddingPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">입찰관리</h1>
+                    <h1 className="text-xl font-semibold mb-1">입찰관리</h1>
                     <p className="text-sm text-neutral-500">입찰 참여 현황을 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
@@ -91,7 +91,7 @@ export default function BiddingPage() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-sm font-bold">{b.title}</h3>
+                                    <h3 className="text-sm font-semibold">{b.title}</h3>
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[b.type] || 'bg-neutral-100 text-neutral-500'}`}>{b.type}</span>
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[b.status] || 'bg-neutral-100 text-neutral-500'}`}>{b.status}</span>
                                 </div>

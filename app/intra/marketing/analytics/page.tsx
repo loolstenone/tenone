@@ -50,8 +50,8 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Analytics</h2>
-                <p className="mt-2 text-neutral-500">마케팅 성과를 분석합니다.</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Analytics</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">마케팅 성과를 분석합니다.</p>
             </div>
 
             {/* KPI Cards */}

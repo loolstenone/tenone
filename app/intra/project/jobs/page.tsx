@@ -223,7 +223,7 @@ export default function MyProjectsPage() {
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">Job 관리</h1>
+                    <h1 className="text-xl font-semibold">Job 관리</h1>
                     <p className="text-sm text-neutral-500 mt-1">프로젝트별 Job 등록 · 관리</p>
                 </div>
                 <div className="flex gap-2 items-center">
@@ -486,7 +486,7 @@ export default function MyProjectsPage() {
                     <div className="bg-white rounded-lg w-[560px] shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="px-5 py-3 border-b border-neutral-100 flex items-center justify-between">
                             <div>
-                                <h3 className="text-sm font-bold">Job 등록</h3>
+                                <h3 className="text-sm font-semibold">Job 등록</h3>
                                 <p className="text-xs text-neutral-400">{showJobModal}</p>
                             </div>
                             <button onClick={() => setShowJobModal(null)}><X className="h-4 w-4 text-neutral-400" /></button>

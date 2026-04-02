@@ -263,7 +263,7 @@ export default function ClubsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+          <h1 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
             <Users size={18} className="text-neutral-600" />
             MADLeague 동아리 관리
           </h1>
@@ -463,7 +463,7 @@ export default function ClubsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">동아리 추가</h2>
+              <h2 className="text-sm font-semibold text-neutral-900">동아리 추가</h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="p-1 rounded hover:bg-neutral-100 text-neutral-400"
@@ -526,7 +526,7 @@ export default function ClubsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">동아리 수정</h2>
+              <h2 className="text-sm font-semibold text-neutral-900">동아리 수정</h2>
               <button
                 onClick={() => setEditClub(null)}
                 className="p-1 rounded hover:bg-neutral-100 text-neutral-400"

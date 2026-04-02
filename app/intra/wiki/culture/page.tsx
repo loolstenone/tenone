@@ -454,7 +454,7 @@ export default function CulturePage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-base font-bold text-neutral-900">Culture</h1>
+        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Culture</h1>
         <p className="text-xs text-neutral-400 mt-1">
           우리는 컬처를 믿고, 컬처로 일합니다
         </p>

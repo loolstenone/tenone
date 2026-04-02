@@ -30,8 +30,8 @@ export default function CampaignsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Campaigns</h2>
-                <p className="mt-1 text-sm text-neutral-500">마케팅 캠페인을 관리합니다.</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Campaigns</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">마케팅 캠페인을 관리합니다.</p>
             </div>
 
             {loading ? (

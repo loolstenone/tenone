@@ -86,7 +86,7 @@ export default function CertificatesPage() {
 
     return (
         <div className="max-w-4xl">
-            <h1 className="text-xl font-bold mb-2">제증명서 관리</h1>
+            <h1 className="text-xl font-semibold mb-2">제증명서 관리</h1>
             <p className="text-sm text-neutral-500 mb-8">각종 증명서를 발급하고 이력을 확인합니다.</p>
 
             {/* Certificate types */}
@@ -97,7 +97,7 @@ export default function CertificatesPage() {
                             <div className="flex items-center gap-3">
                                 <FileCheck className="h-5 w-5 text-neutral-400" />
                                 <div>
-                                    <h3 className="text-sm font-bold">{cert.type}</h3>
+                                    <h3 className="text-sm font-semibold">{cert.type}</h3>
                                     <p className="text-xs text-neutral-400 mt-0.5">{cert.description}</p>
                                 </div>
                             </div>
@@ -114,7 +114,7 @@ export default function CertificatesPage() {
             </div>
 
             {/* Recent history */}
-            <h2 className="text-sm font-bold mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-neutral-400" /> 최근 발급 이력
             </h2>
             <div className="border border-neutral-200 bg-white">

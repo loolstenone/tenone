@@ -213,7 +213,7 @@ export default function VendorsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-5">
                 <div>
-                    <h1 className="text-xl font-bold">협력사</h1>
+                    <h1 className="text-xl font-semibold">협력사</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">프로젝트 협력사 등록 · 평가 · 거래 관리</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800">
@@ -364,7 +364,7 @@ export default function VendorsPage() {
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setEvalModal(null)}>
                     <div className="bg-white rounded-lg w-[380px] shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="px-5 py-3 border-b border-neutral-100">
-                            <h3 className="text-sm font-bold">협력사 평가</h3>
+                            <h3 className="text-sm font-semibold">협력사 평가</h3>
                             <p className="text-xs text-neutral-400">{vendors.find(v => v.id === evalModal)?.name}</p>
                         </div>
                         <div className="px-5 py-4 space-y-4">

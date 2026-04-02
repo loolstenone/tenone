@@ -660,9 +660,8 @@ export default function OnboardingPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Rocket className="w-4 h-4 text-neutral-400" />
-          <h1 className="text-lg font-bold text-neutral-900">온보딩</h1>
+        <div className="mb-1">
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">온보딩</h1>
         </div>
         <p className="text-xs text-neutral-500">
           Ten:One™에 오신 것을 환영합니다. 함께 성장할 준비를 시작하세요.
@@ -692,7 +691,7 @@ export default function OnboardingPage() {
         <div className="space-y-8">
           {/* 텐원의 존재 이유 */}
           <section className="space-y-3">
-            <h2 className="text-sm font-bold text-neutral-900">텐원의 존재 이유</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">텐원의 존재 이유</h2>
             <div className="border border-neutral-200 bg-neutral-50 px-4 py-3">
               <p className="text-xs text-neutral-500 italic leading-relaxed">
                 &ldquo;가치로 연결된 거대한 세계관을 만들기로 했다.&rdquo;
@@ -706,7 +705,7 @@ export default function OnboardingPage() {
 
           {/* 우리는 누구인가 */}
           <section className="space-y-3">
-            <h2 className="text-sm font-bold text-neutral-900">우리는 누구인가</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">우리는 누구인가</h2>
             <div className="space-y-2">
               {[
                 {
@@ -735,7 +734,7 @@ export default function OnboardingPage() {
 
           {/* 교육의 필요성 */}
           <section className="space-y-3">
-            <h2 className="text-sm font-bold text-neutral-900">교육의 필요성</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">교육의 필요성</h2>
             <div className="border border-neutral-200 bg-white p-4 space-y-2.5">
               {[
                 "텐원은 독특한 문화와 일하는 방식을 가지고 있습니다",

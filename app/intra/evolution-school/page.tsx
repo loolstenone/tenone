@@ -35,8 +35,6 @@ import {
   AlertTriangle,
   ExternalLink,
   ArrowRight,
-  Trophy,
-  FileText,
 } from "lucide-react";
 import * as educationDb from "@/lib/supabase/education";
 import { useAuth } from "@/lib/auth-context";
@@ -1439,9 +1437,7 @@ export default function EvolutionSchoolPage() {
                       <div className="space-y-3">
                         {/* Description */}
                         <div>
-                          <h4 className="text-[11px] font-semibold text-neutral-700 mb-1 flex items-center gap-1">
-                            <FileText className="w-3 h-3" /> 강의 설명
-                          </h4>
+                          <h4 className="text-[11px] font-semibold text-neutral-700 mb-1">강의 설명</h4>
                           <p className="text-xs text-neutral-600 leading-relaxed">
                             {course.description}
                           </p>
@@ -1449,9 +1445,7 @@ export default function EvolutionSchoolPage() {
 
                         {/* Objectives */}
                         <div>
-                          <h4 className="text-[11px] font-semibold text-neutral-700 mb-1 flex items-center gap-1">
-                            <Target className="w-3 h-3" /> 학습 목표
-                          </h4>
+                          <h4 className="text-[11px] font-semibold text-neutral-700 mb-1">학습 목표</h4>
                           <ul className="space-y-0.5">
                             {course.objectives.map((obj, i) => (
                               <li key={i} className="text-xs text-neutral-600 flex items-start gap-1.5">
@@ -1574,9 +1568,7 @@ export default function EvolutionSchoolPage() {
           {/* Completed courses table */}
           <div className="border border-neutral-200 bg-white overflow-hidden">
             <div className="px-4 py-3 border-b border-neutral-100">
-              <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
-                <Trophy className="w-3.5 h-3.5 text-amber-500" /> 이수 완료 과정
-              </h3>
+              <h3 className="text-sm font-semibold text-neutral-900">이수 완료 과정</h3>
             </div>
             <table className="w-full text-xs">
               <thead>
@@ -1622,9 +1614,7 @@ export default function EvolutionSchoolPage() {
           {/* Incomplete courses table */}
           <div className="border border-neutral-200 bg-white overflow-hidden">
             <div className="px-4 py-3 border-b border-neutral-100">
-              <h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-neutral-400" /> 미이수 과정
-              </h3>
+              <h3 className="text-sm font-semibold text-neutral-900">미이수 과정</h3>
             </div>
             <table className="w-full text-xs">
               <thead>

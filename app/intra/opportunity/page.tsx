@@ -198,7 +198,7 @@ export default function OpportunityPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">Opportunity</h1>
+                    <h1 className="text-xl font-semibold">Opportunity</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">기회 수집 · 파이프라인 · 프로젝트 전환</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -344,7 +344,7 @@ export default function OpportunityPage() {
                                     <span className={`text-xs px-2 py-0.5 rounded ${statusConfig[selectedOpp.status].bg} ${statusConfig[selectedOpp.status].color}`}>{statusConfig[selectedOpp.status].label}</span>
                                     <ScoreBadge score={selectedOpp.relevanceScore} />
                                 </div>
-                                <h2 className="text-sm font-bold text-neutral-900">{selectedOpp.title}</h2>
+                                <h2 className="text-sm font-semibold text-neutral-900">{selectedOpp.title}</h2>
                             </div>
                             <button onClick={() => setSelectedOpp(null)} className="text-neutral-400 hover:text-neutral-700 p-1">
                                 <X className="h-4 w-4" />
@@ -425,7 +425,7 @@ export default function OpportunityPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white w-full max-w-lg mx-4 shadow-xl rounded">
                         <div className="p-5 border-b border-neutral-100 flex items-center justify-between">
-                            <h2 className="text-sm font-bold">기회 등록</h2>
+                            <h2 className="text-sm font-semibold">기회 등록</h2>
                             <button onClick={() => setShowAdd(false)}><X className="h-4 w-4 text-neutral-400" /></button>
                         </div>
                         <div className="p-5 space-y-3">

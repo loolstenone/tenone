@@ -506,7 +506,7 @@ export default function MyGPRPage() {
           <section>
             <div className="flex items-center gap-2 mb-2.5">
               <Building2 className="h-3.5 w-3.5 text-neutral-400" />
-              <h2 className="text-xs font-bold text-neutral-700">우리의 방향</h2>
+              <h2 className="text-sm font-medium text-neutral-700">우리의 방향</h2>
               <span className="text-[11px] text-neutral-400">CEO가 설정한 회사 목표 (읽기 전용)</span>
             </div>
             <div className="space-y-1.5">
@@ -522,7 +522,7 @@ export default function MyGPRPage() {
           <section>
             <div className="flex items-center gap-2 mb-2.5">
               <Users className="h-3.5 w-3.5 text-neutral-400" />
-              <h2 className="text-xs font-bold text-neutral-700">조직의 과제</h2>
+              <h2 className="text-sm font-medium text-neutral-700">조직의 과제</h2>
               <span className="text-[11px] text-neutral-400">부문/팀 핵심 과제 (읽기 전용)</span>
             </div>
             <div className="space-y-1.5">
@@ -541,7 +541,7 @@ export default function MyGPRPage() {
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
                 <UserCircle className="h-3.5 w-3.5 text-neutral-400" />
-                <h2 className="text-xs font-bold text-neutral-700">개인의 역할</h2>
+                <h2 className="text-sm font-medium text-neutral-700">개인의 역할</h2>
                 <span className="text-[11px] text-neutral-400">전천일 (CEO) · {goals.length}개 목표</span>
               </div>
               <button className="flex items-center gap-1 px-3 py-1.5 text-xs border border-neutral-200 hover:bg-neutral-50">

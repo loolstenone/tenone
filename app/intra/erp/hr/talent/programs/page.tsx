@@ -78,7 +78,7 @@ export default function ProgramsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">인재 육성 Programs</h1>
+                    <h1 className="text-xl font-semibold mb-1">인재 육성 Programs</h1>
                     <p className="text-sm text-neutral-500">온보딩, 멘토링, 교육, 인턴십 프로그램을 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
@@ -106,7 +106,7 @@ export default function ProgramsPage() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-sm font-bold">{p.name}</h3>
+                                    <h3 className="text-sm font-semibold">{p.name}</h3>
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${typeColor[p.type]}`}>{p.type}</span>
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[p.status]}`}>{p.status}</span>
                                 </div>

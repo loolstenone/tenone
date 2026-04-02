@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import {
-    HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Search,
+    ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Search,
     Lightbulb, Target, FileCheck, CalendarDays, User, Globe, GraduationCap,
     FileText, BarChart3, Megaphone, Users, CreditCard,
 } from "lucide-react";
@@ -391,9 +391,8 @@ export default function FaqPage() {
     return (
         <div className="max-w-4xl">
             {/* Header */}
-            <div className="flex items-center gap-2 mb-1">
-                <HelpCircle className="w-5 h-5 text-neutral-400" />
-                <h1 className="text-xl font-bold">FAQ & 업무 가이드</h1>
+            <div className="mb-1">
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">FAQ & 업무 가이드</h1>
             </div>
             <p className="text-xs text-neutral-400 mb-5">자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다</p>
 

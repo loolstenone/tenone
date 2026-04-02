@@ -87,7 +87,7 @@ export default function ExpenseRequestPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">경비품의서</h1>
+                    <h1 className="text-xl font-semibold mb-1">경비품의서</h1>
                     <p className="text-sm text-neutral-500">경비 사용 품의서를 작성하고 결재를 요청합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
@@ -108,7 +108,7 @@ export default function ExpenseRequestPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <FileText className="h-4 w-4 text-neutral-400" />
-                                    <h3 className="text-sm font-bold">{r.title}</h3>
+                                    <h3 className="text-sm font-semibold">{r.title}</h3>
                                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${statusColor[r.status]}`}>{r.status}</span>
                                 </div>
                                 <p className="text-xs text-neutral-500">{r.purpose}</p>

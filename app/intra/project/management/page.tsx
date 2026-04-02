@@ -209,8 +209,8 @@ export default function ProjectListPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">프로젝트 관리</h1>
-                    <p className="text-sm text-neutral-500 mt-1">프로젝트 선택 → Job 등록 · 상세 관리</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 관리</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트 선택 → Job 등록 · 상세 관리</p>
                 </div>
                 <Link
                     href="/intra/project/management/new"
@@ -366,7 +366,7 @@ export default function ProjectListPage() {
                                     <span className="text-xs px-1.5 py-0.5 bg-neutral-50 text-neutral-400 border border-neutral-100">{p.subType}</span>
                                 </div>
                                 {/* Row 2: name */}
-                                <h3 className="text-sm font-bold truncate">{p.name}</h3>
+                                <h3 className="text-sm font-semibold truncate">{p.name}</h3>
                                 {/* Row 3: meta */}
                                 <div className="flex items-center gap-4 mt-1 text-xs text-neutral-400">
                                     <span>PM: {p.pm}</span>

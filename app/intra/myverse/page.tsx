@@ -7,10 +7,10 @@ import { getDailyQuote } from "@/lib/daily-quotes";
 import * as townityDb from "@/lib/supabase/townity";
 import * as myverseDb from "@/lib/supabase/myverse";
 import {
-    Mail, Building2, Calendar, Target, Edit2, Shield, BookOpen, Clock,
-    FileCheck, User, FolderKanban, ChevronRight, CalendarCheck, CreditCard,
+    Mail, Building2, Calendar, Target, Edit2, BookOpen, Clock,
+    FileCheck, User, FolderKanban, ChevronRight, CreditCard,
     GraduationCap, Wallet, DollarSign, TrendingUp, AlertCircle, CheckCircle2,
-    FileText, Palmtree, Stamp, FileSignature, Trophy, Inbox
+    FileText, Palmtree, Stamp, FileSignature, Inbox
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -44,7 +44,7 @@ function PointWidget() {
     return (
         <div className="border border-neutral-200 bg-white p-4 mb-4">
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-bold flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5" /> 포인트 · 등급</h3>
+                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">포인트 · 등급</h3>
                 <Link href="/intra/myverse/points" className="text-[11px] text-neutral-400 hover:text-neutral-900">상세 →</Link>
             </div>
             <div className="flex items-center gap-5">
@@ -171,7 +171,7 @@ export default function MyversePage() {
         <div>
             {/* 인사말 + 격언 */}
             <div className="mb-6">
-                <h1 className="text-xl font-bold">안녕하세요, {user.name}님</h1>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">안녕하세요, {user.name}님</h1>
                 <p className="text-sm text-neutral-500 mt-1 italic">{todayQuote}</p>
             </div>
 
@@ -179,7 +179,7 @@ export default function MyversePage() {
             {isStaff && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="border border-neutral-200 bg-white p-4">
-                        <h3 className="text-xs font-bold mb-3">공지사항</h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">공지사항</h3>
                         {notices.length > 0 ? (
                             <div className="space-y-2">
                                 {notices.map((n, i) => (
@@ -193,7 +193,7 @@ export default function MyversePage() {
                         ) : <EmptyState message="공지사항이 없습니다" />}
                     </div>
                     <div className="border border-neutral-200 bg-white p-4">
-                        <h3 className="text-xs font-bold mb-3">오늘 일정</h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">오늘 일정</h3>
                         {todaySchedule.length > 0 ? (
                             <div className="space-y-2">
                                 {todaySchedule.map((s, i) => (
@@ -216,7 +216,7 @@ export default function MyversePage() {
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-lg font-bold">{user.name}</h1>
+                        <h1 className="text-lg font-semibold tracking-tight">{user.name}</h1>
                         <span className="text-xs tracking-widest text-neutral-400 uppercase">Myverse</span>
                     </div>
                     <div className="flex items-center gap-4 mt-1">
@@ -269,7 +269,7 @@ export default function MyversePage() {
                 {/* HIT 검사 결과 */}
                 <div className="border border-neutral-200 bg-white p-4">
                     <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">🦸 HeRo HIT</h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">HeRo HIT</h3>
                         <Link href="/intra/hero/hit/report" className="text-[11px] text-neutral-400 hover:text-neutral-900">리포트 →</Link>
                     </div>
                     <EmptyState message="HIT 검사 결과가 없습니다" />
@@ -278,7 +278,7 @@ export default function MyversePage() {
                 {/* Evolution School 이수 현황 */}
                 <div className="border border-neutral-200 bg-white p-4">
                     <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">🎓 Evolution School</h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Evolution School</h3>
                         <Link href="/intra/evolution-school" className="text-[11px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                     </div>
                     {myEducation ? (
@@ -318,7 +318,7 @@ export default function MyversePage() {
             {/* Row 1.5: 업무 현황 */}
             <div className="border border-neutral-200 bg-white p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xs font-bold flex items-center gap-1.5">📋 업무 현황</h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">업무 현황</h3>
                     <Link href="/intra/myverse/todo" className="text-[11px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                 </div>
                 <EmptyState message="등록된 업무가 없습니다" />
@@ -329,9 +329,7 @@ export default function MyversePage() {
             {/* Row 1.6: 전자결재 */}
             <div className="border border-neutral-200 bg-white p-5 mb-4">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold flex items-center gap-2">
-                        <Stamp className="h-4 w-4 text-neutral-400" /> 전자결재
-                    </h3>
+                    <h3 className="text-sm font-medium text-neutral-700">전자결재</h3>
                     <div className="flex items-center gap-2">
                         <Link href="/intra/myverse/approval/draft" className="flex items-center gap-1 px-2.5 py-1 text-xs border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-colors">
                             <FileSignature className="h-3 w-3" /> 새 기안
@@ -393,9 +391,7 @@ export default function MyversePage() {
                 {/* GPR */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <Target className="h-4 w-4 text-neutral-400" /> GPR
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">GPR</h3>
                         <Link href="/intra/myverse/gpr" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">상세 →</Link>
                     </div>
                     {myGPR ? (
@@ -435,9 +431,7 @@ export default function MyversePage() {
                 {/* 근태 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <CalendarCheck className="h-4 w-4 text-neutral-400" /> 근태
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">근태</h3>
                         <Link href="/intra/myverse/attendance" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">상세 →</Link>
                     </div>
                     {myAttendance ? (
@@ -488,9 +482,7 @@ export default function MyversePage() {
                 {/* 급여 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <Wallet className="h-4 w-4 text-neutral-400" /> 급여
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">급여</h3>
                         <Link href="/intra/myverse/payroll" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">상세 →</Link>
                     </div>
                     {mySalary ? (
@@ -525,9 +517,7 @@ export default function MyversePage() {
                 {/* 경비 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-neutral-400" /> 경비
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">경비</h3>
                         <Link href="/intra/myverse/expenses" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">상세 →</Link>
                     </div>
                     {myExpenses ? (
@@ -566,9 +556,7 @@ export default function MyversePage() {
                 {/* 투입 프로젝트 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <FolderKanban className="h-4 w-4 text-neutral-400" /> 투입 프로젝트
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">투입 프로젝트</h3>
                         <Link href="/intra/project/management" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">전체 →</Link>
                     </div>
                     {myProjects.length > 0 ? (
@@ -603,9 +591,7 @@ export default function MyversePage() {
                 {/* 교육 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <GraduationCap className="h-4 w-4 text-neutral-400" /> 교육
-                        </h3>
+                        <h3 className="text-sm font-medium text-neutral-700">교육</h3>
                         <Link href="/intra/erp/hr/education" className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors">상세 →</Link>
                     </div>
                     {myEducation ? (
@@ -638,9 +624,7 @@ export default function MyversePage() {
 
             {/* Row 5: 시스템 접근 권한 (직원만) */}
             {isStaff && <div className="border border-neutral-200 bg-white p-5">
-                <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-neutral-400" /> 시스템 접근 권한
-                </h3>
+                <h3 className="text-sm font-medium text-neutral-700 mb-3">시스템 접근 권한</h3>
                 <div className="flex flex-wrap gap-3">
                     {(user.systemAccess || []).map(access => {
                         const info = SystemAccessInfo[access as SystemAccess];

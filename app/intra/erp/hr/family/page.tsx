@@ -59,7 +59,7 @@ export default function FamilyPage() {
         <div className="max-w-4xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">가족관리</h1>
+                    <h1 className="text-xl font-semibold mb-1">가족관리</h1>
                     <p className="text-sm text-neutral-500">가족 및 부양가족 정보를 관리합니다.</p>
                 </div>
                 <button onClick={() => setShowForm(true)}
@@ -91,7 +91,7 @@ export default function FamilyPage() {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-sm font-bold">{member.name}</h3>
+                                        <h3 className="text-sm font-semibold">{member.name}</h3>
                                         <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">{member.relation}</span>
                                     </div>
                                     <p className="text-xs text-neutral-400 mt-0.5">생년월일: {member.birthDate}</p>
@@ -128,7 +128,7 @@ export default function FamilyPage() {
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white w-full max-w-md p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold">가족 등록</h2>
+                            <h2 className="text-lg font-semibold">가족 등록</h2>
                             <button onClick={() => setShowForm(false)} className="text-neutral-400 hover:text-neutral-900">
                                 <X className="h-4 w-4" />
                             </button>

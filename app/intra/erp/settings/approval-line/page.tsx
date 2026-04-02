@@ -101,7 +101,7 @@ export default function ApprovalLinePage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">결재라인 설정</h1>
+                    <h1 className="text-xl font-semibold mb-1">결재라인 설정</h1>
                     <p className="text-xs text-neutral-400">기안 유형별 · 요인별 결재 승인 라인 관리</p>
                 </div>
                 <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors rounded">
@@ -196,7 +196,7 @@ export default function ApprovalLinePage() {
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                     <div className="bg-white border border-neutral-200 rounded w-full max-w-md p-5">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-sm font-bold">결재라인 추가</h2>
+                            <h2 className="text-sm font-semibold">결재라인 추가</h2>
                             <button onClick={() => setShowModal(false)}><X className="h-4 w-4 text-neutral-400" /></button>
                         </div>
                         <div className="space-y-3">

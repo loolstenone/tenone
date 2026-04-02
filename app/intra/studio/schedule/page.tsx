@@ -77,8 +77,8 @@ export default function SchedulePage() {
             {/* Page Header & Controls */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-xl font-bold">Schedule</h2>
-                    <p className="mt-2 text-neutral-500">Integrated calendar for Ten:One™ Universe events.</p>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Schedule</h1>
+                    <p className="text-sm text-neutral-400 mt-0.5">Integrated calendar for Ten:One™ Universe events.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200">

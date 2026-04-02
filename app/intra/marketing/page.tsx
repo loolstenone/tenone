@@ -5,7 +5,7 @@ import Link from "next/link";
 import { fetchCampaigns, fetchLeads, fetchContentPosts } from "@/lib/supabase/marketing";
 import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
 import { Campaign, Lead, ContentPost } from "@/types/marketing";
-import { Megaphone, TrendingUp, FileText, BarChart3, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function MarketingDashboard() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -45,21 +45,14 @@ export default function MarketingDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-xl font-bold">Marketing Dashboard</h2>
-                <p className="mt-1 text-sm text-neutral-500">Ten:One™ 마케팅 포털</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Marketing Dashboard</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 마케팅 포털</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map(item => (
-                    <Link key={item.name} href={item.href} className="group border border-neutral-200 bg-white p-6 hover:border-neutral-900 transition-all">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-neutral-500">{item.name}</p>
-                                <p className="mt-2 text-3xl font-bold">{item.value}</p>
-                            </div>
-                            <div className="p-3 bg-neutral-100 text-neutral-400">
-                                <item.icon className="h-5 w-5" />
-                            </div>
-                        </div>
+                    <Link key={item.name} href={item.href} className="group border border-neutral-200 bg-white p-5 hover:border-neutral-400 transition-colors">
+                        <p className="text-xs text-neutral-400">{item.name}</p>
+                        <p className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">{item.value}</p>
                     </Link>
                 ))}
             </div>

@@ -383,7 +383,7 @@ export default function ProjectDetailPage() {
                         </span>
                     )}
                 </div>
-                <h1 className="text-xl font-bold">{project.name}</h1>
+                <h1 className="text-xl font-semibold">{project.name}</h1>
                 <div className="flex items-center gap-4 mt-1 text-xs text-neutral-400">
                     <span>PM: {project.pm}</span>
                     <span className="flex items-center gap-0.5"><Calendar className="h-3 w-3" /> {project.startDate} ~ {project.endDate}</span>
@@ -568,7 +568,7 @@ export default function ProjectDetailPage() {
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                             <div className="bg-white border border-neutral-200 shadow-lg w-full max-w-lg mx-4 p-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-sm font-bold">Job 등록</h2>
+                                    <h2 className="text-sm font-semibold">Job 등록</h2>
                                     <button onClick={() => setShowJobModal(false)} className="text-neutral-400 hover:text-neutral-600">
                                         <X className="h-4 w-4" />
                                     </button>
@@ -912,7 +912,7 @@ function FileTabPanel({ files: initialFiles }: { files: ProjectFile[] }) {
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                     <div className="bg-white border border-neutral-200 rounded w-full max-w-md p-5">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-sm font-bold">파일 업로드</h2>
+                            <h2 className="text-sm font-semibold">파일 업로드</h2>
                             <button onClick={() => setShowUpload(false)}><X className="h-4 w-4 text-neutral-400" /></button>
                         </div>
                         <div className="space-y-3">

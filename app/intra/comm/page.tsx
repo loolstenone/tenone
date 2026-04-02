@@ -106,8 +106,8 @@ export default function CommPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-xl font-bold">커뮤니케이션</h1>
-                <p className="text-sm text-neutral-500 mt-1">사내 소통 · 공지 · 일정 · 지식경영</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">커뮤니케이션</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">사내 소통 · 공지 · 일정 · 지식경영</p>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -116,7 +116,7 @@ export default function CommPage() {
                     <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Bell className="h-4 w-4 text-neutral-400" />
-                            <h2 className="text-sm font-semibold">공지사항</h2>
+                            <h2 className="text-sm font-medium text-neutral-700">공지사항</h2>
                         </div>
                         <Link href="/intra/comm/notice" className="text-xs text-neutral-400 hover:text-neutral-900 flex items-center gap-1">
                             전체보기 <ArrowRight className="h-3 w-3" />
@@ -140,7 +140,7 @@ export default function CommPage() {
                     <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-neutral-400" />
-                            <h2 className="text-sm font-semibold">사내 일정</h2>
+                            <h2 className="text-sm font-medium text-neutral-700">사내 일정</h2>
                         </div>
                         <Link href="/intra/comm/calendar" className="text-xs text-neutral-400 hover:text-neutral-900 flex items-center gap-1">
                             캘린더 <ArrowRight className="h-3 w-3" />
@@ -168,7 +168,7 @@ export default function CommPage() {
                     <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageSquare className="h-4 w-4 text-neutral-400" />
-                            <h2 className="text-sm font-semibold">자유게시판</h2>
+                            <h2 className="text-sm font-medium text-neutral-700">자유게시판</h2>
                         </div>
                         <Link href="/intra/comm/free" className="text-xs text-neutral-400 hover:text-neutral-900 flex items-center gap-1">
                             전체보기 <ArrowRight className="h-3 w-3" />
@@ -196,7 +196,7 @@ export default function CommPage() {
                 <div className="border border-neutral-200 bg-white">
                     <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-neutral-400" />
-                        <h2 className="text-sm font-semibold">지식경영</h2>
+                        <h2 className="text-sm font-medium text-neutral-700">지식경영</h2>
                     </div>
                     <ul className="divide-y divide-neutral-100">
                         {wikiLinks.map(w => (

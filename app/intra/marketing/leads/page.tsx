@@ -48,8 +48,8 @@ export default function LeadsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Leads</h2>
-                <p className="mt-2 text-neutral-500">리드 퍼널을 관리합니다.</p>
+                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Leads</h1>
+                <p className="text-sm text-neutral-400 mt-0.5">리드 퍼널을 관리합니다.</p>
             </div>
             <div className="grid grid-cols-7 gap-2 min-h-[500px]">
                 {stages.map(stage => {

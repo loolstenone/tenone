@@ -55,7 +55,7 @@ export default function MyversePointsPage() {
         <div className="max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">내 포인트</h1>
+                    <h1 className="text-lg font-semibold">내 포인트</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">활동에 따라 자동으로 포인트가 적립됩니다</p>
                 </div>
             </div>
@@ -114,7 +114,7 @@ export default function MyversePointsPage() {
 
             {/* 등급 안내 바 */}
             <div className="border border-neutral-200 bg-white p-4 mb-6">
-                <h3 className="text-xs font-bold mb-3">등급 체계</h3>
+                <h3 className="text-xs font-semibold mb-3">등급 체계</h3>
                 <div className="flex items-center gap-0">
                     {gradeLevels.map((g, i) => {
                         const gc = gradeConfig[g];
@@ -134,7 +134,7 @@ export default function MyversePointsPage() {
                 {/* 포인트 이력 (2칸) */}
                 <div className="col-span-2 border border-neutral-200 bg-white">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-                        <h3 className="text-xs font-bold">포인트 이력</h3>
+                        <h3 className="text-xs font-semibold">포인트 이력</h3>
                         <div className="flex items-center gap-1">
                             <Filter className="h-3 w-3 text-neutral-400" />
                             <select
@@ -177,7 +177,7 @@ export default function MyversePointsPage() {
                     {/* 카테고리별 적립 */}
                     <div className="border border-neutral-200 bg-white">
                         <div className="px-4 py-3 border-b border-neutral-100">
-                            <h3 className="text-xs font-bold">카테고리별 적립</h3>
+                            <h3 className="text-xs font-semibold">카테고리별 적립</h3>
                         </div>
                         <div className="p-4 space-y-2">
                             {categoryTotals.map(({ category, total }) => (
@@ -194,7 +194,7 @@ export default function MyversePointsPage() {
                     {/* 리더보드 */}
                     <div className="border border-neutral-200 bg-white">
                         <div className="px-4 py-3 border-b border-neutral-100">
-                            <h3 className="text-xs font-bold flex items-center gap-1">
+                            <h3 className="text-xs font-semibold flex items-center gap-1">
                                 <Trophy className="h-3 w-3" /> 리더보드
                             </h3>
                         </div>

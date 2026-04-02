@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { usePoints } from "@/lib/point-context";
 import {
     TrendingUp, Users, FolderKanban, DollarSign, Target,
-    ArrowUpRight, ArrowDownRight, Briefcase, Award, Globe,
-    BarChart3, PieChart, Activity, ChevronRight, Star,
-    Calendar, Layers, UserPlus, CheckCircle2, Clock, XCircle,
+    ArrowUpRight, ArrowDownRight, Briefcase, Globe,
+    PieChart, Activity, ChevronRight, Star,
+    Calendar, UserPlus, CheckCircle2, Clock, XCircle,
     Medal, Gem, Crown
 } from "lucide-react";
 import Link from "next/link";
@@ -133,7 +133,7 @@ export default function BIDashboardPage() {
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-lg font-bold">BI Dashboard</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">BI Dashboard</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">Ten:One™ 전사 경영 현황 · {period}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -193,9 +193,7 @@ export default function BIDashboardPage() {
             <div className="grid grid-cols-3 gap-4 mb-4">
                 {/* 3축 사업 현황 */}
                 <div className="col-span-2 border border-neutral-200 bg-white p-5">
-                    <h3 className="text-xs font-bold mb-4 flex items-center gap-1.5">
-                        <Layers className="h-3.5 w-3.5" /> 사업 3축 현황
-                    </h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-4">사업 3축 현황</h3>
                     <div className="space-y-4">
                         {Object.entries(bizOverview).map(([key, biz]) => {
                             const pct = Math.round((biz.revenue / biz.target) * 100);
@@ -231,9 +229,7 @@ export default function BIDashboardPage() {
 
                 {/* 월별 매출/비용 추이 */}
                 <div className="border border-neutral-200 bg-white p-5">
-                    <h3 className="text-xs font-bold mb-4 flex items-center gap-1.5">
-                        <BarChart3 className="h-3.5 w-3.5" /> 월별 매출·비용
-                    </h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-4">월별 매출·비용</h3>
                     <div className="space-y-3">
                         {monthlyRevenue.map(m => (
                             <div key={m.month}>
@@ -264,9 +260,7 @@ export default function BIDashboardPage() {
                 {/* 프로젝트 현황 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">
-                            <FolderKanban className="h-3.5 w-3.5" /> 프로젝트 현황
-                        </h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">프로젝트 현황</h3>
                         <Link href="/intra/project/management" className="text-[10px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                     </div>
                     {/* 상태 바 */}
@@ -317,9 +311,7 @@ export default function BIDashboardPage() {
                 {/* Opportunity 파이프라인 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">
-                            <Target className="h-3.5 w-3.5" /> Opportunity 파이프라인
-                        </h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Opportunity 파이프라인</h3>
                         <Link href="/intra/opportunity" className="text-[10px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                     </div>
                     {/* 퍼널 바 */}
@@ -339,7 +331,7 @@ export default function BIDashboardPage() {
                         ))}
                     </div>
                     {/* 마감 임박 */}
-                    <h4 className="text-[10px] font-bold text-neutral-500 mb-2">마감 임박</h4>
+                    <h4 className="text-[10px] font-semibold text-neutral-500 mb-2">마감 임박</h4>
                     <div className="space-y-2">
                         {opportunityPipeline.upcomingDeadlines.map((d, i) => (
                             <div key={i} className="flex items-center gap-2 text-xs py-1.5 border-b border-neutral-50 last:border-0">
@@ -372,15 +364,13 @@ export default function BIDashboardPage() {
                 {/* 멤버 현황 */}
                 <div className="col-span-2 border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">
-                            <Users className="h-3.5 w-3.5" /> 멤버 현황
-                        </h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">멤버 현황</h3>
                         <Link href="/intra/erp/hr/people" className="text-[10px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         {/* 구성 */}
                         <div>
-                            <h4 className="text-[10px] font-bold text-neutral-500 mb-2">그룹별 구성</h4>
+                            <h4 className="text-[10px] font-semibold text-neutral-500 mb-2">그룹별 구성</h4>
                             <div className="space-y-2">
                                 {[
                                     { label: 'Staff', count: memberStats.staff, total: memberStats.total, color: 'bg-neutral-800' },
@@ -399,7 +389,7 @@ export default function BIDashboardPage() {
                         </div>
                         {/* 월별 가입 추이 + KPI */}
                         <div>
-                            <h4 className="text-[10px] font-bold text-neutral-500 mb-2">월별 가입 추이</h4>
+                            <h4 className="text-[10px] font-semibold text-neutral-500 mb-2">월별 가입 추이</h4>
                             <div className="space-y-2 mb-4">
                                 {memberStats.monthlyGrowth.map(m => (
                                     <div key={m.month} className="flex items-center gap-2 text-xs">
@@ -427,9 +417,7 @@ export default function BIDashboardPage() {
                 {/* 포인트 리더보드 */}
                 <div className="border border-neutral-200 bg-white p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xs font-bold flex items-center gap-1.5">
-                            <Award className="h-3.5 w-3.5" /> 포인트 Top 5
-                        </h3>
+                        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">포인트 Top 5</h3>
                         <Link href="/intra/erp/hr/points" className="text-[10px] text-neutral-400 hover:text-neutral-900">전체 →</Link>
                     </div>
                     <div className="space-y-2">
@@ -446,7 +434,7 @@ export default function BIDashboardPage() {
                     </div>
                     {/* 등급 분포 */}
                     <div className="mt-3 pt-3 border-t border-neutral-50">
-                        <h4 className="text-[10px] font-bold text-neutral-500 mb-2">등급 분포</h4>
+                        <h4 className="text-[10px] font-semibold text-neutral-500 mb-2">등급 분포</h4>
                         <div className="flex items-center gap-2">
                             {gradeLevels.map(g => {
                                 const count = leaderboard.filter(m => m.grade === g).length;

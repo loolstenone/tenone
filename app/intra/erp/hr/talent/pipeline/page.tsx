@@ -69,7 +69,7 @@ export default function PipelinePage() {
         <div className="max-w-6xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold mb-1">채용 Pipeline</h1>
+                    <h1 className="text-xl font-semibold mb-1">채용 Pipeline</h1>
                     <p className="text-sm text-neutral-500">채용 단계별 후보자 현황을 관리합니다.</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
@@ -84,7 +84,7 @@ export default function PipelinePage() {
                     return (
                         <div key={stage} className="min-w-[220px] flex-shrink-0">
                             <div className="flex items-center justify-between mb-2 px-1">
-                                <h3 className="text-xs font-bold text-neutral-600">{stage}</h3>
+                                <h3 className="text-xs font-semibold text-neutral-600">{stage}</h3>
                                 <span className="text-xs text-neutral-400">{stageCandidates.length}</span>
                             </div>
                             <div className="space-y-2">

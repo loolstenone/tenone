@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookMarked,
   Clock,
   CalendarDays,
   Shirt,
@@ -98,9 +97,8 @@ export default function HandbookPage() {
     <div className="space-y-12 max-w-4xl mx-auto">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <BookMarked className="w-5 h-5 text-neutral-400" />
-          <h1 className="text-xl font-bold">핸드북</h1>
+        <div className="mb-1">
+          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">핸드북</h1>
         </div>
         <p className="text-sm text-neutral-500">
           Ten:One™ 임직원이 알아야 할 기본 규정과 정책을 안내합니다.
@@ -133,7 +131,7 @@ export default function HandbookPage() {
                 <div className="w-8 h-8 bg-neutral-100 flex items-center justify-center">
                   <Icon className="w-4 h-4 text-neutral-500" />
                 </div>
-                <h2 className="text-lg font-bold">{s.title}</h2>
+                <h2 className="text-sm font-medium text-neutral-700">{s.title}</h2>
               </div>
 
               {/* Expense Flow Diagram */}

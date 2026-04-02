@@ -27,7 +27,7 @@ export default function MentorsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold">Mentors</h2>
+                <h2 className="text-xl font-semibold">Mentors</h2>
                 <p className="mt-2 text-neutral-500">YouInOne 멘토단 관리</p>
             </div>
 

@@ -234,8 +234,8 @@ function BoardPageInner({
             <div className="mx-auto max-w-7xl">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold">{displayTitle}</h1>
-                        {displayDesc && <p className="mt-1 text-sm text-neutral-400">{displayDesc}</p>}
+                        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
+                        {displayDesc && <p className="mt-0.5 text-sm text-neutral-400">{displayDesc}</p>}
                     </div>
                     {showWriteButton && (
                         <button

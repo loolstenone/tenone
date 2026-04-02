@@ -88,7 +88,7 @@ export default function NewsletterCmsPage() {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-bold">뉴스레터 관리</h1>
+                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">뉴스레터 관리</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">뉴스레터 작성 · 발송 · 구독자 관리</p>
                 </div>
                 <button className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
