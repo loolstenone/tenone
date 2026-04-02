@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
+import { getSiteConfigServer } from "@/lib/supabase/site-configs";
 
-const site = siteConfigs.wio;
-
-export const metadata: Metadata = {
-    title: { default: site.meta.title, template: `%s | ${site.name}` },
-    description: site.meta.description,
-    openGraph: {
-        title: site.meta.title,
-        description: site.meta.description,
-        siteName: 'Ten:One™ Universe',
-        type: 'website',
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const db = await getSiteConfigServer('wio');
+    const site = siteConfigs.wio;
+    return {
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
+        icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
+        openGraph: {
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+        },
+    };
+}
 
 export default function WIOLayout({ children }: { children: React.ReactNode }) {
     return (

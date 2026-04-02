@@ -2,21 +2,24 @@ import { MadLeapHeader } from "@/features/madleap/MadLeapHeader";
 import { MadLeapFooter } from "@/features/madleap/MadLeapFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
+import { getSiteConfigServer } from "@/lib/supabase/site-configs";
 
-const site = siteConfigs.madleap;
-
-export const metadata: Metadata = {
-    title: { default: site.meta.title, template: `%s | ${site.name}` },
-    description: site.meta.description,
-    icons: { icon: site.faviconUrl, apple: site.appleTouchIcon },
-    openGraph: {
-        title: site.meta.title,
-        description: site.meta.description,
-        siteName: 'Ten:One™ Universe',
-        type: 'website',
-        ...(site.meta.ogImage && { images: [site.meta.ogImage] }),
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const db = await getSiteConfigServer('madleap');
+    const site = siteConfigs.madleap;
+    return {
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
+        icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
+        openGraph: {
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
+        },
+    };
+}
 
 export default function MadLeapLayout({
     children,
