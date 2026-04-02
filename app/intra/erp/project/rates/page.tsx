@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { DollarSign, Edit2, Save, Info, Loader2, Check } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface StandardRate {
     position: string;
@@ -104,11 +105,8 @@ export default function RatesPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <div className="mb-5">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">투입인원단가 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">프로젝트 손익 산출을 위한 인력 단가 관리</p>
-            </div>
+        <div>
+            <PageHeader title="투입인원단가 관리" description="프로젝트 손익 산출을 위한 인력 단가 관리" />
 
             {/* 안내 */}
             <div className="bg-neutral-50 border border-neutral-200 p-4 mb-5 flex gap-3">

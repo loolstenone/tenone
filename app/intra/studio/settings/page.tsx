@@ -1,6 +1,7 @@
 "use client";
 
 import { User, Bell, Shield, Palette } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -9,11 +10,8 @@ export default function SettingsPage() {
     const [pushNotifications, setPushNotifications] = useState(false);
 
     return (
-        <div className="max-w-4xl mx-auto space-y-10 pb-12">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Settings</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">Manage your profile and system preferences.</p>
-            </div>
+        <div className="space-y-10 pb-12">
+            <PageHeader title="Settings" description="Manage your profile and system preferences." />
 
             <div className="grid gap-8">
                 {/* Profile Section */}

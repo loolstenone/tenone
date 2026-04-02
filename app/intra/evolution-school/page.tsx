@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import * as educationDb from "@/lib/supabase/education";
 import { useAuth } from "@/lib/auth-context";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ================================================================== */
 /*  Types                                                              */
@@ -1252,12 +1253,8 @@ export default function EvolutionSchoolPage() {
   const quizCourse = quizCourseId !== null ? courses.find((c) => c.id === quizCourseId) : null;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* ── Header ── */}
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Evolution School</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 교육 과정 · 역량 개발</p>
-      </div>
+    <div className="p-6">
+      <PageHeader title="Evolution School" description="Ten:One™ 교육 과정 · 역량 개발" />
 
       {/* ── Top Stats ── */}
       <div className="grid grid-cols-4 gap-3 mb-6">

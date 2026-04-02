@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
 import { gradeConfig, getPointsToNextGrade } from "@/types/point";
@@ -170,10 +171,7 @@ export default function MyversePage() {
     return (
         <div>
             {/* 인사말 + 격언 */}
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">안녕하세요, {user.name}님</h1>
-                <p className="text-sm text-neutral-400 mt-0.5 italic">{todayQuote}</p>
-            </div>
+            <PageHeader title={`안녕하세요, ${user.name}님`} description={todayQuote} />
 
             {/* 전체 현황: 공지 + 일정 (직원만) */}
             {isStaff && (

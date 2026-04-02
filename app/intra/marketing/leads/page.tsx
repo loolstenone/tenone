@@ -5,6 +5,7 @@ import { fetchLeads, updateLead } from "@/lib/supabase/marketing";
 import { initialLeads } from "@/lib/marketing-data";
 import { Lead, LeadStage } from "@/types/marketing";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const stages: { key: LeadStage; label: string }[] = [
     { key: 'New', label: 'New' },
@@ -47,10 +48,7 @@ export default function LeadsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Leads</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">리드 퍼널을 관리합니다.</p>
-            </div>
+            <PageHeader title="Leads" description="리드 퍼널을 관리합니다." />
             <div className="grid grid-cols-7 gap-2 min-h-[500px]">
                 {stages.map(stage => {
                     const stageLeads = leads.filter(l => l.stage === stage.key);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Share2, Plus, X, TrendingUp, Users } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface SocialAccount {
     id: string;
@@ -109,16 +110,11 @@ export default function SocialPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-start justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Social Media</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">소셜 계정 및 콘텐츠 캘린더</p>
-                </div>
-                <button onClick={() => tab === 'accounts' ? setShowAddAccount(true) : setShowAddContent(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 text-white text-xs hover:bg-neutral-700 transition-colors">
+            <PageHeader title="Social Media" description="소셜 계정 및 콘텐츠 캘린더">
+                <PrimaryButton onClick={() => tab === 'accounts' ? setShowAddAccount(true) : setShowAddContent(true)}>
                     <Plus className="h-3.5 w-3.5" /> 추가
-                </button>
-            </div>
+                </PrimaryButton>
+            </PageHeader>
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

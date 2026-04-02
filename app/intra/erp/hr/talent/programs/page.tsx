@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { GraduationCap, Users, Calendar, Plus, ArrowRight, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface Program {
     id: string;
@@ -75,16 +76,10 @@ export default function ProgramsPage() {
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">인재 육성 Programs</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">온보딩, 멘토링, 교육, 인턴십 프로그램을 관리합니다.</p>
-                </div>
-                <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                    <Plus className="h-3 w-3" /> 프로그램 등록
-                </button>
-            </div>
+        <div>
+            <PageHeader title="인재 육성 Programs" description="온보딩, 멘토링, 교육, 인턴십 프로그램을 관리합니다.">
+                <PrimaryButton><Plus className="h-3 w-3" /> 프로그램 등록</PrimaryButton>
+            </PageHeader>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
                 {[

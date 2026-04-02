@@ -6,6 +6,7 @@ import { initialPeople } from "@/lib/crm-data";
 import { PersonModal } from "@/components/crm/PersonModal";
 import { Person } from "@/types/crm";
 import { Plus, Search, Filter, Loader2 } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 export default function PeoplePage() {
     const [people, setPeople] = useState<Person[]>([]);
@@ -59,15 +60,9 @@ export default function PeoplePage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">People</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">TenOne Universe의 모든 연락처를 관리합니다.</p>
-                </div>
-                <button onClick={() => { setEditingPerson(null); setIsModalOpen(true); }} className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
-                    <Plus className="h-4 w-4" /> New Contact
-                </button>
-            </div>
+            <PageHeader title="People" description="TenOne Universe의 모든 연락처를 관리합니다.">
+                <PrimaryButton onClick={() => { setEditingPerson(null); setIsModalOpen(true); }}><Plus className="h-4 w-4" /> New Contact</PrimaryButton>
+            </PageHeader>
 
             <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-sm">

@@ -7,6 +7,7 @@ import {
     ArrowLeft, ChevronDown, ChevronRight, Plus, Trash2, Save, Send,
     Info, Search, X, DollarSign, Users, FileText, CheckCircle, Loader2
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";
 import { categoryLabels, subTypeByCategory, type ProjectCategory, type ProjectSubType } from "@/types/project";
 import { fetchStaff } from "@/lib/supabase/erp";
@@ -266,17 +267,12 @@ export default function ProjectNewPage() {
     };
 
     return (
-        <div className="max-w-4xl pb-20">
+        <div className="pb-20">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <Link href="/intra/project/management" className="text-neutral-400 hover:text-neutral-700 transition-colors">
-                    <ArrowLeft className="h-4 w-4" />
-                </Link>
-                <div>
-                    <h1 className="text-lg font-semibold text-neutral-900">프로젝트 등록</h1>
-                    <p className="text-xs text-neutral-400">새 프로젝트를 등록합니다. * 표시는 필수 입력 항목</p>
-                </div>
-            </div>
+            <Link href="/intra/project/management" className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 transition-colors mb-2">
+                <ArrowLeft className="h-3.5 w-3.5" /> 프로젝트 목록
+            </Link>
+            <PageHeader title="프로젝트 등록" description="새 프로젝트를 등록합니다. * 표시는 필수 입력 항목" />
 
             {/* 등록 완료 배너 */}
             {submitted && (

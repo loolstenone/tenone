@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Plus, X, Clock, ExternalLink, Loader2 } from
 import clsx from "clsx";
 import Link from "next/link";
 import * as townityDb from "@/lib/supabase/townity";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── Types ── */
 type EventType = "일반" | "프로젝트" | "전체행사" | "휴가" | "마감";
@@ -218,22 +219,15 @@ export default function CalendarPage() {
     nonProjectEvents.filter(e => isDateInRange(dateStr, e.date, e.endDate));
 
   return (
-    <div className="max-w-6xl">
-      {/* Header */}
-      <div className="border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">전체 일정</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">회사 전체 일정 · 이벤트</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 ml-4">
-          <button
-            onClick={() => { setShowEditor(true); setEdDate(selectedDate || todayStr); }}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-          >
-            <Plus className="h-4 w-4" /> 일정 등록
-          </button>
-        </div>
-      </div>
+    <div>
+      <PageHeader title="전체 일정" description="회사 전체 일정 · 이벤트">
+        <button
+          onClick={() => { setShowEditor(true); setEdDate(selectedDate || todayStr); }}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+        >
+          <Plus className="h-4 w-4" /> 일정 등록
+        </button>
+      </PageHeader>
 
       {/* 필터 + 보기 모드 */}
       <div className="flex items-center justify-between mb-4">

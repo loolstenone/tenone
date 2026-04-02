@@ -7,6 +7,7 @@ import clsx from "clsx";
 import type { JobType, JobDetail } from "@/types/project";
 import { jobTypeLabels, jobDetailLabels } from "@/types/project";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Job {
     code: string;
@@ -219,26 +220,20 @@ export default function MyProjectsPage() {
     });
 
     return (
-        <div className="max-w-5xl">
+        <div>
             {/* 헤더 */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Job 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트별 Job 등록 · 관리</p>
+            <PageHeader title="Job 관리" description="프로젝트별 Job 등록 · 관리">
+                <div className="flex gap-1 border border-neutral-200 rounded overflow-hidden">
+                    <button onClick={() => setViewMode('project')}
+                        className={clsx("px-3 py-1.5 text-xs transition-colors", viewMode === 'project' ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50")}>
+                        프로젝트별
+                    </button>
+                    <button onClick={() => setViewMode('all')}
+                        className={clsx("px-3 py-1.5 text-xs transition-colors", viewMode === 'all' ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50")}>
+                        전체 Job
+                    </button>
                 </div>
-                <div className="flex gap-2 items-center">
-                    <div className="flex gap-1 border border-neutral-200 rounded overflow-hidden">
-                        <button onClick={() => setViewMode('project')}
-                            className={clsx("px-3 py-1.5 text-xs transition-colors", viewMode === 'project' ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50")}>
-                            프로젝트별
-                        </button>
-                        <button onClick={() => setViewMode('all')}
-                            className={clsx("px-3 py-1.5 text-xs transition-colors", viewMode === 'all' ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50")}>
-                            전체 Job
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </PageHeader>
 
             {/* 요약 카드 */}
             <div className="grid grid-cols-5 gap-3 mb-5">

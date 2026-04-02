@@ -18,7 +18,7 @@ export default function BrandDetailPage({ params }: Props) {
     }
 
     return (
-        <div className="space-y-8 max-w-5xl mx-auto">
+        <div className="space-y-8">
             <Link
                 href="/intra/studio/brands"
                 className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-900 transition-colors"

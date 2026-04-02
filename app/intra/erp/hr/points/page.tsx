@@ -6,6 +6,7 @@ import {
     Trophy, Search, Plus, ArrowUpRight, ArrowDownRight,
     Filter, Download, Medal, Star, Gem, Crown, Users, TrendingUp, X
 } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 import { gradeConfig, gradeLevels, pointCategoryLabels, defaultPointValues } from "@/types/point";
 import type { GradeLevel, PointCategory } from "@/types/point";
 
@@ -76,19 +77,10 @@ export default function ERPPointsPage() {
     };
 
     return (
-        <div className="max-w-6xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold">포인트 관리</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">구성원 포인트 및 등급 관리</p>
-                </div>
-                <button
-                    onClick={() => setShowAwardModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 text-white text-xs hover:bg-neutral-800"
-                >
-                    <Plus className="h-3.5 w-3.5" /> 포인트 부여
-                </button>
-            </div>
+        <div>
+            <PageHeader title="포인트 관리" description="구성원 포인트 및 등급 관리">
+                <PrimaryButton onClick={() => setShowAwardModal(true)}><Plus className="h-3.5 w-3.5" /> 포인트 부여</PrimaryButton>
+            </PageHeader>
 
             {/* 통계 카드 */}
             <div className="grid grid-cols-5 gap-3 mb-6">

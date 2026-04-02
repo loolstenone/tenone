@@ -6,6 +6,7 @@ import { initialDeals, initialOrganizations } from "@/lib/crm-data";
 import { fetchOrganizations } from "@/lib/supabase/crm";
 import { Deal, DealStage, Organization } from "@/types/crm";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const stages: { key: DealStage; label: string }[] = [
     { key: 'Lead', label: 'Lead' },
@@ -52,10 +53,7 @@ export default function DealsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Deals</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">영업 파이프라인을 관리합니다.</p>
-            </div>
+            <PageHeader title="Deals" description="영업 파이프라인을 관리합니다." />
 
             <div className="grid grid-cols-6 gap-3 min-h-[500px]">
                 {stages.map(stage => {

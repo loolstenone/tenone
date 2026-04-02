@@ -6,6 +6,7 @@ import { initialPipelineItems } from "@/lib/workflow-data";
 import type { PipelineItem, PipelineStage } from "@/types/workflow";
 import { brands } from "@/lib/data";
 import { Sparkles, Filter, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const stages: { key: PipelineStage; label: string }[] = [
     { key: 'Idea', label: 'Idea' },
@@ -65,12 +66,7 @@ export default function PipelinePage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Content Pipeline</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">콘텐츠 제작 흐름을 단계별로 관리합니다.</p>
-                </div>
-                <div className="flex items-center gap-2">
+            <PageHeader title="Content Pipeline" description="콘텐츠 제작 흐름을 단계별로 관리합니다.">
                     <Filter className="h-4 w-4 text-neutral-400" />
                     <select
                         value={brandFilter}
@@ -82,8 +78,7 @@ export default function PipelinePage() {
                             <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                     </select>
-                </div>
-            </div>
+            </PageHeader>
 
             <div className="grid grid-cols-6 gap-3 overflow-x-auto">
                 {stages.map((stage) => {

@@ -5,6 +5,7 @@ import { Send, Upload, User, ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createApproval } from "@/lib/supabase/erp";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const approvalLine = [
     { role: "기안자", name: "나" },
@@ -52,11 +53,8 @@ export default function ExpenditureDraftPage() {
     };
 
     return (
-        <div className="max-w-3xl">
-            <div className="mb-4">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">품의서 작성</h1>
-                <p className="text-sm text-neutral-400">구매, 경비, 청구 등 품의서를 작성합니다</p>
-            </div>
+        <div>
+            <PageHeader title="품의서 작성" description="구매, 경비, 청구 등 품의서를 작성합니다" />
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* 품의 유형 */}

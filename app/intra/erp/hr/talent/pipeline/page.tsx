@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { GitBranch, Plus, User, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface Candidate {
     id: string;
@@ -66,16 +67,10 @@ export default function PipelinePage() {
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-6xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">채용 Pipeline</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">채용 단계별 후보자 현황을 관리합니다.</p>
-                </div>
-                <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                    <Plus className="h-3 w-3" /> 후보자 등록
-                </button>
-            </div>
+        <div>
+            <PageHeader title="채용 Pipeline" description="채용 단계별 후보자 현황을 관리합니다.">
+                <PrimaryButton><Plus className="h-3 w-3" /> 후보자 등록</PrimaryButton>
+            </PageHeader>
 
             {/* Kanban */}
             <div className="flex gap-3 overflow-x-auto pb-4">

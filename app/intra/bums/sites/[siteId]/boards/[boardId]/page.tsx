@@ -9,6 +9,7 @@ import {
     Star, ChevronDown, ChevronRight, Video, Image as ImageIcon,
     Pencil, Trash2, Search, CheckSquare, RefreshCw,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const statusBadge: Record<string, string> = {
     draft: "bg-neutral-100 text-neutral-500",
@@ -127,26 +128,20 @@ export default function BoardPostListPage({ params }: { params: Promise<{ siteId
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {siteId}
                 </button>
-                <div className="flex items-start justify-between">
-                    <div>
-                        <h2 className="text-2xl font-semibold">{boardName}</h2>
-                        <p className="text-xs text-neutral-400 mt-1">총 {total}개 게시글</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={loadPosts}
-                            className="flex items-center gap-2 border border-neutral-200 px-3 py-2 text-sm hover:bg-neutral-50 transition-colors">
-                            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> 새로고침
-                        </button>
-                        <Link href={`/intra/bums/sites/${siteId}/boards/${boardId}/settings`}
-                            className="flex items-center gap-2 border border-neutral-200 px-3 py-2 text-sm hover:bg-neutral-50 transition-colors">
-                            <Settings className="h-3.5 w-3.5" /> 설정
-                        </Link>
-                        <Link href={`/intra/bums/sites/${siteId}/boards/${boardId}/new`}
-                            className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 text-sm hover:bg-neutral-800 transition-colors">
-                            <Plus className="h-4 w-4" /> 글쓰기
-                        </Link>
-                    </div>
-                </div>
+                <PageHeader title={boardName} description={`총 ${total}개 게시글`}>
+                    <button onClick={loadPosts}
+                        className="flex items-center gap-2 border border-neutral-200 px-3 py-2 text-sm hover:bg-neutral-50 transition-colors">
+                        <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> 새로고침
+                    </button>
+                    <Link href={`/intra/bums/sites/${siteId}/boards/${boardId}/settings`}
+                        className="flex items-center gap-2 border border-neutral-200 px-3 py-2 text-sm hover:bg-neutral-50 transition-colors">
+                        <Settings className="h-3.5 w-3.5" /> 설정
+                    </Link>
+                    <Link href={`/intra/bums/sites/${siteId}/boards/${boardId}/new`}
+                        className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 text-sm hover:bg-neutral-800 transition-colors">
+                        <Plus className="h-4 w-4" /> 글쓰기
+                    </Link>
+                </PageHeader>
             </div>
 
             {/* Filters */}

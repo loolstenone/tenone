@@ -6,6 +6,7 @@ import { fetchPipelineItems } from "@/lib/supabase/workflow";
 import { initialPipelineItems } from "@/lib/workflow-data";
 import type { PipelineItem, PipelineStage } from "@/types/workflow";
 import { Plus, MoreHorizontal, Calendar, Video, FileText, Type, Sparkles, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import Link from "next/link";
 
@@ -47,12 +48,7 @@ export default function StudioPage() {
 
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Content Studio</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">Manage content pipeline from idea to publication.</p>
-                </div>
-                <div className="flex items-center gap-2">
+            <PageHeader title="Content Studio" description="Manage content pipeline from idea to publication.">
                     <button className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium transition-all">
                         <Sparkles className="h-4 w-4" />
                         AI Brainstorm
@@ -61,8 +57,7 @@ export default function StudioPage() {
                         <Plus className="h-4 w-4" />
                         New Content
                     </Link>
-                </div>
-            </div>
+            </PageHeader>
 
             {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto pb-4">

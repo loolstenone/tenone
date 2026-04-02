@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { brands, events as mockEvents } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock } from "lucide-react";
 import clsx from "clsx";
 
@@ -74,12 +75,7 @@ export default function SchedulePage() {
 
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col">
-            {/* Page Header & Controls */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Schedule</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">Integrated calendar for Ten:One™ Universe events.</p>
-                </div>
+            <PageHeader title="Schedule" description="Integrated calendar for Ten:One™ Universe events.">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200">
                         <button
@@ -99,7 +95,7 @@ export default function SchedulePage() {
                         + New Event
                     </button>
                 </div>
-            </div>
+            </PageHeader>
 
             {/* Calendar View Container */}
             <div className="flex-1 bg-white border border-neutral-200 overflow-hidden flex flex-col">

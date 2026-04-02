@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Users, Star, MessageCircle, Clock, CheckCircle } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 interface Mentor {
@@ -72,11 +73,8 @@ export default function MentorMatchingPage() {
     const requestedCount = mentors.filter(m => m.status === "requested").length;
 
     return (
-        <div className="max-w-4xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">멘토 매칭</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">YouInOne 멘토단과 연결합니다</p>
-            </div>
+        <div>
+            <PageHeader title="멘토 매칭" description="YouInOne 멘토단과 연결합니다" />
 
             {/* My Mentoring Status */}
             <div className="border border-neutral-200 bg-white p-5 mb-6">

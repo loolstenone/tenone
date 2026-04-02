@@ -2,16 +2,14 @@
 
 import { useState } from "react";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function ImportPage() {
     const [dragOver, setDragOver] = useState(false);
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Import</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">외부 데이터를 대량으로 가져옵니다.</p>
-            </div>
+            <PageHeader title="Import" description="외부 데이터를 대량으로 가져옵니다." />
 
             {/* Upload Area */}
             <div

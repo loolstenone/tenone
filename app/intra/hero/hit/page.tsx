@@ -6,6 +6,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import * as heroDb from "@/lib/supabase/hero";
 import { useAuth } from "@/lib/auth-context";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Question {
     id: number;
@@ -111,11 +112,8 @@ export default function HitTestPage() {
     }
 
     return (
-        <div className="max-w-3xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">HIT — HeRo Integrated Test</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">인성 · 적성 · 역량 · 준비도 통합 진단</p>
-            </div>
+        <div>
+            <PageHeader title="HIT — HeRo Integrated Test" description="인성 · 적성 · 역량 · 준비도 통합 진단" />
 
             {/* Progress */}
             <div className="mb-6">

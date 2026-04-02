@@ -696,7 +696,7 @@ export default function MessengerPage() {
     return (
         <>
         <PageHeader title="메신저" description="팀원 · 조직 · 결재 실시간 소통" />
-        <div className="flex h-[calc(100vh-224px)] -mx-8 -mb-8 overflow-hidden relative border-t border-neutral-200">
+        <div className="flex overflow-hidden relative border border-neutral-200" style={{ height: "calc(100vh - 240px)", minHeight: 480 }}>
 
             {/* ══════════════════════════════════
                 1열: 대화 목록 / 조직도

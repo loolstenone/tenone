@@ -7,6 +7,7 @@ import { divisions, positions, accessOptions, divisionDefaultAccess, brandOption
 import * as membersDb from "@/lib/supabase/members";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const roles: StaffRole[] = ['Admin', 'Manager', 'Editor', 'Viewer'];
 const inputClass = "w-full border border-neutral-200 bg-white px-4 py-2.5 placeholder-neutral-300 focus:border-neutral-900 focus:outline-none";
@@ -105,15 +106,12 @@ export default function StaffRegisterPage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="space-y-6">
             <Link href="/intra/erp/hr/staff" className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-900 transition-colors">
                 <ArrowLeft className="h-4 w-4" /> Staff List
             </Link>
 
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">직원 등록</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">새로운 직원을 시스템에 등록합니다.</p>
-            </div>
+            <PageHeader title="직원 등록" description="새로운 직원을 시스템에 등록합니다." />
 
             <form onSubmit={handleSubmit}>
                 {/* 기본 정보 */}

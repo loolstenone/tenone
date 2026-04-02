@@ -33,6 +33,7 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ================================================================== */
 /*  Types                                                              */
@@ -1098,14 +1099,8 @@ export default function EducationPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="border-b border-neutral-200 pb-5">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Education</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">
-          Ten:One™ 교육 허브 — 필수, 전문, 심화 과정을 학습하고 퀴즈로 이수합니다
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Education" description="Ten:One™ 교육 허브 — 필수, 전문, 심화 과정을 학습하고 퀴즈로 이수합니다" />
 
       {/* Stats */}
       <div className="grid grid-cols-5 gap-0 border border-neutral-200">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Bot, CheckCircle, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 interface Improvement {
@@ -76,11 +77,8 @@ export default function ResumeConsultingPage() {
     };
 
     return (
-        <div className="max-w-3xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">이력서 AI 컨설팅</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">AI가 이력서를 분석하고 개선점을 제안합니다</p>
-            </div>
+        <div>
+            <PageHeader title="이력서 AI 컨설팅" description="AI가 이력서를 분석하고 개선점을 제안합니다" />
 
             {/* Score Card */}
             <div className="border border-neutral-200 bg-white p-6 mb-6">

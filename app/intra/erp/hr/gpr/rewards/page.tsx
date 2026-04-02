@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Award, TrendingUp, DollarSign, Loader2 } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
 import { useAuth } from "@/lib/auth-context";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface RewardRecord {
     period: string;
@@ -73,9 +74,8 @@ export default function RewardsPage() {
         .reduce((s, n) => s + n, 0);
 
     return (
-        <div className="max-w-4xl">
-            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">보상 관리</h1>
-            <p className="text-sm text-neutral-400 mb-6">성과급, 인센티브, 특별보상 이력을 확인합니다.</p>
+        <div>
+            <PageHeader title="보상 관리" description="성과급, 인센티브, 특별보상 이력을 확인합니다." />
 
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[

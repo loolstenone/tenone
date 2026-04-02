@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { BarChart3, Zap, Target, BookOpen } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import Link from "next/link";
 import * as heroDb from "@/lib/supabase/hero";
@@ -56,11 +57,8 @@ export default function CareerDiagnosisPage() {
     const maxVal = Math.max(...activeCompetencies.map(c => c.value));
 
     return (
-        <div className="max-w-4xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">역량 진단</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">HIT 결과 기반 강점/약점 분석</p>
-            </div>
+        <div>
+            <PageHeader title="역량 진단" description="HIT 결과 기반 강점/약점 분석" />
 
             {/* Competency Chart */}
             <div className="border border-neutral-200 bg-white p-6 mb-6">

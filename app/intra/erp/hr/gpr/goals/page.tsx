@@ -7,6 +7,7 @@ import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
 import type { StaffMember } from "@/types/staff";
 import type { GprGoal, GoalLevel } from "@/types/gpr";
 import { Plus, X, Send, Check, Loader2 } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 const levelOptions: GoalLevel[] = ['GPR-I', 'GPR-II', 'GPR-III'];
 const levelLabels: Record<string, string> = { 'GPR-I': '개인 업무 목표', 'GPR-II': '분기 목표', 'GPR-III': '연간 목표' };
@@ -72,21 +73,13 @@ export default function GoalSettingPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Goal Setting</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">목표 설정, 합의, 추적</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <select value={staffFilter} onChange={e => setStaffFilter(e.target.value)} className="border border-neutral-200 bg-white px-3 py-2 text-sm">
-                        <option value="all">All Staff</option>
-                        {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
-                    <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">
-                        <Plus className="h-4 w-4" /> 새 목표
-                    </button>
-                </div>
-            </div>
+            <PageHeader title="Goal Setting" description="목표 설정, 합의, 추적">
+                <select value={staffFilter} onChange={e => setStaffFilter(e.target.value)} className="border border-neutral-200 bg-white px-3 py-2 text-sm">
+                    <option value="all">All Staff</option>
+                    {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <PrimaryButton onClick={() => setShowNew(true)}><Plus className="h-4 w-4" /> 새 목표</PrimaryButton>
+            </PageHeader>
 
             {/* New Goal Form */}
             {showNew && (

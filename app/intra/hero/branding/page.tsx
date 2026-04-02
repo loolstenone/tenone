@@ -5,6 +5,7 @@ import { Sparkles, Hash, FileText, FolderOpen, Eye, EyeOff } from "lucide-react"
 import clsx from "clsx";
 import * as heroDb from "@/lib/supabase/hero";
 import { useAuth } from "@/lib/auth-context";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const mockProjects = [
     {
@@ -79,11 +80,8 @@ export default function PersonalBrandingPage() {
     };
 
     return (
-        <div className="max-w-3xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">퍼스널 브랜딩</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">나만의 브랜드를 기획합니다</p>
-            </div>
+        <div>
+            <PageHeader title="퍼스널 브랜딩" description="나만의 브랜드를 기획합니다" />
 
             {/* HeRo Character Card */}
             <div className="border border-neutral-200 bg-white p-6 mb-6">

@@ -5,6 +5,7 @@ import { fetchCampaigns } from "@/lib/supabase/marketing";
 import { initialCampaigns } from "@/lib/marketing-data";
 import { Campaign } from "@/types/marketing";
 import { DollarSign, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function CampaignsPage() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -29,10 +30,7 @@ export default function CampaignsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Campaigns</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">마케팅 캠페인을 관리합니다.</p>
-            </div>
+            <PageHeader title="Campaigns" description="마케팅 캠페인을 관리합니다." />
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">

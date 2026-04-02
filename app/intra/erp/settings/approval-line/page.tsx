@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Settings, Trash2, Pencil, ChevronRight, CheckCircle2, X } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 type DraftType = "기안" | "품의" | "보고";
 type ApprovalFactor = "일반" | "프로젝트" | "타임시트" | "경비" | "구매" | "인사" | "계약";
@@ -98,16 +99,10 @@ export default function ApprovalLinePage() {
     };
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">결재라인 설정</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">기안 유형별 · 요인별 결재 승인 라인 관리</p>
-                </div>
-                <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors rounded">
-                    <Plus className="h-3.5 w-3.5" /> 결재라인 추가
-                </button>
-            </div>
+        <div>
+            <PageHeader title="결재라인 설정" description="기안 유형별 · 요인별 결재 승인 라인 관리">
+                <PrimaryButton onClick={() => setShowModal(true)}><Plus className="h-3.5 w-3.5" /> 결재라인 추가</PrimaryButton>
+            </PageHeader>
 
             {/* 요인별 라우팅 안내 */}
             <div className="border border-neutral-200 bg-neutral-50 p-4 mb-4">

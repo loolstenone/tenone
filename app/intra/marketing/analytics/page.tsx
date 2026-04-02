@@ -5,6 +5,7 @@ import { fetchCampaigns, fetchLeads, fetchContentPosts } from "@/lib/supabase/ma
 import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
 import { Campaign, Lead, ContentPost } from "@/types/marketing";
 import { BarChart3, TrendingUp, DollarSign, Users, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function AnalyticsPage() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -49,10 +50,7 @@ export default function AnalyticsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Analytics</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">마케팅 성과를 분석합니다.</p>
-            </div>
+            <PageHeader title="Analytics" description="마케팅 성과를 분석합니다." />
 
             {/* KPI Cards */}
             <div className="grid grid-cols-4 gap-4">

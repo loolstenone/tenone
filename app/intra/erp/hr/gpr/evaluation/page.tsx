@@ -8,6 +8,7 @@ import { ratingLabels } from "@/lib/gpr-data";
 import type { StaffMember } from "@/types/staff";
 import type { GprGoal, EvaluationRating } from "@/types/gpr";
 import { Star, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function EvaluationPage() {
     const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -51,10 +52,7 @@ export default function EvaluationPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Evaluation</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">자기 평가 및 상사 평가</p>
-            </div>
+            <PageHeader title="Evaluation" description="자기 평가 및 상사 평가" />
 
             {/* Pending Evaluation */}
             <div>

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Bell, MessageSquare, Calendar, BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface PostPreview { id: string; title: string; date: string; badge?: string; author?: string; comment_count?: number; }
 interface CommEvent { id: number; title: string; time: string; date: string; type: string; }
@@ -105,10 +106,7 @@ export default function CommPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">커뮤니케이션</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">사내 소통 · 공지 · 일정 · 지식경영</p>
-            </div>
+            <PageHeader title="커뮤니케이션" description="사내 소통 · 공지 · 일정 · 지식경영" />
 
             <div className="grid grid-cols-2 gap-6">
                 {/* 공지사항 */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPartners, createPartner } from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 import {
     Plus, Search, Star, Building2, User, ExternalLink, X,
     Briefcase, Phone, Mail, Loader2,
@@ -145,17 +146,13 @@ export default function PartnerPoolPage() {
     const avgRating = partners.length > 0 ? (partners.reduce((s, p) => s + p.rating, 0) / partners.length) : 0;
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Partner Pool</h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">외부 협력사 · 프리랜서 등록 · 검색 · 프로젝트 투입</p>
-                </div>
+        <div>
+            <PageHeader title="Partner Pool" description="외부 협력사 · 프리랜서 등록 · 검색 · 프로젝트 투입">
                 <button onClick={() => setShowAdd(true)}
                     className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 파트너 등록
                 </button>
-            </div>
+            </PageHeader>
 
             {/* Summary */}
             <div className="grid grid-cols-4 gap-3 mb-5">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Shield, CheckCircle, Clock, AlertTriangle, Trash2, Users, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── 타입 ── */
 interface ConsentStat { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color: string }
@@ -92,11 +93,7 @@ export default function UniversePrivacy() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="border-b border-neutral-100 pb-5 mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">개인정보</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">개인정보 관리 및 컴플라이언스</p>
-            </div>
+            <PageHeader title="개인정보" description="개인정보 관리 및 컴플라이언스" />
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

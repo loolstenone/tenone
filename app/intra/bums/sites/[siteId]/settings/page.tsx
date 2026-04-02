@@ -11,6 +11,7 @@ function ImageUploader({ value, onChange, label, previewSize }: { value: string;
     );
 }
 import { ArrowLeft, Check } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const inputClass = "w-full border border-neutral-200 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none bg-white rounded";
 const labelClass = "text-xs font-medium text-neutral-500 uppercase tracking-wider block mb-1.5";
@@ -63,8 +64,7 @@ export default function SiteSettingsPage({ params }: { params: Promise<{ siteId:
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {site.name}
                 </button>
-                <h2 className="text-xl font-semibold">사이트 설정</h2>
-                <p className="text-sm text-neutral-500 mt-1">{site.name} 브랜딩 및 메타 정보 관리</p>
+                <PageHeader title="사이트 설정" description={`${site.name} 브랜딩 및 메타 정보 관리`} />
             </div>
 
             {/* 기본 정보 */}

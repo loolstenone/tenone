@@ -7,6 +7,7 @@ import {
     FileText, BarChart3, Megaphone, Users, CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── 카테고리 정의 ── */
 type FaqCategory = "전체" | "일반" | "VRIEF·GPR" | "시스템" | "근무·복지" | "경영기획" | "콘텐츠 제작" | "마케팅·영업" | "커뮤니티" | "인사·재무";
@@ -389,12 +390,8 @@ export default function FaqPage() {
     const endIdx = Math.min(currentPage * pageSize, filtered.length);
 
     return (
-        <div className="max-w-4xl">
-            {/* Header */}
-            <div className="border-b border-neutral-200 pb-5 mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">FAQ & 업무 가이드</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다</p>
-            </div>
+        <div>
+            <PageHeader title="FAQ & 업무 가이드" description="자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다" />
 
             {/* 검색 + 카테고리 필터 */}
             <div className="mb-4 space-y-3">

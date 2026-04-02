@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Calendar, RefreshCw, Clock } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface ClosingSettings {
   fiscalYearStart: string;
@@ -46,20 +47,9 @@ export default function ClosingSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-neutral-900">결산 설정</h2>
-          <p className="mt-1 text-xs text-neutral-500">
-            회계연도 및 결산 주기를 설정합니다
-          </p>
-        </div>
-        <button
-          onClick={handleSave}
-          className="flex items-center gap-1 bg-neutral-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 transition-colors"
-        >
-          {saved ? "저장됨" : "저장"}
-        </button>
-      </div>
+      <PageHeader title="결산 설정" description="회계연도 및 결산 주기를 설정합니다">
+        <PrimaryButton onClick={handleSave}>{saved ? "저장됨" : "저장"}</PrimaryButton>
+      </PageHeader>
 
       <div className="space-y-4">
         {/* 회계연도 설정 */}

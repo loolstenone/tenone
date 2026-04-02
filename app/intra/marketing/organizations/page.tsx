@@ -5,6 +5,7 @@ import { fetchOrganizations } from "@/lib/supabase/crm";
 import { initialOrganizations } from "@/lib/crm-data";
 import { Organization } from "@/types/crm";
 import { Building2, Globe, Users, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function OrganizationsPage() {
     const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -26,10 +27,7 @@ export default function OrganizationsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Organizations</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">파트너, 클라이언트, 스폰서 조직을 관리합니다.</p>
-            </div>
+            <PageHeader title="Organizations" description="파트너, 클라이언트, 스폰서 조직을 관리합니다." />
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">

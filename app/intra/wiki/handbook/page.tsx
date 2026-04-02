@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── Section Data ── */
 const sections = [
@@ -94,14 +95,8 @@ const sections = [
 
 export default function HandbookPage() {
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="border-b border-neutral-200 pb-5 mb-6">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">핸드북</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">
-          Ten:One™ 임직원이 알아야 할 기본 규정과 정책을 안내합니다.
-        </p>
-      </div>
+    <div>
+      <PageHeader title="핸드북" description="Ten:One™ 임직원이 알아야 할 기본 규정과 정책을 안내합니다." />
 
       {/* Quick Nav */}
       <div className="border border-neutral-200 bg-white p-4">

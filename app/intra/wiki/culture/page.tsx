@@ -19,6 +19,7 @@ import {
   Expand,
   RotateCw,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -451,14 +452,8 @@ export default function CulturePage() {
   const [activeTab, setActiveTab] = useState<TabId>("vision");
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="border-b border-neutral-200 pb-5">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Culture</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">
-          우리는 컬처를 믿고, 컬처로 일합니다
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Culture" description="우리는 컬처를 믿고, 컬처로 일합니다" />
 
       {/* Tabs */}
       <div className="border-b border-neutral-200 flex gap-0 overflow-x-auto">

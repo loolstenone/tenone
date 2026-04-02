@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BookOpen, Compass, GraduationCap, FileText, HelpCircle, ClipboardList, Clock, Users, Star } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const sections = [
     {
@@ -34,11 +35,8 @@ const recentUpdates = [
 
 export default function WikiHomePage() {
     return (
-        <div className="max-w-4xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Wiki</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">교육 · 안내 · 지식 공유</p>
-            </div>
+        <div>
+            <PageHeader title="Wiki" description="교육 · 안내 · 지식 공유" />
 
             {/* 최근 업데이트 */}
             <div className="border border-neutral-200 bg-white p-4 mb-6">

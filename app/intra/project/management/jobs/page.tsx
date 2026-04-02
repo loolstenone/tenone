@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Briefcase, Plus, Clock, User, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import * as projectsDb from "@/lib/supabase/projects";
 
 interface Job {
@@ -71,16 +72,12 @@ export default function JobsPage() {
     if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Job 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트 하위 작업(Job)을 관리합니다.</p>
-                </div>
+        <div>
+            <PageHeader title="Job 관리" description="프로젝트 하위 작업(Job)을 관리합니다.">
                 <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
                     <Plus className="h-3 w-3" /> Job 등록
                 </button>
-            </div>
+            </PageHeader>
 
             <div className="border border-neutral-200 bg-white">
                 <table className="w-full text-sm">

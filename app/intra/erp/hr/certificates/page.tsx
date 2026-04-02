@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FileCheck, Download, Clock, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface Certificate {
     id: string;
@@ -85,9 +86,8 @@ export default function CertificatesPage() {
     if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-4xl">
-            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 mb-1">제증명서 관리</h1>
-            <p className="text-sm text-neutral-400 mb-8">각종 증명서를 발급하고 이력을 확인합니다.</p>
+        <div>
+            <PageHeader title="제증명서 관리" description="각종 증명서를 발급하고 이력을 확인합니다." />
 
             {/* Certificate types */}
             <div className="grid grid-cols-2 gap-4 mb-8">

@@ -5,6 +5,7 @@ import { fetchPeople } from "@/lib/supabase/crm";
 import { initialPeople } from "@/lib/crm-data";
 import { Person } from "@/types/crm";
 import { Tags, Users, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const segments = [
     { id: 'seg1', name: 'MADLeague 학생', filter: 'type=Student' },
@@ -40,10 +41,7 @@ export default function SegmentsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Segments</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">고객을 세그먼트로 분류하여 관리합니다.</p>
-            </div>
+            <PageHeader title="Segments" description="고객을 세그먼트로 분류하여 관리합니다." />
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">

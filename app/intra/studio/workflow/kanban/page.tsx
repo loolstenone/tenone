@@ -8,6 +8,7 @@ import { TaskModal } from "@/components/workflow/TaskModal";
 import { WorkflowTask, TaskStatus } from "@/types/workflow";
 import { brands } from "@/lib/data";
 import { Plus, Filter, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function KanbanPage() {
     const [tasks, setTasks] = useState<WorkflowTask[]>([]);
@@ -76,12 +77,7 @@ export default function KanbanPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Kanban Board</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">드래그앤드롭으로 태스크를 관리합니다.</p>
-                </div>
-                <div className="flex items-center gap-3">
+            <PageHeader title="Kanban Board" description="드래그앤드롭으로 태스크를 관리합니다.">
                     <Filter className="h-4 w-4 text-neutral-400" />
                     <select
                         value={brandFilter}
@@ -109,8 +105,7 @@ export default function KanbanPage() {
                         <Plus className="h-4 w-4" />
                         New Task
                     </button>
-                </div>
-            </div>
+            </PageHeader>
 
             <KanbanBoard
                 tasks={filteredTasks}

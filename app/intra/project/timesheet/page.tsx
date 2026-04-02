@@ -13,6 +13,7 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import type { JobType, JobDetail } from "@/types/project";
@@ -367,22 +368,12 @@ export default function TimesheetPage() {
     return tsProjects.filter((p) => p.code === selectedProject);
   }, [selectedProject, tsProjects]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
-        <span className="ml-2 text-sm text-neutral-400">타임시트 로딩중...</span>
-      </div>
-    );
-  }
-
-  // 전체 집계
+  // 전체 집계 (loading 이전에 hook 선언 — Rules of Hooks)
   const totalStats = useMemo(() => {
     let totalActual = 0;
     let totalEstimated = 0;
     let totalCost = 0;
     const assigneeSet = new Set<string>();
-
     filteredProjects.forEach((p) => {
       p.jobs.forEach((j) => {
         totalActual += j.actualHours;
@@ -391,21 +382,40 @@ export default function TimesheetPage() {
         assigneeSet.add(j.assignee);
       });
     });
-
-    const avgDaily =
-      filteredProjects.length > 0
-        ? Math.round((totalActual / (filteredProjects.length * 20)) * 10) / 10
-        : 0;
-
     return {
       totalActual,
       totalEstimated,
       projectCount: filteredProjects.length,
       staffCount: assigneeSet.size,
-      avgDaily: totalActual > 0 ? 7.8 : 0, // mock: 고정값
+      avgDaily: totalActual > 0 ? 7.8 : 0,
       totalCost,
     };
   }, [filteredProjects]);
+
+  // Grand total
+  const grandTotal = useMemo(() => {
+    let estimated = 0;
+    let actual = 0;
+    let cost = 0;
+    filteredProjects.forEach((p) => {
+      p.jobs.forEach((j) => {
+        estimated += j.estimatedHours;
+        actual += j.actualHours;
+        cost += j.actualHours * j.hourlyRate;
+      });
+    });
+    const pct = estimated > 0 ? Math.round((actual / estimated) * 100) : 0;
+    return { estimated, actual, pct, cost };
+  }, [filteredProjects]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+        <span className="ml-2 text-sm text-neutral-400">타임시트 로딩중...</span>
+      </div>
+    );
+  }
 
   // 프로젝트별 소계
   function getProjectSubtotal(project: TimesheetProject) {
@@ -430,29 +440,9 @@ export default function TimesheetPage() {
     });
   }
 
-  // Grand total
-  const grandTotal = useMemo(() => {
-    let estimated = 0;
-    let actual = 0;
-    let cost = 0;
-    filteredProjects.forEach((p) => {
-      p.jobs.forEach((j) => {
-        estimated += j.estimatedHours;
-        actual += j.actualHours;
-        cost += j.actualHours * j.hourlyRate;
-      });
-    });
-    const pct = estimated > 0 ? Math.round((actual / estimated) * 100) : 0;
-    return { estimated, actual, pct, cost };
-  }, [filteredProjects]);
-
   return (
-    <div className="max-w-[1100px]">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold text-neutral-900">타임시트</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">프로젝트 · Job별 투입 시수 집계</p>
-      </div>
+    <div>
+      <PageHeader title="타임시트" description="프로젝트 · Job별 투입 시수 집계" />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-3 mb-6">

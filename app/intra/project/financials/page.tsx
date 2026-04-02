@@ -14,6 +14,7 @@ import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import type { ProjectFinancials } from "@/types/project";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 // ── 포맷 헬퍼 ──
 const krw = (n: number) => new Intl.NumberFormat("ko-KR").format(n) + "원";
@@ -195,12 +196,9 @@ export default function FinancialsPage() {
   }
 
   return (
-    <div className="max-w-6xl">
+    <div>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 손익</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">프로젝트별 수익성 관리</p>
-      </div>
+      <PageHeader title="프로젝트 손익" description="프로젝트별 수익성 관리" />
 
       {/* 직원 전용 안내 */}
       <div className="flex items-center gap-2 mb-5 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">

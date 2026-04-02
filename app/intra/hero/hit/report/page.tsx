@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Download, User, Zap, AlertTriangle, Briefcase, Sparkles } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 const discData = [
@@ -31,12 +32,8 @@ export default function HitReportPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">HIT 결과 리포트</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">Cheonil Jeon님의 HeRo 프로필</p>
-                </div>
+        <div>
+            <PageHeader title="HIT 결과 리포트" description="Cheonil Jeon님의 HeRo 프로필">
                 <button
                     onClick={handleDownload}
                     className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
@@ -44,7 +41,7 @@ export default function HitReportPage() {
                     <Download className="h-3 w-3" />
                     {downloading ? "다운로드 중..." : "리포트 다운로드"}
                 </button>
-            </div>
+            </PageHeader>
 
             {/* HeRo Character Card */}
             <div className="border border-neutral-200 bg-white p-6 mb-6">

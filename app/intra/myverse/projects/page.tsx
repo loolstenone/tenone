@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import * as myverseDb from "@/lib/supabase/myverse";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { FolderKanban, Plus, ChevronDown, ChevronRight, Clock, Calendar, Users, Briefcase, CheckCircle2, X } from "lucide-react";
 import clsx from "clsx";
 import type { JobType, JobDetail } from "@/types/project";
@@ -130,11 +131,8 @@ export default function MyProjectsPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <div className="mb-5">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">참여 중인 프로젝트와 Job을 관리합니다</p>
-            </div>
+        <div>
+            <PageHeader title="프로젝트 관리" description="참여 중인 프로젝트와 Job을 관리합니다" />
 
             {/* 프로젝트 리스트 */}
             <div className="space-y-2">

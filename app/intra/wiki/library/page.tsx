@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Plus, Search, Star, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLibrary } from "@/lib/library-context";
 import { useAuth } from "@/lib/auth-context";
+import { PageHeader } from "@/components/intra/IntraUI";
 import * as wikiDb from "@/lib/supabase/wiki";
 import { libraryCategoryOptions, formatBadgeColor, libraryPermissionLabels } from "@/types/library";
 import type { LibraryCategory, LibraryPermission, LibraryItem } from "@/types/library";
@@ -99,18 +100,12 @@ export default function WikiLibraryPage() {
     };
 
     return (
-        <div className="max-w-5xl">
-            <div className="border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Knowledge Library</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">지식 관리 · 템플릿 · 레퍼런스 · 내부 문서</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
-                        <Plus className="h-3.5 w-3.5" /> 자료 등록
-                    </button>
-                </div>
-            </div>
+        <div>
+            <PageHeader title="Knowledge Library" description="지식 관리 · 템플릿 · 레퍼런스 · 내부 문서">
+                <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
+                    <Plus className="h-3.5 w-3.5" /> 자료 등록
+                </button>
+            </PageHeader>
 
             {/* Filters */}
             <div className="mb-4 space-y-2">

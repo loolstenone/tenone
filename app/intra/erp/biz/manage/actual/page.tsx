@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -87,21 +88,8 @@ export default function ActualConfirmPage() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">실적 확정</h1>
-          <p className="text-sm text-neutral-400">{now.getFullYear()}년 {months[monthIdx]} 실적</p>
-        </div>
-        <span
-          className={clsx(
-            "rounded-full px-3 py-1 text-xs font-medium",
-            status === "확정" ? "bg-green-100 text-green-700" : "bg-neutral-100 text-neutral-500"
-          )}
-        >
-          {status}
-        </span>
-      </div>
+    <div>
+      <PageHeader title="실적 확정" description={`${now.getFullYear()}년 ${months[monthIdx]} 실적`} />
 
       {/* Month Selector */}
       <div className="mb-4 flex items-center gap-2 border border-neutral-200 bg-white px-3 py-1.5 w-fit">

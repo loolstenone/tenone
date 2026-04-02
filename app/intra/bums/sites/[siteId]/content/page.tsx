@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import Link from "next/link";
 const BoardTypeInfo: Record<string, { label: string }> = {};
 import { Search, Eye, MessageSquare, Pin, Lock } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 const statusBadge: Record<string, string> = {
@@ -46,10 +47,7 @@ export default function SiteContentPage({ params }: { params: Promise<{ siteId: 
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-xl font-semibold">전체 게시물</h2>
-                <p className="text-sm text-neutral-500 mt-1">{site?.name}의 모든 콘텐츠를 관리합니다</p>
-            </div>
+            <PageHeader title="전체 게시물" description={`${site?.name ?? ''}의 모든 콘텐츠를 관리합니다`} />
 
             <div className="flex gap-6">
                 {/* 좌측: 게시판 필터 */}

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Filter, ChevronDown, MoreHorizontal, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── Level 정의 ── */
 interface LevelDef {
@@ -176,11 +177,7 @@ export default function UniverseMembers() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">통합 회원</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">전체 브랜드 통합 회원 관리</p>
-            </div>
+            <PageHeader title="통합 회원" description="전체 브랜드 통합 회원 관리" />
 
             {/* Level Bar */}
             <div className="bg-white border border-neutral-200 rounded-lg p-4">

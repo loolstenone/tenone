@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 type BumsWidget = { displayStyle: "list" | "card" | "thumbnail"; sortBy: "latest" | "views" | "recommended" };
 import { ArrowLeft, Plus, Trash2, Eye, LayoutGrid, List, Image as ImageIcon } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 const inputClass = "w-full border border-neutral-200 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none bg-white rounded";
@@ -58,16 +59,12 @@ export default function WidgetsPage({ params }: { params: Promise<{ siteId: stri
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {site.name}
                 </button>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-semibold">위젯 관리</h2>
-                        <p className="text-sm text-neutral-500 mt-1">게시판 글을 사이트 페이지에 노출하는 위젯</p>
-                    </div>
+                <PageHeader title="위젯 관리" description="게시판 글을 사이트 페이지에 노출하는 위젯">
                     <button onClick={() => setShowForm(!showForm)}
                         className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 text-sm hover:bg-neutral-800 transition-colors">
                         <Plus className="h-4 w-4" /> 위젯 추가
                     </button>
-                </div>
+                </PageHeader>
             </div>
 
             {/* Add Widget Form */}

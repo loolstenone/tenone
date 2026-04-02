@@ -6,6 +6,7 @@ import { fetchCampaigns, fetchLeads, fetchContentPosts } from "@/lib/supabase/ma
 import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
 import { Campaign, Lead, ContentPost } from "@/types/marketing";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function MarketingDashboard() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -44,10 +45,7 @@ export default function MarketingDashboard() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Marketing Dashboard</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 마케팅 포털</p>
-            </div>
+            <PageHeader title="Marketing Dashboard" description="Ten:One™ 마케팅 포털" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map(item => (
                     <Link key={item.name} href={item.href} className="group border border-neutral-200 bg-white p-5 hover:border-neutral-400 transition-colors">

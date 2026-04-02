@@ -6,6 +6,7 @@ import { fetchPeople, fetchOrganizations } from "@/lib/supabase/crm";
 import { initialActivities, initialPeople, initialOrganizations } from "@/lib/crm-data";
 import { Activity, Person, Organization } from "@/types/crm";
 import { Phone, Mail, Calendar, FileText, PartyPopper, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const typeIcon: Record<string, typeof Phone> = { Call: Phone, Email: Mail, Meeting: Calendar, Note: FileText, Event: PartyPopper };
 
@@ -37,10 +38,7 @@ export default function ActivitiesPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Activities</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">미팅, 전화, 이메일 등 활동 기록을 관리합니다.</p>
-            </div>
+            <PageHeader title="Activities" description="미팅, 전화, 이메일 등 활동 기록을 관리합니다." />
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">

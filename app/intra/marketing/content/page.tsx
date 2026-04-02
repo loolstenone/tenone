@@ -5,6 +5,7 @@ import { fetchContentPosts } from "@/lib/supabase/marketing";
 import { initialContentPosts } from "@/lib/marketing-data";
 import { ContentPost } from "@/types/marketing";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function ContentPage() {
     const [contentPosts, setContentPosts] = useState<ContentPost[]>([]);
@@ -28,10 +29,7 @@ export default function ContentPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Content</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">채널별 콘텐츠 발행을 관리합니다.</p>
-            </div>
+            <PageHeader title="Content" description="채널별 콘텐츠 발행을 관리합니다." />
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">

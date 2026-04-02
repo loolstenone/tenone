@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Heart, Plus, Edit2, Trash2, Shield, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface FamilyMember {
     id: string;
@@ -56,17 +57,10 @@ export default function FamilyPage() {
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-4xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">가족관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">가족 및 부양가족 정보를 관리합니다.</p>
-                </div>
-                <button onClick={() => setShowForm(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                    <Plus className="h-3 w-3" /> 가족 등록
-                </button>
-            </div>
+        <div>
+            <PageHeader title="가족관리" description="가족 및 부양가족 정보를 관리합니다.">
+                <PrimaryButton onClick={() => setShowForm(true)}><Plus className="h-3 w-3" /> 가족 등록</PrimaryButton>
+            </PageHeader>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[

@@ -17,6 +17,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { madleagueClubs } from "@/lib/people-data";
 import type { MadLeagueClub } from "@/types/people";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 // ── Mock member per club/generation ──
 type ClubRole = "회장" | "부회장" | "팀장" | "멤버";
@@ -259,21 +260,10 @@ export default function ClubsPage() {
   if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">MADLeague 동아리 관리</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">전국 대학생 마케팅·광고 동아리 연합</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-        >
-          <Plus size={14} />
-          동아리 추가
-        </button>
-      </div>
+    <div>
+      <PageHeader title="MADLeague 동아리 관리" description="전국 대학생 마케팅·광고 동아리 연합">
+        <PrimaryButton onClick={() => setShowAddModal(true)}><Plus size={14} /> 동아리 추가</PrimaryButton>
+      </PageHeader>
 
       {/* Club List */}
       <div className="space-y-2">

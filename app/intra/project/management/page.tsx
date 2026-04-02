@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { FolderKanban, Plus, Search, Calendar, Users, Briefcase, TrendingUp, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ─── Types ─── */
 
@@ -205,20 +206,16 @@ export default function ProjectListPage() {
     const totalJobs = projects.filter((p) => p.status === "진행").reduce((s, p) => s + p.jobCount, 0);
 
     return (
-        <div className="max-w-5xl">
+        <div>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 관리</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트 선택 → Job 등록 · 상세 관리</p>
-                </div>
+            <PageHeader title="프로젝트 관리" description="프로젝트 선택 → Job 등록 · 상세 관리">
                 <Link
                     href="/intra/project/management/new"
                     className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
                 >
                     <Plus className="h-4 w-4" /> 프로젝트 등록
                 </Link>
-            </div>
+            </PageHeader>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-4 gap-3 mb-5">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Shield, ChevronDown, ChevronUp, Save } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 type AccessLevel = "none" | "read" | "write";
 
@@ -158,20 +159,9 @@ export default function PermissionsPage() {
 
     return (
         <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">권한 설정</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">시스템 접근 권한을 관리합니다</p>
-                </div>
-                <button
-                    onClick={handleSave}
-                    className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors"
-                >
-                    <Save className="h-4 w-4" />
-                    {saved ? "저장 완료" : "저장"}
-                </button>
-            </div>
+            <PageHeader title="권한 설정" description="시스템 접근 권한을 관리합니다">
+                <PrimaryButton onClick={handleSave}><Save className="h-4 w-4" /> {saved ? "저장 완료" : "저장"}</PrimaryButton>
+            </PageHeader>
 
             {/* Department × Module Matrix */}
             <div>

@@ -5,6 +5,7 @@ import { Trophy, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import * as projectsDb from "@/lib/supabase/projects";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -73,11 +74,8 @@ export default function ProjectProfitPage() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">프로젝트 수익성</h1>
-        <p className="text-sm text-neutral-400">프로젝트별 손익 랭킹</p>
-      </div>
+    <div>
+      <PageHeader title="프로젝트 수익성" description="프로젝트별 손익 랭킹" />
 
       {/* Summary */}
       <div className="mb-6 grid grid-cols-3 gap-3">

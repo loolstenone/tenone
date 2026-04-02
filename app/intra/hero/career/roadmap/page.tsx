@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MapPin, CheckCircle, Circle, ChevronDown, ChevronRight } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 interface Level {
@@ -75,11 +76,8 @@ export default function CareerRoadmapPage() {
     const [expandedTrack, setExpandedTrack] = useState<string>("CSO");
 
     return (
-        <div className="max-w-4xl">
-            <div className="mb-6">
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">성장 로드맵</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">C-Level을 향한 경로 설계</p>
-            </div>
+        <div>
+            <PageHeader title="성장 로드맵" description="C-Level을 향한 경로 설계" />
 
             {/* Current Position */}
             <div className="border border-neutral-200 bg-white p-5 mb-6">

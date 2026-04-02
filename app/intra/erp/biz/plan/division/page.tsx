@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, Users, Loader2 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "@/lib/auth-context";
 import * as erpDb from "@/lib/supabase/erp";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 const krw = (n: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(n);
@@ -114,11 +115,8 @@ export default function DivisionPlanPage() {
   const toggle = (name: string) => setExpanded(expanded === name ? null : name);
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">부문별 계획</h1>
-        <p className="text-sm text-neutral-400">2026년도 부문별 경영계획</p>
-      </div>
+    <div>
+      <PageHeader title="부문별 계획" description="2026년도 부문별 경영계획" />
 
       <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="w-full text-sm">

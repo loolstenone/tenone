@@ -365,7 +365,7 @@ export default function ProjectDetailPage() {
     }
 
     return (
-        <div className="max-w-5xl">
+        <div>
             {/* Back link */}
             <Link href="/intra/project/management" className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 transition-colors mb-3">
                 <ArrowLeft className="h-3 w-3" /> 프로젝트 목록

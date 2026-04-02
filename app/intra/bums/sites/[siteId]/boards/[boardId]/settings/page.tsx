@@ -38,6 +38,7 @@ const BoardTypeInfo: Record<BoardType, { label: string; description: string }> =
     event: { label: '이벤트', description: '이벤트' },
 };
 import { ArrowLeft, Plus, X as XIcon } from "lucide-react";
+import { PageHeader, TabNav } from "@/components/intra/IntraUI";
 
 // ── 상수 ──
 
@@ -280,23 +281,18 @@ export default function BoardSettingsPage({ params }: { params: Promise<{ siteId
                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-900 mb-4 transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" /> {board.name}
                 </button>
-                <h2 className="text-2xl font-semibold">게시판 설정</h2>
-                <p className="mt-1 text-sm text-neutral-500">{board.name} 게시판 설정을 관리합니다</p>
+                <PageHeader title="게시판 설정" description={`${board.name} 게시판 설정을 관리합니다`} />
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-neutral-200">
-                <button
-                    onClick={() => setTab('settings')}
-                    className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === 'settings' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}>
-                    게시판 설정
-                </button>
-                <button
-                    onClick={() => setTab('design')}
-                    className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === 'design' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}>
-                    디자인
-                </button>
-            </div>
+            <TabNav
+                tabs={[
+                    { id: 'settings', label: '게시판 설정' },
+                    { id: 'design', label: '디자인' },
+                ]}
+                active={tab}
+                onChange={(id) => setTab(id as 'settings' | 'design')}
+            />
 
             {/* ════════════ Tab 1: 게시판 설정 ════════════ */}
             {tab === 'settings' && (

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import * as heroDb from "@/lib/supabase/hero";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { useAuth } from "@/lib/auth-context";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -382,46 +383,39 @@ export default function ResumePage() {
   // ─── Render ─────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-4xl">
+    <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-neutral-900">이력서 빌더</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">광고바닥 이력서 양식 기반 &middot; HeRo 프로필 연동</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Progress */}
-          <div className="flex items-center gap-1.5 mr-3">
-            {Array.from({ length: progress.total }, (_, i) => (
-              <span key={i}>
-                {i < progress.filled ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-neutral-700" />
-                ) : (
-                  <Circle className="h-3.5 w-3.5 text-neutral-300" />
-                )}
-              </span>
-            ))}
-            <span className="text-xs text-neutral-400 ml-1">
-              {progress.filled}/{progress.total}
+      <PageHeader title="이력서 빌더" description="광고바닥 이력서 양식 기반 · HeRo 프로필 연동">
+        <div className="flex items-center gap-1.5 mr-3">
+          {Array.from({ length: progress.total }, (_, i) => (
+            <span key={i}>
+              {i < progress.filled ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-neutral-700" />
+              ) : (
+                <Circle className="h-3.5 w-3.5 text-neutral-300" />
+              )}
             </span>
-          </div>
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-          >
-            <Save className="h-3 w-3" />
-            {saving ? "저장 중..." : "저장"}
-          </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
-            <FileDown className="h-3 w-3" />
-            PDF 내보내기
-          </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
-            <Eye className="h-3 w-3" />
-            두괄식 보기
-          </button>
+          ))}
+          <span className="text-xs text-neutral-400 ml-1">
+            {progress.filled}/{progress.total}
+          </span>
         </div>
-      </div>
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+        >
+          <Save className="h-3 w-3" />
+          {saving ? "저장 중..." : "저장"}
+        </button>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
+          <FileDown className="h-3 w-3" />
+          PDF 내보내기
+        </button>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
+          <Eye className="h-3 w-3" />
+          두괄식 보기
+        </button>
+      </PageHeader>
 
       {/* ═══════════════════════════════════════════════════════════
          Section 1: 타이틀

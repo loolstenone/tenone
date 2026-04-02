@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { isMockAllowed } from "@/lib/env";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { fetchTenOneOpportunities } from "@/lib/supabase/wio";
 
 type OpportunitySource = 'narjangter' | 'competition' | 'government' | 'referral' | 'website' | 'openchat' | 'other';
@@ -194,13 +195,9 @@ export default function OpportunityPage() {
     if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-6xl">
+        <div>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Opportunity</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">기회 수집 · 파이프라인 · 프로젝트 전환</p>
-                </div>
+            <PageHeader title="Opportunity" description="기회 수집 · 파이프라인 · 프로젝트 전환">
                 <div className="flex items-center gap-2">
                     <div className="flex border border-neutral-200 rounded overflow-hidden">
                         <button onClick={() => setViewMode('pipeline')}
@@ -217,7 +214,7 @@ export default function OpportunityPage() {
                         <Plus className="h-4 w-4" /> 기회 등록
                     </button>
                 </div>
-            </div>
+            </PageHeader>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-5 gap-3 mb-5">

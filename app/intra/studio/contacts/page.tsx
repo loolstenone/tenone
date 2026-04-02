@@ -5,6 +5,7 @@ import { brands, contacts as mockContacts } from "@/lib/data";
 import { fetchPeople } from "@/lib/supabase/crm";
 import type { Contact } from "@/types/contact";
 import { Search, Filter, Plus, Mail, Phone, MoreHorizontal, User } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { ContactImportModal } from "@/components/ContactImportModal";
 
@@ -55,25 +56,18 @@ export default function ContactsPage() {
                 onImport={(newContacts) => console.log('Imported:', newContacts)} // Simplified for now
             />
 
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Contacts (CRM)</h2>
-                    <p className="mt-0.5 text-sm text-neutral-400">Manage relationships with partners, clients, and influencers.</p>
-                </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setIsImportModalOpen(true)}
-                        className="flex items-center gap-2 bg-neutral-100 px-4 py-2 text-sm font-medium hover:bg-neutral-200 transition-colors border border-neutral-200"
-                    >
-                        Import Excel
-                    </button>
-                    <button className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
-                        <Plus className="h-4 w-4" />
-                        Add Contact
-                    </button>
-                </div>
-            </div>
+            <PageHeader title="Contacts (CRM)" description="Manage relationships with partners, clients, and influencers.">
+                <button
+                    onClick={() => setIsImportModalOpen(true)}
+                    className="flex items-center gap-2 bg-neutral-100 px-4 py-2 text-sm font-medium hover:bg-neutral-200 transition-colors border border-neutral-200"
+                >
+                    Import Excel
+                </button>
+                <button className="flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition-colors">
+                    <Plus className="h-4 w-4" />
+                    Add Contact
+                </button>
+            </PageHeader>
 
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-4 pb-6 border-b border-neutral-200">

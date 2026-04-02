@@ -11,6 +11,7 @@ import {
   Building2,
   Users,
 } from "lucide-react";
+import { PageHeader, PrimaryButton } from "@/components/intra/IntraUI";
 
 interface Department {
   id: string;
@@ -181,20 +182,9 @@ export default function DepartmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-neutral-900">부서 관리</h2>
-          <p className="mt-1 text-xs text-neutral-500">
-            조직의 부문 및 팀 구조를 관리합니다
-          </p>
-        </div>
-        <button
-          onClick={openAddDivision}
-          className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 transition-colors"
-        >
-          <Plus className="h-3 w-3" /> 부문 추가
-        </button>
-      </div>
+      <PageHeader title="부서 관리" description="조직의 부문 및 팀 구조를 관리합니다">
+        <PrimaryButton onClick={openAddDivision}><Plus className="h-3 w-3" /> 부문 추가</PrimaryButton>
+      </PageHeader>
 
       <div className="border border-neutral-200 bg-white">
         {departments.map((div) => (

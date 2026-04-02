@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { UserPlus, Users, Trash2, ArrowRightCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── 타입 ── */
 interface StatItem { label: string; value: string; icon: React.ComponentType<{ className?: string }> }
@@ -117,11 +118,7 @@ export default function UniverseGuests() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">게스트 관리</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">비회원 게스트 관리 및 자동삭제</p>
-            </div>
+            <PageHeader title="게스트 관리" description="비회원 게스트 관리 및 자동삭제" />
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">

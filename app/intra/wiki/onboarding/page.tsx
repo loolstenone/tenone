@@ -33,6 +33,7 @@ import {
   Database,
 } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ================================================================== */
 /*  Types                                                              */
@@ -657,14 +658,8 @@ export default function OnboardingPage() {
   /* ================================================================ */
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="border-b border-neutral-200 pb-5">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">온보딩</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">
-          Ten:One™에 오신 것을 환영합니다. 함께 성장할 준비를 시작하세요.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="온보딩" description="Ten:One™에 오신 것을 환영합니다. 함께 성장할 준비를 시작하세요." />
 
       {/* Tab Navigation */}
       <div className="flex gap-1 border-b border-neutral-200">

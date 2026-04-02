@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GitBranch, KanbanSquare, FolderKanban, Zap, ArrowRight, Loader2 } from "lucide-react";
 import { fetchWorkflowTasks, fetchPipelineItems, fetchBrandProjects, fetchAutomations } from "@/lib/supabase/workflow";
+import { PageHeader } from "@/components/intra/IntraUI";
 import { initialTasks, initialPipelineItems, initialProjects, initialAutomations } from "@/lib/workflow-data";
 import type { WorkflowTask, PipelineItem, BrandProject, AutomationRule } from "@/types/workflow";
 
@@ -74,10 +75,7 @@ export default function WorkflowDashboard() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Workflow</h2>
-                <p className="mt-0.5 text-sm text-neutral-400">프로젝트와 콘텐츠의 전체 작업 흐름을 관리합니다.</p>
-            </div>
+            <PageHeader title="Workflow" description="프로젝트와 콘텐츠의 전체 작업 흐름을 관리합니다." />
 
             {/* Summary Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -7,6 +7,7 @@ import { brands } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
 import { fetchPipelineItems } from "@/lib/supabase/workflow";
 import type { PipelineItem } from "@/types/workflow";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function OfficeDashboard() {
     const [eventCount, setEventCount] = useState<number | null>(null);
@@ -36,10 +37,7 @@ export default function OfficeDashboard() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Studio Dashboard</h1>
-                <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 콘텐츠 제작 및 브랜드 관리</p>
-            </div>
+            <PageHeader title="Studio Dashboard" description="Ten:One™ 콘텐츠 제작 및 브랜드 관리" />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {stats.map((item) => (

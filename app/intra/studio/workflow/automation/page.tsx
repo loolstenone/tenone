@@ -7,6 +7,7 @@ import { AutomationCard } from "@/components/workflow/AutomationCard";
 import { AutomationBuilder } from "@/components/workflow/AutomationBuilder";
 import { AutomationRule } from "@/types/workflow";
 import { Plus, Zap, Power, AlertCircle, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 export default function AutomationPage() {
     const [automations, setAutomations] = useState<AutomationRule[]>([]);
@@ -59,12 +60,8 @@ export default function AutomationPage() {
     if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
 
     return (
-        <div className="max-w-4xl">
-            <div className="flex items-center justify-between mb-5">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Automation</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">자동화 규칙을 설정하고 관리합니다</p>
-                </div>
+        <div>
+            <PageHeader title="Automation" description="자동화 규칙을 설정하고 관리합니다">
                 <button
                     onClick={() => { setEditingRule(null); setIsBuilderOpen(true); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
@@ -72,7 +69,7 @@ export default function AutomationPage() {
                     <Plus className="h-3.5 w-3.5" />
                     새 자동화
                 </button>
-            </div>
+            </PageHeader>
 
             {/* 요약 카드 */}
             <div className="grid grid-cols-3 gap-3 mb-5">

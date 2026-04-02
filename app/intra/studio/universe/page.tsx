@@ -5,6 +5,7 @@ import { timelineData, universeNodes, universeLinks } from "@/lib/universe";
 import { TimelineView } from "@/components/TimelineView";
 import { RelationshipMap } from "@/components/RelationshipMap";
 import { GitGraph, Network, BarChart3, TrendingUp, Users, Briefcase, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 type View = 'dashboard' | 'timeline' | 'graph';
@@ -65,11 +66,7 @@ export default function UniversePage() {
 
     return (
         <div className="space-y-8 pb-12">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Universe</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">크로스 브랜드 현황 · 타임라인 · 관계도</p>
-                </div>
+            <PageHeader title="Universe" description="크로스 브랜드 현황 · 타임라인 · 관계도">
                 <div className="flex items-center bg-neutral-100 p-1 border border-neutral-200 overflow-x-auto">
                     {([
                         { id: 'dashboard' as View, icon: BarChart3, label: 'Dashboard' },
@@ -82,7 +79,7 @@ export default function UniversePage() {
                         </button>
                     ))}
                 </div>
-            </div>
+            </PageHeader>
 
             {view === 'dashboard' && (
                 <div className="space-y-6 animation-fade-in">

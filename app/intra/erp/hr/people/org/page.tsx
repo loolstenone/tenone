@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Mail, Phone, Building2, User } from "lucide-react";
 import clsx from "clsx";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 interface OrgPerson {
     name: string;
@@ -256,13 +257,11 @@ export default function OrgChartPage() {
     const selectedPerson = selectedNode?.person || null;
 
     return (
-        <div className="flex gap-5 h-full max-w-4xl">
+        <div>
+            <PageHeader title="조직도" description={`Ten:One™ 조직 구조 · 총 ${totalMembers}명`} />
+        <div className="flex gap-5 h-full">
             {/* 좌측: 조직도 트리 */}
             <div className="w-[55%] min-w-0">
-                <div className="mb-4">
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">조직도</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">Ten:One™ 조직 구조 · 총 {totalMembers}명</p>
-                </div>
 
                 <div className="flex items-center gap-3 mb-4 text-[11px] text-neutral-400">
                     <span className="flex items-center gap-1"><span className="w-2 h-2 bg-neutral-200 rounded border border-neutral-300" /> 임원</span>
@@ -351,6 +350,7 @@ export default function OrgChartPage() {
                     </div>
                 )}
             </div>
+        </div>
         </div>
     );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Star, ChevronDown, ChevronRight, Edit2, Building2, Phone, Mail, CreditCard, FileText, MoreVertical } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import clsx from "clsx";
+import { PageHeader } from "@/components/intra/IntraUI";
 
 type VendorCategory = '제작사' | '매체사' | '프리랜서' | '렙사' | '인쇄사' | '이벤트사' | '촬영스튜디오' | '음향스튜디오' | 'IT/개발사' | '디자인스튜디오' | '기타';
 type VendorStatus = '활성' | '휴면' | '블랙리스트' | '신규';
@@ -210,16 +211,12 @@ export default function VendorsPage() {
     const catCounts = categories.reduce((acc, c) => { acc[c] = vendors.filter(v => v.category === c).length; return acc; }, {} as Record<string, number>);
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center justify-between mb-5">
-                <div>
-                    <h1 className="text-lg font-semibold tracking-tight text-neutral-900">협력사</h1>
-                    <p className="text-sm text-neutral-400 mt-0.5">프로젝트 협력사 등록 · 평가 · 거래 관리</p>
-                </div>
+        <div>
+            <PageHeader title="협력사" description="프로젝트 협력사 등록 · 평가 · 거래 관리">
                 <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-3.5 w-3.5" /> 협력사 등록
                 </button>
-            </div>
+            </PageHeader>
 
             {/* 요약 */}
             <div className="grid grid-cols-4 gap-3 mb-5">
