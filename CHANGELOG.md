@@ -30,7 +30,15 @@
 - SmarComm pricing: 대행 가격 vs SaaS 가격 별개 — 확정 필요
 - Phase 0-C(중복 테이블 통합) 보류
 
-**커밋:** `bb82636`, `50dff98`, `722b26f`, `fb9358f`
+**추가 작업:**
+- 메신저 채널 시스템 (5개 에이전트 채널 + Vrief/크롤러 자동 게시)
+- DB 전수 검토 보안 조치 6건 (RLS 9개, search_path 10개, DEFINER뷰, 중복인덱스, th_삭제)
+- 에이전트 이름 AI Team v2 기준 정비 (9개 + 블루 신규)
+- ANTHROPIC_API_KEY Vercel 설정 + Agent Hub 실전 가동
+- fwn.co.kr Vercel 도메인 추가 (DNS 전파 대기)
+- Leaked Password Protection 활성화
+
+**커밋:** `bb82636`, `50dff98`, `722b26f`, `fb9358f`, `ba59412`, `82151eb`, `b0c9186`
 
 ---
 
