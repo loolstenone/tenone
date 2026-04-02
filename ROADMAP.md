@@ -1,178 +1,205 @@
-# TenOne 프로젝트 로드맵
+# TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-04-01
-> 아키텍처 v3.0 기반 재정비
+> 마지막 업데이트: 2026-04-02
+> 기준 문서: TenOne_Universe_Architecture_v1.md / TenOne_4Products.md
+> **핵심 원칙: 4대 제품(Mindle·SmarComm·WIO·AI Agent)을 Intra에서 통제·운영·관리**
+
+---
 
 ## 현재 상태 요약
 
 | 영역 | 상태 | 비고 |
 |------|------|------|
-| 퍼블릭 사이트 (11페이지) | ✅ 완성 | 홈/Works/Newsroom/About/Universe 등 |
-| 인트라 9개 모듈 (143페이지) | ✅ UI 완성 | 대부분 DB 연결 완료 |
-| 사용자 체계 (5단계) | ✅ 구현 | staff/partner/jp/crew/member |
-| 결재 시스템 | ✅ DB 연결 | Myverse + ERP 결재라인 |
-| 프로젝트/Job 관리 | ✅ DB 연결 | 등록/상세/손익/인력/파일 |
-| 라이브러리 (Wiki/Myverse/CMS) | ✅ 구현 | 권한별 노출, 즐겨찾기 연동 |
-| Marketing (CRM+캠페인+리드) | ✅ DB 연결 | Supabase 직접 fetch |
-| ERP HR (Staff+GPR+Talent) | ✅ DB 연결 | Supabase 직접 fetch |
-| Studio Workflow (칸반+파이프라인) | ✅ DB 연결 | workflow.ts 신규, SQL 생성 |
-| Universe OS Agent Hub | ⚠️ 코드 완성 | Prod DB 실행 필요 |
-| Backend API | ❌ 없음 | Supabase 직접 호출로 대체 중 |
-| 배포 | ⚠️ 스크립트만 | Cloud Run 미배포 |
+| 퍼블릭 사이트 (26개 브랜드) | ⚠️ 프론트만 | Google Sites 잔재 /about·/universe·/history |
+| Intra 143페이지 | ✅ UI + DB 대부분 | 4대 제품 통제 레이어 미연결 |
+| WIO Orbi (141p) | ✅ UI + 일부 DB | 외부 테넌트 미연동 |
+| SmarComm (46p) | ⚠️ 숨김 | Coming Soon 상태, 인트라 연결 필요 |
+| site_configs (L1) | ⚠️ 테이블 생성됨 | Intra handleSave + layout.tsx 연동 필요 |
+| 구독 인프라 (L4) | ❌ 없음 | wio_subscription_plans/subscriptions 미생성 |
+| Agent Hub | ⚠️ 코드 완성 | Prod DB 실행 필요 |
+| Mindle 크롤러 (Whole See) | ❌ 미가동 | 6월 목표 |
+| 결제 PG | ❌ 없음 | Phase 2 |
 
 ---
 
-## Phase 0: 프론트엔드 마무리 (즉시)
+## 아키텍처 원칙 (개발 시 반드시 준수)
 
-> 백엔드 전환 전 UI/UX 완성도 높이기
+### 4대 제품 구조
+```
+Mindle(연료) ──트렌드 데이터──→ SmarComm(마케팅 자동화)
+                                       ↑
+WIO(공장) ──────── MKT-* 인프라 ────────┘
+    │
+    └── COM-AI = Agent Hub
+                    │
+            AI Agent(운영 엔진) → 3개 제품 자동 운영
+```
 
-### 완료
-- [x] 0-1. ERP C-Level 구조 개편
-- [x] 0-2. GPR 독립 모듈화
-- [x] 0-3. Myverse 개인 포털
-- [x] 0-4. ERP 관리자 뷰 전환
-- [x] 0-5. SystemAccess 정리
-- [x] 0-6. Intra 헤더
-- [x] 0-7. 교육 필수 이수과정
-- [x] 0-8. Crew/Partner Intra 리다이렉트 수정
-- [x] 0-9. Townity 공개 대상 추가 (공지/자유/일정)
-- [x] 0-10. Wiki Library 페이징 + 즐겨찾기 연동
-- [x] 0-11. 프로필 수정 비밀번호 확인
-- [x] 0-12. 뉴스레터 구독 (가입 시 + 프로필)
-- [x] 0-13. 프로젝트 등록 (코드자동, PM자동, 임시저장, 결재요청)
-
-### 미완료
-- [ ] 0-14. 모바일 반응형 점검 (사이드바 토글, 테이블 스크롤)
-- [ ] 0-15. 텍스트/버튼 일관성 최종 점검
-- [ ] 0-16. 빌드 에러 0개 확인 (npm run build)
-
----
-
-## Phase 1: 백엔드 기반 (1~8주)
-
-> Mock → 실제 DB. 사람이 가입하고 데이터가 저장되는 상태.
-
-### 1-1. Supabase 셋업 (주 1~2)
-- [x] Supabase 프로젝트 생성 ✅
-- [x] .env.local 환경변수 설정 ✅
-- [x] DB 스키마 생성 (핵심 테이블) ✅
-  - [x] members, point_logs ✅
-  - [x] projects, jobs, project_members ✅
-  - [x] posts, events ✅
-  - [x] approvals ✅
-  - [x] gpr_goals ✅
-  - [x] partners, brands ✅
-  - [ ] workflow_tasks, content_pipeline, workflow_automations ← SQL 실행 필요 ⚠️
-  - [ ] agent_profiles, agent_messages ← SQL 실행 필요 ⚠️
-- [x] Supabase Auth 설정 (이메일) ✅
-- [ ] 카카오 소셜 로그인
-- [ ] Supabase Storage 버킷 설정 (avatars, files, content-images)
-
-### 1-2. 인증 전환 (주 1~2)
-- [ ] localStorage Mock → Supabase Auth
-- [ ] 5단계 accountType 유지 (members 테이블 연동)
-- [ ] 로그인/회원가입/로그아웃 API
-- [ ] 미들웨어 보호 (인트라 접근 제어)
-- [ ] 카카오 소셜 로그인
-
-### 1-3. API Routes + 데이터 마이그레이션 (주 3~4)
-- [ ] API 공통 유틸 (에러 핸들링, 인증 체크)
-- [ ] Members API (CRUD + 프로필 수정)
-- [ ] Projects API (CRUD + Job + 투입인원)
-- [ ] Posts API (공지/자유/QnA)
-- [ ] Events API (일정)
-- [ ] Approvals API (결재 + 결재라인 처리)
-- [ ] 기존 Mock 데이터 → seed 스크립트
-
-### 1-4. 모듈 전환 1차 (주 5~6)
-- [ ] Myverse: Context → API (Dashboard, Todo, 타임시트, 결재)
-- [ ] Townity: Context → API (공지, 자유, 일정)
-- [ ] Project: Context → API (프로젝트, Job, 손익)
-- [ ] CMS: Context → API (콘텐츠, 뉴스레터)
-
-### 1-5. 모듈 전환 2차 (주 7~8)
-- [ ] ERP: Context → API (전자결재, HR, Finance, 경영관리)
-- [ ] Wiki: Context → API (Library)
-- [ ] HeRo: Context → API (HIT, 이력서, 커리어)
-- [ ] Evolution School: Context → API (과정, 수강)
-- [ ] Contact 폼 → opportunities 테이블 자동 등록
-
-### Phase 1 완료 기준
-- 실제 회원가입/로그인 작동
-- 프로젝트 생성이 DB에 저장
-- 커뮤니티 글쓰기가 새로고침 후에도 유지
-- 결재 승인/반려가 실제 작동
+### 모순 방지 7원칙 (위반 금지)
+| # | 규칙 |
+|---|------|
+| 1 | 구독 테이블은 `wio_subscription_plans` 하나만 쓴다 |
+| 2 | Intra 전용 운영 테이블을 새로 만들지 않는다 (WIO 테이블 사용) |
+| 3 | 브랜드 사이트는 Supabase만 바라본다 (Intra API 직접 호출 금지) |
+| 4 | SmarComm WS = WIO MKT-* 위의 어플리케이션 (이중 구현 금지) |
+| 5 | 에이전트는 사람과 같은 API를 쓴다 |
+| 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 |
+| 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 |
 
 ---
 
-## Phase 2: 신규 모듈 + 고도화 (8~16주)
+## 🚨 즉시 (이번 주 — 리스크 제거)
 
-> 기회 수집 → 프로젝트 전환 파이프라인 가동
+### ① HeRo Mock 데이터 제거 [법적 리스크]
+- [ ] HeRo 파트너 기업 로고 (카카오·네이버·쿠팡·토스 등) 제거 또는 "예시"로 명시
+- [ ] Mock 수치 (매칭 100+건, 파트너 50+개) 제거
+- [ ] `/hero` 파트너 섹션 → "파트너 모집 중" UI로 교체
 
-### 2-1. Opportunity 모듈 (주 8~10)
-- [ ] opportunities 테이블 + UI (파이프라인 뷰)
-- [ ] AI 크롤링 엔진 (나라장터, bizinfo, 공모전)
-- [ ] Cloud Run Jobs + cron 스케줄
-- [ ] Claude API 관련성 분석 (relevance_score)
-- [ ] 기회 → 프로젝트 전환 기능
-- [ ] 마감 임박/고관련성 알림
+### ② Prod SQL 6개 실행 [기능 미작동]
+- [ ] `sql/erp-finance-tables.sql` (invoices, payments, card_usage, incentives)
+- [ ] `sql/monthly-forecasts-table.sql`
+- [ ] `sql/standard-rates-table.sql`
+- [ ] `sql/agent-tables.sql` (agent_profiles, agent_messages)
+- [ ] `sql/workflow-tables.sql`
+- [ ] `sql/badaksoe-rooms-table.sql`
 
-### 2-2. Partner Pool 모듈 (주 8~10)
-- [ ] partners 테이블 + UI
-- [ ] 파트너 등록 (회사/프리랜서)
-- [ ] 역량 기반 검색/필터
-- [ ] Project에서 파트너 투입
-- [ ] 프로젝트 완료 후 평가
+### ③ site_configs 완전 연동 [L1 설정 레이어]
+- [ ] `/intra/bums/sites/[siteId]/settings` handleSave → DB upsert 연결
+- [ ] 각 브랜드 `layout.tsx` → `getSiteConfig(siteId)` 동적 metadata 생성
+- [ ] 26개 사이트 시드 데이터 확인 (새벽 작업에서 생성됨)
 
-### 2-3. 포인트 시스템 (주 10~12)
-- [ ] point_logs 테이블 + 자동 부여 로직
-- [ ] 등급 시스템 (Bronze~Diamond)
-- [ ] Myverse 포인트 현황 표시
-- [ ] 프로젝트 완료 시 크루 포인트 자동 부여
-- [ ] 교육 이수 시 포인트 자동 부여
-
-### 2-4. BI Dashboard (주 12~14)
-- [ ] 전체 사업 현황 (코어/확장/곁가지)
-- [ ] 멤버 현황 (가입 추이, 그룹별, 활성/이탈)
-- [ ] 프로젝트 현황 (진행중/완료, 성공률, 이익률)
-- [ ] Opportunity 파이프라인 (상태별 금액, 전환율)
-
-### 2-5. 고도화 (주 14~16)
-- [ ] 메신저 실시간 (Supabase Realtime)
-- [ ] 알림 센터 (notifications + Realtime)
-- [ ] 크루 정산 + 외부 정산 (ERP 확장)
-- [ ] AI 콘텐츠 생성 (CMS + Claude API)
-- [ ] Badak.biz 9천명 마이그레이션
+### ④ Google Sites 잔재 제거 [신뢰·SEO]
+- [ ] `/about` → Next.js 내부 페이지로 교체 (Google Sites 링크 제거)
+- [ ] `/universe`, `/history` 네비게이션 링크 확인 및 수정
 
 ---
 
-## Phase 3: 커머스 + 사업 확장 (16~24주)
+## Phase 1: 4대 제품 Intra 통제 레이어 (4월)
 
-- [ ] Commerce 모듈 (상품관리, 포트원 결제, 주문관리)
-- [ ] Evolution School 유료 과정 (Commerce 연동)
-- [ ] 수료증 PDF 자동 발급
-- [ ] HeRo 기업 매칭 대시보드
-- [ ] BI 재무 상세 + 브랜드별 성과
-- [ ] SNS 연동 콘텐츠 배포
+> **목표: Intra 하나에서 Mindle·SmarComm·WIO·AI Agent를 통제할 수 있는 상태**
+
+### 1-A. Mindle 관리 (연료 공급 시스템)
+- [ ] 뉴스레터 구독 DB 연동 확인 (`mindle_subscribers` 테이블 → 홈 폼 연결)
+- [ ] `/intra/bums/newsletter` → mindle_subscribers CRUD 완성
+- [ ] 트렌드 카드 관리: `mindle_trends` 테이블 생성 + Intra에서 수동 등록 UI
+- [ ] `/mindle/trends` 퍼블릭 페이지 → mindle_trends DB 연결
+- [ ] Whole See 크롤러 설정: RSS 소스 목록 관리 UI (Intra BUMS > 콘텐츠)
+
+### 1-B. SmarComm 활성화 (마케팅 자동화 제품)
+- [ ] Coming Soon 해제 → `/smarcomm` 접근 가능 상태로 전환
+- [ ] `/intra/marketing` ↔ SmarComm WS 데이터 연결 (같은 WIO MKT-* 테이블)
+- [ ] SmarComm 구독 플랜 시드: wio_subscription_plans에 smarcomm 플랜 추가
+- [ ] `/smarcomm/pricing` → DB 플랜 연동
+
+### 1-C. WIO 테넌트 관리 (업무 자동화 제품)
+- [ ] `/intra/universe/subscriptions` → wio_subscription_plans + wio_subscriptions DB 연결
+- [ ] WIO Demo 모드: `/wio/app?mode=demo` 샘플 데이터로 접근 가능 확인
+- [ ] WIO SaaS 모드: 테넌트 생성 → OrbiConfig 저장 플로우 완성
+
+### 1-D. Agent Hub 활성화 (운영 엔진)
+- [ ] `sql/agent-tables.sql` 실행 후 `/intra/agent` 테스트
+- [ ] 열시일분(compass) 에이전트 프로필 등록 확인
+- [ ] 바당쇠 에이전트: `/api/agent/badaksoe` 엔드포인트 구현
+- [ ] 10:01 프로토콜 기초: AM/PM 에이전트 Vrief 제출 → Intra Dashboard 위젯
 
 ---
 
-## Phase 4: 생태계 완성 (24주~)
+## Phase 2: 구독 인프라 + 수익화 (5월)
 
-- [ ] 모바일 앱 (PWA → 네이티브 검토)
-- [ ] 데이터 기반 AI 추천 (인재/프로젝트/기회)
-- [ ] 오픈 API (외부 시스템 연동)
-- [ ] 솔루션 외부 라이선스 (Vrief/GPR 디지털 툴)
-- [ ] 기존 사이트 완전 통합 (madleague.net, madleap.co.kr 등)
+> **목표: 결제가 실제로 이루어지는 상태 (MRR 시작)**
+
+### 2-A. 구독 테이블 구축
+- [ ] `wio_subscription_plans` 테이블 생성 + 시드 (Mindle·SmarComm·WIO·Badak 플랜)
+- [ ] `wio_subscriptions` 테이블 생성 + RLS
+- [ ] `/intra/universe/subscriptions` 관리 UI → DB 완전 연결
+
+### 2-B. 결제 PG 연동
+- [ ] 토스페이먼츠 또는 포트원 선택·설정
+- [ ] Mindle 구독 결제 흐름 구현 (`/mindle/pricing` → 결제 → wio_subscriptions)
+- [ ] 구독 체크 미들웨어 (`hasAccess()` 함수 → 유료 콘텐츠 보호)
+
+### 2-C. 브랜드 연동
+- [ ] Badak 사이트 실DB 연동 + 프리미엄 멤버십 티어
+- [ ] MADLeague 사이트 실DB 연동
+- [ ] Myverse 웹 → DB 완전 전환
 
 ---
 
-## 성공 지표
+## Phase 3: 에이전트 자동화 가동 (6월)
 
-| Phase | 핵심 지표 | 목표 |
-|-------|---------|------|
-| 0 | UI 완성 / 빌드 에러 | 143페이지 / 0개 |
-| 1 (8주) | 실제 가입 / DB 모듈 | 50명+ / 9개 전환 |
-| 2 (16주) | 크롤링 기회 / 활성 멤버 | 월 50건+ / 100명+ |
-| 3 (24주) | 커머스 매출 / 통합 회원 | 매출 발생 / 5,000명+ |
-| 4 (24주~) | 전체 활성 / 라이선스 | 500명+ / 1건+ |
+> **목표: 에이전트가 Universe를 자동 운영하는 첫 사이클**
+
+### 3-A. Whole See 크롤러 가동
+- [ ] GCP Scheduler → RSS 크롤 → `mindle_sources` 저장
+- [ ] Claude Haiku 노이즈 제거 → Sonnet 트렌드 카드 생성 → `mindle_trends`
+- [ ] 트렌드 카드 100개 축적 목표
+
+### 3-B. 바당쇠 실전 투입
+- [ ] Badak 14개 방 리스닝 모드 (수집만, 응답은 수동)
+- [ ] 시그널 → `mindle_trends` 연결 (바당쇠 → Mindle 데이터 공급)
+
+### 3-C. 10:01 자동 브리핑
+- [ ] AM 10:01: 각 에이전트 Vrief 제출 → 열시일분 취합 → 텐원에게 방향
+- [ ] PM 10:01: GPR Result → 열시일분 취합 → 텐원에게 성과
+- [ ] GCP Scheduler → 자동 실행 → 카카오톡 전송 (Phase 3 완성)
+
+---
+
+## Phase 4: 콘텐츠 확장 + 대중화 (하반기)
+
+### 7월
+- [ ] Mindle 뉴스레터 1호 발송
+- [ ] Planner's 아티클 시작
+- [ ] Badak 사이트 공개
+
+### 8월
+- [ ] MADLeague 사이트 공개
+- [ ] HeRo 사이트 공개 (실 데이터 기반)
+
+### 9월~12월
+- [ ] GPR·Finance 실DB 완성
+- [ ] Rule Engine 구현
+- [ ] MADLeap 5기 WIO 내부 테스트
+- [ ] tenone.biz 포탈 공개
+- [ ] WIO 80%+ 실DB
+- [ ] Myverse Sprint 1~2 (React Native)
+- [ ] 뉴스레터 500명+
+
+---
+
+## Phase 5: 2027 실전
+
+### 1~3월
+- [ ] MADLeague 신기수 WIO 적용 (30~50명)
+- [ ] Badak 500명+ CRM 적용
+- [ ] Vrief 워크숍 1건 (Phase 1 첫 외부 수익)
+
+### 4~6월
+- [ ] 7거점 확대
+- [ ] HeRo 매칭 파일럿
+- [ ] Evolution School 1기
+
+---
+
+## 에이전트 가동 일정
+
+| 에이전트 | 브랜드 | 가동 목표 |
+|---------|--------|----------|
+| 열시일분 | Ten:One | 2026.04 (Agent Hub 활성화) |
+| 바당쇠 | Badak | 2026.06 |
+| Whole See | Mindle | 2026.06 |
+| 매드레드 | MADLeague | 2026.08 |
+| 스마커 | SmarComm | 2027.Q2 |
+| 히어로 | HeRo | 2027.Q2 |
+
+---
+
+## 수익 마일스톤
+
+| 시점 | 목표 | 핵심 조건 |
+|------|------|----------|
+| 2026.05 | Mindle MRR 시작 | 구독 결제 + 뉴스레터 1호 |
+| 2026.06 | 에이전트 ROI 12.5배 실현 | Whole See 가동 + Naming Factory |
+| 2026.07 | SmarComm 대행 1건 | Intra 통제 + Mindle 데이터 |
+| 2027.03 | Vrief 워크숍 수익 | Phase 1 첫 외부 판매 |
+| 2027.Q2 | WIO SaaS 외부 구독 | 도그푸딩 완성 후 |

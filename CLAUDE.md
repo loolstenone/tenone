@@ -5,6 +5,14 @@
 TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스택 웹 애플리케이션이다.
 퍼블릭 포털(브랜드 쇼케이스)과 인트라 오피스(내부 관리 대시보드)로 구성된다.
 
+**4대 제품 — Intra에서 통제·운영·관리:**
+| 제품 | 역할 | Intra 연결점 |
+|------|------|------------|
+| **Mindle** | 데이터·트렌드 연료 공급 | BUMS > 콘텐츠 > 뉴스레터·트렌드 카드 |
+| **SmarComm** | 마케팅 자동화 OS | Marketing 섹션 ↔ SmarComm WS |
+| **WIO** | 업무 자동화 솔루션 | Universe > 구독 + WIO Orbi |
+| **AI Agent** | 6개 에이전트 운영 엔진 | Agent Hub |
+
 ## 기술 스택
 
 - **프레임워크**: Next.js 16 (App Router) + React 19
@@ -230,11 +238,37 @@ Ten:One Universe는 여러 브랜드로 구성:
 
 ---
 
+## 개발 규칙 — 모순 방지 7원칙 (위반 금지)
+
+> 출처: `TenOne_Universe_Architecture_v1.md` Section 11
+
+| # | 규칙 | 위반 시 문제 |
+|---|------|------------|
+| 1 | 구독 테이블은 `wio_subscription_plans` 하나만 쓴다 | 브랜드마다 구독 테이블 → 관리 불가 |
+| 2 | Intra 전용 운영 테이블을 새로 만들지 않는다 (WIO 테이블 사용) | Intra·WIO 기능 이중 구현 |
+| 3 | 브랜드 사이트는 Supabase만 바라본다 (Intra API 직접 호출 금지) | 브랜드 간 의존성 발생 |
+| 4 | SmarComm WS = WIO MKT-* 위의 어플리케이션 (이중 구현 금지) | 마케팅 기능 중복 |
+| 5 | 에이전트는 사람과 같은 API를 쓴다 | 에이전트 전용 API → UI 동기화 깨짐 |
+| 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 | RLS 격리 불가 |
+| 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 | SEO·테마 연동 깨짐 |
+
+## 새 테이블 생성 전 체크리스트
+
+- [ ] WIO 기존 테이블로 해결 안 되는가?
+- [ ] brand_id 또는 tenant_id 컬럼이 있는가?
+- [ ] RLS 정책이 brand_id/tenant_id 기반인가?
+- [ ] 외부 기업이 써도 작동하는가?
+
+---
+
 ## 현재 상태
 
-- MVP 단계: 프론트엔드 중심, Mock 데이터 기반
-- 백엔드 API / 데이터베이스 미연동
-- 인증: Mock 인증 (실제 인증 서비스 미연동)
+- Intra 143p: UI + DB 대부분 완성
+- 4대 제품 통제 레이어: 구축 중 (Phase 1)
+- 구독 인프라: 미구현 (Phase 2)
+- 에이전트: Agent Hub 코드 완성, Prod DB 실행 필요
 - 상세 로드맵: `ROADMAP.md` 참조
 - 작업 현황: `WORK_STATUS.md` 참조
 - 변경 이력: `CHANGELOG.md` 참조
+- 아키텍처: `TenOne_Universe_Architecture_v1.md` (G드라이브)
+- 4대 제품: `TenOne_4Products.md` (G드라이브)

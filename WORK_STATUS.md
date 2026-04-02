@@ -69,32 +69,55 @@
 
 ## 다음 할 일
 
-### 즉시 — A1 마무리: 브랜드 layout.tsx DB 연동
-1. 24개 브랜드 layout.tsx에서 `export const metadata` → `export async function generateMetadata()` 변경
-2. `getSiteConfigServer(siteId)` 호출, DB 값이 있으면 DB 우선, 없으면 기존 static fallback
-3. ISR 10분 캐시 적용 (getSiteConfigServer 내부에 `next: { revalidate: 600 }` 이미 설정됨)
-4. 테스트: 인트라 BUMS > 사이트 관리에서 HeRo 메타 타이틀 변경 → hero.ne.kr 새로고침 → 반영 확인
+> 기준: ROADMAP.md 재수립 (2026-04-02) — 4대 제품 Intra 통제 체계
 
-### 즉시 — 아키텍처 문서 논의
-텐원 정리 `docs/TenOne_Universe_Architecture_v1.md` 분석에서 나온 보완점 5가지 논의:
-1. site_configs 스키마 차이 (문서 vs 실제) — features JSONB는 이미 반영. 나머지 개별 컬럼 vs JSONB 결정
-2. ChangeUp 라우트: `/changeup` (현재) vs `/madleague/changeup` (문서) — 정책 결정
-3. Korea360 vs Seoul360 — DB는 korea360.net으로 반영 완료. 코드 site_id `seoul360` → `korea360` 리네이밍 여부
-4. NatureBox 위치 — Townity 산하인지 독립인지
-5. SmarComm Workspace `/smarcomm/workspace` 라우트 예약 시점
-+ §11 모순 방지 체크리스트 → CLAUDE.md 추가 여부
+### 🚨 즉시 — 리스크 제거 + 기반 완성
 
-### B1: boards 크래시
-- 배포 후 크롬 콘솔 에러 메시지 확인 → 원인 특정
+1. **HeRo Mock 데이터 제거** (법적 리스크)
+   - `/hero` 파트너 섹션: 카카오·네이버·쿠팡·토스 등 실제 파트너 아닌 로고 제거
+   - Mock 수치 (매칭 100+건, 파트너 50+개) 제거 또는 "예시" 명시
 
-### Prod SQL 실행 대기 (이전 세션)
-1. `sql/erp-finance-tables.sql`
-2. `sql/monthly-forecasts-table.sql`
-3. `sql/standard-rates-table.sql`
-4. `sql/agent-tables.sql`
-5. `sql/workflow-tables.sql`
-6. `sql/badaksoe-rooms-table.sql`
-7. `supabase/migrations/007_shop_promotions.sql`
+2. **Prod SQL 실행** (Claude가 scripts/run-sql.js로 직접 실행)
+   - `sql/erp-finance-tables.sql`
+   - `sql/monthly-forecasts-table.sql`
+   - `sql/standard-rates-table.sql`
+   - `sql/agent-tables.sql` ← Universe OS Phase 1
+   - `sql/workflow-tables.sql`
+   - `sql/badaksoe-rooms-table.sql`
+   - `supabase/migrations/007_shop_promotions.sql`
+
+3. **site_configs 완전 연동** (L1 설정 레이어 — 26개 사이트 SEO 통제)
+   - `/intra/bums/sites/[siteId]/settings` handleSave → DB upsert
+   - 24개 브랜드 layout.tsx: `export const metadata` → `generateMetadata()` + `getSiteConfigServer(siteId)`
+   - 테스트: Intra에서 HeRo 타이틀 변경 → 브랜드 사이트 반영 확인
+
+4. **Google Sites 링크 제거**
+   - 네비게이션 /about, /universe, /history → Next.js 내부 페이지 확인
+
+### Phase 1 — 4대 제품 Intra 통제 (4월 이후)
+
+**Mindle (연료 공급)**
+- 홈 뉴스레터 폼 → mindle_subscribers DB 연결 확인
+- `/intra/bums/newsletter` CRUD 완성
+- `mindle_trends` 테이블 생성 + 수동 트렌드 카드 등록 UI
+
+**SmarComm (마케팅 자동화)**
+- Coming Soon 해제 → 로그인 후 접근 가능으로 전환
+- `/intra/marketing` ↔ SmarComm WS 데이터 연결 (WIO MKT-* 공유)
+
+**Agent Hub (운영 엔진)**
+- agent-tables.sql 실행 후 `/intra/agent` 테스트
+- 바당쇠: `/api/agent/badaksoe` 엔드포인트 구현
+
+**아키텍처 결정 사항 (논의 필요)**
+- ChangeUp 라우트: `/changeup` vs `/madleague/changeup`
+- Korea360 vs Seoul360 site_id 통일
+- NatureBox: 독립 vs Townity 산하
+
+### Phase 2 — 구독 인프라 (5월)
+- `wio_subscription_plans` + `wio_subscriptions` 테이블 생성
+- 결제 PG 연동 (토스페이먼츠 or 포트원)
+- Mindle 구독 결제 흐름 구현
 
 ---
 
