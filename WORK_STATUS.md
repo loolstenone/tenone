@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 10 — 작업 중)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 10 — 완료)
 
 ## 오늘 한 작업 (4/3 사무실 세션 10)
 
@@ -158,17 +158,46 @@
 
 ## 다음 할 일
 
-### 우선순위 높음 (바로 착수 가능)
+### 세션 10 추가 완료 ✅
 
-0. **UMS DB → Intra UI 연결** — UMS 대시보드(`app/intra/ums/page.tsx`) ums_sites 기반 브랜드 집계 전환. 현재 members.affiliations TEXT[]로 브랜드 집계 중 → member_brand_joins 기반으로 변경. `app/intra/ums/page.tsx` 195번째 줄 `membersAll.affiliations` 블록 교체.
+- **UMS 브랜드 집계** — `members.affiliations` → `member_brand_joins` 기반으로 전환 (`ac5a76b`)
+- **구 메뉴 정리** — 사이드바에 universe/bums/agent 없음 확인 (이미 완료)
+- **RLS 민감 테이블 9개** — Always True → 인증/role 기반 교체 (`a3ddcb6`)
+  - `is_tenone_staff()` SECURITY DEFINER 헬퍼 함수 생성
+  - members/guests/revenue/subscriptions/agent_*/chat_*/member_brand_joins
 
-0-1. **구 메뉴 정리** — 기존 `/intra/universe/*`, `/intra/bums/*`, `/intra/agent` 라우트 유지 필요 여부 검토. UMS로 통합됐으므로 사이드바에서 old 모듈이 보이지 않는지 확인.
+---
 
-1. **Vercel 배포 후 Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 5개 스케줄 활성화 확인. `CRON_SECRET` 자동 생성 여부 확인.
+## 다음 할 일
 
-2. **크롤 → 프로세스 파이프라인 첫 실행 검증** — `/intra/ums/agent/comm` 페이지에서 "RSS 크롤 실행" → "트렌드 카드 생성" 순서로 수동 실행. Mindle Trends 페이지에서 새 카드 확인.
+### 우선순위 높음
 
-3. **RLS "Always True" 정책 정비** — 실DB 전환 대상(CRM, HR, Finance)부터 tenant_id 기반 정책으로 교체. `sql/db-review-fixes.sql` 참조. 약 150개 테이블 대상이지만 민감 테이블 우선.
+1. **Vercel 배포 후 Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 5개 스케줄 확인. 첫 실행 로그 확인.
+
+2. **크롤 → 트렌드 파이프라인 첫 실행** — `/intra/ums/agent/comm`에서 "RSS 크롤 실행" → "트렌드 카드 생성" 수동 실행 후 Mindle Trends 페이지 확인.
+
+3. **RLS 나머지 테이블 정비** — CRM/HR/Finance 테이블 (~141개 잔여). 우선순위: `crm_contacts`, `hr_staff`, `finance_*`, `wio_subscription_plans`. `sql/rls-sensitive-tables-2026-04-03.sql` 패턴 그대로 적용.
+
+4. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인. `ums_sites` 기반으로 사이트 목록도 연결.
+
+5. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
+
+### 사용자 결정 후 진행
+
+6. **PG 연동 + 결제 플로우** — 토스페이먼츠/포트원 선택 후 SDK → Mindle 구독 결제. `hasAccess()` 미들웨어 이미 구현.
+7. **SmarComm/WIO 가격 체계 확정** — 확정 후 pricing 페이지 DB 연결.
+8. **뉴스레터 발송 시스템** — Resend/SendGrid 연동 → newsletter_issues 실제 발송.
+
+### 중기
+
+9. **바당쇠 Playwright 세션** — 카카오 오픈채팅 리스닝 모드. `/api/agent/badaksoe` 구현됨.
+10. **Mindle 뉴스레터 1호** — 트렌드 카드 100개 축적 후.
+
+### 도메인
+
+11. **hero.ne.kr** — 기관 이전 완료 후 Vercel 연결
+12. **www.smarcomm.biz** — Vercel 대시보드 설정
+13. **fwn.co.kr DNS** — Vercel Domains에서 Refresh 확인
 
 ### 사용자 결정 후 진행
 
