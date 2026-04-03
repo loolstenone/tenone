@@ -18,7 +18,7 @@ import {
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
     ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
-    Bot, Users, Home, Menu, X,
+    Bot, Users, Home, Menu, X, Radio,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -359,61 +359,52 @@ export const modules: NavModule[] = [
         ],
     },
     {
-        name: "Universe", href: "/intra/universe", icon: Globe, intraModule: "universe" as IntraModule,
+        name: "UMS", href: "/intra/ums", icon: Globe, intraModule: "universe" as IntraModule,
         sections: [
             {
                 items: [
-                    { name: "대시보드", href: "/intra/universe", icon: LayoutDashboard },
-                ],
-            },
-            {
-                label: "MEMBERS",
-                items: [
-                    { name: "통합 회원", href: "/intra/universe/members", icon: Users },
-                    { name: "게스트 관리", href: "/intra/universe/guests", icon: UserPlus },
-                    { name: "개인정보", href: "/intra/universe/privacy", icon: Shield },
-                ],
-            },
-            {
-                label: "SITES",
-                items: [
-                    { name: "사이트 관리", href: "/intra/bums/sites", icon: Globe },
-                    { name: "게시판 관리", href: "/intra/bums/boards", icon: LayoutGrid },
-                    { name: "콘텐츠 관리", href: "/intra/bums/content", icon: PenSquare },
-                    { name: "뉴스레터", href: "/intra/bums/newsletter", icon: MessageSquareText },
-                    { name: "트렌드 관리", href: "/intra/mindle", icon: Flame },
-                ],
-            },
-            {
-                label: "COMMERCE",
-                items: [
-                    { name: "구독 관리", href: "/intra/universe/subscriptions", icon: CreditCard },
-                    { name: "쇼핑 관리", href: "/intra/bums/shop", icon: ShoppingCart },
-                    { name: "예약/이벤트", href: "/intra/universe/bookings", icon: Calendar },
-                    { name: "프로모션", href: "/intra/bums/promotion", icon: Gift },
-                ],
-            },
-            {
-                label: "OPERATIONS",
-                items: [
-                    { name: "손익 관리", href: "/intra/universe/revenue", icon: TrendingUp },
-                    { name: "통계", href: "/intra/bums/stats", icon: BarChart3 },
-                    { name: "고객문의", href: "/intra/bums/inquiry", icon: MessageCircle },
-                    { name: "라이브러리", href: "/intra/bums/library", icon: FolderOpen },
-                ],
-            },
-            {
-                label: "EDUCATION",
-                items: [
-                    { name: "교육 관리", href: "/intra/universe/education", icon: GraduationCap },
+                    { name: "UMS 대시보드", href: "/intra/ums", icon: LayoutDashboard },
+                    {
+                        name: "회원", href: "/intra/ums/members", icon: Users,
+                        children: [
+                            { name: "통합회원", href: "/intra/ums/members/list" },
+                            { name: "게스트", href: "/intra/ums/members/guests" },
+                            { name: "개인정보", href: "/intra/ums/members/privacy" },
+                        ],
+                    },
+                    {
+                        name: "사이트", href: "/intra/ums/sites", icon: Globe,
+                        children: [
+                            { name: "사이트", href: "/intra/ums/sites/list" },
+                            { name: "게시판", href: "/intra/ums/sites/boards" },
+                            { name: "콘텐츠", href: "/intra/ums/sites/content" },
+                            { name: "뉴스레터", href: "/intra/ums/sites/newsletter" },
+                            { name: "라이브러리", href: "/intra/ums/sites/library" },
+                        ],
+                    },
+                    {
+                        name: "커머스", href: "/intra/ums/commerce", icon: ShoppingCart,
+                        children: [
+                            { name: "구독", href: "/intra/ums/commerce/subscriptions" },
+                            { name: "쇼핑", href: "/intra/ums/commerce/shop" },
+                            { name: "예약/이벤트", href: "/intra/ums/commerce/bookings" },
+                            { name: "프로모션", href: "/intra/ums/commerce/promotions" },
+                            { name: "손익", href: "/intra/ums/commerce/revenue" },
+                            { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
+                        ],
+                    },
+                    {
+                        name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
+                        children: [
+                            { name: "Agent Hub", href: "/intra/ums/agent" },
+                            { name: "에이전트 소통", href: "/intra/ums/agent/comm" },
+                            { name: "트렌드", href: "/intra/ums/agent/trends" },
+                        ],
+                    },
                 ],
             },
         ],
         dynamic: true,
-    },
-    {
-        name: "Agent", href: "/intra/agent", icon: Bot, intraModule: "agent" as IntraModule,
-        sections: [],
     },
 ];
 
