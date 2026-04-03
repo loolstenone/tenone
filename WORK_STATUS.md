@@ -2,6 +2,27 @@
 
 > 마지막 업데이트: 2026-04-03 (사무실, 세션 11 — 완료)
 
+## 오늘 한 작업 (4/3 사무실 세션 13)
+
+### Vercel 배포 + Cron 정상화 ✅
+- Hobby 플랜 제약 발견: 크론 최대 2개, 하루 1회 한도
+- 기존 7개 크론 → 2개 통합 크론으로 재설계
+  - `/api/cron/all-crawl` (0:00 UTC = 9:00 KST): Whole See + 기회 RSS 수집
+  - `/api/cron/all-process` (0:30 UTC = 9:30 KST): 처리 + AM 브리핑
+- Vercel 배포 완료: `tenone-7oq5osew7-lools-8381s-projects.vercel.app`
+- 커밋: `d182661`
+
+### RLS 잔여 테이블 정리 ✅
+- bookings/certificates/partners → auth 기반
+- comm_* 4개 → authenticated only
+- competitions/networking/surveys/votes → 적절한 권한 분리
+- newsletter_issues write → staff only
+- bums_* 3개 → auth 기반 재정립
+- wio_bd_projects/sales_pipeline/strategies/quotes → staff write
+- 마이그레이션: `rls_remaining_tables_20260403`
+
+---
+
 ## 오늘 한 작업 (4/3 사무실 세션 12)
 
 ### RLS 대규모 정리 ✅
@@ -205,13 +226,9 @@
 
 ### 우선순위 높음
 
-1. **Vercel Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 7개 스케줄 확인 (opportunity-crawl/process 포함). 첫 실행 로그 확인.
+1. **파이프라인 첫 실행 검증** — `/intra/ums/agent/comm`에서 "공모전/지원사업 수집" + "AI 관련성 분석" 수동 실행 후 `/intra/opportunity` 확인. "RSS 크롤" + "트렌드 카드 생성"도 실행 후 Mindle Trends 확인.
 
-2. **비즈니스 기회 수동 첫 실행** — `/intra/ums/agent/comm`에 opportunity 수동 실행 버튼 추가 필요. 또는 직접 POST /api/opportunity/crawl 호출.
-
-3. **크롤 → 트렌드 파이프라인 첫 실행** — `/intra/ums/agent/comm`에서 "RSS 크롤 실행" → "트렌드 카드 생성" 수동 실행 후 Mindle Trends 페이지 확인.
-
-4. **RLS 잔여 정리** — `qual: true` 중 낮은 우선순위 (공개 콘텐츠 read 정책들은 OK, 나머지 ALL true write 정책 정비). `bookings`, `certificates`, `bums_*`, `networking_*` 등.
+2. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드 확인.
 
 5. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인.
 
