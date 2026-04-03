@@ -1,0 +1,289 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Clock } from 'lucide-react';
+import HitProgressBar from './HitProgressBar';
+import HitQuestionCard from './HitQuestionCard';
+import { baseQuestions } from '@/lib/hit/data/base-questions';
+import { mbtiQuestions } from '@/lib/hit/data/mbti-questions';
+import { discQuestions } from '@/lib/hit/data/disc-questions';
+
+type ModuleType = 'base' | 'mbti' | 'disc';
+
+interface QuestionItem {
+  module: ModuleType;
+  id: string;
+  text: string;
+  options: { label: string; value: string }[];
+}
+
+interface Response {
+  selectedOption: number;
+  optionValue: string;
+}
+
+interface HitTestUIProps {
+  sessionToken: string;
+}
+
+const MODULE_NAMES: Record<ModuleType, string> = {
+  base: '기본 성향 검사',
+  mbti: '성격 유형(MBTI) 검사',
+  disc: '행동 유형(DISC) 검사',
+};
+
+const TRANSITION_MESSAGES: Record<string, string> = {
+  'base→mbti': '다음은 성격 유형(MBTI) 검사입니다',
+  'mbti→disc': '마지막으로 행동 유형(DISC) 검사입니다',
+};
+
+const AVG_SECONDS_PER_QUESTION = 8;
+
+export default function HitTestUI({ sessionToken }: HitTestUIProps) {
+  const router = useRouter();
+  const [sessionId, setSessionId] = useState<string>('');
+
+  const allQuestions = useMemo<QuestionItem[]>(() => {
+    const tagged = (qs: typeof baseQuestions, mod: ModuleType) =>
+      qs.map((q) => ({ module: mod, id: q.id, text: q.text, options: q.options }));
+    return [
+      ...tagged(baseQuestions, 'base'),
+      ...tagged(mbtiQuestions, 'mbti'),
+      ...tagged(discQuestions, 'disc'),
+    ];
+  }, []);
+
+  const [responses, setResponses] = useState<Map<string, Response>>(new Map());
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
+  const [isRestored, setIsRestored] = useState(false);
+
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const total = allQuestions.length;
+  const currentQuestion = allQuestions[currentIndex];
+  const currentModule = currentQuestion?.module ?? 'base';
+  const answeredCount = responses.size;
+
+  // Restore session on mount
+  useEffect(() => {
+    async function restoreSession() {
+      try {
+        const res = await fetch(`/api/hit/a/session/${sessionToken}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.session?.id) setSessionId(data.session.id);
+          if (data.responses && Array.isArray(data.responses)) {
+            const restored = new Map<string, Response>();
+            for (const r of data.responses) {
+              restored.set(r.question_id, { selectedOption: r.selected_option, optionValue: r.option_value });
+            }
+            setResponses(restored);
+            // Resume from first unanswered
+            const firstUnanswered = allQuestions.findIndex((q) => !restored.has(q.id));
+            if (firstUnanswered >= 0) {
+              setCurrentIndex(firstUnanswered);
+            }
+          }
+        }
+      } catch {
+        // Continue fresh
+      } finally {
+        setIsRestored(true);
+      }
+    }
+    restoreSession();
+  }, [sessionToken, allQuestions]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (transitionMessage || isSubmitting || isComplete) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowLeft') {
+        goBack();
+        return;
+      }
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= (currentQuestion?.options.length ?? 0)) {
+        handleSelect(num - 1);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, transitionMessage, isSubmitting, isComplete, currentQuestion]);
+
+  const goBack = useCallback(() => {
+    if (currentIndex > 0) {
+      if (autoAdvanceTimer.current) {
+        clearTimeout(autoAdvanceTimer.current);
+        autoAdvanceTimer.current = null;
+      }
+      setCurrentIndex((prev) => prev - 1);
+    }
+  }, [currentIndex]);
+
+  const fireAndForgetSave = useCallback(
+    (questionId: string, module: string, questionIndex: number, selectedOption: number, optionValue: string) => {
+      fetch('/api/hit/a/response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionToken,
+          questionId,
+          module,
+          questionIndex,
+          selectedOption,
+          optionValue,
+        }),
+      }).catch(() => {});
+    },
+    [sessionToken],
+  );
+
+  const submitResults = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/hit/a/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionToken }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsComplete(true);
+        router.push(`/hero/hit/a/result/${data.resultId}`);
+      }
+    } catch {
+      setIsSubmitting(false);
+    }
+  }, [sessionToken, router]);
+
+  const handleSelect = useCallback(
+    (optionIndex: number) => {
+      if (!currentQuestion || transitionMessage || isSubmitting) return;
+
+      const q = currentQuestion;
+      const optionValue = q.options[optionIndex].value;
+
+      setResponses((prev) => {
+        const next = new Map(prev);
+        next.set(q.id, { selectedOption: optionIndex, optionValue });
+        return next;
+      });
+
+      fireAndForgetSave(q.id, q.module, currentIndex, optionIndex, optionValue);
+
+      // Auto-advance after 400ms
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+
+      autoAdvanceTimer.current = setTimeout(() => {
+        const nextIndex = currentIndex + 1;
+
+        if (nextIndex >= total) {
+          submitResults();
+          return;
+        }
+
+        const nextModule = allQuestions[nextIndex].module;
+        const transKey = `${q.module}→${nextModule}`;
+
+        if (q.module !== nextModule && TRANSITION_MESSAGES[transKey]) {
+          setTransitionMessage(TRANSITION_MESSAGES[transKey]);
+          setTimeout(() => {
+            setTransitionMessage(null);
+            setCurrentIndex(nextIndex);
+          }, 2000);
+        } else {
+          setCurrentIndex(nextIndex);
+        }
+      }, 400);
+    },
+    [currentIndex, currentQuestion, transitionMessage, isSubmitting, allQuestions, total, fireAndForgetSave, submitResults],
+  );
+
+  const remainingQuestions = total - answeredCount;
+  const estimatedMinutes = Math.max(1, Math.ceil((remainingQuestions * AVG_SECONDS_PER_QUESTION) / 60));
+
+  if (!isRestored) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isSubmitting || isComplete) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
+        <p className="text-neutral-500 text-sm">결과를 분석하고 있습니다...</p>
+      </div>
+    );
+  }
+
+  if (transitionMessage) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-xl md:text-2xl font-medium text-neutral-900 animate-pulse">
+            {transitionMessage}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedResponse = currentQuestion ? responses.get(currentQuestion.id) : undefined;
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Progress */}
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm px-4 pt-4 pb-2">
+        <HitProgressBar
+          current={answeredCount}
+          total={total}
+          moduleName={MODULE_NAMES[currentModule]}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-2xl">
+          {/* Back button */}
+          {currentIndex > 0 && (
+            <button
+              type="button"
+              onClick={goBack}
+              className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors mb-6"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              이전 질문
+            </button>
+          )}
+
+          {currentQuestion && (
+            <HitQuestionCard
+              questionText={currentQuestion.text}
+              options={currentQuestion.options}
+              selectedIndex={selectedResponse?.selectedOption ?? null}
+              onSelect={handleSelect}
+              questionNumber={currentIndex + 1}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Time estimate */}
+      <div className="pb-6 text-center">
+        <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
+          <Clock className="w-3.5 h-3.5" />
+          약 {estimatedMinutes}분 남음
+        </span>
+      </div>
+    </div>
+  );
+}

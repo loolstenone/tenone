@@ -1,162 +1,140 @@
 "use client";
 
 import Link from "next/link";
-import {
-    Search,
-    Target,
-    Brain,
-    Zap,
-    Users,
-    ArrowRight,
-    CheckCircle,
-    ClipboardCheck,
-    ChevronRight,
-} from "lucide-react";
+import { Brain, Target, Clock, ArrowRight, Lock } from "lucide-react";
 
-const steps = [
-    {
-        step: 1,
-        title: "기질/태도 검사",
-        desc: "행동유형(DISC 기반), 일상태도(MBTI 기반), 자존감/자존심을 측정합니다.",
-        icon: Brain,
-        items: ["주도형(D)", "사교형(I)", "안정형(S)", "신중형(C)"],
-    },
-    {
-        step: 2,
-        title: "역량/적성 검사",
-        desc: "강점유형(S-Power), 직무적성, 취업준비도를 측정합니다.",
-        icon: Target,
-        items: ["전략적 사고", "실행력", "창의성", "대인관계", "분석력"],
-    },
-    {
-        step: 3,
-        title: "HeRo 캐릭터 생성",
-        desc: "진단 결과를 기반으로 나만의 HeRo 캐릭터와 역량 프로필이 생성됩니다.",
-        icon: Zap,
-        items: ["역량 레이더", "강점 TOP 3", "개발 영역", "성장 로드맵"],
-    },
-];
-
-const benefits = [
-    { title: "과학적 진단", desc: "DISC, MBTI 기반의 검증된 진단 도구로 객관적 분석" },
-    { title: "맞춤 커리어 설계", desc: "진단 결과에 따른 개인화된 성장 경로 제안" },
-    { title: "멘토 매칭", desc: "강점/약점 분석을 통한 최적의 멘토 연결" },
-    { title: "HeRo 캐릭터", desc: "나만의 브랜드 캐릭터 생성 및 포트폴리오 활용" },
-    { title: "지속적 성장 트래킹", desc: "주기적 재진단을 통한 성장 추이 분석" },
-    { title: "커뮤니티 연결", desc: "비슷한 유형의 인재들과 네트워킹 기회" },
-];
-
-export default function HitProgramPage() {
-    return (
-        <div>
-            {/* Hero */}
-            <section className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 lg:py-28">
-                    <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Search className="h-5 w-5 text-amber-500" />
-                            <span className="text-sm font-bold text-amber-600 uppercase tracking-wider">
-                                HIT Program
-                            </span>
-                        </div>
-                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
-                            Hidden Intelligence<br />
-                            <span className="text-amber-500">Talent</span>
-                        </h1>
-                        <p className="text-lg text-neutral-600 mb-8 max-w-2xl">
-                            HeRo Integrated Test. 인성, 적성, 역량, 준비도를 통합 진단하여
-                            숨겨진 인재를 발굴하는 프로그램입니다.
-                        </p>
-                        <Link
-                            href="/signup"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"
-                        >
-                            지원하기 <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* Process */}
-            <section className="bg-white">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-14">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">선발 과정</h2>
-                        <p className="text-neutral-500">3단계 통합 진단으로 숨겨진 인재를 발굴합니다</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {steps.map((s, i) => (
-                            <div key={s.step} className="relative">
-                                {i < 2 && (
-                                    <div className="hidden md:block absolute top-12 -right-4 z-10">
-                                        <ChevronRight className="h-6 w-6 text-amber-300" />
-                                    </div>
-                                )}
-                                <div className="border border-neutral-200 rounded-xl p-6 h-full hover:border-amber-300 transition-colors">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                                            {s.step}
-                                        </div>
-                                        <s.icon className="h-5 w-5 text-amber-500" />
-                                    </div>
-                                    <h3 className="text-lg font-bold mb-2">{s.title}</h3>
-                                    <p className="text-sm text-neutral-500 mb-4">{s.desc}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {s.items.map((item) => (
-                                            <span
-                                                key={item}
-                                                className="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full"
-                                            >
-                                                {item}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Benefits */}
-            <section className="bg-neutral-50">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
-                    <div className="text-center mb-14">
-                        <h2 className="text-xl md:text-3xl font-bold mb-3">HIT 프로그램 혜택</h2>
-                        <p className="text-neutral-500">진단 완료 후 받을 수 있는 혜택</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {benefits.map((b) => (
-                            <div key={b.title} className="bg-white border border-neutral-200 rounded-xl p-6">
-                                <div className="flex items-start gap-3">
-                                    <CheckCircle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-                                    <div>
-                                        <h3 className="text-sm font-bold mb-1">{b.title}</h3>
-                                        <p className="text-xs text-neutral-500">{b.desc}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA */}
-            <section className="bg-amber-500">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16 text-center">
-                    <ClipboardCheck className="h-12 w-12 text-white mx-auto mb-4" />
-                    <h2 className="text-xl md:text-3xl font-bold text-white mb-3">HIT 진단 시작하기</h2>
-                    <p className="text-amber-100 mb-8 max-w-lg mx-auto">
-                        20문항 통합 진단으로 나의 숨겨진 잠재력을 발견하세요. 소요 시간 약 10분.
-                    </p>
-                    <Link
-                        href="/signup"
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-white text-amber-600 font-bold hover:bg-amber-50 transition-colors rounded-lg"
-                    >
-                        지원하기 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
-            </section>
+export default function HitOverviewPage() {
+  return (
+    <div>
+      {/* Hero */}
+      <section className="bg-gradient-to-br from-red-50 via-white to-neutral-50">
+        <div className="mx-auto max-w-5xl px-6 py-20 lg:py-28 text-center">
+          <p className="text-sm font-bold text-[#E53935] uppercase tracking-widest mb-4">
+            HeRo Integrated Test
+          </p>
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+            나를 알아가는 여정
+          </h1>
+          <p className="text-lg text-neutral-500 max-w-2xl mx-auto">
+            HIT는 성격, 역량, 적성을 통합 진단하여 64가지 영웅 유형 중<br className="hidden sm:block" />
+            나만의 프로필을 찾아줍니다.
+          </p>
         </div>
-    );
+      </section>
+
+      {/* A vs B */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* HIT A */}
+            <div className="border-2 border-[#E53935] rounded-2xl p-8 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-[#E53935] text-white rounded-xl flex items-center justify-center font-bold text-lg">
+                  A
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">HIT - A</h2>
+                  <p className="text-sm text-neutral-500">이 사람이 누구인가?</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <Brain className="h-4 w-4 text-[#E53935]" />
+                  <span>기저요인 → DISC 성격 → MBTI 성향 → S-Power 강점</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <Target className="h-4 w-4 text-[#E53935]" />
+                  <span>결과: 64유형 통합 프로필</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <Clock className="h-4 w-4 text-[#E53935]" />
+                  <span>127문항 · 약 20분</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-8">
+                {["기저요인", "MBTI", "DISC", "S-Power", "64유형"].map(tag => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-red-50 text-[#E53935] rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <Link
+                href="/hero/hit/a"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#E53935] text-white font-medium hover:bg-red-700 transition-colors rounded-xl"
+              >
+                HIT - A 시작하기 <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* HIT B */}
+            <div className="border border-neutral-200 rounded-2xl p-8 opacity-60">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-neutral-200 text-neutral-500 rounded-xl flex items-center justify-center font-bold text-lg">
+                  B
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-neutral-400">HIT - B</h2>
+                  <p className="text-sm text-neutral-400">무엇을 할 수 있는가?</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2 text-sm text-neutral-400">
+                  <Brain className="h-4 w-4" />
+                  <span>인성 → 적성(RIASEC) → 역량 → 취업준비도</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-neutral-400">
+                  <Target className="h-4 w-4" />
+                  <span>결과: 역량 레이더 + 준비도 등급</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-neutral-400">
+                  <Clock className="h-4 w-4" />
+                  <span>220문항 · 약 30분</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-8">
+                {["인성", "RIASEC", "역량", "준비도"].map(tag => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-400 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-center gap-2 w-full py-3.5 bg-neutral-100 text-neutral-400 font-medium rounded-xl">
+                <Lock className="h-4 w-4" /> HIT - A 완료 후 이용 가능
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Info */}
+      <section className="bg-neutral-50">
+        <div className="mx-auto max-w-5xl px-6 py-16 text-center">
+          <h3 className="text-lg font-bold mb-2">HIT는 어떻게 작동하나요?</h3>
+          <p className="text-sm text-neutral-500 max-w-xl mx-auto mb-8">
+            HIT - A에서 나의 성격과 행동 유형을 파악하고, HIT - B에서 역량과 준비도를 진단합니다.
+            두 검사를 모두 완료하면 HeRo 오디션 지원이 가능합니다.
+          </p>
+          <div className="flex items-center justify-center gap-4 text-sm text-neutral-400">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-[#E53935]" /> HIT - A: 누구인가
+            </span>
+            <span>→</span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-neutral-300" /> HIT - B: 무엇을 할 수 있는가
+            </span>
+            <span>→</span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-neutral-300" /> 통합 프로필
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

@@ -9,11 +9,11 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "HIT 프로그램", href: "/hit" },
-    { name: "커리어", href: "/career" },
-    { name: "멘토링", href: "/mentor" },
-    { name: "브랜딩", href: "/branding" },
-    { name: "이력서", href: "/resume" },
+    { name: "HIT 검사", href: "/hero/hit" },
+    { name: "커리어", href: "/hero/career" },
+    { name: "멘토링", href: "/hero/mentor" },
+    { name: "브랜딩", href: "/hero/branding" },
+    { name: "이력서", href: "/hero/resume" },
 ];
 
 export function HeRoHeader() {
