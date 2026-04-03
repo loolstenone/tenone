@@ -1,6 +1,37 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 17 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 18 — 진행중)
+
+## 현재 작업 (4/3 사무실 세션 18)
+
+### WholeSee 크롤러 RLS & 스키마 캐시 이슈 해결 🔧
+
+**문제 발견:**
+1. **mindle_trends RLS 정책 불일치** → anon 사용자 INSERT 블로킹
+   - 원인: 여러 RLS 정책이 겹쳐서 조건 충돌
+   - 해결: `mindle_trends_anon_insert` (INSERT) + `mindle_trends_anon_select` (SELECT) 명시적 분리
+
+2. **Supabase 스키마 캐시 만료** → "Could not find the table in schema cache"
+   - 원인: RLS 정책 수정 후 클라이언트 스키마 캐시가 stale 상태
+   - 해결: RPC 함수로 우회 (`get_active_sources`, `get_raw_collected_data`)
+
+**수정 사항:**
+- `lib/supabase/server.ts`: mindle_sources/mindle_trends RLS 정책 재설계
+- `app/api/crawler/route.ts`:
+  - Direct SELECT 대신 RPC 함수 호출로 변경
+  - 에러 로깅 추가 (디버깅 개선)
+- DB: 스키마 캐시 우회용 RPC 함수 2개 생성
+  - `get_active_sources()` - mindle_sources 조회
+  - `get_raw_collected_data()` - collected_data 조회
+
+**커밋:** `64eb54e`
+
+**남은 작업:**
+- [ ] 개발 서버 재시작 후 크롤러 전체 E2E 테스트
+- [ ] 트렌드 카드 생성 파이프라인 동작 확인
+- [ ] #트렌드 채널에 에이전트 메시지 발행 확인
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 17)
 
