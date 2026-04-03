@@ -2,6 +2,25 @@
 
 > 마지막 업데이트: 2026-04-03 (사무실, 세션 11 — 완료)
 
+## 오늘 한 작업 (4/3 사무실 세션 12)
+
+### RLS 대규모 정리 ✅
+- HR (hr_payroll/attendance/evaluations/feedback) → is_tenone_staff()
+- Finance (fin_assets/budgets/contracts/invoices/journals) → is_tenone_staff()
+- wio_members: open read/update → tenant_id 격리 + auth.uid 기반
+- sso_tokens: 0 policies → staff only
+- payroll/approvals/expenses: ALL true override 정책 제거
+- approval_requests/hr_job_postings/hr_org_units/staff_education → auth 기반
+- **CRM 5개 테이블 anon_read/anon_write 제거** (익명 사용자 접근 취약점)
+- **mkt_* 14개 테이블 anon 정책 제거**
+- sys_audit_logs/sys_workflows → staff only
+- smarcomm_billing_history → staff only
+- wio HR/조직 5개 + wio 시스템 4개 → staff only
+- wio_culture_*/departments/positions/role_permissions 등: auth 기반 재정립
+- 커밋: `981dd72`, `0d20c5d`
+
+---
+
 ## 오늘 한 작업 (4/3 사무실 세션 11)
 
 ### 비즈니스 기회 자동 크롤링 파이프라인 ✅
@@ -192,7 +211,7 @@
 
 3. **크롤 → 트렌드 파이프라인 첫 실행** — `/intra/ums/agent/comm`에서 "RSS 크롤 실행" → "트렌드 카드 생성" 수동 실행 후 Mindle Trends 페이지 확인.
 
-4. **RLS 나머지 테이블 정비** — CRM/HR/Finance 테이블 (~141개 잔여). 우선순위: `crm_contacts`, `hr_staff`, `finance_*`, `wio_subscription_plans`. `sql/rls-sensitive-tables-2026-04-03.sql` 패턴 그대로 적용.
+4. **RLS 잔여 정리** — `qual: true` 중 낮은 우선순위 (공개 콘텐츠 read 정책들은 OK, 나머지 ALL true write 정책 정비). `bookings`, `certificates`, `bums_*`, `networking_*` 등.
 
 5. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인.
 
