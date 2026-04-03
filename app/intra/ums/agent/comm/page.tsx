@@ -43,11 +43,12 @@ export default function AgentCommPage() {
 
     useEffect(() => { loadChannels(); }, []);
 
-    const triggerAction = async (action: string, label: string) => {
-        setTriggering(action);
+    const triggerAction = async (endpoint: string, action: string, label: string) => {
+        const key = `${endpoint}:${action}`;
+        setTriggering(key);
         setTriggerResult(null);
         try {
-            const res = await fetch('/api/crawler', {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ADMIN_KEY || ''}` },
                 body: JSON.stringify({ action }),
@@ -56,9 +57,16 @@ export default function AgentCommPage() {
                 setTriggerResult({ action: label, message: '인증 필요 — 서버에서 실행하세요', ok: false });
             } else {
                 const data = await res.json();
-                const msg = action === 'crawl'
-                    ? `${data.sources || 0}개 소스에서 ${data.collected || 0}건 수집`
-                    : `${data.processed || 0}건 발행 (${data.skipped || 0}건 제외)`;
+                let msg = '';
+                if (action === 'crawl' && endpoint.includes('opportunity')) {
+                    msg = `${data.sources || 0}개 소스에서 ${data.collected || 0}건 수집`;
+                } else if (action === 'process' && endpoint.includes('opportunity')) {
+                    msg = `${data.processed || 0}건 발굴 (${data.skipped || 0}건 제외)`;
+                } else if (action === 'crawl') {
+                    msg = `${data.sources || 0}개 소스에서 ${data.collected || 0}건 수집`;
+                } else {
+                    msg = `${data.processed || 0}건 발행 (${data.skipped || 0}건 제외)`;
+                }
                 setTriggerResult({ action: label, message: msg, ok: res.ok });
             }
         } catch {
@@ -82,37 +90,61 @@ export default function AgentCommPage() {
             />
 
             {/* 액션 버튼 */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <button
-                    onClick={() => triggerAction('crawl', 'RSS 크롤')}
-                    disabled={!!triggering}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-50 transition-colors"
-                >
-                    {triggering === 'crawl' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                    RSS 크롤 실행
-                </button>
-                <button
-                    onClick={() => triggerAction('process', '트렌드 생성')}
-                    disabled={!!triggering}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-300 hover:bg-neutral-50 disabled:opacity-50 transition-colors"
-                >
-                    {triggering === 'process' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                    트렌드 카드 생성
-                </button>
-                <button
-                    onClick={loadChannels}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-200 hover:bg-neutral-50 transition-colors"
-                >
-                    <RefreshCw className="h-3.5 w-3.5 text-neutral-400" />
-                    새로고침
-                </button>
-                <Link
-                    href="/intra/myverse/messenger"
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-200 hover:bg-neutral-50 transition-colors ml-auto"
-                >
-                    <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
-                    메신저 전체 보기
-                </Link>
+            <div className="space-y-2">
+                <p className="text-[11px] text-neutral-400 font-medium uppercase tracking-wide">Mindle 트렌드</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => triggerAction('/api/crawler', 'crawl', 'RSS 크롤')}
+                        disabled={!!triggering}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-50 transition-colors"
+                    >
+                        {triggering === '/api/crawler:crawl' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                        RSS 크롤
+                    </button>
+                    <button
+                        onClick={() => triggerAction('/api/crawler', 'process', '트렌드 생성')}
+                        disabled={!!triggering}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-300 hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+                    >
+                        {triggering === '/api/crawler:process' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                        트렌드 카드 생성
+                    </button>
+                </div>
+                <p className="text-[11px] text-neutral-400 font-medium uppercase tracking-wide pt-1">비즈니스 기회</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => triggerAction('/api/opportunity/crawl', 'crawl', '기회 크롤')}
+                        disabled={!!triggering}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    >
+                        {triggering === '/api/opportunity/crawl:crawl' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                        공모전/지원사업 수집
+                    </button>
+                    <button
+                        onClick={() => triggerAction('/api/opportunity/crawl', 'process', '기회 AI 분석')}
+                        disabled={!!triggering}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-blue-300 text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition-colors"
+                    >
+                        {triggering === '/api/opportunity/crawl:process' ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                        AI 관련성 분석
+                    </button>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                    <button
+                        onClick={loadChannels}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-200 hover:bg-neutral-50 transition-colors"
+                    >
+                        <RefreshCw className="h-3.5 w-3.5 text-neutral-400" />
+                        새로고침
+                    </button>
+                    <Link
+                        href="/intra/myverse/messenger"
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium border border-neutral-200 hover:bg-neutral-50 transition-colors"
+                    >
+                        <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
+                        메신저 전체 보기
+                    </Link>
+                </div>
             </div>
 
             {/* 액션 결과 */}
@@ -221,6 +253,8 @@ export default function AgentCommPage() {
                         { label: '트렌드 처리', schedule: '크롤 후 30분', path: '/api/cron/process' },
                         { label: 'AM 브리핑', schedule: '10:01 KST', path: '/api/cron/vrief-am' },
                         { label: 'PM 보고', schedule: '22:01 KST', path: '/api/cron/vrief-pm' },
+                        { label: '기회 수집', schedule: 'AM 8:00 KST', path: '/api/cron/opportunity-crawl' },
+                        { label: '기회 AI 분석', schedule: 'AM 8:30 KST', path: '/api/cron/opportunity-process' },
                     ].map(item => (
                         <div key={item.label} className="text-[11px]">
                             <p className="font-medium text-neutral-700">{item.label}</p>
