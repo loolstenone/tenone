@@ -212,6 +212,9 @@ export default function MessengerPage() {
     // DB 연동 상태
     const [dbLoaded, setDbLoaded] = useState(false);
 
+    // 에이전트 프로필
+    const [agentProfiles, setAgentProfiles] = useState<any[]>([]);
+
     // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -253,6 +256,13 @@ export default function MessengerPage() {
     // ── DB: 채널 로드 ──
     useEffect(() => {
         chatDb.fetchChannels().then(ch => { if (ch.length > 0) setChannels(ch); });
+    }, []);
+
+    // ── 에이전트 프로필 로드 ──
+    useEffect(() => {
+        fetch('/api/agent/profiles').then(r => r.json()).then(data => {
+            if (Array.isArray(data)) setAgentProfiles(data);
+        }).catch(() => {});
     }, []);
 
     // 채널 선택 시 메시지 로드
@@ -1298,42 +1308,132 @@ export default function MessengerPage() {
                     <span className="text-xs font-medium">정보</span>
                 </div>
 
-                {/* 상대 프로필 (1:1) */}
-                {chatPartner && (
-                    <div className="p-4 border-b border-neutral-100 text-center">
-                        <div className="h-12 w-12 bg-neutral-100 flex items-center justify-center text-sm font-bold text-neutral-400 mx-auto mb-2">
-                            {chatPartner.avatarInitials}
+                {selectedChannel ? (
+                    /* ── 채널 정보 패널 ── */
+                    <>
+                        {/* 채널 헤더 */}
+                        <div className="p-4 border-b border-neutral-100">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-neutral-800"># {selectedChannel.name}</span>
+                                {selectedChannel.thread_type && (
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 uppercase tracking-wider rounded">
+                                        {selectedChannel.thread_type}
+                                    </span>
+                                )}
+                            </div>
+                            {selectedChannel.description && (
+                                <p className="text-[11px] text-neutral-500 leading-relaxed">{selectedChannel.description}</p>
+                            )}
                         </div>
-                        <p className="text-xs font-medium">{chatPartner.name}</p>
-                        <p className="text-[11px] text-neutral-400">{chatPartner.subtitle}</p>
-                        {chatPartner.email && <p className="text-[11px] text-neutral-300 mt-1">{chatPartner.email}</p>}
-                        <div className="flex gap-2 justify-center mt-3">
-                            <button className="px-3 py-1 text-[11px] border border-neutral-200 hover:bg-neutral-50 transition-colors">메시지</button>
-                            <button className="px-3 py-1 text-[11px] border border-neutral-200 hover:bg-neutral-50 transition-colors">프로필</button>
-                        </div>
-                    </div>
-                )}
 
-                {/* 그룹 참여자 (그룹 대화 시) */}
-                {selectedThread?.isGroup && (
-                    <div className="p-4 border-b border-neutral-100">
-                        <div className="flex items-center gap-1.5 mb-3">
-                            <Users className="h-3.5 w-3.5 text-neutral-400" />
-                            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">참여자</span>
-                            <span className="text-[10px] text-neutral-300 ml-auto">{selectedThread.participants.length}명</span>
-                        </div>
-                        <div className="space-y-1">
-                            {selectedThread.participants.map(pid => (
-                                <div key={pid} className="flex items-center gap-2 py-1">
-                                    <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0">
-                                        {getStaffInitials(pid)}
+                        {/* 담당 에이전트 */}
+                        {selectedChannel.agent_name && (() => {
+                            const agent = agentProfiles.find(a =>
+                                a.name === selectedChannel.agent_name ||
+                                a.agent_name === selectedChannel.agent_name
+                            );
+                            return (
+                                <div className="p-4 border-b border-neutral-100">
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">담당 에이전트</span>
                                     </div>
-                                    <span className="text-xs truncate">{getStaffName(pid)}</span>
-                                    {pid === currentUserId && <span className="text-[10px] text-neutral-300 ml-auto">나</span>}
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 bg-neutral-900 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                                            AI
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-medium text-neutral-800">{selectedChannel.agent_name}</p>
+                                            {agent?.role && <p className="text-[11px] text-neutral-400 mt-0.5">{agent.role}</p>}
+                                            <div className="flex items-center gap-1 mt-1">
+                                                <Circle className="h-2 w-2 fill-green-400 text-green-400" />
+                                                <span className="text-[10px] text-green-600">활성</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {agent?.description && (
+                                        <p className="text-[11px] text-neutral-400 mt-3 leading-relaxed">{agent.description}</p>
+                                    )}
                                 </div>
-                            ))}
+                            );
+                        })()}
+
+                        {/* 최근 채널 활동 */}
+                        <div className="p-4 border-b border-neutral-100">
+                            <div className="flex items-center gap-1.5 mb-3">
+                                <MessageSquareText className="h-3.5 w-3.5 text-neutral-400" />
+                                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">최근 활동</span>
+                                <span className="text-[10px] text-neutral-300 ml-auto">{channelMessages.length}건</span>
+                            </div>
+                            {channelMessages.length === 0 ? (
+                                <p className="text-[11px] text-neutral-300 text-center py-2">아직 활동 없음</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {channelMessages.slice(-4).map(msg => (
+                                        <div key={msg.id} className="flex items-start gap-2">
+                                            <div className={clsx(
+                                                "h-5 w-5 flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5",
+                                                msg.sender_type === 'agent' ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-500'
+                                            )}>
+                                                {msg.sender_type === 'agent' ? 'AI' : (msg.sender_name || '?').slice(0, 1)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[10px] font-medium text-neutral-600">{msg.sender_name}</span>
+                                                    <span className="text-[9px] text-neutral-300">
+                                                        {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-neutral-500 truncate">{msg.content}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    </div>
+
+                        {/* 오늘 일정 (채널 선택 시에도 표시) */}
+                    </>
+                ) : (
+                    /* ── 일반 대화 패널 ── */
+                    <>
+                        {/* 상대 프로필 (1:1) */}
+                        {chatPartner && (
+                            <div className="p-4 border-b border-neutral-100 text-center">
+                                <div className="h-12 w-12 bg-neutral-100 flex items-center justify-center text-sm font-bold text-neutral-400 mx-auto mb-2">
+                                    {chatPartner.avatarInitials}
+                                </div>
+                                <p className="text-xs font-medium">{chatPartner.name}</p>
+                                <p className="text-[11px] text-neutral-400">{chatPartner.subtitle}</p>
+                                {chatPartner.email && <p className="text-[11px] text-neutral-300 mt-1">{chatPartner.email}</p>}
+                                <div className="flex gap-2 justify-center mt-3">
+                                    <button className="px-3 py-1 text-[11px] border border-neutral-200 hover:bg-neutral-50 transition-colors">메시지</button>
+                                    <button className="px-3 py-1 text-[11px] border border-neutral-200 hover:bg-neutral-50 transition-colors">프로필</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 그룹 참여자 (그룹 대화 시) */}
+                        {selectedThread?.isGroup && (
+                            <div className="p-4 border-b border-neutral-100">
+                                <div className="flex items-center gap-1.5 mb-3">
+                                    <Users className="h-3.5 w-3.5 text-neutral-400" />
+                                    <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">참여자</span>
+                                    <span className="text-[10px] text-neutral-300 ml-auto">{selectedThread.participants.length}명</span>
+                                </div>
+                                <div className="space-y-1">
+                                    {selectedThread.participants.map(pid => (
+                                        <div key={pid} className="flex items-center gap-2 py-1">
+                                            <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0">
+                                                {getStaffInitials(pid)}
+                                            </div>
+                                            <span className="text-xs truncate">{getStaffName(pid)}</span>
+                                            {pid === currentUserId && <span className="text-[10px] text-neutral-300 ml-auto">나</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* 오늘 일정 */}
