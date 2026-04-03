@@ -1,0 +1,14 @@
+-- ============================================================
+-- RLS 긴급 수정 — CRM anon 쓰기 제거 + 시스템/내부 테이블
+-- 실행일: 2026-04-03
+-- ============================================================
+-- 수정 내용:
+-- 1. CRM 5개 테이블: anon_read/anon_write 정책 삭제 (취약점)
+-- 2. mkt_* 14개 테이블: anon 정책 삭제
+-- 3. sys_audit_logs, sys_workflows → staff only
+-- 4. attendance/biz_plans/gpr_goals: ALL true override 제거
+-- 5. smarcomm_billing_history → staff only
+-- 6. wio_bi_snapshots, wio_system_config, wio_integrations, wio_market_intel → staff only
+-- 7. wio HR/조직: headcount/personnel_orders/org_change_history/org_simulations/handover_checklists → staff only
+-- 8. resumes/career_profiles: 중복 정책 제거
+-- 9. wio_culture_*/wio_departments/wio_positions 등 → auth 기반
