@@ -167,12 +167,6 @@ export function IntraSidebar() {
                                                     >
                                                         <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href) ? "text-white" : "text-neutral-600")} />
                                                         <span className="flex-1">{item.name}</span>
-                                                        {/* children 있으면 작은 인디케이터 표시 */}
-                                                        {item.children && (
-                                                            <span className="text-[9px] text-neutral-600 bg-white/5 px-1 rounded">
-                                                                {item.children.length}
-                                                            </span>
-                                                        )}
                                                     </Link>
                                                 ))}
                                         </div>
