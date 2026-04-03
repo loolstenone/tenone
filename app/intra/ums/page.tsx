@@ -201,17 +201,18 @@ export default function UniverseDashboard() {
 
                 // ── 브랜드별 집계 ──
                 const revenueData = revenueRes.data || [];
-                if (revenueData.length > 0) {
-                    // members 브랜드별 집계
-                    const membersAll = await supabase.from("members").select("affiliations");
+                {
                     const brandMap: Record<string, { members: number; revenue: number; subs: number }> = {};
 
-                    // affiliations에서 브랜드별 회원수 집계
-                    (membersAll.data || []).forEach((m: { affiliations: string[] }) => {
-                        (m.affiliations || []).forEach((brand: string) => {
-                            if (!brandMap[brand]) brandMap[brand] = { members: 0, revenue: 0, subs: 0 };
-                            brandMap[brand].members++;
-                        });
+                    // member_brand_joins 기반 브랜드별 회원수 집계
+                    const brandJoins = await supabase
+                        .from("member_brand_joins")
+                        .select("brand_id")
+                        .eq("status", "active");
+                    (brandJoins.data || []).forEach((j: { brand_id: string }) => {
+                        const brand = j.brand_id;
+                        if (!brandMap[brand]) brandMap[brand] = { members: 0, revenue: 0, subs: 0 };
+                        brandMap[brand].members++;
                     });
 
                     // 매출 집계
