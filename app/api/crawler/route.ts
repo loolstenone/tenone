@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
             .select('*')
             .eq('status', 'raw')
             .eq('tenant_id', 'tenone')
-            .order('created_at', { ascending: false })
+            .order('collected_at', { ascending: false })
             .limit(20);
 
         if (!rawItems || rawItems.length === 0) {
