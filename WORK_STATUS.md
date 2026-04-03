@@ -1,6 +1,26 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 11 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 14 — 완료)
+
+## 오늘 한 작업 (4/3 사무실 세션 14)
+
+### 파이프라인 첫 실행 검증 + 버그 수정 ✅
+
+**발견된 버그 5건 → 전부 수정:**
+1. `ADMIN_API_KEY` / `CRON_SECRET` — Vercel env var에 `\n` 공백 포함 → REST API로 삭제+재추가
+2. `wio_tenants` RLS 순환 참조 — `wio_tenants_select` 정책이 `wio_members` 재귀 참조 → 정책 제거
+3. `collected_data` 컬럼명 오류 — `order by created_at` → `collected_at` 수정
+4. `mindle_trends` 컬럼명 오류 — `source_url/source_name` → `source_urls[]/source_names[]` 배열 수정
+5. RLS 정책 누락 — `mindle_trends`, `wio_opportunities`, `chat_messages`, `chat_threads`, `collected_data` anon 접근 정책 추가
+
+**최종 결과:**
+- WholeSee crawl: 40건 수집 (마케팅에센스 1개 소스 오류)
+- WholeSee process: 20건 트렌드 카드 생성 → `mindle_trends` 총 32건
+- 내일부터 Vercel Cron (AM 9:00/9:30 KST) 자동 실행 예정
+
+**커밋:** `ca2f2fa`, `374cc12`, `225ac6b`
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 13)
 
@@ -226,13 +246,11 @@
 
 ### 우선순위 높음
 
-1. **파이프라인 첫 실행 검증** — `/intra/ums/agent/comm`에서 "공모전/지원사업 수집" + "AI 관련성 분석" 수동 실행 후 `/intra/opportunity` 확인. "RSS 크롤" + "트렌드 카드 생성"도 실행 후 Mindle Trends 확인.
+1. **공모전 RSS URL 수정** — 위비티/K-스타트업/창업진흥원 RSS가 404. 올바른 URL 찾아서 `app/api/opportunity/crawl/route.ts` `OPPORTUNITY_SOURCES` 배열 수정.
 
-2. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드 확인.
+2. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인. `app/intra/ums/page.tsx`.
 
-5. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인.
-
-6. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
+3. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
 
 ### 사용자 결정 후 진행
 
