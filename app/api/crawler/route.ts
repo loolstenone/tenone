@@ -73,8 +73,11 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     if (action === 'crawl') {
-        // 활성 소스에서 RSS 수집
-        const { data: sources } = await supabase.from('mindle_sources').select('*').eq('is_active', true);
+        // RPC를 통해 활성 소스 조회 (스키마 캐시 우회)
+        const { data: sources, error: sourcesError } = await supabase.rpc('get_active_sources');
+        if (sourcesError) {
+            return NextResponse.json({ error: `Failed to fetch sources: ${sourcesError.message}` }, { status: 500 });
+        }
         if (!sources || sources.length === 0) {
             return NextResponse.json({ message: 'No active sources' });
         }
@@ -140,13 +143,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
         }
 
-        const { data: rawItems } = await supabase
-            .from('collected_data')
-            .select('*')
-            .eq('status', 'raw')
-            .eq('tenant_id', 'tenone')
-            .order('collected_at', { ascending: false })
-            .limit(20);
+        // RPC를 통해 수집 데이터 조회 (스키마 캐시 우회)
+        const { data: rawItems } = await supabase.rpc('get_raw_collected_data');
 
         if (!rawItems || rawItems.length === 0) {
             return NextResponse.json({ action: 'process', message: 'No raw items to process' });
