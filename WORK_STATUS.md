@@ -1,6 +1,28 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 14 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 15 — 완료)
+
+## 오늘 한 작업 (4/3 사무실 세션 15)
+
+### 기회 RSS 소스 업데이트 ✅
+
+**문제:** OPPORTUNITY_SOURCES 4개 중 3개 404 오류 (위비티, K-스타트업, 창업진흥원)
+
+**조사 결과 (RSS 지원 여부):**
+- 위비티(wevity.com): RSS 완전 미지원 → 비활성화
+- K-스타트업: 공식 "RSS 미지원" alert 명시 → 비활성화
+- 링커리어: 504 타임아웃, SPA → 미지원
+- 캠퍼스픽/씽유: RSS 없음
+
+**수정:** `app/api/opportunity/crawl/route.ts` OPPORTUNITY_SOURCES 업데이트
+- 제거: 위비티, K-스타트업 (RSS 미지원)
+- 교체: 창업진흥원 `/rss/selectRssMainNoticeList.do` → `/rssNotice.es` (실동 확인)
+- 추가: 중기부-사업공고 `mss.go.kr/rss/smba/board/310.do`
+- 추가: 중기부-공지사항 `mss.go.kr/rss/smba/board/81.do`
+
+**결과:** 1개(대티즌) → 4개(대티즌+창업진흥원+중기부2) 활성 소스
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 14)
 
@@ -246,7 +268,7 @@
 
 ### 우선순위 높음
 
-1. **공모전 RSS URL 수정** — 위비티/K-스타트업/창업진흥원 RSS가 404. 올바른 URL 찾아서 `app/api/opportunity/crawl/route.ts` `OPPORTUNITY_SOURCES` 배열 수정.
+1. ✅ **공모전 RSS URL 수정** — 창업진흥원 새 URL + 중기부 2개 추가. 위비티/K-스타트업 비활성화. `app/api/opportunity/crawl/route.ts` 수정 완료 (세션 15).
 
 2. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인. `app/intra/ums/page.tsx`.
 

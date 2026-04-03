@@ -44,11 +44,14 @@ function getAnthropicClient(): Anthropic | null {
 // ── RSS 소스 정의 ───────────────────────────────────────────
 const OPPORTUNITY_SOURCES = [
     // 공모전/대외활동
-    { name: '위비티', url: 'https://www.wevity.com/rss.php', type: 'competition', active: true },
     { name: '대티즌', url: 'https://www.detizen.com/index_rss.php', type: 'competition', active: true },
-    // 지원사업/창업
-    { name: 'K-스타트업', url: 'https://www.k-startup.go.kr/rss/notice.do', type: 'government', active: true },
-    { name: '창업진흥원', url: 'https://www.kised.or.kr/rss/selectRssMainNoticeList.do', type: 'government', active: true },
+    // RSS 미지원 (2026-04 확인): 위비티(wevity.com), 캠퍼스픽, 링커리어, K-스타트업
+    // { name: '위비티', url: 'https://www.wevity.com/rss.php', type: 'competition', active: false },
+
+    // 지원사업/창업 — 정부기관 RSS
+    { name: '창업진흥원', url: 'https://www.kised.or.kr/rssNotice.es', type: 'government', active: true },
+    { name: '중기부-사업공고', url: 'https://mss.go.kr/rss/smba/board/310.do', type: 'government', active: true },
+    { name: '중기부-공지사항', url: 'https://mss.go.kr/rss/smba/board/81.do', type: 'government', active: true },
     // 나라장터 (G2B) — 공공데이터 API 키 필요, 현재 비활성
     // { name: '나라장터', url: 'G2B_API', type: 'narjangter', active: false },
 ];
