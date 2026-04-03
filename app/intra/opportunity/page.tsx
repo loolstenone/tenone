@@ -135,7 +135,7 @@ function mapDbToOpportunity(r: Record<string, unknown>): Opportunity {
         sourceUrl: (r.sourceUrl as string) || (r.url as string) || undefined,
         description: (r.description as string) || undefined,
         budgetMin: (r.estimatedValue as number) || undefined,
-        budgetMax: undefined,
+        budgetMax: (r.budgetMax as number) || undefined,
         deadline: (r.deadline as string) || undefined,
         region: (r.region as string) || undefined,
         category: (r.category as string) || undefined,

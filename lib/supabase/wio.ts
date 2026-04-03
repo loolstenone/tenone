@@ -509,7 +509,7 @@ export function getGrade(totalPoints: number): string {
 // ══════════════════════════════════════
 
 export async function fetchOpportunities(tenantId: string, status?: string): Promise<any[]> {
-  let query = supabase.from('wio_opportunities').select('*, assigned:wio_members!wio_opportunities_assigned_to_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  let query = supabase.from('wio_opportunities').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
   if (status) query = query.eq('status', status);
   const { data } = await query;
   return (data || []).map((r: any) => snakeToCamel(r));
