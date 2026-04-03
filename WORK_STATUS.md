@@ -1,35 +1,46 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 18 — 진행중)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 18 — 완료)
 
-## 현재 작업 (4/3 사무실 세션 18)
+## 오늘 한 작업 (4/3 사무실 세션 18)
 
-### WholeSee 크롤러 RLS & 스키마 캐시 이슈 해결 🔧
+### WholeSee 크롤러 전체 파이프라인 정상화 ✅
 
-**문제 발견:**
-1. **mindle_trends RLS 정책 불일치** → anon 사용자 INSERT 블로킹
-   - 원인: 여러 RLS 정책이 겹쳐서 조건 충돌
-   - 해결: `mindle_trends_anon_insert` (INSERT) + `mindle_trends_anon_select` (SELECT) 명시적 분리
+**근본 원인 발견 & 해결:**
+`.env.local`이 빈 Dev DB(`dwdoxzksvzjnsgupjzob`, 뭄바이)를 가리키고 있었음.
+모든 테이블은 Prod DB(`ziotlxkdctlhiwkgmmsh`, 서울)에만 존재.
+→ `.env.local`을 Prod DB로 전환하여 해결.
 
-2. **Supabase 스키마 캐시 만료** → "Could not find the table in schema cache"
-   - 원인: RLS 정책 수정 후 클라이언트 스키마 캐시가 stale 상태
-   - 해결: RPC 함수로 우회 (`get_active_sources`, `get_raw_collected_data`)
+**추가 수정:**
+1. **mindle_trends RLS 정책** — anon INSERT/SELECT 명시적 분리
+   - `mindle_trends_anon_insert`: tenant_id='tenone' 조건부 INSERT 허용
+   - `mindle_trends_anon_select`: 전체 SELECT 허용
+2. **mindle_sources RLS 정책** — public SELECT 단순화
+3. **RPC 함수 생성** (DB에 설치, 코드에서는 미사용)
+   - `get_active_sources()`, `get_raw_collected_data()`
+4. **크롤러 에러 로깅 개선** — `sourcesError` 명시적 반환
 
-**수정 사항:**
-- `lib/supabase/server.ts`: mindle_sources/mindle_trends RLS 정책 재설계
-- `app/api/crawler/route.ts`:
-  - Direct SELECT 대신 RPC 함수 호출로 변경
-  - 에러 로깅 추가 (디버깅 개선)
-- DB: 스키마 캐시 우회용 RPC 함수 2개 생성
-  - `get_active_sources()` - mindle_sources 조회
-  - `get_raw_collected_data()` - collected_data 조회
+**파이프라인 검증 결과:**
+```
+RSS 크롤  → 17개 소스 → 131건 수집 ✅
+AI 분석   → 20건 처리 → 11건 트렌드 카드 생성, 9건 필터링 ✅
+```
 
-**커밋:** `64eb54e`
+**커밋:** `64eb54e`, `f3e8839`, `94c4c42`
 
-**남은 작업:**
-- [ ] 개발 서버 재시작 후 크롤러 전체 E2E 테스트
-- [ ] 트렌드 카드 생성 파이프라인 동작 확인
-- [ ] #트렌드 채널에 에이전트 메시지 발행 확인
+**⚠️ 집에서 작업 시 주의:**
+- `.env.local`은 gitignore → 집 PC에서도 Prod DB를 가리키도록 수동 변경 필요
+  ```
+  NEXT_PUBLIC_SUPABASE_URL="https://ziotlxkdctlhiwkgmmsh.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGci...9Dx4IpmhYXmTbkX8KxX4O2U1qTWfvN_DDFrYvIoYxi8"
+  ```
+- Dev DB(`dwdoxzksvzjnsgupjzob`)는 테이블 없음 — 사용 금지
+
+**다음 할 일:**
+- Vercel Cron 작동 확인 (프로덕션 환경에서 자동 크롤 돌아가는지)
+- chat_messages RLS 수정 (`postAgentMessage` 호출 시 "new row violates row-level security policy" 경고 해결)
+- 마케팅에센스 RSS 에러 원인 조사 (fetch failed)
+- Phase 2 계획: 38개 non-RSS 사이트 CSS/Puppeteer 크롤러 (4-6주)
 
 ---
 
