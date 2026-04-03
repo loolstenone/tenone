@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
     Users, CreditCard, TrendingUp, DollarSign, UserPlus,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
+    Globe, ShoppingCart, FileText, LayoutList, Bell, CheckCircle2,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
@@ -67,6 +68,14 @@ const mockActivities: ActivityItem[] = [
     { text: "송예린 Badak 네트워크 매칭 성사", time: "7시간 전", type: "match" },
 ];
 
+/* ── UMS 허브 타입 ── */
+interface UmsHubStat {
+    hub: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    stats: { label: string; value: number }[];
+}
+
 /* ── 브랜드 메타 (색상, 이니셜) ── */
 const brandMeta: Record<string, { letter: string; color: string }> = {
     MADLeague: { letter: "M", color: "bg-violet-500" },
@@ -126,6 +135,7 @@ export default function UniverseDashboard() {
     const [stats, setStats] = useState<StatItem[]>(mockStats);
     const [brands, setBrands] = useState<BrandItem[]>(mockBrands);
     const [activities, setActivities] = useState<ActivityItem[]>(mockActivities);
+    const [umsHubs, setUmsHubs] = useState<UmsHubStat[]>([]);
 
     useEffect(() => {
         async function loadData() {
@@ -260,6 +270,73 @@ export default function UniverseDashboard() {
                 if (activityFeed.length > 0) {
                     setActivities(activityFeed.slice(0, 8));
                 }
+                // ── UMS 허브 현황 ──
+                const [
+                    umsSitesRes, umsMembersRes, umsGuestsRes,
+                    umsOrdersRes, umsProductsRes, umsSubsRes, umsPaymentsRes,
+                    umsContentRes, umsBoardsRes, umsPostsRes,
+                    umsNewsletterRes, umsNotifRes, umsMpointsRes,
+                ] = await Promise.all([
+                    supabase.from("ums_sites").select("*", { count: "exact", head: true }),
+                    supabase.from("members").select("*", { count: "exact", head: true }),
+                    supabase.from("guests").select("*", { count: "exact", head: true }),
+                    supabase.from("shop_orders").select("*", { count: "exact", head: true }),
+                    supabase.from("shop_products").select("*", { count: "exact", head: true }),
+                    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
+                    supabase.from("customer_payments").select("*", { count: "exact", head: true }),
+                    supabase.from("content_pipeline").select("*", { count: "exact", head: true }),
+                    supabase.from("ums_boards").select("*", { count: "exact", head: true }),
+                    supabase.from("ums_posts").select("*", { count: "exact", head: true }),
+                    supabase.from("newsletter_subscribers").select("*", { count: "exact", head: true }).eq("is_active", true),
+                    supabase.from("notifications").select("*", { count: "exact", head: true }).eq("is_read", false),
+                    supabase.from("member_points").select("*", { count: "exact", head: true }),
+                ]);
+
+                setUmsHubs([
+                    {
+                        hub: "SITE", icon: Globe, color: "text-blue-600",
+                        stats: [
+                            { label: "사이트", value: umsSitesRes.count ?? 0 },
+                        ],
+                    },
+                    {
+                        hub: "MEMBER", icon: Users, color: "text-violet-600",
+                        stats: [
+                            { label: "회원", value: umsMembersRes.count ?? 0 },
+                            { label: "게스트", value: umsGuestsRes.count ?? 0 },
+                        ],
+                    },
+                    {
+                        hub: "COMMERCE", icon: ShoppingCart, color: "text-emerald-600",
+                        stats: [
+                            { label: "주문", value: umsOrdersRes.count ?? 0 },
+                            { label: "상품", value: umsProductsRes.count ?? 0 },
+                            { label: "구독", value: umsSubsRes.count ?? 0 },
+                            { label: "결제", value: umsPaymentsRes.count ?? 0 },
+                        ],
+                    },
+                    {
+                        hub: "CONTENT", icon: FileText, color: "text-amber-600",
+                        stats: [
+                            { label: "파이프라인", value: umsContentRes.count ?? 0 },
+                        ],
+                    },
+                    {
+                        hub: "BOARD", icon: LayoutList, color: "text-rose-600",
+                        stats: [
+                            { label: "보드", value: umsBoardsRes.count ?? 0 },
+                            { label: "포스트", value: umsPostsRes.count ?? 0 },
+                        ],
+                    },
+                    {
+                        hub: "ENGAGE", icon: Bell, color: "text-cyan-600",
+                        stats: [
+                            { label: "구독자", value: umsNewsletterRes.count ?? 0 },
+                            { label: "미읽알림", value: umsNotifRes.count ?? 0 },
+                            { label: "포인트내역", value: umsMpointsRes.count ?? 0 },
+                        ],
+                    },
+                ]);
             } catch (err) {
                 // 에러 시 mock 데이터 유지
                 console.error("Universe dashboard fetch error:", err);
@@ -287,6 +364,34 @@ export default function UniverseDashboard() {
     return (
         <div className="space-y-6">
             <PageHeader title="Universe Dashboard" description="Ten:One Universe 전체 현황" />
+
+            {/* UMS 허브 현황 */}
+            {umsHubs.length > 0 && (
+                <div>
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-neutral-400" />
+                        UMS 허브 현황
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {umsHubs.map((hub) => (
+                            <div key={hub.hub} className="bg-white border border-neutral-200 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <hub.icon className={`h-4 w-4 ${hub.color}`} />
+                                    <span className="text-xs font-semibold text-neutral-700">{hub.hub}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    {hub.stats.map((s) => (
+                                        <div key={s.label} className="flex items-center justify-between">
+                                            <span className="text-[11px] text-neutral-500">{s.label}</span>
+                                            <span className="text-[11px] font-medium text-neutral-900">{s.value.toLocaleString()}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

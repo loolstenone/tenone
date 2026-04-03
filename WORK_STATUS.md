@@ -1,6 +1,55 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (집, 세션 7 — 작업 종료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 8 — 작업 종료)
+
+## 오늘 한 작업 (4/3 사무실 세션 8)
+
+### UMS (Universe Management System) 7개 TASK 완료 ✅
+
+#### TASK 1: ums_sites 생성 ✅
+- site_configs(24행) + bums_sites(6행, UUID 보존) → ums_sites 통합
+- site_configs → site_configs_legacy 리네임 + 하위호환 뷰
+- RLS: staff 전체 / anon public read
+
+#### TASK 2: account_type 확장 + 고객 플로우 ✅
+- subscriber, guest_buyer enum 추가
+- member_brand_joins origin 컬럼 추가
+- guests.member_id, subscriptions.member_id FK 추가
+- vw_staff / vw_customers 뷰 생성
+- 3개 트리거: auto_brand_join, upgrade_to_subscriber, downgrade_from_subscriber
+
+#### TASK 3: Board 마이그레이션 ✅
+- bums_boards/posts/comments → ums_boards/posts/comments 리네임
+- board_configs(29행) + posts(46행) → ums_* INSERT
+- 레거시 뷰: bums_boards, board_configs, posts
+
+#### TASK 4: Commerce 수정 ✅
+- shop_orders: member_id, guest_id, site_id FK 추가
+- shop_products: site_id FK 추가
+- promotions: site_id FK 추가
+- subscriptions: brand_id, site_id 추가
+- customer_payments 테이블 신규 생성 (PG 연동 준비)
+
+#### TASK 5: Content 파이프라인 복구 ✅
+- content_pipeline: body, source_ids, site_id, author_id, tags, thumbnail_url, published_at, updated_at, tenant_id 추가
+
+#### TASK 6: Engage 활성화 ✅
+- newsletter_subscribers: site_id, member_id 추가 + email→member 자동 연결
+- notifications: site_id, brand_id 추가
+- member_points: tenant_id, type(earn/use/expire/adjust) 추가
+- member_point_balances 뷰 생성
+- fn_newsletter_auto_brand_join 트리거
+
+#### TASK 7: UMS 대시보드 홈 ✅
+- Universe 대시보드에 UMS 6개 허브 현황 섹션 추가
+- SITE/MEMBER/COMMERCE/CONTENT/BOARD/ENGAGE 실시간 카운트
+
+#### 사이드바 서브탭 리팩토링 ✅
+- lib/intra-nav.ts 추출 (modules 배열 + findSubItems + getActiveSubHref)
+- IntraSidebar: 3뎁스 accordion 제거
+- IntraSubTabs: 본문 상단 탭으로 렌더링
+
+---
 
 ## 오늘 한 작업 (4/3 집 세션 7)
 
@@ -67,6 +116,8 @@
 ## 다음 할 일
 
 ### 우선순위 높음 (바로 착수 가능)
+
+0. **UMS DB → Intra UI 연결** — Universe 대시보드 ums_sites 기반 브랜드 집계 전환. 현재 members.affiliations TEXT[]로 브랜드 집계 중 → member_brand_joins 기반으로 변경. `app/intra/universe/page.tsx` 195번째 줄 `membersAll.affiliations` 블록 교체.
 
 1. **GCP Scheduler 설정** — 크롤러(/api/crawler) + Vrief(/api/agent/vrief) 자동 실행. 크롤러: 매 6시간, Vrief: AM 10:01 / PM 22:01. `app/api/crawler/route.ts`, `app/api/agent/vrief/route.ts`에 CRON_SECRET 인증 이미 구현됨.
 

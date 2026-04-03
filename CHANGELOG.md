@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-04-03 (사무실, 세션 8)
+
+### UMS 7개 TASK 완료 — DB 통합 대작전
+
+**수정/생성 파일:**
+- `sql/ums-task1-sites.sql` — ums_sites 생성 (+ site_configs_legacy 뷰)
+- `sql/ums-task2-members.sql` — account_type 확장 + 고객 플로우 트리거 3개
+- `sql/ums-task3-boards.sql` — bums_* → ums_* 리네임 + 데이터 통합
+- `sql/ums-task4-commerce.sql` — shop_orders/products/promotions/subscriptions + customer_payments 신규
+- `sql/ums-task5-content.sql` — content_pipeline 9개 컬럼 추가
+- `sql/ums-task6-engage.sql` — newsletter_subscribers/notifications/member_points + member_point_balances 뷰
+- `app/intra/universe/page.tsx` — UMS 6개 허브 현황 섹션 추가
+- `lib/intra-nav.ts` — 사이드바 nav 모듈 추출
+- `components/IntraSidebar.tsx` — 3뎁스 accordion 제거
+- `components/intra/IntraSubTabs.tsx` — 본문 상단 서브탭 신규
+
+**결정사항:**
+- UMS 6 Hub 구조: SITE / MEMBER / COMMERCE / CONTENT / BOARD / ENGAGE
+- bums_* → ums_* 마이그레이션 완료, 레거시 뷰로 하위호환
+- customer_payments: PG 연동 전 스키마 완비
+- member_point_balances: 집계 뷰로 잔액 관리
+
+**커밋:** (이번 세션)
+
+---
+
 ## 2026-04-03 (집, 세션 7)
 
 ### Phase 0: 테넌트 격리 기반 구축
