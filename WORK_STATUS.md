@@ -1,6 +1,20 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 10 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 11 — 완료)
+
+## 오늘 한 작업 (4/3 사무실 세션 11)
+
+### 비즈니스 기회 자동 크롤링 파이프라인 ✅
+- `/api/opportunity/crawl`: 공모전/지원사업 RSS 4소스 수집 + Haiku 필터(6/10 미만 rejected) + Sonnet 구조화
+- 소스: 위비티(공모전), 대티즌(공모전), K-스타트업(지원사업), 창업진흥원(지원사업)
+- process: relevance_score 0-1로 정규화 저장 (ScoreBadge 표시 정합)
+- `/api/cron/opportunity-crawl`: 매일 AM 8:00 KST / `/api/cron/opportunity-process`: AM 8:30 KST
+- vercel.json: 7개 cron 등록 완료
+- wio.ts: fetchOpportunities FK join 버그 수정 → select(*) 단순화
+- opportunity/page.tsx: budgetMax 연결
+- 커밋: `5a0a606`
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 10)
 
@@ -172,15 +186,17 @@
 
 ### 우선순위 높음
 
-1. **Vercel 배포 후 Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 5개 스케줄 확인. 첫 실행 로그 확인.
+1. **Vercel Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 7개 스케줄 확인 (opportunity-crawl/process 포함). 첫 실행 로그 확인.
 
-2. **크롤 → 트렌드 파이프라인 첫 실행** — `/intra/ums/agent/comm`에서 "RSS 크롤 실행" → "트렌드 카드 생성" 수동 실행 후 Mindle Trends 페이지 확인.
+2. **비즈니스 기회 수동 첫 실행** — `/intra/ums/agent/comm`에 opportunity 수동 실행 버튼 추가 필요. 또는 직접 POST /api/opportunity/crawl 호출.
 
-3. **RLS 나머지 테이블 정비** — CRM/HR/Finance 테이블 (~141개 잔여). 우선순위: `crm_contacts`, `hr_staff`, `finance_*`, `wio_subscription_plans`. `sql/rls-sensitive-tables-2026-04-03.sql` 패턴 그대로 적용.
+3. **크롤 → 트렌드 파이프라인 첫 실행** — `/intra/ums/agent/comm`에서 "RSS 크롤 실행" → "트렌드 카드 생성" 수동 실행 후 Mindle Trends 페이지 확인.
 
-4. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인. `ums_sites` 기반으로 사이트 목록도 연결.
+4. **RLS 나머지 테이블 정비** — CRM/HR/Finance 테이블 (~141개 잔여). 우선순위: `crm_contacts`, `hr_staff`, `finance_*`, `wio_subscription_plans`. `sql/rls-sensitive-tables-2026-04-03.sql` 패턴 그대로 적용.
 
-5. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
+5. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인.
+
+6. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
 
 ### 사용자 결정 후 진행
 
