@@ -181,7 +181,7 @@ async function loadSiteProfile(
         .from(table)
         .select('*')
         .eq('member_id', memberId)
-        .single();
+        .maybeSingle();
 
     return data ? { type: brand, data } as SiteProfile : null;
 }

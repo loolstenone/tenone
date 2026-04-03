@@ -50,7 +50,7 @@ export async function fetchMyProjects(memberId: string) {
     try {
         const { data } = await supabase
             .from('project_members')
-            .select('role, project:projects(id, code, name, status, progress)')
+            .select('role, project:projects(id, code, name, status, phase)')
             .eq('member_id', memberId)
             .limit(10);
 
@@ -58,7 +58,7 @@ export async function fetchMyProjects(memberId: string) {
             name: pm.project?.name || '',
             code: pm.project?.code || '',
             role: pm.role || '',
-            progress: pm.project?.progress || 0,
+            progress: 0, // projects 테이블에 progress 컬럼 없음
             status: pm.project?.status || '진행중',
         }));
     } catch {
@@ -73,7 +73,7 @@ export async function fetchMyEnrollments(memberId: string) {
             .from('enrollments')
             .select('*, course:courses(*)')
             .eq('member_id', memberId)
-            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(20);
 
         if (!data || data.length === 0) return null;
@@ -109,13 +109,13 @@ export async function fetchMyAttendance(memberId: string) {
             .from('timesheets')
             .select('*')
             .eq('member_id', memberId)
-            .gte('date', monthStart)
-            .lte('date', today)
-            .order('date', { ascending: false });
+            .gte('work_date', monthStart)
+            .lte('work_date', today)
+            .order('work_date', { ascending: false });
 
         if (!data || data.length === 0) return null;
 
-        const todayEntry = data.find((t: any) => t.date === today);
+        const todayEntry = data.find((t: any) => t.work_date === today);
         const totalHours = data.reduce((sum: number, t: any) => sum + (t.hours || 0), 0);
         const avgHours = data.length > 0 ? totalHours / data.length : 0;
 
@@ -123,12 +123,12 @@ export async function fetchMyAttendance(memberId: string) {
             thisMonth: {
                 workDays: data.length,
                 avgHours: `${Math.floor(avgHours)}h ${Math.round((avgHours % 1) * 60)}m`,
-                overtime: '0h', // 추후 구현
+                overtime: '0h',
             },
             today: todayEntry ? {
-                checkIn: todayEntry.check_in || '-',
-                checkOut: todayEntry.check_out || '-',
-                status: todayEntry.status || '정상',
+                checkIn: '-',
+                checkOut: '-',
+                status: '정상',
             } : null,
         };
     } catch {

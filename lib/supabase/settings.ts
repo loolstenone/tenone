@@ -16,7 +16,7 @@ async function fetchAllSettings(memberId: string): Promise<Record<string, unknow
         .from('user_settings')
         .select('settings')
         .eq('member_id', memberId)
-        .single();
+        .maybeSingle();
     if (error || !data) return {};
     return (data.settings as Record<string, unknown>) || {};
 }

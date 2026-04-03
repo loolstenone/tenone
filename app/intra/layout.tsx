@@ -20,15 +20,9 @@ type IntraStatus = "loading" | "ok" | "login" | "no-access";
  * sessionStorage 캐시로 새로고침 시 깜박임 방지.
  */
 export default function IntraLayout({ children }: { children: React.ReactNode }) {
-    // sessionStorage에 검증 캐시가 있으면 즉시 'ok', 없으면 'loading'
-    const [status, setStatus] = useState<IntraStatus>(() => {
-        if (typeof window !== "undefined") {
-            try {
-                if (sessionStorage.getItem(INTRA_VERIFIED_KEY) === "1") return "ok";
-            } catch { /* ignore */ }
-        }
-        return "loading";
-    });
+    // 항상 'loading'으로 시작 (hydration 불일치 방지)
+    // sessionStorage 캐시는 useEffect에서 체크
+    const [status, setStatus] = useState<IntraStatus>("loading");
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -39,12 +33,17 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
 
     // 세션 검증 (마운트 시 1회)
     useEffect(() => {
-        // sessionStorage 캐시 히트 → 백그라운드 재검증만
-        // 캐시 미스 → 풀 검증
         if (verifyStarted.current) return;
         verifyStarted.current = true;
 
-        const isCached = status === "ok";
+        // sessionStorage 캐시 히트 → 즉시 ok + 백그라운드 재검증
+        let isCached = false;
+        try {
+            if (sessionStorage.getItem(INTRA_VERIFIED_KEY) === "1") {
+                setStatus("ok");
+                isCached = true;
+            }
+        } catch { /* ignore */ }
 
         const verify = async () => {
             try {
