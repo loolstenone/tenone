@@ -70,7 +70,9 @@ export function IntraSidebar() {
     };
 
     // 모듈 접근 필터
+    // layout.tsx가 이미 인증을 완료했으므로, user가 아직 null(로딩중)이면 전체 표시
     const visibleModules = modules.filter((mod) => {
+        if (!user) return true; // auth-context 로딩 중 → 전체 표시 (layout이 인증 보장)
         if (identityLoaded && accessibleModules.length > 0) {
             if (isSuperAdmin) return true;
             if (mod.intraModule && !accessibleModules.includes(mod.intraModule)) return false;
