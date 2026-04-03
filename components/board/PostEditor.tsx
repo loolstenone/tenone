@@ -7,12 +7,16 @@ import Image from "@tiptap/extension-image";
 import LinkExt from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     Heading2, Heading3, List, ListOrdered,
     Quote, Code, Minus, Image as ImageIcon, Link as LinkIcon,
     Undo, Redo, X, Upload, Tag, Eye, Save, Send, Lock,
-    Paperclip, FileText, Trash2,
+    Paperclip, FileText, Trash2, Table as TableIcon,
 } from "lucide-react";
 import type { CreatePostInput, UpdatePostInput, Post, BoardConfig, Attachment } from "@/types/board";
 
@@ -83,9 +87,13 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
         extensions: [
             StarterKit.configure({ heading: { levels: [2, 3] } }),
             Underline,
-            Image.configure({ inline: false, allowBase64: true }),
+            Image.configure({ inline: false, allowBase64: true, HTMLAttributes: { class: 'tiptap-image' } }),
             LinkExt.configure({ openOnClick: false }),
             Placeholder.configure({ placeholder: "내용을 입력하세요..." }),
+            Table.configure({ resizable: true, HTMLAttributes: { class: 'tiptap-table' } }),
+            TableRow,
+            TableHeader,
+            TableCell,
         ],
         content: post?.content || "",
         editorProps: {
@@ -395,6 +403,7 @@ export default function PostEditor({ config, post, onSubmit, onCancel, isGuest =
                         const url = window.prompt("링크 URL");
                         if (url) editor?.chain().focus().setLink({ href: url }).run();
                     }} title="링크"><LinkIcon size={16} /></ToolBtn>
+                    <ToolBtn onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="표 삽입"><TableIcon size={16} /></ToolBtn>
                     <div className="w-px h-5 mx-1" style={{ backgroundColor: "var(--tn-border)" }} />
                     <ToolBtn onClick={() => editor?.chain().focus().undo().run()} title="실행 취소"><Undo size={16} /></ToolBtn>
                     <ToolBtn onClick={() => editor?.chain().focus().redo().run()} title="다시 실행"><Redo size={16} /></ToolBtn>

@@ -159,6 +159,58 @@ main.bg-white .rounded-xl {
   border-radius: 0.5rem;
 }
 
+/* ── Tiptap 에디터 스타일 ── */
+
+/* 이미지 리사이즈 */
+.tiptap-image {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.tiptap-image.ProseMirror-selectednode {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* 표 스타일 */
+.tiptap-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+.tiptap-table td,
+.tiptap-table th {
+  border: 1px solid var(--tn-border, #e5e5e5);
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  vertical-align: top;
+  font-size: 0.875rem;
+}
+.tiptap-table th {
+  font-weight: 600;
+  background-color: var(--tn-bg-alt, #fafafa);
+}
+[data-theme="dark"] .tiptap-table th {
+  background-color: #1a1a1a;
+}
+.tiptap-table .selectedCell {
+  background-color: rgba(37, 99, 235, 0.1);
+}
+/* 표 리사이즈 핸들 */
+.tiptap-table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #2563EB;
+  cursor: col-resize;
+  pointer-events: all;
+}
+
 /* ── Print / PDF 스타일 ── */
 @media print {
   /* 네비게이션, 사이드바, 버튼 등 UI 요소 숨기기 */

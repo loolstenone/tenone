@@ -174,7 +174,7 @@ function BoardPageInner({
     // 글쓰기 모드
     if (mode === "write") {
         return (
-            <div className="max-w-7xl">
+            <div className="max-w-7xl mx-auto px-6">
                 <PostEditor
                     config={defaultConfig}
                     onSubmit={handleCreate}
@@ -188,7 +188,7 @@ function BoardPageInner({
     // 수정 모드
     if (mode === "edit" && selectedPost) {
         return (
-            <div className="max-w-7xl">
+            <div className="max-w-7xl mx-auto px-6">
                 <PostEditor
                     config={defaultConfig}
                     post={selectedPost}
@@ -202,7 +202,7 @@ function BoardPageInner({
     // 상세 보기
     if (mode === "detail" && selectedPost) {
         return (
-            <div className="max-w-7xl">
+            <div className="max-w-7xl mx-auto px-6">
                 {loading ? (
                     <div className="flex justify-center py-20">
                         <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
@@ -224,7 +224,7 @@ function BoardPageInner({
 
     // 목록 보기
     return (
-        <div className="max-w-7xl">
+        <div className="max-w-7xl mx-auto px-6">
             <div className="border-b border-neutral-200 pb-5 mb-6 flex items-start justify-between">
                 <div>
                     <h1 className="text-lg font-semibold tracking-tight text-neutral-900">{displayTitle}</h1>
