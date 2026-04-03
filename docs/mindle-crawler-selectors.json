@@ -1,0 +1,238 @@
+{
+  "comment": "CSS selectors and web crawling rules for Mindle Phase 2 implementation - Non-RSS sources",
+  "generated_date": "2026-04-03",
+  "phase": 2,
+  "priority_sites": [
+    {
+      "site_name": "brandbrief.co.kr",
+      "category": "Brand/Marketing",
+      "priority": "high",
+      "priority_reason": "Major Korean brand/marketing news outlet, well-structured HTML",
+      "crawl_type": "css_selector",
+      "article_list_url": "https://www.brandbrief.co.kr/articles",
+      "selectors": {
+        "article_container": ".article-item, article, .post-card",
+        "article_title": ".article-title, h2.title, .post-title",
+        "article_url": "a.article-link, a[href*='/article/'], a.post-link",
+        "article_excerpt": ".article-summary, .excerpt, .post-excerpt",
+        "publish_date": ".publish-date, .article-date, time, .post-date",
+        "author": ".author-name, .by-author, .post-author",
+        "category_tag": ".category, .tag, [class*='category']"
+      },
+      "pagination": {
+        "next_page_selector": "a.next, .pagination a.next, a[rel='next']",
+        "pages_to_crawl": 5,
+        "delay_between_pages_ms": 2000
+      },
+      "archive_urls": [
+        "https://www.brandbrief.co.kr/archive/2026-04",
+        "https://www.brandbrief.co.kr/archive/{YYYY}-{MM}"
+      ],
+      "notes": "Verify article structure; may need JavaScript rendering if AJAX-loaded"
+    },
+    {
+      "site_name": "etnews.com",
+      "category": "IT/Tech",
+      "priority": "high",
+      "priority_reason": "Major Korean tech news, requires JS rendering",
+      "crawl_type": "javascript_rendering",
+      "browser": "puppeteer",
+      "article_list_url": "https://www.etnews.com/news",
+      "selectors": {
+        "article_container": ".news-list-item, .article-card, li[data-article-id]",
+        "article_title": ".news-title, h2, .article-headline",
+        "article_url": "a.news-link, a[href*='/article/'], a.headline-link",
+        "article_excerpt": ".news-desc, .summary, .lead-text",
+        "publish_date": ".news-date, time, .publish-time",
+        "author": ".news-writer, .reporter-name",
+        "section": ".section-name, .category-tag"
+      },
+      "javascript_wait": {
+        "wait_for_selector": ".news-list-item",
+        "wait_time_ms": 3000
+      },
+      "pagination": {
+        "type": "infinite_scroll",
+        "scroll_distance_px": 500,
+        "max_scrolls": 10
+      },
+      "notes": "Site uses React/Vue, requires headless browser. JS rendering essential."
+    },
+    {
+      "site_name": "platum.kr",
+      "category": "Startup/Business",
+      "priority": "high",
+      "priority_reason": "Major Korean startup ecosystem news, good content structure",
+      "crawl_type": "css_selector",
+      "article_list_url": "https://platum.kr/news",
+      "selectors": {
+        "article_container": ".news-post, .article-card, .post-item",
+        "article_title": ".news-title, h2.post-title, .headline",
+        "article_url": "a.news-link, a.post-link, a[href^='/columns/']",
+        "article_excerpt": ".news-summary, .post-excerpt, .description",
+        "publish_date": ".post-date, .published-at, time[datetime]",
+        "author": ".author-name, .writer-name, .by-line",
+        "company_mention": ".company-tag, [class*='company-name']"
+      },
+      "pagination": {
+        "next_page_selector": "a.next-page, .pagination .next, a[aria-label='다음']",
+        "pages_to_crawl": 10,
+        "delay_between_pages_ms": 1500
+      },
+      "archive_urls": [
+        "https://platum.kr/news?page={PAGE}",
+        "https://platum.kr/news?category=startup&page={PAGE}"
+      ],
+      "notes": "Good pagination structure; maintain startup company mentions in metadata"
+    },
+    {
+      "site_name": "madtimes.org",
+      "category": "Brand/Marketing",
+      "priority": "medium",
+      "priority_reason": "Korean marketing/advertising focus, premium content",
+      "crawl_type": "css_selector",
+      "article_list_url": "https://www.madtimes.org/",
+      "selectors": {
+        "article_container": ".article-item, .post-card, .news-item",
+        "article_title": ".article-title, h2, .post-headline",
+        "article_url": "a.article-link, a.read-more, .post-url",
+        "article_excerpt": ".article-summary, .description, .teaser",
+        "publish_date": ".published-date, .post-date, [class*='date']",
+        "author": ".author, .writer, .by-author",
+        "campaign_mention": ".brand, .campaign-tag, .advertiser"
+      },
+      "pagination": {
+        "type": "load_more_button",
+        "button_selector": ".load-more, .show-more, button.load-more",
+        "max_loads": 5
+      },
+      "notes": "May have 'Load More' button instead of traditional pagination"
+    },
+    {
+      "site_name": "trendjournal.co.kr",
+      "category": "Trend/Research",
+      "priority": "medium",
+      "priority_reason": "Korean trend reports, structured data potential",
+      "crawl_type": "css_selector_with_pdf_fallback",
+      "article_list_url": "https://www.trendjournal.co.kr/reports",
+      "selectors": {
+        "article_container": ".report-item, .research-card, article",
+        "article_title": ".report-title, h3.title, .report-name",
+        "article_url": "a.report-link, a[href*='.pdf'], a.download-link",
+        "article_excerpt": ".report-summary, .abstract, .overview",
+        "publish_date": ".report-date, .release-date, time",
+        "report_type": ".report-type, .category-badge",
+        "file_type": ".file-format, [class*='pdf']"
+      },
+      "pdf_extraction": {
+        "enabled": true,
+        "extract_first_page": true,
+        "extract_text": true,
+        "extract_metadata": true
+      },
+      "notes": "Reports may be PDF-based; implement PDF text extraction fallback"
+    },
+    {
+      "site_name": "some.co.kr",
+      "category": "Trend/Research",
+      "priority": "medium",
+      "priority_reason": "Korean trend research platform with structured reports",
+      "crawl_type": "css_selector",
+      "article_list_url": "https://www.some.co.kr/trends",
+      "selectors": {
+        "article_container": ".trend-item, .research-item, .report-card",
+        "article_title": ".trend-name, h2.title, .report-title",
+        "article_url": "a.trend-link, a[href*='/trend/'], a.report-link",
+        "article_excerpt": ".trend-desc, .summary, .overview",
+        "publish_date": ".published-date, .date, time[datetime]",
+        "trend_category": ".trend-category, .field, .industry-tag",
+        "data_points": "[class*='metric'], [class*='data']"
+      },
+      "pagination": {
+        "type": "offset",
+        "url_pattern": "https://www.some.co.kr/trends?offset={OFFSET}&limit=20",
+        "max_pages": 10
+      },
+      "notes": "Likely uses offset-based pagination; verify URL pattern"
+    },
+    {
+      "site_name": "outstanding.kr",
+      "category": "Startup/Business",
+      "priority": "low",
+      "priority_reason": "Startup job/project platform, secondary content source",
+      "crawl_type": "css_selector",
+      "article_list_url": "https://www.outstanding.kr/news",
+      "selectors": {
+        "article_container": ".news-card, .article-item, [class*='post']",
+        "article_title": ".news-title, h2, .headline",
+        "article_url": "a.news-link, a[href*='/article/'], a.read-more",
+        "article_excerpt": ".news-desc, .summary, .teaser",
+        "publish_date": ".news-date, time, [class*='date']",
+        "startup_mention": ".startup-name, .company-tag, [class*='company']"
+      },
+      "pagination": {
+        "next_page_selector": "a.next, .pagination .next",
+        "pages_to_crawl": 5
+      },
+      "notes": "Secondary priority; focus on tier1 sites first"
+    },
+    {
+      "site_name": "kbthink.com",
+      "category": "Brand/Marketing",
+      "priority": "low",
+      "priority_reason": "Knowledge base format; may require custom parsing",
+      "crawl_type": "sitemap_based",
+      "sitemap_url": "https://www.kbthink.com/sitemap.xml",
+      "selectors": {
+        "article_container": ".post, .article, [class*='content']",
+        "article_title": "h1, h2.title, .post-title",
+        "article_url": "a[href*='/post/'], a[href*='/blog/'], a.permalink",
+        "publish_date": ".post-date, time, [class*='date']",
+        "category_tag": ".category, .tag, [class*='category']"
+      },
+      "fallback_strategy": "use_sitemap_urls",
+      "notes": "Use sitemap.xml to discover article URLs, then scrape each page individually"
+    }
+  ],
+  "global_settings": {
+    "timeout_seconds": 10,
+    "read_timeout_seconds": 5,
+    "delay_between_requests_ms": 1000,
+    "max_retries": 3,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "respect_robots_txt": true,
+    "follow_redirects": true,
+    "max_redirects": 3
+  },
+  "error_handling": {
+    "404_response": "skip_url",
+    "403_response": "log_and_skip",
+    "5xx_response": "retry_with_backoff",
+    "timeout_response": "retry_once",
+    "invalid_html_response": "log_error_and_skip"
+  },
+  "metadata_extraction": {
+    "extract_open_graph": true,
+    "extract_json_ld": true,
+    "extract_schema_markup": true,
+    "extract_meta_description": true,
+    "extract_image_url": true,
+    "fallback_image_selector": "img.article-image, img.thumbnail, img.featured"
+  },
+  "date_formats_to_detect": [
+    "YYYY-MM-DD",
+    "DD/MM/YYYY",
+    "MM/DD/YYYY",
+    "MMMM D, YYYY",
+    "D MMMM YYYY",
+    "YYYY년 M월 D일",
+    "YYYY-MM-DDTHH:mm:ssZ"
+  ],
+  "implementation_notes": {
+    "phase_2_schedule": "Q2 2026",
+    "estimated_coverage": "37 additional sources via CSS/JS crawling",
+    "tech_stack_recommendation": "Puppeteer for JS-heavy sites, Cheerio for static HTML",
+    "monitoring": "Track parse errors, timeout rates, article volume per source",
+    "quality_gates": "Validate extracted article URLs exist and contain expected content"
+  }
+}

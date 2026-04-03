@@ -1,0 +1,13 @@
+site_name,url,category,rss_feed,status,priority,polling_interval_hours
+bemyb,bemyb.kr,Brand/Marketing,https://bemyb.kr/rss,active,tier1,4
+magazine_cheil,magazine.cheil.com,Brand/Marketing,https://magazine.cheil.com/feed,active,tier1,6
+cosmopolitan_kr,cosmopolitan.co.kr,Fashion/Lifestyle,https://www.cosmopolitan.co.kr/rss,active,tier1,4
+dazedkorea,dazedkorea.com,Fashion/Lifestyle,http://www.dazedkorea.com/rss.xml,active,tier2,6
+elle_kr,elle.co.kr,Fashion/Lifestyle,https://www.elle.co.kr/rss,active,tier1,4
+esquire_kr,esquirekorea.co.kr,Fashion/Lifestyle,https://www.esquirekorea.co.kr/rss,active,tier1,4
+harpers_kr,harpersbazaar.co.kr,Fashion/Lifestyle,https://www.harpersbazaar.co.kr/rss,active,tier2,6
+mknews,mknews.kr,Marketing/Consumer,https://mknews.kr/rss,active,tier2,6
+trend_m,trend-m.com,Trend/Research,https://trend-m.com/rss,active,tier2,6
+daehong_blog,blog.daehong.com,Agency/Blogs,https://blog.daehong.com/feed,active,tier1,4
+hsad_blog,blog.hsad.co.kr,Agency/Blogs,https://blog.hsad.co.kr/feed,active,tier1,4
+innocean_blog,innosight.innocean.com,Agency/Blogs,https://innosight.innocean.com/feed,active,tier1,4
