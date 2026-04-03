@@ -300,7 +300,7 @@
 
 2. ✅ **UMS 대시보드 실데이터 검증** — `.eq("status", "active")` 제거, seed 데이터 추가. `app/intra/ums/page.tsx` 수정 완료 (세션 16).
 
-3. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
+3. **SmarComm 대시보드 Mock→DB 전환** — **보류** (사용자 요청). 스키마가 Mock과 불일치 (`tenant_id` 없음, `metrics` JSON 형식 등). 나중 단계 진행 예정.
 
 ### 사용자 결정 후 진행
 
