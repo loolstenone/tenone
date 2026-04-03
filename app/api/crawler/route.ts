@@ -3,13 +3,35 @@
  * POST /api/crawler  { action: "crawl" | "process" }
  *
  * crawl: RSS 소스에서 기사 수집 → collected_data에 저장
- * process: collected_data → Claude 요약 → mindle_trends에 저장
+ * process: collected_data → Claude Haiku 필터링 → Sonnet 트렌드 카드 → mindle_trends 저장
  *
- * GCP Scheduler 또는 수동 호출용
+ * Vercel Cron 또는 수동 호출용
  */
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { postAgentMessage } from '@/lib/supabase/chat';
+
+function getAnthropicClient(): Anthropic | null {
+    let apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const envPath = path.join(process.cwd(), '.env.local');
+            if (fs.existsSync(envPath)) {
+                for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+                    if (line.startsWith('ANTHROPIC_API_KEY=')) {
+                        apiKey = line.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+                        break;
+                    }
+                }
+            }
+        } catch {}
+    }
+    if (!apiKey) return null;
+    return new Anthropic({ apiKey });
+}
 
 interface RssItem {
     title: string;
@@ -108,6 +130,116 @@ export async function POST(request: NextRequest) {
             action: 'crawl',
             sources: sources.length,
             collected: totalCollected,
+            errors: errors.length > 0 ? errors : undefined,
+        });
+    }
+
+    if (action === 'process') {
+        const anthropic = getAnthropicClient();
+        if (!anthropic) {
+            return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
+        }
+
+        const { data: rawItems } = await supabase
+            .from('collected_data')
+            .select('*')
+            .eq('status', 'raw')
+            .eq('tenant_id', 'tenone')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (!rawItems || rawItems.length === 0) {
+            return NextResponse.json({ action: 'process', message: 'No raw items to process' });
+        }
+
+        let processed = 0;
+        let skipped = 0;
+        const errors: string[] = [];
+
+        for (const item of rawItems) {
+            try {
+                // Step 1: Haiku — 관련성 점수 + 요약
+                const filterRes = await anthropic.messages.create({
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 256,
+                    messages: [{
+                        role: 'user',
+                        content: `기사를 평가하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 400)}\n\nJSON으로 응답:\n{"relevance_score":0~10,"summary":"한줄요약50자","category":"AI/마케팅/스타트업/커머스/미디어/기타"}\nJSON만 응답.`,
+                    }],
+                });
+                const filterText = filterRes.content[0].type === 'text' ? filterRes.content[0].text : '';
+                let filter: { relevance_score: number; summary: string; category: string };
+                try {
+                    filter = JSON.parse(filterText.replace(/```json\n?|```\n?/g, '').trim());
+                } catch {
+                    await supabase.from('collected_data').update({ status: 'error' }).eq('id', item.id);
+                    skipped++;
+                    continue;
+                }
+
+                if (filter.relevance_score < 6) {
+                    await supabase.from('collected_data').update({ status: 'rejected' }).eq('id', item.id);
+                    skipped++;
+                    continue;
+                }
+
+                // Step 2: Sonnet — 트렌드 카드 본문
+                const cardRes = await anthropic.messages.create({
+                    model: 'claude-sonnet-4-6',
+                    max_tokens: 600,
+                    messages: [{
+                        role: 'user',
+                        content: `Mindle 트렌드 카드를 작성하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 600)}\n카테고리: ${filter.category}\n\nJSON으로 응답:\n{"title":"클릭하고싶은제목40자","full_content":"트렌드분석200-400자인사이트포함"}\nJSON만 응답.`,
+                    }],
+                });
+                const cardText = cardRes.content[0].type === 'text' ? cardRes.content[0].text : '';
+                let card: { title: string; full_content: string };
+                try {
+                    card = JSON.parse(cardText.replace(/```json\n?|```\n?/g, '').trim());
+                } catch {
+                    await supabase.from('collected_data').update({ status: 'error' }).eq('id', item.id);
+                    skipped++;
+                    continue;
+                }
+
+                // Step 3: mindle_trends 저장
+                await supabase.from('mindle_trends').insert({
+                    title: card.title || item.title,
+                    summary: filter.summary,
+                    full_content: card.full_content,
+                    category: filter.category,
+                    relevance_score: filter.relevance_score,
+                    source_url: item.url,
+                    source_name: item.source_name,
+                    agent_name: 'Whole See',
+                    status: 'published',
+                    published_at: new Date().toISOString(),
+                    tenant_id: 'tenone',
+                    is_featured: false,
+                    view_count: 0,
+                });
+
+                await supabase.from('collected_data').update({ status: 'processed' }).eq('id', item.id);
+                processed++;
+            } catch (err) {
+                errors.push(`${(item.title || '').slice(0, 30)}: ${err instanceof Error ? err.message : 'Unknown'}`);
+                await supabase.from('collected_data').update({ status: 'error' }).eq('id', item.id);
+            }
+        }
+
+        if (processed > 0) {
+            await postAgentMessage({
+                channelName: '트렌드',
+                agentName: 'Whole See',
+                content: `트렌드 카드 ${processed}건 생성 → Mindle Trends 발행 완료 (${skipped}건 제외${errors.length > 0 ? `, 오류 ${errors.length}건` : ''})`,
+            });
+        }
+
+        return NextResponse.json({
+            action: 'process',
+            total: rawItems.length,
+            processed,
+            skipped,
             errors: errors.length > 0 ? errors : undefined,
         });
     }
