@@ -1,6 +1,47 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 16 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 17 — 완료)
+
+## 오늘 한 작업 (4/3 사무실 세션 17)
+
+### Mindle 크롤러 RSS 소스 12개 추가 ✅
+
+**작업 내용:**
+1. **RSS 피드 가용성 검사** — 50+ 한국/글로벌 마케팅·브랜드·트렌드 사이트 테스트
+   - 성공률: 24.5% (12/49 가능)
+   - 에이전시 블로그 최고: 60% (3/5)
+   - Fashion/Lifestyle: 33% (5/15)
+
+2. **Working RSS 피드 (12개)**
+   - **Brand/Marketing**: bemyb, magazine.cheil.com
+   - **Fashion/Lifestyle**: cosmopolitan.co.kr, elle.co.kr, esquirekorea.co.kr, dazedkorea.com, harpersbazaar.co.kr
+   - **Marketing/Consumer**: mknews.kr
+   - **Trend/Research**: trend-m.com
+   - **Agency/Blogs**: blog.daehong.com, blog.hsad.co.kr, innosight.innocean.com
+
+3. **DB 통합** (mindle_sources 테이블)
+   - 12개 신규 + 기존 9개 = **총 21개 활성 RSS 피드**
+   - Tier 1 (4h 폴링): bemyb, cheil, cosmopolitan, elle, esquire, daehong, hsad, innocean
+   - Tier 2 (6h 폴링): dazed, harper's, mknews, trend-m
+
+4. **예상 효과**
+   - 수집량: 40-50건/day → 120-150건/day (250% 증가)
+   - 카테고리: Brand/Marketing, Fashion, Agency Blogs 강화
+   - 트렌드 다양성 ↑
+
+5. **파일 생성** (docs/ 폴더)
+   - RSS_FEED_ANALYSIS.md (상세 분석)
+   - mindle-rss-feeds.csv (배포용)
+   - mindle-crawler-selectors.json (Phase 2 CSS 크롤러)
+   - README_MINDLE_RSS_TEST.md (구현 가이드)
+
+**커밋:** `1061f86`
+
+**다음 Phase:**
+- Phase 2 (4-6주): 38개 non-RSS 사이트 CSS/Puppeteer 크롤러
+- Phase 3 (장기): API/Newsletter/PDF 추가 통합 → 200+ articles/day
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 16)
 
