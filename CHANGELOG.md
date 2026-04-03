@@ -26,7 +26,7 @@
 - customer_payments: PG 연동 전 스키마 완비
 - member_point_balances: 집계 뷰로 잔액 관리
 
-**커밋:** (이번 세션)
+**커밋:** `367ff1d`
 
 ---
 
