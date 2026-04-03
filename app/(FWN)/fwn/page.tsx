@@ -1,102 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   TrendingUp,
   Star,
   ChevronRight,
   Globe,
   Calendar,
-  MapPin,
   Users,
   Camera,
   Newspaper,
   Shirt,
 } from "lucide-react";
+import {
+  fetchFWNArticles,
+  formatDateKorean,
+  getPrimaryCategory,
+  categoryNameMap,
+  type FWNArticle,
+} from "@/lib/supabase/fwn";
 
-/* ── 플래시 뉴스 ── */
-const flashNews = [
-  "2026 S/S 서울 패션위크 일정 공개",
-  "파리 오트쿠튀르 하이라이트",
-  "뉴욕 패션위크 신진 디자이너 TOP 5",
-  "런던 패션위크 지속가능 패션 트렌드",
-  "밀라노 — 크래프츠맨십의 부활",
-];
-
-/* ── 패션위크 캘린더 ── */
+/* ── 패션위크 캘린더 (정적) ── */
 const fashionWeekCalendar = [
-  {
-    city: "New York",
-    flag: "NY",
-    dates: "2026.09.08 - 09.13",
-    status: "upcoming" as const,
-  },
-  {
-    city: "London",
-    flag: "LDN",
-    dates: "2026.09.15 - 09.19",
-    status: "upcoming" as const,
-  },
-  {
-    city: "Milan",
-    flag: "MIL",
-    dates: "2026.09.20 - 09.26",
-    status: "upcoming" as const,
-  },
-  {
-    city: "Paris",
-    flag: "PAR",
-    dates: "2026.09.27 - 10.05",
-    status: "upcoming" as const,
-  },
-  {
-    city: "Seoul",
-    flag: "SEL",
-    dates: "2026.10.07 - 10.12",
-    status: "upcoming" as const,
-  },
-  {
-    city: "Tokyo",
-    flag: "TKY",
-    dates: "2026.10.14 - 10.18",
-    status: "upcoming" as const,
-  },
+  { city: "New York", flag: "NY", dates: "2026.09.08 - 09.13", status: "upcoming" as const },
+  { city: "London", flag: "LDN", dates: "2026.09.15 - 09.19", status: "upcoming" as const },
+  { city: "Milan", flag: "MIL", dates: "2026.09.20 - 09.26", status: "upcoming" as const },
+  { city: "Paris", flag: "PAR", dates: "2026.09.27 - 10.05", status: "upcoming" as const },
+  { city: "Seoul", flag: "SEL", dates: "2026.10.07 - 10.12", status: "upcoming" as const },
+  { city: "Tokyo", flag: "TKY", dates: "2026.10.14 - 10.18", status: "upcoming" as const },
 ];
 
-/* ── 최근 뉴스 ── */
-const latestNews = [
-  {
-    id: 1,
-    title: "2026 S/S 서울 패션위크, DDP에서 역대 최대 규모로 개최",
-    category: "서울",
-    date: "2026.03.20",
-    tag: "Main Story",
-    excerpt:
-      "올 시즌 54개 브랜드가 참가하며, K-패션의 글로벌 위상을 한 단계 높인다.",
-  },
-  {
-    id: 2,
-    title: "파리 오트쿠튀르 — 메종 마르지엘라의 새로운 시대",
-    category: "파리",
-    date: "2026.03.18",
-    tag: "Editor's Pick",
-    excerpt:
-      "새 크리에이티브 디렉터가 선보인 해체주의 컬렉션이 업계의 주목을 받고 있다.",
-  },
-  {
-    id: 3,
-    title: "뉴욕 패션위크 — 신진 디자이너가 주도하는 변화",
-    category: "뉴욕",
-    date: "2026.03.15",
-    tag: "Trending",
-    excerpt:
-      "빅 하우스 대신 신진 디자이너들이 런웨이를 장악. 다양성과 지속가능성이 키워드.",
-  },
-];
-
-/* ── 네트워크 현황 ── */
+/* ── 네트워크 현황 (정적) ── */
 const networkStats = [
   { label: "디자이너", count: "340+", icon: Shirt },
   { label: "바이어", count: "120+", icon: Users },
@@ -104,17 +39,40 @@ const networkStats = [
   { label: "브랜드", count: "210+", icon: Star },
 ];
 
-/* ── 트렌딩 ── */
-const trendingArticles = [
-  { rank: 1, title: "서울 패션위크 일정 총정리", views: "12.4K" },
-  { rank: 2, title: "파리 2026 S/S 하이라이트", views: "9.8K" },
-  { rank: 3, title: "주목할 한국 디자이너 10인", views: "8.2K" },
-  { rank: 4, title: "뉴욕 스트리트 패션 트렌드", views: "6.5K" },
-  { rank: 5, title: "런던 지속가능 패션 브랜드", views: "5.1K" },
-];
-
 export default function FWNHome() {
   const [hoveredWeek, setHoveredWeek] = useState<string | null>(null);
+  const [flashNews, setFlashNews] = useState<FWNArticle[]>([]);
+  const [latestNews, setLatestNews] = useState<FWNArticle[]>([]);
+  const [trending, setTrending] = useState<FWNArticle[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const [flashData, latestData, trendingData] = await Promise.all([
+        fetchFWNArticles({ limit: 5 }),
+        fetchFWNArticles({ limit: 6 }),
+        fetchFWNArticles({ limit: 5, orderBy: "view_count" }),
+      ]);
+      setFlashNews(flashData);
+      setLatestNews(latestData);
+      setTrending(trendingData);
+      setLoaded(true);
+    }
+    load();
+  }, []);
+
+  /** 기사 태그 라벨 */
+  function getTagLabel(article: FWNArticle): string {
+    if (article.is_pinned) return "Main Story";
+    if (article.is_recommended) return "Editor's Pick";
+    return "News";
+  }
+
+  /** 조회수 포맷 */
+  function formatViews(count: number): string {
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return String(count);
+  }
 
   return (
     <div className="bg-[#0A0A0A] text-white min-h-screen">
@@ -125,12 +83,17 @@ export default function FWNHome() {
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             Flash
           </span>
-          {flashNews.concat(flashNews).map((news, i) => (
-            <span key={i} className="text-xs text-neutral-400 shrink-0">
-              {news}
-              <span className="text-neutral-700 mx-4">/</span>
-            </span>
-          ))}
+          {(flashNews.length > 0
+            ? flashNews.map((a) => a.title)
+            : ["FWN - Fashion Week Network"]
+          )
+            .concat(flashNews.map((a) => a.title))
+            .map((title, i) => (
+              <span key={i} className="text-xs text-neutral-400 shrink-0">
+                {title}
+                <span className="text-neutral-700 mx-4">/</span>
+              </span>
+            ))}
         </div>
       </section>
 
@@ -198,44 +161,72 @@ export default function FWNHome() {
               Latest News
             </h2>
             <Link
-              href="/fwn/news"
+              href="/fwn/category/world"
               className="text-xs text-neutral-500 hover:text-white transition-colors flex items-center gap-1"
             >
               All <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="space-y-0 border-t border-neutral-800/50">
-            {latestNews.map((news) => (
-              <article
-                key={news.id}
-                className="group py-6 border-b border-neutral-800/30 cursor-pointer"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-[10px] font-bold text-white bg-white/10 px-2 py-0.5 uppercase tracking-wider">
-                        {news.tag}
-                      </span>
-                      <span className="text-[10px] text-neutral-600 uppercase tracking-wider">
-                        {news.category}
-                      </span>
+
+          {!loaded ? (
+            <div className="flex justify-center py-12">
+              <div className="w-5 h-5 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+            </div>
+          ) : latestNews.length === 0 ? (
+            <p className="text-neutral-600 text-sm text-center py-12">
+              아직 등록된 기사가 없습니다.
+            </p>
+          ) : (
+            <div className="space-y-0 border-t border-neutral-800/50">
+              {latestNews.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/fwn/article/${article.slug}`}
+                  className="group block"
+                >
+                  <article className="py-6 border-b border-neutral-800/30 cursor-pointer">
+                    <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                      {/* 텍스트 영역 */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-[10px] font-bold text-white bg-white/10 px-2 py-0.5 uppercase tracking-wider">
+                            {getTagLabel(article)}
+                          </span>
+                          <span className="text-[10px] text-neutral-600 uppercase tracking-wider">
+                            {categoryNameMap[getPrimaryCategory(article.tags)] ?? ""}
+                          </span>
+                        </div>
+                        <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-neutral-300 transition-colors leading-tight mb-2">
+                          {article.title}
+                        </h3>
+                        {article.summary && (
+                          <p className="text-sm text-neutral-500 leading-relaxed max-w-2xl line-clamp-2">
+                            {article.summary}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 이미지 + 날짜 */}
+                      <div className="shrink-0 flex flex-row-reverse lg:flex-col items-end gap-3">
+                        {article.image && (
+                          <div className="w-24 h-16 rounded overflow-hidden">
+                            <img
+                              src={article.image}
+                              alt={article.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <p className="text-[10px] text-neutral-600 font-mono lg:text-right">
+                          {formatDateKorean(article.published_at)}
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-neutral-300 transition-colors leading-tight mb-2">
-                      {news.title}
-                    </h3>
-                    <p className="text-sm text-neutral-500 leading-relaxed max-w-2xl">
-                      {news.excerpt}
-                    </p>
-                  </div>
-                  <div className="shrink-0 lg:text-right">
-                    <p className="text-[10px] text-neutral-600 font-mono">
-                      {news.date}
-                    </p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -274,33 +265,41 @@ export default function FWNHome() {
                   Trending
                 </h2>
               </div>
-              <div className="space-y-0 border-t border-neutral-800/50">
-                {trendingArticles.map((article) => (
-                  <Link
-                    key={article.rank}
-                    href="/fwn"
-                    className="group flex items-center gap-4 py-4 border-b border-neutral-800/30 hover:pl-2 transition-all"
-                  >
-                    <span
-                      className={`text-xl font-black shrink-0 w-8 text-center ${
-                        article.rank <= 3
-                          ? "text-white"
-                          : "text-neutral-700"
-                      }`}
+              {!loaded ? (
+                <div className="flex justify-center py-8">
+                  <div className="w-5 h-5 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+                </div>
+              ) : trending.length === 0 ? (
+                <p className="text-neutral-600 text-sm text-center py-8">
+                  트렌딩 기사가 없습니다.
+                </p>
+              ) : (
+                <div className="space-y-0 border-t border-neutral-800/50">
+                  {trending.map((article, idx) => (
+                    <Link
+                      key={article.id}
+                      href={`/fwn/article/${article.slug}`}
+                      className="group flex items-center gap-4 py-4 border-b border-neutral-800/30 hover:pl-2 transition-all"
                     >
-                      {article.rank}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-neutral-300 group-hover:text-white transition-colors truncate">
-                        {article.title}
-                      </p>
-                    </div>
-                    <span className="text-[10px] text-neutral-600 shrink-0 font-mono">
-                      {article.views}
-                    </span>
-                  </Link>
-                ))}
-              </div>
+                      <span
+                        className={`text-xl font-black shrink-0 w-8 text-center ${
+                          idx < 3 ? "text-white" : "text-neutral-700"
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-neutral-300 group-hover:text-white transition-colors truncate">
+                          {article.title}
+                        </p>
+                      </div>
+                      <span className="text-[10px] text-neutral-600 shrink-0 font-mono">
+                        {formatViews(article.view_count ?? 0)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -310,9 +309,7 @@ export default function FWNHome() {
       <section className="px-6 py-16 border-t border-neutral-800/30">
         <div className="mx-auto max-w-2xl text-center">
           <Newspaper className="w-6 h-6 text-neutral-600 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-white mb-2">
-            FWN Weekly
-          </h3>
+          <h3 className="text-lg font-bold text-white mb-2">FWN Weekly</h3>
           <p className="text-neutral-500 text-sm mb-6">
             매주 월요일, 전세계 패션위크 소식을 정리해 보내드립니다.
           </p>
@@ -340,21 +337,9 @@ export default function FWNHome() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              {
-                name: "Badak",
-                desc: "패션 업계 비즈니스 네트워킹",
-                href: "/badak",
-              },
-              {
-                name: "SmarComm",
-                desc: "패션 브랜드 마케팅 커뮤니케이션",
-                href: "/smarcomm",
-              },
-              {
-                name: "MAD League",
-                desc: "패션 분야 대학생 프로젝트",
-                href: "/madleague",
-              },
+              { name: "Badak", desc: "패션 업계 비즈니스 네트워킹", href: "/badak" },
+              { name: "SmarComm", desc: "패션 브랜드 마케팅 커뮤니케이션", href: "/smarcomm" },
+              { name: "MAD League", desc: "패션 분야 대학생 프로젝트", href: "/madleague" },
             ].map((brand) => (
               <Link
                 key={brand.name}
