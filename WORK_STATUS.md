@@ -1,6 +1,34 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 9 — 작업 중)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 10 — 작업 중)
+
+## 오늘 한 작업 (4/3 사무실 세션 10)
+
+### 메신저 우측 패널 분기 ✅
+- 채널 선택 시: 채널명·설명, 담당 에이전트 카드(role·활성상태), 최근 활동 4건
+- 일반 대화 선택 시: 기존 상대 프로필 + 그룹 참여자 패널 유지
+- `/api/agent/profiles` 연동 → agent_name 매핑
+- 커밋: `80aa15c`
+
+### 크롤링 파이프라인 자동화 ✅
+- `crawler/route.ts`: `action=process` 구현 — Haiku 필터링(점수<6 rejected) → Sonnet 트렌드 카드 → `mindle_trends` 발행
+- `collected_data.status`: raw → processed / rejected / error 상태 관리
+
+### Vercel Cron 등록 ✅
+- `/api/cron/crawl`: 매 6시간 (`0 */6 * * *`)
+- `/api/cron/process`: 크롤 30분 후 (`30 */6 * * *`)
+- `/api/cron/vrief-am`: AM 10:01 KST (`1 1 * * *`)
+- `/api/cron/vrief-pm`: PM 22:01 KST (`1 13 * * *`)
+- `CRON_SECRET`: Vercel이 배포 시 자동 생성
+- 커밋: `0be4682`
+
+### UMS 에이전트 소통 페이지 ✅
+- `/intra/ums/agent/comm`: 에이전트 채널 현황 대시보드
+- 5개 채널 카드 (최근 메시지, 담당 에이전트 배지)
+- 수동 실행 버튼 (RSS 크롤, 트렌드 카드 생성)
+- Vercel Cron 스케줄 안내 섹션
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 9)
 
@@ -136,13 +164,11 @@
 
 0-1. **구 메뉴 정리** — 기존 `/intra/universe/*`, `/intra/bums/*`, `/intra/agent` 라우트 유지 필요 여부 검토. UMS로 통합됐으므로 사이드바에서 old 모듈이 보이지 않는지 확인.
 
-1. **GCP Scheduler 설정** — 크롤러(/api/crawler) + Vrief(/api/agent/vrief) 자동 실행. 크롤러: 매 6시간, Vrief: AM 10:01 / PM 22:01. `app/api/crawler/route.ts`, `app/api/agent/vrief/route.ts`에 CRON_SECRET 인증 이미 구현됨.
+1. **Vercel 배포 후 Cron 확인** — Vercel 대시보드 > Project > Crons 탭에서 5개 스케줄 활성화 확인. `CRON_SECRET` 자동 생성 여부 확인.
 
-2. **크롤링 데이터 → Claude 요약 → mindle_trends 자동 생성** — collected_data(raw) → Claude Haiku 노이즈 제거 → Sonnet 트렌드 카드 생성 → mindle_trends 저장. `/api/crawler`에 `action: 'process'` 추가.
+2. **크롤 → 프로세스 파이프라인 첫 실행 검증** — `/intra/ums/agent/comm` 페이지에서 "RSS 크롤 실행" → "트렌드 카드 생성" 순서로 수동 실행. Mindle Trends 페이지에서 새 카드 확인.
 
-3. **메신저 우측 패널 분기** — 채널 선택 시: 채널 설명 + 담당 에이전트 정보 + 최근 활동. 에이전트 선택 시: 역할/상태, 오늘 완료 작업, API 사용량. `app/intra/myverse/messenger/page.tsx` 우측 패널 조건 분기.
-
-4. **RLS "Always True" 정책 정비** — 실DB 전환 대상(CRM, HR, Finance)부터 tenant_id 기반 정책으로 교체. `sql/db-review-fixes.sql` 참조. 약 150개 테이블 대상이지만 민감 테이블 우선.
+3. **RLS "Always True" 정책 정비** — 실DB 전환 대상(CRM, HR, Finance)부터 tenant_id 기반 정책으로 교체. `sql/db-review-fixes.sql` 참조. 약 150개 테이블 대상이지만 민감 테이블 우선.
 
 ### 사용자 결정 후 진행
 
