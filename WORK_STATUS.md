@@ -1,6 +1,21 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 8 — 작업 종료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 9 — 작업 중)
+
+## 오늘 한 작업 (4/3 사무실 세션 9)
+
+### UMS 통합 메뉴 구조 완성 ✅
+- `app/intra/ums/` 전체 디렉토리 신규 생성 (23개 파일)
+- layout.tsx: UmsFilterContext + useBumsFilter 하위호환 제공
+- 회원 탭: list / guests / privacy
+- 사이트 탭: list / boards / content / newsletter / library
+- 커머스 탭: subscriptions / shop / bookings / promotions / revenue / inquiry
+- Team AI Agent 탭: hub / comm / trends
+- lib/intra-nav.ts: UMS 모듈 → children 기반 서브탭 구조로 재구성
+- 빌드 ✅ (564 pages)
+- 커밋: `46d965e`
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 8)
 
@@ -117,7 +132,9 @@
 
 ### 우선순위 높음 (바로 착수 가능)
 
-0. **UMS DB → Intra UI 연결** — Universe 대시보드 ums_sites 기반 브랜드 집계 전환. 현재 members.affiliations TEXT[]로 브랜드 집계 중 → member_brand_joins 기반으로 변경. `app/intra/universe/page.tsx` 195번째 줄 `membersAll.affiliations` 블록 교체.
+0. **UMS DB → Intra UI 연결** — UMS 대시보드(`app/intra/ums/page.tsx`) ums_sites 기반 브랜드 집계 전환. 현재 members.affiliations TEXT[]로 브랜드 집계 중 → member_brand_joins 기반으로 변경. `app/intra/ums/page.tsx` 195번째 줄 `membersAll.affiliations` 블록 교체.
+
+0-1. **구 메뉴 정리** — 기존 `/intra/universe/*`, `/intra/bums/*`, `/intra/agent` 라우트 유지 필요 여부 검토. UMS로 통합됐으므로 사이드바에서 old 모듈이 보이지 않는지 확인.
 
 1. **GCP Scheduler 설정** — 크롤러(/api/crawler) + Vrief(/api/agent/vrief) 자동 실행. 크롤러: 매 6시간, Vrief: AM 10:01 / PM 22:01. `app/api/crawler/route.ts`, `app/api/agent/vrief/route.ts`에 CRON_SECRET 인증 이미 구현됨.
 
