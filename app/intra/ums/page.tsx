@@ -204,11 +204,10 @@ export default function UniverseDashboard() {
                 {
                     const brandMap: Record<string, { members: number; revenue: number; subs: number }> = {};
 
-                    // member_brand_joins 기반 브랜드별 회원수 집계
+                    // member_brand_joins 기반 브랜드별 회원수 집계 (status 컬럼 없음)
                     const brandJoins = await supabase
                         .from("member_brand_joins")
-                        .select("brand_id")
-                        .eq("status", "active");
+                        .select("brand_id");
                     (brandJoins.data || []).forEach((j: { brand_id: string }) => {
                         const brand = j.brand_id;
                         if (!brandMap[brand]) brandMap[brand] = { members: 0, revenue: 0, subs: 0 };
