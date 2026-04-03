@@ -203,14 +203,14 @@ export async function POST(request: NextRequest) {
                 }
 
                 // Step 3: mindle_trends 저장
-                await supabase.from('mindle_trends').insert({
+                const { error: insertErr } = await supabase.from('mindle_trends').insert({
                     title: card.title || item.title,
                     summary: filter.summary,
                     full_content: card.full_content,
                     category: filter.category,
                     relevance_score: filter.relevance_score,
-                    source_url: item.url,
-                    source_name: item.source_name,
+                    source_urls: item.url ? [item.url] : [],
+                    source_names: item.source_name ? [item.source_name] : [],
                     agent_name: 'Whole See',
                     status: 'published',
                     published_at: new Date().toISOString(),
@@ -218,6 +218,7 @@ export async function POST(request: NextRequest) {
                     is_featured: false,
                     view_count: 0,
                 });
+                if (insertErr) throw new Error(`mindle_trends insert: ${insertErr.message}`);
 
                 await supabase.from('collected_data').update({ status: 'processed' }).eq('id', item.id);
                 processed++;
