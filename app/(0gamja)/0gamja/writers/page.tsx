@@ -4,9 +4,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const writers = [
-    { id: 1, name: "gamjamaster", role: "에디터", emoji: "🥔", bio: "공감자의 마스터 감자. 모든 감자를 사랑합니다.", posts: 3 },
-    { id: 2, name: "GamjaJeon", role: "필찐", emoji: "🫓", bio: "시니컬한데 일상에 재미도 좀 넣으려고 하지만 사람들은 의아해 함", posts: 2 },
-    { id: 3, name: "Glow Gamja", role: "필찐", emoji: "✨", bio: "뷰티와 라이프스타일, 반짝이는 감자의 일상.", posts: 1 },
+    { id: 1, name: "yomigamja", role: "귀여움 담당", emoji: "🐹", bio: "하찮고 귀여운 것들을 사랑하는 감자. 소소한 일상을 따뜻하게 담아냅니다.", posts: 5 },
+    { id: 2, name: "glowgamja", role: "뷰티 담당", emoji: "✨", bio: "피부부터 마음까지 빛나게. 가성비 뷰티 팁과 셀프케어를 나눕니다.", posts: 5 },
+    { id: 3, name: "idolgamja", role: "아이돌 담당", emoji: "🎤", bio: "아이돌 세상을 감자의 시선으로. 팬 문화와 엔터테인먼트 이야기.", posts: 5 },
+    { id: 4, name: "gamjajeon", role: "바닥담당", emoji: "🫓", bio: "시니컬한데 일상에 재미도 좀 넣으려고 하지만 사람들은 의아해 함", posts: 8 },
 ];
 
 export default function OgamjaWriters() {

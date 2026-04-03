@@ -103,47 +103,54 @@ const moodColors: Record<string, string> = {
 /* ── 작가 소개 ── */
 const writers = [
   {
-    name: "gamjamaster",
-    role: "대장 감자",
-    desc: "공감자의 시작. 일상의 소소한 순간을 따뜻한 시선으로 담아냅니다.",
-    posts: 12,
-    specialty: "에세이 & 일상",
+    name: "yomigamja",
+    role: "귀여움 담당",
+    desc: "하찮고 귀여운 것들을 사랑하는 감자. 소소한 일상을 따뜻하게 담아냅니다.",
+    posts: 5,
+    specialty: "일상 & 귀여움",
   },
   {
-    name: "GamjaJeon",
-    role: "감자전",
-    desc: "치열한 일상 속에서 찾는 작은 위로. 공장에서 사무실까지, 모든 직장인의 이야기.",
-    posts: 8,
-    specialty: "직장 에세이",
-  },
-  {
-    name: "Glow Gamja",
-    role: "윤감자",
+    name: "glowgamja",
+    role: "뷰티 담당",
     desc: "피부부터 마음까지 빛나게. 가성비 뷰티 팁과 셀프케어를 나눕니다.",
     posts: 5,
     specialty: "뷰티 & 셀프케어",
   },
+  {
+    name: "idolgamja",
+    role: "아이돌 담당",
+    desc: "아이돌 세상을 감자의 시선으로. 팬 문화와 엔터테인먼트 이야기.",
+    posts: 5,
+    specialty: "아이돌 & 엔터",
+  },
+  {
+    name: "gamjajeon",
+    role: "바닥담당",
+    desc: "시니컬한데 일상에 재미도 좀 넣으려고 하지만 사람들은 의아해 함.",
+    posts: 8,
+    specialty: "직장 에세이",
+  },
 ];
 
-/* ── 심리 상담 / 공감 프로그램 ── */
+/* ── 공감 프로그램 ── */
 const empathyPrograms = [
   {
     icon: MessageCircle,
-    title: "감자톡",
-    desc: "익명으로 속마음을 나누는 공간. 감자들끼리 서로 위로하고 공감합니다.",
+    title: "공감대",
+    desc: "같은 고민, 같은 관심사를 가진 사람들끼리 모여서 자신의 이야기를 털어 놓으면서 서로를 응원하고 지지해 주는 프로그램입니다.",
+    status: "상시 운영",
+  },
+  {
+    icon: Lightbulb,
+    title: "영감대",
+    desc: "남들 앞에 설 수 있는 용기만 있다면 자신의 경험을 나눌 수만 있다면 많은 사람들 앞에서 자신이 보고 경험한 것들을 나누는 프로그램입니다.",
     status: "상시 운영",
   },
   {
     icon: HeartHandshake,
-    title: "1:1 감자 상담",
-    desc: "혼자 감당하기 힘든 이야기가 있다면. 전문 상담사가 함께합니다.",
-    status: "예약제",
-  },
-  {
-    icon: Lightbulb,
-    title: "성장 감자 워크숍",
-    desc: "자존감, 관계, 진로 고민. 같은 세대 감자들과 함께 답을 찾아가는 워크숍.",
-    status: "월 2회",
+    title: "오감대",
+    desc: "우리는 일상 속에서 다양한 감각을 통해 세상을 느끼고 경험합니다. 시각, 청각, 후각, 미각, 촉각을 통해 함께 느끼는 활동입니다.",
+    status: "여행 & 놀이",
   },
 ];
 
@@ -187,7 +194,7 @@ export default function OgamjaHome() {
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
-              하찮지만 귀여운<br />
+              하찮고 귀여운<br />
               <span className="text-[#F472B6]">감자들</span>의 공감 이야기
             </h1>
 
@@ -234,7 +241,7 @@ export default function OgamjaHome() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-10 gap-4">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">최근 이야기</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">주렁주렁</h2>
               <p className="text-neutral-500">감자들이 나누는 따뜻한 글</p>
             </div>
             <div className="flex flex-wrap gap-2">
