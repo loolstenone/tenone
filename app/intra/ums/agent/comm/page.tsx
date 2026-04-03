@@ -249,12 +249,8 @@ export default function AgentCommPage() {
                 <p className="text-xs font-medium text-neutral-600 mb-3">Vercel Cron 스케줄</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                        { label: 'RSS 크롤', schedule: '매 6시간', path: '/api/cron/crawl' },
-                        { label: '트렌드 처리', schedule: '크롤 후 30분', path: '/api/cron/process' },
-                        { label: 'AM 브리핑', schedule: '10:01 KST', path: '/api/cron/vrief-am' },
-                        { label: 'PM 보고', schedule: '22:01 KST', path: '/api/cron/vrief-pm' },
-                        { label: '기회 수집', schedule: 'AM 8:00 KST', path: '/api/cron/opportunity-crawl' },
-                        { label: '기회 AI 분석', schedule: 'AM 8:30 KST', path: '/api/cron/opportunity-process' },
+                        { label: '통합 크롤', schedule: 'AM 9:00 KST (daily)', path: '/api/cron/all-crawl' },
+                        { label: '통합 처리 + 브리핑', schedule: 'AM 9:30 KST (daily)', path: '/api/cron/all-process' },
                     ].map(item => (
                         <div key={item.label} className="text-[11px]">
                             <p className="font-medium text-neutral-700">{item.label}</p>
