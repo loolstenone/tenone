@@ -70,7 +70,7 @@ export default function YouInOnePortfolioPage() {
                             className={`px-4 py-2 text-sm rounded-full border transition-colors ${
                                 filter === cat
                                     ? "bg-[#171717] text-white border-[#171717]"
-                                    : "border-neutral-300 hover:border-[#E53935] hover:text-[#E53935]"
+                                    : "border-neutral-300 hover:border-[#1AAD64] hover:text-[#1AAD64]"
                             }`}
                         >
                             {cat}
@@ -83,14 +83,14 @@ export default function YouInOnePortfolioPage() {
                     {filtered.map((p) => (
                         <div
                             key={p.id}
-                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#E53935]/30 transition-all"
+                            className="group bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#1AAD64]/30 transition-all"
                         >
                             <div className="aspect-video bg-gradient-to-br from-[#171717] to-neutral-700 flex items-center justify-center">
                                 <span className="text-5xl md:text-7xl">{p.emoji}</span>
                             </div>
                             <div className="p-6">
-                                <span className="text-xs text-[#E53935] font-medium">{p.category}</span>
-                                <h3 className="text-xl font-bold mt-1 mb-2 group-hover:text-[#E53935] transition-colors">{p.title}</h3>
+                                <span className="text-xs text-[#1AAD64] font-medium">{p.category}</span>
+                                <h3 className="text-xl font-bold mt-1 mb-2 group-hover:text-[#1AAD64] transition-colors">{p.title}</h3>
                                 <p className="text-neutral-500 text-sm italic mb-3">&ldquo;{p.question}&rdquo;</p>
                                 <p className="text-neutral-600 text-sm leading-relaxed mb-4">{p.desc}</p>
                                 <div className="flex flex-wrap gap-2 mb-3">

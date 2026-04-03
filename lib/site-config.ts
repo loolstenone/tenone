@@ -157,8 +157,8 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
     youinone: {
         id: 'youinone', name: 'YouInOne', logo: 'YouInOne', logoText: 'YouInOne', logoStyle: 'text',
         faviconUrl: '/brands/youinone/favicon.png', appleTouchIcon: '/brands/youinone/favicon.png',
-        accentColor: '#171717', bgDark: '#171717',
-        colors: { primary: '#171717', primaryDark: '#0a0a0a', secondary: '#525252', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#E53935' },
+        accentColor: '#1AAD64', bgDark: '#171717',
+        colors: { primary: '#1AAD64', primaryDark: '#148B4A', secondary: '#525252', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#1AAD64' },
         meta: { title: 'YouInOne — 프로젝트 그룹', description: '기업과 사회의 문제를 해결하는 프로젝트 그룹. Idea + Strategy. 소규모 기업 연합 얼라이언스.', keywords: ['YouInOne', '프로젝트그룹', '얼라이언스', '문제해결'] },
         homePath: '/youinone', signupPath: '/signup', domain: 'youinone.com',
         universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,

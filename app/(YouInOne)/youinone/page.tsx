@@ -171,6 +171,9 @@ export default function YouInOneHomePage() {
               <span className="animate-pulse text-green-400">|</span>
             </p>
           </div>
+          <p className="text-emerald-400/60 text-sm font-medium tracking-widest uppercase mb-6">
+            We are Project Group
+          </p>
           <p className="text-neutral-500 mb-10 leading-relaxed max-w-xl mx-auto text-sm">
             대학생, 직장인, 시니어, 소상공인이 세대를 넘어 함께 모여
             <br />
@@ -189,6 +192,32 @@ export default function YouInOneHomePage() {
             >
               프로젝트 보기
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Idea + Strategy ── */}
+      <section className="py-20 px-6 border-t border-green-500/10">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Lightbulb className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-bold text-white uppercase tracking-wider">Idea</h2>
+            </div>
+            <p className="text-neutral-400 leading-relaxed text-sm">
+              인구 감소, 청년 인구 이탈, 지역 소멸, 포스트 코로나...
+              지금까지 겪어 보지 못한 새로운 세상, 기업과 사회의 다양한 문제를 어떻게 해결 할 수 있을까?
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Target className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-bold text-white uppercase tracking-wider">Strategy</h2>
+            </div>
+            <p className="text-neutral-400 leading-relaxed text-sm">
+              다양한 경험의 멤버와 기업 얼라이언스가 함께 온라인 기반 전국 네트워크를 구축합니다.
+              세대를 넘어, 경험을 연결하여 더 큰 가치를 만듭니다.
+            </p>
           </div>
         </div>
       </section>
@@ -231,7 +260,7 @@ export default function YouInOneHomePage() {
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                         project.status === "모집 중"
-                          ? "bg-amber-500/20 text-amber-400"
+                          ? "bg-emerald-500/20 text-emerald-400"
                           : "bg-green-500/20 text-green-400"
                       }`}
                     >
@@ -361,7 +390,7 @@ export default function YouInOneHomePage() {
                 name: "MAD League",
                 desc: "대학생 크루의 동아리 연합 네트워크",
                 href: "/madleague",
-                color: "from-amber-500/10 to-transparent",
+                color: "from-emerald-500/10 to-transparent",
               },
               {
                 name: "domo",

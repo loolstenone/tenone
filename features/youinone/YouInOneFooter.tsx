@@ -23,7 +23,7 @@ export function YouInOneFooter() {
                             <span className="text-white font-extrabold text-lg tracking-tight">
                                 You
                             </span>
-                            <span className="text-[#E53935] font-medium text-xs mx-0.5">
+                            <span className="text-[#1AAD64] font-medium text-xs mx-0.5">
                                 In
                             </span>
                             <span className="text-white font-extrabold text-lg tracking-tight">
@@ -47,7 +47,7 @@ export function YouInOneFooter() {
                                 <li key={link.href}>
                                     <Link
                                         href={link.href}
-                                        className="text-sm hover:text-white transition-colors"
+                                        className="text-sm hover:text-[#1AAD64] transition-colors"
                                     >
                                         {link.name}
                                     </Link>
@@ -61,20 +61,20 @@ export function YouInOneFooter() {
                         <h4 className="text-white font-semibold text-sm mb-4">Contact</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <a href="mailto:hello@youinone.com" className="hover:text-white transition-colors">
+                                <a href="mailto:hello@youinone.com" className="hover:text-[#1AAD64] transition-colors">
                                     hello@youinone.com
                                 </a>
                             </li>
                             <li>서울특별시</li>
                         </ul>
                         <div className="flex items-center gap-4 mt-4">
-                            <a href="https://youinone.com" className="hover:text-white transition-colors" title="Website">
+                            <a href="https://youinone.com" className="hover:text-[#1AAD64] transition-colors" title="Website">
                                 <Globe className="h-5 w-5" />
                             </a>
-                            <a href="mailto:hello@youinone.com" className="hover:text-white transition-colors" title="Email">
+                            <a href="mailto:hello@youinone.com" className="hover:text-[#1AAD64] transition-colors" title="Email">
                                 <Mail className="h-5 w-5" />
                             </a>
-                            <a href="#" className="hover:text-white transition-colors" title="Ideas">
+                            <a href="#" className="hover:text-[#1AAD64] transition-colors" title="Ideas">
                                 <Lightbulb className="h-5 w-5" />
                             </a>
                         </div>
@@ -82,7 +82,7 @@ export function YouInOneFooter() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-neutral-700 text-center text-xs">
-                    &copy; YouInOne. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
+                    &copy; YouInOne. Powered by <a href="/about?tab=universe" className="hover:text-[#1AAD64] transition-colors">Ten:One&trade; Universe</a>.
                 </div>
             </div>
         </footer>

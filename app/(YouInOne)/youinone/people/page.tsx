@@ -23,7 +23,7 @@ export default function YouInOnePeoplePage() {
             {/* Hero */}
             <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">PEOPLE</p>
+                    <p className="text-[#1AAD64] text-sm font-medium tracking-widest mb-4">PEOPLE</p>
                     <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6">
                         유인원의 사람들
                     </h1>
@@ -43,13 +43,13 @@ export default function YouInOnePeoplePage() {
                         {members.map((m) => (
                             <div
                                 key={m.name}
-                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all text-center"
+                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#1AAD64]/30 transition-all text-center"
                             >
                                 <div className="w-20 h-20 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
                                     <span className="text-xl md:text-3xl">{m.emoji}</span>
                                 </div>
-                                <h3 className="text-lg font-bold group-hover:text-[#E53935] transition-colors">{m.name}</h3>
-                                <p className="text-sm text-[#E53935] font-medium mt-1">{m.role}</p>
+                                <h3 className="text-lg font-bold group-hover:text-[#1AAD64] transition-colors">{m.name}</h3>
+                                <p className="text-sm text-[#1AAD64] font-medium mt-1">{m.role}</p>
                                 <p className="text-sm text-neutral-500 mt-3">{m.desc}</p>
                             </div>
                         ))}
@@ -66,15 +66,15 @@ export default function YouInOnePeoplePage() {
                         {alliance.map((a) => (
                             <div
                                 key={a.name}
-                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all"
+                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#1AAD64]/30 transition-all"
                             >
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="w-14 h-14 bg-neutral-100 rounded-full flex items-center justify-center">
                                         <span className="text-2xl">{a.emoji}</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold group-hover:text-[#E53935] transition-colors">{a.name}</h3>
-                                        <p className="text-sm text-[#E53935] font-medium">{a.role}</p>
+                                        <h3 className="text-lg font-bold group-hover:text-[#1AAD64] transition-colors">{a.name}</h3>
+                                        <p className="text-sm text-[#1AAD64] font-medium">{a.role}</p>
                                     </div>
                                 </div>
                                 <p className="text-sm text-neutral-500">{a.desc}</p>
@@ -93,7 +93,7 @@ export default function YouInOnePeoplePage() {
                 <p className="text-neutral-400 mb-8">멤버십 또는 얼라이언스로 유인원과 함께하세요.</p>
                 <Link
                     href="/youinone/alliance"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white font-medium hover:bg-[#C62828] transition-colors rounded"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#1AAD64] text-white font-medium hover:bg-[#148B4A] transition-colors rounded"
                 >
                     참여하기 <ArrowRight className="h-4 w-4" />
                 </Link>

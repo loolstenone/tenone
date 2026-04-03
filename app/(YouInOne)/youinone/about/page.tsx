@@ -24,11 +24,11 @@ export default function YouInOneAboutPage() {
             {/* Hero */}
             <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">ABOUT</p>
+                    <p className="text-[#1AAD64] text-sm font-medium tracking-widest mb-4">ABOUT</p>
                     <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                         Project Group of<br />
                         Thinking Apes.<br />
-                        <span className="text-[#E53935]">We Ask Why?</span>
+                        <span className="text-[#1AAD64]">We Ask Why?</span>
                     </h1>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto leading-relaxed">
                         사회, 경제, 창업, 마케팅, 광고, 디자인, 영상 등<br />
@@ -106,13 +106,13 @@ export default function YouInOneAboutPage() {
 
                     <div className="space-y-8">
                         <div className="p-6 bg-white rounded-xl border border-neutral-200">
-                            <h3 className="text-lg font-bold text-[#E53935] mb-2">Vision</h3>
+                            <h3 className="text-lg font-bold text-[#1AAD64] mb-2">Vision</h3>
                             <p className="text-neutral-700 font-medium">
                                 우리의 아이디어로 세상의 고민을 긍정적인 방법으로 해결한다
                             </p>
                         </div>
                         <div className="p-6 bg-white rounded-xl border border-neutral-200">
-                            <h3 className="text-lg font-bold text-[#E53935] mb-2">Mission</h3>
+                            <h3 className="text-lg font-bold text-[#1AAD64] mb-2">Mission</h3>
                             <p className="text-neutral-700 font-medium">
                                 신뢰 기반의 네트워킹, 질문하는 인간, 빠른 실행, 실패에 대한 두려움 없이
                             </p>
@@ -128,7 +128,7 @@ export default function YouInOneAboutPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {coreValues.map((v) => (
                             <div key={v.num} className="p-6 bg-neutral-50 rounded-xl">
-                                <span className="text-[#E53935] font-bold text-sm">{v.num}</span>
+                                <span className="text-[#1AAD64] font-bold text-sm">{v.num}</span>
                                 <h3 className="text-xl font-bold mt-2 mb-3">{v.title}</h3>
                                 <p className="text-neutral-600 text-sm leading-relaxed">{v.desc}</p>
                             </div>
@@ -144,7 +144,7 @@ export default function YouInOneAboutPage() {
                     <div className="space-y-4">
                         {behaviors.map((b, i) => (
                             <div key={i} className="flex items-center gap-4 p-5 border border-neutral-700 rounded-lg">
-                                <span className="shrink-0 w-8 h-8 bg-[#E53935] text-white font-bold text-sm rounded-full flex items-center justify-center">
+                                <span className="shrink-0 w-8 h-8 bg-[#1AAD64] text-white font-bold text-sm rounded-full flex items-center justify-center">
                                     {i + 1}
                                 </span>
                                 <p className="text-neutral-300 font-medium">{b}</p>
@@ -161,13 +161,13 @@ export default function YouInOneAboutPage() {
                 <div className="flex items-center justify-center gap-4">
                     <Link
                         href="/youinone/alliance"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#171717] text-white hover:bg-[#E53935] transition-colors rounded font-medium"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded font-medium"
                     >
                         멤버십 & 얼라이언스 <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
                         href="/youinone/contact"
-                        className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-300 hover:border-[#E53935] hover:text-[#E53935] transition-colors rounded font-medium"
+                        className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-300 hover:border-[#1AAD64] hover:text-[#148B4A] transition-colors rounded font-medium"
                     >
                         문의하기
                     </Link>

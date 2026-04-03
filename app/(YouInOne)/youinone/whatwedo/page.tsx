@@ -27,7 +27,7 @@ export default function YouInOneWhatWeDoPage() {
             {/* Hero */}
             <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">WHAT WE DO</p>
+                    <p className="text-[#1AAD64] text-sm font-medium tracking-widest mb-4">WHAT WE DO</p>
                     <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6">
                         Showcase Our Item
                     </h1>
@@ -44,12 +44,12 @@ export default function YouInOneWhatWeDoPage() {
                         {services.map((s) => (
                             <div
                                 key={s.title}
-                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all"
+                                className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#1AAD64]/30 transition-all"
                             >
-                                <div className="inline-flex p-3 rounded-lg mb-4 bg-neutral-50 text-[#171717] group-hover:bg-[#E53935]/10 group-hover:text-[#E53935] transition-colors">
+                                <div className="inline-flex p-3 rounded-lg mb-4 bg-neutral-50 text-[#171717] group-hover:bg-[#1AAD64]/10 group-hover:text-[#1AAD64] transition-colors">
                                     <s.icon className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-lg font-bold mb-2 group-hover:text-[#E53935] transition-colors">{s.title}</h3>
+                                <h3 className="text-lg font-bold mb-2 group-hover:text-[#1AAD64] transition-colors">{s.title}</h3>
                                 <p className="text-sm text-neutral-500 leading-relaxed">{s.desc}</p>
                             </div>
                         ))}
@@ -64,7 +64,7 @@ export default function YouInOneWhatWeDoPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {howWeWork.map((h) => (
                             <div key={h.num} className="text-center">
-                                <span className="inline-flex w-16 h-16 items-center justify-center rounded-full bg-[#171717] text-[#E53935] font-bold text-xl mb-4">
+                                <span className="inline-flex w-16 h-16 items-center justify-center rounded-full bg-[#171717] text-[#1AAD64] font-bold text-xl mb-4">
                                     {h.num}
                                 </span>
                                 <h3 className="text-lg font-bold mb-2">{h.title}</h3>
@@ -81,7 +81,7 @@ export default function YouInOneWhatWeDoPage() {
                 <p className="text-neutral-400 mb-8">당신의 고민을 이야기해 주세요.</p>
                 <Link
                     href="/youinone/contact"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white font-medium hover:bg-[#C62828] transition-colors rounded"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#1AAD64] text-white font-medium hover:bg-[#148B4A] transition-colors rounded"
                 >
                     문의하기 <ArrowRight className="h-4 w-4" />
                 </Link>

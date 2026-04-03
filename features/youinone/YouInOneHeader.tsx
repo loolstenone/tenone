@@ -33,7 +33,7 @@ export function YouInOneHeader() {
                     <span className="text-[#171717] font-extrabold text-xl tracking-tight">
                         You
                     </span>
-                    <span className="text-[#E53935] font-medium text-sm mx-0.5">
+                    <span className="text-[#1AAD64] font-medium text-sm mx-0.5">
                         In
                     </span>
                     <span className="text-[#171717] font-extrabold text-xl tracking-tight">
@@ -50,8 +50,8 @@ export function YouInOneHeader() {
                             className={clsx(
                                 "text-sm font-medium transition-colors whitespace-nowrap",
                                 isActive(item.href)
-                                    ? "text-[#171717]"
-                                    : "text-neutral-400 hover:text-[#171717]"
+                                    ? "text-[#1AAD64]"
+                                    : "text-neutral-400 hover:text-[#1AAD64]"
                             )}
                         >
                             {item.name}
@@ -64,12 +64,12 @@ export function YouInOneHeader() {
                     <UniverseUtilityBar
                         aboutPath="/youinone/about"
                         profilePath="/youinone/my"
-                        accentColor="#1a1a2e"
+                        accentColor="#1AAD64"
                         signupPath="/signup"
                     />
                     <Link
                         href="/alliance"
-                        className="text-sm px-5 py-2 bg-[#171717] text-white hover:bg-[#E53935] transition-colors rounded"
+                        className="text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded"
                     >
                         Members &amp; Alliance
                     </Link>
@@ -78,7 +78,7 @@ export function YouInOneHeader() {
                 {/* Mobile menu button */}
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="lg:hidden p-2 text-neutral-500 hover:text-[#171717]"
+                    className="lg:hidden p-2 text-neutral-500 hover:text-[#1AAD64]"
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -95,8 +95,8 @@ export function YouInOneHeader() {
                             className={clsx(
                                 "block text-sm font-medium transition-colors",
                                 isActive(item.href)
-                                    ? "text-[#171717]"
-                                    : "text-neutral-400 hover:text-[#171717]"
+                                    ? "text-[#1AAD64]"
+                                    : "text-neutral-400 hover:text-[#1AAD64]"
                             )}
                         >
                             {item.name}
@@ -104,19 +104,19 @@ export function YouInOneHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#171717] flex items-center gap-2">
+                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#1AAD64] flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#171717]">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#171717]">가입</Link>
+                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">로그인</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">가입</Link>
                             </>
                         )}
                         <Link
                             href="/alliance"
                             onClick={() => setMobileOpen(false)}
-                            className="inline-block text-sm px-5 py-2 bg-[#171717] text-white hover:bg-[#E53935] rounded transition-colors"
+                            className="inline-block text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] rounded transition-colors"
                         >
                             Members &amp; Alliance
                         </Link>

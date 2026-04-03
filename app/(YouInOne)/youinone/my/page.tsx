@@ -21,7 +21,7 @@ export default function YouInOneMyPage() {
         fetch(`/api/board/posts?site=youinone&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
-    if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#E53935] rounded-full animate-spin" /></div>;
+    if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#1AAD64] rounded-full animate-spin" /></div>;
 
     const initials = user?.name?.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() || "?";
     const tabs = [
@@ -34,18 +34,18 @@ export default function YouInOneMyPage() {
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-900 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center gap-6 mb-10">
-                    <div className="w-20 h-20 rounded-full bg-[#E53935]/20 flex items-center justify-center text-2xl font-bold text-[#E53935]">{initials}</div>
+                    <div className="w-20 h-20 rounded-full bg-[#1AAD64]/20 flex items-center justify-center text-2xl font-bold text-[#1AAD64]">{initials}</div>
                     <div>
                         <h1 className="text-2xl font-bold">{user?.name || "회원"}</h1>
                         <p className="text-sm text-neutral-400 mt-1">{user?.email}</p>
-                        <p className="text-xs text-[#E53935] mt-1">YouInOne Member</p>
+                        <p className="text-xs text-[#1AAD64] mt-1">YouInOne Member</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#E53935] text-[#E53935]" : "border-transparent text-neutral-500"}`}>
+                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#1AAD64] text-[#1AAD64]" : "border-transparent text-neutral-500"}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
                             {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-500">{tab.count}</span>}
                         </button>

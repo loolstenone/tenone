@@ -22,10 +22,10 @@ export default function YouInOneAlliancePage() {
             {/* Hero */}
             <section className="bg-[#171717] py-16 md:py-24 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#E53935] text-sm font-medium tracking-widest mb-4">MEMBERSHIP & ALLIANCE</p>
+                    <p className="text-[#1AAD64] text-sm font-medium tracking-widest mb-4">MEMBERSHIP & ALLIANCE</p>
                     <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                         함께 하면<br />
-                        <span className="text-[#E53935]">더 큰 가치</span>를 만듭니다
+                        <span className="text-[#1AAD64]">더 큰 가치</span>를 만듭니다
                     </h1>
                     <p className="text-neutral-400 text-lg max-w-2xl mx-auto leading-relaxed">
                         고령화, 인구감소, 지방소멸 등 다양한 문제가 산재한 이 시대,<br />
@@ -40,11 +40,11 @@ export default function YouInOneAlliancePage() {
                     <h2 className="text-xl md:text-3xl font-bold text-center mb-12">누가 참여할 수 있나요?</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {memberTypes.map((m) => (
-                            <div key={m.title} className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#E53935]/30 transition-all">
-                                <div className="inline-flex p-3 rounded-lg mb-4 bg-neutral-50 text-[#171717] group-hover:bg-[#E53935]/10 group-hover:text-[#E53935] transition-colors">
+                            <div key={m.title} className="group p-6 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-[#1AAD64]/30 transition-all">
+                                <div className="inline-flex p-3 rounded-lg mb-4 bg-neutral-50 text-[#171717] group-hover:bg-[#1AAD64]/10 group-hover:text-[#1AAD64] transition-colors">
                                     <m.icon className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-[#E53935] transition-colors">{m.title}</h3>
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-[#1AAD64] transition-colors">{m.title}</h3>
                                 <p className="text-sm text-neutral-500 leading-relaxed">{m.desc}</p>
                             </div>
                         ))}
@@ -73,7 +73,7 @@ export default function YouInOneAlliancePage() {
                                 href="https://forms.gle/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-[#171717] text-white hover:bg-[#E53935] transition-colors rounded font-medium text-sm"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded font-medium text-sm"
                             >
                                 멤버십 신청 <ExternalLink className="h-4 w-4" />
                             </a>
@@ -96,7 +96,7 @@ export default function YouInOneAlliancePage() {
                                 href="https://forms.gle/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white hover:bg-[#C62828] transition-colors rounded font-medium text-sm"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-[#1AAD64] text-white hover:bg-[#148B4A] transition-colors rounded font-medium text-sm"
                             >
                                 얼라이언스 신청 <ExternalLink className="h-4 w-4" />
                             </a>
