@@ -1,6 +1,34 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 15 — 완료)
+> 마지막 업데이트: 2026-04-03 (사무실, 세션 16 — 완료)
+
+## 오늘 한 작업 (4/3 사무실 세션 16)
+
+### UMS 대시보드 실데이터 검증 + 수정 ✅
+
+**문제 발견:** `member_brand_joins` 조회 시 `.eq("status", "active")` 필터링
+- 테이블 스키마에 `status` 컬럼이 없음 (member_id, brand_id, joined_at 등만 있음)
+- Silent 실패 → 브랜드 데이터 0건
+
+**수정:**
+- `app/intra/ums/page.tsx` 라인 211: `.eq("status", "active")` 제거
+- 모든 member_brand_joins 관계 포함하도록 변경
+
+**Seed 데이터 추가 (실데이터 검증):**
+- `member_brand_joins`: 10건 (sarah/junho/gihyuk/lools가 각각 1~3개 브랜드 가입)
+  - sarah: MADLeague, SmarComm, RooK
+  - junho: MADLeague
+  - gihyuk: Badak
+  - lools(kakao): Mindle, WIO Orbi
+  - lools(tenone): HeRo, Evolution School, YouInOne
+- `subscriptions`: 5건 (활성 구독)
+  - SmarComm Pro 99k, WIO Orbi Business 199k, YouInOne Premium 149k 등
+- `revenue`: 12건 (브랜드별 매출 기록)
+  - SmarComm: 297k, WIO Orbi: 398k, YouInOne: 149k 등
+
+**커밋:** `968a7e8`
+
+---
 
 ## 오늘 한 작업 (4/3 사무실 세션 15)
 
@@ -270,7 +298,7 @@
 
 1. ✅ **공모전 RSS URL 수정** — 창업진흥원 새 URL + 중기부 2개 추가. 위비티/K-스타트업 비활성화. `app/api/opportunity/crawl/route.ts` 수정 완료 (세션 15).
 
-2. **UMS 대시보드 실데이터 검증** — `member_brand_joins` 전환 후 브랜드별 집계 카드가 실제로 뜨는지 확인. `app/intra/ums/page.tsx`.
+2. ✅ **UMS 대시보드 실데이터 검증** — `.eq("status", "active")` 제거, seed 데이터 추가. `app/intra/ums/page.tsx` 수정 완료 (세션 16).
 
 3. **SmarComm 대시보드 Mock→DB 전환** — `MOCK_CAMPAIGNS` / `MOCK_SALES` → `marketing_campaigns` DB 연결. `app/intra/studio/` 경로.
 
