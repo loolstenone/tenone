@@ -113,6 +113,17 @@ export async function getHeroType(typeCode: string) {
   return data;
 }
 
+// ── HIT B 모듈 ──
+
+export async function getReportModules(moduleIds: string[]) {
+  const { data, error } = await supabase
+    .from('hit_report_modules')
+    .select('*')
+    .in('id', moduleIds);
+  if (error) throw error;
+  return data || [];
+}
+
 // ── HIT B 결과 ──
 
 export async function createHitBResult(result: Record<string, unknown>) {
