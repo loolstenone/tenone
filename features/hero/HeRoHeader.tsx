@@ -32,8 +32,9 @@ export function HeRoHeader() {
                 {/* Logo */}
                 <Link href="/hero" className="flex items-center shrink-0 mr-10">
                     <span className="text-2xl font-extrabold tracking-tight">
-                        <span className="text-amber-500">He</span>
-                        <span className="text-neutral-900">Ro</span>
+                        <span className="text-neutral-900">He</span>
+                        <span className="text-[#E53935]">R</span>
+                        <span className="text-neutral-900">o</span>
                     </span>
                 </Link>
 
