@@ -365,19 +365,19 @@ export const modules: NavModule[] = [
                     {
                         name: "HeRo", href: "/intra/hero/talent", icon: Award,
                         children: [
-                            { name: "인재 관리", href: "/intra/hero/talent" },
-                            { name: "HIT 검사", href: "/intra/hero/hit" },
-                            { name: "이력서", href: "/intra/hero/resume" },
-                            { name: "커리어", href: "/intra/hero/career" },
-                            { name: "브랜딩", href: "/intra/hero/branding" },
+                            { name: "인재 관리", href: "/intra/hero/talent" },      // HeRo 소속 멤버 관리
+                            { name: "HIT 이용자", href: "/intra/hero/hit" },        // hero.ne.kr에서 HIT 검사한 사람들
+                            { name: "이력서 이용자", href: "/intra/hero/resume" },    // 이력서 서비스 이용자
+                            { name: "커리어 이용자", href: "/intra/hero/career" },    // 커리어 개발 프로그램 이용자
+                            { name: "브랜딩 이용자", href: "/intra/hero/branding" },  // 퍼스널 브랜딩 이용자
                         ],
                     },
                     {
                         name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
                         children: [
-                            { name: "Agent Hub", href: "/intra/ums/agent" },
-                            { name: "에이전트 소통", href: "/intra/ums/agent/comm" },
-                            { name: "트렌드", href: "/intra/ums/agent/trends" },
+                            { name: "대시보드", href: "/intra/ums/agent" },           // 조직도, 상태, 역할
+                            { name: "지시", href: "/intra/ums/agent/comm" },          // 에이전트에게 질문/지시
+                            { name: "자동화 로그", href: "/intra/ums/agent/trends" },  // 크롤링/Vrief 실행 기록 + 수집 데이터
                         ],
                     },
                 ],
