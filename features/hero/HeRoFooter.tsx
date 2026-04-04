@@ -6,9 +6,7 @@ import { Instagram, Youtube, Mail } from "lucide-react";
 
 const quickLinks = [
     { name: "HIT 프로그램", href: "/hit" },
-    { name: "커리어", href: "/career" },
-    { name: "멘토링", href: "/mentor" },
-    { name: "브랜딩", href: "/branding" },
+    { name: "코칭", href: "/hero/coaching" },
     { name: "이력서", href: "/resume" },
     { name: "About", href: "/about" },
 ];

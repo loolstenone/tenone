@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import Link from "next/link";
 import {
     User, FileText, Bookmark, Heart, Settings, LogOut,
@@ -89,6 +90,11 @@ export default function MyPage() {
                         style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
                         프로필 수정
                     </Link>
+                </div>
+
+                {/* HIT 프로필 */}
+                <div className="mb-6">
+                    <HitProfileBadge memberId={user?.id} />
                 </div>
 
                 {/* 탭 */}

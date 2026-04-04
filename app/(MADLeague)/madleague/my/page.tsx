@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import { User, FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Award } from "lucide-react";
 
@@ -28,6 +29,11 @@ export default function MadLeagueMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-[#212121] text-white">
             <div className="max-w-4xl mx-auto">
+                {/* HIT 프로필 */}
+                <div className="mb-6">
+                    <HitProfileBadge memberId={user?.id} />
+                </div>
+
                 <div className="flex items-center gap-6 mb-10">
                     <div className="w-20 h-20 rounded-full bg-[#D32F2F]/20 flex items-center justify-center text-2xl font-bold text-[#D32F2F]">{initials}</div>
                     <div>
