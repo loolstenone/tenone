@@ -159,7 +159,7 @@ export default function BrandingPage() {
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
                             <span className="text-xs px-3 py-1 bg-amber-500 text-white rounded-full">ENTJ</span>
-                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">D 주도형</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">D 주도성</span>
                             <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">전략적 사고 92점</span>
                             <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">리더십 90점</span>
                         </div>

@@ -98,7 +98,7 @@ export default function PersonalBrandingPage() {
                         </p>
                         <div className="flex gap-2 mt-2">
                             <span className="text-xs px-2 py-0.5 bg-neutral-900 text-white">ENTJ</span>
-                            <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600">D 주도형</span>
+                            <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600">D 주도성</span>
                         </div>
                     </div>
                 </div>

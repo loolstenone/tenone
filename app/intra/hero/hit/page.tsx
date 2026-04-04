@@ -155,7 +155,7 @@ export default function HitTestPage() {
                             행동유형(DISC 기반), 일상태도(MBTI 기반), 자존감/자존심을 측정합니다.
                         </p>
                         <div className="flex gap-4 mt-3">
-                            {["주도형(D)", "사교형(I)", "안정형(S)", "신중형(C)"].map(t => (
+                            {["주도성(D)", "사교성(I)", "안정성(S)", "신중성(C)"].map(t => (
                                 <span key={t} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-500">{t}</span>
                             ))}
                         </div>

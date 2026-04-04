@@ -6,10 +6,10 @@ import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 
 const discData = [
-    { label: "D (주도형)", value: 85, desc: "목표 지향적, 결단력, 도전적" },
-    { label: "I (사교형)", value: 60, desc: "소통, 설득, 네트워킹" },
-    { label: "S (안정형)", value: 30, desc: "인내, 협력, 안정 추구" },
-    { label: "C (신중형)", value: 45, desc: "분석, 정확성, 체계적" },
+    { label: "D (주도성)", value: 85, desc: "목표 지향적, 결단력, 도전적" },
+    { label: "I (사교성)", value: 60, desc: "소통, 설득, 네트워킹" },
+    { label: "S (안정성)", value: 30, desc: "인내, 협력, 안정 추구" },
+    { label: "C (신중성)", value: 45, desc: "분석, 정확성, 체계적" },
 ];
 
 const strengths = ["전략적 사고", "네트워크 빌딩", "비전 제시", "실행 추진력", "조직 설계"];

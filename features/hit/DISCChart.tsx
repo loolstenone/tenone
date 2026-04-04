@@ -9,10 +9,10 @@ interface DISCChartProps {
 }
 
 const DISC_CONFIG = {
-  D: { color: '#E53935', label: 'D 주도형' },
-  I: { color: '#FFB300', label: 'I 사교형' },
-  S: { color: '#43A047', label: 'S 안정형' },
-  C: { color: '#1E88E5', label: 'C 신중형' },
+  D: { color: '#E53935', label: 'D 주도성' },
+  I: { color: '#FFB300', label: 'I 사교성' },
+  S: { color: '#43A047', label: 'S 안정성' },
+  C: { color: '#1E88E5', label: 'C 신중성' },
 } as const;
 
 type DISCKey = keyof typeof DISC_CONFIG;

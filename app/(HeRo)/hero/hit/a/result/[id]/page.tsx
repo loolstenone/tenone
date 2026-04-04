@@ -224,10 +224,10 @@ export default function HitAResultPage() {
             <div className="relative">
               <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-white/60 to-white flex flex-col items-center justify-end pb-8">
                 <Lock className="h-5 w-5 text-neutral-400 mb-2" />
-                <p className="text-sm font-medium text-neutral-700 mb-1">더 자세한 해설을 보시려면</p>
+                <p className="text-sm font-medium text-neutral-700 mb-1">가입하시면 HIT 통합 보고서를 보실 수 있습니다</p>
                 <Link href={`/signup?from=hit&resultId=${resultId}`}
                   className="px-5 py-2.5 bg-[#E53935] text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
-                  회원가입하고 PDF 보고서 받기
+                  회원가입하기
                 </Link>
               </div>
 
