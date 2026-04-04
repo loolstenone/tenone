@@ -10,10 +10,10 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "Planner's", href: "/planners" },
-    { name: "Planning", href: "/planners?tab=planning" },
-    { name: "Planner's Planner", href: "/planners?tab=planner-tool" },
-    { name: "GPR", href: "/planners?tab=gpr" },
-    { name: "Programs", href: "/planners?tab=programs" },
+    { name: "Planning", href: "/planners/planning" },
+    { name: "Planner's Planner", href: "/planners/planner-tool" },
+    { name: "GPR", href: "/planners/gpr" },
+    { name: "Programs", href: "/planners/programs" },
 ];
 
 export function PlannersHeader() {
@@ -22,8 +22,8 @@ export function PlannersHeader() {
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
-        if (href === "/planners") return pathname === "/planners" && !pathname.includes("?");
-        return href.includes("?") ? false : pathname.startsWith(href);
+        if (href === "/planners") return pathname === "/planners";
+        return pathname.startsWith(href);
     };
 
     return (
