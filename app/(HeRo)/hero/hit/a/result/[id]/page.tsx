@@ -15,6 +15,7 @@ export default function HitAResultPage() {
   const params = useParams();
   const resultId = params.id as string;
   const [result, setResult] = useState<HitAResult | null>(null);
+  const [heroType, setHeroType] = useState<{ strengths: { title: string; desc: string }[]; cautions: { title: string; desc: string }[]; fit_direction: string; profile_overview: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -22,8 +23,17 @@ export default function HitAResultPage() {
     if (!resultId) return;
     fetch(`/api/hit/a/result/${resultId}`)
       .then(r => r.json())
-      .then(data => {
+      .then(async (data) => {
         if (data.error) { setLoading(false); return; }
+        // 유형별 보고서 데이터 로드
+        if (data.type_code) {
+          try {
+            const { createClient } = await import('@/lib/supabase/client');
+            const sb = createClient();
+            const { data: ht } = await sb.from('hit_hero_types').select('strengths,cautions,fit_direction,profile_overview').eq('type_code', data.type_code).maybeSingle();
+            if (ht) setHeroType(ht);
+          } catch {}
+        }
         setResult({
           id: data.id,
           sessionId: data.session_id,
@@ -248,30 +258,47 @@ export default function HitAResultPage() {
               </p>
             </div>
 
-            {/* 강점/주의 패턴 preview */}
+            {/* 강점/주의 패턴 preview — 실제 유형별 데이터 */}
             <div>
-              <h3 className="text-base font-bold text-neutral-800 mb-2">강점 5가지 & 주의 패턴 3가지</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-base font-bold text-neutral-800 mb-2">강점 & 주의 패턴</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-green-600 mb-1">핵심 강점</p>
-                  <ul className="text-sm text-neutral-600 space-y-1">
-                    <li>1. 전략적 의사결정 능력</li>
-                    <li>2. 목표 지향적 실행력</li>
-                    <li>3. 독립적 문제해결 능력</li>
-                    <li>4. 분석적 사고와 패턴 인식</li>
-                    <li>5. 높은 자기 기준과 품질 의식</li>
+                  <p className="text-xs font-semibold text-green-600 mb-2">핵심 강점</p>
+                  <ul className="text-sm text-neutral-600 space-y-1.5">
+                    {(heroType?.strengths || []).slice(0, 5).map((s: { title: string; desc: string }, i: number) => (
+                      <li key={i}><span className="font-medium">{i+1}. {s.title}</span> — {s.desc.substring(0, 60)}...</li>
+                    ))}
+                    {(!heroType?.strengths?.length) && <>
+                      <li>1. 전략적 의사결정 능력</li>
+                      <li>2. 목표 지향적 실행력</li>
+                      <li>3. 독립적 문제해결 능력</li>
+                    </>}
                   </ul>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-amber-600 mb-1">주의 패턴</p>
-                  <ul className="text-sm text-neutral-600 space-y-1">
-                    <li>1. 완벽주의로 인한 지연 가능성</li>
-                    <li>2. 감정 표현의 절제 경향</li>
-                    <li>3. 위임보다 직접 처리 선호</li>
+                  <p className="text-xs font-semibold text-amber-600 mb-2">주의 패턴</p>
+                  <ul className="text-sm text-neutral-600 space-y-1.5">
+                    {(heroType?.cautions || []).slice(0, 3).map((c: { title: string; desc: string }, i: number) => (
+                      <li key={i}><span className="font-medium">{i+1}. {c.title}</span> — {c.desc.substring(0, 60)}...</li>
+                    ))}
+                    {(!heroType?.cautions?.length) && <>
+                      <li>1. 완벽주의로 인한 지연</li>
+                      <li>2. 감정 표현의 절제</li>
+                    </>}
                   </ul>
                 </div>
               </div>
             </div>
+
+            {/* 적합 방향 preview */}
+            {heroType?.fit_direction && (
+              <div>
+                <h3 className="text-base font-bold text-neutral-800 mb-2">이 유형에게 어울리는 방향</h3>
+                <p className="text-sm text-neutral-600 leading-relaxed">
+                  {heroType.fit_direction.substring(0, 200)}...
+                </p>
+              </div>
+            )}
           </div>
         }
       />

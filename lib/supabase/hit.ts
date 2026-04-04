@@ -101,6 +101,18 @@ export async function getHitAResult(resultId: string) {
   return data;
 }
 
+// ── 유형별 보고서 ──
+
+export async function getHeroType(typeCode: string) {
+  const { data, error } = await supabase
+    .from('hit_hero_types')
+    .select('*')
+    .eq('type_code', typeCode)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 // ── HIT B 결과 ──
 
 export async function createHitBResult(result: Record<string, unknown>) {
