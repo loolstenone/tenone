@@ -97,38 +97,7 @@ export const modules: NavModule[] = [
             },
         ],
     },
-    {
-        name: "HeRo", href: "/intra/hero/hit", icon: Award, intraModule: "hero" as IntraModule,
-        sections: [
-            {
-                items: [
-                    {
-                        name: "HIT 검사", href: "/intra/hero/hit", icon: Target,
-                        children: [
-                            { name: "검사 실시", href: "/intra/hero/hit" },
-                            { name: "결과 리포트", href: "/intra/hero/hit/report" },
-                        ],
-                    },
-                    {
-                        name: "이력서", href: "/intra/hero/resume", icon: FileText,
-                        children: [
-                            { name: "이력서 작성", href: "/intra/hero/resume" },
-                            { name: "AI 컨설팅", href: "/intra/hero/resume/consulting" },
-                        ],
-                    },
-                    {
-                        name: "커리어 개발", href: "/intra/hero/career", icon: TrendingUp,
-                        children: [
-                            { name: "역량 진단", href: "/intra/hero/career" },
-                            { name: "성장 로드맵", href: "/intra/hero/career/roadmap" },
-                            { name: "멘토 매칭", href: "/intra/hero/career/mentor" },
-                        ],
-                    },
-                    { name: "퍼스널 브랜딩", href: "/intra/hero/branding", icon: Award },
-                ],
-            },
-        ],
-    },
+    // HeRo는 외부 사이트(/hero)로 이동. Intra에서 제거됨.
     {
         name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: "evolution" as IntraModule,
         sections: [

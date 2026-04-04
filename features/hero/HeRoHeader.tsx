@@ -10,10 +10,10 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "HIT 검사", href: "/hero/hit" },
-    { name: "커리어", href: "/hero/career" },
-    { name: "멘토링", href: "/hero/mentor" },
-    { name: "브랜딩", href: "/hero/branding" },
+    { name: "Hero in", href: "/hero/journey" },
     { name: "이력서", href: "/hero/resume" },
+    { name: "커리어 코칭", href: "/hero/coaching" },
+    { name: "About", href: "/hero/about" },
 ];
 
 export function HeRoHeader() {
