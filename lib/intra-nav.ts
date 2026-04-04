@@ -97,16 +97,7 @@ export const modules: NavModule[] = [
             },
         ],
     },
-    {
-        name: "HeRo 관리", href: "/intra/hero/talent", icon: Award, intraModule: "hero" as IntraModule,
-        sections: [
-            {
-                items: [
-                    { name: "인재 관리", href: "/intra/hero/talent", icon: Users, staffOnly: true },
-                ],
-            },
-        ],
-    },
+    // HeRo 관리는 UMS 내 서브메뉴로 이동
     {
         name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: "evolution" as IntraModule,
         sections: [
@@ -369,6 +360,16 @@ export const modules: NavModule[] = [
                             { name: "프로모션", href: "/intra/ums/commerce/promotions" },
                             { name: "손익", href: "/intra/ums/commerce/revenue" },
                             { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
+                        ],
+                    },
+                    {
+                        name: "HeRo", href: "/intra/hero/talent", icon: Award,
+                        children: [
+                            { name: "인재 관리", href: "/intra/hero/talent" },
+                            { name: "HIT 검사", href: "/intra/hero/hit" },
+                            { name: "이력서", href: "/intra/hero/resume" },
+                            { name: "커리어", href: "/intra/hero/career" },
+                            { name: "브랜딩", href: "/intra/hero/branding" },
                         ],
                     },
                     {
