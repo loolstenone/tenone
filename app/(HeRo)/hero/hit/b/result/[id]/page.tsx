@@ -11,6 +11,8 @@ import PersonalityRadar from "@/features/hit/PersonalityRadar";
 import RIASECChart from "@/features/hit/RIASECChart";
 import CompetencyChart from "@/features/hit/CompetencyChart";
 import ReadinessGauge from "@/features/hit/ReadinessGauge";
+import HeroChatPanel from "@/features/hit/HeroChatPanel";
+import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitBResult } from "@/types/hit";
 
 const TRACK_NAMES: Record<string, string> = {
@@ -299,6 +301,22 @@ export default function HitBResultPage() {
           다음 <ChevronRight className="h-4 w-4" />
         </button>
       </div>
+
+      {/* 히어로 AI 채팅 */}
+      {result && (
+        <HeroChatPanel
+          resultId={resultId}
+          mode={result.hitAResultId ? 'AB_FULL' : 'B_ONLY'}
+          greeting={getHeroGreeting(
+            result.hitAResultId ? 'AB_FULL' : 'B_ONLY',
+            { hollandCode: result.hollandCode, topCompetency: TRACK_NAMES[result.competencyTrack] }
+          )}
+          quickQuestions={result.hitAResultId
+            ? ['직무 적합도 분석', '성격과 역량 연결', '3개월 성장 플랜', '면접 강점 어필']
+            : ['적성에 맞는 직무는?', '역량 올리려면?', '취업 준비 어디서부터?', '면접 준비']
+          }
+        />
+      )}
 
       <style jsx>{`
         @keyframes fadeIn {

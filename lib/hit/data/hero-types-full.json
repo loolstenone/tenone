@@ -2667,10 +2667,31 @@
   },
   {
     "type_code": "D-ISTJ",
-    "character_name": "D-ISTJ",
-    "character_label": "",
+    "character_name": "Duty Knight",
+    "character_label": "원칙을 지키는 실행가",
     "profile_overview": "",
-    "strengths": [],
+    "strengths": [
+      {
+        "title": "체계적 관리",
+        "desc": "복잡한 업무를 구조화하고 절차를 만들어 일관되게 실행합니다."
+      },
+      {
+        "title": "신뢰의 기반",
+        "desc": "약속을 반드시 지키고, 맡은 일을 끝까지 완수합니다."
+      },
+      {
+        "title": "실무 추진력",
+        "desc": "계획을 세우면 묵묵히 실행합니다."
+      },
+      {
+        "title": "데이터 기반 판단",
+        "desc": "감이 아니라 근거로 판단합니다."
+      },
+      {
+        "title": "위기 시 냉정함",
+        "desc": "혼란 속에서도 절차를 따르며 침착하게 대응합니다."
+      }
+    ],
     "cautions": [
       {
         "title": "융통성 부족",
@@ -2689,10 +2710,31 @@
   },
   {
     "type_code": "D-INTJ",
-    "character_name": "D-INTJ",
-    "character_label": "",
+    "character_name": "Iron Innovator",
+    "character_label": "전략적인 목표 달성가",
     "profile_overview": "",
-    "strengths": [],
+    "strengths": [
+      {
+        "title": "비전 설계",
+        "desc": "아직 존재하지 않는 것을 상상하고, 현실로 만들 경로를 설계합니다."
+      },
+      {
+        "title": "위기 결단력",
+        "desc": "불확실한 상황에서 결정을 미루지 않습니다. 정보가 70%만 모여도 판단하고 실행합니다."
+      },
+      {
+        "title": "체계적 실행",
+        "desc": "계획→실행→점검의 사이클이 자동으로 돌아갑니다."
+      },
+      {
+        "title": "독립적 판단",
+        "desc": "다수의 의견에 쉽게 흔들리지 않습니다."
+      },
+      {
+        "title": "학습 속도",
+        "desc": "전체 구조를 먼저 파악한 뒤 세부를 채워나가는 하향식 학습에 뛰어납니다."
+      }
+    ],
     "cautions": [
       {
         "title": "\"내가 맞다\" 함정",
