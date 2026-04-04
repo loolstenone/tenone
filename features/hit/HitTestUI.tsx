@@ -67,35 +67,74 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   const currentModule = currentQuestion?.module ?? 'base';
   const answeredCount = responses.size;
 
-  // Restore session on mount
+  const localStorageKey = `hit_a_${sessionToken}`;
+
+  // Restore session on mount: localStorage first (faster), server as fallback
   useEffect(() => {
     async function restoreSession() {
+      let localRestored = false;
+
+      // 1. Try localStorage first (instant)
+      try {
+        const saved = localStorage.getItem(localStorageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved) as Record<string, Response>;
+          const restoredMap = new Map<string, Response>(Object.entries(parsed));
+          if (restoredMap.size > 0) {
+            setResponses(restoredMap);
+            const firstUnanswered = allQuestions.findIndex((q) => !restoredMap.has(q.id));
+            if (firstUnanswered >= 0) {
+              setCurrentIndex(firstUnanswered);
+            }
+            localRestored = true;
+          }
+        }
+      } catch {
+        // localStorage unavailable or corrupted — fall through to server
+      }
+
+      // 2. Server restore (fallback, or to get sessionId)
       try {
         const res = await fetch(`/api/hit/a/session/${sessionToken}`);
         if (res.ok) {
           const data = await res.json();
           if (data.session?.id) setSessionId(data.session.id);
-          if (data.responses && Array.isArray(data.responses)) {
+          // Only apply server responses if localStorage had nothing
+          if (!localRestored && data.responses && Array.isArray(data.responses)) {
             const restored = new Map<string, Response>();
             for (const r of data.responses) {
               restored.set(r.question_id, { selectedOption: r.selected_option, optionValue: r.option_value });
             }
-            setResponses(restored);
-            // Resume from first unanswered
-            const firstUnanswered = allQuestions.findIndex((q) => !restored.has(q.id));
-            if (firstUnanswered >= 0) {
-              setCurrentIndex(firstUnanswered);
+            if (restored.size > 0) {
+              setResponses(restored);
+              const firstUnanswered = allQuestions.findIndex((q) => !restored.has(q.id));
+              if (firstUnanswered >= 0) {
+                setCurrentIndex(firstUnanswered);
+              }
+              // Sync server data to localStorage
+              try {
+                localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(restored)));
+              } catch { /* quota exceeded — ignore */ }
             }
           }
         }
       } catch {
-        // Continue fresh
+        // Continue with whatever we have
       } finally {
         setIsRestored(true);
       }
     }
     restoreSession();
-  }, [sessionToken, allQuestions]);
+  }, [sessionToken, allQuestions, localStorageKey]);
+
+  // Persist responses to localStorage on every change
+  useEffect(() => {
+    if (responses.size > 0) {
+      try {
+        localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(responses)));
+      } catch { /* quota exceeded — ignore */ }
+    }
+  }, [responses, localStorageKey]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -157,6 +196,8 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       });
       const data = await res.json();
       if (res.ok && data.resultId) {
+        // Clear localStorage on successful completion
+        try { localStorage.removeItem(localStorageKey); } catch { /* ignore */ }
         setIsComplete(true);
         router.push(`/hero/hit/a/result/${data.resultId}`);
       } else {
