@@ -38,7 +38,23 @@ export async function POST(request: NextRequest) {
     // AI 내러티브 (실패해도 결과 생성 진행)
     let aiNarrative: string | null = null;
     try {
-      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      let apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        try {
+          const fs = require('fs'), path = require('path');
+          const envPath = path.join(process.cwd(), '.env.local');
+          if (fs.existsSync(envPath)) {
+            for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+              if (line.startsWith('ANTHROPIC_API_KEY=')) {
+                apiKey = line.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+                break;
+              }
+            }
+          }
+        } catch {}
+      }
+      if (!apiKey) throw new Error('ANTHROPIC_API_KEY not found');
+      const anthropic = new Anthropic({ apiKey });
       const msg = await anthropic.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
