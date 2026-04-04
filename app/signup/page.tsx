@@ -248,7 +248,23 @@ function TenOneSignupPage() {
         setIsSubmitting(true);
         try {
             const result = await register(name, email, password, true);
-            if (result.success) { router.push('/'); }
+            if (result.success) {
+                // HIT 결과 연결 (from=hit&resultId=xxx 파라미터)
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const hitResultId = urlParams.get('resultId');
+                    if (hitResultId && result.user?.id) {
+                        await fetch('/api/hit/link-member', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ resultId: hitResultId, memberId: result.user.id }),
+                        });
+                    }
+                } catch {}
+                const from = new URLSearchParams(window.location.search).get('from');
+                const returnUrl = from === 'hit' ? `/hero/hit/a/result/${new URLSearchParams(window.location.search).get('resultId') || ''}` : '/';
+                router.push(returnUrl);
+            }
             else { setError(result.error || '회원가입에 실패했습니다'); setIsSubmitting(false); }
         } catch { setError('회원가입 중 오류가 발생했습니다'); setIsSubmitting(false); }
     };
