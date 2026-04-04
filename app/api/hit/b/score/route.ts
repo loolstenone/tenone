@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       const msg = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
         max_tokens: 2000,
-        system: '당신은 커리어 진단 전문가입니다. 한국어로 따뜻하면서도 전문적인 종합 분석 리포트를 작성합니다. 검사 결과를 통합적으로 해석하여 강점, 성장영역, 커리어 제안을 포함해주세요.',
+        system: '당신은 커리어 진단 전문가입니다. 한국어로 따뜻하면서도 전문적인 종합 분석 리포트를 작성합니다. 검사 결과를 통합적으로 해석하여 강점, 성장영역, 커리어 제안을 포함해주세요. 절대 이모지, 이모티콘, 특수문자(★●▶ 등)를 사용하지 마세요. 순수 텍스트만 사용하세요. 마크다운 헤딩(#)도 사용하지 마세요.',
         messages: [{
           role: 'user',
           content: `${hitAContext}HIT B 결과:\n` +

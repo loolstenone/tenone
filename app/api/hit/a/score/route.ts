@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       const msg = await anthropic.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
-        system: 'You are a personality assessment expert. Write in Korean. Provide a warm, insightful 2-3 paragraph analysis.',
+        system: 'You are a personality assessment expert. Write in Korean. Provide a warm, insightful 2-3 paragraph analysis. 절대 이모지, 이모티콘, 특수문자(★●▶ 등)를 사용하지 마세요. 순수 텍스트만 사용하세요. 마크다운 헤딩(#)도 사용하지 마세요.',
         messages: [{
           role: 'user',
           content: `Analyze this personality profile:\n` +
