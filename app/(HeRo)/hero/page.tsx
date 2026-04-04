@@ -1,187 +1,284 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   Search,
-  FileText,
-  Briefcase,
-  Building2,
-  TrendingUp,
-  Target,
+  Compass,
+  Handshake,
+  Star,
+  Crown,
+  Sparkles,
   ChevronRight,
-  UserCheck,
-  GraduationCap,
+  Users,
+  Building2,
+  Zap,
 } from "lucide-react";
 
-/* ── 인재 파이프라인 단계 ── */
-const pipeline = [
-  {
-    stage: "MAD League",
-    label: "발굴",
-    desc: "대학 동아리 연합에서 잠재력 있는 인재를 발견합니다",
-    icon: GraduationCap,
-    color: "bg-orange-100 text-[#D85A30]",
-    ring: "ring-[#D85A30]/20",
-  },
-  {
-    stage: "HeRo",
-    label: "육성",
-    desc: "HIT 진단 + 멘토링 + 커리어 로드맵으로 키웁니다",
-    icon: TrendingUp,
-    color: "bg-orange-100 text-[#D85A30]",
-    ring: "ring-[#D85A30]/40",
-  },
-  {
-    stage: "기업 연결",
-    label: "매칭",
-    desc: "검증된 인재를 파트너 기업에 연결합니다",
-    icon: Building2,
-    color: "bg-orange-100 text-[#D85A30]",
-    ring: "ring-[#D85A30]/60",
-  },
+/* ── HeRo Red ── */
+const RED = "#E53935";
+
+/* ── 파트너 기업 ── */
+const partners = [
+  "쿠팡",
+  "제일기획",
+  "당근",
+  "비비다드",
+  "잇더컴퍼니",
+  "펑타이코리아",
+  "솔트룩스",
 ];
 
 /* ── 서비스 3종 ── */
 const services = [
   {
     icon: Search,
-    title: "HIT 프로그램",
-    sub: "Hidden Intelligence Talent",
-    desc: "숨겨진 잠재력을 진단하는 통합 역량 평가. AI 기반 분석으로 강점과 성장 포인트를 정밀하게 파악합니다.",
+    num: "01",
+    title: "HIT 통합검사",
+    desc: "나를 진단합니다",
+    detail:
+      "숨겨진 강점과 마케팅 DNA를 분석하는 통합 역량 진단. AI가 당신의 64가지 유형 중 하나를 찾아냅니다.",
     href: "/hero/hit",
-    badge: "인재 발굴",
   },
   {
-    icon: FileText,
-    title: "Resume Lab",
-    sub: "AI 이력서 & 포트폴리오",
-    desc: "AI가 이력서를 분석하고, 직무별 맞춤 포트폴리오를 자동 생성합니다. 합격률을 극대화하세요.",
-    href: "/hero/resume",
-    badge: "퍼스널 브랜딩",
+    icon: Compass,
+    num: "02",
+    title: "커리어 코칭",
+    desc: "방향을 잡아줍니다",
+    detail:
+      "CMO, CTO, CSO, CBO — 목표 C-Level까지의 체계적 성장 경로를 전문 멘토와 함께 설계합니다.",
+    href: "/hero/coaching",
   },
   {
-    icon: Briefcase,
-    title: "Career Path",
-    sub: "C-Level 커리어 로드맵",
-    desc: "CMO, CTO, CSO, CBO — 목표 C-Level까지의 체계적 성장 경로를 설계하고 추적합니다.",
-    href: "/hero/career",
-    badge: "커리어 성장",
+    icon: Handshake,
+    num: "03",
+    title: "기업 매칭",
+    desc: "무대를 만들어줍니다",
+    detail:
+      "검증된 인재 프로필을 파트너 기업에 연결합니다. 당신에게 맞는 무대를 찾아드립니다.",
+    href: "/hero/for-business",
   },
 ];
 
-
-/* ── 파트너 기업 모집 중 ── */
-
-/* ── Universe 연결 ── */
-const universeLinks = [
-  { brand: "MAD League", desc: "대학 동아리 연합 — 인재 소스", href: "/madleague", color: "bg-violet-100 text-violet-700" },
-  { brand: "Badak", desc: "네트워킹 플랫폼 — 기업 연결", href: "/badak", color: "bg-emerald-100 text-emerald-700" },
-  { brand: "ChangeUp", desc: "창업 교육 — 기업가 육성", href: "/changeup", color: "bg-teal-100 text-teal-700" },
-  { brand: "RooK", desc: "AI 크리에이터 — 크리에이티브 인재", href: "/rook", color: "bg-blue-100 text-blue-700" },
+/* ── 영웅의 여정 6단계 ── */
+const journey = [
+  { label: "Dreamer", icon: Sparkles, desc: "꿈을 품다" },
+  { label: "Challenger", icon: Zap, desc: "도전하다" },
+  { label: "Trainee", icon: Search, desc: "훈련하다" },
+  { label: "Debut", icon: Star, desc: "데뷔하다" },
+  { label: "Star", icon: Crown, desc: "빛나다" },
+  { label: "Legend", icon: Crown, desc: "전설이 되다" },
 ];
+
+/* ── 64유형 미리보기 (대표 8개) ── */
+const previewTypes = [
+  { code: "SCE", name: "전략가", alias: "The Strategist" },
+  { code: "CMA", name: "크리에이터", alias: "The Creator" },
+  { code: "DMR", name: "데이터 마스터", alias: "The Analyst" },
+  { code: "BLR", name: "브랜드 빌더", alias: "The Builder" },
+  { code: "GRC", name: "그로스 해커", alias: "The Hacker" },
+  { code: "NTW", name: "네트워커", alias: "The Connector" },
+  { code: "STR", name: "스토리텔러", alias: "The Storyteller" },
+  { code: "PFM", name: "퍼포먼서", alias: "The Performer" },
+];
+
+/* ── 파트너 캐러셀 ── */
+function PartnerCarousel() {
+  const doubled = [...partners, ...partners];
+  return (
+    <div className="overflow-hidden relative mt-12">
+      <div className="flex animate-scroll gap-6">
+        {doubled.map((name, i) => (
+          <span
+            key={`${name}-${i}`}
+            className="flex-shrink-0 px-6 py-2.5 bg-neutral-100 text-neutral-500 text-sm font-medium rounded-full whitespace-nowrap"
+          >
+            {name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function HeRoHomePage() {
-  const [hoveredPipeline, setHoveredPipeline] = useState<number | null>(null);
+  const [activeJourney, setActiveJourney] = useState(2);
+
+  /* 자동 여정 단계 순환 */
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveJourney((prev) => (prev + 1) % journey.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div>
-      {/* ━━ Hero Section ━━ */}
-      <section className="relative bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#D85A30]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-8 py-20 md:py-28 lg:py-36">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-[#D85A30]/10 px-4 py-1.5 rounded-full mb-6">
-              <Target className="h-4 w-4 text-[#D85A30]" />
-              <span className="text-sm font-semibold text-[#D85A30] tracking-wide">
-                Hidden Intelligence & Real Opportunity
-              </span>
-            </div>
+    <div className="bg-white">
+      {/* ── 캐러셀 애니메이션 ── */}
+      <style jsx global>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-scroll {
+          animation: scroll 20s linear infinite;
+        }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
-              <span className="text-[#D85A30]">발굴</span>하고,{" "}
-              <span className="text-[#D85A30]">키우고</span>,{" "}
-              <span className="text-[#D85A30]">연결</span>한다
-            </h1>
+      {/* ━━━ 1. Hero Section ━━━ */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
+        {/* 배경 장식 */}
+        <div className="absolute top-20 right-20 w-96 h-96 bg-[#E53935]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-neutral-100 rounded-full blur-3xl" />
 
-            <p className="text-lg md:text-xl text-neutral-600 leading-relaxed mb-10 max-w-2xl">
-              HeRo는 숨겨진 인재를 발견하고, 체계적인 프로그램으로 성장시키며,
-              최적의 기업과 연결하는 <strong>인재 파이프라인 플랫폼</strong>입니다.
+        <div className="relative mx-auto max-w-5xl px-6 text-center">
+          {/* 로고 */}
+          <div className="mb-8 flex items-center justify-center gap-0 select-none">
+            <span className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900">
+              He
+            </span>
+            <span
+              className="text-6xl md:text-8xl font-black tracking-tighter"
+              style={{ color: RED }}
+            >
+              R
+            </span>
+            <span className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900">
+              o
+            </span>
+          </div>
+
+          {/* 헤드라인 */}
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-6">
+            We believe in{" "}
+            <span className="relative">
+              <span style={{ color: RED }}>your talent</span>
+              <span
+                className="absolute -bottom-1 left-0 w-full h-1 rounded-full"
+                style={{ backgroundColor: RED, opacity: 0.3 }}
+              />
+            </span>
+          </h1>
+
+          <p className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+            마케팅 인재 기획사 HeRo.
+            <br className="hidden md:block" />
+            당신의 숨겨진 재능을 발견하고, 무대 위에 세웁니다.
+          </p>
+
+          {/* CTA */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            <Link
+              href="/hero/hit"
+              className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]"
+              style={{ backgroundColor: RED }}
+            >
+              HIT 검사 받기 <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/hero/for-business"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-neutral-900 text-neutral-900 font-bold rounded-xl hover:bg-neutral-900 hover:text-white transition-all"
+            >
+              <Building2 className="h-4 w-4" /> 기업 문의
+            </Link>
+          </div>
+
+          {/* 파트너 기업 캐러셀 */}
+          <div>
+            <p className="text-xs text-neutral-400 uppercase tracking-widest font-semibold mb-2">
+              Partner Companies
             </p>
-
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/hero/hit"
-                className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#D85A30] text-white font-bold hover:bg-[#C04E28] transition-colors rounded-xl shadow-lg shadow-[#D85A30]/20"
-              >
-                HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/hero/about"
-                className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-neutral-300 text-neutral-700 font-bold hover:border-[#D85A30] hover:text-[#D85A30] transition-colors rounded-xl"
-              >
-                HeRo 알아보기
-              </Link>
-            </div>
+            <PartnerCarousel />
           </div>
         </div>
       </section>
 
+      {/* ━━━ 2. 한 줄 정의 ━━━ */}
+      <section className="py-24 bg-neutral-50">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <h2 className="text-2xl md:text-4xl font-bold text-neutral-900 mb-4">
+            HeRo는{" "}
+            <span style={{ color: RED }}>마케팅 인재 기획사</span>
+            입니다.
+          </h2>
+          <p className="text-lg md:text-xl text-neutral-500 leading-relaxed">
+            CMO, CTO, CSO, CBO를 길러냅니다.
+          </p>
+        </div>
+      </section>
 
-      {/* ━━ 인재 파이프라인 시각화 ━━ */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">인재 파이프라인</h2>
-            <p className="text-neutral-500 max-w-xl mx-auto">
-              MAD League에서 발굴된 인재가 HeRo를 거쳐 기업에 연결되는 완전한 인재 여정
+      {/* ━━━ 3. 두 고객 ━━━ */}
+      <section className="py-0 min-h-[50vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
+          {/* 인재 */}
+          <div className="relative flex flex-col items-center justify-center px-8 py-20 bg-white group">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+              style={{ backgroundColor: `${RED}10` }}
+            >
+              <Users className="h-8 w-8" style={{ color: RED }} />
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-neutral-900 mb-3">
+              인재
+            </h3>
+            <p className="text-neutral-500 text-center max-w-sm mb-8 leading-relaxed">
+              나를 알고, 성장하고, 무대에 서세요.
+              <br />
+              HeRo가 당신의 커리어를 설계합니다.
             </p>
+            <Link
+              href="/hero/hit"
+              className="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl text-white transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: RED }}
+            >
+              HIT 검사 받기 <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {pipeline.map((step, i) => (
-              <div
-                key={step.stage}
-                className={`relative border-2 rounded-2xl p-8 transition-all cursor-default ${
-                  hoveredPipeline === i
-                    ? "border-[#D85A30] shadow-xl shadow-[#D85A30]/10 scale-[1.02]"
-                    : "border-neutral-200 hover:border-[#D85A30]/40"
-                }`}
-                onMouseEnter={() => setHoveredPipeline(i)}
-                onMouseLeave={() => setHoveredPipeline(null)}
-              >
-                {/* Step number */}
-                <div className="absolute -top-4 left-6 bg-[#D85A30] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                  {i + 1}
-                </div>
-
-                <div className={`w-14 h-14 rounded-2xl ${step.color} flex items-center justify-center mb-5`}>
-                  <step.icon className="h-7 w-7" />
-                </div>
-
-                <p className="text-xs font-bold text-[#D85A30] uppercase tracking-wider mb-1">{step.label}</p>
-                <h3 className="text-xl font-bold mb-2">{step.stage}</h3>
-                <p className="text-sm text-neutral-500 leading-relaxed">{step.desc}</p>
-
-                {/* Arrow connector */}
-                {i < 2 && (
-                  <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                    <ChevronRight className="h-6 w-6 text-[#D85A30]" />
-                  </div>
-                )}
-              </div>
-            ))}
+          {/* 기업 */}
+          <div className="relative flex flex-col items-center justify-center px-8 py-20 bg-neutral-900 group">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+              <Building2 className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
+              기업
+            </h3>
+            <p className="text-neutral-400 text-center max-w-sm mb-8 leading-relaxed">
+              검증된 마케팅 인재를 만나세요.
+              <br />
+              HeRo가 최적의 인재를 매칭합니다.
+            </p>
+            <Link
+              href="/hero/for-business"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-neutral-900 transition-all"
+            >
+              기업 문의 <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ━━ 서비스 3종 ━━ */}
-      <section className="bg-neutral-50 py-20">
+      {/* ━━━ 4. 서비스 3가지 ━━━ */}
+      <section className="py-24 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">핵심 서비스</h2>
-            <p className="text-neutral-500">인재의 잠재력을 극대화하는 세 가지 솔루션</p>
+          <div className="text-center mb-16">
+            <p
+              className="text-sm font-bold uppercase tracking-widest mb-3"
+              style={{ color: RED }}
+            >
+              Services
+            </p>
+            <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
+              세 가지 핵심 서비스
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -189,21 +286,33 @@ export default function HeRoHomePage() {
               <Link
                 key={svc.href}
                 href={svc.href}
-                className="group bg-white border border-neutral-200 rounded-2xl p-8 hover:border-[#D85A30] hover:shadow-xl hover:shadow-[#D85A30]/5 transition-all"
+                className="group relative border border-neutral-200 rounded-2xl p-8 hover:border-[#E53935] hover:shadow-xl transition-all"
               >
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-[#D85A30]/10 text-[#D85A30] flex items-center justify-center">
-                    <svc.icon className="h-6 w-6" />
-                  </div>
-                  <span className="text-xs font-bold text-[#D85A30] bg-[#D85A30]/10 px-2.5 py-1 rounded-full">
-                    {svc.badge}
-                  </span>
+                <span
+                  className="text-5xl font-black block mb-6"
+                  style={{ color: `${RED}15` }}
+                >
+                  {svc.num}
+                </span>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                  style={{ backgroundColor: `${RED}10` }}
+                >
+                  <svc.icon className="h-6 w-6" style={{ color: RED }} />
                 </div>
-                <h3 className="text-lg font-bold mb-1 group-hover:text-[#D85A30] transition-colors">{svc.title}</h3>
-                <p className="text-xs text-neutral-400 mb-3">{svc.sub}</p>
-                <p className="text-sm text-neutral-500 leading-relaxed">{svc.desc}</p>
-                <div className="mt-5 flex items-center gap-1 text-sm text-[#D85A30] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  자세히 보기 <ArrowRight className="h-3.5 w-3.5" />
+                <h3 className="text-xl font-bold text-neutral-900 mb-1 group-hover:text-[#E53935] transition-colors">
+                  {svc.title}
+                </h3>
+                <p className="text-sm font-medium text-neutral-400 mb-4">
+                  {svc.desc}
+                </p>
+                <p className="text-sm text-neutral-500 leading-relaxed">
+                  {svc.detail}
+                </p>
+                <div className="mt-6 flex items-center gap-1 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: RED }}
+                >
+                  자세히 보기 <ChevronRight className="h-4 w-4" />
                 </div>
               </Link>
             ))}
@@ -211,71 +320,199 @@ export default function HeRoHomePage() {
         </div>
       </section>
 
+      {/* ━━━ 5. 영웅의 여정 미리보기 ━━━ */}
+      <section className="py-24 bg-neutral-50">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p
+              className="text-sm font-bold uppercase tracking-widest mb-3"
+              style={{ color: RED }}
+            >
+              Hero&apos;s Journey
+            </p>
+            <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
+              영웅의 여정
+            </h2>
+            <p className="text-neutral-500 mt-3 max-w-xl mx-auto">
+              꿈꾸는 자에서 전설로. 6단계 성장 로드맵.
+            </p>
+          </div>
 
-      {/* ━━ 파트너 기업 모집 ━━ */}
-      <section className="bg-neutral-50 py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">파트너 기업 모집 중</h2>
-          <p className="text-neutral-500 mb-8">HeRo 인재를 채용하고 싶은 기업이라면 파트너십을 신청해 주세요</p>
-          <Link
-            href="/hero/about"
-            className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-[#D85A30] text-[#D85A30] font-bold hover:bg-[#D85A30] hover:text-white transition-colors rounded-xl"
-          >
-            파트너십 알아보기 <ArrowRight className="h-4 w-4" />
-          </Link>
+          {/* 타임라인 */}
+          <div className="relative">
+            {/* 수평 라인 */}
+            <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-neutral-200" />
+            <div
+              className="hidden md:block absolute top-8 left-0 h-0.5 transition-all duration-700"
+              style={{
+                width: `${(activeJourney / (journey.length - 1)) * 100}%`,
+                backgroundColor: RED,
+              }}
+            />
+
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-6 md:gap-4">
+              {journey.map((step, i) => {
+                const isActive = i === activeJourney;
+                const isPast = i < activeJourney;
+                return (
+                  <button
+                    key={step.label}
+                    onClick={() => setActiveJourney(i)}
+                    className="flex flex-col items-center text-center group cursor-pointer"
+                  >
+                    {/* 노드 */}
+                    <div
+                      className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${
+                        isActive
+                          ? "scale-110 shadow-lg"
+                          : isPast
+                          ? ""
+                          : "bg-neutral-100"
+                      }`}
+                      style={
+                        isActive
+                          ? { backgroundColor: RED, boxShadow: `0 8px 24px ${RED}40` }
+                          : isPast
+                          ? { backgroundColor: `${RED}20` }
+                          : undefined
+                      }
+                    >
+                      <step.icon
+                        className={`h-6 w-6 transition-colors ${
+                          isActive
+                            ? "text-white"
+                            : isPast
+                            ? ""
+                            : "text-neutral-400"
+                        }`}
+                        style={isPast && !isActive ? { color: RED } : undefined}
+                      />
+                    </div>
+                    <p
+                      className={`text-sm font-bold transition-colors ${
+                        isActive ? "" : "text-neutral-400"
+                      }`}
+                      style={isActive || isPast ? { color: RED } : undefined}
+                    >
+                      {step.label}
+                    </p>
+                    <p
+                      className={`text-xs mt-1 transition-colors ${
+                        isActive ? "text-neutral-700" : "text-neutral-400"
+                      }`}
+                    >
+                      {step.desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/hero/journey"
+              className="inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all"
+              style={{ color: RED }}
+            >
+              자세히 보기 <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ━━ Ten:One Universe 연결 ━━ */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ten:One Universe</h2>
-            <p className="text-neutral-500">HeRo가 연결하는 생태계</p>
+      {/* ━━━ 6. 64유형 미리보기 ━━━ */}
+      <section className="py-24 bg-white">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p
+              className="text-sm font-bold uppercase tracking-widest mb-3"
+              style={{ color: RED }}
+            >
+              64 Types
+            </p>
+            <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
+              64가지 마케팅 유형
+            </h2>
+            <p className="text-neutral-500 mt-3">
+              당신은 어떤 유형일까요?
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {universeLinks.map((u) => (
-              <Link
-                key={u.brand}
-                href={u.href}
-                className="group border border-neutral-200 rounded-2xl p-6 hover:shadow-lg transition-all"
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {previewTypes.map((t) => (
+              <div
+                key={t.code}
+                className="border border-neutral-200 rounded-2xl p-6 text-center hover:border-[#E53935] hover:shadow-md transition-all group cursor-default"
               >
-                <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold mb-4 ${u.color}`}>
-                  {u.brand}
+                <div
+                  className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-sm font-bold"
+                  style={{
+                    backgroundColor: `${RED}10`,
+                    color: RED,
+                  }}
+                >
+                  {t.code}
                 </div>
-                <p className="text-sm text-neutral-600 group-hover:text-neutral-900 transition-colors">{u.desc}</p>
-                <div className="mt-3 flex items-center gap-1 text-xs text-[#D85A30] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  방문하기 <ArrowRight className="h-3 w-3" />
-                </div>
-              </Link>
+                <p className="font-bold text-neutral-900 group-hover:text-[#E53935] transition-colors">
+                  {t.name}
+                </p>
+                <p className="text-xs text-neutral-400 mt-1">{t.alias}</p>
+              </div>
             ))}
           </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/hero/hit"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 font-bold rounded-xl hover:text-white transition-all"
+              style={{
+                borderColor: RED,
+                color: RED,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = RED;
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = RED;
+              }}
+            >
+              나의 유형은? <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ━━ CTA ━━ */}
-      <section className="bg-gradient-to-r from-[#D85A30] to-[#E8764A]">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 text-center">
-          <UserCheck className="h-10 w-10 text-white/80 mx-auto mb-4" />
-          <h2 className="text-2xl md:text-4xl font-black text-white mb-4">
-            당신의 HeRo 여정을 시작하세요
+      {/* ━━━ 7. CTA ━━━ */}
+      <section style={{ backgroundColor: RED }}>
+        <div className="mx-auto max-w-5xl px-6 py-24 text-center">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
+            당신의 무대를 찾을 준비가 되셨나요?
           </h2>
-          <p className="text-white/80 mb-10 max-w-xl mx-auto text-lg">
-            숨겨진 잠재력을 발견하고, 꿈의 커리어를 향해 나아가세요.
-            HeRo가 처음부터 끝까지 함께합니다.
+          <p className="text-white/70 mb-12 max-w-xl mx-auto text-lg leading-relaxed">
+            HIT 검사로 나를 알고, 코칭으로 성장하고, 매칭으로 무대에 서세요.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/hero/hit"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#D85A30] font-bold hover:bg-orange-50 transition-colors rounded-xl"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xl hover:bg-neutral-100 transition-colors"
+              style={{ color: RED }}
             >
-              HIT 진단 시작하기 <ArrowRight className="h-4 w-4" />
+              HIT 무료 검사 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-white text-white font-bold hover:bg-white/10 transition-colors rounded-xl"
+              href="/hero/coaching"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors"
             >
-              회원가입
+              HeRo 오디션 지원
+            </Link>
+            <Link
+              href="/hero/for-business"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/50 text-white/90 font-bold rounded-xl hover:border-white hover:text-white transition-colors"
+            >
+              기업 문의
             </Link>
           </div>
         </div>
