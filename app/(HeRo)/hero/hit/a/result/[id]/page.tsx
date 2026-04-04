@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight, ArrowLeft, Copy, Check, Sparkles, Users,
-  RefreshCw, ChevronLeft, ChevronRight, Lock,
+  RefreshCw, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
@@ -214,64 +214,50 @@ export default function HitAResultPage() {
           </div>
         );
 
-      // ── Page 5: 강점/주의점 (블러 — 회원가입 CTA) ──
+      // ── Page 5: 통합 보고서 안내 ──
       case 4:
         return (
           <div key="p4">
-            <h2 className="text-lg font-bold mb-4">강점 & 주의 패턴</h2>
+            <h2 className="text-lg font-bold mb-6">HIT 통합 보고서</h2>
 
-            {/* 블러 프리뷰 */}
-            <div className="relative">
-              <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-white/60 to-white flex flex-col items-center justify-end pb-8">
-                <Lock className="h-5 w-5 text-neutral-400 mb-2" />
-                <p className="text-sm font-medium text-neutral-700 mb-1">가입하시면 HIT 통합 보고서를 보실 수 있습니다</p>
-                <Link href={`/signup?from=hit&resultId=${resultId}`}
-                  className="px-5 py-2.5 bg-[#E53935] text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
-                  회원가입하기
-                </Link>
-              </div>
-
-              <div className="blur-sm pointer-events-none space-y-4">
-                {/* 강점 */}
-                <div>
-                  <p className="text-xs font-semibold text-green-600 mb-2">핵심 강점 5가지</p>
-                  <div className="space-y-3">
-                    {(heroType?.strengths || []).slice(0, 5).map((s, i) => (
-                      <div key={i} className="border border-neutral-100 rounded-lg p-3">
-                        <p className="text-sm font-bold text-neutral-800">{i + 1}. {s.title}</p>
-                        <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{s.desc}</p>
-                      </div>
-                    ))}
-                    {!heroType?.strengths?.length && (
-                      <div className="border border-neutral-100 rounded-lg p-3">
-                        <p className="text-sm font-bold text-neutral-800">1. 전략적 의사결정</p>
-                        <p className="text-xs text-neutral-500 mt-1">복잡한 상황에서 핵심을 꿰뚫고 최적 경로를 설계합니다.</p>
-                      </div>
-                    )}
-                  </div>
+            {/* 보고서 미리보기 — 제목만 공개 */}
+            <div className="space-y-2 mb-8">
+              {(heroType?.strengths || []).slice(0, 3).map((s, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
+                  <span className="text-xs font-bold text-green-600 w-5">{i + 1}</span>
+                  <span className="text-sm text-neutral-700">{s.title}</span>
+                  <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
                 </div>
-
-                {/* 주의점 */}
-                <div>
-                  <p className="text-xs font-semibold text-amber-600 mb-2">주의 패턴 3가지</p>
-                  <div className="space-y-3">
-                    {(heroType?.cautions || []).slice(0, 3).map((c, i) => (
-                      <div key={i} className="border border-neutral-100 rounded-lg p-3">
-                        <p className="text-sm font-bold text-neutral-800">{i + 1}. {c.title}</p>
-                        <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{c.desc}</p>
-                      </div>
-                    ))}
-                  </div>
+              ))}
+              {(heroType?.cautions || []).slice(0, 2).map((c, i) => (
+                <div key={`c${i}`} className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
+                  <span className="text-xs font-bold text-amber-500 w-5">!</span>
+                  <span className="text-sm text-neutral-700">{c.title}</span>
+                  <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
                 </div>
-
-                {/* 적합 방향 */}
-                {heroType?.fit_direction && (
-                  <div>
-                    <p className="text-xs font-semibold text-blue-600 mb-2">이 유형에게 어울리는 방향</p>
-                    <p className="text-xs text-neutral-500 leading-relaxed">{heroType.fit_direction}</p>
-                  </div>
-                )}
+              ))}
+              <div className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
+                <span className="text-xs font-bold text-blue-500 w-5">◎</span>
+                <span className="text-sm text-neutral-700">이 유형에게 어울리는 방향</span>
+                <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
               </div>
+            </div>
+
+            {/* 안내 영역 */}
+            <div className="border border-neutral-200 rounded-xl p-6 text-center bg-neutral-50">
+              <p className="text-sm text-neutral-600 mb-1">
+                강점 5가지, 주의 패턴 3가지, 소통 스타일, 적합 방향까지
+              </p>
+              <p className="text-base font-bold text-neutral-800 mb-4">
+                가입하시면 HIT 통합 보고서를 보실 수 있습니다
+              </p>
+              <Link href={`/signup?from=hit&resultId=${resultId}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
+                회원가입하기 <ArrowRight className="h-4 w-4" />
+              </Link>
+              <p className="text-xs text-neutral-400 mt-3">
+                검사 데이터는 자동으로 연결됩니다
+              </p>
             </div>
           </div>
         );
