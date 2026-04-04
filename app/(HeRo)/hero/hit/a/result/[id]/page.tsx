@@ -27,6 +27,7 @@ export default function HitAResultPage() {
   const resultId = params.id as string;
   const [result, setResult] = useState<HitAResult | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
+  const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -61,6 +62,7 @@ export default function HitAResultPage() {
           aiNarrative: data.ai_narrative, sPowerScores: data.s_power_scores,
           createdAt: data.created_at,
         });
+        if (data.report_modules) setReportModules(data.report_modules);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -214,13 +216,108 @@ export default function HitAResultPage() {
           </div>
         );
 
-      // ── Page 5: 통합 보고서 안내 ──
+      // ── Page 5: 통합 보고서 (회원) or 안내 (비회원) ──
       case 4:
+        // 모듈 콘텐츠가 있으면 실제 보고서 렌더링
+        if (reportModules && Object.keys(reportModules).length > 0) {
+          // 카테고리별 그룹핑
+          const discMods = Object.entries(reportModules).filter(([k]) => k.startsWith('DISC-'));
+          const mbtiMods = Object.entries(reportModules).filter(([k]) => k.startsWith('MBTI-'));
+          const crossMods = Object.entries(reportModules).filter(([k]) => k.startsWith('CROSS-'));
+          const spMods = Object.entries(reportModules).filter(([k]) => k.startsWith('SP-') && !k.includes('GROWTH'));
+          const spGrowth = Object.entries(reportModules).filter(([k]) => k.includes('GROWTH'));
+          const commMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMM-'));
+
+          return (
+            <div key="p4" className="space-y-6">
+              <h2 className="text-lg font-bold">HIT 통합 보고서</h2>
+
+              {/* DISC 해설 */}
+              {discMods.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">DISC 행동 특성</h3>
+                  {discMods.map(([id, m]) => (
+                    <div key={id} className="mb-4">
+                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* MBTI 해설 */}
+              {mbtiMods.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">MBTI 성향 해설</h3>
+                  {mbtiMods.map(([id, m]) => (
+                    <div key={id} className="mb-3">
+                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 교차 해석 */}
+              {crossMods.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">교차 해석</h3>
+                  {crossMods.map(([id, m]) => (
+                    <div key={id} className="mb-3">
+                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* S-Power 강점 */}
+              {spMods.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">S-Power 주강점</h3>
+                  {spMods.map(([id, m]) => (
+                    <div key={id} className="mb-3">
+                      <p className="text-sm font-bold text-green-600 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 성장 영역 */}
+              {spGrowth.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">성장 영역</h3>
+                  {spGrowth.map(([id, m]) => (
+                    <div key={id} className="mb-3">
+                      <p className="text-sm font-bold text-amber-600 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 소통 스타일 */}
+              {commMods.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">소통 스타일</h3>
+                  {commMods.map(([id, m]) => (
+                    <div key={id} className="mb-3">
+                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // 비회원: 안내
         return (
           <div key="p4">
             <h2 className="text-lg font-bold mb-6">HIT 통합 보고서</h2>
 
-            {/* 보고서 미리보기 — 제목만 공개 */}
             <div className="space-y-2 mb-8">
               {(heroType?.strengths || []).slice(0, 3).map((s, i) => (
                 <div key={i} className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
@@ -238,15 +335,14 @@ export default function HitAResultPage() {
               ))}
               <div className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
                 <span className="text-xs font-bold text-blue-500 w-5">◎</span>
-                <span className="text-sm text-neutral-700">이 유형에게 어울리는 방향</span>
+                <span className="text-sm text-neutral-700">소통 스타일 · 적합 방향</span>
                 <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
               </div>
             </div>
 
-            {/* 안내 영역 */}
             <div className="border border-neutral-200 rounded-xl p-6 text-center bg-neutral-50">
               <p className="text-sm text-neutral-600 mb-1">
-                강점 5가지, 주의 패턴 3가지, 소통 스타일, 적합 방향까지
+                DISC 상세 · MBTI 해설 · 교차 분석 · S-Power · 소통 스타일까지
               </p>
               <p className="text-base font-bold text-neutral-800 mb-4">
                 가입하시면 HIT 통합 보고서를 보실 수 있습니다

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
 import { scoreMBTI, scoreDISC, scoreBase, match64Type, deriveSPower } from '@/lib/hit/scoring';
+import { selectModules } from '@/lib/hit/report-assembler';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -61,6 +62,16 @@ export async function POST(request: NextRequest) {
       console.error('[HIT A Score] AI 내러티브 생성 실패:', aiError);
     }
 
+    // 모듈 선택
+    const modulesUsed = selectModules({
+      discD: disc.d, discI: disc.i, discS: disc.s, discC: disc.c,
+      discPrimary: disc.primary, discSubtype: disc.subtype,
+      mbtiType: mbti.type,
+      mbtiEScore: mbti.eScore, mbtiSScore: mbti.sScore,
+      mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
+      sPowerScores: sPower,
+    });
+
     // 결과 저장
     const result = await createHitAResult({
       session_id: session.id,
@@ -86,6 +97,7 @@ export async function POST(request: NextRequest) {
       type_careers: typeProfile.careers,
       ai_narrative: aiNarrative,
       s_power_scores: sPower,
+      modules_used: modulesUsed,
     });
 
     // 세션 완료 처리
