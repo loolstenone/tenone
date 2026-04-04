@@ -47,10 +47,21 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   const allQuestions = useMemo<QuestionItem[]>(() => {
     const tagged = (qs: typeof baseQuestions, mod: ModuleType) =>
       qs.map((q) => ({ module: mod, id: q.id, text: q.text, options: q.options }));
+
+    // 단계별 셔플 (단계 간 순서는 유지: base → mbti → disc)
+    const shuffle = <T,>(arr: T[]): T[] => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
     return [
-      ...tagged(baseQuestions, 'base'),
-      ...tagged(mbtiQuestions, 'mbti'),
-      ...tagged(discQuestions, 'disc'),
+      ...shuffle(tagged(baseQuestions, 'base')),
+      ...shuffle(tagged(mbtiQuestions, 'mbti')),
+      ...shuffle(tagged(discQuestions, 'disc')),
     ];
   }, []);
 

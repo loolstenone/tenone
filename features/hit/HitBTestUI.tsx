@@ -77,12 +77,22 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
       ? competencyQuestions.filter(q => q.track === selectedTrack)
       : [];
 
+    // 단계별 셔플
+    const shuffle = <T,>(arr: T[]): T[] => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
     return [
-      ...tagged(personalityQuestions, 'personality'),
-      ...tagged(riasecQuestions, 'riasec'),
-      ...tagged(commonCompetency, 'competency'),
-      ...tagged(trackCompetency, 'competency'),
-      ...tagged(readinessQuestions, 'readiness'),
+      ...shuffle(tagged(personalityQuestions, 'personality')),
+      ...shuffle(tagged(riasecQuestions, 'riasec')),
+      ...shuffle(tagged(commonCompetency, 'competency')),
+      ...shuffle(tagged(trackCompetency, 'competency')),
+      ...shuffle(tagged(readinessQuestions, 'readiness')),
     ];
   }, [selectedTrack]);
 

@@ -97,7 +97,16 @@ export const modules: NavModule[] = [
             },
         ],
     },
-    // HeRo는 외부 사이트(/hero)로 이동. Intra에서 제거됨.
+    {
+        name: "HeRo 관리", href: "/intra/hero/talent", icon: Award, intraModule: "hero" as IntraModule,
+        sections: [
+            {
+                items: [
+                    { name: "인재 관리", href: "/intra/hero/talent", icon: Users, staffOnly: true },
+                ],
+            },
+        ],
+    },
     {
         name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: "evolution" as IntraModule,
         sections: [

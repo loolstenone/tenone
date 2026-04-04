@@ -135,6 +135,19 @@ export async function POST(request: NextRequest) {
       })(),
     });
 
+    // 주의 신호 level 3 → 관리자 알림
+    const alerts = computeAlertScores(personality.scores);
+    if (alerts.alertLevel >= 3) {
+      try {
+        const { postAgentMessage } = await import('@/lib/supabase/chat');
+        await postAgentMessage({
+          channelName: '#브리핑',
+          agentName: '히어로',
+          content: `⚠ HIT B 주의 신호 감지 (alert_level: ${alerts.alertLevel})\n결과 ID: ${result.id}\n유형: ${session.member_id || '비회원'}\n즉시 확인 필요`,
+        });
+      } catch {}
+    }
+
     // 세션 완료
     await updateHitSession(sessionToken, {
       status: 'completed',
