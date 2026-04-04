@@ -11,6 +11,8 @@ import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
+import HeroChatPanel from "@/features/hit/HeroChatPanel";
+import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitAResult } from "@/types/hit";
 
 interface HeroTypeData {
@@ -473,6 +475,19 @@ export default function HitAResultPage() {
       </div>
 
       {/* CSS Animation */}
+      {/* 히어로 AI 채팅 */}
+      {result && (
+        <HeroChatPanel
+          resultId={resultId}
+          mode="A_ONLY"
+          greeting={getHeroGreeting('A_ONLY', {
+            typeCode: result.typeCode,
+            typeNameKo: result.typeNameKo,
+          })}
+          quickQuestions={['DISC 결과 궁금해요', '직장에서 어떻게 나타나나요?', '잘 맞는 유형은?', '성장 방법']}
+        />
+      )}
+
       <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }
