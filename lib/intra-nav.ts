@@ -53,7 +53,7 @@ export interface NavModule {
 
 export const modules: NavModule[] = [
     {
-        name: "Myverse", href: "/intra/myverse", icon: Inbox, intraModule: "myverse" as IntraModule,
+        name: "Workspace", href: "/intra/myverse", icon: Inbox, intraModule: "myverse" as IntraModule,
         sections: [
             {
                 items: [
@@ -70,40 +70,21 @@ export const modules: NavModule[] = [
                     { name: "Library", href: "/intra/myverse/library", icon: FolderOpen },
                 ],
             },
-        ],
-    },
-    {
-        name: "Townity", href: "/intra/comm", icon: MessageSquareText, intraModule: "townity" as IntraModule,
-        sections: [
             {
+                label: "커뮤니티",
                 items: [
                     { name: "공지사항", href: "/intra/comm/notice", icon: ClipboardList },
                     { name: "자유게시판", href: "/intra/comm/free", icon: FileText },
                     { name: "전체 일정", href: "/intra/comm/calendar", icon: Calendar },
                 ],
             },
-        ],
-    },
-    {
-        name: "Project", href: "/intra/project", icon: FolderKanban, intraModule: "project" as IntraModule,
-        sections: [
             {
+                label: "프로젝트",
                 items: [
                     { name: "프로젝트 관리", href: "/intra/project/management", icon: ClipboardList },
                     { name: "Job 관리", href: "/intra/project/jobs", icon: Briefcase },
                     { name: "타임시트", href: "/intra/project/timesheet", icon: Clock },
                     { name: "Partner Pool", href: "/intra/partner-pool", icon: Users },
-                ],
-            },
-        ],
-    },
-    // HeRo 관리는 UMS 내 서브메뉴로 이동
-    {
-        name: "Evolution School", href: "/intra/evolution-school", icon: GraduationCap, intraModule: "evolution" as IntraModule,
-        sections: [
-            {
-                items: [
-                    { name: "전체 과정", href: "/intra/evolution-school", icon: GraduationCap },
                 ],
             },
         ],
@@ -370,6 +351,16 @@ export const modules: NavModule[] = [
                             { name: "이력서 이용자", href: "/intra/hero/resume" },
                             { name: "커리어 이용자", href: "/intra/hero/career" },
                             { name: "브랜딩 이용자", href: "/intra/hero/branding" },
+                        ],
+                    },
+                    {
+                        name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
+                        children: [
+                            { name: "Planning", href: "/intra/ums/planners/planning" },
+                            { name: "GPR", href: "/intra/ums/planners/gpr" },
+                            { name: "Planner's Planner", href: "/intra/ums/planners/tool" },
+                            { name: "Programs", href: "/intra/ums/planners/programs" },
+                            { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
                     {
