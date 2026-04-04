@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult } from '@/lib/supabase/hit';
-import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage } from '@/lib/hit/scoring-b';
+import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage, computeAlertScores } from '@/lib/hit/scoring-b';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -123,6 +123,16 @@ export async function POST(request: NextRequest) {
       readiness_gaps: readiness.gaps,
       ai_report: aiReport,
       journey_stage: journeyStage,
+      // 주의 신호 (소비자 비노출)
+      ...(() => {
+        const alerts = computeAlertScores(personality.scores);
+        return {
+          alert_n1: alerts.alertN1,
+          alert_m1: alerts.alertM1,
+          alert_p1: alerts.alertP1,
+          alert_level: alerts.alertLevel,
+        };
+      })(),
     });
 
     // 세션 완료

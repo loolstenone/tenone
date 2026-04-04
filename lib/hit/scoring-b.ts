@@ -297,3 +297,25 @@ export function determineJourneyStage(readinessTotal: number, competencyAvg: num
   if (readinessTotal >= 40) return 'exploring';
   return 'discovering';
 }
+
+// ── 주의 신호 산출 (소비자 비노출) ──
+
+export function computeAlertScores(personalityScores: Record<string, number>): {
+  alertN1: number;
+  alertM1: number;
+  alertP1: number;
+  alertLevel: number;
+} {
+  // _dark subscale에서 추출
+  const alertN1 = personalityScores['narcissism_dark'] ?? 0;
+  const alertM1 = personalityScores['machiavellianism_dark'] ?? 0;
+  const alertP1 = personalityScores['psychopathy_dark'] ?? 0;
+
+  // 70 이상 = 감지
+  let alertLevel = 0;
+  if (alertN1 >= 70) alertLevel++;
+  if (alertM1 >= 70) alertLevel++;
+  if (alertP1 >= 70) alertLevel++;
+
+  return { alertN1, alertM1, alertP1, alertLevel };
+}

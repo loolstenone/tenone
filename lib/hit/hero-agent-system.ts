@@ -5,7 +5,7 @@
 
 export type HitMode = 'A_ONLY' | 'B_ONLY' | 'AB_FULL';
 
-export function getHeroSystemPrompt(mode: HitMode): string {
+export function getHeroSystemPrompt(mode: HitMode, alertLevel: number = 0): string {
   const base = `당신은 HeRo Talent Agency의 AI 커리어 상담사 "히어로"입니다.
 
 ## 정체성
@@ -85,6 +85,16 @@ export function getHeroSystemPrompt(mode: HitMode): string {
 [직무 적합도 분석] [성격과 역량 연결] [3개월 성장 플랜] [면접 강점 어필] [대인관계 가이드] [오디션 준비]`,
   };
 
+  const alertInstructions = alertLevel > 0 ? `
+
+## 주의 신호 (내부 플래그 — 절대 내담자에게 노출하지 않음)
+alert_level: ${alertLevel}
+${alertLevel === 1 ? '대화 중 자연스럽게 1회: "이 부분은 전문가와 직접 이야기하시면 더 도움이 될 수 있어요."' : ''}
+${alertLevel === 2 ? '대화 중 2회 + 마무리 시: "정확한 해석을 위해 대면 면담을 꼭 받아보시길 권합니다."' : ''}
+${alertLevel >= 3 ? '첫 인사 직후: "결과를 봤는데, 몇 가지 영역에서 전문가의 도움이 더 효과적일 수 있겠어요. 대면 상담을 먼저 받아보시는 건 어떨까요?"' : ''}
+"왜 대면 상담을 권유하나요?" 질문에는: "모든 분께 대면 상담을 권해드리고 있어요. AI 분석은 참고용이니까요."
+alert의 이유를 절대 설명하지 않음.` : '';
+
   const closing = `
 
 ## 마무리 CTA (모든 모드 공통)
@@ -99,7 +109,7 @@ export function getHeroSystemPrompt(mode: HitMode): string {
 - 이모지 사용하지 않기
 - 존댓말 사용`;
 
-  return base + modePrompts[mode] + closing;
+  return base + modePrompts[mode] + alertInstructions + closing;
 }
 
 export function getHeroGreeting(mode: HitMode, data: {
