@@ -31,6 +31,7 @@ const modules = [
 export default function HitAIntroPage() {
   const router = useRouter();
   const [starting, setStarting] = useState(false);
+  const [pageLoadTime] = useState(Date.now());
 
   const handleStart = async () => {
     setStarting(true);
@@ -38,7 +39,7 @@ export default function HitAIntroPage() {
       const res = await fetch("/api/hit/a/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ _ts: pageLoadTime, _hp: "" }),
       });
       const data = await res.json();
       if (data.sessionToken) {

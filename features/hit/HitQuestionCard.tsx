@@ -45,22 +45,15 @@ export default function HitQuestionCard({
     <div
       className={`transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
     >
-      <div className="text-center mb-8">
-        <span className="inline-block px-3 py-1 rounded-full bg-neutral-100 text-xs text-neutral-500 font-medium mb-4">
-          Q{displayedNumber}
-        </span>
-        <p className="text-lg md:text-xl font-medium text-neutral-900 leading-relaxed">
+      {/* 질문 영역 — 컴팩트하게 */}
+      <div className="text-center mb-6">
+        <p className="text-base md:text-lg font-medium text-neutral-900 leading-relaxed">
           {displayedQuestion}
         </p>
       </div>
 
-      <div
-        className={
-          isGrid
-            ? 'grid grid-cols-1 md:grid-cols-2 gap-3'
-            : 'grid grid-cols-1 md:grid-cols-2 gap-3'
-        }
-      >
+      {/* 답변 영역 — 넓게 */}
+      <div className={isGrid ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2.5'}>
         {options.map((option, idx) => (
           <HitOptionButton
             key={`${displayedNumber}-${idx}`}

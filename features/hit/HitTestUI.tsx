@@ -144,20 +144,27 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
     [sessionToken],
   );
 
+  const [error, setError] = useState<string | null>(null);
+
   const submitResults = useCallback(async () => {
     setIsSubmitting(true);
+    setError(null);
     try {
       const res = await fetch('/api/hit/a/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionToken }),
       });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      if (res.ok && data.resultId) {
         setIsComplete(true);
         router.push(`/hero/hit/a/result/${data.resultId}`);
+      } else {
+        setError(data.error || '결과 생성에 실패했습니다. 다시 시도해 주세요.');
+        setIsSubmitting(false);
       }
     } catch {
+      setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
       setIsSubmitting(false);
     }
   }, [sessionToken, router]);
@@ -218,18 +225,35 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
 
   if (isSubmitting || isComplete) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
-        <p className="text-neutral-500 text-sm">결과를 분석하고 있습니다...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        {error ? (
+          <>
+            <p className="text-red-500 text-sm">{error}</p>
+            <button
+              onClick={submitResults}
+              className="px-6 py-2 bg-[#E53935] text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+            >
+              다시 시도
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
+            <p className="text-neutral-500 text-sm">결과를 분석하고 있습니다...</p>
+          </>
+        )}
       </div>
     );
   }
 
   if (transitionMessage) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-xl md:text-2xl font-medium text-neutral-900 animate-pulse">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center max-w-sm mx-auto px-6">
+          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+            <div className="w-2 h-2 rounded-full bg-[#E53935] animate-pulse" />
+          </div>
+          <p className="text-base font-medium text-neutral-700">
             {transitionMessage}
           </p>
         </div>
@@ -251,8 +275,8 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        <div className="w-full max-w-lg">
           {/* Back button */}
           {currentIndex > 0 && (
             <button
