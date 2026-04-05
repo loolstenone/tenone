@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// 서비스 role 클라이언트 — auth.admin.createUser() 사용 가능
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// lazy 초기화 — 빌드 타임에 환경변수 없어도 안전
+let _getSupabaseAdmin(): SupabaseClient | null = null;
+function getSupabaseAdmin() {
+  if (!_getSupabaseAdmin()) {
+    _getSupabaseAdmin() = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _getSupabaseAdmin();
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -25,7 +31,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Supabase Auth 계정 생성 (이메일 인증 없이 즉시 활성화)
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        const { data: authData, error: authError } = await getSupabaseAdmin().auth.admin.createUser({
             email,
             password: tempPassword,
             email_confirm: true,        // 즉시 인증 완료
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
 
         // 2. members 테이블에 프로필 생성
         const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || name.slice(0, 2).toUpperCase();
-        const { data: member, error: memberError } = await supabaseAdmin
+        const { data: member, error: memberError } = await getSupabaseAdmin()
             .from('members')
             .insert({
                 auth_id: authUserId,
@@ -71,7 +77,7 @@ export async function POST(req: NextRequest) {
 
         if (memberError) {
             // members 생성 실패 시 auth 계정도 롤백
-            await supabaseAdmin.auth.admin.deleteUser(authUserId);
+            await getSupabaseAdmin().auth.admin.deleteUser(authUserId);
             return NextResponse.json({ error: memberError.message }, { status: 500 });
         }
 
