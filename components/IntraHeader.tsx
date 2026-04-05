@@ -183,7 +183,7 @@ export function IntraHeader() {
                                 color: "#fff",
                                 boxShadow: "0 2px 6px rgba(0,0,0,0.3), inset 0 -2px 3px rgba(0,0,0,0.2)",
                             }}>
-                            {user.avatarInitials}
+                            {user?.avatarInitials || '?'}
                         </div>
                     </button>
 
@@ -192,9 +192,9 @@ export function IntraHeader() {
                             <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
                             <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-neutral-200 shadow-lg w-56">
                                 <div className="px-4 py-3 border-b border-neutral-100">
-                                    <p className="text-sm font-medium">{user.name}</p>
-                                    <p className="text-[10px] text-neutral-400 mt-0.5">{user.email}</p>
-                                    <p className="text-[10px] text-neutral-400">{user.role}</p>
+                                    <p className="text-sm font-medium">{user?.name || '로딩 중...'}</p>
+                                    <p className="text-[10px] text-neutral-400 mt-0.5">{user?.email || ''}</p>
+                                    <p className="text-[10px] text-neutral-400">{user?.role || ''}</p>
                                 </div>
                                 <div className="py-1">
                                     <Link href="/intra/myverse" onClick={() => setProfileOpen(false)}
