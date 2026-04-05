@@ -1,13 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
   Sparkles, ArrowRight, CheckCircle, MessageCircle,
-  Shield, Clock, Brain, Users, FileText, Zap,
+  Shield, Clock, Brain, Users, FileText, Zap, X, AlertCircle,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const RED = "#E53935";
 
@@ -104,6 +105,38 @@ export default function AICounselingPage() {
 function AICounselingContent() {
   const searchParams = useSearchParams();
   const resultId = searchParams.get("resultId");
+  const { isAuthenticated, user } = useAuth();
+  const [hitModal, setHitModal] = useState<{ show: boolean; type: 'login' | 'hitA' | 'hitB' | 'ready' }>({ show: false, type: 'login' });
+
+  const handlePurchase = async (planIndex: number) => {
+    // 체험은 바로 진행
+    if (planIndex === 0) {
+      window.location.href = '/hero/hit';
+      return;
+    }
+
+    // 로그인 확인
+    if (!isAuthenticated || !user) {
+      setHitModal({ show: true, type: 'login' });
+      return;
+    }
+
+    // HIT 완료 확인
+    try {
+      const { checkHitCompletion } = await import('@/lib/supabase/hero');
+      const hit = await checkHitCompletion(user.id);
+
+      if (!hit.hasA) {
+        setHitModal({ show: true, type: 'hitA' });
+      } else if (!hit.hasB) {
+        setHitModal({ show: true, type: 'hitB' });
+      } else {
+        setHitModal({ show: true, type: 'ready' });
+      }
+    } catch {
+      setHitModal({ show: true, type: 'hitA' });
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -226,6 +259,7 @@ function AICounselingContent() {
                   ))}
                 </div>
                 <button
+                  onClick={() => handlePurchase(i)}
                   className={`w-full py-3 rounded-xl text-sm font-bold transition-colors ${
                     p.highlight
                       ? "text-white hover:opacity-90"
@@ -239,6 +273,63 @@ function AICounselingContent() {
             ))}
           </div>
         </div>
+
+        {/* HIT 체크 모달 */}
+        {hitModal.show && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 relative">
+              <button onClick={() => setHitModal({ show: false, type: 'login' })} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600">
+                <X className="h-5 w-5" />
+              </button>
+              {hitModal.type === 'login' && (
+                <div className="text-center">
+                  <AlertCircle className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">로그인이 필요합니다</h3>
+                  <p className="text-sm text-neutral-500 mb-6">서비스를 이용하려면 먼저 로그인해주세요.</p>
+                  <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
+                    로그인하기
+                  </Link>
+                </div>
+              )}
+              {hitModal.type === 'hitA' && (
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="h-8 w-8" style={{ color: RED }} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT A 검사를 먼저 완료해주세요</h3>
+                  <p className="text-sm text-neutral-500 mb-6">성격/강점 진단(HIT A)을 완료해야 맞춤 상담이 가능합니다.</p>
+                  <Link href="/hero/hit/a" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
+                    HIT A 시작하기 <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+              {hitModal.type === 'hitB' && (
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="h-8 w-8" style={{ color: RED }} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT B 검사를 완료하면 더 정확합니다</h3>
+                  <p className="text-sm text-neutral-500 mb-6">역량/적성 진단(HIT B)까지 완료하면 교차 분석이 가능합니다.</p>
+                  <Link href="/hero/hit/b" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
+                    HIT B 시작하기 <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+              {hitModal.type === 'ready' && (
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">결제 준비 중</h3>
+                  <p className="text-sm text-neutral-500 mb-6">결제 시스템이 곧 오픈됩니다. 조금만 기다려주세요.</p>
+                  <button onClick={() => setHitModal({ show: false, type: 'login' })} className="px-6 py-3 border border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50">
+                    확인
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── 프로세스 ── */}

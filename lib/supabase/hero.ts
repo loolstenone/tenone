@@ -102,3 +102,39 @@ export async function deleteResume(id: string) {
     const { error } = await supabase.from('resumes').delete().eq('id', id);
     if (error) throw error;
 }
+
+// ── HIT 완료 상태 확인 ──
+
+export async function checkHitCompletion(memberId: string): Promise<{
+    hasA: boolean;
+    hasB: boolean;
+    aResultId: string | null;
+    bResultId: string | null;
+}> {
+    const { data: aResult } = await supabase
+        .from('hit_a_results')
+        .select('id')
+        .eq('member_id', memberId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    let bResultId: string | null = null;
+    if (aResult?.id) {
+        const { data: bResult } = await supabase
+            .from('hit_b_results')
+            .select('id')
+            .eq('hit_a_result_id', aResult.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        bResultId = bResult?.id || null;
+    }
+
+    return {
+        hasA: !!aResult?.id,
+        hasB: !!bResultId,
+        aResultId: aResult?.id || null,
+        bResultId,
+    };
+}
