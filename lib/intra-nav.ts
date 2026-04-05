@@ -312,6 +312,7 @@ export const modules: NavModule[] = [
         name: "UMS", href: "/intra/ums", icon: Globe, intraModule: "universe" as IntraModule,
         sections: [
             {
+                label: "통합",
                 items: [
                     { name: "UMS 대시보드", href: "/intra/ums", icon: LayoutDashboard },
                     {
@@ -344,6 +345,22 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
+                        name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/agent" },
+                            { name: "지시", href: "/intra/ums/agent/comm" },
+                            { name: "자동화 로그", href: "/intra/ums/agent/trends" },
+                        ],
+                    },
+                ],
+            },
+            {
+                label: "사이트별",
+                items: [
+                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe },
+                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
+                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe },
+                    {
                         name: "HeRo", href: "/intra/hero/talent", icon: Award,
                         children: [
                             { name: "인재 관리", href: "/intra/hero/talent" },
@@ -353,6 +370,19 @@ export const modules: NavModule[] = [
                             { name: "브랜딩 이용자", href: "/intra/hero/branding" },
                         ],
                     },
+                    { name: "MAD League", href: "/intra/ums/madleague", icon: Globe },
+                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Globe },
+                    {
+                        name: "Mindle", href: "/intra/ums/mindle", icon: TrendingUp,
+                        children: [
+                            { name: "트렌드 카드", href: "/intra/ums/agent/trends" },
+                            { name: "RSS 소스", href: "/intra/ums/mindle/sources" },
+                            { name: "뉴스레터", href: "/intra/ums/mindle/newsletter" },
+                        ],
+                    },
+                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe },
+                    { name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe },
+                    { name: "Myverse", href: "/intra/ums/myverse", icon: Globe },
                     {
                         name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
                         children: [
@@ -363,14 +393,8 @@ export const modules: NavModule[] = [
                             { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
-                    {
-                        name: "Mindle", href: "/intra/ums/mindle", icon: TrendingUp,
-                        children: [
-                            { name: "트렌드 카드", href: "/intra/ums/agent/trends" },
-                            { name: "RSS 소스", href: "/intra/ums/mindle/sources" },
-                            { name: "뉴스레터", href: "/intra/ums/mindle/newsletter" },
-                        ],
-                    },
+                    { name: "RooK", href: "/intra/ums/rook", icon: Globe },
+                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe },
                     {
                         name: "WIO", href: "/intra/ums/wio", icon: Settings,
                         children: [
@@ -378,14 +402,7 @@ export const modules: NavModule[] = [
                             { name: "테넌트", href: "/intra/ums/wio/tenants" },
                         ],
                     },
-                    {
-                        name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/agent" },
-                            { name: "지시", href: "/intra/ums/agent/comm" },
-                            { name: "자동화 로그", href: "/intra/ums/agent/trends" },
-                        ],
-                    },
+                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe },
                 ],
             },
         ],
