@@ -83,7 +83,7 @@ export function IntraHeader() {
         }
     };
 
-    if (!user) return null;
+    // user 로딩 중에도 헤더 표시 (layout이 인증 보장)
 
     return (
         <header className="h-12 border-b border-neutral-100 bg-white flex items-center justify-between px-3 pl-14 lg:pl-6 lg:px-6 shrink-0">

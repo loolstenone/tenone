@@ -1,2 +1,1 @@
-import { redirect } from "next/navigation";
-export default function WorkspacePage() { redirect("/intra/myverse"); }
+export { default } from "../myverse/page";
