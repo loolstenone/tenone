@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // lazy 초기화 — 빌드 타임에 환경변수 없어도 안전
-let _getSupabaseAdmin(): SupabaseClient | null = null;
+let _adminClient: SupabaseClient | null = null;
 function getSupabaseAdmin() {
-  if (!_getSupabaseAdmin()) {
-    _getSupabaseAdmin() = createClient(
+  if (!_adminClient) {
+    _adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
   }
-  return _getSupabaseAdmin();
+  return _adminClient;
 }
 
 export async function POST(req: NextRequest) {
