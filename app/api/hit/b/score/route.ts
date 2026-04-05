@@ -7,7 +7,7 @@ import Anthropic from '@anthropic-ai/sdk';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionToken, competencyTrack, hitAResultId } = body;
+    const { sessionToken, competencyTrack, hitAResultId, interestIndustry, interestJobFunction } = body;
 
     if (!sessionToken) {
       return errorResponse('sessionToken은 필수입니다.', 400);
@@ -131,6 +131,8 @@ export async function POST(request: NextRequest) {
       readiness_gaps: readiness.gaps,
       ai_report: aiReport,
       journey_stage: journeyStage,
+      interest_industry: interestIndustry || null,
+      interest_job_function: interestJobFunction || null,
       // 주의 신호 (소비자 비노출)
       ...(() => {
         const alerts = computeAlertScores(personality.scores);

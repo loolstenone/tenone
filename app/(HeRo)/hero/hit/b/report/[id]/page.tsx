@@ -102,10 +102,13 @@ export default function HitBReportPage() {
   const stageLabel = STAGE_INFO[result.journeyStage]?.label || '발견 단계';
   const formattedDate = new Date(result.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
+  // 인성 라벨 (API에서 DB 로드)
+  const dbLabels: Record<string, string> = (result as Record<string, unknown>).personality_labels as Record<string, string> || {};
+
   // 인성 레이더 차트 데이터 (dark 제외)
   const personalityData = Object.entries(result.personalityScores)
     .filter(([k]) => !k.includes('dark'))
-    .map(([k, v]) => ({ label: PERSONALITY_NAMES[k] || k, value: v as number }));
+    .map(([k, v]) => ({ label: dbLabels[k] || PERSONALITY_NAMES[k] || k, value: v as number }));
 
   // 모듈 카테고리별
   const personalityMods = Object.entries(reportModules).filter(([k]) => /^(EMOTIONAL|ETHICS|GROWTH|INTEGRITY|RELATION)/.test(k));

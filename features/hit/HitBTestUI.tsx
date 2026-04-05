@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
 import HitProgressBar from './HitProgressBar';
 import LikertScale from './LikertScale';
-import TrackSelector from './TrackSelector';
+import HitInterestSelector from './HitInterestSelector';
 import { personalityQuestions } from '@/lib/hit/data/personality-questions';
 import { riasecQuestions } from '@/lib/hit/data/riasec-questions';
 import { competencyQuestions } from '@/lib/hit/data/competency-questions';
@@ -42,7 +42,7 @@ const MODULE_NAMES: Record<ModuleType, string> = {
 
 const TRANSITION_MESSAGES: Record<string, string> = {
   'personality→riasec': '다음은 직업 흥미(RIASEC) 검사입니다',
-  'riasec→competency': '역량 검사를 시작합니다.\n먼저 전문 트랙을 선택해주세요',
+  'riasec→competency': '역량 검사를 시작합니다.\n먼저 관심 분야를 선택해주세요',
   'competency→readiness': '마지막! 커리어 준비도를 확인합니다',
 };
 
@@ -54,7 +54,9 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
 
   // Track selection state
   const [selectedTrack, setSelectedTrack] = useState<CompetencyTrack | null>(null);
-  const [showTrackSelector, setShowTrackSelector] = useState(false);
+  const [showInterestSelector, setShowInterestSelector] = useState(false);
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+  const [selectedJobFunction, setSelectedJobFunction] = useState<string>('');
   const [riasecScores, setRiasecScores] = useState<{ r: number; i: number; a: number; s: number; e: number; c: number } | null>(null);
 
   // Build question list — competency track questions added after selection
@@ -141,7 +143,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (transitionMessage || isSubmitting || isComplete || showTrackSelector) return;
+    if (transitionMessage || isSubmitting || isComplete || showInterestSelector) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft') {
@@ -196,6 +198,8 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
           sessionToken,
           competencyTrack: selectedTrack,
           hitAResultId,
+          interestIndustry: selectedIndustry,
+          interestJobFunction: selectedJobFunction,
         }),
       });
       if (res.ok) {
@@ -240,13 +244,12 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
 
   const handleTrackSelect = useCallback((track: CompetencyTrack) => {
     setSelectedTrack(track);
-    setShowTrackSelector(false);
-    // Continue to next question (common competency already in list)
+    setShowInterestSelector(false);
   }, []);
 
   const handleLikertSelect = useCallback(
     (likertValue: number) => {
-      if (!currentQuestion || transitionMessage || isSubmitting || showTrackSelector) return;
+      if (!currentQuestion || transitionMessage || isSubmitting || showInterestSelector) return;
 
       const q = currentQuestion;
       const reverseFlag = q.reverse ? ':r' : '';
@@ -295,7 +298,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
         }
       }, 400);
     },
-    [currentIndex, currentQuestion, transitionMessage, isSubmitting, showTrackSelector,
+    [currentIndex, currentQuestion, transitionMessage, isSubmitting, showInterestSelector,
      allQuestions, total, fireAndForgetSave, submitResults, selectedTrack, computeRiasecScores],
   );
 
@@ -336,12 +339,20 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
     );
   }
 
-  if (showTrackSelector) {
+  if (showInterestSelector) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
-        <TrackSelector
-          onSelect={handleTrackSelect}
-          riasecScores={riasecScores || undefined}
+      <div className="min-h-screen bg-white">
+        <HitInterestSelector
+          onSelect={(industry, jobFunction, trackId) => {
+            setSelectedIndustry(industry);
+            setSelectedJobFunction(jobFunction);
+            if (trackId) {
+              handleTrackSelect(trackId as CompetencyTrack);
+            } else {
+              // 트랙 없음 → 공통 역량만으로 진행
+              handleTrackSelect('marketing_strategy' as CompetencyTrack);
+            }
+          }}
         />
       </div>
     );

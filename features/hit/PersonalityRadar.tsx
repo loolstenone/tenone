@@ -3,6 +3,7 @@
 interface PersonalityRadarProps {
   scores: Record<string, number>;
   darkTriadFlags?: Record<string, boolean>;
+  labels?: Record<string, string>;
 }
 
 // 실제 DB 키 → 소비자 친화 한국어
@@ -55,7 +56,9 @@ function getScoreColor(score: number): string {
   return 'bg-red-400';
 }
 
-export default function PersonalityRadar({ scores }: PersonalityRadarProps) {
+export default function PersonalityRadar({ scores, labels }: PersonalityRadarProps) {
+  // DB 라벨 우선, 없으면 하드코딩 fallback
+  const getName = (key: string) => labels?.[key] || SUBSCALE_NAMES[key] || key;
 
   return (
     <div className="space-y-6">
@@ -71,7 +74,7 @@ export default function PersonalityRadar({ scores }: PersonalityRadarProps) {
             <div className="space-y-2">
               {visibleSubscales.map((subscale) => {
                 const score = scores[subscale] ?? 0;
-                const name = SUBSCALE_NAMES[subscale] || subscale;
+                const name = getName(subscale);
 
                 return (
                   <div key={subscale} className="flex items-center gap-3">

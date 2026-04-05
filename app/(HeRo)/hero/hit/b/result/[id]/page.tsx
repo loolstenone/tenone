@@ -46,6 +46,7 @@ export default function HitBResultPage() {
   const resultId = params.id as string;
   const [result, setResult] = useState<HitBResult | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }>>({});
+  const [personalityLabels, setPersonalityLabels] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -76,6 +77,7 @@ export default function HitBResultPage() {
           createdAt: data.created_at,
         });
         if (data.report_modules) setReportModules(data.report_modules);
+        if (data.personality_labels) setPersonalityLabels(data.personality_labels);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -168,7 +170,7 @@ export default function HitBResultPage() {
           <div key="p1">
             <h2 className="text-lg font-bold mb-4">성격 특성</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <PersonalityRadar scores={result.personalityScores} />
+              <PersonalityRadar scores={result.personalityScores} labels={personalityLabels} />
             </div>
             {personalityMods.length > 0 && (
               <div className="space-y-5">

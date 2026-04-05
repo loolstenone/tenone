@@ -60,7 +60,23 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       } catch {}
     }
 
-    return successResponse({ ...result, report_modules: reportModules, modules_used: modulesUsed });
+    // PERSONALITY-LABELS 로드 (DB에서 한글 라벨)
+    let personalityLabels: Record<string, string> = {};
+    try {
+      const supabaseUrl2 = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseKey2 = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const sb2 = createServerClient(supabaseUrl2, supabaseKey2);
+      const { data: labelMod } = await sb2
+        .from('hit_report_modules')
+        .select('content')
+        .eq('id', 'PERSONALITY-LABELS')
+        .maybeSingle();
+      if (labelMod?.content) {
+        personalityLabels = JSON.parse(labelMod.content);
+      }
+    } catch {}
+
+    return successResponse({ ...result, report_modules: reportModules, modules_used: modulesUsed, personality_labels: personalityLabels });
   } catch (error) {
     console.error('[HIT B Result] 조회 오류:', error);
     const message = error instanceof Error ? error.message : '결과 조회 실패';
