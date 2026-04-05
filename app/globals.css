@@ -239,8 +239,8 @@ main.bg-white .rounded-xl {
 
   /* ── HIT 보고서 전용 ── */
   .hit-report-print-header { display: flex !important; }
-  .hit-print-section { page-break-after: always; }
-  .hit-print-section:last-child { page-break-after: avoid; }
+  .hit-print-section { break-after: page; }
+  .hit-print-section:last-child { break-after: avoid; }
   .hit-report-container {
     max-width: 100% !important;
     padding: 0 !important;
