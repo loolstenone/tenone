@@ -53,21 +53,21 @@ export interface NavModule {
 
 export const modules: NavModule[] = [
     {
-        name: "Workspace", href: "/intra/myverse", icon: Inbox, intraModule: "myverse" as IntraModule,
+        name: "Workspace", href: "/intra/workspace", icon: Inbox, intraModule: "myverse" as IntraModule,
         sections: [
             {
                 items: [
-                    { name: "Dashboard", href: "/intra/myverse", icon: LayoutDashboard },
-                    { name: "메신저", href: "/intra/myverse/messenger", icon: MessageSquareText },
-                    { name: "Todo", href: "/intra/myverse/todo", icon: ListTodo },
-                    { name: "타임시트 입력", href: "/intra/myverse/timesheet", icon: Clock },
-                    { name: "결재", href: "/intra/myverse/approval", icon: Stamp, staffOnly: true },
-                    { name: "GPR", href: "/intra/myverse/gpr", icon: Target, staffOnly: true },
-                    { name: "근태", href: "/intra/myverse/attendance", icon: CalendarCheck, staffOnly: true },
-                    { name: "급여", href: "/intra/myverse/payroll", icon: Wallet, staffOnly: true },
-                    { name: "경비", href: "/intra/myverse/expenses", icon: CreditCard, staffOnly: true },
-                    { name: "포인트", href: "/intra/myverse/points", icon: Award },
-                    { name: "Library", href: "/intra/myverse/library", icon: FolderOpen },
+                    { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard },
+                    { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
+                    { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },
+                    { name: "타임시트 입력", href: "/intra/workspace/timesheet", icon: Clock },
+                    { name: "결재", href: "/intra/workspace/approval", icon: Stamp, staffOnly: true },
+                    { name: "GPR", href: "/intra/workspace/gpr", icon: Target, staffOnly: true },
+                    { name: "근태", href: "/intra/workspace/attendance", icon: CalendarCheck, staffOnly: true },
+                    { name: "급여", href: "/intra/workspace/payroll", icon: Wallet, staffOnly: true },
+                    { name: "경비", href: "/intra/workspace/expenses", icon: CreditCard, staffOnly: true },
+                    { name: "포인트", href: "/intra/workspace/points", icon: Award },
+                    { name: "Library", href: "/intra/workspace/library", icon: FolderOpen },
                 ],
             },
             {

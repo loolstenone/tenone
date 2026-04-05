@@ -21,22 +21,22 @@ function formatToday() {
 
 // 즐겨찾기 기본값
 const defaultFavorites = [
-    { id: 'myverse', label: 'Myverse', href: '/intra/myverse', icon: 'User' },
+    { id: 'myverse', label: 'Workspace', href: '/intra/workspace', icon: 'User' },
     { id: 'org', label: '조직도', href: '/intra/erp/hr/people/org', icon: 'Users' },
 ];
 
 // 즐겨찾기 추가 가능한 메뉴 (staffOnly: 직원만 표시)
 const availableBookmarks = [
-    { id: 'myverse', label: 'Myverse', href: '/intra/myverse', icon: 'User', staffOnly: false },
+    { id: 'myverse', label: 'Workspace', href: '/intra/workspace', icon: 'User', staffOnly: false },
     { id: 'org', label: '조직도', href: '/intra/erp/hr/people/org', icon: 'Users', staffOnly: true },
-    { id: 'messenger', label: '메신저', href: '/intra/myverse/messenger', icon: 'MessageSquareText', staffOnly: false },
-    { id: 'todo', label: 'Todo', href: '/intra/myverse/todo', icon: 'ListTodo', staffOnly: false },
-    { id: 'gpr', label: 'GPR', href: '/intra/myverse/gpr', icon: 'Target', staffOnly: true },
-    { id: 'approval', label: '결재', href: '/intra/myverse/approval', icon: 'Stamp', staffOnly: true },
+    { id: 'messenger', label: '메신저', href: '/intra/workspace/messenger', icon: 'MessageSquareText', staffOnly: false },
+    { id: 'todo', label: 'Todo', href: '/intra/workspace/todo', icon: 'ListTodo', staffOnly: false },
+    { id: 'gpr', label: 'GPR', href: '/intra/workspace/gpr', icon: 'Target', staffOnly: true },
+    { id: 'approval', label: '결재', href: '/intra/workspace/approval', icon: 'Stamp', staffOnly: true },
     { id: 'project', label: '프로젝트', href: '/intra/project/management', icon: 'FolderKanban', staffOnly: true },
-    { id: 'attendance', label: '근태', href: '/intra/myverse/attendance', icon: 'CalendarCheck', staffOnly: true },
-    { id: 'payroll', label: '급여', href: '/intra/myverse/payroll', icon: 'Wallet', staffOnly: true },
-    { id: 'expenses', label: '경비', href: '/intra/myverse/expenses', icon: 'CreditCard', staffOnly: true },
+    { id: 'attendance', label: '근태', href: '/intra/workspace/attendance', icon: 'CalendarCheck', staffOnly: true },
+    { id: 'payroll', label: '급여', href: '/intra/workspace/payroll', icon: 'Wallet', staffOnly: true },
+    { id: 'expenses', label: '경비', href: '/intra/workspace/expenses', icon: 'CreditCard', staffOnly: true },
     { id: 'hero', label: 'HeRo', href: '/intra/hero/hit', icon: 'Target', staffOnly: false },
     { id: 'education', label: 'Evolution School', href: '/intra/evolution-school', icon: 'User', staffOnly: false },
 ];
@@ -197,36 +197,36 @@ export function IntraHeader() {
                                     <p className="text-[10px] text-neutral-400">{user?.role || ''}</p>
                                 </div>
                                 <div className="py-1">
-                                    <Link href="/intra/myverse" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <User className="h-3.5 w-3.5" /> Myverse
                                     </Link>
-                                    <Link href="/intra/myverse/messenger" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/messenger" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <MessageSquareText className="h-3.5 w-3.5" /> 메신저
                                     </Link>
-                                    <Link href="/intra/myverse/todo" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/todo" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <ListTodo className="h-3.5 w-3.5" /> Todo
                                     </Link>
                                     {isStaff && (<>
-                                    <Link href="/intra/myverse/gpr" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/gpr" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <Target className="h-3.5 w-3.5" /> GPR
                                     </Link>
-                                    <Link href="/intra/myverse/approval" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/approval" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <Stamp className="h-3.5 w-3.5" /> 전자결재
                                     </Link>
-                                    <Link href="/intra/myverse/attendance" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/attendance" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <CalendarCheck className="h-3.5 w-3.5" /> 근태
                                     </Link>
-                                    <Link href="/intra/myverse/payroll" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/payroll" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <Wallet className="h-3.5 w-3.5" /> 급여
                                     </Link>
-                                    <Link href="/intra/myverse/expenses" onClick={() => setProfileOpen(false)}
+                                    <Link href="/intra/workspace/expenses" onClick={() => setProfileOpen(false)}
                                         className="flex items-center gap-2.5 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors">
                                         <CreditCard className="h-3.5 w-3.5" /> 경비
                                     </Link>

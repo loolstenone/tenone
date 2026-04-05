@@ -5,6 +5,6 @@ import { useRouter } from "next/navigation";
 
 export default function ProfileRedirect() {
     const router = useRouter();
-    useEffect(() => { router.replace('/intra/myverse'); }, [router]);
+    useEffect(() => { router.replace('/intra/workspace'); }, [router]);
     return null;
 }
