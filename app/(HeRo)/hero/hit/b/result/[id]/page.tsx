@@ -288,6 +288,18 @@ export default function HitBResultPage() {
                   </div>
                 </Link>
               )}
+              {/* 풀 보고서 */}
+              <Link href={`/hero/hit/b/report/${resultId}`}
+                className="block border border-neutral-200 rounded-xl p-5 hover:bg-neutral-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">PDF</div>
+                  <div className="flex-1">
+                    <p className="font-bold text-neutral-800">전체 보고서 보기</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">HIT B 상세 분석 + 인쇄/PDF 저장</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-neutral-400" />
+                </div>
+              </Link>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-[#E53935]" />

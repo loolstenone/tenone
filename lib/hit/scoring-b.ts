@@ -223,16 +223,28 @@ export function scoreReadiness(responses: ResponseRow[]): {
     network: [],
   };
 
+  // option_value 도메인명 → 코드 도메인 매핑
+  const domainAlias: Record<string, string> = {
+    self: 'self',
+    self_understanding: 'self',
+    portfolio: 'portfolio',
+    interview: 'interview',
+    interview_prep: 'interview',
+    network: 'network',
+    networking: 'network',
+  };
+
   for (const resp of readiness) {
     const parts = resp.option_value.split(':');
     let domain: string;
     let value: number;
 
     if (parts.length >= 2) {
-      domain = parts[0];
+      domain = domainAlias[parts[0]] || parts[0];
       value = parseInt(parts[1], 10);
     } else {
-      domain = extractDomain(resp.question_id);
+      const raw = extractDomain(resp.question_id);
+      domain = domainAlias[raw] || raw;
       value = parseInt(resp.option_value, 10);
     }
 

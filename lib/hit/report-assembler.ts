@@ -153,9 +153,17 @@ export function selectBModules(scores: HitBScores): string[] {
   modules.push(`INTEGRITY-${getLevel(integrityAvg)}`);
   modules.push(`RELATION-${getLevel(relationAvg)}`);
 
-  // 2. RIASEC 모듈 — Holland Code로 매핑
-  if (scores.hollandCode) {
-    modules.push(`RIASEC-${scores.hollandCode}`);
+  // 2. RIASEC 모듈 — Holland Code로 매핑 (정확한 3글자 + 순열 fallback)
+  if (scores.hollandCode && scores.hollandCode.length === 3) {
+    const h = scores.hollandCode;
+    // 정확한 매칭 시도 + 6가지 순열
+    const permutations = [
+      h,
+      h[0]+h[2]+h[1], h[1]+h[0]+h[2], h[1]+h[2]+h[0], h[2]+h[0]+h[1], h[2]+h[1]+h[0],
+    ];
+    for (const p of permutations) {
+      modules.push(`RIASEC-${p}`);
+    }
   }
 
   // 3. 역량 모듈 — 6개 핵심 역량 등급

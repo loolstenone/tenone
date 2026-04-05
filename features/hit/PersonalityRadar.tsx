@@ -7,40 +7,53 @@ interface PersonalityRadarProps {
   darkTriadFlags: Record<string, boolean>;
 }
 
-// 15 하위척도 한글 매핑
+// 실제 DB 키 → 소비자 친화 한국어
 const SUBSCALE_NAMES: Record<string, string> = {
+  warmth: '공감력',
+  control: '자기조절',
+  tension: '스트레스 반응',
   openness: '개방성',
-  conscientiousness: '성실성',
-  extraversion: '외향성',
-  agreeableness: '친화성',
-  neuroticism: '신경성',
-  curiosity: '호기심',
-  creativity_trait: '창의성',
-  discipline: '자기규율',
-  empathy: '공감능력',
-  assertiveness: '자기주장',
-  resilience: '회복탄력성',
-  adaptability: '적응력',
-  self_awareness: '자기인식',
-  emotional_regulation: '감정조절',
-  growth_mindset: '성장마인드셋',
-  // Dark triad
-  narcissism_dark: '자기도취',
-  machiavellianism_dark: '권모술수',
-  psychopathy_dark: '냉담함',
+  optimism: '낙관성',
+  adventure: '도전성',
+  dominance: '추진력',
+  intellect: '탐구심',
+  suspicion: '경계심',
+  conscience: '책임감',
+  sensitivity: '감수성',
+  independence: '자립성',
+  perfectionism: '꼼꼼함',
+  self_discipline: '자기관리',
+  social_boldness: '적극성',
 };
 
-// 카테고리 그룹
+// 카테고리 그룹 (실제 DB 키 기반)
 const CATEGORIES: { name: string; subscales: string[]; color: string }[] = [
-  { name: 'Big 5', subscales: ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'], color: '#E53935' },
-  { name: '핵심 역량', subscales: ['curiosity', 'creativity_trait', 'discipline', 'empathy', 'assertiveness'], color: '#1565C0' },
-  { name: '내적 자원', subscales: ['resilience', 'adaptability', 'self_awareness', 'emotional_regulation', 'growth_mindset'], color: '#2E7D32' },
+  {
+    name: '대인관계',
+    subscales: ['warmth', 'social_boldness', 'sensitivity', 'suspicion'],
+    color: '#E53935',
+  },
+  {
+    name: '내적 자원',
+    subscales: ['openness', 'intellect', 'adventure', 'optimism'],
+    color: '#1565C0',
+  },
+  {
+    name: '자기관리',
+    subscales: ['control', 'conscience', 'self_discipline', 'perfectionism'],
+    color: '#2E7D32',
+  },
+  {
+    name: '독립성',
+    subscales: ['dominance', 'independence', 'tension'],
+    color: '#FF8F00',
+  },
 ];
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'bg-green-500';
-  if (score >= 60) return 'bg-yellow-500';
-  if (score >= 40) return 'bg-orange-400';
+  if (score >= 70) return 'bg-green-500';
+  if (score >= 50) return 'bg-yellow-500';
+  if (score >= 30) return 'bg-orange-400';
   return 'bg-red-400';
 }
 
@@ -65,7 +78,7 @@ export default function PersonalityRadar({ scores, darkTriadFlags }: Personality
 
                 return (
                   <div key={subscale} className="flex items-center gap-3">
-                    <span className="text-xs text-neutral-600 w-20 flex-shrink-0 text-right">
+                    <span className="text-xs text-neutral-600 w-24 flex-shrink-0 text-right">
                       {name}
                     </span>
                     <div className="flex-1 h-5 bg-neutral-100 rounded-full overflow-hidden relative">
@@ -85,7 +98,7 @@ export default function PersonalityRadar({ scores, darkTriadFlags }: Personality
         );
       })}
 
-      {/* Dark Triad Warning */}
+      {/* 주의 영역 — dark_triad 라벨 노출하지 않음 */}
       {hasDarkFlags && (
         <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <div className="flex items-start gap-2">
@@ -96,15 +109,9 @@ export default function PersonalityRadar({ scores, darkTriadFlags }: Personality
                 일부 성격 특성이 높은 수준으로 나타났습니다. 이는 리더십이나 결단력의 원천이 될 수 있지만,
                 대인관계에서 주의가 필요할 수 있습니다.
               </p>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {Object.entries(darkTriadFlags)
-                  .filter(([, flagged]) => flagged)
-                  .map(([key]) => (
-                    <span key={key} className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] rounded-full font-medium">
-                      {SUBSCALE_NAMES[key] || key}
-                    </span>
-                  ))}
-              </div>
+              <p className="text-xs text-amber-500 mt-2">
+                더 정확한 해석을 위해 전문 상담사와의 대면 상담을 권합니다.
+              </p>
             </div>
           </div>
         </div>

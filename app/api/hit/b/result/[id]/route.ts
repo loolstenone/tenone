@@ -52,7 +52,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
             let title = m.title;
             let content = m.content;
             // {score} 치환은 개별 모듈마다 다르므로 제거
-            title = title.replace(/\{score\}/g, '').replace(/\{[^}]+\}/g, '');
+            title = title.replace(/\{score\}/g, '').replace(/\{[^}]+\}/g, '').replace(/\s*%\s*/g, ' ').replace(/\s+/g, ' ');
             content = content.replace(/\{score\}/g, '').replace(/\{[^}]+\}/g, '');
             reportModules[m.id] = { title: title.trim(), content: content.trim() };
           });
