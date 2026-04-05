@@ -229,7 +229,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 로그인: Supabase Auth → fallback Mock
     const login = useCallback(async (email: string, password: string) => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            // 20초 타임아웃 (cold start 대응)
+            const authResult = await Promise.race([
+                supabase.auth.signInWithPassword({ email, password }),
+                new Promise<{ data: null; error: { message: string } }>((resolve) =>
+                    setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 20000)
+                ),
+            ]);
+            const { data, error } = authResult as { data: any; error: any };
             if (!error && data.user) {
                 const u = await syncUserFromSession(data.user);
                 if (u) {
@@ -238,7 +245,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     return { success: true, user: u };
                 }
             }
-            if (error) console.error('[Auth] Supabase login error:', error.message);
+            if (error) {
+                console.error('[Auth] Supabase login error:', error.message);
+                if (error.message === 'timeout') {
+                    return { success: false, error: '서버 연결에 시간이 걸리고 있습니다. 다시 시도해 주세요.' };
+                }
+            }
         } catch {
             // Supabase 접속 실패
         }
