@@ -1,8 +1,37 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-05 (집, 세션 19)
+> 마지막 업데이트: 2026-04-06 (집, 세션 20)
 
-## 오늘 한 작업 (4/5 집 세션 19)
+## 오늘 한 작업 (4/5~6 집 세션 19~20)
+
+### 세션 20 (4/6)
+
+**HIT 시스템 대규모 개선:**
+1. UF 기저요인검사 50문항 7점 리커트 (9영역) 전면 교체
+2. scoreUF() 채점 + 역문항 역채점 + DB 9컬럼 저장
+3. S-Power 5→8차원 (harmony/breakthrough/guard + UF 가중치)
+4. 클라이언트 → hit_b_results_safe 뷰 전환 (dark_triad 완전 비노출)
+5. HIT B ai_report 프롬프트 강화 (dark triad 용어 금지)
+6. HIT B 풀 보고서 페이지 `/hero/hit/b/report/[id]` 신규
+7. 성격특성 라벨 소비자 친화 (지배성→추진력, 긴장도→스트레스반응)
+8. PersonalityRadar DB 실제 키 기반 재구성 (4그룹)
+9. RIASEC 바차트→6각 레이더차트, 역량 라벨 한국어화
+10. 역량 30개→6카테고리 그룹핑 + 접기/펼치기
+11. 인성 라벨 DB 로드 (PERSONALITY-LABELS 모듈)
+12. 관심 분야 선택 단계 (HitInterestSelector: 산업군→직군→트랙매칭)
+13. AI 상담 페이지 `/hero/coaching/ai` + 요금 체계
+14. HeRo 로고/파비콘 적용 (헤더/보고서/결과)
+15. 히어로 캐릭터 홈페이지 히어로 영역
+16. HIT 모델 설명서 컴포넌트 (모달+인쇄)
+17. 준비도 채점 self_understanding→self 매핑 수정
+18. 오탈자 수정 (탐함가형→탐험가형)
+19. dark_triad 메시지/라벨/컴포넌트 완전 제거
+
+**커밋:** `4426695`, `bcbc528`, `27cde1b`, `6571ea9`, `aa46174`, `26082e2`, `7fbf969`
+
+---
+
+### 세션 19 (4/5)
 
 ### HeRo HIT 보고서 품질 개선 ✅
 
@@ -400,6 +429,18 @@ AI 분석   → 20건 처리 → 11건 트렌드 카드 생성, 9건 필터링 �
 ---
 
 ## 다음 할 일
+
+### 즉시 (다음 세션)
+
+1. **HIT B 문항 동적 로드** — hit_questions 테이블에서 공통+트랙별 문항 로드. 기존 프론트 하드코딩(competency-questions.ts/readiness-questions.ts)에서 DB로 전환. 592문항 시딩 완료(Chat).
+   - `features/hit/HitBTestUI.tsx`의 allQuestions를 API 호출로 교체
+   - `/api/hit/b/questions?trackId=xxx` API 신규
+   - 공통(track_id=NULL) + 트랙별(track_id=선택값) 조합
+   - 마케팅 5트랙: 기존 프론트 하드코딩 문항 → hit_questions로 마이그레이션 필요
+
+2. **HIT B "준비 중" UX** — 트랙 없을 때: 공통 역량 18 + 공통 준비도 20 = 38문항만 진행, competency_track=NULL, 보고서에서 "기본 역량 분석"으로 표시
+
+3. **A+B 통합 프로필 페이지** — cross_ab 22개 모듈 활용, `/hero/hit/profile/[id]`
 
 ### 우선순위 높음
 
