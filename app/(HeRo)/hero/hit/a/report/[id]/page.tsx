@@ -134,7 +134,10 @@ export default function HitAReportPage() {
         { label: "창의성", value: result.sPowerScores.creativity },
         { label: "대인관계", value: result.sPowerScores.interpersonal },
         { label: "분석적 판단", value: result.sPowerScores.analytical },
-      ]
+        { label: "조직 화합", value: result.sPowerScores.harmony ?? 0 },
+        { label: "돌파 의지", value: result.sPowerScores.breakthrough ?? 0 },
+        { label: "원칙 수호", value: result.sPowerScores.guard ?? 0 },
+      ].filter(d => d.value > 0)
     : [];
 
   const ufData = result.ufScores ? [

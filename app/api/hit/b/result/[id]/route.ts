@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitBResult } from '@/lib/supabase/hit';
+import { getHitBResultFull } from '@/lib/supabase/hit';
 import { selectBModules } from '@/lib/hit/report-assembler';
 import { createClient as createServerClient } from '@supabase/supabase-js';
 
@@ -8,17 +8,30 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   try {
     const { id } = await params;
 
-    const result = await getHitBResult(id);
-    if (!result) {
+    const resultFull = await getHitBResultFull(id);
+    if (!resultFull) {
       return errorResponse('결과를 찾을 수 없습니다.', 404);
     }
 
-    // 모듈 선택
+    // 클라이언트 응답에서 dark_triad + alert 필드 제거
+    const { alert_n1, alert_m1, alert_p1, alert_level, ...result } = resultFull;
+    if (result.personality_scores) {
+      const safe = { ...result.personality_scores };
+      delete safe.narcissism_dark;
+      delete safe.psychopathy_dark;
+      delete safe.machiavellianism_dark;
+      result.personality_scores = safe;
+    }
+    if (result.dark_triad_flags) {
+      result.dark_triad_flags = {}; // 빈 객체로 전달
+    }
+
+    // 모듈 선택 (원본 점수로)
     const modulesUsed = selectBModules({
-      personalityScores: result.personality_scores || {},
-      hollandCode: result.holland_code || '',
-      competencyCommon: result.competency_common || {},
-      readinessGrade: result.readiness_grade || 'D',
+      personalityScores: resultFull.personality_scores || {},
+      hollandCode: resultFull.holland_code || '',
+      competencyCommon: resultFull.competency_common || {},
+      readinessGrade: resultFull.readiness_grade || 'D',
     });
 
     // 모듈 콘텐츠 조회

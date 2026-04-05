@@ -123,39 +123,37 @@ export function match64Type(mbti: MBTIScores, disc: DISCScores): TypeProfile {
   return findTypeMatch(mbti.type, disc.subtype);
 }
 
-// ── S-Power 강점 산출 ──
-export function deriveSPower(mbti: MBTIScores, disc: DISCScores): SPowerScores {
-  // MBTI + DISC 기반 가중 조합
+// ── S-Power 강점 산출 (8차원) ──
+export function deriveSPower(mbti: MBTIScores, disc: DISCScores, ufScores?: UFScores): SPowerScores {
+  // UF 평균 (가중치용)
+  const ufAvg = ufScores
+    ? Math.round(Object.values(ufScores).reduce((a, b) => a + b, 0) / Object.values(ufScores).length)
+    : 50; // UF 없으면 중립값
+
   return {
     strategic: clamp(Math.round(
-      (100 - mbti.sScore) * 0.4 + // N 높을수록 전략적
-      disc.d * 0.3 +
-      (100 - mbti.eScore) * 0.15 + // I 성향이 전략적 사고에 기여
-      mbti.tScore * 0.15
+      disc.d * 0.3 + (100 - mbti.sScore) * 0.3 + mbti.tScore * 0.2 + ufAvg * 0.2
     )),
     execution: clamp(Math.round(
-      disc.d * 0.4 +
-      mbti.jScore * 0.3 +
-      mbti.eScore * 0.15 +
-      mbti.sScore * 0.15
+      disc.d * 0.3 + mbti.jScore * 0.3 + mbti.tScore * 0.2 + ufAvg * 0.2
     )),
     creativity: clamp(Math.round(
-      (100 - mbti.sScore) * 0.35 + // N 높을수록 창의적
-      (100 - mbti.jScore) * 0.25 + // P 높을수록 유연
-      disc.i * 0.2 +
-      mbti.eScore * 0.2
+      disc.i * 0.25 + (100 - mbti.sScore) * 0.3 + (100 - mbti.jScore) * 0.25 + ufAvg * 0.2
     )),
     interpersonal: clamp(Math.round(
-      disc.i * 0.3 +
-      disc.s * 0.2 +
-      mbti.eScore * 0.25 +
-      (100 - mbti.tScore) * 0.25 // F 높을수록 대인관계
+      disc.i * 0.3 + mbti.eScore * 0.3 + (100 - mbti.tScore) * 0.2 + ufAvg * 0.2
     )),
     analytical: clamp(Math.round(
-      disc.c * 0.35 +
-      mbti.tScore * 0.3 +
-      mbti.sScore * 0.2 +
-      mbti.jScore * 0.15
+      disc.c * 0.3 + mbti.tScore * 0.3 + (100 - (100 - mbti.sScore)) * 0.2 + ufAvg * 0.2
+    )),
+    harmony: clamp(Math.round(
+      disc.s * 0.3 + (100 - mbti.tScore) * 0.25 + mbti.eScore * 0.15 + mbti.jScore * 0.1 + ufAvg * 0.2
+    )),
+    breakthrough: clamp(Math.round(
+      disc.d * 0.25 + (100 - mbti.sScore) * 0.25 + (100 - mbti.jScore) * 0.2 + (100 - disc.s) * 0.1 + ufAvg * 0.2
+    )),
+    guard: clamp(Math.round(
+      disc.c * 0.3 + mbti.jScore * 0.25 + mbti.tScore * 0.15 + disc.s * 0.1 + ufAvg * 0.2
     )),
   };
 }

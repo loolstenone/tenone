@@ -137,6 +137,28 @@ export async function createHitBResult(result: Record<string, unknown>) {
 }
 
 export async function getHitBResult(resultId: string) {
+  // 클라이언트용: dark_triad, alert 필드 제외된 safe 뷰
+  const { data, error } = await supabase
+    .from('hit_b_results_safe')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
+  // safe 뷰가 없으면 원본 테이블 fallback
+  if (error?.code === '42P01' || error?.message?.includes('does not exist')) {
+    const { data: fallback, error: fbErr } = await supabase
+      .from('hit_b_results')
+      .select('*')
+      .eq('id', resultId)
+      .maybeSingle();
+    if (fbErr) throw fbErr;
+    return fallback;
+  }
+  if (error) throw error;
+  return data;
+}
+
+/** 서버사이드 전용 — 원본 테이블 (alert/dark_triad 포함) */
+export async function getHitBResultFull(resultId: string) {
   const { data, error } = await supabase
     .from('hit_b_results')
     .select('*')

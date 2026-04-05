@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const base = scoreBase(responses);
     const uf = scoreUF(responses);
     const typeProfile = match64Type(mbti, disc);
-    const sPower = deriveSPower(mbti, disc);
+    const sPower = deriveSPower(mbti, disc, uf);
 
     // AI 내러티브 (실패해도 결과 생성 진행)
     let aiNarrative: string | null = null;

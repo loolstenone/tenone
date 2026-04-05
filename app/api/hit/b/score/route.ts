@@ -74,12 +74,20 @@ export async function POST(request: NextRequest) {
       const msg = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
         max_tokens: 2000,
-        system: '당신은 커리어 진단 전문가입니다. 한국어로 따뜻하면서도 전문적인 종합 분석 리포트를 작성합니다. 검사 결과를 통합적으로 해석하여 강점, 성장영역, 커리어 제안을 포함해주세요. 절대 이모지, 이모티콘, 특수문자(★●▶ 등)를 사용하지 마세요. 순수 텍스트만 사용하세요. 마크다운 헤딩(#)도 사용하지 마세요.',
+        system: `당신은 HeRo 인재 기획사의 커리어 진단 전문가입니다. 한국어로 따뜻하면서도 전문적인 종합 분석 리포트를 작성합니다.
+
+규칙:
+- 검사 결과를 통합적으로 해석하여 강점, 성장영역, 커리어 제안을 포함
+- 절대 이모지, 이모티콘, 특수문자 사용 금지
+- 마크다운 헤딩(#) 사용 금지
+- dark triad, 나르시시즘, 마키아벨리즘, 사이코패시 등의 용어 절대 사용 금지
+- 주의 신호 관련 내용 절대 노출 금지
+- UF 원점수를 직접 언급하지 않고 서사적으로 연결
+- 마지막에 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
           content: `${hitAContext}HIT B 결과:\n` +
-            `성격 특성: ${JSON.stringify(personality.scores)}\n` +
-            `다크 트라이어드: ${JSON.stringify(personality.darkTriadFlags)}\n` +
+            `성격 특성: ${JSON.stringify(Object.fromEntries(Object.entries(personality.scores).filter(([k]) => !k.includes('dark'))))}\n` +
             `RIASEC: R${riasec.r} I${riasec.i} A${riasec.a} S${riasec.s} E${riasec.e} C${riasec.c} (Holland: ${riasec.hollandCode})\n` +
             `역량(공통): ${JSON.stringify(competency.common)}\n` +
             `역량(트랙: ${competencyTrack}): ${JSON.stringify(competency.trackScores)}\n` +

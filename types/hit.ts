@@ -98,6 +98,9 @@ export interface SPowerScores {
   creativity: number;    // 창의성
   interpersonal: number; // 대인관계
   analytical: number;    // 분석적 판단
+  harmony: number;       // 조직 화합력
+  breakthrough: number;  // 돌파 의지력
+  guard: number;         // 원칙 수호력
 }
 
 /** UF (Underlying Factors) 기저요인 9영역 점수 (0~100) */
