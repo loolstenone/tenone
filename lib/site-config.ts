@@ -112,7 +112,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         meta: { title: 'Ten:One™ — Beyond the Limit', description: 'Ten:One Universe. 다양한 브랜드와 프로젝트로 구성된 멀티 브랜드 생태계.', keywords: ['TenOne', 'Ten:One', '멀티브랜드', '생태계'] },
         homePath: '/', signupPath: '/signup', domain: 'tenone.biz',
         universeLabel: '', showUniverseBadge: false,
-        authMethods: { email: true, google: true, kakao: true },
+        authMethods: { email: true, google: false, kakao: false },
         nav: [
             { name: 'About', href: '/about' },
             { name: 'Universe', href: '/universe' },
