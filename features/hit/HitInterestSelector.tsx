@@ -54,18 +54,15 @@ export default function HitInterestSelector({ onSelect, onSkip }: HitInterestSel
       const res = await fetch(`/api/hit/b/tracks?industry=${selectedIndustry}&jobFunction=${id}`);
       const data = await res.json();
       const matchedTracks: Track[] = data.tracks || [];
+      const matchType: string = data.matchType || 'none';
 
-      const activeTracks = matchedTracks.filter(t => t.is_active);
-
-      if (activeTracks.length === 1) {
-        // 트랙 1개 → 바로 진행
-        onSelect(selectedIndustry, id, activeTracks[0].id);
-      } else if (activeTracks.length > 1) {
-        // 트랙 2개+ → 세부 선택
-        setTracks(activeTracks);
+      if (matchedTracks.length === 1) {
+        onSelect(selectedIndustry, id, matchedTracks[0].id);
+      } else if (matchedTracks.length > 1) {
+        setTracks(matchedTracks);
         setStep('track');
       } else {
-        // 활성 트랙 없음 → 준비 중 안내
+        // 3단계 폴백 전부 없음 → 준비 중
         setStep('inactive');
       }
     } catch {

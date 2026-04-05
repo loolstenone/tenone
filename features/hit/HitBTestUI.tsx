@@ -59,44 +59,75 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const [selectedJobFunction, setSelectedJobFunction] = useState<string>('');
   const [riasecScores, setRiasecScores] = useState<{ r: number; i: number; a: number; s: number; e: number; c: number } | null>(null);
 
-  // Build question list — competency track questions added after selection
+  // DB에서 로드된 역량/준비도 문항
+  const [dbCompQuestions, setDbCompQuestions] = useState<QuestionItem[]>([]);
+  const [dbReadyQuestions, setDbReadyQuestions] = useState<QuestionItem[]>([]);
+  const [dbQuestionsLoaded, setDbQuestionsLoaded] = useState(false);
+
+  // 트랙 선택 후 DB에서 문항 로드
+  useEffect(() => {
+    if (!selectedTrack) return;
+    setDbQuestionsLoaded(false);
+
+    fetch(`/api/hit/b/questions?trackId=${selectedTrack}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.competency?.length > 0) {
+          setDbCompQuestions(data.competency.map((q: { id: string; text: string; subscale: string; reverse: boolean; track: string | null }) => ({
+            module: 'competency' as ModuleType, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track,
+          })));
+          setDbReadyQuestions(data.readiness.map((q: { id: string; text: string; subscale: string; reverse: boolean; track: string | null }) => ({
+            module: 'readiness' as ModuleType, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track,
+          })));
+        }
+        setDbQuestionsLoaded(true);
+      })
+      .catch(() => setDbQuestionsLoaded(true)); // fallback to hardcoded
+  }, [selectedTrack]);
+
+  // 셔플 함수
+  const shuffle = <T,>(arr: T[]): T[] => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  // Build question list
   const allQuestions = useMemo<QuestionItem[]>(() => {
     const tagged = <T extends { id: string; text: string; subscale: string; reverse?: boolean; track?: string }>(
       qs: T[],
       mod: ModuleType,
     ): QuestionItem[] =>
       qs.map((q) => ({
-        module: mod,
-        id: q.id,
-        text: q.text,
-        subscale: q.subscale,
-        reverse: q.reverse,
-        track: 'track' in q ? (q as { track?: string }).track : undefined,
+        module: mod, id: q.id, text: q.text, subscale: q.subscale,
+        reverse: q.reverse, track: 'track' in q ? (q as { track?: string }).track : undefined,
       }));
 
-    const commonCompetency = competencyQuestions.filter(q => !q.track);
-    const trackCompetency = selectedTrack
-      ? competencyQuestions.filter(q => q.track === selectedTrack)
-      : [];
+    // 인성 + RIASEC (항상 프론트 하드코딩)
+    const personalityItems = shuffle(tagged(personalityQuestions, 'personality'));
+    const riasecItems = shuffle(tagged(riasecQuestions, 'riasec'));
 
-    // 단계별 셔플
-    const shuffle = <T,>(arr: T[]): T[] => {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    };
+    // 역량 + 준비도: DB 문항 우선, 없으면 프론트 하드코딩 fallback
+    let compItems: QuestionItem[];
+    let readyItems: QuestionItem[];
 
-    return [
-      ...shuffle(tagged(personalityQuestions, 'personality')),
-      ...shuffle(tagged(riasecQuestions, 'riasec')),
-      ...shuffle(tagged(commonCompetency, 'competency')),
-      ...shuffle(tagged(trackCompetency, 'competency')),
-      ...shuffle(tagged(readinessQuestions, 'readiness')),
-    ];
-  }, [selectedTrack]);
+    if (dbQuestionsLoaded && dbCompQuestions.length > 0) {
+      // DB 문항 사용
+      compItems = shuffle(dbCompQuestions);
+      readyItems = shuffle(dbReadyQuestions);
+    } else {
+      // 프론트 하드코딩 fallback (기존 마케팅 트랙)
+      const commonComp = competencyQuestions.filter(q => !q.track);
+      const trackComp = selectedTrack ? competencyQuestions.filter(q => q.track === selectedTrack) : [];
+      compItems = shuffle([...tagged(commonComp, 'competency'), ...tagged(trackComp, 'competency')]);
+      readyItems = shuffle(tagged(readinessQuestions, 'readiness'));
+    }
+
+    return [...personalityItems, ...riasecItems, ...compItems, ...readyItems];
+  }, [selectedTrack, dbQuestionsLoaded, dbCompQuestions, dbReadyQuestions]);
 
   const [responses, setResponses] = useState<Map<string, Response>>(new Map());
   const [currentIndex, setCurrentIndex] = useState(0);
