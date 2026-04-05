@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Search,
@@ -102,8 +103,15 @@ function PartnerCarousel() {
   );
 }
 
+/* ── 히어로 캐릭터 (랜덤) ── */
+const heroChars = [
+  { src: "/hero-char-boy.png", alt: "HeRo Male" },
+  { src: "/hero-char-girl.png", alt: "HeRo Female" },
+];
+
 export default function HeRoHomePage() {
   const [activeJourney, setActiveJourney] = useState(2);
+  const heroChar = useMemo(() => heroChars[Math.floor(Math.random() * heroChars.length)], []);
 
   /* 자동 여정 단계 순환 */
   useEffect(() => {
@@ -134,69 +142,45 @@ export default function HeRoHomePage() {
       `}</style>
 
       {/* ━━━ 1. Hero Section ━━━ */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
-        {/* 배경 장식 */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-[#E53935]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-64 h-64 bg-neutral-100 rounded-full blur-3xl" />
+      <section className="relative min-h-screen overflow-hidden bg-white">
+        {/* 캐릭터 — 좌하단 고정 */}
+        <div className="absolute left-0 bottom-0 z-[1] w-[40%] md:w-[35%] lg:w-[30%] h-[75%]">
+          <Image
+            src={heroChar.src}
+            alt={heroChar.alt}
+            fill
+            className="object-contain object-left-bottom"
+            priority
+            sizes="35vw"
+          />
+        </div>
 
-        <div className="relative mx-auto max-w-5xl px-6 text-center">
-          {/* 로고 */}
-          <div className="mb-8 flex items-center justify-center gap-0 select-none">
-            <span className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900">
-              He
-            </span>
-            <span
-              className="text-6xl md:text-8xl font-black tracking-tighter"
-              style={{ color: RED }}
-            >
-              R
-            </span>
-            <span className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900">
-              o
-            </span>
-          </div>
+        {/* 텍스트 + 버튼 */}
+        <div className="relative z-10 min-h-screen flex items-center">
+          <div className="mx-auto max-w-7xl w-full px-6 lg:px-8">
+            <div className="ml-auto w-full md:w-[55%] lg:w-[50%] text-center md:text-left md:pl-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-5 leading-tight">
+                We believe in
+                <br />
+                <span style={{ color: RED }}>your talent</span>
+              </h1>
 
-          {/* 헤드라인 */}
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-6">
-            We believe in{" "}
-            <span className="relative">
-              <span style={{ color: RED }}>your talent</span>
-              <span
-                className="absolute -bottom-1 left-0 w-full h-1 rounded-full"
-                style={{ backgroundColor: RED, opacity: 0.3 }}
-              />
-            </span>
-          </h1>
+              <p className="text-sm md:text-base text-neutral-500 mb-8 leading-relaxed max-w-md mx-auto md:mx-0">
+                인재 기획사 HeRo.
+                <br />
+                당신의 숨겨진 재능을 발견하고, 무대 위에 세웁니다.
+              </p>
 
-          <p className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto mb-12 leading-relaxed">
-            마케팅 인재 기획사 HeRo.
-            <br className="hidden md:block" />
-            당신의 숨겨진 재능을 발견하고, 무대 위에 세웁니다.
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Link
-              href="/hero/hit"
-              className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]"
-              style={{ backgroundColor: RED }}
-            >
-              HIT 검사 받기 <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/hero/for-business"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-neutral-900 text-neutral-900 font-bold rounded-xl hover:bg-neutral-900 hover:text-white transition-all"
-            >
-              <Building2 className="h-4 w-4" /> 기업 문의
-            </Link>
-          </div>
-
-          {/* 파트너 기업 캐러셀 */}
-          <div>
-            <p className="text-xs text-neutral-400 uppercase tracking-widest font-semibold mb-2">
-              Partner Companies
-            </p>
-            <PartnerCarousel />
+              <div className="flex flex-wrap justify-center md:justify-start">
+                <Link
+                  href="/hero/hit"
+                  className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]"
+                  style={{ backgroundColor: RED }}
+                >
+                  HIT 검사 받기 <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -206,7 +190,7 @@ export default function HeRoHomePage() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <h2 className="text-2xl md:text-4xl font-bold text-neutral-900 mb-4">
             HeRo는{" "}
-            <span style={{ color: RED }}>마케팅 인재 기획사</span>
+            <span style={{ color: RED }}>인재 기획사</span>
             입니다.
           </h2>
           <p className="text-lg md:text-xl text-neutral-500 leading-relaxed">

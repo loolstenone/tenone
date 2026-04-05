@@ -1,8 +1,9 @@
 /**
  * HIT A 채점 알고리즘
  */
-import type { MBTIScores, DISCScores, SPowerScores, TypeProfile } from '@/types/hit';
+import type { MBTIScores, DISCScores, SPowerScores, UFScores, TypeProfile } from '@/types/hit';
 import { findTypeMatch } from './data/type-matching';
+import { ufQuestions } from './data/base-questions';
 
 interface ResponseRow {
   module: string;
@@ -52,29 +53,69 @@ export function scoreDISC(responses: ResponseRow[]): DISCScores {
   return { d, i, s, c, primary, subtype };
 }
 
-// ── 기저요인 채점 ──
+// ── UF 기저요인 채점 (9영역 × 7점 리커트) ──
+
+// 문항 ID → subscale 매핑 (ufQuestions에서 구축)
+const UF_SUBSCALE_MAP: Record<string, keyof UFScores> = {};
+const UF_REVERSE_SET = new Set<string>();
+ufQuestions.forEach(q => {
+  UF_SUBSCALE_MAP[q.id] = q.subscale as keyof UFScores;
+  if (q.reverse) UF_REVERSE_SET.add(q.id);
+});
+
+export function scoreUF(responses: ResponseRow[]): UFScores {
+  const uf = responses.filter(r => r.module === 'base');
+
+  // 영역별 점수 누적
+  const sums: Record<string, number[]> = {};
+
+  uf.forEach(r => {
+    const subscale = UF_SUBSCALE_MAP[r.question_id];
+    if (!subscale) return;
+    if (!sums[subscale]) sums[subscale] = [];
+
+    let value = parseInt(r.option_value); // 1~7
+    if (isNaN(value)) return;
+    if (UF_REVERSE_SET.has(r.question_id)) {
+      value = 8 - value; // 역문항 변환
+    }
+    sums[subscale].push(value);
+  });
+
+  // 영역별 평균 → 0~100 스케일 변환
+  const toScore = (values: number[] | undefined): number => {
+    if (!values || values.length === 0) return 0;
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    return Math.round(((avg - 1) / 6) * 100); // 1~7 → 0~100
+  };
+
+  return {
+    sibling: toScore(sums['sibling']),
+    parent: toScore(sums['parent']),
+    family: toScore(sums['family']),
+    peer: toScore(sums['peer']),
+    self: toScore(sums['self']),
+    temperament: toScore(sums['temperament']),
+    economic: toScore(sums['economic']),
+    trauma: toScore(sums['trauma']),
+    cultural: toScore(sums['cultural']),
+  };
+}
+
+/** @deprecated 하위 호환용 — 새 코드에서는 scoreUF 사용 */
 export function scoreBase(responses: ResponseRow[]): { scores: Record<string, number>; summary: string } {
-  const base = responses.filter(r => r.module === 'base');
-  const counts: Record<string, number> = { D: 0, I: 0, S: 0, C: 0 };
-  base.forEach(r => { counts[r.option_value] = (counts[r.option_value] || 0) + 1; });
-
-  const total = base.length || 1;
-  const scores = {
-    D: Math.round((counts.D / total) * 100),
-    I: Math.round((counts.I / total) * 100),
-    S: Math.round((counts.S / total) * 100),
-    C: Math.round((counts.C / total) * 100),
+  const uf = scoreUF(responses);
+  // 가장 높은 영역 3개로 요약 생성
+  const sorted = Object.entries(uf).sort((a, b) => b[1] - a[1]);
+  const areaNames: Record<string, string> = {
+    sibling: '형제관계', parent: '부모관계', family: '가정환경',
+    peer: '또래관계', self: '자기개념', temperament: '기질',
+    economic: '경제환경', trauma: '전환경험', cultural: '문화맥락',
   };
+  const top3 = sorted.slice(0, 3).map(([k]) => areaNames[k]).join(', ');
+  const summary = `${top3} 영역에서 높은 점수를 보이며, 이러한 기저요인이 현재 성향 형성에 기여하고 있습니다.`;
 
-  const dominant = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
-  const summaryMap: Record<string, string> = {
-    D: '도전적이고 독립적인 양육 환경에서 성장하여 주도적 성향이 형성되었습니다.',
-    I: '사교적이고 활발한 환경에서 성장하여 소통과 관계 형성을 중시합니다.',
-    S: '안정적이고 지지적인 환경에서 성장하여 꾸준함과 조화를 추구합니다.',
-    C: '체계적이고 분석적인 환경에서 성장하여 논리적 사고를 중시합니다.',
-  };
-
-  return { scores, summary: summaryMap[dominant] || '' };
+  return { scores: uf as unknown as Record<string, number>, summary };
 }
 
 // ── 64유형 매칭 ──

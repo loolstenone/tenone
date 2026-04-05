@@ -1,5 +1,7 @@
 'use client';
 
+import RadarChart from './RadarChart';
+
 interface RIASECChartProps {
   r: number;
   i: number;
@@ -22,12 +24,17 @@ const TYPES: { key: string; label: string; labelKo: string; color: string }[] = 
 export default function RIASECChart({ r, i, a, s, e, c, hollandCode }: RIASECChartProps) {
   const scores: Record<string, number> = { r, i, a, s, e, c };
 
+  const radarData = TYPES.map(t => ({
+    label: `${t.label} ${t.labelKo}`,
+    value: scores[t.key] ?? 0,
+  }));
+
   return (
     <div>
       {/* Holland Code */}
       <div className="text-center mb-6">
         <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Holland Code</span>
-        <div className="flex items-center justify-center gap-1 mt-2">
+        <div className="flex items-center justify-center gap-1.5 mt-2">
           {hollandCode.split('').map((char, idx) => {
             const typeInfo = TYPES.find(t => t.label === char);
             return (
@@ -43,40 +50,27 @@ export default function RIASECChart({ r, i, a, s, e, c, hollandCode }: RIASECCha
         </div>
       </div>
 
-      {/* Bars */}
-      <div className="space-y-3">
+      {/* 6각 레이더 차트 */}
+      <div className="flex justify-center mb-6">
+        <RadarChart data={radarData} size={280} />
+      </div>
+
+      {/* 점수 목록 */}
+      <div className="grid grid-cols-3 gap-3">
         {TYPES.map((type) => {
           const score = scores[type.key] ?? 0;
           const isInCode = hollandCode.includes(type.label);
-
           return (
-            <div key={type.key} className="flex items-center gap-3">
-              <div className="flex items-center gap-2 w-16 flex-shrink-0">
-                <span
-                  className={`
-                    inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold text-white
-                    ${isInCode ? '' : 'opacity-40'}
-                  `}
-                  style={{ backgroundColor: type.color }}
-                >
-                  {type.label}
-                </span>
-                <span className={`text-xs ${isInCode ? 'text-neutral-700 font-medium' : 'text-neutral-400'}`}>
-                  {type.labelKo}
-                </span>
-              </div>
-              <div className="flex-1 h-6 bg-neutral-100 rounded-full overflow-hidden relative">
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${score}%`,
-                    backgroundColor: type.color,
-                    opacity: isInCode ? 1 : 0.4,
-                  }}
-                />
-                <span className="absolute inset-0 flex items-center justify-end pr-2.5 text-[11px] font-bold text-neutral-700">
-                  {score}
-                </span>
+            <div key={type.key} className={`flex items-center gap-2 p-2 rounded-lg ${isInCode ? 'bg-neutral-50' : ''}`}>
+              <span
+                className={`w-7 h-7 rounded flex items-center justify-center text-xs font-bold text-white ${isInCode ? '' : 'opacity-40'}`}
+                style={{ backgroundColor: type.color }}
+              >
+                {type.label}
+              </span>
+              <div>
+                <p className={`text-xs font-medium ${isInCode ? 'text-neutral-800' : 'text-neutral-400'}`}>{type.labelKo}</p>
+                <p className={`text-sm font-bold ${isInCode ? 'text-neutral-900' : 'text-neutral-400'}`}>{score}</p>
               </div>
             </div>
           );

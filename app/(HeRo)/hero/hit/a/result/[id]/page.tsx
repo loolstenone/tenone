@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
@@ -16,6 +17,18 @@ import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitAResult } from "@/types/hit";
+
+// 마크다운 → 순수 텍스트
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/^[-*]\s/gm, '')
+    .replace(/^\d+\.\s/gm, '')
+    .trim();
+}
 
 interface HeroTypeData {
   strengths: { title: string; desc: string }[];
@@ -133,6 +146,7 @@ export default function HitAResultPage() {
         return (
           <div key="p0">
             <div className="text-center mb-6">
+              <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
               <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - A 결과</p>
               <h1 className="text-2xl md:text-3xl font-extrabold">나의 영웅 유형</h1>
             </div>
@@ -144,7 +158,7 @@ export default function HitAResultPage() {
             {heroType?.profile_overview && (
               <div className="mt-6 bg-neutral-50 p-5 rounded-xl">
                 <p className="text-sm text-neutral-600 leading-relaxed">
-                  {heroType.profile_overview.split('\n')[0]}
+                  {cleanMarkdown(heroType.profile_overview.split('\n')[0])}
                 </p>
               </div>
             )}
@@ -212,9 +226,12 @@ export default function HitAResultPage() {
             )}
             {narrativeParagraphs.length > 0 && (
               <>
-                <h2 className="text-lg font-bold mb-3">AI 분석</h2>
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <Image src="/hero-logo-wide.png" alt="" width={28} height={14} className="h-4 w-auto" />
+                  HeRo의 분석
+                </h2>
                 <div className="bg-neutral-50 p-5 rounded-xl">
-                  <p className="text-sm text-neutral-700 leading-relaxed">{narrativeParagraphs[0]}</p>
+                  <p className="text-sm text-neutral-700 leading-relaxed">{cleanMarkdown(narrativeParagraphs[0])}</p>
                   {narrativeParagraphs.length > 1 && (
                     <p className="text-xs text-neutral-400 mt-3 italic">더 자세한 분석은 PDF 보고서에서 확인하세요.</p>
                   )}
@@ -247,7 +264,7 @@ export default function HitAResultPage() {
                   {discMods.map(([id, m]) => (
                     <div key={id} className="mb-4">
                       <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>
@@ -260,7 +277,7 @@ export default function HitAResultPage() {
                   {mbtiMods.map(([id, m]) => (
                     <div key={id} className="mb-3">
                       <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>
@@ -273,7 +290,7 @@ export default function HitAResultPage() {
                   {crossMods.map(([id, m]) => (
                     <div key={id} className="mb-3">
                       <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>
@@ -286,7 +303,7 @@ export default function HitAResultPage() {
                   {spMods.map(([id, m]) => (
                     <div key={id} className="mb-3">
                       <p className="text-sm font-bold text-green-600 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>
@@ -299,7 +316,7 @@ export default function HitAResultPage() {
                   {spGrowth.map(([id, m]) => (
                     <div key={id} className="mb-3">
                       <p className="text-sm font-bold text-amber-600 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>
@@ -312,7 +329,7 @@ export default function HitAResultPage() {
                   {commMods.map(([id, m]) => (
                     <div key={id} className="mb-3">
                       <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{m.content}</p>
+                      <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{cleanMarkdown(m.content)}</p>
                     </div>
                   ))}
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
@@ -10,9 +11,10 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
     { name: "HIT 검사", href: "/hero/hit" },
+    { name: "AI 상담", href: "/hero/coaching/ai" },
+    { name: "커리어 코칭", href: "/hero/coaching" },
     { name: "Hero in", href: "/hero/journey" },
     { name: "이력서", href: "/hero/resume" },
-    { name: "커리어 코칭", href: "/hero/coaching" },
 ];
 
 export function HeRoHeader() {
@@ -31,11 +33,14 @@ export function HeRoHeader() {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center">
                 {/* Logo */}
                 <Link href="/hero" className="flex items-center shrink-0 mr-10">
-                    <span className="text-2xl font-extrabold tracking-tight">
-                        <span className="text-neutral-900">He</span>
-                        <span className="text-[#E53935]">R</span>
-                        <span className="text-neutral-900">o</span>
-                    </span>
+                    <Image
+                        src="/hero-logo-wide.png"
+                        alt="HeRo"
+                        width={80}
+                        height={40}
+                        className="h-9 w-auto"
+                        priority
+                    />
                 </Link>
 
                 {/* Desktop Nav — 로고와 분리 */}

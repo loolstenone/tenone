@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight, Copy, Check, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
@@ -14,6 +15,17 @@ import ReadinessGauge from "@/features/hit/ReadinessGauge";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitBResult } from "@/types/hit";
+
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/^[-*]\s/gm, '')
+    .replace(/^\d+\.\s/gm, '')
+    .trim();
+}
 
 const TRACK_NAMES: Record<string, string> = {
   marketing_strategy: '마케팅전략', branding: '브랜딩',
@@ -33,6 +45,7 @@ export default function HitBResultPage() {
   const params = useParams();
   const resultId = params.id as string;
   const [result, setResult] = useState<HitBResult | null>(null);
+  const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }>>({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -62,6 +75,7 @@ export default function HitBResultPage() {
           aiReport: data.ai_report, journeyStage: data.journey_stage,
           createdAt: data.created_at,
         });
+        if (data.report_modules) setReportModules(data.report_modules);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -112,6 +126,12 @@ export default function HitBResultPage() {
   const trackName = TRACK_NAMES[result.competencyTrack] || result.competencyTrack;
   const pageLabels = ["여정 단계", "성격 특성", "RIASEC", "역량", "준비도", "다음 단계"];
 
+  // 모듈 카테고리별 필터
+  const personalityMods = Object.entries(reportModules).filter(([k]) => /^(EMOTIONAL|ETHICS|GROWTH|INTEGRITY|RELATION)/.test(k));
+  const riasecMods = Object.entries(reportModules).filter(([k]) => k.startsWith('RIASEC-'));
+  const compMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMP-'));
+  const readyMods = Object.entries(reportModules).filter(([k]) => k.startsWith('READY-'));
+
   const renderPage = () => {
     switch (currentPage) {
       // ── Page 1: 여정 단계 + 요약 ──
@@ -119,6 +139,7 @@ export default function HitBResultPage() {
         return (
           <div key="p0">
             <div className="text-center mb-6">
+              <Image src="/hero-logo.png" alt="HeRo" width={48} height={48} className="h-12 w-12 mx-auto mb-3" />
               <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT - B 결과</p>
               <h1 className="text-2xl md:text-3xl font-extrabold">종합 커리어 진단</h1>
             </div>
@@ -146,9 +167,19 @@ export default function HitBResultPage() {
         return (
           <div key="p1">
             <h2 className="text-lg font-bold mb-4">성격 특성</h2>
-            <div className="border border-neutral-200 rounded-xl p-6">
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <PersonalityRadar scores={result.personalityScores} darkTriadFlags={result.darkTriadFlags} />
             </div>
+            {personalityMods.length > 0 && (
+              <div className="space-y-5">
+                {personalityMods.map(([id, m]) => (
+                  <div key={id} className="border-l-2 border-neutral-300 pl-4">
+                    <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                    <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
 
@@ -157,13 +188,19 @@ export default function HitBResultPage() {
         return (
           <div key="p2">
             <h2 className="text-lg font-bold mb-4">직업 흥미 (RIASEC)</h2>
-            <div className="border border-neutral-200 rounded-xl p-6">
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <RIASECChart
                 r={result.riasecR} i={result.riasecI} a={result.riasecA}
                 s={result.riasecS} e={result.riasecE} c={result.riasecC}
                 hollandCode={result.hollandCode}
               />
             </div>
+            {riasecMods.length > 0 && riasecMods.map(([id, m]) => (
+              <div key={id} className="border-l-2 border-purple-400 pl-4 mb-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
           </div>
         );
 
@@ -172,13 +209,28 @@ export default function HitBResultPage() {
         return (
           <div key="p3">
             <h2 className="text-lg font-bold mb-4">역량 진단</h2>
-            <div className="border border-neutral-200 rounded-xl p-6">
+            <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <CompetencyChart
                 common={result.competencyCommon}
                 trackScores={result.competencyTrackScores}
                 trackName={trackName}
               />
             </div>
+            {compMods.length > 0 && (
+              <div className="space-y-5">
+                {compMods.map(([id, m]) => {
+                  const isA = id.endsWith('-A');
+                  const isD = id.endsWith('-D');
+                  const borderColor = isA ? 'border-green-400' : isD ? 'border-red-300' : 'border-neutral-300';
+                  return (
+                    <div key={id} className={`border-l-2 ${borderColor} pl-4`}>
+                      <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                      <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
 
@@ -195,12 +247,21 @@ export default function HitBResultPage() {
                 gaps={result.readinessGaps}
               />
             </div>
+            {readyMods.length > 0 && readyMods.map(([id, m]) => (
+              <div key={id} className="mt-6 border-l-2 border-blue-400 pl-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-1">{m.title}</p>
+                <p className="text-sm text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
             {result.aiReport && (
               <div className="mt-6">
-                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">AI 종합 리포트</h3>
+                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" />
+                  HeRo의 종합 분석
+                </h3>
                 <div className="bg-neutral-50 p-5 rounded-xl">
-                  <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">
-                    {result.aiReport}
+                  <p className="text-sm text-neutral-700 leading-[1.8] whitespace-pre-line">
+                    {cleanMarkdown(result.aiReport)}
                   </p>
                 </div>
               </div>

@@ -5,9 +5,20 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
 import HitProgressBar from './HitProgressBar';
 import HitQuestionCard from './HitQuestionCard';
-import { baseQuestions } from '@/lib/hit/data/base-questions';
+import { ufQuestions } from '@/lib/hit/data/base-questions';
 import { mbtiQuestions } from '@/lib/hit/data/mbti-questions';
 import { discQuestions } from '@/lib/hit/data/disc-questions';
+
+/** UF 7점 리커트 옵션 */
+const LIKERT_7_OPTIONS = [
+  { label: '전혀 아니다', value: '1' },
+  { label: '아니다', value: '2' },
+  { label: '약간 아니다', value: '3' },
+  { label: '보통이다', value: '4' },
+  { label: '약간 그렇다', value: '5' },
+  { label: '그렇다', value: '6' },
+  { label: '매우 그렇다', value: '7' },
+];
 
 type ModuleType = 'base' | 'mbti' | 'disc';
 
@@ -28,13 +39,13 @@ interface HitTestUIProps {
 }
 
 const MODULE_NAMES: Record<ModuleType, string> = {
-  base: '기본 성향 검사',
+  base: '기저요인(UF) 검사',
   mbti: '성격 유형(MBTI) 검사',
   disc: '행동 유형(DISC) 검사',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'base→mbti': '다음은 성격 유형(MBTI) 검사입니다',
+  'base→mbti': '기저요인 검사가 끝났습니다. 다음은 성격 유형(MBTI) 검사입니다',
   'mbti→disc': '마지막으로 행동 유형(DISC) 검사입니다',
 };
 
@@ -45,10 +56,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   const [sessionId, setSessionId] = useState<string>('');
 
   const allQuestions = useMemo<QuestionItem[]>(() => {
-    const tagged = (qs: typeof baseQuestions, mod: ModuleType) =>
-      qs.map((q) => ({ module: mod, id: q.id, text: q.text, options: q.options }));
-
-    // 단계별 셔플 (단계 간 순서는 유지: base → mbti → disc)
+    // 셔플 함수
     const shuffle = <T,>(arr: T[]): T[] => {
       const a = [...arr];
       for (let i = a.length - 1; i > 0; i--) {
@@ -58,10 +66,27 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       return a;
     };
 
+    // UF 문항: LikertQuestion → QuestionItem (7점 리커트 옵션 부여)
+    const ufTagged: QuestionItem[] = ufQuestions.map((q) => ({
+      module: 'base' as ModuleType,
+      id: q.id,
+      text: q.text,
+      options: LIKERT_7_OPTIONS,
+    }));
+
+    // MBTI/DISC: 기존 4지선다
+    const taggedMbti: QuestionItem[] = mbtiQuestions.map((q) => ({
+      module: 'mbti' as ModuleType, id: q.id, text: q.text, options: q.options,
+    }));
+    const taggedDisc: QuestionItem[] = discQuestions.map((q) => ({
+      module: 'disc' as ModuleType, id: q.id, text: q.text, options: q.options,
+    }));
+
+    // 단계별 셔플 (단계 간 순서: base → mbti → disc)
     return [
-      ...shuffle(tagged(baseQuestions, 'base')),
-      ...shuffle(tagged(mbtiQuestions, 'mbti')),
-      ...shuffle(tagged(discQuestions, 'disc')),
+      ...shuffle(ufTagged),
+      ...shuffle(taggedMbti),
+      ...shuffle(taggedDisc),
     ];
   }, []);
 

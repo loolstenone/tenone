@@ -6,8 +6,9 @@ interface CompetencyChartProps {
   trackName: string;
 }
 
-// 공통 역량 한글명
-const COMMON_NAMES: Record<string, string> = {
+// 전체 역량 한글명 매핑
+const COMPETENCY_NAMES: Record<string, string> = {
+  // 공통
   communication: '커뮤니케이션',
   problem_solving: '문제해결',
   teamwork: '팀워크',
@@ -16,29 +17,56 @@ const COMMON_NAMES: Record<string, string> = {
   critical_thinking: '비판적 사고',
   digital_literacy: '디지털 리터러시',
   project_management: '프로젝트 관리',
-};
-
-// 트랙별 역량 한글명
-const TRACK_NAMES: Record<string, string> = {
+  collaboration: '협업',
+  self_management: '자기관리',
+  learning_agility: '학습 민첩성',
+  initiative: '주도성',
+  persuasion: '설득력',
+  consistency: '일관성',
+  // 마케팅/브랜딩
   market_analysis: '시장분석',
   positioning: '포지셔닝',
   consumer_insight: '소비자 인사이트',
   brand_identity: '브랜드 아이덴티티',
   storytelling: '스토리텔링',
+  visual_sense: '시각적 감각',
   experience_design: '경험설계',
   campaign_planning: '캠페인 기획',
+  campaign_mgmt: '캠페인 관리',
   creative_direction: '크리에이티브 디렉션',
+  creative_concept: '크리에이티브 컨셉',
   media_strategy: '미디어 전략',
+  media_planning: '미디어 기획',
   content_strategy: '콘텐츠 전략',
+  content_creation: '콘텐츠 제작',
   copywriting: '카피라이팅',
+  copy_writing: '카피라이팅',
   sns_management: 'SNS 운영',
+  // 데이터/퍼포먼스
   data_analysis: '데이터 분석',
+  data_driven: '데이터 기반 의사결정',
+  analytics: '분석',
   performance_marketing: '퍼포먼스 마케팅',
   growth_hacking: '그로스해킹',
   ab_testing: 'A/B 테스팅',
+  funnel_optimization: '퍼널 최적화',
   channel_management: '채널관리',
   roi_optimization: 'ROI 최적화',
+  // 전략/기획
+  strategic_thinking: '전략적 사고',
+  planning: '기획',
+  reporting: '보고서 작성',
+  seo: '검색엔진최적화(SEO)',
+  editorial: '편집',
+  customer_focus: '고객 중심',
+  stakeholder_mgmt: '이해관계자 관리',
+  platform_knowledge: '플랫폼 이해',
+  audience_engagement: '오디언스 참여',
 };
+
+// 하위 호환
+const COMMON_NAMES = COMPETENCY_NAMES;
+const TRACK_NAMES_MAP = COMPETENCY_NAMES;
 
 function getScoreLevel(score: number): { color: string; label: string } {
   if (score >= 80) return { color: 'bg-green-500', label: '우수' };
@@ -57,7 +85,7 @@ export default function CompetencyChart({ common, trackScores, trackName }: Comp
         <div className="space-y-2">
           {Object.entries(common).map(([key, score]) => {
             const { color } = getScoreLevel(score);
-            const name = COMMON_NAMES[key] || key;
+            const name = COMPETENCY_NAMES[key] || key;
             return (
               <div key={key} className="flex items-center gap-3">
                 <span className="text-xs text-neutral-600 w-24 flex-shrink-0 text-right">
@@ -88,7 +116,7 @@ export default function CompetencyChart({ common, trackScores, trackName }: Comp
           <div className="space-y-2">
             {Object.entries(trackScores).map(([key, score]) => {
               const { color } = getScoreLevel(score);
-              const name = TRACK_NAMES[key] || key;
+              const name = COMPETENCY_NAMES[key] || key;
               return (
                 <div key={key} className="flex items-center gap-3">
                   <span className="text-xs text-neutral-600 w-24 flex-shrink-0 text-right">

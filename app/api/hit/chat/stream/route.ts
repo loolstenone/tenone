@@ -37,13 +37,16 @@ export async function POST(request: NextRequest) {
 
     // HIT 결과 로드
     const result = await getHitAResult(resultId);
+    const ufContext = result?.uf_sibling != null ? `
+- UF 기저요인: 형제관계${result.uf_sibling} 부모관계${result.uf_parent} 가정환경${result.uf_family} 또래관계${result.uf_peer} 자기개념${result.uf_self} 기질${result.uf_temperament} 경제환경${result.uf_economic} 트라우마${result.uf_trauma} 문화세대${result.uf_cultural}` : '';
+
     const resultContext = result ? `
 내담자 HIT 결과:
 - 유형: ${result.type_code} (${result.type_name_ko})
-- DISC: D${result.disc_d_score} I${result.disc_i_score} S${result.disc_s_score} C${result.disc_c_score}
-- MBTI: ${result.mbti_type}
-- S-Power: ${JSON.stringify(result.s_power_scores || {})}
-- 기저요인: ${result.base_summary || ''}
+- DISC: D${result.disc_d_score} I${result.disc_i_score} S${result.disc_s_score} C${result.disc_c_score} (주: ${result.disc_primary}, 보조: ${result.disc_subtype})
+- MBTI: ${result.mbti_type} (E${result.mbti_e_score} S${result.mbti_s_score} T${result.mbti_t_score} J${result.mbti_j_score})
+- S-Power: ${JSON.stringify(result.s_power_scores || {})}${ufContext}
+- 기저요인 요약: ${result.base_summary || ''}
 ` : '';
 
     const systemPrompt = getHeroSystemPrompt(mode as HitMode, alertLevel || 0) + '\n\n' + resultContext;

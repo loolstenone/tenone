@@ -1,8 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-03 (사무실, 세션 18 — 완료)
+> 마지막 업데이트: 2026-04-05 (집, 세션 19)
 
-## 오늘 한 작업 (4/3 사무실 세션 18)
+## 오늘 한 작업 (4/5 집 세션 19)
+
+### HeRo HIT 보고서 품질 개선 ✅
+
+**cleanMarkdown 전체 적용:**
+- `app/(HeRo)/hero/hit/a/result/[id]/page.tsx` — 페이지네이션 결과 페이지에 cleanMarkdown 추가
+  - profile_overview, aiNarrative, 6개 모듈 콘텐츠(DISC/MBTI/CROSS/SP/GROWTH/COMM) 모두 적용
+- `app/(HeRo)/hero/hit/a/report/[id]/page.tsx` — 이미 적용 확인 (전 세션)
+- `app/(HeRo)/hero/hit/profile/[id]/page.tsx` — 통합 프로필 aiReport에 cleanMarkdown 적용
+- `app/(HeRo)/hero/hit/b/result/[id]/page.tsx` — B결과 aiReport에 cleanMarkdown 적용
+
+**DB 마크다운 정리:**
+- `hit_hero_types` 64행 profile_overview에서 `**볼드**` 마크다운 전부 제거 (SQL regexp_replace)
+- 예: `**스타로드(피터 퀼)**` → `스타로드(피터 퀼)`
+
+**FWN 마이그레이션 확인:**
+- WordPress 원본(fwn.co.kr) 접속 불가 (ECONNREFUSED)
+- 기존 migrate-fwn.js로 15개 기사 이미 DB 저장 완료
+- FWN 홈/카테고리/기사 상세 페이지 모두 정상 작동
+
+**빌드:** 성공 ✅
+
+---
+
+## 이전 작업 (4/3 사무실 세션 18)
 
 ### WholeSee 크롤러 전체 파이프라인 정상화 ✅
 

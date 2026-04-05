@@ -100,6 +100,19 @@ export interface SPowerScores {
   analytical: number;    // 분석적 판단
 }
 
+/** UF (Underlying Factors) 기저요인 9영역 점수 (0~100) */
+export interface UFScores {
+  sibling: number;       // 형제관계·협력
+  parent: number;        // 부모관계·정서
+  family: number;        // 가정정서·자원
+  peer: number;          // 또래·학교
+  self: number;          // 자기개념·사회역량
+  temperament: number;   // 기질적 본능
+  economic: number;      // 경제적 환경
+  trauma: number;        // 트라우마·전환점
+  cultural: number;      // 문화·세대·교육
+}
+
 // ── 64유형 프로필 ──
 
 export interface TypeProfile {
@@ -134,9 +147,10 @@ export interface HitAResult {
   discSScore: number;
   discCScore: number;
 
-  // 기저요인
+  // 기저요인 (UF)
   baseSummary: string;
-  baseScores: Record<string, number>;
+  baseScores: Record<string, number>;  // DEPRECATED
+  ufScores?: UFScores;
 
   // 64유형
   typeCode: string;

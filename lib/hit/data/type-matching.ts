@@ -7,8 +7,8 @@ export const typeMatchingMap: Record<string, TypeProfile> = {
     "code": "I-ESTP",
     "nameKo": "설득자형",
     "nickname": "폼생폼사, 팔방미인, 겁없는 해결사, 임기응변, 정보통",
-    "category": "탐함가형",
-    "traits": "벼랑끝의 아슬앗ㄹ한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
+    "category": "탐험가형",
+    "traits": "벼랑 끝의 아슬아슬한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
     "careers": "친구, 운동, 음식 등 다양함을 선호",
     "jobs": "경찰관, 소방관, 은행원"
   },
@@ -25,8 +25,8 @@ export const typeMatchingMap: Record<string, TypeProfile> = {
     "code": "D-ESTP",
     "nameKo": "개척자형",
     "nickname": "폼생폼사, 팔방미인, 겁없는 해결사, 임기응변, 정보통",
-    "category": "탐함가형",
-    "traits": "벼랑끝의 아슬앗ㄹ한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
+    "category": "탐험가형",
+    "traits": "벼랑 끝의 아슬아슬한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
     "careers": "친구, 운동, 음식 등 다양함을 선호",
     "jobs": "경찰관, 소방관, 은행원"
   },
@@ -228,8 +228,8 @@ export const mbtiFallbackMap: Record<string, Omit<TypeProfile, "code">> = {
   "ESTP": {
     "nameKo": "모험을 즐기는 사업가",
     "nickname": "폼생폼사, 팔방미인, 겁없는 해결사, 임기응변, 정보통",
-    "category": "탐함가형",
-    "traits": "벼랑끝의 아슬앗ㄹ한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
+    "category": "탐험가형",
+    "traits": "벼랑 끝의 아슬아슬한 삶을 진정으로 즐길 줄 아는 이들로 명석한 두뇌와 에너지 그리고 뛰어난 직관력을 가지고 있는 유형",
     "careers": "친구, 운동, 음식 등 다양함을 선호",
     "jobs": "경찰관, 소방관, 은행원"
   },

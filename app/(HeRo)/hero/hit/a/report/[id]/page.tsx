@@ -3,12 +3,27 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Printer, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { Printer, ArrowLeft, Sparkles } from "lucide-react";
+import HitModelGuideModal from "@/features/hit/HitModelGuideModal";
+import HitModelGuide from "@/features/hit/HitModelGuide";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import type { HitAResult } from "@/types/hit";
+
+// 마크다운 → 순수 텍스트 (볼드는 유지)
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, '')           // 헤딩 제거
+    .replace(/\*\*(.+?)\*\*/g, '$1')    // **볼드** → 볼드 (순수 텍스트)
+    .replace(/\*(.+?)\*/g, '$1')        // *이탤릭* → 이탤릭
+    .replace(/`(.+?)`/g, '$1')          // `코드` → 코드
+    .replace(/^[-*]\s/gm, '')           // 불릿 제거
+    .replace(/^\d+\.\s/gm, '')          // 번호 리스트 제거
+    .trim();
+}
 
 interface HeroTypeData {
   strengths: { title: string; desc: string }[];
@@ -71,6 +86,11 @@ export default function HitAReportPage() {
           typeCareers: data.type_careers,
           aiNarrative: data.ai_narrative,
           sPowerScores: data.s_power_scores,
+          ufScores: (data.uf_sibling != null) ? {
+            sibling: data.uf_sibling, parent: data.uf_parent, family: data.uf_family,
+            peer: data.uf_peer, self: data.uf_self, temperament: data.uf_temperament,
+            economic: data.uf_economic, trauma: data.uf_trauma, cultural: data.uf_cultural,
+          } : undefined,
           createdAt: data.created_at,
         });
         if (data.report_modules) setReportModules(data.report_modules);
@@ -117,6 +137,18 @@ export default function HitAReportPage() {
       ]
     : [];
 
+  const ufData = result.ufScores ? [
+    { label: "형제관계", value: result.ufScores.sibling },
+    { label: "부모관계", value: result.ufScores.parent },
+    { label: "가정환경", value: result.ufScores.family },
+    { label: "또래관계", value: result.ufScores.peer },
+    { label: "자기개념", value: result.ufScores.self },
+    { label: "기질", value: result.ufScores.temperament },
+    { label: "경제환경", value: result.ufScores.economic },
+    { label: "전환경험", value: result.ufScores.trauma },
+    { label: "문화·세대", value: result.ufScores.cultural },
+  ].filter(d => d.value > 0) : [];
+
   const narrativeParagraphs =
     result.aiNarrative?.split("\n").filter((p) => p.trim()) ?? [];
 
@@ -147,9 +179,12 @@ export default function HitAReportPage() {
   const commMods = reportModules
     ? Object.entries(reportModules).filter(([k]) => k.startsWith("COMM-"))
     : [];
+  const ufMods = reportModules
+    ? Object.entries(reportModules).filter(([k]) => k.startsWith("UF-"))
+    : [];
 
   return (
-    <div className="hit-report-container mx-auto max-w-[210mm] px-8 py-10">
+    <div className="hit-report-container mx-auto max-w-[210mm] px-8 py-10 print:pb-0">
       {/* ── 인쇄 버튼 (화면에서만 보임) ── */}
       <div className="no-print flex items-center justify-between mb-8">
         <Link
@@ -158,13 +193,23 @@ export default function HitAReportPage() {
         >
           <ArrowLeft className="h-4 w-4" /> 결과 페이지로 돌아가기
         </Link>
-        <button
-          onClick={handlePrint}
-          className="print-keep inline-flex items-center gap-2 px-5 py-2.5 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
-        >
-          <Printer className="h-4 w-4" />
-          인쇄 / PDF 저장
-        </button>
+        <div className="flex items-center gap-2">
+          <HitModelGuideModal />
+          <Link
+            href={`/hero/coaching/ai?resultId=${resultId}`}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-[#E53935] text-[#E53935] text-sm font-medium rounded-xl hover:bg-red-50 transition-colors"
+          >
+            <Sparkles className="h-4 w-4" />
+            AI 상담
+          </Link>
+          <button
+            onClick={handlePrint}
+            className="print-keep inline-flex items-center gap-2 px-4 py-2 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
+          >
+            <Printer className="h-4 w-4" />
+            인쇄 / PDF
+          </button>
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════
@@ -174,13 +219,22 @@ export default function HitAReportPage() {
         {/* 보고서 헤더 */}
         <div className="border-b-2 border-[#E53935] pb-6 mb-8">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-[#E53935] uppercase tracking-[0.2em] mb-1">
-                HeRo Integrated Test
-              </p>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900">
-                HIT A 결과 보고서
-              </h1>
+            <div className="flex items-center gap-4">
+              <Image
+                src="/hero-logo.png"
+                alt="HeRo"
+                width={56}
+                height={56}
+                className="h-14 w-14 object-contain"
+              />
+              <div>
+                <p className="text-xs font-bold text-[#E53935] uppercase tracking-[0.2em] mb-1">
+                  HeRo Integrated Test
+                </p>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900">
+                  HIT A 결과 보고서
+                </h1>
+              </div>
             </div>
             <div className="text-right text-xs text-neutral-400">
               <p>{formattedDate}</p>
@@ -205,75 +259,93 @@ export default function HitAReportPage() {
         </div>
 
         {heroType?.profile_overview && (
-          <div className="bg-neutral-50 p-5 rounded-xl mb-4">
-            <p className="text-sm text-neutral-600 leading-relaxed">
+          <div className="bg-neutral-50 p-6 rounded-xl mb-4">
+            <p className="text-[15px] text-neutral-600 leading-[1.8]">
               {heroType.profile_overview}
             </p>
           </div>
         )}
       </section>
 
+      {/* 인쇄 전용: 검사 설명 */}
+      <section className="hit-print-section mt-12 hidden print:block">
+        <HitModelGuide mode="print" />
+      </section>
+
       {/* ══════════════════════════════════════════
-          Section 2: DISC 행동유형 + 기저요인
+          Section 2: DISC 행동유형
           ══════════════════════════════════════════ */}
-      <section className="hit-print-section">
-        <h2 className="text-lg font-bold mb-4 pt-4 border-t border-neutral-200">
+      <section className="hit-print-section mt-16">
+        <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">
           DISC 행동유형
         </h2>
         <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-          <DISCChart
-            d={result.discDScore}
-            i={result.discIScore}
-            s={result.discSScore}
-            c={result.discCScore}
-            primary={result.discPrimary}
-          />
+          <DISCChart d={result.discDScore} i={result.discIScore} s={result.discSScore} c={result.discCScore} primary={result.discPrimary} />
         </div>
-        {result.baseSummary && (
-          <>
-            <h3 className="text-base font-bold mb-3">기저요인</h3>
-            <p className="text-sm text-neutral-600 leading-relaxed bg-neutral-50 p-4 rounded-xl">
-              {result.baseSummary}
-            </p>
-          </>
+        {/* 기저요인 (UF) */}
+        {(ufData.length > 0 || result.baseSummary) && (
+          <div className="mt-8 pt-6 border-t border-neutral-100">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">기저요인의 영향</p>
+            {ufData.length > 0 && (
+              <div className="border border-neutral-200 rounded-xl p-6 flex justify-center mb-4">
+                <RadarChart data={ufData} size={240} />
+              </div>
+            )}
+            {result.baseSummary && (
+              <p className="text-[15px] text-neutral-600 leading-[1.8] border-l-2 border-neutral-300 pl-4 mb-4">
+                {result.baseSummary}
+              </p>
+            )}
+            {ufMods.length > 0 && ufMods.map(([id, m]) => (
+              <div key={id} className="mb-4 border-l-2 border-purple-400 pl-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {discMods.length > 0 && discMods.map(([id, m]) => (
+          <div key={id} className="mb-7">
+            <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+            <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* ══════════════════════════════════════════
+          Section 3: MBTI 성향
+          ══════════════════════════════════════════ */}
+      <section className="hit-print-section mt-16">
+        <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">
+          MBTI 성향
+        </h2>
+        <div className="border border-neutral-200 rounded-xl p-6 mb-6">
+          <MBTISpectrum eScore={result.mbtiEScore} sScore={result.mbtiSScore} tScore={result.mbtiTScore} jScore={result.mbtiJScore} />
+        </div>
+        {mbtiMods.length > 0 && mbtiMods.map(([id, m]) => (
+          <div key={id} className="mb-7">
+            <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+            <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+          </div>
+        ))}
+        {crossMods.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-neutral-100">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">DISC x MBTI 교차 해석</p>
+            {crossMods.map(([id, m]) => (
+              <div key={id} className="mb-7">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
       {/* ══════════════════════════════════════════
-          Section 3: MBTI 성향 스펙트럼
+          Section 4: S-Power 강점
           ══════════════════════════════════════════ */}
-      <section className="hit-print-section">
-        <h2 className="text-lg font-bold mb-4 pt-4 border-t border-neutral-200">
-          MBTI 성향 스펙트럼
-        </h2>
-        <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-          <MBTISpectrum
-            eScore={result.mbtiEScore}
-            sScore={result.mbtiSScore}
-            tScore={result.mbtiTScore}
-            jScore={result.mbtiJScore}
-          />
-        </div>
-        <div className="bg-neutral-50 p-5 rounded-xl">
-          <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-            유형: {result.mbtiType}
-          </p>
-          <p className="text-sm text-neutral-600 leading-relaxed">
-            {result.mbtiType?.includes("I")
-              ? "에너지를 혼자만의 시간에서 충전하며, 깊이 있는 사고를 선호합니다."
-              : "다양한 사람과의 교류에서 에너지를 얻으며, 적극적으로 소통합니다."}{" "}
-            {result.mbtiType?.includes("N")
-              ? "패턴과 가능성을 먼저 파악하며, 미래 지향적 사고가 특징입니다."
-              : "구체적인 사실과 현실적 정보를 중시합니다."}
-          </p>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          Section 4: S-Power 강점 + AI 분석
-          ══════════════════════════════════════════ */}
-      <section className="hit-print-section">
-        <h2 className="text-lg font-bold mb-4 pt-4 border-t border-neutral-200">
+      <section className="hit-print-section mt-16">
+        <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">
           S-Power 강점
         </h2>
         {spData.length > 0 && (
@@ -281,210 +353,129 @@ export default function HitAReportPage() {
             <RadarChart data={spData} size={260} />
           </div>
         )}
+        {spMods.length > 0 && (
+          <div className="mb-6">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">핵심 강점</p>
+            {spMods.map(([id, m]) => (
+              <div key={id} className="mb-7 border-l-2 border-green-400 pl-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {spGrowth.length > 0 && (
+          <div className="mb-6">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">성장 영역</p>
+            {spGrowth.map(([id, m]) => (
+              <div key={id} className="mb-7 border-l-2 border-amber-400 pl-4">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+          </div>
+        )}
         {narrativeParagraphs.length > 0 && (
-          <>
-            <h3 className="text-base font-bold mb-3">AI 분석</h3>
-            <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
+          <div className="mt-8 pt-6 border-t border-neutral-100">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3 w-auto opacity-60" />
+              HeRo의 분석
+            </p>
+            <div className="space-y-3">
               {narrativeParagraphs.map((p, i) => (
-                <p key={i} className="text-sm text-neutral-700 leading-relaxed">
-                  {p}
-                </p>
+                <p key={i} className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(p)}</p>
               ))}
             </div>
-          </>
+          </div>
+        )}
+        {commMods.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-neutral-100">
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">소통 스타일</p>
+            {commMods.map(([id, m]) => (
+              <div key={id} className="mb-7">
+                <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{cleanMarkdown(m.content)}</p>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
       {/* ══════════════════════════════════════════
           Section 5: 강점 / 주의점
           ══════════════════════════════════════════ */}
-      <section className="hit-print-section">
-        <h2 className="text-lg font-bold mb-4 pt-4 border-t border-neutral-200">
+      <section className="hit-print-section mt-16">
+        <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">
           강점 및 주의점
         </h2>
-
         {heroType?.strengths && heroType.strengths.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">
-              강점
-            </h3>
-            <div className="space-y-3">
-              {heroType.strengths.map((s, i) => (
-                <div key={i} className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm font-bold text-neutral-800 mb-1">
-                    {s.title}
-                  </p>
-                  <p className="text-xs text-neutral-600 leading-relaxed">
-                    {s.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="mb-8">
+            <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">강점</p>
+            {heroType.strengths.map((s, i) => (
+              <div key={i} className="mb-4 border-l-2 border-green-400 pl-4">
+                <p className="text-sm font-semibold text-neutral-800 mb-0.5">{s.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{s.desc}</p>
+              </div>
+            ))}
           </div>
         )}
-
         {heroType?.cautions && heroType.cautions.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">
-              주의점
-            </h3>
-            <div className="space-y-3">
-              {heroType.cautions.map((c, i) => (
-                <div key={i} className="bg-amber-50 p-4 rounded-lg">
-                  <p className="text-sm font-bold text-neutral-800 mb-1">
-                    {c.title}
-                  </p>
-                  <p className="text-xs text-neutral-600 leading-relaxed">
-                    {c.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="mb-8">
+            <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">주의점</p>
+            {heroType.cautions.map((c, i) => (
+              <div key={i} className="mb-4 border-l-2 border-amber-400 pl-4">
+                <p className="text-sm font-semibold text-neutral-800 mb-0.5">{c.title}</p>
+                <p className="text-[15px] text-neutral-600 leading-[1.8]">{c.desc}</p>
+              </div>
+            ))}
           </div>
         )}
-
         {heroType?.fit_direction && (
           <div>
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
-              적합 방향
-            </h3>
-            <p className="text-sm text-neutral-600 leading-relaxed bg-blue-50 p-4 rounded-lg">
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">적합 방향</p>
+            <p className="text-[15px] text-neutral-600 leading-[1.8] border-l-2 border-blue-400 pl-4">
               {heroType.fit_direction}
             </p>
           </div>
         )}
       </section>
 
-      {/* ══════════════════════════════════════════
-          Section 6: 통합 보고서 (회원 모듈)
-          ══════════════════════════════════════════ */}
-      {reportModules && Object.keys(reportModules).length > 0 && (
-        <section className="hit-print-section">
-          <h2 className="text-lg font-bold mb-4 pt-4 border-t border-neutral-200">
-            HIT 통합 보고서
-          </h2>
-
-          {/* DISC 해설 */}
-          {discMods.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                DISC 행동 특성
-              </h3>
-              {discMods.map(([id, m]) => (
-                <div key={id} className="mb-4">
-                  <p className="text-sm font-bold text-neutral-700 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* MBTI 해설 */}
-          {mbtiMods.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                MBTI 성향 해설
-              </h3>
-              {mbtiMods.map(([id, m]) => (
-                <div key={id} className="mb-3">
-                  <p className="text-sm font-bold text-neutral-700 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 교차 해석 */}
-          {crossMods.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                교차 해석
-              </h3>
-              {crossMods.map(([id, m]) => (
-                <div key={id} className="mb-3">
-                  <p className="text-sm font-bold text-neutral-700 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* S-Power 주강점 */}
-          {spMods.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                S-Power 주강점
-              </h3>
-              {spMods.map(([id, m]) => (
-                <div key={id} className="mb-3">
-                  <p className="text-sm font-bold text-green-600 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 성장 영역 */}
-          {spGrowth.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                성장 영역
-              </h3>
-              {spGrowth.map(([id, m]) => (
-                <div key={id} className="mb-3">
-                  <p className="text-sm font-bold text-amber-600 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 소통 스타일 */}
-          {commMods.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-                소통 스타일
-              </h3>
-              {commMods.map(([id, m]) => (
-                <div key={id} className="mb-3">
-                  <p className="text-sm font-bold text-neutral-700 mb-1">
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">
-                    {m.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* ── 푸터 (인쇄 시 표시) ── */}
-      <div className="mt-12 pt-4 border-t border-neutral-200 text-center">
-        <p className="text-[10px] text-neutral-300">
+      {/* ── 푸터 ── */}
+      <div className="mt-16 pt-6 border-t border-neutral-200 flex items-center justify-center gap-3">
+        <Image src="/hero-logo-wide.png" alt="HeRo" width={48} height={24} className="h-5 w-auto opacity-30" />
+        <p className="text-xs text-neutral-300">
           HeRo Integrated Test (HIT) | Ten:One Universe | {formattedDate}
         </p>
+      </div>
+
+      {/* ── AI 상담 플로팅 버튼 (우하단, 인쇄 시 숨김) ── */}
+      <Link
+        href={`/hero/coaching/ai?resultId=${resultId}`}
+        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white font-bold rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl transition-all hover:scale-105"
+      >
+        <Sparkles className="h-5 w-5" />
+        AI 상담
+      </Link>
+
+      {/* ── 마지막 페이지: 로고 워터마크 (인쇄/PDF 전용) ── */}
+      <div className="hidden print:block" style={{ pageBreakBefore: "always" }}>
+        <div className="flex items-center justify-center" style={{ height: "calc(100vh - 40px)" }}>
+          <div className="text-center">
+            <Image
+              src="/hero-logo-black-wide.png"
+              alt="HeRo"
+              width={400}
+              height={200}
+              className="w-80 mx-auto opacity-[0.06]"
+            />
+            <p className="text-sm text-neutral-300 mt-10 tracking-widest uppercase">
+              HeRo Integrated Test
+            </p>
+            <p className="text-xs text-neutral-300 mt-2">
+              Ten:One Universe
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

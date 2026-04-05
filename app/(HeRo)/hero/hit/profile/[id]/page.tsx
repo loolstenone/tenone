@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Copy, Check, Share2 } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
@@ -13,6 +14,17 @@ import RIASECChart from "@/features/hit/RIASECChart";
 import CompetencyChart from "@/features/hit/CompetencyChart";
 import ReadinessGauge from "@/features/hit/ReadinessGauge";
 import type { HitAResult, HitBResult } from "@/types/hit";
+
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/^[-*]\s/gm, '')
+    .replace(/^\d+\.\s/gm, '')
+    .trim();
+}
 
 const TRACK_DISPLAY_NAMES: Record<string, string> = {
   marketing_strategy: '마케팅전략',
@@ -164,6 +176,7 @@ export default function IntegratedProfilePage() {
     <div className="mx-auto max-w-3xl px-6 py-12">
       {/* Header */}
       <div className="text-center mb-8">
+        <Image src="/hero-logo.png" alt="HeRo" width={56} height={56} className="h-14 w-14 mx-auto mb-3" />
         <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">Integrated Hero Profile</p>
         <h1 className="text-2xl md:text-3xl font-extrabold">통합 영웅 프로필</h1>
         <p className="text-sm text-neutral-500 mt-2">HIT - A + HIT - B 종합</p>
@@ -292,9 +305,12 @@ export default function IntegratedProfilePage() {
       {/* AI Report */}
       {hitB.aiReport && (
         <section className="mt-8">
-          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">AI 종합 리포트</h2>
+          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <Image src="/hero-logo-wide.png" alt="" width={24} height={12} className="h-3.5 w-auto opacity-50" />
+            HeRo의 종합 분석
+          </h2>
           <div className="bg-neutral-50 p-6 rounded-xl">
-            <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">{hitB.aiReport}</p>
+            <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">{cleanMarkdown(hitB.aiReport)}</p>
           </div>
         </section>
       )}

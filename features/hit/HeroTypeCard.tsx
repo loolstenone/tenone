@@ -1,12 +1,12 @@
 'use client';
 
 interface HeroTypeCardProps {
-  typeCode: string;   // e.g. "D-INTJ"
-  nameKo: string;     // e.g. "전략적 지휘관"
-  nickname: string;   // e.g. "건축가"
-  category: string;   // e.g. "분석형 리더"
-  traits: string;     // paragraph description
-  careers: string;    // career direction text
+  typeCode: string;
+  nameKo: string;
+  nickname: string;
+  category: string;
+  traits: string;
+  careers: string;
 }
 
 const DISC_COLORS: Record<string, string> = {
@@ -33,52 +33,29 @@ export default function HeroTypeCard({
   const accentColor = DISC_COLORS[discType] ?? '#E53935';
 
   return (
-    <div
-      className="bg-white rounded-xl border border-neutral-200 overflow-hidden"
-      style={{ borderLeftWidth: '4px', borderLeftColor: accentColor }}
-    >
-      <div className="p-6 md:p-8">
-        {/* Type code */}
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: accentColor }}>
+    <div className="border-l-[3px] pl-6" style={{ borderColor: accentColor }}>
+      {/* 유형 코드 + 이름 — 한 줄 */}
+      <div className="flex items-baseline gap-3 mb-1">
+        <span className="text-2xl font-extrabold tracking-tight" style={{ color: accentColor }}>
           {typeCode}
-        </h2>
+        </span>
+        <span className="text-lg font-bold text-neutral-900">{nameKo}</span>
+      </div>
 
-        {/* Korean name */}
-        <p className="text-xl md:text-2xl font-semibold text-neutral-900 mt-1">
-          {nameKo}
-        </p>
+      {/* 별칭 + 카테고리 */}
+      <p className="text-xs text-neutral-400 mb-4">
+        {nickname} · {category}
+      </p>
 
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          <span
-            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white"
-            style={{ backgroundColor: accentColor }}
-          >
-            {nickname}
-          </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600">
-            {category}
-          </span>
+      {/* 특성 + 커리어 — 2단 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-[13px] text-neutral-600 leading-relaxed">
+        <div>
+          <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-widest mb-1">특성</p>
+          <p>{traits}</p>
         </div>
-
-        {/* Traits */}
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">
-            성격 특성
-          </h3>
-          <p className="text-sm text-neutral-700 leading-relaxed">
-            {traits}
-          </p>
-        </div>
-
-        {/* Careers */}
-        <div className="mt-5">
-          <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">
-            커리어 방향
-          </h3>
-          <p className="text-sm text-neutral-700 leading-relaxed">
-            {careers}
-          </p>
+        <div>
+          <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-widest mb-1">커리어 방향</p>
+          <p>{careers}</p>
         </div>
       </div>
     </div>

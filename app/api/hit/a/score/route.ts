@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
-import { scoreMBTI, scoreDISC, scoreBase, match64Type, deriveSPower } from '@/lib/hit/scoring';
+import { scoreMBTI, scoreDISC, scoreBase, scoreUF, match64Type, deriveSPower } from '@/lib/hit/scoring';
 import { selectModules } from '@/lib/hit/report-assembler';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     const mbti = scoreMBTI(responses);
     const disc = scoreDISC(responses);
     const base = scoreBase(responses);
+    const uf = scoreUF(responses);
     const typeProfile = match64Type(mbti, disc);
     const sPower = deriveSPower(mbti, disc);
 
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
       mbtiEScore: mbti.eScore, mbtiSScore: mbti.sScore,
       mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
       sPowerScores: sPower,
+      ufScores: uf,
     });
 
     // 결과 저장
@@ -114,6 +116,16 @@ export async function POST(request: NextRequest) {
       ai_narrative: aiNarrative,
       s_power_scores: sPower,
       modules_used: modulesUsed,
+      // UF 기저요인 9영역
+      uf_sibling: uf.sibling,
+      uf_parent: uf.parent,
+      uf_family: uf.family,
+      uf_peer: uf.peer,
+      uf_self: uf.self,
+      uf_temperament: uf.temperament,
+      uf_economic: uf.economic,
+      uf_trauma: uf.trauma,
+      uf_cultural: uf.cultural,
     });
 
     // 세션 완료 처리
