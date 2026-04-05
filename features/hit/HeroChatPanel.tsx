@@ -120,7 +120,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[360px] h-[520px] bg-white border border-neutral-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 z-50 sm:w-[360px] sm:h-[520px] bg-white border-0 sm:border sm:border-neutral-200 sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 bg-[#E53935] text-white">
         <div>
