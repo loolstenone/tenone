@@ -39,19 +39,67 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
     setInput('');
     setLoading(true);
 
+    // 스트리밍 응답
     try {
-      const res = await fetch('/api/hit/chat', {
+      const res = await fetch('/api/hit/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text.trim(),
           resultId,
           mode,
-          history: messages.filter(m => m !== messages[0]), // 첫 인사 제외
+          history: messages.filter(m => m !== messages[0]),
+          sessionId: `chat_${resultId}_${Date.now()}`,
         }),
       });
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || '응답을 받지 못했습니다.' }]);
+
+      if (!res.ok) throw new Error('stream failed');
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+
+      // 빈 assistant 메시지 추가 (스트리밍으로 채워감)
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+          for (const line of lines) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.text) {
+                assistantContent += data.text;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
+                  return updated;
+                });
+              }
+              if (data.done) break;
+              if (data.error) {
+                assistantContent = data.error;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
+                  return updated;
+                });
+              }
+            } catch {}
+          }
+        }
+      }
+
+      if (!assistantContent) {
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'assistant', content: '응답을 받지 못했습니다.' };
+          return updated;
+        });
+      }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: '네트워크 오류가 발생했습니다. 다시 시도해 주세요.' }]);
     }

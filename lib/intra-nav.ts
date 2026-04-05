@@ -365,6 +365,7 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "인재 관리", href: "/intra/hero/talent" },
                             { name: "HIT 이용자", href: "/intra/hero/hit" },
+                            { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서 이용자", href: "/intra/hero/resume" },
                             { name: "커리어 이용자", href: "/intra/hero/career" },
                             { name: "브랜딩 이용자", href: "/intra/hero/branding" },
