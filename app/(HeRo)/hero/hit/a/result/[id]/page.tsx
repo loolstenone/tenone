@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowRight, ArrowLeft, Copy, Check, Sparkles, Users,
+  ArrowRight, Sparkles, Users,
   RefreshCw, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
@@ -12,6 +12,8 @@ import MBTISpectrum from "@/features/hit/MBTISpectrum";
 import DISCChart from "@/features/hit/DISCChart";
 import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
+import HitPdfButton from "@/features/hit/HitPdfButton";
+import HitShareButtons from "@/features/hit/HitShareButtons";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitAResult } from "@/types/hit";
 
@@ -32,7 +34,6 @@ export default function HitAResultPage() {
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
-  const [copied, setCopied] = useState(false);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
 
   useEffect(() => {
@@ -94,12 +95,6 @@ export default function HitAResultPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [goNext, goPrev]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -153,6 +148,17 @@ export default function HitAResultPage() {
                 </p>
               </div>
             )}
+            {/* Share buttons */}
+            <div className="mt-6 flex flex-col items-center gap-1.5">
+              <p className="text-xs text-neutral-400">결과 공유하기</p>
+              <HitShareButtons
+                typeCode={result.typeCode}
+                typeNameKo={result.typeNameKo}
+                typeNickname={result.typeNickname}
+                resultId={resultId}
+                variant="compact"
+              />
+            </div>
           </div>
         );
 
@@ -311,6 +317,11 @@ export default function HitAResultPage() {
                   ))}
                 </div>
               )}
+
+              {/* PDF 보고서 다운로드 */}
+              <div className="pt-4 border-t border-neutral-100 text-center">
+                <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
+              </div>
             </div>
           );
         }
@@ -404,12 +415,23 @@ export default function HitAResultPage() {
                 </div>
               </div>
 
+              {/* PDF 보고서 */}
+              {result.memberId && (
+                <div className="border border-neutral-200 rounded-xl p-5 text-center">
+                  <p className="text-xs text-neutral-500 mb-3">전체 결과를 PDF로 저장하세요</p>
+                  <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
+                </div>
+              )}
+
               {/* 공유 + 재시도 */}
               <div className="pt-4 space-y-2">
-                <button onClick={handleCopy}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 border border-neutral-200 rounded-lg text-sm hover:bg-neutral-50 transition-colors">
-                  {copied ? <><Check className="h-3.5 w-3.5 text-green-500" /> 복사됨</> : <><Copy className="h-3.5 w-3.5" /> 결과 링크 복사</>}
-                </button>
+                <HitShareButtons
+                  typeCode={result.typeCode}
+                  typeNameKo={result.typeNameKo}
+                  typeNickname={result.typeNickname}
+                  resultId={resultId}
+                  variant="full"
+                />
                 <Link href="/hero/hit/a"
                   className="flex items-center justify-center gap-2 w-full py-2.5 text-xs text-neutral-400 hover:text-neutral-600">
                   <RefreshCw className="h-3 w-3" /> 다시 검사하기

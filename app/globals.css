@@ -236,4 +236,19 @@ main.bg-white .rounded-xl {
   .page-break { page-break-before: always; }
   table { page-break-inside: avoid; }
   tr { page-break-inside: avoid; }
+
+  /* ── HIT 보고서 전용 ── */
+  .hit-report-print-header { display: flex !important; }
+  .hit-print-section { page-break-after: always; }
+  .hit-print-section:last-child { page-break-after: avoid; }
+  .hit-report-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .hit-report-container canvas,
+  .hit-report-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
 }
