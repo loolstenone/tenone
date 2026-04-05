@@ -1,8 +1,24 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-06 (집, 세션 20)
+> 마지막 업데이트: 2026-04-06 (집, 세션 21)
 
 ## 오늘 한 작업 (4/5~6 집 세션 19~20)
+
+### 세션 21 (4/6 오후)
+
+**HIT B 범용화 + HeRo 서비스 구조:**
+1. HIT B 문항 동적 로드 — hit_questions DB에서 592문항 (공통+트랙별) API 로드
+2. 직군 우선 폴백 트랙 매칭 (3단계: 전용→범용→없음)
+3. HitBTestUI DB 문항 전환 (DB 우선, 프론트 하드코딩 fallback)
+4. checkHitCompletion() — HIT A+B 완료 여부 확인 함수
+5. AI 상담 페이지 HIT 체크 모달 (로그인/HIT A/HIT B/결제준비중)
+6. /hero/career 커리어 로드맵 안내 페이지 full 구현
+7. /hero/resume 이력서 코칭 2티어 (9,900원 AI + 89,000원 전문가)
+8. 푸터 로고 흰색 단색 + 메뉴 통일 + Contact lools@tenone.biz
+
+**커밋:** `d11119b`, `ebe214d`, `7c93767`
+
+---
 
 ### 세션 20 (4/6)
 
@@ -432,15 +448,15 @@ AI 분석   → 20건 처리 → 11건 트렌드 카드 생성, 9건 필터링 �
 
 ### 즉시 (다음 세션)
 
-1. **HIT B 문항 동적 로드** — hit_questions 테이블에서 공통+트랙별 문항 로드. 기존 프론트 하드코딩(competency-questions.ts/readiness-questions.ts)에서 DB로 전환. 592문항 시딩 완료(Chat).
-   - `features/hit/HitBTestUI.tsx`의 allQuestions를 API 호출로 교체
-   - `/api/hit/b/questions?trackId=xxx` API 신규
-   - 공통(track_id=NULL) + 트랙별(track_id=선택값) 조합
-   - 마케팅 5트랙: 기존 프론트 하드코딩 문항 → hit_questions로 마이그레이션 필요
-
-2. **HIT B "준비 중" UX** — 트랙 없을 때: 공통 역량 18 + 공통 준비도 20 = 38문항만 진행, competency_track=NULL, 보고서에서 "기본 역량 분석"으로 표시
-
+1. ✅ **HIT B 문항 동적 로드** — 완료 (세션 21). `/api/hit/b/questions?trackId=xxx` + DB 우선 로드
+2. ✅ **HIT B "준비 중" UX** — 완료 (세션 21). 공통 문항만 진행
 3. **A+B 통합 프로필 페이지** — cross_ab 22개 모듈 활용, `/hero/hit/profile/[id]`
+
+### P1 (서비스 인프라)
+4. **구독 API** — `/api/hero/subscribe` (hero_subscriptions INSERT, HIT 완료 검증)
+5. **이력서 AI 코칭 API** — `/api/hero/resume/coach` (파일 업로드 → Claude 분석 → ai_feedback 저장)
+6. **결제 연동** — 토스페이먼츠 또는 Stripe (Phase 2)
+7. **마케팅 5트랙 DB 마이그레이션** — 프론트 하드코딩 문항 → hit_questions로 이관
 
 ### 우선순위 높음
 
