@@ -5,14 +5,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_001",
     "axis": "" as const,
-    "text": "새로운 일을 맡게 되었을 때, 당신은 어떻게 하나요?",
+    "text": "팀에서 새 프로젝트가 시작되었습니다. 당신의 첫 반응은?",
     "options": [
       {
-        "label": "계획을 세우고 체계적으로 일을 진행한다.",
+        "label": "일정과 단계를 먼저 정리한다.",
         "value": "J"
       },
       {
-        "label": "상황을 보며 유연하게 일을 진행한다.",
+        "label": "일단 시작해보면서 방향을 잡는다.",
         "value": "P"
       }
     ]
@@ -20,14 +20,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_002",
     "axis": "" as const,
-    "text": "당신이 작성한 보고서에 대한 피드백을 받을 때, 당신은 무엇에 더 집중하나요?",
+    "text": "상사가 당신의 기획안에 대해 수정 의견을 보내왔습니다. 당신이 먼저 확인하는 것은?",
     "options": [
       {
-        "label": "피드백의 논리와 데이터에 집중한다.",
+        "label": "의견의 논리적 근거와 데이터가 타당한지 본다.",
         "value": "T"
       },
       {
-        "label": "피드백을 준 사람의 감정과 의도에 집중한다.",
+        "label": "상사가 어떤 맥락과 의도로 그 의견을 냈는지 읽는다.",
         "value": "F"
       }
     ]
@@ -35,14 +35,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_003",
     "axis": "" as const,
-    "text": "집안 청소를 할 때, 당신은 어떻게 하나요?",
+    "text": "주말에 밀린 빨래, 설거지, 청소가 쌓여있습니다. 당신은?",
     "options": [
       {
-        "label": "청소 계획을 세우고 체계적으로 한다.",
+        "label": "거실부터 욕실까지 순서를 정해놓고 한 번에 처리한다.",
         "value": "J"
       },
       {
-        "label": "필요할 때마다 즉흥적으로 청소한다.",
+        "label": "눈에 보이는 것부터 기분 내키는 대로 하나씩 한다.",
         "value": "P"
       }
     ]
@@ -50,14 +50,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_004",
     "axis": "" as const,
-    "text": "새로운 사람을 만났을 때, 당신은 어떻게 행동하나요?",
+    "text": "회사 워크숍에서 처음 보는 타 부서 사람들과 한 테이블에 앉게 되었습니다.",
     "options": [
       {
-        "label": "먼저 다가가서 대화를 시작하고 친해지려 노력한다.",
+        "label": "자기소개를 먼저 하며 분위기를 주도한다.",
         "value": "E"
       },
       {
-        "label": "상대방이 먼저 다가오기를 기다리며 천천히 친해진다.",
+        "label": "옆 사람이 말을 걸 때까지 자연스럽게 기다린다.",
         "value": "I"
       }
     ]
@@ -65,14 +65,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_005",
     "axis": "" as const,
-    "text": "책을 읽을 때, 당신은 어떤 부분에 더 집중하나요?",
+    "text": "신간 비즈니스 서적을 읽고 있습니다. 당신이 더 집중하게 되는 부분은?",
     "options": [
       {
-        "label": "이야기의 흐름과 전체적인 의미에 집중한다.",
+        "label": "저자가 제시하는 큰 프레임워크와 통찰.",
         "value": "N"
       },
       {
-        "label": "세부적인 설명과 사실에 집중한다.",
+        "label": "실제 기업의 구체적인 사례와 수치.",
         "value": "S"
       }
     ]
@@ -80,14 +80,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_006",
     "axis": "" as const,
-    "text": "당신은 보통 회의나 모임에서 어떻게 참여하나요?",
+    "text": "주간 팀 회의 시간입니다. 당신의 평소 참여 스타일은?",
     "options": [
       {
-        "label": "주로 듣는 편이고 꼭 필요할 때만 의견을 낸다.",
+        "label": "메모를 하며 듣다가 꼭 필요한 포인트에서만 발언한다.",
         "value": "I"
       },
       {
-        "label": "적극적으로 의견을 내고 논의에 참여한다.",
+        "label": "떠오르는 생각이 있으면 바로바로 공유하며 토론한다.",
         "value": "E"
       }
     ]
@@ -95,14 +95,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_007",
     "axis": "" as const,
-    "text": "낯선 장소에 갔을 때, 당신은 어떻게 행동하나요?",
+    "text": "출장으로 처음 방문한 도시에서 자유 시간이 생겼습니다. 당신은?",
     "options": [
       {
-        "label": "조용히 주변을 관찰하며 분위기에 적응한다.",
+        "label": "호텔 근처 카페에서 조용히 쉬면서 주변을 관찰한다.",
         "value": "I"
       },
       {
-        "label": "적극적으로 탐험하고 사람들과 대화한다.",
+        "label": "현지인에게 추천 명소를 물어보고 돌아다닌다.",
         "value": "E"
       }
     ]
@@ -110,14 +110,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_008",
     "axis": "" as const,
-    "text": "회사에서 팀 프로젝트가 주어졌을 때, 당신은 어떻게 하나요?",
+    "text": "크로스펑셔널 TF팀에 배정되어 2주간 집중 협업을 하게 되었습니다.",
     "options": [
       {
-        "label": "팀원들과 활발히 소통하고 협력한다.",
+        "label": "매일 아이디어를 나누며 활발히 소통하는 과정이 즐겁다.",
         "value": "E"
       },
       {
-        "label": "주어진 역할에 집중하며 필요한 최소한의 소통만 한다.",
+        "label": "맡은 파트에 몰입하고, 필요한 것만 슬랙으로 공유한다.",
         "value": "I"
       }
     ]
@@ -125,14 +125,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_009",
     "axis": "" as const,
-    "text": "친구와의 약속이 취소되면 당신은 어떻게 하나요?",
+    "text": "금요일 저녁 약속이 갑자기 취소되었습니다. 당신의 선택은?",
     "options": [
       {
-        "label": "집에서 혼자만의 시간을 즐긴다.",
+        "label": "오히려 좋다, 집에서 밀린 드라마를 보거나 책을 읽는다.",
         "value": "I"
       },
       {
-        "label": "다른 사람에게 연락해 새로운 약속을 잡는다.",
+        "label": "다른 친구에게 연락해서 급하게라도 만남을 잡는다.",
         "value": "E"
       }
     ]
@@ -140,14 +140,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_010",
     "axis": "" as const,
-    "text": "당신은 일과 후에 어떤 활동을 선호하나요?",
+    "text": "퇴근 후 남는 에너지로 하고 싶은 일은?",
     "options": [
       {
-        "label": "동료들과 함께 어울리며 시간을 보낸다.",
+        "label": "동료들과 맛집을 탐방하거나 운동 모임에 참여한다.",
         "value": "E"
       },
       {
-        "label": "혼자 조용한 곳에서 책을 읽거나 취미를 즐긴다.",
+        "label": "조용한 공간에서 혼자 취미 활동에 집중한다.",
         "value": "I"
       }
     ]
@@ -155,14 +155,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_011",
     "axis": "" as const,
-    "text": "당신은 새로운 그룹에 합류할 때 어떻게 행동하나요?",
+    "text": "새로 입사한 회사의 동아리에 가입하려고 합니다. 당신의 접근법은?",
     "options": [
       {
-        "label": "천천히 적응하며 그룹의 분위기를 파악한다.",
+        "label": "먼저 몇 번 참관하면서 분위기를 살핀 뒤 결정한다.",
         "value": "I"
       },
       {
-        "label": "적극적으로 참여하고 그룹의 일원이 되기 위해 노력한다.",
+        "label": "바로 가입하고 사람들과 어울리면서 적응한다.",
         "value": "E"
       }
     ]
@@ -170,14 +170,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_012",
     "axis": "" as const,
-    "text": "혼자 있는 시간이 길어지면 어떤 느낌이 드나요?",
+    "text": "재택근무가 연속 3일째입니다. 이런 날이 계속되면 당신은?",
     "options": [
       {
-        "label": "지루하고 외롭다.",
+        "label": "사람이 그리워져서 카페라도 가고 싶어진다.",
         "value": "E"
       },
       {
-        "label": "편안하고 재충전되는 느낌이다.",
+        "label": "오히려 집중이 잘 되어서 더 생산적으로 느낀다.",
         "value": "I"
       }
     ]
@@ -185,14 +185,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_013",
     "axis": "" as const,
-    "text": "새로운 정보를 접할 때, 당신은 주로 어떤 방식으로 이해하나요?",
+    "text": "마케팅 전략 세미나에서 새로운 트렌드를 접했습니다. 당신의 이해 방식은?",
     "options": [
       {
-        "label": "전체적인 개념과 가능성을 통해 이해한다.",
+        "label": "이 트렌드가 업계 전체에 어떤 변화를 일으킬지 상상한다.",
         "value": "N"
       },
       {
-        "label": "구체적이고 실질적인 예시를 통해 이해한다.",
+        "label": "실제로 적용한 기업의 구체적인 성과 수치를 확인한다.",
         "value": "S"
       }
     ]
@@ -200,14 +200,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_014",
     "axis": "" as const,
-    "text": "일상적인 문제를 해결할 때, 당신은 어떻게 접근하나요?",
+    "text": "사내 시스템에 반복적으로 같은 오류가 발생하고 있습니다. 당신의 접근은?",
     "options": [
       {
-        "label": "기존의 방법과 경험을 바탕으로 해결한다.",
+        "label": "이전에 통했던 해결 방법을 먼저 적용해본다.",
         "value": "S"
       },
       {
-        "label": "창의적이고 새로운 방법을 시도한다.",
+        "label": "기존 방식의 한계를 의심하고 새로운 해결 루트를 찾는다.",
         "value": "N"
       }
     ]
@@ -215,14 +215,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_015",
     "axis": "" as const,
-    "text": "새로운 기술을 배울 때, 당신은 어떤 방식으로 배우나요?",
+    "text": "회사에서 새로운 프로젝트 관리 툴을 도입했습니다. 당신이 배우는 방식은?",
     "options": [
       {
-        "label": "전체적인 개념을 이해한 후에 배운다.",
+        "label": "전체 기능의 구조와 철학을 먼저 파악한 뒤 쓰기 시작한다.",
         "value": "N"
       },
       {
-        "label": "단계별로 실습하며 배운다.",
+        "label": "매뉴얼을 보며 하나씩 직접 클릭해보면서 익힌다.",
         "value": "S"
       }
     ]
@@ -230,14 +230,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_016",
     "axis": "" as const,
-    "text": "당신은 단체 활동과 개인 활동 중 어떤 것을 더 좋아하나요?",
+    "text": "토요일 오후, 스케줄이 텅 비어있습니다. 당신이 더 끌리는 활동은?",
     "options": [
       {
-        "label": "개인 활동을 통해 자신만의 시간을 갖는 것을 좋아한다.",
+        "label": "혼자 미술관에 가거나 집에서 요리를 만든다.",
         "value": "I"
       },
       {
-        "label": "단체 활동을 통해 여러 사람들과 어울리는 것을 좋아한다.",
+        "label": "소셜 모임에 참석하거나 동호회 정기 활동에 간다.",
         "value": "E"
       }
     ]
@@ -245,14 +245,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_017",
     "axis": "" as const,
-    "text": "당신은 보통 주말에 어떻게 시간을 보내나요?",
+    "text": "일요일에 특별한 계획 없이 눈을 떴습니다. 당신의 선택은?",
     "options": [
       {
-        "label": "친구들과 만나거나 외출한다.",
+        "label": "친구에게 연락해서 브런치를 먹으러 나간다.",
         "value": "E"
       },
       {
-        "label": "집에서 편안하게 쉰다.",
+        "label": "집에서 느긋하게 커피를 마시며 하루를 보낸다.",
         "value": "I"
       }
     ]
@@ -260,14 +260,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_018",
     "axis": "" as const,
-    "text": "당신은 주로 어떤 방식으로 의사 결정을 하나요?",
+    "text": "신제품 출시를 앞두고 가격 전략을 결정해야 합니다. 당신이 중시하는 판단 기준은?",
     "options": [
       {
-        "label": "현재 상황과 구체적인 정보를 바탕으로 결정한다.",
+        "label": "경쟁사 가격과 원가 구조 등 현재 시장 데이터.",
         "value": "S"
       },
       {
-        "label": "미래의 가능성과 잠재적인 결과를 고려하여 결정한다.",
+        "label": "향후 시장 변화와 고객 인식 변화의 가능성.",
         "value": "N"
       }
     ]
@@ -275,14 +275,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_019",
     "axis": "" as const,
-    "text": "일기 예보를 볼 때, 당신은 무엇에 더 주목하나요?",
+    "text": "뉴스레터에서 업계 분석 리포트를 읽고 있습니다. 당신이 더 주목하는 부분은?",
     "options": [
       {
-        "label": "날씨 변화의 경향과 패턴.",
+        "label": "전체 트렌드의 방향성과 앞으로의 전망.",
         "value": "N"
       },
       {
-        "label": "구체적인 날씨와 기온 정보.",
+        "label": "구체적인 시장 규모 수치와 현재 점유율 데이터.",
         "value": "S"
       }
     ]
@@ -290,14 +290,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_020",
     "axis": "" as const,
-    "text": "새로운 직장에서 첫날, 당신은 어떻게 행동하나요?",
+    "text": "새 직장에 첫 출근한 날, 점심시간에 당신이 더 신경 쓰는 것은?",
     "options": [
       {
-        "label": "동료들과 친해지며 관계를 형성하려고 한다.",
+        "label": "옆 동료에게 먼저 말을 걸어서 관계의 물꼬를 튼다.",
         "value": "F"
       },
       {
-        "label": "업무 절차와 규칙을 파악하고 따르려고 한다.",
+        "label": "오후 업무에 필요한 시스템 접근 권한과 절차를 파악한다.",
         "value": "T"
       }
     ]
@@ -305,14 +305,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_021",
     "axis": "" as const,
-    "text": "친구가 당신에게 조언을 구할 때, 당신은 어떻게 응답하나요?",
+    "text": "후배가 커리어 고민을 상담해왔습니다. 당신이 자연스럽게 하는 조언 방식은?",
     "options": [
       {
-        "label": "문제 해결을 위한 구체적인 방법을 제시한다.",
+        "label": "현실적인 선택지를 정리해주고 각각의 장단점을 분석해준다.",
         "value": "T"
       },
       {
-        "label": "친구의 감정을 공감하고 위로하며 조언한다.",
+        "label": "먼저 이야기를 충분히 들어주고 후배의 마음을 헤아려준다.",
         "value": "F"
       }
     ]
@@ -320,14 +320,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_022",
     "axis": "" as const,
-    "text": "직장에서 스트레스를 받을 때, 당신은 어떻게 대처하나요?",
+    "text": "실적 압박이 심한 분기 마감 시즌입니다. 당신의 스트레스 해소법은?",
     "options": [
       {
-        "label": "문제의 원인을 분석하고 해결책을 찾는다.",
+        "label": "남은 할 일 목록을 정리하고 하나씩 지워나가면서 통제감을 찾는다.",
         "value": "T"
       },
       {
-        "label": "동료나 친구와 대화를 나누며 감정을 풀어낸다.",
+        "label": "가까운 동료에게 힘들다고 솔직히 이야기하면서 마음을 가볍게 한다.",
         "value": "F"
       }
     ]
@@ -335,14 +335,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_023",
     "axis": "" as const,
-    "text": "대화를 나눌 때, 당신은 어떤 이야기에 더 관심이 있나요?",
+    "text": "동기 모임에서 화제가 된 이야기가 있습니다. 당신이 더 귀 기울이는 쪽은?",
     "options": [
       {
-        "label": "실제로 일어난 사건과 경험.",
+        "label": "실제로 회사에서 있었던 일이나 겪은 에피소드.",
         "value": "S"
       },
       {
-        "label": "가능성과 아이디어에 대한 이야기.",
+        "label": "업계의 미래나 새로운 가능성에 대한 토론.",
         "value": "N"
       }
     ]
@@ -350,14 +350,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_024",
     "axis": "" as const,
-    "text": "문제를 분석할 때, 당신은 어떤 방식으로 접근하나요?",
+    "text": "캠페인 성과 리포트를 분석해야 합니다. 당신이 먼저 보는 것은?",
     "options": [
       {
-        "label": "세부 사항을 철저히 분석한다.",
+        "label": "각 채널별 상세 수치와 전환율.",
         "value": "S"
       },
       {
-        "label": "큰 그림을 보고 패턴을 파악한다.",
+        "label": "전체 캠페인 흐름에서 보이는 패턴과 인사이트.",
         "value": "N"
       }
     ]
@@ -365,14 +365,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_025",
     "axis": "" as const,
-    "text": "당신은 보통 어떤 종류의 영화를 더 좋아하나요?",
+    "text": "넷플릭스에서 무엇을 볼지 고르는 중입니다. 당신이 더 끌리는 장르는?",
     "options": [
       {
-        "label": "상상력이 풍부하고 창의적인 영화.",
+        "label": "SF나 판타지처럼 상상력을 자극하는 장르.",
         "value": "N"
       },
       {
-        "label": "현실적이고 사실적인 영화.",
+        "label": "다큐멘터리나 실화 기반 드라마.",
         "value": "S"
       }
     ]
@@ -380,14 +380,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_026",
     "axis": "" as const,
-    "text": "주말에 평소에 관심 있던 큰 모임이 있다고 합니다. 당신은 어떻게 할 것인가요?",
+    "text": "관심 있는 대규모 네트워킹 행사가 주말에 열립니다. 당신은?",
     "options": [
       {
-        "label": "소수의 가까운 친구들과 갈 수 있으면 가고 아니면 집에 있겠다.",
+        "label": "아는 사람과 함께 갈 수 있으면 가고, 아니면 패스한다.",
         "value": "I"
       },
       {
-        "label": "적극적으로 참석하고 여러 사람들과 어울리겠다",
+        "label": "혼자라도 가서 새로운 사람들을 만나본다.",
         "value": "E"
       }
     ]
@@ -395,14 +395,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_027",
     "axis": "" as const,
-    "text": "새로운 음식을 시도할 때, 당신은 무엇에 더 주목하나요?",
+    "text": "맛집 탐방을 갔습니다. 메뉴를 고를 때 당신이 더 신경 쓰는 것은?",
     "options": [
       {
-        "label": "음식의 재료와 조리 방법.",
+        "label": "어떤 재료로 어떻게 조리하는지 구성이 궁금하다.",
         "value": "S"
       },
       {
-        "label": "음식의 독특한 맛과 새로운 경험.",
+        "label": "이 집만의 독특한 콘셉트나 새로운 맛 조합이 끌린다.",
         "value": "N"
       }
     ]
@@ -410,14 +410,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_028",
     "axis": "" as const,
-    "text": "친구와 여행을 갈 때, 당신은 어떻게 행동하나요?",
+    "text": "동료와 함께 3박 4일 해외 출장을 갑니다. 자유 일정에 대한 당신의 스타일은?",
     "options": [
       {
-        "label": "여행 중에 즉흥적으로 계획을 바꾼다.",
+        "label": "그때그때 현지 분위기에 맞춰서 움직인다.",
         "value": "P"
       },
       {
-        "label": "여행 일정을 상세하게 계획하고 준비한다.",
+        "label": "방문할 곳과 이동 경로를 미리 정리해둔다.",
         "value": "J"
       }
     ]
@@ -425,14 +425,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_029",
     "axis": "" as const,
-    "text": "중요한 결정을 내릴 때, 당신은 어떻게 하나요?",
+    "text": "이직 제안이 들어왔습니다. 연봉은 비슷하지만 업무 환경이 크게 다릅니다. 당신의 결정 방식은?",
     "options": [
       {
-        "label": "계획을 세우고 신중하게 결정을 내린다.",
+        "label": "체크리스트를 만들어 현재 직장과 비교 분석한 뒤 결정한다.",
         "value": "J"
       },
       {
-        "label": "상황을 보고 즉흥적으로 결정을 내린다.",
+        "label": "일단 면접을 보면서 느낌을 확인하고 그때 판단한다.",
         "value": "P"
       }
     ]
@@ -440,14 +440,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_030",
     "axis": "" as const,
-    "text": "일상적인 대화를 할 때, 당신은 어떤 주제를 더 좋아하나요?",
+    "text": "친한 동료와 점심을 먹으며 대화하고 있습니다. 당신이 더 즐겁게 이야기하는 주제는?",
     "options": [
       {
-        "label": "미래의 가능성과 꿈에 대한 이야기.",
+        "label": "5년 후 우리가 어떤 일을 하고 있을지에 대한 상상.",
         "value": "N"
       },
       {
-        "label": "현재 일어나고 있는 일과 구체적인 상황.",
+        "label": "요즘 진행 중인 업무의 구체적인 이야기.",
         "value": "S"
       }
     ]
@@ -455,14 +455,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_031",
     "axis": "" as const,
-    "text": "프로젝트를 시작할 때, 당신은 어떻게 준비하나요?",
+    "text": "브랜드 리뉴얼 프로젝트에 참여하게 되었습니다. 당신의 준비 방식은?",
     "options": [
       {
-        "label": "구체적인 계획을 세우고 단계를 나눈다.",
+        "label": "경쟁사 분석, 시장 데이터 등 구체적 정보부터 수집한다.",
         "value": "S"
       },
       {
-        "label": "전체적인 목표를 설정하고 유연하게 진행한다.",
+        "label": "브랜드가 나아갈 큰 비전을 먼저 구상하고 세부를 채운다.",
         "value": "N"
       }
     ]
@@ -470,14 +470,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_032",
     "axis": "" as const,
-    "text": "휴가를 계획할 때, 당신은 어떻게 하나요?",
+    "text": "연차를 써서 쉬는 날, 당신이 더 끌리는 계획은?",
     "options": [
       {
-        "label": "혼자서 조용히 휴식을 취할 계획을 세운다.",
+        "label": "집에서 조용히 밀린 넷플릭스나 책을 소화한다.",
         "value": "I"
       },
       {
-        "label": "친구들이나 가족들과 함께 떠나는 계획을 세운다.",
+        "label": "평소에 못 본 친구를 만나거나 새로운 곳을 탐방한다.",
         "value": "E"
       }
     ]
@@ -485,14 +485,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_033",
     "axis": "" as const,
-    "text": "당신은 보통 어떤 방식으로 스트레스를 푸나요?",
+    "text": "월요일이 다가오는 일요일 저녁입니다. 기분 전환을 위해 당신이 하는 일은?",
     "options": [
       {
-        "label": "친구들과 수다를 떨거나 외출을 한다.",
+        "label": "친구에게 전화해서 수다를 떨거나 동네 산책에 나선다.",
         "value": "E"
       },
       {
-        "label": "혼자서 산책을 하거나 음악을 듣는다.",
+        "label": "좋아하는 음악을 틀어놓고 혼자만의 루틴을 즐긴다.",
         "value": "I"
       }
     ]
@@ -500,14 +500,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_034",
     "axis": "" as const,
-    "text": "일상 생활에서의 변화를 어떻게 받아들이나요?",
+    "text": "회사에서 기존 업무 프로세스를 대폭 바꾸겠다는 공지가 내려왔습니다. 당신의 반응은?",
     "options": [
       {
-        "label": "변화를 쉽게 받아들이지 않고 현재 상태를 유지하려 한다.",
+        "label": "지금 방식이 잘 되고 있는데 왜 바꾸는지 의문이 든다.",
         "value": "S"
       },
       {
-        "label": "변화를 기회로 보고 새로운 것을 시도하려 한다.",
+        "label": "새로운 방식에 어떤 가능성이 있을지 기대가 된다.",
         "value": "N"
       }
     ]
@@ -515,14 +515,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_035",
     "axis": "" as const,
-    "text": "당신은 주로 어떤 스타일의 일을 선호하나요?",
+    "text": "두 가지 업무 중 하나를 선택해야 합니다. 당신이 더 끌리는 쪽은?",
     "options": [
       {
-        "label": "규칙적이고 체계적인 일을 선호한다.",
+        "label": "매뉴얼이 확립된 안정적인 운영 업무.",
         "value": "S"
       },
       {
-        "label": "창의적이고 유연한 일을 선호한다.",
+        "label": "아직 정답이 없는 실험적인 기획 업무.",
         "value": "N"
       }
     ]
@@ -530,14 +530,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_036",
     "axis": "" as const,
-    "text": "새로운 정보를 기억할 때, 당신은 어떤 방식으로 기억하나요?",
+    "text": "중요한 미팅 직후, 내용을 정리하려고 합니다. 당신의 메모 스타일은?",
     "options": [
       {
-        "label": "개념과 아이디어를 기억한다.",
+        "label": "핵심 키워드와 연결 관계를 중심으로 마인드맵 식으로 정리한다.",
         "value": "N"
       },
       {
-        "label": "구체적인 사실과 데이터를 기억한다.",
+        "label": "논의된 사안을 시간 순서대로 빠짐없이 기록한다.",
         "value": "S"
       }
     ]
@@ -545,14 +545,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_037",
     "axis": "" as const,
-    "text": "당신은 보통 어떤 방식으로 사람들과 소통하나요?",
+    "text": "클라이언트에게 프로젝트 진행 상황을 설명해야 합니다. 당신의 커뮤니케이션 스타일은?",
     "options": [
       {
-        "label": "비유적이고 추상적으로 소통한다.",
+        "label": "전체적인 방향과 기대 효과를 큰 그림으로 설명한다.",
         "value": "N"
       },
       {
-        "label": "직접적이고 구체적으로 소통한다.",
+        "label": "완료된 항목과 수치를 구체적으로 하나씩 짚어준다.",
         "value": "S"
       }
     ]
@@ -560,14 +560,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_038",
     "axis": "" as const,
-    "text": "친구가 직장에서 힘든 상황을 이야기할 때, 당신은 어떻게 반응하나요?",
+    "text": "같은 팀 동료가 업무 실수로 힘들어하며 이야기를 꺼냈습니다. 당신의 자연스러운 반응은?",
     "options": [
       {
-        "label": "문제를 해결할 수 있는 구체적인 조언을 해준다.",
+        "label": "비슷한 상황에서 쓸 수 있는 구체적인 대처법을 알려준다.",
         "value": "T"
       },
       {
-        "label": "친구의 감정을 이해하고 위로한다.",
+        "label": "먼저 힘들었겠다고 공감해주고 이야기를 더 들어준다.",
         "value": "F"
       }
     ]
@@ -575,14 +575,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_039",
     "axis": "" as const,
-    "text": "중요한 결정을 내릴 때, 당신은 어떤 기준을 더 중요시하나요?",
+    "text": "회사를 옮길지, 지금 회사에서 부서 이동을 할지 고민 중입니다. 결정에 가장 큰 영향을 미치는 것은?",
     "options": [
       {
-        "label": "자신의 가치관과 감정에 기반하여 결정한다.",
+        "label": "내가 이 일을 하면서 어떤 감정을 느끼는지, 가치관에 맞는지.",
         "value": "F"
       },
       {
-        "label": "논리적이고 객관적인 정보에 기반하여 결정한다.",
+        "label": "연봉, 성장 가능성, 업무 범위 등 객관적 조건.",
         "value": "T"
       }
     ]
@@ -590,14 +590,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_040",
     "axis": "" as const,
-    "text": "팀 프로젝트에서 의견이 충돌할 때, 당신은 어떻게 행동하나요?",
+    "text": "기획 회의에서 두 안이 팽팽하게 맞서고 있습니다. 당신이 결론을 내리는 기준은?",
     "options": [
       {
-        "label": "갈등을 최소화하고 조화를 이루기 위해 노력한다.",
+        "label": "팀원들의 동기와 수용도를 고려해서 조율한다.",
         "value": "F"
       },
       {
-        "label": "논리적인 논쟁을 통해 최선의 결론을 도출한다.",
+        "label": "데이터와 성과 예측을 근거로 더 나은 안을 밀어붙인다.",
         "value": "T"
       }
     ]
@@ -605,14 +605,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_041",
     "axis": "" as const,
-    "text": "친구들과의 모임에서 당신은 어떻게 행동하나요?",
+    "text": "친구 4~5명이 모인 가벼운 술자리에서 당신은 어떤 포지션인가요?",
     "options": [
       {
-        "label": "주로 듣는 편이고 필요한 때에만 말한다.",
+        "label": "주로 듣고 웃으며 가끔 한마디를 보탠다.",
         "value": "I"
       },
       {
-        "label": "대화를 주도하며 분위기를 띄운다.",
+        "label": "이야기를 이끌고 화제를 제공하는 편이다.",
         "value": "E"
       }
     ]
@@ -620,14 +620,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_042",
     "axis": "" as const,
-    "text": "새로운 직장에서 첫날, 당신은 어떻게 하나요?",
+    "text": "새로운 프로젝트 팀의 첫 미팅 날입니다. 쉬는 시간에 당신은?",
     "options": [
       {
-        "label": "동료들에게 먼저 다가가 인사하고 대화한다.",
+        "label": "커피를 건네며 이름과 근황을 물어본다.",
         "value": "E"
       },
       {
-        "label": "동료들이 먼저 다가오기를 기다리며 관찰한다.",
+        "label": "자리에서 핸드폰을 보며 자연스럽게 누군가 말 걸길 기다린다.",
         "value": "I"
       }
     ]
@@ -635,14 +635,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_043",
     "axis": "" as const,
-    "text": "친구가 약속을 지키지 않았을 때, 당신은 어떻게 느끼나요?",
+    "text": "동료가 약속한 자료를 마감까지 보내주지 않았습니다. 당신의 반응은?",
     "options": [
       {
-        "label": "약속을 어긴 이유를 논리적으로 설명해달라고 요구한다.",
+        "label": "언제까지 보내줄 수 있는지 이유와 함께 명확히 물어본다.",
         "value": "T"
       },
       {
-        "label": "친구의 사정을 이해하고 공감하려고 노력한다.",
+        "label": "바빴나보다 하고 이해하면서 부드럽게 한 번 더 요청한다.",
         "value": "F"
       }
     ]
@@ -650,14 +650,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_044",
     "axis": "" as const,
-    "text": "친구들과의 약속을 잡을 때, 당신은 어떻게 하나요?",
+    "text": "대학 동기들과 오랜만에 만나기로 했습니다. 약속을 잡는 당신의 방식은?",
     "options": [
       {
-        "label": "미리 날짜와 시간을 정하고 계획한다.",
+        "label": "날짜, 시간, 장소를 미리 확정하고 공유한다.",
         "value": "J"
       },
       {
-        "label": "약속 당일에 즉흥적으로 시간을 정한다.",
+        "label": "대략적으로 정하고 당일에 세부사항을 맞춘다.",
         "value": "P"
       }
     ]
@@ -665,14 +665,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_045",
     "axis": "" as const,
-    "text": "집안일을 할 때, 당신은 어떻게 하나요?",
+    "text": "혼자 사는 집에서 주말 아침을 맞았습니다. 살림에 대한 당신의 스타일은?",
     "options": [
       {
-        "label": "필요할 때마다 즉흥적으로 집안일을 한다.",
+        "label": "기분 내킬 때 한꺼번에 몰아서 한다.",
         "value": "P"
       },
       {
-        "label": "계획을 세우고 체계적으로 집안일을 한다.",
+        "label": "요일별로 해야 할 것을 정해놓고 규칙적으로 한다.",
         "value": "J"
       }
     ]
@@ -680,14 +680,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_046",
     "axis": "" as const,
-    "text": "회사에서 중요한 발표를 준비할 때, 당신은 어떻게 하나요?",
+    "text": "다음 주에 경영진 앞에서 분기 실적 발표를 해야 합니다. 당신의 준비 포인트는?",
     "options": [
       {
-        "label": "청중의 감정을 고려하여 발표를 준비한다.",
+        "label": "청중이 어떤 감정 상태인지 고려해서 전달 톤을 조절한다.",
         "value": "F"
       },
       {
-        "label": "데이터를 철저히 분석하고 논리적으로 구성한다.",
+        "label": "숫자와 논리 흐름이 빈틈없이 탄탄한지 반복 점검한다.",
         "value": "T"
       }
     ]
@@ -695,14 +695,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_047",
     "axis": "" as const,
-    "text": "상사가 비판적인 피드백을 줄 때, 당신은 어떻게 반응하나요?",
+    "text": "분기 평가에서 팀장이 \"기대보다 성장이 느리다\"고 했습니다. 당신의 내적 반응은?",
     "options": [
       {
-        "label": "피드백을 분석하고 개선할 방법을 찾는다.",
+        "label": "어떤 부분이 느린 건지 구체적 근거를 확인하고 대응 계획을 세운다.",
         "value": "T"
       },
       {
-        "label": "상사의 의도를 이해하고 자신의 감정을 표현한다.",
+        "label": "팀장의 기대가 무엇이었는지 이해하려 하고, 솔직히 서운한 감정도 든다.",
         "value": "F"
       }
     ]
@@ -710,14 +710,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_048",
     "axis": "" as const,
-    "text": "중요한 이메일을 작성할 때, 당신은 무엇에 더 신경 쓰나요?",
+    "text": "클라이언트에게 프로젝트 일정 변경을 알리는 메일을 쓰고 있습니다. 당신이 더 신경 쓰는 것은?",
     "options": [
       {
-        "label": "이메일의 어조가 상대방에게 어떻게 전달될지 신경 쓴다.",
+        "label": "상대방이 이 메일을 받고 어떤 기분일지, 완곡한 표현을 고민한다.",
         "value": "F"
       },
       {
-        "label": "이메일의 내용이 논리적이고 명확한지 신경 쓴다.",
+        "label": "변경 사유와 새 일정이 정확하고 명확하게 전달되는지 확인한다.",
         "value": "T"
       }
     ]
@@ -725,14 +725,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_049",
     "axis": "" as const,
-    "text": "상사의 기대에 부응하지 못했을 때, 당신은 어떻게 느끼나요?",
+    "text": "중요한 제안서가 클라이언트의 기대에 미치지 못했다는 피드백을 받았습니다. 당신은?",
     "options": [
       {
-        "label": "논리적으로 이유를 분석하고 개선할 방법을 찾는다.",
+        "label": "어디가 부족했는지 항목별로 분석하고 개선안을 작성한다.",
         "value": "T"
       },
       {
-        "label": "상사의 실망감을 이해하고 공감한다.",
+        "label": "클라이언트가 진짜 원했던 것이 무엇이었는지 감을 잡으려 다시 만난다.",
         "value": "F"
       }
     ]
@@ -740,14 +740,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_050",
     "axis": "" as const,
-    "text": "가족과의 갈등이 있을 때, 당신은 어떻게 행동하나요?",
+    "text": "가족 간에 명절 일정 때문에 의견 충돌이 생겼습니다. 당신의 접근 방식은?",
     "options": [
       {
-        "label": "논리적으로 문제를 해결하려고 한다.",
+        "label": "각자의 일정을 놓고 가장 합리적인 안을 찾아 제안한다.",
         "value": "T"
       },
       {
-        "label": "가족의 감정을 이해하고 화해하려고 한다.",
+        "label": "가족 모두의 기분을 살피면서 모두가 수용할 수 있는 타협점을 찾는다.",
         "value": "F"
       }
     ]
@@ -755,14 +755,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_051",
     "axis": "" as const,
-    "text": "중요한 선택을 할 때, 당신은 어떤 방식을 더 선호하나요?",
+    "text": "이번 달 말까지 두 개의 프로젝트 중 하나를 포기해야 합니다. 당신의 선택 기준은?",
     "options": [
       {
-        "label": "논리적인 분석과 데이터를 바탕으로 선택한다.",
+        "label": "ROI, 일정, 리소스를 비교해서 효율이 높은 쪽을 남긴다.",
         "value": "T"
       },
       {
-        "label": "자신의 감정과 직관을 바탕으로 선택한다.",
+        "label": "각 프로젝트에 참여한 사람들의 상황과 나의 열정을 고려한다.",
         "value": "F"
       }
     ]
@@ -770,14 +770,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_052",
     "axis": "" as const,
-    "text": "친구가 고민을 털어놓을 때, 당신은 어떻게 반응하나요?",
+    "text": "친구가 밤늦게 전화해서 회사 인간관계 고민을 쏟아냅니다. 당신은?",
     "options": [
       {
-        "label": "친구의 감정을 공감하고 위로하며 듣는다.",
+        "label": "힘들었겠다며 이야기를 끝까지 들어주고 마음을 보듬어준다.",
         "value": "F"
       },
       {
-        "label": "문제 해결을 위한 구체적인 방법을 제시한다.",
+        "label": "상황을 정리해주고 내일 할 수 있는 현실적인 액션을 제안한다.",
         "value": "T"
       }
     ]
@@ -785,14 +785,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_053",
     "axis": "" as const,
-    "text": "여행을 계획할 때, 당신은 어떻게 하나요?",
+    "text": "3박 4일 국내 여행을 계획 중입니다. 당신의 준비 수준은?",
     "options": [
       {
-        "label": "철저한 계획을 세우고 일정을 정한다.",
+        "label": "숙소, 맛집, 관광지를 시간대별로 정리해둔다.",
         "value": "J"
       },
       {
-        "label": "자유롭게 일정을 정하지 않고 유연하게 계획한다.",
+        "label": "숙소 정도만 잡고 나머지는 현장에서 결정한다.",
         "value": "P"
       }
     ]
@@ -800,14 +800,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_054",
     "axis": "" as const,
-    "text": "일을 마칠 때, 당신은 어떻게 하나요?",
+    "text": "마감이 일주일 남은 보고서가 있습니다. 당신의 작업 패턴은?",
     "options": [
       {
-        "label": "여유롭게 일을 마무리하고, 때로는 마지막 순간에 완성한다.",
+        "label": "마감 이틀 전쯤 집중력이 폭발하면서 한 번에 완성한다.",
         "value": "P"
       },
       {
-        "label": "마감일을 지키기 위해 계획적으로 일한다.",
+        "label": "매일 조금씩 작업해서 마감 전에 여유 있게 마무리한다.",
         "value": "J"
       }
     ]
@@ -815,14 +815,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_055",
     "axis": "" as const,
-    "text": "일과를 마친 후, 당신은 어떻게 시간을 보낼 것인가요?",
+    "text": "평일 저녁, 업무가 일찍 끝났습니다. 남은 시간을 어떻게 보내나요?",
     "options": [
       {
-        "label": "미리 계획한 활동을 한다.",
+        "label": "내일 할 일을 미리 정리하거나 예정된 자기계발을 한다.",
         "value": "J"
       },
       {
-        "label": "기분에 따라 즉흥적으로 활동을 선택한다.",
+        "label": "그때 기분에 따라 넷플릭스를 보거나 산책을 나간다.",
         "value": "P"
       }
     ]
@@ -830,14 +830,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_056",
     "axis": "" as const,
-    "text": "친구의 생일 선물을 고를 때, 당신은 어떤 기준으로 선택하나요?",
+    "text": "동료의 생일 선물을 골라야 합니다. 당신이 선택하는 기준은?",
     "options": [
       {
-        "label": "실용적이고 필요할 것 같은 선물을 선택한다.",
+        "label": "받는 사람이 실제로 활용할 수 있는 실용적인 것.",
         "value": "T"
       },
       {
-        "label": "친구가 좋아할 것 같은 감성적인 선물을 선택한다.",
+        "label": "받는 순간 기분이 좋아질 수 있는 감성적인 것.",
         "value": "F"
       }
     ]
@@ -845,14 +845,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_057",
     "axis": "" as const,
-    "text": "갈등 상황에서 당신은 어떻게 행동하나요?",
+    "text": "외부 파트너사와의 계약 조건에서 양측 입장이 다릅니다. 당신의 협상 스타일은?",
     "options": [
       {
-        "label": "감정적으로 상대방을 이해하고 화해하려고 노력한다.",
+        "label": "상대의 상황을 이해하면서 서로 만족할 수 있는 접점을 찾는다.",
         "value": "F"
       },
       {
-        "label": "논리적으로 문제를 해결하려고 노력한다.",
+        "label": "계약 조건의 타당성을 근거로 논리적으로 설득한다.",
         "value": "T"
       }
     ]
@@ -860,14 +860,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_058",
     "axis": "" as const,
-    "text": "팀원과 의견이 맞지 않을 때, 당신은 어떻게 해결하나요?",
+    "text": "프로젝트 방향에 대해 팀원과 정면으로 생각이 다릅니다. 당신의 해결 방식은?",
     "options": [
       {
-        "label": "논리적으로 자신의 의견을 설득하려고 한다.",
+        "label": "각자의 주장을 뒷받침하는 자료를 가져와서 비교 검토한다.",
         "value": "T"
       },
       {
-        "label": "팀원의 감정을 이해하고 타협점을 찾으려고 한다.",
+        "label": "먼저 상대의 생각을 충분히 이해하고, 절충할 부분을 찾는다.",
         "value": "F"
       }
     ]
@@ -875,14 +875,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_059",
     "axis": "" as const,
-    "text": "프로젝트를 시작할 때, 당신은 어떻게 준비하나요?",
+    "text": "새로운 사업 아이디어가 떠올랐고 실행해볼지 고민 중입니다. 당신의 다음 단계는?",
     "options": [
       {
-        "label": "철저한 계획과 일정을 세운다.",
+        "label": "사업 계획서 초안, 예산, 타임라인을 먼저 짠다.",
         "value": "J"
       },
       {
-        "label": "필요한 자료를 모으고 유연하게 시작한다.",
+        "label": "관심 있는 사람들과 이야기하면서 아이디어를 발전시킨다.",
         "value": "P"
       }
     ]
@@ -890,14 +890,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_060",
     "axis": "" as const,
-    "text": "휴가를 보낼 때, 당신은 어떻게 하나요?",
+    "text": "다음 주부터 5일간의 연차를 냈습니다. 당신의 계획 수준은?",
     "options": [
       {
-        "label": "휴가 중에 즉흥적으로 활동을 결정한다.",
+        "label": "특별히 안 정하고, 그날그날 하고 싶은 것을 한다.",
         "value": "P"
       },
       {
-        "label": "미리 계획하고 일정을 정한다.",
+        "label": "어디 갈지, 무엇을 할지 대략적인 일정을 잡아놓는다.",
         "value": "J"
       }
     ]
@@ -905,14 +905,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_061",
     "axis": "" as const,
-    "text": "새로운 프로젝트를 시작할 때, 당신은 어떻게 하나요?",
+    "text": "분기 초, 팀 OKR을 수립해야 합니다. 당신이 선호하는 진행 방식은?",
     "options": [
       {
-        "label": "목표와 일정을 세우고 계획적으로 진행한다.",
+        "label": "목표와 핵심 결과를 확정하고 주차별 실행 계획을 즉시 만든다.",
         "value": "J"
       },
       {
-        "label": "프로젝트의 흐름에 따라 유연하게 진행한다.",
+        "label": "큰 방향만 잡고 실행하면서 유연하게 목표를 조정한다.",
         "value": "P"
       }
     ]
@@ -920,14 +920,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_062",
     "axis": "" as const,
-    "text": "일상생활에서 당신은 어떻게 시간을 관리하나요?",
+    "text": "하루의 시간 배분에 대한 당신의 평소 스타일은?",
     "options": [
       {
-        "label": "상황에 따라 유연하게 시간을 관리한다.",
+        "label": "그날의 상태와 업무 흐름에 맞게 유동적으로 운영한다.",
         "value": "P"
       },
       {
-        "label": "일정표를 작성하고 계획적으로 시간을 관리한다.",
+        "label": "아침에 할 일 목록을 만들고 시간 블록으로 나눠서 관리한다.",
         "value": "J"
       }
     ]
@@ -935,14 +935,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_063",
     "axis": "" as const,
-    "text": "업무 중에 갑작스러운 변경이 생기면 어떻게 대응하나요?",
+    "text": "진행 중인 업무의 요구사항이 갑자기 바뀌었습니다. 당신의 반응은?",
     "options": [
       {
-        "label": "계획을 수정하여 새로운 일정에 맞춘다.",
+        "label": "기존 계획을 수정해서 새로운 요구사항에 맞는 새 일정을 바로 짠다.",
         "value": "J"
       },
       {
-        "label": "상황에 맞게 즉흥적으로 대응한다.",
+        "label": "우선 바뀐 요구사항에 맞춰 작업하면서 계획은 나중에 정리한다.",
         "value": "P"
       }
     ]
@@ -950,14 +950,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_064",
     "axis": "" as const,
-    "text": "일정을 계획할 때, 당신은 어떻게 하나요?",
+    "text": "내년도 팀 예산과 인력 계획을 수립하라는 요청을 받았습니다. 당신의 접근법은?",
     "options": [
       {
-        "label": "구체적이고 현실적인 계획을 세운다.",
+        "label": "올해 실적 데이터를 기반으로 현실적인 수치를 먼저 잡는다.",
         "value": "S"
       },
       {
-        "label": "큰 그림을 그리고 유연하게 계획을 수정한다.",
+        "label": "내년에 도전할 큰 방향을 먼저 정하고 거기에 필요한 자원을 역산한다.",
         "value": "N"
       }
     ]
@@ -965,14 +965,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_065",
     "axis": "" as const,
-    "text": "친구가 여행 이야기를 할 때, 당신은 무엇에 더 관심이 있나요?",
+    "text": "동료가 최근 다녀온 해외 컨퍼런스 이야기를 해줍니다. 당신이 더 듣고 싶은 부분은?",
     "options": [
       {
-        "label": "여행 중에 했던 구체적인 활동과 경험.",
+        "label": "어떤 세션에 참석했고 구체적으로 무엇을 봤는지.",
         "value": "S"
       },
       {
-        "label": "여행을 통해 얻은 통찰과 깨달음.",
+        "label": "그 경험을 통해 어떤 새로운 관점이 생겼는지.",
         "value": "N"
       }
     ]
@@ -980,14 +980,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_066",
     "axis": "" as const,
-    "text": "당신은 혼자서 여행을 떠나게 된다면 어떤 생각이 드나요?",
+    "text": "해외 출장이 잡혔는데 동행자 없이 혼자 가야 합니다. 당신의 솔직한 기분은?",
     "options": [
       {
-        "label": "외롭고 지루할 것 같아 걱정된다.",
+        "label": "혼자면 좀 외롭고 심심할 것 같아 걱정된다.",
         "value": "E"
       },
       {
-        "label": "새로운 경험을 할 수 있을 것 같아 기대된다.",
+        "label": "내 페이스대로 움직일 수 있어서 오히려 편하다.",
         "value": "I"
       }
     ]
@@ -995,14 +995,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_067",
     "axis": "" as const,
-    "text": "새로운 사람들과의 첫 만남에서 당신은 어떻게 하나요?",
+    "text": "업계 소규모 밋업에 참석했습니다. 프리 네트워킹 시간에 당신은?",
     "options": [
       {
-        "label": "조용히 듣고 상대방이 먼저 말을 걸기를 기다린다.",
+        "label": "음료를 들고 가만히 서서 누군가 말을 걸면 대화한다.",
         "value": "I"
       },
       {
-        "label": "대화를 주도하며 분위기를 이끌어간다.",
+        "label": "관심 가는 사람에게 먼저 다가가 명함을 교환한다.",
         "value": "E"
       }
     ]
@@ -1010,14 +1010,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_068",
     "axis": "" as const,
-    "text": "친구들과의 모임에서 당신은 어떻게 행동하나요?",
+    "text": "고등학교 동창 모임이 잡혔습니다. 모임 당일 당신은?",
     "options": [
       {
-        "label": "모임 중에 즉흥적으로 활동을 결정한다.",
+        "label": "그때그때 분위기에 따라 2차, 3차를 결정한다.",
         "value": "P"
       },
       {
-        "label": "모임의 일정을 미리 계획하고 준비한다.",
+        "label": "몇 시에 시작해서 어디로 이동할지 미리 계획해서 공유한다.",
         "value": "J"
       }
     ]
@@ -1025,14 +1025,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_069",
     "axis": "" as const,
-    "text": "친구와의 다툼 후, 당신은 어떻게 해결하려고 하나요?",
+    "text": "가까운 동료와 업무 방식 차이로 불편한 상황이 생겼습니다. 당신의 해결법은?",
     "options": [
       {
-        "label": "문제의 원인을 분석하고 해결책을 제시한다.",
+        "label": "구체적으로 어떤 부분이 불편한지 정리해서 솔직하게 이야기한다.",
         "value": "T"
       },
       {
-        "label": "친구의 감정을 이해하고 화해하려고 노력한다.",
+        "label": "관계가 틀어지지 않게 조심하면서 자연스럽게 풀어간다.",
         "value": "F"
       }
     ]
@@ -1040,14 +1040,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_070",
     "axis": "" as const,
-    "text": "중요한 회의를 준비할 때, 당신은 무엇에 더 집중하나요?",
+    "text": "중요한 클라이언트 미팅을 준비하고 있습니다. 당신이 더 심혈을 기울이는 부분은?",
     "options": [
       {
-        "label": "회의에 참여하는 사람들의 감정을 고려한다.",
+        "label": "참석자들의 성향과 관심사를 파악해서 분위기를 맞춘다.",
         "value": "F"
       },
       {
-        "label": "회의의 목적과 논리적인 전개에 집중한다.",
+        "label": "제안의 논리적 흐름과 설득력 있는 데이터를 완성한다.",
         "value": "T"
       }
     ]
@@ -1055,14 +1055,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_071",
     "axis": "" as const,
-    "text": "일상적인 쇼핑을 할 때, 당신은 어떻게 하나요?",
+    "text": "마트에 장을 보러 갑니다. 당신의 쇼핑 스타일은?",
     "options": [
       {
-        "label": "쇼핑 목록을 작성하고 계획적으로 쇼핑한다.",
+        "label": "필요한 것을 메모해두고 빠르게 동선대로 돈다.",
         "value": "J"
       },
       {
-        "label": "필요할 때마다 즉흥적으로 쇼핑한다.",
+        "label": "매대를 돌아다니며 끌리는 것을 카트에 담는다.",
         "value": "P"
       }
     ]
@@ -1070,14 +1070,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_072",
     "axis": "" as const,
-    "text": "중요한 발표를 준비할 때, 당신은 어떻게 하나요?",
+    "text": "2주 후에 100명 앞에서 발표를 해야 합니다. 당신의 준비 타임라인은?",
     "options": [
       {
-        "label": "발표 당일에 필요한 내용을 준비한다.",
+        "label": "발표 전날 밤에 집중해서 최종 완성하는 편이다.",
         "value": "P"
       },
       {
-        "label": "철저하게 계획하고 연습한다.",
+        "label": "일주일 전에 초안을 완성하고 여러 번 리허설한다.",
         "value": "J"
       }
     ]
@@ -1085,14 +1085,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_073",
     "axis": "" as const,
-    "text": "중요한 결정을 내릴 때, 당신은 어떻게 하나요?",
+    "text": "인생의 큰 결정 (이직, 이사 등)을 앞두고 있습니다. 당신이 결정을 내리는 방식은?",
     "options": [
       {
-        "label": "혼자서 신중히 생각하고 결정을 내린다.",
+        "label": "혼자서 충분히 생각하고 정리한 뒤에 결론을 낸다.",
         "value": "I"
       },
       {
-        "label": "주변 사람들과 상의하고 여러 의견을 듣는다.",
+        "label": "여러 사람의 경험과 의견을 들으면서 방향을 잡아간다.",
         "value": "E"
       }
     ]
@@ -1100,14 +1100,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_074",
     "axis": "" as const,
-    "text": "당신은 새로운 취미를 시작할 때 어떻게 하나요?",
+    "text": "새로 관심 생긴 취미(예: 테니스, 사진)를 시작하려고 합니다. 당신은?",
     "options": [
       {
-        "label": "동호회나 모임에 가입해 사람들과 함께 시작한다.",
+        "label": "레슨 그룹이나 동호회를 찾아서 사람들과 시작한다.",
         "value": "E"
       },
       {
-        "label": "혼자서 조용히 배우고 연습한다.",
+        "label": "유튜브 영상을 보며 혼자서 먼저 연습해본다.",
         "value": "I"
       }
     ]
@@ -1115,14 +1115,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_075",
     "axis": "" as const,
-    "text": "긴 하루를 보낸 후, 당신은 어떻게 휴식을 취하나요?",
+    "text": "정말 바빴던 한 주가 끝나고 금요일 밤입니다. 당신의 선택은?",
     "options": [
       {
-        "label": "친구들과 어울리거나 외출한다.",
+        "label": "친구들과 약속을 잡아서 에너지를 충전한다.",
         "value": "E"
       },
       {
-        "label": "집에서 조용히 책을 읽거나 영화를 본다.",
+        "label": "집에서 조용히 나만의 시간을 보내며 회복한다.",
         "value": "I"
       }
     ]
@@ -1130,14 +1130,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_076",
     "axis": "" as const,
-    "text": "직장에서 갑작스러운 업무 요청이 들어왔을 때, 당신은 어떻게 하나요?",
+    "text": "오전에 계획한 업무를 하려는데 갑자기 긴급 요청이 들어왔습니다. 당신은?",
     "options": [
       {
-        "label": "유연하게 상황에 맞춰 업무를 처리한다.",
+        "label": "흐름을 타고 긴급 건을 먼저 처리한 뒤 원래 일로 돌아간다.",
         "value": "P"
       },
       {
-        "label": "기존 계획을 수정하고 새로운 요청에 맞춘다.",
+        "label": "오늘 계획을 재조정해서 둘 다 처리할 수 있는 순서를 정한다.",
         "value": "J"
       }
     ]
@@ -1145,14 +1145,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_077",
     "axis": "" as const,
-    "text": "회의를 할 때, 당신은 어떤 부분에 더 집중하나요?",
+    "text": "브레인스토밍 회의에서 당신이 더 많이 기여하는 방식은?",
     "options": [
       {
-        "label": "아이디어와 가능성에 대해 논의한다.",
+        "label": "아직 아무도 생각 못 한 새로운 방향의 아이디어를 제안한다.",
         "value": "N"
       },
       {
-        "label": "구체적인 사실과 데이터에 집중한다.",
+        "label": "나온 아이디어의 실현 가능성과 구체적 실행 방법을 점검한다.",
         "value": "S"
       }
     ]
@@ -1160,14 +1160,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_078",
     "axis": "" as const,
-    "text": "당신은 보통 어떤 방식으로 목표를 설정하나요?",
+    "text": "올해의 개인 성장 목표를 세우려고 합니다. 당신이 세우는 목표의 성격은?",
     "options": [
       {
-        "label": "도전적이고 혁신적인 목표를 설정한다.",
+        "label": "아직 잘 모르는 새로운 분야에 도전해보겠다는 목표.",
         "value": "N"
       },
       {
-        "label": "실질적이고 현실적인 목표를 설정한다.",
+        "label": "현재 잘하는 것을 더 깊이 있게 발전시키겠다는 목표.",
         "value": "S"
       }
     ]
@@ -1175,14 +1175,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_079",
     "axis": "" as const,
-    "text": "새로운 직장에서의 첫날, 당신은 어떻게 준비하나요?",
+    "text": "내일이 새 회사 첫 출근입니다. 오늘 밤 당신이 하는 일은?",
     "options": [
       {
-        "label": "첫날 일정을 철저하게 계획하고 준비한다.",
+        "label": "내일 입을 옷, 출근 경로, 도착 시간까지 미리 정해둔다.",
         "value": "J"
       },
       {
-        "label": "첫날 상황에 맞춰 유연하게 행동한다.",
+        "label": "긴장되지만 가서 보면 되겠지, 일찍 잠이나 자둔다.",
         "value": "P"
       }
     ]
@@ -1190,14 +1190,14 @@ export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_080",
     "axis": "" as const,
-    "text": "주말 계획을 세울 때, 당신은 어떻게 하나요?",
+    "text": "이번 주말은 완전히 비어있습니다. 당신의 주말 운영 스타일은?",
     "options": [
       {
-        "label": "주말에 할 일을 미리 계획한다.",
+        "label": "토요일은 이것, 일요일은 저것 — 느슨하게라도 계획을 잡아둔다.",
         "value": "J"
       },
       {
-        "label": "주말에 기분에 따라 즉흥적으로 활동을 결정한다.",
+        "label": "아침에 눈 떠서 그날 기분이 가는 대로 움직인다.",
         "value": "P"
       }
     ]
