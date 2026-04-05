@@ -260,12 +260,16 @@ function LoginForm() {
         );
     }
 
-    // TenOne 기본 디자인
+    // 브랜드 사이트 로그인 (동적 사이트명)
+    const siteName = site?.name || 'Ten:One™';
+    const isBrandSite = isSubdomain === true;
+
     return (
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-10">
-                    <h1 className="text-xl md:text-3xl font-bold tracking-wider">Ten:One™</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-wider">{siteName}</h1>
+                    <p className="text-sm text-neutral-400 mt-2">Ten:One™ Universe에 로그인</p>
                 </div>
 
                 <div className="border border-neutral-200 p-8">
