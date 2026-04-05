@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Printer, ArrowLeft, Sparkles } from "lucide-react";
+import HitModelGuideModal from "@/features/hit/HitModelGuideModal";
 import RIASECChart from "@/features/hit/RIASECChart";
 import CompetencyChart from "@/features/hit/CompetencyChart";
 import ReadinessGauge from "@/features/hit/ReadinessGauge";
@@ -120,6 +121,7 @@ export default function HitBReportPage() {
           <ArrowLeft className="h-4 w-4" /> 결과 페이지로 돌아가기
         </Link>
         <div className="flex items-center gap-2">
+          <HitModelGuideModal />
           <Link href={`/hero/coaching/ai?resultId=${resultId}`} className="inline-flex items-center gap-2 px-4 py-2 border border-[#E53935] text-[#E53935] text-sm font-medium rounded-xl hover:bg-red-50 transition-colors">
             <Sparkles className="h-4 w-4" /> AI 상담
           </Link>
@@ -173,6 +175,7 @@ export default function HitBReportPage() {
             <RadarChart data={personalityData.slice(0, 8)} size={280} />
           </div>
         )}
+        {/* 해설은 5영역 집계 (성실성/대인관계/정서/윤리/성장) — 차트의 8개 raw 속성을 그룹핑한 것 */}
         {personalityMods.length > 0 && personalityMods.map(([id, m]) => (
           <div key={id} className="mb-7 border-l-2 border-neutral-300 pl-4">
             <p className="text-[15px] font-semibold text-neutral-800 mb-2">{m.title}</p>

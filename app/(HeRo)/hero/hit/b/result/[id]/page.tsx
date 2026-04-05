@@ -168,7 +168,7 @@ export default function HitBResultPage() {
           <div key="p1">
             <h2 className="text-lg font-bold mb-4">성격 특성</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
-              <PersonalityRadar scores={result.personalityScores} darkTriadFlags={result.darkTriadFlags} />
+              <PersonalityRadar scores={result.personalityScores} />
             </div>
             {personalityMods.length > 0 && (
               <div className="space-y-5">

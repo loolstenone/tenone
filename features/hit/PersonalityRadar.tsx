@@ -1,10 +1,8 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
-
 interface PersonalityRadarProps {
   scores: Record<string, number>;
-  darkTriadFlags: Record<string, boolean>;
+  darkTriadFlags?: Record<string, boolean>;
 }
 
 // 실제 DB 키 → 소비자 친화 한국어
@@ -57,8 +55,7 @@ function getScoreColor(score: number): string {
   return 'bg-red-400';
 }
 
-export default function PersonalityRadar({ scores, darkTriadFlags }: PersonalityRadarProps) {
-  const hasDarkFlags = Object.values(darkTriadFlags).some(v => v);
+export default function PersonalityRadar({ scores }: PersonalityRadarProps) {
 
   return (
     <div className="space-y-6">
@@ -98,24 +95,7 @@ export default function PersonalityRadar({ scores, darkTriadFlags }: Personality
         );
       })}
 
-      {/* 주의 영역 — dark_triad 라벨 노출하지 않음 */}
-      {hasDarkFlags && (
-        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-bold text-amber-700 mb-1">주의 영역 감지</p>
-              <p className="text-xs text-amber-600">
-                일부 성격 특성이 높은 수준으로 나타났습니다. 이는 리더십이나 결단력의 원천이 될 수 있지만,
-                대인관계에서 주의가 필요할 수 있습니다.
-              </p>
-              <p className="text-xs text-amber-500 mt-2">
-                더 정확한 해석을 위해 전문 상담사와의 대면 상담을 권합니다.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* dark_triad: 소비자에게 일체 노출하지 않음. 관리자 전용 내부 플래그. */}
     </div>
   );
 }
