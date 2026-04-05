@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Youtube, Mail } from "lucide-react";
 
-
-const quickLinks = [
-    { name: "HIT 프로그램", href: "/hit" },
-    { name: "코칭", href: "/hero/coaching" },
-    { name: "이력서", href: "/resume" },
-    { name: "About", href: "/about" },
+const navLinks = [
+    { name: "HIT 검사", href: "/hero/hit" },
+    { name: "AI 상담", href: "/hero/coaching/ai" },
+    { name: "커리어 코칭", href: "/hero/coaching" },
+    { name: "커리어 로드맵", href: "/hero/career" },
+    { name: "이력서", href: "/hero/resume" },
+    { name: "Hero in", href: "/hero/journey" },
+    { name: "About", href: "/hero/about" },
 ];
 
 export function HeRoFooter() {
@@ -16,13 +19,16 @@ export function HeRoFooter() {
         <footer className="bg-neutral-900 text-neutral-400">
             <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    {/* Logo & Description */}
+                    {/* Logo */}
                     <div>
-                        <Link href="/" className="flex items-center mb-4">
-                            <span className="text-2xl font-extrabold tracking-tight">
-                                <span className="text-amber-500">He</span>
-                                <span className="text-white">Ro</span>
-                            </span>
+                        <Link href="/hero" className="inline-block mb-4">
+                            <Image
+                                src="/hero-logo-wide.png"
+                                alt="HeRo"
+                                width={80}
+                                height={40}
+                                className="h-8 w-auto brightness-0 invert"
+                            />
                         </Link>
                         <p className="text-sm leading-relaxed">
                             Hidden Intelligence &amp; Real Opportunity.<br />
@@ -30,16 +36,13 @@ export function HeRoFooter() {
                         </p>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* Links */}
                     <div>
                         <h4 className="text-white font-semibold text-sm mb-4">바로가기</h4>
                         <ul className="space-y-2">
-                            {quickLinks.map((link) => (
+                            {navLinks.map((link) => (
                                 <li key={link.href}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm hover:text-white transition-colors"
-                                    >
+                                    <Link href={link.href} className="text-sm hover:text-white transition-colors">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -52,8 +55,8 @@ export function HeRoFooter() {
                         <h4 className="text-white font-semibold text-sm mb-4">Contact</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <a href="mailto:info@hero.ne.kr" className="hover:text-white transition-colors">
-                                    info@hero.ne.kr
+                                <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">
+                                    lools@tenone.biz
                                 </a>
                             </li>
                             <li>인재 발굴 · 성장 플랫폼</li>
@@ -65,7 +68,7 @@ export function HeRoFooter() {
                             <a href="#" className="hover:text-white transition-colors" title="YouTube">
                                 <Youtube className="h-5 w-5" />
                             </a>
-                            <a href="mailto:info@hero.ne.kr" className="hover:text-white transition-colors" title="Email">
+                            <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors" title="Email">
                                 <Mail className="h-5 w-5" />
                             </a>
                         </div>

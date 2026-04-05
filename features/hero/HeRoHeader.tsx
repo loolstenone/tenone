@@ -13,7 +13,7 @@ const navItems = [
     { name: "HIT 검사", href: "/hero/hit" },
     { name: "AI 상담", href: "/hero/coaching/ai" },
     { name: "커리어 코칭", href: "/hero/coaching" },
-    { name: "Hero in", href: "/hero/journey" },
+    { name: "커리어 로드맵", href: "/hero/career" },
     { name: "이력서", href: "/hero/resume" },
 ];
 
