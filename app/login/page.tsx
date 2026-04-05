@@ -350,8 +350,14 @@ export default function LoginPage() {
         setIsSmarComm(host.includes('smarcomm'));
 
         // 외부 도메인(smarcomm.biz, badak.biz 등)에서 접속 시 SSO 자동 시도
-        const isTenone = host === 'tenone.biz' || host.endsWith('.tenone.biz') || host === 'localhost';
-        if (!isTenone) {
+        const isTenone = host === 'tenone.biz' || host === 'www.tenone.biz';
+        // tenone.biz에서 /login 접근 → Intra로 리디렉트 (소비자 가입 안 받음)
+        if (isTenone) {
+            window.location.href = '/intra';
+            return;
+        }
+        const isTenoneSubdomain = host.endsWith('.tenone.biz') || host === 'localhost';
+        if (!isTenone && !isTenoneSubdomain) {
             // tenone.biz에 세션이 있으면 자동 로그인 시도 (한 번만)
             const ssoAttempted = sessionStorage.getItem('sso_attempted');
             if (!ssoAttempted) {
