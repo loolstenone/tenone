@@ -63,23 +63,23 @@ function InlineAgentCard({ agents }: { agents: AgentStatus[] }) {
   const layerLabel: Record<number, string> = { 0: 'ORCHESTRATOR', 1: 'L1 수집·인프라', 2: 'L2 대화형' };
 
   return (
-    <div className="mt-2 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 space-y-2.5">
-      <p className="text-[12px] font-semibold text-indigo-400/60 uppercase tracking-widest">Agent Status</p>
+    <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.06] p-3.5 space-y-3">
+      <p className="text-[12px] font-semibold text-indigo-300/70 uppercase tracking-widest">Agent Status</p>
       {layers.map(layer => {
         const group = agents.filter(a => a.layer === layer);
         if (!group.length) return null;
         return (
           <div key={layer}>
-            <p className="text-[11px] text-slate-700 mb-1.5 uppercase tracking-wide">{layerLabel[layer]}</p>
-            <div className="flex flex-wrap gap-1.5">
+            <p className="text-[12px] text-slate-400 mb-2 uppercase tracking-wide">{layerLabel[layer]}</p>
+            <div className="flex flex-wrap gap-2">
               {group.map(a => (
                 <span key={a.name}
-                  className={`inline-flex items-center gap-1 text-[13px] rounded-md px-2 py-1 border ${
+                  className={`inline-flex items-center gap-1.5 text-[13px] rounded-lg px-2.5 py-1.5 border ${
                     a.isActive
-                      ? 'text-slate-300 border-emerald-500/20 bg-emerald-500/5'
-                      : 'text-slate-600 border-white/[0.05] bg-white/[0.02]'
+                      ? 'text-white border-emerald-400/30 bg-emerald-400/10'
+                      : 'text-slate-500 border-white/[0.08] bg-white/[0.03]'
                   }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${a.isActive ? 'bg-emerald-400' : 'bg-slate-700'}`}/>
+                  <span className={`w-1.5 h-1.5 rounded-full ${a.isActive ? 'bg-emerald-400' : 'bg-slate-600'}`}/>
                   {a.displayName}
                 </span>
               ))}
@@ -93,44 +93,24 @@ function InlineAgentCard({ agents }: { agents: AgentStatus[] }) {
 
 function InlineTrendCard({ trends }: { trends: TrendItem[] }) {
   return (
-    <div className="mt-2 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 space-y-2">
-      <p className="text-[12px] font-semibold text-purple-400/60 uppercase tracking-widest">Whole See Trends</p>
+    <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.06] p-3.5 space-y-2.5">
+      <p className="text-[12px] font-semibold text-purple-300/70 uppercase tracking-widest">Whole See Trends</p>
       {trends.map((t, i) => (
-        <div key={i} className={`py-2 ${i < trends.length - 1 ? 'border-b border-white/[0.04]' : ''}`}>
-          <p className="text-[14px] text-slate-200 leading-snug">{t.title}</p>
+        <div key={i} className={`py-2 ${i < trends.length - 1 ? 'border-b border-white/[0.08]' : ''}`}>
+          <p className="text-[15px] text-white leading-snug font-medium">{t.title}</p>
           {t.summary && (
-            <p className="text-[13px] text-slate-500 mt-0.5 leading-snug line-clamp-2">{t.summary}</p>
+            <p className="text-[14px] text-slate-400 mt-1 leading-snug line-clamp-2">{t.summary}</p>
           )}
-          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             {t.tags?.slice(0, 3).map(tag => (
-              <span key={tag} className="text-[11px] bg-indigo-500/10 text-indigo-400/70 rounded px-1.5 py-0.5">{tag}</span>
+              <span key={tag} className="text-[12px] bg-indigo-400/15 text-indigo-300 rounded-md px-2 py-0.5">{tag}</span>
             ))}
             {t.source && (
-              <span className="text-[11px] text-slate-700">{t.source}</span>
+              <span className="text-[12px] text-slate-500">{t.source}</span>
             )}
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-// ── 타이핑 인디케이터 ──────────────────────────────────────────────
-
-function TypingDots() {
-  return (
-    <div className="flex items-end gap-2 py-1">
-      <div className="h-8 w-8 rounded-full bg-[#FEE500]/10 border border-[#FEE500]/20 flex-shrink-0 flex items-center justify-center">
-        <span className="text-[8px] font-bold text-[#FEE500]">10</span>
-      </div>
-      <div className="rounded-2xl rounded-tl-sm bg-[#1e1e2e] px-4 py-2.5">
-        <div className="flex gap-1 items-center h-4">
-          {[0, 150, 300].map((d, i) => (
-            <span key={i} className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-bounce"
-              style={{ animationDelay: `${d}ms` }}/>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -142,38 +122,40 @@ function Bubble({ msg, showAvatar }: { msg: Message; showAvatar: boolean }) {
 
   if (isUser) {
     return (
-      <div className="flex justify-end items-end gap-1.5 py-0.5">
-        <span className="text-[12px] text-slate-700 self-end shrink-0">{msg.time}</span>
-        <div className="max-w-[72%] rounded-2xl rounded-tr-sm bg-[#FEE500] px-3.5 py-2.5">
-          <p className="text-[15px] leading-relaxed text-neutral-900 whitespace-pre-wrap">{msg.text}</p>
+      <div className="flex justify-end items-end gap-2 py-0.5">
+        <span className="text-[13px] text-slate-500 self-end shrink-0">{msg.time}</span>
+        <div className="max-w-[72%] rounded-2xl rounded-tr-sm bg-[#FEE500] px-4 py-3">
+          <p className="text-[16px] leading-relaxed text-neutral-900 font-medium whitespace-pre-wrap">{msg.text}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-start gap-2 py-0.5">
+    <div className="flex items-start gap-2.5 py-0.5">
       {/* 아바타 */}
-      <div className={`mt-0.5 h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-        showAvatar ? 'bg-[#FEE500]/10 border border-[#FEE500]/20' : 'invisible'
+      <div className={`mt-0.5 h-9 w-9 rounded-full flex-shrink-0 flex items-center justify-center ${
+        showAvatar ? 'bg-[#FEE500]/15 border border-[#FEE500]/30' : 'invisible'
       }`}>
         {showAvatar && <span className="text-[9px] font-bold text-[#FEE500]">10:01</span>}
       </div>
       {/* 버블 + 인라인 카드 + 타임스탬프 */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-end gap-1.5">
-          <div className="max-w-[78%] rounded-2xl rounded-tl-sm bg-[#1e1e2e] px-3.5 py-2.5">
-            <p className="text-[15px] leading-relaxed text-slate-200 whitespace-pre-wrap">{msg.text}</p>
-            {/* 인라인 카드 — 트렌드만 */}
+        <div className="flex items-end gap-2">
+          <div className="max-w-[78%] rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
+            <p className="text-[16px] leading-relaxed text-white whitespace-pre-wrap">{msg.text}</p>
             {msg.cards?.map((card, i) => (
               <div key={i}>
+                {card.type === 'agent_status' && (
+                  <InlineAgentCard agents={card.data as AgentStatus[]}/>
+                )}
                 {card.type === 'trend' && (
                   <InlineTrendCard trends={card.data as TrendItem[]}/>
                 )}
               </div>
             ))}
           </div>
-          <span className="text-[12px] text-slate-700 self-end shrink-0">{msg.time}</span>
+          <span className="text-[13px] text-slate-500 self-end shrink-0">{msg.time}</span>
         </div>
       </div>
     </div>
@@ -184,10 +166,10 @@ function Bubble({ msg, showAvatar }: { msg: Message; showAvatar: boolean }) {
 
 function DateDivider() {
   return (
-    <div className="flex items-center gap-3 py-3">
-      <div className="flex-1 h-px bg-white/[0.04]"/>
-      <span className="text-[12px] text-slate-700 font-medium">{todayLabel()}</span>
-      <div className="flex-1 h-px bg-white/[0.04]"/>
+    <div className="flex items-center gap-3 py-4">
+      <div className="flex-1 h-px bg-white/[0.08]"/>
+      <span className="text-[13px] text-slate-400 font-medium">{todayLabel()}</span>
+      <div className="flex-1 h-px bg-white/[0.08]"/>
     </div>
   );
 }
@@ -249,39 +231,39 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#101018] flex flex-col items-center justify-center px-6">
+    <div className="min-h-[100dvh] bg-[#0d0e1a] flex flex-col items-center justify-center px-6">
       <div className="mb-10 text-center">
-        <div className="mx-auto mb-5 h-16 w-16 rounded-2xl bg-[#FEE500]/10 border border-[#FEE500]/20 flex items-center justify-center">
+        <div className="mx-auto mb-5 h-16 w-16 rounded-2xl bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center">
           <span className="text-base font-bold text-[#FEE500]">10:01</span>
         </div>
-        <h1 className="text-xl font-bold text-white">독대</h1>
-        <p className="text-[13px] text-slate-600 mt-1">열시일분과의 전용 채널</p>
+        <h1 className="text-2xl font-bold text-white">독대</h1>
+        <p className="text-[15px] text-slate-400 mt-1.5">열시일분과의 전용 채널</p>
       </div>
-      <form onSubmit={submit} className="w-full max-w-[320px] space-y-2.5">
+      <form onSubmit={submit} className="w-full max-w-[320px] space-y-3">
         <input type="email" value={email} onChange={e => setEmail(e.target.value)}
           placeholder="이메일" autoComplete="email"
-          className="w-full rounded-xl bg-white/[0.05] border border-white/[0.07] px-4 py-3.5 text-[15px] text-white placeholder:text-slate-700 focus:outline-none focus:border-[#FEE500]/30"/>
+          className="w-full rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3.5 text-[16px] text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FEE500]/40"/>
         <div className="relative">
           <input type={showPw ? 'text' : 'password'} value={pw} onChange={e => setPw(e.target.value)}
             placeholder="비밀번호" autoComplete="current-password"
-            className="w-full rounded-xl bg-white/[0.05] border border-white/[0.07] px-4 py-3.5 text-[13px] text-white placeholder:text-slate-700 focus:outline-none focus:border-[#FEE500]/30 pr-12"/>
+            className="w-full rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3.5 text-[16px] text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FEE500]/40 pr-12"/>
           <button type="button" onClick={() => setShowPw(p => !p)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600">
-            {showPw ? <EyeOff size={15}/> : <Eye size={15}/>}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">
+            {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
           </button>
         </div>
-        {err && <p className="text-[11px] text-red-400 px-1">{err}</p>}
+        {err && <p className="text-[13px] text-red-400 px-1">{err}</p>}
         <button type="submit" disabled={loading || !email || !pw}
-          className="w-full rounded-xl bg-[#FEE500] py-3.5 text-[15px] font-bold text-neutral-900 hover:bg-yellow-300 active:scale-[0.98] disabled:opacity-30 transition-all">
-          {loading ? <Loader2 size={16} className="animate-spin mx-auto text-neutral-800"/> : '입장하기'}
+          className="w-full rounded-xl bg-[#FEE500] py-4 text-[16px] font-bold text-neutral-900 hover:bg-yellow-300 active:scale-[0.98] disabled:opacity-30 transition-all">
+          {loading ? <Loader2 size={18} className="animate-spin mx-auto text-neutral-800"/> : '입장하기'}
         </button>
       </form>
-      <p className="mt-12 text-[12px] text-slate-800">Ten:One™ Universe OS</p>
+      <p className="mt-12 text-[13px] text-slate-600">Ten:One™ Universe OS</p>
     </div>
   );
 }
 
-// ── 채팅 화면 ─────────────────────────────────────────────────────
+// ── 사이드 메뉴 ────────────────────────────────────────────────────
 
 function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: string, key: string) => void }) {
   const [agents, setAgents] = useState<AgentStatus[]>([]);
@@ -325,34 +307,34 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"/>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"/>
       <div
-        className="relative w-80 max-w-[90vw] h-full bg-[#14141f] border-l border-white/[0.06] flex flex-col overflow-hidden"
+        className="relative w-80 max-w-[90vw] h-full bg-[#12132a] border-l border-white/10 flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
         style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
           <div>
-            <p className="text-[15px] font-semibold text-white">Universe 메뉴</p>
-            <p className="text-[12px] text-slate-600 mt-0.5">Ten:One OS</p>
+            <p className="text-[16px] font-semibold text-white">Universe 메뉴</p>
+            <p className="text-[13px] text-slate-400 mt-0.5">Ten:One OS</p>
           </div>
-          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center text-slate-600 hover:text-slate-300 transition-colors">
-            <X size={18}/>
+          <button onClick={onClose} className="h-9 w-9 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+            <X size={20}/>
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {/* 빠른 요청 */}
           <div className="px-4 pt-5 pb-3">
-            <p className="text-[11px] text-slate-700 uppercase tracking-widest mb-3">빠른 요청</p>
-            <div className="space-y-1.5">
+            <p className="text-[12px] text-slate-500 uppercase tracking-widest mb-3">빠른 요청</p>
+            <div className="space-y-2">
               {quickMenuItems.map(item => (
                 <button key={item.key} onClick={() => handleQuick(item.key, item.label)}
-                  className="w-full flex items-start gap-3 rounded-xl px-3.5 py-3 bg-white/[0.03] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.05] active:scale-[0.98] transition-all text-left">
+                  className="w-full flex items-start gap-3 rounded-xl px-4 py-3.5 bg-white/[0.05] border border-white/10 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] transition-all text-left">
                   <div>
-                    <p className="text-[14px] text-slate-200 font-medium">{item.label}</p>
-                    <p className="text-[12px] text-slate-600 mt-0.5">{item.desc}</p>
+                    <p className="text-[15px] text-white font-medium">{item.label}</p>
+                    <p className="text-[13px] text-slate-400 mt-0.5">{item.desc}</p>
                   </div>
                 </button>
               ))}
@@ -365,13 +347,13 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
               onClick={() => setAgentOpen(o => !o)}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <p className="text-[11px] text-slate-700 uppercase tracking-widest group-hover:text-slate-500 transition-colors">에이전트 현황</p>
-              <span className={`text-[10px] text-slate-700 transition-transform ${agentOpen ? 'rotate-180' : ''}`}>▾</span>
+              <p className="text-[12px] text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">에이전트 현황</p>
+              <span className={`text-[11px] text-slate-500 transition-transform ${agentOpen ? 'rotate-180' : ''}`}>▾</span>
             </button>
             {agentOpen && (
               agentLoading ? (
                 <div className="flex justify-center py-6">
-                  <Loader2 size={18} className="animate-spin text-slate-700"/>
+                  <Loader2 size={18} className="animate-spin text-slate-500"/>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -380,18 +362,18 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
                     if (!group.length) return null;
                     return (
                       <div key={layer}>
-                        <p className="text-[11px] text-slate-700 mb-2 pl-0.5">{layerLabel[layer]}</p>
-                        <div className="space-y-1">
+                        <p className="text-[12px] text-slate-500 mb-2 pl-0.5">{layerLabel[layer]}</p>
+                        <div className="space-y-1.5">
                           {group.map(a => (
                             <div key={a.name}
-                              className={`flex items-center justify-between rounded-xl px-3 py-2.5 border ${
-                                a.isActive ? 'border-emerald-500/15 bg-emerald-500/5' : 'border-white/[0.05] bg-white/[0.02]'
+                              className={`flex items-center justify-between rounded-xl px-3.5 py-3 border ${
+                                a.isActive ? 'border-emerald-400/25 bg-emerald-400/8' : 'border-white/[0.07] bg-white/[0.03]'
                               }`}>
                               <div className="flex items-center gap-2.5">
-                                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${a.isActive ? 'bg-emerald-400' : 'bg-slate-700'}`}/>
-                                <span className={`text-[14px] ${a.isActive ? 'text-slate-200' : 'text-slate-600'}`}>{a.displayName}</span>
+                                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${a.isActive ? 'bg-emerald-400' : 'bg-slate-600'}`}/>
+                                <span className={`text-[15px] ${a.isActive ? 'text-white' : 'text-slate-500'}`}>{a.displayName}</span>
                               </div>
-                              <span className={`text-[11px] ${a.isActive ? 'text-emerald-500' : 'text-slate-700'}`}>
+                              <span className={`text-[12px] font-medium ${a.isActive ? 'text-emerald-400' : 'text-slate-600'}`}>
                                 {a.isActive ? 'ON' : 'OFF'}
                               </span>
                             </div>
@@ -407,9 +389,9 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
         </div>
 
         {/* 로그아웃 */}
-        <div className="flex-shrink-0 px-4 py-4 border-t border-white/[0.06]">
+        <div className="flex-shrink-0 px-4 py-4 border-t border-white/10">
           <button onClick={handleLogout}
-            className="w-full rounded-xl px-4 py-3 text-[14px] text-slate-600 hover:text-slate-400 hover:bg-white/[0.03] border border-white/[0.04] hover:border-white/10 transition-all">
+            className="w-full rounded-xl px-4 py-3.5 text-[15px] text-slate-400 hover:text-white hover:bg-white/[0.05] border border-white/10 hover:border-white/20 transition-all">
             로그아웃
           </button>
         </div>
@@ -507,7 +489,7 @@ function ChatScreen() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#101018]">
+    <div className="flex flex-col h-[100dvh] bg-[#0d0e1a]">
 
       {drawerOpen && (
         <SideMenu
@@ -517,22 +499,22 @@ function ChatScreen() {
       )}
 
       {/* 헤더 */}
-      <div className="flex-shrink-0 bg-[#101018] border-b border-white/[0.04]"
+      <div className="flex-shrink-0 bg-[#0d0e1a] border-b border-white/10"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 py-3">
-          <div className="h-9 w-9 rounded-full bg-[#FEE500]/10 border border-[#FEE500]/20 flex items-center justify-center flex-shrink-0">
+        <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 py-3.5">
+          <div className="h-10 w-10 rounded-full bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center flex-shrink-0">
             <span className="text-[10px] font-bold text-[#FEE500]">10:01</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[16px] font-semibold text-white leading-none">열시일분</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"/>
-              <p className="text-[12px] text-slate-600 leading-none">Universe 오케스트레이터</p>
+            <p className="text-[18px] font-bold text-white leading-none">열시일분</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"/>
+              <p className="text-[13px] text-slate-400 leading-none">Universe 오케스트레이터</p>
             </div>
           </div>
           <button onClick={() => setDrawerOpen(true)}
-            className="h-9 w-9 flex items-center justify-center text-slate-600 hover:text-slate-300 active:scale-90 transition-all">
-            <Menu size={20}/>
+            className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
+            <Menu size={22}/>
           </button>
         </div>
       </div>
@@ -542,11 +524,11 @@ function ChatScreen() {
         <div className="max-w-2xl mx-auto px-4 py-3">
 
           {messages.length === 0 && !isLoading && (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-[#FEE500]/10 border border-[#FEE500]/15 flex items-center justify-center">
-                <span className="text-sm font-bold text-[#FEE500]">10:01</span>
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center">
+                <span className="text-base font-bold text-[#FEE500]">10:01</span>
               </div>
-              <p className="text-[15px] text-slate-500">지시를 내리거나 Universe 현황을 물어보세요</p>
+              <p className="text-[16px] text-slate-400">지시를 내리거나 Universe 현황을 물어보세요</p>
             </div>
           )}
 
@@ -559,14 +541,14 @@ function ChatScreen() {
           })}
 
           {isLoading && (
-            <div className="flex items-end gap-2 py-1">
-              <div className="h-8 w-8 rounded-full bg-[#FEE500]/10 border border-[#FEE500]/20 flex-shrink-0 flex items-center justify-center">
-                <span className="text-[8px] font-bold text-[#FEE500]">10</span>
+            <div className="flex items-end gap-2.5 py-1">
+              <div className="h-9 w-9 rounded-full bg-[#FEE500]/15 border border-[#FEE500]/30 flex-shrink-0 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-[#FEE500]">10</span>
               </div>
-              <div className="rounded-2xl rounded-tl-sm bg-[#1e1e2e] px-4 py-2.5">
-                <div className="flex gap-1 items-center h-4">
+              <div className="rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
+                <div className="flex gap-1.5 items-center h-5">
                   {[0, 150, 300].map((d, i) => (
-                    <span key={i} className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-bounce"
+                    <span key={i} className="h-2 w-2 rounded-full bg-slate-400 animate-bounce"
                       style={{ animationDelay: `${d}ms` }}/>
                   ))}
                 </div>
@@ -579,11 +561,11 @@ function ChatScreen() {
       </div>
 
       {/* 퀵 액션 */}
-      <div className="flex-shrink-0 border-t border-white/[0.04] bg-[#101018]">
-        <div className="max-w-2xl mx-auto flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
+      <div className="flex-shrink-0 border-t border-white/10 bg-[#0d0e1a]">
+        <div className="max-w-2xl mx-auto flex gap-2 px-4 py-2.5 overflow-x-auto scrollbar-hide">
           {QUICK.map(q => (
             <button key={q.key} onClick={() => send(q.label, q.key)} disabled={isLoading}
-              className="flex-shrink-0 rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5 text-[13px] text-slate-500 hover:text-slate-300 hover:border-white/15 active:scale-95 transition-all disabled:opacity-30">
+              className="flex-shrink-0 rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-[14px] text-slate-300 hover:text-white hover:border-white/30 hover:bg-white/10 active:scale-95 transition-all disabled:opacity-30">
               {q.label}
             </button>
           ))}
@@ -591,10 +573,10 @@ function ChatScreen() {
       </div>
 
       {/* 입력 바 */}
-      <div className="flex-shrink-0 bg-[#101018] border-t border-white/[0.04]"
+      <div className="flex-shrink-0 bg-[#0d0e1a] border-t border-white/10"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="max-w-2xl mx-auto flex items-end gap-2 px-3 py-2">
-          <button className="flex-shrink-0 h-9 w-9 rounded-full bg-white/[0.05] flex items-center justify-center text-slate-500 hover:text-slate-300 active:scale-90 transition-all">
+        <div className="max-w-2xl mx-auto flex items-end gap-2.5 px-3 py-2.5">
+          <button className="flex-shrink-0 h-10 w-10 rounded-full bg-white/[0.07] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
             <Plus size={18}/>
           </button>
           <textarea
@@ -605,24 +587,24 @@ function ChatScreen() {
             disabled={isLoading}
             placeholder="메시지 입력"
             rows={1}
-            className="flex-1 resize-none bg-[#1e1e2e] rounded-2xl px-4 py-2.5 text-[15px] text-slate-200 placeholder:text-slate-700 focus:outline-none disabled:opacity-40 leading-relaxed"
+            className="flex-1 resize-none bg-[#1c1e30] border border-white/10 rounded-2xl px-4 py-2.5 text-[16px] text-white placeholder:text-slate-500 focus:outline-none focus:border-white/20 disabled:opacity-40 leading-relaxed"
             style={{ maxHeight: '100px' }}
           />
           {!input.trim() ? (
             <>
-              <button className="flex-shrink-0 h-9 w-9 rounded-full bg-white/[0.05] flex items-center justify-center text-slate-500 hover:text-slate-300 active:scale-90 transition-all">
-                <ImageIcon size={17}/>
+              <button className="flex-shrink-0 h-10 w-10 rounded-full bg-white/[0.07] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
+                <ImageIcon size={18}/>
               </button>
-              <button className="flex-shrink-0 h-9 w-9 rounded-full bg-white/[0.05] flex items-center justify-center text-slate-500 hover:text-slate-300 active:scale-90 transition-all">
-                <Mic size={17}/>
+              <button className="flex-shrink-0 h-10 w-10 rounded-full bg-white/[0.07] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
+                <Mic size={18}/>
               </button>
             </>
           ) : (
             <button onClick={() => send(input)} disabled={isLoading}
-              className="flex-shrink-0 h-9 w-9 rounded-full bg-[#FEE500] flex items-center justify-center active:scale-90 disabled:opacity-30 transition-all">
+              className="flex-shrink-0 h-10 w-10 rounded-full bg-[#FEE500] flex items-center justify-center active:scale-90 disabled:opacity-30 transition-all shadow-[0_0_16px_rgba(254,229,0,0.25)]">
               {isLoading
-                ? <Loader2 size={15} className="animate-spin text-neutral-800"/>
-                : <Send size={15} className="text-neutral-900 ml-0.5"/>}
+                ? <Loader2 size={16} className="animate-spin text-neutral-800"/>
+                : <Send size={16} className="text-neutral-900 ml-0.5"/>}
             </button>
           )}
         </div>
@@ -647,8 +629,8 @@ export default function DokdaePage() {
   }, []);
 
   if (auth === 'loading') return (
-    <div className="min-h-[100dvh] bg-[#101018] flex items-center justify-center">
-      <div className="h-5 w-5 border-2 border-slate-800 border-t-[#FEE500] rounded-full animate-spin"/>
+    <div className="min-h-[100dvh] bg-[#0d0e1a] flex items-center justify-center">
+      <div className="h-5 w-5 border-2 border-slate-700 border-t-[#FEE500] rounded-full animate-spin"/>
     </div>
   );
 
