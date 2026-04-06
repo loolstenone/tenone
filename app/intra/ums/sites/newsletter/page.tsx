@@ -54,6 +54,7 @@ export default function NewsletterCmsPage() {
     const [editTitle, setEditTitle] = useState("");
     const [editContent, setEditContent] = useState("");
     const [saving, setSaving] = useState(false);
+    const [sending, setSending] = useState<string | null>(null); // 발송 중인 issueId
 
     const supabase = createClient();
 
@@ -124,6 +125,29 @@ export default function NewsletterCmsPage() {
         if (!confirm("삭제하시겠습니까?")) return;
         await supabase.from("newsletter_issues").delete().eq("id", id);
         setIssues((prev) => prev.filter((i) => i.id !== id));
+    };
+
+    const handleSend = async (issue: NewsletterIssue) => {
+        if (!confirm(`"${issue.title}"을(를) 활성 구독자 전체에게 발송할까요?\n발송 후 취소할 수 없습니다.`)) return;
+        setSending(issue.id);
+        try {
+            const res = await fetch('/api/newsletter/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId: issue.id }),
+            });
+            const data = await res.json() as { ok?: boolean; sent?: number; total?: number; errors?: string[]; error?: string };
+            if (!res.ok) {
+                alert(`발송 실패: ${data.error || '알 수 없는 오류'}`);
+            } else {
+                alert(`발송 완료: ${data.sent}/${data.total}명${data.errors?.length ? `\n오류 ${data.errors.length}건` : ''}`);
+                setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, status: 'sent' as const, recipient_count: data.sent ?? 0 } : i));
+            }
+        } catch (e) {
+            alert(`발송 오류: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
+        } finally {
+            setSending(null);
+        }
     };
 
     const handleDeleteSubscriber = async (id: string) => {
@@ -222,7 +246,17 @@ export default function NewsletterCmsPage() {
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button onClick={() => openEditor(nl)} className="p-1.5 hover:bg-neutral-100 rounded" aria-label="수정"><Edit2 className="h-3 w-3 text-neutral-400" /></button>
                                     {nl.status === "draft" && (
-                                        <button className="p-1.5 hover:bg-neutral-100 rounded" aria-label="발송"><Send className="h-3 w-3 text-neutral-400" /></button>
+                                        <button
+                                            onClick={() => handleSend(nl)}
+                                            disabled={sending === nl.id}
+                                            className="p-1.5 hover:bg-neutral-100 rounded disabled:opacity-40"
+                                            aria-label="발송"
+                                            title="전체 구독자에게 발송"
+                                        >
+                                            {sending === nl.id
+                                                ? <span className="h-3 w-3 border border-neutral-400 border-t-transparent rounded-full animate-spin inline-block"/>
+                                                : <Send className="h-3 w-3 text-neutral-400 hover:text-neutral-700" />}
+                                        </button>
                                     )}
                                     <button onClick={() => handleDelete(nl.id)} className="p-1.5 hover:bg-red-50 rounded" aria-label="삭제"><Trash2 className="h-3 w-3 text-neutral-300 hover:text-red-500" /></button>
                                 </div>
