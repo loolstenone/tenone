@@ -1,6 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-06 (집, 세션 21)
+> 마지막 업데이트: 2026-04-06 (사무실, 세션 22)
+
+## 오늘 한 작업 (4/6 사무실, 세션 22)
+
+### AA Code Instructions 전체 구현 ✅
+
+**Task 1 — 에이전트 리네임 (코드):**
+- `compass` → `1001` (hub, vrief, WIO ai page, messages comment)
+- `badaksoe` → `deutbot` (새 라우트 파일 생성)
+
+**Task 2 — 에이전트 시스템 프롬프트 DB UPDATE (9개 에이전트):**
+- 1001(열시일분): 3-Layer 라우팅 규칙, 10:01 프로토콜, 에스컬레이션, Few-shot
+- badangsoe(바당쇠): 2000자+ 바닥 커뮤니티 챗봇
+- hero(히어로): HIT/S-Power 8D 기반 커리어 카운슬러
+- madleague/madleap/smarcomm/mindle/wio/deutbot: 각 1500자+
+
+**Task 3 — 독대 페이지 구현:**
+- `app/api/agent/dokdae/route.ts`: QuickAction 4종, 카드 병렬 조회
+- `app/intra/dokdae/page.tsx`: JARVIS 다크 3패널 UI
+- `lib/intra-nav.ts`: 독대 + Agent Hub 사이드바 추가
+
+**Alert System + HIT Core 기초:**
+- computeAlertScoresFromDB(), crossAnalysis, router, cvi 추가
+
+**커밋:** `634604b`
+
+---
 
 ## 오늘 한 작업 (4/5~6 집 세션 19~20)
 
@@ -474,7 +500,7 @@ AI 분석   → 20건 처리 → 11건 트렌드 카드 생성, 9건 필터링 �
 
 ### 중기
 
-9. **바당쇠 Playwright 세션** — 카카오 오픈채팅 리스닝 모드. `/api/agent/badaksoe` 구현됨.
+9. **바당쇠 Playwright 세션** — 카카오 오픈채팅 리스닝 모드. `/api/agent/deutbot` 구현됨.
 10. **Mindle 뉴스레터 1호** — 트렌드 카드 100개 축적 후.
 
 ### 도메인
