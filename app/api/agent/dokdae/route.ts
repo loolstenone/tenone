@@ -55,7 +55,7 @@ const QUICK_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  const { error: authErr } = await requireAuth();
+  const { error: authErr, user } = await requireAuth();
   if (authErr) return authErr;
 
   try {
@@ -71,16 +71,28 @@ export async function POST(request: NextRequest) {
     }
 
     const corrId = `dokdae-${Date.now()}`;
+    const supabase = await createClient();
+
+    // 유저 메시지 저장
+    await supabase.from('agent_messages').insert({
+      from_agent: 'user',
+      to_agent: '1001',
+      message_type: 'dokdae_chat',
+      payload: { text: message, quickAction: quickAction ?? null },
+      risk_level: 'green',
+      correlation_id: corrId,
+      user_id: user!.id,
+    });
 
     // 1001에게 직접 전달
     const result = await invokeAgent({
       agentName: '1001',
       userMessage: `[독대 채널 — 텐원 직접 지시]\n${userMessage}`,
       correlationId: corrId,
+      userId: user!.id,
     });
 
     // 트렌드 카드: trend_summary 또는 morning_briefing 때만 첨부
-    const supabase = await createClient();
     const cards: (AgentStatusCard | TrendCard)[] = [];
 
     if (quickAction === 'trend_summary' || quickAction === 'morning_briefing') {
@@ -103,6 +115,17 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
+    // AI 응답 저장
+    await supabase.from('agent_messages').insert({
+      from_agent: '1001',
+      to_agent: 'user',
+      message_type: 'dokdae_chat',
+      payload: { text: result.response, cards },
+      risk_level: 'green',
+      correlation_id: corrId,
+      user_id: user!.id,
+    });
 
     const response: DokdaeResponse = {
       response: result.response,

@@ -423,13 +423,41 @@ function ChatScreen() {
   const [input, setInput]         = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const inputRef  = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const scrollDown = (smooth = true) =>
     bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
 
-  useEffect(() => { scrollDown(false); }, []);
+  // 이전 대화 로드
+  useEffect(() => {
+    const sb = createClient();
+    sb.auth.getUser().then(async ({ data }: { data: { user: import('@supabase/supabase-js').User | null } }) => {
+      if (!data.user) return;
+      const { data: rows } = await sb
+        .from('agent_messages')
+        .select('from_agent, payload, created_at')
+        .eq('message_type', 'dokdae_chat')
+        .eq('user_id', data.user.id)
+        .order('created_at', { ascending: true })
+        .limit(60);
+
+      if (rows?.length) {
+        const loaded: Message[] = rows.map((row: { from_agent: string; payload: Record<string, unknown>; created_at: string }) => ({
+          id: uid(),
+          role: row.from_agent === 'user' ? 'user' : 'ai',
+          text: (row.payload as { text?: string }).text ?? '',
+          time: new Date(row.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          cards: row.from_agent !== 'user' ? extractCards(row.payload as Record<string, unknown>) : undefined,
+        }));
+        setMessages(loaded);
+      }
+      setHistoryLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => { if (historyLoaded) scrollDown(false); }, [historyLoaded]);
   useEffect(() => { if (!isLoading) scrollDown(); }, [messages.length, isLoading]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
