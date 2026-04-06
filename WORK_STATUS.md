@@ -1,6 +1,41 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-06 (사무실, 세션 22)
+> 마지막 업데이트: 2026-04-06 (사무실, 세션 23)
+
+## 오늘 한 작업 (4/6 사무실, 세션 23)
+
+### 독대 — 독립 PWA 메신저로 완전 재설계 ✅
+
+**카카오톡 스타일 메신저:**
+- `app/(Dokdae)/` 독립 라우트 그룹 (인트라 레이아웃 분리)
+- `app/(Dokdae)/dokdae/page.tsx`: 100dvh, safe-area, 카카오 입력창 (#FEE500 전송)
+- 인라인 카드: AgentStatus/Trend 카드를 채팅 버블 안에 임베드 (별도 패널 없음)
+- AI 버블: 왼쪽 아바타 + `#1e1e2e` 배경, 유저 버블: 오른쪽 `#FEE500` 배경
+- 로그인 화면: Supabase auth 인라인 (인트라 로그인 페이지 미거쳐도 됨)
+
+**PWA (홈 화면 앱 설치):**
+- `/dokdae-manifest.json`: standalone 모드, 세로 고정
+- `/dokdae-icon.svg` + 192/512 PNG: 다크 배경 + 황색 "10:01" 원
+- layout.tsx: appleWebApp, themeColor `#101018`, viewportFit cover
+
+**API 수정:**
+- `app/api/agent/dokdae/route.ts`: requireAuth로 변경
+- `app/intra/dokdae/page.tsx`: 삭제 (이전 3패널 구현)
+
+**커밋:** `b3bdd49`
+
+---
+
+## 다음 할 일
+
+- **Task 4**: `/api/agent/invoke` — Phase 2 에이전트 체이닝 엔드포인트
+  - `app/api/agent/invoke/route.ts` 신규 생성
+  - 입력: `{ agent: string, message: string, context?: object }`
+  - 동작: 1001→L1 에이전트 라우팅, 응답 병합, 스트리밍 옵션
+- **Task 5**: Supabase Edge Functions — `daily-vrief`, `trend-crawl`
+- **Task 6**: Skill 파일 동기화
+
+---
 
 ## 오늘 한 작업 (4/6 사무실, 세션 22)
 
