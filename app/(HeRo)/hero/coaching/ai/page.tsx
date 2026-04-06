@@ -231,7 +231,7 @@ function AICounselingContent() {
             <p className="text-neutral-500">목적에 맞는 플랜을 선택하세요</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricing.map((p) => (
+            {pricing.map((p, i) => (
               <div
                 key={p.plan}
                 className={`rounded-2xl p-8 ${

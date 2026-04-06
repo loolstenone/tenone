@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server';
 import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           // 스트리밍 완료 후 대화 DB 저장
           if (sessionId) {
             try {
-              const supabase = createClient();
+              const supabase = await createClient();
               // 사용자 메시지 저장
               await supabase.from('hit_chat_messages').insert({
                 session_id: sessionId,
