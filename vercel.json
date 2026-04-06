@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/all-process",
       "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/cron/daily-vrief",
+      "schedule": "1 1 * * *"
+    },
+    {
+      "path": "/api/cron/trend-crawl",
+      "schedule": "0 */3 * * *"
     }
   ]
 }

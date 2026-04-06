@@ -96,3 +96,28 @@ export interface CreateAgentProfileRequest {
   risk_level?: RiskLevel;
   can_invoke?: string[];
 }
+
+/** 체이닝 실행 단계 */
+export interface ChainStep {
+  agent: string;
+  role: 'orchestrate' | 'execute' | 'synthesize';
+  input: string;
+  output: string;
+  ms: number;
+}
+
+/** /api/agent/invoke 요청 */
+export interface AgentInvokeRequest {
+  message: string;
+  context?: Record<string, unknown>;
+  maxDepth?: number;  // 최대 체인 깊이 (기본 2)
+}
+
+/** /api/agent/invoke 응답 */
+export interface AgentInvokeResponse {
+  response: string;
+  chain: ChainStep[];
+  agentPath: string[];  // 호출된 에이전트 순서
+  correlationId: string;
+  totalMs: number;
+}
