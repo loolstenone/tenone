@@ -7,6 +7,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, Eye, EyeOff, Plus, Mic, Image as ImageIcon, Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 // ── 타입 ─────────────────────────────────────────────────────────
@@ -134,10 +135,10 @@ function Bubble({ msg, showAvatar }: { msg: Message; showAvatar: boolean }) {
   return (
     <div className="flex items-start gap-2.5 py-0.5">
       {/* 아바타 */}
-      <div className={`mt-0.5 h-9 w-9 rounded-full flex-shrink-0 flex items-center justify-center ${
-        showAvatar ? 'bg-[#FEE500]/15 border border-[#FEE500]/30' : 'invisible'
+      <div className={`mt-0.5 h-9 w-9 rounded-full flex-shrink-0 overflow-hidden ${
+        showAvatar ? 'bg-black border border-white/10' : 'invisible'
       }`}>
-        {showAvatar && <span className="text-[9px] font-bold text-[#FEE500]">10:01</span>}
+        {showAvatar && <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>}
       </div>
       {/* 버블 + 인라인 카드 + 타임스탬프 */}
       <div className="flex-1 min-w-0">
@@ -233,8 +234,8 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="min-h-[100dvh] bg-[#0d0e1a] flex flex-col items-center justify-center px-6">
       <div className="mb-10 text-center">
-        <div className="mx-auto mb-5 h-16 w-16 rounded-2xl bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center">
-          <span className="text-base font-bold text-[#FEE500]">10:01</span>
+        <div className="mx-auto mb-5 h-16 w-16 rounded-2xl overflow-hidden bg-black border border-white/10">
+          <Image src="/logo-tenone.png" alt="Ten:One" width={64} height={64} className="object-cover w-full h-full"/>
         </div>
         <h1 className="text-2xl font-bold text-white">독대</h1>
         <p className="text-[15px] text-slate-400 mt-1.5">열시일분과의 전용 채널</p>
@@ -502,8 +503,8 @@ function ChatScreen() {
       <div className="flex-shrink-0 bg-[#0d0e1a] border-b border-white/10"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 py-3.5">
-          <div className="h-10 w-10 rounded-full bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] font-bold text-[#FEE500]">10:01</span>
+          <div className="h-10 w-10 rounded-full overflow-hidden bg-black border border-white/10 flex-shrink-0">
+            <Image src="/logo-tenone.png" alt="Ten:One" width={40} height={40} className="object-cover w-full h-full"/>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[18px] font-bold text-white leading-none">열시일분</p>
@@ -525,8 +526,8 @@ function ChatScreen() {
 
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 text-center">
-              <div className="h-16 w-16 rounded-2xl bg-[#FEE500]/15 border border-[#FEE500]/30 flex items-center justify-center">
-                <span className="text-base font-bold text-[#FEE500]">10:01</span>
+              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-black border border-white/10">
+                <Image src="/logo-tenone.png" alt="Ten:One" width={64} height={64} className="object-cover w-full h-full"/>
               </div>
               <p className="text-[16px] text-slate-400">지시를 내리거나 Universe 현황을 물어보세요</p>
             </div>
@@ -542,8 +543,8 @@ function ChatScreen() {
 
           {isLoading && (
             <div className="flex items-end gap-2.5 py-1">
-              <div className="h-9 w-9 rounded-full bg-[#FEE500]/15 border border-[#FEE500]/30 flex-shrink-0 flex items-center justify-center">
-                <span className="text-[9px] font-bold text-[#FEE500]">10</span>
+              <div className="h-9 w-9 rounded-full overflow-hidden bg-black border border-white/10 flex-shrink-0">
+                <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>
               </div>
               <div className="rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
                 <div className="flex gap-1.5 items-center h-5">
