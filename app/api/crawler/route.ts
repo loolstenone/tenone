@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { postAgentMessage } from '@/lib/supabase/chat';
+import { MINDLE_CATEGORY_LIST_FOR_PROMPT } from '@/constants/mindle-categories';
 
 function getAnthropicClient(): Anthropic | null {
     let apiKey = process.env.ANTHROPIC_API_KEY;
@@ -164,10 +165,10 @@ export async function POST(request: NextRequest) {
                 // Step 1: Haiku — 관련성 점수 + 요약
                 const filterRes = await anthropic.messages.create({
                     model: 'claude-haiku-4-5-20251001',
-                    max_tokens: 256,
+                    max_tokens: 300,
                     messages: [{
                         role: 'user',
-                        content: `기사를 평가하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 400)}\n\nJSON으로 응답:\n{"relevance_score":0~10,"summary":"한줄요약50자","category":"AI/마케팅/스타트업/커머스/미디어/기타"}\nJSON만 응답.`,
+                        content: `기사를 평가하고 카테고리를 분류하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 400)}\n\n아래 11개 카테고리 중 가장 적합한 1개를 선택하세요:\n${MINDLE_CATEGORY_LIST_FOR_PROMPT}\n\nJSON으로 응답:\n{"relevance_score":0~10,"summary":"한줄요약50자","category":"카테고리_id"}\nJSON만 응답.`,
                     }],
                 });
                 const filterText = filterRes.content[0].type === 'text' ? filterRes.content[0].text : '';
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest) {
                     max_tokens: 600,
                     messages: [{
                         role: 'user',
-                        content: `Mindle 트렌드 카드를 작성하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 600)}\n카테고리: ${filter.category}\n\nJSON으로 응답:\n{"title":"클릭하고싶은제목40자","full_content":"트렌드분석200-400자인사이트포함"}\nJSON만 응답.`,
+                        content: `Mindle 트렌드 카드를 작성하세요.\n제목: ${item.title}\n내용: ${(item.content || '').slice(0, 600)}\n카테고리: ${filter.category}\n\n마케팅·광고업계 종사자(바닥 커뮤니티 9000명+)가 읽는다. 실무 인사이트 중심으로 작성.\n\nJSON으로 응답:\n{"title":"클릭하고싶은제목40자","full_content":"트렌드분석200-400자인사이트포함"}\nJSON만 응답.`,
                     }],
                 });
                 const cardText = cardRes.content[0].type === 'text' ? cardRes.content[0].text : '';

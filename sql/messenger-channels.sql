@@ -21,10 +21,10 @@ UPDATE chat_threads SET thread_type = CASE WHEN is_group THEN 'group' ELSE 'dm' 
 -- 4. 에이전트 채널 시드
 INSERT INTO chat_threads (id, name, is_group, thread_type, description, agent_name, participants, tenant_id)
 VALUES
-  (gen_random_uuid(), '브리핑', true, 'channel', '열시일분 AM/PM 브리핑 — 매일 10:01 방향 제시·성과 보고', 'compass', ARRAY[]::uuid[], 'tenone'),
+  (gen_random_uuid(), '브리핑', true, 'channel', '열시일분 AM/PM 브리핑 — 매일 10:01 방향 제시·성과 보고', '1001', ARRAY[]::uuid[], 'tenone'),
   (gen_random_uuid(), '트렌드', true, 'channel', 'Whole See 트렌드 카드·크롤링 결과', 'mindle', ARRAY[]::uuid[], 'tenone'),
   (gen_random_uuid(), 'MADLeague', true, 'channel', '레드 MADLeague 운영 현황', 'madleague', ARRAY[]::uuid[], 'tenone'),
-  (gen_random_uuid(), 'Badak', true, 'channel', '쇠봇 Badak 방 모니터링', 'badaksoe', ARRAY[]::uuid[], 'tenone'),
+  (gen_random_uuid(), 'Badak', true, 'channel', '쇠봇 Badak 방 모니터링', 'badak', ARRAY[]::uuid[], 'tenone'),
   (gen_random_uuid(), '일반', true, 'channel', '일반 공지·소통', NULL, ARRAY[]::uuid[], 'tenone')
 ON CONFLICT DO NOTHING;
 
