@@ -5,10 +5,10 @@
  * 텐원(대표)과 열시일분(1001)의 1:1 전용 채널.
  * 에이전트 현황·트렌드·태스크 카드를 함께 반환.
  *
- * Auth: 로그인 필수 (requireAuthOrAdmin)
+ * Auth: 로그인 필수 (requireAuth)
  */
 import { NextRequest } from 'next/server';
-import { successResponse, errorResponse, requireAuthOrAdmin } from '@/lib/supabase/api-utils';
+import { successResponse, errorResponse, requireAuth } from '@/lib/supabase/api-utils';
 import { invokeAgent } from '@/lib/agent/claude';
 import { createClient } from '@/lib/supabase/server';
 
@@ -55,7 +55,7 @@ const QUICK_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  const { error: authErr } = await requireAuthOrAdmin(request);
+  const { error: authErr } = await requireAuth();
   if (authErr) return authErr;
 
   try {

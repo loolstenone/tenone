@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="112" fill="#101018"/>
+  <!-- 황색 원 테두리 -->
+  <circle cx="256" cy="220" r="130" fill="none" stroke="#FEE500" stroke-width="12"/>
+  <!-- 10:01 텍스트 -->
+  <text x="256" y="248" font-family="system-ui, -apple-system, sans-serif" font-size="88" font-weight="700" fill="#FEE500" text-anchor="middle" dominant-baseline="middle">10:01</text>
+  <!-- 독대 텍스트 -->
+  <text x="256" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="600" fill="#4a4a6a" text-anchor="middle">독대</text>
+</svg>
