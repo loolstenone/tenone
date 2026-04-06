@@ -1,6 +1,87 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-06 (사무실, 세션 23)
+> 마지막 업데이트: 2026-04-06 (사무실, 세션 24)
+
+---
+
+## 다음 할 일
+
+### 1. Resend 설정 (집에서 먼저) — 10분
+1. [resend.com](https://resend.com) 가입
+2. Domains → Add Domain → `tenone.biz` → DNS 레코드 추가 (SPF/DKIM)
+3. API Keys → Create API Key 복사
+4. Vercel 대시보드 → Settings → Environment Variables 추가:
+   ```
+   RESEND_API_KEY        = re_xxxxxxxxxxxx
+   NEWSLETTER_FROM_EMAIL = newsletter@tenone.biz
+   NEWSLETTER_FROM_NAME  = Ten:One™ Universe
+   ```
+5. Vercel 재배포 후 테스트 발송 1건 확인
+
+### 2. daily-gpr Edge Function — 30분
+PM 18:00 GPR 수합 브리핑. `supabase/functions/daily-gpr/index.ts` 신규.
+vercel.json cron: `"schedule": "0 9 * * *"` (KST 18:00 = UTC 09:00)
+→ `supabase/functions/daily-vrief/index.ts` 패턴 그대로 복사해서 GPR 쿼리만 교체
+
+### 3. WIO People 7개 모듈 실DB 전환
+`/intra/wio` 하위 People 모듈들 Mock → Supabase 연결
+대상: Members / Roles / Departments / Attendance / Timesheet / Payroll / Evaluations
+
+### 4. CRM 핵심 3개 실DB
+ERP/CRM: people / segments / import → DB 연결
+
+### 5. Marketing 핵심 5개 실DB
+campaigns / leads / deals / content / analytics → DB 연결
+
+### 6. Hero 구독 API
+`/api/hero/subscribe` (HIT 완료 검증 + DB INSERT)
+
+### 사용자 결정 후
+- PG 연동: 토스페이먼츠/포트원 선택 후 진행
+- 도메인: hero.ne.kr Vercel 연결, fwn.co.kr DNS 확인
+
+---
+
+## 현재 DB 상태 (2026-04-06 기준)
+
+| 테이블 | 건수 | 비고 |
+|--------|------|------|
+| agent_profiles | 21개 | L0×1, L1×3 에이전트+챗봇, L2×9 에이전트, L2×8 챗봇 |
+| mindle_trends | 52건 | 11개 카테고리 표준화 완료 |
+| badaksoe_rooms | 7개 | 시트 기준 완료 |
+| newsletter_subscribers | 수집 중 | 발송은 Resend 설정 후 |
+
+---
+
+## 오늘 한 작업 (4/6 사무실, 세션 24)
+
+### AA팀 구조 정상화 (AA_TEAM_CODE_INSTRUCTIONS_FINAL.md 작업 0~7) ✅
+- 작업 0: 시딩 스크립트 수정 (compass→1001, badaksoe→deutbot, sql 파일 2개)
+- 작업 1: agent_type 'brand'→'agent', deutbot→chatbot, badangsoe→badak (DB)
+- 작업 2: 쇠봇 7개 chatbot 등록 + badaksoe_rooms 7개 방 시트 기준 재등록 (DB)
+- 작업 3: `constants/mindle-categories.ts` 신규 + DB 52건 카테고리 표준화 + 크롤러 분류 프롬프트 교체
+- 작업 5: Edge Functions 2개 (daily-vrief, trend-crawl) + Vercel Cron 4개
+- 작업 6: 신규 에이전트 5개 DB 등록 — planner/rook/montz/fwn/youinone (1500자+ 프롬프트)
+- 작업 7: 1001 system_prompt + can_invoke 13개로 업데이트
+
+### 독대 UI 개선 ✅
+- 배경 #0d0e1a, AI버블 #222336, 전체 텍스트 대비 상향
+- 폰트: 버블 16px, 헤더 18px, 타임스탬프 13px, 퀵버튼 14px
+- `public/logo-tenone.png` 추가 → 모든 아바타 TenOne 로고 이미지로 교체
+- 전송버튼 글로우 추가
+
+### 메일링 시스템 구축 ✅
+- resend v6.10 설치
+- `lib/email/newsletter-template.ts`: HTML 이메일 템플릿 (수신거부 링크 포함)
+- `app/api/newsletter/send/route.ts`: 배치 발송 API (50명씩)
+- `app/api/newsletter/unsubscribe/route.ts`: RFC 8058 One-Click 수신거부
+- `app/(TenOne)/unsubscribe/done/page.tsx`: 수신거부 완료 페이지
+- Intra 뉴스레터 Send 버튼 연결 완료
+- ⚠️ RESEND_API_KEY 환경변수 설정 필요 (위 "다음 할 일 #1" 참고)
+
+**커밋:** `48aa447`, `957f7b0`, `f222e7a`, `62af774`, `133acf8`
+
+---
 
 ## 오늘 한 작업 (4/6 사무실, 세션 23)
 

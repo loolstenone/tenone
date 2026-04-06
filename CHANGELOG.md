@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-04-06 (사무실, 세션 24)
+
+### AA팀 구조 정상화
+- agent_type 'brand'→'agent'/'chatbot' 확장, badangsoe→badak rename (DB)
+- 쇠봇 7개 chatbot + badaksoe_rooms 7개 방 시트 기준 완료 (DB)
+- `constants/mindle-categories.ts` 신규: 11개 카테고리 상수/타입
+- DB mindle_trends 52건 카테고리 표준화
+- crawler route Haiku 분류 프롬프트 11개 카테고리 기준 교체
+- Edge Functions: daily-vrief, trend-crawl (Deno) + Vercel Cron 4개
+- 신규 에이전트 5개 DB: planner/rook/montz/fwn/youinone (1500자+ 프롬프트)
+- 1001 system_prompt + can_invoke 13개 업데이트
+
+### 독대 UI 대폭 개선
+- `app/(Dokdae)/dokdae/page.tsx`: 밝기/대비 전면 개선, 폰트 크기 업
+- `public/logo-tenone.png` 추가, 전 아바타 TenOne 로고 이미지로 교체
+
+### 메일링 시스템 (Resend)
+- resend v6.10 설치
+- `lib/email/newsletter-template.ts`: HTML 이메일 템플릿
+- `app/api/newsletter/send/route.ts`: 배치 발송
+- `app/api/newsletter/unsubscribe/route.ts`: One-Click 수신거부
+- `app/(TenOne)/unsubscribe/done/page.tsx`: 수신거부 완료 페이지
+- Intra 뉴스레터 Send 버튼 연결
+
+**수정 파일:** constants/mindle-categories.ts, app/api/crawler/route.ts, sql/agent-tables.sql, sql/messenger-channels.sql, app/(Dokdae)/dokdae/page.tsx, public/logo-tenone.png, lib/email/newsletter-template.ts, app/api/newsletter/send/route.ts, app/api/newsletter/unsubscribe/route.ts, app/(TenOne)/unsubscribe/done/page.tsx, app/intra/ums/sites/newsletter/page.tsx, vercel.json, tsconfig.json, package.json
+
+**커밋:** `48aa447` `957f7b0` `f222e7a` `62af774` `133acf8`
+
+---
+
 ## 2026-04-05 (집, 세션 19)
 
 ### HeRo HIT 보고서 품질 개선
