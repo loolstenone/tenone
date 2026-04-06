@@ -1,8 +1,13 @@
 /**
  * POST /api/newsletter/send
- * 뉴스레터 이슈를 활성 구독자 전체에게 발송
+ * 뉴스레터 이슈를 구독자에게 발송
  *
- * body: { issueId: string }
+ * body: {
+ *   issueId: string;
+ *   fromName?: string;    // 브랜드별 From 이름 (기본: Ten:One™ Universe)
+ *   siteIds?: string[];   // 타겟: 구독 사이트 필터
+ *   tags?: string[];      // 타겟: 태그 필터
+ * }
  * auth: ADMIN_API_KEY 또는 로그인 Staff
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,13 +16,20 @@ import { createClient } from '@/lib/supabase/server';
 import { renderNewsletterHtml, renderNewsletterText } from '@/lib/email/newsletter-template';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenone.biz';
-const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || 'newsletter@tenone.biz';
+const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || 'noreply@tenone.biz';
 const FROM_NAME  = process.env.NEWSLETTER_FROM_NAME  || 'Ten:One™ Universe';
 
 /** 수신거부 URL — subscriber id를 base64로 인코딩 */
 function unsubscribeUrl(subscriberId: string): string {
   const token = Buffer.from(subscriberId).toString('base64url');
   return `${SITE_URL}/unsubscribe?token=${token}`;
+}
+
+interface SendBody {
+  issueId?: string;
+  fromName?: string;
+  siteIds?: string[];
+  tags?: string[];
 }
 
 export async function POST(request: NextRequest) {
@@ -37,8 +49,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'RESEND_API_KEY가 설정되지 않았습니다. Vercel 환경변수에 추가해주세요.' }, { status: 500 });
   }
 
-  const body = await request.json().catch(() => ({})) as { issueId?: string };
-  const { issueId } = body;
+  const body = await request.json().catch(() => ({})) as SendBody;
+  const { issueId, fromName, siteIds, tags } = body;
   if (!issueId) {
     return NextResponse.json({ error: 'issueId가 필요합니다.' }, { status: 400 });
   }
@@ -60,18 +72,46 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '제목과 본문을 먼저 작성해주세요.' }, { status: 400 });
   }
 
-  // 활성 구독자 조회
-  const { data: subscribers, error: subErr } = await supabase
+  // 활성 구독자 조회 (타겟 필터 적용)
+  let query = supabase
     .from('newsletter_subscribers')
     .select('id, email, name')
     .eq('status', 'active');
 
+  // 사이트 필터
+  if (siteIds && siteIds.length > 0) {
+    query = query.in('site_id', siteIds);
+  }
+
+  const { data: subscribers, error: subErr } = await query;
+
   if (subErr) {
     return NextResponse.json({ error: `구독자 조회 실패: ${subErr.message}` }, { status: 500 });
   }
-  if (!subscribers || subscribers.length === 0) {
-    return NextResponse.json({ error: '활성 구독자가 없습니다.' }, { status: 400 });
+
+  let filtered = subscribers || [];
+
+  // 태그 필터: subscriber_tags에서 해당 태그를 가진 구독자만
+  if (tags && tags.length > 0 && filtered.length > 0) {
+    const { data: taggedRows } = await supabase
+      .from('subscriber_tags')
+      .select('subscriber_id')
+      .in('tag', tags);
+
+    if (taggedRows && taggedRows.length > 0) {
+      const taggedIds = new Set(taggedRows.map((r: { subscriber_id: string }) => r.subscriber_id));
+      filtered = filtered.filter((s: { id: string }) => taggedIds.has(s.id));
+    } else {
+      filtered = [];
+    }
   }
+
+  if (filtered.length === 0) {
+    return NextResponse.json({ error: '대상 구독자가 없습니다.' }, { status: 400 });
+  }
+
+  // From 이름 결정
+  const senderName = fromName || FROM_NAME;
 
   const resend = new Resend(resendKey);
   let sent = 0;
@@ -79,11 +119,11 @@ export async function POST(request: NextRequest) {
 
   // 배치 발송 (Resend 무료: 100건/일 제한, 최대 50명씩 배치)
   const BATCH_SIZE = 50;
-  for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
-    const batch = subscribers.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < filtered.length; i += BATCH_SIZE) {
+    const batch = filtered.slice(i, i + BATCH_SIZE);
 
     const emailBatch = batch.map((sub: { id: string; email: string; name?: string }) => ({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      from: `${senderName} <${FROM_EMAIL}>`,
       to: sub.email,
       subject: issue.title,
       html: renderNewsletterHtml({
@@ -99,6 +139,7 @@ export async function POST(request: NextRequest) {
         unsubscribeUrl: unsubscribeUrl(sub.id),
         siteUrl: SITE_URL,
       }),
+      replyTo: 'lools@tenone.biz',
       headers: {
         'List-Unsubscribe': `<${unsubscribeUrl(sub.id)}>`,
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
@@ -123,13 +164,16 @@ export async function POST(request: NextRequest) {
       status: 'sent',
       sent_at: new Date().toISOString(),
       recipient_count: sent,
+      from_name: senderName !== FROM_NAME ? senderName : null,
+      target_site_ids: siteIds && siteIds.length > 0 ? siteIds : null,
+      target_tags: tags && tags.length > 0 ? tags : null,
     }).eq('id', issueId);
   }
 
   return NextResponse.json({
     ok: sent > 0,
     sent,
-    total: subscribers.length,
+    total: filtered.length,
     errors: errors.length > 0 ? errors : undefined,
   });
 }

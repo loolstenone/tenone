@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchCampaigns, fetchLeads, fetchContentPosts, fetchTrends, type TrendInsight } from "@/lib/supabase/marketing";
-import { initialCampaigns, initialLeads, initialContentPosts } from "@/lib/marketing-data";
+
 import { Campaign, Lead, ContentPost } from "@/types/marketing";
 import { BarChart3, TrendingUp, DollarSign, Users, Loader2, Flame } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -24,13 +24,13 @@ export default function AnalyticsPage() {
         ])
             .then(([c, l, p, t]) => {
                 if (cancelled) return;
-                setCampaigns(c.length > 0 ? c : initialCampaigns);
-                setLeads(l.length > 0 ? l : initialLeads);
-                setContentPosts(p.length > 0 ? p : initialContentPosts);
+                setCampaigns(c);
+                setLeads(l);
+                setContentPosts(p);
                 setTrends(t as TrendInsight[]);
             })
             .catch(() => {
-                if (!cancelled) { setCampaigns(initialCampaigns); setLeads(initialLeads); setContentPosts(initialContentPosts); }
+                if (!cancelled) { setCampaigns([]); setLeads([]); setContentPosts([]); }
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchOrganizations } from "@/lib/supabase/crm";
-import { initialOrganizations } from "@/lib/crm-data";
+
 import { Organization } from "@/types/crm";
 import { Building2, Globe, Users, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -16,10 +16,10 @@ export default function OrganizationsPage() {
         fetchOrganizations()
             .then(data => {
                 if (cancelled) return;
-                setOrganizations(data.length > 0 ? data : initialOrganizations);
+                setOrganizations(data);
             })
             .catch(() => {
-                if (!cancelled) setOrganizations(initialOrganizations);
+                if (!cancelled) setOrganizations([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

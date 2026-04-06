@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchLeads, updateLead, createLead } from "@/lib/supabase/marketing";
-import { initialLeads } from "@/lib/marketing-data";
+
 import { Lead, LeadStage, LeadSource } from "@/types/marketing";
 import { Loader2, Plus, X } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -45,10 +45,10 @@ export default function LeadsPage() {
         fetchLeads()
             .then(data => {
                 if (cancelled) return;
-                setLeads(data.length > 0 ? data : initialLeads);
+                setLeads(data);
             })
             .catch(() => {
-                if (!cancelled) setLeads(initialLeads);
+                if (!cancelled) setLeads([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

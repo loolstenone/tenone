@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchDeals, updateDeal } from "@/lib/supabase/crm";
-import { initialDeals, initialOrganizations } from "@/lib/crm-data";
+
 import { fetchOrganizations } from "@/lib/supabase/crm";
 import { Deal, DealStage, Organization } from "@/types/crm";
 import { Loader2 } from "lucide-react";
@@ -28,11 +28,11 @@ export default function DealsPage() {
         Promise.all([fetchDeals(), fetchOrganizations()])
             .then(([d, o]) => {
                 if (cancelled) return;
-                setDeals(d.length > 0 ? d : initialDeals);
-                setOrgs(o.length > 0 ? o : initialOrganizations);
+                setDeals(d);
+                setOrgs(o);
             })
             .catch(() => {
-                if (!cancelled) { setDeals(initialDeals); setOrgs(initialOrganizations); }
+                if (!cancelled) { setDeals([]); setOrgs([]); }
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

@@ -16,13 +16,7 @@ interface Talent {
     status: "활성" | "대기" | "비활성";
 }
 
-const initialTalents: Talent[] = [
-    { id: "1", name: "박영상", specialty: "영상 PD / 편집", source: "프리랜서", skills: ["Premiere", "After Effects", "DaVinci"], rating: 5, lastContact: "2026-03-15", status: "활성" },
-    { id: "2", name: "이디자인", specialty: "그래픽 디자이너", source: "외부", skills: ["Figma", "Illustrator", "Photoshop"], rating: 4, lastContact: "2026-02-20", status: "활성" },
-    { id: "3", name: "김개발", specialty: "풀스택 개발", source: "추천", skills: ["React", "Node.js", "Python"], rating: 5, lastContact: "2026-03-01", status: "대기" },
-    { id: "4", name: "최음악", specialty: "작곡 / 편곡", source: "외부", skills: ["Logic Pro", "Ableton", "작곡"], rating: 4, lastContact: "2025-12-10", status: "비활성" },
-    { id: "5", name: "정마케", specialty: "디지털 마케팅", source: "내부", skills: ["SEO", "Google Ads", "콘텐츠 기획"], rating: 3, lastContact: "2026-03-18", status: "활성" },
-];
+const emptyTalents: Talent[] = [];
 
 const sourceColor: Record<string, string> = {
     "내부": "bg-blue-50 text-blue-600",
@@ -60,10 +54,10 @@ export default function TalentPoolPage() {
                         status: ((r.status as string) || '활성') as Talent['status'],
                     })));
                 } else if (!cancelled) {
-                    setTalents(initialTalents);
+                    setTalents(emptyTalents);
                 }
             } catch {
-                if (!cancelled) setTalents(initialTalents);
+                if (!cancelled) setTalents(emptyTalents);
             } finally {
                 if (!cancelled) setLoading(false);
             }

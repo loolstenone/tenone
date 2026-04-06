@@ -11,9 +11,12 @@
  */
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
+import { successResponse, errorResponse, requireAuth } from '@/lib/supabase/api-utils';
 
 export async function GET(request: NextRequest) {
+  const { error: authErr } = await requireAuth();
+  if (authErr) return authErr;
+
   const supabase = await createClient();
   const { searchParams } = new URL(request.url);
 

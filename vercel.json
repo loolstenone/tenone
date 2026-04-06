@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/trend-crawl",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/daily-gpr",
+      "schedule": "0 9 * * *"
     }
   ]
 }

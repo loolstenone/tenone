@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-04-07 (집, 세션 25)
+
+### Resend 메일링 설정
+- resend.com 가입 + tenone.biz 도메인 인증 (가비아 DNS: DKIM/SPF/DMARC)
+- API Key → .env.local + Vercel 환경변수
+- From: noreply@tenone.biz, Reply-To: lools@tenone.biz
+
+### 뉴스레터 발송 고도화
+- `sql/newsletter-tags.sql`: subscriber_tags 테이블 + newsletter_issues 컬럼 추가
+- `app/api/newsletter/send/route.ts`: fromName/siteIds/tags 파라미터
+- `app/intra/ums/sites/newsletter/page.tsx`: 발송 설정 모달(브랜드/타겟/태그/예상수신자), 구독자 태그 관리
+
+### daily-gpr Edge Function
+- `supabase/functions/daily-gpr/index.ts`: GPR PM 브리핑
+- `app/api/cron/daily-gpr/route.ts` + vercel.json cron 추가
+
+### Mock 폴백 제거 (16개 파일)
+- ERP HR: gpr/evaluation, talent
+- Marketing/CRM: 14개 파일 일괄 DB 전용 전환
+
+### AA팀 전면 수리
+- DB: agent_messages RLS `am_select_own` 정책 (독대 히스토리 복원)
+- `app/api/agent/messages/route.ts`: 인증 추가
+- `app/api/agent/vrief/route.ts`: 필드명 수정 (agent_name→from_agent)
+- `app/api/agent/invoke/route.ts`: 3중→2중 호출 최적화
+- `app/(Dokdae)/dokdae/page.tsx`: 마크다운 렌더링, 에러 재시도, 페이지네이션, 타이핑 개선
+
+### HIT C~F 전체 구현 (4단계 × 13파일 = 52파일+)
+- HIT C "어디로 이직?" (60문항): c-questions, scoring-c, API 5개, 페이지 4개
+- HIT D "시니어 리더십 전환?" (70문항): d-questions, scoring-d, API 5개, 페이지 4개
+- HIT E "인생 2막?" (60문항): e-questions, scoring-e, API 5개, 페이지 4개
+- HIT F "경력 공백 복귀?" (55문항+CVI): f-questions, scoring-f, API 5개, 페이지 4개
+- lib/supabase/hit.ts: D/E/F 타입 + 헬퍼 함수 추가
+
+**수정 파일:** 25개 수정 + 50개+ 신규
+
+---
+
 ## 2026-04-06 (사무실, 세션 24)
 
 ### AA팀 구조 정상화

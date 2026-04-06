@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPeople } from "@/lib/supabase/crm";
-import { initialPeople } from "@/lib/crm-data";
+
 import { Person } from "@/types/crm";
 import { Tags, Users, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -25,10 +25,10 @@ export default function SegmentsPage() {
         fetchPeople({ limit: 500 })
             .then(res => {
                 if (cancelled) return;
-                setPeople(res.people.length > 0 ? res.people : initialPeople);
+                setPeople(res.people);
             })
             .catch(() => {
-                if (!cancelled) setPeople(initialPeople);
+                if (!cancelled) setPeople([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

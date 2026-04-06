@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchCampaigns, fetchLeads } from "@/lib/supabase/marketing";
-import { initialCampaigns, initialLeads } from "@/lib/marketing-data";
+
 import type { Campaign, Lead } from "@/types/marketing";
 import { BarChart3, TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 import { PageHeader, SecondaryButton } from "@/components/intra/IntraUI";
@@ -28,15 +28,15 @@ function Trend({ value, target }: { value: number; target: number }) {
 }
 
 export default function PerformancePage() {
-    const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
-    const [leads, setLeads] = useState<Lead[]>(initialLeads);
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [leads, setLeads] = useState<Lead[]>([]);
     const [snapshots, setSnapshots] = useState<PerfSnapshot[]>([]);
     const [loading, setLoading] = useState(true);
     const supabase = createClient();
 
     useEffect(() => {
-        fetchCampaigns().then(rows => { if (rows.length > 0) setCampaigns(rows); }).catch(() => {});
-        fetchLeads().then(rows => { if (rows.length > 0) setLeads(rows); }).catch(() => {});
+        fetchCampaigns().then(rows => setCampaigns(rows)).catch(() => {});
+        fetchLeads().then(rows => setLeads(rows)).catch(() => {});
         fetchSnapshots();
     }, []);
 

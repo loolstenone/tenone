@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchContentPosts } from "@/lib/supabase/marketing";
-import { initialContentPosts } from "@/lib/marketing-data";
+
 import { ContentPost } from "@/types/marketing";
 import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -16,10 +16,10 @@ export default function ContentPage() {
         fetchContentPosts()
             .then(data => {
                 if (cancelled) return;
-                setContentPosts(data.length > 0 ? data : initialContentPosts);
+                setContentPosts(data);
             })
             .catch(() => {
-                if (!cancelled) setContentPosts(initialContentPosts);
+                if (!cancelled) setContentPosts([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

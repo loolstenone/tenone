@@ -40,6 +40,9 @@ interface Message {
   text: string;
   time: string;
   cards?: InlineCard[];
+  error?: boolean;
+  retryText?: string;
+  retryAction?: string;
 }
 
 // ── 상수 ─────────────────────────────────────────────────────────
@@ -116,9 +119,89 @@ function InlineTrendCard({ trends }: { trends: TrendItem[] }) {
   );
 }
 
+// ── 간단 마크다운 렌더링 ──────────────────────────────────────────
+function renderMarkdown(text: string) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let inCodeBlock = false;
+  let codeLines: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('```')) {
+      if (inCodeBlock) {
+        elements.push(
+          <pre key={`code-${i}`} className="mt-2 mb-2 rounded-lg bg-black/30 border border-white/10 px-3 py-2 overflow-x-auto">
+            <code className="text-[13px] text-emerald-300 font-mono">{codeLines.join('\n')}</code>
+          </pre>
+        );
+        codeLines = [];
+        inCodeBlock = false;
+      } else {
+        inCodeBlock = true;
+      }
+      continue;
+    }
+    if (inCodeBlock) { codeLines.push(line); continue; }
+
+    if (line.startsWith('## ')) {
+      elements.push(<p key={i} className="text-[15px] font-bold text-white mt-3 mb-1">{line.slice(3)}</p>);
+    } else if (line.startsWith('### ')) {
+      elements.push(<p key={i} className="text-[14px] font-semibold text-slate-200 mt-2 mb-1">{line.slice(4)}</p>);
+    } else if (line.startsWith('- ') || line.startsWith('• ')) {
+      elements.push(
+        <div key={i} className="flex gap-2 pl-1">
+          <span className="text-slate-500 mt-0.5">•</span>
+          <span className="flex-1">{formatInline(line.slice(2))}</span>
+        </div>
+      );
+    } else if (/^\d+\.\s/.test(line)) {
+      const num = line.match(/^(\d+)\.\s/)?.[1];
+      elements.push(
+        <div key={i} className="flex gap-2 pl-1">
+          <span className="text-slate-400 text-[14px] font-mono min-w-[1.2em]">{num}.</span>
+          <span className="flex-1">{formatInline(line.replace(/^\d+\.\s/, ''))}</span>
+        </div>
+      );
+    } else if (line.startsWith('|') && line.endsWith('|')) {
+      // 테이블 행 — 구분선(---)은 스킵
+      if (line.includes('---')) continue;
+      const cells = line.split('|').filter(c => c.trim());
+      elements.push(
+        <div key={i} className="flex gap-3 text-[13px] py-0.5">
+          {cells.map((c, ci) => <span key={ci} className={ci === 0 ? 'text-slate-300 min-w-[80px]' : 'text-slate-400 flex-1'}>{c.trim()}</span>)}
+        </div>
+      );
+    } else if (line.trim() === '') {
+      elements.push(<div key={i} className="h-1.5" />);
+    } else {
+      elements.push(<p key={i}>{formatInline(line)}</p>);
+    }
+  }
+  return elements;
+}
+
+function formatInline(text: string): React.ReactNode {
+  // **bold** 처리
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
+    }
+    // `code` 인라인
+    const codeParts = part.split(/(`[^`]+`)/g);
+    return codeParts.map((cp, ci) => {
+      if (cp.startsWith('`') && cp.endsWith('`')) {
+        return <code key={`${i}-${ci}`} className="text-[13px] bg-white/10 px-1 py-0.5 rounded text-emerald-300 font-mono">{cp.slice(1, -1)}</code>;
+      }
+      return cp;
+    });
+  });
+}
+
 // ── 채팅 버블 ──────────────────────────────────────────────────────
 
-function Bubble({ msg, showAvatar }: { msg: Message; showAvatar: boolean }) {
+function Bubble({ msg, showAvatar, onRetry }: { msg: Message; showAvatar: boolean; onRetry?: (text: string, action?: string) => void }) {
   const isUser = msg.role === 'user';
 
   if (isUser) {
@@ -143,8 +226,14 @@ function Bubble({ msg, showAvatar }: { msg: Message; showAvatar: boolean }) {
       {/* 버블 + 인라인 카드 + 타임스탬프 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-end gap-2">
-          <div className="max-w-[78%] rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
-            <p className="text-[16px] leading-relaxed text-white whitespace-pre-wrap">{msg.text}</p>
+          <div className={`max-w-[78%] rounded-2xl rounded-tl-sm px-4 py-3 ${msg.error ? 'bg-red-900/30 border border-red-500/20' : 'bg-[#222336]'}`}>
+            <div className="text-[16px] leading-relaxed text-white">{renderMarkdown(msg.text)}</div>
+            {msg.error && msg.retryText && onRetry && (
+              <button onClick={() => onRetry(msg.retryText!, msg.retryAction)}
+                className="mt-2 text-[13px] text-red-300 hover:text-white border border-red-500/30 rounded-lg px-3 py-1.5 hover:bg-red-500/20 transition-all">
+                재시도
+              </button>
+            )}
             {msg.cards?.map((card, i) => (
               <div key={i}>
                 {card.type === 'agent_status' && (
@@ -407,6 +496,10 @@ function ChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   const inputRef  = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -435,6 +528,7 @@ function ChatScreen() {
           cards: row.from_agent !== 'user' ? extractCards(row.payload as Record<string, unknown>) : undefined,
         }));
         setMessages(loaded);
+        setHasMore(rows.length >= 60);
       }
       setHistoryLoaded(true);
     });
@@ -478,6 +572,9 @@ function ChatScreen() {
         id: uid(), role: 'ai',
         text: e instanceof Error ? `오류: ${e.message}` : '오류가 발생했습니다.',
         time: timeStr(),
+        error: true,
+        retryText: text.trim(),
+        retryAction: quickAction,
       }]);
     } finally {
       setIsLoading(false);
@@ -524,6 +621,47 @@ function ChatScreen() {
       <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
         <div className="max-w-2xl mx-auto px-4 py-3">
 
+          {hasMore && (
+            <div className="flex justify-center py-3">
+              <button
+                onClick={async () => {
+                  if (loadingMore || messages.length === 0) return;
+                  setLoadingMore(true);
+                  const sb = createClient();
+                  const { data: u } = await sb.auth.getUser();
+                  if (!u.user) { setLoadingMore(false); return; }
+                  const oldest = messages[0];
+                  const { data: rows } = await sb
+                    .from('agent_messages')
+                    .select('from_agent, payload, created_at')
+                    .eq('message_type', 'dokdae_chat')
+                    .eq('user_id', u.user.id)
+                    .lt('created_at', new Date(Date.now() - messages.length * 60000).toISOString())
+                    .order('created_at', { ascending: false })
+                    .limit(40);
+                  if (rows?.length) {
+                    const older: Message[] = rows.reverse().map((row: { from_agent: string; payload: Record<string, unknown>; created_at: string }) => ({
+                      id: uid(),
+                      role: row.from_agent === 'user' ? 'user' as const : 'ai' as const,
+                      text: (row.payload as { text?: string }).text ?? '',
+                      time: new Date(row.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                      cards: row.from_agent !== 'user' ? extractCards(row.payload as Record<string, unknown>) : undefined,
+                    }));
+                    setMessages(prev => [...older, ...prev]);
+                    setHasMore(rows.length >= 40);
+                  } else {
+                    setHasMore(false);
+                  }
+                  setLoadingMore(false);
+                }}
+                disabled={loadingMore}
+                className="text-[13px] text-slate-500 hover:text-slate-300 border border-white/10 rounded-full px-4 py-1.5 hover:bg-white/[0.05] transition-all disabled:opacity-30"
+              >
+                {loadingMore ? '불러오는 중...' : '이전 대화 불러오기'}
+              </button>
+            </div>
+          )}
+
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 text-center">
               <div className="h-16 w-16 rounded-2xl overflow-hidden bg-black border border-white/10">
@@ -538,7 +676,7 @@ function ChatScreen() {
           {messages.map((msg, i) => {
             const prev = messages[i - 1];
             const showAvatar = msg.role === 'ai' && (!prev || prev.role === 'user');
-            return <Bubble key={msg.id} msg={msg} showAvatar={showAvatar}/>;
+            return <Bubble key={msg.id} msg={msg} showAvatar={showAvatar} onRetry={(text, action) => send(text, action)}/>;
           })}
 
           {isLoading && (
@@ -547,11 +685,14 @@ function ChatScreen() {
                 <Image src="/logo-tenone.png" alt="Ten:One" width={36} height={36} className="object-cover w-full h-full"/>
               </div>
               <div className="rounded-2xl rounded-tl-sm bg-[#222336] px-4 py-3">
-                <div className="flex gap-1.5 items-center h-5">
-                  {[0, 150, 300].map((d, i) => (
-                    <span key={i} className="h-2 w-2 rounded-full bg-slate-400 animate-bounce"
-                      style={{ animationDelay: `${d}ms` }}/>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1 items-center">
+                    {[0, 150, 300].map((d, i) => (
+                      <span key={i} className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-bounce"
+                        style={{ animationDelay: `${d}ms` }}/>
+                    ))}
+                  </div>
+                  <span className="text-[13px] text-slate-400">열시일분이 분석 중...</span>
                 </div>
               </div>
             </div>

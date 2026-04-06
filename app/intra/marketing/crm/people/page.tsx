@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPeople, createPerson, updatePerson as updatePersonDb } from "@/lib/supabase/crm";
-import { initialPeople } from "@/lib/crm-data";
+
 import { PersonModal } from "@/components/crm/PersonModal";
 import { Person } from "@/types/crm";
 import { Plus, Search, Filter, Loader2 } from "lucide-react";
@@ -23,10 +23,10 @@ export default function PeoplePage() {
         fetchPeople({ limit: 200 })
             .then(res => {
                 if (cancelled) return;
-                setPeople(res.people.length > 0 ? res.people : initialPeople);
+                setPeople(res.people);
             })
             .catch(() => {
-                if (!cancelled) setPeople(initialPeople);
+                if (!cancelled) setPeople([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

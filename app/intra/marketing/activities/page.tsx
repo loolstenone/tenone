@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchActivities } from "@/lib/supabase/crm";
 import { fetchPeople, fetchOrganizations } from "@/lib/supabase/crm";
-import { initialActivities, initialPeople, initialOrganizations } from "@/lib/crm-data";
+
 import { Activity, Person, Organization } from "@/types/crm";
 import { Phone, Mail, Calendar, FileText, PartyPopper, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -21,12 +21,12 @@ export default function ActivitiesPage() {
         Promise.all([fetchActivities(), fetchPeople(), fetchOrganizations()])
             .then(([acts, pRes, oRes]) => {
                 if (cancelled) return;
-                setActivities(acts.length > 0 ? acts : initialActivities);
-                setPeople(pRes.people.length > 0 ? pRes.people : initialPeople);
-                setOrgs(oRes.length > 0 ? oRes : initialOrganizations);
+                setActivities(acts);
+                setPeople(pRes.people);
+                setOrgs(oRes);
             })
             .catch(() => {
-                if (!cancelled) { setActivities(initialActivities); setPeople(initialPeople); setOrgs(initialOrganizations); }
+                if (!cancelled) { setActivities([]); setPeople([]); setOrgs([]); }
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

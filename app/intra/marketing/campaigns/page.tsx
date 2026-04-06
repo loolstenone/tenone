@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchCampaigns, createCampaign } from "@/lib/supabase/marketing";
-import { initialCampaigns } from "@/lib/marketing-data";
+
 import { Campaign, CampaignType, CampaignStatus } from "@/types/marketing";
 import { DollarSign, Loader2, Plus, X } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -37,10 +37,10 @@ export default function CampaignsPage() {
         fetchCampaigns()
             .then(data => {
                 if (cancelled) return;
-                setCampaigns(data.length > 0 ? data : initialCampaigns);
+                setCampaigns(data);
             })
             .catch(() => {
-                if (!cancelled) setCampaigns(initialCampaigns);
+                if (!cancelled) setCampaigns([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

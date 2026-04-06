@@ -79,12 +79,13 @@ export async function POST(request: NextRequest) {
         // 결과를 agent_messages에 별도 기록 (vrief 타입)
         const supabase = await createClient();
         await supabase.from('agent_messages').insert({
-            agent_name: '1001',
+            from_agent: '1001',
+            to_agent: 'user',
             message_type: 'vrief',
-            content: result.response,
-            correlation_id: `vrief-${type}-${new Date().toISOString().slice(0, 10)}`,
+            payload: { text: result.response, type, timestamp: new Date().toISOString() },
+            risk_level: 'green',
             confidence: result.confidence,
-            metadata: { type, timestamp: new Date().toISOString() },
+            correlation_id: `vrief-${type}-${new Date().toISOString().slice(0, 10)}`,
         });
 
         // #브리핑 채널에 자동 게시

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPeople } from "@/lib/supabase/crm";
-import { initialPeople } from "@/lib/crm-data";
+
 import { Person } from "@/types/crm";
 import { Loader2 } from "lucide-react";
 
@@ -15,10 +15,10 @@ export default function ProfessionalsPage() {
         fetchPeople({ type: 'Professional', limit: 100 })
             .then(res => {
                 if (cancelled) return;
-                setPros(res.people.length > 0 ? res.people : initialPeople.filter(p => p.type === 'Professional'));
+                setPros(res.people);
             })
             .catch(() => {
-                if (!cancelled) setPros(initialPeople.filter(p => p.type === 'Professional'));
+                if (!cancelled) setPros([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

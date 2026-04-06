@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { fetchStaffMembers, fetchGprGoalsTyped } from "@/lib/supabase/erp";
-import { initialStaff } from "@/lib/staff-data";
-import { initialGprGoals as initialGoals } from "@/lib/gpr-data";
 import { ratingLabels } from "@/lib/gpr-data";
 import type { StaffMember } from "@/types/staff";
 import type { GprGoal, EvaluationRating } from "@/types/gpr";
@@ -23,11 +21,11 @@ export default function EvaluationPage() {
         Promise.all([fetchStaffMembers(), fetchGprGoalsTyped()])
             .then(([s, g]) => {
                 if (cancelled) return;
-                setStaff(s.length > 0 ? s : initialStaff);
-                setGoals(g.length > 0 ? g : initialGoals);
+                setStaff(s);
+                setGoals(g);
             })
             .catch(() => {
-                if (!cancelled) { setStaff(initialStaff); setGoals(initialGoals); }
+                if (!cancelled) { setStaff([]); setGoals([]); }
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

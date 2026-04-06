@@ -7,8 +7,16 @@ const supabase = createClient();
 
 // ── 세션 ──
 
-export async function createHitSession(testType: 'A' | 'B', memberId?: string) {
+export async function createHitSession(testType: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', memberId?: string) {
   const sessionToken = crypto.randomUUID();
+  const firstModule: Record<string, string> = {
+    A: 'base',
+    B: 'personality',
+    C: 'capital',
+    D: 'expertise',
+    E: 'satisfaction',
+    F: 'break_context',
+  };
   const { data, error } = await supabase
     .from('hit_sessions')
     .insert({
@@ -16,7 +24,7 @@ export async function createHitSession(testType: 'A' | 'B', memberId?: string) {
       test_type: testType,
       member_id: memberId || null,
       status: 'in_progress',
-      current_module: testType === 'A' ? 'base' : 'personality',
+      current_module: firstModule[testType] || 'base',
       current_index: 0,
     })
     .select()
@@ -202,6 +210,96 @@ export async function getLatestHitAResult(memberId?: string) {
   }
 
   const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// ── Hero Profile ──
+
+// ── HIT C 결과 ──
+
+export async function createHitCResult(result: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from('hit_c_results')
+    .insert(result)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getHitCResult(resultId: string) {
+  const { data, error } = await supabase
+    .from('hit_c_results')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// ── HIT D 결과 ──
+
+export async function createHitDResult(result: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from('hit_d_results')
+    .insert(result)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getHitDResult(resultId: string) {
+  const { data, error } = await supabase
+    .from('hit_d_results')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// ── HIT E 결과 ──
+
+export async function createHitEResult(result: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from('hit_e_results')
+    .insert(result)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getHitEResult(resultId: string) {
+  const { data, error } = await supabase
+    .from('hit_e_results')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// ── HIT F 결과 ──
+
+export async function createHitFResult(result: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from('hit_f_results')
+    .insert(result)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getHitFResult(resultId: string) {
+  const { data, error } = await supabase
+    .from('hit_f_results')
+    .select('*')
+    .eq('id', resultId)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPeople } from "@/lib/supabase/crm";
-import { initialPeople } from "@/lib/crm-data";
+
 import { Person } from "@/types/crm";
 import { Loader2 } from "lucide-react";
 
@@ -15,10 +15,10 @@ export default function MentorsPage() {
         fetchPeople({ type: 'Mentor', limit: 100 })
             .then(res => {
                 if (cancelled) return;
-                setMentors(res.people.length > 0 ? res.people : initialPeople.filter(p => p.type === 'Mentor'));
+                setMentors(res.people);
             })
             .catch(() => {
-                if (!cancelled) setMentors(initialPeople.filter(p => p.type === 'Mentor'));
+                if (!cancelled) setMentors([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };

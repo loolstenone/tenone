@@ -170,25 +170,32 @@ export async function POST(request: NextRequest) {
         ms: Date.now() - t2,
       });
 
-      // ── Step 3: 1001 취합 ───────────────────────────────────────
-      const t3 = Date.now();
-      const synthesisResult = await invokeAgent({
-        agentName: '1001',
-        userMessage: buildSynthesisPrompt(message, targetAgent, agentResult.response, context),
-        userId,
-        correlationId: corrId,
-      });
+      // ── Step 3: 1001 취합 (응답이 충분하면 스킵) ──────────────────
+      // 에이전트 응답이 200자 이상이고 에러가 아니면 합성 불필요
+      const needsSynthesis = agentResult.response.length < 200 || context;
 
-      chain.push({
-        agent: '1001',
-        role: 'synthesize',
-        input: agentResult.response,
-        output: synthesisResult.response,
-        ms: Date.now() - t3,
-      });
+      if (needsSynthesis) {
+        const t3 = Date.now();
+        const synthesisResult = await invokeAgent({
+          agentName: '1001',
+          userMessage: buildSynthesisPrompt(message, targetAgent, agentResult.response, context),
+          userId,
+          correlationId: corrId,
+        });
 
-      agentPath.push('1001');
-      finalResponse = synthesisResult.response;
+        chain.push({
+          agent: '1001',
+          role: 'synthesize',
+          input: agentResult.response,
+          output: synthesisResult.response,
+          ms: Date.now() - t3,
+        });
+
+        agentPath.push('1001');
+        finalResponse = synthesisResult.response;
+      } else {
+        finalResponse = agentResult.response;
+      }
     }
 
     const response: AgentInvokeResponse = {

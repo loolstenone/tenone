@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPeople } from "@/lib/supabase/crm";
-import { initialPeople } from "@/lib/crm-data";
+
 import { Person } from "@/types/crm";
 import { GraduationCap, Loader2 } from "lucide-react";
 
@@ -15,10 +15,10 @@ export default function StudentsPage() {
         fetchPeople({ type: 'Student', limit: 200 })
             .then(res => {
                 if (cancelled) return;
-                setStudents(res.people.length > 0 ? res.people : initialPeople.filter(p => p.type === 'Student'));
+                setStudents(res.people);
             })
             .catch(() => {
-                if (!cancelled) setStudents(initialPeople.filter(p => p.type === 'Student'));
+                if (!cancelled) setStudents([]);
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };
