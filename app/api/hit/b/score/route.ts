@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult } from '@/lib/supabase/hit';
-import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage, computeAlertScores } from '@/lib/hit/scoring-b';
+import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage, computeAlertScoresFromDB } from '@/lib/hit/scoring-b';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -44,6 +44,22 @@ export async function POST(request: NextRequest) {
       hitAData = data;
     } else {
       hitAData = await getLatestHitAResult(session.member_id);
+    }
+
+    // alert_code 지정 문항 조회 (DB 기반 주의 신호 채점용)
+    let alertQuestions: { question_id: string; alert_code: string }[] = [];
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const sb = createClient();
+      const { data: aqData } = await sb
+        .from('hit_questions')
+        .select('id, alert_code')
+        .not('alert_code', 'is', null);
+      if (aqData) {
+        alertQuestions = aqData.map((q: { id: string; alert_code: string }) => ({ question_id: q.id, alert_code: q.alert_code }));
+      }
+    } catch {
+      // 조회 실패 시 폴백(_dark subscale) 사용
     }
 
     // 채점
@@ -133,9 +149,9 @@ export async function POST(request: NextRequest) {
       journey_stage: journeyStage,
       interest_industry: interestIndustry || null,
       interest_job_function: interestJobFunction || null,
-      // 주의 신호 (소비자 비노출)
+      // 주의 신호 (소비자 비노출) — DB alert_code 우선, 없으면 _dark subscale 폴백
       ...(() => {
-        const alerts = computeAlertScores(personality.scores);
+        const alerts = computeAlertScoresFromDB(responses, alertQuestions, personality.scores);
         return {
           alert_n1: alerts.alertN1,
           alert_m1: alerts.alertM1,
@@ -146,7 +162,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 주의 신호 level 3 → 관리자 알림
-    const alerts = computeAlertScores(personality.scores);
+    const alerts = computeAlertScoresFromDB(responses, alertQuestions, personality.scores);
     if (alerts.alertLevel >= 3) {
       try {
         const { postAgentMessage } = await import('@/lib/supabase/chat');

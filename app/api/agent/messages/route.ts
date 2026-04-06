@@ -3,7 +3,7 @@
  * GET /api/agent/messages — 에이전트 메시지 로그 조회
  *
  * 필터:
- *   ?agentName=compass     — 특정 에이전트의 송수신 메시지
+ *   ?agentName=1001        — 특정 에이전트의 송수신 메시지
  *   ?correlationId=uuid    — 특정 대화 흐름 추적
  *   ?messageType=user_input — 메시지 유형 필터
  *   ?limit=50              — 조회 건수 (기본 50, 최대 200)

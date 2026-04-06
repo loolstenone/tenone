@@ -40,7 +40,7 @@ function createNewConversation(): Conversation {
     id: generateId(),
     title: '새 대화',
     messages: [],
-    agentName: 'compass',
+    agentName: '1001',
     createdAt: new Date().toISOString(),
   };
 }

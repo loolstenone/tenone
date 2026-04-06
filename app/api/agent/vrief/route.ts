@@ -2,8 +2,8 @@
  * 10:01 프로토콜 — Vrief (브리핑) API
  * POST /api/agent/vrief  { type: "am" | "pm" }
  *
- * AM 10:01: 각 에이전트 현황 → compass 취합 → 텐원에게 방향
- * PM 10:01: 각 에이전트 성과 → compass 취합 → 텐원에게 결과
+ * AM 10:01: 각 에이전트 현황 → 1001 취합 → 텐원에게 방향
+ * PM 10:01: 각 에이전트 성과 → 1001 취합 → 텐원에게 결과
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { invokeAgent } from '@/lib/agent/claude';
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
         const type = (body as { type?: string }).type || 'am';
         const prompt = type === 'pm' ? PM_PROMPT : AM_PROMPT;
 
-        // compass 에이전트로 브리핑 실행
+        // 1001 에이전트로 브리핑 실행
         const result = await invokeAgent({
-            agentName: 'compass',
+            agentName: '1001',
             userMessage: prompt,
             correlationId: `vrief-${type}-${new Date().toISOString().slice(0, 10)}`,
         });
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         // 결과를 agent_messages에 별도 기록 (vrief 타입)
         const supabase = await createClient();
         await supabase.from('agent_messages').insert({
-            agent_name: 'compass',
+            agent_name: '1001',
             message_type: 'vrief',
             content: result.response,
             correlation_id: `vrief-${type}-${new Date().toISOString().slice(0, 10)}`,

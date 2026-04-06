@@ -57,6 +57,8 @@ export const modules: NavModule[] = [
         sections: [
             {
                 items: [
+                    { name: "독대", href: "/intra/dokdae", icon: MessageCircle, staffOnly: true },
+                    { name: "Agent Hub", href: "/intra/agent", icon: Bot, staffOnly: true },
                     { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard },
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
                     { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },

@@ -312,18 +312,69 @@ export function determineJourneyStage(readinessTotal: number, competencyAvg: num
 
 // ── 주의 신호 산출 (소비자 비노출) ──
 
+/**
+ * 기본 alert 채점 — personality_scores의 _dark subscale 기반 (폴백)
+ * hit_questions.alert_code가 설정되지 않은 경우 사용
+ */
 export function computeAlertScores(personalityScores: Record<string, number>): {
   alertN1: number;
   alertM1: number;
   alertP1: number;
   alertLevel: number;
 } {
-  // _dark subscale에서 추출
   const alertN1 = personalityScores['narcissism_dark'] ?? 0;
   const alertM1 = personalityScores['machiavellianism_dark'] ?? 0;
   const alertP1 = personalityScores['psychopathy_dark'] ?? 0;
 
-  // 70 이상 = 감지
+  let alertLevel = 0;
+  if (alertN1 >= 70) alertLevel++;
+  if (alertM1 >= 70) alertLevel++;
+  if (alertP1 >= 70) alertLevel++;
+
+  return { alertN1, alertM1, alertP1, alertLevel };
+}
+
+/**
+ * DB 기반 alert 채점 — hit_questions.alert_code 매핑 사용
+ * 관리자가 alert_code를 지정한 문항의 응답만 별도 집계
+ * alert_code가 없으면 computeAlertScores() 폴백
+ */
+export function computeAlertScoresFromDB(
+  responses: ResponseRow[],
+  alertQuestions: { question_id: string; alert_code: string }[],
+  personalityScoresFallback: Record<string, number>,
+): {
+  alertN1: number;
+  alertM1: number;
+  alertP1: number;
+  alertLevel: number;
+} {
+  if (alertQuestions.length === 0) {
+    return computeAlertScores(personalityScoresFallback);
+  }
+
+  // alert_code별 question_id 세트 구성
+  const n1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'N1').map(q => q.question_id));
+  const m1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'M1').map(q => q.question_id));
+  const p1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'P1').map(q => q.question_id));
+
+  function aggregateAlertGroup(questionIds: Set<string>): number {
+    if (questionIds.size === 0) return 0;
+    const matching = responses.filter(r => questionIds.has(r.question_id));
+    if (matching.length === 0) return 0;
+    const values = matching.map(r => {
+      const parts = r.option_value.split(':');
+      const raw = parseInt(parts.length >= 2 ? parts[1] : parts[0], 10);
+      return isNaN(raw) ? 0 : raw;
+    });
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    return Math.round(((avg - 1) / 6) * 100);  // 1-7 → 0-100
+  }
+
+  const alertN1 = aggregateAlertGroup(n1Ids);
+  const alertM1 = aggregateAlertGroup(m1Ids);
+  const alertP1 = aggregateAlertGroup(p1Ids);
+
   let alertLevel = 0;
   if (alertN1 >= 70) alertLevel++;
   if (alertM1 >= 70) alertLevel++;
