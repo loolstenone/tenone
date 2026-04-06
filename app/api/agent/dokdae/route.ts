@@ -79,47 +79,29 @@ export async function POST(request: NextRequest) {
       correlationId: corrId,
     });
 
-    // 사이드 데이터 병렬 조회
+    // 트렌드 카드: trend_summary 또는 morning_briefing 때만 첨부
     const supabase = await createClient();
+    const cards: (AgentStatusCard | TrendCard)[] = [];
 
-    const [agentsRes, trendsRes] = await Promise.allSettled([
-      supabase
-        .from('agent_profiles')
-        .select('name, display_name, is_active, layer, risk_level')
-        .order('layer', { ascending: true }),
-      supabase
+    if (quickAction === 'trend_summary' || quickAction === 'morning_briefing') {
+      const trendsRes = await supabase
         .from('mindle_trends')
         .select('title, summary, source_url, tags, published_at')
         .order('published_at', { ascending: false })
-        .limit(3),
-    ]);
+        .limit(3);
 
-    const cards: (AgentStatusCard | TrendCard)[] = [];
-
-    if (agentsRes.status === 'fulfilled' && agentsRes.value.data) {
-      agentsRes.value.data.slice(0, 6).forEach((a) => {
-        cards.push({
-          type: 'agent_status',
-          name: a.name,
-          displayName: a.display_name,
-          isActive: a.is_active,
-          layer: a.layer,
-          riskLevel: a.risk_level,
+      if (trendsRes.data) {
+        trendsRes.data.forEach((t) => {
+          cards.push({
+            type: 'trend',
+            title: t.title,
+            summary: t.summary,
+            source: t.source_url,
+            tags: t.tags ?? [],
+            publishedAt: t.published_at,
+          });
         });
-      });
-    }
-
-    if (trendsRes.status === 'fulfilled' && trendsRes.value.data) {
-      trendsRes.value.data.forEach((t) => {
-        cards.push({
-          type: 'trend',
-          title: t.title,
-          summary: t.summary,
-          source: t.source_url,
-          tags: t.tags ?? [],
-          publishedAt: t.published_at,
-        });
-      });
+      }
     }
 
     const response: DokdaeResponse = {
