@@ -14,7 +14,7 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 type NavItem = { name: string; href: string; sub?: { name: string; href: string }[] };
 
 const publicNav: NavItem[] = [
-    { name: "Works", href: "/works" },
+    // { name: "Works", href: "/works" }, // 콘텐츠 준비 중 — 임시 비노출
     { name: "Contact", href: "/contact" },
     { name: "Newsroom", href: "/newsroom" },
     { name: "About", href: "/about" },
