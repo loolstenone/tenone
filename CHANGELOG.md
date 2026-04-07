@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-04-07 (집, 세션 26)
+
+### HIT C/D/E/F 문항 전면교체
+- `lib/hit/data/c-questions.ts`: 60개 → 120개 (원본, subscale 11종)
+- `lib/hit/data/d-questions.ts`: 70개 → 140개 (원본, subscale 17종)
+- `lib/hit/data/e-questions.ts`: 60개 → 140개 (원본, subscale 17종)
+- `lib/hit/data/f-questions.ts`: 55개 → 152개 (원본, subscale 16종)
+
+### HIT 채점 로직 전면 수정
+- `lib/hit/scoring-c.ts`: careerCapital 모듈키, 새 subscale 4종+3종+4종
+- `lib/hit/scoring-d.ts`: LeadershipType 4종 변경, seniorReadiness 모듈 분리 신설
+- `lib/hit/scoring-e.ts`: residual_passion, DirectionType 5종, legacy/social 재설계
+- `lib/hit/scoring-f.ts`: latentSkills=viability, resilience=자기서사/자존감/재도전의지, reentry 방향+준비도 분리
+- `app/api/hit/d|e|f/score/route.ts`: 리더십/방향 한글 라벨, AI 프롬프트 subscale 참조 업데이트
+
+### 정밀 QA 대응 수정
+- `app/(HeRo)/hero/coaching/page.tsx`: 가짜 대기업 멘토 프로필 → 일반 직함
+- `app/(HeRo)/hero/page.tsx`: 파트너 캐러셀 대기업명 → 업종 카테고리
+- `app/(Mindle)/mindle/page.tsx`: 가공 통계/조회수/키워드% → 준비중/샘플 표시
+- `app/(Mindle)/mindle/about/page.tsx`: 브랜드 수 12→26
+- `app/(TenOne)/newsletter/page.tsx`: STATIC_ISSUES 6건 제거, 빈 상태 안내 추가
+- `next.config.ts`: /goods 404 → / 301 리다이렉트
+
+---
+
 ## 2026-04-07 (집, 세션 25)
 
 ### Resend 메일링 설정
