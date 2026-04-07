@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
-import { scoreMBTI, scoreDISC, scoreBase, scoreUF, match64Type, deriveSPower } from '@/lib/hit/scoring';
+import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, deriveSPower } from '@/lib/hit/scoring';
 import { selectModules } from '@/lib/hit/report-assembler';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -28,13 +28,21 @@ export async function POST(request: NextRequest) {
       return errorResponse('응답 데이터가 없습니다.', 400);
     }
 
-    // 채점
-    const mbti = scoreMBTI(responses);
-    const disc = scoreDISC(responses);
-    const base = scoreBase(responses);
+    // 채점 — v2: PT + BT + CH + AP + UF → S-Power 5모듈 교차
+    const pt = scorePT(responses);
+    const bt = scoreBT(responses);
+    const ch = scoreCH(responses);
+    const ap = scoreAP(responses);
     const uf = scoreUF(responses);
+    const base = scoreBase(responses);
+
+    // 하위 호환 (64유형 매칭, 리포트 모듈 선택에 사용)
+    const mbti = scoreMBTI(responses);  // PT 래핑
+    const disc = scoreDISC(responses);  // BT 래핑
     const typeProfile = match64Type(mbti, disc);
-    const sPower = deriveSPower(mbti, disc, uf);
+
+    // S-Power: 5모듈 교차 (신규)
+    const sPower = calcSpower8d(pt, bt, uf, ch, ap);
 
     // AI 내러티브 (실패해도 결과 생성 진행)
     let aiNarrative: string | null = null;
@@ -63,12 +71,14 @@ export async function POST(request: NextRequest) {
         messages: [{
           role: 'user',
           content: `Analyze this personality profile:\n` +
-            `MBTI: ${mbti.type} (E${mbti.eScore} S${mbti.sScore} T${mbti.tScore} J${mbti.jScore})\n` +
-            `DISC: ${disc.primary} (subtype: ${disc.subtype}, D${disc.d} I${disc.i} S${disc.s} C${disc.c})\n` +
-            `64 Type: ${typeProfile.code} "${typeProfile.nameKo}"\n` +
-            `S-Power: Strategic${sPower.strategic} Execution${sPower.execution} Creativity${sPower.creativity} Interpersonal${sPower.interpersonal} Analytical${sPower.analytical}\n` +
-            `Base factor: ${base.summary}\n\n` +
-            `Write a personalized narrative that weaves these results together into a coherent personality portrait.`,
+            `PT(성격): ${pt.type} (E${pt.eScore} N${pt.nScore} T${pt.tScore} J${pt.jScore})\n` +
+            `BT(행동): ${bt.primary} (D${bt.d} I${bt.i} S${bt.s} C${bt.c})\n` +
+            `64유형: ${typeProfile.code} "${typeProfile.nameKo}"\n` +
+            `CH(인성): 성실성${ch.integrity} 대인관계${ch.relational} 정서안정${ch.emotional} 윤리성${ch.ethics} 성장지향${ch.growth}\n` +
+            `AP(적성): Top3=${ap.top3Code} (R${ap.R} I${ap.I} A${ap.A} S${ap.S} E${ap.E} C${ap.C})\n` +
+            `S-Power: 전략${sPower.strategic} 실행${sPower.execution} 창의${sPower.creativity} 대인${sPower.interpersonal} 분석${sPower.analytical} 화합${sPower.harmony} 돌파${sPower.breakthrough} 원칙${sPower.guard}\n` +
+            `기저요인: ${base.summary}\n\n` +
+            `5가지 검사 결과를 통합하여 이 사람의 성격·강점·적성을 한국어로 2-3단락 분석해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -126,7 +136,44 @@ export async function POST(request: NextRequest) {
       uf_economic: uf.economic,
       uf_trauma: uf.trauma,
       uf_cultural: uf.cultural,
+      // CH core 5영역 (신규)
+      ch_integrity: ch.integrity,
+      ch_relational: ch.relational,
+      ch_emotional: ch.emotional,
+      ch_ethics: ch.ethics,
+      ch_growth: ch.growth,
+      // AP core 적성 (신규)
+      ap_top3_code: ap.top3Code,
+      ap_scores: ap.scores,
     });
+
+    // 다크 패턴 플래그 저장 (관리자 전용)
+    if (ch.darkPreFlag || bt.darkPattern || pt.fakingFlag) {
+      try {
+        const { createClient } = await import('@/lib/supabase/server');
+        const supabase = createClient();
+        if (ch.darkPreFlag || bt.darkPattern) {
+          await supabase.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'dark_triad',
+            flag_score: bt.darkPattern ? 85 : 50,
+            flag_detail: { ch_dark: ch.darkPreFlag, bt_dark: bt.darkPattern, ch_c08: ch.ethics, ch_r06: ch.relational },
+          });
+        }
+        if (pt.fakingFlag) {
+          await supabase.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'distortion',
+            flag_score: 90,
+            flag_detail: { faking_decoy: true },
+          });
+        }
+      } catch (flagErr) {
+        console.warn('[HIT A Score] 플래그 저장 실패 (결과 저장은 완료됨):', flagErr);
+      }
+    }
 
     // 세션 완료 처리
     await updateHitSession(sessionToken, {

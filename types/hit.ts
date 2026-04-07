@@ -43,7 +43,7 @@ export type HitQuestion = MBTIQuestion | DISCQuestion | BaseQuestion;
 
 export type HitTestType = 'A' | 'B';
 export type HitSessionStatus = 'in_progress' | 'completed' | 'abandoned';
-export type HitModule = 'base' | 'mbti' | 'disc' | 'personality' | 'riasec' | 'competency' | 'readiness';
+export type HitModule = 'base' | 'mbti' | 'disc' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core' | 'personality' | 'riasec' | 'competency' | 'readiness';
 
 export interface HitSession {
   id: string;
@@ -167,6 +167,17 @@ export interface HitAResult {
   aiNarrative: string | null;
   sPowerScores: SPowerScores | null;
 
+  // CH core 인성 (신규)
+  chIntegrity?: number;
+  chRelational?: number;
+  chEmotional?: number;
+  chEthics?: number;
+  chGrowth?: number;
+
+  // AP core 적성 (신규)
+  apTop3Code?: string;
+  apScores?: APCoreScores;
+
   createdAt: string;
 }
 
@@ -185,6 +196,54 @@ export interface SaveResponseInput {
   selectedOption: number;
   optionValue: string;
   responseTimeMs?: number;
+}
+
+// ── PT 성격유형 점수 ──
+export interface PTScores {
+  eScore: number;   // 0-100 (E 방향 %)
+  nScore: number;   // 0-100 (N 방향 %)
+  tScore: number;   // 0-100 (T 방향 %)
+  jScore: number;   // 0-100 (J 방향 %)
+  type: string;     // 'INTJ' 등 (호환용)
+  eGrade: 'STRONG' | 'MID' | 'WEAK';
+  nGrade: 'STRONG' | 'MID' | 'WEAK';
+  tGrade: 'STRONG' | 'MID' | 'WEAK';
+  jGrade: 'STRONG' | 'MID' | 'WEAK';
+  fakingFlag: boolean;
+}
+
+// ── BT 행동유형 점수 ──
+export interface BTScores {
+  d: number;         // 0-100 (배합 %)
+  i: number;
+  s: number;
+  c: number;
+  primary: string;   // 'D'|'I'|'S'|'C'
+  secondary: string;
+  lowest: string;
+  darkPattern: boolean; // D 과잉 패턴 탐지
+}
+
+// ── CH Core 인성 5대 영역 점수 ──
+export interface CHCoreScores {
+  integrity: number;   // 성실성 0-100
+  relational: number;  // 대인관계 0-100
+  emotional: number;   // 정서안정성 0-100
+  ethics: number;      // 윤리성 0-100
+  growth: number;      // 성장지향성 0-100
+  darkPreFlag: boolean; // 다크 패턴 사전 탐지
+}
+
+// ── AP Core 적성 Holland 6유형 점수 ──
+export interface APCoreScores {
+  R: number;  // 현실형
+  I: number;  // 탐구형
+  A: number;  // 예술형
+  S: number;  // 사회형
+  E: number;  // 기업형
+  C: number;  // 관습형
+  top3Code: string;  // 예: 'EAI'
+  scores: Record<string, number>;
 }
 
 // ── HIT B 타입 ──
