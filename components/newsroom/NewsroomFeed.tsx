@@ -7,19 +7,23 @@ import { getBrandMeta, getAllBrands } from '@/lib/brand-meta';
 
 interface FeedPost {
   id: string;
-  site: string;
-  board: string;
+  source_brand: string;
+  // 하위 호환: 구버전 board posts 필드도 허용
+  site?: string;
   title: string;
-  excerpt: string;
-  represent_image: string | null;
-  created_at: string;
+  summary: string | null;
+  // 하위 호환
+  excerpt?: string;
+  thumbnail_url: string | null;
+  represent_image?: string | null;
+  published_at: string;
+  created_at?: string;
   view_count: number;
   like_count: number;
-  comment_count: number;
-  author_name: string | null;
-  guest_nickname: string | null;
-  author_type: string;
+  popularity_score?: number;
+  url: string | null;
   category: string | null;
+  is_featured?: boolean;
 }
 
 function formatRelative(dateStr: string): string {
@@ -36,25 +40,40 @@ function formatRelative(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
 
-function getAuthor(post: FeedPost): string {
-  if (post.author_type === 'guest') return post.guest_nickname || '익명';
-  return post.author_name || '관리자';
+// 헬퍼: 브랜드 코드 정규화 (site → source_brand 하위호환)
+function getBrandCode(post: FeedPost): string {
+  return post.source_brand || post.site || 'tenone';
+}
+
+// 헬퍼: 날짜 필드 정규화
+function getDate(post: FeedPost): string {
+  return post.published_at || post.created_at || '';
+}
+
+// 헬퍼: 요약 필드 정규화
+function getSummary(post: FeedPost): string {
+  return post.summary || post.excerpt || '';
+}
+
+// 헬퍼: 썸네일 필드 정규화
+function getThumbnail(post: FeedPost): string | null {
+  return post.thumbnail_url || post.represent_image || null;
 }
 
 const MOCK_POSTS: FeedPost[] = [
-  { id: 'n1', site: 'madleague', board: 'madzine', title: 'MADLeague 시즌 4 — 참가 대학 30곳 확정, 120개 팀 킥오프', excerpt: '전국 30개 대학에서 120개 팀이 참가하는 시즌 4가 4월 1일 킥오프합니다.', represent_image: null, created_at: '2026-03-30T10:00:00Z', view_count: 1240, like_count: 45, comment_count: 12, author_name: '운영팀', guest_nickname: null, author_type: 'member', category: '공지' },
-  { id: 'n2', site: 'badak', board: 'community', title: '4월 네트워킹 데이 — 마케팅/광고 업계 밋업 참가 신청 오픈', excerpt: '현업 마케터, 광고인들이 모여 인사이트를 나누는 월간 네트워킹. 참여 신청 오픈!', represent_image: null, created_at: '2026-03-29T14:30:00Z', view_count: 890, like_count: 32, comment_count: 8, author_name: null, guest_nickname: '바닥 운영진', author_type: 'guest', category: '모임' },
-  { id: 'n3', site: 'tenone', board: 'newsroom', title: 'Ten:One Universe 2026 비전 — 가치로 연결된 세계관', excerpt: '올해 Ten:One이 집중하는 3가지 키워드: 본질, 속도, 이행.', represent_image: null, created_at: '2026-03-28T09:00:00Z', view_count: 2100, like_count: 78, comment_count: 15, author_name: '텐원', guest_nickname: null, author_type: 'member', category: '비전' },
-  { id: 'n4', site: 'rook', board: 'board', title: 'RooK AI 크리에이터 챌린지 — 수상작 발표', excerpt: 'AI를 활용한 크리에이티브 작품 100점 중 TOP 10을 선정했습니다.', represent_image: null, created_at: '2026-03-27T16:00:00Z', view_count: 560, like_count: 23, comment_count: 5, author_name: 'RooK', guest_nickname: null, author_type: 'member', category: '이벤트' },
-  { id: 'n5', site: 'hero', board: 'news', title: 'HeRo HIT 통합검사 2.0 — 역량 진단의 새로운 기준', excerpt: 'AI 기반 역량 매칭 알고리즘이 업데이트되었습니다. 더 정밀한 진단을 경험하세요.', represent_image: null, created_at: '2026-03-26T11:00:00Z', view_count: 430, like_count: 19, comment_count: 3, author_name: 'HeRo', guest_nickname: null, author_type: 'member', category: '업데이트' },
-  { id: 'n6', site: 'changeup', board: 'news', title: 'ChangeUp 6기 데모데이 — 5개 창업팀 투자 유치 성공', excerpt: '총 8억원 규모의 시드 투자를 유치한 ChangeUp 6기 졸업팀들의 이야기.', represent_image: null, created_at: '2026-03-25T13:00:00Z', view_count: 780, like_count: 56, comment_count: 20, author_name: 'ChangeUp', guest_nickname: null, author_type: 'member', category: '성과' },
-  { id: 'n7', site: 'smarcomm', board: 'news', title: 'SmarComm GEO SEO 솔루션 — 2026 업데이트 공개', excerpt: 'AI 기반 검색 최적화 솔루션의 2026년 버전이 출시됩니다.', represent_image: null, created_at: '2026-03-24T10:00:00Z', view_count: 320, like_count: 14, comment_count: 2, author_name: 'SmarComm', guest_nickname: null, author_type: 'member', category: '업데이트' },
-  { id: 'n8', site: 'youinone', board: 'news', title: 'YouInOne 신규 프로젝트 3건 런칭 — 크루 모집 중', excerpt: '디자인, 개발, 마케팅 크루를 모집합니다.', represent_image: null, created_at: '2026-03-23T09:00:00Z', view_count: 210, like_count: 9, comment_count: 1, author_name: 'YIO', guest_nickname: null, author_type: 'member', category: '모집' },
+  { id: 'n1', source_brand: 'madleague', title: 'MADLeague 시즌 4 — 참가 대학 30곳 확정, 120개 팀 킥오프', summary: '전국 30개 대학에서 120개 팀이 참가하는 시즌 4가 4월 1일 킥오프합니다.', thumbnail_url: null, published_at: '2026-03-30T10:00:00Z', view_count: 1240, like_count: 45, url: '/madleague/madzine', category: '공지' },
+  { id: 'n2', source_brand: 'badak', title: '4월 네트워킹 데이 — 마케팅/광고 업계 밋업 참가 신청 오픈', summary: '현업 마케터, 광고인들이 모여 인사이트를 나누는 월간 네트워킹. 참여 신청 오픈!', thumbnail_url: null, published_at: '2026-03-29T14:30:00Z', view_count: 890, like_count: 32, url: '/badak/community', category: '모임' },
+  { id: 'n3', source_brand: 'tenone', title: 'Ten:One Universe 2026 비전 — 가치로 연결된 세계관', summary: '올해 Ten:One이 집중하는 3가지 키워드: 본질, 속도, 이행.', thumbnail_url: null, published_at: '2026-03-28T09:00:00Z', view_count: 2100, like_count: 78, url: '/newsroom', category: '비전' },
+  { id: 'n4', source_brand: 'rook', title: 'RooK AI 크리에이터 챌린지 — 수상작 발표', summary: 'AI를 활용한 크리에이티브 작품 100점 중 TOP 10을 선정했습니다.', thumbnail_url: null, published_at: '2026-03-27T16:00:00Z', view_count: 560, like_count: 23, url: '/rook/board', category: '이벤트' },
+  { id: 'n5', source_brand: 'hero', title: 'HeRo HIT 통합검사 2.0 — 역량 진단의 새로운 기준', summary: 'AI 기반 역량 매칭 알고리즘이 업데이트되었습니다. 더 정밀한 진단을 경험하세요.', thumbnail_url: null, published_at: '2026-03-26T11:00:00Z', view_count: 430, like_count: 19, url: '/hero/hit', category: '업데이트' },
+  { id: 'n6', source_brand: 'changeup', title: 'ChangeUp 6기 데모데이 — 5개 창업팀 투자 유치 도전', summary: 'ChangeUp 6기 졸업팀들의 데모데이 현장 스토리.', thumbnail_url: null, published_at: '2026-03-25T13:00:00Z', view_count: 780, like_count: 56, url: '/changeup/community', category: '성과' },
+  { id: 'n7', source_brand: 'smarcomm', title: 'SmarComm GEO SEO 솔루션 — 2026 업데이트 공개', summary: 'AI 기반 검색 최적화 솔루션의 2026년 버전이 출시됩니다.', thumbnail_url: null, published_at: '2026-03-24T10:00:00Z', view_count: 320, like_count: 14, url: '/smarcomm', category: '업데이트' },
+  { id: 'n8', source_brand: 'youinone', title: 'YouInOne 신규 프로젝트 3건 런칭 — 크루 모집 중', summary: '디자인, 개발, 마케팅 크루를 모집합니다.', thumbnail_url: null, published_at: '2026-03-23T09:00:00Z', view_count: 210, like_count: 9, url: '/youinone', category: '모집' },
 ];
 
 // 브랜드 배지
-function BrandBadge({ site, category }: { site: string; category?: string | null }) {
-  const meta = getBrandMeta(site);
+function BrandBadge({ code, category }: { code: string; category?: string | null }) {
+  const meta = getBrandMeta(code);
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-[10px] font-bold px-2 py-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
@@ -69,30 +88,31 @@ function BrandBadge({ site, category }: { site: string; category?: string | null
 
 // 메인 피처 카드 (좌측 큰 카드)
 function FeatureCard({ post }: { post: FeedPost }) {
-  const meta = getBrandMeta(post.site);
+  const code = getBrandCode(post);
+  const meta = getBrandMeta(code);
+  const thumb = getThumbnail(post);
+  const href = post.url || `/newsroom`;
   return (
-    <Link href={`/newsroom/${post.id}`} className="group relative block overflow-hidden" style={{ backgroundColor: 'var(--tn-surface)' }}>
-      {/* 이미지 영역 */}
+    <Link href={href} className="group relative block overflow-hidden" style={{ backgroundColor: 'var(--tn-surface)' }}>
       <div className="aspect-[16/10] overflow-hidden" style={{ backgroundColor: 'var(--tn-surface)' }}>
-        {post.represent_image ? (
-          <img src={post.represent_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {thumb ? (
+          <img src={thumb} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--tn-surface)' }}>
             <span className="text-6xl font-black" style={{ color: 'var(--tn-border)' }}>{meta.name.charAt(0)}</span>
           </div>
         )}
       </div>
-      {/* 오버레이 텍스트 */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6">
-        <BrandBadge site={post.site} category={post.category} />
+        <BrandBadge code={code} category={post.category} />
         <h2 className="mt-2 text-xl md:text-2xl font-black text-white leading-snug line-clamp-3 group-hover:text-neutral-200 transition-colors">
           {post.title}
         </h2>
-        <p className="mt-2 text-sm text-neutral-300 line-clamp-2">{post.excerpt}</p>
+        <p className="mt-2 text-sm text-neutral-300 line-clamp-2">{getSummary(post)}</p>
         <div className="mt-3 flex items-center gap-3 text-[11px] text-neutral-400">
-          <span>{getAuthor(post)}</span>
+          <span>{meta.name}</span>
           <span>·</span>
-          <span>{formatRelative(post.created_at)}</span>
+          <span>{formatRelative(getDate(post))}</span>
           <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.view_count}</span>
         </div>
       </div>
@@ -102,10 +122,12 @@ function FeatureCard({ post }: { post: FeedPost }) {
 
 // 편집자 추천 리스트 아이템
 function EditorPickItem({ post, rank }: { post: FeedPost; rank: number }) {
-  const meta = getBrandMeta(post.site);
+  const code = getBrandCode(post);
+  const meta = getBrandMeta(code);
+  const thumb = getThumbnail(post);
+  const href = post.url || `/newsroom`;
   return (
-    <Link href={`/newsroom/${post.id}`} className="group flex gap-3 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--tn-border)' }}>
-      {/* 번호 */}
+    <Link href={href} className="group flex gap-3 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--tn-border)' }}>
       <span className="shrink-0 w-6 h-6 flex items-center justify-center text-xs font-black" style={{ backgroundColor: 'var(--tn-text)', color: 'var(--tn-bg)' }}>
         {rank}
       </span>
@@ -119,13 +141,12 @@ function EditorPickItem({ post, rank }: { post: FeedPost; rank: number }) {
         </p>
         <div className="mt-1 flex items-center gap-2 text-[10px]" style={{ color: 'var(--tn-text-sub)' }}>
           <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{post.view_count}</span>
-          <span>{formatRelative(post.created_at)}</span>
+          <span>{formatRelative(getDate(post))}</span>
         </div>
       </div>
-      {/* 썸네일 */}
-      {post.represent_image && (
+      {thumb && (
         <div className="shrink-0 w-16 h-12 overflow-hidden">
-          <img src={post.represent_image} alt="" className="w-full h-full object-cover" />
+          <img src={thumb} alt="" className="w-full h-full object-cover" />
         </div>
       )}
     </Link>
@@ -134,14 +155,16 @@ function EditorPickItem({ post, rank }: { post: FeedPost; rank: number }) {
 
 // 일반 카드 (하단 그리드)
 function NewsCard({ post }: { post: FeedPost }) {
-  const meta = getBrandMeta(post.site);
+  const code = getBrandCode(post);
+  const meta = getBrandMeta(code);
+  const thumb = getThumbnail(post);
+  const href = post.url || `/newsroom`;
   return (
-    <Link href={`/newsroom/${post.id}`} className="group border-b pb-5" style={{ borderColor: 'var(--tn-border)' }}>
+    <Link href={href} className="group border-b pb-5" style={{ borderColor: 'var(--tn-border)' }}>
       <div className="flex gap-3">
-        {/* 썸네일 */}
         <div className="shrink-0 w-24 h-16 overflow-hidden" style={{ backgroundColor: 'var(--tn-surface)' }}>
-          {post.represent_image ? (
-            <img src={post.represent_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          {thumb ? (
+            <img src={thumb} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-lg font-black" style={{ color: 'var(--tn-border)' }}>{meta.name.charAt(0)}</span>
@@ -157,7 +180,7 @@ function NewsCard({ post }: { post: FeedPost }) {
             {post.title}
           </h3>
           <div className="mt-1.5 flex items-center gap-2 text-[10px]" style={{ color: 'var(--tn-text-sub)' }}>
-            <span>{formatRelative(post.created_at)}</span>
+            <span>{formatRelative(getDate(post))}</span>
             <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{post.view_count}</span>
             <span className="flex items-center gap-0.5"><ThumbsUp className="w-2.5 h-2.5" />{post.like_count}</span>
           </div>

@@ -58,6 +58,21 @@ export async function POST(request: NextRequest) {
                 author_type: 'agent',
             }).eq('id', post.id);
 
+            // 발행 상태면 뉴스룸 자동 등록
+            if ((body.status || 'published') === 'published') {
+                const { registerToNewsroom } = await import('@/lib/supabase/newsroom');
+                await registerToNewsroom({
+                    id: post.id,
+                    site: post.site,
+                    title: post.title,
+                    excerpt: post.excerpt,
+                    represent_image: post.represent_image,
+                    category: post.category,
+                    tags: post.tags,
+                    created_at: post.created_at,
+                });
+            }
+
             return NextResponse.json(post, { status: 201 });
         }
 
@@ -75,6 +90,22 @@ export async function POST(request: NextRequest) {
         }
 
         const post = await boardDb.createPost(body, authorId);
+
+        // 발행 상태면 뉴스룸 자동 등록
+        if (post.status === 'published') {
+            const { registerToNewsroom } = await import('@/lib/supabase/newsroom');
+            await registerToNewsroom({
+                id: post.id,
+                site: post.site,
+                title: post.title,
+                excerpt: post.excerpt,
+                represent_image: post.represent_image,
+                category: post.category,
+                tags: post.tags,
+                created_at: post.created_at,
+            });
+        }
+
         return NextResponse.json(post, { status: 201 });
     } catch (error) {
         console.error('createPost error:', error);

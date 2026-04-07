@@ -330,6 +330,7 @@ export const modules: NavModule[] = [
                             { name: "사이트", href: "/intra/ums/sites/list" },
                             { name: "게시판", href: "/intra/ums/sites/boards" },
                             { name: "콘텐츠", href: "/intra/ums/sites/content" },
+                            { name: "뉴스룸", href: "/intra/ums/sites/newsroom" },
                             { name: "뉴스레터", href: "/intra/ums/sites/newsletter" },
                             { name: "라이브러리", href: "/intra/ums/sites/library" },
                         ],
