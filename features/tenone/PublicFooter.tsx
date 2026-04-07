@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 const brandLinks = [
-    { name: 'Badak.biz', href: 'http://Badak.biz' },
-    { name: 'MADLeap.co.kr', href: 'http://MADLeap.co.kr' },
-    { name: 'MADLeague.net', href: 'http://MADLeague.net' },
-    { name: 'YouInOne.com', href: 'http://YouInOne.com' },
-    { name: 'FWN.co.kr', href: 'http://FWN.co.kr' },
-    { name: '0gamja.com', href: 'http://0gamja.com' },
-    { name: 'RooK.co.kr', href: 'http://RooK.co.kr' },
+    { name: 'Badak', href: '/badak' },
+    { name: 'MADLeap', href: '/madleap' },
+    { name: 'MADLeague', href: '/madleague' },
+    { name: 'YouInOne', href: '/youinone' },
+    { name: 'FWN', href: '/fwn' },
+    { name: '0gamja', href: '/0gamja' },
+    { name: 'RooK', href: '/rook' },
 ];
 
 export function PublicFooter() {
@@ -29,10 +29,10 @@ export function PublicFooter() {
                         <ul className="space-y-3">
                             {brandLinks.map(link => (
                                 <li key={link.name}>
-                                    <a href={link.href} target="_blank" rel="noopener noreferrer"
+                                    <Link href={link.href}
                                         className="text-sm text-neutral-500 hover:text-white transition-colors">
                                         {link.name}
-                                    </a>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>

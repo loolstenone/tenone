@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
       // 삭제된 페이지 — 301 리다이렉트
       { source: '/goods', destination: '/', permanent: true },
       { source: '/goods/:path*', destination: '/', permanent: true },
+      // URL 컨벤션 통일 (PascalCase → kebab-case)
+      { source: '/CrewInvite', destination: '/crew-invite', permanent: true },
     ];
   },
 

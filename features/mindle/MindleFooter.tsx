@@ -27,15 +27,15 @@ export function MindleFooter() {
                         <div className="space-y-2">
                             <Link href="/mindle/about" className="block text-sm hover:text-[#F5C518] transition-colors">Mindle 소개</Link>
                             <Link href="/mindle/newsletter" className="block text-sm hover:text-[#F5C518] transition-colors">뉴스레터</Link>
-                            <a href="https://tenone.biz/contact" className="block text-sm hover:text-[#F5C518] transition-colors">문의</a>
+                            <Link href="/contact" className="block text-sm hover:text-[#F5C518] transition-colors">문의</Link>
                         </div>
                     </div>
                     <div>
                         <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">유니버스</h3>
                         <div className="space-y-2">
-                            <a href="https://tenone.biz" className="block text-sm hover:text-[#F5C518] transition-colors">TenOne.biz</a>
-                            <a href="https://badak.biz" className="block text-sm hover:text-[#F5C518] transition-colors">Badak.biz</a>
-                            <a href="https://smarcomm.biz" className="block text-sm hover:text-[#F5C518] transition-colors">SmarComm.biz</a>
+                            <Link href="/" className="block text-sm hover:text-[#F5C518] transition-colors">TenOne Universe</Link>
+                            <Link href="/badak" className="block text-sm hover:text-[#F5C518] transition-colors">Badak</Link>
+                            <Link href="/smarcomm" className="block text-sm hover:text-[#F5C518] transition-colors">SmarComm</Link>
                         </div>
                     </div>
                 </div>

@@ -166,7 +166,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex justify-center gap-4">
-                        <Link href="/CrewInvite" className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors"
+                        <Link href="/crew-invite" className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors"
                             style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                             Crew 지원하기
                         </Link>
