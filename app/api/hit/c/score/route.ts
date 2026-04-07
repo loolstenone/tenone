@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
             `이직 동기: Push ${scored.motivationPush} / Pull ${scored.motivationPull} (유형: ${scored.motivationType})\n` +
             `전환 가능성: ${JSON.stringify(scored.transferabilityScores)} (지수 ${scored.transferabilityIndex})\n` +
             `전환 준비도: ${scored.transitionReadiness} (준비 ${scored.preparation}, 갭인식 ${scored.gapAwareness})\n` +
+            `준비도 세부: ${JSON.stringify(scored.readinessScores)}\n` +
+            `전환유형(CTYPE): ${scored.ctype}\n` +
             `갭 영역: ${scored.gapAreas.join(', ') || '없음'}\n` +
             `여정 단계: ${journeyStage}\n` +
             (targetJob ? `희망 직무: ${targetJob}\n` : '') +
@@ -109,7 +111,27 @@ export async function POST(request: NextRequest) {
       transition_readiness: scored.transitionReadiness,
       ai_report: aiReport,
       journey_stage: journeyStage,
+      // 신규 (HIT_C_Final.md)
+      ctype: scored.ctype,
+      transferability_scores: scored.transferabilityScores,
+      readiness_scores: scored.readinessScores,
+      faking_flag: scored.fakingFlag,
     });
+
+    // faking 의심 시 hit_admin_flags 기록
+    if (scored.fakingFlag) {
+      try {
+        await supabase.from('hit_admin_flags').insert({
+          member_id: session.member_id || null,
+          session_id: session.id,
+          flag_type: 'distortion',
+          flag_score: 90,
+          flag_detail: { source: 'HIT_C', c_val01: true, c_val02: true },
+        });
+      } catch (e) {
+        console.warn('[HIT C Score] faking flag 저장 실패:', e);
+      }
+    }
 
     // hero_profiles 링크
     if (session.member_id) {

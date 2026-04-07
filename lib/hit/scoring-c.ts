@@ -1,10 +1,12 @@
 /**
- * HIT C 채점 알고리즘 — 경력전환 분석
- * 7점 리커트 척도 기반
- * 모듈1: careerCapital — domain_expertise, achievement, relational, transferable
- * 모듈2: motivation — push, pull
- * 모듈3: transferability — skill_transfer, market_fit, adaptation
- * 모듈4: readiness — doc_readiness, interview_readiness, timing, psych_readiness
+ * HIT C 채점 알고리즘 — 경력전환 분석 (HIT_C_Final.md 기반)
+ * 7점 리커트 척도 기반 · 122문항 (120 + 미끼 2)
+ *
+ * 모듈1 capital — domain_expertise, achievement, relational, transferable
+ * 모듈2 motivation — push, pull
+ * 모듈3 transferability — skill_transfer, market_fit, adaptation
+ * 모듈4 readiness — doc, interview, timing, psychological
+ * 추가: CTYPE 산출, decoy(faking) 검출
  */
 
 interface ResponseRow {
@@ -31,7 +33,7 @@ function buildSubscaleMap(responses: ResponseRow[]): Record<string, number[]> {
     }
 
     if (isNaN(value)) continue;
-    if (reverse) value = 8 - value;  // 7점 역채점: 1→7, 7→1
+    if (reverse) value = 8 - value;  // 7점 역채점
 
     if (!map[subscale]) map[subscale] = [];
     map[subscale].push(value);
@@ -45,7 +47,33 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 경력 자본 채점 ──
+/** 단일 응답 raw 값 추출 (역채점 적용 후 1~7) */
+function rawValue(r: ResponseRow | undefined): number | null {
+  if (!r) return null;
+  const parts = r.option_value.split(':');
+  let value = NaN;
+  let reverse = false;
+  if (parts.length >= 2) {
+    value = parseInt(parts[1], 10);
+    reverse = parts[2] === 'r';
+  } else {
+    value = parseInt(parts[0], 10);
+  }
+  if (isNaN(value)) return null;
+  if (reverse) value = 8 - value;
+  return value;
+}
+
+function avgFromIds(responses: ResponseRow[], ids: string[]): number {
+  const vals: number[] = [];
+  for (const id of ids) {
+    const v = rawValue(responses.find(r => r.question_id === id));
+    if (v !== null) vals.push(v);
+  }
+  return scaleToHundred(vals);
+}
+
+// ── 경력 자본 ──
 
 export function scoreCapital(responses: ResponseRow[]): {
   scores: Record<string, number>;
@@ -62,13 +90,13 @@ export function scoreCapital(responses: ResponseRow[]): {
   };
 
   const overall = Math.round(
-    Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length
+    Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length,
   );
 
   return { scores, overall };
 }
 
-// ── 이직 동기 채점 ──
+// ── 이직 동기 ──
 
 export function scoreMotivation(responses: ResponseRow[]): {
   push: number;
@@ -89,7 +117,22 @@ export function scoreMotivation(responses: ResponseRow[]): {
   return { push, pull, motivationType };
 }
 
-// ── 전환 가능성 채점 ──
+/** Push/Pull 내부 sub 영역 (CTYPE 산출용) */
+export function scorePushPullSubs(responses: ResponseRow[]): {
+  pushGrowth: number;
+  pushCulture: number;
+  pullGrowth: number;
+  pullReward: number;
+} {
+  return {
+    pushGrowth: avgFromIds(responses, ['c_pu01', 'c_pu02', 'c_pu09']),
+    pushCulture: avgFromIds(responses, ['c_pu04', 'c_pu05', 'c_pu10']),
+    pullGrowth: avgFromIds(responses, ['c_pl01', 'c_pl06', 'c_pl08']),
+    pullReward: avgFromIds(responses, ['c_pl03']),
+  };
+}
+
+// ── 전환 가능성 ──
 
 export function scoreTransferability(responses: ResponseRow[]): {
   scores: Record<string, number>;
@@ -104,19 +147,23 @@ export function scoreTransferability(responses: ResponseRow[]): {
     adaptation: scaleToHundred(subscaleMap['adaptation'] || []),
   };
 
-  // 전환가능성 지수: 스킬전이 40% + 시장적합 30% + 적응력 30%
   const transferabilityIndex = Math.round(
     scores.skill_transfer * 0.4 +
     scores.market_fit * 0.3 +
-    scores.adaptation * 0.3
+    scores.adaptation * 0.3,
   );
 
   return { scores, transferabilityIndex };
 }
 
-// ── 준비도 채점 ──
+// ── 준비도 ──
 
 export function scoreReadiness(responses: ResponseRow[]): {
+  doc: number;
+  interview: number;
+  timing: number;
+  psychological: number;
+  total: number;
   preparation: number;
   gapAwareness: number;
   transitionReadiness: number;
@@ -124,23 +171,23 @@ export function scoreReadiness(responses: ResponseRow[]): {
   const readiness = responses.filter(r => r.module === 'readiness');
   const subscaleMap = buildSubscaleMap(readiness);
 
-  const docReadiness = scaleToHundred(subscaleMap['doc_readiness'] || []);
-  const interviewReadiness = scaleToHundred(subscaleMap['interview_readiness'] || []);
+  // 신규 키 우선, 구버전 키 fallback
+  const doc = scaleToHundred(subscaleMap['doc'] || subscaleMap['doc_readiness'] || []);
+  const interview = scaleToHundred(subscaleMap['interview'] || subscaleMap['interview_readiness'] || []);
   const timing = scaleToHundred(subscaleMap['timing'] || []);
-  const psychReadiness = scaleToHundred(subscaleMap['psych_readiness'] || []);
+  const psychological = scaleToHundred(subscaleMap['psychological'] || subscaleMap['psych_readiness'] || []);
 
-  // 실질 준비: 서류·면접·타이밍 평균
-  const preparation = Math.round((docReadiness + interviewReadiness + timing) / 3);
-  // 심리 준비도를 갭 인식으로 활용
-  const gapAwareness = psychReadiness;
+  const total = Math.round((doc + interview + timing + psychological) / 4);
 
-  // 전환 준비도: 준비 60% + 갭인식 40%
+  // 기존 호환
+  const preparation = Math.round((doc + interview + timing) / 3);
+  const gapAwareness = psychological;
   const transitionReadiness = Math.round(preparation * 0.6 + gapAwareness * 0.4);
 
-  return { preparation, gapAwareness, transitionReadiness };
+  return { doc, interview, timing, psychological, total, preparation, gapAwareness, transitionReadiness };
 }
 
-// ── 갭 영역 도출 ──
+// ── 갭 영역 ──
 
 export function identifyGapAreas(
   capitalScores: Record<string, number>,
@@ -162,6 +209,58 @@ export function identifyGapAreas(
   return gaps;
 }
 
+// ── CTYPE (전환유형) ──
+
+export type CType = 'CTYPE-STRATEGIC' | 'CTYPE-GROWTH' | 'CTYPE-ESCAPE' | 'CTYPE-EXPLORER';
+
+export function scoreCType(params: {
+  capitalScores: { domain_expertise: number; achievement: number; relational: number; transferable: number };
+  motivationPush: number;
+  motivationPull: number;
+  pullGrowth: number;
+  pushGrowth: number;
+  transferScores: { skill_transfer: number; market_fit: number; adaptation: number };
+}): CType {
+  const cc_domain = params.capitalScores.domain_expertise;
+  const HIGH = 67;
+  const MID_HIGH = 50;
+
+  // STRATEGIC: domain HIGH + pushGrowth HIGH + skill_transfer HIGH
+  if (cc_domain >= HIGH && params.pushGrowth >= HIGH && params.transferScores.skill_transfer >= HIGH) {
+    return 'CTYPE-STRATEGIC';
+  }
+
+  // GROWTH: domain MID + pullGrowth HIGH + adaptation HIGH
+  if (cc_domain >= MID_HIGH && cc_domain < HIGH && params.pullGrowth >= HIGH && params.transferScores.adaptation >= HIGH) {
+    return 'CTYPE-GROWTH';
+  }
+
+  // ESCAPE: push >= 70 AND pull < 50
+  if (params.motivationPush >= 70 && params.motivationPull < 50) {
+    return 'CTYPE-ESCAPE';
+  }
+
+  // EXPLORER: 둘 다 낮으면서 적응력 높음
+  if (params.motivationPush < 50 && params.motivationPull < 50 && params.transferScores.adaptation >= HIGH) {
+    return 'CTYPE-EXPLORER';
+  }
+
+  // 기본: 가장 강한 신호
+  if (params.motivationPush > params.motivationPull + 15) return 'CTYPE-ESCAPE';
+  if (params.pullGrowth >= HIGH) return 'CTYPE-GROWTH';
+  if (cc_domain >= HIGH) return 'CTYPE-STRATEGIC';
+  return 'CTYPE-EXPLORER';
+}
+
+// ── 미끼 (faking) 판정 ──
+
+export function scoreCDecoy(responses: ResponseRow[]): boolean {
+  const v1 = rawValue(responses.find(r => r.question_id === 'c_val01'));
+  const v2 = rawValue(responses.find(r => r.question_id === 'c_val02'));
+  if (v1 === null || v2 === null) return false;
+  return v1 >= 6 && v2 >= 6;
+}
+
 // ── 통합 채점 ──
 
 export interface HitCScoreResult {
@@ -176,6 +275,10 @@ export interface HitCScoreResult {
   gapAwareness: number;
   transitionReadiness: number;
   gapAreas: string[];
+  // 신규
+  readinessScores: { doc: number; interview: number; timing: number; psychological: number; total: number };
+  ctype: CType;
+  fakingFlag: boolean;
 }
 
 export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
@@ -184,6 +287,17 @@ export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
   const transfer = scoreTransferability(responses);
   const readiness = scoreReadiness(responses);
   const gapAreas = identifyGapAreas(capital.scores, transfer.scores, readiness.preparation);
+
+  const pushPullSubs = scorePushPullSubs(responses);
+  const ctype = scoreCType({
+    capitalScores: capital.scores as { domain_expertise: number; achievement: number; relational: number; transferable: number },
+    motivationPush: motivation.push,
+    motivationPull: motivation.pull,
+    pushGrowth: pushPullSubs.pushGrowth,
+    pullGrowth: pushPullSubs.pullGrowth,
+    transferScores: transfer.scores as { skill_transfer: number; market_fit: number; adaptation: number },
+  });
+  const fakingFlag = scoreCDecoy(responses);
 
   return {
     capitalScores: capital.scores,
@@ -197,5 +311,14 @@ export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
     gapAwareness: readiness.gapAwareness,
     transitionReadiness: readiness.transitionReadiness,
     gapAreas,
+    readinessScores: {
+      doc: readiness.doc,
+      interview: readiness.interview,
+      timing: readiness.timing,
+      psychological: readiness.psychological,
+      total: readiness.total,
+    },
+    ctype,
+    fakingFlag,
   };
 }
