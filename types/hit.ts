@@ -43,7 +43,7 @@ export type HitQuestion = MBTIQuestion | DISCQuestion | BaseQuestion;
 
 export type HitTestType = 'A' | 'B';
 export type HitSessionStatus = 'in_progress' | 'completed' | 'abandoned';
-export type HitModule = 'base' | 'mbti' | 'disc' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core' | 'personality' | 'riasec' | 'competency' | 'readiness';
+export type HitModule = 'base' | 'mbti' | 'disc' | 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core' | 'character_deep' | 'aptitude_deep' | 'personality' | 'riasec' | 'competency' | 'readiness';
 
 export interface HitSession {
   id: string;
@@ -288,4 +288,51 @@ export interface HitBResult {
   aiReport: string | null;
   journeyStage: string;
   createdAt: string;
+}
+
+// ── CH Deep 심화 (14하위영역 + 5영역 재산출 + 다크 탐지) ──
+
+export interface CHDeepScores {
+  subscales: {
+    conscience: number;
+    self_discipline: number;
+    perfectionism: number;
+    warmth: number;
+    social_boldness: number;
+    sensitivity: number;
+    tension: number;
+    optimism: number;
+    control: number;
+    independence: number;
+    suspicion: number;
+    openness: number;
+    adventure: number;
+    intellect: number;
+  };
+  precise: {
+    integrity: number;
+    relational: number;
+    emotional: number;
+    ethics: number;
+    growth: number;
+  };
+  darkTypes: {
+    narcissism: boolean;
+    machiavellianism: boolean;
+    psychopathy: boolean;
+    sociopathy: boolean;
+  };
+  decoyFakingFlag: boolean;
+}
+
+// ── AP Deep 심화 (흥미-효능감 매트릭스) ──
+
+export type APMatrixCell = '최적영역' | '탐색학습필요' | '소진리스크' | '비관심영역';
+
+export interface APDeepScores {
+  interest: { R: number; I: number; A: number; S: number; E: number; C: number };
+  efficacy: { R: number; I: number; A: number; S: number; E: number; C: number };
+  total: { R: number; I: number; A: number; S: number; E: number; C: number };
+  matrix: { R: APMatrixCell; I: APMatrixCell; A: APMatrixCell; S: APMatrixCell; E: APMatrixCell; C: APMatrixCell };
+  top3TotalCode: string;
 }

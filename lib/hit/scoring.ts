@@ -12,6 +12,9 @@ import type {
   BTScores,
   CHCoreScores,
   APCoreScores,
+  CHDeepScores,
+  APDeepScores,
+  APMatrixCell,
 } from '@/types/hit';
 import { findTypeMatch } from './data/type-matching';
 import { ufQuestions } from './data/base-questions';
@@ -398,4 +401,218 @@ export function deriveSPower(mbti: MBTIScores, disc: DISCScores, ufScores?: UFSc
     breakthrough: clamp(Math.round(disc.d * 0.25 + (100 - mbti.sScore) * 0.25 + (100 - mbti.jScore) * 0.2 + ufAvg * 0.2)),
     guard: clamp(Math.round(disc.c * 0.3 + mbti.jScore * 0.25 + mbti.tScore * 0.15 + ufAvg * 0.2)),
   };
+}
+
+// ── CH Deep 심화 채점 (14하위영역 + 5영역 정밀 재산출 + 다크 탐지) ──
+
+export function scoreCHDeep(responses: ResponseRow[], _chCoreScores?: CHCoreScores): CHDeepScores {
+  const coreRes = responses.filter(r => r.module === 'character_core');
+  const deepRes = responses.filter(r => r.module === 'character_deep');
+
+  const getCore = (id: string, rev: boolean): number => {
+    const r = coreRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : (rev ? reverseScore(v) : v);
+  };
+  const getDeep = (id: string, rev: boolean): number => {
+    const r = deepRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : (rev ? reverseScore(v) : v);
+  };
+
+  const conscience = score100([
+    getCore('ch_c01', false), getCore('ch_c05', false), getCore('ch_c08', true),
+    getCore('ch_x01', false), getCore('ch_x03', false), getDeep('chx_con01', false),
+  ]);
+  const self_discipline = score100([
+    getCore('ch_c02', false), getCore('ch_c03', false), getCore('ch_c06', true),
+    getCore('ch_c07', false), getDeep('chx_sd01', false), getDeep('chx_sd02', false),
+  ]);
+  const perfectionism = score100([
+    getCore('ch_c04', false),
+    getDeep('chx_pf01', false), getDeep('chx_pf02', false),
+    getDeep('chx_pf03', true), getDeep('chx_pf04', true), getDeep('chx_pf05', false),
+  ]);
+  const warmth = score100([
+    getCore('ch_r01', false), getCore('ch_r04', false), getCore('ch_r06', true),
+    getDeep('chx_wm01', false), getDeep('chx_wm02', false), getDeep('chx_wm03', false),
+  ]);
+  const social_boldness = score100([
+    getCore('ch_r03', false), getCore('ch_r05', false), getCore('ch_r07', true),
+    getDeep('chx_sb01', false), getDeep('chx_sb02', false), getDeep('chx_sb03', false),
+  ]);
+  const sensitivity = score100([
+    getCore('ch_r02', false), getCore('ch_r08', false),
+    getDeep('chx_sn01', false), getDeep('chx_sn02', false),
+    getDeep('chx_sn03', true), getDeep('chx_sn04', false),
+  ]);
+  const tension = score100([
+    getCore('ch_e01', true), getCore('ch_e05', true),
+    getDeep('chx_tn01', true), getDeep('chx_tn02', true),
+    getDeep('chx_tn03', false), getDeep('chx_tn04', true),
+  ]);
+  const optimism = score100([
+    getCore('ch_e02', false), getCore('ch_e04', false), getCore('ch_e07', false),
+    getDeep('chx_op01', false), getDeep('chx_op02', false), getDeep('chx_op03', true),
+  ]);
+  const control = score100([
+    getCore('ch_e03', false), getCore('ch_e06', false), getCore('ch_e08', true),
+    getDeep('chx_ct01', false), getDeep('chx_ct02', true), getDeep('chx_ct03', false),
+  ]);
+  const independence = score100([
+    getCore('ch_x02', false), getCore('ch_x04', false), getCore('ch_x07', false),
+    getDeep('chx_in01', false), getDeep('chx_in02', true), getDeep('chx_in03', false),
+  ]);
+  const suspicion = score100([
+    getCore('ch_x05', true), getCore('ch_x06', false), getCore('ch_x08', true),
+    getDeep('chx_su01', true), getDeep('chx_su02', true), getDeep('chx_su03', false),
+  ]);
+  const openness = score100([
+    getCore('ch_g01', false), getCore('ch_g04', false),
+    getDeep('chx_op2_01', false), getDeep('chx_op2_02', false),
+    getDeep('chx_op2_03', false), getDeep('chx_op2_04', true),
+  ]);
+  const adventure = score100([
+    getCore('ch_g02', false), getCore('ch_g05', false), getCore('ch_g07', true),
+    getDeep('chx_ad01', false), getDeep('chx_ad02', false), getDeep('chx_ad03', false),
+  ]);
+  const intellect = score100([
+    getCore('ch_g03', false), getCore('ch_g06', false), getCore('ch_g08', false),
+    getDeep('chx_iq01', false), getDeep('chx_iq02', false), getDeep('chx_iq03', false),
+  ]);
+
+  const subscales = {
+    conscience, self_discipline, perfectionism,
+    warmth, social_boldness, sensitivity,
+    tension, optimism, control,
+    independence, suspicion,
+    openness, adventure, intellect,
+  };
+
+  const precise = {
+    integrity: Math.round((conscience + self_discipline + perfectionism) / 3),
+    relational: Math.round((warmth + social_boldness + sensitivity) / 3),
+    emotional: Math.round(((100 - tension) + optimism + control) / 3),
+    ethics: Math.round((conscience + (100 - suspicion) + independence) / 3),
+    growth: Math.round((openness + adventure + intellect) / 3),
+  };
+
+  const getRawCore = (id: string): number => {
+    const r = coreRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : v;
+  };
+  const getRawDeep = (id: string): number => {
+    const r = deepRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : v;
+  };
+
+  const narcissism = [
+    getRawDeep('chx_pf05'),
+    getRawDeep('chx_sb02'),
+    getRawDeep('chx_sb03'),
+  ].every(v => v >= 6) && sensitivity < 34;
+
+  const machiavellianism = [
+    getRawCore('ch_c08'),
+    getRawCore('ch_x05'),
+    getRawCore('ch_x08'),
+    getRawDeep('chx_su01'),
+  ].every(v => v >= 6) && independence >= 80;
+
+  const psychopathy = [
+    getRawCore('ch_r06'),
+    getRawDeep('chx_sn03'),
+    getRawDeep('chx_tn03'),
+    getRawDeep('chx_ct03'),
+  ].every(v => v >= 6) && conscience < 34;
+
+  const sociopathy = [
+    getRawCore('ch_c08'),
+    getRawDeep('chx_ad03'),
+    getRawCore('ch_r06'),
+  ].every(v => v >= 6) && control >= 67 && conscience < 34;
+
+  const decoyVal = getRawDeep('chx_val01');
+  const decoyFakingFlag = decoyVal >= 6;
+
+  return {
+    subscales,
+    precise,
+    darkTypes: { narcissism, machiavellianism, psychopathy, sociopathy },
+    decoyFakingFlag,
+  };
+}
+
+// ── AP Deep 심화 채점 (흥미-효능감 매트릭스) ──
+
+export function scoreAPDeep(responses: ResponseRow[]): APDeepScores {
+  const coreRes = responses.filter(r => r.module === 'aptitude_core');
+  const deepRes = responses.filter(r => r.module === 'aptitude_deep');
+
+  const getCore = (id: string): number => {
+    const r = coreRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : v;
+  };
+  const getDeep = (id: string): number => {
+    const r = deepRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    const v = parseInt(r.option_value);
+    return isNaN(v) ? 0 : v;
+  };
+
+  const interest = {
+    R: score100(['ap_r01','ap_r02','ap_r03','ap_r04','ap_r05'].map(getCore)),
+    I: score100(['ap_i01','ap_i02','ap_i03','ap_i04','ap_i05'].map(getCore)),
+    A: score100(['ap_a01','ap_a02','ap_a03','ap_a04','ap_a05'].map(getCore)),
+    S: score100(['ap_s01','ap_s02','ap_s03','ap_s04','ap_s05'].map(getCore)),
+    E: score100(['ap_e01','ap_e02','ap_e03','ap_e04','ap_e05'].map(getCore)),
+    C: score100(['ap_c01','ap_c02','ap_c03','ap_c04','ap_c05'].map(getCore)),
+  };
+
+  const efficacy = {
+    R: score100(['apx_r01','apx_r02','apx_r03','apx_r04','apx_r05'].map(getDeep)),
+    I: score100(['apx_i01','apx_i02','apx_i03','apx_i04','apx_i05'].map(getDeep)),
+    A: score100(['apx_a01','apx_a02','apx_a03','apx_a04','apx_a05'].map(getDeep)),
+    S: score100(['apx_s01','apx_s02','apx_s03','apx_s04','apx_s05'].map(getDeep)),
+    E: score100(['apx_e01','apx_e02','apx_e03','apx_e04','apx_e05'].map(getDeep)),
+    C: score100(['apx_c01','apx_c02','apx_c03','apx_c04','apx_c05'].map(getDeep)),
+  };
+
+  const total = {
+    R: Math.round(interest.R * 0.6 + efficacy.R * 0.4),
+    I: Math.round(interest.I * 0.6 + efficacy.I * 0.4),
+    A: Math.round(interest.A * 0.6 + efficacy.A * 0.4),
+    S: Math.round(interest.S * 0.6 + efficacy.S * 0.4),
+    E: Math.round(interest.E * 0.6 + efficacy.E * 0.4),
+    C: Math.round(interest.C * 0.6 + efficacy.C * 0.4),
+  };
+
+  const cell = (int: number, eff: number): APMatrixCell => {
+    if (int >= 60 && eff >= 60) return '최적영역';
+    if (int >= 60 && eff < 60) return '탐색학습필요';
+    if (int < 60 && eff >= 60) return '소진리스크';
+    return '비관심영역';
+  };
+
+  const matrix = {
+    R: cell(interest.R, efficacy.R),
+    I: cell(interest.I, efficacy.I),
+    A: cell(interest.A, efficacy.A),
+    S: cell(interest.S, efficacy.S),
+    E: cell(interest.E, efficacy.E),
+    C: cell(interest.C, efficacy.C),
+  };
+
+  const sorted = Object.entries(total).sort((a, b) => b[1] - a[1]);
+  const top3TotalCode = sorted.slice(0, 3).map(([k]) => k).join('');
+
+  return { interest, efficacy, total, matrix, top3TotalCode };
 }
