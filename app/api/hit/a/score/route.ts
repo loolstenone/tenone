@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       mbtiType: mbti.type,
       mbtiEScore: mbti.eScore, mbtiSScore: mbti.sScore,
       mbtiTScore: mbti.tScore, mbtiJScore: mbti.jScore,
-      sPowerScores: sPower,
+      sPowerScores: sPower as unknown as Record<string, number>,
       ufScores: uf,
     });
 

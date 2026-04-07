@@ -66,10 +66,10 @@ export async function POST(request: NextRequest) {
                     site: post.site,
                     title: post.title,
                     excerpt: post.excerpt,
-                    represent_image: post.represent_image,
+                    represent_image: post.representImage,
                     category: post.category,
                     tags: post.tags,
-                    created_at: post.created_at,
+                    created_at: post.createdAt,
                 });
             }
 
@@ -99,10 +99,10 @@ export async function POST(request: NextRequest) {
                 site: post.site,
                 title: post.title,
                 excerpt: post.excerpt,
-                represent_image: post.represent_image,
+                represent_image: post.representImage,
                 category: post.category,
                 tags: post.tags,
-                created_at: post.created_at,
+                created_at: post.createdAt,
             });
         }
 
