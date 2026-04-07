@@ -44,8 +44,35 @@ export async function POST(request: NextRequest) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
     }
 
+    // A 결과 컨텍스트
+    const aCtx = {
+      bt: {
+        d: hitAData.disc_d_score || 50,
+        i: hitAData.disc_i_score || 50,
+        s: hitAData.disc_s_score || 50,
+        c: hitAData.disc_c_score || 50,
+      },
+      sp: hitAData.s_power_scores || {
+        strategic: 50, execution: 50, creativity: 50, interpersonal: 50,
+        analytical: 50, harmony: 50, breakthrough: 50, guard: 50,
+      },
+      ch: {
+        integrity: hitAData.ch_integrity || 50,
+        relational: hitAData.ch_relational || 50,
+        emotional: hitAData.ch_emotional || 50,
+        ethics: hitAData.ch_ethics || 50,
+        growth: hitAData.ch_growth || 50,
+      },
+      ap: hitAData.ap_scores || { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 },
+      uf: {
+        self: hitAData.uf_self || 50,
+        parent: hitAData.uf_parent || 50,
+        peer: hitAData.uf_peer || 50,
+      },
+    };
+
     // 채점
-    const scored = scoreHitD(responses);
+    const scored = scoreHitD(responses, aCtx);
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
@@ -124,7 +151,25 @@ export async function POST(request: NextRequest) {
       next_role_matrix: scored.next_role_matrix,
       ai_report: aiReport,
       journey_stage: journeyStage,
+      faking_flag: scored.faking_flag,
     });
+
+    // 미끼 통과(조작 의심) 시 어드민 플래그 등록
+    if (scored.faking_flag) {
+      try {
+        const { createClient: createServerClient } = await import('@/lib/supabase/server');
+        const serverSupabase = await createServerClient();
+        await serverSupabase.from('hit_admin_flags').insert({
+          member_id: session.member_id || null,
+          session_id: session.id,
+          flag_type: 'distortion',
+          flag_score: 90,
+          flag_detail: { source: 'HIT_D', d_val01: true, d_val02: true },
+        });
+      } catch (e) {
+        console.warn('[HIT D Score] faking flag 저장 실패:', e);
+      }
+    }
 
     // hero_profiles 링크
     if (session.member_id) {
