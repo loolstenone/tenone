@@ -18,9 +18,9 @@ const process = [
 ];
 
 const cases = [
-    { name: "MADLeague", category: "Community", result: "대학생 동아리 연합 → 전국 12개 대학 확대", tags: ["로고", "컬러", "웹사이트"] },
-    { name: "LUKI", category: "AI Idol", result: "AI 아이돌 브랜드 론칭 → SNS 팔로워 5만 돌파", tags: ["캐릭터", "세계관", "콘텐츠"] },
-    { name: "Badak", category: "Network", result: "전문가 네트워크 리브랜딩 → 가입자 30% 증가", tags: ["BI", "UX", "마케팅"] },
+    { name: "MADLeague", category: "Community", result: "대학생 동아리 연합 브랜드 아이덴티티 구축 (진행 중)", tags: ["로고", "컬러", "웹사이트"] },
+    { name: "LUKI", category: "AI Idol", result: "AI 아이돌 브랜드 세계관 및 비주얼 시스템 설계 (진행 중)", tags: ["캐릭터", "세계관", "콘텐츠"] },
+    { name: "Badak", category: "Network", result: "전문가 네트워크 플랫폼 BI 리뉴얼 (진행 중)", tags: ["BI", "UX", "마케팅"] },
 ];
 
 export default function BrandGravityPage() {
@@ -49,10 +49,10 @@ export default function BrandGravityPage() {
                 {/* Stats */}
                 <section className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/5 rounded-xl overflow-hidden mb-20">
                     {[
-                        { value: "50+", label: "브랜딩 프로젝트" },
-                        { value: "23", label: "Universe 브랜드" },
+                        { value: "준비 중", label: "브랜딩 프로젝트" },
+                        { value: "26", label: "Universe 브랜드" },
                         { value: "4D", label: "프로세스" },
-                        { value: "92%", label: "고객 만족도" },
+                        { value: "준비 중", label: "고객 만족도" },
                     ].map(s => (
                         <div key={s.label} className="bg-[#0A0A0A] p-5 text-center">
                             <div className="text-xl font-bold text-amber-500">{s.value}</div>

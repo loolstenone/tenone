@@ -45,10 +45,10 @@ const partners = [
 ];
 
 const stats = [
-    { icon: Users, label: "발굴 인재", value: "500+" },
-    { icon: Zap, label: "멘토 매칭", value: "200+" },
-    { icon: Award, label: "성공 사례", value: "150+" },
-    { icon: Globe, label: "파트너 대학", value: "10+" },
+    { icon: Users, label: "HIT 진단", value: "준비 중" },
+    { icon: Zap, label: "멘토 매칭", value: "준비 중" },
+    { icon: Award, label: "성공 사례", value: "준비 중" },
+    { icon: Globe, label: "파트너 대학", value: "준비 중" },
 ];
 
 export default function AboutPage() {
