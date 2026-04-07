@@ -1,4 +1,7 @@
-/** HIT A — DISC 40문항 (Pre-Test 20 + Main 20) */
+/**
+ * HIT A — DISC 40문항 (Pre-Test 20 + Main 20)
+ * @deprecated 레거시 모듈. 신규 개발은 pt-questions.ts / bt-questions.ts 사용
+ */
 import type { DISCQuestion } from "@/types/hit";
 
 export const discQuestions: DISCQuestion[] = [

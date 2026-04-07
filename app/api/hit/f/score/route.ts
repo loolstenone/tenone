@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses, updateHitSession, createHitFResult } from '@/lib/supabase/hit';
+import { getHitSession, getHitResponses, updateHitSession, createHitFResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitF } from '@/lib/hit/scoring-f';
 import { createClient } from '@/lib/supabase/client';
 import Anthropic from '@anthropic-ai/sdk';
@@ -126,6 +126,15 @@ export async function POST(request: NextRequest) {
       reentry_motivation: scored.reentryMotivation,
       job_category: jobCategory,
     });
+
+    // hero_profiles 링크
+    if (session.member_id) {
+      try {
+        await upsertHeroProfile({ member_id: session.member_id, hit_f_result_id: result.id });
+      } catch (e) {
+        console.warn('[HIT F Score] hero_profile 업데이트 실패:', e);
+      }
+    }
 
     // 세션 완료
     await updateHitSession(sessionToken, {

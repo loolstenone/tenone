@@ -1,4 +1,7 @@
-/** HIT A — MBTI 80문항 (전체 구조.xlsx C-MBTI 80 시트에서 추출) */
+/**
+ * HIT A — MBTI 80문항 (전체 구조.xlsx C-MBTI 80 시트에서 추출)
+ * @deprecated 레거시 모듈. 신규 개발은 pt-questions.ts / bt-questions.ts 사용
+ */
 import type { MBTIQuestion } from "@/types/hit";
 
 export const mbtiQuestions: MBTIQuestion[] = [

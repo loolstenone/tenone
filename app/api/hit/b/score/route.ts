@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult } from '@/lib/supabase/hit';
+import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage, computeAlertScoresFromDB } from '@/lib/hit/scoring-b';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -172,6 +172,15 @@ export async function POST(request: NextRequest) {
           content: `⚠ HIT B 주의 신호 감지 (alert_level: ${alerts.alertLevel})\n결과 ID: ${result.id}\n유형: ${session.member_id || '비회원'}\n즉시 확인 필요`,
         });
       } catch {}
+    }
+
+    // hero_profiles 링크
+    if (session.member_id) {
+      try {
+        await upsertHeroProfile({ member_id: session.member_id, hit_b_result_id: result.id });
+      } catch (e) {
+        console.warn('[HIT B Score] hero_profile 업데이트 실패:', e);
+      }
     }
 
     // 세션 완료

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { getHitSession, getHitResponses, updateHitSession, createHitCResult } from '@/lib/supabase/hit';
+import { getHitSession, getHitResponses, updateHitSession, createHitCResult, upsertHeroProfile } from '@/lib/supabase/hit';
 import { scoreHitC } from '@/lib/hit/scoring-c';
 import { createClient } from '@/lib/supabase/client';
 import Anthropic from '@anthropic-ai/sdk';
@@ -110,6 +110,15 @@ export async function POST(request: NextRequest) {
       ai_report: aiReport,
       journey_stage: journeyStage,
     });
+
+    // hero_profiles 링크
+    if (session.member_id) {
+      try {
+        await upsertHeroProfile({ member_id: session.member_id, hit_c_result_id: result.id });
+      } catch (e) {
+        console.warn('[HIT C Score] hero_profile 업데이트 실패:', e);
+      }
+    }
 
     // 세션 완료
     await updateHitSession(sessionToken, {
