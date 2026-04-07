@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession } from '@/lib/supabase/hit';
+import { gateApi } from '@/lib/hit/membership';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,10 @@ export async function POST(request: NextRequest) {
     if (!hitAResultId) {
       return errorResponse('hitAResultId는 필수입니다.', 400);
     }
+
+    // 멤버십 게이트 — Deep 모듈은 Premium 이상 필요
+    const gateResult = await gateApi(memberId, 'HIT_DEEP');
+    if (gateResult) return gateResult;
 
     const session = await createHitSession('A', memberId);
 

@@ -8,14 +8,19 @@ import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
+import { gateApi } from '@/lib/hit/membership';
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, resultId, mode, history, sessionId, alertLevel } = await request.json();
+    const { message, resultId, mode, history, sessionId, alertLevel, memberId } = await request.json();
 
     if (!message || !resultId || !mode) {
       return new Response(JSON.stringify({ error: 'message, resultId, mode 필수' }), { status: 400 });
     }
+
+    // 멤버십 게이트 — AI 채팅은 무료 회원 이상
+    const gateResult = await gateApi(memberId ?? null, 'HIT_AI_CHAT_BASIC');
+    if (gateResult) return gateResult;
 
     // API 키
     let apiKey = process.env.ANTHROPIC_API_KEY;

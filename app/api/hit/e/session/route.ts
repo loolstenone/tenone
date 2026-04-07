@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession } from '@/lib/supabase/hit';
 import { createClient } from '@/lib/supabase/client';
+import { gateApi } from '@/lib/hit/membership';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +24,9 @@ export async function POST(request: NextRequest) {
     if (!aResult) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다. 먼저 HIT A를 완료해주세요.', 400);
     }
+
+    const gateResult = await gateApi(memberId, 'HIT_LAYER_ONE');
+    if (gateResult) return gateResult;
 
     const session = await createHitSession('E', memberId);
 

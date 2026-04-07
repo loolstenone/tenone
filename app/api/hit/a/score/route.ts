@@ -3,6 +3,7 @@ import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
 import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, deriveSPower } from '@/lib/hit/scoring';
 import { selectModules } from '@/lib/hit/report-assembler';
+import { getMembershipTier, canAccess } from '@/lib/hit/membership';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -181,7 +182,11 @@ export async function POST(request: NextRequest) {
       completed_at: new Date().toISOString(),
     });
 
-    return successResponse({ resultId: result.id }, 201);
+    // 멤버십 tier에 따른 응답 모드 결정
+    const tier = await getMembershipTier(session.member_id);
+    const resultMode = canAccess(tier, 'HIT_A_RESULT_FULL') ? 'full' : 'teaser';
+
+    return successResponse({ resultId: result.id, resultMode, tier }, 201);
   } catch (error) {
     console.error('[HIT A Score] 채점 오류:', error);
     const message = error instanceof Error ? error.message : '채점 처리 실패';
