@@ -99,34 +99,34 @@ const trendCards = [
   },
 ];
 
-/* ── 주간 인사이트 ── */
+/* ── 주간 인사이트 (샘플 — 서비스 출시 후 실데이터로 교체) ── */
 const weeklyInsight = {
-  weekLabel: "2026년 3월 4주차",
+  weekLabel: "샘플 인사이트",
   title: "AI 에이전트, '도구'에서 '동료'로 진화 중",
   summary:
-    "이번 주 핵심 트렌드는 AI 에이전트의 자율성 확대입니다. 단순 챗봇을 넘어 독립적으로 작업을 수행하는 에이전트 AI가 기업 현장에 빠르게 도입되고 있으며, 마케팅 자동화와 콘텐츠 생산 분야에서 특히 두드러집니다.",
+    "Mindle이 출시되면 매주 AI가 분석한 트렌드 인사이트를 제공합니다. 아래는 서비스 출시 후 어떤 형태의 인사이트가 제공되는지 보여주는 샘플입니다.",
   keyPoints: [
-    "에이전트 AI 검색량 전주 대비 340% 급증",
-    "슬로우 콘텐츠 — 롱폼 뉴스레터 구독 23% 증가",
-    "하이퍼로컬 마케팅 캠페인 ROI 평균 2.4배 상승",
+    "주요 키워드 변화 및 검색량 트렌드 분석",
+    "업계별 콘텐츠 소비 패턴 인사이트",
+    "마케터에게 필요한 액션 포인트 요약",
   ],
-  generatedBy: "Mindle AI",
+  generatedBy: "Mindle AI (샘플)",
 };
 
-/* ── 핫 키워드 ── */
+/* ── 핫 키워드 (샘플 — 서비스 출시 후 실데이터로 교체) ── */
 const hotKeywords = [
-  { rank: 1, keyword: "에이전트 AI", change: "+340%" },
-  { rank: 2, keyword: "슬로우 콘텐츠", change: "+180%" },
-  { rank: 3, keyword: "하이퍼로컬", change: "+120%" },
-  { rank: 4, keyword: "디지털 디톡스", change: "+95%" },
-  { rank: 5, keyword: "마이크로 SaaS", change: "+75%" },
+  { rank: 1, keyword: "에이전트 AI", change: "추적 예정" },
+  { rank: 2, keyword: "슬로우 콘텐츠", change: "추적 예정" },
+  { rank: 3, keyword: "하이퍼로컬", change: "추적 예정" },
+  { rank: 4, keyword: "디지털 디톡스", change: "추적 예정" },
+  { rank: 5, keyword: "마이크로 SaaS", change: "추적 예정" },
 ];
 
-/* ── 통계 ── */
+/* ── 통계 (데모 수치 — 서비스 출시 후 실데이터로 교체 예정) ── */
 const stats = [
-  { label: "수집된 트렌드", value: "500+", icon: TrendingUp },
-  { label: "주간 리포트", value: "52회", icon: BookOpen },
-  { label: "구독자", value: "1,200+", icon: Mail },
+  { label: "추적 트렌드", value: "준비 중", icon: TrendingUp },
+  { label: "주간 리포트", value: "출시 예정", icon: BookOpen },
+  { label: "구독자", value: "사전 신청 중", icon: Mail },
   { label: "카테고리", value: "5개", icon: BarChart3 },
 ];
 
@@ -234,9 +234,14 @@ export default function MindleHomePage() {
       <section className="px-6 py-12">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white">
-              최근 트렌드
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-bold text-white">
+                최근 트렌드
+              </h2>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 uppercase tracking-wide">
+                샘플
+              </span>
+            </div>
             <Link
               href="/mindle/trends"
               className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
@@ -298,10 +303,6 @@ export default function MindleHomePage() {
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {trend.readTime}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {trend.views.toLocaleString()}
                       </span>
                     </div>
                   </div>

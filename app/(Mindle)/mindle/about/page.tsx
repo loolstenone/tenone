@@ -41,7 +41,7 @@ export default function MindleAboutPage() {
             <section className="py-16 px-6 border-t border-neutral-800/50">
                 <div className="mx-auto max-w-3xl text-center">
                     <h2 className="text-2xl font-bold text-white mb-4">Ten:One&trade; Universe와 함께</h2>
-                    <p className="text-neutral-400 mb-8">Mindle이 발견한 트렌드는 Universe의 12개 브랜드를 통해 현실이 됩니다.</p>
+                    <p className="text-neutral-400 mb-8">Mindle이 발견한 트렌드는 Universe의 26개 브랜드를 통해 현실이 됩니다.</p>
                     <Link href="/about?tab=universe" className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-700 rounded-full text-white hover:border-[#F5C518]/50 transition-colors">
                         유니버스 살펴보기 <ArrowRight className="w-4 h-4" />
                     </Link>

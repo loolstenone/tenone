@@ -14,14 +14,7 @@ interface NewsletterIssue {
     url?: string;
 }
 
-const STATIC_ISSUES: NewsletterIssue[] = [
-    { id: 1, title: "MADLeague 인사이트 투어링 — 영양군에서 만난 기획의 본질", date: "2026-03-15", category: "MADLeague" },
-    { id: 2, title: "LUKI 2nd Single 비하인드 — AI 아이돌은 어떻게 만들어지는가", date: "2026-03-01", category: "LUKI" },
-    { id: 3, title: "Badak 3월 밋업 리캡 — 퍼포먼스 마케팅의 미래", date: "2026-02-15", category: "Badak" },
-    { id: 4, title: "GPR 가이드북 공개 — 우리의 성장 철학을 나눕니다", date: "2026-02-01", category: "Culture" },
-    { id: 5, title: "리제로스 시즌1 결과 발표 — 5개 팀의 도전 이야기", date: "2026-01-15", category: "MADLeague" },
-    { id: 6, title: "2026년 Ten:One™ Universe 로드맵 공개", date: "2026-01-01", category: "Universe" },
-];
+const STATIC_ISSUES: NewsletterIssue[] = [];
 
 const categoryStyle: Record<string, string> = {
     MADLeague: "bg-violet-50 text-violet-600",
@@ -158,6 +151,13 @@ export default function NewsletterPage() {
             {/* 지난 뉴스레터 */}
             <div>
                 <h2 className="text-sm font-bold mb-6">지난 뉴스레터</h2>
+                {pastIssues.length === 0 ? (
+                    <div className="border tn-border tn-surface p-10 text-center">
+                        <Mail className="h-8 w-8 tn-text-muted mx-auto mb-3" />
+                        <p className="text-sm font-medium mb-1">아직 발행된 뉴스레터가 없습니다</p>
+                        <p className="text-xs tn-text-sub">구독하시면 첫 번째 뉴스레터가 발행될 때 알려드립니다.</p>
+                    </div>
+                ) : (
                 <div className="space-y-3">
                     {pastIssues.map(issue => {
                         const inner = (
@@ -188,6 +188,7 @@ export default function NewsletterPage() {
                         );
                     })}
                 </div>
+                )}
             </div>
         </div>
     );

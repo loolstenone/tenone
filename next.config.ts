@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   env: {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   },
+  async redirects() {
+    return [
+      // 삭제된 페이지 — 301 리다이렉트
+      { source: '/goods', destination: '/', permanent: true },
+      { source: '/goods/:path*', destination: '/', permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       // 마케팅/랜딩 페이지 — 1시간 캐시 (ISR 대체)
