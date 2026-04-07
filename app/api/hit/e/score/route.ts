@@ -88,14 +88,17 @@ export async function POST(request: NextRequest) {
           content: `${hitAContext}HIT E 인생 2막 분석 결과:\n` +
             `삶의 만족도: ${scored.lifeSatisfaction}점\n` +
             `남은 열정: ${scored.remainingPassion}점\n` +
-            `방향 유형: ${directionLabels[scored.directionType] || scored.directionType}\n` +
+            `심리적 전환: ${scored.psychTransition}점\n` +
+            `방향 유형(Top1): ${directionLabels[scored.directionType] || scored.directionType}\n` +
+            `2막 방향 Top2: ${scored.directionTop2.map(t => `${t.label}(${t.score}점)`).join(', ')}\n` +
             `방향별 점수: ${JSON.stringify(scored.directionScores)}\n` +
             `레거시 스킬: ${scored.legacySkillScore}점\n` +
             `레거시 영역: ${scored.legacyAreas.join(', ') || '없음'}\n` +
             `사회적 필요: ${scored.socialNeedScore}점\n` +
-            `2막 준비도: ${scored.secondActReadiness}점\n` +
+            `2막 준비도 총합: ${scored.secondActReadiness}점\n` +
+            `2막 준비도 세부: 시간 ${scored.readinessScores.time}, 에너지 ${scored.readinessScores.energy}, 재정 ${scored.readinessScores.finance}, 관계 ${scored.readinessScores.relationship}\n` +
             `여정 단계: ${journeyStage}\n` +
-            `\n위 결과를 통합하여 4-5문단의 인생 2막 분석 리포트를 작성해주세요. 현재 삶 진단, 방향성 해석, 레거시 스킬 활용 전략, 사회적 연결 방안, 구체적 액션 아이템을 포함해주세요.`,
+            `\n위 결과를 통합하여 4-5문단의 인생 2막 분석 리포트를 작성해주세요. 현재 삶 진단, 방향성 해석(Top2 비교), 레거시 스킬 활용 전략, 4대 준비도 중 가장 약한 영역 보완 방안, 구체적 액션 아이템을 포함해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -121,7 +124,29 @@ export async function POST(request: NextRequest) {
       second_act_readiness: scored.secondActReadiness,
       ai_report: aiReport,
       journey_stage: journeyStage,
+      // HIT_E_Final.md 신규 필드
+      direction_top2: scored.directionTop2,
+      readiness_scores: scored.readinessScores,
+      psych_transition: scored.psychTransition,
+      faking_flag: scored.fakingFlag,
     });
+
+    // 미끼 플래그가 켜지면 hit_admin_flags 기록
+    if (scored.fakingFlag) {
+      try {
+        const { createClient: createServerClient } = await import('@/lib/supabase/server');
+        const serverSupabase = await createServerClient();
+        await serverSupabase.from('hit_admin_flags').insert({
+          member_id: session.member_id || null,
+          session_id: session.id,
+          flag_type: 'distortion',
+          flag_score: 90,
+          flag_detail: { source: 'HIT_E', e_val01: true, e_val02: true },
+        });
+      } catch (e) {
+        console.warn('[HIT E Score] faking flag 저장 실패:', e);
+      }
+    }
 
     // hero_profiles 링크
     if (session.member_id) {

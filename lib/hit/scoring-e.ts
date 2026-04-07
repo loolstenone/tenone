@@ -1,10 +1,12 @@
 /**
- * HIT E 채점 알고리즘 — 인생 2막 분석
+ * HIT E 채점 알고리즘 — 인생전환검사 (140 + 미끼 2)
  * 7점 리커트 척도 기반
  * 모듈1: satisfaction — life_satisfaction, residual_passion, psych_transition
  * 모듈2: direction — re_employment, entrepreneurship, social_contribution, mentoring, leisure
  * 모듈3: legacy — transferable_legacy, knowledge_transfer, new_capability
- * 모듈4: social_readiness — belonging, role_necessity, time_readiness, energy_readiness, financial_readiness, relationship_readiness
+ * 모듈4: social — belonging, role_necessity
+ * 모듈5: readiness — time_readiness, energy_readiness, financial_readiness, relationship_readiness
+ * 미끼: decoy (DECOY)
  */
 
 interface ResponseRow {
@@ -66,10 +68,21 @@ export function scoreLifeSatisfaction(responses: ResponseRow[]): {
 
 export type DirectionType = 're_employment' | 'entrepreneurship' | 'social_contribution' | 'mentoring' | 'leisure';
 
-export function scoreDirection(responses: ResponseRow[]): {
+const DIRECTION_LABELS: Record<DirectionType, string> = {
+  re_employment: '재취업',
+  entrepreneurship: '창업·독립',
+  social_contribution: '봉사·사회공헌',
+  mentoring: '멘토링·교육',
+  leisure: '여가·자기실현',
+};
+
+export interface DirectionResult {
   directionType: DirectionType;
   directionScores: Record<DirectionType, number>;
-} {
+  directionTop2: Array<{ code: DirectionType; label: string; score: number }>;
+}
+
+export function scoreDirection(responses: ResponseRow[]): DirectionResult {
   const direction = responses.filter(r => r.module === 'direction');
   const subscaleMap = buildSubscaleMap(direction);
 
@@ -81,17 +94,17 @@ export function scoreDirection(responses: ResponseRow[]): {
     leisure: scaleToHundred(subscaleMap['leisure'] || []),
   };
 
-  // 가장 높은 점수의 방향을 선택
-  let directionType: DirectionType = 're_employment';
-  let maxScore = -1;
-  for (const [key, score] of Object.entries(directionScores) as [DirectionType, number][]) {
-    if (score > maxScore) {
-      maxScore = score;
-      directionType = key;
-    }
-  }
+  const sorted = (Object.entries(directionScores) as [DirectionType, number][])
+    .sort((a, b) => b[1] - a[1]);
 
-  return { directionType, directionScores };
+  const directionType: DirectionType = sorted[0]?.[0] ?? 're_employment';
+  const directionTop2 = sorted.slice(0, 2).map(([code, score]) => ({
+    code,
+    label: DIRECTION_LABELS[code],
+    score,
+  }));
+
+  return { directionType, directionScores, directionTop2 };
 }
 
 // ── 역량 재활용 진단 채점 ──
@@ -107,7 +120,6 @@ export function scoreLegacy(responses: ResponseRow[]): {
   const knowledge_transfer = scaleToHundred(subscaleMap['knowledge_transfer'] || []);
   const new_capability = scaleToHundred(subscaleMap['new_capability'] || []);
 
-  // 레거시 스킬 종합: 이전가능역량 40% + 지식전수 30% + 신규역량 30%
   const legacySkillScore = Math.round(
     transferable_legacy * 0.4 +
     knowledge_transfer * 0.3 +
@@ -127,28 +139,54 @@ export function scoreLegacy(responses: ResponseRow[]): {
 
 // ── 사회적 연결 & 2막 준비도 채점 ──
 
-export function scoreSocialReadiness(responses: ResponseRow[]): {
+export interface SocialReadinessResult {
   socialNeedScore: number;
   secondActReadiness: number;
-} {
-  const socialReadiness = responses.filter(r => r.module === 'social_readiness');
+  readinessScores: {
+    time: number;
+    energy: number;
+    finance: number;
+    relationship: number;
+    total: number;
+  };
+}
+
+export function scoreSocialReadiness(responses: ResponseRow[]): SocialReadinessResult {
+  // 기존 'social_readiness' + 신규 'social'/'readiness' 모두 수용
+  const socialReadiness = responses.filter(r =>
+    r.module === 'social_readiness' || r.module === 'social' || r.module === 'readiness'
+  );
   const subscaleMap = buildSubscaleMap(socialReadiness);
 
   const belonging = scaleToHundred(subscaleMap['belonging'] || []);
   const role_necessity = scaleToHundred(subscaleMap['role_necessity'] || []);
-  const time_readiness = scaleToHundred(subscaleMap['time_readiness'] || []);
-  const energy_readiness = scaleToHundred(subscaleMap['energy_readiness'] || []);
-  const financial_readiness = scaleToHundred(subscaleMap['financial_readiness'] || []);
-  const relationship_readiness = scaleToHundred(subscaleMap['relationship_readiness'] || []);
 
-  // 사회적 연결 필요도: 소속감 + 역할필요도 평균
+  const time = scaleToHundred(subscaleMap['time_readiness'] || []);
+  const energy = scaleToHundred(subscaleMap['energy_readiness'] || []);
+  const finance = scaleToHundred(subscaleMap['financial_readiness'] || []);
+  const relationship = scaleToHundred(subscaleMap['relationship_readiness'] || []);
+
   const socialNeedScore = Math.round((belonging + role_necessity) / 2);
-  // 2막 준비도: 시간·에너지·재정·관계 평균
-  const secondActReadiness = Math.round(
-    (time_readiness + energy_readiness + financial_readiness + relationship_readiness) / 4
-  );
+  const total = Math.round((time + energy + finance + relationship) / 4);
+  const secondActReadiness = total;
 
-  return { socialNeedScore, secondActReadiness };
+  return {
+    socialNeedScore,
+    secondActReadiness,
+    readinessScores: { time, energy, finance, relationship, total },
+  };
+}
+
+// ── 미끼 (faking) 채점 ──
+
+export function scoreDecoyE(responses: ResponseRow[]): boolean {
+  const getVal = (id: string): number => {
+    const r = responses.find(x => x.question_id === id);
+    if (!r) return 0;
+    const parts = r.option_value.split(':');
+    return parseInt(parts[1] || parts[0], 10) || 0;
+  };
+  return getVal('e_val01') >= 6 && getVal('e_val02') >= 6;
 }
 
 // ── 통합 채점 ──
@@ -159,10 +197,19 @@ export interface HitEScoreResult {
   psychTransition: number;
   directionType: DirectionType;
   directionScores: Record<DirectionType, number>;
+  directionTop2: Array<{ code: DirectionType; label: string; score: number }>;
   legacySkillScore: number;
   legacyAreas: string[];
   socialNeedScore: number;
   secondActReadiness: number;
+  readinessScores: {
+    time: number;
+    energy: number;
+    finance: number;
+    relationship: number;
+    total: number;
+  };
+  fakingFlag: boolean;
 }
 
 export function scoreHitE(responses: ResponseRow[]): HitEScoreResult {
@@ -170,6 +217,7 @@ export function scoreHitE(responses: ResponseRow[]): HitEScoreResult {
   const direction = scoreDirection(responses);
   const legacy = scoreLegacy(responses);
   const social = scoreSocialReadiness(responses);
+  const fakingFlag = scoreDecoyE(responses);
 
   return {
     lifeSatisfaction: satisfaction.lifeSatisfaction,
@@ -177,9 +225,12 @@ export function scoreHitE(responses: ResponseRow[]): HitEScoreResult {
     psychTransition: satisfaction.psychTransition,
     directionType: direction.directionType,
     directionScores: direction.directionScores,
+    directionTop2: direction.directionTop2,
     legacySkillScore: legacy.legacySkillScore,
     legacyAreas: legacy.legacyAreas,
     socialNeedScore: social.socialNeedScore,
     secondActReadiness: social.secondActReadiness,
+    readinessScores: social.readinessScores,
+    fakingFlag,
   };
 }

@@ -9,7 +9,7 @@ import {
   allEQuestions,
 } from "@/lib/hit/data/e-questions";
 
-type EModuleType = 'satisfaction' | 'direction' | 'legacy' | 'social_readiness';
+type EModuleType = 'satisfaction' | 'direction' | 'legacy' | 'social' | 'readiness' | 'social_readiness';
 
 interface QuestionItem {
   module: EModuleType;
@@ -28,13 +28,16 @@ const MODULE_NAMES: Record<EModuleType, string> = {
   satisfaction: '삶의 만족도 & 열정',
   direction: '방향 탐색',
   legacy: '레거시 스킬',
+  social: '사회적 연결 필요도',
+  readiness: '2막 준비도',
   social_readiness: '사회적 연결 & 준비도',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
   'satisfaction→direction': '다음은 인생 2막의 방향을 탐색합니다',
   'direction→legacy': '수십 년의 경험, 레거시 스킬을 평가합니다',
-  'legacy→social_readiness': '마지막! 사회적 연결과 준비도를 확인합니다',
+  'legacy→social': '사회적 연결 필요도를 확인합니다',
+  'social→readiness': '마지막! 2막 준비도를 확인합니다',
 };
 
 const AVG_SECONDS_PER_QUESTION = 6;
