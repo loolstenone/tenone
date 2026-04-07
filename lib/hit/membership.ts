@@ -2,7 +2,8 @@
  * HIT 멤버십 차등 시스템
  * 4개 tier (guest/free/premium/professional)별로 접근 가능한 기능을 정의한다.
  */
-import { createClient } from '@/lib/supabase/server';
+// Note: server-only client is dynamically imported inside getMembershipTier
+// to keep this module client-safe (used by useMembership/MembershipGate).
 
 export type MembershipTier = 'guest' | 'free' | 'premium' | 'professional';
 
@@ -96,41 +97,4 @@ export function getUpgradeMessage(currentTier: MembershipTier, requiredFeature: 
   return `${tierName[required]} 이상에서 이용 가능합니다.`;
 }
 
-/**
- * 서버사이드에서 member의 membership_tier 조회
- */
-export async function getMembershipTier(memberId: string | null | undefined): Promise<MembershipTier> {
-  if (!memberId) return 'guest';
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('members')
-      .select('membership_tier')
-      .eq('id', memberId)
-      .single();
-    if (error || !data) return 'guest';
-    return ((data as { membership_tier?: MembershipTier }).membership_tier as MembershipTier) || 'free';
-  } catch {
-    return 'guest';
-  }
-}
-
-/**
- * API 게이트 — 권한 없으면 Response 반환, 있으면 null 반환
- */
-export async function gateApi(
-  memberId: string | null | undefined,
-  feature: HitFeature
-): Promise<Response | null> {
-  const tier = await getMembershipTier(memberId);
-  if (canAccess(tier, feature)) return null;
-  return new Response(
-    JSON.stringify({
-      error: 'membership_required',
-      tier,
-      requiredFeature: feature,
-      message: getUpgradeMessage(tier, feature),
-    }),
-    { status: 403, headers: { 'Content-Type': 'application/json' } }
-  );
-}
+// Server-only helpers (getMembershipTier, gateApi) live in ./membership-server.ts

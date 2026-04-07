@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession } from '@/lib/supabase/hit';
 import { createClient } from '@/lib/supabase/client';
-import { gateApi } from '@/lib/hit/membership';
+import { gateApi } from '@/lib/hit/membership-server';
 
 export async function POST(request: NextRequest) {
   try {

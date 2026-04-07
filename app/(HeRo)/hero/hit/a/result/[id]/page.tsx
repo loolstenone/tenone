@@ -15,6 +15,7 @@ import RadarChart from "@/features/hit/RadarChart";
 import HeroChatPanel from "@/features/hit/HeroChatPanel";
 import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
+import { HitADeepCTA } from "@/features/hit/HitADeepCTA";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
 import type { HitAResult } from "@/types/hit";
 
@@ -45,6 +46,7 @@ export default function HitAResultPage() {
   const [result, setResult] = useState<HitAResult | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
+  const [hasDeep, setHasDeep] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
@@ -79,6 +81,7 @@ export default function HitAResultPage() {
           createdAt: data.created_at,
         });
         if (data.report_modules) setReportModules(data.report_modules);
+        if (data.ch_deep_scores || data.ap_deep_scores) setHasDeep(true);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -515,6 +518,9 @@ export default function HitAResultPage() {
           다음 <ChevronRight className="h-4 w-4" />
         </button>
       </div>
+
+      {/* HIT A 심화 검사 CTA */}
+      <HitADeepCTA resultId={resultId} hasDeep={hasDeep} />
 
       {/* CSS Animation */}
       {/* 히어로 AI 채팅 */}

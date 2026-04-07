@@ -3,7 +3,8 @@ import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
 import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, deriveSPower } from '@/lib/hit/scoring';
 import { selectModules } from '@/lib/hit/report-assembler';
-import { getMembershipTier, canAccess } from '@/lib/hit/membership';
+import { canAccess } from '@/lib/hit/membership';
+import { getMembershipTier } from '@/lib/hit/membership-server';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {

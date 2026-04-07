@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { createHitSession, getLatestHitAResult } from '@/lib/supabase/hit';
-import { gateApi } from '@/lib/hit/membership';
+import { gateApi } from '@/lib/hit/membership-server';
 
 export async function POST(request: NextRequest) {
   try {

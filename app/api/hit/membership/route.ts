@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedClient } from '@/lib/supabase/api-utils';
-import { getMembershipTier } from '@/lib/hit/membership';
+import { getMembershipTier } from '@/lib/hit/membership-server';
 
 export async function GET() {
   try {

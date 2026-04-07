@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
-import { gateApi } from '@/lib/hit/membership';
+import { gateApi } from '@/lib/hit/membership-server';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
