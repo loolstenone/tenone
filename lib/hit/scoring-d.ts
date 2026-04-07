@@ -1,6 +1,11 @@
 /**
  * HIT D 채점 알고리즘 — 시니어 리더십 전환
- * 7점 리커트 척도 기반: expertise, leadership, identity, network
+ * 7점 리커트 척도 기반
+ * 모듈1: expertise — domain_depth, tacit_knowledge, redeployment, personal_brand
+ * 모듈2: leadership — exec_leadership, strategic_leadership, coaching_leadership, independent_leadership
+ * 모듈3: identity — identity_strength, new_role, identity_recon
+ * 모듈4: network — strong_ties, weak_ties
+ * 모듈5: seniorReadiness — positioning, compensation, reference, senior_psych
  */
 
 interface ResponseRow {
@@ -41,7 +46,7 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 전문성 채점 ──
+// ── 전문성 자산 채점 ──
 
 export function scoreExpertise(responses: ResponseRow[]): {
   expertise_depth: number;
@@ -51,20 +56,29 @@ export function scoreExpertise(responses: ResponseRow[]): {
   const expertise = responses.filter(r => r.module === 'expertise');
   const subscaleMap = buildSubscaleMap(expertise);
 
-  const expertise_depth = scaleToHundred(subscaleMap['expertise_depth'] || []);
-  const expertise_breadth = scaleToHundred(subscaleMap['expertise_breadth'] || []);
+  const domain_depth = scaleToHundred(subscaleMap['domain_depth'] || []);
+  const tacit_knowledge = scaleToHundred(subscaleMap['tacit_knowledge'] || []);
+  const redeployment = scaleToHundred(subscaleMap['redeployment'] || []);
+  const personal_brand = scaleToHundred(subscaleMap['personal_brand'] || []);
+
+  // expertise_depth: 도메인 깊이 + 암묵지 평균
+  const expertise_depth = Math.round((domain_depth + tacit_knowledge) / 2);
+  // expertise_breadth: 재배치 가능성 + 퍼스널 브랜드 평균
+  const expertise_breadth = Math.round((redeployment + personal_brand) / 2);
 
   const expertise_domains: Record<string, number> = {
-    depth: expertise_depth,
-    breadth: expertise_breadth,
+    domain_depth,
+    tacit_knowledge,
+    redeployment,
+    personal_brand,
   };
 
   return { expertise_depth, expertise_breadth, expertise_domains };
 }
 
-// ── 리더십 채점 ──
+// ── 리더십 유형 채점 ──
 
-export type LeadershipType = 'visionary' | 'coaching' | 'democratic' | 'commanding';
+export type LeadershipType = 'exec_leadership' | 'strategic_leadership' | 'coaching_leadership' | 'independent_leadership';
 
 export function scoreLeadership(responses: ResponseRow[]): {
   leadership_type: LeadershipType;
@@ -74,14 +88,14 @@ export function scoreLeadership(responses: ResponseRow[]): {
   const subscaleMap = buildSubscaleMap(leadership);
 
   const leadership_scores: Record<LeadershipType, number> = {
-    visionary: scaleToHundred(subscaleMap['visionary'] || []),
-    coaching: scaleToHundred(subscaleMap['coaching'] || []),
-    democratic: scaleToHundred(subscaleMap['democratic'] || []),
-    commanding: scaleToHundred(subscaleMap['commanding'] || []),
+    exec_leadership: scaleToHundred(subscaleMap['exec_leadership'] || []),
+    strategic_leadership: scaleToHundred(subscaleMap['strategic_leadership'] || []),
+    coaching_leadership: scaleToHundred(subscaleMap['coaching_leadership'] || []),
+    independent_leadership: scaleToHundred(subscaleMap['independent_leadership'] || []),
   };
 
   // 최고 점수 유형을 leadership_type으로 결정
-  let leadership_type: LeadershipType = 'visionary';
+  let leadership_type: LeadershipType = 'exec_leadership';
   let maxScore = 0;
   for (const [type, score] of Object.entries(leadership_scores)) {
     if (score > maxScore) {
@@ -93,7 +107,7 @@ export function scoreLeadership(responses: ResponseRow[]): {
   return { leadership_type, leadership_scores };
 }
 
-// ── 정체성 유연성 채점 ──
+// ── 경력 정체성 유연성 채점 ──
 
 export function scoreIdentity(responses: ResponseRow[]): {
   role_identity: number;
@@ -104,9 +118,9 @@ export function scoreIdentity(responses: ResponseRow[]): {
   const identity = responses.filter(r => r.module === 'identity');
   const subscaleMap = buildSubscaleMap(identity);
 
-  const role_identity = scaleToHundred(subscaleMap['role_identity'] || []);
-  const change_openness = scaleToHundred(subscaleMap['change_openness'] || []);
-  const self_reinvention = scaleToHundred(subscaleMap['self_reinvention'] || []);
+  const role_identity = scaleToHundred(subscaleMap['identity_strength'] || []);
+  const change_openness = scaleToHundred(subscaleMap['new_role'] || []);
+  const self_reinvention = scaleToHundred(subscaleMap['identity_recon'] || []);
 
   // 정체성 유연성 지수: 역할 정체성 30% + 변화 개방성 35% + 자기 재발명 35%
   const identity_flexibility = Math.round(
@@ -118,21 +132,43 @@ export function scoreIdentity(responses: ResponseRow[]): {
   return { role_identity, change_openness, self_reinvention, identity_flexibility };
 }
 
-// ── 네트워크 & 시니어 준비도 채점 ──
+// ── 네트워크 자본 채점 ──
 
 export function scoreNetwork(responses: ResponseRow[]): {
   network_quality: number;
   network_breadth: number;
-  senior_readiness: number;
 } {
   const network = responses.filter(r => r.module === 'network');
   const subscaleMap = buildSubscaleMap(network);
 
-  const network_quality = scaleToHundred(subscaleMap['network_quality'] || []);
-  const network_breadth = scaleToHundred(subscaleMap['network_breadth'] || []);
-  const senior_readiness = scaleToHundred(subscaleMap['senior_readiness'] || []);
+  const network_quality = scaleToHundred(subscaleMap['strong_ties'] || []);
+  const network_breadth = scaleToHundred(subscaleMap['weak_ties'] || []);
 
-  return { network_quality, network_breadth, senior_readiness };
+  return { network_quality, network_breadth };
+}
+
+// ── 고년차 이직 준비도 채점 ──
+
+export function scoreSeniorReadiness(responses: ResponseRow[]): {
+  senior_readiness: number;
+  senior_readiness_scores: Record<string, number>;
+} {
+  const readiness = responses.filter(r => r.module === 'seniorReadiness');
+  const subscaleMap = buildSubscaleMap(readiness);
+
+  const senior_readiness_scores: Record<string, number> = {
+    positioning: scaleToHundred(subscaleMap['positioning'] || []),
+    compensation: scaleToHundred(subscaleMap['compensation'] || []),
+    reference: scaleToHundred(subscaleMap['reference'] || []),
+    senior_psych: scaleToHundred(subscaleMap['senior_psych'] || []),
+  };
+
+  const senior_readiness = Math.round(
+    Object.values(senior_readiness_scores).reduce((a, b) => a + b, 0) /
+    Object.keys(senior_readiness_scores).length
+  );
+
+  return { senior_readiness, senior_readiness_scores };
 }
 
 // ── 다음 역할 매트릭스 ──
@@ -193,7 +229,7 @@ export function buildNextRoleMatrix(
 
   // 전문 코칭 / 멘토링
   const coachScore = Math.round(
-    (leadershipType === 'coaching' ? 90 : 50) * 0.3 +
+    (leadershipType === 'coaching_leadership' ? 90 : 50) * 0.3 +
     expertise_depth * 0.3 +
     identity_flexibility * 0.2 +
     expertise_breadth * 0.2
@@ -256,6 +292,7 @@ export interface HitDScoreResult {
   network_quality: number;
   network_breadth: number;
   senior_readiness: number;
+  senior_readiness_scores: Record<string, number>;
   next_role_matrix: { current_role: string; possible_roles: NextRoleOption[] };
 }
 
@@ -264,12 +301,13 @@ export function scoreHitD(responses: ResponseRow[]): HitDScoreResult {
   const leadership = scoreLeadership(responses);
   const identity = scoreIdentity(responses);
   const network = scoreNetwork(responses);
+  const seniorReadiness = scoreSeniorReadiness(responses);
   const next_role_matrix = buildNextRoleMatrix(
     expertise.expertise_depth,
     expertise.expertise_breadth,
     leadership.leadership_type,
     identity.identity_flexibility,
-    network.senior_readiness,
+    seniorReadiness.senior_readiness,
   );
 
   return {
@@ -284,7 +322,8 @@ export function scoreHitD(responses: ResponseRow[]): HitDScoreResult {
     identity_flexibility: identity.identity_flexibility,
     network_quality: network.network_quality,
     network_breadth: network.network_breadth,
-    senior_readiness: network.senior_readiness,
+    senior_readiness: seniorReadiness.senior_readiness,
+    senior_readiness_scores: seniorReadiness.senior_readiness_scores,
     next_role_matrix,
   };
 }

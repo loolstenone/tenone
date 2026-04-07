@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
             `직군: ${jobCategory} (직무변화속도: ${scored.jobChangeVelocity})\n` +
             `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
             `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)'}\n` +
-            `잠재 역량: ${scored.latentScore}점 (기술유지 ${scored.latentScores.technical_retention}, 소프트스킬 ${scored.latentScores.soft_skill_retention}, 학습 ${scored.latentScores.continuous_learning})\n` +
-            `회복탄력성: ${scored.resilienceScore}점 (정서 ${scored.resilienceScores.emotional_resilience}, 자신감 ${scored.resilienceScores.confidence}, 적응력 ${scored.resilienceScores.adaptability})\n` +
+            `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +
+            `회복탄력성: ${scored.resilienceScore}점 (자기서사 ${scored.resilienceScores.self_narrative}, 자존감 ${scored.resilienceScores.self_esteem}, 재도전의지 ${scored.resilienceScores.retry_willingness})\n` +
             `재진입 준비도: ${scored.reentryReadiness}점 (실질준비 ${scored.practicalReadiness}, 동기 ${scored.reentryMotivation})\n` +
             `공백 맥락: ${scored.overallContext}점\n` +
             `라우팅 근거: ${scored.routingRationale}\n` +

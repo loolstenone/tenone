@@ -1,6 +1,10 @@
 /**
  * HIT F 채점 알고리즘 -- 경력 공백 복귀 분석
- * 7점 리커트 척도 기반: break_context, latent_skills, resilience, reentry
+ * 7점 리커트 척도 기반
+ * 모듈1(break_context=latentCapabilityQuestions): disruption_context, hidden_competency, gap_activities
+ * 모듈2(latent_skills=viabilityQuestions): job_viability, skill_currency, market_reentry
+ * 모듈3(resilience=resilienceQuestions): self_narrative, self_esteem, retry_willingness
+ * 모듈4(reentry=directionQuestions+reentryReadinessQuestions): career_restoration, career_pivot, fresh_start, skill_update, network_status, self_presentation, field_language
  * CRITICAL: CVI (Career Validity Index) 통합
  */
 
@@ -45,7 +49,7 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 공백 맥락 채점 ──
+// ── 공백 맥락 채점 (break_context 모듈 = latentCapabilityQuestions) ──
 
 export function scoreBreakContext(responses: ResponseRow[]): {
   breakContextScore: number;
@@ -55,15 +59,21 @@ export function scoreBreakContext(responses: ResponseRow[]): {
   const ctx = responses.filter(r => r.module === 'break_context');
   const subscaleMap = buildSubscaleMap(ctx);
 
-  const breakContextScore = scaleToHundred(subscaleMap['break_context'] || []);
-  const breakReasonScore = scaleToHundred(subscaleMap['break_reason'] || []);
+  const disruptionContext = scaleToHundred(subscaleMap['disruption_context'] || []);
+  const hiddenCompetency = scaleToHundred(subscaleMap['hidden_competency'] || []);
+  const gapActivities = scaleToHundred(subscaleMap['gap_activities'] || []);
+
+  // breakContextScore: 단절 맥락 명확성
+  const breakContextScore = Math.round((disruptionContext + gapActivities) / 2);
+  // breakReasonScore: 공백기 숨겨진 역량
+  const breakReasonScore = hiddenCompetency;
 
   const overallContext = Math.round(breakContextScore * 0.5 + breakReasonScore * 0.5);
 
   return { breakContextScore, breakReasonScore, overallContext };
 }
 
-// ── 잠재 역량 채점 ──
+// ── 경력 유효성 채점 (latent_skills 모듈 = viabilityQuestions) ──
 
 export function scoreLatentSkills(responses: ResponseRow[]): {
   scores: Record<string, number>;
@@ -73,22 +83,22 @@ export function scoreLatentSkills(responses: ResponseRow[]): {
   const subscaleMap = buildSubscaleMap(latent);
 
   const scores: Record<string, number> = {
-    technical_retention: scaleToHundred(subscaleMap['technical_retention'] || []),
-    soft_skill_retention: scaleToHundred(subscaleMap['soft_skill_retention'] || []),
-    continuous_learning: scaleToHundred(subscaleMap['continuous_learning'] || []),
+    job_viability: scaleToHundred(subscaleMap['job_viability'] || []),
+    skill_currency: scaleToHundred(subscaleMap['skill_currency'] || []),
+    market_reentry: scaleToHundred(subscaleMap['market_reentry'] || []),
   };
 
-  // 잠재 역량 종합: 기술 40% + 소프트 스킬 30% + 학습 30%
+  // 경력 유효성 종합: 직무유효성 40% + 스킬현재성 30% + 시장재진입 30%
   const latentScore = Math.round(
-    scores.technical_retention * 0.4 +
-    scores.soft_skill_retention * 0.3 +
-    scores.continuous_learning * 0.3
+    scores.job_viability * 0.4 +
+    scores.skill_currency * 0.3 +
+    scores.market_reentry * 0.3
   );
 
   return { scores, latentScore };
 }
 
-// ── 회복탄력성 채점 ──
+// ── 심리적 회복력 채점 (resilience 모듈) ──
 
 export function scoreResilience(responses: ResponseRow[]): {
   scores: Record<string, number>;
@@ -98,38 +108,56 @@ export function scoreResilience(responses: ResponseRow[]): {
   const subscaleMap = buildSubscaleMap(resilience);
 
   const scores: Record<string, number> = {
-    emotional_resilience: scaleToHundred(subscaleMap['emotional_resilience'] || []),
-    confidence: scaleToHundred(subscaleMap['confidence'] || []),
-    adaptability: scaleToHundred(subscaleMap['adaptability'] || []),
+    self_narrative: scaleToHundred(subscaleMap['self_narrative'] || []),
+    self_esteem: scaleToHundred(subscaleMap['self_esteem'] || []),
+    retry_willingness: scaleToHundred(subscaleMap['retry_willingness'] || []),
   };
 
-  // 회복탄력성 종합: 정서 30% + 자신감 35% + 적응력 35%
+  // 회복탄력성 종합: 자기서사 30% + 자존감 35% + 재도전의지 35%
   const resilienceScore = Math.round(
-    scores.emotional_resilience * 0.3 +
-    scores.confidence * 0.35 +
-    scores.adaptability * 0.35
+    scores.self_narrative * 0.3 +
+    scores.self_esteem * 0.35 +
+    scores.retry_willingness * 0.35
   );
 
   return { scores, resilienceScore };
 }
 
-// ── 재진입 준비도 채점 ──
+// ── 재진입 준비도 채점 (reentry 모듈 = directionQuestions + reentryReadinessQuestions) ──
 
 export function scoreReentry(responses: ResponseRow[]): {
   practicalReadiness: number;
   reentryMotivation: number;
   reentryReadiness: number;
+  directionScores: Record<string, number>;
 } {
   const reentry = responses.filter(r => r.module === 'reentry');
   const subscaleMap = buildSubscaleMap(reentry);
 
-  const practicalReadiness = scaleToHundred(subscaleMap['practical_readiness'] || []);
-  const reentryMotivation = scaleToHundred(subscaleMap['reentry_motivation'] || []);
+  // 재진입 방향 점수
+  const career_restoration = scaleToHundred(subscaleMap['career_restoration'] || []);
+  const career_pivot = scaleToHundred(subscaleMap['career_pivot'] || []);
+  const fresh_start = scaleToHundred(subscaleMap['fresh_start'] || []);
+
+  // 실질 준비도: 스킬업데이트 + 네트워크 + 자기표현 + 현장언어 평균
+  const skill_update = scaleToHundred(subscaleMap['skill_update'] || []);
+  const network_status = scaleToHundred(subscaleMap['network_status'] || []);
+  const self_presentation = scaleToHundred(subscaleMap['self_presentation'] || []);
+  const field_language = scaleToHundred(subscaleMap['field_language'] || []);
+
+  const practicalReadiness = Math.round(
+    (skill_update + network_status + self_presentation + field_language) / 4
+  );
+
+  // 재진입 동기: 방향 점수 중 최대값을 대표 동기로 활용
+  const reentryMotivation = Math.max(career_restoration, career_pivot, fresh_start);
+
+  const directionScores = { career_restoration, career_pivot, fresh_start };
 
   // 재진입 준비도: 실질 준비 55% + 복귀 동기 45%
   const reentryReadiness = Math.round(practicalReadiness * 0.55 + reentryMotivation * 0.45);
 
-  return { practicalReadiness, reentryMotivation, reentryReadiness };
+  return { practicalReadiness, reentryMotivation, reentryReadiness, directionScores };
 }
 
 // ── 라우팅 근거 ──
@@ -151,11 +179,11 @@ export function buildRoutingRationale(
     parts.push('경력 유효성이 낮아 기초 역량 점검이 필요합니다.');
   }
 
-  if (latentScore >= 70) parts.push('잠재 역량이 잘 유지되어 있습니다.');
-  else if (latentScore < 40) parts.push('잠재 역량 보강이 시급합니다.');
+  if (latentScore >= 70) parts.push('경력 유효성 진단이 양호합니다.');
+  else if (latentScore < 40) parts.push('직무 유효성 및 스킬 현재성 보강이 시급합니다.');
 
-  if (resilienceScore >= 70) parts.push('회복탄력성이 높아 복귀 과정을 잘 견딜 수 있습니다.');
-  else if (resilienceScore < 40) parts.push('정서적 지원과 자신감 회복이 우선입니다.');
+  if (resilienceScore >= 70) parts.push('심리적 회복력이 높아 복귀 과정을 잘 견딜 수 있습니다.');
+  else if (resilienceScore < 40) parts.push('자존감 회복과 재도전 의지 강화가 우선입니다.');
 
   if (reentryReadiness >= 70) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
   else if (reentryReadiness < 40) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
@@ -173,16 +201,17 @@ export interface HitFScoreResult {
   breakContextScore: number;
   breakReasonScore: number;
   overallContext: number;
-  // 잠재 역량
+  // 경력 유효성 (latent skills)
   latentScores: Record<string, number>;
   latentScore: number;
-  // 회복탄력성
+  // 심리적 회복력
   resilienceScores: Record<string, number>;
   resilienceScore: number;
   // 재진입 준비도
   practicalReadiness: number;
   reentryMotivation: number;
   reentryReadiness: number;
+  directionScores: Record<string, number>;
   // CVI
   cviRaw: number;
   cviGrade: CviGrade;
@@ -229,6 +258,7 @@ export function scoreHitF(
     practicalReadiness: reentry.practicalReadiness,
     reentryMotivation: reentry.reentryMotivation,
     reentryReadiness: reentry.reentryReadiness,
+    directionScores: reentry.directionScores,
     cviRaw: cviResult.cviRaw,
     cviGrade: cviResult.cviGrade,
     nextRoute: cviResult.nextRoute,

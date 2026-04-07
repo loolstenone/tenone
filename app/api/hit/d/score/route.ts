@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
 
     // 리더십 유형 한글 라벨
     const leadershipLabels: Record<string, string> = {
-      visionary: '비전 제시형',
-      coaching: '코칭형',
-      democratic: '민주형',
-      commanding: '지시형',
+      exec_leadership: '실행형',
+      strategic_leadership: '전략형',
+      coaching_leadership: '코칭형',
+      independent_leadership: '독립형',
     };
 
     // AI 리포트 (Claude Sonnet) — 시니어 리더십 전환 분석

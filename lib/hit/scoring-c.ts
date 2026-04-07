@@ -1,6 +1,10 @@
 /**
  * HIT C 채점 알고리즘 — 경력전환 분석
- * 7점 리커트 척도 기반: capital, motivation, transferability, readiness
+ * 7점 리커트 척도 기반
+ * 모듈1: careerCapital — domain_expertise, achievement, relational, transferable
+ * 모듈2: motivation — push, pull
+ * 모듈3: transferability — skill_transfer, market_fit, adaptation
+ * 모듈4: readiness — doc_readiness, interview_readiness, timing, psych_readiness
  */
 
 interface ResponseRow {
@@ -47,14 +51,14 @@ export function scoreCapital(responses: ResponseRow[]): {
   scores: Record<string, number>;
   overall: number;
 } {
-  const capital = responses.filter(r => r.module === 'capital');
+  const capital = responses.filter(r => r.module === 'careerCapital');
   const subscaleMap = buildSubscaleMap(capital);
 
   const scores: Record<string, number> = {
-    expertise: scaleToHundred(subscaleMap['expertise'] || []),
-    network: scaleToHundred(subscaleMap['network'] || []),
-    org_understanding: scaleToHundred(subscaleMap['org_understanding'] || []),
-    competencies: scaleToHundred(subscaleMap['competencies'] || []),
+    domain_expertise: scaleToHundred(subscaleMap['domain_expertise'] || []),
+    achievement: scaleToHundred(subscaleMap['achievement'] || []),
+    relational: scaleToHundred(subscaleMap['relational'] || []),
+    transferable: scaleToHundred(subscaleMap['transferable'] || []),
   };
 
   const overall = Math.round(
@@ -95,16 +99,16 @@ export function scoreTransferability(responses: ResponseRow[]): {
   const subscaleMap = buildSubscaleMap(transferability);
 
   const scores: Record<string, number> = {
-    skill_portability: scaleToHundred(subscaleMap['skill_portability'] || []),
-    industry_adaptability: scaleToHundred(subscaleMap['industry_adaptability'] || []),
-    learning_agility: scaleToHundred(subscaleMap['learning_agility'] || []),
+    skill_transfer: scaleToHundred(subscaleMap['skill_transfer'] || []),
+    market_fit: scaleToHundred(subscaleMap['market_fit'] || []),
+    adaptation: scaleToHundred(subscaleMap['adaptation'] || []),
   };
 
-  // 전환가능성 지수: 가중 평균 (스킬 40%, 적응력 30%, 학습 30%)
+  // 전환가능성 지수: 스킬전이 40% + 시장적합 30% + 적응력 30%
   const transferabilityIndex = Math.round(
-    scores.skill_portability * 0.4 +
-    scores.industry_adaptability * 0.3 +
-    scores.learning_agility * 0.3
+    scores.skill_transfer * 0.4 +
+    scores.market_fit * 0.3 +
+    scores.adaptation * 0.3
   );
 
   return { scores, transferabilityIndex };
@@ -120,10 +124,17 @@ export function scoreReadiness(responses: ResponseRow[]): {
   const readiness = responses.filter(r => r.module === 'readiness');
   const subscaleMap = buildSubscaleMap(readiness);
 
-  const preparation = scaleToHundred(subscaleMap['preparation'] || []);
-  const gapAwareness = scaleToHundred(subscaleMap['gap_awareness'] || []);
+  const docReadiness = scaleToHundred(subscaleMap['doc_readiness'] || []);
+  const interviewReadiness = scaleToHundred(subscaleMap['interview_readiness'] || []);
+  const timing = scaleToHundred(subscaleMap['timing'] || []);
+  const psychReadiness = scaleToHundred(subscaleMap['psych_readiness'] || []);
 
-  // 전환 준비도: 준비 60% + 갭 인식 40%
+  // 실질 준비: 서류·면접·타이밍 평균
+  const preparation = Math.round((docReadiness + interviewReadiness + timing) / 3);
+  // 심리 준비도를 갭 인식으로 활용
+  const gapAwareness = psychReadiness;
+
+  // 전환 준비도: 준비 60% + 갭인식 40%
   const transitionReadiness = Math.round(preparation * 0.6 + gapAwareness * 0.4);
 
   return { preparation, gapAwareness, transitionReadiness };
@@ -139,13 +150,13 @@ export function identifyGapAreas(
   const gaps: string[] = [];
   const threshold = 50;
 
-  if (capitalScores.expertise < threshold) gaps.push('전문성 심화 필요');
-  if (capitalScores.network < threshold) gaps.push('업계 네트워크 확장 필요');
-  if (capitalScores.org_understanding < threshold) gaps.push('조직 이해력 개발 필요');
-  if (capitalScores.competencies < threshold) gaps.push('핵심 역량 보강 필요');
-  if (transferScores.skill_portability < threshold) gaps.push('스킬 범용성 확보 필요');
-  if (transferScores.industry_adaptability < threshold) gaps.push('산업 적응력 개발 필요');
-  if (transferScores.learning_agility < threshold) gaps.push('학습 민첩성 향상 필요');
+  if (capitalScores.domain_expertise < threshold) gaps.push('전문성 심화 필요');
+  if (capitalScores.achievement < threshold) gaps.push('성과 수량화 필요');
+  if (capitalScores.relational < threshold) gaps.push('업계 네트워크 확장 필요');
+  if (capitalScores.transferable < threshold) gaps.push('이전 가능 역량 개발 필요');
+  if (transferScores.skill_transfer < threshold) gaps.push('스킬 이전 가능성 강화 필요');
+  if (transferScores.market_fit < threshold) gaps.push('목표 시장 이해도 제고 필요');
+  if (transferScores.adaptation < threshold) gaps.push('적응력 개발 필요');
   if (preparation < threshold) gaps.push('이직 준비(이력서/면접/재정) 보강 필요');
 
   return gaps;

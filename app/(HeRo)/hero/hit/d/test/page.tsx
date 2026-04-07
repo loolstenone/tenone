@@ -9,7 +9,7 @@ import {
   allDQuestions,
 } from "@/lib/hit/data/d-questions";
 
-type DModuleType = 'expertise' | 'leadership' | 'identity' | 'network';
+type DModuleType = 'expertise' | 'leadership' | 'identity' | 'network' | 'seniorReadiness';
 
 interface QuestionItem {
   module: DModuleType;
@@ -25,16 +25,18 @@ interface Response {
 }
 
 const MODULE_NAMES: Record<DModuleType, string> = {
-  expertise: '전문성 깊이 & 도메인',
-  leadership: '리더십 스타일',
-  identity: '정체성 유연성',
-  network: '네트워크 & 시니어 준비도',
+  expertise: '전문성 자산',
+  leadership: '리더십 유형',
+  identity: '경력 정체성 유연성',
+  network: '네트워크 자본',
+  seniorReadiness: '고년차 이직 준비도',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'expertise→leadership': '다음은 리더십 스타일을 분석합니다',
-  'leadership→identity': '정체성 유연성을 평가합니다',
-  'identity→network': '마지막! 네트워크와 시니어 준비도를 확인합니다',
+  'expertise→leadership': '다음은 리더십 유형을 분석합니다',
+  'leadership→identity': '경력 정체성 유연성을 평가합니다',
+  'identity→network': '네트워크 자본을 확인합니다',
+  'network→seniorReadiness': '마지막! 고년차 이직 준비도를 확인합니다',
 };
 
 const AVG_SECONDS_PER_QUESTION = 6;

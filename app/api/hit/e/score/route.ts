@@ -57,9 +57,10 @@ export async function POST(request: NextRequest) {
 
     // 방향 유형 한글 라벨
     const directionLabels: Record<string, string> = {
-      social_contribution: '사회 공헌형',
+      re_employment: '재취업형',
       entrepreneurship: '창업/사업형',
-      education: '교육/멘토링형',
+      social_contribution: '사회 공헌형',
+      mentoring: '멘토링/교육형',
       leisure: '여가/취미형',
     };
 

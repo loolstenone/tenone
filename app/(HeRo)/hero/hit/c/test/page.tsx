@@ -9,7 +9,7 @@ import {
   allCQuestions,
 } from "@/lib/hit/data/c-questions";
 
-type CModuleType = 'capital' | 'motivation' | 'transferability' | 'readiness';
+type CModuleType = 'careerCapital' | 'motivation' | 'transferability' | 'readiness';
 
 interface QuestionItem {
   module: CModuleType;
@@ -25,16 +25,16 @@ interface Response {
 }
 
 const MODULE_NAMES: Record<CModuleType, string> = {
-  capital: '경력 자본',
+  careerCapital: '경력 자본',
   motivation: '이직 동기',
-  transferability: '전환 가능성',
-  readiness: '준비도',
+  transferability: '전직 가능성',
+  readiness: '이직 준비도',
 };
 
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'capital→motivation': '다음은 이직 동기를 분석합니다',
-  'motivation→transferability': '전환 가능성을 평가합니다',
-  'transferability→readiness': '마지막! 준비도를 확인합니다',
+  'careerCapital→motivation': '다음은 이직 동기를 분석합니다',
+  'motivation→transferability': '전직 가능성을 평가합니다',
+  'transferability→readiness': '마지막! 이직 준비도를 확인합니다',
 };
 
 const AVG_SECONDS_PER_QUESTION = 6;
@@ -85,7 +85,7 @@ function HitCTestContent() {
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = allQuestions.length;
   const currentQuestion = allQuestions[currentIndex];
-  const currentModule = currentQuestion?.module ?? 'capital';
+  const currentModule = currentQuestion?.module ?? 'careerCapital';
   const answeredCount = responses.size;
 
   // Restore session on mount
