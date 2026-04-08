@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-04-09 (집, 세션 34)
+
+### N-04 Latest 섹션 실데이터 연결
+
+- `app/page.tsx`: STATIC_NEWS 배열 제거 (2025.08 하드코딩 날짜 원인). newsroom feed 필드 매핑 수정 (summary→excerpt, thumbnail_url→representImage, published_at→created_at, url 직접 연결). 빈 상태 fallback → 준비 중 안내로 교체. 실데이터 4건 (2026-04-*) 정상 노출 확인.
+
+### 세션 34 조사 결과
+
+- `/crew-invite/page.tsx`: 이미 완성 (244줄, 지원폼 전체 구현). WORK_STATUS 항목 완료 상태였음.
+- `/intra/hero/hit/report/page.tsx`: 코드 정상. hit_a_results 시드 데이터 member_id=NULL (orphan) → 실사용자 응시 시 정상 작동 예정.
+- 뉴스레터 API: `/api/newsletter` 단일 엔드포인트로 이미 통일 완료. 추가 작업 불필요.
+
+---
+
 ## 2026-04-09 (집, 세션 33)
 
 ### 뉴스레터 고도화 + UMS 사이트 필터 재구성
