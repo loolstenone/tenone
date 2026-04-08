@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-04-08 (집, 세션 29)
+
+### HIT F 전면 재구축 (Phase 9)
+- `lib/hit/data/f-questions.ts`: Q() 포맷 전면 교체, 5모듈 152 + 미끼 2 = 154문항
+  - module/section/subscale/crossTags 완비 (C/D/E와 동일 표준)
+  - 미끼 f_val01/02: 사회적 바람직성 편향 탐지용
+- `lib/hit/scoring-f.ts`: 전면 재설계
+  - scoreDecoyF(): 미끼 탐지 → fakingFlag
+  - scoreDirection(): directionTop (Top1 방향 + 한글 라벨 + 점수)
+  - scoreReadiness(): 4개 준비도 subscale 개별 점수
+  - scoreBreakContext(): 3개 맥락 subscale 개별 반환
+- DB: hit_f_results에 readiness_scores, break_context_scores JSONB 추가
+- `sql/seed-hit-v2/10-layer_f.sql`: layer_f 154건 시딩 완료
+- `Scripts/seed-hit-layer-f.js`: 시딩 SQL 자동 생성기
+- `app/api/hit/f/score/route.ts`: direction_scores/direction_dominant/readiness_scores/faking_flag/break_context_scores 저장, AI 프롬프트 방향 정보 추가
+
+---
+
 ## 2026-04-07 (집, 세션 26)
 
 ### HIT C/D/E/F 문항 전면교체

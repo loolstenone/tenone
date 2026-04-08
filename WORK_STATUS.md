@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-07 (집, 세션 27~28)
+> 마지막 업데이트: 2026-04-08 (집, 세션 29)
 
 ---
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 현재 DB 상태 (2026-04-07 기준)
+## 현재 DB 상태 (2026-04-08 기준)
 
 | 테이블 | 건수 | 비고 |
 |--------|------|------|
@@ -48,14 +48,31 @@
 | newsroom_items | 8건 | 초기 시드 데이터 |
 | hit_c_results | 스키마만 | 실제 응시 대기 |
 | hit_d/e/f_results | 스키마만 | 실제 응시 대기 |
+| hit_questions layer_f | 154건 | Phase 9 시딩 완료 |
 | newsletter_issues | 0건 발행 | Resend 연결 완료 |
 
 ---
 
+## HIT 재구축 진행 현황
+
+| Phase | 내용 | 상태 |
+|-------|------|------|
+| Phase 0 | DB 마이그레이션 | ✅ |
+| Phase 1 | HIT A 재구축 (PT+BT+CH+AP) | ✅ |
+| Phase 2 | 멤버십 게이트 (4티어) | ✅ |
+| Phase 3 | 심화 모듈 (CH Deep 45 + AP Deep 30) | ✅ |
+| Phase 3b | 프론트엔드 (심화 검사 UI) | ✅ |
+| Phase 4 | B/C/D/E/F 레이어 링크 정렬 | ✅ |
+| Phase 5 | hit_questions DB 시딩 (247건) | ✅ |
+| Phase 6 | HIT C 재구축 (122문항 + CTYPE 4유형) | ✅ |
+| Phase 7 | HIT D 재구축 (142문항 + 7역할 fit_score) | ✅ |
+| Phase 8 | HIT E 재구축 (142문항 + 2막 방향 Top2) | ✅ |
+| Phase 9 | HIT F 재구축 (154문항 + 방향 Top1 + 미끼 탐지) | ✅ |
+
 ## 다음 스텝 후보
 
-1. **/crew-invite 페이지 제작** — 링크는 고쳤는데 실제 페이지가 없음 (404 상태)
-2. **N-03 뉴스레터 폼 통일** — 메인/Mindle/newsletter 3곳 단일 API로 정리
-3. **PG 연동** — 토스페이먼츠/포트원 결정 후 WIO 구독 결제 구현
-4. **도메인 연결** — hero.ne.kr Vercel 연결
-5. **SmarComm Phase 1** — DB 연결 시작
+1. **HIT B 재구축 (Phase 10)** — B-questions.ts 현황 확인 후 동일 패턴 적용
+2. **/crew-invite 페이지 제작** — 링크는 고쳤는데 실제 페이지가 없음 (404 상태)
+3. **N-03 뉴스레터 폼 통일** — 메인/Mindle/newsletter 3곳 단일 API로 정리
+4. **PG 연동** — 토스페이먼츠/포트원 결정 후 WIO 구독 결제 구현
+5. **도메인 연결** — hero.ne.kr Vercel 연결
