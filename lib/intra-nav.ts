@@ -338,7 +338,7 @@ export const modules: NavModule[] = [
                         name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
                         children: [
                             { name: "대시보드", href: "/intra/ums/newsletter" },
-                            { name: "이슈 관리", href: "/intra/ums/newsletter/issues" },
+                            { name: "뉴스레터 관리", href: "/intra/ums/newsletter/issues" },
                             { name: "구독자", href: "/intra/ums/newsletter/subscribers" },
                         ],
                     },

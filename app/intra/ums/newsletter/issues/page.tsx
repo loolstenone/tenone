@@ -182,7 +182,7 @@ export default function IssuesPage() {
 
     return (
         <div>
-            <PageHeader title="이슈 관리" description="뉴스레터 작성 및 발송">
+            <PageHeader title="뉴스레터 관리" description="뉴스레터 작성 및 발송">
                 <button onClick={handleCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800">
                     <Plus className="h-4 w-4" /> 새 뉴스레터
                 </button>
