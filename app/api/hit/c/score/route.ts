@@ -83,6 +83,8 @@ export async function POST(request: NextRequest) {
             `준비도 세부: ${JSON.stringify(scored.readinessScores)}\n` +
             `전환유형(CTYPE): ${scored.ctype}\n` +
             `갭 영역: ${scored.gapAreas.join(', ') || '없음'}\n` +
+            (scored.chDeepScores ? `CH 심화(경력전환맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
+            (scored.apDeepScores ? `AP 심화(경력효능감 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
             `여정 단계: ${journeyStage}\n` +
             (targetJob ? `희망 직무: ${targetJob}\n` : '') +
             `\n위 결과를 통합하여 4-5문단의 경력전환 분석 리포트를 작성해주세요. 현재 자본 진단, 전환 동기 해석, 전환 가능성 평가, 갭 보완 전략, 구체적 액션 아이템을 포함해주세요.`,
@@ -94,6 +96,27 @@ export async function POST(request: NextRequest) {
       }
     } catch (aiError) {
       console.error('[HIT C Score] AI 리포트 생성 실패:', aiError);
+    }
+
+    // CH Deep 다크 플래그 — admin-only
+    if (scored.chDeepScores?.alertFlags) {
+      const af = scored.chDeepScores.alertFlags;
+      const darkScore = af.NR + af.MK;
+      if (darkScore >= 50) {
+        try {
+          const { createClient: serverClient } = await import('@/lib/supabase/server');
+          const supabaseAdmin = await serverClient();
+          await supabaseAdmin.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'dark_triad',
+            flag_score: darkScore,
+            flag_detail: { ...af, source: 'ch_deep_c', layer: 'C' },
+          });
+        } catch (flagErr) {
+          console.warn('[HIT C Score] CH Deep 플래그 저장 실패:', flagErr);
+        }
+      }
     }
 
     // 결과 저장
@@ -111,11 +134,28 @@ export async function POST(request: NextRequest) {
       transition_readiness: scored.transitionReadiness,
       ai_report: aiReport,
       journey_stage: journeyStage,
-      // 신규 (HIT_C_Final.md)
       ctype: scored.ctype,
       transferability_scores: scored.transferabilityScores,
       readiness_scores: scored.readinessScores,
       faking_flag: scored.fakingFlag,
+      // CH Deep C / AP Deep C
+      ...(scored.chDeepScores && {
+        ch_deep_scores: {
+          scores: scored.chDeepScores.scores,
+          grades: scored.chDeepScores.grades,
+          overallScore: scored.chDeepScores.overallScore,
+          overallGrade: scored.chDeepScores.overallGrade,
+        },
+      }),
+      ...(scored.apDeepScores && {
+        ap_deep_scores: {
+          scores: scored.apDeepScores.scores,
+          grades: scored.apDeepScores.grades,
+          top3Code: scored.apDeepScores.top3Code,
+          top3Labels: scored.apDeepScores.top3Labels,
+          dominantType: scored.apDeepScores.dominantType,
+        },
+      }),
     });
 
     // faking 의심 시 hit_admin_flags 기록

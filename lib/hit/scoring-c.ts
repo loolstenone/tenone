@@ -7,7 +7,13 @@
  * 모듈3 transferability — skill_transfer, market_fit, adaptation
  * 모듈4 readiness — doc, interview, timing, psychological
  * 추가: CTYPE 산출, decoy(faking) 검출
+ * 심화: CH Deep C맞춤 + AP Deep C맞춤 (scoreChDeepB/scoreApDeepB 재사용)
  */
+
+// CH/AP Deep 채점은 B와 동일 구조 (character_deep/aptitude_deep 모듈 필터)
+import { scoreChDeepB, scoreApDeepB } from './scoring-b';
+export { scoreChDeepB as scoreChDeepC, scoreApDeepB as scoreApDeepC } from './scoring-b';
+export type { CHDeepBSubscale as CHDeepCSubscale, HollandType } from './data/b-deep-questions';
 
 interface ResponseRow {
   module: string;
@@ -275,10 +281,25 @@ export interface HitCScoreResult {
   gapAwareness: number;
   transitionReadiness: number;
   gapAreas: string[];
-  // 신규
   readinessScores: { doc: number; interview: number; timing: number; psychological: number; total: number };
   ctype: CType;
   fakingFlag: boolean;
+  // CH Deep C맞춤 / AP Deep C맞춤 (심화 레이어 응답 있을 때)
+  chDeepScores?: {
+    scores: Record<string, number>;
+    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
+    overallScore: number;
+    overallGrade: 'A' | 'B' | 'C' | 'D';
+    decoyScore: number;
+    alertFlags: { NR: number; PP: number; MK: number; SP: number };
+  };
+  apDeepScores?: {
+    scores: Record<string, number>;
+    grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
+    top3Code: string;
+    top3Labels: string[];
+    dominantType: string;
+  };
 }
 
 export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
@@ -298,6 +319,10 @@ export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
     transferScores: transfer.scores as { skill_transfer: number; market_fit: number; adaptation: number },
   });
   const fakingFlag = scoreCDecoy(responses);
+
+  // CH Deep C / AP Deep C — 심화 응답 있을 때만
+  const hasChDeep = responses.some(r => r.module === 'character_deep');
+  const hasApDeep = responses.some(r => r.module === 'aptitude_deep');
 
   return {
     capitalScores: capital.scores,
@@ -320,5 +345,7 @@ export function scoreHitC(responses: ResponseRow[]): HitCScoreResult {
     },
     ctype,
     fakingFlag,
+    ...(hasChDeep && { chDeepScores: scoreChDeepB(responses) }),
+    ...(hasApDeep && { apDeepScores: scoreApDeepB(responses) }),
   };
 }
