@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('HIT A 결과를 찾을 수 없습니다.', 400);
     }
 
-    // 채점 (CVI 포함)
+    // 채점 (CVI + 미끼 탐지 포함)
     const scored = scoreHitF(responses, breakMonths, jobCategory);
 
     // 여정 단계 결정
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
 - 마크다운 헤딩(#) 사용 금지
 - CVI 등급(HIGH/MID/LOW)에 따른 맞춤형 복귀 전략 제시
 - 잠재 역량을 강점으로 활용하는 방안 구체화
+- 주도 방향(경력복원/경력전환/새출발) 맞춤 전략 포함
 - 마지막에 복귀를 위한 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
@@ -84,13 +85,16 @@ export async function POST(request: NextRequest) {
             `직군: ${jobCategory} (직무변화속도: ${scored.jobChangeVelocity})\n` +
             `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
             `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)'}\n` +
+            `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
+            `방향 점수: 경력복원 ${scored.directionScores.career_restoration} / 경력전환 ${scored.directionScores.career_pivot} / 새출발 ${scored.directionScores.fresh_start}\n` +
             `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +
             `회복탄력성: ${scored.resilienceScore}점 (자기서사 ${scored.resilienceScores.self_narrative}, 자존감 ${scored.resilienceScores.self_esteem}, 재도전의지 ${scored.resilienceScores.retry_willingness})\n` +
             `재진입 준비도: ${scored.reentryReadiness}점 (실질준비 ${scored.practicalReadiness}, 동기 ${scored.reentryMotivation})\n` +
+            `준비 상세: 스킬업데이트 ${scored.readinessScores.skill_update} / 네트워크 ${scored.readinessScores.network_status} / 자기표현 ${scored.readinessScores.self_presentation} / 현장언어 ${scored.readinessScores.field_language}\n` +
             `공백 맥락: ${scored.overallContext}점\n` +
             `라우팅 근거: ${scored.routingRationale}\n` +
             `여정 단계: ${journeyStage}\n` +
-            `\n위 결과를 통합하여 4-5문단의 경력 복귀 분석 리포트를 작성해주세요. CVI 해석, 잠재 역량 활용 방안, 회복탄력성 평가, 복귀 전략, 구체적 액션 아이템을 포함해주세요.`,
+            `\n위 결과를 통합하여 4-5문단의 경력 복귀 분석 리포트를 작성해주세요. CVI 해석, 주도 방향에 맞는 전략, 잠재 역량 활용, 회복탄력성 평가, 구체적 액션 아이템을 포함해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -125,6 +129,16 @@ export async function POST(request: NextRequest) {
       practical_readiness: scored.practicalReadiness,
       reentry_motivation: scored.reentryMotivation,
       job_category: jobCategory,
+      // Phase 9 신규: 방향/준비도 상세 + 미끼 플래그
+      direction_scores:   scored.directionScores,
+      direction_dominant: scored.directionTop.code,
+      readiness_scores:   scored.readinessScores,
+      faking_flag:        scored.fakingFlag,
+      break_context_scores: {
+        disruption_context: scored.disruptionContext,
+        hidden_competency:  scored.hiddenCompetency,
+        gap_activities:     scored.gapActivities,
+      },
     });
 
     // hero_profiles 링크

@@ -1,11 +1,15 @@
 /**
- * HIT F 채점 알고리즘 -- 경력 공백 복귀 분석
- * 7점 리커트 척도 기반
- * 모듈1(break_context=latentCapabilityQuestions): disruption_context, hidden_competency, gap_activities
- * 모듈2(latent_skills=viabilityQuestions): job_viability, skill_currency, market_reentry
- * 모듈3(resilience=resilienceQuestions): self_narrative, self_esteem, retry_willingness
- * 모듈4(reentry=directionQuestions+reentryReadinessQuestions): career_restoration, career_pivot, fresh_start, skill_update, network_status, self_presentation, field_language
- * CRITICAL: CVI (Career Validity Index) 통합
+ * HIT F 채점 알고리즘 — 경력 공백 복귀 분석
+ * 7점 리커트 척도 기반 · 154문항 (152 + 미끼 2)
+ *
+ * 모듈1: break_context — disruption_context, hidden_competency, gap_activities
+ * 모듈2: viability     — job_viability, skill_currency, market_reentry
+ * 모듈3: resilience    — self_narrative, self_esteem, retry_willingness
+ * 모듈4: direction     — career_restoration, career_pivot, fresh_start
+ * 모듈5: readiness     — skill_update, network_status, self_presentation, field_language
+ * 미끼: DECOY          — f_val01, f_val02
+ *
+ * CVI (Career Validity Index) 통합
  */
 
 import { calculateCVI, getJobVelocity } from '@/lib/hit/cvi';
@@ -35,7 +39,7 @@ function buildSubscaleMap(responses: ResponseRow[]): Record<string, number[]> {
     }
 
     if (isNaN(value)) continue;
-    if (reverse) value = 8 - value;  // 7점 역채점: 1->7, 7->1
+    if (reverse) value = 8 - value;  // 7점 역채점: 1→7, 7→1
 
     if (!map[subscale]) map[subscale] = [];
     map[subscale].push(value);
@@ -49,9 +53,38 @@ function scaleToHundred(values: number[]): number {
   return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── 공백 맥락 채점 (break_context 모듈 = latentCapabilityQuestions) ──
+// ── 미끼 탐지 ──────────────────────────────────────────────────────
+
+/**
+ * 미끼 문항 신뢰도 탐지
+ * f_val01, f_val02: 7점(완전 동의)이면 사회적 바람직성 편향
+ */
+export function scoreDecoyF(responses: ResponseRow[]): {
+  fakingFlag: boolean;
+  decoyDetail: { val01: number; val02: number };
+} {
+  const getDecoyValue = (qid: string): number => {
+    const row = responses.find(r => r.question_id === qid);
+    if (!row) return 0;
+    const parts = row.option_value.split(':');
+    return parseInt(parts.length >= 2 ? parts[1] : parts[0], 10) || 0;
+  };
+
+  const val01 = getDecoyValue('f_val01');
+  const val02 = getDecoyValue('f_val02');
+
+  // 둘 다 6~7점이면 신뢰도 의심
+  const fakingFlag = val01 >= 6 && val02 >= 6;
+
+  return { fakingFlag, decoyDetail: { val01, val02 } };
+}
+
+// ── 공백 맥락 채점 (break_context 모듈) ──────────────────────────
 
 export function scoreBreakContext(responses: ResponseRow[]): {
+  disruptionContext: number;
+  hiddenCompetency: number;
+  gapActivities: number;
   breakContextScore: number;
   breakReasonScore: number;
   overallContext: number;
@@ -63,104 +96,157 @@ export function scoreBreakContext(responses: ResponseRow[]): {
   const hiddenCompetency = scaleToHundred(subscaleMap['hidden_competency'] || []);
   const gapActivities = scaleToHundred(subscaleMap['gap_activities'] || []);
 
-  // breakContextScore: 단절 맥락 명확성
+  // breakContextScore: 단절 맥락 명확성 (맥락 + 활동 평균)
   const breakContextScore = Math.round((disruptionContext + gapActivities) / 2);
   // breakReasonScore: 공백기 숨겨진 역량
   const breakReasonScore = hiddenCompetency;
 
   const overallContext = Math.round(breakContextScore * 0.5 + breakReasonScore * 0.5);
 
-  return { breakContextScore, breakReasonScore, overallContext };
+  return {
+    disruptionContext,
+    hiddenCompetency,
+    gapActivities,
+    breakContextScore,
+    breakReasonScore,
+    overallContext,
+  };
 }
 
-// ── 경력 유효성 채점 (latent_skills 모듈 = viabilityQuestions) ──
+// ── 경력 유효성 채점 (viability 모듈) ────────────────────────────
 
-export function scoreLatentSkills(responses: ResponseRow[]): {
+export function scoreViability(responses: ResponseRow[]): {
   scores: Record<string, number>;
   latentScore: number;
 } {
-  const latent = responses.filter(r => r.module === 'latent_skills');
-  const subscaleMap = buildSubscaleMap(latent);
+  const viab = responses.filter(r => r.module === 'viability' || r.module === 'latent_skills');
+  const subscaleMap = buildSubscaleMap(viab);
 
   const scores: Record<string, number> = {
-    job_viability: scaleToHundred(subscaleMap['job_viability'] || []),
+    job_viability:  scaleToHundred(subscaleMap['job_viability']  || []),
     skill_currency: scaleToHundred(subscaleMap['skill_currency'] || []),
     market_reentry: scaleToHundred(subscaleMap['market_reentry'] || []),
   };
 
   // 경력 유효성 종합: 직무유효성 40% + 스킬현재성 30% + 시장재진입 30%
   const latentScore = Math.round(
-    scores.job_viability * 0.4 +
+    scores.job_viability  * 0.4 +
     scores.skill_currency * 0.3 +
-    scores.market_reentry * 0.3
+    scores.market_reentry * 0.3,
   );
 
   return { scores, latentScore };
 }
 
-// ── 심리적 회복력 채점 (resilience 모듈) ──
+/** @deprecated scoreViability 사용 권장 */
+export const scoreLatentSkills = scoreViability;
+
+// ── 심리적 회복력 채점 (resilience 모듈) ─────────────────────────
 
 export function scoreResilience(responses: ResponseRow[]): {
   scores: Record<string, number>;
   resilienceScore: number;
 } {
-  const resilience = responses.filter(r => r.module === 'resilience');
-  const subscaleMap = buildSubscaleMap(resilience);
+  const res = responses.filter(r => r.module === 'resilience');
+  const subscaleMap = buildSubscaleMap(res);
 
   const scores: Record<string, number> = {
-    self_narrative: scaleToHundred(subscaleMap['self_narrative'] || []),
-    self_esteem: scaleToHundred(subscaleMap['self_esteem'] || []),
-    retry_willingness: scaleToHundred(subscaleMap['retry_willingness'] || []),
+    self_narrative:     scaleToHundred(subscaleMap['self_narrative']     || []),
+    self_esteem:        scaleToHundred(subscaleMap['self_esteem']        || []),
+    retry_willingness:  scaleToHundred(subscaleMap['retry_willingness']  || []),
   };
 
   // 회복탄력성 종합: 자기서사 30% + 자존감 35% + 재도전의지 35%
   const resilienceScore = Math.round(
-    scores.self_narrative * 0.3 +
-    scores.self_esteem * 0.35 +
-    scores.retry_willingness * 0.35
+    scores.self_narrative    * 0.3 +
+    scores.self_esteem       * 0.35 +
+    scores.retry_willingness * 0.35,
   );
 
   return { scores, resilienceScore };
 }
 
-// ── 재진입 준비도 채점 (reentry 모듈 = directionQuestions + reentryReadinessQuestions) ──
+// ── 방향 채점 (direction 모듈) ───────────────────────────────────
 
-export function scoreReentry(responses: ResponseRow[]): {
-  practicalReadiness: number;
-  reentryMotivation: number;
-  reentryReadiness: number;
+const DIRECTION_LABELS: Record<string, string> = {
+  career_restoration: '경력 복원',
+  career_pivot:       '경력 전환',
+  fresh_start:        '새 출발',
+};
+
+export function scoreDirection(responses: ResponseRow[]): {
   directionScores: Record<string, number>;
+  directionTop: { code: string; label: string; score: number };
+  reentryMotivation: number;
 } {
-  const reentry = responses.filter(r => r.module === 'reentry');
-  const subscaleMap = buildSubscaleMap(reentry);
+  const dir = responses.filter(r => r.module === 'direction' || r.module === 'reentry');
+  const subscaleMap = buildSubscaleMap(dir);
 
-  // 재진입 방향 점수
   const career_restoration = scaleToHundred(subscaleMap['career_restoration'] || []);
-  const career_pivot = scaleToHundred(subscaleMap['career_pivot'] || []);
-  const fresh_start = scaleToHundred(subscaleMap['fresh_start'] || []);
-
-  // 실질 준비도: 스킬업데이트 + 네트워크 + 자기표현 + 현장언어 평균
-  const skill_update = scaleToHundred(subscaleMap['skill_update'] || []);
-  const network_status = scaleToHundred(subscaleMap['network_status'] || []);
-  const self_presentation = scaleToHundred(subscaleMap['self_presentation'] || []);
-  const field_language = scaleToHundred(subscaleMap['field_language'] || []);
-
-  const practicalReadiness = Math.round(
-    (skill_update + network_status + self_presentation + field_language) / 4
-  );
-
-  // 재진입 동기: 방향 점수 중 최대값을 대표 동기로 활용
-  const reentryMotivation = Math.max(career_restoration, career_pivot, fresh_start);
+  const career_pivot       = scaleToHundred(subscaleMap['career_pivot']       || []);
+  const fresh_start        = scaleToHundred(subscaleMap['fresh_start']        || []);
 
   const directionScores = { career_restoration, career_pivot, fresh_start };
 
-  // 재진입 준비도: 실질 준비 55% + 복귀 동기 45%
-  const reentryReadiness = Math.round(practicalReadiness * 0.55 + reentryMotivation * 0.45);
+  // Top 1 방향
+  const topCode = Object.entries(directionScores).reduce((a, b) => (a[1] >= b[1] ? a : b))[0] as keyof typeof directionScores;
+  const directionTop = {
+    code:  topCode,
+    label: DIRECTION_LABELS[topCode] ?? topCode,
+    score: directionScores[topCode],
+  };
 
-  return { practicalReadiness, reentryMotivation, reentryReadiness, directionScores };
+  // 재진입 동기: 3방향 중 최대값
+  const reentryMotivation = Math.max(career_restoration, career_pivot, fresh_start);
+
+  return { directionScores, directionTop, reentryMotivation };
 }
 
-// ── 라우팅 근거 ──
+// ── 재진입 준비도 채점 (readiness 모듈) ──────────────────────────
+
+export function scoreReadiness(responses: ResponseRow[]): {
+  readinessScores: Record<string, number>;
+  practicalReadiness: number;
+  reentryReadiness: number;
+} {
+  const ready = responses.filter(
+    r => r.module === 'readiness' ||
+         // 구버전 호환: 방향+준비도가 'reentry'로 묶여 들어올 경우
+         (r.module === 'reentry' && (
+           r.question_id.startsWith('f_su') ||
+           r.question_id.startsWith('f_ns') ||
+           r.question_id.startsWith('f_sp') ||
+           r.question_id.startsWith('f_fl') ||
+           r.question_id.startsWith('hit_f_12') ||
+           r.question_id.startsWith('hit_f_13') ||
+           r.question_id.startsWith('hit_f_14') ||
+           r.question_id.startsWith('hit_f_15')
+         )),
+  );
+  const subscaleMap = buildSubscaleMap(ready);
+
+  const readinessScores: Record<string, number> = {
+    skill_update:      scaleToHundred(subscaleMap['skill_update']      || []),
+    network_status:    scaleToHundred(subscaleMap['network_status']    || []),
+    self_presentation: scaleToHundred(subscaleMap['self_presentation'] || []),
+    field_language:    scaleToHundred(subscaleMap['field_language']    || []),
+  };
+
+  // 실질 준비도: 4항목 평균
+  const practicalReadiness = Math.round(
+    (readinessScores.skill_update +
+     readinessScores.network_status +
+     readinessScores.self_presentation +
+     readinessScores.field_language) / 4,
+  );
+
+  // 재진입 준비도 (direction 없이 순수 준비 점수)
+  const reentryReadiness = practicalReadiness;
+
+  return { readinessScores, practicalReadiness, reentryReadiness };
+}
+
+// ── 라우팅 근거 ──────────────────────────────────────────────────
 
 export function buildRoutingRationale(
   cviGrade: CviGrade,
@@ -168,6 +254,7 @@ export function buildRoutingRationale(
   latentScore: number,
   resilienceScore: number,
   reentryReadiness: number,
+  directionTop: { code: string; label: string },
 ): string {
   const parts: string[] = [];
 
@@ -188,81 +275,117 @@ export function buildRoutingRationale(
   if (reentryReadiness >= 70) parts.push('실질적 복귀 준비가 잘 되어 있습니다.');
   else if (reentryReadiness < 40) parts.push('구체적인 복귀 준비 활동이 필요합니다.');
 
+  parts.push(`주도 방향: ${directionTop.label}`);
+
   const routeLabel = nextRoute === 'recovery' ? 'Recovery(복귀)' : nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)';
   parts.push(`추천 경로: ${routeLabel}`);
 
   return parts.join(' ');
 }
 
-// ── 통합 채점 ──
+// ── 통합 결과 타입 ─────────────────────────────────────────────
 
 export interface HitFScoreResult {
   // 공백 맥락
-  breakContextScore: number;
-  breakReasonScore: number;
-  overallContext: number;
-  // 경력 유효성 (latent skills)
-  latentScores: Record<string, number>;
-  latentScore: number;
+  disruptionContext:  number;
+  hiddenCompetency:   number;
+  gapActivities:      number;
+  breakContextScore:  number;
+  breakReasonScore:   number;
+  overallContext:     number;
+  // 경력 유효성
+  latentScores:  Record<string, number>;
+  latentScore:   number;
   // 심리적 회복력
   resilienceScores: Record<string, number>;
-  resilienceScore: number;
-  // 재진입 준비도
-  practicalReadiness: number;
-  reentryMotivation: number;
-  reentryReadiness: number;
+  resilienceScore:  number;
+  // 방향
   directionScores: Record<string, number>;
+  directionTop:    { code: string; label: string; score: number };
+  reentryMotivation: number;
+  // 준비도
+  readinessScores:  Record<string, number>;
+  practicalReadiness: number;
+  reentryReadiness:   number;
   // CVI
-  cviRaw: number;
-  cviGrade: CviGrade;
-  nextRoute: FNextRoute;
+  cviRaw:            number;
+  cviGrade:          CviGrade;
+  nextRoute:         FNextRoute;
   jobChangeVelocity: number;
   // 라우팅
   routingRationale: string;
+  // 미끼
+  fakingFlag:   boolean;
+  decoyDetail:  { val01: number; val02: number };
 }
+
+// ── 통합 채점 ──────────────────────────────────────────────────
 
 export function scoreHitF(
   responses: ResponseRow[],
   breakMonths: number,
   jobCategory: string,
 ): HitFScoreResult {
-  const context = scoreBreakContext(responses);
-  const latent = scoreLatentSkills(responses);
+  const context    = scoreBreakContext(responses);
+  const viability  = scoreViability(responses);
   const resilience = scoreResilience(responses);
-  const reentry = scoreReentry(responses);
+  const direction  = scoreDirection(responses);
+  const readiness  = scoreReadiness(responses);
+  const decoy      = scoreDecoyF(responses);
 
   // CVI 계산
   const jobChangeVelocity = getJobVelocity(jobCategory);
   const cviResult = calculateCVI({
     breakMonths,
     jobChangeVelocity,
-    latentScore: latent.latentScore,
+    latentScore: viability.latentScore,
   });
+
+  // 재진입 준비도 통합: 실질준비 55% + 복귀동기 45%
+  const reentryReadinessFinal = Math.round(
+    readiness.practicalReadiness * 0.55 + direction.reentryMotivation * 0.45,
+  );
 
   const routingRationale = buildRoutingRationale(
     cviResult.cviGrade,
     cviResult.nextRoute,
-    latent.latentScore,
+    viability.latentScore,
     resilience.resilienceScore,
-    reentry.reentryReadiness,
+    reentryReadinessFinal,
+    direction.directionTop,
   );
 
   return {
+    // 공백 맥락
+    disruptionContext: context.disruptionContext,
+    hiddenCompetency:  context.hiddenCompetency,
+    gapActivities:     context.gapActivities,
     breakContextScore: context.breakContextScore,
-    breakReasonScore: context.breakReasonScore,
-    overallContext: context.overallContext,
-    latentScores: latent.scores,
-    latentScore: latent.latentScore,
+    breakReasonScore:  context.breakReasonScore,
+    overallContext:    context.overallContext,
+    // 경력 유효성
+    latentScores: viability.scores,
+    latentScore:  viability.latentScore,
+    // 심리적 회복력
     resilienceScores: resilience.scores,
-    resilienceScore: resilience.resilienceScore,
-    practicalReadiness: reentry.practicalReadiness,
-    reentryMotivation: reentry.reentryMotivation,
-    reentryReadiness: reentry.reentryReadiness,
-    directionScores: reentry.directionScores,
-    cviRaw: cviResult.cviRaw,
-    cviGrade: cviResult.cviGrade,
-    nextRoute: cviResult.nextRoute,
+    resilienceScore:  resilience.resilienceScore,
+    // 방향
+    directionScores:   direction.directionScores,
+    directionTop:      direction.directionTop,
+    reentryMotivation: direction.reentryMotivation,
+    // 준비도
+    readinessScores:    readiness.readinessScores,
+    practicalReadiness: readiness.practicalReadiness,
+    reentryReadiness:   reentryReadinessFinal,
+    // CVI
+    cviRaw:            cviResult.cviRaw,
+    cviGrade:          cviResult.cviGrade,
+    nextRoute:         cviResult.nextRoute,
     jobChangeVelocity,
+    // 라우팅
     routingRationale,
+    // 미끼
+    fakingFlag:  decoy.fakingFlag,
+    decoyDetail: decoy.decoyDetail,
   };
 }
