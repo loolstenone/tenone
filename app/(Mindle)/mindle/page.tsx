@@ -378,10 +378,10 @@ export default function MindleHomePage() {
         <div className="mx-auto max-w-2xl text-center">
           <Mail className="w-8 h-8 text-indigo-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">
-            매주 화요일, 트렌드 브리핑
+            트렌드 브리핑
           </h3>
           <p className="text-indigo-400/50 text-sm mb-6">
-            AI가 분석한 주간 트렌드 리포트를 받아보세요.
+            AI가 분석한 트렌드 리포트를 받아보세요.
           </p>
           {nlStatus === "done" ? (
             <p className="text-indigo-300 text-sm">구독이 완료되었습니다!</p>

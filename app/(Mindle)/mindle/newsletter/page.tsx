@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 const benefits = [
     {
         icon: TrendingUp,
-        title: "주간 트렌드 다이제스트",
-        desc: "엄선된 신호와 부상하는 패턴을 매주 월요일 아침에 전달합니다.",
+        title: "트렌드 다이제스트",
+        desc: "엄선된 신호와 부상하는 패턴을 정기적으로 전달합니다.",
     },
     {
         icon: Zap,
@@ -22,8 +22,8 @@ const benefits = [
     },
     {
         icon: FileText,
-        title: "주간 리포트 선공개",
-        desc: "정식 발행 24시간 전에 주간 리포트를 먼저 받아보세요.",
+        title: "리포트 선공개",
+        desc: "정식 발행 전에 리포트를 먼저 받아보세요.",
     },
 ];
 
@@ -80,7 +80,7 @@ export default function NewsletterPage() {
                 </h1>
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                     매주 Mindle의 트렌드 인사이트로 한 주를 시작하세요.
-                    무료, 주 1회, 스팸 없음.
+                    무료, 스팸 없음.
                 </p>
 
                 {/* Subscribe Form */}
