@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-04-09 (집, 세션 32)
+
+### QA + 버그 수정 + 도메인 라우팅 정비
+- `app/(HeRo)/hero/page.tsx`: hydration mismatch 수정 — `useMemo(Math.random)` → `useState(heroChars[0])` + `useEffect` 패턴
+- `app/(MADLeague)/madleague/page.tsx`: 가짜 2025 활동 데이터 제거 (`recentActivities = []`, 섹션 조건부 렌더)
+- `app/(Mindle)/mindle/page.tsx`: 뉴스레터 이메일 수집 동의 체크박스 추가
+- `middleware.ts`: 9개 도메인 매핑 추가 (`domo.ne.kr`, `hero.tenone.biz`, `fwn.tenone.biz`, `0gamja.tenone.biz`, `changeup.tenone.biz`, `jakka.tenone.biz`, `planners.tenone.biz`, `wio.tenone.biz`, `seoul360.tenone.biz`)
+- `app/CrewInvite/` → `app/crew-invite/` 폴더명 rename (Next.js 대소문자 라우팅 수정)
+- `app/intra/universe/` 폴더 전체 삭제 (UMS로 대체된 고아 경로 8페이지 제거)
+- `RELAY.md` 신규 생성 (Code→Chat 단방향 완료 보고 구조 문서화)
+- `npx next build` 에러 없음 확인
+
+---
+
 ## 2026-04-08 (집, 세션 31)
 
 ### HIT D/E 레이어 심화 75문항 — 채점 통합

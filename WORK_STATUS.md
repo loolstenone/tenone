@@ -80,22 +80,23 @@
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
 
-## 이번 세션 (세션 31) 완료 항목
+## 이번 세션 (세션 32) 완료 항목
 
 | 항목 | 내용 |
 |------|------|
-| HIT D/E/F 심화 채점 통합 | scoring-d/e/f.ts — CH Deep 45 + AP Deep 30 재사용 채점, Dark flag 탐지 (NR+MK≥50 → hit_admin_flags) |
-| Admin HIT 리포트 페이지 | `/intra/hero/hit/report` — 멤버 목록 + 레이어 완료 배지 + 소비자 뷰 팝업 (iframe) |
-| Mock 미리보기 API | `/api/hit/a/result/preview` — D-INFJ 전체 프로필 + report_modules 포함 |
-| 소비자 카드 높이 일정화 | `h-[540px] overflow-hidden` — 모든 페이지 동일 사이즈, 내용 많으면 내부 스크롤 |
-| 통합 보고서 내부 스크롤 | 페이지 4: 제목 고정 + 모듈 스크롤 + PDF버튼 고정 (`flex-col` 구조) |
-| MembershipGate 리디자인 | 노란 자물쇠 → 그레이 미니멀 + 빨간 태그 + 다크 CTA |
-| HitPdfButton 레이블 수정 | `PDF 보고서 다운로드` → `전체 보고서 보기` |
+| HeRo hydration fix | `useMemo(Math.random)` → `useState+useEffect` (서버/클라 렌더 불일치 수정) |
+| MADLeague 가짜 데이터 제거 | recentActivities 빈 배열, 섹션 조건부 노출 |
+| Mindle 동의 체크박스 | 뉴스레터 이메일 수집 동의 체크박스 추가 (N-03) |
+| middleware.ts 보완 | domo.ne.kr, hero.tenone.biz 등 9개 도메인 매핑 추가 |
+| CrewInvite 경로 수정 | PascalCase → kebab-case 폴더 rename (404 수정) |
+| /intra/universe/ 삭제 | UMS로 대체된 고아 폴더 제거 |
+| RELAY.md 신규 | Code→Chat 단방향 완료 보고 구조 |
+| 빌드 검증 | `npx next build` — 에러 없음 ✅ |
 
 ## 다음 스텝 후보
 
-1. **E 레이어 심화 시딩 검증** — `HIT_E_Deep_75.md` 기준 hit_questions에 E 레이어 75문항(che_*/ape_*) 정확히 들어갔는지 카운트 확인
-2. **Admin 리포트 데이터 연결** — 실제 members + hit_a_results JOIN이 동작하는지 실계정으로 확인
-3. **/crew-invite 페이지 제작** — 링크는 고쳤는데 실제 페이지가 없음 (404 상태)
-4. **N-03 뉴스레터 폼 통일** — 메인/Mindle/newsletter 3곳 단일 API로 정리
-5. **PG 연동** — 토스페이먼츠/포트원 결정 후 WIO 구독 결제 구현
+1. **/crew-invite 페이지 제작** — 폴더는 있는데 실제 콘텐츠가 없음. `/app/crew-invite/page.tsx` 신규 제작
+2. **Admin 리포트 실데이터 연결** — `/intra/hero/hit/report` 실계정 members + hit_a_results JOIN 동작 확인
+3. **N-04 Latest 섹션 날짜** — 메인 Latest 섹션 2025.08 날짜 → DB 실데이터 필요
+4. **뉴스레터 단일 API 통일** — 메인/Mindle/newsletter 3곳 동일 엔드포인트 연결
+5. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)
