@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 채점 (CVI + 미끼 탐지 포함)
-    const scored = scoreHitF(responses, breakMonths, jobCategory);
+    const scored = scoreHitF(responses);
 
     // 여정 단계 결정
     const journeyStage = determineJourneyStage(
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           role: 'user',
           content: `${hitAContext}HIT F 경력 공백 복귀 분석 결과:\n` +
             `경력 공백: ${breakMonths}개월\n` +
-            `직군: ${jobCategory} (직무변화속도: ${scored.jobChangeVelocity})\n` +
+            `직군: ${jobCategory}\n` +
             `CVI: ${scored.cviRaw}점 (등급: ${scored.cviGrade})\n` +
             `추천 경로: ${scored.nextRoute === 'recovery' ? 'Recovery(복귀)' : scored.nextRoute === 'C' ? 'HIT C(전환)' : 'HIT B(기본)'}\n` +
             `주도 방향: ${scored.directionTop.label} (${scored.directionTop.score}점)\n` +
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
             `경력 유효성: ${scored.latentScore}점 (직무유효성 ${scored.latentScores.job_viability}, 스킬현재성 ${scored.latentScores.skill_currency}, 시장재진입 ${scored.latentScores.market_reentry})\n` +
             `회복탄력성: ${scored.resilienceScore}점 (자기서사 ${scored.resilienceScores.self_narrative}, 자존감 ${scored.resilienceScores.self_esteem}, 재도전의지 ${scored.resilienceScores.retry_willingness})\n` +
             `재진입 준비도: ${scored.reentryReadiness}점 (실질준비 ${scored.practicalReadiness}, 동기 ${scored.reentryMotivation})\n` +
-            `준비 상세: 스킬업데이트 ${scored.readinessScores.skill_update} / 네트워크 ${scored.readinessScores.network_status} / 자기표현 ${scored.readinessScores.self_presentation} / 현장언어 ${scored.readinessScores.field_language}\n` +
+            `준비 상세: 스킬업데이트 ${scored.readinessScores.skill_update} / 네트워크 ${scored.readinessScores.network} / 자기표현 ${scored.readinessScores.self_presentation} / 현장언어 ${scored.readinessScores.field_language}\n` +
             `공백 맥락: ${scored.overallContext}점\n` +
             `라우팅 근거: ${scored.routingRationale}\n` +
             `여정 단계: ${journeyStage}\n` +
@@ -111,7 +111,6 @@ export async function POST(request: NextRequest) {
       member_id: session.member_id || null,
       hit_a_result_id: hitAResultId,
       break_months: breakMonths,
-      job_change_velocity: scored.jobChangeVelocity,
       latent_score: scored.latentScore,
       cvi_raw: scored.cviRaw,
       cvi_grade: scored.cviGrade,

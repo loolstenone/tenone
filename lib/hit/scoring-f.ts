@@ -2,17 +2,17 @@
  * HIT F 채점 알고리즘 — 경력 공백 복귀 분석
  * 7점 리커트 척도 기반 · 154문항 (152 + 미끼 2)
  *
- * 모듈1: break_context — disruption_context, hidden_competency, gap_activities
- * 모듈2: viability     — job_viability, skill_currency, market_reentry
- * 모듈3: resilience    — self_narrative, self_esteem, retry_willingness
- * 모듈4: direction     — career_restoration, career_pivot, fresh_start
- * 모듈5: readiness     — skill_update, network_status, self_presentation, field_language
- * 미끼: DECOY          — f_val01, f_val02
+ * 모듈1: latent_capability    — disruption_context, hidden_competency, gap_activities
+ * 모듈2: career_viability     — job_viability, skill_currency, market_reentry
+ * 모듈3: resilience           — self_narrative, self_esteem, retry_willingness
+ * 모듈4: direction_bifurcation — career_restoration, career_pivot, fresh_start
+ * 모듈5: reentry_readiness    — skill_update, network, self_presentation, field_language
+ * 미끼: DECOY                 — f_val01, f_val02
  *
  * CVI (Career Validity Index) 통합
  */
 
-import { calculateCVI, getJobVelocity } from '@/lib/hit/cvi';
+import { calculateCVI } from '@/lib/hit/cvi';
 import type { CviGrade, FNextRoute } from '@/lib/hit/cvi';
 
 interface ResponseRow {
@@ -89,7 +89,7 @@ export function scoreBreakContext(responses: ResponseRow[]): {
   breakReasonScore: number;
   overallContext: number;
 } {
-  const ctx = responses.filter(r => r.module === 'break_context');
+  const ctx = responses.filter(r => r.module === 'latent_capability');
   const subscaleMap = buildSubscaleMap(ctx);
 
   const disruptionContext = scaleToHundred(subscaleMap['disruption_context'] || []);
@@ -119,7 +119,7 @@ export function scoreViability(responses: ResponseRow[]): {
   scores: Record<string, number>;
   latentScore: number;
 } {
-  const viab = responses.filter(r => r.module === 'viability' || r.module === 'latent_skills');
+  const viab = responses.filter(r => r.module === 'career_viability');
   const subscaleMap = buildSubscaleMap(viab);
 
   const scores: Record<string, number> = {
@@ -179,7 +179,7 @@ export function scoreDirection(responses: ResponseRow[]): {
   directionTop: { code: string; label: string; score: number };
   reentryMotivation: number;
 } {
-  const dir = responses.filter(r => r.module === 'direction' || r.module === 'reentry');
+  const dir = responses.filter(r => r.module === 'direction_bifurcation');
   const subscaleMap = buildSubscaleMap(dir);
 
   const career_restoration = scaleToHundred(subscaleMap['career_restoration'] || []);
@@ -209,25 +209,12 @@ export function scoreReadiness(responses: ResponseRow[]): {
   practicalReadiness: number;
   reentryReadiness: number;
 } {
-  const ready = responses.filter(
-    r => r.module === 'readiness' ||
-         // 구버전 호환: 방향+준비도가 'reentry'로 묶여 들어올 경우
-         (r.module === 'reentry' && (
-           r.question_id.startsWith('f_su') ||
-           r.question_id.startsWith('f_ns') ||
-           r.question_id.startsWith('f_sp') ||
-           r.question_id.startsWith('f_fl') ||
-           r.question_id.startsWith('hit_f_12') ||
-           r.question_id.startsWith('hit_f_13') ||
-           r.question_id.startsWith('hit_f_14') ||
-           r.question_id.startsWith('hit_f_15')
-         )),
-  );
+  const ready = responses.filter(r => r.module === 'reentry_readiness');
   const subscaleMap = buildSubscaleMap(ready);
 
   const readinessScores: Record<string, number> = {
     skill_update:      scaleToHundred(subscaleMap['skill_update']      || []),
-    network_status:    scaleToHundred(subscaleMap['network_status']    || []),
+    network:           scaleToHundred(subscaleMap['network']           || []),
     self_presentation: scaleToHundred(subscaleMap['self_presentation'] || []),
     field_language:    scaleToHundred(subscaleMap['field_language']    || []),
   };
@@ -235,7 +222,7 @@ export function scoreReadiness(responses: ResponseRow[]): {
   // 실질 준비도: 4항목 평균
   const practicalReadiness = Math.round(
     (readinessScores.skill_update +
-     readinessScores.network_status +
+     readinessScores.network +
      readinessScores.self_presentation +
      readinessScores.field_language) / 4,
   );
@@ -308,10 +295,9 @@ export interface HitFScoreResult {
   practicalReadiness: number;
   reentryReadiness:   number;
   // CVI
-  cviRaw:            number;
-  cviGrade:          CviGrade;
-  nextRoute:         FNextRoute;
-  jobChangeVelocity: number;
+  cviRaw:    number;
+  cviGrade:  CviGrade;
+  nextRoute: FNextRoute;
   // 라우팅
   routingRationale: string;
   // 미끼
@@ -321,11 +307,7 @@ export interface HitFScoreResult {
 
 // ── 통합 채점 ──────────────────────────────────────────────────
 
-export function scoreHitF(
-  responses: ResponseRow[],
-  breakMonths: number,
-  jobCategory: string,
-): HitFScoreResult {
+export function scoreHitF(responses: ResponseRow[]): HitFScoreResult {
   const context    = scoreBreakContext(responses);
   const viability  = scoreViability(responses);
   const resilience = scoreResilience(responses);
@@ -333,12 +315,11 @@ export function scoreHitF(
   const readiness  = scoreReadiness(responses);
   const decoy      = scoreDecoyF(responses);
 
-  // CVI 계산
-  const jobChangeVelocity = getJobVelocity(jobCategory);
+  // CVI 계산 — 설계서 확정 공식: (직무유효성×0.35) + (기술유효성×0.35) + (시장재진입×0.30)
   const cviResult = calculateCVI({
-    breakMonths,
-    jobChangeVelocity,
-    latentScore: viability.latentScore,
+    jobViability:  viability.scores.job_viability,
+    skillCurrency: viability.scores.skill_currency,
+    marketReentry: viability.scores.market_reentry,
   });
 
   // 재진입 준비도 통합: 실질준비 55% + 복귀동기 45%
@@ -378,10 +359,9 @@ export function scoreHitF(
     practicalReadiness: readiness.practicalReadiness,
     reentryReadiness:   reentryReadinessFinal,
     // CVI
-    cviRaw:            cviResult.cviRaw,
-    cviGrade:          cviResult.cviGrade,
-    nextRoute:         cviResult.nextRoute,
-    jobChangeVelocity,
+    cviRaw:    cviResult.cviRaw,
+    cviGrade:  cviResult.cviGrade,
+    nextRoute: cviResult.nextRoute,
     // 라우팅
     routingRationale,
     // 미끼
