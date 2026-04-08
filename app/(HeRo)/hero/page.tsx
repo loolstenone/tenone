@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -111,7 +111,10 @@ const heroChars = [
 
 export default function HeRoHomePage() {
   const [activeJourney, setActiveJourney] = useState(2);
-  const heroChar = useMemo(() => heroChars[Math.floor(Math.random() * heroChars.length)], []);
+  const [heroChar, setHeroChar] = useState(heroChars[0]);
+  useEffect(() => {
+    setHeroChar(heroChars[Math.floor(Math.random() * heroChars.length)]);
+  }, []);
 
   /* 자동 여정 단계 순환 */
   useEffect(() => {

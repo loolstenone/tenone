@@ -64,26 +64,7 @@ const regions = [
   },
 ];
 
-const recentActivities = [
-  {
-    type: "경쟁PT",
-    title: "제8회 경쟁PT — 지평주조 100주년 마케팅",
-    date: "2025.11",
-    desc: "12개 팀 참가, 서울·부산·대구 3개 권역 동시 진행",
-  },
-  {
-    type: "DAM Party",
-    title: "제4회 DAM Party — 기업×대학생 네트워킹",
-    date: "2025.09",
-    desc: "15개 기업, 120명 대학생 참가. 현장 면접·포트폴리오 리뷰",
-  },
-  {
-    type: "MADzine",
-    title: "MADzine Vol.6 — 'Z세대 브랜딩 해부학'",
-    date: "2025.08",
-    desc: "전국 리퍼 기고, 브랜드 케이스 스터디 12편 수록",
-  },
-];
+const recentActivities: { type: string; title: string; date: string; desc: string }[] = [];
 
 const programs = [
   {
@@ -230,7 +211,7 @@ export default function MadLeagueHomePage() {
       </section>
 
       {/* ── 최근 활동 ── */}
-      <section className="py-20 px-6">
+      {recentActivities.length > 0 && <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900">최근 활동</h2>
@@ -262,7 +243,7 @@ export default function MadLeagueHomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ── 주요 프로그램 ── */}
       <section className="py-20 px-6 bg-neutral-50">

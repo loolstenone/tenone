@@ -151,6 +151,7 @@ export default function MindleHomePage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [nlEmail, setNlEmail] = useState("");
   const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [nlAgree, setNlAgree] = useState(false);
 
   useEffect(() => {
     setCopy(insightCopies[Math.floor(Math.random() * insightCopies.length)]);
@@ -388,7 +389,7 @@ export default function MindleHomePage() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                if (!nlEmail.trim()) return;
+                if (!nlEmail.trim() || !nlAgree) return;
                 setNlStatus("loading");
                 try {
                   const res = await fetch("/api/newsletter", {
@@ -414,12 +415,23 @@ export default function MindleHomePage() {
               />
               <button
                 type="submit"
-                disabled={nlStatus === "loading"}
+                disabled={nlStatus === "loading" || !nlAgree}
                 className="px-5 py-2.5 bg-indigo-500 text-white font-semibold rounded-full text-sm hover:bg-indigo-400 transition-colors disabled:opacity-50"
               >
                 {nlStatus === "loading" ? "..." : "구독"}
               </button>
             </form>
+          )}
+          {nlStatus !== "done" && (
+            <label className="flex items-center justify-center gap-2 mt-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={nlAgree}
+                onChange={e => setNlAgree(e.target.checked)}
+                className="accent-indigo-500"
+              />
+              <span className="text-indigo-500/50 text-[11px]">이메일 수집 및 뉴스레터 수신에 동의합니다</span>
+            </label>
           )}
           {nlStatus === "error" && (
             <p className="text-red-400 text-xs mt-2">구독 처리 중 오류가 발생했습니다.</p>
