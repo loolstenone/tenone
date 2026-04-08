@@ -91,11 +91,12 @@ export async function POST(request: NextRequest) {
           content: `${hitAContext}HIT B 기초역량·준비도 결과:\n` +
             `희망 직무 트랙: ${competencyTrack}\n` +
             `공통 기초역량: ${JSON.stringify(scored.coreCompetencyScores)} (종합 ${scored.coreCompetencyOverall}점, ${scored.coreCompetencyGrade}등급)\n` +
-            `역량 등급: ${JSON.stringify(scored.coreCompetencyGrades)}\n` +
             `직무별 역량(${competencyTrack}): ${JSON.stringify(scored.trackScores)} (종합 ${scored.trackOverallScore}점, ${scored.trackOverallGrade}등급)\n` +
             `준비도: 자기이해 ${scored.readinessScores.self_understanding} / 직무이해 ${scored.readinessScores.job_understanding} / 역량준비 ${scored.readinessScores.skill_readiness} / 실행준비 ${scored.readinessScores.action_readiness}\n` +
             `준비도 종합: ${scored.readinessTotal}점 (${scored.readinessGrade}등급)\n` +
             `보완 필요 영역: ${scored.readinessGaps.join(', ') || '없음'}\n` +
+            (scored.chDeepScores ? `CH 심화(신입맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 자기규율${scored.chDeepScores.scores.self_discipline} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
+            (scored.apDeepScores ? `AP 심화(자기효능감 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
             `여정 단계: ${scored.journeyStage}\n\n` +
             `위 결과를 통합하여 4-5문단의 커리어 분석 리포트를 작성해주세요. 강점 역량, 희망 직무 적합성, 준비도 평가, 구체적 액션 아이템을 포함해주세요.`,
         }],
@@ -111,6 +112,27 @@ export async function POST(request: NextRequest) {
     // 주의 신호 채점
     const alerts = computeAlertScoresFromDB(responses, alertQuestions, {});
 
+    // CH Deep 다크 플래그 (admin-only — 소비자 절대 비노출)
+    if (scored.chDeepScores?.alertFlags) {
+      const af = scored.chDeepScores.alertFlags;
+      const darkScore = af.NR + af.MK;  // 나르시시즘 + 마키아벨리즘
+      if (darkScore >= 50) {
+        try {
+          const { createClient } = await import('@/lib/supabase/server');
+          const supabase = await createClient();
+          await supabase.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'dark_triad',
+            flag_score: darkScore,
+            flag_detail: { ...af, source: 'ch_deep_b', layer: 'B' },
+          });
+        } catch (flagErr) {
+          console.warn('[HIT B Score] CH Deep 플래그 저장 실패:', flagErr);
+        }
+      }
+    }
+
     // 결과 저장
     const result = await createHitBResult({
       session_id: session.id,
@@ -120,14 +142,32 @@ export async function POST(request: NextRequest) {
       competency_common: scored.coreCompetencyScores,
       competency_track: competencyTrack,
       competency_track_scores: scored.trackScores,
-      // 준비도
-      readiness_self: scored.readinessScores.self_understanding,
-      readiness_portfolio: scored.readinessScores.skill_readiness,
-      readiness_interview: scored.readinessScores.action_readiness,
-      readiness_network: scored.readinessScores.job_understanding,
+      // 준비도 (신규 컬럼 기준)
+      readiness_self:   scored.readinessScores.self_understanding,
+      readiness_job:    scored.readinessScores.job_understanding,
+      readiness_skill:  scored.readinessScores.skill_readiness,
+      readiness_action: scored.readinessScores.action_readiness,
       readiness_total: scored.readinessTotal,
       readiness_grade: scored.readinessGrade,
       readiness_gaps: scored.readinessGaps,
+      // CH Deep B / AP Deep B (심화 레이어 응답 있을 때만)
+      ...(scored.chDeepScores && {
+        ch_deep_scores: {
+          scores: scored.chDeepScores.scores,
+          grades: scored.chDeepScores.grades,
+          overallScore: scored.chDeepScores.overallScore,
+          overallGrade: scored.chDeepScores.overallGrade,
+        },
+      }),
+      ...(scored.apDeepScores && {
+        ap_deep_scores: {
+          scores: scored.apDeepScores.scores,
+          grades: scored.apDeepScores.grades,
+          top3Code: scored.apDeepScores.top3Code,
+          top3Labels: scored.apDeepScores.top3Labels,
+          dominantType: scored.apDeepScores.dominantType,
+        },
+      }),
       ai_report: aiReport,
       journey_stage: scored.journeyStage,
       interest_industry: interestIndustry || null,

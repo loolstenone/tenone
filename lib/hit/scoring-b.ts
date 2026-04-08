@@ -258,6 +258,104 @@ export function computeAlertScoresFromDB(
   return { alertN1, alertM1, alertP1, alertLevel };
 }
 
+// ── CH Deep B 채점 ─────────────────────────────────────────────────
+
+import { CH_DEEP_B_SUBSCALES, type CHDeepBSubscale, type HollandType } from './data/b-deep-questions';
+
+/**
+ * CH Deep B맞춤 채점 (45문항 → 14구독척도, decoy 제외)
+ * responses: character_deep module 응답만 전달 or 전체에서 필터링됨
+ * option_value 형식: 'subscale:value' 또는 'subscale:value:r'
+ */
+export function scoreChDeepB(responses: ResponseRow[]): {
+  scores: Record<CHDeepBSubscale, number>;
+  grades: Record<CHDeepBSubscale, 'A' | 'B' | 'C' | 'D'>;
+  overallScore: number;
+  overallGrade: 'A' | 'B' | 'C' | 'D';
+  decoyScore: number;   // 1~7 평균 (낮을수록 솔직)
+  alertFlags: { NR: number; PP: number; MK: number; SP: number };
+} {
+  const filtered = responses.filter(r => r.module === 'character_deep');
+  const subscaleMap = buildSubscaleMap(filtered);
+
+  const scores = {} as Record<CHDeepBSubscale, number>;
+  const grades = {} as Record<CHDeepBSubscale, 'A' | 'B' | 'C' | 'D'>;
+
+  for (const sub of CH_DEEP_B_SUBSCALES) {
+    scores[sub] = scaleToHundred(subscaleMap[sub] || []);
+    grades[sub] = gradeScore(scores[sub]);
+  }
+
+  const vals = Object.values(scores);
+  const overallScore = vals.length > 0
+    ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+    : 0;
+  const overallGrade = gradeScore(overallScore);
+
+  // decoy 점수 (raw 1~7 평균, 채점 제외)
+  const decoyRaw = (subscaleMap['decoy'] || []);
+  const decoyScore = decoyRaw.length > 0
+    ? Math.round((decoyRaw.reduce((a, b) => a + b, 0) / decoyRaw.length) * 10) / 10
+    : 0;
+
+  // 다크 플래그별 점수 (NR·PP·MK·SP)
+  const alertFlags = {
+    NR: scaleToHundred(subscaleMap['NR'] || subscaleMap['social_boldness'] || []),
+    PP: scaleToHundred(subscaleMap['PP'] || []),
+    MK: scaleToHundred(subscaleMap['MK'] || subscaleMap['suspicion'] || []),
+    SP: scaleToHundred(subscaleMap['SP'] || subscaleMap['adventure'] || []),
+  };
+
+  return { scores, grades, overallScore, overallGrade, decoyScore, alertFlags };
+}
+
+// ── AP Deep B 채점 ─────────────────────────────────────────────────
+
+const HOLLAND_LABELS: Record<HollandType, string> = {
+  R: '현실형',
+  I: '탐구형',
+  A: '예술형',
+  S: '사회형',
+  E: '기업형',
+  C: '관습형',
+};
+
+/**
+ * AP Deep B맞춤 채점 (30문항 → R/I/A/S/E/C 6개 점수 + top3Code)
+ * AP Deep은 역채점 없음 (모두 정방향)
+ */
+export function scoreApDeepB(responses: ResponseRow[]): {
+  scores: Record<HollandType, number>;
+  grades: Record<HollandType, 'A' | 'B' | 'C' | 'D'>;
+  top3Code: string;        // e.g. 'ESA'
+  top3Labels: string[];    // e.g. ['기업형','사회형','예술형']
+  dominantType: HollandType;
+} {
+  const filtered = responses.filter(r => r.module === 'aptitude_deep');
+  const subscaleMap = buildSubscaleMap(filtered);
+
+  const hollandTypes: HollandType[] = ['R', 'I', 'A', 'S', 'E', 'C'];
+  const scores = {} as Record<HollandType, number>;
+  const grades = {} as Record<HollandType, 'A' | 'B' | 'C' | 'D'>;
+
+  for (const type of hollandTypes) {
+    scores[type] = scaleToHundred(subscaleMap[type] || []);
+    grades[type] = gradeScore(scores[type]);
+  }
+
+  // top3 정렬 (점수 내림차순)
+  const sorted = hollandTypes
+    .map(t => ({ type: t, score: scores[t] }))
+    .sort((a, b) => b.score - a.score);
+
+  const top3 = sorted.slice(0, 3);
+  const top3Code = top3.map(t => t.type).join('');
+  const top3Labels = top3.map(t => HOLLAND_LABELS[t.type]);
+  const dominantType = top3[0].type;
+
+  return { scores, grades, top3Code, top3Labels, dominantType };
+}
+
 // ── 통합 결과 타입 ──────────────────────────────────────────────────
 
 export interface HitBScoreResult {
@@ -287,6 +385,23 @@ export interface HitBScoreResult {
   readinessTotal: number;
   readinessGrade: 'A' | 'B' | 'C' | 'D';
   readinessGaps:  string[];
+  // CH Deep B맞춤 (optional — 심화 레이어 응답 있을 때)
+  chDeepScores?: {
+    scores: Record<CHDeepBSubscale, number>;
+    grades: Record<CHDeepBSubscale, 'A' | 'B' | 'C' | 'D'>;
+    overallScore: number;
+    overallGrade: 'A' | 'B' | 'C' | 'D';
+    decoyScore: number;
+    alertFlags: { NR: number; PP: number; MK: number; SP: number };
+  };
+  // AP Deep B맞춤 (optional — 심화 레이어 응답 있을 때)
+  apDeepScores?: {
+    scores: Record<HollandType, number>;
+    grades: Record<HollandType, 'A' | 'B' | 'C' | 'D'>;
+    top3Code: string;
+    top3Labels: string[];
+    dominantType: HollandType;
+  };
   // 여정
   journeyStage: string;
 }
@@ -306,6 +421,10 @@ export function scoreHitB(
   // competencyTrack은 AI 프롬프트/DB 저장용으로 전달됨 — 채점 자체엔 불필요
   void competencyTrack;
 
+  // CH Deep B / AP Deep B — 해당 모듈 응답이 있을 때만 채점
+  const hasChDeep = responses.some(r => r.module === 'character_deep');
+  const hasApDeep = responses.some(r => r.module === 'aptitude_deep');
+
   return {
     // 공통 기초역량
     coreCompetencyScores:  core.scores,
@@ -323,6 +442,10 @@ export function scoreHitB(
     readinessTotal:  readiness.readinessTotal,
     readinessGrade:  readiness.readinessGrade,
     readinessGaps:   readiness.gaps,
+    // CH Deep B (심화)
+    ...(hasChDeep && { chDeepScores: scoreChDeepB(responses) }),
+    // AP Deep B (심화)
+    ...(hasApDeep && { apDeepScores: scoreApDeepB(responses) }),
     // 여정
     journeyStage,
   };
