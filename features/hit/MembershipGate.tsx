@@ -1,6 +1,6 @@
 'use client';
 import type { ReactNode } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { HitFeature } from '@/lib/hit/membership';
 import { getUpgradeMessage } from '@/lib/hit/membership';
@@ -17,7 +17,7 @@ export function MembershipGate({ feature, children, fallback, blurContent = fals
   const { tier, loading, can } = useMembership();
 
   if (loading) {
-    return <div className="animate-pulse h-32 bg-neutral-800/50 rounded-lg" />;
+    return <div className="animate-pulse h-24 bg-neutral-100 rounded-xl" />;
   }
 
   if (can(feature)) {
@@ -31,26 +31,41 @@ export function MembershipGate({ feature, children, fallback, blurContent = fals
   return (
     <div className="relative">
       {blurContent && (
-        <div className="pointer-events-none select-none blur-sm opacity-40">{children}</div>
+        <div className="pointer-events-none select-none blur-sm opacity-30">{children}</div>
       )}
       <div
         className={
           blurContent
-            ? 'absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-neutral-950/80 to-neutral-950'
-            : 'rounded-xl border border-[#F5C518]/20 bg-[#F5C518]/5 p-8 text-center'
+            ? 'absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-white/90 to-white'
+            : 'rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm'
         }
       >
-        <div className="mx-auto max-w-md">
-          <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-[#F5C518]/15 flex items-center justify-center">
-            <Lock size={20} className="text-[#F5C518]" />
+        <div className="mx-auto max-w-sm">
+          {/* 자물쇠 아이콘 — 미니멀 */}
+          <div className="mx-auto mb-5 w-11 h-11 rounded-full bg-neutral-100 flex items-center justify-center">
+            <Lock size={17} className="text-neutral-400" />
           </div>
-          <p className="text-sm text-neutral-300 mb-4">{message}</p>
+
+          {/* 상태 태그 */}
+          <span className="inline-block text-[10px] font-bold text-[#E53935] uppercase tracking-widest border border-[#E53935]/30 bg-[#E53935]/5 px-2.5 py-0.5 rounded-full mb-3">
+            HeRo 멤버십 전용
+          </span>
+
+          {/* 설명 */}
+          <p className="text-sm text-neutral-600 leading-relaxed mb-6">{message}</p>
+
+          {/* CTA */}
           <Link
             href="/hero/pricing"
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#F5C518] text-black text-sm font-semibold hover:bg-[#E0B000] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-700 transition-colors"
           >
-            멤버십 업그레이드
+            멤버십 살펴보기 <ArrowRight size={14} />
           </Link>
+
+          {/* 서브텍스트 */}
+          <p className="text-[11px] text-neutral-400 mt-3">
+            가입 즉시 이용 가능 · 언제든 해지
+          </p>
         </div>
       </div>
     </div>

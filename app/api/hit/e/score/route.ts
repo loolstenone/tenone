@@ -97,6 +97,8 @@ export async function POST(request: NextRequest) {
             `사회적 필요: ${scored.socialNeedScore}점\n` +
             `2막 준비도 총합: ${scored.secondActReadiness}점\n` +
             `2막 준비도 세부: 시간 ${scored.readinessScores.time}, 에너지 ${scored.readinessScores.energy}, 재정 ${scored.readinessScores.finance}, 관계 ${scored.readinessScores.relationship}\n` +
+            (scored.chDeepScores ? `CH 심화(인생전환맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
+            (scored.apDeepScores ? `AP 심화(2막역량 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
             `여정 단계: ${journeyStage}\n` +
             `\n위 결과를 통합하여 4-5문단의 인생 2막 분석 리포트를 작성해주세요. 현재 삶 진단, 방향성 해석(Top2 비교), 레거시 스킬 활용 전략, 4대 준비도 중 가장 약한 영역 보완 방안, 구체적 액션 아이템을 포함해주세요.`,
         }],
@@ -107,6 +109,27 @@ export async function POST(request: NextRequest) {
       }
     } catch (aiError) {
       console.error('[HIT E Score] AI 리포트 생성 실패:', aiError);
+    }
+
+    // CH Deep 다크 플래그 — admin-only
+    if (scored.chDeepScores?.alertFlags) {
+      const af = scored.chDeepScores.alertFlags;
+      const darkScore = af.NR + af.MK;
+      if (darkScore >= 50) {
+        try {
+          const { createClient: serverClient } = await import('@/lib/supabase/server');
+          const supabaseAdmin = await serverClient();
+          await supabaseAdmin.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'dark_triad',
+            flag_score: darkScore,
+            flag_detail: { ...af, source: 'ch_deep_e', layer: 'E' },
+          });
+        } catch (flagErr) {
+          console.warn('[HIT E Score] CH Deep 플래그 저장 실패:', flagErr);
+        }
+      }
     }
 
     // 결과 저장
@@ -129,6 +152,24 @@ export async function POST(request: NextRequest) {
       readiness_scores: scored.readinessScores,
       psych_transition: scored.psychTransition,
       faking_flag: scored.fakingFlag,
+      // CH Deep E / AP Deep E
+      ...(scored.chDeepScores && {
+        ch_deep_scores: {
+          scores: scored.chDeepScores.scores,
+          grades: scored.chDeepScores.grades,
+          overallScore: scored.chDeepScores.overallScore,
+          overallGrade: scored.chDeepScores.overallGrade,
+        },
+      }),
+      ...(scored.apDeepScores && {
+        ap_deep_scores: {
+          scores: scored.apDeepScores.scores,
+          grades: scored.apDeepScores.grades,
+          top3Code: scored.apDeepScores.top3Code,
+          top3Labels: scored.apDeepScores.top3Labels,
+          dominantType: scored.apDeepScores.dominantType,
+        },
+      }),
     });
 
     // 미끼 플래그가 켜지면 hit_admin_flags 기록

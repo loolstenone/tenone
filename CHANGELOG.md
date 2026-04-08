@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-04-08 (집, 세션 31)
+
+### HIT D/E 레이어 심화 75문항 — 채점 통합
+- `lib/hit/scoring-d.ts`: CH Deep 45 + AP Deep 30 채점 통합 (`scoreChDeepB`/`scoreApDeepB` 재사용)
+- `lib/hit/scoring-e.ts`: 동일 패턴 — chDeepScores/apDeepScores 반환
+- `app/api/hit/d/score/route.ts`: Dark flag 탐지 (NR+MK≥50 → hit_admin_flags), ch_deep_scores/ap_deep_scores 저장
+- `app/api/hit/e/score/route.ts`: 동일 패턴 적용
+- `app/api/hit/f/score/route.ts`: 동일 패턴 적용 (이미 D/E와 동일 구조)
+- `app/api/hit/a/result/preview/route.ts`: 신규 — 어드민용 목업 결과 API (GET /api/hit/a/result/preview)
+  - D-INFJ 전체 프로필 + 8개 report_modules + AI 내러티브 포함
+
+### Admin HIT 리포트 페이지
+- `app/intra/hero/hit/report/page.tsx`: 신규 — 멤버 목록 + 레이어 완료 배지
+  - members 테이블 조회 + 각 hit_[a-f]_results JOIN
+  - A~F 배지 클릭 → 소비자 뷰 팝업 (iframe `ConsumerPreviewModal`)
+  - 모바일(400px) / 데스크탑(900px) 토글
+  - 헤더 "Mock 소비자 뷰" 버튼 → `/hero/hit/a/result/preview` 팝업
+
+### 소비자 결과 페이지 UX 개선
+- `app/(HeRo)/hero/hit/a/result/[id]/page.tsx`:
+  - 카드 고정 높이 `h-[540px] overflow-hidden` — 모든 페이지 동일 사이즈
+  - 페이지 4 (통합 보고서): `flex flex-col` — 제목 고정 상단 / 모듈 스크롤 / PDF버튼 고정 하단
+  - 페이지 3 "PDF 보고서" 안내 문구 → "다음 페이지에서 확인" 으로 수정
+- `features/hit/MembershipGate.tsx`: 전면 리디자인
+  - 기존: 노란(`#F5C518`) 자물쇠 + 멤버십 업그레이드 버튼 (유치한 느낌)
+  - 변경: 그레이 아이콘 + `HeRo 멤버십 전용` 빨간 태그 + 다크 "멤버십 살펴보기" CTA
+- `features/hit/HitPdfButton.tsx`: 레이블 변경
+  - `PDF 보고서 다운로드` → `전체 보고서 보기` (FileText 아이콘, 아웃라인 스타일)
+
+---
+
 ## 2026-04-08 (집, 세션 29)
 
 ### HIT F 전면 재구축 (Phase 9)

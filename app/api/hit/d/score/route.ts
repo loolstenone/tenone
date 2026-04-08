@@ -123,6 +123,8 @@ export async function POST(request: NextRequest) {
             `시니어 준비도: ${scored.senior_readiness}점\n` +
             `추천 다음 역할 Top 3: ${topRoles}\n` +
             `현재 추정 역할: ${scored.next_role_matrix.current_role}\n` +
+            (scored.chDeepScores ? `CH 심화(시니어맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
+            (scored.apDeepScores ? `AP 심화(임원역량 Top3=${scored.apDeepScores.top3Code}): R${scored.apDeepScores.scores.R} I${scored.apDeepScores.scores.I} A${scored.apDeepScores.scores.A} S${scored.apDeepScores.scores.S} E${scored.apDeepScores.scores.E} C${scored.apDeepScores.scores.C}\n` : '') +
             `여정 단계: ${journeyStage}\n` +
             `\n위 결과를 통합하여 4-5문단의 시니어 리더십 전환 분석 리포트를 작성해주세요. 전문성 진단, 리더십 스타일 분석, 정체성 유연성 평가, 다음 역할 전환 전략, 구체적 액션 아이템을 포함해주세요.`,
         }],
@@ -133,6 +135,27 @@ export async function POST(request: NextRequest) {
       }
     } catch (aiError) {
       console.error('[HIT D Score] AI 리포트 생성 실패:', aiError);
+    }
+
+    // CH Deep 다크 플래그 — admin-only
+    if (scored.chDeepScores?.alertFlags) {
+      const af = scored.chDeepScores.alertFlags;
+      const darkScore = af.NR + af.MK;
+      if (darkScore >= 50) {
+        try {
+          const { createClient: serverClient } = await import('@/lib/supabase/server');
+          const supabaseAdmin = await serverClient();
+          await supabaseAdmin.from('hit_admin_flags').insert({
+            member_id: session.member_id || null,
+            session_id: session.id,
+            flag_type: 'dark_triad',
+            flag_score: darkScore,
+            flag_detail: { ...af, source: 'ch_deep_d', layer: 'D' },
+          });
+        } catch (flagErr) {
+          console.warn('[HIT D Score] CH Deep 플래그 저장 실패:', flagErr);
+        }
+      }
     }
 
     // 결과 저장
@@ -152,6 +175,24 @@ export async function POST(request: NextRequest) {
       ai_report: aiReport,
       journey_stage: journeyStage,
       faking_flag: scored.faking_flag,
+      // CH Deep D / AP Deep D
+      ...(scored.chDeepScores && {
+        ch_deep_scores: {
+          scores: scored.chDeepScores.scores,
+          grades: scored.chDeepScores.grades,
+          overallScore: scored.chDeepScores.overallScore,
+          overallGrade: scored.chDeepScores.overallGrade,
+        },
+      }),
+      ...(scored.apDeepScores && {
+        ap_deep_scores: {
+          scores: scored.apDeepScores.scores,
+          grades: scored.apDeepScores.grades,
+          top3Code: scored.apDeepScores.top3Code,
+          top3Labels: scored.apDeepScores.top3Labels,
+          dominantType: scored.apDeepScores.dominantType,
+        },
+      }),
     });
 
     // 미끼 통과(조작 의심) 시 어드민 플래그 등록

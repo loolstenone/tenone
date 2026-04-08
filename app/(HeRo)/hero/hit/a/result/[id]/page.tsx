@@ -262,7 +262,7 @@ export default function HitAResultPage() {
                 <div className="bg-neutral-50 p-5 rounded-xl">
                   <p className="text-sm text-neutral-700 leading-relaxed">{cleanMarkdown(narrativeParagraphs[0])}</p>
                   {narrativeParagraphs.length > 1 && (
-                    <p className="text-xs text-neutral-400 mt-3 italic">더 자세한 분석은 PDF 보고서에서 확인하세요.</p>
+                    <p className="text-xs text-neutral-400 mt-3 italic">DISC·MBTI 교차 해석과 상세 분석은 다음 페이지에서 확인하세요.</p>
                   )}
                 </div>
               </>
@@ -283,89 +283,93 @@ export default function HitAResultPage() {
           const commMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMM-'));
 
           return (
-            <div key="p4" className="space-y-6">
-              <h2 className="text-lg font-bold">HIT 통합 보고서</h2>
+            <div key="p4" className="h-full flex flex-col">
+              {/* 고정 헤더 */}
+              <h2 className="text-lg font-bold mb-4 flex-shrink-0">HIT 통합 보고서</h2>
 
-              {/* DISC 해설 */}
-              {discMods.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">DISC 행동 특성</h3>
-                  {discMods.map(([id, m]) => (
-                    <div key={id} className="mb-4">
-                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* 스크롤 가능 모듈 영역 */}
+              <div className="flex-1 overflow-y-auto space-y-6 pr-1 min-h-0">
+                {/* DISC 해설 */}
+                {discMods.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">DISC 행동 특성</h3>
+                    {discMods.map(([id, m]) => (
+                      <div key={id} className="mb-4">
+                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* MBTI 해설 */}
-              {mbtiMods.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">MBTI 성향 해설</h3>
-                  {mbtiMods.map(([id, m]) => (
-                    <div key={id} className="mb-3">
-                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {/* MBTI 해설 */}
+                {mbtiMods.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">MBTI 성향 해설</h3>
+                    {mbtiMods.map(([id, m]) => (
+                      <div key={id} className="mb-3">
+                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* 교차 해석 */}
-              {crossMods.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">교차 해석</h3>
-                  {crossMods.map(([id, m]) => (
-                    <div key={id} className="mb-3">
-                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {/* 교차 해석 */}
+                {crossMods.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">교차 해석</h3>
+                    {crossMods.map(([id, m]) => (
+                      <div key={id} className="mb-3">
+                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* S-Power 강점 */}
-              {spMods.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">S-Power 주강점</h3>
-                  {spMods.map(([id, m]) => (
-                    <div key={id} className="mb-3">
-                      <p className="text-sm font-bold text-green-600 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {/* S-Power 강점 */}
+                {spMods.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">S-Power 주강점</h3>
+                    {spMods.map(([id, m]) => (
+                      <div key={id} className="mb-3">
+                        <p className="text-sm font-bold text-green-600 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* 성장 영역 */}
-              {spGrowth.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">성장 영역</h3>
-                  {spGrowth.map(([id, m]) => (
-                    <div key={id} className="mb-3">
-                      <p className="text-sm font-bold text-amber-600 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {/* 성장 영역 */}
+                {spGrowth.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">성장 영역</h3>
+                    {spGrowth.map(([id, m]) => (
+                      <div key={id} className="mb-3">
+                        <p className="text-sm font-bold text-amber-600 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* 소통 스타일 */}
-              {commMods.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">소통 스타일</h3>
-                  {commMods.map(([id, m]) => (
-                    <div key={id} className="mb-3">
-                      <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
-                      <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{cleanMarkdown(m.content)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {/* 소통 스타일 */}
+                {commMods.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">소통 스타일</h3>
+                    {commMods.map(([id, m]) => (
+                      <div key={id} className="mb-3">
+                        <p className="text-sm font-bold text-neutral-700 mb-1">{m.title}</p>
+                        <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">{cleanMarkdown(m.content)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-              {/* PDF 보고서 다운로드 */}
-              <div className="pt-4 border-t border-neutral-100 text-center">
+              {/* 고정 푸터 */}
+              <div className="pt-4 border-t border-neutral-100 text-center flex-shrink-0">
                 <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
               </div>
             </div>
@@ -461,10 +465,10 @@ export default function HitAResultPage() {
                 </div>
               </div>
 
-              {/* PDF 보고서 */}
+              {/* 전체 보고서 */}
               {result.memberId && (
                 <div className="border border-neutral-200 rounded-xl p-5 text-center">
-                  <p className="text-xs text-neutral-500 mb-3">전체 결과를 PDF로 저장하세요</p>
+                  <p className="text-xs text-neutral-500 mb-3">전체 분석 결과를 보고서로 저장하세요</p>
                   <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
                 </div>
               )}
@@ -508,11 +512,11 @@ export default function HitAResultPage() {
         ))}
       </div>
 
-      {/* ── 콘텐츠 ── */}
-      <div className="flex-1">
+      {/* ── 콘텐츠 — 모든 페이지 동일 높이 고정 ── */}
+      <div className="h-[540px] overflow-hidden">
         <div
           key={currentPage}
-          className={`animate-fade-in ${direction === 'next' ? 'animate-slide-left' : 'animate-slide-right'}`}
+          className="h-full overflow-y-auto"
           style={{ animation: 'fadeIn 0.3s ease-out' }}
         >
           {renderPage()}
