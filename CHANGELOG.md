@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-09 (집, 세션 33)
+
+### 뉴스레터 고도화 + UMS 사이트 필터 재구성
+
+- `app/api/newsletter/send/route.ts`: blocks 기반 매거진 렌더러(`renderMagazineHtml`/`renderMagazineText`) 적용, blocks 없을 시 legacy fallback. 구독자 필터 버그 수정 (`eq('status','active')` → `eq('is_active', true)`)
+- `app/intra/ums/newsletter/page.tsx`: 탭 페이지 → 대시보드로 전환 (통계 카드 4개 + 최근 이슈 5개 + 빠른 링크)
+- `app/intra/ums/newsletter/issues/page.tsx`: 신규 — 뉴스레터 관리 (이슈 목록 + 블록 에디터 + 발송 모달)
+- `app/intra/ums/newsletter/subscribers/page.tsx`: 독립 페이지로 재작성 (검색/필터/태그/삭제)
+- `lib/intra-nav.ts`: 뉴스레터 하위 메뉴 3개 (대시보드/뉴스레터 관리/구독자), "이슈 관리" → "뉴스레터 관리" 변경
+- `app/intra/ums/layout.tsx`: 전역 `SiteFilterDropdown` 제거 → `SiteFilterDropdown` 컴포넌트로 export, UmsLayout은 Context Provider만 유지
+- `app/intra/ums/sites/boards/page.tsx`: PageHeader children에 `<SiteFilterDropdown />` 추가
+- `app/intra/ums/sites/content/page.tsx`: 동일 패턴 적용
+- `~/.claude/settings.json`: model: sonnet, MAX_THINKING_TOKENS: 10000, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: 50, CLAUDE_CODE_SUBAGENT_MODEL: haiku 추가
+
+---
+
 ## 2026-04-09 (집, 세션 32)
 
 ### QA + 버그 수정 + 도메인 라우팅 정비

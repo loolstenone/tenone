@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-08 (집, 세션 31)
+> 마지막 업데이트: 2026-04-09 (집, 세션 33)
 
 ---
 
@@ -80,7 +80,17 @@
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
 
-## 이번 세션 (세션 32) 완료 항목
+## 이번 세션 (세션 33) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| 뉴스레터 send route 수정 | blocks 기반 매거진 렌더러 적용 + fallback (legacy html), `is_active` 필터 버그 수정 |
+| 뉴스레터 페이지 3분할 | 단일 탭 → dashboard / issues(뉴스레터 관리) / subscribers 독립 페이지 |
+| nav "이슈 관리" → "뉴스레터 관리" | `lib/intra-nav.ts` 레이블 변경 |
+| UMS 사이트 필터 재구성 | 전체 UMS 레이아웃에서 제거 → boards/content PageHeader children에만 배치 |
+| Claude settings 업데이트 | `~/.claude/settings.json` — model: sonnet, MAX_THINKING_TOKENS, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, CLAUDE_CODE_SUBAGENT_MODEL |
+
+## 이전 세션 (세션 32) 완료 항목
 
 | 항목 | 내용 |
 |------|------|
@@ -98,5 +108,5 @@
 1. **/crew-invite 페이지 제작** — 폴더는 있는데 실제 콘텐츠가 없음. `/app/crew-invite/page.tsx` 신규 제작
 2. **Admin 리포트 실데이터 연결** — `/intra/hero/hit/report` 실계정 members + hit_a_results JOIN 동작 확인
 3. **N-04 Latest 섹션 날짜** — 메인 Latest 섹션 2025.08 날짜 → DB 실데이터 필요
-4. **뉴스레터 단일 API 통일** — 메인/Mindle/newsletter 3곳 동일 엔드포인트 연결
+4. **뉴스레터 단일 API 통일** — 메인/Mindle/newsletter 3곳 동일 엔드포인트 연결 (현재 boards/content만 SiteFilterDropdown 사용, 나머지 UMS 페이지 확인 필요)
 5. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)
