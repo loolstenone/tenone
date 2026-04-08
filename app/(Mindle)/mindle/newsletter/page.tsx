@@ -80,7 +80,7 @@ export default function NewsletterPage() {
                 </h1>
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                     매주 Mindle의 트렌드 인사이트로 한 주를 시작하세요.
-                    무료, 스팸 없음.
+                    무료, 언제든 해지 가능.
                 </p>
 
                 {/* Subscribe Form */}

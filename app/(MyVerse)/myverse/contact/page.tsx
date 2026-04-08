@@ -46,7 +46,7 @@ function EarlyAccessSection() {
                             </button>
                         </div>
                         <p className="text-xs text-neutral-500 mt-4">
-                            스팸 없음 · 언제든 구독 해지 가능
+                            언제든 구독 해지 가능
                         </p>
                     </div>
                 </div>
