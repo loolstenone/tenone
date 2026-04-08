@@ -428,7 +428,7 @@ export default function HomePage() {
                             </div>
                         </>
                     )}
-                    <p className="text-[10px] tn-text-muted mt-3">격주 발행 · 언제든 구독 취소 가능 · <Link href="/newsletter" className="underline hover:tn-text-sub">지난 뉴스레터 보기</Link></p>
+                    <p className="text-[10px] tn-text-muted mt-3"><Link href="/newsletter" className="underline hover:tn-text-sub">지난 뉴스레터 보기</Link></p>
                 </div>
             </section>
 

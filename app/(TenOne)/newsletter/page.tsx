@@ -112,7 +112,6 @@ export default function NewsletterPage() {
                             className="px-8 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 mx-auto">
                             <Mail className="h-4 w-4" /> 뉴스레터 구독하기
                         </button>
-                        <p className="text-[10px] tn-text-sub mt-3">언제든 프로필에서 구독 취소 가능</p>
                     </div>
                 ) : (
                     /* 비회원 구독 폼 */
@@ -147,7 +146,7 @@ export default function NewsletterPage() {
                                 뉴스레터 발송을 위한 이메일 수집에 동의합니다. 수집된 정보는 뉴스레터 발송 목적으로만 사용되며, 구독 해지 시 즉시 삭제됩니다.
                             </p>
                         </div>
-                        <p className="text-[10px] tn-text-muted text-center mt-3">언제든 구독 취소 가능 · 회원 가입 없이 구독 가능</p>
+                        <p className="text-[10px] tn-text-muted text-center mt-3">회원 가입 없이 구독 가능</p>
                     </form>
                 )}
             </div>

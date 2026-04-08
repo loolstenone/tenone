@@ -79,8 +79,7 @@ export default function NewsletterPage() {
                     <span className="text-[#F5C518]">트렌드 신호.</span>
                 </h1>
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
-                    매주 Mindle의 트렌드 인사이트로 한 주를 시작하세요.
-                    무료, 언제든 해지 가능.
+                    Mindle의 트렌드 인사이트로 앞서 나가세요. 무료.
                 </p>
 
                 {/* Subscribe Form */}
