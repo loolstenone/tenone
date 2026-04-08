@@ -18,7 +18,7 @@ import {
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
     ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
-    Bot, Users, Home, Menu, X, Radio,
+    Bot, Users, Home, Menu, X, Radio, Mail,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -331,8 +331,14 @@ export const modules: NavModule[] = [
                             { name: "게시판", href: "/intra/ums/sites/boards" },
                             { name: "콘텐츠", href: "/intra/ums/sites/content" },
                             { name: "뉴스룸", href: "/intra/ums/sites/newsroom" },
-                            { name: "뉴스레터", href: "/intra/ums/sites/newsletter" },
                             { name: "라이브러리", href: "/intra/ums/sites/library" },
+                        ],
+                    },
+                    {
+                        name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
+                        children: [
+                            { name: "이슈 관리", href: "/intra/ums/newsletter" },
+                            { name: "구독자", href: "/intra/ums/newsletter/subscribers" },
                         ],
                     },
                     {
@@ -380,7 +386,6 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "트렌드 카드", href: "/intra/ums/agent/trends" },
                             { name: "RSS 소스", href: "/intra/ums/mindle/sources" },
-                            { name: "뉴스레터", href: "/intra/ums/mindle/newsletter" },
                         ],
                     },
                     { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe },
