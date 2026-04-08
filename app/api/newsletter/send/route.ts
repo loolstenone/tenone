@@ -14,6 +14,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
 import { renderNewsletterHtml, renderNewsletterText } from '@/lib/email/newsletter-template';
+import { renderMagazineHtml, renderMagazineText } from '@/lib/email/newsletter-blocks';
+import type { NewsletterBlock } from '@/lib/email/newsletter-blocks';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenone.biz';
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || 'noreply@tenone.biz';
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
   let query = supabase
     .from('newsletter_subscribers')
     .select('id, email, name')
-    .eq('status', 'active');
+    .eq('is_active', true);
 
   // 사이트 필터
   if (siteIds && siteIds.length > 0) {
@@ -126,19 +128,12 @@ export async function POST(request: NextRequest) {
       from: `${senderName} <${FROM_EMAIL}>`,
       to: sub.email,
       subject: issue.title,
-      html: renderNewsletterHtml({
-        title: issue.title,
-        content: issue.content,
-        issueNumber: issue.id,
-        unsubscribeUrl: unsubscribeUrl(sub.id),
-        siteUrl: SITE_URL,
-      }),
-      text: renderNewsletterText({
-        title: issue.title,
-        content: issue.content,
-        unsubscribeUrl: unsubscribeUrl(sub.id),
-        siteUrl: SITE_URL,
-      }),
+      html: (issue.blocks as NewsletterBlock[] | null)?.length
+        ? renderMagazineHtml({ blocks: issue.blocks as NewsletterBlock[], unsubscribeUrl: unsubscribeUrl(sub.id), siteUrl: SITE_URL, issueNumber: issue.id })
+        : renderNewsletterHtml({ title: issue.title, content: issue.content || '', issueNumber: issue.id, unsubscribeUrl: unsubscribeUrl(sub.id), siteUrl: SITE_URL }),
+      text: (issue.blocks as NewsletterBlock[] | null)?.length
+        ? renderMagazineText({ blocks: issue.blocks as NewsletterBlock[], unsubscribeUrl: unsubscribeUrl(sub.id), siteUrl: SITE_URL })
+        : renderNewsletterText({ title: issue.title, content: issue.content || '', unsubscribeUrl: unsubscribeUrl(sub.id), siteUrl: SITE_URL }),
       replyTo: 'lools@tenone.biz',
       headers: {
         'List-Unsubscribe': `<${unsubscribeUrl(sub.id)}>`,

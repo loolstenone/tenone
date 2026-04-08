@@ -2,16 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, User, Globe, Search, X, Save, Tag, ChevronDown } from "lucide-react";
+import { Plus, Send, Eye, Edit2, Trash2, Users, Mail, Calendar, User, Globe, Search, X, Tag, ChevronDown } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
+import { NewsletterBlockEditor } from "@/components/intra/NewsletterBlockEditor";
+import type { NewsletterBlock } from "@/lib/email/newsletter-blocks";
 
 /* ── 타입 ── */
 interface NewsletterIssue {
     id: string;
     title: string;
     content: string | null;
+    blocks: NewsletterBlock[] | null;
     status: "draft" | "scheduled" | "sent";
     scheduled_at: string | null;
     sent_at: string | null;
@@ -70,7 +73,7 @@ export default function NewsletterCmsPage() {
     /* 에디터 */
     const [editing, setEditing] = useState<NewsletterIssue | null>(null);
     const [editTitle, setEditTitle] = useState("");
-    const [editContent, setEditContent] = useState("");
+    const [editBlocks, setEditBlocks] = useState<NewsletterBlock[]>([]);
     const [saving, setSaving] = useState(false);
     const [sending, setSending] = useState<string | null>(null);
 
@@ -150,7 +153,7 @@ export default function NewsletterCmsPage() {
     const openEditor = (issue: NewsletterIssue) => {
         setEditing(issue);
         setEditTitle(issue.title);
-        setEditContent(issue.content || "");
+        setEditBlocks(issue.blocks || []);
     };
 
     const handleSave = async () => {
@@ -158,10 +161,10 @@ export default function NewsletterCmsPage() {
         setSaving(true);
         await supabase
             .from("newsletter_issues")
-            .update({ title: editTitle, content: editContent, updated_at: new Date().toISOString() })
+            .update({ title: editTitle, blocks: editBlocks, updated_at: new Date().toISOString() })
             .eq("id", editing.id);
         setIssues((prev) =>
-            prev.map((i) => (i.id === editing.id ? { ...i, title: editTitle, content: editContent } : i))
+            prev.map((i) => (i.id === editing.id ? { ...i, title: editTitle, blocks: editBlocks } : i))
         );
         setSaving(false);
         setEditing(null);
@@ -484,38 +487,17 @@ export default function NewsletterCmsPage() {
                 </div>
             )}
 
-            {/* 에디터 모달 */}
+            {/* 블록 에디터 모달 */}
             {editing && (
-                <>
-                    <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setEditing(null)} />
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
-                            <div className="p-5 border-b border-neutral-100 flex items-center justify-between shrink-0">
-                                <h2 className="text-sm font-semibold">뉴스레터 편집</h2>
-                                <button onClick={() => setEditing(null)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="h-5 w-5" /></button>
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                                <div>
-                                    <label className="text-xs text-neutral-500 mb-1 block">제목</label>
-                                    <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-neutral-500 mb-1 block">본문</label>
-                                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={12}
-                                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400 resize-none" />
-                                </div>
-                            </div>
-                            <div className="p-4 border-t border-neutral-100 flex justify-end gap-2">
-                                <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm text-neutral-500 hover:bg-neutral-100 rounded">취소</button>
-                                <button onClick={handleSave} disabled={saving}
-                                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-50">
-                                    <Save className="h-3.5 w-3.5" /> {saving ? "저장 중..." : "저장"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </>
+                <NewsletterBlockEditor
+                    title={editTitle}
+                    blocks={editBlocks}
+                    onTitleChange={setEditTitle}
+                    onBlocksChange={setEditBlocks}
+                    onSave={handleSave}
+                    onClose={() => setEditing(null)}
+                    saving={saving}
+                />
             )}
 
             {/* 발송 설정 모달 */}
