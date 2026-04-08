@@ -50,6 +50,7 @@ export default function HitAResultPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
+  const [chatRemaining, setChatRemaining] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (!resultId) return;
@@ -82,6 +83,28 @@ export default function HitAResultPage() {
         });
         if (data.report_modules) setReportModules(data.report_modules);
         if (data.ch_deep_scores || data.ap_deep_scores) setHasDeep(true);
+
+        // 무료 회원 AI 채팅 남은 횟수 조회
+        if (data.member_id) {
+          fetch('/api/hit/membership')
+            .then(r => r.json())
+            .then(mData => {
+              if (mData.data?.tier && mData.data.tier !== 'premium' && mData.data.tier !== 'professional') {
+                // 현재 사용 횟수 조회
+                fetch(`/api/hit/chat/usage?memberId=${data.member_id}`)
+                  .then(r => r.json())
+                  .then(uData => {
+                    if (uData.data !== undefined) {
+                      setChatRemaining(Math.max(0, 3 - uData.data));
+                    }
+                  })
+                  .catch(() => setChatRemaining(3));
+              }
+              // premium/professional은 undefined = 무제한
+            })
+            .catch(() => {});
+        }
+
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -533,6 +556,8 @@ export default function HitAResultPage() {
             typeNameKo: result.typeNameKo,
           })}
           quickQuestions={['DISC 결과 궁금해요', '직장에서 어떻게 나타나나요?', '잘 맞는 유형은?', '성장 방법']}
+          memberId={result.memberId}
+          chatRemaining={chatRemaining}
         />
       )}
 

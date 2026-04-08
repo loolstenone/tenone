@@ -8,7 +8,10 @@ import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
-import { gateApi } from '@/lib/hit/membership-server';
+import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
+import { canAccess } from '@/lib/hit/membership';
+
+const FREE_CHAT_LIMIT = 3;
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +24,29 @@ export async function POST(request: NextRequest) {
     // 멤버십 게이트 — AI 채팅은 무료 회원 이상
     const gateResult = await gateApi(memberId ?? null, 'HIT_AI_CHAT_BASIC');
     if (gateResult) return gateResult;
+
+    // 무료 회원 3회 사용 제한
+    const tier = await getMembershipTier(memberId ?? null);
+    if (!canAccess(tier, 'HIT_AI_CHAT_UNLIMITED') && memberId) {
+      const supabaseCheck = await createClient();
+      const { count } = await supabaseCheck
+        .from('hit_chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('member_id', memberId)
+        .eq('role', 'user');
+      if ((count ?? 0) >= FREE_CHAT_LIMIT) {
+        return new Response(
+          JSON.stringify({
+            error: 'chat_limit_reached',
+            tier,
+            message: `무료 회원은 AI 상담을 ${FREE_CHAT_LIMIT}회까지 이용할 수 있습니다. Premium으로 업그레이드하세요.`,
+            usageCount: count,
+            limit: FREE_CHAT_LIMIT,
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // API 키
     let apiKey = process.env.ANTHROPIC_API_KEY;
@@ -89,25 +115,25 @@ export async function POST(request: NextRequest) {
           }
 
           // 스트리밍 완료 후 대화 DB 저장
-          if (sessionId) {
-            try {
-              const supabase = await createClient();
-              // 사용자 메시지 저장
-              await supabase.from('hit_chat_messages').insert({
-                session_id: sessionId,
+          try {
+            const supabase = await createClient();
+            await supabase.from('hit_chat_messages').insert([
+              {
+                session_id: sessionId ?? null,
                 result_id: resultId,
+                member_id: memberId ?? null,
                 role: 'user',
                 content: message,
-              });
-              // AI 응답 저장
-              await supabase.from('hit_chat_messages').insert({
-                session_id: sessionId,
+              },
+              {
+                session_id: sessionId ?? null,
                 result_id: resultId,
+                member_id: memberId ?? null,
                 role: 'assistant',
                 content: fullResponse,
-              });
-            } catch {}
-          }
+              },
+            ]);
+          } catch {}
 
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
           controller.close();

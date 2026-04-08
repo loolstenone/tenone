@@ -7,8 +7,13 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitAResult } from '@/lib/supabase/hit';
 import { getHeroSystemPrompt, type HitMode } from '@/lib/hit/hero-agent-system';
-import { gateApi } from '@/lib/hit/membership-server';
+import { gateApi, getMembershipTier } from '@/lib/hit/membership-server';
+import { canAccess } from '@/lib/hit/membership';
+import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
+
+/** 무료 회원 AI 채팅 최대 횟수 */
+const FREE_CHAT_LIMIT = 3;
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +26,29 @@ export async function POST(request: NextRequest) {
     // 멤버십 게이트 — AI 채팅은 무료 회원 이상
     const gateResult = await gateApi(memberId ?? null, 'HIT_AI_CHAT_BASIC');
     if (gateResult) return gateResult;
+
+    // 무료 회원 3회 사용 제한 확인
+    const tier = await getMembershipTier(memberId ?? null);
+    if (!canAccess(tier, 'HIT_AI_CHAT_UNLIMITED') && memberId) {
+      const supabase = await createClient();
+      const { count } = await supabase
+        .from('hit_chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('member_id', memberId)
+        .eq('role', 'user');
+      if ((count ?? 0) >= FREE_CHAT_LIMIT) {
+        return new Response(
+          JSON.stringify({
+            error: 'chat_limit_reached',
+            tier,
+            message: `무료 회원은 AI 상담을 ${FREE_CHAT_LIMIT}회까지 이용할 수 있습니다. 더 많이 이용하려면 Premium으로 업그레이드하세요.`,
+            usageCount: count,
+            limit: FREE_CHAT_LIMIT,
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // API 키 로드
     let apiKey = process.env.ANTHROPIC_API_KEY;
@@ -71,9 +99,51 @@ export async function POST(request: NextRequest) {
     });
 
     const text = response.content.find(b => b.type === 'text');
+    const replyText = text?.type === 'text' ? text.text : '응답을 생성하지 못했습니다.';
+
+    // 메시지 저장 (사용량 추적 + 대화 기록)
+    if (memberId || resultId) {
+      try {
+        const supabaseWrite = await createClient();
+        await supabaseWrite.from('hit_chat_messages').insert([
+          {
+            result_id: resultId,
+            member_id: memberId ?? null,
+            role: 'user',
+            content: message,
+          },
+          {
+            result_id: resultId,
+            member_id: memberId ?? null,
+            role: 'assistant',
+            content: replyText,
+          },
+        ]);
+      } catch (saveErr) {
+        console.warn('[HIT Chat] 메시지 저장 실패 (응답은 정상):', saveErr);
+      }
+    }
+
+    // 무료 회원의 남은 횟수 계산
+    let usageInfo: { usageCount: number; limit: number; remaining: number } | null = null;
+    if (!canAccess(tier, 'HIT_AI_CHAT_UNLIMITED') && memberId) {
+      const supabase = await createClient();
+      const { count } = await supabase
+        .from('hit_chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('member_id', memberId)
+        .eq('role', 'user');
+      const usageCount = count ?? 0;
+      usageInfo = {
+        usageCount,
+        limit: FREE_CHAT_LIMIT,
+        remaining: Math.max(0, FREE_CHAT_LIMIT - usageCount),
+      };
+    }
 
     return successResponse({
-      reply: text?.type === 'text' ? text.text : '응답을 생성하지 못했습니다.',
+      reply: replyText,
+      ...(usageInfo && { usage: usageInfo }),
     });
   } catch (error) {
     console.error('[HIT Chat]:', error);

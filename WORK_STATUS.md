@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-08 (집, 세션 29)
+> 마지막 업데이트: 2026-04-08 (집, 세션 30)
 
 ---
 
@@ -68,11 +68,22 @@
 | Phase 7 | HIT D 재구축 (142문항 + 7역할 fit_score) | ✅ |
 | Phase 8 | HIT E 재구축 (142문항 + 2막 방향 Top2) | ✅ |
 | Phase 9 | HIT F 재구축 (154문항 + 방향 Top1 + 미끼 탐지) | ✅ |
+| Phase 10 | HIT B 재구축 (50문항 + 채점 재작성) | ✅ |
+| **Phase 2b** | **차등 멤버십 완성 (3회 제한 + 구독 동기화)** | **✅** |
+
+### Phase 2b 세부 내역 (2026-04-08 완료)
+- `hit_chat_messages` → `member_id` 컬럼 추가 + INDEX
+- `hero_subscriptions` status→active/expired/cancelled 시 `members.membership_tier` 자동 동기화 트리거 생성
+- `/api/hit/chat/stream` — Free 티어 3회 제한 (member_id 기반 카운트), member_id 저장
+- `/api/hit/chat/route.ts` — 동일 제한 로직 추가
+- `/api/hit/chat/usage/route.ts` — 신규 엔드포인트 (사용 횟수 조회)
+- `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
+- HIT A 결과 페이지 — memberId + chatRemaining 전달
 
 ## 다음 스텝 후보
 
-1. **HIT B 재구축 (Phase 10)** — B-questions.ts 현황 확인 후 동일 패턴 적용
-2. **/crew-invite 페이지 제작** — 링크는 고쳤는데 실제 페이지가 없음 (404 상태)
-3. **N-03 뉴스레터 폼 통일** — 메인/Mindle/newsletter 3곳 단일 API로 정리
-4. **PG 연동** — 토스페이먼츠/포트원 결정 후 WIO 구독 결제 구현
-5. **도메인 연결** — hero.ne.kr Vercel 연결
+1. **Phase 3 — 레이어 B~F 새 문항 적용** — 사용자가 새 심화 75문항(CH Deep 45 + AP Deep 30) × 5세트 전달 후 시딩
+2. **Phase 4 — AI 상담 + 교차 리포트** — 교차 해석 웹 전용 생성, PDF 제외
+3. **/crew-invite 페이지 제작** — 링크는 고쳤는데 실제 페이지가 없음 (404 상태)
+4. **N-03 뉴스레터 폼 통일** — 메인/Mindle/newsletter 3곳 단일 API로 정리
+5. **PG 연동** — 토스페이먼츠/포트원 결정 후 WIO 구독 결제 구현

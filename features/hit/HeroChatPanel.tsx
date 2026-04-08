@@ -14,18 +14,23 @@ interface HeroChatPanelProps {
   mode: HitMode;
   greeting: string;
   quickQuestions?: string[];
+  memberId?: string | null;
+  /** 무료 회원 남은 채팅 횟수 (undefined = 무제한) */
+  chatRemaining?: number;
 }
 
 /**
  * 히어로 AI 상담 채팅 패널 — 결과 화면 내 인라인
  */
-export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions }: HeroChatPanelProps) {
+export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions, memberId, chatRemaining }: HeroChatPanelProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: greeting },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [remaining, setRemaining] = useState<number | undefined>(chatRemaining);
+  const [limitReached, setLimitReached] = useState(chatRemaining !== undefined && chatRemaining <= 0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,7 +38,7 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
   }, [messages]);
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || limitReached) return;
     const userMsg: Message = { role: 'user', content: text.trim() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
@@ -50,8 +55,24 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
           mode,
           history: messages.filter(m => m !== messages[0]),
           sessionId: `chat_${resultId}_${Date.now()}`,
+          memberId: memberId ?? undefined,
         }),
       });
+
+      if (res.status === 403) {
+        const errData = await res.json();
+        if (errData.error === 'chat_limit_reached') {
+          setLimitReached(true);
+          setRemaining(0);
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: errData.message || '무료 AI 상담 횟수를 모두 사용했습니다. Premium으로 업그레이드하시면 무제한 이용 가능합니다.',
+          }]);
+          setLoading(false);
+          return;
+        }
+        throw new Error('access denied');
+      }
 
       if (!res.ok) throw new Error('stream failed');
 
@@ -100,6 +121,13 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
           return updated;
         });
       }
+
+      // 무료 회원 남은 횟수 갱신
+      if (remaining !== undefined) {
+        const newRemaining = Math.max(0, remaining - 1);
+        setRemaining(newRemaining);
+        if (newRemaining <= 0) setLimitReached(true);
+      }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: '네트워크 오류가 발생했습니다. 다시 시도해 주세요.' }]);
     }
@@ -127,9 +155,16 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
           <p className="text-sm font-bold">히어로 AI 상담</p>
           <p className="text-[10px] opacity-80">HeRo Talent Agency</p>
         </div>
-        <button onClick={() => setOpen(false)} className="p-1 hover:bg-white/20 rounded">
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {remaining !== undefined && (
+            <span className="text-[10px] px-2 py-0.5 bg-white/20 rounded-full">
+              {remaining > 0 ? `${remaining}회 남음` : '횟수 소진'}
+            </span>
+          )}
+          <button onClick={() => setOpen(false)} className="p-1 hover:bg-white/20 rounded">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* 메시지 영역 */}
@@ -173,25 +208,37 @@ export default function HeroChatPanel({ resultId, mode, greeting, quickQuestions
 
       {/* 입력 */}
       <div className="px-3 py-2 border-t border-neutral-100">
-        <form
-          onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
-          className="flex items-center gap-2"
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="히어로에게 물어보세요..."
-            className="flex-1 text-sm px-3 py-2 bg-neutral-50 rounded-lg border-0 focus:outline-none focus:ring-1 focus:ring-[#E53935]"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || loading}
-            className="p-2 bg-[#E53935] text-white rounded-lg disabled:opacity-30 hover:bg-red-700 transition-colors"
+        {limitReached ? (
+          <div className="text-center py-2">
+            <p className="text-xs text-neutral-500 mb-2">무료 AI 상담 3회를 모두 사용했습니다.</p>
+            <a
+              href="/hero/membership"
+              className="inline-block text-xs px-4 py-1.5 bg-[#E53935] text-white rounded-full hover:bg-red-700 transition-colors"
+            >
+              Premium으로 업그레이드
+            </a>
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
+            className="flex items-center gap-2"
           >
-            <Send className="h-4 w-4" />
-          </button>
-        </form>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="히어로에게 물어보세요..."
+              className="flex-1 text-sm px-3 py-2 bg-neutral-50 rounded-lg border-0 focus:outline-none focus:ring-1 focus:ring-[#E53935]"
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || loading}
+              className="p-2 bg-[#E53935] text-white rounded-lg disabled:opacity-30 hover:bg-red-700 transition-colors"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
