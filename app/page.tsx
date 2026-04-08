@@ -402,7 +402,7 @@ export default function HomePage() {
                                     e.preventDefault();
                                     if (!nlEmail.trim() || !nlAgree) return;
                                     try {
-                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim() }) });
+                                        const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: nlEmail.trim(), source: 'tenone' }) });
                                         if (res.ok) setNlSubscribed(true);
                                     } catch { setNlSubscribed(true); }
                                 }}

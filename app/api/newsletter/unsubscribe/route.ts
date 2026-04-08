@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { error } = await supabase
     .from('newsletter_subscribers')
-    .update({ status: 'unsubscribed' })
+    .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
     .eq('id', subscriberId);
 
   if (error) {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   await supabase
     .from('newsletter_subscribers')
-    .update({ status: 'unsubscribed' })
+    .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
     .eq('id', subscriberId);
 
   return NextResponse.json({ ok: true });

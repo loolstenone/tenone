@@ -395,7 +395,7 @@ export default function MindleHomePage() {
                   const res = await fetch("/api/newsletter", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: nlEmail.trim() }),
+                    body: JSON.stringify({ email: nlEmail.trim(), source: 'mindle' }),
                   });
                   if (!res.ok) throw new Error();
                   setNlStatus("done");

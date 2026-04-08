@@ -54,6 +54,7 @@ export default function NewsletterPage() {
                     email: isAuthenticated ? user?.email : email,
                     name: isAuthenticated ? user?.name : guestName,
                     memberId: isAuthenticated ? user?.id : null,
+                    source: 'tenone',
                 }),
             });
             if (res.ok) setSubscribed(true);
@@ -85,6 +86,9 @@ export default function NewsletterPage() {
                         </h3>
                         <p className="text-xs tn-text-sub">
                             {isAuthenticated ? user?.email : email}로 뉴스레터를 보내드립니다.
+                        </p>
+                        <p className="text-[10px] tn-text-muted mt-2">
+                            Ten:One™ Universe의 일원이 되셨습니다. Powered by Ten:One™ Universe.
                         </p>
                         {isAuthenticated && (
                             <Link href="/profile" className="inline-block mt-3 text-xs tn-text-sub hover:text-neutral-700 underline underline-offset-2">
