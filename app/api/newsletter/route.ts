@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
+import { renderConfirmHtml, renderConfirmText } from '@/lib/email/newsletter-template';
 
-// API 라우트 전용 service role 클라이언트 (RLS 우회)
 function getAdminClient() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,32 +10,52 @@ function getAdminClient() {
     );
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenone.biz';
+const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || 'noreply@tenone.biz';
+
+/** 브랜드별 확인 메일 설정 */
+const BRAND_CONFIG: Record<string, { name: string; color: string; fromName: string }> = {
+    mindle:  { name: 'Mindle',           color: '#F5C518', fromName: 'Mindle Newsletter' },
+    tenone:  { name: 'Ten:One™ Universe', color: '#000000', fromName: 'Ten:One™ Universe' },
+    hero:    { name: 'HeRo',             color: '#0a0a0a', fromName: 'HeRo Newsletter' },
+    badak:   { name: 'Badak',            color: '#0a0a0a', fromName: 'Badak Newsletter' },
+    myverse: { name: 'Myverse',          color: '#6366f1', fromName: 'Myverse Newsletter' },
+};
+
+/** 구독자 id → base64url 토큰 */
+function makeToken(id: string): string {
+    return Buffer.from(id).toString('base64url');
+}
+
 export async function POST(request: NextRequest) {
     try {
-        const { email, name, memberId, source } = await request.json();
+        const { email, nickname, name, memberId, source } = await request.json();
         if (!email) return NextResponse.json({ error: '이메일은 필수입니다.' }, { status: 400 });
+
+        // nickname 우선, 없으면 name 폴백 (로그인 회원)
+        const displayName = nickname || name || null;
 
         const supabase = getAdminClient();
 
-        // 1. 구독자 upsert
+        // 1. 구독자 upsert (미인증 상태로)
         const { data: subscriber, error } = await supabase
             .from('newsletter_subscribers')
             .upsert(
                 {
                     email,
-                    name: name || null,
+                    name: displayName,
                     member_id: memberId || null,
-                    is_active: true,
+                    is_active: false,   // 확인 메일 클릭 후 활성화
                     source: source || null,
                 },
                 { onConflict: 'email' }
             )
-            .select('id')
+            .select('id, is_active')
             .single();
 
         if (error) throw error;
 
-        // 2. 브랜드 소스 태그 등록 (subscriber_tags)
+        // 2. 브랜드 태그 등록
         if (subscriber?.id && source) {
             await supabase
                 .from('subscriber_tags')
@@ -42,6 +63,35 @@ export async function POST(request: NextRequest) {
                     { subscriber_id: subscriber.id, tag: source },
                     { onConflict: 'subscriber_id,tag' }
                 );
+        }
+
+        // 3. 확인 메일 발송 (Resend)
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey && subscriber?.id) {
+            const brand = BRAND_CONFIG[source] || BRAND_CONFIG.tenone;
+            const token = makeToken(subscriber.id);
+            const confirmUrl = `${SITE_URL}/api/newsletter/confirm?token=${token}`;
+
+            const resend = new Resend(resendKey);
+            await resend.emails.send({
+                from: `${brand.fromName} <${FROM_EMAIL}>`,
+                to: email,
+                subject: `[${brand.name}] 뉴스레터 구독을 확인해주세요`,
+                html: renderConfirmHtml({
+                    nickname: displayName || '구독자',
+                    brandName: brand.name,
+                    brandColor: brand.color,
+                    confirmUrl,
+                    siteUrl: SITE_URL,
+                }),
+                text: renderConfirmText({
+                    nickname: displayName || '구독자',
+                    brandName: brand.name,
+                    brandColor: brand.color,
+                    confirmUrl,
+                    siteUrl: SITE_URL,
+                }),
+            });
         }
 
         return NextResponse.json({ success: true });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Check, ArrowRight, Zap, TrendingUp, BarChart3, FileText } from "lucide-react";
+import { Send, ArrowRight, Zap, TrendingUp, BarChart3, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const benefits = [
@@ -33,11 +33,144 @@ interface PastIssue {
     date: string;
 }
 
-export default function NewsletterPage() {
+function isValidEmail(v: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function SubscribeForm({
+    layout,
+    brandDesc,
+}: {
+    layout: "vertical" | "horizontal";
+    brandDesc: string;
+}) {
     const [email, setEmail] = useState("");
-    const [submitted, setSubmitted] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState("");
+    const [nickname, setNickname] = useState("");
+    const [nicknameError, setNicknameError] = useState("");
     const [agree, setAgree] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [sent, setSent] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        let valid = true;
+        if (!nickname.trim()) { setNicknameError("닉네임을 입력해주세요."); valid = false; }
+        else setNicknameError("");
+        if (!email.trim() || !isValidEmail(email)) { setEmailError("유효한 이메일 주소를 입력해주세요."); valid = false; }
+        else setEmailError("");
+        if (!agree || !valid) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim(), nickname: nickname.trim(), source: 'mindle' }),
+            });
+            if (res.ok) setSent(true);
+        } catch { /* 무시 */ }
+        setLoading(false);
+    };
+
+    if (sent) {
+        return (
+            <div className="flex flex-col items-center gap-2 text-center py-4">
+                <Send className="w-8 h-8 text-[#F5C518]" />
+                <p className="font-medium text-sm">확인 메일을 보냈습니다</p>
+                <p className="text-[11px] text-neutral-500 leading-relaxed">
+                    신청하신 이메일 주소로 확인용 메일을 보내드렸습니다.<br />
+                    메일함을 확인하고 구독을 완료해주세요.
+                </p>
+            </div>
+        );
+    }
+
+    if (layout === "horizontal") {
+        return (
+            <form onSubmit={handleSubmit}>
+                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                    <input
+                        type="text"
+                        value={nickname}
+                        onChange={e => { setNickname(e.target.value); setNicknameError(""); }}
+                        placeholder="닉네임 *"
+                        className="w-full sm:w-32 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition text-sm"
+                    />
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                        placeholder="이메일 주소 *"
+                        className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition text-sm"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading || !agree}
+                        className="px-6 py-3 rounded-lg bg-[#F5C518] text-black font-bold hover:bg-[#E0B015] transition disabled:opacity-40 text-sm shrink-0"
+                    >
+                        {loading ? "..." : "구독"}
+                    </button>
+                </div>
+                {(nicknameError || emailError) && (
+                    <p className="text-[10px] text-red-400 mb-2">{nicknameError || emailError}</p>
+                )}
+                <label className="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-0.5 shrink-0 accent-[#F5C518]" />
+                    <span className="text-[10px] text-neutral-500 leading-relaxed">
+                        뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다. 언제든 수신거부 가능합니다.
+                    </span>
+                </label>
+                <p className="text-[10px] text-neutral-600 mt-2">{brandDesc}</p>
+            </form>
+        );
+    }
+
+    // vertical
+    return (
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+            <div className="flex flex-col gap-3 mb-3">
+                <div>
+                    <input
+                        type="text"
+                        value={nickname}
+                        onChange={e => { setNickname(e.target.value); setNicknameError(""); }}
+                        placeholder="닉네임 *"
+                        className="w-full px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition"
+                    />
+                    {nicknameError && <p className="text-[10px] text-red-400 mt-1">{nicknameError}</p>}
+                </div>
+                <div>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                        placeholder="이메일 주소 *"
+                        className="w-full px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition"
+                    />
+                    {emailError && <p className="text-[10px] text-red-400 mt-1">{emailError}</p>}
+                </div>
+                <label className="flex items-start gap-2 cursor-pointer text-left">
+                    <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="mt-0.5 shrink-0 accent-[#F5C518]" />
+                    <span className="text-[11px] text-neutral-500 leading-relaxed">
+                        뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다. 언제든 수신거부 가능합니다.
+                    </span>
+                </label>
+                <button
+                    type="submit"
+                    disabled={loading || !agree}
+                    className="w-full px-6 py-3 rounded-lg bg-[#F5C518] text-black font-bold hover:bg-[#E0B015] transition flex items-center justify-center gap-2 disabled:opacity-40"
+                >
+                    {loading ? "처리 중..." : "구독하기"}
+                    <ArrowRight className="w-4 h-4" />
+                </button>
+            </div>
+            <p className="text-[10px] text-neutral-600 text-center">{brandDesc}</p>
+        </form>
+    );
+}
+
+export default function NewsletterPage() {
     const [pastIssues, setPastIssues] = useState<PastIssue[]>([]);
 
     useEffect(() => {
@@ -51,27 +184,13 @@ export default function NewsletterPage() {
             .then(({ data }) => { if (data) setPastIssues(data); });
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email || !agree) return;
-        setLoading(true);
-        try {
-            const res = await fetch('/api/newsletter', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim(), source: 'mindle' }),
-            });
-            if (res.ok) setSubmitted(true);
-        } catch { /* 실패 시 무시 */ }
-        setLoading(false);
-    };
+    const brandDesc = "Mindle 뉴스레터는 Ten:One™ Universe의 다양한 소식을 받을 수 있습니다.";
 
     return (
         <main className="min-h-screen bg-[#0A0A0A] text-white pt-20 pb-20">
             {/* Hero */}
             <section className="max-w-3xl mx-auto px-6 text-center mb-20">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F5C518]/10 text-[#F5C518] text-xs font-medium mb-6">
-                    <Mail className="w-3.5 h-3.5" />
                     뉴스레터
                 </div>
                 <h1 className="font-black tracking-tight mb-6">
@@ -81,52 +200,7 @@ export default function NewsletterPage() {
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                     Mindle의 트렌드 인사이트로 앞서 나가세요. 무료.
                 </p>
-
-                {/* Subscribe Form */}
-                {!submitted ? (
-                    <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-                        <div className="flex flex-col sm:flex-row gap-3 mb-3">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="이메일을 입력하세요"
-                                required
-                                className="flex-1 px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition"
-                            />
-                            <button
-                                type="submit"
-                                disabled={loading || !agree}
-                                className="px-6 py-3 rounded-lg bg-[#F5C518] text-black font-bold hover:bg-[#E0B015] transition flex items-center justify-center gap-2 disabled:opacity-40"
-                            >
-                                {loading ? "구독 중..." : "구독하기"}
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                        {/* 개인정보 동의 */}
-                        <label className="flex items-start gap-2 cursor-pointer text-left">
-                            <input
-                                type="checkbox"
-                                checked={agree}
-                                onChange={e => setAgree(e.target.checked)}
-                                className="mt-0.5 shrink-0 accent-[#F5C518]"
-                            />
-                            <span className="text-[11px] text-neutral-500 leading-relaxed">
-                                뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다. 언제든 수신거부 가능합니다.
-                            </span>
-                        </label>
-                    </form>
-                ) : (
-                    <div className="flex flex-col items-center gap-2 text-green-400 bg-green-400/10 rounded-lg px-6 py-5 max-w-md mx-auto">
-                        <div className="flex items-center gap-2">
-                            <Check className="w-5 h-5" />
-                            <span className="font-medium">구독 완료! 받은 편지함을 확인하세요.</span>
-                        </div>
-                        <p className="text-[11px] text-neutral-500">
-                            Mindle과 함께 Ten:One™ Universe의 일원이 되셨습니다.
-                        </p>
-                    </div>
-                )}
+                <SubscribeForm layout="vertical" brandDesc={brandDesc} />
             </section>
 
             {/* Benefits */}
@@ -151,13 +225,12 @@ export default function NewsletterPage() {
                         {pastIssues.map((issue) => (
                             <div
                                 key={issue.id}
-                                className="flex items-center justify-between p-4 rounded-lg bg-neutral-900/40 border border-neutral-800 hover:border-neutral-700 transition group"
+                                className="flex items-center justify-between p-4 rounded-lg bg-neutral-900/40 border border-neutral-800 hover:border-neutral-700 transition"
                             >
                                 <div className="flex items-center gap-4">
                                     <span className="text-neutral-600 text-sm w-24 shrink-0">{issue.date}</span>
-                                    <span className="font-medium group-hover:text-[#F5C518] transition">{issue.title}</span>
+                                    <span className="font-medium">{issue.title}</span>
                                 </div>
-                                <ArrowRight className="w-4 h-4 text-neutral-600 group-hover:text-[#F5C518] transition" />
                             </div>
                         ))}
                     </div>
@@ -169,27 +242,7 @@ export default function NewsletterPage() {
                 <div className="p-10 rounded-2xl bg-gradient-to-b from-neutral-900 to-[#0A0A0A] border border-neutral-800">
                     <h2 className="text-2xl font-bold mb-3">다음 신호를 놓치지 마세요.</h2>
                     <p className="text-neutral-400 mb-6">가장 좋은 인사이트는 가장 먼저 행동하는 것입니다.</p>
-                    {!submitted ? (
-                        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="이메일을 입력하세요"
-                                required
-                                className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F5C518] transition"
-                            />
-                            <button
-                                type="submit"
-                                disabled={loading || !agree}
-                                className="px-6 py-3 rounded-lg bg-[#F5C518] text-black font-bold hover:bg-[#E0B015] transition disabled:opacity-40"
-                            >
-                                {loading ? "..." : "구독"}
-                            </button>
-                        </form>
-                    ) : (
-                        <p className="text-green-400 font-medium">이미 구독 중입니다!</p>
-                    )}
+                    <SubscribeForm layout="horizontal" brandDesc={brandDesc} />
                 </div>
             </section>
         </main>
