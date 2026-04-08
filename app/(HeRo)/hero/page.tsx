@@ -111,7 +111,7 @@ const heroChars = [
 
 export default function HeRoHomePage() {
   const [activeJourney, setActiveJourney] = useState(2);
-  const [heroChar, setHeroChar] = useState(heroChars[0]);
+  const [heroChar, setHeroChar] = useState<{ src: string; alt: string } | null>(null);
   useEffect(() => {
     setHeroChar(heroChars[Math.floor(Math.random() * heroChars.length)]);
   }, []);
@@ -147,16 +147,18 @@ export default function HeRoHomePage() {
       {/* ━━━ 1. Hero Section ━━━ */}
       <section className="relative min-h-screen overflow-hidden bg-white">
         {/* 캐릭터 — 좌하단 고정 */}
-        <div className="absolute left-0 bottom-0 z-[1] w-[40%] md:w-[35%] lg:w-[30%] h-[75%]">
-          <Image
-            src={heroChar.src}
-            alt={heroChar.alt}
-            fill
-            className="object-contain object-left-bottom"
-            priority
-            sizes="35vw"
-          />
-        </div>
+        {heroChar && (
+          <div className="absolute left-0 bottom-0 z-[1] w-[40%] md:w-[35%] lg:w-[30%] h-[75%]">
+            <Image
+              src={heroChar.src}
+              alt={heroChar.alt}
+              fill
+              className="object-contain object-left-bottom"
+              priority
+              sizes="35vw"
+            />
+          </div>
+        )}
 
         {/* 텍스트 + 버튼 */}
         <div className="relative z-10 min-h-screen flex items-center">
