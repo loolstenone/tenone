@@ -74,9 +74,9 @@ export default function NewsletterPage() {
                     <Mail className="w-3.5 h-3.5" />
                     뉴스레터
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
-                    당신의 호기심을 채우는<br />
-                    <span className="text-[#F5C518]">트렌드 홀씨.</span>
+                <h1 className="font-black tracking-tight mb-6">
+                    <span className="block text-xl md:text-2xl text-neutral-400 mb-2">당신의 호기심을 피우는</span>
+                    <span className="text-[#F5C518] text-4xl md:text-6xl">트렌드 홀씨.</span>
                 </h1>
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                     Mindle의 트렌드 인사이트로 앞서 나가세요. 무료.
