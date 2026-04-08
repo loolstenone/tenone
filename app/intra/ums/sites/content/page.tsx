@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useBumsFilter } from "../../layout";
+import { useBumsFilter, SiteFilterDropdown } from "../../layout";
 import { siteConfigs } from "@/lib/site-config";
 import {
     FileText, Search, Plus, Eye, Pencil, Trash2, Calendar,
@@ -150,6 +150,7 @@ export default function ContentManagementPage() {
                 title="콘텐츠 관리"
                 description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시글 통합 관리`}
             >
+                <SiteFilterDropdown />
                 <PrimaryButton onClick={() => router.push("/intra/bums/content?new=true")}>
                     <Plus className="h-3.5 w-3.5" /> 새 글 작성
                 </PrimaryButton>

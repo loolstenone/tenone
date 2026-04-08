@@ -7,7 +7,7 @@ import {
 import { PageHeader, TabNav } from "@/components/intra/IntraUI";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { useBumsFilter } from "../../layout";
+import { useBumsFilter, SiteFilterDropdown } from "../../layout";
 import { siteConfigs } from "@/lib/site-config";
 /* ── API 응답용 snake_case 인터페이스 ── */
 interface PostRow {
@@ -155,7 +155,9 @@ export default function BoardsManagementPage() {
             <PageHeader
                 title="게시판 관리"
                 description={`${selectedSiteId === "all" ? "전체 사이트" : siteName(selectedSiteId)} 게시판·게시글·작성자 통합 관리`}
-            />
+            >
+                <SiteFilterDropdown />
+            </PageHeader>
 
             {/* Tabs */}
             <TabNav
