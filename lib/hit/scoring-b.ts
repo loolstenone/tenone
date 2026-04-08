@@ -1,53 +1,28 @@
 /**
- * HIT B 채점 알고리즘
- * 7점 리커트 척도 기반: personality, riasec, competency, readiness
+ * HIT B 채점 알고리즘 — 신입·사회초년생 기초역량 분석
+ * 7점 리커트 척도 기반 · 80문항
+ * HIT_B_Final.md 설계서 기준 (확정판)
+ *
+ * 모듈1: competency_core — 공통 기초역량 18문항 (6역량 × 3문항)
+ *   - problem_solving, communication, initiative, collaboration, self_management, learning_agility
+ * 모듈2: competency     — 직무별 전문역량 30문항 (기존 DB 트랙별 추출)
+ * 모듈3: readiness_core — 공통 준비도 32문항 (4영역 × 8문항)
+ *   - self_understanding, job_understanding, skill_readiness, action_readiness
+ *
+ * 등급: A(≥75) / B(50~74) / C(25~49) / D(<25)
  */
 
 interface ResponseRow {
   module: string;
   question_id: string;
-  option_value: string;  // '1'~'7' (Likert)
+  option_value: string;  // 'subscale:value[:r]'
 }
 
-// ── 성격 특성 채점 (15 하위척도) ──
-
-export function scorePersonality(responses: ResponseRow[]): {
-  scores: Record<string, number>;
-  darkTriadFlags: Record<string, boolean>;
-} {
-  const personality = responses.filter(r => r.module === 'personality');
-
-  // question_id 형식: 'pers_001' — subscale은 question data에서 매핑됨
-  // option_value에 subscale 정보 인코딩: 'subscale:value' 또는 순수 숫자
-  // 여기서는 question_id에서 subscale 매핑 필요 — subscale map 사용
-
-  // subscale별로 그룹핑 (question_id 패턴 기반)
-  const subscaleMap = buildSubscaleMap(personality);
-  const scores: Record<string, number> = {};
-  const darkTriadFlags: Record<string, boolean> = {};
-
-  for (const [subscale, values] of Object.entries(subscaleMap)) {
-    if (values.length === 0) continue;
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    // 1-7 → 0-100 스케일
-    scores[subscale] = Math.round(((avg - 1) / 6) * 100);
-
-    // Dark triad 판별: _dark 접미사 subscale이 70 초과 시 플래그
-    if (subscale.endsWith('_dark') && scores[subscale] > 70) {
-      darkTriadFlags[subscale] = true;
-    } else if (subscale.endsWith('_dark')) {
-      darkTriadFlags[subscale] = false;
-    }
-  }
-
-  return { scores, darkTriadFlags };
-}
+// ── 공통 유틸 ──────────────────────────────────────────────────────
 
 function buildSubscaleMap(responses: ResponseRow[]): Record<string, number[]> {
   const map: Record<string, number[]> = {};
-
   for (const r of responses) {
-    // option_value 형식: 'subscale:value:reverse' 또는 그냥 숫자
     const parts = r.option_value.split(':');
     let subscale: string;
     let value: number;
@@ -58,264 +33,170 @@ function buildSubscaleMap(responses: ResponseRow[]): Record<string, number[]> {
       value = parseInt(parts[1], 10);
       reverse = parts[2] === 'r';
     } else {
-      // fallback: question_id에서 subscale 추정
-      subscale = extractSubscale(r.question_id);
+      subscale = 'unknown';
       value = parseInt(r.option_value, 10);
     }
 
     if (isNaN(value)) continue;
-    if (reverse) value = 8 - value;
+    if (reverse) value = 8 - value;  // 7점 역채점: 1→7, 7→1
 
     if (!map[subscale]) map[subscale] = [];
     map[subscale].push(value);
   }
-
   return map;
 }
 
-function extractSubscale(questionId: string): string {
-  // question_id 형식 예: 'pers_openness_001' → 'openness'
-  const parts = questionId.split('_');
-  if (parts.length >= 3) {
-    return parts.slice(1, -1).join('_');
-  }
-  return 'unknown';
+function scaleToHundred(values: number[]): number {
+  if (values.length === 0) return 0;
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  return Math.round(((avg - 1) / 6) * 100);
 }
 
-// ── RIASEC 채점 ──
+/** A(≥75) / B(50~74) / C(25~49) / D(<25) */
+export function gradeScore(score: number): 'A' | 'B' | 'C' | 'D' {
+  if (score >= 75) return 'A';
+  if (score >= 50) return 'B';
+  if (score >= 25) return 'C';
+  return 'D';
+}
 
-export function scoreRIASEC(responses: ResponseRow[]): {
-  r: number; i: number; a: number; s: number; e: number; c: number;
-  hollandCode: string;
+// ── 모듈1: 공통 기초역량 채점 (competency_core) ────────────────────
+
+export function scoreCoreCompetency(responses: ResponseRow[]): {
+  scores: Record<string, number>;
+  grades: Record<string, 'A' | 'B' | 'C' | 'D'>;
+  overallScore: number;
+  overallGrade: 'A' | 'B' | 'C' | 'D';
 } {
-  const riasec = responses.filter(r => r.module === 'riasec');
+  const core = responses.filter(r => r.module === 'competency_core');
+  const subscaleMap = buildSubscaleMap(core);
 
-  const sums: Record<string, number[]> = { R: [], I: [], A: [], S: [], E: [], C: [] };
-
-  for (const resp of riasec) {
-    // option_value 형식: 'TYPE:value' (예: 'R:5')
-    const parts = resp.option_value.split(':');
-    let type: string;
-    let value: number;
-
-    if (parts.length >= 2) {
-      type = parts[0].toUpperCase();
-      value = parseInt(parts[1], 10);
-    } else {
-      // fallback: question_id에서 type 추출
-      type = extractRIASECType(resp.question_id);
-      value = parseInt(resp.option_value, 10);
-    }
-
-    if (isNaN(value) || !sums[type]) continue;
-    sums[type].push(value);
-  }
+  const competencies = [
+    'problem_solving',
+    'communication',
+    'initiative',
+    'collaboration',
+    'self_management',
+    'learning_agility',
+  ];
 
   const scores: Record<string, number> = {};
-  for (const [type, values] of Object.entries(sums)) {
-    if (values.length === 0) {
-      scores[type] = 0;
-      continue;
-    }
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    scores[type] = Math.round(((avg - 1) / 6) * 100);
+  const grades: Record<string, 'A' | 'B' | 'C' | 'D'> = {};
+
+  for (const comp of competencies) {
+    scores[comp] = scaleToHundred(subscaleMap[comp] || []);
+    grades[comp] = gradeScore(scores[comp]);
   }
 
-  // Top 3 = Holland Code
-  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const hollandCode = sorted.slice(0, 3).map(([k]) => k).join('');
+  const values = Object.values(scores);
+  const overallScore = values.length > 0
+    ? Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+    : 0;
+  const overallGrade = gradeScore(overallScore);
 
-  return {
-    r: scores.R, i: scores.I, a: scores.A,
-    s: scores.S, e: scores.E, c: scores.C,
-    hollandCode,
-  };
+  return { scores, grades, overallScore, overallGrade };
 }
 
-function extractRIASECType(questionId: string): string {
-  // question_id 형식 예: 'riasec_r_001' → 'R'
-  const parts = questionId.split('_');
-  if (parts.length >= 3) {
-    return parts[1].toUpperCase();
-  }
-  return 'R';
-}
+// ── 모듈2: 직무별 전문역량 채점 (competency) ──────────────────────
 
-// ── 역량 채점 ──
-
-export function scoreCompetency(
-  responses: ResponseRow[],
-  track: string,
-): {
-  common: Record<string, number>;
+/**
+ * 기존 DB module='competency' 트랙별 30문항 채점
+ * option_value: 'subscale:value' 형식
+ */
+export function scoreTrackCompetency(responses: ResponseRow[]): {
   trackScores: Record<string, number>;
+  trackGrades: Record<string, 'A' | 'B' | 'C' | 'D'>;
+  trackOverallScore: number;
+  trackOverallGrade: 'A' | 'B' | 'C' | 'D';
 } {
-  const competency = responses.filter(r => r.module === 'competency');
-
-  const commonMap: Record<string, number[]> = {};
-  const trackMap: Record<string, number[]> = {};
-
-  for (const resp of competency) {
-    // option_value 형식: 'subscale:value[:track]'
-    const parts = resp.option_value.split(':');
-    let subscale: string;
-    let value: number;
-    let respTrack: string | null = null;
-
-    if (parts.length >= 2) {
-      subscale = parts[0];
-      value = parseInt(parts[1], 10);
-      if (parts.length >= 3 && parts[2] !== 'r') {
-        respTrack = parts[2];
-      }
-    } else {
-      subscale = extractSubscale(resp.question_id);
-      value = parseInt(resp.option_value, 10);
-      // track 여부는 question_id에서 판단
-      if (resp.question_id.includes(track)) {
-        respTrack = track;
-      }
-    }
-
-    if (isNaN(value)) continue;
-
-    if (respTrack) {
-      if (!trackMap[subscale]) trackMap[subscale] = [];
-      trackMap[subscale].push(value);
-    } else {
-      if (!commonMap[subscale]) commonMap[subscale] = [];
-      commonMap[subscale].push(value);
-    }
-  }
-
-  const common: Record<string, number> = {};
-  for (const [sub, values] of Object.entries(commonMap)) {
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    common[sub] = Math.round(((avg - 1) / 6) * 100);
-  }
+  const track = responses.filter(r => r.module === 'competency');
+  const subscaleMap = buildSubscaleMap(track);
 
   const trackScores: Record<string, number> = {};
-  for (const [sub, values] of Object.entries(trackMap)) {
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    trackScores[sub] = Math.round(((avg - 1) / 6) * 100);
+  const trackGrades: Record<string, 'A' | 'B' | 'C' | 'D'> = {};
+
+  for (const [subscale, values] of Object.entries(subscaleMap)) {
+    if (subscale === 'unknown') continue;
+    trackScores[subscale] = scaleToHundred(values);
+    trackGrades[subscale] = gradeScore(trackScores[subscale]);
   }
 
-  return { common, trackScores };
+  const vals = Object.values(trackScores);
+  const trackOverallScore = vals.length > 0
+    ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+    : 0;
+  const trackOverallGrade = gradeScore(trackOverallScore);
+
+  return { trackScores, trackGrades, trackOverallScore, trackOverallGrade };
 }
 
-// ── 준비도 채점 ──
+// ── 모듈3: 공통 준비도 채점 (readiness_core) ──────────────────────
 
-export function scoreReadiness(responses: ResponseRow[]): {
-  self: number;
-  portfolio: number;
-  interview: number;
-  network: number;
-  total: number;
-  grade: string;
+export function scoreCoreReadiness(responses: ResponseRow[]): {
+  scores: {
+    self_understanding:  number;
+    job_understanding:   number;
+    skill_readiness:     number;
+    action_readiness:    number;
+  };
+  grades: {
+    self_understanding:  'A' | 'B' | 'C' | 'D';
+    job_understanding:   'A' | 'B' | 'C' | 'D';
+    skill_readiness:     'A' | 'B' | 'C' | 'D';
+    action_readiness:    'A' | 'B' | 'C' | 'D';
+  };
+  readinessTotal: number;
+  readinessGrade: 'A' | 'B' | 'C' | 'D';
   gaps: string[];
 } {
-  const readiness = responses.filter(r => r.module === 'readiness');
+  const ready = responses.filter(r => r.module === 'readiness_core');
+  const subscaleMap = buildSubscaleMap(ready);
 
-  const domainMap: Record<string, number[]> = {
-    self: [],
-    portfolio: [],
-    interview: [],
-    network: [],
+  const su = scaleToHundred(subscaleMap['self_understanding'] || []);
+  const ju = scaleToHundred(subscaleMap['job_understanding']  || []);
+  const sr = scaleToHundred(subscaleMap['skill_readiness']    || []);
+  const ar = scaleToHundred(subscaleMap['action_readiness']   || []);
+
+  const readinessTotal = Math.round((su + ju + sr + ar) / 4);
+
+  const AREA_LABELS: Record<string, string> = {
+    self_understanding: '자기이해',
+    job_understanding:  '직무이해',
+    skill_readiness:    '역량준비',
+    action_readiness:   '실행준비',
   };
 
-  // option_value 도메인명 → 코드 도메인 매핑
-  const domainAlias: Record<string, string> = {
-    self: 'self',
-    self_understanding: 'self',
-    portfolio: 'portfolio',
-    interview: 'interview',
-    interview_prep: 'interview',
-    network: 'network',
-    networking: 'network',
-  };
-
-  for (const resp of readiness) {
-    const parts = resp.option_value.split(':');
-    let domain: string;
-    let value: number;
-
-    if (parts.length >= 2) {
-      domain = domainAlias[parts[0]] || parts[0];
-      value = parseInt(parts[1], 10);
-    } else {
-      const raw = extractDomain(resp.question_id);
-      domain = domainAlias[raw] || raw;
-      value = parseInt(resp.option_value, 10);
-    }
-
-    if (isNaN(value) || !domainMap[domain]) continue;
-    domainMap[domain].push(value);
-  }
-
-  const scores: Record<string, number> = {};
-  for (const [domain, values] of Object.entries(domainMap)) {
-    if (values.length === 0) {
-      scores[domain] = 0;
-      continue;
-    }
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    scores[domain] = Math.round(((avg - 1) / 6) * 100);
-  }
-
-  const self = scores.self;
-  const portfolio = scores.portfolio;
-  const interview = scores.interview;
-  const network = scores.network;
-  const total = Math.round((self + portfolio + interview + network) / 4);
-
-  // 등급: A>=80, B>=65, C>=50, D<50
-  let grade: string;
-  if (total >= 80) grade = 'A';
-  else if (total >= 65) grade = 'B';
-  else if (total >= 50) grade = 'C';
-  else grade = 'D';
-
-  // 60 미만 도메인 = gap
+  const areaScores = { self_understanding: su, job_understanding: ju, skill_readiness: sr, action_readiness: ar };
   const gaps: string[] = [];
-  const domainNames: Record<string, string> = {
-    self: '자기이해',
-    portfolio: '포트폴리오',
-    interview: '면접준비',
-    network: '네트워킹',
+  for (const [key, score] of Object.entries(areaScores)) {
+    if (score < 50) gaps.push(AREA_LABELS[key] || key);
+  }
+
+  return {
+    scores: areaScores,
+    grades: {
+      self_understanding: gradeScore(su),
+      job_understanding:  gradeScore(ju),
+      skill_readiness:    gradeScore(sr),
+      action_readiness:   gradeScore(ar),
+    },
+    readinessTotal,
+    readinessGrade: gradeScore(readinessTotal),
+    gaps,
   };
-  for (const [domain, score] of Object.entries(scores)) {
-    if (score < 60) {
-      gaps.push(domainNames[domain] || domain);
-    }
-  }
-
-  return { self, portfolio, interview, network, total, grade, gaps };
 }
 
-function extractDomain(questionId: string): string {
-  // question_id 형식 예: 'read_self_001' → 'self'
-  const parts = questionId.split('_');
-  if (parts.length >= 3) {
-    return parts[1];
-  }
-  return 'self';
-}
+// ── 여정 단계 판별 ──────────────────────────────────────────────────
 
-// ── 여정 단계 판별 ──
-
-export function determineJourneyStage(readinessTotal: number, competencyAvg: number): string {
-  if (readinessTotal >= 80 && competencyAvg >= 70) return 'ready';
-  if (readinessTotal >= 60 && competencyAvg >= 50) return 'developing';
-  if (readinessTotal >= 40) return 'exploring';
+export function determineJourneyStage(readinessTotal: number, competencyOverall: number): string {
+  if (readinessTotal >= 75 && competencyOverall >= 75) return 'ready';
+  if (readinessTotal >= 50 && competencyOverall >= 50) return 'developing';
+  if (readinessTotal >= 25) return 'exploring';
   return 'discovering';
 }
 
-// ── 주의 신호 산출 (소비자 비노출) ──
+// ── 주의 신호 (소비자 비노출) ────────────────────────────────────────
 
-/**
- * 기본 alert 채점 — personality_scores의 _dark subscale 기반 (폴백)
- * hit_questions.alert_code가 설정되지 않은 경우 사용
- */
 export function computeAlertScores(personalityScores: Record<string, number>): {
   alertN1: number;
   alertM1: number;
@@ -334,11 +215,6 @@ export function computeAlertScores(personalityScores: Record<string, number>): {
   return { alertN1, alertM1, alertP1, alertLevel };
 }
 
-/**
- * DB 기반 alert 채점 — hit_questions.alert_code 매핑 사용
- * 관리자가 alert_code를 지정한 문항의 응답만 별도 집계
- * alert_code가 없으면 computeAlertScores() 폴백
- */
 export function computeAlertScoresFromDB(
   responses: ResponseRow[],
   alertQuestions: { question_id: string; alert_code: string }[],
@@ -353,7 +229,6 @@ export function computeAlertScoresFromDB(
     return computeAlertScores(personalityScoresFallback);
   }
 
-  // alert_code별 question_id 세트 구성
   const n1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'N1').map(q => q.question_id));
   const m1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'M1').map(q => q.question_id));
   const p1Ids = new Set(alertQuestions.filter(q => q.alert_code === 'P1').map(q => q.question_id));
@@ -368,7 +243,7 @@ export function computeAlertScoresFromDB(
       return isNaN(raw) ? 0 : raw;
     });
     const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    return Math.round(((avg - 1) / 6) * 100);  // 1-7 → 0-100
+    return Math.round(((avg - 1) / 6) * 100);
   }
 
   const alertN1 = aggregateAlertGroup(n1Ids);
@@ -381,4 +256,74 @@ export function computeAlertScoresFromDB(
   if (alertP1 >= 70) alertLevel++;
 
   return { alertN1, alertM1, alertP1, alertLevel };
+}
+
+// ── 통합 결과 타입 ──────────────────────────────────────────────────
+
+export interface HitBScoreResult {
+  // 공통 기초역량
+  coreCompetencyScores:   Record<string, number>;
+  coreCompetencyGrades:   Record<string, 'A' | 'B' | 'C' | 'D'>;
+  coreCompetencyOverall:  number;
+  coreCompetencyGrade:    'A' | 'B' | 'C' | 'D';
+  // 직무별 전문역량
+  trackScores:       Record<string, number>;
+  trackGrades:       Record<string, 'A' | 'B' | 'C' | 'D'>;
+  trackOverallScore: number;
+  trackOverallGrade: 'A' | 'B' | 'C' | 'D';
+  // 준비도
+  readinessScores: {
+    self_understanding: number;
+    job_understanding:  number;
+    skill_readiness:    number;
+    action_readiness:   number;
+  };
+  readinessGrades: {
+    self_understanding: 'A' | 'B' | 'C' | 'D';
+    job_understanding:  'A' | 'B' | 'C' | 'D';
+    skill_readiness:    'A' | 'B' | 'C' | 'D';
+    action_readiness:   'A' | 'B' | 'C' | 'D';
+  };
+  readinessTotal: number;
+  readinessGrade: 'A' | 'B' | 'C' | 'D';
+  readinessGaps:  string[];
+  // 여정
+  journeyStage: string;
+}
+
+// ── 통합 채점 ───────────────────────────────────────────────────────
+
+export function scoreHitB(
+  responses: ResponseRow[],
+  competencyTrack: string,
+): HitBScoreResult {
+  const core     = scoreCoreCompetency(responses);
+  const track    = scoreTrackCompetency(responses);
+  const readiness = scoreCoreReadiness(responses);
+
+  const journeyStage = determineJourneyStage(readiness.readinessTotal, core.overallScore);
+
+  // competencyTrack은 AI 프롬프트/DB 저장용으로 전달됨 — 채점 자체엔 불필요
+  void competencyTrack;
+
+  return {
+    // 공통 기초역량
+    coreCompetencyScores:  core.scores,
+    coreCompetencyGrades:  core.grades,
+    coreCompetencyOverall: core.overallScore,
+    coreCompetencyGrade:   core.overallGrade,
+    // 직무별 전문역량
+    trackScores:       track.trackScores,
+    trackGrades:       track.trackGrades,
+    trackOverallScore: track.trackOverallScore,
+    trackOverallGrade: track.trackOverallGrade,
+    // 준비도
+    readinessScores: readiness.scores,
+    readinessGrades: readiness.grades,
+    readinessTotal:  readiness.readinessTotal,
+    readinessGrade:  readiness.readinessGrade,
+    readinessGaps:   readiness.gaps,
+    // 여정
+    journeyStage,
+  };
 }

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitBResult, getLatestHitAResult, upsertHeroProfile } from '@/lib/supabase/hit';
-import { scorePersonality, scoreRIASEC, scoreCompetency, scoreReadiness, determineJourneyStage, computeAlertScoresFromDB } from '@/lib/hit/scoring-b';
+import { scoreHitB, computeAlertScoresFromDB } from '@/lib/hit/scoring-b';
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
@@ -59,27 +59,13 @@ export async function POST(request: NextRequest) {
         alertQuestions = aqData.map((q: { id: string; alert_code: string }) => ({ question_id: q.id, alert_code: q.alert_code }));
       }
     } catch {
-      // 조회 실패 시 폴백(_dark subscale) 사용
+      // 조회 실패 시 폴백 사용
     }
 
-    // 채점
-    const personality = scorePersonality(responses);
-    const riasec = scoreRIASEC(responses);
-    const competency = scoreCompetency(responses, competencyTrack);
-    const readiness = scoreReadiness(responses);
+    // 채점 (공통역량 + 트랙역량 + 준비도)
+    const scored = scoreHitB(responses, competencyTrack);
 
-    // 역량 평균
-    const competencyValues = [
-      ...Object.values(competency.common),
-      ...Object.values(competency.trackScores),
-    ];
-    const competencyAvg = competencyValues.length > 0
-      ? competencyValues.reduce((a, b) => a + b, 0) / competencyValues.length
-      : 0;
-
-    const journeyStage = determineJourneyStage(readiness.total, competencyAvg);
-
-    // AI 리포트 (Claude Sonnet)
+    // AI 리포트 (Claude Sonnet) — 강점 기반 커리어 분석
     let aiReport: string | null = null;
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -88,29 +74,30 @@ export async function POST(request: NextRequest) {
         : '';
 
       const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
-        system: `당신은 HeRo 인재 기획사의 커리어 진단 전문가입니다. 한국어로 따뜻하면서도 전문적인 종합 분석 리포트를 작성합니다.
+        system: `당신은 HeRo 인재 기획사의 신입·사회초년생 커리어 전문 컨설턴트입니다. 한국어로 따뜻하면서도 전문적인 커리어 분석 리포트를 작성합니다.
 
 규칙:
-- 검사 결과를 통합적으로 해석하여 강점, 성장영역, 커리어 제안을 포함
+- 공통 기초역량 6가지, 직무별 전문역량, 준비도 4영역을 통합 분석
+- 강점 역량에서 출발하여 커리어 방향을 구체화
 - 절대 이모지, 이모티콘, 특수문자 사용 금지
 - 마크다운 헤딩(#) 사용 금지
-- dark triad, 나르시시즘, 마키아벨리즘, 사이코패시 등의 용어 절대 사용 금지
-- 주의 신호 관련 내용 절대 노출 금지
-- UF 원점수를 직접 언급하지 않고 서사적으로 연결
-- 마지막에 구체적 액션 아이템 3가지 제시`,
+- 준비도 갭 영역은 성장 기회로 재프레이밍
+- 희망 직무 트랙과 역량 매칭 관점 포함
+- 마지막에 지금 당장 할 수 있는 구체적 액션 아이템 3가지 제시`,
         messages: [{
           role: 'user',
-          content: `${hitAContext}HIT B 결과:\n` +
-            `성격 특성: ${JSON.stringify(Object.fromEntries(Object.entries(personality.scores).filter(([k]) => !k.includes('dark'))))}\n` +
-            `RIASEC: R${riasec.r} I${riasec.i} A${riasec.a} S${riasec.s} E${riasec.e} C${riasec.c} (Holland: ${riasec.hollandCode})\n` +
-            `역량(공통): ${JSON.stringify(competency.common)}\n` +
-            `역량(트랙: ${competencyTrack}): ${JSON.stringify(competency.trackScores)}\n` +
-            `준비도: 자기이해${readiness.self} 포트폴리오${readiness.portfolio} 면접${readiness.interview} 네트워킹${readiness.network} (총점${readiness.total}, ${readiness.grade}등급)\n` +
-            `여정단계: ${journeyStage}\n` +
-            `취약영역: ${readiness.gaps.join(', ') || '없음'}\n\n` +
-            `위 결과를 통합하여 4-5문단의 종합 커리어 분석 리포트를 작성해주세요. 강점, 주의점, 추천 커리어 방향, 지금 해야 할 액션 아이템을 포함해주세요.`,
+          content: `${hitAContext}HIT B 기초역량·준비도 결과:\n` +
+            `희망 직무 트랙: ${competencyTrack}\n` +
+            `공통 기초역량: ${JSON.stringify(scored.coreCompetencyScores)} (종합 ${scored.coreCompetencyOverall}점, ${scored.coreCompetencyGrade}등급)\n` +
+            `역량 등급: ${JSON.stringify(scored.coreCompetencyGrades)}\n` +
+            `직무별 역량(${competencyTrack}): ${JSON.stringify(scored.trackScores)} (종합 ${scored.trackOverallScore}점, ${scored.trackOverallGrade}등급)\n` +
+            `준비도: 자기이해 ${scored.readinessScores.self_understanding} / 직무이해 ${scored.readinessScores.job_understanding} / 역량준비 ${scored.readinessScores.skill_readiness} / 실행준비 ${scored.readinessScores.action_readiness}\n` +
+            `준비도 종합: ${scored.readinessTotal}점 (${scored.readinessGrade}등급)\n` +
+            `보완 필요 영역: ${scored.readinessGaps.join(', ') || '없음'}\n` +
+            `여정 단계: ${scored.journeyStage}\n\n` +
+            `위 결과를 통합하여 4-5문단의 커리어 분석 리포트를 작성해주세요. 강점 역량, 희망 직무 적합성, 준비도 평가, 구체적 액션 아이템을 포함해주세요.`,
         }],
       });
       const textBlock = msg.content.find(b => b.type === 'text');
@@ -121,48 +108,38 @@ export async function POST(request: NextRequest) {
       console.error('[HIT B Score] AI 리포트 생성 실패:', aiError);
     }
 
+    // 주의 신호 채점
+    const alerts = computeAlertScoresFromDB(responses, alertQuestions, {});
+
     // 결과 저장
     const result = await createHitBResult({
       session_id: session.id,
       member_id: session.member_id || null,
       hit_a_result_id: hitAResultId || (hitAData?.id ?? null),
-      personality_scores: personality.scores,
-      dark_triad_flags: personality.darkTriadFlags,
-      riasec_r: riasec.r,
-      riasec_i: riasec.i,
-      riasec_a: riasec.a,
-      riasec_s: riasec.s,
-      riasec_e: riasec.e,
-      riasec_c: riasec.c,
-      holland_code: riasec.hollandCode,
-      competency_common: competency.common,
+      // 공통 기초역량
+      competency_common: scored.coreCompetencyScores,
       competency_track: competencyTrack,
-      competency_track_scores: competency.trackScores,
-      readiness_self: readiness.self,
-      readiness_portfolio: readiness.portfolio,
-      readiness_interview: readiness.interview,
-      readiness_network: readiness.network,
-      readiness_total: readiness.total,
-      readiness_grade: readiness.grade,
-      readiness_gaps: readiness.gaps,
+      competency_track_scores: scored.trackScores,
+      // 준비도
+      readiness_self: scored.readinessScores.self_understanding,
+      readiness_portfolio: scored.readinessScores.skill_readiness,
+      readiness_interview: scored.readinessScores.action_readiness,
+      readiness_network: scored.readinessScores.job_understanding,
+      readiness_total: scored.readinessTotal,
+      readiness_grade: scored.readinessGrade,
+      readiness_gaps: scored.readinessGaps,
       ai_report: aiReport,
-      journey_stage: journeyStage,
+      journey_stage: scored.journeyStage,
       interest_industry: interestIndustry || null,
       interest_job_function: interestJobFunction || null,
-      // 주의 신호 (소비자 비노출) — DB alert_code 우선, 없으면 _dark subscale 폴백
-      ...(() => {
-        const alerts = computeAlertScoresFromDB(responses, alertQuestions, personality.scores);
-        return {
-          alert_n1: alerts.alertN1,
-          alert_m1: alerts.alertM1,
-          alert_p1: alerts.alertP1,
-          alert_level: alerts.alertLevel,
-        };
-      })(),
+      // 주의 신호 (소비자 비노출)
+      alert_n1: alerts.alertN1,
+      alert_m1: alerts.alertM1,
+      alert_p1: alerts.alertP1,
+      alert_level: alerts.alertLevel,
     });
 
     // 주의 신호 level 3 → 관리자 알림
-    const alerts = computeAlertScoresFromDB(responses, alertQuestions, personality.scores);
     if (alerts.alertLevel >= 3) {
       try {
         const { postAgentMessage } = await import('@/lib/supabase/chat');
