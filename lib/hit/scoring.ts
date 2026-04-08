@@ -616,3 +616,141 @@ export function scoreAPDeep(responses: ResponseRow[]): APDeepScores {
 
   return { interest, efficacy, total, matrix, top3TotalCode };
 }
+
+// ── 왜곡 탐지 — inconsistency_flag + pattern_flag ─────────────────────────
+// HIT_Scoring_Algorithm.md 3가지 왜곡 조건 완전 구현
+// 결과는 관리자 전용 hit_admin_flags에만 저장 — 내담자 절대 비노출
+
+export interface DistortionFlags {
+  /** 미끼 문항 6~7점 → 사회적 바람직성 편향 */
+  fakingFlag: boolean;
+  /** 동일 축 역문항 불일치 ≥50% → 무성의 응답 또는 왜곡 */
+  inconsistencyFlag: boolean;
+  /** 연속 8문항+ 동일 점수 → 패턴 응답(무성의) */
+  patternFlag: boolean;
+  /** 상세 정보 (관리자 전용) */
+  detail: {
+    inconsistentAxes: string[];
+    longestRun: number;
+    patternValue: number | null;
+  };
+}
+
+export function detectDistortion(
+  responses: ResponseRow[],
+  ptScores: PTScores,
+): DistortionFlags {
+  // 1. faking_flag: PT 미끼 문항 (이미 scorePT에서 계산됨)
+  const fakingFlag = ptScores.fakingFlag;
+
+  // 2. inconsistency_flag: 동일 축 역문항 불일치
+  // 각 PT 축에서 정방향/역방향 문항 평균 차이 > 3.5 (7점 척도 50%)이면 불일치
+  const ptRes = responses.filter(r => r.module === 'personality_type');
+  const getVal = (id: string): number => {
+    const r = ptRes.find(x => x.question_id === id);
+    if (!r) return 0;
+    return parseInt(r.option_value) || 0;
+  };
+
+  // 각 축의 정방향/역방향 문항 평균을 비교
+  const axisChecks: { axis: string; fwdIds: string[]; revIds: string[] }[] = [
+    {
+      axis: 'E/I',
+      fwdIds: ['pt_e01','pt_e02','pt_e03','pt_e04','pt_e05','pt_e06','pt_e07','pt_e08'],
+      revIds: ['pt_i01','pt_i02','pt_i03','pt_i04','pt_i05','pt_i06','pt_i07'],
+    },
+    {
+      axis: 'N/S',
+      fwdIds: ['pt_n01','pt_n02','pt_n03','pt_n04','pt_n05','pt_n06','pt_n07'],
+      revIds: ['pt_s01','pt_s02','pt_s03','pt_s04','pt_s05','pt_s06','pt_s07'],
+    },
+    {
+      axis: 'T/F',
+      fwdIds: ['pt_t01','pt_t02','pt_t03','pt_t04','pt_t05','pt_t06','pt_t07'],
+      revIds: ['pt_f01','pt_f02','pt_f03','pt_f04','pt_f05','pt_f06','pt_f07'],
+    },
+    {
+      axis: 'J/P',
+      fwdIds: ['pt_j01','pt_j02','pt_j03','pt_j04','pt_j05','pt_j06','pt_j07'],
+      revIds: ['pt_p01','pt_p02','pt_p03','pt_p04','pt_p05','pt_p06','pt_p07'],
+    },
+  ];
+
+  const inconsistentAxes: string[] = [];
+  for (const { axis, fwdIds, revIds } of axisChecks) {
+    const fwdVals = fwdIds.map(getVal).filter(v => v > 0);
+    const revVals = revIds.map(getVal).filter(v => v > 0);
+    if (fwdVals.length === 0 || revVals.length === 0) continue;
+    const fwdAvg = fwdVals.reduce((a, b) => a + b, 0) / fwdVals.length;
+    // 역방향 문항은 원래 반대 극성 — 7점 척도에서 역산 후 비교
+    const revAvgReversed = revVals.reduce((a, b) => a + (8 - b), 0) / revVals.length;
+    // 두 평균 차이가 3.5점(7점 척도 50%) 이상이면 불일치
+    if (Math.abs(fwdAvg - revAvgReversed) >= 3.5) {
+      inconsistentAxes.push(axis);
+    }
+  }
+  const inconsistencyFlag = inconsistentAxes.length >= 2; // 2축 이상 불일치
+
+  // 3. pattern_flag: 연속 8문항+ 동일 점수
+  // 모든 응답을 question_index 순서로 정렬 후 연속 동일값 체크
+  const allVals = responses
+    .filter(r => ['personality_type','behavior_type','character_core','aptitude_core'].includes(r.module))
+    .map(r => parseInt(r.option_value) || 0)
+    .filter(v => v > 0);
+
+  let longestRun = 1;
+  let currentRun = 1;
+  let patternValue: number | null = null;
+  for (let i = 1; i < allVals.length; i++) {
+    if (allVals[i] === allVals[i - 1]) {
+      currentRun++;
+      if (currentRun > longestRun) {
+        longestRun = currentRun;
+        patternValue = allVals[i];
+      }
+    } else {
+      currentRun = 1;
+    }
+  }
+  const patternFlag = longestRun >= 8;
+
+  return {
+    fakingFlag,
+    inconsistencyFlag,
+    patternFlag,
+    detail: { inconsistentAxes, longestRun, patternValue: patternFlag ? patternValue : null },
+  };
+}
+
+// ── DISC × MBTI 교차 패턴 8개 ───────────────────────────────────────────────
+// HIT_Scoring_Algorithm.md 1-7 기준 트리거 조건 완전 구현
+
+export interface CrossPattern {
+  code: string;
+  label: string;
+  d_pct: number;
+  pt_pct: number;
+}
+
+export function computeCrossPatterns(bt: BTScores, pt: PTScores): CrossPattern[] {
+  const triggered: CrossPattern[] = [];
+
+  const checks: { code: string; label: string; btVal: number; ptVal: number; btThresh: number; ptThresh: number }[] = [
+    { code: 'CROSS-D-T', label: '냉철한 결단력',        btVal: bt.d, ptVal: pt.tScore,  btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-D-P', label: '기회 포착형 리더십',    btVal: bt.d, ptVal: 100 - pt.jScore, btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-D-J', label: '체계적 추진력',         btVal: bt.d, ptVal: pt.jScore,  btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-D-F', label: '카리스마적 동기부여',   btVal: bt.d, ptVal: 100 - pt.tScore, btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-I-E', label: '영향력 있는 네트워커',  btVal: bt.i, ptVal: pt.eScore,  btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-S-N', label: '비전 있는 조율자',      btVal: bt.s, ptVal: pt.nScore,  btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-S-J', label: '믿을 수 있는 관리자',   btVal: bt.s, ptVal: pt.jScore,  btThresh: 30, ptThresh: 56 },
+    { code: 'CROSS-C-N', label: '혁신적 분석가',         btVal: bt.c, ptVal: pt.nScore,  btThresh: 30, ptThresh: 56 },
+  ];
+
+  for (const { code, label, btVal, ptVal, btThresh, ptThresh } of checks) {
+    if (btVal >= btThresh && ptVal >= ptThresh) {
+      triggered.push({ code, label, d_pct: btVal, pt_pct: ptVal });
+    }
+  }
+
+  return triggered;
+}

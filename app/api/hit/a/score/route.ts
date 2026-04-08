@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
 import { getHitSession, getHitResponses, updateHitSession, createHitAResult } from '@/lib/supabase/hit';
-import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, deriveSPower } from '@/lib/hit/scoring';
+import { scorePT, scoreBT, scoreCH, scoreAP, scoreUF, scoreBase, match64Type, calcSpower8d, scoreMBTI, scoreDISC, detectDistortion, computeCrossPatterns } from '@/lib/hit/scoring';
+// deriveSPower는 더 이상 사용하지 않음 (calcSpower8d로 대체)
 import { selectModules } from '@/lib/hit/report-assembler';
 import { canAccess } from '@/lib/hit/membership';
 import { getMembershipTier } from '@/lib/hit/membership-server';
@@ -43,8 +44,19 @@ export async function POST(request: NextRequest) {
     const disc = scoreDISC(responses);  // BT 래핑
     const typeProfile = match64Type(mbti, disc);
 
-    // S-Power: 5모듈 교차 (신규)
+    // S-Power: 5모듈 교차
     const sPower = calcSpower8d(pt, bt, uf, ch, ap);
+
+    // DISC × MBTI 교차 패턴 8개
+    const crossPatterns = computeCrossPatterns(bt, pt);
+
+    // PT 강도 등급 저장용
+    const ptGrades = {
+      e: pt.eGrade, n: pt.nGrade, t: pt.tGrade, j: pt.jGrade,
+    };
+
+    // 왜곡 탐지 (관리자 전용 — 내담자 비노출)
+    const distortion = detectDistortion(responses, pt);
 
     // AI 내러티브 (실패해도 결과 생성 진행)
     let aiNarrative: string | null = null;
@@ -144,32 +156,56 @@ export async function POST(request: NextRequest) {
       ch_emotional: ch.emotional,
       ch_ethics: ch.ethics,
       ch_growth: ch.growth,
-      // AP core 적성 (신규)
+      // AP core 적성
       ap_top3_code: ap.top3Code,
       ap_scores: ap.scores,
+      // 교차 패턴 + PT 강도 등급
+      cross_patterns: crossPatterns,
+      pt_grades: ptGrades,
     });
 
-    // 다크 패턴 플래그 저장 (관리자 전용)
-    if (ch.darkPreFlag || bt.darkPattern || pt.fakingFlag) {
+    // 관리자 전용 플래그 저장 — 내담자 절대 비노출
+    const hasAdminFlag = ch.darkPreFlag || bt.darkPattern ||
+      distortion.fakingFlag || distortion.inconsistencyFlag || distortion.patternFlag;
+
+    if (hasAdminFlag) {
       try {
         const { createClient } = await import('@/lib/supabase/server');
         const supabase = createClient();
+
+        // 다크 트라이어드 사전 탐지
         if (ch.darkPreFlag || bt.darkPattern) {
           await supabase.from('hit_admin_flags').insert({
             member_id: session.member_id || null,
             session_id: session.id,
             flag_type: 'dark_triad',
             flag_score: bt.darkPattern ? 85 : 50,
-            flag_detail: { ch_dark: ch.darkPreFlag, bt_dark: bt.darkPattern, ch_c08: ch.ethics, ch_r06: ch.relational },
+            flag_detail: {
+              ch_dark: ch.darkPreFlag,
+              bt_dark: bt.darkPattern,
+              ch_ethics: ch.ethics,
+              ch_relational: ch.relational,
+            },
           });
         }
-        if (pt.fakingFlag) {
+
+        // 왜곡 탐지: faking + inconsistency + pattern
+        if (distortion.fakingFlag || distortion.inconsistencyFlag || distortion.patternFlag) {
           await supabase.from('hit_admin_flags').insert({
             member_id: session.member_id || null,
             session_id: session.id,
             flag_type: 'distortion',
-            flag_score: 90,
-            flag_detail: { faking_decoy: true },
+            flag_score: [
+              distortion.fakingFlag       ? 40 : 0,
+              distortion.inconsistencyFlag ? 35 : 0,
+              distortion.patternFlag       ? 25 : 0,
+            ].reduce((a, b) => a + b, 0),
+            flag_detail: {
+              faking:        distortion.fakingFlag,
+              inconsistency: distortion.inconsistencyFlag,
+              pattern:       distortion.patternFlag,
+              ...distortion.detail,
+            },
           });
         }
       } catch (flagErr) {
