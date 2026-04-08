@@ -6,17 +6,7 @@ import { PublicHeader } from "@/features/tenone/PublicHeader";
 import { PublicFooter } from "@/features/tenone/PublicFooter";
 import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
-import { ArrowRight, ExternalLink, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
-
-// ===== Static Latest News (fallback when API empty) =====
-const STATIC_NEWS = [
-    { id: "luki", title: "LUKI", excerpt: "인공지능 4인조 여성 아이돌 데뷔", category: "AI Idol", date: "2025.08", link: "https://youtube.com/@LUKI-AIdol" },
-    { id: "rook", title: "RooK", excerpt: "인공지능 크리에이터 플랫폼 런칭", category: "AI Creator", date: "2025.08", link: "https://rook.co.kr" },
-    { id: "madzine", title: "MADzine", excerpt: "마케팅/광고 매거진 창간", category: "Magazine", date: "2025.04", link: "https://madleague.net/MADzine" },
-    { id: "dam-be", title: "DAM Be", excerpt: "MAD League 캐릭터 개발", category: "Character", date: "2025.03", link: "https://madleague.net" },
-    { id: "jeju", title: "제주 수작 합류", excerpt: "전국 5개 권역 네트워크 완성", category: "Network", date: "2025.01" },
-    { id: "changeup", title: "ChangeUp", excerpt: "인공지능 시대 인재 양성 프로그램", category: "Education", date: "2024.05", link: "https://changeup.company" },
-];
+import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
 
 // ===== Universe Brand Showcase =====
 const UNIVERSE_BRANDS = [
@@ -40,6 +30,7 @@ interface SimplePost {
     representImage: string;
     created_at: string;
     view_count: number;
+    url?: string;
 }
 
 export default function HomePage() {
@@ -57,9 +48,11 @@ export default function HomePage() {
         fetch('/api/newsroom/feed?sort=latest&limit=4')
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(d => setLatestNews((d.posts || []).map((p: any) => ({
-                id: p.id, title: p.title, excerpt: p.excerpt || '',
-                category: p.category || p.site || '', representImage: p.represent_image || '',
-                created_at: p.created_at, view_count: p.view_count || 0,
+                id: p.id, title: p.title, excerpt: p.summary || p.excerpt || '',
+                category: p.category || p.source_brand || '',
+                representImage: p.thumbnail_url || p.represent_image || '',
+                created_at: p.published_at || p.created_at, view_count: p.view_count || 0,
+                url: p.url || `/newsroom/${p.id}`,
             }))))
             .catch(() => console.warn('[Home] Newsroom feed fetch failed — using empty state'));
     }, []);
@@ -310,7 +303,7 @@ export default function HomePage() {
                             {latestNews.map((news) => {
                                 const rawDate = (news.created_at || '').substring(0, 10);
                                 return (
-                                    <Link key={news.id} href={`/newsroom/${news.id}`} className="group block">
+                                    <Link key={news.id} href={news.url || `/newsroom/${news.id}`} className="group block">
                                         <div className="aspect-[4/3] bg-[var(--tn-bg-alt)] mb-4 flex items-center justify-center overflow-hidden">
                                             {news.representImage ? (
                                                 <img src={news.representImage} alt={news.title} className="w-full h-full object-cover" />
@@ -326,24 +319,7 @@ export default function HomePage() {
                             })}
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
-                            {STATIC_NEWS.map((news) => (
-                                <div key={news.id} className="p-6" style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-[10px] font-mono tn-text-sub">{news.date}</span>
-                                        <span className="text-[9px] px-2 py-0.5 border tn-border tn-text-sub">{news.category}</span>
-                                    </div>
-                                    <h3 className="text-lg font-bold tn-text">{news.title}</h3>
-                                    <p className="text-sm tn-text-sub mt-1">{news.excerpt}</p>
-                                    {news.link && (
-                                        <a href={news.link} target="_blank" rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-xs tn-text-sub hover:tn-text mt-3 transition-colors">
-                                            Visit <ExternalLink className="h-3 w-3" />
-                                        </a>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                        <p className="text-sm tn-text-sub text-center py-12">준비 중입니다.</p>
                     )}
                 </div>
             </section>
