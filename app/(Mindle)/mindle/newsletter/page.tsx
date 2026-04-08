@@ -76,7 +76,7 @@ export default function NewsletterPage() {
                 </div>
                 <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
                     당신의 호기심을 채우는<br />
-                    <span className="text-[#F5C518]">트렌드 신호.</span>
+                    <span className="text-[#F5C518]">트렌드 홀씨.</span>
                 </h1>
                 <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                     Mindle의 트렌드 인사이트로 앞서 나가세요. 무료.
