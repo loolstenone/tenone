@@ -320,6 +320,7 @@ export const modules: NavModule[] = [
                         name: "회원", href: "/intra/ums/members", icon: Users,
                         children: [
                             { name: "통합회원", href: "/intra/ums/members/list" },
+                            { name: "초대", href: "/intra/ums/members/invite" },
                             { name: "게스트", href: "/intra/ums/members/guests" },
                             { name: "개인정보", href: "/intra/ums/members/privacy" },
                         ],
