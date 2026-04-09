@@ -18,7 +18,7 @@ import {
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
     ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
-    Bot, Users, Home, Menu, X, Radio, Mail,
+    Bot, Users, Home, Menu, X, Radio, Mail, Brain,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -369,6 +369,12 @@ export const modules: NavModule[] = [
                 items: [
                     { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe },
                     { name: "Badak", href: "/intra/ums/badak", icon: Globe },
+                    {
+                        name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
+                        children: [
+                            { name: "대시보드", href: "/intra/gravity" },
+                        ],
+                    },
                     { name: "FWN", href: "/intra/ums/fwn", icon: Globe },
                     {
                         name: "HeRo", href: "/intra/hero/talent", icon: Award,
