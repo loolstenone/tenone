@@ -41,7 +41,7 @@ export default function TalentDashboardPage() {
         .select('id, type_code, type_name_ko, type_nickname, disc_primary, mbti_type, member_id, created_at')
         .order('created_at', { ascending: false })
         .limit(100)
-        .then(async ({ data: aResults }) => {
+        .then(async ({ data: aResults }: { data: Record<string, unknown>[] | null }) => {
           if (!aResults) { setLoading(false); return; }
 
           // B 결과 가져오기
@@ -55,14 +55,14 @@ export default function TalentDashboardPage() {
               .maybeSingle();
 
             rows.push({
-              ...a,
-              holland_code: bResult?.holland_code || null,
-              readiness_grade: bResult?.readiness_grade || null,
-              competency_track: bResult?.competency_track || null,
-              alert_level: bResult?.alert_level || 0,
-              alert_n1: bResult?.alert_n1 || 0,
-              alert_m1: bResult?.alert_m1 || 0,
-              alert_p1: bResult?.alert_p1 || 0,
+              ...(a as Omit<TalentRow, 'holland_code' | 'readiness_grade' | 'competency_track' | 'alert_level' | 'alert_n1' | 'alert_m1' | 'alert_p1'>),
+              holland_code: (bResult?.holland_code as string) || null,
+              readiness_grade: (bResult?.readiness_grade as string) || null,
+              competency_track: (bResult?.competency_track as string) || null,
+              alert_level: (bResult?.alert_level as number) || 0,
+              alert_n1: (bResult?.alert_n1 as number) || 0,
+              alert_m1: (bResult?.alert_m1 as number) || 0,
+              alert_p1: (bResult?.alert_p1 as number) || 0,
             });
           }
           setTalents(rows);

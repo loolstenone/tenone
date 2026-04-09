@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     if (hasAdminFlag) {
       try {
         const { createClient } = await import('@/lib/supabase/server');
-        const supabase = createClient();
+        const supabase = await createClient();
 
         // 다크 트라이어드 사전 탐지
         if (ch.darkPreFlag || bt.darkPattern) {

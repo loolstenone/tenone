@@ -70,7 +70,7 @@ export default function FWNPage() {
 
       if (allPosts) {
         // 총 조회수
-        const views = allPosts.reduce((s, p) => s + (p.view_count ?? 0), 0);
+        const views = (allPosts as { tags: string[]; view_count: number | null }[]).reduce((s: number, p) => s + (p.view_count ?? 0), 0);
         setTotalViews(views);
 
         // 카테고리별 집계

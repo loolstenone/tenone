@@ -16,7 +16,7 @@ interface AuthContextType {
     hasAccess: (system: SystemAccess) => boolean;
     hasModuleAccess: (module: IntraModule) => boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
-    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean) => Promise<{ success: boolean; error?: string }>;
+    register: (name: string, email: string, password: string, newsletterSubscribed?: boolean) => Promise<{ success: boolean; error?: string; memberId?: string }>;
     loginWithGoogle: () => Promise<void>;
     loginWithKakao: () => Promise<void>;
     updateProfile: (updates: Partial<User>) => void;
@@ -299,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     const u = memberToUser(member);
                     setUser(u);
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-                    return { success: true };
+                    return { success: true, memberId: member.id };
                 }
                 return { success: false, error: memberError?.message || '프로필 생성 실패' };
             }

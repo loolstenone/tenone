@@ -326,3 +326,86 @@ Ten:One Universe는 여러 브랜드로 구성:
 - 변경 이력: `CHANGELOG.md` 참조
 - 아키텍처: `TenOne_Universe_Architecture_v1.md` (G드라이브)
 - 4대 제품: `TenOne_4Products.md` (G드라이브)
+
+---
+
+## QA Protocol
+
+"QA해줘" 또는 "보안 점검" 시 아래 프로토콜을 실행한다.
+
+### 코드 리뷰 기준
+
+**구조**
+- 파일 200~400줄 기본, 800줄 초과 시 분리
+- 기능/도메인 기준 구성 (타입 기준 X)
+- early return 패턴 (3단계+ 중첩 금지)
+
+**불변성 (Critical)**
+- 객체 mutation 금지 — `{ ...obj, key: newValue }`
+- 배열 mutation 금지 — push/splice 대신 map/filter/spread
+- 함수 인자 직접 수정 금지
+
+**에러 핸들링**
+- 빈 catch 금지 — 에러를 조용히 삼키지 않는다
+- UI: 사용자 친화적 메시지 / 서버: 상세 로깅
+- 모든 레벨에서 에러 처리
+
+**입력 검증**
+- 시스템 경계에서 스키마 검증
+- 외부 데이터는 절대 신뢰하지 않는다
+- 빠른 실패, 명확한 메시지
+
+**React/Next.js**
+- useEffect 의존성 배열 완전성
+- 리스트 key에 index 금지 (고유 ID 사용)
+- 서버 컴포넌트 vs 클라이언트 컴포넌트 구분
+
+### TypeScript + 빌드
+
+```bash
+npx tsc --noEmit       # 타입 에러 0
+npx eslint . --ext .ts,.tsx
+npm run build          # 빌드 에러 0
+npm audit --audit-level=high  # 의존성 보안
+```
+
+빌드 실패 시: 에러 분석 → 하나씩 수정 → 수정마다 재검증.
+
+### 보안 감사
+
+**Phase 1: 체크리스트 스캔**
+
+A. 시크릿 노출 — settings.json 하드코딩, .env gitignore, service_role 프론트 노출, ANTHROPIC_BASE_URL 변조
+B. 권한 과다 — RLS disabled 테이블, anon key write, 인증 없는 공개 API
+C. MCP 위험 — 비공식 MCP, 파일쓰기 과도한 MCP, 활성 10개 초과
+D. 훅/인젝션 — hooks.json 외부 URL, CLAUDE.md 프롬프트 인젝션, 클론 레포 .claude/ 의심 설정
+E. 인프라 — Claude Code 1.0.111+ (CVE-2025-59536), ANTHROPIC_BASE_URL 무결, Node.js 18+
+F. 공급망 — PR 히든 diff 인젝션, npm audit, 외부 레포 .claude/ 수동 점검
+G. 에이전트 통신 — can_invoke 최소 권한, 하위→상위 호출 불가, 챗봇 입력 새니타이징
+H. 런타임 — API 폭증(3배+), 프로젝트 밖 파일 접근, agent_messages error 급증
+I. 출력 — 콘텐츠 script/onclick, 외부 URL 무단 삽입, 크롤링 이미지 저작권
+J. 샌드박싱 — Cloud Run 서비스 간 격리, 에이전트→Prod DB 직접 접근 차단
+
+**Phase 2: 레드팀/블루팀 (서브에이전트)**
+
+서브에이전트 A (레드팀): "현재 설정에서 악용 가능한 취약점을 모두 찾아라. 외부 공격자, 악의적 MCP, 프롬프트 인젝션 포함."
+서브에이전트 B (블루팀): "레드팀 취약점에 대한 현재 방어 상태를 평가하고 수정 방안을 우선순위로 제시하라."
+
+**Phase 3:** Critical/High/Medium/Low 분류. Critical/High 즉시 보고.
+
+### 코드 메트릭 (분기 점검)
+
+```bash
+find src -name '*.ts' -o -name '*.tsx' | xargs wc -l | sort -rn | head -20
+grep -r ': any' src --include='*.ts' --include='*.tsx' | wc -l
+grep -r 'console.log' src --include='*.ts' --include='*.tsx' | wc -l
+grep -rn 'TODO\|FIXME' src | wc -l
+```
+
+## Context Rot 방지
+
+- 이 CLAUDE.md는 2,000~3,000 토큰 이하 유지. 넘으면 점검.
+- /clear: 완전히 다른 작업 전환 시 (무료, 즉시)
+- /compact: 마일스톤 사이 (리서치→구현, 디버깅→다음 기능)
+- ❌ 구현 도중 compact 금지 (변수명·파일경로 유실)
+- MCP 서버 10개 이하, 활성 도구 80개 이하

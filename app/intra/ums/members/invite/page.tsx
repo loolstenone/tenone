@@ -59,7 +59,7 @@ export default function MemberInvitePage() {
     // 폼 상태
     const [brand, setBrand] = useState<Brand>("madleague");
     const [emails, setEmails] = useState("");
-    const [message, setMessage] = useState(BRAND_CONFIG.madleague.defaultMessage);
+    const [message, setMessage] = useState<string>(BRAND_CONFIG.madleague.defaultMessage);
     const [sending, setSending] = useState(false);
     const [sendResult, setSendResult] = useState<{ ok: number; fail: number } | null>(null);
 
@@ -126,7 +126,7 @@ export default function MemberInvitePage() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="회원 초대" subtitle="MAD League · MADLeap OB를 초대합니다" />
+            <PageHeader title="회원 초대" description="MAD League · MADLeap OB를 초대합니다" />
 
             {/* 초대 폼 */}
             <div className="bg-white border border-neutral-200 rounded-xl p-6">

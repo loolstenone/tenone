@@ -48,7 +48,7 @@ export default function EducationAdminPage() {
     useEffect(() => {
         const supabase = createClient();
         supabase.from('staff_education').select('*').order('member_name')
-            .then(({ data: rows }) => {
+            .then(({ data: rows }: { data: Record<string, unknown>[] | null }) => {
                 if (rows && rows.length > 0) {
                     setData(rows.map((r: Record<string, unknown>) => ({
                         name: r.member_name as string,

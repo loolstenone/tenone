@@ -103,7 +103,7 @@ export default function HitBReportPage() {
   const formattedDate = new Date(result.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
   // 인성 라벨 (API에서 DB 로드)
-  const dbLabels: Record<string, string> = (result as Record<string, unknown>).personality_labels as Record<string, string> || {};
+  const dbLabels: Record<string, string> = (result as unknown as Record<string, unknown>).personality_labels as Record<string, string> || {};
 
   // 인성 레이더 차트 데이터 (dark 제외)
   const personalityData = Object.entries(result.personalityScores)

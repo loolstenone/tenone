@@ -357,6 +357,7 @@ export interface OrbiConfig {
   enabledModules: string[];
   enabledServices: string[];    // L4 서비스 활성 목록
   categories: CategoryConfig[];
+  [key: string]: unknown;
 }
 
 /* ── Default config ── */

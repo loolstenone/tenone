@@ -156,8 +156,8 @@ export function subscribeToMessages(
                 table: 'chat_messages',
                 filter: `thread_id=eq.${threadId}`,
             },
-            (payload) => {
-                callback(payload.new as ChatMessage);
+            (payload: { new: Record<string, unknown> }) => {
+                callback(payload.new as unknown as ChatMessage);
             }
         )
         .subscribe();
@@ -180,8 +180,8 @@ export function subscribeToAllThreads(
                 schema: 'public',
                 table: 'chat_messages',
             },
-            (payload) => {
-                callback(payload.new as ChatMessage);
+            (payload: { new: Record<string, unknown> }) => {
+                callback(payload.new as unknown as ChatMessage);
             }
         )
         .subscribe();

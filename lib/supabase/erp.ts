@@ -203,7 +203,7 @@ export async function fetchGprGoalsTyped(params?: { memberId?: string; quarter?:
     if (params?.quarter) query = query.eq('quarter', params.quarter);
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map(r => rowToGprGoal(r as Record<string, unknown>));
+    return (data || []).map((r: Record<string, unknown>) => rowToGprGoal(r));
 }
 
 export async function fetchGprGoals(params?: { memberId?: string; quarter?: string }) {
@@ -332,7 +332,7 @@ export function rowToStaffMember(r: Record<string, unknown>): StaffMember {
 export async function fetchStaffMembers(): Promise<StaffMember[]> {
     const { data, error } = await supabase.from('members').select('*').eq('account_type', 'staff').order('name');
     if (error) throw error;
-    return (data || []).map(r => rowToStaffMember(r as Record<string, unknown>));
+    return (data || []).map((r: Record<string, unknown>) => rowToStaffMember(r));
 }
 
 export async function fetchStaff() {

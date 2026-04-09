@@ -26,7 +26,7 @@ export default function AICounselingPage() {
         .select('session_id, result_id, created_at')
         .order('created_at', { ascending: false })
         .limit(500)
-        .then(({ data }) => {
+        .then(({ data }: { data: { session_id: string; result_id: string; created_at: string }[] | null }) => {
           if (!data) { setLoading(false); return; }
           // 세션별 그룹핑
           const grouped: Record<string, ChatSession> = {};

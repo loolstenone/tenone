@@ -315,7 +315,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
             setTransitionMessage(TRANSITION_MESSAGES[transKey]);
             setTimeout(() => {
               setTransitionMessage(null);
-              setShowTrackSelector(true);
+              setShowInterestSelector(true);
             }, 2000);
           } else {
             setTransitionMessage(TRANSITION_MESSAGES[transKey]);

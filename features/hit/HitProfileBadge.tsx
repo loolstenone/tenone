@@ -44,14 +44,14 @@ export default function HitProfileBadge({ memberId }: { memberId?: string }) {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data }: { data: Record<string, unknown> | null }) => {
           if (data) {
             setHitA({
-              typeCode: data.type_code,
-              typeNameKo: data.type_name_ko,
-              typeNickname: data.type_nickname,
-              discPrimary: data.disc_primary,
-              mbtiType: data.mbti_type,
+              typeCode: data.type_code as string,
+              typeNameKo: data.type_name_ko as string,
+              typeNickname: data.type_nickname as string,
+              discPrimary: data.disc_primary as string,
+              mbtiType: data.mbti_type as string,
             });
           }
         })
@@ -64,12 +64,12 @@ export default function HitProfileBadge({ memberId }: { memberId?: string }) {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data }: { data: Record<string, unknown> | null }) => {
           if (data) {
             setHitB({
-              hollandCode: data.holland_code,
-              readinessGrade: data.readiness_grade,
-              competencyTrack: data.competency_track,
+              hollandCode: data.holland_code as string,
+              readinessGrade: data.readiness_grade as string,
+              competencyTrack: data.competency_track as string,
             });
           }
           setLoading(false);

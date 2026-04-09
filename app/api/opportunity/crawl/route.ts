@@ -72,13 +72,13 @@ function parseRssOpportunities(xml: string, sourceName: string, sourceType: stri
     let match;
     while ((match = itemRegex.exec(xml)) !== null) {
         const block = match[1];
-        const title = block.match(/<title><!\[CDATA\[(.*?)\]\]>/s)?.[1]
-            || block.match(/<title>(.*?)<\/title>/s)?.[1] || '';
-        const link = block.match(/<link>(.*?)<\/link>/s)?.[1]
-            || block.match(/<guid[^>]*>(.*?)<\/guid>/s)?.[1] || '';
-        const desc = block.match(/<description><!\[CDATA\[(.*?)\]\]>/s)?.[1]
-            || block.match(/<description>(.*?)<\/description>/s)?.[1] || '';
-        const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/s)?.[1] || null;
+        const title = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]>/)?.[1]
+            || block.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '';
+        const link = block.match(/<link>([\s\S]*?)<\/link>/)?.[1]
+            || block.match(/<guid[^>]*>([\s\S]*?)<\/guid>/)?.[1] || '';
+        const desc = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]>/)?.[1]
+            || block.match(/<description>([\s\S]*?)<\/description>/)?.[1] || '';
+        const pubDate = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || null;
         if (title && link) {
             items.push({
                 rawTitle: title.replace(/<[^>]*>/g, '').trim(),

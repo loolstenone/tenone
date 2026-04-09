@@ -34,7 +34,7 @@ export default function BiddingPage() {
     useEffect(() => {
         const supabase = createClient();
         supabase.from('project_bids').select('*').order('created_at', { ascending: false })
-            .then(({ data }) => {
+            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     setBids(data.map((r: Record<string, unknown>) => ({
                         id: r.id as string,

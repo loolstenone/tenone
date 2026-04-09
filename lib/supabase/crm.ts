@@ -116,7 +116,7 @@ export async function fetchPeople(params: PeopleListParams = {}) {
     const { data, error, count } = await query;
     if (error) throw error;
     return {
-        people: (data || []).map(rowToPerson),
+        people: ((data || []) as Record<string, unknown>[]).map(rowToPerson),
         total: count || 0,
         page,
         limit,

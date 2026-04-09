@@ -7,7 +7,7 @@ import type { MBTIQuestion } from "@/types/hit";
 export const mbtiQuestions: MBTIQuestion[] = [
   {
     "id": "mbti_001",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "팀에서 새 프로젝트가 시작되었습니다. 당신의 첫 반응은?",
     "options": [
       {
@@ -22,7 +22,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_002",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "상사가 당신의 기획안에 대해 수정 의견을 보내왔습니다. 당신이 먼저 확인하는 것은?",
     "options": [
       {
@@ -37,7 +37,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_003",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "주말에 밀린 빨래, 설거지, 청소가 쌓여있습니다. 당신은?",
     "options": [
       {
@@ -52,7 +52,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_004",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "회사 워크숍에서 처음 보는 타 부서 사람들과 한 테이블에 앉게 되었습니다.",
     "options": [
       {
@@ -67,7 +67,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_005",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "신간 비즈니스 서적을 읽고 있습니다. 당신이 더 집중하게 되는 부분은?",
     "options": [
       {
@@ -82,7 +82,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_006",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "주간 팀 회의 시간입니다. 당신의 평소 참여 스타일은?",
     "options": [
       {
@@ -97,7 +97,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_007",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "출장으로 처음 방문한 도시에서 자유 시간이 생겼습니다. 당신은?",
     "options": [
       {
@@ -112,7 +112,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_008",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "크로스펑셔널 TF팀에 배정되어 2주간 집중 협업을 하게 되었습니다.",
     "options": [
       {
@@ -127,7 +127,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_009",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "금요일 저녁 약속이 갑자기 취소되었습니다. 당신의 선택은?",
     "options": [
       {
@@ -142,7 +142,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_010",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "퇴근 후 남는 에너지로 하고 싶은 일은?",
     "options": [
       {
@@ -157,7 +157,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_011",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "새로 입사한 회사의 동아리에 가입하려고 합니다. 당신의 접근법은?",
     "options": [
       {
@@ -172,7 +172,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_012",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "재택근무가 연속 3일째입니다. 이런 날이 계속되면 당신은?",
     "options": [
       {
@@ -187,7 +187,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_013",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "마케팅 전략 세미나에서 새로운 트렌드를 접했습니다. 당신의 이해 방식은?",
     "options": [
       {
@@ -202,7 +202,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_014",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "사내 시스템에 반복적으로 같은 오류가 발생하고 있습니다. 당신의 접근은?",
     "options": [
       {
@@ -217,7 +217,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_015",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "회사에서 새로운 프로젝트 관리 툴을 도입했습니다. 당신이 배우는 방식은?",
     "options": [
       {
@@ -232,7 +232,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_016",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "토요일 오후, 스케줄이 텅 비어있습니다. 당신이 더 끌리는 활동은?",
     "options": [
       {
@@ -247,7 +247,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_017",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "일요일에 특별한 계획 없이 눈을 떴습니다. 당신의 선택은?",
     "options": [
       {
@@ -262,7 +262,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_018",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "신제품 출시를 앞두고 가격 전략을 결정해야 합니다. 당신이 중시하는 판단 기준은?",
     "options": [
       {
@@ -277,7 +277,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_019",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "뉴스레터에서 업계 분석 리포트를 읽고 있습니다. 당신이 더 주목하는 부분은?",
     "options": [
       {
@@ -292,7 +292,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_020",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "새 직장에 첫 출근한 날, 점심시간에 당신이 더 신경 쓰는 것은?",
     "options": [
       {
@@ -307,7 +307,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_021",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "후배가 커리어 고민을 상담해왔습니다. 당신이 자연스럽게 하는 조언 방식은?",
     "options": [
       {
@@ -322,7 +322,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_022",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "실적 압박이 심한 분기 마감 시즌입니다. 당신의 스트레스 해소법은?",
     "options": [
       {
@@ -337,7 +337,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_023",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "동기 모임에서 화제가 된 이야기가 있습니다. 당신이 더 귀 기울이는 쪽은?",
     "options": [
       {
@@ -352,7 +352,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_024",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "캠페인 성과 리포트를 분석해야 합니다. 당신이 먼저 보는 것은?",
     "options": [
       {
@@ -367,7 +367,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_025",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "넷플릭스에서 무엇을 볼지 고르는 중입니다. 당신이 더 끌리는 장르는?",
     "options": [
       {
@@ -382,7 +382,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_026",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "관심 있는 대규모 네트워킹 행사가 주말에 열립니다. 당신은?",
     "options": [
       {
@@ -397,7 +397,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_027",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "맛집 탐방을 갔습니다. 메뉴를 고를 때 당신이 더 신경 쓰는 것은?",
     "options": [
       {
@@ -412,7 +412,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_028",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "동료와 함께 3박 4일 해외 출장을 갑니다. 자유 일정에 대한 당신의 스타일은?",
     "options": [
       {
@@ -427,7 +427,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_029",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "이직 제안이 들어왔습니다. 연봉은 비슷하지만 업무 환경이 크게 다릅니다. 당신의 결정 방식은?",
     "options": [
       {
@@ -442,7 +442,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_030",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "친한 동료와 점심을 먹으며 대화하고 있습니다. 당신이 더 즐겁게 이야기하는 주제는?",
     "options": [
       {
@@ -457,7 +457,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_031",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "브랜드 리뉴얼 프로젝트에 참여하게 되었습니다. 당신의 준비 방식은?",
     "options": [
       {
@@ -472,7 +472,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_032",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "연차를 써서 쉬는 날, 당신이 더 끌리는 계획은?",
     "options": [
       {
@@ -487,7 +487,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_033",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "월요일이 다가오는 일요일 저녁입니다. 기분 전환을 위해 당신이 하는 일은?",
     "options": [
       {
@@ -502,7 +502,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_034",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "회사에서 기존 업무 프로세스를 대폭 바꾸겠다는 공지가 내려왔습니다. 당신의 반응은?",
     "options": [
       {
@@ -517,7 +517,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_035",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "두 가지 업무 중 하나를 선택해야 합니다. 당신이 더 끌리는 쪽은?",
     "options": [
       {
@@ -532,7 +532,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_036",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "중요한 미팅 직후, 내용을 정리하려고 합니다. 당신의 메모 스타일은?",
     "options": [
       {
@@ -547,7 +547,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_037",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "클라이언트에게 프로젝트 진행 상황을 설명해야 합니다. 당신의 커뮤니케이션 스타일은?",
     "options": [
       {
@@ -562,7 +562,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_038",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "같은 팀 동료가 업무 실수로 힘들어하며 이야기를 꺼냈습니다. 당신의 자연스러운 반응은?",
     "options": [
       {
@@ -577,7 +577,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_039",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "회사를 옮길지, 지금 회사에서 부서 이동을 할지 고민 중입니다. 결정에 가장 큰 영향을 미치는 것은?",
     "options": [
       {
@@ -592,7 +592,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_040",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "기획 회의에서 두 안이 팽팽하게 맞서고 있습니다. 당신이 결론을 내리는 기준은?",
     "options": [
       {
@@ -607,7 +607,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_041",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "친구 4~5명이 모인 가벼운 술자리에서 당신은 어떤 포지션인가요?",
     "options": [
       {
@@ -622,7 +622,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_042",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "새로운 프로젝트 팀의 첫 미팅 날입니다. 쉬는 시간에 당신은?",
     "options": [
       {
@@ -637,7 +637,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_043",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "동료가 약속한 자료를 마감까지 보내주지 않았습니다. 당신의 반응은?",
     "options": [
       {
@@ -652,7 +652,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_044",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "대학 동기들과 오랜만에 만나기로 했습니다. 약속을 잡는 당신의 방식은?",
     "options": [
       {
@@ -667,7 +667,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_045",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "혼자 사는 집에서 주말 아침을 맞았습니다. 살림에 대한 당신의 스타일은?",
     "options": [
       {
@@ -682,7 +682,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_046",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "다음 주에 경영진 앞에서 분기 실적 발표를 해야 합니다. 당신의 준비 포인트는?",
     "options": [
       {
@@ -697,7 +697,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_047",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "분기 평가에서 팀장이 \"기대보다 성장이 느리다\"고 했습니다. 당신의 내적 반응은?",
     "options": [
       {
@@ -712,7 +712,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_048",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "클라이언트에게 프로젝트 일정 변경을 알리는 메일을 쓰고 있습니다. 당신이 더 신경 쓰는 것은?",
     "options": [
       {
@@ -727,7 +727,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_049",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "중요한 제안서가 클라이언트의 기대에 미치지 못했다는 피드백을 받았습니다. 당신은?",
     "options": [
       {
@@ -742,7 +742,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_050",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "가족 간에 명절 일정 때문에 의견 충돌이 생겼습니다. 당신의 접근 방식은?",
     "options": [
       {
@@ -757,7 +757,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_051",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "이번 달 말까지 두 개의 프로젝트 중 하나를 포기해야 합니다. 당신의 선택 기준은?",
     "options": [
       {
@@ -772,7 +772,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_052",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "친구가 밤늦게 전화해서 회사 인간관계 고민을 쏟아냅니다. 당신은?",
     "options": [
       {
@@ -787,7 +787,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_053",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "3박 4일 국내 여행을 계획 중입니다. 당신의 준비 수준은?",
     "options": [
       {
@@ -802,7 +802,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_054",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "마감이 일주일 남은 보고서가 있습니다. 당신의 작업 패턴은?",
     "options": [
       {
@@ -817,7 +817,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_055",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "평일 저녁, 업무가 일찍 끝났습니다. 남은 시간을 어떻게 보내나요?",
     "options": [
       {
@@ -832,7 +832,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_056",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "동료의 생일 선물을 골라야 합니다. 당신이 선택하는 기준은?",
     "options": [
       {
@@ -847,7 +847,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_057",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "외부 파트너사와의 계약 조건에서 양측 입장이 다릅니다. 당신의 협상 스타일은?",
     "options": [
       {
@@ -862,7 +862,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_058",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "프로젝트 방향에 대해 팀원과 정면으로 생각이 다릅니다. 당신의 해결 방식은?",
     "options": [
       {
@@ -877,7 +877,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_059",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "새로운 사업 아이디어가 떠올랐고 실행해볼지 고민 중입니다. 당신의 다음 단계는?",
     "options": [
       {
@@ -892,7 +892,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_060",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "다음 주부터 5일간의 연차를 냈습니다. 당신의 계획 수준은?",
     "options": [
       {
@@ -907,7 +907,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_061",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "분기 초, 팀 OKR을 수립해야 합니다. 당신이 선호하는 진행 방식은?",
     "options": [
       {
@@ -922,7 +922,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_062",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "하루의 시간 배분에 대한 당신의 평소 스타일은?",
     "options": [
       {
@@ -937,7 +937,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_063",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "진행 중인 업무의 요구사항이 갑자기 바뀌었습니다. 당신의 반응은?",
     "options": [
       {
@@ -952,7 +952,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_064",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "내년도 팀 예산과 인력 계획을 수립하라는 요청을 받았습니다. 당신의 접근법은?",
     "options": [
       {
@@ -967,7 +967,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_065",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "동료가 최근 다녀온 해외 컨퍼런스 이야기를 해줍니다. 당신이 더 듣고 싶은 부분은?",
     "options": [
       {
@@ -982,7 +982,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_066",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "해외 출장이 잡혔는데 동행자 없이 혼자 가야 합니다. 당신의 솔직한 기분은?",
     "options": [
       {
@@ -997,7 +997,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_067",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "업계 소규모 밋업에 참석했습니다. 프리 네트워킹 시간에 당신은?",
     "options": [
       {
@@ -1012,7 +1012,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_068",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "고등학교 동창 모임이 잡혔습니다. 모임 당일 당신은?",
     "options": [
       {
@@ -1027,7 +1027,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_069",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "가까운 동료와 업무 방식 차이로 불편한 상황이 생겼습니다. 당신의 해결법은?",
     "options": [
       {
@@ -1042,7 +1042,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_070",
-    "axis": "" as const,
+    "axis": "TF" as const,
     "text": "중요한 클라이언트 미팅을 준비하고 있습니다. 당신이 더 심혈을 기울이는 부분은?",
     "options": [
       {
@@ -1057,7 +1057,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_071",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "마트에 장을 보러 갑니다. 당신의 쇼핑 스타일은?",
     "options": [
       {
@@ -1072,7 +1072,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_072",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "2주 후에 100명 앞에서 발표를 해야 합니다. 당신의 준비 타임라인은?",
     "options": [
       {
@@ -1087,7 +1087,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_073",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "인생의 큰 결정 (이직, 이사 등)을 앞두고 있습니다. 당신이 결정을 내리는 방식은?",
     "options": [
       {
@@ -1102,7 +1102,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_074",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "새로 관심 생긴 취미(예: 테니스, 사진)를 시작하려고 합니다. 당신은?",
     "options": [
       {
@@ -1117,7 +1117,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_075",
-    "axis": "" as const,
+    "axis": "EI" as const,
     "text": "정말 바빴던 한 주가 끝나고 금요일 밤입니다. 당신의 선택은?",
     "options": [
       {
@@ -1132,7 +1132,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_076",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "오전에 계획한 업무를 하려는데 갑자기 긴급 요청이 들어왔습니다. 당신은?",
     "options": [
       {
@@ -1147,7 +1147,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_077",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "브레인스토밍 회의에서 당신이 더 많이 기여하는 방식은?",
     "options": [
       {
@@ -1162,7 +1162,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_078",
-    "axis": "" as const,
+    "axis": "SN" as const,
     "text": "올해의 개인 성장 목표를 세우려고 합니다. 당신이 세우는 목표의 성격은?",
     "options": [
       {
@@ -1177,7 +1177,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_079",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "내일이 새 회사 첫 출근입니다. 오늘 밤 당신이 하는 일은?",
     "options": [
       {
@@ -1192,7 +1192,7 @@ export const mbtiQuestions: MBTIQuestion[] = [
   },
   {
     "id": "mbti_080",
-    "axis": "" as const,
+    "axis": "JP" as const,
     "text": "이번 주말은 완전히 비어있습니다. 당신의 주말 운영 스타일은?",
     "options": [
       {

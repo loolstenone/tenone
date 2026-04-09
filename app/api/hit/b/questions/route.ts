@@ -41,18 +41,18 @@ export async function GET(request: NextRequest) {
     ]);
 
     return successResponse({
-      competency: (compQuestions || []).map(q => ({
+      competency: ((compQuestions || []) as Record<string, unknown>[]).map(q => ({
         id: q.id,
         text: q.question_text,
         subscale: q.sub_domain,
-        reverse: q.reverse_scored || false,
+        reverse: (q.reverse_scored as boolean) || false,
         track: q.track_id,
       })),
-      readiness: (readyQuestions || []).map(q => ({
+      readiness: ((readyQuestions || []) as Record<string, unknown>[]).map(q => ({
         id: q.id,
         text: q.question_text,
         subscale: q.sub_domain,
-        reverse: q.reverse_scored || false,
+        reverse: (q.reverse_scored as boolean) || false,
         track: q.track_id,
       })),
       trackId: trackId || null,

@@ -181,7 +181,7 @@ export default function NewsletterPage() {
             .eq('published', true)
             .order('date', { ascending: false })
             .limit(5)
-            .then(({ data }) => { if (data) setPastIssues(data); });
+            .then(({ data }: { data: PastIssue[] | null }) => { if (data) setPastIssues(data); });
     }, []);
 
     const brandDesc = "Mindle 뉴스레터는 Ten:One™ Universe의 다양한 소식을 받을 수 있습니다.";

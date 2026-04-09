@@ -43,7 +43,7 @@ export default function NewsletterPage() {
         const supabase = createClient();
         supabase.from('newsletter_issues').select('id, title, date, category, url')
             .eq('published', true).order('date', { ascending: false }).limit(12)
-            .then(({ data }) => { if (data && data.length > 0) setPastIssues(data); });
+            .then(({ data }: { data: NewsletterIssue[] | null }) => { if (data && data.length > 0) setPastIssues(data); });
     }, []);
 
     const handleSubscribe = async (e: React.FormEvent) => {
@@ -68,7 +68,7 @@ export default function NewsletterPage() {
                     email: isAuthenticated ? user?.email : email,
                     nickname: isAuthenticated ? user?.name : nickname,
                     memberId: isAuthenticated ? user?.id : null,
-                    source: 'tenone',
+                    source: 'tenone-newsletter',
                 }),
             });
             if (res.ok) setSent(true);

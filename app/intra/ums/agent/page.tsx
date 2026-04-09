@@ -95,7 +95,7 @@ export default function AgentDashboardPage() {
         .order("created_at", { ascending: false })
         .limit(200);
 
-      const messages = messagesData ?? [];
+      const messages = (messagesData ?? []) as { id: string; sender_name: string; sender_display_name: string | null; content: string; created_at: string }[];
 
       // 에이전트별 통계 계산
       const statsMap = new Map<string, AgentStat>();

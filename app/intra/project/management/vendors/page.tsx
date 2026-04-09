@@ -146,7 +146,7 @@ export default function VendorsPage() {
     useEffect(() => {
         const supabase = createClient();
         supabase.from('project_vendors').select('*').order('name')
-            .then(({ data }) => {
+            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     setVendors(data.map((r: Record<string, unknown>) => ({
                         id: r.id as string,

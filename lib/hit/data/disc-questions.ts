@@ -7,7 +7,7 @@ import type { DISCQuestion } from "@/types/hit";
 export const discQuestions: DISCQuestion[] = [
   {
     "id": "disc_001",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "월요일 아침, 이번 주에 새 프로젝트 킥오프 미팅이 잡혔다는 알림을 받았습니다. 미팅 전까지 당신은 무엇을 하나요?",
     "options": [
       {
@@ -30,7 +30,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_002",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "킥오프 미팅에서 자유롭게 질문할 시간이 주어졌습니다. 당신이 가장 먼저 던질 질문은?",
     "options": [
       {
@@ -53,7 +53,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_003",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트에 합류한 첫 주, 당신에게 맡겨진 업무를 시작하기 전에 가장 먼저 하는 일은?",
     "options": [
       {
@@ -76,7 +76,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_004",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "팀이 모여서 프로젝트의 최종 목표를 확정하는 자리입니다. 당신이 가장 중시하는 점은?",
     "options": [
       {
@@ -99,7 +99,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_005",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "팀장이 특정 주제에 대한 조사 보고서를 요청했습니다. 작업을 시작하기 전 당신의 접근법은?",
     "options": [
       {
@@ -122,7 +122,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_006",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "업무를 진행하다가 혼자 해결하기 어려운 문제에 부딪혔습니다. 당신의 대처 방식은?",
     "options": [
       {
@@ -145,7 +145,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_007",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트가 한창 진행 중인데 갑자기 한 시간 뒤 중간 점검 미팅이 잡혔습니다. 당신은?",
     "options": [
       {
@@ -168,7 +168,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_008",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트 중간에 아무도 예상하지 못한 기술적 문제가 터졌습니다. 당신의 첫 번째 반응은?",
     "options": [
       {
@@ -191,7 +191,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_009",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "팀에 업무 태도가 좋지 않고 자주 문제를 일으키는 멤버가 있습니다. 당신이라면?",
     "options": [
       {
@@ -214,7 +214,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_010",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "여러 차례 피드백을 줬지만 해당 멤버가 전혀 개선되지 않고 있습니다. 다음 단계는?",
     "options": [
       {
@@ -237,7 +237,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_011",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트 일정이 예정보다 밀리기 시작했습니다. 당신의 대응은?",
     "options": [
       {
@@ -260,7 +260,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_012",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "잘 되고 있던 프로젝트의 팀장이 갑자기 이직했습니다. 당신이 리더를 맡을 수도 있는 상황이라면?",
     "options": [
       {
@@ -283,7 +283,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_013",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "새 팀장으로서 프로젝트를 이어받았습니다. 가장 먼저 하고 싶은 일은?",
     "options": [
       {
@@ -306,7 +306,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_014",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "완전히 새로운 프로젝트가 시작됩니다. 당신이 가장 먼저 착수하는 것은?",
     "options": [
       {
@@ -329,7 +329,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_015",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트 도중 두 팀원 사이에 의견 충돌이 심해졌습니다. 당신이 리더라면?",
     "options": [
       {
@@ -352,7 +352,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_016",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "리더로서 이끈 프로젝트가 끝났는데, 실패는 아니지만 기대만큼의 성과는 아닙니다. 당신의 반응은?",
     "options": [
       {
@@ -375,7 +375,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_017",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "회사가 해당 프로젝트를 보완해서 재도전하기로 결정했습니다. 여전히 당신이 리더입니다. 첫 생각은?",
     "options": [
       {
@@ -398,7 +398,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_018",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "재도전 프로젝트가 많은 어려움 끝에 훌륭한 성과를 거뒀습니다. 지금 당신의 마음은?",
     "options": [
       {
@@ -421,7 +421,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_019",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "프로젝트 성공에 대한 포상이 예정되어 있습니다. 리더로서 배분 기준에 대한 당신의 생각은?",
     "options": [
       {
@@ -444,7 +444,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_020",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "조만간 또 다른 프로젝트가 시작될 예정이지만, 아직 내용도 리더도 정해지지 않았습니다. 지금 당신의 생각은?",
     "options": [
       {
@@ -467,7 +467,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_021",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "분기 목표가 공유되었고, 각자 실행 방안을 수립해야 합니다. 당신의 접근 방식은?",
     "options": [
       {
@@ -490,7 +490,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_022",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "연속된 야근과 촉박한 마감으로 스트레스가 쌓이고 있습니다. 당신은 어떻게 하나요?",
     "options": [
       {
@@ -513,7 +513,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_023",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "팀 회식 자리에서 자연스럽게 대화가 이어지고 있습니다. 당신은 주로 어떤 포지션인가요?",
     "options": [
       {
@@ -536,7 +536,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_024",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "이전에 해본 적 없는 완전히 새로운 업무가 떨어졌습니다. 당신의 첫 반응은?",
     "options": [
       {
@@ -559,7 +559,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_025",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "중요한 의사결정의 순간입니다. 선택지 A와 B 모두 장단점이 있을 때 당신은?",
     "options": [
       {
@@ -582,7 +582,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_026",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "부서 간 협업에서 의견이 팽팽히 맞서고 있습니다. 당신의 행동 방식은?",
     "options": [
       {
@@ -605,7 +605,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_027",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "타 부서 사람들과 처음 함께 일하게 되었습니다. 협업 초기에 당신이 중시하는 것은?",
     "options": [
       {
@@ -628,7 +628,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_028",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "일하면서 가장 보람을 느끼는 순간은 언제인가요?",
     "options": [
       {
@@ -651,7 +651,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_029",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "상사에게 예상치 못한 날카로운 피드백을 받았습니다. 그 순간 당신은?",
     "options": [
       {
@@ -674,7 +674,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_030",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "요즘 업무 동기가 좀 떨어진 것 같습니다. 당신에게 가장 효과적인 동기 부여 방법은?",
     "options": [
       {
@@ -697,7 +697,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_031",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "업계 컨퍼런스에서 처음 보는 사람들과 네트워킹 시간이 주어졌습니다. 당신은?",
     "options": [
       {
@@ -720,7 +720,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_032",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "새로운 업무 도구나 시스템을 배워야 할 때, 당신이 선호하는 학습법은?",
     "options": [
       {
@@ -743,7 +743,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_033",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "일하다 보면 유독 지치거나 짜증이 나는 상황이 있습니다. 당신에게 그 상황은?",
     "options": [
       {
@@ -766,7 +766,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_034",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "새해를 맞아 올해의 업무 목표를 세워야 합니다. 당신이 세우는 목표의 특징은?",
     "options": [
       {
@@ -789,7 +789,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_035",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "업무 중 갑자기 시스템 오류로 작업물이 날아갔습니다. 당신의 즉각적인 반응은?",
     "options": [
       {
@@ -812,7 +812,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_036",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "팀 내에서 당신이 자연스럽게 맡게 되는 역할은 무엇인가요?",
     "options": [
       {
@@ -835,7 +835,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_037",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "점심시간에 갑자기 오후 회의 안건에 대한 결정을 내려달라는 요청이 왔습니다. 당신은?",
     "options": [
       {
@@ -858,7 +858,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_038",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "오래 함께 일한 동료가 다른 팀으로 이동하게 됩니다. 이별 방식에서 당신의 스타일은?",
     "options": [
       {
@@ -881,7 +881,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_039",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "하루에 처리해야 할 업무가 5개 이상 겹쳤습니다. 당신의 시간 관리법은?",
     "options": [
       {
@@ -904,7 +904,7 @@ export const discQuestions: DISCQuestion[] = [
   },
   {
     "id": "disc_040",
-    "source": "" as const,
+    "source": "main" as const,
     "text": "금요일 오후, 다음 주 업무를 미리 정리하는 시간입니다. 당신이 가장 먼저 하는 일은?",
     "options": [
       {

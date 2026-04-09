@@ -26,7 +26,7 @@ export default function SchedulePage() {
     useEffect(() => {
         const supabase = createClient();
         supabase.from('comm_events').select('*').order('start_at', { ascending: true })
-            .then(({ data }) => {
+            .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     setEvents(data.map((e: Record<string, unknown>) => {
                         const start = new Date(e.start_at as string);

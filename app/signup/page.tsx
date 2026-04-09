@@ -253,11 +253,11 @@ function TenOneSignupPage() {
                 try {
                     const urlParams = new URLSearchParams(window.location.search);
                     const hitResultId = urlParams.get('resultId');
-                    if (hitResultId && result.user?.id) {
+                    if (hitResultId && result.memberId) {
                         await fetch('/api/hit/link-member', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ resultId: hitResultId, memberId: result.user.id }),
+                            body: JSON.stringify({ resultId: hitResultId, memberId: result.memberId }),
                         });
                     }
                 } catch {}
