@@ -47,7 +47,7 @@ confidence는 0.0~1.0 사이 숫자. 리뷰가 충분히 구체적이면 0.8+, �
 async function classifyReview(rawText: string): Promise<Record<string, unknown> | null> {
   try {
     const msg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 512,
       messages: [{
         role: 'user',

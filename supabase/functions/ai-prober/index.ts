@@ -32,7 +32,7 @@ const anthropic = new Anthropic({
 async function queryClaude(question: string): Promise<string | null> {
   try {
     const msg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: '당신은 소비자 질문에 제품/서비스를 추천해주는 AI 어시스턴트입니다. 구체적인 브랜드와 제품을 추천하세요.',
       messages: [{ role: 'user', content: question }],
