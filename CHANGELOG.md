@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-04-10 (집, 세션 38)
+
+### Brand Gravity 보고서 시스템 구축
+
+#### 신규 파일
+- `app/intra/gravity/[productId]/report/page.tsx` — 클라이언트 전달용 보고서 페이지
+  - 7개 섹션: Gravity Score / 페인 포인트 / AI 질문 패턴 / AI 프로브 결과(질문×AI 그리드) / 갭 분석 / 액션 플랜 / 부록
+  - `window.print()` PDF 출력, `@media print` A4 CSS (`print:hidden` Tailwind)
+  - Promise.all() 7개 데이터 소스 병렬 페칭
+
+#### DB 마이그레이션
+- bg_gravity_scores: `context_score` 컬럼 추가
+- bg_products: `site_url`, `specs` 컬럼 추가
+- bg_ai_probe_results: 6개 컬럼 추가 (recommended_brands, client_brand_context, competitor_brands, source_urls, category_headwind, headwind_detail)
+- 신규 테이블 16개: bg_pain_clusters, bg_situation_sets, bg_situations, bg_probe_runs, bg_source_analyses, bg_source_search, bg_source_site_check, bg_source_independent, bg_gaps, bg_actions, bg_scores, bg_scores_by_ai, bg_scores_by_category, bg_score_snapshots, bg_competitor_scores, bg_reports
+- 전체 RLS 활성화 + service_role_all 정책
+
+#### 수정 파일
+- `app/intra/gravity/[productId]/page.tsx`
+  - 헤더에 "보고서" 버튼 추가 (FileBarChart2 아이콘)
+  - Sub-score 3개 → 4개로 수정: Mention/30, Context/25, Rank/25, Coverage/20 (스펙 기준)
+  - bg_gravity_scores 쿼리에 context_score 포함
+
+#### 아키텍처 결정
+- Brand Gravity = 컨설팅. SaaS 아님
+- 클라이언트 워크스페이스(Layer 2) 개발 불필요
+- Intra 관리 도구 + PDF 보고서 전달이 전체 시스템
+
+---
+
 ## 2026-04-09 (집, 세션 37)
 
 ### Mindle 콘텐츠 파이프라인 완전 복구

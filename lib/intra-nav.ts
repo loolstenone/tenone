@@ -372,7 +372,9 @@ export const modules: NavModule[] = [
                     {
                         name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
                         children: [
-                            { name: "대시보드", href: "/intra/gravity" },
+                            { name: "전체 현황", href: "/intra/gravity" },
+                            { name: "클라이언트", href: "/intra/gravity/clients" },
+                            { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
                         ],
                     },
                     { name: "FWN", href: "/intra/ums/fwn", icon: Globe },

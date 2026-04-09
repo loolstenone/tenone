@@ -80,6 +80,17 @@
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
 
+## 이번 세션 (세션 38) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| Brand Gravity 보고서 페이지 신규 | `/intra/gravity/[productId]/report/page.tsx` — 7개 섹션, window.print() PDF 출력, @media print A4 CSS |
+| DB 마이그레이션 (3배치) | bg_gravity_scores에 context_score 추가, bg_products에 site_url/specs, bg_ai_probe_results 6개 컬럼 추가, bg_gaps/bg_actions/bg_reports 등 16개 테이블 신규 생성, 전체 RLS 활성화 |
+| 보고서 버튼 추가 | `/intra/gravity/[productId]/page.tsx` 헤더에 "보고서" 버튼 → /report 라우트 연결 |
+| Sub-score 스펙 정정 | 3개(Mention40/Rank30/Coverage30) → 4개(Mention30/Context25/Rank25/Coverage20) 스펙 기준으로 수정 |
+| context_score DB 쿼리 추가 | bg_gravity_scores 쿼리에 context_score 포함 |
+| 아키텍처 재확인 | Brand Gravity = 컨설팅 (SaaS 아님). 클라이언트 워크스페이스(Layer 2) 불필요. Intra 관리 도구 + 보고서 PDF 전달이 전부 |
+
 ## 이번 세션 (세션 37) 완료 항목
 
 | 항목 | 내용 |
@@ -150,10 +161,11 @@
 
 ## 다음 스텝 후보
 
-1. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)
-2. ~~**/crew-invite 폼 DB 저장**~~ — UMS 초대 기능으로 대체 완료
-3. ~~**N-03 뉴스레터 구독 폼 통일**~~ ✅ 공통 컴포넌트 + 22개 브랜드 완료
-4. **N-10 privacy@tenone.biz 실수신 확인** — 운영자 직접 확인
+### Brand Gravity (우선순위)
+1. **파이프라인 관리 화면** — 각 단계(Pain Collector/Question Mapper/AI Prober/Gap Analyzer/Source Tracer/Voice Designer) 수동 실행 + 결과 확인 화면. 현재는 "풀 스캔" 버튼 하나뿐
+2. **Phase 0 파일럿** — 춤추는 고래 또는 TenOne 자사를 대상으로 파이프라인 전체 수동 실행 후 보고서 완성
+3. **보고서 디자인 완성** — 클라이언트 전달용 PDF 기준으로 폰트/레이아웃/로고 정리
+
+### 기타
+4. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)
 5. **SmarComm/MADLeague DB 연결** — 전체 Mock 상태 (5월 예정)
-6. **Mindle 메인 인라인 폼 → 공통 컴포넌트 교체** — `app/(Mindle)/mindle/page.tsx` 내 기존 인라인 뉴스레터 폼 → `NewsletterSubscribeForm`으로 교체 (낮은 우선순위)
-7. **TenOne/newsletter 페이지 교체** — `app/(TenOne)/newsletter/page.tsx` 내 중복 코드 → 공통 컴포넌트 사용 (낮은 우선순위)

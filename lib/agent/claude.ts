@@ -5,8 +5,16 @@
  * ✅ 대화 히스토리     — user_id × agentName 기준 최근 N턴 자동 로드
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { AgentProfile, AgentMessage } from '@/types/agent';
+
+// 에이전트 전용 서비스 클라이언트 (RLS 우회)
+function getServiceClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
 // ── Anthropic 클라이언트 ─────────────────────────────────────────
 
@@ -38,7 +46,7 @@ function getAnthropicClient(): Anthropic | null {
 // ── 프로필 조회 ──────────────────────────────────────────────────
 
 export async function getAgentProfile(name: string): Promise<AgentProfile | null> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('agent_profiles')
     .select('*')
@@ -51,7 +59,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
 }
 
 export async function listAgentProfiles(): Promise<AgentProfile[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('agent_profiles')
     .select('*')
@@ -67,7 +75,7 @@ export async function listAgentProfiles(): Promise<AgentProfile[]> {
 async function logMessage(
   message: Omit<AgentMessage, 'id' | 'created_at'>
 ): Promise<string | null> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data, error } = await supabase
     .from('agent_messages')
     .insert(message)
@@ -94,7 +102,7 @@ async function loadConversationHistory(
   userId: string,
   maxTurns = 10,
 ): Promise<HistoryMessage[]> {
-  const supabase = await createClient();
+  const supabase = getServiceClient();
 
   const { data } = await supabase
     .from('agent_messages')
