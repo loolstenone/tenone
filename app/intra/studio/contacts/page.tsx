@@ -53,7 +53,7 @@ export default function ContactsPage() {
             <ContactImportModal
                 isOpen={isImportModalOpen}
                 onClose={() => setIsImportModalOpen(false)}
-                onImport={(newContacts) => console.log('Imported:', newContacts)} // Simplified for now
+                onImport={() => {}} // TODO: 연락처 임포트 처리
             />
 
             <PageHeader title="Contacts (CRM)" description="Manage relationships with partners, clients, and influencers.">

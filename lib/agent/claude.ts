@@ -28,7 +28,6 @@ function getAnthropicClient(): Anthropic | null {
     } catch {}
   }
 
-  console.log('[Agent] ANTHROPIC_API_KEY:', apiKey ? `${apiKey.substring(0, 15)}... (${apiKey.length}자)` : 'NOT SET');
   if (!apiKey || apiKey.trim() === '') return null;
   return new Anthropic({ apiKey });
 }

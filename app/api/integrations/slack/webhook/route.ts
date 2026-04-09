@@ -45,19 +45,15 @@ export async function POST(request: NextRequest) {
       // 이벤트 타입별 처리
       switch (type) {
         case 'app_mention':
-          // 앱이 멘션됐을 때
-          console.log(`[Slack] 멘션 수신 - user: ${user}, channel: ${channel}, text: ${text}`);
           // TODO: 멘션 이벤트를 WIO 알림으로 전환
           break;
 
         case 'message':
-          // DM 또는 채널 메시지
-          console.log(`[Slack] 메시지 수신 - user: ${user}, channel: ${channel}`);
           // TODO: 필요 시 메시지 이벤트 처리
           break;
 
         default:
-          console.log(`[Slack] 미처리 이벤트 타입: ${type}`);
+          break;
       }
     }
 

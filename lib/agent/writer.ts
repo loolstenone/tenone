@@ -47,8 +47,5 @@ export async function generateContent(
 
     const result = JSON.parse(jsonMatch[0]) as GeneratedContent;
 
-    // 토큰 사용량 로깅
-    console.log(`[Agent Writer] tokens: input=${response.usage.input_tokens} output=${response.usage.output_tokens}`);
-
     return result;
 }

@@ -18,9 +18,10 @@ import {
   ShoppingCart,
   Palette,
   Cpu,
-  Mail,
   Sparkles,
+  Mail,
 } from "lucide-react";
+import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
 
 /* ── 인사이트 카피 (로테이션) ── */
 const insightCopies = [
@@ -149,10 +150,6 @@ const categoryColor: Record<string, string> = {
 export default function MindleHomePage() {
   const [copy, setCopy] = useState(insightCopies[0]);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [nlEmail, setNlEmail] = useState("");
-  const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [nlAgree, setNlAgree] = useState(false);
-
   useEffect(() => {
     setCopy(insightCopies[Math.floor(Math.random() * insightCopies.length)]);
     const interval = setInterval(() => {
@@ -375,68 +372,13 @@ export default function MindleHomePage() {
 
       {/* ── 뉴스레터 구독 CTA ── */}
       <section className="px-6 py-16 border-t border-indigo-500/10">
-        <div className="mx-auto max-w-2xl text-center">
-          <Mail className="w-8 h-8 text-indigo-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">
-            트렌드 브리핑
-          </h3>
-          <p className="text-indigo-400/50 text-sm mb-6">
-            AI가 분석한 트렌드 리포트를 받아보세요.
-          </p>
-          {nlStatus === "done" ? (
-            <p className="text-indigo-300 text-sm">구독이 완료되었습니다!</p>
-          ) : (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!nlEmail.trim() || !nlAgree) return;
-                setNlStatus("loading");
-                try {
-                  const res = await fetch("/api/newsletter", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: nlEmail.trim(), source: 'mindle' }),
-                  });
-                  if (!res.ok) throw new Error();
-                  setNlStatus("done");
-                } catch {
-                  setNlStatus("error");
-                }
-              }}
-              className="flex gap-2 max-w-sm mx-auto"
-            >
-              <input
-                type="email"
-                required
-                value={nlEmail}
-                onChange={(e) => { setNlEmail(e.target.value); if (nlStatus === "error") setNlStatus("idle"); }}
-                placeholder="email@example.com"
-                className="flex-1 px-4 py-2.5 bg-white/5 border border-indigo-500/20 rounded-full text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={nlStatus === "loading" || !nlAgree}
-                className="px-5 py-2.5 bg-indigo-500 text-white font-semibold rounded-full text-sm hover:bg-indigo-400 transition-colors disabled:opacity-50"
-              >
-                {nlStatus === "loading" ? "..." : "구독"}
-              </button>
-            </form>
-          )}
-          {nlStatus !== "done" && (
-            <label className="flex items-center justify-center gap-2 mt-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={nlAgree}
-                onChange={e => setNlAgree(e.target.checked)}
-                className="accent-indigo-500"
-              />
-              <span className="text-indigo-500/50 text-[11px]">이메일 수집 및 뉴스레터 수신에 동의합니다</span>
-            </label>
-          )}
-          {nlStatus === "error" && (
-            <p className="text-red-400 text-xs mt-2">구독 처리 중 오류가 발생했습니다.</p>
-          )}
-        </div>
+        <NewsletterSubscribeForm
+          source="mindle"
+          dark
+          accentColor="#6366f1"
+          title="트렌드 브리핑"
+          subtitle="AI가 분석한 트렌드 리포트를 받아보세요."
+        />
       </section>
 
       {/* ── Ten:One Universe 연결 ── */}

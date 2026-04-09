@@ -144,7 +144,6 @@ export default function AuditionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("[HeRo Audition] 지원서 제출:", form);
     setSubmitted(true);
   };
 

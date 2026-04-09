@@ -58,7 +58,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-base font-medium mb-3" style={{ color: "var(--tn-text)" }}>7. 개인정보 보호책임자</h2>
-                        <p>성명: 전천일<br />직책: 대표<br />이메일: privacy@tenone.biz</p>
+                        <p>성명: 전천일<br />직책: 대표<br />이메일: lools@tenone.biz</p>
                     </section>
 
                     <p className="text-xs pt-4 border-t" style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>

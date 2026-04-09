@@ -55,18 +55,14 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 const user = sessionData?.session?.user ?? null;
 
                 if (!user) {
-                    console.log("[Intra] No session found, showing login");
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("login");
                     return;
                 }
 
-                console.log("[Intra] Session found:", user.email);
-
                 // 2-A) JWT app_metadata에서 빠른 권한 판단 (DB 조회 없음)
                 const appMeta = user.app_metadata;
                 if (appMeta?.is_staff === true || appMeta?.is_super_admin === true) {
-                    console.log("[Intra] JWT fast-path: staff/admin access granted");
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                     setStatus("ok");
                     return;
@@ -79,14 +75,12 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         || r.startsWith('crew:')
                     );
                     if (canIntra) {
-                        console.log("[Intra] JWT fast-path: role-based access granted");
                         sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                         setStatus("ok");
                         return;
                     }
                     // JWT에 roles가 있지만 인트라 권한 없음
                     if (appMeta.roles.length > 0) {
-                        console.log("[Intra] JWT: no intra access in roles");
                         sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                         setStatus("no-access");
                         return;
@@ -109,15 +103,12 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         : null;
 
                 if (member && member.account_type !== "member") {
-                    console.log("[Intra] Legacy access granted:", member.account_type);
                     sessionStorage.setItem(INTRA_VERIFIED_KEY, "1");
                     setStatus("ok");
                 } else if (member && member.account_type === "member") {
-                    console.log("[Intra] No access: account_type =", member.account_type);
                     sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                     setStatus("no-access");
                 } else {
-                    console.log("[Intra] Member lookup failed, isCached:", isCached);
                     if (!isCached) {
                         sessionStorage.removeItem(INTRA_VERIFIED_KEY);
                         setStatus("login");

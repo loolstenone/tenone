@@ -195,7 +195,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
-            console.log('[Auth] onAuthStateChange:', event, session?.user?.email || 'no user');
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (session?.user) {

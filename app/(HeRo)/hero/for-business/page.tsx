@@ -134,7 +134,6 @@ export default function ForBusinessPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("[HeRo For Business] 문의:", form);
     setSubmitted(true);
   };
 

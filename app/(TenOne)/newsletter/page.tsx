@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Send, ArrowRight, Calendar, ExternalLink } from "lucide-react";
+import { Mail, Calendar, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
+import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
 
 interface NewsletterIssue {
     id: number;
@@ -22,18 +23,9 @@ const categoryStyle: Record<string, string> = {
     Universe: "bg-neutral-900 text-white",
 };
 
-function isValidEmail(v: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-}
-
 export default function NewsletterPage() {
     const { user, isAuthenticated } = useAuth();
-    const [email, setEmail] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [nickname, setNickname] = useState("");
-    const [nicknameError, setNicknameError] = useState("");
     const [sent, setSent] = useState(false);
-    const [agreePrivacy, setAgreePrivacy] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [pastIssues, setPastIssues] = useState<NewsletterIssue[]>([]);
 
@@ -46,34 +38,24 @@ export default function NewsletterPage() {
             .then(({ data }: { data: NewsletterIssue[] | null }) => { if (data && data.length > 0) setPastIssues(data); });
     }, []);
 
-    const handleSubscribe = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // 비회원 유효성 검사
-        if (!isAuthenticated) {
-            let valid = true;
-            if (!nickname.trim()) { setNicknameError("닉네임을 입력해주세요."); valid = false; }
-            else setNicknameError("");
-            if (!email.trim() || !isValidEmail(email)) { setEmailError("유효한 이메일 주소를 입력해주세요."); valid = false; }
-            else setEmailError("");
-            if (!agreePrivacy || !valid) return;
-        }
-
+    const handleMemberSubscribe = async () => {
         setSubmitting(true);
         try {
             const res = await fetch('/api/newsletter', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    email: isAuthenticated ? user?.email : email,
-                    nickname: isAuthenticated ? user?.name : nickname,
-                    memberId: isAuthenticated ? user?.id : null,
+                    email: user?.email,
+                    nickname: user?.name,
+                    memberId: user?.id,
                     source: 'tenone-newsletter',
                 }),
             });
             if (res.ok) setSent(true);
             else alert('구독에 실패했습니다. 다시 시도해주세요.');
-        } catch { alert('네트워크 오류가 발생했습니다.'); }
+        } catch {
+            alert('네트워크 오류가 발생했습니다.');
+        }
         setSubmitting(false);
     };
 
@@ -92,18 +74,7 @@ export default function NewsletterPage() {
 
             {/* 구독 폼 */}
             <div className="tn-bg-alt border tn-border p-8 mb-10 md:mb-16">
-                {sent ? (
-                    /* 발송 완료 메시지 */
-                    <div className="text-center py-6">
-                        <Send className="h-10 w-10 tn-text-sub mx-auto mb-3" />
-                        <h3 className="text-sm font-bold mb-2">확인 메일을 보냈습니다</h3>
-                        <p className="text-xs tn-text-sub leading-relaxed">
-                            신청하신 이메일 주소로 확인용 메일을 보내드렸습니다.<br />
-                            메일함을 확인하고 구독을 완료해주세요.
-                        </p>
-                    </div>
-                ) : isMemberSubscribed ? (
-                    /* 이미 구독 중 */
+                {isMemberSubscribed ? (
                     <div className="text-center py-4">
                         <Mail className="h-8 w-8 tn-text-sub mx-auto mb-3" />
                         <h3 className="text-sm font-bold mb-1">이미 뉴스레터를 구독하고 있습니다</h3>
@@ -112,8 +83,7 @@ export default function NewsletterPage() {
                             프로필에서 구독 관리 →
                         </Link>
                     </div>
-                ) : isAuthenticated ? (
-                    /* 로그인 회원 미구독 */
+                ) : isAuthenticated && !sent ? (
                     <div className="text-center py-2">
                         <div className="flex items-center justify-center gap-2 mb-4">
                             <div className="h-8 w-8 rounded-full bg-neutral-900 flex items-center justify-center text-white text-xs font-bold">
@@ -124,63 +94,20 @@ export default function NewsletterPage() {
                                 <p className="text-xs tn-text-sub">{user?.email}</p>
                             </div>
                         </div>
-                        <button onClick={handleSubscribe} disabled={submitting}
+                        <button onClick={handleMemberSubscribe} disabled={submitting}
                             className="px-8 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 mx-auto disabled:opacity-40">
                             <Mail className="h-4 w-4" /> {submitting ? "처리 중..." : "뉴스레터 구독하기"}
                         </button>
                         <p className="text-[10px] tn-text-muted mt-3">신청 후 이메일로 확인 절차가 진행됩니다</p>
                     </div>
+                ) : isAuthenticated && sent ? (
+                    <div className="text-center py-6">
+                        <Mail className="h-10 w-10 tn-text-sub mx-auto mb-3" />
+                        <h3 className="text-sm font-bold mb-2">확인 메일을 보냈습니다</h3>
+                        <p className="text-xs tn-text-sub">메일함을 확인하고 구독을 완료해주세요.</p>
+                    </div>
                 ) : (
-                    /* 비회원 구독 폼 — 세로형 */
-                    <form onSubmit={handleSubscribe} className="max-w-sm mx-auto">
-                        <div className="flex flex-col gap-3 mb-3">
-                            {/* 닉네임 */}
-                            <div>
-                                <input
-                                    type="text"
-                                    value={nickname}
-                                    onChange={e => { setNickname(e.target.value); setNicknameError(""); }}
-                                    placeholder="닉네임 *"
-                                    className="w-full px-4 py-3 text-sm border tn-border tn-surface focus:outline-none focus:border-neutral-400 placeholder:tn-text-muted"
-                                />
-                                {nicknameError && <p className="text-[10px] text-red-500 mt-1">{nicknameError}</p>}
-                            </div>
-                            {/* 이메일 */}
-                            <div>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={e => { setEmail(e.target.value); setEmailError(""); }}
-                                    placeholder="이메일 주소 *"
-                                    className="w-full px-4 py-3 text-sm border tn-border tn-surface focus:outline-none focus:border-neutral-400 placeholder:tn-text-muted"
-                                />
-                                {emailError && <p className="text-[10px] text-red-500 mt-1">{emailError}</p>}
-                            </div>
-                            {/* 동의 */}
-                            <label className="flex items-start gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={agreePrivacy}
-                                    onChange={e => setAgreePrivacy(e.target.checked)}
-                                    className="mt-0.5 shrink-0 accent-neutral-900"
-                                />
-                                <span className="text-[10px] tn-text-sub leading-relaxed">
-                                    뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다. 언제든 수신거부 가능합니다.
-                                </span>
-                            </label>
-                            {/* 버튼 */}
-                            <button
-                                type="submit"
-                                disabled={submitting || !agreePrivacy}
-                                className="w-full px-8 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-30 flex items-center justify-center gap-2"
-                            >
-                                {submitting ? "처리 중..." : "구독하기"} <ArrowRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                        <p className="text-[10px] tn-text-muted text-center">
-                            Ten:One™ Universe 뉴스레터는 Ten:One™ Universe의 다양한 소식을 받을 수 있습니다.
-                        </p>
-                    </form>
+                    <NewsletterSubscribeForm source="tenone-newsletter" />
                 )}
             </div>
 
