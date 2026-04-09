@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import {
   ArrowRight,
   ChevronRight,
@@ -403,6 +404,15 @@ export default function OgamjaHome() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-200">
+        <NewsletterSubscribeForm
+          source="0gamja"
+          accentColor="#F472B6"
+          subtitle="공감자 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ━━ CTA ━━ */}

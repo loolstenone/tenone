@@ -9,6 +9,7 @@ import {
   PenTool,
   BarChart3,
 } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 // ===== Hero Section =====
 function HeroSection() {
@@ -190,6 +191,14 @@ export default function PlannersPage() {
     <main className="bg-white text-[#1a1a1a] min-h-screen">
       <HeroSection />
       <ExploreSection />
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-200">
+        <NewsletterSubscribeForm
+          source="planners"
+          accentColor="#1a1a1a"
+          subtitle="Planner's 소식을 가장 먼저 받아보세요."
+        />
+      </section>
       <AboutSection />
     </main>
   );

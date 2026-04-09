@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Header from '@/features/smarcomm/Header';
 import Footer from '@/features/smarcomm/Footer';
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const HEADLINES = [
   { main: 'AI가 추천하는 브랜드,', accent: '당신인가요?' },
@@ -436,6 +437,16 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+        </section>
+
+        {/* ── 뉴스레터 구독 ── */}
+        <section className="py-16 px-6 border-t border-neutral-800">
+          <NewsletterSubscribeForm
+            source="smarcomm"
+            dark
+            accentColor="#2563EB"
+            subtitle="SmarComm 소식을 가장 먼저 받아보세요."
+          />
         </section>
 
         {/* CTA */}

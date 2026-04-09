@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Sparkles, Lightbulb, Search, CheckCircle, Zap, Star, MessageSquare, FileText, Globe } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const process = [
     { step: "01", icon: Search, title: "시장 리서치", desc: "업종, 경쟁사, 타겟 분석으로 네이밍 방향을 설정합니다.", client: "업종·타겟 정보 공유", nf: "경쟁사·키워드 분석" },
@@ -131,6 +132,15 @@ export default function NamingFactoryPage() {
                             </div>
                         ))}
                     </div>
+                </section>
+
+                {/* ── 뉴스레터 구독 ── */}
+                <section className="py-16 px-6 border-t border-neutral-200">
+                    <NewsletterSubscribeForm
+                        source="namingfactory"
+                        accentColor="#7C3AED"
+                        subtitle="Naming Factory 소식을 가장 먼저 받아보세요."
+                    />
                 </section>
 
                 {/* CTA */}

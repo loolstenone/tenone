@@ -1,6 +1,7 @@
 "use client";
 
 import { MapPin, Camera, Clock, Mail, Phone, MessageCircle } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const galleryImages = [
     { id: 1, alt: "문래동 철공소 골목", color: "bg-neutral-700" },
@@ -208,6 +209,15 @@ export default function MullaesianHome() {
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <section className="py-16 px-6 border-t border-neutral-200">
+                <NewsletterSubscribeForm
+                    source="mullaesian"
+                    accentColor="#007BBF"
+                    subtitle="문래지앙 소식을 가장 먼저 받아보세요."
+                />
             </section>
 
             {/* ── Contact 섹션 ── */}

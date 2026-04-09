@@ -10,7 +10,6 @@ import {
   Calendar,
   Users,
   Camera,
-  Newspaper,
   Shirt,
 } from "lucide-react";
 import {
@@ -20,6 +19,7 @@ import {
   categoryNameMap,
   type FWNArticle,
 } from "@/lib/supabase/fwn";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── 패션위크 캘린더 (정적) ── */
 const fashionWeekCalendar = [
@@ -305,25 +305,14 @@ export default function FWNHome() {
         </div>
       </section>
 
-      {/* ── 뉴스레터 CTA ── */}
-      <section className="px-6 py-16 border-t border-neutral-800/30">
-        <div className="mx-auto max-w-2xl text-center">
-          <Newspaper className="w-6 h-6 text-neutral-600 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-white mb-2">FWN Weekly</h3>
-          <p className="text-neutral-500 text-sm mb-6">
-            매주 월요일, 전세계 패션위크 소식을 정리해 보내드립니다.
-          </p>
-          <div className="flex gap-2 max-w-sm mx-auto">
-            <input
-              type="email"
-              placeholder="email@example.com"
-              className="flex-1 px-4 py-2.5 bg-transparent border border-neutral-800 rounded text-sm text-white placeholder-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
-            />
-            <button className="px-5 py-2.5 bg-white text-black font-semibold rounded text-sm hover:bg-neutral-200 transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800">
+        <NewsletterSubscribeForm
+          source="fwn"
+          dark
+          accentColor="#FFFFFF"
+          subtitle="FWN 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ── Ten:One Universe 연결 ── */}

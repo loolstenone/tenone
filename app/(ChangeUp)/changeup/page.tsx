@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import {
   ArrowRight,
   Rocket,
@@ -354,6 +355,16 @@ export default function ChangeUpHomePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800 bg-[#0D2818]">
+        <NewsletterSubscribeForm
+          source="changeup"
+          dark
+          accentColor="#0D9488"
+          subtitle="ChangeUp 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ━━ CTA ━━ */}

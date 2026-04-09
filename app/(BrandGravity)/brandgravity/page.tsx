@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Sparkles, Target, TrendingUp, Users, Palette, BarChart3, CheckCircle2, Zap, Eye } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const services = [
     { icon: Target, title: "브랜드 전략", desc: "시장 분석과 트렌드 데이터 기반의 포지셔닝 전략을 수립합니다." },
@@ -132,6 +133,16 @@ export default function BrandGravityPage() {
                         Mindle 트렌드 분석 + SmarComm 마케팅 전략 + Brand Gravity 브랜딩 = 풀패키지 솔루션
                     </p>
                     <Link href="/universe" className="text-xs text-amber-500 hover:underline">Universe 구조 보기 →</Link>
+                </section>
+
+                {/* ── 뉴스레터 구독 ── */}
+                <section className="py-16 px-6 border-t border-neutral-800">
+                    <NewsletterSubscribeForm
+                        source="brandgravity"
+                        dark
+                        accentColor="#F59E0B"
+                        subtitle="Brand Gravity 소식을 가장 먼저 받아보세요."
+                    />
                 </section>
 
                 {/* CTA */}

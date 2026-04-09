@@ -1,6 +1,7 @@
 "use client";
 
 import { MapPin, Users, Heart, Lightbulb, TreePine, MessageCircle, Mail, Phone, TrendingDown, Brain, HandHeart } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const challenges = [
     {
@@ -249,6 +250,15 @@ export default function TownityHome() {
                         * 콘텐츠는 준비 중입니다
                     </p>
                 </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <section className="py-16 px-6 border-t border-neutral-200">
+                <NewsletterSubscribeForm
+                    source="townity"
+                    accentColor="#10B981"
+                    subtitle="Townity 소식을 가장 먼저 받아보세요."
+                />
             </section>
 
             {/* ── Contact ── */}

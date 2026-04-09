@@ -16,6 +16,7 @@ import {
   Building2,
   Zap,
 } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── HeRo Red ── */
 const RED = "#E53935";
@@ -472,6 +473,15 @@ export default function HeRoHomePage() {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-200">
+        <NewsletterSubscribeForm
+          source="hero"
+          accentColor="#E53935"
+          subtitle="HeRo 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ━━━ 7. CTA ━━━ */}

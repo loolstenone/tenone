@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import {
   ArrowRight,
   Calendar,
@@ -382,6 +383,16 @@ export default function DomoHome() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-stone-700 bg-[#1C1917]">
+        <NewsletterSubscribeForm
+          source="domo"
+          dark
+          accentColor="#D97706"
+          subtitle="domo 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ── CTA ── */}

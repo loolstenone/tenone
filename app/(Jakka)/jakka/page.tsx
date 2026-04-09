@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const categories = [
     {
@@ -72,6 +73,15 @@ export default function JakkaHomePage() {
                         </Link>
                     ))}
                 </div>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <div className="mt-16 border-t border-neutral-200 pt-16">
+              <NewsletterSubscribeForm
+                source="jakka"
+                accentColor="#404040"
+                subtitle="Jakka 소식을 가장 먼저 받아보세요."
+              />
+            </div>
             </div>
         </section>
     );

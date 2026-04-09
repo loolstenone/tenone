@@ -8,6 +8,7 @@ import {
   ChevronRight, Sparkles, Target, BarChart3, BookOpen
 } from 'lucide-react';
 import { WIOMarketingHeader } from '@/features/wio/WIOMarketingHeader';
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── 3대 자원 ── */
 const RESOURCES = [
@@ -325,6 +326,16 @@ export default function WIOHome() {
           </div>
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800">
+        <NewsletterSubscribeForm
+          source="wio"
+          dark
+          accentColor="#534AB7"
+          subtitle="WIO 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ═══════ CTA ═══════ */}

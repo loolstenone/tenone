@@ -1,6 +1,7 @@
 "use client";
 
 import { Leaf, Mountain, Sun, Package, MapPin, Mail, Phone, MessageCircle, Sprout, Heart, Truck } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const products = [
     {
@@ -193,6 +194,15 @@ export default function NatureBoxHome() {
                         ))}
                     </div>
                 </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <section className="py-16 px-6 border-t border-neutral-200">
+                <NewsletterSubscribeForm
+                    source="naturebox"
+                    accentColor="#6B8E23"
+                    subtitle="자연함 소식을 가장 먼저 받아보세요."
+                />
             </section>
 
             {/* ── 오시는 길 (Visit) ── */}

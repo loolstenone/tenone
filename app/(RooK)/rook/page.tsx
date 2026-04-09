@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import {
   ArrowRight,
   Play,
@@ -350,6 +351,16 @@ export default function RooKHome() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800">
+        <NewsletterSubscribeForm
+          source="rook"
+          dark
+          accentColor="#185FA5"
+          subtitle="RooK 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ━━ RooKie CTA ━━ */}

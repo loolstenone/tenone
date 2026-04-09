@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Train, MapPin, Building2, Navigation, Plane } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 // AREX stations from Incheon Airport to Seoul Station
 const arexStations = [
@@ -223,6 +224,15 @@ export default function Seoul360Home() {
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <section className="py-16 px-6 border-t border-neutral-200">
+                <NewsletterSubscribeForm
+                    source="seoul360"
+                    accentColor="#F5C518"
+                    subtitle="Seoul/360° 소식을 가장 먼저 받아보세요."
+                />
             </section>
 
             {/* Quick Navigation Cards */}

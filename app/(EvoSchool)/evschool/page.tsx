@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, GraduationCap, BookOpen, Award, Users, Play, Clock, Star, MessageSquare, Briefcase } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const courses = [
     { title: "마케팅 기초 부트캠프", category: "Marketing", duration: "4주", level: "입문", students: 128 },
@@ -155,6 +156,16 @@ export default function EvoSchoolPage() {
                         <span>→</span>
                         <span className="px-3 py-1 border border-slate-700 rounded">기업</span>
                     </div>
+                </section>
+
+                {/* ── 뉴스레터 구독 ── */}
+                <section className="py-16 px-6 border-t border-neutral-800">
+                  <NewsletterSubscribeForm
+                    source="evschool"
+                    dark
+                    accentColor="#06b6d4"
+                    subtitle="Evolution School 소식을 가장 먼저 받아보세요."
+                  />
                 </section>
 
                 {/* CTA */}

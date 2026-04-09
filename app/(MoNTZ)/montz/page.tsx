@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 const categories = [
     {
@@ -137,6 +138,15 @@ export default function MoNTZHome() {
                         ))}
                     </div>
                 </div>
+            </section>
+
+            {/* ── 뉴스레터 구독 ── */}
+            <section className="py-16 px-6 border-t border-neutral-200">
+              <NewsletterSubscribeForm
+                source="montz"
+                accentColor="#404040"
+                subtitle="MoNTZ 소식을 가장 먼저 받아보세요."
+              />
             </section>
         </div>
     );

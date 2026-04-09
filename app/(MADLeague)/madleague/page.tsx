@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import {
   ArrowRight,
   MapPin,
@@ -292,6 +293,16 @@ export default function MadLeagueHomePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800">
+        <NewsletterSubscribeForm
+          source="madleague"
+          dark
+          accentColor="#16a34a"
+          subtitle="MAD League 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ── CTA ── */}

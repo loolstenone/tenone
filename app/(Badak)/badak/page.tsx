@@ -9,6 +9,7 @@ import {
 import { fetchStars, fetchBadakStats } from '@/lib/supabase/badak';
 import type { BadakStar } from '@/types/badak';
 import { BoardWidget } from '@/components/board';
+import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 
 /* ── Mock: 다음 모임 ── */
 const UPCOMING_MEETUPS = [
@@ -364,6 +365,16 @@ export default function BadakHome() {
             accentColor="#d97706"
           />
         </div>
+      </section>
+
+      {/* ── 뉴스레터 구독 ── */}
+      <section className="py-16 px-6 border-t border-neutral-800">
+        <NewsletterSubscribeForm
+          source="badak"
+          dark
+          accentColor="#f59e0b"
+          subtitle="Badak 소식을 가장 먼저 받아보세요."
+        />
       </section>
 
       {/* ===== Final CTA ===== */}
