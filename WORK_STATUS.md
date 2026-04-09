@@ -33,7 +33,7 @@
 ### 미처리 (사용자 확인 필요 or 낮은 우선순위)
 - **N-03** 뉴스레터 구독 폼 3곳 중복 — 통일 방향 결정 필요
 - ~~**N-04**~~ ✅ 메인 Latest 섹션 — STATIC_NEWS 제거 + newsroom feed 필드 매핑 수정 완료 (세션 34)
-- **N-10** privacy@tenone.biz 실수신 확인 — 운영자 직접 확인
+- ~~**N-10**~~ ✅ privacy 페이지 이미 lools@tenone.biz로 작성됨 — 별도 조치 불필요
 - **SmarComm DB 연결** — 전체 Mock 상태 (5월 예정)
 - **MADLeague DB 연결** — 전체 Mock (5월 예정)
 
@@ -44,7 +44,7 @@
 | 테이블 | 건수 | 비고 |
 |--------|------|------|
 | agent_profiles | 21개 | L0×1, L1×3, L2×17 |
-| mindle_trends | 52건 | 11개 카테고리 |
+| mindle_trends | 67건 | 11개 카테고리 (자동 파이프라인 가동 중) |
 | newsroom_items | 8건 | 초기 시드 데이터 |
 | hit_c_results | 스키마만 | 실제 응시 대기 |
 | hit_d/e/f_results | 스키마만 | 실제 응시 대기 |
@@ -79,6 +79,16 @@
 - `/api/hit/chat/usage/route.ts` — 신규 엔드포인트 (사용 횟수 조회)
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
+
+## 이번 세션 (세션 37) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| trend-crawl v4 재작성 | Next.js HTTP 홉 제거 → Supabase+Anthropic 직접 호출, limit 5건/회 (76s 실행) |
+| trend-to-draft v2 수정 | content_drafts 스키마 수정 (stage→status, ai_generated 제거) |
+| daily-vrief v3 수정 | 트렌드 조회 today→최근 7일 (trends:[] 버그 수정) |
+| pg_cron 스케줄 등록 | 3개 cron job 활성화 (trend-crawl/trend-to-draft/daily-vrief) |
+| 파이프라인 검증 | mindle_trends 52→67건, content_drafts 15건 신규, agent_messages green |
 
 ## 이번 세션 (세션 36) 완료 항목
 

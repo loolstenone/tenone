@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-04-09 (집, 세션 37)
+
+### Mindle 콘텐츠 파이프라인 완전 복구
+
+#### Edge Functions 재배포
+- `trend-crawl` v4: Next.js HTTP 호출(→HTML 오류) 완전 제거, Supabase+Anthropic 직접 호출로 재작성
+  - crawl(): mindle_sources RSS 수집 → collected_data upsert
+  - process(): raw 항목 → Haiku 필터(≥6) → Sonnet 카드 → mindle_trends insert
+  - 처리 limit 5건/회 (Supabase 150s 제한 대응, 실행 ~76s)
+- `daily-vrief` v3: 트렌드 조회 today→최근 7일로 확장 (trends:[] 버그 수정)
+- `trend-to-draft` v2: content_drafts 스키마 수정 (stage→status, ai_generated 제거)
+
+#### pg_cron 스케줄 등록
+- trend-crawl-hourly: `0 * * * *`
+- trend-to-draft-hourly: `30 * * * *`
+- daily-vrief-morning: `1 1 * * *` (UTC 01:01 = KST 10:01)
+
+#### 검증 결과
+- trend-crawl 실행: 16 sources 크롤, 5건 raw → 5건 processed, mindle_trends 52→67건
+- trend-to-draft 실행: 24시간 내 신규 15건 → content_drafts 15건 초안 생성
+- agent_messages: vrief type, risk_level=green 정상 기록
+
+---
+
 ## 2026-04-09 (집, 세션 36)
 
 ### QA: 800줄 초과 파일 4개 분리 완료

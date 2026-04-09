@@ -45,12 +45,13 @@ Deno.serve(async (_req) => {
       ?.map((a) => `${a.display_name}(L${a.layer}): ${a.is_active ? 'ON' : 'OFF'}`)
       .join(', ') ?? '정보 없음';
 
-    // ── 2. 오늘 트렌드 top 3 ────────────────────────────────────
+    // ── 2. 최근 7일 트렌드 top 3 ────────────────────────────────
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: trends } = await supabase
       .from('mindle_trends')
       .select('title, summary, tags')
-      .gte('published_at', today)
-      .order('published_at', { ascending: false })
+      .gte('published_at', sevenDaysAgo)
+      .order('relevance_score', { ascending: false })
       .limit(3);
 
     const trendSummary = trends?.length
