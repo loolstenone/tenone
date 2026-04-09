@@ -1,166 +1,28 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import * as chatDb from '@/lib/supabase/chat';
 import { initialStaff, divisions } from "@/lib/staff-data";
-import { initialPeople, madleagueClubs } from "@/lib/people-data";
 import {
-    Search, Send, ChevronDown, ChevronRight, ChevronLeft, Bell, MessageSquareText,
-    Paperclip, Smile, MoreVertical, Pin, Circle, Calendar, Target,
+    Search, Send, ChevronLeft, Bell, MessageSquareText,
+    Paperclip, Smile, Pin, Circle, Calendar, Target,
     CheckCheck, AlertCircle, Stamp, FolderKanban, Users, X, Image, FileText
 } from "lucide-react";
 import clsx from "clsx";
 import { PageHeader } from "@/components/intra/IntraUI";
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   데이터 준비
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-const activeCrewMembers = initialPeople.filter(p => p.category === 'crew' && p.membershipStatus === 'active');
-const youinoneMembers = activeCrewMembers.filter(p => p.type === 'youinone');
-const allianceMembers = activeCrewMembers.filter(p => p.type === 'youinone-alliance');
-const madleagueMembers = activeCrewMembers.filter(p => p.type === 'madleague-leader' || p.type === 'madleague-member');
-const madleagueByClub = madleagueClubs.map(club => ({
-    club,
-    members: madleagueMembers.filter(m => m.clubId === club.id),
-})).filter(g => g.members.length > 0);
+import {
+    Message, ChatThread,
+    generateNotifications, generateMockChats,
+    todaySchedule, activeProjects, pendingApprovals, emojiGroups,
+    currentUserId,
+    getStaff, getCrewPerson, getAnyPerson, getStaffName, getStaffInitials, getStaffPosition,
+} from "./messenger-data";
+import GroupChatModal from "./group-chat-modal";
+import BroadcastModal from "./broadcast-modal";
+import MessengerSidebar from "./messenger-sidebar";
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   타입 정의
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-interface Message {
-    id: string;
-    from: string;
-    text: string;
-    time: string;
-    type: 'chat' | 'notification';
-    read: boolean;
-}
-
-interface ChatThread {
-    id: string;
-    name: string;
-    participants: string[];
-    messages: Message[];
-    isGroup: boolean;
-    lastActive: string;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Mock 데이터 생성
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function generateNotifications(): Message[] {
-    return [
-        { id: 'n1', from: 'system', text: 'GPR 2026 Q1 자기평가 마감 D-3', time: '09:00', type: 'notification', read: false },
-        { id: 'n2', from: 'system', text: '결재 요청: MADLeague 인사이트 투어링 예산 품의', time: '09:15', type: 'notification', read: false },
-        { id: 'n3', from: 'system', text: '프로젝트 LUKI 2nd Single: 뮤직비디오 촬영 D-5', time: '어제', type: 'notification', read: true },
-        { id: 'n4', from: 'system', text: '오늘 14:00 주간 팀 회의', time: '08:30', type: 'notification', read: true },
-        { id: 'n5', from: 'system', text: 'Badak 3월 밋업 참석자 18/25명', time: '어제', type: 'notification', read: true },
-    ];
-}
-
-function generateMockChats(): ChatThread[] {
-    return [
-        {
-            id: 'c1', name: 'Sarah Kim', participants: ['s1', 's2'], isGroup: false, lastActive: '10:32',
-            messages: [
-                { id: 'm1', from: 's2', text: '대표님, LUKI 2nd Single 컨셉 회의 일정 잡았습니다. 내일 오후 2시 어떠세요?', time: '10:15', type: 'chat', read: true },
-                { id: 'm2', from: 's1', text: '좋아요. 김콘텐 팀장도 같이 참석하도록 해주세요.', time: '10:20', type: 'chat', read: true },
-                { id: 'm3', from: 's2', text: '네, 콘텐츠팀이랑 AI팀도 같이 부를게요. 회의실 예약하겠습니다.', time: '10:32', type: 'chat', read: false },
-            ],
-        },
-        {
-            id: 'c2', name: '김준호', participants: ['s1', 's20'], isGroup: false, lastActive: '09:45',
-            messages: [
-                { id: 'm4', from: 's20', text: 'MADLeap 5기 1차 정기모임 참석자 30명 확정했습니다!', time: '09:30', type: 'chat', read: true },
-                { id: 'm5', from: 's1', text: '수고했어요. 모임 장소는 어디로 잡았어요?', time: '09:35', type: 'chat', read: true },
-                { id: 'm6', from: 's20', text: '성수동 위워크 4층 세미나룸이요. 케이터링도 진행 예정입니다.', time: '09:45', type: 'chat', read: true },
-            ],
-        },
-        {
-            id: 'c3', name: '경영진 회의', participants: ['s1', 's2', 's3', 's4'], isGroup: true, lastActive: '어제',
-            messages: [
-                { id: 'm7', from: 's3', text: '이번 달 신규 채용 2명 진행 중입니다.', time: '16:00', type: 'chat', read: true },
-                { id: 'm8', from: 's4', text: '3월 경비 집행률 78%입니다.', time: '16:05', type: 'chat', read: true },
-                { id: 'm9', from: 's2', text: '리제로스 시즌2 스폰서 기업 3곳 미팅 완료.', time: '16:15', type: 'chat', read: true },
-                { id: 'm10', from: 's1', text: '좋아요. 스폰서 건은 이번 주 내로 제안서 보내주세요.', time: '16:20', type: 'chat', read: true },
-            ],
-        },
-        {
-            id: 'c4', name: 'LUKI 프로젝트', participants: ['s1', 's2', 's27', 's28', 's37', 's38'], isGroup: true, lastActive: '어제',
-            messages: [
-                { id: 'm11', from: 's27', text: '뮤직비디오 스토리보드 1차 완성했습니다.', time: '15:00', type: 'chat', read: true },
-                { id: 'm12', from: 's37', text: 'AI 생성 배경 이미지 3종 테스트 완료.', time: '15:30', type: 'chat', read: true },
-                { id: 'm13', from: 's28', text: '촬영 일정 다음 주 화~수로 잡을게요.', time: '15:45', type: 'chat', read: true },
-            ],
-        },
-        {
-            id: 'c5', name: '박기획', participants: ['s1', 's5'], isGroup: false, lastActive: '3/18',
-            messages: [
-                { id: 'm14', from: 's5', text: '2분기 사업계획서 초안 작성 완료했습니다.', time: '11:00', type: 'chat', read: true },
-                { id: 'm15', from: 's1', text: '확인했어요. 코멘트 남겼으니 수정 후 다시 보내주세요.', time: '14:30', type: 'chat', read: true },
-            ],
-        },
-    ];
-}
-
-const todaySchedule = [
-    { time: '10:00', title: '주간 팀 회의', type: '회의' },
-    { time: '14:00', title: 'LUKI 컨셉 회의', type: '프로젝트' },
-    { time: '16:00', title: 'Badak 밋업 준비', type: '이벤트' },
-];
-
-const activeProjects = [
-    { name: 'LUKI 2nd Single', progress: 45, dday: 'D-12' },
-    { name: 'MADLeap 5기 운영', progress: 25, dday: '진행중' },
-    { name: '리제로스 시즌2', progress: 10, dday: '기획중' },
-];
-
-const pendingApprovals = [
-    { title: '인사이트 투어링 예산', from: '한마케', amount: '5,000,000원' },
-    { title: '콘텐츠팀 장비 구매', from: '김콘텐', amount: '2,300,000원' },
-];
-
-const emojiGroups = [
-    { group: '자주 쓰는', items: ['👍', '👏', '🙏', '💪', '🔥', '✅', '❤️', '😊'] },
-    { group: '반응', items: ['😂', '🤔', '😮', '👀', '🎉', '💡', '⭐', '🚀'] },
-    { group: '업무', items: ['📋', '📌', '📊', '💼', '🗓️', '⏰', '📎', '✏️'] },
-    { group: '상태', items: ['🟢', '🟡', '🔴', '⏳', '✔️', '❌', '⚠️', '🔔'] },
-];
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   헬퍼 함수
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-const currentUserId = 's1';
-
-const getStaff = (id: string) => initialStaff.find(s => s.id === id);
-const getCrewPerson = (id: string) => activeCrewMembers.find(p => p.id === id);
-const getAnyPerson = (id: string) => getStaff(id) || getCrewPerson(id);
-const getStaffName = (id: string) => {
-    const s = getStaff(id);
-    if (s) return s.name;
-    const c = getCrewPerson(id);
-    if (c) return c.name;
-    return '알 수 없음';
-};
-const getStaffInitials = (id: string) => {
-    const s = getStaff(id);
-    if (s) return s.avatarInitials;
-    const c = getCrewPerson(id);
-    if (c) return c.avatarInitials;
-    return '?';
-};
-const getStaffPosition = (id: string) => {
-    const s = getStaff(id);
-    if (s) return `${s.department} · ${s.position}`;
-    const c = getCrewPerson(id);
-    if (c) return c.crewRole || c.type;
-    return '';
-};
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   메인 컴포넌트
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 export default function MessengerPage() {
     const { user } = useAuth();
 
@@ -230,23 +92,20 @@ export default function MessengerPage() {
                 const threads = await chatDb.fetchThreads(user.id);
                 if (cancelled) return;
                 if (threads.length > 0) {
-                    // DB 스레드 → 로컬 ChatThread 형태로 변환
                     const converted: ChatThread[] = threads.map(t => ({
                         id: t.id,
                         name: t.name || '대화',
                         participants: t.participants,
-                        messages: [], // 메시지는 스레드 선택 시 로드
+                        messages: [],
                         isGroup: t.is_group,
                         lastActive: new Date(t.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
                     }));
                     setChats(converted);
                     setDbLoaded(true);
                 } else {
-                    // DB에 스레드 없으면 Mock 유지
                     setDbLoaded(false);
                 }
             } catch {
-                // DB 에러 시 Mock 유지
                 setDbLoaded(false);
             }
         })();
@@ -275,14 +134,12 @@ export default function MessengerPage() {
         return unsub;
     }, [selectedChannel?.id]);
 
-    // ── DB: 전체 스레드 실시간 구독 (새 메시지 → 스레드 목록 갱신) ──
+    // ── DB: 전체 스레드 실시간 구독 ──
     useEffect(() => {
         if (!user?.id || !dbLoaded) return;
         const unsub = chatDb.subscribeToAllThreads(user.id, (newMsg) => {
-            // 현재 선택된 스레드에 메시지가 오면 messages에 추가
             setChats(prev => prev.map(c => {
                 if (c.id !== newMsg.thread_id) return c;
-                // 이미 존재하는 메시지면 무시 (optimistic update 중복 방지)
                 if (c.messages.some(m => m.id === newMsg.id)) return c;
                 const converted: Message = {
                     id: newMsg.id,
@@ -303,7 +160,6 @@ export default function MessengerPage() {
         if (!user?.id || !dbLoaded || !selectedChat || selectedChat === 'notifications') return;
         let cancelled = false;
 
-        // 이전 구독 해제
         if (realtimeUnsub.current) {
             realtimeUnsub.current();
             realtimeUnsub.current = null;
@@ -324,15 +180,12 @@ export default function MessengerPage() {
                 setChats(prev => prev.map(c =>
                     c.id === selectedChat ? { ...c, messages: converted } : c
                 ));
-
-                // 읽음 처리
                 chatDb.markAsRead(selectedChat, user.id);
             } catch {
                 // 에러 시 기존 메시지 유지
             }
         })();
 
-        // 개별 스레드 실시간 구독
         realtimeUnsub.current = chatDb.subscribeToMessages(selectedChat, (newMsg) => {
             if (cancelled) return;
             setChats(prev => prev.map(c => {
@@ -348,7 +201,6 @@ export default function MessengerPage() {
                 };
                 return { ...c, messages: [...c.messages, converted], lastActive: converted.time };
             }));
-            // 새 메시지 읽음 처리
             chatDb.markAsRead(selectedChat, user.id);
         });
 
@@ -393,12 +245,10 @@ export default function MessengerPage() {
         return false;
     });
 
-    // 대화 내 메시지 검색 필터
     const chatSearchResults = selectedThread && chatSearchQuery.trim()
         ? selectedThread.messages.filter(m => m.text.toLowerCase().includes(chatSearchQuery.toLowerCase()))
         : [];
 
-    // 1:1 상대 정보
     const chatPartnerId = selectedThread && !selectedThread.isGroup
         ? selectedThread.participants.find(p => p !== currentUserId) || ''
         : '';
@@ -413,28 +263,11 @@ export default function MessengerPage() {
     const allDepartments = divisions.flatMap(d => d.departments);
 
     /* ── 액션 핸들러 ── */
-    const toggleDivision = (id: string) => {
-        setExpandedDivisions(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id); else next.add(id);
-            return next;
-        });
-    };
-
-    const toggleSet = (setter: React.Dispatch<React.SetStateAction<Set<string>>>, key: string) => {
-        setter(prev => {
-            const n = new Set(prev);
-            if (n.has(key)) n.delete(key); else n.add(key);
-            return n;
-        });
-    };
-
     const selectChat = (chatId: string) => {
         setSelectedChat(chatId);
-        setSelectedChannel(null); // 채널 선택 해제
+        setSelectedChannel(null);
         setChatMenuOpen(null);
         setMobileView('chat');
-        // DB 모드: 읽음 처리
         if (user?.id && dbLoaded && chatId !== 'notifications') {
             chatDb.markAsRead(chatId, user.id);
         }
@@ -477,7 +310,6 @@ export default function MessengerPage() {
         const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
         const content = newMessage.trim();
 
-        // Optimistic update
         const optimisticId = `msg-${msgCounter.current++}`;
         const msg: Message = {
             id: optimisticId,
@@ -494,7 +326,6 @@ export default function MessengerPage() {
         ));
         setNewMessage('');
 
-        // DB 전송 (로그인 + DB 연동 시)
         if (user?.id && dbLoaded) {
             const sent = await chatDb.sendMessage({
                 threadId: selectedThread.id,
@@ -502,7 +333,6 @@ export default function MessengerPage() {
                 senderName: user.name || '나',
                 content,
             });
-            // DB 전송 성공 시 optimistic 메시지 ID를 실제 ID로 교체
             if (sent) {
                 setChats(prev => prev.map(c => {
                     if (c.id !== selectedChat) return c;
@@ -515,7 +345,6 @@ export default function MessengerPage() {
                 }));
             }
         } else {
-            // Mock 모드: 자동 응답 (1.5초 후)
             const threadRef = selectedThread;
             const chatRef = selectedChat;
             setTimeout(() => {
@@ -545,7 +374,6 @@ export default function MessengerPage() {
         if (existing) {
             setSelectedChat(existing.id);
         } else if (user?.id && dbLoaded) {
-            // DB 모드: 스레드 생성
             const person = getAnyPerson(personId);
             const thread = await chatDb.createThread({
                 isGroup: false,
@@ -565,7 +393,6 @@ export default function MessengerPage() {
                 setSelectedChat(thread.id);
             }
         } else {
-            // Mock 모드
             const person = getAnyPerson(personId);
             const newChat: ChatThread = {
                 id: `c-new-${personId}`,
@@ -588,7 +415,6 @@ export default function MessengerPage() {
         const name = groupName.trim();
 
         if (user?.id && dbLoaded) {
-            // DB 모드
             const thread = await chatDb.createThread({
                 name,
                 isGroup: true,
@@ -616,7 +442,6 @@ export default function MessengerPage() {
                 setSelectedChat(thread.id);
             }
         } else {
-            // Mock 모드
             const newChat: ChatThread = {
                 id: `c-group-${Date.now()}`,
                 name,
@@ -730,314 +555,50 @@ export default function MessengerPage() {
             {/* ══════════════════════════════════
                 1열: 대화 목록 / 조직도
                ══════════════════════════════════ */}
-            <div className={clsx(
-                "border-r border-neutral-200 bg-white flex flex-col shrink-0 transition-transform duration-300 ease-in-out",
-                // 데스크탑
-                "md:w-[260px] md:relative md:translate-x-0",
-                // 모바일: 전체 폭, 슬라이드
-                "w-full absolute inset-0 z-20",
-                mobileView === 'list' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-            )}>
-                {/* 탭 */}
-                <div className="flex border-b border-neutral-200">
-                    <button onClick={() => setActiveTab('channels')}
-                        className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                            activeTab === 'channels' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                        )}>
-                        채널
-                    </button>
-                    <button onClick={() => setActiveTab('chats')}
-                        className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                            activeTab === 'chats' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                        )}>
-                        대화 {unreadChats > 0 && <span className="ml-1 px-1.5 py-0.5 text-[11px] bg-red-500 text-white rounded-full">{unreadChats}</span>}
-                    </button>
-                    <button onClick={() => setActiveTab('people')}
-                        className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                            activeTab === 'people' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                        )}>
-                        조직도
-                    </button>
-                </div>
-
-                {/* 검색 */}
-                <div className="p-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-300" />
-                        <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                            placeholder="검색..." className="w-full pl-7 pr-3 py-1.5 text-[11px] border border-neutral-200 focus:outline-none focus:border-neutral-400" />
-                    </div>
-                </div>
-
-                {/* 컨텐츠 */}
-                <div className="flex-1 overflow-y-auto">
-                    {activeTab === 'channels' ? (
-                        <div>
-                            <div className="px-3 py-2 text-[10px] text-neutral-400 uppercase tracking-wider">에이전트 채널</div>
-                            {channels.map(ch => (
-                                <button key={ch.id}
-                                    onClick={() => { setSelectedChannel(ch); setSelectedChat(''); setMobileView('chat'); }}
-                                    className={clsx(
-                                        "w-full text-left px-3 py-2.5 border-b border-neutral-50 hover:bg-neutral-50 transition-colors",
-                                        selectedChannel?.id === ch.id && 'bg-neutral-100'
-                                    )}>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-neutral-700"># {ch.name}</span>
-                                        {ch.agent_name && (
-                                            <span className="text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded">{ch.agent_name}</span>
-                                        )}
-                                    </div>
-                                    {ch.description && (
-                                        <p className="text-[11px] text-neutral-400 mt-0.5 truncate">{ch.description}</p>
-                                    )}
-                                </button>
-                            ))}
-                            {channels.length === 0 && (
-                                <p className="px-3 py-8 text-center text-xs text-neutral-400">채널이 없습니다</p>
-                            )}
-                        </div>
-                    ) : activeTab === 'chats' ? (
-                        <div>
-                            {/* 그룹 / 일괄 버튼 */}
-                            <div className="flex gap-1.5 px-3 py-1.5 border-b border-neutral-100">
-                                <button onClick={() => setShowNewGroupModal(true)}
-                                    className="flex-1 py-1.5 text-xs font-medium text-neutral-500 border border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 transition-colors">
-                                    + 그룹 채팅
-                                </button>
-                                <button onClick={() => setShowBroadcastModal(true)}
-                                    className="flex-1 py-1.5 text-xs font-medium text-neutral-500 border border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 transition-colors">
-                                    일괄 메시지
-                                </button>
-                            </div>
-
-                            {/* 알림 */}
-                            <button onClick={() => selectChat('notifications')}
-                                className={clsx("w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
-                                    selectedChat === 'notifications' ? 'bg-neutral-100' : 'hover:bg-neutral-50')}>
-                                <div className="h-8 w-8 bg-amber-50 flex items-center justify-center shrink-0">
-                                    <Bell className="h-3.5 w-3.5 text-amber-500" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[11px] font-medium">알림</span>
-                                        {unreadNotifications > 0 && <span className="text-[10px] px-1 py-0.5 bg-red-500 text-white rounded-full">{unreadNotifications}</span>}
-                                    </div>
-                                    <p className="text-[11px] text-neutral-400 truncate">업무 · 프로젝트 · 결재</p>
-                                </div>
-                            </button>
-
-                            {/* 채팅 목록 */}
-                            {filteredChats.map(chat => {
-                                const lastMsg = chat.messages[chat.messages.length - 1];
-                                const hasUnread = chat.messages.some(m => !m.read && m.from !== currentUserId);
-                                const unreadCount = chat.messages.filter(m => !m.read && m.from !== currentUserId).length;
-                                const menuOpen = chatMenuOpen === chat.id;
-                                return (
-                                    <div key={chat.id} className={clsx("relative group flex items-center",
-                                        selectedChat === chat.id ? 'bg-neutral-100' : 'hover:bg-neutral-50')}>
-                                        {editingChatName === chat.id ? (
-                                            <div className="flex-1 px-3 py-2 flex items-center gap-1.5">
-                                                <input value={editChatNameValue} onChange={e => setEditChatNameValue(e.target.value)}
-                                                    autoFocus onKeyDown={e => { if (e.key === 'Enter') renameChatConfirm(chat.id); if (e.key === 'Escape') setEditingChatName(null); }}
-                                                    className="flex-1 px-2 py-1 text-xs border border-neutral-300 focus:outline-none focus:border-neutral-500" />
-                                                <button onClick={() => renameChatConfirm(chat.id)} className="text-[11px] text-neutral-500 hover:text-neutral-900">확인</button>
-                                                <button onClick={() => setEditingChatName(null)} className="text-[11px] text-neutral-400">취소</button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => selectChat(chat.id)}
-                                                    className="flex-1 flex items-center gap-2.5 px-3 py-2 text-left min-w-0">
-                                                    <div className={clsx("h-8 w-8 flex items-center justify-center text-[11px] font-bold shrink-0",
-                                                        chat.isGroup ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-100 text-neutral-400')}>
-                                                        {chat.isGroup ? <Users className="h-3.5 w-3.5" /> : getStaffInitials(chat.participants.find(p => p !== currentUserId) || '')}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <span className={clsx("text-[11px] truncate max-w-[120px]", hasUnread ? 'font-bold' : 'font-medium')}>
-                                                                {chat.name}
-                                                                {chat.isGroup && <span className="text-[10px] text-neutral-300 ml-1">({chat.participants.length})</span>}
-                                                            </span>
-                                                            <span className="text-[10px] text-neutral-300 shrink-0">{chat.lastActive}</span>
-                                                        </div>
-                                                        <p className={clsx("text-[11px] truncate", hasUnread ? 'text-neutral-600' : 'text-neutral-400')}>{lastMsg?.text}</p>
-                                                    </div>
-                                                    {unreadCount > 0 && (
-                                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-500 text-white rounded-full shrink-0 min-w-[18px] text-center">
-                                                            {unreadCount}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                                <button onClick={e => { e.stopPropagation(); setChatMenuOpen(menuOpen ? null : chat.id); }}
-                                                    className="p-1.5 mr-1 opacity-0 group-hover:opacity-100 hover:bg-neutral-200 transition-all shrink-0">
-                                                    <MoreVertical className="h-3 w-3 text-neutral-400" />
-                                                </button>
-                                                {menuOpen && (
-                                                    <div className="absolute right-2 top-8 z-30 bg-white border border-neutral-200 py-1 w-28"
-                                                        onClick={e => e.stopPropagation()}>
-                                                        {chat.isGroup && (
-                                                            <button onClick={() => { setEditingChatName(chat.id); setEditChatNameValue(chat.name); setChatMenuOpen(null); }}
-                                                                className="w-full text-left px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50">이름 수정</button>
-                                                        )}
-                                                        {chat.isGroup && (
-                                                            <button onClick={() => leaveChat(chat.id)}
-                                                                className="w-full text-left px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50">나가기</button>
-                                                        )}
-                                                        <button onClick={() => deleteChat(chat.id)}
-                                                            className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">삭제</button>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        /* ── 조직도 탭 ── */
-                        <div className="py-1">
-                            {divisions.map(div => {
-                                const divStaff = filteredStaff.filter(s => s.division === div.id);
-                                const divExpanded = expandedDivisions.has(div.id);
-                                return (
-                                    <div key={div.id} className="mb-0.5">
-                                        <button onClick={() => toggleDivision(div.id)}
-                                            className="w-full flex items-center gap-1 px-3 py-1.5 hover:bg-neutral-50">
-                                            {divExpanded ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                            <span className="text-xs font-medium text-neutral-600">{div.name}</span>
-                                            <span className="text-[10px] text-neutral-300 ml-auto pr-1">{divStaff.length}</span>
-                                        </button>
-                                        {divExpanded && div.departments.map(dept => {
-                                            const deptStaff = divStaff.filter(s => s.department === dept);
-                                            if (deptStaff.length === 0) return null;
-                                            const deptKey = `people-${div.id}-${dept}`;
-                                            const deptExpanded = expandedDepts.has(deptKey);
-                                            return (
-                                                <div key={dept} className="ml-4">
-                                                    <button onClick={() => toggleSet(setExpandedDepts, deptKey)}
-                                                        className="w-full flex items-center gap-1 px-2 py-1 hover:bg-neutral-50">
-                                                        {deptExpanded ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                        <span className="text-[11px] text-neutral-500">{dept}</span>
-                                                        <span className="text-[10px] text-neutral-300 ml-auto pr-1">{deptStaff.length}</span>
-                                                    </button>
-                                                    {deptExpanded && deptStaff.map(s => (
-                                                        <button key={s.id} onClick={() => startChatWith(s.id)}
-                                                            className="w-full flex items-center gap-2 px-3 py-1 ml-4 text-left hover:bg-neutral-50 transition-colors">
-                                                            <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0 relative">
-                                                                {s.avatarInitials}
-                                                                <span className={clsx("absolute -bottom-px -right-px h-1.5 w-1.5 border border-white",
-                                                                    s.status === 'Active' ? 'bg-green-400' : 'bg-neutral-300')} />
-                                                            </div>
-                                                            <span className="text-xs truncate">{s.name}</span>
-                                                            <span className="text-[10px] text-neutral-300 ml-auto shrink-0">{s.position}</span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                );
-                            })}
-
-                            {/* Crew */}
-                            <div className="mt-1 border-t border-neutral-100 pt-1">
-                                <button onClick={() => toggleSet(setExpandedCrew, 'crew')}
-                                    className="w-full flex items-center gap-1 px-3 py-1.5 hover:bg-neutral-50">
-                                    {expandedCrew.has('crew') ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                    <span className="text-xs font-medium text-neutral-600">Crew</span>
-                                    <span className="text-[10px] text-neutral-300 ml-auto pr-1">{activeCrewMembers.length}명</span>
-                                </button>
-                                {expandedCrew.has('crew') && (
-                                    <>
-                                        {/* YouInOne */}
-                                        {youinoneMembers.length > 0 && (
-                                            <div className="ml-4">
-                                                <button onClick={() => toggleSet(setExpandedCrewSubs, 'youinone')}
-                                                    className="w-full flex items-center gap-1 px-2 py-1 hover:bg-neutral-50">
-                                                    {expandedCrewSubs.has('youinone') ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                    <span className="text-[11px] text-neutral-500">YouInOne</span>
-                                                    <span className="text-[10px] text-neutral-300 ml-auto pr-1">{youinoneMembers.length}</span>
-                                                </button>
-                                                {expandedCrewSubs.has('youinone') && youinoneMembers.map(p => (
-                                                    <button key={p.id} onClick={() => startChatWith(p.id)}
-                                                        className="w-full flex items-center gap-2 px-3 py-1 ml-4 text-left hover:bg-neutral-50 transition-colors">
-                                                        <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0">
-                                                            {p.avatarInitials}
-                                                        </div>
-                                                        <span className="text-xs truncate">{p.name}</span>
-                                                        <span className="text-[10px] text-neutral-300 ml-auto shrink-0">{p.crewRole || ''}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {/* Alliance */}
-                                        {allianceMembers.length > 0 && (
-                                            <div className="ml-4">
-                                                <button onClick={() => toggleSet(setExpandedCrewSubs, 'alliance')}
-                                                    className="w-full flex items-center gap-1 px-2 py-1 hover:bg-neutral-50">
-                                                    {expandedCrewSubs.has('alliance') ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                    <span className="text-[11px] text-neutral-500">YouInOne Alliance</span>
-                                                    <span className="text-[10px] text-neutral-300 ml-auto pr-1">{allianceMembers.length}</span>
-                                                </button>
-                                                {expandedCrewSubs.has('alliance') && allianceMembers.map(p => (
-                                                    <button key={p.id} onClick={() => startChatWith(p.id)}
-                                                        className="w-full flex items-center gap-2 px-3 py-1 ml-4 text-left hover:bg-neutral-50 transition-colors">
-                                                        <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0">
-                                                            {p.avatarInitials}
-                                                        </div>
-                                                        <span className="text-xs truncate">{p.name}</span>
-                                                        <span className="text-[10px] text-neutral-300 ml-auto shrink-0">{p.crewRole || ''}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {/* MADLeague */}
-                                        {madleagueByClub.length > 0 && (
-                                            <div className="ml-4">
-                                                <button onClick={() => toggleSet(setExpandedCrewSubs, 'madleague')}
-                                                    className="w-full flex items-center gap-1 px-2 py-1 hover:bg-neutral-50">
-                                                    {expandedCrewSubs.has('madleague') ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                    <span className="text-[11px] text-neutral-500">MADLeague</span>
-                                                    <span className="text-[10px] text-neutral-300 ml-auto pr-1">{madleagueMembers.length}</span>
-                                                </button>
-                                                {expandedCrewSubs.has('madleague') && madleagueByClub.map(({ club, members }) => (
-                                                    <div key={club.id} className="ml-4">
-                                                        <button onClick={() => toggleSet(setExpandedCrewSubs, `mad-${club.id}`)}
-                                                            className="w-full flex items-center gap-1 px-2 py-1 hover:bg-neutral-50">
-                                                            {expandedCrewSubs.has(`mad-${club.id}`) ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                            <span className="text-[11px] text-neutral-500">{club.name}</span>
-                                                            <span className="text-[7px] text-neutral-300 ml-1">{club.region}</span>
-                                                            <span className="text-[10px] text-neutral-300 ml-auto pr-1">{members.length}</span>
-                                                        </button>
-                                                        {expandedCrewSubs.has(`mad-${club.id}`) && members.map(p => (
-                                                            <button key={p.id} onClick={() => startChatWith(p.id)}
-                                                                className="w-full flex items-center gap-2 px-3 py-1 ml-4 text-left hover:bg-neutral-50 transition-colors">
-                                                                <div className="h-5 w-5 bg-neutral-100 flex items-center justify-center text-[7px] font-bold text-neutral-400 shrink-0">
-                                                                    {p.avatarInitials}
-                                                                </div>
-                                                                <span className="text-xs truncate">{p.name}</span>
-                                                                <span className="text-[10px] text-neutral-300 ml-auto shrink-0">{p.crewRole || ''}</span>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+            <MessengerSidebar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedChat={selectedChat}
+                selectedChannel={selectedChannel}
+                setSelectedChannel={setSelectedChannel}
+                channels={channels}
+                filteredChats={filteredChats}
+                filteredStaff={filteredStaff}
+                unreadChats={unreadChats}
+                unreadNotifications={unreadNotifications}
+                chatMenuOpen={chatMenuOpen}
+                setChatMenuOpen={setChatMenuOpen}
+                editingChatName={editingChatName}
+                setEditingChatName={setEditingChatName}
+                editChatNameValue={editChatNameValue}
+                setEditChatNameValue={setEditChatNameValue}
+                expandedDivisions={expandedDivisions}
+                setExpandedDivisions={setExpandedDivisions}
+                expandedDepts={expandedDepts}
+                setExpandedDepts={setExpandedDepts}
+                expandedCrew={expandedCrew}
+                setExpandedCrew={setExpandedCrew}
+                expandedCrewSubs={expandedCrewSubs}
+                setExpandedCrewSubs={setExpandedCrewSubs}
+                mobileView={mobileView}
+                setMobileView={setMobileView}
+                onSelectChat={selectChat}
+                onStartChatWith={startChatWith}
+                onShowNewGroupModal={() => setShowNewGroupModal(true)}
+                onShowBroadcastModal={() => setShowBroadcastModal(true)}
+                onDeleteChat={deleteChat}
+                onLeaveChat={leaveChat}
+                onRenameChatConfirm={renameChatConfirm}
+            />
 
             {/* ══════════════════════════════════
                 2열: 대화창
                ══════════════════════════════════ */}
             <div className={clsx(
                 "flex-1 flex flex-col bg-neutral-50 min-w-0 max-w-2xl transition-transform duration-300 ease-in-out",
-                // 데스크탑
                 "md:relative md:translate-x-0",
-                // 모바일
                 "w-full absolute inset-0 z-30",
                 mobileView === 'chat' ? 'translate-x-0' : mobileView === 'profile' ? '-translate-x-full' : 'translate-x-full',
                 "md:translate-x-0"
@@ -1293,9 +854,7 @@ export default function MessengerPage() {
                ══════════════════════════════════ */}
             <div className={clsx(
                 "border-l border-neutral-200 bg-white flex flex-col shrink-0 overflow-y-auto transition-transform duration-300 ease-in-out",
-                // 데스크탑
                 "md:w-[280px] md:relative md:translate-x-0 md:flex-1",
-                // 모바일
                 "w-full absolute inset-0 z-40",
                 mobileView === 'profile' ? 'translate-x-0' : 'translate-x-full',
                 "md:translate-x-0"
@@ -1311,7 +870,6 @@ export default function MessengerPage() {
                 {selectedChannel ? (
                     /* ── 채널 정보 패널 ── */
                     <>
-                        {/* 채널 헤더 */}
                         <div className="p-4 border-b border-neutral-100">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-neutral-800"># {selectedChannel.name}</span>
@@ -1390,8 +948,6 @@ export default function MessengerPage() {
                                 </div>
                             )}
                         </div>
-
-                        {/* 오늘 일정 (채널 선택 시에도 표시) */}
                     </>
                 ) : (
                     /* ── 일반 대화 패널 ── */
@@ -1514,376 +1070,37 @@ export default function MessengerPage() {
                 모달: 그룹 채팅 생성
                ══════════════════════════════════ */}
             {showNewGroupModal && (
-                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setShowNewGroupModal(false)}>
-                    <div className="bg-white w-[400px] max-w-[95vw] max-h-[500px] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="px-5 py-3 border-b border-neutral-100">
-                            <h3 className="text-sm font-semibold">그룹 채팅 만들기</h3>
-                            <p className="text-xs text-neutral-400">2명 이상 선택하세요</p>
-                        </div>
-                        <div className="px-5 py-3 border-b border-neutral-100">
-                            <input value={groupName} onChange={e => setGroupName(e.target.value)}
-                                placeholder="그룹 이름..."
-                                className="w-full px-3 py-1.5 text-xs border border-neutral-200 focus:outline-none focus:border-neutral-400" />
-                            {groupSelectedMembers.size > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                    {Array.from(groupSelectedMembers).map(id => (
-                                        <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] bg-neutral-100">
-                                            {getStaffName(id)}
-                                            <button onClick={() => setGroupSelectedMembers(prev => { const n = new Set(prev); n.delete(id); return n; })}
-                                                className="text-neutral-400 hover:text-red-500">×</button>
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1 overflow-y-auto px-5 py-2 max-h-[320px]">
-                            {/* Staff divisions */}
-                            {divisions.map(div => {
-                                const divStaff = initialStaff.filter(s => s.division === div.id && s.id !== currentUserId);
-                                const allDivSelected = divStaff.every(s => groupSelectedMembers.has(s.id));
-                                const someDivSelected = divStaff.some(s => groupSelectedMembers.has(s.id));
-                                const divExpanded = groupExpandedDivs.has(div.id);
-                                return (
-                                    <div key={div.id} className="mb-0.5">
-                                        <div className="flex items-center gap-1 px-1 py-1.5 hover:bg-neutral-50">
-                                            <button onClick={() => toggleSet(setGroupExpandedDivs, div.id)} className="p-0.5">
-                                                {divExpanded ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                            </button>
-                                            <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                <input type="checkbox" checked={allDivSelected}
-                                                    ref={el => { if (el) el.indeterminate = someDivSelected && !allDivSelected; }}
-                                                    onChange={e => {
-                                                        setGroupSelectedMembers(prev => {
-                                                            const n = new Set(prev);
-                                                            divStaff.forEach(s => e.target.checked ? n.add(s.id) : n.delete(s.id));
-                                                            return n;
-                                                        });
-                                                    }}
-                                                    className="h-3 w-3 border-neutral-300" />
-                                                <span className="text-xs font-medium text-neutral-600">{div.name}</span>
-                                            </label>
-                                            <span className="text-[10px] text-neutral-300 pr-1">{divStaff.filter(s => groupSelectedMembers.has(s.id)).length}/{divStaff.length}</span>
-                                        </div>
-                                        {divExpanded && div.departments.map(dept => {
-                                            const deptStaff = divStaff.filter(s => s.department === dept);
-                                            if (deptStaff.length === 0) return null;
-                                            const allDeptSelected = deptStaff.every(s => groupSelectedMembers.has(s.id));
-                                            const someDeptSelected = deptStaff.some(s => groupSelectedMembers.has(s.id));
-                                            const deptKey = `${div.id}-${dept}`;
-                                            const deptExpanded = groupExpandedDepts.has(deptKey);
-                                            return (
-                                                <div key={dept} className="ml-5">
-                                                    <div className="flex items-center gap-1 px-1 py-1 hover:bg-neutral-50">
-                                                        <button onClick={() => toggleSet(setGroupExpandedDepts, deptKey)} className="p-0.5">
-                                                            {deptExpanded ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                        </button>
-                                                        <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                            <input type="checkbox" checked={allDeptSelected}
-                                                                ref={el => { if (el) el.indeterminate = someDeptSelected && !allDeptSelected; }}
-                                                                onChange={e => {
-                                                                    setGroupSelectedMembers(prev => {
-                                                                        const n = new Set(prev);
-                                                                        deptStaff.forEach(s => e.target.checked ? n.add(s.id) : n.delete(s.id));
-                                                                        return n;
-                                                                    });
-                                                                }}
-                                                                className="h-3 w-3 border-neutral-300" />
-                                                            <span className="text-[11px] text-neutral-500">{dept}</span>
-                                                        </label>
-                                                        <span className="text-[10px] text-neutral-300 pr-1">{deptStaff.filter(s => groupSelectedMembers.has(s.id)).length}/{deptStaff.length}</span>
-                                                    </div>
-                                                    {deptExpanded && deptStaff.map(s => (
-                                                        <label key={s.id} className="flex items-center gap-2 px-2 py-1 ml-5 hover:bg-neutral-50 cursor-pointer">
-                                                            <input type="checkbox" checked={groupSelectedMembers.has(s.id)}
-                                                                onChange={e => {
-                                                                    setGroupSelectedMembers(prev => {
-                                                                        const n = new Set(prev);
-                                                                        if (e.target.checked) n.add(s.id); else n.delete(s.id);
-                                                                        return n;
-                                                                    });
-                                                                }}
-                                                                className="h-3 w-3 border-neutral-300" />
-                                                            <div className="h-4 w-4 bg-neutral-100 flex items-center justify-center text-[6px] font-bold text-neutral-400 shrink-0">
-                                                                {s.avatarInitials}
-                                                            </div>
-                                                            <span className="text-[11px]">{s.name}</span>
-                                                            <span className="text-[7px] text-neutral-300 ml-auto">{s.position}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                );
-                            })}
-
-                            {/* Crew in modal */}
-                            <div className="mt-1 pt-1 border-t border-neutral-100">
-                                {/* YouInOne */}
-                                {youinoneMembers.length > 0 && (() => {
-                                    const allSelected = youinoneMembers.every(p => groupSelectedMembers.has(p.id));
-                                    const someSelected = youinoneMembers.some(p => groupSelectedMembers.has(p.id));
-                                    const expanded = groupExpandedDivs.has('crew-youinone');
-                                    return (
-                                        <div className="mb-0.5">
-                                            <div className="flex items-center gap-1 px-1 py-1.5 hover:bg-neutral-50">
-                                                <button onClick={() => toggleSet(setGroupExpandedDivs, 'crew-youinone')} className="p-0.5">
-                                                    {expanded ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                                </button>
-                                                <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                    <input type="checkbox" checked={allSelected}
-                                                        ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }}
-                                                        onChange={e => {
-                                                            setGroupSelectedMembers(prev => {
-                                                                const n = new Set(prev);
-                                                                youinoneMembers.forEach(p => e.target.checked ? n.add(p.id) : n.delete(p.id));
-                                                                return n;
-                                                            });
-                                                        }}
-                                                        className="h-3 w-3 border-neutral-300" />
-                                                    <span className="text-xs font-medium text-neutral-600">YouInOne</span>
-                                                </label>
-                                                <span className="text-[10px] text-neutral-300 pr-1">{youinoneMembers.filter(p => groupSelectedMembers.has(p.id)).length}/{youinoneMembers.length}</span>
-                                            </div>
-                                            {expanded && youinoneMembers.map(p => (
-                                                <label key={p.id} className="flex items-center gap-2 px-2 py-1 ml-5 hover:bg-neutral-50 cursor-pointer">
-                                                    <input type="checkbox" checked={groupSelectedMembers.has(p.id)}
-                                                        onChange={e => {
-                                                            setGroupSelectedMembers(prev => {
-                                                                const n = new Set(prev);
-                                                                if (e.target.checked) n.add(p.id); else n.delete(p.id);
-                                                                return n;
-                                                            });
-                                                        }}
-                                                        className="h-3 w-3 border-neutral-300" />
-                                                    <div className="h-4 w-4 bg-neutral-100 flex items-center justify-center text-[6px] font-bold text-neutral-400 shrink-0">
-                                                        {p.avatarInitials}
-                                                    </div>
-                                                    <span className="text-[11px]">{p.name}</span>
-                                                    <span className="text-[7px] text-neutral-300 ml-auto">{p.crewRole || ''}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    );
-                                })()}
-
-                                {/* Alliance */}
-                                {allianceMembers.length > 0 && (() => {
-                                    const allSelected = allianceMembers.every(p => groupSelectedMembers.has(p.id));
-                                    const someSelected = allianceMembers.some(p => groupSelectedMembers.has(p.id));
-                                    const expanded = groupExpandedDivs.has('crew-alliance');
-                                    return (
-                                        <div className="mb-0.5">
-                                            <div className="flex items-center gap-1 px-1 py-1.5 hover:bg-neutral-50">
-                                                <button onClick={() => toggleSet(setGroupExpandedDivs, 'crew-alliance')} className="p-0.5">
-                                                    {expanded ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                                </button>
-                                                <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                    <input type="checkbox" checked={allSelected}
-                                                        ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }}
-                                                        onChange={e => {
-                                                            setGroupSelectedMembers(prev => {
-                                                                const n = new Set(prev);
-                                                                allianceMembers.forEach(p => e.target.checked ? n.add(p.id) : n.delete(p.id));
-                                                                return n;
-                                                            });
-                                                        }}
-                                                        className="h-3 w-3 border-neutral-300" />
-                                                    <span className="text-xs font-medium text-neutral-600">YouInOne Alliance</span>
-                                                </label>
-                                                <span className="text-[10px] text-neutral-300 pr-1">{allianceMembers.filter(p => groupSelectedMembers.has(p.id)).length}/{allianceMembers.length}</span>
-                                            </div>
-                                            {expanded && allianceMembers.map(p => (
-                                                <label key={p.id} className="flex items-center gap-2 px-2 py-1 ml-5 hover:bg-neutral-50 cursor-pointer">
-                                                    <input type="checkbox" checked={groupSelectedMembers.has(p.id)}
-                                                        onChange={e => {
-                                                            setGroupSelectedMembers(prev => {
-                                                                const n = new Set(prev);
-                                                                if (e.target.checked) n.add(p.id); else n.delete(p.id);
-                                                                return n;
-                                                            });
-                                                        }}
-                                                        className="h-3 w-3 border-neutral-300" />
-                                                    <div className="h-4 w-4 bg-neutral-100 flex items-center justify-center text-[6px] font-bold text-neutral-400 shrink-0">
-                                                        {p.avatarInitials}
-                                                    </div>
-                                                    <span className="text-[11px]">{p.name}</span>
-                                                    <span className="text-[7px] text-neutral-300 ml-auto">{p.crewRole || ''}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    );
-                                })()}
-
-                                {/* MADLeague */}
-                                {madleagueByClub.length > 0 && (() => {
-                                    const allMadMembers = madleagueMembers;
-                                    const allSelected = allMadMembers.every(p => groupSelectedMembers.has(p.id));
-                                    const someSelected = allMadMembers.some(p => groupSelectedMembers.has(p.id));
-                                    const expanded = groupExpandedDivs.has('crew-madleague');
-                                    return (
-                                        <div className="mb-0.5">
-                                            <div className="flex items-center gap-1 px-1 py-1.5 hover:bg-neutral-50">
-                                                <button onClick={() => toggleSet(setGroupExpandedDivs, 'crew-madleague')} className="p-0.5">
-                                                    {expanded ? <ChevronDown className="h-3 w-3 text-neutral-400" /> : <ChevronRight className="h-3 w-3 text-neutral-400" />}
-                                                </button>
-                                                <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                    <input type="checkbox" checked={allSelected}
-                                                        ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }}
-                                                        onChange={e => {
-                                                            setGroupSelectedMembers(prev => {
-                                                                const n = new Set(prev);
-                                                                allMadMembers.forEach(p => e.target.checked ? n.add(p.id) : n.delete(p.id));
-                                                                return n;
-                                                            });
-                                                        }}
-                                                        className="h-3 w-3 border-neutral-300" />
-                                                    <span className="text-xs font-medium text-neutral-600">MADLeague</span>
-                                                </label>
-                                                <span className="text-[10px] text-neutral-300 pr-1">{allMadMembers.filter(p => groupSelectedMembers.has(p.id)).length}/{allMadMembers.length}</span>
-                                            </div>
-                                            {expanded && madleagueByClub.map(({ club, members }) => {
-                                                const clubAllSelected = members.every(p => groupSelectedMembers.has(p.id));
-                                                const clubSomeSelected = members.some(p => groupSelectedMembers.has(p.id));
-                                                const clubKey = `crew-mad-${club.id}`;
-                                                const clubExpanded = groupExpandedDepts.has(clubKey);
-                                                return (
-                                                    <div key={club.id} className="ml-5">
-                                                        <div className="flex items-center gap-1 px-1 py-1 hover:bg-neutral-50">
-                                                            <button onClick={() => toggleSet(setGroupExpandedDepts, clubKey)} className="p-0.5">
-                                                                {clubExpanded ? <ChevronDown className="h-2.5 w-2.5 text-neutral-300" /> : <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />}
-                                                            </button>
-                                                            <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                                                <input type="checkbox" checked={clubAllSelected}
-                                                                    ref={el => { if (el) el.indeterminate = clubSomeSelected && !clubAllSelected; }}
-                                                                    onChange={e => {
-                                                                        setGroupSelectedMembers(prev => {
-                                                                            const n = new Set(prev);
-                                                                            members.forEach(p => e.target.checked ? n.add(p.id) : n.delete(p.id));
-                                                                            return n;
-                                                                        });
-                                                                    }}
-                                                                    className="h-3 w-3 border-neutral-300" />
-                                                                <span className="text-[11px] text-neutral-500">{club.name}</span>
-                                                                <span className="text-[7px] text-neutral-300 ml-1">{club.region}</span>
-                                                            </label>
-                                                            <span className="text-[10px] text-neutral-300 pr-1">{members.filter(p => groupSelectedMembers.has(p.id)).length}/{members.length}</span>
-                                                        </div>
-                                                        {clubExpanded && members.map(p => (
-                                                            <label key={p.id} className="flex items-center gap-2 px-2 py-1 ml-5 hover:bg-neutral-50 cursor-pointer">
-                                                                <input type="checkbox" checked={groupSelectedMembers.has(p.id)}
-                                                                    onChange={e => {
-                                                                        setGroupSelectedMembers(prev => {
-                                                                            const n = new Set(prev);
-                                                                            if (e.target.checked) n.add(p.id); else n.delete(p.id);
-                                                                            return n;
-                                                                        });
-                                                                    }}
-                                                                    className="h-3 w-3 border-neutral-300" />
-                                                                <div className="h-4 w-4 bg-neutral-100 flex items-center justify-center text-[6px] font-bold text-neutral-400 shrink-0">
-                                                                    {p.avatarInitials}
-                                                                </div>
-                                                                <span className="text-[11px]">{p.name}</span>
-                                                                <span className="text-[7px] text-neutral-300 ml-auto">{p.crewRole || ''}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-                        </div>
-                        <div className="px-5 py-3 border-t border-neutral-100 flex justify-end gap-2">
-                            <button onClick={() => setShowNewGroupModal(false)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100">취소</button>
-                            <button onClick={createGroupChat}
-                                disabled={groupSelectedMembers.size < 1 || !groupName.trim()}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30 disabled:cursor-not-allowed">
-                                생성 ({groupSelectedMembers.size}명 선택)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <GroupChatModal
+                    groupName={groupName}
+                    setGroupName={setGroupName}
+                    groupSelectedMembers={groupSelectedMembers}
+                    setGroupSelectedMembers={setGroupSelectedMembers}
+                    groupExpandedDivs={groupExpandedDivs}
+                    setGroupExpandedDivs={setGroupExpandedDivs}
+                    groupExpandedDepts={groupExpandedDepts}
+                    setGroupExpandedDepts={setGroupExpandedDepts}
+                    onClose={() => setShowNewGroupModal(false)}
+                    onConfirm={createGroupChat}
+                />
             )}
 
             {/* ══════════════════════════════════
                 모달: 일괄 메시지
                ══════════════════════════════════ */}
             {showBroadcastModal && (
-                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setShowBroadcastModal(false)}>
-                    <div className="bg-white w-[420px] max-w-[95vw]" onClick={e => e.stopPropagation()}>
-                        <div className="px-5 py-3 border-b border-neutral-100">
-                            <h3 className="text-sm font-semibold">일괄 메시지</h3>
-                            <p className="text-xs text-neutral-400">대상을 선택하고 메시지를 보내세요</p>
-                        </div>
-                        <div className="px-5 py-4 space-y-3">
-                            <div>
-                                <p className="text-xs font-medium text-neutral-500 mb-1.5">대상</p>
-                                <div className="flex gap-1.5">
-                                    {[
-                                        { key: 'all' as const, label: `전 직원 (${initialStaff.length - 1}명)` },
-                                        { key: 'division' as const, label: '부문별' },
-                                        { key: 'department' as const, label: '부서별' },
-                                    ].map(t => (
-                                        <button key={t.key} onClick={() => setBroadcastTarget(t.key)}
-                                            className={clsx("px-3 py-1.5 text-xs border transition-colors",
-                                                broadcastTarget === t.key ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 hover:border-neutral-400')}>
-                                            {t.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            {broadcastTarget === 'division' && (
-                                <div>
-                                    <p className="text-xs font-medium text-neutral-500 mb-1.5">부문 선택</p>
-                                    <div className="flex gap-1.5 flex-wrap">
-                                        {divisions.map(d => (
-                                            <button key={d.id} onClick={() => setBroadcastDivision(d.id)}
-                                                className={clsx("px-3 py-1 text-xs border transition-colors",
-                                                    broadcastDivision === d.id ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 hover:border-neutral-400')}>
-                                                {d.name} ({initialStaff.filter(s => s.division === d.id && s.id !== currentUserId).length}명)
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {broadcastTarget === 'department' && (
-                                <div>
-                                    <p className="text-xs font-medium text-neutral-500 mb-1.5">부서 선택</p>
-                                    <div className="flex gap-1 flex-wrap">
-                                        {allDepartments.map(dept => {
-                                            const count = initialStaff.filter(s => s.department === dept && s.id !== currentUserId).length;
-                                            if (count === 0) return null;
-                                            return (
-                                                <button key={dept} onClick={() => setBroadcastDept(dept)}
-                                                    className={clsx("px-2.5 py-1 text-[11px] border transition-colors",
-                                                        broadcastDept === dept ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 hover:border-neutral-400')}>
-                                                    {dept} ({count})
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                            <div>
-                                <p className="text-xs font-medium text-neutral-500 mb-1.5">메시지</p>
-                                <textarea value={broadcastMessage} onChange={e => setBroadcastMessage(e.target.value)}
-                                    placeholder="전달할 메시지를 입력하세요..."
-                                    rows={4}
-                                    className="w-full px-3 py-2 text-xs border border-neutral-200 resize-none focus:outline-none focus:border-neutral-400" />
-                            </div>
-                        </div>
-                        <div className="px-5 py-3 border-t border-neutral-100 flex justify-end gap-2">
-                            <button onClick={() => setShowBroadcastModal(false)} className="px-4 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100">취소</button>
-                            <button onClick={sendBroadcast}
-                                disabled={!broadcastMessage.trim()}
-                                className="px-4 py-1.5 text-xs bg-neutral-900 text-white disabled:opacity-30 disabled:cursor-not-allowed">
-                                전송
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <BroadcastModal
+                    broadcastTarget={broadcastTarget}
+                    setBroadcastTarget={setBroadcastTarget}
+                    broadcastDivision={broadcastDivision}
+                    setBroadcastDivision={setBroadcastDivision}
+                    broadcastDept={broadcastDept}
+                    setBroadcastDept={setBroadcastDept}
+                    broadcastMessage={broadcastMessage}
+                    setBroadcastMessage={setBroadcastMessage}
+                    allDepartments={allDepartments}
+                    onClose={() => setShowBroadcastModal(false)}
+                    onSend={sendBroadcast}
+                />
             )}
         </div>
         </>
