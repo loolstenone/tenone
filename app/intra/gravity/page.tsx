@@ -229,7 +229,7 @@ export default function GravityPage() {
 
     /* ── UI ── */
     return (
-        <div className="flex-1 flex flex-col min-h-0 bg-neutral-950">
+        <div className="flex-1 flex flex-col min-h-0">
             <PageHeader
                 title="Brand Gravity"
                 description="AI 추천 브랜드 노출 분석 · AEO 콘텐츠 전략"
