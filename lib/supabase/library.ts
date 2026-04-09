@@ -4,36 +4,36 @@ import type { LibraryItem, LibraryBookmark, LibrarySource } from '@/types/librar
 const supabase = createClient();
 
 // ── Helper: DB row → Frontend type ──────────────────
-function rowToLibraryItem(r: any): LibraryItem {
+function rowToLibraryItem(r: Record<string, unknown>): LibraryItem {
   return {
-    id: r.id,
-    title: r.title || '',
-    description: r.description || '',
-    category: r.category || '기타',
-    source: r.source || 'cms',
-    format: r.format || 'OTHER',
-    fileUrl: r.file_url || undefined,
-    fileSize: r.file_size || undefined,
-    tags: r.tags || [],
-    author: r.author || '',
-    authorId: r.author_id || '',
-    createdAt: r.created_at?.split('T')[0] || '',
-    updatedAt: r.updated_at?.split('T')[0] || '',
-    permission: r.permission || 'all',
-    projectCode: r.project_code || undefined,
-    projectName: r.project_name || undefined,
+    id: r.id as string,
+    title: (r.title as string) || '',
+    description: (r.description as string) || '',
+    category: (r.category as LibraryItem['category']) || '기타',
+    source: (r.source as LibraryItem['source']) || 'cms',
+    format: (r.format as LibraryItem['format']) || 'OTHER',
+    fileUrl: (r.file_url as string) || undefined,
+    fileSize: (r.file_size as string) || undefined,
+    tags: (r.tags as string[]) || [],
+    author: (r.author as string) || '',
+    authorId: (r.author_id as string) || '',
+    createdAt: ((r.created_at as string)?.split('T')[0]) || '',
+    updatedAt: ((r.updated_at as string)?.split('T')[0]) || '',
+    permission: (r.permission as LibraryItem['permission']) || 'all',
+    projectCode: (r.project_code as string) || undefined,
+    projectName: (r.project_name as string) || undefined,
     bookmarkCount: Number(r.bookmark_count) || 0,
     viewCount: Number(r.view_count) || 0,
   };
 }
 
-function rowToBookmark(r: any): LibraryBookmark {
+function rowToBookmark(r: Record<string, unknown>): LibraryBookmark {
   return {
-    id: r.id,
-    userId: r.user_id,
-    itemId: r.item_id,
-    source: r.source || 'cms',
-    createdAt: r.created_at?.split('T')[0] || '',
+    id: r.id as string,
+    userId: r.user_id as string,
+    itemId: r.item_id as string,
+    source: (r.source as LibraryBookmark['source']) || 'cms',
+    createdAt: ((r.created_at as string)?.split('T')[0]) || '',
   };
 }
 
