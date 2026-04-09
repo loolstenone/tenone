@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { Receipt, FileText, CreditCard, BarChart3, Plus, Check, X, Clock } from 'lucide-react';
@@ -7,7 +8,7 @@ import { fetchApprovals, createApproval, updateApprovalStatus, fetchExpenses, cr
 
 type Tab = 'approval' | 'expenses';
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   pending: { label: '대기', color: 'text-amber-400 bg-amber-500/10', icon: Clock },
   approved: { label: '승인', color: 'text-emerald-400 bg-emerald-500/10', icon: Check },
   rejected: { label: '반려', color: 'text-red-400 bg-red-500/10', icon: X },

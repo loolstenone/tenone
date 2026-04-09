@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Building2, DollarSign, Receipt, ClipboardList, Plus, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
@@ -34,7 +35,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   ended: { label: '종료', color: 'text-slate-400 bg-slate-500/10' },
 };
 
-const PAY_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const PAY_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   paid: { label: '정산완료', color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle2 },
   pending: { label: '정산대기', color: 'text-amber-400 bg-amber-500/10', icon: Clock },
   overdue: { label: '미정산', color: 'text-red-400 bg-red-500/10', icon: AlertTriangle },

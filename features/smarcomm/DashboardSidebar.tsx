@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,7 +33,7 @@ const PACK_LABELS: Record<PackType, { label: string; emoji: string }> = {
 interface MenuItem {
   href: string;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   pack?: PackType;
 }
 

@@ -278,10 +278,10 @@ export async function fetchVerseTimeline(userId: string, limit = 30): Promise<Ve
     ]);
 
     const events: VerseEvent[] = [];
-    (logsRes.data || []).forEach((l: any) => events.push({ type: 'log', title: l.content || '기록', created_at: l.created_at }));
-    (dreamsRes.data || []).forEach((d: any) => events.push({ type: 'dream', title: d.title, description: d.description ?? undefined, created_at: d.created_at }));
-    (tasksRes.data || []).forEach((t: any) => events.push({ type: 'task', title: t.title, description: t.status, created_at: t.created_at }));
-    (projectsRes.data || []).forEach((p: any) => events.push({ type: 'project', title: p.title, description: p.status, created_at: p.created_at }));
+    (logsRes.data || []).forEach((l: Record<string, unknown>) => events.push({ type: 'log', title: (l.content as string) || '기록', created_at: l.created_at as string }));
+    (dreamsRes.data || []).forEach((d: Record<string, unknown>) => events.push({ type: 'dream', title: d.title as string, description: (d.description as string) ?? undefined, created_at: d.created_at as string }));
+    (tasksRes.data || []).forEach((t: Record<string, unknown>) => events.push({ type: 'task', title: t.title as string, description: t.status as string, created_at: t.created_at as string }));
+    (projectsRes.data || []).forEach((p: Record<string, unknown>) => events.push({ type: 'project', title: p.title as string, description: p.status as string, created_at: p.created_at as string }));
 
     // 최신순 정렬
     events.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

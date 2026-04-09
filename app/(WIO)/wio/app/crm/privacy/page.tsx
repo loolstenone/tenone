@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Shield, CheckCircle, AlertTriangle, Clock, FileText, Eye, Trash2, Download } from 'lucide-react';
@@ -21,7 +22,7 @@ const MOCK_REQUESTS = [
   { id: 'PR-006', type: 'delete', customer: '박지민', email: 'jimin@startup.io', status: 'pending', requestDate: '2026-03-28', completedDate: null, deadline: '2026-04-27' },
 ];
 
-const REQUEST_TYPE: Record<string, { label: string; icon: any; color: string }> = {
+const REQUEST_TYPE: Record<string, { label: string; icon: LucideIcon; color: string }> = {
   access: { label: '열람 청구', icon: Eye, color: 'text-blue-400 bg-blue-500/10' },
   delete: { label: '삭제 청구', icon: Trash2, color: 'text-red-400 bg-red-500/10' },
   rectify: { label: '정정 청구', icon: FileText, color: 'text-amber-400 bg-amber-500/10' },

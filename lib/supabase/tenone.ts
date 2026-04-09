@@ -1,31 +1,31 @@
 import { createClient } from '@/lib/supabase/client';
 import { Brand, HistoryEvent } from '@/types/brand';
 
-function rowToBrand(r: any): Brand {
+function rowToBrand(r: Record<string, unknown>): Brand {
     return {
-        id: r.id,
-        name: r.name,
-        category: r.category || 'Corporate',
-        description: r.description || '',
-        tagline: r.tagline || undefined,
-        domain: r.domain || undefined,
-        logoUrl: r.logo_url || undefined,
-        thumbnailUrl: r.thumbnail_url || undefined,
-        websiteUrl: r.website_url || undefined,
-        foundedDate: r.founded_date || undefined,
-        status: r.display_status || r.status || 'Active',
-        tags: r.tags || [],
+        id: r.id as string,
+        name: r.name as string,
+        category: (r.category as Brand['category']) || 'Corporate',
+        description: (r.description as string) || '',
+        tagline: (r.tagline as string) || undefined,
+        domain: (r.domain as string) || undefined,
+        logoUrl: (r.logo_url as string) || undefined,
+        thumbnailUrl: (r.thumbnail_url as string) || undefined,
+        websiteUrl: (r.website_url as string) || undefined,
+        foundedDate: (r.founded_date as string) || undefined,
+        status: ((r.display_status || r.status) as Brand['status']) || 'Active',
+        tags: (r.tags as string[]) || [],
     };
 }
 
-function rowToHistory(r: any): HistoryEvent {
+function rowToHistory(r: Record<string, unknown>): HistoryEvent {
     return {
-        id: r.id,
-        date: r.date,
-        year: r.year,
-        title: r.title,
-        description: r.description || '',
-        brandId: r.brand_id || undefined,
+        id: r.id as string,
+        date: r.date as string,
+        year: r.year as string,
+        title: r.title as string,
+        description: (r.description as string) || '',
+        brandId: (r.brand_id as string) || undefined,
     };
 }
 
@@ -36,7 +36,7 @@ export async function fetchPortalBrands(): Promise<Brand[]> {
         .select('id, name, category, description, tagline, domain, logo_url, thumbnail_url, website_url, founded_date, display_status, tags')
         .order('name');
     if (error || !data) return [];
-    return data.map((r: any) => rowToBrand(r));
+    return data.map((r: Record<string, unknown>) => rowToBrand(r));
 }
 
 export async function fetchHistoryEvents(): Promise<HistoryEvent[]> {
@@ -46,5 +46,5 @@ export async function fetchHistoryEvents(): Promise<HistoryEvent[]> {
         .select('id, date, year, title, description, brand_id')
         .order('date', { ascending: false });
     if (error || !data) return [];
-    return data.map((r: any) => rowToHistory(r));
+    return data.map((r: Record<string, unknown>) => rowToHistory(r));
 }

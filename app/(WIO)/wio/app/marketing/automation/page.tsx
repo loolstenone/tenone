@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Workflow, Zap, Mail, Clock, Users, ArrowRight, Play, Pause, Plus } from 'lucide-react';
@@ -43,7 +44,7 @@ const MOCK_JOURNEYS = [
   },
 ];
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   active: { label: '활성', color: 'text-emerald-400 bg-emerald-500/10', icon: Play },
   paused: { label: '일시정지', color: 'text-amber-400 bg-amber-500/10', icon: Pause },
   draft: { label: '초안', color: 'text-slate-400 bg-slate-500/10', icon: Pause },

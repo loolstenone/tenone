@@ -18,7 +18,7 @@ export async function fetchMyApprovals(memberId: string) {
             .limit(20);
 
         // approval_line에 내 ID가 포함된 건만 필터
-        const myPending = (pending || []).filter((a: any) => {
+        const myPending = (pending || []).filter((a: Record<string, unknown>) => {
             const line = a.approval_line;
             if (!line) return false;
             return JSON.stringify(line).includes(memberId);
@@ -37,8 +37,8 @@ export async function fetchMyApprovals(memberId: string) {
             pending: myPending,
             myDrafts: myDrafts || [],
             pendingCount: myPending.length,
-            inProgressCount: myDrafts?.filter((d: any) => d.status === 'in-progress').length || 0,
-            draftsCount: myDrafts?.filter((d: any) => d.status === 'pending').length || 0,
+            inProgressCount: myDrafts?.filter((d: Record<string, unknown>) => d.status === 'in-progress').length || 0,
+            draftsCount: myDrafts?.filter((d: Record<string, unknown>) => d.status === 'pending').length || 0,
         };
     } catch {
         return { pending: [], myDrafts: [], pendingCount: 0, inProgressCount: 0, draftsCount: 0 };
@@ -54,13 +54,16 @@ export async function fetchMyProjects(memberId: string) {
             .eq('member_id', memberId)
             .limit(10);
 
-        return (data || []).map((pm: any) => ({
-            name: pm.project?.name || '',
-            code: pm.project?.code || '',
-            role: pm.role || '',
-            progress: 0, // projects 테이블에 progress 컬럼 없음
-            status: pm.project?.status || '진행중',
-        }));
+        return (data || []).map((pm: Record<string, unknown>) => {
+            const project = pm.project as Record<string, unknown> | null;
+            return {
+                name: (project?.name as string) || '',
+                code: (project?.code as string) || '',
+                role: (pm.role as string) || '',
+                progress: 0, // projects 테이블에 progress 컬럼 없음
+                status: (project?.status as string) || '진행중',
+            };
+        });
     } catch {
         return [];
     }
@@ -78,15 +81,15 @@ export async function fetchMyEnrollments(memberId: string) {
 
         if (!data || data.length === 0) return null;
 
-        const completed = data.filter((e: any) => e.status === 'completed');
-        const inProgress = data.filter((e: any) => e.status === 'in-progress');
-        const courses = data.filter((e: any) => e.course?.category === 'required');
-        const mandatoryCompleted = courses.filter((e: any) => e.status === 'completed').length;
+        const completed = data.filter((e: Record<string, unknown>) => e.status === 'completed');
+        const inProgress = data.filter((e: Record<string, unknown>) => e.status === 'in-progress');
+        const courses = data.filter((e: Record<string, unknown>) => (e.course as Record<string, unknown>)?.category === 'required');
+        const mandatoryCompleted = courses.filter((e: Record<string, unknown>) => e.status === 'completed').length;
 
         return {
             mandatory: { total: courses.length || 0, completed: mandatoryCompleted },
-            recent: data.slice(0, 5).map((e: any) => ({
-                name: e.course?.title || '과정명 없음',
+            recent: data.slice(0, 5).map((e: Record<string, unknown>) => ({
+                name: ((e.course as Record<string, unknown>)?.title as string) || '과정명 없음',
                 status: e.status === 'completed' ? '수료' as const :
                     e.status === 'in-progress' ? '진행중' as const : '미시작' as const,
             })),
@@ -115,8 +118,8 @@ export async function fetchMyAttendance(memberId: string) {
 
         if (!data || data.length === 0) return null;
 
-        const todayEntry = data.find((t: any) => t.work_date === today);
-        const totalHours = data.reduce((sum: number, t: any) => sum + (t.hours || 0), 0);
+        const todayEntry = data.find((t: Record<string, unknown>) => t.work_date === today);
+        const totalHours = data.reduce((sum: number, t: Record<string, unknown>) => sum + ((t.hours as number) || 0), 0);
         const avgHours = data.length > 0 ? totalHours / data.length : 0;
 
         return {

@@ -1,10 +1,11 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Rocket, CheckCircle, XCircle, Clock, RotateCcw, GitBranch, Play } from 'lucide-react';
 import { useWIO } from '../../layout';
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   success: { label: '성공', color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle },
   failed: { label: '실패', color: 'text-red-400 bg-red-500/10', icon: XCircle },
   deploying: { label: '배포중', color: 'text-amber-400 bg-amber-500/10', icon: Clock },

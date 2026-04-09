@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Code, Plus, Bug, Zap, CheckCircle2 } from 'lucide-react';
@@ -14,7 +15,7 @@ const COLUMNS: { key: Column; label: string; color: string }[] = [
   { key: 'done', label: '완료', color: 'border-emerald-600' },
 ];
 
-const TYPE_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const TYPE_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   bug: { label: '버그', color: 'text-red-400 bg-red-500/10', icon: Bug },
   feature: { label: '기능', color: 'text-blue-400 bg-blue-500/10', icon: Zap },
   improvement: { label: '개선', color: 'text-violet-400 bg-violet-500/10', icon: CheckCircle2 },

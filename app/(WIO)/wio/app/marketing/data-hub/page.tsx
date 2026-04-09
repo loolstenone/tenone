@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Database, RefreshCw, CheckCircle2, AlertTriangle, Clock, ArrowDownToLine } from 'lucide-react';
@@ -15,7 +16,7 @@ const MOCK_SOURCES = [
   { id: 8, name: '오프라인 이벤트', type: 'CSV', lastSync: '2026-03-25 14:00', status: 'manual', records: 320, normalized: 310 },
 ];
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   synced: { label: '동기화 완료', color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle2 },
   syncing: { label: '동기화중', color: 'text-blue-400 bg-blue-500/10', icon: RefreshCw },
   delayed: { label: '지연', color: 'text-amber-400 bg-amber-500/10', icon: AlertTriangle },

@@ -4,54 +4,54 @@ import type { Campaign, Lead, ContentPost } from '@/types/marketing';
 const supabase = createClient();
 
 // ── Helper: DB row → Frontend type ──────────────────
-function rowToCampaign(r: any): Campaign {
+function rowToCampaign(r: Record<string, unknown>): Campaign {
   return {
-    id: r.id,
-    name: r.name,
-    type: r.type,
-    status: r.status,
-    brandId: r.brand_id || '',
-    description: r.description || '',
+    id: r.id as string,
+    name: r.name as string,
+    type: r.type as Campaign['type'],
+    status: r.status as Campaign['status'],
+    brandId: (r.brand_id as string) || '',
+    description: (r.description as string) || '',
     budget: Number(r.budget) || 0,
     spent: Number(r.spent) || 0,
-    kpi: r.kpi || '',
-    assignee: r.assignee || '',
-    startDate: r.start_date || '',
-    endDate: r.end_date || undefined,
-    channels: r.channels || [],
-    createdAt: r.created_at?.split('T')[0] || '',
+    kpi: (r.kpi as string) || '',
+    assignee: (r.assignee as string) || '',
+    startDate: (r.start_date as string) || '',
+    endDate: (r.end_date as string) || undefined,
+    channels: (r.channels as string[]) || [],
+    createdAt: ((r.created_at as string)?.split('T')[0]) || '',
   };
 }
 
-function rowToLead(r: any): Lead {
+function rowToLead(r: Record<string, unknown>): Lead {
   return {
-    id: r.id,
-    name: r.name,
-    company: r.company || undefined,
-    email: r.email || '',
-    phone: r.phone || undefined,
-    stage: r.stage,
-    source: r.source,
+    id: r.id as string,
+    name: r.name as string,
+    company: (r.company as string) || undefined,
+    email: (r.email as string) || '',
+    phone: (r.phone as string) || undefined,
+    stage: r.stage as Lead['stage'],
+    source: r.source as Lead['source'],
     value: Number(r.value) || 0,
-    assignee: r.assignee || '',
-    notes: r.notes || undefined,
-    createdAt: r.created_at?.split('T')[0] || '',
-    updatedAt: r.updated_at?.split('T')[0] || '',
+    assignee: (r.assignee as string) || '',
+    notes: (r.notes as string) || undefined,
+    createdAt: ((r.created_at as string)?.split('T')[0]) || '',
+    updatedAt: ((r.updated_at as string)?.split('T')[0]) || '',
   };
 }
 
-function rowToContent(r: any): ContentPost {
+function rowToContent(r: Record<string, unknown>): ContentPost {
   return {
-    id: r.id,
-    title: r.title,
-    type: r.type,
-    status: r.status,
-    channel: r.channel || '',
-    brandId: r.brand_id || '',
-    assignee: r.assignee || '',
-    publishDate: r.publish_date || undefined,
-    engagement: r.engagement || undefined,
-    createdAt: r.created_at?.split('T')[0] || '',
+    id: r.id as string,
+    title: r.title as string,
+    type: r.type as ContentPost['type'],
+    status: r.status as ContentPost['status'],
+    channel: (r.channel as string) || '',
+    brandId: (r.brand_id as string) || '',
+    assignee: (r.assignee as string) || '',
+    publishDate: (r.publish_date as string) || undefined,
+    engagement: (r.engagement as number) || undefined,
+    createdAt: ((r.created_at as string)?.split('T')[0]) || '',
   };
 }
 
@@ -77,7 +77,7 @@ export async function createCampaign(c: Omit<Campaign, 'id' | 'createdAt'>) {
 }
 
 export async function updateCampaign(id: string, updates: Partial<Campaign>) {
-  const mapped: any = {};
+  const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.type !== undefined) mapped.type = updates.type;
   if (updates.status !== undefined) mapped.status = updates.status;
@@ -122,7 +122,7 @@ export async function createLead(l: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>
 }
 
 export async function updateLead(id: string, updates: Partial<Lead>) {
-  const mapped: any = { updated_at: new Date().toISOString() };
+  const mapped: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.company !== undefined) mapped.company = updates.company;
   if (updates.email !== undefined) mapped.email = updates.email;
@@ -163,7 +163,7 @@ export async function createContentPost(p: Omit<ContentPost, 'id' | 'createdAt'>
 }
 
 export async function updateContentPost(id: string, updates: Partial<ContentPost>) {
-  const mapped: any = { updated_at: new Date().toISOString() };
+  const mapped: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.title !== undefined) mapped.title = updates.title;
   if (updates.type !== undefined) mapped.type = updates.type;
   if (updates.status !== undefined) mapped.status = updates.status;
@@ -212,16 +212,16 @@ export async function fetchTrends(options?: { limit?: number; category?: string;
   if (options?.limit) query = query.limit(options.limit);
   const { data, error } = await query;
   if (error) throw error;
-  return (data || []).map((r: any) => ({
-    id: r.id,
-    title: r.title,
-    summary: r.summary,
-    category: r.category,
-    tags: r.tags || [],
-    relevanceScore: r.relevance_score,
-    isFeatured: r.is_featured,
-    publishedAt: r.published_at,
-    createdAt: r.created_at,
+  return (data || []).map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    title: r.title as string,
+    summary: r.summary as string,
+    category: r.category as string,
+    tags: (r.tags as string[]) || [],
+    relevanceScore: r.relevance_score as number,
+    isFeatured: r.is_featured as boolean,
+    publishedAt: r.published_at as string | null,
+    createdAt: r.created_at as string,
   }));
 }
 
@@ -238,10 +238,10 @@ export async function fetchMarketingStats() {
 
   return {
     totalCampaigns: campaignData.length,
-    activeCampaigns: campaignData.filter((c: any) => c.status === 'Active').length,
+    activeCampaigns: campaignData.filter((c: Record<string, unknown>) => c.status === 'Active').length,
     totalLeads: leadData.length,
-    pipelineValue: leadData.reduce((sum: number, l: any) => sum + (Number(l.value) || 0), 0),
-    wonLeads: leadData.filter((l: any) => l.stage === 'Won').length,
+    pipelineValue: leadData.reduce((sum: number, l: Record<string, unknown>) => sum + (Number(l.value) || 0), 0),
+    wonLeads: leadData.filter((l: Record<string, unknown>) => l.stage === 'Won').length,
     totalContent: (content.data || []).length,
   };
 }

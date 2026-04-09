@@ -32,7 +32,7 @@ function camelToSnake(obj: Record<string, unknown>): Record<string, unknown> {
 
 export async function fetchMyTenants(): Promise<WIOTenant[]> {
   const { data } = await supabase.from('wio_tenants').select('*').eq('is_active', true);
-  return (data || []).map((r: any) => snakeToCamel(r) as unknown as WIOTenant);
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r) as unknown as WIOTenant);
 }
 
 export async function fetchTenant(tenantId: string): Promise<WIOTenant | null> {
@@ -89,7 +89,7 @@ export async function removeMember(memberId: string): Promise<boolean> {
 
 export async function fetchTenantMembers(tenantId: string): Promise<WIOMember[]> {
   const { data } = await supabase.from('wio_members').select('*').eq('tenant_id', tenantId).eq('is_active', true).order('joined_at');
-  return (data || []).map((r: any) => snakeToCamel(r) as unknown as WIOMember);
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r) as unknown as WIOMember);
 }
 
 export async function fetchMyMembership(tenantId: string): Promise<WIOMember | null> {
@@ -131,7 +131,7 @@ export async function fetchProjects(tenantId: string, status?: ProjectStatus): P
   let query = supabase.from('wio_projects').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
   if (status) query = query.eq('status', status);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r) as unknown as WIOProject);
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r) as unknown as WIOProject);
 }
 
 export async function fetchProject(projectId: string): Promise<WIOProject | null> {
@@ -169,7 +169,7 @@ export async function generateProjectCode(tenantId: string, type: string): Promi
 
 export async function fetchJobs(projectId: string): Promise<WIOJob[]> {
   const { data } = await supabase.from('wio_jobs').select('*, assignee:wio_members!wio_jobs_assignee_id_fkey(*)').eq('project_id', projectId).order('created_at');
-  return (data || []).map((r: any) => {
+  return (data || []).map((r: Record<string, unknown>) => {
     const job = snakeToCamel(r) as unknown as WIOJob;
     if (r.assignee) job.assignee = snakeToCamel(r.assignee as Record<string, unknown>) as unknown as WIOMember;
     return job;
@@ -206,7 +206,7 @@ export async function fetchTimesheets(tenantId: string, options: { memberId?: st
   if (options.weekStart) query = query.gte('work_date', options.weekStart);
   if (options.weekEnd) query = query.lte('work_date', options.weekEnd);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r) as unknown as WIOTimesheet);
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r) as unknown as WIOTimesheet);
 }
 
 export async function upsertTimesheet(entry: Partial<WIOTimesheet>): Promise<boolean> {
@@ -224,7 +224,7 @@ export async function upsertTimesheet(entry: Partial<WIOTimesheet>): Promise<boo
 
 export async function fetchProjectMembers(projectId: string): Promise<WIOProjectMember[]> {
   const { data } = await supabase.from('wio_project_members').select('*, member:wio_members!wio_project_members_member_id_fkey(*)').eq('project_id', projectId);
-  return (data || []).map((r: any) => {
+  return (data || []).map((r: Record<string, unknown>) => {
     const pm = snakeToCamel(r) as unknown as WIOProjectMember;
     if (r.member) pm.member = snakeToCamel(r.member as Record<string, unknown>) as unknown as WIOMember;
     return pm;
@@ -255,9 +255,9 @@ export async function calculateProjectPnL(projectId: string): Promise<{ revenue:
     .select('hours, wio_jobs!inner(hourly_rate)')
     .eq('wio_jobs.project_id', projectId);
 
-  const internalCost = (timesheets || []).reduce((sum: number, t: any) => {
-    const rate = (t as any).wio_jobs?.hourly_rate || 0;
-    return sum + (t.hours * rate);
+  const internalCost = (timesheets || []).reduce((sum: number, t: Record<string, unknown>) => {
+    const rate = (t.wio_jobs as Record<string, unknown>)?.hourly_rate as number || 0;
+    return sum + ((t.hours as number) * rate);
   }, 0);
 
   return {
@@ -276,7 +276,7 @@ export async function fetchPosts(tenantId: string, board?: string): Promise<any[
   let query = supabase.from('wio_posts').select('*, author:wio_members!wio_posts_author_id_fkey(display_name, avatar_url)').eq('tenant_id', tenantId).order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
   if (board) query = query.eq('board', board);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createPost(post: { tenantId: string; board: string; title: string; content: string; authorId: string }): Promise<boolean> {
@@ -295,7 +295,7 @@ export async function fetchPost(postId: string): Promise<any | null> {
 // 댓글
 export async function fetchComments(postId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_comments').select('*, author:wio_members!wio_comments_author_id_fkey(display_name, avatar_url)').eq('post_id', postId).eq('is_deleted', false).order('created_at');
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createComment(comment: { postId: string; tenantId: string; authorId: string; content: string; parentId?: string }): Promise<boolean> {
@@ -361,7 +361,7 @@ export async function checkBookmarked(postId: string, userId: string): Promise<b
 
 export async function fetchTodos(memberId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_todos').select('*').eq('member_id', memberId).order('is_done').order('created_at', { ascending: false });
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createTodo(todo: { tenantId: string; memberId: string; title: string; dueDate?: string; projectId?: string; priority?: string }): Promise<boolean> {
@@ -380,7 +380,7 @@ export async function toggleTodo(todoId: string, isDone: boolean): Promise<boole
 
 export async function fetchNotifications(memberId: string, limit = 20): Promise<any[]> {
   const { data } = await supabase.from('wio_notifications').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(limit);
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function markNotificationRead(notifId: string): Promise<boolean> {
@@ -401,7 +401,7 @@ export async function fetchApprovals(tenantId: string, status?: string): Promise
   let query = supabase.from('wio_approvals').select('*, requester:wio_members!wio_approvals_requester_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
   if (status) query = query.eq('status', status);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createApproval(approval: { tenantId: string; type: string; title: string; content?: string; requesterId: string; approverId?: string; projectId?: string; amount?: number }): Promise<boolean> {
@@ -420,7 +420,7 @@ export async function updateApprovalStatus(approvalId: string, status: 'approved
 
 export async function fetchExpenses(tenantId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_expenses').select('*, member:wio_members!wio_expenses_member_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createExpense(expense: { tenantId: string; memberId: string; projectId?: string; category: string; description: string; amount: number }): Promise<boolean> {
@@ -434,7 +434,7 @@ export async function createExpense(expense: { tenantId: string; memberId: strin
 
 export async function fetchSettlements(projectId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_settlements').select('*, member:wio_members!wio_settlements_member_id_fkey(display_name)').eq('project_id', projectId).order('created_at');
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createSettlement(settlement: { tenantId: string; projectId: string; memberId?: string; type: string; amount: number; note?: string }): Promise<boolean> {
@@ -452,7 +452,7 @@ export async function fetchEvents(tenantId: string, month?: string): Promise<any
     query = query.gte('start_at', `${month}-01`).lte('start_at', `${month}-31`);
   }
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createEvent(event: { tenantId: string; title: string; startAt: string; endAt?: string; allDay?: boolean; projectId?: string; createdBy: string }): Promise<boolean> {
@@ -472,7 +472,7 @@ export async function createProjectChatThread(tenantId: string, projectId: strin
 
 export async function fetchChatMessages(threadId: string, limit = 50): Promise<any[]> {
   const { data } = await supabase.from('wio_chat_messages').select('*, sender:wio_members!wio_chat_messages_sender_id_fkey(display_name, avatar_url)').eq('thread_id', threadId).order('created_at', { ascending: false }).limit(limit);
-  return (data || []).reverse().map((r: any) => snakeToCamel(r));
+  return (data || []).reverse().map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function sendChatMessage(threadId: string, senderId: string, content: string): Promise<boolean> {
@@ -484,10 +484,10 @@ export async function sendChatMessage(threadId: string, senderId: string, conten
 // Sprint 3: 포인트
 // ══════════════════════════════════════
 
-export async function fetchMemberPoints(memberId: string): Promise<{ total: number; logs: any[] }> {
+export async function fetchMemberPoints(memberId: string): Promise<{ total: number; logs: Record<string, unknown>[] }> {
   const { data } = await supabase.from('wio_points').select('*').eq('member_id', memberId).order('created_at', { ascending: false });
-  const logs = (data || []).map((r: any) => snakeToCamel(r));
-  const total = logs.reduce((s: number, l: any) => s + (l.points || 0), 0);
+  const logs = (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
+  const total = logs.reduce((s: number, l: Record<string, unknown>) => s + ((l.points as number) || 0), 0);
   return { total, logs };
 }
 
@@ -512,7 +512,7 @@ export async function fetchOpportunities(tenantId: string, status?: string): Pro
   let query = supabase.from('wio_opportunities').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
   if (status) query = query.eq('status', status);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function fetchTenOneOpportunities(status?: string): Promise<any[]> {
@@ -557,7 +557,7 @@ export async function convertOpportunityToProject(oppId: string, tenantId: strin
 
 export async function fetchLeads(tenantId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_leads').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createLead(lead: { tenantId: string; name: string; company?: string; email?: string; phone?: string; source?: string; note?: string }): Promise<boolean> {
@@ -575,7 +575,7 @@ export async function fetchGPRs(tenantId: string, options?: { level?: string; ow
   if (options?.ownerId) query = query.eq('owner_id', options.ownerId);
   if (options?.projectId) query = query.eq('project_id', options.projectId);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createGPR(gpr: { tenantId: string; level: string; ownerId: string; projectId?: string; period: string; goal: string; parentGprId?: string }): Promise<boolean> {
@@ -594,12 +594,12 @@ export async function updateGPR(gprId: string, updates: { plan?: string; result?
 
 export async function fetchCourses(tenantId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_courses').select('*').eq('tenant_id', tenantId).eq('is_published', true).order('created_at');
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function fetchMyEnrollments(memberId: string): Promise<any[]> {
   const { data } = await supabase.from('wio_enrollments').select('*, course:wio_courses!wio_enrollments_course_id_fkey(title, category, duration_minutes, points_reward)').eq('member_id', memberId);
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function enrollCourse(tenantId: string, courseId: string, memberId: string): Promise<boolean> {
@@ -621,7 +621,7 @@ export async function fetchContents(tenantId: string, channel?: string): Promise
   let query = supabase.from('wio_contents').select('*, author:wio_members!wio_contents_author_id_fkey(display_name)').eq('tenant_id', tenantId).order('created_at', { ascending: false });
   if (channel) query = query.eq('channel', channel);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createContent(content: { tenantId: string; title: string; body: string; channel?: string; authorId: string; tags?: string[] }): Promise<boolean> {
@@ -642,7 +642,7 @@ export async function fetchDocuments(tenantId: string, category?: string): Promi
   let query = supabase.from('wio_documents').select('*, author:wio_members!wio_documents_author_id_fkey(display_name)').eq('tenant_id', tenantId).eq('is_archived', false).order('updated_at', { ascending: false });
   if (category) query = query.eq('category', category);
   const { data } = await query;
-  return (data || []).map((r: any) => snakeToCamel(r));
+  return (data || []).map((r: Record<string, unknown>) => snakeToCamel(r));
 }
 
 export async function createDocument(doc: { tenantId: string; title: string; body: string; category?: string; authorId: string; projectId?: string }): Promise<boolean> {

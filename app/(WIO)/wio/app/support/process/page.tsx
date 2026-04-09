@@ -1,10 +1,11 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Activity, AlertTriangle, CheckCircle, Pause, Play } from 'lucide-react';
 import { useWIO } from '../../layout';
 
-const LINE_STATUS: Record<string, { label: string; color: string; icon: any }> = {
+const LINE_STATUS: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   running: { label: '가동', color: 'text-emerald-400 bg-emerald-500/10', icon: Play },
   idle: { label: '대기', color: 'text-amber-400 bg-amber-500/10', icon: Pause },
   maintenance: { label: '점검', color: 'text-blue-400 bg-blue-500/10', icon: Activity },

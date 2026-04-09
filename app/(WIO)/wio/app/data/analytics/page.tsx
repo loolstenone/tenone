@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -10,7 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 
 /* ── 4단계 분석 프레임워크 ── */
 type AnalysisTab = 'descriptive' | 'diagnostic' | 'predictive' | 'prescriptive';
-const TABS: { key: AnalysisTab; label: string; icon: any; desc: string }[] = [
+const TABS: { key: AnalysisTab; label: string; icon: LucideIcon; desc: string }[] = [
   { key: 'descriptive', label: '기술 분석', icon: BarChart3, desc: '무엇이 일어났는가' },
   { key: 'diagnostic', label: '진단 분석', icon: Search, desc: '왜 일어났는가' },
   { key: 'predictive', label: '예측 분석', icon: TrendingUp, desc: '앞으로 무엇이' },

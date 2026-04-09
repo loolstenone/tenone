@@ -1,10 +1,11 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Film, Search, Grid3X3, List, Download, Image, FileText, Music, Video, Shield } from 'lucide-react';
 import { useWIO } from '../../layout';
 
-const FILE_TYPES: Record<string, { icon: any; color: string }> = {
+const FILE_TYPES: Record<string, { icon: LucideIcon; color: string }> = {
   image: { icon: Image, color: 'bg-pink-500/20 text-pink-400' },
   video: { icon: Video, color: 'bg-violet-500/20 text-violet-400' },
   document: { icon: FileText, color: 'bg-blue-500/20 text-blue-400' },

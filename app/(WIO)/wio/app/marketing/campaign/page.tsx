@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { Megaphone, Plus, Calendar, TrendingUp, Pause, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
@@ -16,7 +17,7 @@ const MOCK_CAMPAIGNS = [
 ];
 
 const TYPE_MAP: Record<string, string> = { brand: '브랜드', performance: '퍼포먼스', promotion: '프로모션', content: '콘텐츠' };
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   draft: { label: '초안', color: 'text-slate-400 bg-slate-500/10', icon: Pause },
   planned: { label: '예정', color: 'text-blue-400 bg-blue-500/10', icon: Calendar },
   live: { label: '라이브', color: 'text-emerald-400 bg-emerald-500/10', icon: TrendingUp },

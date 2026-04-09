@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { User, Plus, Search, CheckCircle2, Clock, XCircle } from 'lucide-react';
@@ -26,7 +27,7 @@ type MatchRequest = {
   date: string;
 };
 
-const AVAIL_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const AVAIL_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   available: { label: '가용', color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle2 },
   busy: { label: '진행중', color: 'text-amber-400 bg-amber-500/10', icon: Clock },
   unavailable: { label: '불가', color: 'text-red-400 bg-red-500/10', icon: XCircle },

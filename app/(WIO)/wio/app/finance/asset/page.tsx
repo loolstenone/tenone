@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Monitor, Armchair, Car, Code2, Filter } from 'lucide-react';
@@ -18,7 +19,7 @@ type Asset = {
   location: string;
 };
 
-const CATEGORY_MAP: Record<string, { icon: any; color: string }> = {
+const CATEGORY_MAP: Record<string, { icon: LucideIcon; color: string }> = {
   'IT장비': { icon: Monitor, color: 'text-blue-400 bg-blue-500/10' },
   '가구': { icon: Armchair, color: 'text-amber-400 bg-amber-500/10' },
   '차량': { icon: Car, color: 'text-emerald-400 bg-emerald-500/10' },

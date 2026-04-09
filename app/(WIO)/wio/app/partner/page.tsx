@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Star, Filter, Building2, Handshake, Briefcase, GraduationCap } from 'lucide-react';
@@ -17,7 +18,7 @@ type Partner = {
   since: string;
 };
 
-const TYPE_MAP: Record<string, { icon: any; color: string }> = {
+const TYPE_MAP: Record<string, { icon: LucideIcon; color: string }> = {
   '계열사': { icon: Building2, color: 'text-purple-400 bg-purple-500/10' },
   '협력사': { icon: Handshake, color: 'text-blue-400 bg-blue-500/10' },
   '벤더': { icon: Briefcase, color: 'text-amber-400 bg-amber-500/10' },

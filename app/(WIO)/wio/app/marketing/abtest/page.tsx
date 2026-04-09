@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { FlaskConical, CheckCircle2, Clock, XCircle, BarChart3, Trophy } from 'lucide-react';
@@ -31,7 +32,7 @@ const MOCK_EXPERIMENTS = [
   },
 ];
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   running: { label: '진행중', color: 'text-emerald-400 bg-emerald-500/10', icon: Clock },
   completed: { label: '완료', color: 'text-blue-400 bg-blue-500/10', icon: CheckCircle2 },
   stopped: { label: '중단', color: 'text-red-400 bg-red-500/10', icon: XCircle },

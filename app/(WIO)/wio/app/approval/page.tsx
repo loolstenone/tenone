@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Stamp, Plus, Clock, Check, X, FileText, ChevronRight, Filter, AlertCircle, ArrowRight, CheckCircle2, Circle, Zap, MessageSquare } from 'lucide-react';
@@ -27,7 +28,7 @@ interface ApprovalItem {
   workflowInstanceId?: string;
 }
 
-const STATUS_CONFIG: Record<ApprovalStatus, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<ApprovalStatus, { label: string; color: string; icon: LucideIcon }> = {
   pending: { label: '대기', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Clock },
   approved: { label: '승인', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: Check },
   rejected: { label: '반려', color: 'text-red-400 bg-red-500/10 border-red-500/20', icon: X },

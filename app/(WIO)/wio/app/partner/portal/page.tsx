@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Globe, FileText, FolderOpen, Activity, Eye } from 'lucide-react';
@@ -15,7 +16,7 @@ type SharedItem = {
   status: 'active' | 'expired';
 };
 
-const TYPE_MAP: Record<string, { icon: any; color: string }> = {
+const TYPE_MAP: Record<string, { icon: LucideIcon; color: string }> = {
   document: { icon: FileText, color: 'text-blue-400 bg-blue-500/10' },
   project: { icon: FolderOpen, color: 'text-purple-400 bg-purple-500/10' },
   report: { icon: Activity, color: 'text-emerald-400 bg-emerald-500/10' },

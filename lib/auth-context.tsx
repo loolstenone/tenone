@@ -5,6 +5,7 @@ import { User, SystemAccess, IntraModule } from '@/types/auth';
 import { createClient } from '@/lib/supabase/client';
 import { permissionsFromJWT } from '@/lib/supabase/identity';
 import type { JWTAppMetadata } from '@/types/identity';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
     user: User | null;
@@ -76,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
 
     // Supabase 세션에서 members 조회 → User 설정
-    const syncUserFromSession = useCallback(async (sessionUser: { id: string; email?: string; user_metadata?: any }) => {
+    const syncUserFromSession = useCallback(async (sessionUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }) => {
         try {
             let { data: member } = await supabase
                 .from('members')
@@ -86,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // 소셜 로그인 첫 가입 → 자동 프로필 생성
             if (!member) {
-                const userName = sessionUser.user_metadata?.full_name
-                    || sessionUser.user_metadata?.name
+                const userName = (sessionUser.user_metadata?.full_name as string)
+                    || (sessionUser.user_metadata?.name as string)
                     || sessionUser.email?.split('@')[0]
                     || '사용자';
                 const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
@@ -134,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // members 조회/생성 실패 → 최소 로그인 처리
             const fallbackUser: User = {
                 id: sessionUser.id,
-                name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || '사용자',
+                name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || '사용자',
                 email: sessionUser.email || '',
                 role: 'Member' as const,
                 accountType: 'member' as const,
@@ -194,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         validateSession();
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (session?.user) {
@@ -235,8 +236,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setTimeout(() => resolve({ data: null, error: { message: 'timeout' } }), 20000)
                 ),
             ]);
-            const { data, error } = authResult as { data: any; error: any };
-            if (!error && data.user) {
+            const { data, error } = authResult as { data: { user: { id: string; email?: string } } | null; error: { message: string } | null };
+            if (!error && data && data.user) {
                 const u = await syncUserFromSession(data.user);
                 if (u) {
                     // last_login_at 업데이트

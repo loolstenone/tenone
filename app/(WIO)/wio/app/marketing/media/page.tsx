@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Monitor, Globe, Share2, DollarSign, BarChart3, FileText } from 'lucide-react';
@@ -23,7 +24,7 @@ const MEDIA_PLAN = [
   { month: '5월', paid: 2600, owned: 50, earned: 0, total: 2650 },
 ];
 
-const TAB_MAP: Record<MediaTab, { label: string; icon: any; color: string }> = {
+const TAB_MAP: Record<MediaTab, { label: string; icon: LucideIcon; color: string }> = {
   paid: { label: 'Paid', icon: DollarSign, color: 'text-amber-400' },
   owned: { label: 'Owned', icon: Globe, color: 'text-emerald-400' },
   earned: { label: 'Earned', icon: Share2, color: 'text-violet-400' },

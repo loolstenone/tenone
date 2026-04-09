@@ -64,18 +64,18 @@ export function PointProvider({ children }: { children: ReactNode }) {
                         .gte('created_at', monthStart);
 
                     const monthMap: Record<string, number> = {};
-                    (monthLogs || []).forEach((l: any) => {
-                        monthMap[l.member_id] = (monthMap[l.member_id] || 0) + l.points;
+                    (monthLogs || []).forEach((l: Record<string, unknown>) => {
+                        monthMap[l.member_id as string] = (monthMap[l.member_id as string] || 0) + (l.points as number);
                     });
 
-                    setMemberPoints(members.map((m: any) => ({
-                        memberId: m.id,
-                        memberName: m.name,
-                        department: m.department || '-',
-                        position: m.position || '-',
-                        totalPoints: m.total_points || 0,
-                        grade: getGradeByPoints(m.total_points || 0),
-                        thisMonthPoints: monthMap[m.id] || 0,
+                    setMemberPoints(members.map((m: Record<string, unknown>) => ({
+                        memberId: m.id as string,
+                        memberName: m.name as string,
+                        department: (m.department as string) || '-',
+                        position: (m.position as string) || '-',
+                        totalPoints: (m.total_points as number) || 0,
+                        grade: getGradeByPoints((m.total_points as number) || 0),
+                        thisMonthPoints: monthMap[m.id as string] || 0,
                         thisQuarterPoints: 0,
                         lastActivity: '-',
                     })));
@@ -89,16 +89,16 @@ export function PointProvider({ children }: { children: ReactNode }) {
                     .limit(100);
 
                 if (dbLogs && dbLogs.length > 0) {
-                    setLogs(dbLogs.map((l: any) => ({
-                        id: l.id,
-                        memberId: l.member_id,
-                        memberName: l.member?.name || '알 수 없음',
-                        category: (l.source_type || 'admin_adjust') as PointCategory,
-                        points: l.points,
+                    setLogs(dbLogs.map((l: Record<string, unknown>) => ({
+                        id: l.id as string,
+                        memberId: l.member_id as string,
+                        memberName: ((l.member as Record<string, unknown>)?.name as string) || '알 수 없음',
+                        category: ((l.source_type as string) || 'admin_adjust') as PointCategory,
+                        points: l.points as number,
                         balance: 0,
-                        description: l.reason,
-                        referenceId: l.source_id,
-                        createdAt: (l.created_at || '').split('T')[0],
+                        description: l.reason as string,
+                        referenceId: l.source_id as string,
+                        createdAt: ((l.created_at as string) || '').split('T')[0],
                         createdBy: '시스템',
                     })));
                 }

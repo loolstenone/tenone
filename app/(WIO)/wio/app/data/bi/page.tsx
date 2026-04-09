@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -19,7 +20,7 @@ const ROLE_TABS: { key: RoleView; label: string }[] = [
 
 /* ── Mock 핵심 지표 ── */
 const KPI_DATA: Record<RoleView, {
-  icon: any; label: string; value: string; prev: number; targetPct: number;
+  icon: LucideIcon; label: string; value: string; prev: number; targetPct: number;
   spark: number[]; color: string;
 }[]> = {
   ceo: [

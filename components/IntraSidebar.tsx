@@ -17,9 +17,9 @@ export function IntraSidebar() {
     const router = useRouter();
     const { user, isStaff, hasAccess, hasModuleAccess, logout } = useAuth();
     const { accessibleModules, isSuperAdmin, identityLoaded } = useIdentityAdapter();
-    const getSiteById = (_id: string): any => null;
-    const getBoardsBySite = (_id: string): any[] => [];
-    const getPostsByBoard = (_id: string): any[] => [];
+    const getSiteById = (_id: string): { name: string } | null => null;
+    const getBoardsBySite = (_id: string): never[] => [];
+    const getPostsByBoard = (_id: string): never[] => [];
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [mobileOpen, setMobileOpen] = useState(false);
 

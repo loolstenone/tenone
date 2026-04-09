@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
@@ -10,7 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 
 /* ── 콘텐츠 유형 ── */
 type ContentType = 'all' | 'post' | 'document' | 'wiki' | 'marketing';
-const TYPE_FILTERS: { key: ContentType; label: string; icon: any }[] = [
+const TYPE_FILTERS: { key: ContentType; label: string; icon: LucideIcon }[] = [
   { key: 'all', label: '전체', icon: Filter },
   { key: 'post', label: '게시글', icon: StickyNote },
   { key: 'document', label: '문서', icon: FileText },

@@ -1,4 +1,5 @@
 'use client';
+import type { LucideIcon } from 'lucide-react';
 
 import { useState } from 'react';
 import { Users, Search, CheckCircle, AlertCircle, Link2, Filter, Eye } from 'lucide-react';
@@ -17,7 +18,7 @@ const MOCK_CUSTOMERS = [
   { id: 'C010', name: '오지훈', email: 'jihun@fin.com', phone: '010-9012-3456', company: '핀테크솔루션', sources: ['CRM', '콜센터', '이메일'], identityScore: 96, status: 'resolved', lastActivity: '2026-03-28', totalOrders: 20, ltv: 8500000 },
 ];
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   resolved: { label: '통합완료', color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle },
   partial: { label: '부분일치', color: 'text-amber-400 bg-amber-500/10', icon: AlertCircle },
   unresolved: { label: '미해결', color: 'text-red-400 bg-red-500/10', icon: AlertCircle },
