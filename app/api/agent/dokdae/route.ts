@@ -14,6 +14,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export interface DokdaeRequest {
   message: string;
+  agentName?: string;
   quickAction?: 'morning_briefing' | 'agent_status' | 'trend_summary' | 'today_tasks';
 }
 
@@ -60,7 +61,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body: DokdaeRequest = await request.json();
-    const { message, quickAction } = body;
+    const { message, quickAction, agentName: reqAgentName } = body;
+    const targetAgent = reqAgentName || '1001';
 
     const userMessage = quickAction
       ? QUICK_PROMPTS[quickAction] || message
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
     // 유저 메시지 저장
     await supabase.from('agent_messages').insert({
       from_agent: 'user',
-      to_agent: '1001',
+      to_agent: targetAgent,
       message_type: 'dokdae_chat',
       payload: { text: message, quickAction: quickAction ?? null },
       risk_level: 'green',
@@ -84,9 +86,9 @@ export async function POST(request: NextRequest) {
       user_id: user!.id,
     });
 
-    // 1001에게 직접 전달
+    // 지정된 에이전트에게 직접 전달
     const result = await invokeAgent({
-      agentName: '1001',
+      agentName: targetAgent,
       userMessage: `[독대 채널 — 텐원 직접 지시]\n${userMessage}`,
       correlationId: corrId,
       userId: user!.id,
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     // AI 응답 저장
     await supabase.from('agent_messages').insert({
-      from_agent: '1001',
+      from_agent: targetAgent,
       to_agent: 'user',
       message_type: 'dokdae_chat',
       payload: { text: result.response, cards },
@@ -129,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     const response: DokdaeResponse = {
       response: result.response,
-      agentName: '1001',
+      agentName: targetAgent,
       messageId: result.messageId || corrId,
       correlationId: corrId,
       cards,

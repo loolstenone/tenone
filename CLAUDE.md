@@ -13,6 +13,22 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 | **WIO** | 업무 자동화 솔루션 | Universe > 구독 + WIO Orbi |
 | **AI Agent** | 6개 에이전트 운영 엔진 | Agent Hub |
 
+## AI Agent Team — 3축 체계
+
+> **OpenClaw** = Peter Steinberger 개발 오픈소스 AI 에이전트 프레임워크 (MIT). 텐원 PC에 상주하며 에이전트를 자율 실행.
+> **Claude Code(나)는 OpenClaw용 커스텀 스킬을 개발하고, OpenClaw이 그 스킬을 실행한다.**
+
+| 축 | 도구 | 역할 | 상시 가동 |
+|---|------|------|----------|
+| 기획 | 열시일분 (Claude Chat) | 전략, 오케스트레이션 | ❌ |
+| 실행 | **OpenClaw** (PC 상주) | 에이전트 런타임, 자율 실행, 메시징, 소셜 게시 | ✅ |
+| 개발 | **Claude Code** | 코드/빌드/배포, OpenClaw 커스텀 스킬 개발 | ❌ |
+
+**OpenClaw 핵심:** Lobster(YAML 워크플로우 엔진) + ClawHub 스킬 마켓 + 로컬 영구 메모리(`~/.openclaw/`)
+**Claude Code 산출물 위치:** `C:\Users\텐원\TenOne\skills\` (커스텀 스킬), `~/.openclaw/workflows/` (Lobster YAML)
+
+---
+
 ## 기술 스택
 
 - **프레임워크**: Next.js 16 (App Router) + React 19

@@ -20,6 +20,13 @@ interface AgentStatus {
   layer: number;
   isActive: boolean;
   riskLevel: string;
+  role?: string;
+}
+
+interface SelectedAgent {
+  name: string;
+  displayName: string;
+  role: string;
 }
 
 interface TrendItem {
@@ -355,10 +362,20 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
 
 // ── 사이드 메뉴 ────────────────────────────────────────────────────
 
-function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: string, key: string) => void }) {
+function SideMenu({
+  onClose,
+  onSend,
+  selectedAgent,
+  onSelectAgent,
+}: {
+  onClose: () => void;
+  onSend: (label: string, key: string) => void;
+  selectedAgent: SelectedAgent;
+  onSelectAgent: (agent: SelectedAgent) => void;
+}) {
   const [agents, setAgents] = useState<AgentStatus[]>([]);
   const [agentLoading, setAgentLoading] = useState(true);
-  const [agentOpen, setAgentOpen] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(true);
 
   useEffect(() => {
     createClient()
@@ -378,6 +395,16 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
   }, []);
 
   const layerLabel: Record<number, string> = { 0: 'ORCHESTRATOR', 1: 'L1 수집·인프라', 2: 'L2 대화형' };
+  const layerRole: Record<number, string> = { 0: '오케스트레이터', 1: '수집·인프라 에이전트', 2: '대화형 에이전트' };
+
+  const handleSelectAgent = (a: AgentStatus) => {
+    onSelectAgent({
+      name: a.name,
+      displayName: a.displayName,
+      role: layerRole[a.layer] ?? '에이전트',
+    });
+    onClose();
+  };
 
   const quickMenuItems = [
     { key: 'morning_briefing', label: 'AM 브리핑',     desc: '오늘 Universe 현황 요약' },
@@ -431,13 +458,13 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
             </div>
           </div>
 
-          {/* 에이전트 현황 */}
+          {/* 에이전트 선택 */}
           <div className="px-4 pt-4 pb-3">
             <button
               onClick={() => setAgentOpen(o => !o)}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <p className="text-[12px] text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">에이전트 현황</p>
+              <p className="text-[12px] text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">에이전트 선택</p>
               <span className={`text-[11px] text-slate-500 transition-transform ${agentOpen ? 'rotate-180' : ''}`}>▾</span>
             </button>
             {agentOpen && (
@@ -454,20 +481,31 @@ function SideMenu({ onClose, onSend }: { onClose: () => void; onSend: (label: st
                       <div key={layer}>
                         <p className="text-[12px] text-slate-500 mb-2 pl-0.5">{layerLabel[layer]}</p>
                         <div className="space-y-1.5">
-                          {group.map(a => (
-                            <div key={a.name}
-                              className={`flex items-center justify-between rounded-xl px-3.5 py-3 border ${
-                                a.isActive ? 'border-emerald-400/25 bg-emerald-400/8' : 'border-white/[0.07] bg-white/[0.03]'
-                              }`}>
-                              <div className="flex items-center gap-2.5">
-                                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${a.isActive ? 'bg-emerald-400' : 'bg-slate-600'}`}/>
-                                <span className={`text-[15px] ${a.isActive ? 'text-white' : 'text-slate-500'}`}>{a.displayName}</span>
-                              </div>
-                              <span className={`text-[12px] font-medium ${a.isActive ? 'text-emerald-400' : 'text-slate-600'}`}>
-                                {a.isActive ? 'ON' : 'OFF'}
-                              </span>
-                            </div>
-                          ))}
+                          {group.map(a => {
+                            const isSelected = selectedAgent.name === a.name;
+                            return (
+                              <button key={a.name} onClick={() => handleSelectAgent(a)}
+                                className={`w-full flex items-center justify-between rounded-xl px-3.5 py-3 border transition-all active:scale-[0.98] text-left ${
+                                  isSelected
+                                    ? 'border-[#FEE500]/40 bg-[#FEE500]/[0.08]'
+                                    : a.isActive
+                                      ? 'border-emerald-400/25 bg-emerald-400/[0.05] hover:bg-emerald-400/10 hover:border-emerald-400/40'
+                                      : 'border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/15'
+                                }`}>
+                                <div className="flex items-center gap-2.5">
+                                  <span className={`h-2 w-2 rounded-full flex-shrink-0 ${a.isActive ? 'bg-emerald-400' : 'bg-slate-600'}`}/>
+                                  <span className={`text-[15px] ${isSelected ? 'text-[#FEE500] font-medium' : a.isActive ? 'text-white' : 'text-slate-500'}`}>{a.displayName}</span>
+                                </div>
+                                {isSelected ? (
+                                  <span className="text-[12px] font-semibold text-[#FEE500]">대화 중</span>
+                                ) : (
+                                  <span className={`text-[12px] font-medium ${a.isActive ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                    {a.isActive ? 'ON' : 'OFF'}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     );
@@ -498,13 +536,38 @@ function ChatScreen() {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [selectedAgent, setSelectedAgent] = useState<SelectedAgent>({
+    name: '1001',
+    displayName: '열시일분',
+    role: 'Universe 오케스트레이터',
+  });
   const inputRef  = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const scrollDown = (smooth = true) =>
     bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+
+  // ── 키보드 높이 추적 (카카오톡 방식) ────────────────────────────
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onViewportChange = () => {
+      // window.innerHeight - vv.height = 키보드 + 브라우저 UI 높이
+      const kbH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      setKeyboardHeight(kbH);
+      // 키보드 올라올 때 최신 메시지로 스크롤
+      if (kbH > 0) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
+    };
+
+    vv.addEventListener('resize', onViewportChange);
+    vv.addEventListener('scroll', onViewportChange);
+    return () => {
+      vv.removeEventListener('resize', onViewportChange);
+      vv.removeEventListener('scroll', onViewportChange);
+    };
+  }, []);
 
   // 이전 대화 로드
   useEffect(() => {
@@ -555,7 +618,11 @@ function ChatScreen() {
       const res  = await fetch('/api/agent/dokdae', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text.trim(), ...(quickAction ? { quickAction } : {}) }),
+        body: JSON.stringify({
+          message: text.trim(),
+          agentName: selectedAgent.name,
+          ...(quickAction ? { quickAction } : {}),
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || '서버 오류');
@@ -580,19 +647,32 @@ function ChatScreen() {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isLoading]);
+  }, [isLoading, selectedAgent]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); }
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#0d0e1a]">
+    <div
+      className="flex flex-col bg-[#0d0e1a]"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: keyboardHeight,
+        // 키보드 전환 시 자연스럽게
+        transition: keyboardHeight > 0 ? 'none' : 'bottom 0.25s ease',
+      }}
+    >
 
       {drawerOpen && (
         <SideMenu
           onClose={() => setDrawerOpen(false)}
           onSend={(label, key) => { send(label, key); }}
+          selectedAgent={selectedAgent}
+          onSelectAgent={(agent) => { setSelectedAgent(agent); setMessages([]); }}
         />
       )}
 
@@ -604,10 +684,10 @@ function ChatScreen() {
             <Image src="/logo-tenone.png" alt="Ten:One" width={40} height={40} className="object-cover w-full h-full"/>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[18px] font-bold text-white leading-none">열시일분</p>
+            <p className="text-[18px] font-bold text-white leading-none">{selectedAgent.displayName}</p>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"/>
-              <p className="text-[13px] text-slate-400 leading-none">Universe 오케스트레이터</p>
+              <p className="text-[13px] text-slate-400 leading-none">{selectedAgent.role}</p>
             </div>
           </div>
           <button onClick={() => setDrawerOpen(true)}
@@ -692,7 +772,7 @@ function ChatScreen() {
                         style={{ animationDelay: `${d}ms` }}/>
                     ))}
                   </div>
-                  <span className="text-[13px] text-slate-400">열시일분이 분석 중...</span>
+                  <span className="text-[13px] text-slate-400">{selectedAgent.displayName}이 분석 중...</span>
                 </div>
               </div>
             </div>
@@ -715,8 +795,10 @@ function ChatScreen() {
       </div>
 
       {/* 입력 바 */}
-      <div className="flex-shrink-0 bg-[#0d0e1a] border-t border-white/10"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div
+        className="flex-shrink-0 bg-[#0d0e1a] border-t border-white/10"
+        style={{ paddingBottom: keyboardHeight > 0 ? '4px' : 'env(safe-area-inset-bottom)' }}
+      >
         <div className="max-w-2xl mx-auto flex items-end gap-2.5 px-3 py-2.5">
           <button className="flex-shrink-0 h-10 w-10 rounded-full bg-white/[0.07] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white active:scale-90 transition-all">
             <Plus size={18}/>
