@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-09 (집, 세션 34)
+> 마지막 업데이트: 2026-04-09 (집, 세션 35)
 
 ---
 
@@ -80,7 +80,19 @@
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
 
-## 이번 세션 (세션 34) 완료 항목
+## 이번 세션 (세션 35) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| UMS 회원 초대 기능 | `/intra/ums/members/invite/page.tsx` 신규 — MADLeague/MADLeap OB 초대 관리 페이지 |
+| 초대 API | `/app/api/ums/invite/route.ts` 신규 — Supabase upsert + Resend 이메일 발송 |
+| member_invites 테이블 | Supabase 신규 테이블 생성 (invite_token, expires_at 7일) |
+| /crew-invite 삭제 | 공개 지원 폼 → 용도 없음으로 삭제 (인트라 UMS 초대 기능으로 대체) |
+| intra-nav.ts | UMS 회원 하위에 "초대" 메뉴 추가 |
+| ccusage 모니터링 | `~/.claude/usage-status.js` — 캐시 방식(10분) + Stop 훅 연결 |
+| settings.json hooks | Stop 이벤트에 usage-status.js 실행 추가 |
+
+## 이전 세션 (세션 34) 완료 항목
 
 | 항목 | 내용 |
 |------|------|

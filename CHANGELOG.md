@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-04-09 (집, 세션 35)
+
+### crew-invite → UMS 회원 초대 + ccusage 모니터링
+
+- `app/crew-invite/page.tsx`: 삭제 — 공개 지원 폼 불필요 (텐원은 직원만 채용, OB 초대는 UMS에서)
+- `app/intra/ums/members/invite/page.tsx`: 신규 — MADLeague/MADLeap OB 초대 관리 페이지 (브랜드 선택, 이메일 다건 입력, 발송 현황 테이블, 상태/브랜드 필터, 재발송)
+- `app/api/ums/invite/route.ts`: 신규 — POST: emails[]/brand/message 받아 Supabase member_invites upsert + Resend 이메일 발송. ok/fail 카운트 반환
+- Supabase `member_invites` 테이블: invite_token(base64url 24byte), expires_at(7일), brand CHECK(madleague/madleap), status CHECK(pending/accepted/expired)
+- `lib/intra-nav.ts`: UMS > 회원 하위에 "초대" 메뉴(`/intra/ums/members/invite`) 추가
+- `~/.claude/usage-status.js`: ccusage 캐시 방식 모니터링 스크립트 (10분 캐시, 백그라운드 갱신). 출력: `MAX $200 | 이번주 $X(Y%) | N월 $Z/Wt`
+- `~/.claude/settings.json`: Stop 훅 추가 — `node ~/.claude/usage-status.js` 실행
+
+---
+
 ## 2026-04-09 (집, 세션 34)
 
 ### N-04 Latest 섹션 실데이터 연결
