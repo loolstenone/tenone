@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-09 (집, 세션 35)
+> 마지막 업데이트: 2026-04-09 (집, 세션 36)
 
 ---
 
@@ -80,7 +80,17 @@
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
 
-## 이번 세션 (세션 35) 완료 항목
+## 이번 세션 (세션 36) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| QA 파일 분리 — guide-sections | `lib/smarcomm/guide-sections.ts` 1392→19줄, 6개 파셜 파일로 분리 |
+| QA 파일 분리 — evolution-school | `app/intra/evolution-school/page.tsx` 2064→751줄, course-data/quiz-modal/course-list-tab 추출 |
+| QA 파일 분리 — messenger | `app/intra/myverse/messenger/page.tsx` 1891→760줄, messenger-data/modals/sidebar 추출 |
+| QA 파일 분리 — WIO settings | `app/(WIO)/wio/app/settings/page.tsx` 1673→400줄, settings-data + 5개 탭 컴포넌트 추출 |
+| tsc 검증 | 전체 0 에러 확인 |
+
+## 이전 세션 (세션 35) 완료 항목
 
 | 항목 | 내용 |
 |------|------|

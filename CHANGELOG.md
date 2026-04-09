@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-04-09 (집, 세션 36)
+
+### QA: 800줄 초과 파일 4개 분리 완료
+
+- `lib/smarcomm/guide-sections.ts` (1392→19줄): 26개 가이드 섹션을 6개 파셜 파일로 분리
+  - guide-sections-traffic, analytics, geo, content, workspace, project
+- `app/intra/evolution-school/page.tsx` (2064→751줄)
+  - `course-data.ts`: CourseStatus/CategoryFilter/StatusFilter/TabId/QuizQuestion/Course 타입 + initialCourses 데이터
+  - `quiz-modal.tsx`: QuizModal 컴포넌트
+  - `course-list-tab.tsx`: CourseListTab 컴포넌트
+- `app/intra/myverse/messenger/page.tsx` (1891→760줄)
+  - `messenger-data.ts`: Message/ChatThread 인터페이스, mock 데이터, helper 함수
+  - `group-chat-modal.tsx`: GroupChatModal 컴포넌트
+  - `broadcast-modal.tsx`: BroadcastModal 컴포넌트
+  - `messenger-sidebar.tsx`: MessengerSidebar 컴포넌트 (Column 1)
+- `app/(WIO)/wio/app/settings/page.tsx` (1673→400줄)
+  - `settings-data.ts`: 타입 + mock 데이터
+  - `service-tab.tsx`, `workflow-canvas.tsx`, `permissions-tab.tsx`, `theme-tab.tsx`, `system-tab.tsx`
+- 전체 tsc --noEmit 0 에러 확인
+
+---
+
 ## 2026-04-09 (집, 세션 35b)
 
 ### N-03 뉴스레터 공통 컴포넌트 + 전 브랜드 삽입
