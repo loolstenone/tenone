@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-04-09 (집, 세션 35b)
+
+### N-03 뉴스레터 공통 컴포넌트 + 전 브랜드 삽입
+
+- `components/newsletter/NewsletterSubscribeForm.tsx`: 신규 — dark/light 테마, accentColor, source, title, subtitle prop. 닉네임+이메일+동의 체크박스, 성공/에러 처리
+- 22개 브랜드 메인 페이지에 `NewsletterSubscribeForm` 삽입 (HeRo, MADLeague, RooK, WIO, Badak, MADLeap, SmarComm, YouInOne, EvoSchool, FWN, Planners, Seoul360, Townity, 0gamja, ChangeUp, Domo, Jakka, MoNTZ, Mullaesian, NatureBox, BrandGravity, NamingFactory)
+- FWN: 기존 인라인 뉴스레터 폼 → 공통 컴포넌트로 교체
+- `CLAUDE.md`: Context Rot 방지 → Context Rot 방지 + 토큰 최적화 섹션으로 교체 (모델 선택, compact 타이밍, 서브에이전트 활용)
+- `.claude/hooks.json`: strategic-compact 훅 추가 (Edit/Write PreToolUse → stderr 메시지)
+- 스킵: TrendHunter(리다이렉트 전용), Mindle 메인(기존 인라인 폼 교체 후순위), MyVerse(기존 구독 CTA 있음), Dokdae(풀스크린 채팅 구조)
+
+---
+
 ## 2026-04-09 (집, 세션 35)
 
 ### crew-invite → UMS 회원 초대 + ccusage 모니터링

@@ -91,6 +91,10 @@
 | intra-nav.ts | UMS 회원 하위에 "초대" 메뉴 추가 |
 | ccusage 모니터링 | `~/.claude/usage-status.js` — 캐시 방식(10분) + Stop 훅 연결 |
 | settings.json hooks | Stop 이벤트에 usage-status.js 실행 추가 |
+| N-03 뉴스레터 공통 컴포넌트 | `components/newsletter/NewsletterSubscribeForm.tsx` 신규 — dark/light 테마, accentColor, source prop |
+| 전 브랜드 뉴스레터 삽입 | 22개 브랜드 메인 페이지에 NewsletterSubscribeForm 삽입 완료 (FWN 기존 인라인 → 컴포넌트 교체) |
+| CLAUDE.md 업데이트 | Context Rot 방지 → 토큰 최적화 전략 섹션으로 교체 |
+| hooks.json | `.claude/hooks.json` strategic-compact 훅 추가 (Edit/Write PreToolUse) |
 
 ## 이전 세션 (세션 34) 완료 항목
 
@@ -127,7 +131,9 @@
 ## 다음 스텝 후보
 
 1. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)
-2. **/crew-invite 폼 DB 저장** — `handleSubmit`이 UI만 바꿈. Supabase에 지원서 저장하는 API + 테이블 필요
-3. **N-03 뉴스레터 구독 폼 통일** — 메인/Mindle/newsletter 3곳 방향 결정 필요
+2. ~~**/crew-invite 폼 DB 저장**~~ — UMS 초대 기능으로 대체 완료
+3. ~~**N-03 뉴스레터 구독 폼 통일**~~ ✅ 공통 컴포넌트 + 22개 브랜드 완료
 4. **N-10 privacy@tenone.biz 실수신 확인** — 운영자 직접 확인
 5. **SmarComm/MADLeague DB 연결** — 전체 Mock 상태 (5월 예정)
+6. **Mindle 메인 인라인 폼 → 공통 컴포넌트 교체** — `app/(Mindle)/mindle/page.tsx` 내 기존 인라인 뉴스레터 폼 → `NewsletterSubscribeForm`으로 교체 (낮은 우선순위)
+7. **TenOne/newsletter 페이지 교체** — `app/(TenOne)/newsletter/page.tsx` 내 중복 코드 → 공통 컴포넌트 사용 (낮은 우선순위)
