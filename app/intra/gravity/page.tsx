@@ -8,8 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 /* ── 타입 ── */
 interface Product {
     id: string;
-    product_name: string;
-    brand_name: string;
+    name: string;
+    client_name: string;
     category: string;
     created_at: string;
 }
@@ -76,9 +76,16 @@ export default function GravityPage() {
         setLoading(true);
         const { data } = await supabase
             .from("bg_products")
-            .select("id, product_name, brand_name, category, created_at")
+            .select("id, name, category, created_at, bg_clients(name)")
             .order("created_at", { ascending: false });
-        setProducts(data ?? []);
+        const mapped = (data ?? []).map((p: { id: string; name: string; category: string; created_at: string; bg_clients: { name: string } | null }) => ({
+            id: p.id,
+            name: p.name,
+            client_name: p.bg_clients?.name ?? "",
+            category: p.category,
+            created_at: p.created_at,
+        }));
+        setProducts(mapped);
 
         // 최신 gravity score 조회
         if (data && data.length > 0) {
@@ -160,7 +167,7 @@ export default function GravityPage() {
             const res3 = await fetch("/api/gravity/probe/run", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, brand_name: product.brand_name }),
+                body: JSON.stringify({ product_id: product.id, brand_name: product.name }),
             });
             const d3 = await res3.json();
             log("AI Prober", res3.ok, d3.probed ? `${d3.probed}개 프로브` : d3.message);
@@ -169,7 +176,7 @@ export default function GravityPage() {
             const res4 = await fetch("/api/gravity/scan/run", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, brand_name: product.brand_name }),
+                body: JSON.stringify({ product_id: product.id, brand_name: product.name }),
             });
             const d4 = await res4.json();
             log("Gap Analyzer + Score Tracker", res4.ok, d4.result?.gravity_score != null ? `Gravity Score: ${d4.result.gravity_score}` : d4.error);
@@ -178,7 +185,7 @@ export default function GravityPage() {
             const res5 = await fetch("/api/gravity/source/run", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, brand_name: product.brand_name }),
+                body: JSON.stringify({ product_id: product.id, brand_name: product.name }),
             });
             const d5 = await res5.json();
             log("Source Tracer", res5.ok, d5.total_sources ? `${d5.total_sources}개 소스` : d5.message);
@@ -187,7 +194,7 @@ export default function GravityPage() {
             const res6 = await fetch("/api/gravity/voice/run", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, brand_name: product.brand_name }),
+                body: JSON.stringify({ product_id: product.id, brand_name: product.name }),
             });
             const d6 = await res6.json();
             log("Voice Designer", res6.ok, d6.briefs_generated ? `${d6.briefs_generated}개 브리프 생성` : d6.error);
@@ -255,8 +262,8 @@ export default function GravityPage() {
                                     >
                                         <div className="flex items-start justify-between mb-3">
                                             <div>
-                                                <p className="text-sm font-semibold text-white">{p.brand_name}</p>
-                                                <p className="text-xs text-neutral-500">{p.product_name}</p>
+                                                <p className="text-sm font-semibold text-white">{p.name}</p>
+                                                <p className="text-xs text-neutral-500">{p.client_name}</p>
                                             </div>
                                             {s && (
                                                 <span className={`text-2xl font-bold font-mono ${scoreColor(s.gravity_score)}`}>
@@ -311,7 +318,7 @@ export default function GravityPage() {
                         {selectedProduct && (
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3 pb-2 border-b border-neutral-800">
-                                    <h2 className="text-base font-bold text-white">{selectedProduct.brand_name} 리포트</h2>
+                                    <h2 className="text-base font-bold text-white">{selectedProduct.name} 리포트</h2>
                                     <a
                                         href={`/brandgravity`}
                                         target="_blank"
