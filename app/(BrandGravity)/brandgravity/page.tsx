@@ -48,40 +48,54 @@ export default function BrandGravityPage() {
                 justifyContent: "center",
             }}>
 
-                {/* 달 배경 */}
+                {/* 행성 배경 */}
                 <div style={{
                     position: "absolute",
-                    right: "-12%",
+                    right: "-10%",
                     top: "50%",
                     transform: "translateY(-50%)",
                     width: "65vw",
                     height: "65vw",
                     borderRadius: "50%",
-                    background: "radial-gradient(circle at 28% 42%, #2a2a2a 0%, #141414 35%, #070707 65%, #000 100%)",
-                    boxShadow: "inset -30px -10px 80px rgba(0,0,0,0.95), inset 20px 15px 60px rgba(60,60,60,0.15)",
+                    background: "radial-gradient(circle at 30% 38%, #4a4a4a 0%, #2a2a2a 20%, #181818 45%, #090909 75%, #000 100%)",
+                    boxShadow: "inset -40px -15px 100px rgba(0,0,0,0.9), inset 30px 20px 80px rgba(80,80,80,0.12), 0 0 120px rgba(60,60,60,0.08)",
                     pointerEvents: "none",
                 }} />
-                {/* 달 크레이터 느낌 */}
+                {/* 행성 크레이터 */}
                 <div style={{
                     position: "absolute",
-                    right: "5%",
-                    top: "30%",
+                    right: "8%",
+                    top: "28%",
                     width: "8vw",
                     height: "8vw",
                     borderRadius: "50%",
-                    background: "radial-gradient(circle at 40% 40%, #1a1a1a 0%, #0a0a0a 100%)",
-                    opacity: 0.6,
+                    background: "radial-gradient(circle at 35% 35%, #252525 0%, #111 60%, #060606 100%)",
+                    boxShadow: "inset 3px 3px 12px rgba(0,0,0,0.8)",
+                    opacity: 0.9,
                     pointerEvents: "none",
                 }} />
                 <div style={{
                     position: "absolute",
-                    right: "20%",
-                    top: "55%",
+                    right: "22%",
+                    top: "58%",
                     width: "5vw",
                     height: "5vw",
                     borderRadius: "50%",
-                    background: "radial-gradient(circle at 35% 35%, #181818 0%, #080808 100%)",
-                    opacity: 0.5,
+                    background: "radial-gradient(circle at 30% 30%, #202020 0%, #0d0d0d 70%, #050505 100%)",
+                    boxShadow: "inset 2px 2px 8px rgba(0,0,0,0.8)",
+                    opacity: 0.85,
+                    pointerEvents: "none",
+                }} />
+                <div style={{
+                    position: "absolute",
+                    right: "15%",
+                    top: "42%",
+                    width: "3vw",
+                    height: "3vw",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle at 40% 40%, #1e1e1e 0%, #0a0a0a 100%)",
+                    boxShadow: "inset 1px 1px 6px rgba(0,0,0,0.7)",
+                    opacity: 0.8,
                     pointerEvents: "none",
                 }} />
 
@@ -128,10 +142,10 @@ export default function BrandGravityPage() {
                                     "--g-final": `translate(0, ${l.fy}) rotate(${l.fr}) scale(1)`,
                                     animationDelay: l.delay,
                                     fontSize: "clamp(2.4rem, 7vw, 7.5rem)",
-                                    fontWeight: 900,
+                                    fontWeight: 100,
                                     color: "#fff",
                                     lineHeight: 1,
-                                    letterSpacing: "-0.02em",
+                                    letterSpacing: "0.1em",
                                 } as React.CSSProperties}
                             >
                                 {l.char}
