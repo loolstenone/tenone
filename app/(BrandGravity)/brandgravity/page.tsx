@@ -58,8 +58,8 @@ export default function BrandGravityPage() {
                     width: "65vw",
                     height: "65vw",
                     borderRadius: "50%",
-                    background: "radial-gradient(circle at 30% 38%, #222 0%, #141414 20%, #0d0d0d 45%, #050505 75%, #000 100%)",
-                    boxShadow: "inset -40px -15px 100px rgba(0,0,0,0.95), inset 30px 20px 80px rgba(40,40,40,0.08), 0 0 120px rgba(30,30,30,0.06)",
+                    background: "radial-gradient(circle at 30% 38%, #363636 0%, #1e1e1e 20%, #131313 45%, #070707 75%, #000 100%)",
+                    boxShadow: "inset -40px -15px 100px rgba(0,0,0,0.92), inset 30px 20px 80px rgba(60,60,60,0.10), 0 0 120px rgba(45,45,45,0.07)",
                     pointerEvents: "none",
                 }} />
                 {/* 행성 크레이터 — 각각 다른 속도로 부유 */}
