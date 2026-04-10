@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-09 (집, 세션 36)
+> 마지막 업데이트: 2026-04-10 (집, 세션 39)
 
 ---
 
@@ -79,6 +79,21 @@
 - `/api/hit/chat/usage/route.ts` — 신규 엔드포인트 (사용 횟수 조회)
 - `HeroChatPanel` — memberId/chatRemaining prop 추가, 제한 도달 시 업그레이드 CTA 표시
 - HIT A 결과 페이지 — memberId + chatRemaining 전달
+
+## 이번 세션 (세션 39) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| 파이프라인 관리 UI | `app/intra/gravity/[productId]/page.tsx` 전체 재작성 — 7개 스텝 개별 실행 버튼 + 카운트 뱃지 + 상태 아이콘 |
+| 보고서 페이지 업그레이드 | `app/intra/gravity/[productId]/report/page.tsx` — 6섹션→10섹션+4부록으로 확장 |
+| bg_source_traces 연동 | 경쟁사 소스 역추적 섹션 (06) — 소스 유형 분포 + 자사/경쟁사 비교 |
+| bg_voice_briefs 연동 | 브랜드 보이스 전환 가이드 섹션 (08) — 콘텐츠 브리프 카드 |
+| Executive Summary 추가 | 섹션 01 — StatCard 3종 + 핵심 발견 사항 + 최우선 권고 |
+| 카테고리 역풍 분석 추가 | 섹션 04 — headwindQuestions 목록 + 대응 전략 |
+| AI 추천 지도 개선 | 섹션 05 — 매트릭스 + AI별 추천율 통계 5개 카드 |
+| JSON-LD 코드블록 추가 | 섹션 09 — FAQPage + Organization 스키마 자동 생성 |
+| 부록 4종 추가 | A: 상황 문장 세트, B: 방법론, C: 경쟁사 상세, D: 용어 정의 |
+| 등급 시스템 추가 | scoreGrade() — A/B/C/D 등급 + 원형 Score 배지 표지 |
 
 ## 이번 세션 (세션 38) 완료 항목
 
@@ -162,9 +177,12 @@
 ## 다음 스텝 후보
 
 ### Brand Gravity (우선순위)
-1. **파이프라인 관리 화면** — 각 단계(Pain Collector/Question Mapper/AI Prober/Gap Analyzer/Source Tracer/Voice Designer) 수동 실행 + 결과 확인 화면. 현재는 "풀 스캔" 버튼 하나뿐
-2. **Phase 0 파일럿** — 춤추는 고래 또는 TenOne 자사를 대상으로 파이프라인 전체 수동 실행 후 보고서 완성
-3. **보고서 디자인 완성** — 클라이언트 전달용 PDF 기준으로 폰트/레이아웃/로고 정리
+1. **Phase 0 파일럿** ← 다음 작업 — 춤추는 고래(dancingwhale) 실제 데이터로 파이프라인 전체 수동 실행 → 보고서 PDF 완성 확인
+   - `/intra/gravity/[productId]/page.tsx` 파이프라인 패널에서 7단계 순서대로 실행
+   - 각 단계 실행 후 카운트 배지 확인 (0건 → N건)
+   - 마지막으로 "보고서" 버튼 클릭 → report/page.tsx에서 10섹션+4부록 PDF 출력 테스트
+2. **gap-analyzer Edge Function 수정** — Context score(25pt) 계산 로직 추가 (현재 구버전 Mention40+Rank30+Coverage30 공식 사용 중)
+3. **bg_gaps / bg_actions 자동 생성** — gap-analyzer에서 bg_gaps/bg_actions 자동 populate 로직 추가
 
 ### 기타
 4. **DNS 이전** — madleap.co.kr, madleague.net, rook.co.kr, badak.biz → Vercel NS (텐원 직접 처리)

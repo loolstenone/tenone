@@ -43,6 +43,9 @@ const domainPrefixMap: Record<string, string> = {
     'wio.tenone.biz': '/wio',
     'seoul360.tenone.biz': '/seoul360',
     'auth.tenone.biz': '/auth-hub',
+    'brandgravity.co.kr': '/brandgravity',
+    'www.brandgravity.co.kr': '/brandgravity',
+    'brandgravity.tenone.biz': '/brandgravity',
     // 추후 추가: 'luki.ai': '/lk'
 };
 

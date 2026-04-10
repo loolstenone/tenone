@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
     ArrowLeft, PlayCircle, RefreshCw, CheckCircle, XCircle,
-    ChevronDown, ChevronUp, FileBarChart2, TrendingUp, TrendingDown, Minus
+    ChevronDown, ChevronUp, FileBarChart2, TrendingUp, TrendingDown,
+    Minus, Play, Activity,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
@@ -61,14 +62,52 @@ interface ScanLog {
     detail?: string;
 }
 
+interface StepCounts {
+    collect: number;
+    classify: number;
+    question: number;
+    probe: number;
+    gap: number;
+    source: number;
+    voice: number;
+}
+
 const STEPS = [
-    { key: "collect", label: "Pain Collector", desc: "네이버 블로그 리뷰 수집" },
-    { key: "classify", label: "Pain Classifier", desc: "페인 포인트 분류" },
-    { key: "question", label: "Question Mapper", desc: "질문 패턴 클러스터링" },
-    { key: "probe", label: "AI Prober", desc: "5대 AI 질의 실행" },
-    { key: "gap", label: "Gap Analyzer", desc: "Gravity Score 산출" },
-    { key: "source", label: "Source Tracer", desc: "추천 출처 추적" },
-    { key: "voice", label: "Voice Designer", desc: "브랜드 보이스 설계" },
+    {
+        key: "collect", label: "Pain Collector", desc: "네이버 블로그 리뷰 수집",
+        countTable: "bg_pain_sources",
+        apiPath: null, // uses collect endpoint below
+    },
+    {
+        key: "classify", label: "Pain Classifier", desc: "페인 포인트 분류",
+        countTable: "bg_pain_points",
+        apiPath: "/api/gravity/pain/run",
+    },
+    {
+        key: "question", label: "Question Mapper", desc: "AI 질문 패턴 클러스터링",
+        countTable: "bg_question_patterns",
+        apiPath: "/api/gravity/question/run",
+    },
+    {
+        key: "probe", label: "AI Prober", desc: "4대 AI 동시 질의 실행",
+        countTable: "bg_ai_probe_results",
+        apiPath: "/api/gravity/probe/run",
+    },
+    {
+        key: "gap", label: "Gap Analyzer", desc: "Gravity Score 산출",
+        countTable: "bg_gravity_scores",
+        apiPath: "/api/gravity/gap/run",
+    },
+    {
+        key: "source", label: "Source Tracer", desc: "AI 추천 출처 역추적",
+        countTable: "bg_source_traces",
+        apiPath: "/api/gravity/source/run",
+    },
+    {
+        key: "voice", label: "Voice Designer", desc: "AEO 콘텐츠 브리프 생성",
+        countTable: "bg_voice_briefs",
+        apiPath: "/api/gravity/voice/run",
+    },
 ];
 
 export default function GravityProductPage() {
@@ -82,11 +121,16 @@ export default function GravityProductPage() {
     const [painPoints, setPainPoints] = useState<PainPoint[]>([]);
     const [patterns, setPatterns] = useState<QuestionPattern[]>([]);
     const [briefs, setBriefs] = useState<ContentBrief[]>([]);
+    const [stepCounts, setStepCounts] = useState<StepCounts>({
+        collect: 0, classify: 0, question: 0, probe: 0, gap: 0, source: 0, voice: 0,
+    });
     const [loading, setLoading] = useState(true);
     const [scanning, setScanning] = useState(false);
+    const [stepRunning, setStepRunning] = useState<string | null>(null);
     const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
     const [currentStep, setCurrentStep] = useState<string | null>(null);
     const [openSection, setOpenSection] = useState<string>("pain");
+    const [showPipeline, setShowPipeline] = useState(true);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -99,47 +143,53 @@ export default function GravityProductPage() {
 
         if (!p) { setLoading(false); return; }
 
-        setProduct({
+        const prod = {
             id: p.id,
             name: p.name,
             client_name: (p.bg_clients as { name: string } | null)?.name ?? "",
             category: p.category,
             competitors: (p.competitors as string[] | null) ?? [],
             target_keywords: (p.target_keywords as string[] | null) ?? [],
-        });
+        };
+        setProduct(prod);
 
-        const [scoreRes, painRes, patternRes, briefRes] = await Promise.all([
-            supabase
-                .from("bg_gravity_scores")
-                .select("gravity_score, mention_score, context_score, rank_score, coverage_score, scan_date")
-                .eq("product_id", productId)
-                .order("scan_date", { ascending: false })
-                .limit(1)
-                .single(),
-            supabase
-                .from("bg_pain_points")
-                .select("id, pain_summary, category, urgency, frequency, representative_quote")
-                .eq("product_id", productId)
-                .order("frequency", { ascending: false })
-                .limit(20),
-            supabase
-                .from("bg_question_patterns")
-                .select("id, pattern_text, situation_type, priority_rank, pain_keyword")
-                .eq("product_id", productId)
-                .order("priority_rank", { ascending: true })
-                .limit(20),
-            supabase
-                .from("bg_content_briefs")
-                .select("id, title, situation_sentence, target_pain_category, content_type, status, created_at")
-                .eq("product_id", productId)
-                .order("created_at", { ascending: false })
-                .limit(20),
-        ]);
+        const [scoreRes, painRes, patternRes, briefRes,
+               cCollect, cClassify, cQuestion, cProbe, cGap, cSource, cVoice] =
+            await Promise.all([
+                supabase.from("bg_gravity_scores")
+                    .select("gravity_score, mention_score, context_score, rank_score, coverage_score, scan_date")
+                    .eq("product_id", productId).order("scan_date", { ascending: false }).limit(1).single(),
+                supabase.from("bg_pain_points")
+                    .select("id, pain_summary, category, urgency, frequency, representative_quote")
+                    .eq("product_id", productId).order("frequency", { ascending: false }).limit(20),
+                supabase.from("bg_question_patterns")
+                    .select("id, pattern_text, situation_type, priority_rank, pain_keyword")
+                    .eq("product_id", productId).order("priority_rank", { ascending: true }).limit(20),
+                supabase.from("bg_content_briefs")
+                    .select("id, title, situation_sentence, target_pain_category, content_type, status, created_at")
+                    .eq("product_id", productId).order("created_at", { ascending: false }).limit(20),
+                supabase.from("bg_pain_sources").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_pain_points").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_question_patterns").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_ai_probe_results").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_gravity_scores").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_source_traces").select("id", { count: "exact", head: true }).eq("product_id", productId),
+                supabase.from("bg_voice_briefs").select("id", { count: "exact", head: true }).eq("product_id", productId),
+            ]);
 
         if (scoreRes.data) setScore(scoreRes.data);
         setPainPoints((painRes.data ?? []) as PainPoint[]);
         setPatterns((patternRes.data ?? []) as QuestionPattern[]);
         setBriefs((briefRes.data ?? []) as ContentBrief[]);
+        setStepCounts({
+            collect: cCollect.count ?? 0,
+            classify: cClassify.count ?? 0,
+            question: cQuestion.count ?? 0,
+            probe: cProbe.count ?? 0,
+            gap: cGap.count ?? 0,
+            source: cSource.count ?? 0,
+            voice: cVoice.count ?? 0,
+        });
 
         setLoading(false);
     }, [supabase, productId]);
@@ -150,129 +200,98 @@ export default function GravityProductPage() {
         setScanLogs(prev => [...prev, { step, label, ok, detail }]);
     };
 
+    const callStep = async (key: string, prod: Product): Promise<{ ok: boolean; detail: string }> => {
+        try {
+            let r: Response;
+            if (key === "collect") {
+                r = await fetch("/api/gravity/pain/collect", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        product_id: prod.id, brand_name: prod.name,
+                        category: prod.category, keywords: prod.target_keywords,
+                        competitors: prod.competitors,
+                    }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.total_collected ?? 0}개 수집` : d.error };
+            }
+            if (key === "classify") {
+                r = await fetch("/api/gravity/pain/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: prod.id, limit: 30 }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.classified ?? 0}개 분류` : d.error };
+            }
+            if (key === "question") {
+                r = await fetch("/api/gravity/question/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: prod.id, top_n: 30 }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.patterns_generated ?? 0}개 패턴` : d.error };
+            }
+            if (key === "probe") {
+                r = await fetch("/api/gravity/probe/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        product_id: prod.id, brand_name: prod.name,
+                        competitors: prod.competitors,
+                        models: ["claude", "chatgpt", "gemini", "perplexity"], pattern_limit: 10,
+                    }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.total_probed ?? 0}개 질의` : d.error };
+            }
+            if (key === "gap") {
+                r = await fetch("/api/gravity/gap/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: prod.id, brand_name: prod.name, competitors: prod.competitors }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `Gravity Score ${d.gravity_score ?? "-"}` : d.error };
+            }
+            if (key === "source") {
+                r = await fetch("/api/gravity/source/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: prod.id, brand_name: prod.name, competitors: prod.competitors }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.traced ?? 0}건 추적` : d.error };
+            }
+            if (key === "voice") {
+                r = await fetch("/api/gravity/voice/run", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: prod.id, brand_name: prod.name }),
+                });
+                const d = await r.json().catch(() => ({}));
+                return { ok: r.ok, detail: r.ok ? `${d.briefs_created ?? 0}개 브리프` : d.error };
+            }
+            return { ok: false, detail: "알 수 없는 스텝" };
+        } catch (e) {
+            return { ok: false, detail: String(e) };
+        }
+    };
+
+    const runStep = async (key: string) => {
+        if (!product || stepRunning || scanning) return;
+        setStepRunning(key);
+        const step = STEPS.find(s => s.key === key)!;
+        const result = await callStep(key, product);
+        setStepRunning(null);
+        log(key, step.label, result.ok, result.detail);
+        await load();
+    };
+
     const runFullScan = async () => {
         if (!product) return;
         setScanning(true);
         setScanLogs([]);
-
-        // Step 1: Collect
-        setCurrentStep("collect");
-        try {
-            const r = await fetch("/api/gravity/pain/collect", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    product_id: product.id,
-                    brand_name: product.name,
-                    category: product.category,
-                    keywords: product.target_keywords,
-                    competitors: product.competitors,
-                }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("collect", "Pain Collector", r.ok, r.ok ? `${d.total_collected ?? 0}개 수집` : d.error);
-        } catch (e) {
-            log("collect", "Pain Collector", false, String(e));
+        for (const s of STEPS) {
+            setCurrentStep(s.key);
+            const result = await callStep(s.key, product);
+            log(s.key, s.label, result.ok, result.detail);
         }
-
-        // Step 2: Classify
-        setCurrentStep("classify");
-        try {
-            const r = await fetch("/api/gravity/pain/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, limit: 30 }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("classify", "Pain Classifier", r.ok, r.ok ? `${d.classified ?? 0}개 분류` : d.error);
-        } catch (e) {
-            log("classify", "Pain Classifier", false, String(e));
-        }
-
-        // Step 3: Question
-        setCurrentStep("question");
-        try {
-            const r = await fetch("/api/gravity/question/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, top_n: 30 }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("question", "Question Mapper", r.ok, r.ok ? `${d.patterns_generated ?? 0}개 패턴` : d.error);
-        } catch (e) {
-            log("question", "Question Mapper", false, String(e));
-        }
-
-        // Step 4: Probe
-        setCurrentStep("probe");
-        try {
-            const r = await fetch("/api/gravity/probe/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    product_id: product.id,
-                    brand_name: product.name,
-                    competitors: product.competitors,
-                    models: ["claude", "chatgpt", "gemini", "perplexity"],
-                    pattern_limit: 10,
-                }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("probe", "AI Prober", r.ok, r.ok ? `${d.total_probed ?? 0}개 질의` : d.error);
-        } catch (e) {
-            log("probe", "AI Prober", false, String(e));
-        }
-
-        // Step 5: Gap/Score
-        setCurrentStep("gap");
-        try {
-            const r = await fetch("/api/gravity/gap/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    product_id: product.id,
-                    brand_name: product.name,
-                    competitors: product.competitors,
-                }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("gap", "Gap Analyzer", r.ok, r.ok ? `Gravity Score ${d.gravity_score ?? "-"}` : d.error);
-        } catch (e) {
-            log("gap", "Gap Analyzer", false, String(e));
-        }
-
-        // Step 6: Source
-        setCurrentStep("source");
-        try {
-            const r = await fetch("/api/gravity/source/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    product_id: product.id,
-                    brand_name: product.name,
-                    competitors: product.competitors,
-                }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("source", "Source Tracer", r.ok, r.ok ? "추적 완료" : d.error);
-        } catch (e) {
-            log("source", "Source Tracer", false, String(e));
-        }
-
-        // Step 7: Voice
-        setCurrentStep("voice");
-        try {
-            const r = await fetch("/api/gravity/voice/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product_id: product.id, brand_name: product.name }),
-            });
-            const d = await r.json().catch(() => ({}));
-            log("voice", "Voice Designer", r.ok, r.ok ? "보이스 가이드 생성" : d.error);
-        } catch (e) {
-            log("voice", "Voice Designer", false, String(e));
-        }
-
         setCurrentStep(null);
         setScanning(false);
         await load();
@@ -291,7 +310,9 @@ export default function GravityProductPage() {
         return "bg-neutral-100 text-neutral-500";
     };
 
-    const Section = ({ id, title, count, children }: { id: string; title: string; count?: number; children: React.ReactNode }) => (
+    const countKey = (key: string): number => stepCounts[key as keyof StepCounts] ?? 0;
+
+    const Accordion = ({ id, title, count, children }: { id: string; title: string; count?: number; children: React.ReactNode }) => (
         <div className="border border-neutral-200 bg-white">
             <button
                 onClick={() => setOpenSection(openSection === id ? "" : id)}
@@ -310,19 +331,14 @@ export default function GravityProductPage() {
     );
 
     if (loading) {
-        return (
-            <div className="flex-1 flex items-center justify-center text-neutral-400 text-sm">로딩 중...</div>
-        );
+        return <div className="flex-1 flex items-center justify-center text-neutral-400 text-sm">로딩 중...</div>;
     }
-
     if (!product) {
         return (
             <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">클라이언트를 찾을 수 없습니다</p>
-                    <button onClick={() => router.push("/intra/gravity")} className="text-xs text-amber-600 hover:underline">
-                        ← 목록으로
-                    </button>
+                    <button onClick={() => router.push("/intra/gravity")} className="text-xs text-amber-600 hover:underline">← 목록으로</button>
                 </div>
             </div>
         );
@@ -330,10 +346,7 @@ export default function GravityProductPage() {
 
     return (
         <div className="flex-1 flex flex-col min-h-0">
-            <PageHeader
-                title={product.name}
-                description={`${product.client_name} · ${product.category}`}
-            >
+            <PageHeader title={product.name} description={`${product.client_name} · ${product.category}`}>
                 <button
                     onClick={() => router.push("/intra/gravity")}
                     className="flex items-center gap-1.5 text-xs border border-neutral-200 px-3 py-1.5 text-neutral-600 hover:border-neutral-400 transition-colors"
@@ -348,7 +361,7 @@ export default function GravityProductPage() {
                 </button>
                 <button
                     onClick={runFullScan}
-                    disabled={scanning}
+                    disabled={scanning || !!stepRunning}
                     className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-500 text-white font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                     {scanning
@@ -360,13 +373,98 @@ export default function GravityProductPage() {
             <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-5xl mx-auto space-y-5">
 
-                    {/* 스캔 진행 로그 */}
-                    {(scanning || scanLogs.length > 0) && (
+                    {/* ── 파이프라인 관리 패널 ── */}
+                    <div className="border border-neutral-200 bg-white">
+                        <button
+                            onClick={() => setShowPipeline(!showPipeline)}
+                            className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-amber-500" />
+                                <span className="text-sm font-semibold text-neutral-800">파이프라인 관리</span>
+                                <span className="text-[10px] text-neutral-400">단계별 실행 · 데이터 확인</span>
+                            </div>
+                            {showPipeline
+                                ? <ChevronUp className="w-4 h-4 text-neutral-400" />
+                                : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+                        </button>
+                        {showPipeline && (
+                            <div className="border-t border-neutral-100">
+                                {STEPS.map((s, idx) => {
+                                    const count = countKey(s.key);
+                                    const isRunning = stepRunning === s.key || (scanning && currentStep === s.key);
+                                    const isDone = count > 0;
+                                    const lastLog = scanLogs.findLast(l => l.step === s.key);
+
+                                    return (
+                                        <div
+                                            key={s.key}
+                                            className={`flex items-center gap-4 px-5 py-3 ${idx < STEPS.length - 1 ? "border-b border-neutral-50" : ""}`}
+                                        >
+                                            {/* 번호 */}
+                                            <span className="text-[10px] font-mono text-neutral-300 w-5 shrink-0">
+                                                {String(idx + 1).padStart(2, "0")}
+                                            </span>
+
+                                            {/* 상태 아이콘 */}
+                                            {isRunning ? (
+                                                <RefreshCw className="w-4 h-4 text-amber-500 animate-spin shrink-0" />
+                                            ) : isDone ? (
+                                                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                                            ) : (
+                                                <div className="w-4 h-4 rounded-full border border-neutral-200 shrink-0" />
+                                            )}
+
+                                            {/* 레이블 + 설명 */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-sm font-medium ${isRunning ? "text-amber-600" : isDone ? "text-neutral-800" : "text-neutral-400"}`}>
+                                                        {s.label}
+                                                    </span>
+                                                    {count > 0 && (
+                                                        <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full">
+                                                            {count.toLocaleString()}건
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-neutral-400">{s.desc}</p>
+                                                {lastLog?.detail && (
+                                                    <p className={`text-[10px] mt-0.5 ${lastLog.ok ? "text-neutral-500" : "text-red-400"}`}>
+                                                        → {lastLog.detail}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* 실행 버튼 */}
+                                            <button
+                                                onClick={() => runStep(s.key)}
+                                                disabled={isRunning || scanning || !!stepRunning}
+                                                className={`flex items-center gap-1 text-[11px] px-2.5 py-1 border font-medium transition-colors shrink-0 ${
+                                                    isRunning
+                                                        ? "border-amber-200 text-amber-400 cursor-not-allowed"
+                                                        : isDone
+                                                            ? "border-neutral-200 text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
+                                                            : "border-amber-300 text-amber-600 hover:bg-amber-50"
+                                                } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                            >
+                                                {isRunning
+                                                    ? <><RefreshCw className="w-3 h-3 animate-spin" /> 실행 중</>
+                                                    : <><Play className="w-3 h-3" /> {isDone ? "재실행" : "실행"}</>}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 풀 스캔 진행 로그 */}
+                    {(scanning || (scanLogs.length > 0 && !stepRunning)) && (
                         <div className="border border-neutral-200 bg-white p-5">
-                            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">스캔 진행</p>
+                            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">풀 스캔 진행</p>
                             <div className="space-y-2">
                                 {STEPS.map(s => {
-                                    const done = scanLogs.find(l => l.step === s.key);
+                                    const done = scanLogs.findLast(l => l.step === s.key);
                                     const active = currentStep === s.key;
                                     return (
                                         <div key={s.key} className={`flex items-center gap-3 text-sm ${!done && !active ? "opacity-30" : ""}`}>
@@ -436,7 +534,7 @@ export default function GravityProductPage() {
                     ) : (
                         <div className="border border-dashed border-neutral-200 p-8 text-center">
                             <p className="text-sm text-neutral-400 mb-2">아직 스캔 결과가 없습니다</p>
-                            <p className="text-xs text-neutral-300">풀 스캔을 실행하면 Gravity Score가 산출됩니다</p>
+                            <p className="text-xs text-neutral-300">파이프라인을 실행하면 Gravity Score가 산출됩니다</p>
                         </div>
                     )}
 
@@ -465,9 +563,9 @@ export default function GravityProductPage() {
                     </div>
 
                     {/* 페인 포인트 */}
-                    <Section id="pain" title="페인 포인트" count={painPoints.length}>
+                    <Accordion id="pain" title="페인 포인트" count={painPoints.length}>
                         {painPoints.length === 0 ? (
-                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — 스캔 후 확인하세요</p>
+                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — Pain Classifier 실행 후 확인하세요</p>
                         ) : (
                             <div className="space-y-3">
                                 {painPoints.map(p => (
@@ -475,9 +573,7 @@ export default function GravityProductPage() {
                                         <div className="flex items-start justify-between gap-3 mb-2">
                                             <p className="text-sm font-medium text-neutral-800">{p.pain_summary}</p>
                                             <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${urgencyBadge(p.urgency)}`}>
-                                                    {p.urgency}
-                                                </span>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${urgencyBadge(p.urgency)}`}>{p.urgency}</span>
                                                 <span className="text-[10px] text-neutral-400">×{p.frequency}</span>
                                             </div>
                                         </div>
@@ -487,12 +583,12 @@ export default function GravityProductPage() {
                                 ))}
                             </div>
                         )}
-                    </Section>
+                    </Accordion>
 
                     {/* 질문 패턴 */}
-                    <Section id="patterns" title="AI 질문 패턴" count={patterns.length}>
+                    <Accordion id="patterns" title="AI 질문 패턴" count={patterns.length}>
                         {patterns.length === 0 ? (
-                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — 스캔 후 확인하세요</p>
+                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — Question Mapper 실행 후 확인하세요</p>
                         ) : (
                             <div className="space-y-2">
                                 {patterns.map((p, i) => (
@@ -513,12 +609,12 @@ export default function GravityProductPage() {
                                 ))}
                             </div>
                         )}
-                    </Section>
+                    </Accordion>
 
                     {/* 콘텐츠 브리프 */}
-                    <Section id="briefs" title="콘텐츠 브리프" count={briefs.length}>
+                    <Accordion id="briefs" title="AEO 콘텐츠 브리프" count={briefs.length}>
                         {briefs.length === 0 ? (
-                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — 스캔 후 확인하세요</p>
+                            <p className="text-sm text-neutral-400 text-center py-4">데이터 없음 — Voice Designer 실행 후 확인하세요</p>
                         ) : (
                             <div className="space-y-3">
                                 {briefs.map(b => (
@@ -541,7 +637,7 @@ export default function GravityProductPage() {
                                 ))}
                             </div>
                         )}
-                    </Section>
+                    </Accordion>
 
                 </div>
             </div>
