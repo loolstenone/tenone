@@ -58,12 +58,12 @@ export default function BrandGravityPage() {
                     width: "65vw",
                     height: "65vw",
                     borderRadius: "50%",
-                    background: "radial-gradient(circle at 30% 38%, #4a4a4a 0%, #2a2a2a 20%, #181818 45%, #090909 75%, #000 100%)",
-                    boxShadow: "inset -40px -15px 100px rgba(0,0,0,0.9), inset 30px 20px 80px rgba(80,80,80,0.12), 0 0 120px rgba(60,60,60,0.08)",
+                    background: "radial-gradient(circle at 30% 38%, #222 0%, #141414 20%, #0d0d0d 45%, #050505 75%, #000 100%)",
+                    boxShadow: "inset -40px -15px 100px rgba(0,0,0,0.95), inset 30px 20px 80px rgba(40,40,40,0.08), 0 0 120px rgba(30,30,30,0.06)",
                     pointerEvents: "none",
                 }} />
-                {/* 행성 크레이터 */}
-                <div style={{
+                {/* 행성 크레이터 — 각각 다른 속도로 부유 */}
+                <div className="crater-a" style={{
                     position: "absolute",
                     right: "8%",
                     top: "28%",
@@ -75,7 +75,7 @@ export default function BrandGravityPage() {
                     opacity: 0.9,
                     pointerEvents: "none",
                 }} />
-                <div style={{
+                <div className="crater-b" style={{
                     position: "absolute",
                     right: "22%",
                     top: "58%",
@@ -87,7 +87,7 @@ export default function BrandGravityPage() {
                     opacity: 0.85,
                     pointerEvents: "none",
                 }} />
-                <div style={{
+                <div className="crater-c" style={{
                     position: "absolute",
                     right: "15%",
                     top: "42%",
