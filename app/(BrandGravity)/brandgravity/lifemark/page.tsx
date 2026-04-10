@@ -39,7 +39,7 @@ export default function LifeMarkPage() {
                 <p className="text-xs tracking-[0.25em] uppercase text-neutral-500 mb-4">Life Mark</p>
                 <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-6">
                     브랜드가 소비자의 삶에<br />
-                    <span className="text-amber-500">접속</span>하도록 함께 뛴다
+                    <span className="text-amber-500">접속을 시도</span>합니다.
                 </h1>
                 <p className="text-neutral-400 leading-relaxed max-w-xl">
                     Brand Gravity가 AI 추천 진입이라는 구체적 결과를 파는 서비스라면,
