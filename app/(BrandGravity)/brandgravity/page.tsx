@@ -8,13 +8,13 @@ import '../gravity-hero.css';
 // 최종 위치 근처에서 둥둥 떠다니는 두 위치 (작은 offset)
 // ga: 첫 번째 떠다니는 위치, gb: 두 번째 떠다니는 위치 → 서서히 0,0으로 안착
 const GRAVITY_LETTERS = [
-    { char: "G", ga: "translate(-14px, -18px) rotate(-7deg)",  gb: "translate(8px, 12px) rotate(4deg)",    gl: "translate(-6px, -7px) rotate(-3deg)",  delay: "0s"    },
-    { char: "R", ga: "translate(10px, -14px) rotate(6deg)",    gb: "translate(-12px, 16px) rotate(-5deg)", gl: "translate(4px, -5px) rotate(2.5deg)",  delay: "0.1s"  },
-    { char: "A", ga: "translate(-8px, 16px) rotate(-9deg)",    gb: "translate(12px, -10px) rotate(5deg)",  gl: "translate(-3px, 6px) rotate(-4deg)",   delay: "0.2s"  },
-    { char: "V", ga: "translate(16px, 10px) rotate(8deg)",     gb: "translate(-10px, -14px) rotate(-6deg)",gl: "translate(6px, 4px) rotate(3deg)",     delay: "0.05s" },
-    { char: "I", ga: "translate(-12px, -12px) rotate(-10deg)", gb: "translate(8px, 16px) rotate(7deg)",    gl: "translate(-5px, -5px) rotate(-4deg)",  delay: "0.15s" },
-    { char: "T", ga: "translate(10px, -16px) rotate(5deg)",    gb: "translate(-14px, 10px) rotate(-4deg)", gl: "translate(4px, -6px) rotate(2deg)",    delay: "0.25s" },
-    { char: "Y", ga: "translate(-16px, 12px) rotate(-8deg)",   gb: "translate(10px, -12px) rotate(5deg)",  gl: "translate(-6px, 5px) rotate(-3deg)",   delay: "0.32s" },
+    { char: "G", ga: "translate(-5px, -7px) rotate(-3deg)",  gb: "translate(3px, 5px) rotate(1.5deg)",  gl: "translate(-2px, -3px) rotate(-1deg)",  delay: "0s"    },
+    { char: "R", ga: "translate(4px, -5px) rotate(2.5deg)",  gb: "translate(-5px, 6px) rotate(-2deg)",  gl: "translate(2px, -2px) rotate(1deg)",    delay: "0.1s"  },
+    { char: "A", ga: "translate(-3px, 6px) rotate(-3.5deg)", gb: "translate(5px, -4px) rotate(2deg)",   gl: "translate(-1px, 2px) rotate(-1.5deg)", delay: "0.2s"  },
+    { char: "V", ga: "translate(6px, 4px) rotate(3deg)",     gb: "translate(-4px, -5px) rotate(-2deg)", gl: "translate(2px, 1.5px) rotate(1deg)",   delay: "0.05s" },
+    { char: "I", ga: "translate(-5px, -5px) rotate(-4deg)",  gb: "translate(3px, 6px) rotate(2.5deg)",  gl: "translate(-2px, -2px) rotate(-1.5deg)",delay: "0.15s" },
+    { char: "T", ga: "translate(4px, -6px) rotate(2deg)",    gb: "translate(-5px, 4px) rotate(-1.5deg)",gl: "translate(1.5px, -2px) rotate(0.8deg)", delay: "0.25s" },
+    { char: "Y", ga: "translate(-6px, 5px) rotate(-3deg)",   gb: "translate(4px, -4px) rotate(2deg)",   gl: "translate(-2px, 2px) rotate(-1deg)",   delay: "0.32s" },
 ];
 
 const systems = [
@@ -111,7 +111,7 @@ export default function BrandGravityPage() {
                 }}>
                     {/* BRAND / GRAVITY 폭 통일 컨테이너 */}
                     <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "stretch" }}>
-                        {/* BRAND 텍스트 */}
+                        {/* BRAND 텍스트 — D를 좌우 반전해 B↔D 마주보게 */}
                         <div
                             className="gravity-brand"
                             style={{
@@ -121,9 +121,17 @@ export default function BrandGravityPage() {
                                 color: "#fff",
                                 lineHeight: 1,
                                 textAlign: "center",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "baseline",
+                                gap: "0.1em",
                             }}
                         >
-                            BRAND
+                            {"BRAND".split("").map((ch, i) => (
+                                <span key={i} style={ch === "D" ? { display: "inline-block", transform: "scaleX(-1)" } : undefined}>
+                                    {ch}
+                                </span>
+                            ))}
                         </div>
 
                         {/* 구분선 */}
