@@ -5,7 +5,7 @@ export default function BrandGravityLayout({ children }: { children: React.React
         <>
             <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-neutral-800">
                 <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link href="/brandgravity" className="text-sm font-bold tracking-tight">
+                    <Link href="/brandgravity" className="text-sm font-bold tracking-tight text-white">
                         Brand <span className="text-amber-500">Gravity</span>
                     </Link>
                     <div className="flex items-center gap-6">
