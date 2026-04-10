@@ -5,15 +5,16 @@ import { ArrowRight, Brain, Search, Target, Database, Radar, PenTool, BarChart3,
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import '../gravity-hero.css';
 
-// 각 글자별 중력 낙하 파라미터 (startX, startY, rotation, delay, finalRotate)
+// 흩어진 상태 → drift → 일직선 제자리
+// sx/sy/sr: 시작 위치(흩어짐), mx/my/mr: 중간 drift 위치, delay: 등장 지연
 const GRAVITY_LETTERS = [
-    { char: "G", sx: "-60px", sy: "-320px", r: "-25deg", delay: "0s",    fr: "-3deg",  fy: "2px"  },
-    { char: "R", sx: "-20px", sy: "-180px", r: "12deg",  delay: "0.08s", fr: "1deg",   fy: "-3px" },
-    { char: "A", sx: "10px",  sy: "-440px", r: "-8deg",  delay: "0.15s", fr: "-2deg",  fy: "6px"  },
-    { char: "V", sx: "30px",  sy: "-260px", r: "5deg",   delay: "0.22s", fr: "4deg",   fy: "-4px" },
-    { char: "I", sx: "5px",   sy: "-200px", r: "-18deg", delay: "0.30s", fr: "-1deg",  fy: "3px"  },
-    { char: "T", sx: "-15px", sy: "-350px", r: "20deg",  delay: "0.38s", fr: "3deg",   fy: "-2px" },
-    { char: "Y", sx: "40px",  sy: "-280px", r: "-12deg", delay: "0.46s", fr: "-4deg",  fy: "5px"  },
+    { char: "G", sx: "-210px", sy: "80px",   sr: "42deg",  mx: "-95px",  my: "36px",   mr: "20deg",  delay: "0s"    },
+    { char: "R", sx: "100px",  sy: "-160px", sr: "-34deg", mx: "44px",   my: "-72px",  mr: "-16deg", delay: "0.1s"  },
+    { char: "A", sx: "240px",  sy: "90px",   sr: "24deg",  mx: "105px",  my: "40px",   mr: "11deg",  delay: "0.2s"  },
+    { char: "V", sx: "-140px", sy: "-140px", sr: "-52deg", mx: "-60px",  my: "-60px",  mr: "-24deg", delay: "0.05s" },
+    { char: "I", sx: "180px",  sy: "130px",  sr: "62deg",  mx: "78px",   my: "56px",   mr: "28deg",  delay: "0.15s" },
+    { char: "T", sx: "-90px",  sy: "175px",  sr: "-30deg", mx: "-38px",  my: "70px",   mr: "-14deg", delay: "0.25s" },
+    { char: "Y", sx: "125px",  sy: "-100px", sr: "36deg",  mx: "54px",   my: "-44px",  mr: "17deg",  delay: "0.32s" },
 ];
 
 const systems = [
@@ -136,16 +137,14 @@ export default function BrandGravityPage() {
                                 key={l.char}
                                 className="gravity-letter"
                                 style={{
-                                    "--g-start": `translate(${l.sx}, ${l.sy}) rotate(${l.r}) scale(0.7)`,
-                                    "--g-overshoot": `translate(0, 8px) rotate(${l.fr}) scale(1.04)`,
-                                    "--g-bounce": `translate(0, -4px) rotate(calc(${l.fr} * 0.5)) scale(0.98)`,
-                                    "--g-final": `translate(0, ${l.fy}) rotate(${l.fr}) scale(1)`,
+                                    "--g-start": `translate(${l.sx}, ${l.sy}) rotate(${l.sr}) scale(0.82)`,
+                                    "--g-mid": `translate(${l.mx}, ${l.my}) rotate(${l.mr}) scale(0.94)`,
                                     animationDelay: l.delay,
                                     fontSize: "clamp(2.4rem, 7vw, 7.5rem)",
                                     fontWeight: 100,
                                     color: "#fff",
                                     lineHeight: 1,
-                                    letterSpacing: "0.1em",
+                                    letterSpacing: "0.12em",
                                 } as React.CSSProperties}
                             >
                                 {l.char}

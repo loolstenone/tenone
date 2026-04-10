@@ -1,12 +1,15 @@
-@keyframes gravityFall {
-    0%   { opacity: 0; transform: var(--g-start); filter: blur(4px); }
-    60%  { opacity: 1; filter: blur(0); }
-    75%  { transform: var(--g-overshoot); }
-    88%  { transform: var(--g-bounce); }
-    100% { opacity: 1; transform: var(--g-final); filter: blur(0); }
+/* 흩어진 상태에서 둥둥 떠다니다 → 일직선 제자리 */
+@keyframes gravitySettle {
+    0%   { opacity: 0; transform: var(--g-start); filter: blur(3px); }
+    10%  { opacity: 1; filter: blur(0); transform: var(--g-start); }
+    36%  { transform: var(--g-start); }
+    54%  { transform: var(--g-mid); }
+    72%  { transform: translate(0, 9px) rotate(1deg) scale(1.02); }
+    84%  { transform: translate(0, -4px) rotate(-0.5deg) scale(0.99); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; filter: blur(0); }
 }
 @keyframes brandReveal {
-    0%   { opacity: 0; transform: translateY(-20px); }
+    0%   { opacity: 0; transform: translateY(-16px); }
     100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes subtitleFade {
@@ -19,18 +22,18 @@
 }
 
 .gravity-brand {
-    animation: brandReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+    animation: brandReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 .gravity-letter {
     display: inline-block;
-    animation: gravityFall 0.9s cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation: gravitySettle 2.6s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 .gravity-subtitle {
-    animation: subtitleFade 0.7s ease-out 0.85s both;
+    animation: subtitleFade 0.7s ease-out 2.8s both;
 }
 .gravity-cta {
-    animation: subtitleFade 0.7s ease-out 1.05s both;
+    animation: subtitleFade 0.7s ease-out 3.0s both;
 }
 .gravity-scroll-line {
-    animation: scrollPulse 2s ease-in-out 1.8s infinite;
+    animation: scrollPulse 2s ease-in-out 3.4s infinite;
 }
