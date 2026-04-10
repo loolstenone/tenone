@@ -1,14 +1,22 @@
-/* 최종 위치 근처에서 둥둥 떠다니다 → 서서히 안착 */
+/*
+  무중력 부유 → 안착
+  0~12%   : 페이드인 (ga 위치에서 나타남)
+  12~38%  : ga에서 둥둥 (정체)
+  38~60%  : ga → gb 천천히 이동 (1차 부유)
+  60~78%  : gb → ga 천천히 복귀 (2차 부유)
+  78~100% : 서서히 0,0으로 안착 (감속)
+*/
 @keyframes gravitySettle {
-    0%   { opacity: 0; transform: var(--g-a); filter: blur(1px); }
-    10%  { opacity: 1; filter: blur(0); transform: var(--g-a); }
-    32%  { transform: var(--g-a); }
-    55%  { transform: var(--g-b); }
-    70%  { transform: translate(0, 5px) rotate(0.8deg); }
-    82%  { transform: translate(0, -2px) rotate(-0.4deg); }
-    91%  { transform: translate(0, 1px); }
-    100% { transform: translate(0, 0) rotate(0deg); opacity: 1; filter: blur(0); }
+    0%   { opacity: 0; transform: var(--g-a); }
+    12%  { opacity: 1; transform: var(--g-a); }
+    38%  { transform: var(--g-a); }
+    60%  { transform: var(--g-b); }
+    78%  { transform: var(--g-a-light); }
+    88%  { transform: translate(0, 3px) rotate(0.4deg); }
+    95%  { transform: translate(0, -1px); }
+    100% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
 }
+
 @keyframes brandReveal {
     0%   { opacity: 0; transform: translateY(-12px); }
     100% { opacity: 1; transform: translateY(0); }
@@ -27,14 +35,15 @@
 }
 .gravity-letter {
     display: inline-block;
-    animation: gravitySettle 3.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    /* ease-in-out: 각 키프레임 사이 사인곡선 느낌 */
+    animation: gravitySettle 4.0s ease-in-out both;
 }
 .gravity-subtitle {
-    animation: subtitleFade 0.7s ease-out 3.0s both;
+    animation: subtitleFade 0.7s ease-out 3.8s both;
 }
 .gravity-cta {
-    animation: subtitleFade 0.7s ease-out 3.2s both;
+    animation: subtitleFade 0.7s ease-out 4.0s both;
 }
 .gravity-scroll-line {
-    animation: scrollPulse 2s ease-in-out 3.6s infinite;
+    animation: scrollPulse 2s ease-in-out 4.4s infinite;
 }

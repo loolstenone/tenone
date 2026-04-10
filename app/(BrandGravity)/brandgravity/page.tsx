@@ -8,13 +8,13 @@ import '../gravity-hero.css';
 // 최종 위치 근처에서 둥둥 떠다니는 두 위치 (작은 offset)
 // ga: 첫 번째 떠다니는 위치, gb: 두 번째 떠다니는 위치 → 서서히 0,0으로 안착
 const GRAVITY_LETTERS = [
-    { char: "G", ga: "translate(-14px, -18px) rotate(-7deg)",  gb: "translate(8px, 12px) rotate(4deg)",   delay: "0s"    },
-    { char: "R", ga: "translate(10px, -14px) rotate(6deg)",    gb: "translate(-12px, 16px) rotate(-5deg)", delay: "0.1s"  },
-    { char: "A", ga: "translate(-8px, 16px) rotate(-9deg)",    gb: "translate(12px, -10px) rotate(5deg)",  delay: "0.2s"  },
-    { char: "V", ga: "translate(16px, 10px) rotate(8deg)",     gb: "translate(-10px, -14px) rotate(-6deg)",delay: "0.05s" },
-    { char: "I", ga: "translate(-12px, -12px) rotate(-10deg)", gb: "translate(8px, 16px) rotate(7deg)",   delay: "0.15s" },
-    { char: "T", ga: "translate(10px, -16px) rotate(5deg)",    gb: "translate(-14px, 10px) rotate(-4deg)", delay: "0.25s" },
-    { char: "Y", ga: "translate(-16px, 12px) rotate(-8deg)",   gb: "translate(10px, -12px) rotate(5deg)",  delay: "0.32s" },
+    { char: "G", ga: "translate(-14px, -18px) rotate(-7deg)",  gb: "translate(8px, 12px) rotate(4deg)",    gl: "translate(-6px, -7px) rotate(-3deg)",  delay: "0s"    },
+    { char: "R", ga: "translate(10px, -14px) rotate(6deg)",    gb: "translate(-12px, 16px) rotate(-5deg)", gl: "translate(4px, -5px) rotate(2.5deg)",  delay: "0.1s"  },
+    { char: "A", ga: "translate(-8px, 16px) rotate(-9deg)",    gb: "translate(12px, -10px) rotate(5deg)",  gl: "translate(-3px, 6px) rotate(-4deg)",   delay: "0.2s"  },
+    { char: "V", ga: "translate(16px, 10px) rotate(8deg)",     gb: "translate(-10px, -14px) rotate(-6deg)",gl: "translate(6px, 4px) rotate(3deg)",     delay: "0.05s" },
+    { char: "I", ga: "translate(-12px, -12px) rotate(-10deg)", gb: "translate(8px, 16px) rotate(7deg)",    gl: "translate(-5px, -5px) rotate(-4deg)",  delay: "0.15s" },
+    { char: "T", ga: "translate(10px, -16px) rotate(5deg)",    gb: "translate(-14px, 10px) rotate(-4deg)", gl: "translate(4px, -6px) rotate(2deg)",    delay: "0.25s" },
+    { char: "Y", ga: "translate(-16px, 12px) rotate(-8deg)",   gb: "translate(10px, -12px) rotate(5deg)",  gl: "translate(-6px, 5px) rotate(-3deg)",   delay: "0.32s" },
 ];
 
 const systems = [
@@ -146,6 +146,7 @@ export default function BrandGravityPage() {
                                     style={{
                                         "--g-a": l.ga,
                                         "--g-b": l.gb,
+                                        "--g-a-light": l.gl,
                                         animationDelay: l.delay,
                                         fontSize: "clamp(1.6rem, 4.8vw, 5.8rem)",
                                         fontWeight: 100,
