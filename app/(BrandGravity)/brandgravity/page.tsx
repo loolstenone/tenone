@@ -3,6 +3,18 @@
 import Link from "next/link";
 import { ArrowRight, Brain, Search, Target, Database, Radar, PenTool, BarChart3, ChevronRight } from "lucide-react";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
+import '../gravity-hero.css';
+
+// 각 글자별 중력 낙하 파라미터 (startX, startY, rotation, delay, finalRotate)
+const GRAVITY_LETTERS = [
+    { char: "G", sx: "-60px", sy: "-320px", r: "-25deg", delay: "0s",    fr: "-3deg",  fy: "2px"  },
+    { char: "R", sx: "-20px", sy: "-180px", r: "12deg",  delay: "0.08s", fr: "1deg",   fy: "-3px" },
+    { char: "A", sx: "10px",  sy: "-440px", r: "-8deg",  delay: "0.15s", fr: "-2deg",  fy: "6px"  },
+    { char: "V", sx: "30px",  sy: "-260px", r: "5deg",   delay: "0.22s", fr: "4deg",   fy: "-4px" },
+    { char: "I", sx: "5px",   sy: "-200px", r: "-18deg", delay: "0.30s", fr: "-1deg",  fy: "3px"  },
+    { char: "T", sx: "-15px", sy: "-350px", r: "20deg",  delay: "0.38s", fr: "3deg",   fy: "-2px" },
+    { char: "Y", sx: "40px",  sy: "-280px", r: "-12deg", delay: "0.46s", fr: "-4deg",  fy: "5px"  },
+];
 
 const systems = [
     { icon: Database, name: "Pain Collector", desc: "리뷰·커뮤니티·Q&A 데이터에서 구매 동기와 불만 패턴을 수집·분류합니다" },
@@ -24,19 +36,128 @@ const processSteps = [
 export default function BrandGravityPage() {
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white">
-            <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
 
-                {/* Hero */}
-                <section className="mb-24">
-                    <p className="text-xs tracking-[0.3em] uppercase text-amber-500 mb-4">AI Era Branding</p>
-                    <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-6">
-                        AI가 추천하는<br />브랜드를 설계합니다
-                    </h1>
-                    <p className="text-neutral-400 text-lg max-w-2xl leading-relaxed mb-10">
-                        소비자는 AI를 통해 제품을 추천받습니다.<br />
-                        Brand Gravity는 AI 추천 채널에서의 브랜드 존재감을 진단하고 강화합니다.
+            {/* ── 풀스크린 히어로 ── */}
+            <section style={{
+                position: "relative",
+                minHeight: "100vh",
+                overflow: "hidden",
+                background: "#000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+            }}>
+
+                {/* 달 배경 */}
+                <div style={{
+                    position: "absolute",
+                    right: "-12%",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: "65vw",
+                    height: "65vw",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle at 28% 42%, #2a2a2a 0%, #141414 35%, #070707 65%, #000 100%)",
+                    boxShadow: "inset -30px -10px 80px rgba(0,0,0,0.95), inset 20px 15px 60px rgba(60,60,60,0.15)",
+                    pointerEvents: "none",
+                }} />
+                {/* 달 크레이터 느낌 */}
+                <div style={{
+                    position: "absolute",
+                    right: "5%",
+                    top: "30%",
+                    width: "8vw",
+                    height: "8vw",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle at 40% 40%, #1a1a1a 0%, #0a0a0a 100%)",
+                    opacity: 0.6,
+                    pointerEvents: "none",
+                }} />
+                <div style={{
+                    position: "absolute",
+                    right: "20%",
+                    top: "55%",
+                    width: "5vw",
+                    height: "5vw",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 35%, #181818 0%, #080808 100%)",
+                    opacity: 0.5,
+                    pointerEvents: "none",
+                }} />
+
+                {/* 텍스트 중앙 컨테이너 */}
+                <div style={{
+                    position: "relative",
+                    zIndex: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    width: "100%",
+                    padding: "0 1.5rem",
+                }}>
+                    {/* Brand 텍스트 */}
+                    <div
+                        className="gravity-brand"
+                        style={{
+                            fontSize: "clamp(2.8rem, 8vw, 9rem)",
+                            fontWeight: 900,
+                            letterSpacing: "0.04em",
+                            color: "#fff",
+                            lineHeight: 1,
+                        }}
+                    >
+                        Brand
+                    </div>
+
+                    {/* GRAVITY 중력 글자들 */}
+                    <div style={{
+                        display: "flex",
+                        alignItems: "flex-end",
+                        gap: "clamp(2px, 0.8vw, 12px)",
+                        marginTop: "clamp(4px, 1vw, 16px)",
+                    }}>
+                        {GRAVITY_LETTERS.map((l) => (
+                            <span
+                                key={l.char}
+                                className="gravity-letter"
+                                style={{
+                                    "--g-start": `translate(${l.sx}, ${l.sy}) rotate(${l.r}) scale(0.7)`,
+                                    "--g-overshoot": `translate(0, 8px) rotate(${l.fr}) scale(1.04)`,
+                                    "--g-bounce": `translate(0, -4px) rotate(calc(${l.fr} * 0.5)) scale(0.98)`,
+                                    "--g-final": `translate(0, ${l.fy}) rotate(${l.fr}) scale(1)`,
+                                    animationDelay: l.delay,
+                                    fontSize: "clamp(2.4rem, 7vw, 7.5rem)",
+                                    fontWeight: 900,
+                                    color: "#fff",
+                                    lineHeight: 1,
+                                    letterSpacing: "-0.02em",
+                                } as React.CSSProperties}
+                            >
+                                {l.char}
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* 서브타이틀 */}
+                    <p className="gravity-subtitle" style={{
+                        marginTop: "clamp(24px, 4vw, 48px)",
+                        color: "#888",
+                        fontSize: "clamp(0.8rem, 1.5vw, 1rem)",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                    }}>
+                        AI Era Branding
                     </p>
-                    <div className="flex gap-3">
+
+                    {/* CTA 버튼 */}
+                    <div className="gravity-cta" style={{
+                        display: "flex",
+                        gap: "12px",
+                        marginTop: "clamp(24px, 3vw, 40px)",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                    }}>
                         <Link href="/brandgravity/apply" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black text-sm font-bold rounded-lg hover:bg-amber-400 transition">
                             Gravity Scan 신청 <ArrowRight className="w-4 h-4" />
                         </Link>
@@ -44,7 +165,30 @@ export default function BrandGravityPage() {
                             서비스 소개
                         </Link>
                     </div>
-                </section>
+                </div>
+
+                {/* 스크롤 힌트 */}
+                <div className="gravity-subtitle" style={{
+                    position: "absolute",
+                    bottom: "32px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                    zIndex: 10,
+                }}>
+                    <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "#555", textTransform: "uppercase" }}>Scroll</span>
+                    <div className="gravity-scroll-line" style={{
+                        width: "1px",
+                        height: "40px",
+                        background: "linear-gradient(to bottom, #555, transparent)",
+                    }} />
+                </div>
+            </section>
+
+            <div className="max-w-4xl mx-auto px-6 pt-24 pb-20">
 
                 {/* 시대 전환 */}
                 <section className="mb-24">
