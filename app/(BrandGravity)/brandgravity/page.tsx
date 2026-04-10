@@ -5,16 +5,16 @@ import { ArrowRight, Brain, Search, Target, Database, Radar, PenTool, BarChart3,
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
 import '../gravity-hero.css';
 
-// 흩어진 상태 → drift → 일직선 제자리
-// sx/sy/sr: 시작 위치(흩어짐), mx/my/mr: 중간 drift 위치, delay: 등장 지연
+// 최종 위치 근처에서 둥둥 떠다니는 두 위치 (작은 offset)
+// ga: 첫 번째 떠다니는 위치, gb: 두 번째 떠다니는 위치 → 서서히 0,0으로 안착
 const GRAVITY_LETTERS = [
-    { char: "G", sx: "-210px", sy: "80px",   sr: "42deg",  mx: "-95px",  my: "36px",   mr: "20deg",  delay: "0s"    },
-    { char: "R", sx: "100px",  sy: "-160px", sr: "-34deg", mx: "44px",   my: "-72px",  mr: "-16deg", delay: "0.1s"  },
-    { char: "A", sx: "240px",  sy: "90px",   sr: "24deg",  mx: "105px",  my: "40px",   mr: "11deg",  delay: "0.2s"  },
-    { char: "V", sx: "-140px", sy: "-140px", sr: "-52deg", mx: "-60px",  my: "-60px",  mr: "-24deg", delay: "0.05s" },
-    { char: "I", sx: "180px",  sy: "130px",  sr: "62deg",  mx: "78px",   my: "56px",   mr: "28deg",  delay: "0.15s" },
-    { char: "T", sx: "-90px",  sy: "175px",  sr: "-30deg", mx: "-38px",  my: "70px",   mr: "-14deg", delay: "0.25s" },
-    { char: "Y", sx: "125px",  sy: "-100px", sr: "36deg",  mx: "54px",   my: "-44px",  mr: "17deg",  delay: "0.32s" },
+    { char: "G", ga: "translate(-14px, -18px) rotate(-7deg)",  gb: "translate(8px, 12px) rotate(4deg)",   delay: "0s"    },
+    { char: "R", ga: "translate(10px, -14px) rotate(6deg)",    gb: "translate(-12px, 16px) rotate(-5deg)", delay: "0.1s"  },
+    { char: "A", ga: "translate(-8px, 16px) rotate(-9deg)",    gb: "translate(12px, -10px) rotate(5deg)",  delay: "0.2s"  },
+    { char: "V", ga: "translate(16px, 10px) rotate(8deg)",     gb: "translate(-10px, -14px) rotate(-6deg)",delay: "0.05s" },
+    { char: "I", ga: "translate(-12px, -12px) rotate(-10deg)", gb: "translate(8px, 16px) rotate(7deg)",   delay: "0.15s" },
+    { char: "T", ga: "translate(10px, -16px) rotate(5deg)",    gb: "translate(-14px, 10px) rotate(-4deg)", delay: "0.25s" },
+    { char: "Y", ga: "translate(-16px, 12px) rotate(-8deg)",   gb: "translate(10px, -12px) rotate(5deg)",  delay: "0.32s" },
 ];
 
 const systems = [
@@ -100,7 +100,7 @@ export default function BrandGravityPage() {
                     pointerEvents: "none",
                 }} />
 
-                {/* 텍스트 중앙 컨테이너 */}
+                {/* 텍스트 중앙 컨테이너 — BRAND 폭 기준으로 GRAVITY 폭 맞춤 */}
                 <div style={{
                     position: "relative",
                     zIndex: 10,
@@ -108,48 +108,56 @@ export default function BrandGravityPage() {
                     flexDirection: "column",
                     alignItems: "center",
                     textAlign: "center",
-                    width: "100%",
-                    padding: "0 1.5rem",
                 }}>
-                    {/* Brand 텍스트 */}
-                    <div
-                        className="gravity-brand"
-                        style={{
-                            fontSize: "clamp(2.8rem, 8vw, 9rem)",
-                            fontWeight: 900,
-                            letterSpacing: "0.04em",
-                            color: "#fff",
-                            lineHeight: 1,
-                        }}
-                    >
-                        Brand
-                    </div>
+                    {/* BRAND / GRAVITY 폭 통일 컨테이너 */}
+                    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "stretch" }}>
+                        {/* BRAND 텍스트 */}
+                        <div
+                            className="gravity-brand"
+                            style={{
+                                fontSize: "clamp(2.8rem, 8vw, 9rem)",
+                                fontWeight: 900,
+                                letterSpacing: "0.1em",
+                                color: "#fff",
+                                lineHeight: 1,
+                                textAlign: "center",
+                            }}
+                        >
+                            BRAND
+                        </div>
 
-                    {/* GRAVITY 중력 글자들 */}
-                    <div style={{
-                        display: "flex",
-                        alignItems: "flex-end",
-                        gap: "clamp(2px, 0.8vw, 12px)",
-                        marginTop: "clamp(4px, 1vw, 16px)",
-                    }}>
-                        {GRAVITY_LETTERS.map((l) => (
-                            <span
-                                key={l.char}
-                                className="gravity-letter"
-                                style={{
-                                    "--g-start": `translate(${l.sx}, ${l.sy}) rotate(${l.sr}) scale(0.82)`,
-                                    "--g-mid": `translate(${l.mx}, ${l.my}) rotate(${l.mr}) scale(0.94)`,
-                                    animationDelay: l.delay,
-                                    fontSize: "clamp(2.4rem, 7vw, 7.5rem)",
-                                    fontWeight: 100,
-                                    color: "#fff",
-                                    lineHeight: 1,
-                                    letterSpacing: "0.12em",
-                                } as React.CSSProperties}
-                            >
-                                {l.char}
-                            </span>
-                        ))}
+                        {/* 구분선 */}
+                        <div style={{
+                            height: "1px",
+                            background: "rgba(255,255,255,0.3)",
+                            margin: "clamp(6px, 1vw, 14px) 0",
+                        }} />
+
+                        {/* GRAVITY 글자들 — BRAND 폭에 맞춰 space-between */}
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}>
+                            {GRAVITY_LETTERS.map((l) => (
+                                <span
+                                    key={l.char}
+                                    className="gravity-letter"
+                                    style={{
+                                        "--g-a": l.ga,
+                                        "--g-b": l.gb,
+                                        animationDelay: l.delay,
+                                        fontSize: "clamp(1.6rem, 4.8vw, 5.8rem)",
+                                        fontWeight: 100,
+                                        color: "#fff",
+                                        lineHeight: 1,
+                                        letterSpacing: 0,
+                                    } as React.CSSProperties}
+                                >
+                                    {l.char}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     {/* 서브타이틀 */}
