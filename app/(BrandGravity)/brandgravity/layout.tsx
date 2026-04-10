@@ -8,11 +8,11 @@ export default function BrandGravityLayout({ children }: { children: React.React
                     <Link href="/brandgravity" className="text-sm font-bold tracking-tight text-white">
                         Brand <span className="text-amber-500">Gravity</span>
                     </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/brandgravity/services" className="text-sm text-neutral-400 hover:text-white transition">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                        <Link href="/brandgravity/services" className="hidden sm:block text-sm text-neutral-400 hover:text-white transition">
                             Brand Gravity
                         </Link>
-                        <Link href="/brandgravity/lifemark" className="text-sm text-neutral-400 hover:text-white transition">
+                        <Link href="/brandgravity/lifemark" className="hidden sm:block text-sm text-neutral-400 hover:text-white transition">
                             Life Mark
                         </Link>
                         <Link

@@ -108,23 +108,26 @@ export default function BrandGravityPage() {
                     flexDirection: "column",
                     alignItems: "center",
                     textAlign: "center",
+                    width: "100%",
+                    padding: "0 24px",
+                    boxSizing: "border-box",
                 }}>
                     {/* BRAND / GRAVITY 폭 통일 컨테이너 */}
-                    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "stretch" }}>
+                    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "stretch", maxWidth: "calc(100vw - 48px)" }}>
                         {/* BRAND 텍스트 — D를 좌우 반전해 B↔D 마주보게 */}
                         <div
                             className="gravity-brand"
                             style={{
-                                fontSize: "clamp(2.8rem, 8vw, 9rem)",
+                                fontSize: "clamp(2rem, 10vw, 9rem)",
                                 fontWeight: 900,
-                                letterSpacing: "0.1em",
+                                letterSpacing: "0.08em",
                                 color: "#fff",
                                 lineHeight: 1,
                                 textAlign: "center",
                                 display: "flex",
                                 justifyContent: "center",
                                 alignItems: "baseline",
-                                gap: "0.1em",
+                                gap: "0.08em",
                             }}
                         >
                             {"BRAND".split("").map((ch, i) => (
@@ -156,7 +159,7 @@ export default function BrandGravityPage() {
                                         "--g-b": l.gb,
                                         "--g-a-light": l.gl,
                                         animationDelay: l.delay,
-                                        fontSize: "clamp(1.6rem, 4.8vw, 5.8rem)",
+                                        fontSize: "clamp(1rem, 6vw, 5.8rem)",
                                         fontWeight: 100,
                                         color: "#fff",
                                         lineHeight: 1,
@@ -181,17 +184,13 @@ export default function BrandGravityPage() {
                     </p>
 
                     {/* CTA 버튼 */}
-                    <div className="gravity-cta" style={{
-                        display: "flex",
-                        gap: "12px",
-                        marginTop: "clamp(24px, 3vw, 40px)",
-                        flexWrap: "wrap",
-                        justifyContent: "center",
+                    <div className="gravity-cta flex flex-col sm:flex-row items-center gap-3" style={{
+                        marginTop: "clamp(20px, 3vw, 40px)",
                     }}>
-                        <Link href="/brandgravity/apply" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black text-sm font-bold rounded-lg hover:bg-amber-400 transition">
+                        <Link href="/brandgravity/apply" className="inline-flex items-center gap-2 px-6 py-2.5 bg-amber-500 text-black text-sm font-bold rounded-lg hover:bg-amber-400 transition">
                             Gravity Scan 신청 <ArrowRight className="w-4 h-4" />
                         </Link>
-                        <Link href="/brandgravity/services" className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-700 text-sm rounded-lg hover:border-neutral-500 transition">
+                        <Link href="/brandgravity/services" className="inline-flex items-center gap-2 px-6 py-2.5 border border-neutral-700 text-sm rounded-lg hover:border-neutral-500 transition">
                             서비스 소개
                         </Link>
                     </div>
