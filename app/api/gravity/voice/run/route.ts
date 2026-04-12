@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
         key_messages: string[];
         target_ai: string[];
         priority: number;
-        why: string;
+        why: string | null;
     }> = [];
 
     try {
@@ -190,6 +190,7 @@ export async function POST(req: NextRequest) {
         key_messages: b.key_messages ?? [],
         target_ai: b.target_ai ?? [],
         priority: b.priority ?? 3,
+        why: b.why ?? null,
         status: "draft",
     }));
 

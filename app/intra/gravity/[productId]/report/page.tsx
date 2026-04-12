@@ -95,6 +95,7 @@ interface VoiceBrief {
     key_messages: string[];
     target_ai: string[];
     priority: number;
+    why: string | null;
     status: string;
 }
 
@@ -232,7 +233,7 @@ export default function GravityReportPage() {
                 .eq("product_id", productId),
             supabase
                 .from("bg_voice_briefs")
-                .select("id, content_type, target_pattern, title_suggestion, key_messages, target_ai, priority, status")
+                .select("id, content_type, target_pattern, title_suggestion, key_messages, target_ai, priority, why, status")
                 .eq("product_id", productId)
                 .order("priority", { ascending: true }),
             supabase
@@ -823,6 +824,12 @@ export default function GravityReportPage() {
                                         <div className="mb-3">
                                             <p className="text-[10px] text-neutral-400 mb-0.5">공략 질문 패턴</p>
                                             <p className="text-[11px] text-neutral-600 italic">"{b.target_pattern}"</p>
+                                        </div>
+                                    )}
+
+                                    {b.why && (
+                                        <div className="mb-3 pl-2 border-l-2 border-amber-200">
+                                            <p className="text-[11px] text-amber-700">{b.why}</p>
                                         </div>
                                     )}
 
