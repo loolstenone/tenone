@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-04-12 (집, 세션 40)
+
+### Brand Gravity 컨설팅 서비스 — P0 전체 완료
+
+#### 신규 파일
+- `app/api/gravity/prescan/run/route.ts` — Quick Probe API (시장 사전 진단, 유형 A/A'/B/C 자동 판정)
+- `app/api/gravity/social/run/route.ts` — Naver 소셜 언급 · SOV · 감정분석 API
+- `app/api/gravity/brand-value/run/route.ts` — 브랜드 4대 가치 (인지도/호감도/추천도/만족도) 산출
+- `lib/gravity/notify.ts` — agent_messages 기반 그래비티 에이전트 메신저 알림 유틸
+- `components/gravity/PrescanCard.tsx` — 시장 유형 뱃지 + 여정 히트맵 + 4대 가치 바 카드
+- `app/intra/gravity/[productId]/intake/page.tsx` — 클라이언트 사전 질문서 A~E 5섹션
+- `docs/BrandGravity_Service_Design.md` — 1주 컨설팅 프로세스 설계서
+
+#### 수정 파일
+- `app/api/gravity/gap/run/route.ts` — Gravity Score 공식 수정 (Mention40 + Context25 + Rank20 + Coverage15)
+- `app/api/gravity/scan/run/route.ts` — 5단계 → 8단계 파이프라인 (source/voice/brand-value 추가) + 메신저 훅
+- `app/api/gravity/apply/route.ts` — 신청 시 그래비티 에이전트 알림 추가
+- `app/intra/gravity/page.tsx` — 대시보드 "오늘의 할 일" + "에이전트 메시지" 섹션 추가
+- `app/intra/gravity/[productId]/page.tsx` — PrescanCard 삽입
+- `app/intra/gravity/[productId]/report/page.tsx` — 섹션 11(4대가치) + 섹션 12(세일즈액션) + 배점 수정
+- `scripts/reset-and-reseed-dancingwhale.js` — 춤추는고래 여성위생용품으로 전면 재작성
+
+#### DB 변경
+- 신규 테이블: bg_prescan_results, bg_brand_values, bg_intake_responses
+- bg_products: market_type 컬럼 추가
+- agent_profiles: gravity(그래비티) 에이전트 INSERT (layer=1, can_invoke: 1001/smarcomm/mindle)
+
+#### 파이프라인 검증
+- 춤추는고래 8단계 전체 실행 완료: Gravity Score 6/100, Brand Values 종합 20/100 (정상)
+
+---
+
 ## 2026-04-10 (집, 세션 38)
 
 ### Brand Gravity 보고서 시스템 구축

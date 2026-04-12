@@ -149,7 +149,8 @@ Deno.serve(async (req) => {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
     const parsed = JSON.parse(text);
     briefs = parsed.briefs ?? [];
   } catch (e) {

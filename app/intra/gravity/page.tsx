@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { PlayCircle, RefreshCw, Plus, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { PlayCircle, RefreshCw, Plus, TrendingUp, TrendingDown, Minus, Bell, MessageSquare, Clock, FileText } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -21,7 +21,23 @@ interface GravityScore {
     mention_score: number;
     rank_score: number;
     coverage_score: number;
+    context_score?: number;
     scan_date: string;
+}
+
+interface AgentMessage {
+    id: string;
+    payload: { text?: string; priority?: string; event?: string };
+    risk_level: string;
+    created_at: string;
+}
+
+interface ApplyRequest {
+    id: string;
+    company_name: string;
+    product_name: string;
+    status: string;
+    created_at: string;
 }
 
 export default function GravityDashboardPage() {
@@ -32,6 +48,8 @@ export default function GravityDashboardPage() {
     const [scores, setScores] = useState<Record<string, GravityScore>>({});
     const [loading, setLoading] = useState(true);
     const [scanning, setScanning] = useState<string | null>(null);
+    const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
+    const [pendingApplies, setPendingApplies] = useState<ApplyRequest[]>([]);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -69,6 +87,23 @@ export default function GravityDashboardPage() {
             }
             setScores(scoreMap);
         }
+        // 에이전트 메시지 로딩 (최근 5건)
+        const { data: msgs } = await supabase
+            .from("agent_messages")
+            .select("id, payload, risk_level, created_at")
+            .eq("from_agent", "gravity")
+            .order("created_at", { ascending: false })
+            .limit(5);
+        setAgentMessages(msgs ?? []);
+
+        // 미확인 신청 로딩
+        const { data: applies } = await supabase
+            .from("bg_apply_requests")
+            .select("id, company_name, product_name, status, created_at")
+            .eq("status", "new")
+            .order("created_at", { ascending: false });
+        setPendingApplies(applies ?? []);
+
         setLoading(false);
     }, [supabase]);
 
@@ -151,6 +186,80 @@ export default function GravityDashboardPage() {
                 ) : (
                     <div className="max-w-6xl mx-auto space-y-6">
 
+                        {/* 오늘의 할 일 + 에이전트 메시지 */}
+                        {(pendingApplies.length > 0 || agentMessages.length > 0) && (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                                {/* 오늘의 할 일 */}
+                                <div className="bg-white border border-neutral-200 p-4">
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        <Bell className="w-3.5 h-3.5 text-amber-500" />
+                                        <p className="text-xs font-semibold text-neutral-700">오늘의 할 일</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {pendingApplies.length > 0 && (
+                                            <div className="flex items-center justify-between text-xs px-3 py-2 bg-amber-50 border border-amber-100">
+                                                <div className="flex items-center gap-2">
+                                                    <FileText className="w-3 h-3 text-amber-500" />
+                                                    <span className="text-neutral-700">새 신청 {pendingApplies.length}건 (미확인)</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => router.push("/intra/gravity/clients")}
+                                                    className="text-amber-600 hover:underline"
+                                                >
+                                                    확인하기
+                                                </button>
+                                            </div>
+                                        )}
+                                        {scanned.filter(p => {
+                                            const s = scores[p.id];
+                                            if (!s) return false;
+                                            const scanAge = (Date.now() - new Date(s.scan_date).getTime()) / (1000 * 60 * 60 * 24);
+                                            return scanAge > 25;
+                                        }).map(p => (
+                                            <div key={p.id} className="flex items-center justify-between text-xs px-3 py-2 bg-blue-50 border border-blue-100">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="w-3 h-3 text-blue-500" />
+                                                    <span className="text-neutral-700">{p.name} 월간 스캔 예정</span>
+                                                </div>
+                                                <button
+                                                    onClick={e => runQuickScan(e, p)}
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    지금 실행
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {pendingApplies.length === 0 && scanned.length === 0 && (
+                                            <p className="text-[11px] text-neutral-400 px-3 py-2">할 일 없음</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* 에이전트 메시지 */}
+                                <div className="bg-white border border-neutral-200 p-4">
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        <MessageSquare className="w-3.5 h-3.5 text-violet-500" />
+                                        <p className="text-xs font-semibold text-neutral-700">그래비티 에이전트</p>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        {agentMessages.length > 0 ? agentMessages.map(m => (
+                                            <div key={m.id} className="flex items-start gap-2 text-xs px-3 py-1.5">
+                                                <span className={`mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${m.risk_level === "yellow" ? "bg-amber-400" : "bg-emerald-400"}`} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-neutral-700 truncate">{m.payload?.text || JSON.stringify(m.payload)}</p>
+                                                    <p className="text-[10px] text-neutral-400">
+                                                        {new Date(m.created_at).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )) : (
+                                            <p className="text-[11px] text-neutral-400 px-3 py-2">아직 메시지 없음</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* 요약 통계 */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {[
@@ -226,11 +335,12 @@ export default function GravityDashboardPage() {
 
                                                 {/* 서브스코어 */}
                                                 {s && (
-                                                    <div className="grid grid-cols-3 gap-2 mb-3">
+                                                    <div className="grid grid-cols-4 gap-2 mb-3">
                                                         {[
                                                             { label: "Mention", value: s.mention_score, max: 40 },
-                                                            { label: "Rank", value: s.rank_score, max: 30 },
-                                                            { label: "Coverage", value: s.coverage_score, max: 30 },
+                                                            { label: "Rank", value: s.rank_score, max: 20 },
+                                                            { label: "Coverage", value: s.coverage_score, max: 15 },
+                                                            { label: "Context", value: s.context_score ?? 0, max: 25 },
                                                         ].map(m => (
                                                             <div key={m.label}>
                                                                 <p className="text-[9px] text-neutral-400 mb-1">{m.label}</p>

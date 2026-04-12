@@ -6,9 +6,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   serverExternalPackages: ['@anthropic-ai/sdk'],
-  env: {
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-  },
   async redirects() {
     return [
       // 삭제된 페이지 — 301 리다이렉트

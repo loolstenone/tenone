@@ -28,6 +28,7 @@ interface Score {
     coverage_score: number;
     scan_date: string;
     competitor_scores: Record<string, CompetitorScore> | null;
+    gap_summary?: { top_gaps?: string[]; quick_wins?: string[] };
 }
 
 interface PainPoint {
@@ -179,12 +180,13 @@ export default function GravityReportPage() {
     const [actions, setActions] = useState<Action[]>([]);
     const [sourceTraces, setSourceTraces] = useState<SourceTrace[]>([]);
     const [voiceBriefs, setVoiceBriefs] = useState<VoiceBrief[]>([]);
+    const [brandValues, setBrandValues] = useState<{ awareness_score: number; favorability_score: number; recommendation_score: number; satisfaction_score: number; overall_score: number; diagnosis_text: string } | null>(null);
     const [loading, setLoading] = useState(true);
 
     const load = useCallback(async () => {
         setLoading(true);
 
-        const [productRes, scoreRes, painRes, probeRes, qRes, gapRes, actionRes, sourceRes, briefRes] = await Promise.all([
+        const [productRes, scoreRes, painRes, probeRes, qRes, gapRes, actionRes, sourceRes, briefRes, bvRes] = await Promise.all([
             supabase
                 .from("bg_products")
                 .select("id, name, category, competitors, target_keywords, site_url, bg_clients(name)")
@@ -192,7 +194,7 @@ export default function GravityReportPage() {
                 .single(),
             supabase
                 .from("bg_gravity_scores")
-                .select("gravity_score, mention_score, context_score, rank_score, coverage_score, scan_date, competitor_scores")
+                .select("gravity_score, mention_score, context_score, rank_score, coverage_score, scan_date, competitor_scores, gap_summary")
                 .eq("product_id", productId)
                 .order("scan_date", { ascending: false })
                 .limit(1)
@@ -233,7 +235,17 @@ export default function GravityReportPage() {
                 .select("id, content_type, target_pattern, title_suggestion, key_messages, target_ai, priority, status")
                 .eq("product_id", productId)
                 .order("priority", { ascending: true }),
+            supabase
+                .from("bg_brand_values")
+                .select("awareness_score, favorability_score, recommendation_score, satisfaction_score, overall_score, diagnosis_text")
+                .eq("product_id", productId)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .single(),
         ]);
+
+        if (productRes.error) console.error("[report] productRes error:", productRes.error);
+        if (scoreRes.error) console.error("[report] scoreRes error:", scoreRes.error);
 
         if (productRes.data) {
             const p = productRes.data as {
@@ -261,6 +273,7 @@ export default function GravityReportPage() {
         setActions((actionRes.data ?? []) as Action[]);
         setSourceTraces((sourceRes.data ?? []) as SourceTrace[]);
         setVoiceBriefs((briefRes.data ?? []) as VoiceBrief[]);
+        if (bvRes.data) setBrandValues(bvRes.data as { awareness_score: number; favorability_score: number; recommendation_score: number; satisfaction_score: number; overall_score: number; diagnosis_text: string });
         setLoading(false);
     }, [supabase, productId]);
 
@@ -490,10 +503,10 @@ export default function GravityReportPage() {
                         {/* 서브스코어 카드 */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             {[
-                                { label: "Mention Score", value: score.mention_score, max: 30, desc: "AI 응답 내 브랜드 언급 비율 (탐침 당 0~30점)" },
-                                { label: "Context Score", value: score.context_score, max: 25, desc: "추천 맥락이 의도한 용도와 일치하는 비율 (0~25점)" },
-                                { label: "Rank Score", value: score.rank_score, max: 25, desc: "추천 리스트에서의 평균 순위 가중치 (0~25점)" },
-                                { label: "Coverage Score", value: score.coverage_score, max: 20, desc: "5대 AI 엔진 중 최소 1회 등장한 비율 (0~20점)" },
+                                { label: "Mention Score", value: score.mention_score, max: 40, desc: "AI 응답 내 브랜드 언급 비율 (0~40점)" },
+                                { label: "Context Score", value: score.context_score, max: 25, desc: "소스 품질 + 맥락 일치도 (0~25점)" },
+                                { label: "Rank Score", value: score.rank_score, max: 20, desc: "추천 리스트 순위 가중치 (0~20점)" },
+                                { label: "Coverage Score", value: score.coverage_score, max: 15, desc: "5대 AI 엔진 중 등장 엔진 수 (0~15점)" },
                             ].map(m => (
                                 <div key={m.label} className="border border-neutral-100 p-4">
                                     <div className="flex items-baseline justify-between mb-2">
@@ -911,6 +924,93 @@ export default function GravityReportPage() {
                     </section>
                 )}
 
+                {/* ── 11. 브랜드 가치 진단 ── */}
+                {brandValues && (
+                    <section className="mb-10">
+                        <SectionTitle num="11" title="브랜드 가치 진단 (인지도·호감도·추천도·만족도)" />
+                        <div className="grid grid-cols-4 gap-3 mb-4">
+                            {[
+                                { label: "인지도", score: brandValues.awareness_score, icon: "👁️", desc: "AI·검색·소셜에서 브랜드가 알려진 정도" },
+                                { label: "호감도", score: brandValues.favorability_score, icon: "❤️", desc: "소비자가 브랜드를 긍정적으로 인식하는 정도" },
+                                { label: "추천도", score: brandValues.recommendation_score, icon: "👍", desc: "AI·소비자가 브랜드를 추천하는 빈도" },
+                                { label: "만족도", score: brandValues.satisfaction_score, icon: "⭐", desc: "구매 후 만족도·재구매 의향" },
+                            ].map(v => (
+                                <div key={v.label} className="border border-neutral-100 p-3">
+                                    <p className="text-[10px] text-neutral-400 mb-1">{v.icon} {v.label}</p>
+                                    <p className={`text-2xl font-bold ${v.score >= 60 ? "text-emerald-600" : v.score >= 30 ? "text-amber-600" : "text-red-500"}`}>
+                                        {v.score}<span className="text-xs font-normal text-neutral-400">/100</span>
+                                    </p>
+                                    <div className="mt-1.5 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                                        <div className={`h-full rounded-full ${v.score >= 60 ? "bg-emerald-400" : v.score >= 30 ? "bg-amber-400" : "bg-red-400"}`}
+                                            style={{ width: `${v.score}%` }} />
+                                    </div>
+                                    <p className="text-[9px] text-neutral-400 mt-1">{v.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-3 bg-neutral-50 border border-neutral-100">
+                            <p className="text-[10px] font-semibold text-neutral-600 mb-1">종합 점수: {brandValues.overall_score}/100</p>
+                            <p className="text-[11px] text-neutral-500 leading-relaxed">{brandValues.diagnosis_text}</p>
+                        </div>
+                        <div className="mt-3 p-3 bg-amber-50 border border-amber-100">
+                            <p className="text-[10px] font-semibold text-amber-700 mb-1">개선 방향</p>
+                            <ul className="text-[11px] text-neutral-600 space-y-1 list-disc list-inside">
+                                {brandValues.awareness_score < 30 && <li>인지도 구축: 위키피디아 등록, SEO 최적화, PR/인플루언서 활용</li>}
+                                {brandValues.favorability_score < 50 && <li>호감도 개선: 부정 리뷰 대응, 제품 개선 포인트 반영, 브랜드 스토리 강화</li>}
+                                {brandValues.recommendation_score < 50 && <li>추천도 강화: AEO 콘텐츠 생산, 리뷰 활성화, 비교 콘텐츠 제작</li>}
+                                {brandValues.satisfaction_score < 50 && <li>만족도 제고: 핵심 불만 해결, 재구매 프로그램, 고객 커뮤니케이션 강화</li>}
+                            </ul>
+                        </div>
+                    </section>
+                )}
+
+                {/* ── 12. 세일즈 액션 플랜 ── */}
+                <section className="mb-10">
+                    <SectionTitle num="12" title="세일즈 액션 플랜" />
+                    <p className="text-[11px] text-neutral-400 mb-4">
+                        분석 결과를 바탕으로, 매출을 올리기 위한 구체적 실행 계획을 제안합니다.
+                    </p>
+                    <div className="space-y-3">
+                        {[
+                            {
+                                phase: "즉시 (1~2주)",
+                                color: "border-red-200 bg-red-50",
+                                actions: score?.gap_summary?.quick_wins?.slice(0, 3) ?? ["빠른 개선 데이터 없음 — Gap Analyzer 실행 필요"],
+                            },
+                            {
+                                phase: "단기 (1~3개월)",
+                                color: "border-amber-200 bg-amber-50",
+                                actions: [
+                                    "AEO 콘텐츠 브리프 5건 실행 (Voice Designer 결과 기반)",
+                                    "검색 최적화 (SEO) — 핵심 키워드 상위 노출 전략",
+                                    "리뷰 확보 캠페인 — 구매 고객 리뷰 요청 자동화",
+                                ],
+                            },
+                            {
+                                phase: "중장기 (3~6개월)",
+                                color: "border-blue-200 bg-blue-50",
+                                actions: [
+                                    "월간 Gravity Score 모니터링 + 재스캔",
+                                    "경쟁사 벤치마크 정기 비교",
+                                    "구조화 데이터 + 위키피디아 등록으로 AI 학습 소스 확보",
+                                ],
+                            },
+                        ].map(p => (
+                            <div key={p.phase} className={`border p-3 ${p.color}`}>
+                                <p className="text-xs font-semibold text-neutral-700 mb-2">{p.phase}</p>
+                                <ul className="text-[11px] text-neutral-600 space-y-1">
+                                    {p.actions.map((a, i) => (
+                                        <li key={i} className="flex items-start gap-1.5">
+                                            <span className="text-neutral-400">•</span>
+                                            <span>{a}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 {/* ── 부록 구분선 ── */}
                 <div className="border-t-2 border-neutral-200 pt-8 mt-8 mb-8">
                     <p className="text-[10px] tracking-widest uppercase text-neutral-400 font-semibold">Appendix</p>
@@ -949,13 +1049,13 @@ export default function GravityReportPage() {
                         <div className="border border-neutral-100 p-4">
                             <p className="font-semibold text-neutral-700 mb-2">Gravity Score 공식</p>
                             <p className="font-mono text-xs bg-neutral-50 p-2 mb-2">
-                                Gravity Score = Mention(30) + Context(25) + Rank(25) + Coverage(20)
+                                Gravity Score = Mention(40) + Context(25) + Rank(20) + Coverage(15)
                             </p>
                             <ul className="space-y-1">
-                                <li><strong>Mention Score (30점)</strong>: 전체 탐침 중 브랜드가 응답에 포함된 비율 × 30</li>
-                                <li><strong>Context Score (25점)</strong>: 브랜드 언급 시 의도한 용도/맥락과 일치한 비율 × 25</li>
-                                <li><strong>Rank Score (25점)</strong>: 추천 리스트에서의 순위 가중치 (1위=1.0, 2위=0.7, 3위=0.4) × 25</li>
-                                <li><strong>Coverage Score (20점)</strong>: ChatGPT/Claude/Gemini/Perplexity/Copilot 중 등장한 AI 수 × 4</li>
+                                <li><strong>Mention Score (40점)</strong>: AI 응답 내 브랜드 언급 비율 × 40</li>
+                                <li><strong>Context Score (25점)</strong>: 자사 소스 비율(60%) + 소스 다양성(40%) × 25</li>
+                                <li><strong>Rank Score (20점)</strong>: 추천 리스트 내 브랜드 순위 가중치 × 20</li>
+                                <li><strong>Coverage Score (15점)</strong>: 5대 AI 엔진 중 브랜드를 언급한 엔진 수 비율 × 15</li>
                             </ul>
                         </div>
                         <div className="border border-neutral-100 p-4">

@@ -101,12 +101,14 @@ Deno.serve(async (req) => {
       }],
     });
 
-    const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    // 코드 블록 제거 (```json ... ``` 또는 ``` ... ```)
+    const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
     const parsed = JSON.parse(text);
     patterns = parsed.patterns ?? [];
   } catch (e) {
     console.error('[question-mapper] Claude error:', e);
-    return Response.json({ error: 'Claude 분류 실패' }, { status: 500 });
+    return Response.json({ error: 'Claude 분류 실패', detail: String(e) }, { status: 500 });
   }
 
   // 기존 패턴 삭제 후 재삽입 (전체 갱신)

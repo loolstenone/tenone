@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
+import { PrescanCard } from "@/components/gravity/PrescanCard";
 
 interface Product {
     id: string;
@@ -372,6 +373,9 @@ export default function GravityProductPage() {
 
             <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-5xl mx-auto space-y-5">
+
+                    {/* ── Pre-Scan + Brand Value ── */}
+                    <PrescanCard productId={productId} />
 
                     {/* ── 파이프라인 관리 패널 ── */}
                     <div className="border border-neutral-200 bg-white">

@@ -21,6 +21,9 @@ export function createClient() {
                 storageKey: 'tenone-auth',
                 persistSession: true,
                 autoRefreshToken: true,
+                // Navigator Lock 경합 방지: 탭 간 lock 없이 in-process로만 실행
+                // (Intra 단일 테넌트 앱에서는 cross-tab 동기화 불필요)
+                lock: async <R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> => fn(),
             },
         }
     );

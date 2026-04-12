@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { notifyNewApplication } from "@/lib/gravity/notify";
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,6 +42,9 @@ export async function POST(req: NextRequest) {
         // DB 실패해도 200 반환 (이메일 백업 알림 예정)
         return NextResponse.json({ ok: true, warn: "db_error" });
     }
+
+    // 그래비티 에이전트 → 메신저 알림
+    notifyNewApplication(companyName, productName || "미지정").catch(() => {});
 
     return NextResponse.json({ ok: true });
 }
