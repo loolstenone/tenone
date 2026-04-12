@@ -6,7 +6,8 @@ export const config = {
         serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
     },
     openclaw: {
-        url: process.env.OPENCLAW_URL || "http://localhost:8080",
+        url: process.env.OPENCLAW_URL || "http://localhost:18789",
+        token: process.env.OPENCLAW_TOKEN || "",
     },
     ollama: {
         url: process.env.OLLAMA_URL || "http://localhost:11434",

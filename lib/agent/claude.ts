@@ -225,15 +225,77 @@ export async function invokeAgent(params: {
     user_id: userId || null,
   });
 
-  // 4. Claude API 호출
-  const anthropic = getAnthropicClient();
+  // 4. API 호출 — 로컬 에이전트면 Ollama, 아니면 Claude API
+  const isLocal = profile.runtime === 'local';
+  const localEndpoint = profile.local_endpoint;
+
   let responseText: string;
   let confidence = 0.9;
 
-  if (!anthropic) {
+  if (isLocal && localEndpoint) {
+    // ── 로컬 AI (Ollama) 직접 호출 ──
+    try {
+      const ollamaUrl = localEndpoint.includes('/api/chat')
+        ? localEndpoint
+        : `${new URL(localEndpoint).origin}/api/chat`;
+
+      // system prompt + 히스토리 + 현재 메시지 조립
+      const ollamaMessages = [
+        { role: 'system' as const, content: profile.system_prompt },
+        ...history.map(h => ({ role: h.role as 'user' | 'assistant', content: h.content })),
+        { role: 'user' as const, content: userMessage },
+      ];
+
+      const ollamaRes = await fetch(ollamaUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: profile.model_id || 'gemma4:e4b',
+          messages: ollamaMessages,
+          stream: false,
+          options: {
+            temperature: profile.temperature || 0.3,
+            num_predict: profile.max_tokens || 2048,
+          },
+        }),
+        signal: AbortSignal.timeout(120000),
+      });
+
+      if (!ollamaRes.ok) {
+        throw new Error(`Ollama error ${ollamaRes.status}`);
+      }
+
+      const ollamaData = await ollamaRes.json() as { message?: { content?: string }; model?: string };
+      responseText = ollamaData.message?.content || '';
+      confidence = 0.85;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Agent:${agentName}] LOCAL response (${ollamaData.model}): ${responseText.slice(0, 80)}...`);
+      }
+    } catch (error) {
+      // 로컬 실패 → 폴백 에이전트(클라우드)로 위임
+      const fallbackAgent = profile.fallback_agent || '1001';
+      console.warn(`[Agent] 로컬 AI 실패 (${agentName}), ${fallbackAgent}로 폴백:`, error);
+
+      try {
+        const fallbackResult = await invokeAgent({
+          agentName: fallbackAgent,
+          userMessage: `[${agentName} 오프라인 — 대신 응답] ${userMessage}`,
+          userId,
+          correlationId,
+        });
+        responseText = fallbackResult.response;
+        confidence = fallbackResult.confidence;
+      } catch {
+        responseText = `${agentName} 오프라인, 폴백도 실패했습니다.`;
+        confidence = 0;
+      }
+    }
+  } else if (!getAnthropicClient()) {
     responseText = createMockResponse(agentName, userMessage);
     confidence = 0;
   } else {
+    const anthropic = getAnthropicClient()!;
     try {
       const messages = buildMessageParams(history, userMessage);
 

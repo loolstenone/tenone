@@ -25,7 +25,7 @@ export class OllamaAdapter implements LocalAgentAdapter {
 
     async chat(req: ChatRequest): Promise<ChatResponse> {
         const start = Date.now();
-        const model = req.model || "gemma3:27b";
+        const model = req.model || "gemma4:e4b";
 
         const res = await fetch(`${this.endpoint}/api/chat`, {
             method: "POST",

@@ -39,6 +39,11 @@ export interface AgentProfile {
   can_invoke: string[];
   is_active: boolean;
   version: string;
+  // Local Agent Bridge 확장
+  runtime?: 'cloud' | 'local';
+  local_endpoint?: string;
+  fallback_agent?: string;
+  brand_id?: string;
   created_at: string;
   updated_at: string;
 }

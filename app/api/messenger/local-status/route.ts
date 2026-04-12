@@ -42,10 +42,11 @@ export async function GET(request: NextRequest) {
 
             if (agent.local_endpoint) {
                 try {
-                    // Ollama: /api/tags, OpenClaw: /v1/models
+                    // Ollama: /api/tags, OpenClaw: root (200 = running)
+                    const origin = new URL(agent.local_endpoint).origin;
                     const checkUrl = agent.local_endpoint.includes("11434")
-                        ? `${new URL(agent.local_endpoint).origin}/api/tags`
-                        : `${new URL(agent.local_endpoint).origin}/v1/models`;
+                        ? `${origin}/api/tags`
+                        : origin;
 
                     const res = await fetch(checkUrl, {
                         signal: AbortSignal.timeout(3000),
