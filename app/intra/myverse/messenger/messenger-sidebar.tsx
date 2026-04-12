@@ -7,6 +7,7 @@ import {
 import { divisions } from "@/lib/staff-data";
 import * as chatDb from "@/lib/supabase/chat";
 import type { StaffMember } from "@/types/staff";
+import type { AgentProfileExtended, MessengerServiceHook } from "@/types/messenger";
 import {
     currentUserId,
     getStaffInitials,
@@ -17,10 +18,12 @@ import {
     madleagueMembers,
 } from "./messenger-data";
 import type { ChatThread } from "./messenger-data";
+import AgentTab from "./agent-tab";
+import ServiceTab from "./service-tab";
 
 interface MessengerSidebarProps {
-    activeTab: 'channels' | 'chats' | 'people';
-    setActiveTab: (v: 'channels' | 'chats' | 'people') => void;
+    activeTab: 'channels' | 'chats' | 'people' | 'agents' | 'services';
+    setActiveTab: (v: 'channels' | 'chats' | 'people' | 'agents' | 'services') => void;
     searchQuery: string;
     setSearchQuery: (v: string) => void;
     selectedChat: string | null;
@@ -54,6 +57,14 @@ interface MessengerSidebarProps {
     onDeleteChat: (id: string) => void;
     onLeaveChat: (id: string) => void;
     onRenameChatConfirm: (id: string) => void;
+    // Phase 1: 에이전트/서비스 탭
+    agentProfiles: AgentProfileExtended[];
+    selectedAgentDM: string | null;
+    onSelectAgent: (agent: AgentProfileExtended) => void;
+    serviceHooks: MessengerServiceHook[];
+    selectedService: string | null;
+    onSelectService: (service: MessengerServiceHook) => void;
+    serviceUnreadCounts: Record<string, number>;
 }
 
 function toggleSet(setter: React.Dispatch<React.SetStateAction<Set<string>>>, key: string) {
@@ -100,6 +111,13 @@ export default function MessengerSidebar({
     onDeleteChat,
     onLeaveChat,
     onRenameChatConfirm,
+    agentProfiles,
+    selectedAgentDM,
+    onSelectAgent,
+    serviceHooks,
+    selectedService,
+    onSelectService,
+    serviceUnreadCounts,
 }: MessengerSidebarProps) {
     const toggleDivision = (id: string) => {
         setExpandedDivisions(prev => {
@@ -118,26 +136,23 @@ export default function MessengerSidebar({
             "w-full absolute inset-0 z-20",
             mobileView === 'list' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         )}>
-            {/* 탭 */}
-            <div className="flex border-b border-neutral-200">
-                <button onClick={() => setActiveTab('channels')}
-                    className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                        activeTab === 'channels' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                    )}>
-                    채널
-                </button>
-                <button onClick={() => setActiveTab('chats')}
-                    className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                        activeTab === 'chats' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                    )}>
-                    대화 {unreadChats > 0 && <span className="ml-1 px-1.5 py-0.5 text-[11px] bg-red-500 text-white rounded-full">{unreadChats}</span>}
-                </button>
-                <button onClick={() => setActiveTab('people')}
-                    className={clsx("flex-1 py-2.5 text-xs font-medium transition-colors",
-                        activeTab === 'people' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
-                    )}>
-                    조직도
-                </button>
+            {/* 탭 — 5탭: 채널 | 대화 | 에이전트 | 서비스 | 조직도 */}
+            <div className="flex border-b border-neutral-200 overflow-x-auto">
+                {([
+                    { key: 'channels' as const, label: '채널' },
+                    { key: 'chats' as const, label: '대화', badge: unreadChats },
+                    { key: 'agents' as const, label: 'AI' },
+                    { key: 'services' as const, label: '서비스' },
+                    { key: 'people' as const, label: '조직도' },
+                ]).map(tab => (
+                    <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                        className={clsx("flex-1 py-2.5 text-[11px] font-medium transition-colors whitespace-nowrap",
+                            activeTab === tab.key ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-400'
+                        )}>
+                        {tab.label}
+                        {tab.badge && tab.badge > 0 ? <span className="ml-1 px-1 py-0.5 text-[10px] bg-red-500 text-white rounded-full">{tab.badge}</span> : null}
+                    </button>
+                ))}
             </div>
 
             {/* 검색 */}
@@ -272,6 +287,19 @@ export default function MessengerSidebar({
                             );
                         })}
                     </div>
+                ) : activeTab === 'agents' ? (
+                    <AgentTab
+                        agents={agentProfiles}
+                        selectedAgentDM={selectedAgentDM}
+                        onSelectAgent={onSelectAgent}
+                    />
+                ) : activeTab === 'services' ? (
+                    <ServiceTab
+                        services={serviceHooks}
+                        selectedService={selectedService}
+                        onSelectService={onSelectService}
+                        unreadCounts={serviceUnreadCounts}
+                    />
                 ) : (
                     /* ── 조직도 탭 ── */
                     <div className="py-1">

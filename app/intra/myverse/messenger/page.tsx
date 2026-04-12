@@ -7,10 +7,11 @@ import { initialStaff, divisions } from "@/lib/staff-data";
 import {
     Search, Send, ChevronLeft, Bell, MessageSquareText,
     Paperclip, Smile, Pin, Circle, Calendar, Target,
-    CheckCheck, AlertCircle, Stamp, FolderKanban, Users, X, Image, FileText
+    CheckCheck, AlertCircle, Stamp, FolderKanban, Users, X, Image, FileText, Bot, Loader2,
 } from "lucide-react";
 import clsx from "clsx";
 import { PageHeader } from "@/components/intra/IntraUI";
+import type { AgentProfileExtended, MessengerServiceHook, MessengerMessage, ActionButton } from "@/types/messenger";
 
 import {
     Message, ChatThread,
@@ -22,6 +23,8 @@ import {
 import GroupChatModal from "./group-chat-modal";
 import BroadcastModal from "./broadcast-modal";
 import MessengerSidebar from "./messenger-sidebar";
+import ActionCard from "./action-card";
+import MentionInput from "./mention-input";
 
 export default function MessengerPage() {
     const { user } = useAuth();
@@ -32,10 +35,21 @@ export default function MessengerPage() {
     const [newMessage, setNewMessage] = useState('');
     const [chats, setChats] = useState<ChatThread[]>(generateMockChats);
     const [notifications] = useState<Message[]>(generateNotifications);
-    const [activeTab, setActiveTab] = useState<'channels' | 'chats' | 'people'>('channels');
+    const [activeTab, setActiveTab] = useState<'channels' | 'chats' | 'people' | 'agents' | 'services'>('channels');
     const [channels, setChannels] = useState<chatDb.ChatThread[]>([]);
     const [channelMessages, setChannelMessages] = useState<chatDb.ChatMessage[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<chatDb.ChatThread | null>(null);
+
+    // Phase 1: 에이전트 독대 + 서비스
+    const [agentDMMessages, setAgentDMMessages] = useState<chatDb.ChatMessage[]>([]);
+    const [selectedAgentDM, setSelectedAgentDM] = useState<string | null>(null);
+    const [agentDMThreadId, setAgentDMThreadId] = useState<string | null>(null);
+    const [agentTyping, setAgentTyping] = useState(false);
+    const [serviceHooks, setServiceHooks] = useState<MessengerServiceHook[]>([]);
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    const [serviceMessages, setServiceMessages] = useState<chatDb.ChatMessage[]>([]);
+    const [serviceThreadId, setServiceThreadId] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     // 모바일 뷰 상태
     const [mobileView, setMobileView] = useState<'list' | 'chat' | 'profile'>('list');
@@ -75,7 +89,7 @@ export default function MessengerPage() {
     const [dbLoaded, setDbLoaded] = useState(false);
 
     // 에이전트 프로필
-    const [agentProfiles, setAgentProfiles] = useState<any[]>([]);
+    const [agentProfiles, setAgentProfiles] = useState<AgentProfileExtended[]>([]);
 
     // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -122,6 +136,8 @@ export default function MessengerPage() {
         fetch('/api/agent/profiles').then(r => r.json()).then(data => {
             if (Array.isArray(data)) setAgentProfiles(data);
         }).catch(() => {});
+        // 서비스 훅 로드
+        chatDb.fetchServiceHooks().then(hooks => setServiceHooks(hooks));
     }, []);
 
     // 채널 선택 시 메시지 로드
@@ -266,10 +282,242 @@ export default function MessengerPage() {
     const selectChat = (chatId: string) => {
         setSelectedChat(chatId);
         setSelectedChannel(null);
+        setSelectedAgentDM(null);
+        setSelectedService(null);
         setChatMenuOpen(null);
         setMobileView('chat');
         if (user?.id && dbLoaded && chatId !== 'notifications') {
             chatDb.markAsRead(chatId, user.id);
+        }
+    };
+
+    // 에이전트 DM 선택
+    const selectAgentDM = async (agent: AgentProfileExtended) => {
+        setSelectedChat(null);
+        setSelectedChannel(null);
+        setSelectedService(null);
+        setSelectedAgentDM(agent.name);
+        setAgentDMMessages([]);
+        setMobileView('chat');
+
+        // 기존 DM 스레드 찾거나 생성
+        if (user?.id) {
+            const thread = await chatDb.findOrCreateAgentDM({
+                userId: user.id,
+                agentName: agent.name,
+                agentRuntime: (agent.runtime || 'cloud') as 'cloud' | 'local',
+            });
+            if (thread) {
+                setAgentDMThreadId(thread.id);
+                const msgs = await chatDb.fetchMessages(thread.id, 100);
+                setAgentDMMessages(msgs);
+            }
+        }
+    };
+
+    // 에이전트에게 메시지 전송
+    const sendAgentDMMessage = async () => {
+        if (!newMessage.trim() || !selectedAgentDM) return;
+        const content = newMessage.trim();
+        setNewMessage('');
+
+        const agent = agentProfiles.find(a => a.name === selectedAgentDM);
+        const userId = user?.id || 'anonymous';
+        const userName = user?.name || '나';
+
+        // Optimistic: 사용자 메시지 즉시 표시
+        const optimisticMsg: chatDb.ChatMessage = {
+            id: `temp-${Date.now()}`,
+            thread_id: agentDMThreadId || '',
+            sender_id: userId,
+            sender_name: userName,
+            content,
+            type: 'text',
+            sender_type: 'human',
+            message_format: 'text',
+            read_by: [userId],
+            created_at: new Date().toISOString(),
+        };
+        setAgentDMMessages(prev => [...prev, optimisticMsg]);
+
+        // DB에 사용자 메시지 저장
+        if (agentDMThreadId) {
+            await chatDb.sendMessage({
+                threadId: agentDMThreadId,
+                senderId: userId,
+                senderName: userName,
+                content,
+            });
+        }
+
+        // Agent Hub 호출
+        setAgentTyping(true);
+        try {
+            const res = await fetch('/api/agent/hub', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    agentName: selectedAgentDM,
+                    message: content,
+                    userId,
+                }),
+            });
+            const data = await res.json();
+            const agentResponse = data.response || data.error || '응답 없음';
+
+            // 에이전트 응답을 DB에 저장하고 UI에 표시
+            if (agentDMThreadId) {
+                await chatDb.sendAgentMessage({
+                    threadId: agentDMThreadId,
+                    agentName: selectedAgentDM,
+                    content: agentResponse,
+                    senderType: agent?.runtime === 'local' ? 'local_agent' : 'agent',
+                });
+            }
+
+            const agentMsg: chatDb.ChatMessage = {
+                id: `agent-${Date.now()}`,
+                thread_id: agentDMThreadId || '',
+                sender_id: '00000000-0000-0000-0000-000000000000',
+                sender_name: agent?.display_name || selectedAgentDM,
+                content: agentResponse,
+                type: 'text',
+                sender_type: agent?.runtime === 'local' ? 'local_agent' : 'agent',
+                message_format: 'text',
+                read_by: [],
+                created_at: new Date().toISOString(),
+            };
+            setAgentDMMessages(prev => [...prev, agentMsg]);
+        } catch {
+            const errMsg: chatDb.ChatMessage = {
+                id: `err-${Date.now()}`,
+                thread_id: agentDMThreadId || '',
+                sender_id: 'system',
+                sender_name: 'System',
+                content: '에이전트 응답을 받지 못했습니다.',
+                type: 'system',
+                sender_type: 'system',
+                message_format: 'text',
+                read_by: [],
+                created_at: new Date().toISOString(),
+            };
+            setAgentDMMessages(prev => [...prev, errMsg]);
+        } finally {
+            setAgentTyping(false);
+        }
+    };
+
+    // 서비스 선택
+    const selectService = async (service: MessengerServiceHook) => {
+        setSelectedChat(null);
+        setSelectedChannel(null);
+        setSelectedAgentDM(null);
+        setSelectedService(service.service_name);
+        setServiceMessages([]);
+        setMobileView('chat');
+
+        // 서비스 스레드 찾기
+        const threads = await chatDb.fetchServiceThreads();
+        const svcThread = threads.find(t => t.service_name === service.service_name);
+        if (svcThread) {
+            setServiceThreadId(svcThread.id);
+            const msgs = await chatDb.fetchMessages(svcThread.id, 100);
+            setServiceMessages(msgs);
+        } else {
+            setServiceThreadId(null);
+        }
+    };
+
+    // Action Card 버튼 클릭
+    const handleActionClick = async (messageId: string, action: ActionButton) => {
+        if (action.type === 'navigate' && action.url) {
+            window.location.href = action.url;
+            return;
+        }
+        if (action.type === 'dismiss') {
+            chatDb.updateActionStatus(messageId, action.id, user?.id || 'admin');
+            // 로컬 업데이트
+            setServiceMessages(prev => prev.map(m => {
+                if (m.id !== messageId || !m.action_payload) return m;
+                return { ...m, action_payload: { ...m.action_payload, status: 'acted', acted_action_id: action.id, acted_at: new Date().toISOString() } };
+            }));
+            return;
+        }
+
+        setActionLoading(messageId);
+        try {
+            const res = await fetch('/api/messenger/action-callback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message_id: messageId,
+                    thread_id: serviceThreadId,
+                    action_id: action.id,
+                }),
+            });
+            if (res.ok) {
+                // 상태 업데이트
+                setServiceMessages(prev => prev.map(m => {
+                    if (m.id !== messageId || !m.action_payload) return m;
+                    return { ...m, action_payload: { ...m.action_payload, status: 'acted', acted_action_id: action.id, acted_at: new Date().toISOString() } };
+                }));
+                // 후속 메시지 리로드
+                if (serviceThreadId) {
+                    const msgs = await chatDb.fetchMessages(serviceThreadId, 100);
+                    setServiceMessages(msgs);
+                }
+            }
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    // @멘션 위임: 대화 중 @에이전트 메시지 → 에이전트에게 전달
+    const handleMentionSend = async (target: { type: string; name: string; displayName: string }, message: string) => {
+        if (target.type === "agent") {
+            // 현재 대화에 사용자 메시지 표시
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const msg: Message = {
+                id: `msg-${msgCounter.current++}`,
+                from: currentUserId,
+                text: `@${target.name} ${message}`,
+                time: timeStr,
+                type: 'chat',
+                read: false,
+            };
+            if (selectedThread) {
+                setChats(prev => prev.map(c =>
+                    c.id === selectedChat ? { ...c, messages: [...c.messages, msg], lastActive: timeStr } : c
+                ));
+            }
+            setNewMessage('');
+
+            // Agent Hub 호출
+            try {
+                const res = await fetch('/api/agent/hub', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agentName: target.name, message, userId: user?.id }),
+                });
+                const data = await res.json();
+
+                const reply: Message = {
+                    id: `msg-${msgCounter.current++}`,
+                    from: 'agent',
+                    text: `[${target.displayName}] ${data.response || '응답 없음'}`,
+                    time: timeStr,
+                    type: 'chat',
+                    read: false,
+                };
+                if (selectedThread) {
+                    setChats(prev => prev.map(c =>
+                        c.id === selectedChat ? { ...c, messages: [...c.messages, reply] } : c
+                    ));
+                }
+            } catch {
+                // 에러 무시
+            }
         }
     };
 
@@ -591,6 +839,13 @@ export default function MessengerPage() {
                 onDeleteChat={deleteChat}
                 onLeaveChat={leaveChat}
                 onRenameChatConfirm={renameChatConfirm}
+                agentProfiles={agentProfiles}
+                selectedAgentDM={selectedAgentDM}
+                onSelectAgent={selectAgentDM}
+                serviceHooks={serviceHooks}
+                selectedService={selectedService}
+                onSelectService={selectService}
+                serviceUnreadCounts={{}}
             />
 
             {/* ══════════════════════════════════
@@ -647,6 +902,164 @@ export default function MessengerPage() {
                             ))}
                         </div>
                     </>
+                ) : selectedAgentDM ? (
+                    /* ── 에이전트 DM 뷰 ── */
+                    (() => {
+                        const agent = agentProfiles.find(a => a.name === selectedAgentDM);
+                        return (
+                            <>
+                                <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center gap-2.5">
+                                    <button onClick={() => { setSelectedAgentDM(null); setMobileView('list'); }} className="md:hidden p-1 hover:bg-neutral-100">
+                                        <ChevronLeft className="h-4 w-4 text-neutral-500" />
+                                    </button>
+                                    <div className="relative">
+                                        <div className="h-7 w-7 bg-neutral-100 flex items-center justify-center">
+                                            <Bot className="h-4 w-4 text-neutral-500" />
+                                        </div>
+                                        <span className={clsx("absolute -bottom-0.5 -right-0.5 h-2 w-2 border border-white rounded-full",
+                                            agent?.runtime === 'local' ? 'bg-neutral-300' : 'bg-green-400'
+                                        )} />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-neutral-700">{agent?.display_name || selectedAgentDM}</span>
+                                        <span className="text-[10px] text-neutral-400 ml-2">
+                                            {agent?.runtime === 'local' ? 'PC 로컬' : 'Cloud'} · {agent?.agent_type}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                    {agentDMMessages.length === 0 && !agentTyping && (
+                                        <div className="text-center py-12">
+                                            <Bot className="h-8 w-8 text-neutral-200 mx-auto mb-3" />
+                                            <p className="text-xs text-neutral-400">{agent?.display_name}에게 메시지를 보내보세요</p>
+                                        </div>
+                                    )}
+                                    {agentDMMessages.map(msg => (
+                                        <div key={msg.id} className={clsx("flex gap-2.5",
+                                            msg.sender_type === 'human' ? 'justify-end' : ''
+                                        )}>
+                                            {msg.sender_type !== 'human' && (
+                                                <div className="h-7 w-7 bg-neutral-800 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                                                    AI
+                                                </div>
+                                            )}
+                                            <div className={clsx("max-w-[80%] min-w-0",
+                                                msg.sender_type === 'human'
+                                                    ? 'bg-neutral-800 text-white px-3 py-2 rounded-lg'
+                                                    : msg.sender_type === 'system'
+                                                        ? 'text-center text-xs text-neutral-400 w-full'
+                                                        : 'bg-white border border-neutral-200 px-3 py-2 rounded-lg'
+                                            )}>
+                                                <div className="text-xs whitespace-pre-wrap">{msg.content}</div>
+                                                <div className={clsx("text-[10px] mt-1",
+                                                    msg.sender_type === 'human' ? 'text-neutral-400' : 'text-neutral-300'
+                                                )}>
+                                                    {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {agentTyping && (
+                                        <div className="flex gap-2.5 items-center">
+                                            <div className="h-7 w-7 bg-neutral-800 text-white flex items-center justify-center text-[10px] font-bold shrink-0">AI</div>
+                                            <div className="flex items-center gap-1 px-3 py-2 bg-white border border-neutral-200 rounded-lg">
+                                                <Loader2 className="h-3 w-3 animate-spin text-neutral-400" />
+                                                <span className="text-xs text-neutral-400">응답 중...</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+                                {/* 입력창 */}
+                                <div className="p-3 bg-white border-t border-neutral-200">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            value={newMessage}
+                                            onChange={e => setNewMessage(e.target.value)}
+                                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAgentDMMessage(); } }}
+                                            placeholder={`${agent?.display_name || selectedAgentDM}에게 메시지...`}
+                                            className="flex-1 px-3 py-2 text-xs border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                                            disabled={agentTyping}
+                                        />
+                                        <button
+                                            onClick={sendAgentDMMessage}
+                                            disabled={!newMessage.trim() || agentTyping}
+                                            className="p-2 bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-300 transition-colors"
+                                        >
+                                            <Send className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        );
+                    })()
+                ) : selectedService ? (
+                    /* ── 서비스 뷰 ── */
+                    (() => {
+                        const svc = serviceHooks.find(s => s.service_name === selectedService);
+                        return (
+                            <>
+                                <div className="px-4 py-2.5 bg-white border-b border-neutral-200 flex items-center gap-2.5">
+                                    <button onClick={() => { setSelectedService(null); setMobileView('list'); }} className="md:hidden p-1 hover:bg-neutral-100">
+                                        <ChevronLeft className="h-4 w-4 text-neutral-500" />
+                                    </button>
+                                    <div className="h-7 w-7 flex items-center justify-center rounded" style={{ backgroundColor: `${svc?.color || '#666'}15` }}>
+                                        <span className="text-[11px] font-bold" style={{ color: svc?.color || '#666' }}>
+                                            {(svc?.display_name || '?')[0]}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-neutral-700">{svc?.display_name || selectedService}</span>
+                                        <span className="text-[10px] text-neutral-400 ml-2">{svc?.events.length || 0}개 이벤트</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                    {serviceMessages.length === 0 && (
+                                        <div className="text-center py-12">
+                                            <p className="text-xs text-neutral-400">{svc?.display_name}에서 아직 알림이 없습니다</p>
+                                            <p className="text-[10px] text-neutral-300 mt-1">서비스에서 이벤트가 발생하면 여기에 표시됩니다</p>
+                                        </div>
+                                    )}
+                                    {serviceMessages.map(msg => {
+                                        const isActionCard = msg.message_format === 'action_card' && msg.action_payload;
+                                        return (
+                                            <div key={msg.id} className="flex gap-2.5">
+                                                <div className="h-7 w-7 rounded flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                    style={{ backgroundColor: `${svc?.color || '#666'}15`, color: svc?.color || '#666' }}>
+                                                    {(svc?.display_name || '?')[0]}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[11px] font-medium" style={{ color: svc?.color || '#666' }}>
+                                                            {msg.sender_name}
+                                                        </span>
+                                                        <span className="text-[10px] text-neutral-300">
+                                                            {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                    {isActionCard ? (
+                                                        <div className="mt-1">
+                                                            <ActionCard
+                                                                payload={msg.action_payload!}
+                                                                messageId={msg.id}
+                                                                senderName={msg.sender_name}
+                                                                metadata={msg.metadata}
+                                                                onAction={handleActionClick}
+                                                                isLoading={actionLoading === msg.id}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs text-neutral-700 mt-0.5 whitespace-pre-wrap">{msg.content}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div ref={messagesEndRef} />
+                                </div>
+                            </>
+                        );
+                    })()
                 ) : selectedChat === 'notifications' ? (
                     /* ── 알림 뷰 ── */
                     <>
@@ -815,22 +1228,23 @@ export default function MessengerPage() {
                             <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileAttach} />
                             <div className="px-4 py-2.5 flex items-center gap-1.5">
                                 <button onClick={() => { setShowAttachMenu(!showAttachMenu); setShowEmoji(false); }}
-                                    className={clsx("p-1.5 transition-colors", showAttachMenu ? 'bg-neutral-200' : 'hover:bg-neutral-100')}>
+                                    className={clsx("p-1.5 transition-colors shrink-0", showAttachMenu ? 'bg-neutral-200' : 'hover:bg-neutral-100')}>
                                     <Paperclip className="h-3.5 w-3.5 text-neutral-400" />
                                 </button>
-                                <input value={newMessage} onChange={e => setNewMessage(e.target.value)}
-                                    placeholder="메시지 입력..."
-                                    className="flex-1 px-3 py-1.5 text-[11px] border border-neutral-200 focus:outline-none focus:border-neutral-400"
-                                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                                    onClick={() => { setShowEmoji(false); setShowAttachMenu(false); }} />
+                                <div className="flex-1">
+                                    <MentionInput
+                                        value={newMessage}
+                                        onChange={setNewMessage}
+                                        onSend={sendMessage}
+                                        onMentionSend={handleMentionSend}
+                                        agents={agentProfiles}
+                                        services={serviceHooks}
+                                        placeholder="메시지 입력... (@로 멘션)"
+                                    />
+                                </div>
                                 <button onClick={() => { setShowEmoji(!showEmoji); setShowAttachMenu(false); }}
-                                    className={clsx("p-1.5 transition-colors", showEmoji ? 'bg-neutral-200' : 'hover:bg-neutral-100')}>
+                                    className={clsx("p-1.5 transition-colors shrink-0", showEmoji ? 'bg-neutral-200' : 'hover:bg-neutral-100')}>
                                     <Smile className="h-3.5 w-3.5 text-neutral-400" />
-                                </button>
-                                <button onClick={sendMessage}
-                                    className={clsx("p-1.5 transition-colors",
-                                        newMessage.trim() ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-300')}>
-                                    <Send className="h-3.5 w-3.5" />
                                 </button>
                             </div>
                         </div>
@@ -886,10 +1300,7 @@ export default function MessengerPage() {
 
                         {/* 담당 에이전트 */}
                         {selectedChannel.agent_name && (() => {
-                            const agent = agentProfiles.find(a =>
-                                a.name === selectedChannel.agent_name ||
-                                a.agent_name === selectedChannel.agent_name
-                            );
+                            const agent = agentProfiles.find(a => a.name === selectedChannel.agent_name);
                             return (
                                 <div className="p-4 border-b border-neutral-100">
                                     <div className="flex items-center gap-1.5 mb-3">
@@ -900,17 +1311,14 @@ export default function MessengerPage() {
                                             AI
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-neutral-800">{selectedChannel.agent_name}</p>
-                                            {agent?.role && <p className="text-[11px] text-neutral-400 mt-0.5">{agent.role}</p>}
+                                            <p className="text-xs font-medium text-neutral-800">{agent?.display_name || selectedChannel.agent_name}</p>
+                                            {agent?.agent_type && <p className="text-[11px] text-neutral-400 mt-0.5">L{agent.layer} · {agent.agent_type}</p>}
                                             <div className="flex items-center gap-1 mt-1">
                                                 <Circle className="h-2 w-2 fill-green-400 text-green-400" />
                                                 <span className="text-[10px] text-green-600">활성</span>
                                             </div>
                                         </div>
                                     </div>
-                                    {agent?.description && (
-                                        <p className="text-[11px] text-neutral-400 mt-3 leading-relaxed">{agent.description}</p>
-                                    )}
                                 </div>
                             );
                         })()}

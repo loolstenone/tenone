@@ -200,7 +200,8 @@ export async function POST(req: NextRequest) {
     notifyAnalysisComplete(
         safeBrandName,
         finalScore as number,
-        `/intra/gravity/${product_id}/report`
+        `/intra/gravity/${product_id}/report`,
+        product_id
     ).catch(() => {});
 
     return NextResponse.json({

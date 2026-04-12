@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { notifyPrescanComplete } from "@/lib/gravity/notify";
 
 /**
  * POST /api/gravity/prescan/run
@@ -279,6 +280,14 @@ export async function POST(req: NextRequest) {
         serviceRoleKey,
         { market_type: marketClassification.type }
     );
+
+    // 메신저 알림 (에이전트 + Service Hook)
+    notifyPrescanComplete(
+        brand_name,
+        marketClassification.type,
+        brandRate,
+        product_id
+    ).catch(() => {});
 
     return NextResponse.json({
         ok: true,

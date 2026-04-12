@@ -1,0 +1,20 @@
+{
+  "name": "tenone-local-agent-bridge",
+  "version": "1.0.0",
+  "description": "Ten:One Local Agent Bridge — Supabase ↔ OpenClaw/Gemma 연결 데몬",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
