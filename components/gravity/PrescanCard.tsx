@@ -8,7 +8,7 @@ interface PrescanResult {
     market_type: string;
     brand_mention_rate: number;
     competitor_mention_rates: Record<string, number>;
-    journey_heatmap: Record<string, Array<{ brand: boolean; competitors: string[] }>>;
+    journey_heatmap: Record<string, Array<{ brand: boolean; competitors: string[]; question?: string }>>;
     diagnosis_text: string;
 }
 
@@ -122,15 +122,24 @@ export function PrescanCard({ productId }: { productId: string }) {
                     {prescan.journey_heatmap && Object.keys(prescan.journey_heatmap).length > 0 && (
                         <div>
                             <p className="text-[10px] text-neutral-400 mb-1.5">구매 여정 AI 가시성</p>
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                                 {Object.entries(prescan.journey_heatmap).map(([stage, probes]) => (
-                                    <div key={stage} className="flex items-center gap-2">
-                                        <span className="text-[10px] text-neutral-500 w-12">{JOURNEY_LABELS[stage] || stage}</span>
-                                        <div className="flex gap-0.5">
+                                    <div key={stage} className="flex items-start gap-2">
+                                        <span className="text-[10px] text-neutral-500 w-12 pt-0.5 shrink-0">{JOURNEY_LABELS[stage] || stage}</span>
+                                        <div className="flex flex-col gap-1 flex-1">
                                             {probes.map((p, i) => (
-                                                <span key={i} className={`w-4 h-4 flex items-center justify-center text-[8px] border ${p.brand ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "bg-red-50 border-red-200 text-red-400"}`}>
-                                                    {p.brand ? "✓" : "✗"}
-                                                </span>
+                                                <div
+                                                    key={i}
+                                                    title={p.question || `질문 ${i + 1}`}
+                                                    className={`flex items-center gap-1.5 px-1.5 py-0.5 border cursor-default ${p.brand ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}
+                                                >
+                                                    <span className={`text-[9px] font-bold ${p.brand ? "text-emerald-600" : "text-red-400"}`}>
+                                                        {p.brand ? "✓" : "✗"}
+                                                    </span>
+                                                    <span className="text-[10px] text-neutral-500 truncate">
+                                                        {p.question ? p.question.slice(0, 28) + (p.question.length > 28 ? "…" : "") : `질문 ${i + 1}`}
+                                                    </span>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>

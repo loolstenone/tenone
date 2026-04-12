@@ -46,6 +46,27 @@ export async function POST(req: NextRequest) {
 
     const base = req.nextUrl.origin;
     const headers = { "Content-Type": "application/json" };
+
+    // ── 인코딩 안전: DB에서 실제 브랜드명 조회 ─────────────────────
+    // HTTP body로 전달된 brand_name은 인코딩 이슈가 생길 수 있으므로
+    // product_id로 bg_products에서 직접 조회한 name을 사용한다.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    let safeBrandName = brand_name;
+    if (supabaseUrl && serviceRoleKey) {
+        try {
+            const productRes = await fetch(
+                `${supabaseUrl}/rest/v1/bg_products?id=eq.${product_id}&select=name&limit=1`,
+                { headers: { "Authorization": `Bearer ${serviceRoleKey}`, "apikey": serviceRoleKey } }
+            );
+            const productRows = await productRes.json().catch(() => []);
+            if (Array.isArray(productRows) && productRows[0]?.name) {
+                safeBrandName = productRows[0].name;
+            }
+        } catch {
+            // DB 조회 실패 시 원본 사용
+        }
+    }
     const steps: Array<{ step: string; ok: boolean; data?: unknown; error?: string }> = [];
 
     // ── Step 1: 리뷰 투입 (선택) ──────────────────────────────────
@@ -72,7 +93,7 @@ export async function POST(req: NextRequest) {
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "pain_classify", ok: res.ok, data });
-        notifyPipelineStep(brand_name, "페인포인트 분류", 2, 8, res.ok).catch(() => {});
+        notifyPipelineStep(safeBrandName, "페인포인트 분류", 2, 8, res.ok).catch(() => {});
         if (!res.ok) {
             return NextResponse.json({ ok: false, steps, error: "pain_classify 실패" }, { status: 500 });
         }
@@ -90,7 +111,7 @@ export async function POST(req: NextRequest) {
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "question_mapper", ok: res.ok, data });
-        notifyPipelineStep(brand_name, "질문 클러스터링", 3, 8, res.ok).catch(() => {});
+        notifyPipelineStep(safeBrandName, "질문 클러스터링", 3, 8, res.ok).catch(() => {});
         if (!res.ok) {
             return NextResponse.json({ ok: false, steps, error: "question_mapper 실패" }, { status: 500 });
         }
@@ -104,11 +125,11 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`${base}/api/gravity/probe/run`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ product_id, brand_name, competitors, models, pattern_limit }),
+            body: JSON.stringify({ product_id, brand_name: safeBrandName, competitors, models, pattern_limit }),
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "ai_prober", ok: res.ok, data });
-        notifyPipelineStep(brand_name, "AI 프로빙", 4, 8, res.ok).catch(() => {});
+        notifyPipelineStep(safeBrandName, "AI 프로빙", 4, 8, res.ok).catch(() => {});
         if (!res.ok) {
             return NextResponse.json({ ok: false, steps, error: "ai_prober 실패" }, { status: 500 });
         }
@@ -122,7 +143,7 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`${base}/api/gravity/source/run`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ product_id, brand_name, competitors, limit: 10 }),
+            body: JSON.stringify({ product_id, brand_name: safeBrandName, competitors, limit: 10 }),
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "source_tracer", ok: res.ok, data });
@@ -137,7 +158,7 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`${base}/api/gravity/gap/run`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ product_id, brand_name, competitors }),
+            body: JSON.stringify({ product_id, brand_name: safeBrandName, competitors }),
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "gap_analyzer", ok: res.ok, data });
@@ -151,7 +172,7 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`${base}/api/gravity/voice/run`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ product_id, brand_name, competitors, limit: 5 }),
+            body: JSON.stringify({ product_id, brand_name: safeBrandName, competitors, limit: 5 }),
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "voice_designer", ok: res.ok, data });
@@ -165,7 +186,7 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`${base}/api/gravity/brand-value/run`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ product_id, brand_name, competitors }),
+            body: JSON.stringify({ product_id, brand_name: safeBrandName, competitors }),
         });
         const data = await res.json().catch(() => ({}));
         steps.push({ step: "brand_value", ok: res.ok, data });
@@ -177,7 +198,7 @@ export async function POST(req: NextRequest) {
     // 전체 파이프라인 완료 알림
     const finalScore = typeof gravityResult.gravity_score === "number" ? gravityResult.gravity_score : 0;
     notifyAnalysisComplete(
-        brand_name,
+        safeBrandName,
         finalScore as number,
         `/intra/gravity/${product_id}/report`
     ).catch(() => {});

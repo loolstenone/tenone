@@ -360,15 +360,6 @@ export default function GravityProductPage() {
                 >
                     <FileBarChart2 className="w-3 h-3" /> 보고서
                 </button>
-                <button
-                    onClick={runFullScan}
-                    disabled={scanning || !!stepRunning}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-500 text-white font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                    {scanning
-                        ? <><RefreshCw className="w-3 h-3 animate-spin" /> 스캔 중</>
-                        : <><PlayCircle className="w-3 h-3" /> 풀 스캔</>}
-                </button>
             </PageHeader>
 
             <div className="flex-1 overflow-auto p-6">
@@ -388,9 +379,20 @@ export default function GravityProductPage() {
                                 <span className="text-sm font-semibold text-neutral-800">파이프라인 관리</span>
                                 <span className="text-[10px] text-neutral-400">단계별 실행 · 데이터 확인</span>
                             </div>
-                            {showPipeline
-                                ? <ChevronUp className="w-4 h-4 text-neutral-400" />
-                                : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); runFullScan(); }}
+                                    disabled={scanning || !!stepRunning}
+                                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-500 text-white font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {scanning
+                                        ? <><RefreshCw className="w-3 h-3 animate-spin" /> 스캔 중</>
+                                        : <><PlayCircle className="w-3 h-3" /> 풀 스캔</>}
+                                </button>
+                                {showPipeline
+                                    ? <ChevronUp className="w-4 h-4 text-neutral-400" />
+                                    : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+                            </div>
                         </button>
                         {showPipeline && (
                             <div className="border-t border-neutral-100">

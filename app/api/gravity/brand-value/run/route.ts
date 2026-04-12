@@ -62,6 +62,21 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "환경 변수 누락" }, { status: 500 });
     }
 
+    // ── 인코딩 안전: DB에서 실제 브랜드명 조회 ─────────────────────
+    let safeBrandName = brand_name;
+    try {
+        const productRes = await fetch(
+            `${supabaseUrl}/rest/v1/bg_products?id=eq.${product_id}&select=name&limit=1`,
+            { headers: { "Authorization": `Bearer ${serviceRoleKey}`, "apikey": serviceRoleKey } }
+        );
+        const productRows = await productRes.json().catch(() => []);
+        if (Array.isArray(productRows) && productRows[0]?.name) {
+            safeBrandName = productRows[0].name;
+        }
+    } catch {
+        // DB 조회 실패 시 원본 사용
+    }
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     // 1. social/run 호출하여 소셜 데이터 수집
@@ -207,7 +222,7 @@ export async function POST(req: NextRequest) {
         satisfaction: "만족도",
     };
 
-    let diagnosisText = `${brand_name}의 브랜드 가치 종합 점수는 ${overallScore}/100입니다. `;
+    let diagnosisText = `${safeBrandName}의 브랜드 가치 종합 점수는 ${overallScore}/100입니다. `;
     diagnosisText += `${labels[highest[0]]}(${highest[1]})이 가장 높고, ${labels[lowest[0]]}(${lowest[1]})이 가장 낮습니다. `;
 
     if (awarenessScore < 30 && favorabilityScore > 60) {

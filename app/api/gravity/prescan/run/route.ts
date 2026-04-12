@@ -148,10 +148,25 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "환경 변수 누락" }, { status: 500 });
     }
 
+    // ── 인코딩 안전: DB에서 실제 브랜드명 조회 ─────────────────────
+    let safeBrandName = brand_name;
+    try {
+        const productRes = await fetch(
+            `${supabaseUrl}/rest/v1/bg_products?id=eq.${product_id}&select=name&limit=1`,
+            { headers: { "Authorization": `Bearer ${serviceRoleKey}`, "apikey": serviceRoleKey } }
+        );
+        const productRows = await productRes.json().catch(() => []);
+        if (Array.isArray(productRows) && productRows[0]?.name) {
+            safeBrandName = productRows[0].name;
+        }
+    } catch {
+        // DB 조회 실패 시 원본 사용
+    }
+
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     // 1. 구매 여정 5단계 질문 생성
-    const journeyQuestions = generateJourneyQuestions(brand_name, category, competitors);
+    const journeyQuestions = generateJourneyQuestions(safeBrandName, category, competitors);
     const allQuestions = Object.entries(journeyQuestions).flatMap(([stage, qs]) =>
         qs.map(q => ({ stage, question: q }))
     );
@@ -172,7 +187,7 @@ export async function POST(req: NextRequest) {
 
     for (const { stage, question } of allQuestions) {
         try {
-            const result = await probeAI(anthropic, question, brand_name, competitors);
+            const result = await probeAI(anthropic, question, safeBrandName, competitors);
 
             if (result.brandMentioned) brandMentionTotal++;
             result.competitorsMentioned.forEach(c => {
@@ -212,13 +227,14 @@ export async function POST(req: NextRequest) {
         ? Math.round(Object.values(competitorRates).reduce((a, b) => a + b, 0) / Object.values(competitorRates).length)
         : 0;
 
-    // 4. 구매 여정 히트맵 구성
-    const journeyHeatmap: Record<string, { brand: boolean; competitors: string[] }[]> = {};
+    // 4. 구매 여정 히트맵 구성 (질문 텍스트 포함)
+    const journeyHeatmap: Record<string, { brand: boolean; competitors: string[]; question: string }[]> = {};
     for (const detail of probeDetails) {
         if (!journeyHeatmap[detail.stage]) journeyHeatmap[detail.stage] = [];
         journeyHeatmap[detail.stage].push({
             brand: detail.brand_mentioned,
             competitors: detail.competitors_mentioned,
+            question: detail.question,
         });
     }
 
@@ -226,7 +242,7 @@ export async function POST(req: NextRequest) {
     const marketClassification = classifyMarketType(brandRate, avgCompetitorRate);
 
     // 6. 진단 문장 생성
-    const diagnosisText = `${brand_name}의 AI 언급률은 ${brandRate}%이며, ` +
+    const diagnosisText = `${safeBrandName}의 AI 언급률은 ${brandRate}%이며, ` +
         `경쟁사 평균 ${avgCompetitorRate}%입니다. ` +
         `시장 유형: ${marketClassification.type} (${marketClassification.label}). ` +
         marketClassification.description;
