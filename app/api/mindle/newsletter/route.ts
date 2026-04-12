@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
                 const { data: existing } = await supabase
                     .from('mindle_trends')
                     .select('id')
-                    .eq('source_name', `newsletter:${email.from}`)
+                    .contains('source_names', [`newsletter:${email.from}`])
                     .ilike('title', `%${email.subject.slice(0, 50)}%`)
                     .limit(1);
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
                     title: t.title,
                     summary: t.summary,
                     category: t.category,
-                    source_name: `newsletter:${email.from}`,
+                    source_names: [`newsletter:${email.from}`],
                     source_urls: t.source_urls,
                     relevance_score: t.relevance_score,
                     agent_name: 'Mindle AI',
