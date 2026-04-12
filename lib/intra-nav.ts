@@ -57,9 +57,16 @@ export const modules: NavModule[] = [
         sections: [
             {
                 items: [
-                    { name: "Agent Hub", href: "/intra/agent", icon: Bot, staffOnly: true },
-{ name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard },
+                    { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard },
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
+                    {
+                        name: "Agent Hub", href: "/intra/agent", icon: Bot, staffOnly: true,
+                        children: [
+                            { name: "대시보드", href: "/intra/agent" },
+                            { name: "에이전트 지시", href: "/intra/ums/agent/comm" },
+                            { name: "에이전트 로그", href: "/intra/ums/agent/logs" },
+                        ],
+                    },
                     { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },
                     { name: "타임시트 입력", href: "/intra/workspace/timesheet", icon: Clock },
                     { name: "결재", href: "/intra/workspace/approval", icon: Stamp, staffOnly: true },
@@ -358,8 +365,6 @@ export const modules: NavModule[] = [
                         name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
                         children: [
                             { name: "대시보드", href: "/intra/ums/agent" },
-                            { name: "지시", href: "/intra/ums/agent/comm" },
-                            { name: "자동화 로그", href: "/intra/ums/agent/trends" },
                         ],
                     },
                 ],
@@ -394,8 +399,9 @@ export const modules: NavModule[] = [
                     {
                         name: "Mindle", href: "/intra/ums/mindle", icon: TrendingUp,
                         children: [
-                            { name: "트렌드 카드", href: "/intra/ums/agent/trends" },
-                            { name: "RSS 소스", href: "/intra/ums/mindle/sources" },
+                            { name: "트렌드 수집 현황", href: "/intra/ums/mindle/trends" },
+                            { name: "콘텐츠 파이프라인", href: "/intra/ums/mindle/pipeline" },
+                            { name: "RSS 소스 관리", href: "/intra/ums/mindle/sources" },
                         ],
                     },
                     { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe },
