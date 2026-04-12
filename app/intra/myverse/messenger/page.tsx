@@ -50,6 +50,7 @@ export default function MessengerPage() {
     const [serviceMessages, setServiceMessages] = useState<chatDb.ChatMessage[]>([]);
     const [serviceThreadId, setServiceThreadId] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [serviceUnreadCounts, setServiceUnreadCounts] = useState<Record<string, number>>({});
 
     // 모바일 뷰 상태
     const [mobileView, setMobileView] = useState<'list' | 'chat' | 'profile'>('list');
@@ -136,9 +137,20 @@ export default function MessengerPage() {
         fetch('/api/agent/profiles').then(r => r.json()).then(data => {
             if (Array.isArray(data)) setAgentProfiles(data);
         }).catch(() => {});
-        // 서비스 훅 로드
+        // 서비스 훅 + 미읽 카운트 로드
         chatDb.fetchServiceHooks().then(hooks => setServiceHooks(hooks));
-    }, []);
+        chatDb.fetchServiceThreads().then(threads => {
+            const counts: Record<string, number> = {};
+            Promise.all(threads.map(async t => {
+                if (!t.service_name) return;
+                const msgs = await chatDb.fetchMessages(t.id, 50);
+                const unread = msgs.filter(m =>
+                    m.sender_type !== 'human' && !m.read_by?.includes(user?.id || '')
+                ).length;
+                if (unread > 0) counts[t.service_name] = unread;
+            })).then(() => setServiceUnreadCounts(counts));
+        });
+    }, [user?.id]);
 
     // 채널 선택 시 메시지 로드
     useEffect(() => {
@@ -845,7 +857,7 @@ export default function MessengerPage() {
                 serviceHooks={serviceHooks}
                 selectedService={selectedService}
                 onSelectService={selectService}
-                serviceUnreadCounts={{}}
+                serviceUnreadCounts={serviceUnreadCounts}
             />
 
             {/* ══════════════════════════════════
@@ -932,6 +944,26 @@ export default function MessengerPage() {
                                         <div className="text-center py-12">
                                             <Bot className="h-8 w-8 text-neutral-200 mx-auto mb-3" />
                                             <p className="text-xs text-neutral-400">{agent?.display_name}에게 메시지를 보내보세요</p>
+                                            {agent?.runtime === 'local' && (
+                                                <div className="mt-4 mx-auto max-w-xs p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                                    <p className="text-[11px] text-amber-700 font-medium">로컬 AI 에이전트</p>
+                                                    <p className="text-[10px] text-amber-600 mt-1">
+                                                        PC가 켜져 있고 {agent.display_name}이 실행 중이어야 응답합니다.
+                                                        오프라인 시 {agent.fallback_agent || '1001'}이 대신 응답합니다.
+                                                    </p>
+                                                    {agent.fallback_agent && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const fallback = agentProfiles.find(a => a.name === agent.fallback_agent);
+                                                                if (fallback) selectAgentDM(fallback);
+                                                            }}
+                                                            className="mt-2 px-3 py-1 text-[10px] font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 rounded transition-colors"
+                                                        >
+                                                            {agent.fallback_agent}에게 보내기
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {agentDMMessages.map(msg => (
@@ -1020,37 +1052,60 @@ export default function MessengerPage() {
                                             <p className="text-[10px] text-neutral-300 mt-1">서비스에서 이벤트가 발생하면 여기에 표시됩니다</p>
                                         </div>
                                     )}
-                                    {serviceMessages.map(msg => {
+                                    {serviceMessages.map((msg, idx) => {
                                         const isActionCard = msg.message_format === 'action_card' && msg.action_payload;
+                                        const prevMsg = idx > 0 ? serviceMessages[idx - 1] : null;
+                                        const showCorrelationDivider = msg.correlation_id &&
+                                            prevMsg?.correlation_id &&
+                                            msg.correlation_id !== prevMsg.correlation_id;
+                                        const isNewCorrelation = msg.correlation_id &&
+                                            (!prevMsg || prevMsg.correlation_id !== msg.correlation_id);
+
                                         return (
-                                            <div key={msg.id} className="flex gap-2.5">
-                                                <div className="h-7 w-7 rounded flex items-center justify-center text-[10px] font-bold shrink-0"
-                                                    style={{ backgroundColor: `${svc?.color || '#666'}15`, color: svc?.color || '#666' }}>
-                                                    {(svc?.display_name || '?')[0]}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[11px] font-medium" style={{ color: svc?.color || '#666' }}>
-                                                            {msg.sender_name}
-                                                        </span>
-                                                        <span className="text-[10px] text-neutral-300">
-                                                            {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                            <div key={msg.id}>
+                                                {showCorrelationDivider && (
+                                                    <div className="flex items-center gap-2 my-2">
+                                                        <div className="flex-1 h-px bg-neutral-200" />
+                                                        <span className="text-[9px] text-neutral-300">새 작업 흐름</span>
+                                                        <div className="flex-1 h-px bg-neutral-200" />
+                                                    </div>
+                                                )}
+                                                {isNewCorrelation && (
+                                                    <div className="mb-1">
+                                                        <span className="text-[9px] px-1.5 py-0.5 bg-neutral-100 text-neutral-400 rounded">
+                                                            작업 #{msg.correlation_id?.slice(0, 8)}
                                                         </span>
                                                     </div>
-                                                    {isActionCard ? (
-                                                        <div className="mt-1">
-                                                            <ActionCard
-                                                                payload={msg.action_payload!}
-                                                                messageId={msg.id}
-                                                                senderName={msg.sender_name}
-                                                                metadata={msg.metadata}
-                                                                onAction={handleActionClick}
-                                                                isLoading={actionLoading === msg.id}
-                                                            />
+                                                )}
+                                                <div className="flex gap-2.5">
+                                                    <div className="h-7 w-7 rounded flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                        style={{ backgroundColor: `${svc?.color || '#666'}15`, color: svc?.color || '#666' }}>
+                                                        {(svc?.display_name || '?')[0]}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] font-medium" style={{ color: svc?.color || '#666' }}>
+                                                                {msg.sender_name}
+                                                            </span>
+                                                            <span className="text-[10px] text-neutral-300">
+                                                                {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
                                                         </div>
-                                                    ) : (
-                                                        <div className="text-xs text-neutral-700 mt-0.5 whitespace-pre-wrap">{msg.content}</div>
-                                                    )}
+                                                        {isActionCard ? (
+                                                            <div className="mt-1">
+                                                                <ActionCard
+                                                                    payload={msg.action_payload!}
+                                                                    messageId={msg.id}
+                                                                    senderName={msg.sender_name}
+                                                                    metadata={msg.metadata}
+                                                                    onAction={handleActionClick}
+                                                                    isLoading={actionLoading === msg.id}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-xs text-neutral-700 mt-0.5 whitespace-pre-wrap">{msg.content}</div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         );

@@ -226,6 +226,63 @@ export function notifyNewApplication(companyName: string, productName: string) {
     );
 }
 
+export function notifyBriefReady(
+    brandName: string,
+    briefTitle: string,
+    briefId?: string,
+    productId?: string,
+    correlationId?: string
+) {
+    return notifyBoth(
+        {
+            message: `📝 ${brandName} 콘텐츠 브리프 초안 생성: ${briefTitle}`,
+            priority: "high",
+            metadata: { event: "brief_ready", brand_name: brandName, brief_title: briefTitle },
+        },
+        {
+            event: "brief_ready",
+            title: `${brandName} 콘텐츠 브리프 초안`,
+            body: briefTitle,
+            priority: "high",
+            correlationId,
+            metadata: { brand_name: brandName, brief_id: briefId, product_id: productId },
+            actions: [
+                { id: "act_brief_approve", label: "승인", type: "callback", callback_url: `/api/gravity/voice/approve`, callback_payload: { brief_id: briefId, product_id: productId }, style: "primary" },
+                { id: "act_brief_edit", label: "수정 요청", type: "delegate", delegate_to: "1001", style: "secondary" },
+                { id: "act_brief_discard", label: "폐기", type: "dismiss", style: "danger" },
+            ],
+        }
+    );
+}
+
+export function notifyBriefApproved(
+    brandName: string,
+    briefTitle: string,
+    channel?: string,
+    productId?: string
+) {
+    return notifyBoth(
+        {
+            message: `✅ ${brandName} 브리프 승인 완료: ${briefTitle}${channel ? ` → ${channel} 발행 예정` : ''}`,
+            priority: "normal",
+            metadata: { event: "brief_approved", brand_name: brandName, brief_title: briefTitle, channel },
+        },
+        {
+            event: "brief_approved",
+            title: `${brandName} 브리프 승인 완료`,
+            body: `${briefTitle}${channel ? `\n발행 채널: ${channel}` : ''}`,
+            priority: "normal",
+            metadata: { brand_name: brandName, product_id: productId, channel },
+            actions: productId ? [
+                { id: "act_approved_view", label: "브리프 보기", type: "navigate", url: `/intra/gravity/${productId}`, style: "primary" },
+                { id: "act_approved_dismiss", label: "확인", type: "dismiss" },
+            ] : [
+                { id: "act_approved_dismiss", label: "확인", type: "dismiss" },
+            ],
+        }
+    );
+}
+
 export function notifyScoreChange(
     brandName: string,
     oldScore: number,
