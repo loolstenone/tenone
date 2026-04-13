@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleDollarSign, Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, X } from "lucide-react";
 import * as erpDb from "@/lib/supabase/erp";
 import { PageHeader } from "@/components/intra/IntraUI";
 
@@ -40,6 +40,12 @@ const statusMap: Record<string, Invoice["status"]> = {
 
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
+function generateInvoiceNo(): string {
+    const year = new Date().getFullYear();
+    const seq = String(Math.floor(Math.random() * 900) + 100);
+    return `INV-${year}-${seq}`;
+}
+
 function dbRowToInvoice(r: Record<string, unknown>): Invoice {
     return {
         id: r.id as string,
@@ -53,9 +59,166 @@ function dbRowToInvoice(r: Record<string, unknown>): Invoice {
     };
 }
 
+interface InvoiceFormData {
+    client: string;
+    project: string;
+    amount: string;
+    issueDate: string;
+    dueDate: string;
+    status: string;
+}
+
+const EMPTY_FORM: InvoiceFormData = {
+    client: "",
+    project: "",
+    amount: "",
+    issueDate: new Date().toISOString().slice(0, 10),
+    dueDate: "",
+    status: "issued",
+};
+
+function InvoiceModal({ onClose, onCreated }: { onClose: () => void; onCreated: (inv: Invoice) => void }) {
+    const [form, setForm] = useState<InvoiceFormData>(EMPTY_FORM);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    const set = (key: keyof InvoiceFormData, value: string) =>
+        setForm(prev => ({ ...prev, [key]: value }));
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        const amount = parseInt(form.amount.replace(/,/g, ""), 10);
+        if (!form.client.trim()) { setError("거래처를 입력하세요."); return; }
+        if (!form.project.trim()) { setError("프로젝트를 입력하세요."); return; }
+        if (isNaN(amount) || amount <= 0) { setError("유효한 금액을 입력하세요."); return; }
+        if (!form.dueDate) { setError("만기일을 입력하세요."); return; }
+
+        setSaving(true);
+        try {
+            const invoiceNo = generateInvoiceNo();
+            const row = await erpDb.createInvoice({
+                invoice_no: invoiceNo,
+                client_name: form.client.trim(),
+                project_name: form.project.trim(),
+                amount,
+                issue_date: form.status === "draft" ? null : form.issueDate,
+                due_date: form.dueDate,
+                status: form.status,
+                tenant_id: "tenone",
+            });
+            onCreated(dbRowToInvoice(row as Record<string, unknown>));
+            onClose();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "저장 실패");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+            <div className="bg-white w-full max-w-md mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                    <h2 className="text-sm font-semibold">청구서 발행</h2>
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                            <label className="block text-xs text-neutral-500 mb-1">거래처 *</label>
+                            <input
+                                type="text"
+                                value={form.client}
+                                onChange={e => set("client", e.target.value)}
+                                placeholder="예: ABC엔터"
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-neutral-500 mb-1">프로젝트 *</label>
+                            <input
+                                type="text"
+                                value={form.project}
+                                onChange={e => set("project", e.target.value)}
+                                placeholder="예: LUKI 2nd Single MV"
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-neutral-500 mb-1">금액 (원) *</label>
+                            <input
+                                type="text"
+                                value={form.amount}
+                                onChange={e => set("amount", e.target.value.replace(/[^\d,]/g, ""))}
+                                placeholder="예: 15000000"
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-neutral-500 mb-1">발행일</label>
+                            <input
+                                type="date"
+                                value={form.issueDate}
+                                onChange={e => set("issueDate", e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-neutral-500 mb-1">만기일 *</label>
+                            <input
+                                type="date"
+                                value={form.dueDate}
+                                onChange={e => set("dueDate", e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-neutral-500 mb-1">상태</label>
+                            <select
+                                value={form.status}
+                                onChange={e => set("status", e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400 bg-white"
+                            >
+                                <option value="issued">발행</option>
+                                <option value="draft">미발행 (초안)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {error && <p className="text-xs text-red-500">{error}</p>}
+
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 text-xs text-neutral-600 border border-neutral-200 hover:bg-neutral-50 transition-colors"
+                        >
+                            취소
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 transition-colors disabled:opacity-40 flex items-center gap-1.5"
+                        >
+                            {saving && <Loader2 className="h-3 w-3 animate-spin" />}
+                            발행하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export default function BillingPage() {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -83,8 +246,18 @@ export default function BillingPage() {
 
     return (
         <div className="space-y-6">
+            {showModal && (
+                <InvoiceModal
+                    onClose={() => setShowModal(false)}
+                    onCreated={inv => setInvoices(prev => [inv, ...prev])}
+                />
+            )}
+
             <PageHeader title="청구관리" description="청구서 발행 및 입금 현황을 관리합니다.">
-                <button className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+                >
                     <Plus className="h-3 w-3" /> 청구서 발행
                 </button>
             </PageHeader>

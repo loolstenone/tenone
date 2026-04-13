@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-04-13 (집, 세션 41)
+
+### Intra Phase C — ERP 입력 폼 + Wiki DB 연동
+
+#### 수정 파일
+- `app/intra/erp/finance/billing/page.tsx` — 청구서 발행 모달 추가 (InvoiceModal 컴포넌트, createInvoice 연동)
+- `app/intra/erp/finance/card/page.tsx` — 하드코딩 mockCards 제거, card_usage에서 카드별 집계 동적 생성
+- `app/intra/wiki/library/page.tsx` — DB items 실제 로드 (기존 TODO 해결), displayItems = DB || mock
+- `app/intra/wiki/faq/page.tsx` — FAQ 등록 모달 추가 (AddFaqModal), wiki_faq 테이블 저장 + 로컬 fallback
+
+---
+
 ## 2026-04-12 (집, 세션 40)
 
 ### Brand Gravity 컨설팅 서비스 — P0 전체 완료

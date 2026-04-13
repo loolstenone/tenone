@@ -4,10 +4,11 @@ import { useState, useMemo } from "react";
 import {
     ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Search,
     Lightbulb, Target, FileCheck, CalendarDays, User, Globe, GraduationCap,
-    FileText, BarChart3, Megaphone, Users, CreditCard,
+    FileText, BarChart3, Megaphone, Users, CreditCard, Plus, X, Loader2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { createClient } from "@/lib/supabase/client";
 
 /* ── 카테고리 정의 ── */
 type FaqCategory = "전체" | "일반" | "VRIEF·GPR" | "시스템" | "근무·복지" | "경영기획" | "콘텐츠 제작" | "마케팅·영업" | "커뮤니티" | "인사·재무";
@@ -365,15 +366,114 @@ function FaqAccordion({ item, isOpen, onToggle }: { item: FaqItem; isOpen: boole
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30, 50];
 
+interface NewFaqForm {
+    question: string;
+    answer: string;
+    category: FaqCategory;
+}
+
+function AddFaqModal({ onClose, onAdded }: { onClose: () => void; onAdded: (item: FaqItem) => void }) {
+    const [form, setForm] = useState<NewFaqForm>({ question: "", answer: "", category: "일반" });
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        if (!form.question.trim()) { setError("질문을 입력하세요."); return; }
+        if (!form.answer.trim()) { setError("답변을 입력하세요."); return; }
+        setSaving(true);
+        try {
+            const supabase = createClient();
+            const { data, error: dbError } = await supabase.from("wiki_faq").insert({
+                question: form.question.trim(),
+                answer: form.answer.trim(),
+                category: form.category,
+                author: "Cheonil Jeon",
+                tenant_id: "tenone",
+            }).select().single();
+            if (dbError) throw dbError;
+            onAdded({
+                icon: FileText,
+                question: form.question.trim(),
+                answer: form.answer.trim().split("\n"),
+                category: form.category,
+                author: "Cheonil Jeon",
+                updated: new Date().toISOString().slice(0, 10),
+                views: 0,
+            });
+            onClose();
+        } catch {
+            // wiki_faq 테이블이 없을 경우 로컬 추가만
+            onAdded({
+                icon: FileText,
+                question: form.question.trim(),
+                answer: form.answer.trim().split("\n"),
+                category: form.category,
+                author: "Cheonil Jeon",
+                updated: new Date().toISOString().slice(0, 10),
+                views: 0,
+            });
+            onClose();
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+            <div className="bg-white w-full max-w-lg mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                    <h2 className="text-sm font-semibold">FAQ 등록</h2>
+                    <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600"><X className="h-4 w-4" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">카테고리</label>
+                        <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as FaqCategory }))}
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400 bg-white">
+                            {categories.filter(c => c !== "전체").map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">질문 *</label>
+                        <input type="text" value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))}
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400" />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">답변 * (줄바꿈으로 문단 구분)</label>
+                        <textarea value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))}
+                            rows={6} className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400 resize-none" />
+                    </div>
+                    {error && <p className="text-xs text-red-500">{error}</p>}
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="px-4 py-2 text-xs text-neutral-600 border border-neutral-200 hover:bg-neutral-50">취소</button>
+                        <button type="submit" disabled={saving}
+                            className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-40 flex items-center gap-1.5">
+                            {saving && <Loader2 className="h-3 w-3 animate-spin" />}
+                            등록
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export default function FaqPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
     const [selectedCategory, setSelectedCategory] = useState<FaqCategory>("전체");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [extraItems, setExtraItems] = useState<FaqItem[]>([]);
+
+    const allItems = [...extraItems, ...faqItems];
 
     const filtered = useMemo(() => {
-        return faqItems.filter(item => {
+        return allItems.filter(item => {
             if (selectedCategory !== "전체" && item.category !== selectedCategory) return false;
             if (search.trim()) {
                 const q = search.toLowerCase();
@@ -381,7 +481,7 @@ export default function FaqPage() {
             }
             return true;
         });
-    }, [selectedCategory, search]);
+    }, [selectedCategory, search, extraItems]);
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
@@ -391,7 +491,18 @@ export default function FaqPage() {
 
     return (
         <div>
-            <PageHeader title="FAQ & 업무 가이드" description="자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다" />
+            {showAddModal && (
+                <AddFaqModal
+                    onClose={() => setShowAddModal(false)}
+                    onAdded={item => setExtraItems(prev => [item, ...prev])}
+                />
+            )}
+            <PageHeader title="FAQ & 업무 가이드" description="자주 묻는 질문과 업무별 가이드를 한곳에 모았습니다">
+                <button onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
+                    <Plus className="h-3 w-3" /> FAQ 등록
+                </button>
+            </PageHeader>
 
             {/* 검색 + 카테고리 필터 */}
             <div className="mb-4 space-y-3">

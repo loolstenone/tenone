@@ -24,10 +24,8 @@ const mockUsage: CardUsage[] = [
     { id: "5", date: "2026-03-16", merchant: "쿠팡", category: "소모품", amount: 89000, cardLast4: "5678", holder: "Sarah Kim", approved: false },
 ];
 
-const mockCards = [
-    { last4: "1234", holder: "Cheonil Jeon", limit: 5000000, used: 1200000 },
-    { last4: "5678", holder: "Sarah Kim", limit: 3000000, used: 800000 },
-];
+// 카드 한도는 카드 자체 정보가 없을 때 사용하는 기본값
+const DEFAULT_CARD_LIMIT = 5000000;
 
 function formatKRW(n: number) { return new Intl.NumberFormat("ko-KR").format(n) + "원"; }
 
@@ -69,10 +67,20 @@ export default function CardPage() {
         return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-neutral-400" /></div>;
     }
 
-    // 카드별 집계
-    const cardSummary = mockCards.map(c => ({
+    // 카드별 집계 — DB 사용 내역에서 카드 목록 도출
+    const cardMap = new Map<string, { last4: string; holder: string; used: number }>();
+    for (const u of usage) {
+        const key = u.cardLast4;
+        const existing = cardMap.get(key);
+        if (existing) {
+            existing.used += u.amount;
+        } else {
+            cardMap.set(key, { last4: key, holder: u.holder, used: u.amount });
+        }
+    }
+    const cardSummary = Array.from(cardMap.values()).map(c => ({
         ...c,
-        used: usage.filter(u => u.cardLast4 === c.last4).reduce((s, u) => s + u.amount, 0) || c.used,
+        limit: DEFAULT_CARD_LIMIT,
     }));
 
     return (
