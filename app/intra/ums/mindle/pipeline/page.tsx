@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Check, Clock, Edit3, Eye, Send, Trash2, Filter } from "lucide-react";
+import { ArrowRight, Check, Clock, Edit3, Eye, Send, Trash2, Filter, Plus, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface TrendItem {
@@ -34,11 +34,102 @@ const categoryLabels: Record<string, string> = {
     marketing: '마케팅',
 };
 
+interface NewTrendForm {
+    title: string;
+    summary: string;
+    category: string;
+    relevance_score: string;
+    status: string;
+}
+
+const EMPTY_TREND: NewTrendForm = { title: '', summary: '', category: 'tech', relevance_score: '70', status: 'collected' };
+
+function AddTrendModal({ onClose, onAdded }: { onClose: () => void; onAdded: (item: TrendItem) => void }) {
+    const [form, setForm] = useState<NewTrendForm>(EMPTY_TREND);
+    const [saving, setSaving] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!form.title.trim()) return;
+        setSaving(true);
+        const supabase = createClient();
+        const { data, error } = await supabase.from('mindle_trends').insert({
+            title: form.title.trim(),
+            summary: form.summary.trim() || null,
+            category: form.category,
+            relevance_score: parseFloat(form.relevance_score) || 70,
+            status: form.status,
+            source_urls: [],
+            agent_name: 'intra_manual',
+        }).select().single();
+        if (!error && data) { onAdded(data as TrendItem); onClose(); }
+        setSaving(false);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+            <div className="bg-white w-full max-w-md mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                    <h2 className="text-sm font-semibold">트렌드 수동 등록</h2>
+                    <button onClick={onClose}><X className="h-4 w-4 text-neutral-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-5 space-y-3">
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">제목 *</label>
+                        <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400" />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">요약</label>
+                        <textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))}
+                            rows={3} className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400 resize-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs text-neutral-500 mb-1">카테고리</label>
+                            <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400">
+                                {Object.entries(categoryLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-neutral-500 mb-1">관련도 점수 (0~100)</label>
+                            <input type="number" min={0} max={100} value={form.relevance_score}
+                                onChange={e => setForm(p => ({ ...p, relevance_score: e.target.value }))}
+                                className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs text-neutral-500 mb-1">초기 상태</label>
+                        <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}
+                            className="w-full px-3 py-2 text-sm border border-neutral-200 focus:outline-none focus:border-neutral-400">
+                            <option value="collected">수집됨</option>
+                            <option value="reviewed">검토 중</option>
+                            <option value="approved">승인됨</option>
+                            <option value="published">발행됨</option>
+                        </select>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="px-4 py-2 text-xs border border-neutral-200 hover:bg-neutral-50">취소</button>
+                        <button type="submit" disabled={saving}
+                            className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-40 flex items-center gap-1.5">
+                            {saving && <Loader2 className="h-3 w-3 animate-spin" />}
+                            등록
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export default function MindlePipelinePage() {
     const [items, setItems] = useState<TrendItem[]>([]);
     const [activeStage, setActiveStage] = useState<PipelineStage>('collected');
     const [loading, setLoading] = useState(true);
     const [counts, setCounts] = useState<Record<string, number>>({});
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         loadItems();
@@ -93,12 +184,28 @@ export default function MindlePipelinePage() {
     const displayItems = items;
     const totalCollected = counts['published'] || 0;
 
+    const handleTrendAdded = (item: TrendItem) => {
+        if (item.status === activeStage || (activeStage === 'collected' && item.status === 'collected')) {
+            setItems(prev => [item, ...prev]);
+        }
+        setCounts(prev => ({ ...prev, [item.status]: (prev[item.status] || 0) + 1 }));
+    };
+
     return (
         <div>
+            {showAddModal && (
+                <AddTrendModal onClose={() => setShowAddModal(false)} onAdded={handleTrendAdded} />
+            )}
             {/* 헤더 */}
-            <div className="mb-5">
-                <h2 className="text-base font-semibold text-neutral-900">콘텐츠 파이프라인</h2>
-                <p className="text-xs text-neutral-400 mt-0.5">수집 → 검토 → 승인 → 발행 채널 선택</p>
+            <div className="mb-5 flex items-start justify-between">
+                <div>
+                    <h2 className="text-base font-semibold text-neutral-900">콘텐츠 파이프라인</h2>
+                    <p className="text-xs text-neutral-400 mt-0.5">수집 → 검토 → 승인 → 발행 채널 선택</p>
+                </div>
+                <button onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 transition-colors">
+                    <Plus className="h-3 w-3" /> 트렌드 등록
+                </button>
             </div>
 
             {/* 파이프라인 스테이지 탭 */}
