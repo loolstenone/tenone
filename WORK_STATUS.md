@@ -1,10 +1,17 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-13 (집, 세션 41)
+> 마지막 업데이트: 2026-04-13 (집, 세션 42)
 
 ---
 
-## 이번 세션 (세션 41) 완료 항목
+## 이번 세션 (세션 42) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| Mindle 뉴스레터 관리 페이지 | `ums/mindle/newsletter/page.tsx` — '준비 중' 플레이스홀더 완전 교체. newsletter_subscribers + mindle_trends 실데이터 로드. 3탭(개요/구독자/트렌드이슈), 구독자 추가·해지·삭제, 지금 수집 버튼 |
+| Mindle 트렌드 수동 등록 | `ums/mindle/pipeline/page.tsx` — '트렌드 등록' 버튼 + 모달. 제목/요약/카테고리/점수/상태 입력 → mindle_trends INSERT. 등록 즉시 현재 스테이지 목록 반영 |
+
+## 이전 세션 (세션 41) 완료 항목
 
 | 항목 | 내용 |
 |------|------|
@@ -74,12 +81,13 @@
 
 ## 다음 스텝 후보 (P1)
 
-1. **Naver API 연결** — `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` 환경변수 설정 시 인지도/호감도 실측 가능
-2. **멀티모델 프로빙** — OpenAI/Gemini/Perplexity API 키 확보 후 probe/run 확장 (현재 Claude만)
-3. **공유 링크** — `/brandgravity/report/[token]` 클라이언트 열람 URL
-4. **대화형 그래비티** — 인트라 메신저에서 "점수 알려줘" → Claude 호출
-5. **점수 트렌드 차트** — 시계열 Gravity Score 변화 그래프
-6. **정기 자동 스캔** — Vercel Cron / pg_cron 월간 재측정
+1. **Phase 1-B: SmarComm Intra 연결** — `/intra/marketing` 페이지들을 WIO MKT-* 테이블 실데이터 연동
+2. **Phase 1-C: WIO 구독 관리** — `/intra/universe/subscriptions` → DB (wio_subscription_plans + wio_subscriptions)
+3. **Phase 1-D: 바닥쇠 에이전트** — `/api/agent/badaksoe` 엔드포인트 구현
+4. **Phase C-4: UNIVERSE 브랜드 셀렉터** — SiteFilterDropdown이 UMS 대시보드에 실제 필터링 적용
+5. **Naver API 연결** — `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` 환경변수 설정 시 Brand Gravity 인지도/호감도 실측 가능
+6. **공유 링크** — `/brandgravity/report/[token]` 클라이언트 열람 URL
+7. **정기 자동 스캔** — Vercel Cron / pg_cron 월간 재측정
 
 ---
 
