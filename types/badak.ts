@@ -1,5 +1,44 @@
 // Badak.biz MVP 타입 정의
 
+// ── Next Stage 타입 ──
+
+export interface CloudWord {
+  text: string;
+  size: number;
+  hasGroup: boolean;
+  members: number;
+  imageUrl?: string;
+}
+
+export interface FeedItem {
+  type: 'group' | 'needs' | 'story';
+  badge: string;
+  title: string;
+  // group
+  leader?: string;
+  leaderJob?: string;
+  members?: number;
+  max?: number;
+  date?: string;
+  location?: string;
+  // needs
+  count?: number;
+  threshold?: number;
+  // story
+  author?: string;
+  authorJob?: string;
+  // common
+  tags?: string[];
+  imageUrl?: string;
+}
+
+export interface SkyInfo {
+  bg: string;
+  period: 'dawn' | 'morning' | 'day' | 'afternoon' | 'sunset' | 'night';
+}
+
+// ── 기존 타입 ──
+
 export interface BadakProfile {
   id: string;
   displayName: string;

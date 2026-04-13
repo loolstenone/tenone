@@ -1,6 +1,5 @@
 import { BadakHeader } from "@/features/badak/BadakHeader";
 import { BadakFooter } from "@/features/badak/BadakFooter";
-import { StarfieldWrapper } from "@/components/StarfieldWrapper";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -29,11 +28,10 @@ export default function BadakLayout({
     return (
         <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
             <BadakHeader />
-            <main className="flex-1 pt-14">
+            <main className="flex-1">
                 {children}
             </main>
             <BadakFooter />
-            <StarfieldWrapper />
         </div>
     );
 }

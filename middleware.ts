@@ -29,6 +29,7 @@ const domainPrefixMap: Record<string, string> = {
     'myverse.tenone.biz': '/myverse',
     'badak.biz': '/badak',
     'www.badak.biz': '/badak',
+    'badak.tenone.biz': '/badak',
     'townity.tenone.biz': '/townity',
     'naturebox.tenone.biz': '/naturebox',
     'domo.tenone.biz': '/domo',
