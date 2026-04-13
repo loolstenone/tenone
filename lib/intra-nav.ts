@@ -34,6 +34,7 @@ import type { SystemAccess, IntraModule } from "@/types/auth";
 export interface SubItem {
     name: string;
     href: string;
+    badge?: "soon" | "beta" | "new";
 }
 
 export interface MenuItem {
@@ -168,16 +169,16 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
-                        name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
+                        name: "Planner's", href: "/intra/evolution-school", icon: BookOpen,
                         children: [
-                            { name: "Planning", href: "/intra/ums/planners/planning" },
-                            { name: "GPR", href: "/intra/ums/planners/gpr" },
-                            { name: "Programs", href: "/intra/ums/planners/programs" },
+                            { name: "Planning", href: "/intra/ums/planners/planning", badge: "soon" },
+                            { name: "GPR", href: "/intra/ums/planners/gpr", badge: "soon" },
+                            { name: "Programs", href: "/intra/ums/planners/programs", badge: "soon" },
                             { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
                     {
-                        name: "WIO", href: "/intra/ums/wio", icon: Settings,
+                        name: "WIO", href: "/intra/ums/commerce/subscriptions", icon: Settings,
                         children: [
                             { name: "구독 관리", href: "/intra/ums/commerce/subscriptions" },
                             { name: "테넌트", href: "/intra/ums/wio/tenants" },
@@ -437,6 +438,7 @@ export const modules: NavModule[] = [
                 items: [
                     { name: "트렌드 현황", href: "/intra/ums/mindle/trends", icon: TrendingUp },
                     { name: "콘텐츠 파이프라인", href: "/intra/ums/mindle/pipeline", icon: Layers },
+                    { name: "뉴스레터", href: "/intra/ums/mindle/newsletter", icon: Mail },
                     { name: "RSS 소스", href: "/intra/ums/mindle/sources", icon: Radio },
                 ],
             },
