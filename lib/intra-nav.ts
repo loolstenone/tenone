@@ -150,6 +150,8 @@ export const modules: NavModule[] = [
             {
                 label: "브랜드별",
                 items: [
+                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
                     {
                         name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
                         children: [
@@ -158,6 +160,7 @@ export const modules: NavModule[] = [
                             { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
                         ],
                     },
+                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "soon" },
                     {
                         name: "HeRo", href: "/intra/hero/talent", icon: Award,
                         children: [
@@ -168,6 +171,9 @@ export const modules: NavModule[] = [
                             { name: "커리어 이용자", href: "/intra/hero/career" },
                         ],
                     },
+                    { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
+                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
+                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
                     {
                         name: "Planner's", href: "/intra/evolution-school", icon: BookOpen,
                         children: [
@@ -177,6 +183,8 @@ export const modules: NavModule[] = [
                             { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
+                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
+                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
                     {
                         name: "WIO", href: "/intra/ums/commerce/subscriptions", icon: Settings,
                         children: [
@@ -184,15 +192,7 @@ export const modules: NavModule[] = [
                             { name: "테넌트", href: "/intra/ums/wio/tenants" },
                         ],
                     },
-                    { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
-                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
-                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
-                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
-                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
-                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
                     { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe, badge: "soon" },
-                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
-                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "soon" },
                 ],
             },
         ],
