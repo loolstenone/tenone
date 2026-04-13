@@ -8,19 +8,78 @@ import { TenOneThemeWrapper } from "@/features/tenone/TenOneThemeWrapper";
 import Image from "next/image";
 import { ArrowRight, Diamond, Zap, CheckSquare, FolderKanban, Target, Users, CheckCircle2, Globe } from "lucide-react";
 
-// ===== Universe Brand Showcase =====
-const UNIVERSE_BRANDS = [
-    { name: "Badak", domain: "badak.biz", desc: "마케팅 광고 업계 네트워킹 커뮤니티", href: "/badak" },
-    { name: "MADLeague", domain: "madleague.net", desc: "전국 대학생 프로젝트 연합", href: "/madleague" },
-    { name: "YouInOne", domain: "youinone.com", desc: "프로젝트 그룹", href: "/youinone" },
-    { name: "HeRo", desc: "탤런트 에이전시", href: "/hero" },
-    { name: "SmarComm.", domain: "smarcomm.biz", desc: "AI 마케팅 커뮤니케이션 솔루션", href: "/smarcomm" },
-    { name: "RooK", domain: "rook.co.kr", desc: "인공지능 크리에이터", href: "/rook" },
-    { name: "FWN", domain: "fwn.co.kr", desc: "패션 위크 네트워크", href: "/fwn" },
-    { name: "0gamja", domain: "0gamja.com", desc: "공감 콘텐츠 · 심리 상담", href: "/0gamja" },
-    { name: "Mindle", desc: "트렌드 인텔리전스", href: "/mindle" },
-    { name: "WIO", desc: "통합 운영 플랫폼", href: "/wio" },
-];
+// ===== Universe Brand Map — 8 역할 그룹 (26 브랜드) =====
+const UNIVERSE_ROLE_GROUPS = [
+    {
+        num: "01", role: "철학 · 일하는 방법과 언어를 맞추는", color: "#C9B896",
+        brands: [
+            { name: "TenOne", kr: "텐원", desc: "Universe 설계자·운영자", href: "/" },
+            { name: "Protocols", kr: "프로토콜", desc: "공통 언어 · Vrief · GPR" },
+            { name: "Dokdae", kr: "독대", desc: "AI Agent 1:1 채널" },
+            { name: "Intra", kr: "인트라", desc: "내부 관제 대시보드" },
+            { name: "AI Agent", kr: "에이전트 팀", desc: "자동 브리핑 운영 체계" },
+        ]
+    },
+    {
+        num: "02", role: "일이 되게 하는", color: "#7BAE7F",
+        brands: [
+            { name: "WIO", kr: "Work In One", desc: "120+ 모듈 기업 운영 인프라", href: "/wio" },
+            { name: "YouInOne", kr: "유인원", desc: "프로젝트 기획·실행", href: "/youinone" },
+        ]
+    },
+    {
+        num: "03", role: "사람을 모으는", color: "#E8845C",
+        brands: [
+            { name: "MADLeague", kr: "매드리그", desc: "전국 대학생 프로젝트 연합", href: "/madleague" },
+            { name: "MADLeap", kr: "매드립", desc: "실전 프로젝트 부트캠프", href: "/madleap" },
+            { name: "Badak", kr: "바닥", desc: "업계 실무자 네트워킹", href: "/badak" },
+            { name: "ChangeUp", kr: "체인지업", desc: "창업 교육 · 펀딩", href: "/changeup" },
+            { name: "0gamja", kr: "공감자", desc: "감성 콘텐츠 · 마음 상담", href: "/0gamja" },
+            { name: "Domo", kr: "도모", desc: "하이엔드 비즈니스 연대", href: "/domo" },
+            { name: "FWN", desc: "글로벌 패션위크 네트워크", href: "/fwn" },
+        ]
+    },
+    {
+        num: "04", role: "사람을 키우고 연결하는", color: "#D85A30",
+        brands: [
+            { name: "HeRo", kr: "히어로", desc: "데이터 기반 인재 발굴·매칭", href: "/hero" },
+            { name: "Planner's", kr: "플래너스", desc: "AI 시대 기획자 교육", href: "/planners" },
+        ]
+    },
+    {
+        num: "05", role: "정보를 모으고 해석하는", color: "#5B8FB9",
+        brands: [
+            { name: "Mindle", kr: "마인들", desc: "트렌드 인텔리전스 엔진", href: "/mindle" },
+        ]
+    },
+    {
+        num: "06", role: "문제를 풀고 가치를 만드는", color: "#BA7517",
+        brands: [
+            { name: "SmarComm", kr: "스마콤", desc: "AI 마케팅 자동화 솔루션", href: "/smarcomm" },
+            { name: "Brand Gravity", kr: "브랜드 그래비티", desc: "브랜딩 컨설팅" },
+            { name: "Naming Factory", kr: "네이밍 팩토리", desc: "세상에서 가장 짧은 전략" },
+            { name: "RooK", kr: "루크", desc: "AI 크리에이터", href: "/rook" },
+        ]
+    },
+    {
+        num: "07", role: "개인을 기록하는", color: "#9B7DD4",
+        brands: [
+            { name: "Myverse", kr: "마이버스", desc: "개인 디지털 기록 보관", href: "/myverse" },
+        ]
+    },
+    {
+        num: "08", role: "가능성을 키우는 — 인큐베이팅", color: "#888780",
+        brands: [
+            { name: "MoNTZ", kr: "몬츠", desc: "AI 버추얼 아티스트 에이전시", href: "/montz" },
+            { name: "Townity", kr: "타우니티", desc: "하이퍼로컬 커뮤니티", href: "/townity" },
+            { name: "Mullaesian", kr: "물래지앙", desc: "문래동 라이프 미디어", href: "/mullaesian" },
+            { name: "Scribble", kr: "스크리블", desc: "출판 · 콘텐츠 IP" },
+            { name: "NatureBox", kr: "자연함", desc: "강원도 친환경 농작물", href: "/naturebox" },
+            { name: "Korea360", kr: "코리아360", desc: "외국인 커뮤니티 · 관광" },
+            { name: "Seoul360", kr: "서울360", desc: "서울 지하철 여행 가이드", href: "/seoul360" },
+        ]
+    },
+] as const;
 
 interface SimplePost {
     id: string;
@@ -63,7 +122,7 @@ export default function HomePage() {
         <TenOneThemeWrapper>
             <PublicHeader />
 
-            {/* Hero — 좌측 정렬, 비대칭 */}
+            {/* ── Hero ── */}
             <section className="min-h-[70vh] md:min-h-screen flex items-center px-6 lg:px-0">
                 <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
                     <div className="lg:pl-8">
@@ -81,16 +140,11 @@ export default function HomePage() {
                             기업과 사회의 문제를 해결하는 다양한 프로젝트를 합니다.
                         </p>
                         <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
-                            <Link href="/about?tab=universe"
+                            <Link href="/about"
                                 className="group px-8 py-3.5 text-sm tracking-wide transition-colors flex items-center gap-2"
                                 style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 Explore Universe
                                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                            <Link href="/about"
-                                className="px-8 py-3.5 border text-sm tracking-wide transition-colors"
-                                style={{ borderColor: "var(--tn-border)", color: "var(--tn-text)" }}>
-                                Our Philosophy
                             </Link>
                             <Link href="/contact"
                                 className="px-8 py-3.5 border text-sm tracking-wide transition-colors"
@@ -109,7 +163,6 @@ export default function HomePage() {
                                 priority
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
-                            {/* Fallback: 그라디언트 + 텍스트 */}
                             <div className="absolute inset-0 flex items-center justify-center opacity-30">
                                 <div className="text-center">
                                     <div className="text-6xl font-black tracking-tighter" style={{ color: "var(--tn-text-muted)" }}>10:01</div>
@@ -121,7 +174,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Crew CTA — 크루 모집 */}
+            {/* ── Crew CTA ── */}
             <section className="py-24 px-6 tn-bg-alt">
                 <div className="max-w-5xl mx-auto text-center">
                     <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-4">Join the Universe</p>
@@ -129,7 +182,6 @@ export default function HomePage() {
                         프로젝트 <span className="tn-text-sub">크루</span>를 모집합니다.
                     </h2>
                     <p className="text-base tn-text-sub mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Ten:One™ Crew가 되면 세계관 안에서 함께 성장합니다.<br />
                         기획자, 마케터, 디자이너, 개발자 — 당신의 재능이 필요합니다.
                     </p>
 
@@ -160,19 +212,131 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    <div className="flex justify-center gap-4">
-                        <Link href="/crew-invite" className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors"
+                    <div className="flex justify-center">
+                        <button type="button"
+                            className="px-8 py-3.5 text-sm tracking-wide hover:opacity-90 transition-colors cursor-default"
                             style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                             Crew 지원하기
-                        </Link>
-                        <Link href="/about" className="px-8 py-3.5 border border-[var(--tn-border)] text-[var(--tn-text)] text-sm tracking-wide hover:border-[var(--tn-accent)] hover:tn-text transition-colors tn-surface">
-                            더 알아보기
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </section>
 
-            {/* Core Values — 다크 섹션 */}
+            {/* ── Works ── */}
+            {latestWorks.length > 0 && (
+                <section className="py-20 md:py-32 px-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex items-end justify-between mb-10 md:mb-16">
+                            <div>
+                                <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Works</p>
+                                <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
+                                    우리가 <span className="font-bold">해온 일들</span>
+                                </h2>
+                            </div>
+                            <Link href="/works" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
+                                View All <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                            {latestWorks.map((work) => {
+                                const rawDate = (work.created_at || '').substring(0, 7);
+                                const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
+                                return (
+                                    <Link key={work.id} href={`/works/${work.id}`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
+                                        <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden relative">
+                                            {work.representImage ? (
+                                                <img src={work.representImage} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            ) : (
+                                                <>
+                                                    <span className="text-[4rem] font-bold opacity-[0.06] absolute">{work.title?.substring(0, 1)}</span>
+                                                    <span className="text-xs tracking-wider uppercase tn-text-muted">{work.category}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs tn-text-sub mb-1">{work.category}{date ? ` · ${date}` : ''}</p>
+                                            <h3 className="font-semibold tn-text text-sm leading-snug">{work.title}</h3>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+
+                        <Link href="/works" className="md:hidden flex items-center justify-center gap-2 mt-12 text-sm tn-text-sub hover:tn-text">
+                            모든 Works 보기 <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                </section>
+            )}
+
+            {/* ── Universe — 전체 브랜드 맵 (8 역할 그룹) ── */}
+            <section className="py-20 md:py-32 px-6 tn-bg-alt">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex items-end justify-between mb-10 md:mb-16">
+                        <div>
+                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
+                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
+                                지금까지 펼쳐진 <span className="font-bold">세계관</span>
+                            </h2>
+                        </div>
+                        <Link href="/about?tab=universe" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
+                            전체 보기 <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+
+                    <div className="space-y-3">
+                        {UNIVERSE_ROLE_GROUPS.map((group) => (
+                            <div key={group.num} className="border tn-border overflow-hidden" style={{ backgroundColor: "var(--tn-surface)" }}>
+                                {/* 그룹 헤더 */}
+                                <div className="flex items-center gap-3 px-5 py-3 border-b tn-border" style={{ borderLeftWidth: 3, borderLeftColor: group.color }}>
+                                    <span className="text-[11px] font-mono" style={{ color: group.color }}>{group.num}</span>
+                                    <span className="text-xs font-medium tn-text-sub">{group.role}</span>
+                                </div>
+                                {/* 브랜드 카드 */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
+                                    {group.brands.map((brand) => {
+                                        const inner = (
+                                            <div style={{ backgroundColor: "var(--tn-surface)" }} className="h-full p-4 hover:opacity-80 transition-opacity">
+                                                <div className="flex items-start gap-2">
+                                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: group.color }} />
+                                                    <div>
+                                                        <p className="text-sm font-bold tn-text leading-tight">{brand.name}</p>
+                                                        {'kr' in brand && <p className="text-[10px] tn-text-muted">{(brand as any).kr}</p>}
+                                                        <p className="text-[11px] tn-text-sub mt-1 leading-snug">{brand.desc}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                        return 'href' in brand ? (
+                                            <Link key={brand.name} href={(brand as any).href}>{inner}</Link>
+                                        ) : (
+                                            <div key={brand.name}>{inner}</div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Universe 순환 플로우 */}
+                    <div className="mt-8 px-5 py-4 border tn-border text-[11px] tn-text-sub leading-relaxed font-mono" style={{ backgroundColor: "var(--tn-surface)" }}>
+                        <span style={{ color: "#5B8FB9" }}>Mindle</span> 트렌드 발견 →{" "}
+                        <span style={{ color: "#BA7517" }}>SmarComm</span> 전략 수립 →{" "}
+                        <span style={{ color: "#BA7517" }}>RooK</span> 크리에이티브 실행 → 성과 환류 → 다음 트렌드 ↻
+                        <span className="mx-4 opacity-30">|</span>
+                        <span style={{ color: "#E8845C" }}>MADLeague</span> 모은다 →{" "}
+                        <span style={{ color: "#D85A30" }}>HeRo</span> 키운다 →{" "}
+                        <span style={{ color: "#E8845C" }}>Badak</span> 연결한다 → 멘토로 돌아온다 ↻
+                    </div>
+
+                    <Link href="/about?tab=brands" className="md:hidden flex items-center justify-center gap-2 mt-6 text-sm tn-text-sub hover:tn-text">
+                        전체 브랜드 보기 <ArrowRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            </section>
+
+            {/* ── Core Values ── */}
             <section className="tn-card py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
@@ -200,93 +364,8 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Works — 화이트 섹션 */}
-            {latestWorks.length > 0 && <section className="py-20 md:py-32 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">
-                                Works
-                            </p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                우리가 <span className="font-bold">해온 일들</span>
-                            </h2>
-                        </div>
-                        <Link href="/works" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            View All <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                        {latestWorks.map((work) => {
-                            const rawDate = (work.created_at || '').substring(0, 7);
-                            const date = rawDate ? `${rawDate.split('-')[0]}년 ${rawDate.split('-')[1]}월` : '';
-                            return (
-                                <Link key={work.id} href={`/works/${work.id}`} className="group block border-b tn-border pb-6 hover:border-[var(--tn-accent)] transition-colors">
-                                    <div className="aspect-[3/2] tn-bg-alt mb-4 flex items-center justify-center overflow-hidden relative">
-                                        {work.representImage ? (
-                                            <img src={work.representImage} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                        ) : (
-                                            <>
-                                                <span className="text-[4rem] font-bold opacity-[0.06] absolute">{work.title?.substring(0, 1)}</span>
-                                                <span className="text-xs tracking-wider uppercase tn-text-muted">{work.category}</span>
-                                            </>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs tn-text-sub mb-1">{work.category}{date ? ` · ${date}` : ''}</p>
-                                        <h3 className="font-semibold tn-text text-sm leading-snug">{work.title}</h3>
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
-
-                    <Link href="/works" className="md:hidden flex items-center justify-center gap-2 mt-12 text-sm tn-text-sub hover:tn-text">
-                        모든 Works 보기 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
-            </section>}
-
-            {/* Universe Brands Showcase */}
+            {/* ── Latest News ── */}
             <section className="py-20 md:py-32 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-end justify-between mb-10 md:mb-16">
-                        <div>
-                            <p className="text-xs tracking-[0.3em] uppercase tn-text-sub mb-4">Universe</p>
-                            <h2 className="text-xl md:text-3xl lg:text-4xl font-light">
-                                지금까지 펼쳐진 <span className="font-bold">세계관</span>
-                            </h2>
-                        </div>
-                        <Link href="/about?tab=universe" className="hidden md:flex items-center gap-2 text-sm tn-text-sub hover:tn-text transition-colors">
-                            Explore <ArrowRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-px" style={{ backgroundColor: "var(--tn-border)" }}>
-                        {UNIVERSE_BRANDS.map((brand) => (
-                            <Link key={brand.name} href={brand.href}
-                                className="group p-4 sm:p-6 text-center transition-all hover:opacity-100 opacity-80"
-                                style={{ backgroundColor: "var(--tn-bg, var(--tn-surface))" }}>
-                                <div className="h-10 w-10 mx-auto flex items-center justify-center text-xs font-bold border mb-3"
-                                    style={{ borderColor: "var(--tn-border)" }}>
-                                    {brand.name.slice(0, 2)}
-                                </div>
-                                <h3 className="text-sm font-semibold tn-text">{brand.name}</h3>
-                                <p className="text-[11px] tn-text-sub mt-1">{brand.desc}</p>
-                                {brand.domain && (
-                                    <p className="text-[10px] tn-text-muted mt-1">{brand.domain}</p>
-                                )}
-                            </Link>
-                        ))}
-                    </div>
-                    <Link href="/about?tab=brands" className="md:hidden flex items-center justify-center gap-2 mt-8 text-sm tn-text-sub hover:tn-text">
-                        전체 브랜드 보기 <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
-            </section>
-
-            {/* Latest — 이미지 카드 or Static Fallback */}
-            <section className="py-20 md:py-32 px-6 tn-bg-alt">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-end justify-between mb-10 md:mb-16">
                         <div>
@@ -314,8 +393,8 @@ export default function HomePage() {
                                             )}
                                         </div>
                                         <p className="text-xs tn-text-sub">{rawDate}</p>
-                                        <h3 className="font-semibold tn-text mt-1 group-hover:underline">{news.title}</h3>
-                                        <p className="text-sm tn-text-sub mt-1 line-clamp-1">{news.excerpt}</p>
+                                        <h3 className="font-semibold tn-text mt-1 group-hover:underline leading-snug">{news.title}</h3>
+                                        <p className="text-sm tn-text-sub mt-1 line-clamp-2">{news.excerpt}</p>
                                     </Link>
                                 );
                             })}
@@ -326,7 +405,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* CTA — 다크 섹션 */}
+            {/* ── CTA — Are you ready ── */}
             <section className="tn-card py-20 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
                     <div>
@@ -339,10 +418,15 @@ export default function HomePage() {
                             하나의 거대한 세계관을 만듭니다.
                         </p>
                         <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                            <Link href="/contact" className="px-8 py-3.5 tn-surface tn-text text-sm tracking-wide hover:bg-neutral-100 transition-colors">
+                            {/* Join the Universe — Primary (더 강조) */}
+                            <Link href="/contact"
+                                className="px-8 py-3.5 text-sm tracking-wide font-semibold transition-opacity hover:opacity-90"
+                                style={{ backgroundColor: "var(--tn-accent)", color: "var(--tn-bg)" }}>
                                 Join the Universe
                             </Link>
-                            <Link href="/about?tab=universe" className="px-8 py-3.5 border border-neutral-600 tn-text-muted text-sm tracking-wide hover:border-white hover:text-white transition-colors">
+                            {/* Explore — Secondary */}
+                            <Link href="/about?tab=universe"
+                                className="px-8 py-3.5 border border-neutral-600 tn-text-muted text-sm tracking-wide hover:border-white hover:text-white transition-colors">
                                 Explore
                             </Link>
                         </div>
@@ -358,7 +442,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Newsletter CTA */}
+            {/* ── Newsletter ── */}
             <section className="py-20 px-6 border-t tn-border">
                 <div className="max-w-2xl mx-auto text-center">
                     <p className="text-xs tracking-[0.3em] tn-text-sub uppercase mb-3">Newsletter</p>
@@ -366,7 +450,7 @@ export default function HomePage() {
                         Ten:One™ Universe의 이야기를 받아보세요
                     </h2>
                     <p className="text-sm tn-text-sub mb-8">
-                        프로젝트 소식, 크루 이야기, 업계 인사이트를 격주로 보내드립니다.
+                        프로젝트 소식, 크루 이야기, 업계 인사이트를 보내드립니다.
                     </p>
                     {nlSubscribed ? (
                         <div className="py-4">

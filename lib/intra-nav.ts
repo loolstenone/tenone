@@ -18,7 +18,7 @@ import {
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
     ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
-    Bot, Users, Home, Menu, X, Radio, Mail, Brain,
+    Bot, Users, Home, Menu, X, Radio, Mail, Brain, LineChart, Map, RefreshCw,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -34,6 +34,7 @@ export interface MenuItem {
     icon: LucideIcon;
     children?: SubItem[];
     staffOnly?: boolean;
+    exact?: boolean;
 }
 
 export interface MenuSection {
@@ -57,7 +58,7 @@ export const modules: NavModule[] = [
         sections: [
             {
                 items: [
-                    { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard },
+                    { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard, exact: true },
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
                     {
                         name: "Agent Hub", href: "/intra/agent", icon: Bot, staffOnly: true,
@@ -135,6 +136,19 @@ export const modules: NavModule[] = [
                 label: "OPPORTUNITY",
                 items: [
                     { name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp },
+                ],
+            },
+        ],
+    },
+    {
+        name: "Analytics", href: "/intra/analytics", icon: LineChart, intraModule: "universe" as IntraModule,
+        sections: [
+            {
+                items: [
+                    { name: "Universe 전체", href: "/intra/analytics", icon: BarChart3, staffOnly: true },
+                    { name: "브랜드별", href: "/intra/analytics/brands", icon: Globe, staffOnly: true },
+                    { name: "크로스 브랜드 여정", href: "/intra/analytics/journey", icon: Map, staffOnly: true },
+                    { name: "동기화", href: "/intra/analytics/sync", icon: RefreshCw, staffOnly: true },
                 ],
             },
         ],

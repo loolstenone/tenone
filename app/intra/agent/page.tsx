@@ -68,8 +68,33 @@ export default function AgentDashboardPage() {
   const [agentsLoading, setAgentsLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<AgentProfile | null>(null);
 
-  // 채팅
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // 채팅 — 에이전트별 대화 기록 (localStorage 영구 저장)
+  const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>(() => {
+    try {
+      const saved = localStorage.getItem("agent_chat_histories");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // timestamp 복원 (JSON은 Date를 string으로 직렬화)
+        Object.values(parsed).forEach((msgs: unknown) => {
+          (msgs as ChatMessage[]).forEach(m => { m.timestamp = new Date(m.timestamp); });
+        });
+        return parsed as Record<string, ChatMessage[]>;
+      }
+    } catch {}
+    return {};
+  });
+  const messages = selectedAgent ? (chatHistories[selectedAgent.id] ?? []) : [];
+  const setMessages = (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+    if (!selectedAgent) return;
+    const agentId = selectedAgent.id;
+    setChatHistories(prev => {
+      const current = prev[agentId] ?? [];
+      const next = typeof updater === "function" ? updater(current) : updater;
+      const updated = { ...prev, [agentId]: next };
+      try { localStorage.setItem("agent_chat_histories", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);

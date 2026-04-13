@@ -155,12 +155,12 @@ export function IntraSidebar() {
                                                         href={item.href}
                                                         className={clsx(
                                                             "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
-                                                            isActive(item.href)
+                                                            isActive(item.href, item.exact)
                                                                 ? "text-white font-medium bg-white/5"
                                                                 : "text-neutral-500 hover:text-white hover:bg-white/[0.03]"
                                                         )}
                                                     >
-                                                        <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href) ? "text-white" : "text-neutral-600")} />
+                                                        <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href, item.exact) ? "text-white" : "text-neutral-600")} />
                                                         <span className="flex-1">{item.name}</span>
                                                     </Link>
                                                 ))}
