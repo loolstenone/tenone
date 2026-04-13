@@ -1,4 +1,10 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "dev": false,
+      "feature-*": false
+    }
+  },
   "functions": {
     "app/api/agent/deutbot/route.ts": {
       "maxDuration": 60

@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-14 (집, 세션 41)
+
+### Vercel 비용 관리 + 배포 정책 수립
+
+#### 수정 파일
+- `vercel.json` — `git.deploymentEnabled` 추가: dev/feature-* 프리뷰 배포 차단
+- `CLAUDE.md` — "작업 종료 프로토콜"에 Vercel 비용 관리 규칙 블록 추가, "절대 하지 말 것"에 중간 push 금지 항목 추가
+
+#### 결정 사항
+- Vercel Pro 전환 ($20/월). 동일 커밋 20+회 반복 배포가 Free 리밋 소진 원인
+- **push는 작업 종료 시 1회만** — 작업 중 push 금지 (매 push → 자동 배포 → 크레딧 소진)
+- 로컬 `npm run dev`로 확인, Vercel 배포는 최소화
+- On-Demand 상한 $100 설정 완료
+
+---
+
 ## 2026-04-12 (집, 세션 40)
 
 ### Brand Gravity 컨설팅 서비스 — P0 전체 완료
