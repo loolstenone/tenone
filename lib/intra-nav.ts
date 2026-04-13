@@ -1,24 +1,32 @@
 /**
  * Intra 사이드바 네비게이션 데이터 & 유틸리티
  * IntraSidebar + IntraSubTabs 양쪽에서 import
+ *
+ * 모듈 체계 (5개):
+ *  MY        — 개인 워크스페이스 (대시보드, 메신저, Todo, 타임시트, 포인트)
+ *  UNIVERSE  — 브랜드/회원 통합 관리 (UMS + 브랜드별)
+ *  MARKETING — 캠페인·CRM·콘텐츠 스튜디오·위키
+ *  ERP       — HR·GPR·재무·프로젝트·경영관리
+ *  INTEL     — Analytics·Mindle·Agent Hub
  */
 
 import {
     LayoutDashboard, FileText, MessageSquareText,
-    LogOut, ChevronDown, ChevronRight,
-    FolderKanban, ClipboardList, Clock, UserPlus, Palette,
+    ChevronDown, ChevronRight,
+    FolderKanban, ClipboardList, Clock, Palette,
     Workflow, Calendar, Contact, Globe, FolderOpen,
-    Megaphone, TrendingUp, Handshake, Activity, BarChart3, Building2, Tags, Upload,
+    Megaphone, TrendingUp, Handshake, Activity, BarChart3, Building2, Tags,
     Share2, Star, Gauge,
     UserCheck, Target, GitBranch, GraduationCap, DollarSign, CreditCard, Receipt,
     Briefcase, CalendarCheck, Wallet, Award, FileCheck, Heart,
     Calculator, CircleDollarSign, FileSpreadsheet,
     Stamp, Settings, Shield, GitMerge,
-    FolderGit2, PackageCheck, FileSignature, ClipboardCheck, Factory, Gavel,
+    Gavel, FileSignature,
     ListTodo, CheckSquare, Inbox,
     BookOpen, Compass, HelpCircle,
-    ShoppingCart, Gift, CalendarClock, LayoutGrid, PenSquare, MessageCircle, Flame,
+    ShoppingCart, CalendarClock, LayoutGrid, MessageCircle, Flame,
     Bot, Users, Home, Menu, X, Radio, Mail, Brain, LineChart, Map, RefreshCw,
+    Zap, Layers, PenTool, Eye,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -35,6 +43,7 @@ export interface MenuItem {
     children?: SubItem[];
     staffOnly?: boolean;
     exact?: boolean;
+    badge?: "soon" | "beta" | "new";
 }
 
 export interface MenuSection {
@@ -53,28 +62,23 @@ export interface NavModule {
 }
 
 export const modules: NavModule[] = [
+
+    // ══════════════════════════════════════════════════════════
+    //  MY — 개인 워크스페이스
+    // ══════════════════════════════════════════════════════════
     {
-        name: "Workspace", href: "/intra/workspace", icon: Inbox, intraModule: "myverse" as IntraModule,
+        name: "MY",
+        href: "/intra/workspace",
+        icon: Home,
+        intraModule: "myverse" as IntraModule,
         sections: [
             {
                 items: [
-                    { name: "Dashboard", href: "/intra/workspace", icon: LayoutDashboard, exact: true },
+                    { name: "대시보드", href: "/intra/workspace", icon: LayoutDashboard, exact: true },
                     { name: "메신저", href: "/intra/workspace/messenger", icon: MessageSquareText },
-                    {
-                        name: "Agent Hub", href: "/intra/agent", icon: Bot, staffOnly: true,
-                        children: [
-                            { name: "대시보드", href: "/intra/agent" },
-                            { name: "에이전트 지시", href: "/intra/ums/agent/comm" },
-                            { name: "에이전트 로그", href: "/intra/ums/agent/logs" },
-                        ],
-                    },
                     { name: "Todo", href: "/intra/workspace/todo", icon: ListTodo },
-                    { name: "타임시트 입력", href: "/intra/workspace/timesheet", icon: Clock },
-                    { name: "결재", href: "/intra/workspace/approval", icon: Stamp, staffOnly: true },
-                    { name: "GPR", href: "/intra/workspace/gpr", icon: Target, staffOnly: true },
-                    { name: "근태", href: "/intra/workspace/attendance", icon: CalendarCheck, staffOnly: true },
-                    { name: "급여", href: "/intra/workspace/payroll", icon: Wallet, staffOnly: true },
-                    { name: "경비", href: "/intra/workspace/expenses", icon: CreditCard, staffOnly: true },
+                    { name: "타임시트", href: "/intra/workspace/timesheet", icon: Clock },
+                    { name: "받은 문서", href: "/intra/workspace/approval", icon: Inbox, staffOnly: true },
                     { name: "포인트", href: "/intra/workspace/points", icon: Award },
                     { name: "Library", href: "/intra/workspace/library", icon: FolderOpen },
                 ],
@@ -87,94 +91,173 @@ export const modules: NavModule[] = [
                     { name: "전체 일정", href: "/intra/comm/calendar", icon: Calendar },
                 ],
             },
+        ],
+    },
+
+    // ══════════════════════════════════════════════════════════
+    //  UNIVERSE — 브랜드/회원 통합 관리
+    // ══════════════════════════════════════════════════════════
+    {
+        name: "UNIVERSE",
+        href: "/intra/ums",
+        icon: Globe,
+        intraModule: "universe" as IntraModule,
+        sections: [
             {
-                label: "프로젝트",
+                label: "통합 관리",
                 items: [
-                    { name: "프로젝트 관리", href: "/intra/project/management", icon: ClipboardList },
-                    { name: "Job 관리", href: "/intra/project/jobs", icon: Briefcase },
-                    { name: "타임시트", href: "/intra/project/timesheet", icon: Clock },
-                    { name: "Partner Pool", href: "/intra/partner-pool", icon: Users },
+                    { name: "대시보드", href: "/intra/ums", icon: LayoutDashboard, exact: true },
+                    {
+                        name: "통합 회원", href: "/intra/ums/members", icon: Users,
+                        children: [
+                            { name: "전체 회원", href: "/intra/ums/members/list" },
+                            { name: "초대", href: "/intra/ums/members/invite" },
+                            { name: "게스트", href: "/intra/ums/members/guests" },
+                            { name: "개인정보", href: "/intra/ums/members/privacy" },
+                        ],
+                    },
+                    {
+                        name: "사이트 관리", href: "/intra/ums/sites", icon: Globe,
+                        children: [
+                            { name: "사이트 목록", href: "/intra/ums/sites/list" },
+                            { name: "게시판", href: "/intra/ums/sites/boards" },
+                            { name: "콘텐츠", href: "/intra/ums/sites/content" },
+                            { name: "뉴스룸", href: "/intra/ums/sites/newsroom" },
+                        ],
+                    },
+                    {
+                        name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/newsletter" },
+                            { name: "뉴스레터 관리", href: "/intra/ums/newsletter/issues" },
+                            { name: "구독자", href: "/intra/ums/newsletter/subscribers" },
+                        ],
+                    },
+                    {
+                        name: "커머스", href: "/intra/ums/commerce", icon: ShoppingCart,
+                        children: [
+                            { name: "구독", href: "/intra/ums/commerce/subscriptions" },
+                            { name: "쇼핑", href: "/intra/ums/commerce/shop" },
+                            { name: "예약/이벤트", href: "/intra/ums/commerce/bookings" },
+                            { name: "프로모션", href: "/intra/ums/commerce/promotions" },
+                            { name: "손익", href: "/intra/ums/commerce/revenue" },
+                            { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
+                        ],
+                    },
+                ],
+            },
+            {
+                label: "브랜드별",
+                items: [
+                    {
+                        name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
+                        children: [
+                            { name: "전체 현황", href: "/intra/gravity" },
+                            { name: "클라이언트", href: "/intra/gravity/clients" },
+                            { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
+                        ],
+                    },
+                    {
+                        name: "HeRo", href: "/intra/hero/talent", icon: Award,
+                        children: [
+                            { name: "인재 관리", href: "/intra/hero/talent" },
+                            { name: "HIT 이용자", href: "/intra/hero/hit" },
+                            { name: "AI 상담", href: "/intra/hero/ai-counseling" },
+                            { name: "이력서 이용자", href: "/intra/hero/resume" },
+                            { name: "커리어 이용자", href: "/intra/hero/career" },
+                        ],
+                    },
+                    {
+                        name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
+                        children: [
+                            { name: "Planning", href: "/intra/ums/planners/planning" },
+                            { name: "GPR", href: "/intra/ums/planners/gpr" },
+                            { name: "Programs", href: "/intra/ums/planners/programs" },
+                            { name: "Evolution School", href: "/intra/evolution-school" },
+                        ],
+                    },
+                    {
+                        name: "WIO", href: "/intra/ums/wio", icon: Settings,
+                        children: [
+                            { name: "구독 관리", href: "/intra/ums/commerce/subscriptions" },
+                            { name: "테넌트", href: "/intra/ums/wio/tenants" },
+                        ],
+                    },
+                    { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
+                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
+                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
+                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
+                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
+                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
+                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe, badge: "soon" },
+                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "soon" },
                 ],
             },
         ],
+        dynamic: true,
     },
+
+    // ══════════════════════════════════════════════════════════
+    //  MARKETING — 캠페인 · CRM · 콘텐츠 스튜디오 · 위키
+    // ══════════════════════════════════════════════════════════
     {
-        name: "Marketing", href: "/intra/studio", icon: Megaphone, intraModule: "smarcomm" as IntraModule,
+        name: "MARKETING",
+        href: "/intra/marketing",
+        icon: Megaphone,
+        intraModule: "smarcomm" as IntraModule,
         sections: [
             {
-                label: "STUDIO",
+                label: "캠페인 · CRM",
                 items: [
-                    {
-                        name: "Workflow", href: "/intra/studio/workflow", icon: Workflow,
-                        children: [
-                            { name: "Pipeline", href: "/intra/studio/workflow/pipeline" },
-                            { name: "Kanban", href: "/intra/studio/workflow/kanban" },
-                            { name: "Automation", href: "/intra/studio/workflow/automation" },
-                        ],
-                    },
-                    { name: "Schedule", href: "/intra/studio/schedule", icon: Calendar },
-                    { name: "Assets", href: "/intra/studio/assets", icon: FolderOpen },
-                    { name: "Brands", href: "/intra/studio/brands", icon: Palette },
-                    { name: "Universe", href: "/intra/studio/universe", icon: Globe },
+                    { name: "캠페인", href: "/intra/marketing/campaigns", icon: Megaphone },
+                    { name: "리드", href: "/intra/marketing/leads", icon: TrendingUp },
+                    { name: "딜", href: "/intra/marketing/deals", icon: Handshake },
+                    { name: "액티비티", href: "/intra/marketing/activities", icon: Activity },
+                    { name: "연락처", href: "/intra/marketing/crm/people", icon: Users },
+                    { name: "퍼포먼스", href: "/intra/marketing/performance", icon: Gauge },
+                    { name: "인플루언서", href: "/intra/marketing/influencers", icon: Star, badge: "soon" },
+                    { name: "소셜", href: "/intra/marketing/social", icon: Share2, badge: "soon" },
                 ],
             },
             {
-                label: "MARKETING",
+                label: "콘텐츠 스튜디오",
                 items: [
-                    { name: "Campaigns", href: "/intra/marketing/campaigns", icon: Megaphone, staffOnly: true },
-                    { name: "Leads", href: "/intra/marketing/leads", icon: TrendingUp, staffOnly: true },
-                    { name: "Deals", href: "/intra/marketing/deals", icon: Handshake, staffOnly: true },
-                    { name: "Activities", href: "/intra/marketing/activities", icon: Activity },
-                    { name: "Contacts", href: "/intra/marketing/crm/people", icon: Contact, staffOnly: true },
-                    { name: "Analytics", href: "/intra/marketing/analytics", icon: BarChart3, staffOnly: true },
-                    { name: "Performance", href: "/intra/marketing/performance", icon: Gauge, staffOnly: true },
-                    { name: "Influencers", href: "/intra/marketing/influencers", icon: Star, staffOnly: true },
-                    { name: "Social", href: "/intra/marketing/social", icon: Share2, staffOnly: true },
+                    { name: "파이프라인", href: "/intra/studio/workflow/pipeline", icon: Layers },
+                    { name: "Kanban", href: "/intra/studio/workflow/kanban", icon: FolderKanban },
+                    { name: "스케줄", href: "/intra/studio/schedule", icon: Calendar },
+                    { name: "에셋", href: "/intra/studio/assets", icon: FolderOpen },
+                    { name: "브랜드 자산", href: "/intra/studio/brands", icon: Palette },
+                    { name: "자동화", href: "/intra/studio/workflow/automation", icon: Zap, badge: "soon" },
                 ],
             },
             {
-                label: "OPPORTUNITY",
+                label: "기회",
                 items: [
                     { name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp },
                 ],
             },
-        ],
-    },
-    {
-        name: "Analytics", href: "/intra/analytics", icon: LineChart, intraModule: "universe" as IntraModule,
-        sections: [
             {
+                label: "위키",
                 items: [
-                    { name: "Universe 전체", href: "/intra/analytics", icon: BarChart3, staffOnly: true },
-                    { name: "브랜드별", href: "/intra/analytics/brands", icon: Globe, staffOnly: true },
-                    { name: "크로스 브랜드 여정", href: "/intra/analytics/journey", icon: Map, staffOnly: true },
-                    { name: "동기화", href: "/intra/analytics/sync", icon: RefreshCw, staffOnly: true },
-                ],
-            },
-        ],
-    },
-    {
-        name: "Wiki", href: "/intra/wiki", icon: BookOpen, intraModule: "wiki" as IntraModule,
-        sections: [
-            {
-                label: "문화 · 안내",
-                items: [
-                    { name: "Culture", href: "/intra/wiki/culture", icon: BookOpen },
-                    { name: "Onboarding", href: "/intra/wiki/onboarding", icon: Compass },
-                    { name: "Handbook", href: "/intra/wiki/handbook", icon: FileText },
+                    { name: "컬처", href: "/intra/wiki/culture", icon: BookOpen },
+                    { name: "온보딩", href: "/intra/wiki/onboarding", icon: Compass },
+                    { name: "핸드북", href: "/intra/wiki/handbook", icon: FileText },
                     { name: "FAQ", href: "/intra/wiki/faq", icon: HelpCircle },
                 ],
             },
-            {
-                label: "지식 공유",
-                items: [
-                    { name: "Library", href: "/intra/wiki/library", icon: FolderOpen },
-                ],
-            },
         ],
     },
+
+    // ══════════════════════════════════════════════════════════
+    //  ERP — HR · GPR · 재무 · 프로젝트 · 경영관리
+    // ══════════════════════════════════════════════════════════
     {
-        name: "ERP", href: "/intra/erp", icon: Building2, access: "erp-hr", intraModule: "erp" as IntraModule,
+        name: "ERP",
+        href: "/intra/erp",
+        icon: Building2,
+        access: "erp-hr" as SystemAccess,
+        intraModule: "erp" as IntraModule,
         sections: [
             {
                 items: [
@@ -226,7 +309,6 @@ export const modules: NavModule[] = [
                             { name: "직원 관리", href: "/intra/erp/hr/staff" },
                             { name: "조직도", href: "/intra/erp/hr/people/org" },
                             { name: "구성원 등록", href: "/intra/erp/hr/staff/register" },
-                            { name: "MADLeague 동아리", href: "/intra/erp/hr/people/clubs" },
                             { name: "권한위임", href: "/intra/erp/hr/people/delegation" },
                         ],
                     },
@@ -237,7 +319,7 @@ export const modules: NavModule[] = [
                     { name: "제증명서", href: "/intra/erp/hr/certificates", icon: FileCheck },
                     { name: "가족관리", href: "/intra/erp/hr/family", icon: Heart },
                     {
-                        name: "인재관리", href: "/intra/erp/hr/talent", icon: Users,
+                        name: "인재관리", href: "/intra/erp/hr/talent", icon: UserCheck,
                         children: [
                             { name: "Talent Pool", href: "/intra/erp/hr/talent" },
                             { name: "Pipeline", href: "/intra/erp/hr/talent/pipeline" },
@@ -247,26 +329,28 @@ export const modules: NavModule[] = [
                 ],
             },
             {
-                label: "PROJECT",
+                label: "프로젝트",
                 items: [
-                    { name: "프로젝트 손익", href: "/intra/project/financials", icon: BarChart3 },
-                    { name: "입찰관리", href: "/intra/project/management/bidding", icon: Gavel },
-                    { name: "협력사", href: "/intra/project/management/vendors", icon: Handshake },
-                    { name: "투입인원단가", href: "/intra/erp/project/rates", icon: DollarSign },
+                    { name: "프로젝트 관리", href: "/intra/project/management", icon: ClipboardList },
+                    { name: "Job 관리", href: "/intra/project/jobs", icon: Briefcase },
+                    { name: "Partner Pool", href: "/intra/partner-pool", icon: Users },
+                    { name: "프로젝트 손익", href: "/intra/project/financials", icon: BarChart3, badge: "soon" },
+                    { name: "입찰관리", href: "/intra/project/management/bidding", icon: Gavel, badge: "soon" },
+                    { name: "협력사", href: "/intra/project/management/vendors", icon: Handshake, badge: "soon" },
                 ],
             },
             {
                 label: "경영관리",
                 items: [
                     {
-                        name: "경영 계획", href: "/intra/erp/biz/plan", icon: Target,
+                        name: "경영 계획", href: "/intra/erp/biz/plan", icon: Target, badge: "soon",
                         children: [
                             { name: "연간 경영계획", href: "/intra/erp/biz/plan" },
                             { name: "부문별 계획", href: "/intra/erp/biz/plan/division" },
                         ],
                     },
                     {
-                        name: "경영 관리", href: "/intra/erp/biz/manage", icon: ClipboardList,
+                        name: "경영 관리", href: "/intra/erp/biz/manage", icon: ClipboardList, badge: "soon",
                         children: [
                             { name: "월별 추정", href: "/intra/erp/biz/manage" },
                             { name: "실적 확정", href: "/intra/erp/biz/manage/actual" },
@@ -274,18 +358,17 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
-                        name: "경영 분석", href: "/intra/erp/biz/analysis", icon: BarChart3,
+                        name: "경영 분석", href: "/intra/erp/biz/analysis", icon: BarChart3, badge: "soon",
                         children: [
                             { name: "손익 현황", href: "/intra/erp/biz/analysis" },
                             { name: "부문별 이익률", href: "/intra/erp/biz/analysis/division" },
                             { name: "프로젝트 수익성", href: "/intra/erp/biz/analysis/project" },
-                            { name: "비용 분석", href: "/intra/erp/biz/analysis/cost" },
                         ],
                     },
                 ],
             },
             {
-                label: "FINANCE",
+                label: "Finance",
                 items: [
                     {
                         name: "경비관리", href: "/intra/erp/finance/expenses", icon: CreditCard,
@@ -330,121 +413,47 @@ export const modules: NavModule[] = [
             },
         ],
     },
+
+    // ══════════════════════════════════════════════════════════
+    //  INTEL — Analytics · Mindle · Agent Hub
+    // ══════════════════════════════════════════════════════════
     {
-        name: "UMS", href: "/intra/ums", icon: Globe, intraModule: "universe" as IntraModule,
+        name: "INTEL",
+        href: "/intra/analytics",
+        icon: Brain,
+        intraModule: "universe" as IntraModule,
         sections: [
             {
-                label: "통합",
+                label: "Analytics",
                 items: [
-                    { name: "UMS 대시보드", href: "/intra/ums", icon: LayoutDashboard },
-                    {
-                        name: "회원", href: "/intra/ums/members", icon: Users,
-                        children: [
-                            { name: "통합회원", href: "/intra/ums/members/list" },
-                            { name: "초대", href: "/intra/ums/members/invite" },
-                            { name: "게스트", href: "/intra/ums/members/guests" },
-                            { name: "개인정보", href: "/intra/ums/members/privacy" },
-                        ],
-                    },
-                    {
-                        name: "사이트", href: "/intra/ums/sites", icon: Globe,
-                        children: [
-                            { name: "사이트", href: "/intra/ums/sites/list" },
-                            { name: "게시판", href: "/intra/ums/sites/boards" },
-                            { name: "콘텐츠", href: "/intra/ums/sites/content" },
-                            { name: "뉴스룸", href: "/intra/ums/sites/newsroom" },
-                            { name: "라이브러리", href: "/intra/ums/sites/library" },
-                        ],
-                    },
-                    {
-                        name: "뉴스레터", href: "/intra/ums/newsletter", icon: Mail,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/newsletter" },
-                            { name: "뉴스레터 관리", href: "/intra/ums/newsletter/issues" },
-                            { name: "구독자", href: "/intra/ums/newsletter/subscribers" },
-                        ],
-                    },
-                    {
-                        name: "커머스", href: "/intra/ums/commerce", icon: ShoppingCart,
-                        children: [
-                            { name: "구독", href: "/intra/ums/commerce/subscriptions" },
-                            { name: "쇼핑", href: "/intra/ums/commerce/shop" },
-                            { name: "예약/이벤트", href: "/intra/ums/commerce/bookings" },
-                            { name: "프로모션", href: "/intra/ums/commerce/promotions" },
-                            { name: "손익", href: "/intra/ums/commerce/revenue" },
-                            { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
-                        ],
-                    },
-                    {
-                        name: "Team AI Agent", href: "/intra/ums/agent", icon: Bot,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/agent" },
-                        ],
-                    },
+                    { name: "Universe 전체", href: "/intra/analytics", icon: BarChart3, exact: true },
+                    { name: "브랜드별", href: "/intra/analytics/brands", icon: Globe },
+                    { name: "크로스 여정", href: "/intra/analytics/journey", icon: Map },
+                    { name: "동기화", href: "/intra/analytics/sync", icon: RefreshCw },
                 ],
             },
             {
-                label: "사이트별",
+                label: "Mindle",
                 items: [
-                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe },
-                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
+                    { name: "트렌드 현황", href: "/intra/ums/mindle/trends", icon: TrendingUp },
+                    { name: "콘텐츠 파이프라인", href: "/intra/ums/mindle/pipeline", icon: Layers },
+                    { name: "RSS 소스", href: "/intra/ums/mindle/sources", icon: Radio },
+                ],
+            },
+            {
+                label: "Agent Hub",
+                items: [
                     {
-                        name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
+                        name: "에이전트 현황", href: "/intra/agent", icon: Bot,
                         children: [
-                            { name: "전체 현황", href: "/intra/gravity" },
-                            { name: "클라이언트", href: "/intra/gravity/clients" },
-                            { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
+                            { name: "대시보드", href: "/intra/agent" },
+                            { name: "에이전트 지시", href: "/intra/ums/agent/comm" },
+                            { name: "에이전트 로그", href: "/intra/ums/agent/logs" },
                         ],
                     },
-                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe },
-                    {
-                        name: "HeRo", href: "/intra/hero/talent", icon: Award,
-                        children: [
-                            { name: "인재 관리", href: "/intra/hero/talent" },
-                            { name: "HIT 이용자", href: "/intra/hero/hit" },
-                            { name: "AI 상담", href: "/intra/hero/ai-counseling" },
-                            { name: "이력서 이용자", href: "/intra/hero/resume" },
-                            { name: "커리어 이용자", href: "/intra/hero/career" },
-                            { name: "브랜딩 이용자", href: "/intra/hero/branding" },
-                        ],
-                    },
-                    { name: "MAD League", href: "/intra/ums/madleague", icon: Globe },
-                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Globe },
-                    {
-                        name: "Mindle", href: "/intra/ums/mindle", icon: TrendingUp,
-                        children: [
-                            { name: "트렌드 수집 현황", href: "/intra/ums/mindle/trends" },
-                            { name: "콘텐츠 파이프라인", href: "/intra/ums/mindle/pipeline" },
-                            { name: "RSS 소스 관리", href: "/intra/ums/mindle/sources" },
-                        ],
-                    },
-                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe },
-                    { name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe },
-                    { name: "Myverse", href: "/intra/ums/myverse", icon: Globe },
-                    {
-                        name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
-                        children: [
-                            { name: "Planning", href: "/intra/ums/planners/planning" },
-                            { name: "GPR", href: "/intra/ums/planners/gpr" },
-                            { name: "Planner's Planner", href: "/intra/ums/planners/tool" },
-                            { name: "Programs", href: "/intra/ums/planners/programs" },
-                            { name: "Evolution School", href: "/intra/evolution-school" },
-                        ],
-                    },
-                    { name: "RooK", href: "/intra/ums/rook", icon: Globe },
-                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe },
-                    {
-                        name: "WIO", href: "/intra/ums/wio", icon: Settings,
-                        children: [
-                            { name: "구독 관리", href: "/intra/ums/commerce/subscriptions" },
-                            { name: "테넌트", href: "/intra/ums/wio/tenants" },
-                        ],
-                    },
-                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe },
                 ],
             },
         ],
-        dynamic: true,
     },
 ];
 
