@@ -159,7 +159,7 @@ export default function MindlePipelinePage() {
         const { data } = await supabase
             .from('mindle_trends')
             .select('*')
-            .eq('status', activeStage === 'collected' ? 'published' : activeStage)
+            .eq('status', activeStage)
             .order('relevance_score', { ascending: false })
             .limit(50);
 
@@ -180,9 +180,8 @@ export default function MindlePipelinePage() {
         }));
     };
 
-    // 현재 DB에는 status='published'만 있으므로 collected로 매핑
     const displayItems = items;
-    const totalCollected = counts['published'] || 0;
+    const totalCollected = counts['collected'] || 0;
 
     const handleTrendAdded = (item: TrendItem) => {
         if (item.status === activeStage || (activeStage === 'collected' && item.status === 'collected')) {
@@ -225,7 +224,7 @@ export default function MindlePipelinePage() {
                             <span className={`px-1.5 py-0.5 text-[9px] rounded-full ${
                                 activeStage === stage.key ? 'bg-white/20' : 'bg-neutral-100'
                             }`}>
-                                {stage.key === 'collected' ? totalCollected : (counts[stage.key] || 0)}
+                                {counts[stage.key] || 0}
                             </span>
                         </button>
                         {idx < stages.length - 1 && (

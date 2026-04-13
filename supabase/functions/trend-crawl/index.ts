@@ -213,7 +213,7 @@ async function process(): Promise<{ total: number; processed: number; skipped: n
         source_urls: item.url ? [item.url] : [],
         source_names: item.source_name ? [item.source_name] : [],
         agent_name: 'Whole See',
-        status: 'published',
+        status: 'collected',
         published_at: new Date().toISOString(),
         tenant_id: 'tenone',
         is_featured: false,
