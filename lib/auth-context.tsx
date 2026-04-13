@@ -29,6 +29,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'tenone_auth_user';
+const STORAGE_TTL_MS = 30 * 60 * 1000; // 30분 — 이후엔 Supabase 세션 재검증 강제
+
+function saveUserToStorage(user: User) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, cached_at: Date.now() }));
+    } catch { /* ignore */ }
+}
+
+function loadUserFromStorage(): User | null {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        // 구형 포맷(user 객체 직접 저장) 호환
+        const user: User = parsed.user ?? parsed;
+        const cached_at: number = parsed.cached_at ?? 0;
+        if (Date.now() - cached_at > STORAGE_TTL_MS) {
+            localStorage.removeItem(STORAGE_KEY);
+            return null;
+        }
+        return user;
+    } catch {
+        return null;
+    }
+}
 
 // Supabase members → User 변환 (v2)
 function memberToUser(member: Record<string, unknown>): User {
@@ -128,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (member) {
                 const u = memberToUser(member);
                 setUser(u);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                saveUserToStorage(u);
                 return u;
             }
 
@@ -144,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 systemAccess: [],
             };
             setUser(fallbackUser);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackUser));
+            saveUserToStorage(fallbackUser);
             return fallbackUser;
         } catch {
             return null;
@@ -153,16 +178,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 초기화: localStorage 즉시 표시 → Supabase 세션 검증 → 불일치 시 정리
     useEffect(() => {
-        // 1단계: localStorage 즉시 복원 (깜박임 방지)
+        // 1단계: localStorage 즉시 복원 (깜박임 방지, 30분 이내 캐시만)
         let hasLocalData = false;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                setUser(JSON.parse(stored));
-                hasLocalData = true;
-                setIsLoading(false); // localStorage 있으면 즉시 표시
-            }
-        } catch { /* ignore */ }
+        const cachedUser = loadUserFromStorage();
+        if (cachedUser) {
+            setUser(cachedUser);
+            hasLocalData = true;
+            setIsLoading(false); // localStorage 있으면 즉시 표시
+        }
 
         // 2단계: Supabase 세션 검증 (비동기, 5초 타임아웃)
         async function validateSession() {
@@ -180,8 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     ]);
                 } else {
                     // 세션 없음 or 타임아웃 → localStorage에 남은 stale 데이터 정리
-                    const stored = localStorage.getItem(STORAGE_KEY);
-                    if (stored) {
+                    if (localStorage.getItem(STORAGE_KEY)) {
                         setUser(null);
                         localStorage.removeItem(STORAGE_KEY);
                     }
@@ -211,7 +233,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === STORAGE_KEY) {
                 if (e.newValue) {
-                    try { setUser(JSON.parse(e.newValue)); } catch { /* ignore */ }
+                    try {
+                        const parsed = JSON.parse(e.newValue);
+                        const user: User = parsed.user ?? parsed;
+                        setUser(user);
+                    } catch { /* ignore */ }
                 } else {
                     setUser(null);
                 }
@@ -298,7 +324,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (!memberError && member) {
                     const u = memberToUser(member);
                     setUser(u);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+                    saveUserToStorage(u);
                     return { success: true, memberId: member.id };
                 }
                 return { success: false, error: memberError?.message || '프로필 생성 실패' };
@@ -322,7 +348,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(prev => {
             if (!prev) return prev;
             const updated = { ...prev, ...updates };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            saveUserToStorage(updated);
 
             // Supabase members 테이블도 업데이트 (비동기, 에러 무시)
             supabase.from('members')
@@ -397,11 +423,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     // 로그아웃 — Supabase 세션 + localStorage + 쿠키 모두 클리어
+    // scope:'global' = Supabase 서버에서 refresh_token 즉시 무효화
+    // → 외부 독립 도메인(madleague.net 등)의 쿠키는 JS로 삭제 불가하지만,
+    //   refresh_token이 서버에서 무효화되므로 다음 갱신 시 자동 만료됨
     const logout = useCallback(async () => {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         try {
-            await supabase.auth.signOut({ scope: 'local' });
+            await supabase.auth.signOut({ scope: 'global' });
         } catch { /* ignore */ }
         // Supabase SSR 쿠키 + tenone-auth 쿠키 강제 제거
         document.cookie.split(';').forEach(c => {

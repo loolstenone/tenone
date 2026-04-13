@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
                     source_urls: t.source_urls,
                     relevance_score: t.relevance_score,
                     agent_name: 'Mindle AI',
-                    status: 'published',
+                    status: 'collected',
                     published_at: email.date || new Date().toISOString(),
                     tenant_id: 'tenone',
                 }));

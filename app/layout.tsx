@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { IdentityProvider } from "@/lib/identity-context";
 
 import { SiteProvider } from "@/lib/site-context";
+import { Analytics } from "@/components/Analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -88,6 +89,7 @@ export default function RootLayout({
               {children}
             </IdentityProvider>
           </AuthProvider>
+          <Analytics />
         </SiteProvider>
       </body>
     </html>

@@ -24,7 +24,10 @@ export default function WikiLibraryPage() {
     const userId = "user-ceo";
     const accountType = user?.accountType || 'member';
 
-    const wikiItems = getBySource("wiki", accountType);
+    const mockWikiItems = getBySource("wiki", accountType);
+    const [dbItems, setDbItems] = useState<LibraryItem[] | null>(null); // null = loading
+    const displayItems = dbItems !== null && dbItems.length > 0 ? dbItems : mockWikiItems;
+
     const [search, setSearch] = useState("");
     const [catFilter, setCatFilter] = useState<"전체" | LibraryCategory>("전체");
     const [permFilter, setPermFilter] = useState<"전체" | LibraryPermission>("전체");
@@ -40,21 +43,43 @@ export default function WikiLibraryPage() {
     const [newTags, setNewTags] = useState("");
     const [newProject, setNewProject] = useState("");
 
-    // Supabase에서 라이브러리 아이템 로드 (DB 데이터 있으면 사용, 없으면 Mock 유지)
+    // DB에서 라이브러리 아이템 로드 — DB 데이터 있으면 DB 우선, 없으면 mock 유지
     useEffect(() => {
         let cancelled = false;
         wikiDb.fetchLibraryItems({ source: "wiki" })
-            .then(({ items: dbItems }) => {
-                if (cancelled || dbItems.length === 0) return;
-                // DB 데이터가 있으면 context items를 DB로 대체
-                // TODO: context에 setItems 노출 시 직접 교체 가능
+            .then(({ items: rows }) => {
+                if (cancelled) return;
+                if (rows.length > 0) {
+                    // DB row → LibraryItem 변환
+                    const converted: LibraryItem[] = rows.map((r: any) => ({
+                        id: r.id,
+                        title: r.title || "",
+                        description: r.description || "",
+                        category: r.category as LibraryCategory || "전략·기획",
+                        source: (r.source || "wiki") as LibraryItem["source"],
+                        format: (r.format || "PDF") as LibraryItem["format"],
+                        fileSize: r.file_size || "0 KB",
+                        tags: Array.isArray(r.tags) ? r.tags : [],
+                        author: r.author?.name || r.author_id || "-",
+                        authorId: r.author_id || "",
+                        createdAt: (r.created_at || "").slice(0, 10),
+                        updatedAt: (r.updated_at || r.created_at || "").slice(0, 10),
+                        permission: (r.permission || "all") as LibraryPermission,
+                        projectCode: r.project_code || undefined,
+                        bookmarkCount: r.bookmark_count || 0,
+                        viewCount: r.view_count || 0,
+                    }));
+                    setDbItems(converted);
+                } else {
+                    setDbItems([]); // 빈 배열 = DB 로드 완료, 데이터 없음 → mock 사용
+                }
             })
-            .catch(() => { /* DB 실패 시 Mock 유지 */ });
+            .catch(() => { setDbItems([]); }); // 에러 시 mock 유지
         return () => { cancelled = true; };
     }, []);
 
     const filtered = useMemo(() => {
-        return wikiItems.filter(item => {
+        return displayItems.filter(item => {
             if (catFilter !== "전체" && item.category !== catFilter) return false;
             if (permFilter !== "전체" && item.permission !== permFilter) return false;
             if (search.trim()) {
@@ -63,7 +88,7 @@ export default function WikiLibraryPage() {
             }
             return true;
         });
-    }, [wikiItems, catFilter, permFilter, search]);
+    }, [displayItems, catFilter, permFilter, search]);
 
     // 페이지네이션
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -88,13 +113,15 @@ export default function WikiLibraryPage() {
             projectCode: newProject || undefined,
             bookmarkCount: 0, viewCount: 0,
         };
-        addItem(item);
+        addItem(item); // context (mock fallback)
         wikiDb.createLibraryItem({
             title: item.title, description: item.description, category: item.category,
             source: item.source, format: item.format, file_size: item.fileSize,
             tags: item.tags, author_id: item.authorId,
             permission: item.permission, project_code: item.projectCode || null,
         }).catch(() => {});
+        // DB items state에도 즉시 반영
+        setDbItems(prev => prev !== null ? [item, ...prev] : [item]);
         setShowAdd(false);
         setNewTitle(""); setNewDesc(""); setNewTags(""); setNewProject("");
     };

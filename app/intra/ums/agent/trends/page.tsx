@@ -1,45 +1,68 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, Eye, Search, LayoutGrid, List, ExternalLink, TrendingUp } from "lucide-react";
-import { featured as mockFeatured, trends as mockTrends, categories, statusBadge, type TrendArticle } from "@/lib/mindle/trend-data";
+import { Clock, Eye, Search, LayoutGrid, List, ExternalLink, TrendingUp, Loader2, Radio } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+
+interface TrendArticle {
+    id: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    status: "trending" | "rising" | "signal" | "fading";
+    date: string;
+    readTime: string;
+    views: number;
+    author?: string;
+    content?: string;
+}
+
+const categories = [
+    "전체", "AI / 테크", "마케팅", "소비자", "비즈니스",
+    "콘텐츠", "라이프스타일", "인재/커리어", "크리에이터",
+];
 
 function mapDbToTrend(r: Record<string, unknown>): TrendArticle {
     const score = (r.relevance_score as number) || 5;
-    const status = score >= 9 ? 'trending' : score >= 7.5 ? 'rising' : score >= 6 ? 'signal' : 'fading';
+    const status = score >= 9 ? "trending" : score >= 7.5 ? "rising" : score >= 6 ? "signal" : "fading";
     return {
-        id: (r.id as string) || '',
-        title: (r.title as string) || '',
-        excerpt: (r.summary as string) || '',
-        category: (r.category as string) || '',
+        id: (r.id as string) || "",
+        title: (r.title as string) || "",
+        excerpt: (r.summary as string) || "",
+        category: (r.category as string) || "",
         status,
-        date: ((r.published_at as string) || '').slice(5, 10).replace('-', '.'),
-        readTime: `${Math.max(3, Math.ceil(((r.full_content as string) || '').length / 300))}분`,
+        date: ((r.published_at as string) || (r.created_at as string) || "").slice(5, 10).replace("-", "."),
+        readTime: `${Math.max(3, Math.ceil(((r.full_content as string) || "").length / 300))}분`,
         views: (r.view_count as number) || 0,
-        author: (r.agent_name as string) || 'Mindle AI',
-        content: (r.full_content as string) || '',
+        author: (r.agent_name as string) || "Mindle AI",
+        content: (r.full_content as string) || "",
     };
 }
 
 const intraBadge: Record<string, { label: string; bg: string; text: string }> = {
-    trending: { label: '급상승', bg: 'bg-red-50', text: 'text-red-600' },
-    rising:   { label: '상승',   bg: 'bg-amber-50', text: 'text-amber-600' },
-    signal:   { label: '신호',   bg: 'bg-blue-50', text: 'text-blue-600' },
-    fading:   { label: '하락',   bg: 'bg-neutral-100', text: 'text-neutral-500' },
+    trending: { label: "급상승", bg: "bg-red-50", text: "text-red-600" },
+    rising: { label: "상승", bg: "bg-amber-50", text: "text-amber-600" },
+    signal: { label: "신호", bg: "bg-blue-50", text: "text-blue-600" },
+    fading: { label: "하락", bg: "bg-neutral-100", text: "text-neutral-500" },
 };
 
 export default function MindleTrendsPage() {
     const [selectedCat, setSelectedCat] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-    const [featured, setFeatured] = useState<TrendArticle>(mockFeatured);
-    const [trends, setTrends] = useState<TrendArticle[]>(mockTrends);
+    const [featured, setFeatured] = useState<TrendArticle | null>(null);
+    const [trends, setTrends] = useState<TrendArticle[]>([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const supabase = createClient();
-        supabase.from('mindle_trends').select('*').eq('status', 'published').order('relevance_score', { ascending: false })
+        supabase
+            .from("mindle_trends")
+            .select("*")
+            .eq("status", "published")
+            .order("relevance_score", { ascending: false })
             .then(({ data }: { data: Record<string, unknown>[] | null }) => {
                 if (data && data.length > 0) {
                     const mapped = data.map((r: Record<string, unknown>) => mapDbToTrend(r));
@@ -48,16 +71,57 @@ export default function MindleTrendsPage() {
                     setTrends(mapped.filter((t: TrendArticle) => t.id !== feat.id));
                     setTotalCount(data.length);
                 }
-            });
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
     }, []);
 
-    const filtered = trends.filter(t => {
+    const filtered = trends.filter((t) => {
         const matchCat = selectedCat === "전체" || t.category === selectedCat;
         const matchSearch = !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });
 
     const badge = (status: string) => intraBadge[status] || intraBadge.fading;
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
+
+    // DB에 데이터 없음
+    if (!featured && trends.length === 0) {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-base font-semibold text-neutral-900">트렌드 카드</h2>
+                    <p className="text-xs text-neutral-400 mt-0.5">Mindle AI 수집 · 0건</p>
+                </div>
+                <div className="border border-neutral-200 bg-neutral-50 p-12 text-center space-y-4">
+                    <Radio className="h-8 w-8 text-neutral-300 mx-auto" />
+                    <div>
+                        <p className="text-sm font-medium text-neutral-700">수집된 트렌드가 없습니다</p>
+                        <p className="text-xs text-neutral-400 mt-1">
+                            RSS 소스를 추가하고 수집을 실행하면 AI가 트렌드 카드를 생성합니다.
+                        </p>
+                    </div>
+                    <div className="flex justify-center gap-2">
+                        <Link href="/intra/ums/mindle/sources"
+                            className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 transition-colors">
+                            RSS 소스 관리
+                        </Link>
+                        <Link href="/intra/ums/mindle/pipeline"
+                            className="px-4 py-2 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
+                            파이프라인 보기
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -67,41 +131,45 @@ export default function MindleTrendsPage() {
                     <h2 className="text-base font-semibold text-neutral-900">트렌드 카드</h2>
                     <p className="text-xs text-neutral-400 mt-0.5">Mindle AI 수집 · {totalCount}건</p>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-neutral-400">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    <span>최근 업데이트: {featured.date}</span>
-                </div>
+                {featured && (
+                    <div className="flex items-center gap-2 text-xs text-neutral-400">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        <span>최근 업데이트: {featured.date}</span>
+                    </div>
+                )}
             </div>
 
             {/* 주요 트렌드 카드 */}
-            <div className="border border-neutral-200 bg-white p-5 mb-6">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-                    <div className="lg:col-span-3 h-48 bg-neutral-50 border border-neutral-100 flex items-center justify-center">
-                        <div className="text-center text-neutral-300">
-                            <TrendingUp className="h-8 w-8 mx-auto mb-2" />
-                            <span className="text-xs">주요 트렌드</span>
+            {featured && (
+                <div className="border border-neutral-200 bg-white p-5 mb-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+                        <div className="lg:col-span-3 h-48 bg-neutral-50 border border-neutral-100 flex items-center justify-center">
+                            <div className="text-center text-neutral-300">
+                                <TrendingUp className="h-8 w-8 mx-auto mb-2" />
+                                <span className="text-xs">주요 트렌드</span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="lg:col-span-2 flex flex-col justify-center">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 ${badge(featured.status).bg} ${badge(featured.status).text}`}>
-                                {badge(featured.status).label}
-                            </span>
-                            <span className="text-[10px] text-neutral-400">{featured.category}</span>
-                        </div>
-                        <h3 className="text-sm font-semibold text-neutral-900 leading-snug mb-2">
-                            {featured.title}
-                        </h3>
-                        <p className="text-[11px] text-neutral-500 leading-relaxed mb-3 line-clamp-3">{featured.excerpt}</p>
-                        <div className="flex items-center gap-3 text-[10px] text-neutral-400">
-                            <span className="text-neutral-600 font-medium">{featured.author}</span>
-                            <span>{featured.date}</span>
-                            <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{featured.readTime}</span>
-                            <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{featured.views.toLocaleString()}</span>
+                        <div className="lg:col-span-2 flex flex-col justify-center">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 ${badge(featured.status).bg} ${badge(featured.status).text}`}>
+                                    {badge(featured.status).label}
+                                </span>
+                                <span className="text-[10px] text-neutral-400">{featured.category}</span>
+                            </div>
+                            <h3 className="text-sm font-semibold text-neutral-900 leading-snug mb-2">
+                                {featured.title}
+                            </h3>
+                            <p className="text-[11px] text-neutral-500 leading-relaxed mb-3 line-clamp-3">{featured.excerpt}</p>
+                            <div className="flex items-center gap-3 text-[10px] text-neutral-400">
+                                <span className="text-neutral-600 font-medium">{featured.author}</span>
+                                <span>{featured.date}</span>
+                                <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{featured.readTime}</span>
+                                <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{featured.views.toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* 필터 */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4 pb-4 border-b border-neutral-100">

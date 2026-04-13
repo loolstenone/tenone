@@ -260,16 +260,17 @@ function LoginForm() {
         );
     }
 
-    // 브랜드 사이트 로그인 (동적 사이트명)
+    // 브랜드 사이트 로그인 (동적 사이트명 + 브랜드 컬러)
     const siteName = site?.name || 'Ten:One™';
-    const isBrandSite = isSubdomain === true;
+    const primaryColor = site?.colors?.primary || '#171717'; // 브랜드 primary, 없으면 neutral-900
+    const signupPath = site?.signupPath || '/signup';
 
     return (
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-10">
                     <h1 className="text-2xl md:text-3xl font-bold tracking-wider">{siteName}</h1>
-                    <p className="text-sm text-neutral-400 mt-2">Ten:One™ Universe에 로그인</p>
+                    <p className="text-sm text-neutral-400 mt-2">{siteName}에 로그인</p>
                 </div>
 
                 <div className="border border-neutral-200 p-8">
@@ -283,14 +284,15 @@ function LoginForm() {
                             <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">이메일</label>
                             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                                 placeholder="email@example.com" required
-                                className="w-full border border-neutral-200 px-4 py-3 text-sm focus:border-neutral-900 focus:outline-none" />
+                                className="w-full border border-neutral-200 px-4 py-3 text-sm focus:outline-none"
+                                style={{ '--tw-ring-color': primaryColor } as React.CSSProperties} />
                         </div>
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">비밀번호</label>
                             <div className="relative">
                                 <input id="password" type={showPassword ? 'text' : 'password'} value={password}
                                     onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
-                                    className="w-full border border-neutral-200 px-4 py-3 pr-12 text-sm focus:border-neutral-900 focus:outline-none" />
+                                    className="w-full border border-neutral-200 px-4 py-3 pr-12 text-sm focus:outline-none" />
                                 <button type="button"
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowPassword(prev => !prev); }}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 transition-colors">
@@ -304,7 +306,8 @@ function LoginForm() {
                         )}
 
                         <button type="submit" disabled={isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                            style={{ backgroundColor: primaryColor }}>
                             {isSubmitting ? (
                                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (<><LogIn className="h-4 w-4" /> 로그인</>)}
@@ -333,12 +336,12 @@ function LoginForm() {
 
                     <div className="mt-4 text-center">
                         <p className="text-sm text-neutral-500">
-                            계정이 없으신가요? <Link href="/signup" className="text-neutral-900 font-medium hover:underline">회원가입</Link>
+                            계정이 없으신가요? <Link href={signupPath} className="font-medium hover:underline" style={{ color: primaryColor }}>회원가입</Link>
                         </p>
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-neutral-400 mt-8">&copy; {new Date().getFullYear()} Ten:One™ Universe.</p>
+                <p className="text-center text-xs text-neutral-400 mt-8">&copy; {new Date().getFullYear()} {siteName}. Powered by Ten:One™ Universe.</p>
             </div>
         </div>
     );
@@ -347,6 +350,8 @@ function LoginForm() {
 export default function LoginPage() {
     const { isMadLeague } = useSite();
     const [isSmarComm, setIsSmarComm] = useState<boolean | null>(null);
+    // 외부 독립 도메인 여부 (tenone.biz, *.tenone.biz, localhost 제외)
+    const [isExternalDomain, setIsExternalDomain] = useState<boolean | null>(null);
     const [domainChecked, setDomainChecked] = useState(false);
 
     useEffect(() => {
@@ -361,7 +366,10 @@ export default function LoginPage() {
             return;
         }
         const isTenoneSubdomain = host.endsWith('.tenone.biz') || host === 'localhost';
-        if (!isTenone && !isTenoneSubdomain) {
+        const isExternal = !isTenone && !isTenoneSubdomain;
+        setIsExternalDomain(isExternal);
+
+        if (isExternal) {
             // tenone.biz에 세션이 있으면 자동 로그인 시도 (한 번만)
             const ssoAttempted = sessionStorage.getItem('sso_attempted');
             if (!ssoAttempted) {
@@ -381,34 +389,48 @@ export default function LoginPage() {
         setDomainChecked(true);
     }, []);
 
-    // 도메인 감지 전 — 중립 로딩 (깜빡임 방지)
-    if (!domainChecked || isSmarComm === null) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
-            </div>
-        );
-    }
+    const spinner = <div className="min-h-screen flex items-center justify-center bg-white"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>;
 
-    // SmarComm 도메인 → SmarComm 전용 UI (PublicHeader/Footer 없음)
+    // 도메인 감지 전 — 중립 로딩 (깜빡임 방지)
+    if (!domainChecked || isSmarComm === null) return spinner;
+
+    const loginForm = (
+        <Suspense fallback={spinner}>
+            <LoginForm />
+        </Suspense>
+    );
+
+    // SmarComm 또는 기타 외부 독립 도메인 → 브랜드 전용 UI (PublicHeader/Footer 없음)
     if (isSmarComm) {
         return (
-            <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={spinner}>
                 <SmarCommLoginForm />
             </Suspense>
         );
     }
 
-    // TenOne / MADLeague
+    if (isExternalDomain) {
+        // 외부 브랜드 도메인 (badak.biz, rook.co.kr 등) — 헤더/푸터 없이 LoginForm만
+        return <div className="min-h-screen bg-white">{loginForm}</div>;
+    }
+
+    // MADLeague 서브도메인 또는 tenone.biz 서브도메인 (*.tenone.biz)
+    if (isMadLeague) {
+        return (
+            <div className="min-h-screen flex flex-col bg-[#212121]">
+                <MadLeagueHeader />
+                <main className="flex-1 pt-16">{loginForm}</main>
+                <MadLeagueFooter />
+            </div>
+        );
+    }
+
+    // tenone.biz 서브도메인 (myverse.tenone.biz 등)
     return (
-        <div className={`min-h-screen flex flex-col ${isMadLeague ? 'bg-[#212121]' : 'bg-white'}`}>
-            {isMadLeague ? <MadLeagueHeader /> : <PublicHeader />}
-            <main className="flex-1 pt-16">
-                <Suspense fallback={<div className="h-full flex items-center justify-center"><div className="h-8 w-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
-                    <LoginForm />
-                </Suspense>
-            </main>
-            {isMadLeague ? <MadLeagueFooter /> : <PublicFooter />}
+        <div className="min-h-screen flex flex-col bg-white">
+            <PublicHeader />
+            <main className="flex-1 pt-16">{loginForm}</main>
+            <PublicFooter />
         </div>
     );
 }

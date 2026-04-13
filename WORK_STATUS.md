@@ -1,17 +1,33 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-14 (집, 세션 41)
+> 마지막 업데이트: 2026-04-14 (집, 세션 44)
 
 ---
 
-## 이번 세션 (세션 41) 완료 항목
+## 이번 세션 (세션 44) 완료 항목
 
 | 항목 | 내용 |
 |------|------|
 | Vercel Pro 전환 대응 | 반복 배포로 크레딧 급속 소진 원인 분석. 동일 커밋 20+회 배포 확인 |
 | 프리뷰 배포 차단 | `vercel.json`에 `git.deploymentEnabled` 설정 — dev/feature-* 브랜치 배포 비활성화 |
 | 작업 가이드 업데이트 | CLAUDE.md에 Vercel 비용 관리 규칙 추가 (작업 중 push 금지, 작업 종료 시 1회만) |
-| 절대 하지 말 것 추가 | "작업 중간에 push하기" 항목 추가 |
+
+## 이전 세션 (세션 43) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| 인트라 메뉴 구조 감사 | 204개 페이지 전수 조사. 5모듈별 DB 구현율 산출 (MARKETING 94%, INTEL 61%, UNIVERSE 59%, ERP 50%, MY 17%) |
+| nav 정비 (5건) | ① Mindle "뉴스레터" 항목 추가 ② WIO redirect 오류 수정 ③ Planner's 미구현 badge:"soon" ④ SubItem badge 렌더링 ⑤ UNIVERSE 브랜드별 알파벳 순 정렬 |
+| GPR cascade DB 연동 | `erp/gpr/cascade/page.tsx` — hardcoded mock 제거 → members + gpr_goals 테이블에서 department별 동적 계층 생성 |
+| Studio Brands 실구현 | `studio/brands/page.tsx` — 정적 플레이스홀더 → DB 로드(fallback: static) + 검색/필터 + 통계 + 브랜드 등록 모달. 22개 브랜드 표시 |
+| Mindle 트렌드 정합성 | ① 메뉴명 "트렌드 현황"→"트렌드 카드" 통일 ② Mock fallback 완전 제거(DB 전용) ③ pipeline status hack 제거 ④ **"검토 후 발행" 워크플로우 확정** |
+
+## 이전 세션 (세션 42) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| Mindle 뉴스레터 관리 페이지 | `ums/mindle/newsletter/page.tsx` — newsletter_subscribers + mindle_trends 실데이터 로드. 3탭(개요/구독자/트렌드이슈) |
+| Mindle 트렌드 수동 등록 | `ums/mindle/pipeline/page.tsx` — '트렌드 등록' 버튼 + 모달. mindle_trends INSERT |
 
 ---
 
@@ -26,24 +42,32 @@
 
 ---
 
-## 현재 미커밋 변경 (이전 세션에서 이어옴)
+## 인트라 현황 진단 (세션 43 기준)
 
-대규모 변경이 스테이징 안 된 상태로 남아있음:
-- Badak: explore/join/my/page, groups/onboard/story 신규, cloud 기능, API
-- Wiki: 퍼블릭 위키 시스템 신규 (`app/(wiki)/`, `app/api/wiki/`, `lib/wiki/`)
-- Intra wiki: 기존 서브페이지 5개 삭제 → 통합 페이지로 변경
-- Mindle: my 페이지 수정
-- 인프라: middleware, auth-context, site-config, domain-registry 수정
-- 패키지: package.json 의존성 추가
+| 모듈 | 총 페이지 | 실DB | 구현율 |
+|------|----------|------|--------|
+| MARKETING | 17 | 16 | 94% |
+| INTEL | 61 | 37 | 61% |
+| UNIVERSE | 46 | 27 | 59% |
+| ERP | 56 | 28 | 50% |
+| MY | 24 | 4 | 17% |
+| **합계** | **204** | **112** | **55%** |
 
 ---
 
-## 다음 할 것
+## 다음 스텝 (우선순위순)
 
-1. **미커밋 변경 전체 커밋 + push** — 위의 Badak/Wiki/인프라 변경을 정리해서 커밋
-2. **Naver API 연결** — `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` 환경변수 설정
-3. **멀티모델 프로빙** — OpenAI/Gemini/Perplexity API 키 확보 후 probe/run 확장
-4. **공유 링크** — `/brandgravity/report/[token]` 클라이언트 열람 URL
+### 즉시 (Phase B — Mock 정리)
+1. **ERP biz/* 9개 + settings/* 8개** — 형식적 Mock → "준비 중" 전환
+2. **Agent 대시보드** — mock → agent_profiles 실DB 연동
+3. **MY workspace mock 정리** — 핵심 기능만 DB, 나머지 "준비 중" 배너
+
+### 이후 (P1)
+4. **Phase 1-B: SmarComm Intra 연결** — `/intra/marketing` WIO MKT-* 실데이터
+5. **Phase 1-C: WIO 구독 관리** — DB 연동
+6. **Phase 1-D: 바닥쇠 에이전트** — `/api/agent/badaksoe`
+7. **Phase C-4: UNIVERSE 브랜드 셀렉터** — 실 필터링
+8. **Naver API 연결** — Brand Gravity 인지도/호감도 실측
 
 ---
 

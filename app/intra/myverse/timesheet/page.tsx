@@ -23,32 +23,6 @@ interface MyJob {
 
 interface ProjectPeriod { start: string; end: string; }
 
-// Mock fallback
-const mockActiveJobs: MyJob[] = [
-    { projectCode: "PRJ-2026-0001", projectName: "LUKI 2nd Single", projectStatus: "진행", jobId: "", jobName: "컨셉 기획", jobType: "PR", jobDetail: "PL", estimatedHours: 15 },
-    { projectCode: "PRJ-2026-0001", projectName: "LUKI 2nd Single", projectStatus: "진행", jobId: "", jobName: "MV 제작", jobType: "PR", jobDetail: "DO", estimatedHours: 40 },
-    { projectCode: "PRJ-2026-0002", projectName: "MADLeap 5기", projectStatus: "진행", jobId: "", jobName: "OT 기획", jobType: "PT", jobDetail: "PL", estimatedHours: 8 },
-    { projectCode: "PRJ-2026-0003", projectName: "리제로스 시즌2", projectStatus: "진행", jobId: "", jobName: "스폰서 제안서", jobType: "PR", jobDetail: "PL", estimatedHours: 10 },
-    { projectCode: "PRJ-2026-0004", projectName: "Brand Gravity", projectStatus: "진행", jobId: "", jobName: "브랜드 전략", jobType: "PR", jobDetail: "PL", estimatedHours: 20 },
-];
-const mockCompletedProjects = [
-    { code: "PRJ-2025-0001", name: "LUKI 1st Single", estimatedHours: 45, actualHours: 42 },
-    { code: "PRJ-2025-0002", name: "리제로스 시즌1", estimatedHours: 25, actualHours: 28 },
-    { code: "PRJ-2025-0003", name: "Badak 밋업 런칭", estimatedHours: 15, actualHours: 14 },
-];
-const mockPeriods: Record<string, ProjectPeriod> = {
-    "PRJ-2026-0001": { start: "2026-02-01", end: "2026-05-31" },
-    "PRJ-2026-0002": { start: "2026-03-01", end: "2026-06-30" },
-    "PRJ-2026-0003": { start: "2026-04-01", end: "2026-09-30" },
-    "PRJ-2026-0004": { start: "2026-03-15", end: "2026-06-15" },
-};
-const mockDailyHours: DailyHours = {
-    "2026-03-17": { "mock-job-1": 4, "mock-job-2": 2, "mock-job-4": 3 },
-    "2026-03-18": { "mock-job-1": 2, "mock-job-3": 1.5, "mock-job-5": 3 },
-    "2026-03-19": { "mock-job-1": 3, "mock-job-2": 4 },
-    "2026-03-20": { "mock-job-4": 5, "mock-job-3": 2 },
-    "2026-03-21": { "mock-job-2": 3, "mock-job-5": 2.5 },
-};
 
 type DailyHours = Record<string, Record<string, number>>;
 
@@ -117,82 +91,64 @@ export default function TimesheetInputPage() {
                     ]);
 
                     if (!cancelled) {
-                        if (jobData.jobs.length > 0) {
-                            // Map DB rows to MyJob
-                            const projMap: Record<string, Record<string, unknown>> = {};
-                            jobData.projects.forEach(p => { projMap[p.id as string] = p; });
+                        // Map DB rows to MyJob
+                        const projMap: Record<string, Record<string, unknown>> = {};
+                        jobData.projects.forEach(p => { projMap[p.id as string] = p; });
 
-                            const activeJobList: MyJob[] = [];
-                            const completedList: { code: string; name: string; estimatedHours: number; actualHours: number }[] = [];
-                            const periods: Record<string, ProjectPeriod> = {};
+                        const activeJobList: MyJob[] = [];
+                        const completedList: { code: string; name: string; estimatedHours: number; actualHours: number }[] = [];
+                        const periods: Record<string, ProjectPeriod> = {};
 
-                            jobData.jobs.forEach(j => {
-                                const proj = projMap[j.project_id as string];
-                                if (!proj) return;
-                                const status = proj.status as string;
-                                const isCompleted = status === "completed";
-                                if (proj.start_date && proj.end_date) {
-                                    periods[proj.code as string] = { start: proj.start_date as string, end: proj.end_date as string };
-                                }
-                                if (!isCompleted) {
-                                    activeJobList.push({
-                                        projectCode: proj.code as string,
-                                        projectName: proj.name as string,
-                                        projectStatus: "진행",
-                                        jobId: j.id as string,
-                                        jobName: j.name as string,
-                                        jobType: (j.type as JobType) || "PR",
-                                        jobDetail: (j.detail as JobDetail) || "PL",
-                                        estimatedHours: (j.estimated_hours as number) || 0,
-                                    });
-                                }
-                            });
+                        jobData.jobs.forEach(j => {
+                            const proj = projMap[j.project_id as string];
+                            if (!proj) return;
+                            const status = proj.status as string;
+                            const isCompleted = status === "completed";
+                            if (proj.start_date && proj.end_date) {
+                                periods[proj.code as string] = { start: proj.start_date as string, end: proj.end_date as string };
+                            }
+                            if (!isCompleted) {
+                                activeJobList.push({
+                                    projectCode: proj.code as string,
+                                    projectName: proj.name as string,
+                                    projectStatus: "진행",
+                                    jobId: j.id as string,
+                                    jobName: j.name as string,
+                                    jobType: (j.type as JobType) || "PR",
+                                    jobDetail: (j.detail as JobDetail) || "PL",
+                                    estimatedHours: (j.estimated_hours as number) || 0,
+                                });
+                            }
+                        });
 
-                            // Completed projects from DB
-                            jobData.projects.filter(p => p.status === "completed").forEach(p => {
-                                const projJobs = jobData.jobs.filter(j => j.project_id === p.id);
-                                const estimated = projJobs.reduce((s, j) => s + ((j.estimated_hours as number) || 0), 0);
-                                const actual = tsData
-                                    .filter(ts => projJobs.some(j => j.id === ts.job_id))
-                                    .reduce((s, ts) => s + ts.hours, 0);
-                                completedList.push({ code: p.code as string, name: p.name as string, estimatedHours: estimated, actualHours: actual });
-                            });
+                        // Completed projects from DB
+                        jobData.projects.filter(p => p.status === "completed").forEach(p => {
+                            const projJobs = jobData.jobs.filter(j => j.project_id === p.id);
+                            const estimated = projJobs.reduce((s, j) => s + ((j.estimated_hours as number) || 0), 0);
+                            const actual = tsData
+                                .filter(ts => projJobs.some(j => j.id === ts.job_id))
+                                .reduce((s, ts) => s + ts.hours, 0);
+                            completedList.push({ code: p.code as string, name: p.name as string, estimatedHours: estimated, actualHours: actual });
+                        });
 
-                            // Build hours state from all timesheets
-                            const hoursMap: DailyHours = {};
-                            tsData.forEach(ts => {
-                                if (!hoursMap[ts.work_date]) hoursMap[ts.work_date] = {};
-                                hoursMap[ts.work_date][ts.job_id] = ts.hours;
-                            });
+                        // Build hours state from all timesheets
+                        const hoursMap: DailyHours = {};
+                        tsData.forEach(ts => {
+                            if (!hoursMap[ts.work_date]) hoursMap[ts.work_date] = {};
+                            hoursMap[ts.work_date][ts.job_id] = ts.hours;
+                        });
 
-                            setMemberId(mid);
-                            setActiveJobs(activeJobList.length > 0 ? activeJobList : mockActiveJobs);
-                            setCompletedProjects(completedList.length > 0 ? completedList : mockCompletedProjects);
-                            setProjectPeriods(Object.keys(periods).length > 0 ? periods : mockPeriods);
-                            setHours(Object.keys(hoursMap).length > 0 ? hoursMap : mockDailyHours);
-                        } else {
-                            // No jobs in DB → use mock
-                            setActiveJobs(mockActiveJobs);
-                            setCompletedProjects(mockCompletedProjects);
-                            setProjectPeriods(mockPeriods);
-                            setHours(mockDailyHours);
-                        }
+                        setMemberId(mid);
+                        setActiveJobs(activeJobList);
+                        setCompletedProjects(completedList);
+                        setProjectPeriods(periods);
+                        setHours(hoursMap);
                     }
                 } else {
-                    if (!cancelled) {
-                        setActiveJobs(mockActiveJobs);
-                        setCompletedProjects(mockCompletedProjects);
-                        setProjectPeriods(mockPeriods);
-                        setHours(mockDailyHours);
-                    }
+                    if (!cancelled) setMemberId(null);
                 }
             } catch {
-                if (!cancelled) {
-                    setActiveJobs(mockActiveJobs);
-                    setCompletedProjects(mockCompletedProjects);
-                    setProjectPeriods(mockPeriods);
-                    setHours(mockDailyHours);
-                }
+                // DB 오류 시 빈 상태 유지
             } finally {
                 if (!cancelled) setLoading(false);
             }

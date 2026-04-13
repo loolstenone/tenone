@@ -18,18 +18,6 @@ interface TodoItem {
     history: HistoryEntry[]; createdAt: string;
 }
 
-const initialTodos: TodoItem[] = [
-    { id: 't1', title: 'LUKI 2nd Single 컨셉 기획안 작성', category: '프로젝트', priority: '높음', status: '진행중', dueDate: '2026-03-25', assignedBy: 'Sarah Kim', project: 'LUKI 2nd Single', description: '2nd 싱글 앨범 컨셉 방향성 기획. AI 생성 비주얼과 스토리라인 포함.', createdAt: '2026-03-15', history: [{ id: 'h1', date: '03-15 09:00', action: '업무 생성', actor: 'Sarah Kim' }, { id: 'h2', date: '03-18 14:30', action: '진행중으로 변경', actor: 'Cheonil Jeon', comment: '컨셉 리서치 시작' }] },
-    { id: 't2', title: 'Q2 사업계획서 최종 검토', category: '일반', priority: '높음', status: '진행중', dueDate: '2026-03-28', assignedBy: '박기획', description: '2분기 사업계획서 최종 검토. 예산 항목 재확인.', createdAt: '2026-03-17', history: [{ id: 'h3', date: '03-17 10:00', action: '업무 생성', actor: '박기획' }] },
-    { id: 't3', title: 'MADLeague 스폰서 제안서 발송', category: '프로젝트', priority: '높음', status: '승인대기', dueDate: '2026-03-22', assignedBy: 'Sarah Kim', project: '리제로스 시즌2', createdAt: '2026-03-14', history: [{ id: 'h4', date: '03-14 11:00', action: '업무 생성', actor: 'Sarah Kim' }, { id: 'h5', date: '03-20 09:00', action: '완료 보고', actor: 'Cheonil Jeon', comment: '3개 기업 발송 완료' }] },
-    { id: 't4', title: '뮤직비디오 스토리보드 리뷰', category: '프로젝트', priority: '중간', status: '진행중', dueDate: '2026-03-23', project: 'LUKI 2nd Single', assignedBy: '김콘텐', createdAt: '2026-03-18', history: [{ id: 'h7', date: '03-18 15:00', action: '업무 생성', actor: '김콘텐' }] },
-    { id: 't5', title: 'MADLeap 5기 OT 자료 준비', category: '프로젝트', priority: '중간', status: '대기', dueDate: '2026-03-26', project: 'MADLeap 5기', assignedBy: '김준호', createdAt: '2026-03-19', history: [{ id: 'h8', date: '03-19 10:00', action: '업무 생성', actor: '김준호' }] },
-    { id: 't6', title: 'Badak 3월 밋업 후기 콘텐츠', category: '일반', priority: '낮음', status: '대기', dueDate: '2026-03-30', assignedBy: '이수진', createdAt: '2026-03-20', history: [{ id: 'h9', date: '03-20 11:00', action: '업무 생성', actor: '이수진' }] },
-    { id: 't7', title: 'AI 배경 이미지 최종 선정', category: '프로젝트', priority: '높음', status: '완료', dueDate: '2026-03-20', project: 'LUKI 2nd Single', assignedBy: '조에이', createdAt: '2026-03-16', history: [{ id: 'h10', date: '03-16 09:00', action: '업무 생성', actor: '조에이' }, { id: 'h11', date: '03-19 16:00', action: '완료', actor: 'Cheonil Jeon', comment: '2번 안 확정' }, { id: 'h12', date: '03-19 17:00', action: '승인', actor: 'Sarah Kim' }] },
-    { id: 't8', title: 'GPR Q1 자기평가 작성', category: '기타', priority: '중간', status: '진행중', dueDate: '2026-03-31', createdAt: '2026-03-01', history: [{ id: 'h13', date: '03-01 09:00', action: '자동 생성', actor: 'System' }] },
-    { id: 't9', title: '정보보안 필수 교육 이수', category: '기타', priority: '낮음', status: '대기', dueDate: '2026-04-15', createdAt: '2026-03-10', history: [{ id: 'h14', date: '03-10 09:00', action: '자동 생성', actor: 'System' }] },
-    { id: 't10', title: 'Evolution School 커리큘럼 검토', category: '일반', priority: '중간', status: '대기', dueDate: '2026-04-05', assignedBy: '구교수', createdAt: '2026-03-20', history: [{ id: 'h15', date: '03-20 14:00', action: '업무 생성', actor: '구교수' }] },
-];
 
 const priorityColor: Record<TodoPriority, string> = { '높음': 'bg-red-400', '중간': 'bg-amber-400', '낮음': 'bg-blue-300' };
 const statusBadge: Record<TodoStatus, "default" | "success" | "warning" | "danger" | "info"> = { '대기': 'default', '진행중': 'info', '완료': 'success', '승인대기': 'warning', '반려': 'danger' };
@@ -37,7 +25,7 @@ const categoryStyle: Record<TodoCategory, string> = { '일반': 'bg-neutral-100 
 let counter = 100;
 
 export default function TodoPage() {
-    const [todos, setTodos] = useState<TodoItem[]>(initialTodos);
+    const [todos, setTodos] = useState<TodoItem[]>([]);
     const [wioMemberId, setWioMemberId] = useState<string | null>(null);
     const [filter, setFilter] = useState<'전체' | TodoCategory>('전체');
     const [statusFilter, setStatusFilter] = useState<'전체' | TodoStatus>('전체');

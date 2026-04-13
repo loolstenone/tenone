@@ -1,1 +1,2 @@
-export { default } from "../../myverse/expenses/page";
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/intra/erp/finance/expenses"); }

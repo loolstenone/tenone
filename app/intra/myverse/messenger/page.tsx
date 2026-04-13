@@ -33,7 +33,7 @@ export default function MessengerPage() {
     const [selectedChat, setSelectedChat] = useState<string | null>('c1');
     const [searchQuery, setSearchQuery] = useState('');
     const [newMessage, setNewMessage] = useState('');
-    const [chats, setChats] = useState<ChatThread[]>(generateMockChats);
+    const [chats, setChats] = useState<ChatThread[]>([]);
     const [notifications] = useState<Message[]>(generateNotifications);
     const [activeTab, setActiveTab] = useState<'channels' | 'chats' | 'people' | 'agents' | 'services'>('channels');
     const [channels, setChannels] = useState<chatDb.ChatThread[]>([]);
@@ -106,20 +106,16 @@ export default function MessengerPage() {
             try {
                 const threads = await chatDb.fetchThreads(user.id);
                 if (cancelled) return;
-                if (threads.length > 0) {
-                    const converted: ChatThread[] = threads.map(t => ({
-                        id: t.id,
-                        name: t.name || '대화',
-                        participants: t.participants,
-                        messages: [],
-                        isGroup: t.is_group,
-                        lastActive: new Date(t.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                    }));
-                    setChats(converted);
-                    setDbLoaded(true);
-                } else {
-                    setDbLoaded(false);
-                }
+                const converted: ChatThread[] = threads.map(t => ({
+                    id: t.id,
+                    name: t.name || '대화',
+                    participants: t.participants,
+                    messages: [],
+                    isGroup: t.is_group,
+                    lastActive: new Date(t.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                }));
+                setChats(converted);
+                setDbLoaded(threads.length > 0);
             } catch {
                 setDbLoaded(false);
             }

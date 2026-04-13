@@ -1,1 +1,2 @@
-export { default } from "../../myverse/payroll/page";
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/intra/erp/hr/payroll"); }

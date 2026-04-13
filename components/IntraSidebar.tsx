@@ -109,7 +109,15 @@ export function IntraSidebar() {
             {/* Modules */}
             <nav className="flex-1 overflow-y-auto px-3 py-1 space-y-0.5">
                 {visibleModules.map((mod) => {
-                    const isModuleActive = pathname.startsWith(mod.href);
+                    // mod.href 외에 하위 섹션 아이템 경로도 확인 (MARKETING→/intra/studio/ 등)
+                    const isModuleActive = pathname.startsWith(mod.href) ||
+                        mod.sections.some((s) =>
+                            s.items.some((item) =>
+                                pathname === item.href ||
+                                pathname.startsWith(item.href + "/") ||
+                                (item.children?.some((c) => pathname === c.href || pathname.startsWith(c.href + "/")))
+                            )
+                        );
                     const isExpanded = expandedModules.has(mod.name);
                     const hasSections = mod.sections.length > 0;
 
@@ -155,13 +163,22 @@ export function IntraSidebar() {
                                                         href={item.href}
                                                         className={clsx(
                                                             "flex items-center gap-2 px-3 py-1.5 text-xs rounded transition-all",
-                                                            isActive(item.href)
+                                                            isActive(item.href, item.exact)
                                                                 ? "text-white font-medium bg-white/5"
                                                                 : "text-neutral-500 hover:text-white hover:bg-white/[0.03]"
                                                         )}
                                                     >
-                                                        <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href) ? "text-white" : "text-neutral-600")} />
+                                                        <item.icon className={clsx("h-3.5 w-3.5 shrink-0", isActive(item.href, item.exact) ? "text-white" : "text-neutral-600")} />
                                                         <span className="flex-1">{item.name}</span>
+                                                        {item.badge === "soon" && (
+                                                            <span className="text-[8px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-600 font-medium">준비중</span>
+                                                        )}
+                                                        {item.badge === "beta" && (
+                                                            <span className="text-[8px] px-1 py-0.5 rounded bg-blue-900/50 text-blue-400 font-medium">BETA</span>
+                                                        )}
+                                                        {item.badge === "new" && (
+                                                            <span className="text-[8px] px-1 py-0.5 rounded bg-green-900/50 text-green-400 font-medium">NEW</span>
+                                                        )}
                                                     </Link>
                                                 ))}
                                         </div>

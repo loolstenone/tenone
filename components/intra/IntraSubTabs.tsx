@@ -27,13 +27,19 @@ export function IntraSubTabs() {
                         key={item.href}
                         href={item.href}
                         className={clsx(
-                            "px-4 py-2.5 text-sm border-b-2 -mb-[2px] transition-colors whitespace-nowrap",
+                            "flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 -mb-[2px] transition-colors whitespace-nowrap",
                             isActive
                                 ? "border-neutral-900 text-neutral-900 font-medium"
                                 : "border-transparent text-neutral-400 hover:text-neutral-700 hover:border-neutral-300"
                         )}
                     >
                         {item.name}
+                        {item.badge === "soon" && (
+                            <span className="text-[8px] px-1 py-0.5 rounded bg-neutral-100 text-neutral-400 font-medium">준비중</span>
+                        )}
+                        {item.badge === "new" && (
+                            <span className="text-[8px] px-1 py-0.5 rounded bg-green-50 text-green-600 font-medium">NEW</span>
+                        )}
                     </Link>
                 );
             })}
