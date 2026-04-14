@@ -44,9 +44,12 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 npm run dev        # 개발 서버
 npm run build      # 프로덕션 빌드
 npm run lint       # ESLint
-npm run deploy:dev # GCP 개발 배포
-npm run deploy:prod # GCP 프로덕션 배포
 ```
+
+> ⚠️ **배포는 git push만으로 한다. Claude는 절대 `vercel deploy` 또는 `npm run deploy:*`를 실행하지 않는다.**
+> Vercel이 GitHub push를 감지해 자동 빌드·배포한다. Claude가 직접 deploy 명령을 실행하면
+> 동일 커밋이 중복 빌드되어 빌드 크레딧이 낭비된다 (실제 1시간에 18회 빌드 → $1.95 소진 사례).
+> 배포 확인이 필요하면 Vercel Dashboard에서 확인한다.
 
 ## Supabase SQL 직접 실행
 
@@ -289,6 +292,7 @@ Ten:One Universe는 여러 브랜드로 구성:
 - ❌ "다음 할 일"을 막연하게 쓰기
 - ❌ "작업 종료할까요?" / "이어갈까요?" 등 묻지 않기 — 사용자가 말할 때까지 계속 진행
 - ❌ 각 서비스의 디자인 톤앤매너를 무시하고 코드만 짜기 — 반드시 기존 테마에 맞출 것
+- ❌ `vercel deploy` / `npm run deploy:*` 직접 실행 — git push → Vercel 자동배포가 유일한 배포 경로. 중복 빌드 = 크레딧 낭비
 
 ---
 

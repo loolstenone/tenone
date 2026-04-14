@@ -1,8 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
-      "dev": false,
-      "feature-*": false
+      "master": true
     }
   },
   "functions": {
