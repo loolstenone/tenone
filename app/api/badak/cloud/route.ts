@@ -1,7 +1,35 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
 export async function GET() {
-  // Phase 0: mock data. Phase 1: fetch from badak_needs table
-  return NextResponse.json({ needs: CLOUD_WORDS });
+  // Phase 1: DB에서 실제 니즈 데이터 로드, 없으면 Mock 폴백
+  if (url && key) {
+    try {
+      const supabase = createClient(url, key);
+      const { data, error } = await supabase
+        .from('badak_needs')
+        .select('id, display_text, count, category, status')
+        .in('status', ['active', 'group_created'])
+        .order('count', { ascending: false })
+        .limit(60);
+
+      if (!error && data && data.length > 0) {
+        const needs = data.map(n => ({
+          id: n.id,
+          text: n.display_text,
+          count: n.count,
+          category: n.category || '',
+          status: n.status,
+        }));
+        return NextResponse.json({ needs, source: 'db' });
+      }
+    } catch { /* fallback to mock */ }
+  }
+
+  // Mock 폴백
+  return NextResponse.json({ needs: CLOUD_WORDS, source: 'mock' });
 }

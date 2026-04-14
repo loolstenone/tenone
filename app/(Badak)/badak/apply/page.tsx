@@ -61,12 +61,43 @@ export default function ApplyPage() {
   const canSubmit = name.trim() && industry.trim() && experience.trim()
     && interests.length > 0 && reason.trim().length >= 20 && contact.trim();
 
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
   const handleSubmit = async () => {
     if (!isAuthenticated) { setShowLogin(true); return; }
-    if (!canSubmit) return;
+    if (!canSubmit || submitting) return;
 
-    // TODO: POST /api/badak/apply
-    setSubmitted(true);
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) { setShowLogin(true); setSubmitting(false); return; }
+
+      const res = await fetch('/api/badak/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ name, industry, experience, interests, reason, plan, contact }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || '신청 중 오류가 발생했습니다');
+        setSubmitting(false);
+        return;
+      }
+
+      setSubmitted(true);
+    } catch {
+      setError('네트워크 오류가 발생했습니다');
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -271,17 +302,24 @@ export default function ApplyPage() {
             </p>
           </div>
 
+          {/* 에러 */}
+          {error && (
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
+              {error}
+            </div>
+          )}
+
           {/* 제출 버튼 */}
           <button onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all"
             style={{
-              background: canSubmit ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)',
-              color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
-              cursor: canSubmit ? 'pointer' : 'not-allowed',
+              background: canSubmit && !submitting ? 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)' : 'rgba(255,255,255,0.06)',
+              color: canSubmit && !submitting ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
+              cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed',
             }}>
             <Send className="h-4 w-4" />
-            바닥장 신청하기
+            {submitting ? '신청 중...' : '바닥장 신청하기'}
           </button>
         </div>
       </div>

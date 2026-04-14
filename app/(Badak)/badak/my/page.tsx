@@ -13,7 +13,7 @@ import {
   ToggleLeft, ToggleRight, UserPlus, AlertCircle,
 } from 'lucide-react';
 
-type TabType = 'posts' | 'bookmarks' | 'messages' | 'mygroups' | 'settings';
+type TabType = 'posts' | 'bookmarks' | 'notifications' | 'mygroups' | 'settings';
 type ApplicantStatus = 'pending' | 'approved' | 'rejected';
 type JoinType = 'approval' | 'firstcome';
 
@@ -392,7 +392,8 @@ export default function BadakMyPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('posts');
   const [showLogin, setShowLogin] = useState(false);
-  const [msgFilter, setMsgFilter] = useState<'all' | 'sent' | 'received'>('all');
+  const [notifications, setNotifications] = useState<{ id: string; type: string; title: string; body: string | null; link: string | null; read: boolean; created_at: string }[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 설정
   const [nickname, setNickname] = useState('');
@@ -407,19 +408,75 @@ export default function BadakMyPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [codeResendCooldown, setCodeResendCooldown] = useState(0);
 
+  // 내 글 (실DB)
+  const [myPosts, setMyPosts] = useState<MyPost[]>([]);
+  const [myPostsLoading, setMyPostsLoading] = useState(true);
+
   // 내 모임 (바닥장)
   const [myGroups, setMyGroups] = useState<MyGroup[]>(MOCK_MY_GROUPS);
   const isLeader = myGroups.length > 0;
 
+  // 멤버 역할
+  const [memberRole, setMemberRole] = useState<string>('member');
+
   useEffect(() => { if (!isLoading && !isAuthenticated) setShowLogin(true); }, [isLoading, isAuthenticated]);
+
+  // 프로필 + 내 글 실DB 로드
   useEffect(() => {
-    if (user) {
-      setNickname(user.name || '');
-      setPhone('010-1234-5678');
-      setIndustry('광고/에이전시');
-      setJobFunction('퍼포먼스 마케팅');
-      setInterests(['네트워킹', '업무 스킬 향상', '이직 준비']);
-    }
+    if (!user) return;
+    (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const { data: { session } } = await createClient().auth.getSession();
+        if (!session) return;
+        const headers = { Authorization: `Bearer ${session.access_token}` };
+
+        // 프로필
+        const memberRes = await fetch('/api/badak/member', { headers });
+        const memberData = await memberRes.json();
+        if (memberData.member) {
+          setNickname(memberData.member.display_name || user.name || '');
+          setPhone(memberData.member.phone || '');
+          setIndustry(memberData.member.industry || '');
+          setJobFunction(memberData.member.job_function || '');
+          setInterests(memberData.member.interests || []);
+          setMemberRole(memberData.member.role || 'member');
+        } else {
+          setNickname(user.name || '');
+        }
+
+        // 내 글 (모든 보드에서 내 글)
+        setMyPostsLoading(true);
+        const boardLabels: Record<string, string> = { chat: '수다', review: '모임 후기', proposal: '모임 제안' };
+        const results = await Promise.all(
+          ['chat', 'review', 'proposal'].map(b => fetch(`/api/badak/community?board=${b}&limit=50`).then(r => r.json()))
+        );
+        const allPosts = results.flatMap(r => r.posts || []);
+        const mine = allPosts
+          .filter((p: { user_id: string }) => p.user_id === user.id)
+          .map((p: { id: string; board: string; title: string; views_count: number; likes_count: number; comments_count: number; created_at: string }) => ({
+            id: p.id,
+            board: p.board,
+            boardLabel: boardLabels[p.board] || p.board,
+            title: p.title,
+            views: p.views_count || 0,
+            likes: p.likes_count || 0,
+            comments: p.comments_count || 0,
+            createdAt: new Date(p.created_at).toLocaleDateString('ko-KR'),
+          }));
+        setMyPosts(mine);
+        setMyPostsLoading(false);
+
+        // 알림 로드
+        const notiRes = await fetch('/api/badak/notifications', { headers });
+        const notiData = await notiRes.json();
+        setNotifications(notiData.notifications || []);
+        setUnreadCount(notiData.unreadCount || 0);
+      } catch {
+        setNickname(user.name || '');
+        setMyPostsLoading(false);
+      }
+    })();
   }, [user]);
 
   if (isLoading) return <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]"><div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>;
@@ -433,14 +490,12 @@ export default function BadakMyPage() {
   );
 
   const initials = user?.name?.substring(0, 1) || '?';
-  const unreadMsg = MOCK_MESSAGES.filter((m) => !m.read).length;
   const pendingApplicants = myGroups.reduce((sum, g) => sum + g.applicants.filter((a) => a.status === 'pending').length, 0);
-  const filteredMessages = MOCK_MESSAGES.filter((m) => msgFilter === 'all' || m.direction === msgFilter);
 
   const tabs: { id: TabType; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'posts', label: '내 글', icon: FileText },
     { id: 'bookmarks', label: '북마크', icon: Bookmark },
-    { id: 'messages', label: '메시지', icon: MessageSquare, badge: unreadMsg },
+    { id: 'notifications', label: '알림', icon: Bell, badge: unreadCount },
     ...(isLeader ? [{ id: 'mygroups' as const, label: '내 모임', icon: Crown, badge: pendingApplicants }] : []),
     { id: 'settings', label: '설정', icon: Settings },
   ];
@@ -484,7 +539,16 @@ export default function BadakMyPage() {
         setVerifyStep('input');
         return;
       }
-      // TODO: 프로필 업데이트 API 호출 (nickname, phone, industry, jobFunction, interests)
+      // 프로필 업데이트 API 호출
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      if (session) {
+        await fetch('/api/badak/member', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ displayName: nickname, phone, industry, jobFunction, interests }),
+        });
+      }
       setSaveSuccess(true); setVerifyStep('idle'); setEditMode(false); setVerificationCode('');
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
@@ -561,9 +625,11 @@ export default function BadakMyPage() {
         {/* ── 내 글 ── */}
         {activeTab === 'posts' && (
           <div className="space-y-2">
-            {MOCK_POSTS.length === 0 ? (
+            {myPostsLoading ? (
+              <div className="flex justify-center py-16"><div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>
+            ) : myPosts.length === 0 ? (
               <div className="py-16 text-center"><FileText className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">작성한 글이 없습니다</p></div>
-            ) : MOCK_POSTS.map((post) => (
+            ) : myPosts.map((post) => (
               <div key={post.id} className="rounded-xl border border-white/6 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="rounded bg-white/8 px-1.5 py-0.5 text-[10px] text-white/40">{post.boardLabel}</span>
@@ -607,53 +673,65 @@ export default function BadakMyPage() {
         )}
 
         {/* ── 메시지 (통합) ── */}
-        {activeTab === 'messages' && (
+        {activeTab === 'notifications' && (
           <div>
-            {/* 필터 */}
-            <div className="mb-4 flex gap-2">
-              {([['all', '전체'], ['received', '받은'], ['sent', '보낸']] as const).map(([key, label]) => (
-                <button key={key} onClick={() => setMsgFilter(key)}
-                  className="rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors"
-                  style={{ background: msgFilter === key ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.03)', color: msgFilter === key ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>
-                  {label}
+            {notifications.length > 0 && unreadCount > 0 && (
+              <div className="mb-4 flex justify-end">
+                <button
+                  onClick={async () => {
+                    const { createClient } = await import('@/lib/supabase/client');
+                    const { data: { session } } = await createClient().auth.getSession();
+                    if (!session) return;
+                    await fetch('/api/badak/notifications', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+                      body: JSON.stringify({ readAll: true }),
+                    });
+                    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                    setUnreadCount(0);
+                  }}
+                  className="text-[11px] text-white/30 hover:text-white/50"
+                >
+                  모두 읽음
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
             <div className="space-y-2">
-              {filteredMessages.length === 0 ? (
-                <div className="py-16 text-center"><MessageSquare className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">메시지가 없습니다</p></div>
-              ) : filteredMessages.map((msg) => {
-                const typeLabels: Record<string, { label: string; color: string; bg: string }> = {
-                  join: { label: '참여 신청', color: '#4ade80', bg: 'rgba(34,197,94,0.1)' },
-                  interest: { label: '관심 표현', color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
-                  approved: { label: '승인 알림', color: '#a5b4fc', bg: 'rgba(99,102,241,0.12)' },
-                  rejected: { label: '거절 알림', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
-                  notice: { label: '공지', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+              {notifications.length === 0 ? (
+                <div className="py-16 text-center"><Bell className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">알림이 없습니다</p></div>
+              ) : notifications.map((noti) => {
+                const typeStyles: Record<string, { label: string; color: string; bg: string }> = {
+                  join_request: { label: '참여 신청', color: '#4ade80', bg: 'rgba(34,197,94,0.1)' },
+                  join_approved: { label: '승인', color: '#a5b4fc', bg: 'rgba(99,102,241,0.12)' },
+                  join_rejected: { label: '거절', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
+                  comment: { label: '댓글', color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
+                  like: { label: '좋아요', color: '#f87171', bg: 'rgba(239,68,68,0.08)' },
+                  group_update: { label: '모임', color: '#a5b4fc', bg: 'rgba(99,102,241,0.1)' },
+                  system: { label: '시스템', color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
                 };
-                const t = typeLabels[msg.type] || typeLabels.join;
+                const s = typeStyles[noti.type] || typeStyles.system;
+                const ago = (() => {
+                  const diff = Date.now() - new Date(noti.created_at).getTime();
+                  const mins = Math.floor(diff / 60000);
+                  if (mins < 60) return `${mins}분 전`;
+                  const hours = Math.floor(mins / 60);
+                  if (hours < 24) return `${hours}시간 전`;
+                  return `${Math.floor(hours / 24)}일 전`;
+                })();
                 return (
-                  <div key={msg.id} className="rounded-xl border p-4" style={{
-                    background: msg.read ? 'rgba(255,255,255,0.02)' : 'rgba(255,217,61,0.02)',
-                    borderColor: msg.read ? 'rgba(255,255,255,0.06)' : 'rgba(255,217,61,0.1)',
+                  <div key={noti.id} className="rounded-xl border p-4 transition-colors" style={{
+                    background: noti.read ? 'rgba(255,255,255,0.02)' : 'rgba(255,217,61,0.02)',
+                    borderColor: noti.read ? 'rgba(255,255,255,0.06)' : 'rgba(255,217,61,0.1)',
                   }}>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {!msg.read && <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
-                        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: t.bg, color: t.color }}>{t.label}</span>
-                        <span className="rounded bg-white/6 px-1.5 py-0.5 text-[10px] text-white/25">
-                          {msg.direction === 'sent' ? '보냄' : '받음'}
-                        </span>
+                        {!noti.read && <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
+                        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: s.bg, color: s.color }}>{s.label}</span>
                       </div>
-                      <span className="text-[10px] text-white/20">{msg.createdAt}</span>
+                      <span className="text-[10px] text-white/20">{ago}</span>
                     </div>
-                    <h4 className="mb-1 text-xs font-semibold text-white/60">{msg.groupName || msg.needName}</h4>
-                    {msg.counterpartName && (
-                      <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40">
-                        {msg.direction === 'sent' ? '→' : '←'} {msg.counterpartName}
-                        {msg.counterpartJob && <span className="text-white/20">· {msg.counterpartJob}</span>}
-                      </div>
-                    )}
-                    {msg.content && <p className="text-[11px] leading-relaxed text-white/45">{msg.content}</p>}
+                    <p className="text-xs font-medium text-white/70">{noti.title}</p>
+                    {noti.body && <p className="mt-0.5 text-[11px] text-white/40">{noti.body}</p>}
                   </div>
                 );
               })}

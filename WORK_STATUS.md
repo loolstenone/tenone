@@ -1,10 +1,38 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-14 (집, 세션 45)
+> 마지막 업데이트: 2026-04-15 (사무실, 세션 46)
 
 ---
 
-## 이번 세션 (세션 45) 완료 항목
+## 이번 세션 (세션 46) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| Badak 사이트 정밀 검토 | 26개 페이지/13개 API 전수 조사. 데이터 흐름, Mock/실DB 현황, 미완성 기능, 누락 기능 식별 |
+| 모임 참여 상태 서버 조회 | `groups/[id]/join` GET 엔드포인트 추가. 페이지 로드 시 참여 상태 확인 + CTA 4분기 (leader/approved/applied/none) |
+| 카운터 원자적 처리 통일 | broken RPC 호출 제거, COUNT 쿼리 직접 사용으로 통일 (좋아요/댓글 카운트) |
+| 서비스 키 폴백 제거 | 14개 API 파일에서 `anon_key` 폴백 제거 → `throw Error` 명시적 실패 |
+| 프로필 수정 API | `/api/badak/member` PUT 추가 + 마이페이지 TODO → 실제 API 호출 |
+| 글/댓글 수정·삭제 | 커뮤니티 `PUT/DELETE` + 모임 게시판 `PUT/DELETE` + 댓글 `DELETE` (6개 엔드포인트) |
+| 커뮤니티 전면 개편 | 글 상세 화면 + 좋아요 + 댓글 + 수정/삭제 + 검색 바 + 태그/내용 필터 |
+| 모임 게시글/댓글 페이지네이션 | `limit/offset` + 총 카운트 반환 + N+1 쿼리 해결 (배치 카운트) |
+| 니즈 클라우드 실DB 전환 | Phase 1: `badak_needs` 테이블 우선 조회, Mock 폴백 |
+| 마이페이지 실DB 전환 | 내 글 → 커뮤니티 API에서 `user_id` 필터. 프로필 → `/api/badak/member` GET |
+| 알림 시스템 신규 | `badak_notifications` 테이블 + RLS + GET/PUT API + 모임 참여 신청 시 바닥장 알림 생성 |
+| 모임 수정/삭제 API | `/api/badak/groups` PUT/DELETE (리더만, 참여자 있으면 closed 처리) |
+| 마이페이지 메시지→알림 | Mock 메시지 탭 제거 → 실DB 알림 탭 ("모두 읽음" + 읽음/안읽음 스타일) |
+
+## 다음 할 일
+
+- 마이페이지 북마크 탭 실DB 전환 (현재 MOCK_BOOKMARKS) — `badak_bookmarks` 테이블 생성 필요
+- 마이페이지 내 모임 탭 실DB 전환 (현재 MOCK_MY_GROUPS) — `badak_group_members` + `badak_groups` JOIN 쿼리
+- 모임 상세 페이지에서 본인 글 수정/삭제 UI 추가 (API는 완성됨)
+- firstcome 자동 승인 로직 — join API에서 `joinType='firstcome'`이면 status='approved'로 즉시 처리
+- `badak_members`에 `phone`, `interests`, `role` 컬럼 존재 여부 확인 (프로필 수정 API에서 사용)
+- 커뮤니티 글 상세에서 조회수 증가가 정상 작동하는지 확인 (현재 +1 방식, 동일 사용자 중복 증가 방지 없음)
+- `RESEND_API_KEY` .env.local에 추가
+
+## 이전 세션 (세션 45) 완료 항목
 
 | 항목 | 내용 |
 |------|------|

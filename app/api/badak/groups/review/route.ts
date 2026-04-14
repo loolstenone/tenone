@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY_PROD || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+const supabase = createClient(url, key);
 
 // GET: 심사 대기 모임 목록
 export async function GET(request: NextRequest) {

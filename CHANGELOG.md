@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-04-15 (사무실, 세션 46)
+
+### Badak 사이트 정밀 검토 + 12개 이슈 일괄 수정
+
+#### 신규 파일
+- `app/api/badak/notifications/route.ts` — 알림 API (GET 목록/PUT 읽음 처리)
+
+#### 수정 파일 (보안)
+- 14개 Badak API 파일 — `SUPABASE_SERVICE_ROLE_KEY` 폴백 제거, 명시적 에러 처리
+
+#### 수정 파일 (API 신규 엔드포인트)
+- `app/api/badak/groups/[id]/join/route.ts` — GET (참여 상태 조회) + 참여 신청 시 바닥장 알림 생성
+- `app/api/badak/member/route.ts` — PUT (프로필 수정)
+- `app/api/badak/community/[postId]/route.ts` — PUT (글 수정) + DELETE (글 삭제) + 조회수 직접 증가
+- `app/api/badak/community/[postId]/comments/route.ts` — GET (댓글 목록) + DELETE (댓글 삭제)
+- `app/api/badak/groups/[id]/posts/route.ts` — PUT (게시글 수정) + DELETE (게시글 삭제) + 페이지네이션 + N+1 해결
+- `app/api/badak/posts/[postId]/comments/route.ts` — DELETE (댓글 삭제) + 페이지네이션
+- `app/api/badak/groups/route.ts` — PUT (모임 수정) + DELETE (모임 삭제)
+- `app/api/badak/cloud/route.ts` — Phase 1 실DB 전환 (badak_needs 우선, Mock 폴백)
+
+#### 수정 파일 (프론트엔드)
+- `app/(Badak)/badak/community/page.tsx` — 전면 개편: 글 상세 + 좋아요 + 댓글 + 수정/삭제 + 검색/필터
+- `app/(Badak)/badak/groups/[id]/page.tsx` — 참여 상태 서버 조회 + CTA 4분기 (leader/approved/applied/none)
+- `app/(Badak)/badak/my/page.tsx` — 내 글 실DB 전환 + 프로필 실DB + 메시지탭→알림탭 + 프로필 수정 API 연결
+- `app/api/badak/community/[postId]/like/route.ts` — broken RPC 제거, COUNT 직접 사용
+- `app/api/badak/feed/route.ts` — 타입 캐스팅 수정
+
+#### DB 마이그레이션
+- `badak_notifications` 테이블 생성 (type, title, body, link, read, metadata) + RLS
+
+#### 결정 사항
+- 모임 참여 상태는 서버에서 관리 (leader/approved/applied/none)
+- 참여자 있는 모임은 삭제 대신 closed 처리
+- 서비스 키 없으면 에러 throw (anon_key 폴백 절대 금지)
+- 커뮤니티에 글 상세 화면 추가 (좋아요/댓글/수정/삭제 완비)
+- 마이페이지 메시지 탭 폐기 → 알림 탭으로 전환 (실DB)
+
+---
+
 ## 2026-04-14 (집, 세션 45)
 
 ### Badak Next Stage — 다크 테마 통일 + 클라우드 개선 + 바닥장 시스템

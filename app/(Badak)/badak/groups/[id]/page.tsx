@@ -50,6 +50,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [tab, setTab] = useState<Tab>('info');
   const [joining, setJoining] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [joinStatus, setJoinStatus] = useState<'none' | 'applied' | 'approved' | 'leader'>('none');
 
   // Board state
   const [posts, setPosts] = useState<Post[]>([]);
@@ -63,6 +64,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [submittingPost, setSubmittingPost] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
 
+  // 모임 정보 로드
   useEffect(() => {
     fetch(`/api/badak/groups?limit=50`)
       .then((r) => r.json())
@@ -72,6 +74,28 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       })
       .catch(() => {});
   }, [id]);
+
+  // 참여 상태 서버 조회
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const res = await fetch(`/api/badak/groups/${id}/join`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setJoinStatus(data.status || 'none');
+          if (data.status === 'applied' || data.status === 'approved' || data.status === 'leader') {
+            setJoined(true);
+          }
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [id, isAuthenticated]);
 
   useEffect(() => {
     if (tab === 'board') {
@@ -129,7 +153,6 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       setWriteTitle('');
       setWriteContent('');
       setWriteImages([]);
-      // 리로드
       const data = await fetch(`/api/badak/groups/${id}/posts`).then((r) => r.json());
       setPosts(data.posts || []);
     }
@@ -179,8 +202,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
   if (!group) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="text-sm text-neutral-400">로딩 중...</div>
+      <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
+        <div className="text-sm text-white/30">로딩 중...</div>
       </div>
     );
   }
@@ -189,10 +212,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const leader = group.leader as GroupDetail['leader'];
 
   return (
-    <div className="mx-auto min-h-screen max-w-[860px] bg-white text-neutral-900">
+    <div className="mx-auto min-h-screen max-w-[860px] bg-[#1a1a2e] pt-14 text-white">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-4">
-        <Link href="/badak" className="text-neutral-400 hover:text-neutral-900">
+        <Link href="/badak/groups" className="text-white/30 hover:text-white/60">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-lg font-bold">{group.title}</h1>
@@ -202,11 +225,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {group.cover_image_url ? (
         <img src={group.cover_image_url} alt="" className="h-40 w-full object-cover" />
       ) : (
-        <div className="h-24 w-full" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 50%, #f0fdf4 100%)' }} />
+        <div className="h-24 w-full" style={{ background: 'linear-gradient(135deg, rgba(255,217,61,0.08) 0%, rgba(139,92,246,0.08) 50%, rgba(59,130,246,0.08) 100%)' }} />
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-neutral-100 px-5">
+      <div className="flex border-b border-white/8 px-5">
         {[
           { key: 'info' as Tab, label: '모임 정보' },
           { key: 'board' as Tab, label: '게시판' },
@@ -216,8 +239,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             onClick={() => { setTab(t.key); setSelectedPost(null); }}
             className="border-b-2 px-4 pb-3 pt-4 text-sm font-medium transition-colors"
             style={{
-              borderColor: tab === t.key ? '#2563eb' : 'transparent',
-              color: tab === t.key ? '#2563eb' : '#9ca3af',
+              borderColor: tab === t.key ? '#ffd93d' : 'transparent',
+              color: tab === t.key ? '#ffd93d' : 'rgba(255,255,255,0.3)',
             }}
           >
             {t.label}
@@ -231,33 +254,33 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           <span
             className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
             style={{
-              background: group.status === 'recruiting' ? '#f0fdf4' : '#fef2f2',
-              color: group.status === 'recruiting' ? '#16a34a' : '#dc2626',
+              background: group.status === 'recruiting' ? 'rgba(74,222,128,0.1)' : 'rgba(239,68,68,0.1)',
+              color: group.status === 'recruiting' ? '#4ade80' : '#f87171',
             }}
           >
             {group.status === 'recruiting' ? '모집중' : '마감'}
           </span>
 
           {group.description && (
-            <p className="mt-4 text-sm text-neutral-600 leading-relaxed">{group.description}</p>
+            <p className="mt-4 text-sm leading-relaxed text-white/50">{group.description}</p>
           )}
 
           {leader && (
-            <div className="mt-6 flex items-center gap-3 rounded-xl border border-neutral-100 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+            <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/8 p-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
                 {leader.display_name.charAt(0)}
               </div>
               <div>
-                <div className="text-sm font-medium">바닥장 {leader.display_name}</div>
-                <div className="text-xs text-neutral-400">{leader.job_function} · {leader.experience_years}년차</div>
+                <div className="text-sm font-medium text-white/80">바닥장 {leader.display_name}</div>
+                <div className="text-xs text-white/30">{leader.job_function} · {leader.experience_years}년차</div>
               </div>
             </div>
           )}
 
           <div className="mt-6 space-y-3">
             {group.event_date && (
-              <div className="flex items-center gap-3 text-sm text-neutral-600">
-                <Calendar className="h-4 w-4 text-neutral-300" />
+              <div className="flex items-center gap-3 text-sm text-white/50">
+                <Calendar className="h-4 w-4 text-white/20" />
                 {new Date(group.event_date).toLocaleDateString('ko-KR', {
                   year: 'numeric', month: 'long', day: 'numeric', weekday: 'short',
                   hour: '2-digit', minute: '2-digit',
@@ -265,20 +288,20 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
             {group.location && (
-              <div className="flex items-center gap-3 text-sm text-neutral-600">
-                <MapPin className="h-4 w-4 text-neutral-300" />
+              <div className="flex items-center gap-3 text-sm text-white/50">
+                <MapPin className="h-4 w-4 text-white/20" />
                 {group.location}{group.location_detail ? ` · ${group.location_detail}` : ''}
               </div>
             )}
-            <div className="flex items-center gap-3 text-sm text-neutral-600">
-              <Users className="h-4 w-4 text-neutral-300" />
-              <span style={{ color: isFull ? '#dc2626' : undefined }}>
+            <div className="flex items-center gap-3 text-sm text-white/50">
+              <Users className="h-4 w-4 text-white/20" />
+              <span style={{ color: isFull ? '#f87171' : undefined }}>
                 {group.current_members}/{group.max_members}명
               </span>
             </div>
             {group.fee > 0 && (
-              <div className="flex items-center gap-3 text-sm text-neutral-600">
-                <Banknote className="h-4 w-4 text-neutral-300" />
+              <div className="flex items-center gap-3 text-sm text-white/50">
+                <Banknote className="h-4 w-4 text-white/20" />
                 {group.fee.toLocaleString()}원
               </div>
             )}
@@ -287,7 +310,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.tags?.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-1.5">
               {group.tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-neutral-50 px-3 py-1 text-xs text-neutral-400">#{tag}</span>
+                <span key={tag} className="rounded-full px-3 py-1 text-xs text-white/30" style={{ background: 'rgba(255,255,255,0.05)' }}>#{tag}</span>
               ))}
             </div>
           )}
@@ -298,11 +321,12 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {tab === 'board' && !selectedPost && !showWrite && (
         <div className="px-5 pb-28 pt-4">
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-sm text-neutral-400">{posts.length}개의 글</span>
+            <span className="text-sm text-white/30">{posts.length}개의 글</span>
             {isAuthenticated && (
               <button
                 onClick={() => setShowWrite(true)}
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+                style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
               >
                 글쓰기
               </button>
@@ -310,7 +334,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {posts.length === 0 ? (
-            <div className="py-16 text-center text-sm text-neutral-300">
+            <div className="py-16 text-center text-sm text-white/20">
               아직 게시글이 없어요
             </div>
           ) : (
@@ -321,7 +345,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   <button
                     key={post.id}
                     onClick={() => { setSelectedPost(post); loadComments(post.id); }}
-                    className="w-full rounded-xl border border-neutral-100 p-4 text-left transition-colors hover:bg-neutral-50"
+                    className="w-full rounded-xl border border-white/8 p-4 text-left transition-colors hover:bg-white/[0.03]"
                   >
                     <div className="flex items-start gap-3">
                       {post.images?.length > 0 && (
@@ -329,11 +353,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          {post.pinned && <Pin className="h-3 w-3 text-blue-500" />}
-                          <h3 className="text-sm font-semibold truncate">{post.title}</h3>
+                          {post.pinned && <Pin className="h-3 w-3 text-amber-400" />}
+                          <h3 className="text-sm font-semibold text-white/80 truncate">{post.title}</h3>
                         </div>
-                        <p className="mt-1 text-xs text-neutral-400 line-clamp-2">{post.content}</p>
-                        <div className="mt-2 flex items-center gap-3 text-[11px] text-neutral-300">
+                        <p className="mt-1 text-xs text-white/30 line-clamp-2">{post.content}</p>
+                        <div className="mt-2 flex items-center gap-3 text-[11px] text-white/20">
                           <span>{author?.display_name}</span>
                           <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
                           <span className="flex items-center gap-0.5">
@@ -354,8 +378,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {tab === 'board' && showWrite && (
         <div className="px-5 pb-28 pt-4">
           <div className="mb-4 flex items-center justify-between">
-            <button onClick={() => setShowWrite(false)} className="text-sm text-neutral-400">← 뒤로</button>
-            <h2 className="text-sm font-bold">글쓰기</h2>
+            <button onClick={() => setShowWrite(false)} className="text-sm text-white/30 hover:text-white/50">← 뒤로</button>
+            <h2 className="text-sm font-bold text-white/70">글쓰기</h2>
             <div className="w-10" />
           </div>
 
@@ -364,14 +388,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               value={writeTitle}
               onChange={(e) => setWriteTitle(e.target.value)}
               placeholder="제목"
-              className="w-full border-b border-neutral-200 pb-3 text-lg font-bold outline-none placeholder:text-neutral-300"
+              className="w-full border-b border-white/10 bg-transparent pb-3 text-lg font-bold text-white outline-none placeholder:text-white/20"
             />
             <textarea
               value={writeContent}
               onChange={(e) => setWriteContent(e.target.value)}
               placeholder="내용을 입력하세요"
               rows={8}
-              className="w-full resize-none text-sm leading-relaxed outline-none placeholder:text-neutral-300"
+              className="w-full resize-none bg-transparent text-sm leading-relaxed text-white/70 outline-none placeholder:text-white/20"
             />
 
             {writeImages.length > 0 && (
@@ -383,18 +407,19 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             )}
 
             <div className="flex items-center gap-3">
-              <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-2 text-xs text-neutral-500 hover:bg-neutral-50">
+              <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/40 hover:bg-white/[0.03]">
                 <ImageIcon className="h-4 w-4" /> 이미지
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
               </label>
             </div>
           </div>
 
-          <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[860px] -translate-x-1/2 border-t border-neutral-100 bg-white px-5 py-4">
+          <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[860px] -translate-x-1/2 border-t border-white/8 bg-[#1a1a2e] px-5 py-4">
             <button
               onClick={handleWritePost}
               disabled={!writeTitle.trim() || !writeContent.trim() || submittingPost}
-              className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white disabled:opacity-30"
+              className="w-full rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-30"
+              style={{ background: 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)', color: '#1a1a2e' }}
             >
               {submittingPost ? '등록 중...' : '등록하기'}
             </button>
@@ -405,16 +430,16 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {/* Post detail */}
       {tab === 'board' && selectedPost && (
         <div className="px-5 pb-28 pt-4">
-          <button onClick={() => setSelectedPost(null)} className="mb-4 text-sm text-neutral-400">← 목록</button>
+          <button onClick={() => setSelectedPost(null)} className="mb-4 text-sm text-white/30 hover:text-white/50">← 목록</button>
 
-          <h2 className="text-lg font-bold">{selectedPost.title}</h2>
-          <div className="mt-2 flex items-center gap-2 text-xs text-neutral-400">
+          <h2 className="text-lg font-bold text-white/90">{selectedPost.title}</h2>
+          <div className="mt-2 flex items-center gap-2 text-xs text-white/30">
             <span>{(selectedPost.author as Post['author'])?.display_name}</span>
             <span>·</span>
             <span>{new Date(selectedPost.created_at).toLocaleDateString('ko-KR')}</span>
           </div>
 
-          <div className="mt-4 text-sm leading-relaxed text-neutral-700 whitespace-pre-line">
+          <div className="mt-4 text-sm leading-relaxed text-white/60 whitespace-pre-line">
             {selectedPost.content}
           </div>
 
@@ -427,18 +452,18 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           )}
 
           {/* Comments */}
-          <div className="mt-8 border-t border-neutral-100 pt-4">
-            <h3 className="mb-3 text-sm font-bold">댓글 {comments.length}</h3>
+          <div className="mt-8 border-t border-white/8 pt-4">
+            <h3 className="mb-3 text-sm font-bold text-white/60">댓글 {comments.length}</h3>
             <div className="space-y-3">
               {comments.map((c) => {
                 const author = c.author as Comment['author'];
                 return (
-                  <div key={c.id} className="rounded-lg bg-neutral-50 p-3">
-                    <div className="flex items-center gap-2 text-xs text-neutral-400">
-                      <span className="font-medium text-neutral-600">{author?.display_name}</span>
+                  <div key={c.id} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <div className="flex items-center gap-2 text-xs text-white/30">
+                      <span className="font-medium text-white/50">{author?.display_name}</span>
                       <span>{new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
                     </div>
-                    <p className="mt-1 text-sm text-neutral-700">{c.content}</p>
+                    <p className="mt-1 text-sm text-white/60">{c.content}</p>
                   </div>
                 );
               })}
@@ -451,12 +476,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
                   placeholder="댓글 입력"
-                  className="flex-1 rounded-lg border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-blue-300"
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#ffd93d]/30"
                 />
                 <button
                   onClick={handleSubmitComment}
                   disabled={!newComment.trim() || submittingComment}
-                  className="rounded-lg bg-blue-600 p-2.5 text-white disabled:opacity-30"
+                  className="rounded-lg p-2.5 disabled:opacity-30"
+                  style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -468,17 +494,28 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Bottom CTA (info tab only) */}
       {tab === 'info' && (
-        <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[860px] -translate-x-1/2 border-t border-neutral-100 bg-white px-5 py-4">
-          {joined ? (
-            <div className="rounded-xl bg-green-50 py-3.5 text-center text-sm font-bold text-green-600">
-              참여 신청 완료!
+        <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[860px] -translate-x-1/2 border-t border-white/8 bg-[#1a1a2e] px-5 py-4">
+          {joinStatus === 'leader' ? (
+            <div className="rounded-xl py-3.5 text-center text-sm font-bold" style={{ background: 'rgba(255,217,61,0.1)', color: '#ffd93d' }}>
+              내가 개설한 모임
+            </div>
+          ) : joinStatus === 'approved' ? (
+            <div className="rounded-xl py-3.5 text-center text-sm font-bold" style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>
+              참여 중
+            </div>
+          ) : joined || joinStatus === 'applied' ? (
+            <div className="rounded-xl py-3.5 text-center text-sm font-bold" style={{ background: 'rgba(255,217,61,0.08)', color: '#ffd93d' }}>
+              승인 대기 중
             </div>
           ) : (
             <button
               onClick={handleJoin}
               disabled={isFull || joining}
-              className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all disabled:opacity-30"
-              style={{ background: isFull ? '#d1d5db' : '#2563eb' }}
+              className="w-full rounded-xl py-3.5 text-sm font-bold transition-all disabled:opacity-30"
+              style={{
+                background: isFull ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%)',
+                color: isFull ? 'rgba(255,255,255,0.2)' : '#1a1a2e',
+              }}
             >
               {isFull ? '모집 마감' : joining ? '신청 중...' : '참여 신청하기'}
             </button>

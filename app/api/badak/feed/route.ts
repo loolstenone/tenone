@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY_PROD || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+const supabase = createClient(url, key);
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   // 그룹 → 피드 아이템
   for (const g of groups || []) {
     const isUrgent = g.current_members / g.max_members > 0.9;
-    const leader = g.leader as { display_name: string; job_function: string; experience_years: number } | null;
+    const leader = g.leader as unknown as { display_name: string; job_function: string; experience_years: number } | null;
     feed.push({
       type: 'group',
       badge: isUrgent ? '마감 임박' : '모임 확정',
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
 
   // 스토리 → 피드 아이템
   for (const s of stories || []) {
-    const member = s.member as { display_name: string } | null;
+    const member = s.member as unknown as { display_name: string } | null;
     feed.push({
       type: 'story',
       badge: 'Next Stage 스토리',

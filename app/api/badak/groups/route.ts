@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY_PROD || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+const supabase = createClient(url, key);
 
 // GET: 모임 목록
 export async function GET(request: NextRequest) {
@@ -110,4 +110,98 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ group });
+}
+
+// PUT: 모임 수정 (리더만)
+export async function PUT(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { data: member } = await supabase
+    .from('badak_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+
+  const body = await request.json();
+  if (!body.groupId) return NextResponse.json({ error: 'groupId required' }, { status: 400 });
+
+  const { data: group } = await supabase
+    .from('badak_groups')
+    .select('id, leader_id')
+    .eq('id', body.groupId)
+    .single();
+
+  if (!group) return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+  if (group.leader_id !== member.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const updates: Record<string, unknown> = {};
+  if (body.title !== undefined) updates.title = body.title;
+  if (body.description !== undefined) updates.description = body.description;
+  if (body.eventDate !== undefined) updates.event_date = body.eventDate;
+  if (body.location !== undefined) updates.location = body.location;
+  if (body.locationDetail !== undefined) updates.location_detail = body.locationDetail;
+  if (body.maxMembers !== undefined) updates.max_members = body.maxMembers;
+  if (body.fee !== undefined) updates.fee = body.fee;
+  if (body.tags !== undefined) updates.tags = body.tags;
+  if (body.status !== undefined) updates.status = body.status;
+  if (body.coverImageUrl !== undefined) updates.cover_image_url = body.coverImageUrl;
+
+  const { data: updated, error } = await supabase
+    .from('badak_groups')
+    .update(updates)
+    .eq('id', body.groupId)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ group: updated });
+}
+
+// DELETE: 모임 삭제 (리더만)
+export async function DELETE(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { data: member } = await supabase
+    .from('badak_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+
+  const { searchParams } = new URL(request.url);
+  const groupId = searchParams.get('groupId');
+  if (!groupId) return NextResponse.json({ error: 'groupId required' }, { status: 400 });
+
+  const { data: grp } = await supabase
+    .from('badak_groups')
+    .select('id, leader_id, current_members')
+    .eq('id', groupId)
+    .single();
+
+  if (!grp) return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+  if (grp.leader_id !== member.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  // 참여자 있으면 closed 처리
+  if (grp.current_members > 1) {
+    await supabase.from('badak_groups').update({ status: 'closed' }).eq('id', groupId);
+    return NextResponse.json({ closed: true });
+  }
+
+  await supabase.from('badak_group_members').delete().eq('group_id', groupId);
+  await supabase.from('badak_groups').delete().eq('id', groupId);
+
+  return NextResponse.json({ deleted: true });
 }

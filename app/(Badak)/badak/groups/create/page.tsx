@@ -60,8 +60,26 @@ export default function CreateGroupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [needs, setNeeds] = useState<NeedOption[]>([]);
 
-  // 바닥장 여부 (TODO: DB에서 user role 확인)
-  const isBadakjang = (user as Record<string, unknown>)?.role === 'badakjang';
+  // 바닥장 여부 — badak_members.role 실제 DB 조회
+  const [isBadakjang, setIsBadakjang] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const sb = createClient();
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) return;
+        const res = await fetch('/api/badak/member', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const { member } = await res.json();
+        if (member?.role === 'badakjang' || member?.role === 'admin') {
+          setIsBadakjang(true);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [isAuthenticated]);
 
   // Form state
   const [title, setTitle] = useState('');
