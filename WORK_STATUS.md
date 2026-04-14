@@ -1,10 +1,39 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-14 (집, 세션 44)
+> 마지막 업데이트: 2026-04-14 (집, 세션 45)
 
 ---
 
-## 이번 세션 (세션 44) 완료 항목
+## 이번 세션 (세션 45) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| 메인 페이지 다크 테마 통일 | skyBg, CloudBubble(amber/gray), NeedsInput, FeedCard, FeedHighlights, FeedSection 전체 #1a1a2e 통일 |
+| 클라우드 애니메이션 개선 | 시간 기반 dt 보간 + CSS transition(0.08s) + FRICTION 0.985로 부드러운 관성 |
+| 바닥장 신청 페이지 신규 | `/badak/apply` — 지원서(이름/산업군/경력/분야/동기/계획/연락처), 직접 입력 분야는 승인 시 전체 카테고리 반영 |
+| 모임 개설 바닥장 분기 | 비바닥장: 1회 단발만 가능 + 바닥장 신청 유도 배너. 바닥장: 연속/정기/비정기 모두 가능 |
+| 모임 개설 운영방식 추가 | 7종: 네트워킹, 스터디, 사이드 프로젝트, 강의, 토론, 멘토링/코칭, 워크숍/세미나 |
+| 연결 니즈 커스텀 드롭다운 | 네이티브 select → 검색 가능 커스텀 UI + 제목 기반 추천순 + 모임 미개설 니즈만 표시 + 15명+ 우선 |
+| 태그 입력 개선 | `,`로 구분 입력, 붙여넣기 자동 분리 |
+| 바닥이란 소개 리라이트 | 다크 테마 + 철학(약한 연결 고리) + 4단계 흐름 + 서비스 기능 링크 + CTA |
+| 탐색 페이지 전면 개편 | 프로필 탐색 → 니즈 기반 탐색. 통계 + 검색 + 카테고리 필터 + 추천/Hot 슬라이드 |
+| 스토리 페이지 다크 테마 | 5개 Mock 스토리 + before→after 전환 뱃지 + 응원/북마크 |
+| 모임 목록 페이지 신규 | `/badak/groups` — 추천/Hot/최신 슬라이드 + 검색 + 전체 리스트 |
+| 이메일 인증 연동 | `/api/badak/member/verify` — Resend API + badak_verify_codes 테이블 |
+| 랜덤 서브 카피 | 8종 카피 랜덤 노출 (성장/사수/경력/연결 등) |
+| 메뉴 정리 | 모임, 커뮤니티, 스토리, 탐색, 모임 개설, 바닥장 신청, 바닥이란 |
+
+## 다음 할 일
+
+- 바닥장 신청 API 연결: `/api/badak/apply` POST → `badak_leader_applications` 테이블 생성 + 관리자 알림
+- 바닥장 권한 체크: `badak_members` 테이블에 `role` 컬럼 추가 (member/badakjang/admin), 모임 개설 시 실제 DB 조회
+- 모임 상세 페이지(`/badak/groups/[id]`) 다크 테마 확인 및 통일
+- 마이페이지 다크 테마 확인 (5탭 전체)
+- 커뮤니티 페이지 실제 DB 연동 (현재 Mock)
+- `RESEND_API_KEY` .env.local에 추가 (현재 Vercel env에만 존재)
+- groups/create API: meetingType, joinType, seriesDates, recurringSchedule, groupCategory 필드 처리
+
+## 이전 세션 (세션 44) 완료 항목
 
 | 항목 | 내용 |
 |------|------|

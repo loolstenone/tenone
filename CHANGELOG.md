@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-04-14 (집, 세션 45)
+
+### Badak Next Stage — 다크 테마 통일 + 클라우드 개선 + 바닥장 시스템
+
+#### 신규 파일
+- `app/(Badak)/badak/apply/page.tsx` — 바닥장 신청 페이지 (이름/산업군/경력/분야/동기/계획/연락처, 직접 입력 분야는 승인 시 전체 카테고리 반영)
+
+#### 수정 파일 (다크 테마 통일 — #1a1a2e)
+- `app/(Badak)/badak/page.tsx` — skyBg, 슬로건, 서브카피 8종 랜덤, 스파크 amber, 입력영역 다크
+- `features/badak/cloud/CloudBubble.tsx` — amber/gray 색상 + CSS transition(0.08s) + willChange
+- `features/badak/cloud/NeedsInput.tsx` — 입력창/버튼 다크 스타일
+- `features/badak/cloud/FeedCard.tsx` — 카드/뱃지/프로그레스바 다크
+- `features/badak/cloud/FeedHighlights.tsx` — 하이라이트 카드 다크
+- `features/badak/cloud/FeedSection.tsx` — 컨테이너/탭 다크
+- `lib/badak-cloud-data.ts` — `getTimeBasedSky()` 6시간대 전부 다크 그라디언트
+- `features/badak/BadakHeader.tsx` — 메뉴 정리 (모임, 커뮤니티, 스토리, 탐색, 모임 개설, 바닥장 신청, 바닥이란)
+
+#### 수정 파일 (기능)
+- `app/(Badak)/badak/groups/create/page.tsx` — 커스텀 니즈 드롭다운(검색+제목 기반 추천+미개설만), 바닥장 분기(비바닥장: 1회만+유도 배너), 운영방식 7종, 태그 ','구분, groupCategory
+- `app/(Badak)/badak/about/page.tsx` — 다크 테마 리라이트 (약한 연결 고리 철학 + 4단계 흐름 + 서비스 링크 + CTA)
+
+#### 결정 사항
+- 메인 페이지 전체 #1a1a2e 다크 테마 확정
+- 바닥장 = 트레바리 클럽장 모델. 관리자 승인제, 승인 시 role='badakjang'
+- 비바닥장은 1회 단발 모임만 개설 가능, 바닥장 신청 유도
+- 직접 입력 분야가 승인되면 바닥 전체 카테고리에 반영
+- 운영방식: 네트워킹, 스터디, 사이드 프로젝트, 강의, 토론, 멘토링/코칭, 워크숍/세미나
+- 클라우드 애니메이션: dt 보간 + CSS transition + FRICTION 0.985
+
+---
+
 ## 2026-04-14 (집, 세션 44)
 
 ### Vercel 비용 관리 + 배포 정책 수립
