@@ -39,7 +39,7 @@ export function CloudBubble({ word, index, total, rotation, radius = 180, onClic
 
   const scale = projScale * (0.5 + depth * 0.5);
   const opacity = Math.pow(depth, 1.5) * 0.9 + 0.1;
-  const fontSize = Math.max(9, Math.min(13, word.size * 9));
+  const fontSize = Math.max(11, Math.min(16, word.size * 11));
 
   const color = word.hasGroup
     ? ['#ffd93d', '#fbbf24', '#f59e0b', '#fcd34d'][index % 4]

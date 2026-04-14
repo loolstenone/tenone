@@ -106,7 +106,7 @@ export default function BadakNextStage() {
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
     const vx = -dy * 0.004;
-    const vy = -dx * 0.004;
+    const vy = dx * 0.004;
     velocity.current = { x: vx, y: vy };
     setRotation((prev) => ({
       x: prev.x + vx,
