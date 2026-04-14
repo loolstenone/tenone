@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import {
+  ArrowRight, Quote, TrendingUp, Briefcase, Star,
+  Heart, MessageCircle, Bookmark, Share2,
+} from 'lucide-react';
 
 interface Story {
   id: string;
@@ -14,7 +16,6 @@ interface Story {
   member: { display_name: string; avatar_url: string | null; job_function: string | null } | null;
 }
 
-// Mock stories for Phase 0
 const MOCK_STORIES: Story[] = [
   {
     id: '1',
@@ -43,76 +44,163 @@ const MOCK_STORIES: Story[] = [
     created_at: '2026-01-20',
     member: { display_name: '이준호', avatar_url: null, job_function: '제조' },
   },
+  {
+    id: '4',
+    title: '프리랜서 전환, 혼자였으면 절대 못 했어요',
+    content: '회사에서 10년 일하고 프리랜서로 전환하려니 막막했어요. 바닥 "프리랜서 전환" 모임에서 계약서 작성법, 단가 책정, 클라이언트 관리까지 실전 노하우를 배웠습니다. 지금은 월 수입이 회사 다닐 때보다 30% 올랐어요.',
+    before_role: '디자이너 (회사원)',
+    after_role: '프리랜서 디자이너',
+    created_at: '2025-12-10',
+    member: { display_name: '김하늘', avatar_url: null, job_function: '디자인' },
+  },
+  {
+    id: '5',
+    title: '해외 진출 꿈, 바닥 네트워킹이 현실로 만들어줬어요',
+    content: '동남아 시장에 진출하고 싶었지만 현지 정보가 전혀 없었어요. 바닥 "해외 마케팅" 모임에서 베트남 현지 마케터와 연결되어 3개월 만에 파일럿 캠페인을 론칭했습니다.',
+    before_role: '국내 마케터',
+    after_role: '글로벌 마케팅 매니저',
+    created_at: '2025-11-05',
+    member: { display_name: '정유진', avatar_url: null, job_function: '마케팅' },
+  },
+];
+
+const CATEGORY_COLORS = [
+  { bg: 'rgba(255,217,61,0.08)', border: 'rgba(255,217,61,0.15)', accent: '#ffd93d' },
+  { bg: 'rgba(116,185,255,0.08)', border: 'rgba(116,185,255,0.15)', accent: '#74b9ff' },
+  { bg: 'rgba(162,155,254,0.08)', border: 'rgba(162,155,254,0.15)', accent: '#a29bfe' },
+  { bg: 'rgba(255,118,117,0.08)', border: 'rgba(255,118,117,0.15)', accent: '#ff7675' },
+  { bg: 'rgba(0,206,201,0.08)', border: 'rgba(0,206,201,0.15)', accent: '#00cec9' },
 ];
 
 export default function StoryPage() {
   const [stories, setStories] = useState<Story[]>(MOCK_STORIES);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const [saved, setSaved] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch('/api/badak/stories')
       .then((r) => r.json())
-      .then((data) => {
-        if (data.stories?.length > 0) setStories(data.stories);
-      })
+      .then((data) => { if (data.stories?.length > 0) setStories(data.stories); })
       .catch(() => {});
   }, []);
 
+  const toggleLike = (id: string) => setLiked((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const toggleSave = (id: string) => setSaved((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
   return (
-    <div className="mx-auto min-h-screen max-w-[860px] bg-white text-neutral-900">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-6 pt-5 pb-6">
-        <Link href="/badak" className="text-neutral-900/60 hover:text-neutral-900">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-lg font-bold">Next Stage 스토리</h1>
-      </div>
+    <div className="min-h-screen bg-[#1a1a2e] pt-14">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+        {/* 헤더 */}
+        <div className="mb-6">
+          <div className="mb-1 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-amber-400" />
+            <h1 className="text-xl font-bold text-white">성장 스토리</h1>
+          </div>
+          <p className="text-xs text-white/40">바닥에서 만남이 만들어낸 변화의 이야기</p>
+        </div>
 
-      <div className="px-6 pb-4">
-        <p className="text-sm text-neutral-900/40">
-          바닥에서 만남이 만들어낸 성장 이야기
-        </p>
-      </div>
-
-      {/* Stories */}
-      <div className="space-y-4 px-5 pb-20">
-        {stories.map((story) => {
-          const member = story.member as Story['member'];
-          return (
-            <div
-              key={story.id}
-              className="rounded-2xl border border-white/8 bg-white/4 p-6"
-            >
-              <div className="mb-4 inline-block rounded-full bg-[#74b9ff]/10 px-3 py-1 text-[11px] font-semibold text-[#74b9ff]">
-                Next Stage 스토리
+        {/* 스탯 카드 */}
+        <div className="mb-6 flex gap-2">
+          {[
+            { label: '성장 스토리', value: `${stories.length}건`, icon: Star },
+            { label: '직무 전환', value: '12건', icon: Briefcase },
+            { label: '누적 응원', value: '248', icon: Heart },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="flex flex-1 items-center gap-2 rounded-xl border border-white/8 p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <Icon className="h-4 w-4 text-white/20" />
+              <div>
+                <div className="text-xs font-bold text-white/70">{value}</div>
+                <div className="text-[9px] text-white/25">{label}</div>
               </div>
+            </div>
+          ))}
+        </div>
 
-              <h2 className="mb-3 text-base font-bold leading-snug">
-                &ldquo;{story.title}&rdquo;
-              </h2>
+        {/* 스토리 목록 */}
+        <div className="space-y-4">
+          {stories.map((story, idx) => {
+            const c = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
+            const member = story.member;
+            const isLiked = liked.has(story.id);
+            const isSaved = saved.has(story.id);
 
-              {story.content && (
-                <p className="mb-4 text-sm text-neutral-900/50 leading-relaxed">
-                  {story.content}
-                </p>
-              )}
+            return (
+              <div key={story.id} className="overflow-hidden rounded-2xl border transition-all hover:border-white/15"
+                style={{ background: c.bg, borderColor: c.border }}>
+                <div className="p-5">
+                  {/* 전환 뱃지 */}
+                  {story.before_role && story.after_role && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-medium text-white/50"
+                        style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        {story.before_role}
+                      </span>
+                      <ArrowRight className="h-3 w-3" style={{ color: c.accent }} />
+                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+                        style={{ background: `${c.accent}20`, color: c.accent }}>
+                        {story.after_role}
+                      </span>
+                    </div>
+                  )}
 
-              <div className="flex items-center gap-3 border-t border-neutral-100 pt-4">
-                <div
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold"
-                  style={{ background: 'linear-gradient(135deg, #74b9ff, #a29bfe)', color: '#1a1a2e' }}
-                >
-                  {member?.display_name?.charAt(0) || '?'}
-                </div>
-                <div>
-                  <div className="text-sm font-medium">{member?.display_name}</div>
-                  <div className="text-xs text-neutral-900/40">
-                    前 {story.before_role} → 現 {story.after_role}
+                  {/* 제목 */}
+                  <div className="mb-3 flex gap-2">
+                    <Quote className="mt-0.5 h-4 w-4 shrink-0" style={{ color: c.accent, opacity: 0.5 }} />
+                    <h2 className="text-[15px] font-bold leading-snug text-white">{story.title}</h2>
+                  </div>
+
+                  {/* 본문 */}
+                  {story.content && (
+                    <p className="mb-4 pl-6 text-xs leading-relaxed text-white/45">{story.content}</p>
+                  )}
+
+                  {/* 하단: 프로필 + 액션 */}
+                  <div className="flex items-center justify-between border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                        style={{ background: `${c.accent}20`, color: c.accent }}>
+                        {member?.display_name?.charAt(0) || '?'}
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-white/70">{member?.display_name}</div>
+                        <div className="text-[10px] text-white/30">{member?.job_function}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => toggleLike(story.id)} className="flex items-center gap-1 text-[10px] text-white/30 transition-colors hover:text-red-400">
+                        <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-red-400 text-red-400' : ''}`} />
+                        {isLiked ? '응원!' : '응원'}
+                      </button>
+                      <button onClick={() => toggleSave(story.id)} className="text-white/30 transition-colors hover:text-amber-400">
+                        <Bookmark className={`h-3.5 w-3.5 ${isSaved ? 'fill-amber-400 text-amber-400' : ''}`} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {/* 내 스토리 제출 CTA */}
+        <div className="mt-8 rounded-2xl border border-white/8 p-5 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+          <Quote className="mx-auto mb-2 h-6 w-6 text-amber-400/30" />
+          <p className="mb-1 text-sm font-bold text-white/60">당신의 성장 스토리를 들려주세요</p>
+          <p className="mb-4 text-xs text-white/30">바닥에서의 경험이 누군가에게 용기가 됩니다</p>
+          <button className="rounded-xl px-5 py-2.5 text-xs font-bold"
+            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+            스토리 보내기
+          </button>
+        </div>
       </div>
     </div>
   );

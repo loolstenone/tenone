@@ -64,7 +64,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
-        if (!name.trim()) { setError("이름을 입력해주세요"); return; }
+        if (!name.trim()) { setError("닉네임을 입력해주세요"); return; }
         if (password.length < 6) { setError("비밀번호는 6자 이상이어야 합니다"); return; }
         if (password !== passwordConfirm) { setError("비밀번호가 일치하지 않습니다"); return; }
         setIsSubmitting(true);
@@ -158,7 +158,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                     {/* 가입 폼 */}
                     {tab === "signup" && (
                         <form onSubmit={handleSignup} className="space-y-3">
-                            <input type="text" placeholder="이름" value={name} onChange={e => setName(e.target.value)} className={inputClass} required />
+                            <input type="text" placeholder="닉네임" value={name} onChange={e => setName(e.target.value)} className={inputClass} required />
                             <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
                             <div className="relative">
                                 <input type={showPassword ? "text" : "password"} placeholder="비밀번호 (6자 이상)" value={password} onChange={e => setPassword(e.target.value)} className={inputClass + " pr-10"} required />

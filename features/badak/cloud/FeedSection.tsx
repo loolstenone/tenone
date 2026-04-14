@@ -32,7 +32,7 @@ export function FeedSection() {
   const items = filterItems(feedItems, activeTab);
 
   return (
-    <div className="border-t border-neutral-100 bg-white px-4 pb-24 pt-8">
+    <div className="border-t border-white/8 px-4 pb-24 pt-8" style={{ background: '#1a1a2e' }}>
       {/* Highlights — Hot/추천/진행중 좌우 슬라이드 */}
       <FeedHighlights items={feedItems} />
 
@@ -46,9 +46,9 @@ export function FeedSection() {
               onClick={() => setActiveTab(tab)}
               className="shrink-0 cursor-pointer whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium"
               style={{
-                border: isActive ? '1px solid #2563eb' : '1px solid #e5e7eb',
-                background: isActive ? '#eff6ff' : 'transparent',
-                color: isActive ? '#2563eb' : '#9ca3af',
+                border: isActive ? '1px solid rgba(255,217,61,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                background: isActive ? 'rgba(255,217,61,0.1)' : 'transparent',
+                color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.4)',
               }}
             >
               {tab}
@@ -63,7 +63,7 @@ export function FeedSection() {
       ))}
 
       {items.length === 0 && (
-        <div className="py-16 text-center text-sm text-neutral-300">
+        <div className="py-16 text-center text-sm text-white/20">
           해당하는 항목이 없습니다
         </div>
       )}

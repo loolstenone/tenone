@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+import { useRef } from 'react';
 import { Flame, Star, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { FeedItem } from '@/types/badak';
 
@@ -21,7 +20,6 @@ interface FeedHighlightsProps {
 export function FeedHighlights({ items }: FeedHighlightsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 카테고리별 분류
   const hotItems = items
     .filter((i) => i.type === 'group' && i.badge === '마감 임박')
     .slice(0, 2);
@@ -37,24 +35,24 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
       type: 'hot' as const,
       label: '🔥 Hot',
       icon: <Flame className="h-3.5 w-3.5" />,
-      labelColor: '#dc2626',
-      bgColor: '#fef2f2',
+      labelColor: '#f87171',
+      bgColor: 'rgba(239,68,68,0.06)',
       item,
     })),
     ...recommendedItems.map((item) => ({
       type: 'recommended' as const,
       label: '⭐ 추천',
       icon: <Star className="h-3.5 w-3.5" />,
-      labelColor: '#d97706',
-      bgColor: '#fffbeb',
+      labelColor: '#fbbf24',
+      bgColor: 'rgba(255,217,61,0.06)',
       item,
     })),
     ...activeNeeds.map((item) => ({
       type: 'active' as const,
       label: '🚀 진행중',
       icon: <Users className="h-3.5 w-3.5" />,
-      labelColor: '#2563eb',
-      bgColor: '#eff6ff',
+      labelColor: '#60a5fa',
+      bgColor: 'rgba(96,165,250,0.06)',
       item,
     })),
   ];
@@ -70,12 +68,12 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
   return (
     <div className="relative mb-6">
       <div className="mb-3 flex items-center justify-between px-1">
-        <h2 className="text-sm font-bold text-neutral-800">니즈 맞춤 공지</h2>
+        <h2 className="text-sm font-bold text-white/70">니즈 맞춤 공지</h2>
         <div className="flex gap-1">
-          <button onClick={() => scroll('left')} className="rounded-full border border-neutral-200 p-1 text-neutral-400 hover:text-neutral-600">
+          <button onClick={() => scroll('left')} className="rounded-full border border-white/10 p-1 text-white/30 hover:text-white/60">
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => scroll('right')} className="rounded-full border border-neutral-200 p-1 text-neutral-400 hover:text-neutral-600">
+          <button onClick={() => scroll('right')} className="rounded-full border border-white/10 p-1 text-white/30 hover:text-white/60">
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -89,7 +87,7 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
         {highlights.map((h, i) => (
           <div
             key={i}
-            className="w-[240px] shrink-0 overflow-hidden rounded-xl border border-neutral-100"
+            className="w-[240px] shrink-0 overflow-hidden rounded-xl border border-white/8"
             style={{ background: h.bgColor, scrollSnapAlign: 'start' }}
           >
             {h.item.imageUrl && (
@@ -98,21 +96,21 @@ export function FeedHighlights({ items }: FeedHighlightsProps) {
             <div className="p-4">
             <span
               className="mb-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold"
-              style={{ color: h.labelColor, background: 'rgba(255,255,255,0.7)' }}
+              style={{ color: h.labelColor, background: 'rgba(255,255,255,0.08)' }}
             >
               {h.label}
             </span>
-            <h3 className="mb-2 text-[13px] font-bold leading-snug text-neutral-900 line-clamp-2">
+            <h3 className="mb-2 text-[13px] font-bold leading-snug text-white/80 line-clamp-2">
               {h.item.title}
             </h3>
             {h.item.type === 'group' && (
-              <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+              <div className="flex items-center gap-2 text-[11px] text-white/35">
                 <span>📅 {h.item.date}</span>
                 <span>👥 {h.item.members}/{h.item.max}</span>
               </div>
             )}
             {h.item.type === 'needs' && (
-              <div className="text-[11px] text-neutral-500">
+              <div className="text-[11px] text-white/35">
                 {h.item.count}명이 원해요
               </div>
             )}

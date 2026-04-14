@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY_PROD || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 // GET: 모임 목록
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
       .eq('id', body.needId)
       .single();
 
-    if (need && need.count < 20) {
+    if (need && need.count < 15) {
       return NextResponse.json(
-        { error: `관심 ${need.count}명 — 20명 이상 모여야 모임을 개설할 수 있습니다` },
+        { error: `관심 ${need.count}명 — 15명 이상 모여야 모임을 개설할 수 있습니다` },
         { status: 400 },
       );
     }

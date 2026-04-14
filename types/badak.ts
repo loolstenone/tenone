@@ -8,6 +8,20 @@ export interface CloudWord {
   hasGroup: boolean;
   members: number;
   imageUrl?: string;
+  // 모임방 개설 시 추가 정보
+  group?: {
+    id: string;
+    title: string;
+    type: 'once' | 'recurring';       // 1회성 / 다회성
+    maxMembers: number;
+    currentMembers: number;
+    leaderName: string;
+    leaderJob: string;
+    eventDate?: string;               // 1회성: 모임 날짜
+    schedule?: string;                 // 다회성: 주기 (매주 화 19:00 등)
+    location: string;
+    status: 'recruiting' | 'confirmed' | 'closed';
+  };
 }
 
 export interface FeedItem {

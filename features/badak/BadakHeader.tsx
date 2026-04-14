@@ -10,10 +10,12 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const PREFIX = '/badak';
 const navItems = [
-    { name: "탐색", href: `${PREFIX}/explore` },
-    { name: "모임", href: `${PREFIX}/meetups` },
+    { name: "모임", href: `${PREFIX}/groups` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
-    { name: "이바닥 스타", href: `${PREFIX}/stars` },
+    { name: "스토리", href: `${PREFIX}/story` },
+    { name: "탐색", href: `${PREFIX}/explore` },
+    { name: "모임 개설", href: `${PREFIX}/groups/create` },
+    { name: "바닥장 신청", href: `${PREFIX}/apply` },
     { name: "바닥이란", href: `${PREFIX}/about` },
 ];
 
@@ -32,11 +34,8 @@ export function BadakHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e] text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
-                <Link href={PREFIX} className="shrink-0 flex items-center gap-3">
-                    <span className="text-xl font-black leading-none tracking-tight">
-                        <span className="block text-[11px]">Ba</span>
-                        <span className="block text-[11px]">dak</span>
-                    </span>
+                <Link href={PREFIX} className="shrink-0 flex items-center">
+                    <span className="text-[18px] font-black tracking-tight">Badak</span>
                 </Link>
 
                 {/* Desktop Nav */}

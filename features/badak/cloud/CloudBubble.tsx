@@ -7,13 +7,14 @@ interface CloudBubbleProps {
   index: number;
   total: number;
   rotation: { x: number; y: number };
+  radius?: number;
   onClick: (word: CloudWord) => void;
 }
 
-export function CloudBubble({ word, index, total, rotation, onClick }: CloudBubbleProps) {
+export function CloudBubble({ word, index, total, rotation, radius = 180, onClick }: CloudBubbleProps) {
   const phi = Math.acos(-1 + (2 * index + 1) / total);
   const theta = Math.sqrt(total * Math.PI) * phi;
-  const r = 180;
+  const r = radius;
 
   let sx = Math.cos(theta) * Math.sin(phi);
   let sy = Math.sin(theta) * Math.sin(phi);
@@ -29,17 +30,23 @@ export function CloudBubble({ word, index, total, rotation, onClick }: CloudBubb
   sz = sy * sinX + sz * cosX;
   sy = ry;
 
-  const x = sx * r;
-  const y = sy * r;
+  // Perspective projection for globe-like depth
+  const perspective = 600;
+  const projScale = perspective / (perspective + r - sz * r);
+  const x = sx * r * projScale;
+  const y = sy * r * projScale;
   const depth = (sz + 1) / 2;
 
-  const scale = 0.4 + depth * 0.8;
-  const opacity = 0.15 + depth * 0.85;
-  const fontSize = Math.max(11, Math.min(18, word.size * 12));
+  const scale = projScale * (0.5 + depth * 0.5);
+  const opacity = Math.pow(depth, 1.5) * 0.9 + 0.1;
+  const fontSize = Math.max(9, Math.min(13, word.size * 9));
 
   const color = word.hasGroup
-    ? ['#1d4ed8', '#2563eb', '#1e40af', '#3b82f6'][index % 4]
-    : ['#374151', '#4b5563', '#6b7280', '#1f2937'][index % 4];
+    ? ['#ffd93d', '#fbbf24', '#f59e0b', '#fcd34d'][index % 4]
+    : ['#94a3b8', '#a1a1aa', '#9ca3af', '#cbd5e1'][index % 4];
+
+  // Hide items on the far back of the sphere
+  if (depth < 0.15) return null;
 
   return (
     <div
@@ -51,13 +58,15 @@ export function CloudBubble({ word, index, total, rotation, onClick }: CloudBubb
         transform: `translate(-50%, -50%) scale(${scale})`,
         opacity,
         zIndex: Math.round(depth * 100),
-        transition: 'all 0.12s ease-out',
+        transition: 'left 0.08s linear, top 0.08s linear, transform 0.08s linear, opacity 0.15s ease-out',
+        willChange: 'left, top, transform, opacity',
         fontSize: `${fontSize}px`,
-        fontWeight: fontSize > 14 ? 700 : 500,
+        fontWeight: depth > 0.6 ? 700 : 500,
         color,
         letterSpacing: '-0.03em',
         lineHeight: 1.2,
-        textShadow: depth > 0.7 ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+        textShadow: depth > 0.7 ? '0 1px 6px rgba(0,0,0,0.4)' : 'none',
+        filter: depth < 0.3 ? `blur(${(1 - depth * 3) * 2}px)` : 'none',
       }}
     >
       {word.text}

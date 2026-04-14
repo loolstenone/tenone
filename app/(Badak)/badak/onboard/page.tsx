@@ -1,10 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
+import { LoginModal } from '@/components/LoginModal';
+
+const TOTAL_STEPS = 5;
+
+const EXPECTATIONS = [
+  '취업 준비', '이직 준비', '구인 (채용)', '구직 활동',
+  '업무 스킬 향상', '커리어 전환', '창업/사업 준비',
+  '사이드 프로젝트', '네트워킹', '업계 정보 교류',
+  '파트너/제휴 구하기', '스터디/스킬 교환',
+  '사업 투자/펀딩', '멘토링', '프리랜서 전환', '해외 진출',
+];
 
 const INDUSTRIES = [
   'IT/테크', '광고/에이전시', '마케팅', '디자인', '미디어/콘텐츠',
@@ -26,18 +36,54 @@ export default function OnboardPage() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const [displayName, setDisplayName] = useState(user?.name || '');
+  // Form state
+  const [expectations, setExpectations] = useState<string[]>([]);
   const [industry, setIndustry] = useState('');
   const [industryType, setIndustryType] = useState<'current' | 'desired'>('current');
   const [jobFunction, setJobFunction] = useState('');
   const [jobFunctionType, setJobFunctionType] = useState<'current' | 'desired'>('current');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Auto-fill from user data
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.name || '');
+      setEmail(user.email || '');
+      // Supabase auth 유저는 이미 이메일 인증됨
+      if (user.email) setEmailVerified(true);
+    }
+  }, [user]);
+
+  const toggleExpectation = (exp: string) => {
+    setExpectations((prev) =>
+      prev.includes(exp) ? prev.filter((e) => e !== exp) : [...prev, exp]
+    );
+  };
 
   const canNext = () => {
-    if (step === 0) return industry.length > 0;
-    if (step === 1) return jobFunction.length > 0;
-    if (step === 2) return phone.trim().length >= 10;
+    if (step === 0) return true; // 슬로건 — 항상 통과
+    if (step === 1) return expectations.length > 0;
+    if (step === 2) return industry.length > 0;
+    if (step === 3) return jobFunction.length > 0;
+    if (step === 4) return phone.trim().length >= 10 && emailVerified;
     return false;
+  };
+
+  const handleSendVerification = async () => {
+    if (!email.includes('@')) return;
+    setVerificationSent(true);
+    // 유니버스 가입 시 이미 인증된 경우 스킵
+    if (user?.email === email) {
+      setEmailVerified(true);
+      return;
+    }
+    // 새 이메일이면 인증 메일 발송 (실제 구현 시 API 호출)
+    setEmailVerified(true); // Mock: 바로 인증 처리
   };
 
   const handleSubmit = async () => {
@@ -59,6 +105,7 @@ export default function OnboardPage() {
         jobFunction,
         jobFunctionType,
         phone,
+        expectations,
       }),
     });
 
@@ -75,11 +122,21 @@ export default function OnboardPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white px-6">
         <div className="text-center">
-          <div className="mb-4 text-xl font-bold">로그인이 필요합니다</div>
-          <Link href="/login?redirect=/onboard" className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white">
+          <div className="mb-6 text-xl font-bold">로그인이 필요합니다</div>
+          <button
+            onClick={() => setShowLogin(true)}
+            className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white"
+          >
             로그인하기
-          </Link>
+          </button>
+          <div className="mt-4 text-sm text-neutral-400">
+            계정이 없으신가요?{' '}
+            <button onClick={() => setShowLogin(true)} className="font-semibold text-blue-600">
+              가입하기
+            </button>
+          </div>
         </div>
+        <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
       </div>
     );
   }
@@ -87,18 +144,76 @@ export default function OnboardPage() {
   return (
     <div className="mx-auto min-h-screen max-w-[480px] bg-white px-6 pt-12 pb-32">
       {/* Progress */}
-      <div className="mb-8 flex gap-1">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-1 flex-1 rounded-full"
-            style={{ background: i <= step ? '#2563eb' : '#e5e7eb' }}
-          />
-        ))}
-      </div>
+      {step > 0 && (
+        <div className="mb-8 flex gap-1">
+          {Array.from({ length: TOTAL_STEPS - 1 }, (_, i) => (
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full"
+              style={{ background: i < step ? '#2563eb' : '#e5e7eb' }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Step 0: 산업군 */}
+      {/* ── Step 0: 슬로건 + 태그라인 ── */}
       {step === 0 && (
+        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+          <div
+            className="mb-3 text-3xl font-black tracking-tight text-neutral-900"
+            style={{ letterSpacing: '-0.04em' }}
+          >
+            Badak
+          </div>
+          <h1
+            className="mb-4 text-xl font-bold leading-relaxed text-neutral-800"
+            style={{ letterSpacing: '-0.03em' }}
+          >
+            지식도 취미도 다 좋은데<br />
+            난 좀 더 <span className="text-blue-600">성장</span>하고 싶어
+          </h1>
+          <p className="mb-2 text-sm text-neutral-500" style={{ letterSpacing: '-0.02em' }}>
+            회사 밖에서도 통하는 사람이 되고 싶어.
+          </p>
+          <p className="text-xs text-neutral-400">
+            마케팅·광고 업계 네트워킹 커뮤니티
+          </p>
+        </div>
+      )}
+
+      {/* ── Step 1: 기대하는 것 ── */}
+      {step === 1 && (
+        <div>
+          <h1 className="mb-2 text-2xl font-bold text-neutral-900">
+            바닥에서 뭘 하고 싶으세요?
+          </h1>
+          <p className="mb-6 text-sm text-neutral-500">복수 선택 가능해요</p>
+
+          <div className="flex flex-wrap gap-2">
+            {EXPECTATIONS.map((exp) => {
+              const selected = expectations.includes(exp);
+              return (
+                <button
+                  key={exp}
+                  onClick={() => toggleExpectation(exp)}
+                  className="rounded-lg border px-3.5 py-2.5 text-sm transition-all"
+                  style={{
+                    borderColor: selected ? '#2563eb' : '#e5e7eb',
+                    background: selected ? '#eff6ff' : 'white',
+                    color: selected ? '#2563eb' : '#374151',
+                    fontWeight: selected ? 600 : 400,
+                  }}
+                >
+                  {exp}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 2: 산업군 ── */}
+      {step === 2 && (
         <div>
           <h1 className="mb-2 text-2xl font-bold text-neutral-900">어떤 업계에 계신가요?</h1>
           <p className="mb-6 text-sm text-neutral-500">현재 근무 중이거나 희망하는 산업을 선택해주세요</p>
@@ -140,8 +255,8 @@ export default function OnboardPage() {
         </div>
       )}
 
-      {/* Step 1: 직무 */}
-      {step === 1 && (
+      {/* ── Step 3: 직무 ── */}
+      {step === 3 && (
         <div>
           <h1 className="mb-2 text-2xl font-bold text-neutral-900">어떤 일을 하세요?</h1>
           <p className="mb-6 text-sm text-neutral-500">현재 담당하거나 희망하는 직무를 선택해주세요</p>
@@ -183,19 +298,17 @@ export default function OnboardPage() {
         </div>
       )}
 
-      {/* Step 2: 연락처 */}
-      {step === 2 && (
+      {/* ── Step 4: 연락처 + 이메일 인증 ── */}
+      {step === 4 && (
         <div>
-          <h1 className="mb-2 text-2xl font-bold text-neutral-900">연락처를 알려주세요</h1>
+          <h1 className="mb-2 text-2xl font-bold text-neutral-900">거의 다 됐어요!</h1>
           <p className="mb-8 text-sm text-neutral-500">
-            모임 안내와 매칭 알림을 보내드려요.
-            <br />
-            프로필에 공개되지 않습니다.
+            모임 안내와 매칭 알림을 보내드려요. 프로필에 공개되지 않습니다.
           </p>
 
           <div className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-500">이름 (닉네임)</label>
+              <label className="mb-1.5 block text-xs font-medium text-neutral-500">닉네임</label>
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -203,6 +316,37 @@ export default function OnboardPage() {
                 className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
               />
             </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-neutral-500">이메일 *</label>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setEmailVerified(false); setVerificationSent(false); }}
+                  placeholder="name@company.com"
+                  className="flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  readOnly={!!user?.email}
+                />
+                {emailVerified ? (
+                  <div className="flex items-center rounded-xl bg-green-50 px-4 text-xs font-semibold text-green-600">
+                    인증됨
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleSendVerification}
+                    disabled={!email.includes('@') || verificationSent}
+                    className="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-semibold text-blue-600 disabled:opacity-40"
+                  >
+                    {verificationSent ? '전송됨' : '인증하기'}
+                  </button>
+                )}
+              </div>
+              {user?.email && (
+                <p className="mt-1 text-[11px] text-green-500">유니버스 가입 시 인증된 이메일입니다</p>
+              )}
+            </div>
+
             <div>
               <label className="mb-1.5 block text-xs font-medium text-neutral-500">휴대전화 번호 *</label>
               <input
@@ -225,20 +369,30 @@ export default function OnboardPage() {
                 {(displayName || '?').charAt(0)}
               </div>
               <div>
-                <div className="font-bold text-neutral-900">{displayName || '이름 없음'}</div>
+                <div className="font-bold text-neutral-900">{displayName || '닉네임 없음'}</div>
                 <div className="text-xs text-neutral-500">
                   {industry} · {jobFunction}
                   <span className="ml-1 text-neutral-300">
                     ({industryType === 'current' ? '재직' : '희망'})
                   </span>
                 </div>
+                {expectations.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {expectations.slice(0, 3).map((e) => (
+                      <span key={e} className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-500">{e}</span>
+                    ))}
+                    {expectations.length > 3 && (
+                      <span className="text-[10px] text-neutral-400">+{expectations.length - 3}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Bottom CTA */}
+      {/* ── Bottom CTA ── */}
       <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[480px] -translate-x-1/2 border-t border-neutral-100 bg-white px-6 py-4">
         <div className="flex gap-3">
           {step > 0 && (
@@ -249,14 +403,14 @@ export default function OnboardPage() {
               이전
             </button>
           )}
-          {step < 2 ? (
+          {step < TOTAL_STEPS - 1 ? (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canNext()}
               className="flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-30"
               style={{ background: canNext() ? '#2563eb' : '#d1d5db' }}
             >
-              다음
+              {step === 0 ? '시작하기' : '다음'}
             </button>
           ) : (
             <button

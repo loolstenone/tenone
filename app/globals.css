@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* 스크롤바 숨김 유틸리티 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -264,6 +273,12 @@ main.bg-white .rounded-xl {
   0% { opacity: 1; transform: translateX(-50%) translateY(0); }
   60% { opacity: 1; }
   100% { opacity: 0; transform: translateX(-50%) translateY(-200px); }
+}
+
+@keyframes badak-sparkFly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  70% { opacity: 1; transform: translate(var(--spark-tx), var(--spark-ty)) scale(1.2); }
+  100% { opacity: 0; transform: translate(var(--spark-tx), var(--spark-ty)) scale(0); }
 }
 
 @keyframes badak-promptFade {
