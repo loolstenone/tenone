@@ -4,6 +4,46 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52 Part 4) — Phase 2 핵심 기능 (인증서 + 커뮤니티 + 프로필)
+
+### M2-F: 인증서 시스템 ⭐
+- **DB** `sql/madleague_phase2_certificates.sql` — `mad_certificates` 테이블 + RLS + 유틸 함수
+  - `mad_gen_cert_code()` — A-Z0-9 10자리 고유 코드 생성
+  - `mad_eligible_certificates(p_member_id)` RPC — 활동/수상/Crown 인증서 자동 판별
+- **API** `/api/madleague/certificates` GET(발급가능+기발급 목록), POST(발급)
+- **페이지**:
+  - `/madleague/member/certificate` 발급 대시보드 (발급가능·기발급 섹션)
+  - `/madleague/certificate/verify` 검증 코드 입력 페이지
+  - `/madleague/certificate/verify/[code]` 진위 표시 (유효/취소/미존재 3상태)
+  - `/madleague/certificate/print/[code]` A4 landscape 인쇄 레이아웃 (브라우저 Ctrl+P → PDF)
+- 4종 인증서: activity / competition / award / crown
+
+### M2-I: 커뮤니티
+- **DB** `sql/madleague_phase2_community.sql` — `mad_posts` + `mad_comments` + RLS (매드리거만 read, 본인만 CUD) + comments_count 동기화 트리거
+- **API**:
+  - `/api/madleague/posts` GET(카테고리/동아리 필터, JOIN 저자+동아리) / POST(작성)
+  - `/api/madleague/posts/[id]` GET(상세+댓글) / POST(댓글 작성) / DELETE(본인 글)
+- **페이지**:
+  - `/madleague/community` 피드 (카테고리 6종 + 동아리 필터 + 모달 작성)
+  - `/madleague/community/[id]` 글 상세 + 댓글 섹션 (`CommentSection` 클라이언트)
+- 6 카테고리: free / question / share / insight / pinboard / notice
+
+### M2-B: 프로필 편집
+- **API** `/api/madleague/member/profile` PATCH (bio, skill_tags, portfolio_public, avatar_url, phone, university, major, year_in_school)
+- **페이지** `/madleague/member/profile` — 읽기전용(이름·이메일) + 편집 가능 필드 + 스킬 태그 동적 입력
+- 이름·동아리·기수는 운영진만 수정 (인증서·수상 데이터 무결성)
+
+### /madleague/member 개선
+- Quick actions 추가 (프로필 편집 · 인증서 발급 · 커뮤니티)
+
+### 검증
+- 라우트 5종 전부 200 OK
+- 인증 가드 401 확인 (certs/posts/profile PATCH)
+- TS 에러 0
+- Prod DB 마이그레이션 2개 모두 HTTP 201
+
+---
+
 ## 2026-04-16 (사무실, 세션 52 Part 3) — Intra 관리 + Phase 2 기반
 
 ### MI-A: Intra MADLeague 관리 대시보드

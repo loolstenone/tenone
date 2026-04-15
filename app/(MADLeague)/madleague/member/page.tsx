@@ -112,6 +112,19 @@ export default async function MemberPage() {
 
       {/* Member Info */}
       <section className="mx-auto max-w-5xl px-6 py-12">
+        {/* Quick actions */}
+        <div className="mb-8 flex flex-wrap gap-3">
+          <Link href="/madleague/member/profile" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-5 py-2.5 text-sm transition">
+            프로필 편집
+          </Link>
+          <Link href="/madleague/member/certificate" className="inline-flex items-center gap-2 border border-[#FFC000] hover:bg-[#FFC000] hover:text-black text-[#FFC000] font-bold px-5 py-2.5 text-sm transition">
+            인증서 발급
+          </Link>
+          <Link href="/madleague/community" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-5 py-2.5 text-sm transition">
+            커뮤니티
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <InfoCard label="활동연도" value={(member.activity_years ?? []).join(' · ') || '-'} />
           <InfoCard label="가입일" value={new Date(member.joined_at).toLocaleDateString('ko-KR')} />
