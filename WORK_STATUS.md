@@ -1,6 +1,43 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 50)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 51)
+
+---
+
+## 세션 51 완료 항목 — Badak 마무리 정리 (이월 항목 일괄 처리)
+
+| 항목 | 내용 |
+|------|------|
+| **vercel.json Cron 확인** | `badak-expire-wants` `"0 0 * * *"` 등록 확인 완료 |
+| **needs-queue 인증** | 관리자 페이지에 Bearer 토큰 인증 헤더 추가. authError 상태 처리 |
+| **unreadTalkCount 실집계** | `/api/badak/talks` 응답에 `unreadTotal` 포함. `wio_talk_messages.read_by` 배열 기반 집계. 마이페이지에서 실값 사용 |
+| **ROADMAP Phase 0 검토** | 다음 우선순위 확인: tenant_id 일괄 추가(0-A), 고객 신원 아키텍처(0-B), 중복 테이블 정리(0-C), WIO 서비스 인프라(0-D) |
+
+## 다음 할 일
+
+### Phase 0 — 테넌트 격리 인프라 (즉시 처리)
+
+| # | 작업 | 세부 내용 |
+|---|------|-----------|
+| **0-A** | `tenant_id` 일괄 추가 | 63개 테이블 `ALTER TABLE ADD COLUMN tenant_id TEXT DEFAULT 'tenone'` + RLS 업데이트 |
+| **0-B** | 고객 신원 아키텍처 | 4계층: auth.users → profiles → member_brand_joins → wio_members |
+| **0-C** | 중복 테이블 정리 | expenses→wio_expenses, approvals→wio_approvals, timesheets→wio_timesheets, chat→wio_chat |
+| **0-D** | WIO 서비스 인프라 | `wio_tenant_configs`, `wio_feature_flags` 테이블 신설 |
+
+### Phase 1 — 제품 활성화 (4월 3~4주)
+
+| # | 작업 |
+|---|------|
+| **1-A** | Mindle 관리 (구독자 DB, 트렌드 카드) |
+| **1-B** | SmarComm Coming Soon 해제 |
+| **1-C** | WIO 테넌트 관리 (구독 DB 연결) |
+| **1-D** | Agent Hub 활성화 (badaksoe 엔드포인트, 10:01 프로토콜) |
+
+### Badak 잔여 (Phase 0 병행)
+- 멤버 검색/필터 고도화
+- 모임 상세 페이지 완성
+- 알림 시스템
+- 온보딩 플로우
 
 ---
 
@@ -14,15 +51,7 @@
 | **E-4**: 바닥 만료 배치 | DB: `expire_badak_wants()` 함수 + `/api/cron/badak-expire-wants` Vercel Cron 라우트 |
 | **needs-queue 페이지** | `/intra/ums/badak/needs-queue` — 관리자용 니즈 승인 큐 UI |
 
-## 다음 할 일
-
-### 즉시 처리 필요
-- **vercel.json Cron 등록**: `/api/cron/badak-expire-wants` 를 `"0 0 * * *"` 스케줄로 추가
-- **`CRON_SECRET` 환경 변수**: Vercel Dashboard > 프로젝트 > Settings > Environment Variables에 추가
-- **`career` JSONB 컬럼 마이그레이션**: Supabase 대시보드 SQL Editor에서 실행 필요
-  ```sql
-  ALTER TABLE badak_members ADD COLUMN IF NOT EXISTS career JSONB DEFAULT '[]';
-  ```
+## 다음 할 일 (세션 50 기준 — 세션 51에서 일부 완료)
 
 ### Sprint 2 — HeRo Time + 관리자
 1. `MemberProfileSheet`에 **HeRo Time** 섹션 추가 (크로스 브랜드 커리어 이력)

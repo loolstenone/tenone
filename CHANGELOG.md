@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 51)
+
+### Badak 이월 항목 일괄 처리 + Phase 0 로드맵 확인
+
+#### 코드 변경
+- **`app/intra/ums/badak/needs-queue/page.tsx`** — 관리자 인증 헤더 추가. `createClient().auth.getSession()` → Bearer 토큰. `authError` 상태 처리 추가
+- **`app/api/badak/talks/route.ts`** — `unreadTotal` 집계 추가. `wio_talk_messages.read_by` 배열 기반 `.not('read_by', 'cs', '{userId}')` 쿼리로 읽지 않은 메시지 수 계산
+- **`app/(Badak)/badak/my/page.tsx`** — `setUnreadTalkCount(0)` → `setUnreadTalkCount(talksData.unreadTotal ?? 0)` 실값 사용
+
+#### 의사결정
+- Phase 0 (테넌트 격리) → Phase 1 (제품 활성화) 순서로 다음 작업 진행 확정
+- Badak 잔여 항목(검색/알림/온보딩)은 Phase 0 병행으로 처리
+
+---
+
 ## 2026-04-16 (사무실, 세션 50)
 
 ### E 시리즈 정리 작업 완료 (E-1 ~ E-4)
