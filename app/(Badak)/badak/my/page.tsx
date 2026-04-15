@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
@@ -15,6 +15,19 @@ import {
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'notifications' | 'settings';
 type ApplicantStatus = 'pending' | 'approved' | 'rejected';
+
+// ── 이력 항목 ──
+interface CareerEntry {
+  id: string;
+  company: string;   // 회사/조직
+  title: string;     // 직함
+  startYear: number;
+  startMonth: number;
+  endYear: number | null;
+  endMonth: number | null;
+  isCurrent: boolean;
+  description: string; // 역할과 업적
+}
 type JoinType = 'approval' | 'firstcome';
 
 // ── 인터페이스 ──
@@ -349,6 +362,420 @@ function GroupManageCard({
   );
 }
 
+// ── 심화 프로필 카드 ──
+const CAREER_YEARS = Array.from({ length: 40 }, (_, i) => new Date().getFullYear() - i);
+const CAREER_MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const EMPTY_CAREER_FORM = {
+  company: '', title: '', startYear: new Date().getFullYear(), startMonth: 1,
+  endYear: null as number | null, endMonth: null as number | null,
+  isCurrent: false, description: '',
+};
+
+function ProfileBoostCard({
+  displayName,
+  avatarUrl, onAvatarChange,
+  bio, setBio,
+  experienceYears, setExperienceYears,
+  career, setCareer,
+  lookingFor, onToggleLookingFor,
+  canOffer, onToggleCanOffer,
+  onSave, saving,
+}: {
+  displayName: string;
+  avatarUrl: string | null; onAvatarChange: (v: string | null) => void;
+  bio: string; setBio: (v: string) => void;
+  experienceYears: number | null; setExperienceYears: (v: number) => void;
+  career: CareerEntry[]; setCareer: (v: CareerEntry[]) => void;
+  lookingFor: string[]; onToggleLookingFor: (v: string) => void;
+  canOffer: string[]; onToggleCanOffer: (v: string) => void;
+  onSave: () => void; saving: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showCareerForm, setShowCareerForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [careerForm, setCareerForm] = useState({ ...EMPTY_CAREER_FORM });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasData = !!(avatarUrl || bio || experienceYears !== null || lookingFor.length > 0 || canOffer.length > 0 || career.length > 0);
+
+  const formatPeriod = (c: CareerEntry) => {
+    const s = `${c.startYear}.${String(c.startMonth).padStart(2, '0')}`;
+    const e = c.isCurrent ? '현재' : c.endYear ? `${c.endYear}.${String(c.endMonth ?? 1).padStart(2, '0')}` : '현재';
+    return `${s} ~ ${e}`;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 1024 * 1024) { alert('1MB 이하 이미지만 가능합니다'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => { if (ev.target?.result) onAvatarChange(ev.target.result as string); };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const openCareerForm = (entry?: CareerEntry) => {
+    if (entry) {
+      setEditingId(entry.id);
+      setCareerForm({ company: entry.company, title: entry.title, startYear: entry.startYear, startMonth: entry.startMonth, endYear: entry.endYear, endMonth: entry.endMonth, isCurrent: entry.isCurrent, description: entry.description });
+    } else {
+      setEditingId(null);
+      setCareerForm({ ...EMPTY_CAREER_FORM });
+    }
+    setShowCareerForm(true);
+  };
+
+  const submitCareer = () => {
+    if (!careerForm.company.trim() || !careerForm.title.trim()) return;
+    if (editingId) {
+      setCareer(career.map(c => c.id === editingId ? { ...careerForm, id: editingId } : c));
+    } else {
+      setCareer([...career, { ...careerForm, id: Date.now().toString() }]);
+    }
+    setShowCareerForm(false);
+    setEditingId(null);
+    setCareerForm({ ...EMPTY_CAREER_FORM });
+  };
+
+  const inputCls = "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30";
+  const selectCls = "rounded-lg border border-white/10 bg-[#1a1a2e] px-2 py-1.5 text-xs text-white/70 outline-none";
+
+  return (
+    <>
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: hasData ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.08)', background: hasData ? 'rgba(255,217,61,0.03)' : 'rgba(255,255,255,0.02)' }}>
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between p-4 text-left">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: 'rgba(255,217,61,0.1)' }}>
+            <Crown className="h-4 w-4" style={{ color: '#ffd93d' }} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: hasData ? '#ffd93d' : 'rgba(255,255,255,0.6)' }}>
+              {hasData ? '프로필 완성됨' : '프로필 보강하기'}
+            </p>
+            <p className="text-[11px] text-white/30">
+              {hasData ? '사진·이력·소개가 등록되어 있어요' : '사진과 이력을 채워 나를 소개해보세요 (선택)'}
+            </p>
+          </div>
+        </div>
+        <ChevronDown className={`h-4 w-4 text-white/30 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="border-t px-4 pb-5 pt-4 space-y-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+
+          {/* ── 프로필 사진 ── */}
+          <div>
+            <label className="mb-3 flex items-center gap-1.5 text-[11px] text-white/40">프로필 사진</label>
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 shrink-0">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold"
+                    style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                    {displayName.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-lg border border-white/15 px-3 py-1.5 text-[11px] text-white/60 hover:border-white/30 transition-colors"
+                >
+                  사진 변경
+                </button>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() => onAvatarChange(null)}
+                    className="rounded-lg border border-white/8 px-3 py-1.5 text-[11px] text-white/30 hover:text-red-400 transition-colors"
+                  >
+                    제거
+                  </button>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            </div>
+          </div>
+
+          {/* ── 경력 연차 ── */}
+          <div>
+            <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><Briefcase className="h-3 w-3" /> 경력 연차</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((yr) => (
+                <button key={yr} onClick={() => setExperienceYears(yr)}
+                  className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                  style={{ background: experienceYears === yr ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: experienceYears === yr ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: experienceYears === yr ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>
+                  {yr === 0 ? '신입' : `${yr}년차`}
+                </button>
+              ))}
+              <button onClick={() => setExperienceYears(11)}
+                className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                style={{ background: (experienceYears ?? -1) >= 11 ? 'rgba(255,217,61,0.12)' : 'transparent', borderColor: (experienceYears ?? -1) >= 11 ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)', color: (experienceYears ?? -1) >= 11 ? '#ffd93d' : 'rgba(255,255,255,0.5)' }}>
+                10년차+
+              </button>
+            </div>
+          </div>
+
+          {/* ── 한 줄 소개 ── */}
+          <div>
+            <label className="mb-1.5 flex items-center gap-1.5 text-[11px] text-white/40"><FileText className="h-3 w-3" /> 한 줄 소개</label>
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
+              placeholder="나를 한마디로 소개해보세요. 모임에서 어떤 사람인지 알 수 있어요."
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none" />
+          </div>
+
+          {/* ── 이력 ── */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="flex items-center gap-1.5 text-[11px] text-white/40"><Briefcase className="h-3 w-3" /> 이력</label>
+              <button
+                type="button"
+                onClick={() => openCareerForm()}
+                className="rounded-lg border border-white/10 px-2.5 py-1 text-[10px] text-white/50 hover:border-amber-400/30 hover:text-amber-400 transition-colors"
+              >
+                + 이력 추가
+              </button>
+            </div>
+
+            {/* 이력 목록 */}
+            {career.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {career.map((c) => (
+                  <div
+                    key={c.id}
+                    className="rounded-xl border border-white/8 px-3 py-3"
+                    style={{ background: 'rgba(255,255,255,0.03)' }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-semibold text-white/80">{c.company}</div>
+                        <div className="text-[11px] text-amber-400/70">{c.title}</div>
+                        <div className="mt-0.5 text-[10px] text-white/30">{formatPeriod(c)}</div>
+                        {c.description && (
+                          <p className="mt-1.5 text-[11px] leading-relaxed text-white/40 line-clamp-2">{c.description}</p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => openCareerForm(c)}
+                          className="rounded p-1 text-white/20 hover:text-amber-400 transition-colors"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCareer(career.filter(x => x.id !== c.id))}
+                          className="rounded p-1 text-white/20 hover:text-red-400 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 이력 추가/수정 폼 */}
+            {showCareerForm && (
+              <div className="rounded-xl border border-amber-400/15 px-4 py-4 space-y-3" style={{ background: 'rgba(255,217,61,0.03)' }}>
+                <p className="text-[11px] font-semibold text-amber-400/60">{editingId ? '이력 수정' : '이력 추가'}</p>
+
+                <input
+                  placeholder="회사/조직"
+                  value={careerForm.company}
+                  onChange={(e) => setCareerForm(f => ({ ...f, company: e.target.value }))}
+                  className={inputCls}
+                />
+                <input
+                  placeholder="직함 (예: 마케팅 매니저)"
+                  value={careerForm.title}
+                  onChange={(e) => setCareerForm(f => ({ ...f, title: e.target.value }))}
+                  className={inputCls}
+                />
+
+                {/* 시작 연월 */}
+                <div>
+                  <div className="mb-1 text-[10px] text-white/30">시작</div>
+                  <div className="flex gap-2">
+                    <select value={careerForm.startYear} onChange={(e) => setCareerForm(f => ({ ...f, startYear: Number(e.target.value) }))} className={selectCls}>
+                      {CAREER_YEARS.map(y => <option key={y} value={y}>{y}년</option>)}
+                    </select>
+                    <select value={careerForm.startMonth} onChange={(e) => setCareerForm(f => ({ ...f, startMonth: Number(e.target.value) }))} className={selectCls}>
+                      {CAREER_MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 현재 여부 + 종료 연월 */}
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-[11px] text-white/50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={careerForm.isCurrent}
+                      onChange={(e) => setCareerForm(f => ({ ...f, isCurrent: e.target.checked, endYear: e.target.checked ? null : f.endYear, endMonth: e.target.checked ? null : f.endMonth }))}
+                      className="accent-amber-400"
+                    />
+                    현재 재직/활동 중
+                  </label>
+                  {!careerForm.isCurrent && (
+                    <div>
+                      <div className="mb-1 text-[10px] text-white/30">종료</div>
+                      <div className="flex gap-2">
+                        <select value={careerForm.endYear ?? new Date().getFullYear()} onChange={(e) => setCareerForm(f => ({ ...f, endYear: Number(e.target.value) }))} className={selectCls}>
+                          {CAREER_YEARS.map(y => <option key={y} value={y}>{y}년</option>)}
+                        </select>
+                        <select value={careerForm.endMonth ?? 1} onChange={(e) => setCareerForm(f => ({ ...f, endMonth: Number(e.target.value) }))} className={selectCls}>
+                          {CAREER_MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 역할과 업적 */}
+                <textarea
+                  placeholder="역할과 업적 (선택)"
+                  value={careerForm.description}
+                  onChange={(e) => setCareerForm(f => ({ ...f, description: e.target.value }))}
+                  rows={3}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 outline-none focus:border-amber-400/30 resize-none"
+                />
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={submitCareer}
+                    disabled={!careerForm.company.trim() || !careerForm.title.trim()}
+                    className="flex-1 rounded-xl py-2 text-xs font-semibold disabled:opacity-40 transition-colors"
+                    style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                  >
+                    {editingId ? '수정 완료' : '추가'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowCareerForm(false); setEditingId(null); }}
+                    className="rounded-xl border border-white/10 px-4 py-2 text-xs text-white/40"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── 원하는 것 ── */}
+          <div>
+            <label className="mb-2 flex items-center gap-1.5 text-[11px] text-white/40">원하는 것 <span className="text-white/20">(모임에서 얻고 싶은 것)</span></label>
+            <div className="flex flex-wrap gap-1.5">
+              {EXPECTATIONS.map((exp) => {
+                const sel = lookingFor.includes(exp);
+                return <button key={exp} onClick={() => onToggleLookingFor(exp)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                  style={{ background: sel ? 'rgba(96,165,250,0.12)' : 'transparent', borderColor: sel ? 'rgba(96,165,250,0.3)' : 'rgba(255,255,255,0.1)', color: sel ? '#93c5fd' : 'rgba(255,255,255,0.5)' }}>{exp}</button>;
+              })}
+            </div>
+          </div>
+
+          {/* 줄 수 있는 것 */}
+          <div>
+            <label className="mb-2 flex items-center gap-1.5 text-[11px] text-white/40">줄 수 있는 것 <span className="text-white/20">(다른 멤버에게 도움이 될 것)</span></label>
+            <div className="flex flex-wrap gap-1.5">
+              {EXPECTATIONS.map((exp) => {
+                const sel = canOffer.includes(exp);
+                return <button key={exp} onClick={() => onToggleCanOffer(exp)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
+                  style={{ background: sel ? 'rgba(74,222,128,0.12)' : 'transparent', borderColor: sel ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.1)', color: sel ? '#86efac' : 'rgba(255,255,255,0.5)' }}>{exp}</button>;
+              })}
+            </div>
+          </div>
+
+          {/* ── 버튼 행 ── */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPreview(true)}
+              className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-white/50 hover:border-amber-400/20 hover:text-amber-400 transition-colors"
+            >
+              미리보기
+            </button>
+            <button onClick={onSave} disabled={saving}
+              className="flex-1 rounded-xl py-2.5 text-xs font-semibold disabled:opacity-50"
+              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+              {saving ? '저장 중...' : '프로필 저장'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* ── 미리보기 모달 ── */}
+    {showPreview && (
+      <div className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center" onClick={() => setShowPreview(false)}>
+        <div className="absolute inset-0 bg-black/70" />
+        <div
+          className="relative z-10 w-full max-w-sm rounded-t-2xl sm:rounded-2xl px-6 py-7 mx-0 sm:mx-4"
+          style={{ background: '#1e1e36', border: '1px solid rgba(255,255,255,0.08)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-xs font-semibold text-amber-400/60">간략 프로필 미리보기</span>
+            <button onClick={() => setShowPreview(false)} className="p-1 text-white/30 hover:text-white">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* 아바타 + 이름 */}
+          <div className="flex items-center gap-4 mb-4">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold"
+                style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                {displayName.charAt(0)}
+              </div>
+            )}
+            <div>
+              <div className="text-sm font-bold text-white/90">{displayName || '이름 없음'}</div>
+              {experienceYears !== null && (
+                <div className="mt-0.5 text-[11px] text-amber-400/60">
+                  {experienceYears === 0 ? '신입' : experienceYears >= 11 ? '10년차+' : `${experienceYears}년차`}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 한 줄 소개 */}
+          {bio && (
+            <p className="mb-4 text-xs leading-relaxed text-white/55 border-l-2 border-amber-400/20 pl-3">{bio}</p>
+          )}
+
+          {/* 이력 목록 */}
+          {career.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-white/25 mb-2">이력</div>
+              {career.map((c) => (
+                <div key={c.id} className="rounded-lg px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <div className="text-xs font-semibold text-white/80">{c.company}</div>
+                  <div className="text-[11px] text-amber-400/60">{c.title}</div>
+                  <div className="mt-0.5 text-[10px] text-white/25">{formatPeriod(c)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!bio && career.length === 0 && (
+            <p className="text-center text-xs text-white/25 py-4">소개와 이력을 채워주세요</p>
+          )}
+        </div>
+      </div>
+    )}
+    </>
+  );
+}
+
 // ── 메인 페이지 ──
 export default function BadakMyPage() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -364,6 +791,12 @@ export default function BadakMyPage() {
   const [industry, setIndustry] = useState('');
   const [jobFunction, setJobFunction] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
+  const [bio, setBio] = useState('');
+  const [experienceYears, setExperienceYears] = useState<number | null>(null);
+  const [lookingFor, setLookingFor] = useState<string[]>([]);
+  const [canOffer, setCanOffer] = useState<string[]>([]);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [career, setCareer] = useState<CareerEntry[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [verifyStep, setVerifyStep] = useState<'idle' | 'confirm' | 'sending' | 'input' | 'verifying'>('idle');
   const [verificationCode, setVerificationCode] = useState('');
@@ -406,6 +839,12 @@ export default function BadakMyPage() {
           setIndustry(memberData.member.industry || '');
           setJobFunction(memberData.member.job_function || '');
           setInterests(memberData.member.interests || []);
+          setBio(memberData.member.bio || '');
+          setExperienceYears(memberData.member.experience_years ?? null);
+          setLookingFor(memberData.member.looking_for || []);
+          setCanOffer(memberData.member.can_offer || []);
+          setAvatarUrl(memberData.member.avatar_url || null);
+          setCareer(memberData.member.career || []);
           setMemberRole(memberData.member.role || 'member');
         } else {
           setNickname(user.name || '');
@@ -526,7 +965,7 @@ export default function BadakMyPage() {
         await fetch('/api/badak/member', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ displayName: nickname, phone, industry, jobFunction, interests }),
+          body: JSON.stringify({ displayName: nickname, phone, industry, jobFunction, interests, bio, experienceYears, lookingFor, canOffer, avatarUrl, career }),
         });
       }
       setSaveSuccess(true); setVerifyStep('idle'); setEditMode(false); setVerificationCode('');
@@ -536,6 +975,8 @@ export default function BadakMyPage() {
       setVerifyStep('input');
     }
   };
+  const handleToggleLookingFor = (item: string) => setLookingFor((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
+  const handleToggleCanOffer = (item: string) => setCanOffer((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleCancelEdit = () => { setEditMode(false); setVerifyStep('idle'); setVerificationCode(''); setVerifyError(''); };
 
   const handleGroupUpdate = (updated: MyGroup) => {
@@ -604,12 +1045,16 @@ export default function BadakMyPage() {
       <div className="px-4 pb-6 pt-8 text-center" style={{ background: 'linear-gradient(180deg, rgba(255,217,61,0.04) 0%, transparent 100%)' }}>
         {/* 아바타 */}
         <div className="relative inline-block mb-4">
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold"
-            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d', border: '2px solid rgba(255,217,61,0.2)' }}
-          >
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" style={{ border: '2px solid rgba(255,217,61,0.2)' }} />
+          ) : (
+            <div
+              className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold"
+              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d', border: '2px solid rgba(255,217,61,0.2)' }}
+            >
+              {initials}
+            </div>
+          )}
           <button
             onClick={() => setActiveTab('settings')}
             className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border border-white/10"
@@ -1011,7 +1456,21 @@ export default function BadakMyPage() {
                   </div>
                 )}
               </div>
+
             </div>
+
+            {/* 심화 프로필 — 바닥장 준비 / 선택 입력 */}
+            <ProfileBoostCard
+              displayName={nickname}
+              avatarUrl={avatarUrl} onAvatarChange={setAvatarUrl}
+              bio={bio} setBio={setBio}
+              experienceYears={experienceYears} setExperienceYears={setExperienceYears}
+              career={career} setCareer={setCareer}
+              lookingFor={lookingFor} onToggleLookingFor={handleToggleLookingFor}
+              canOffer={canOffer} onToggleCanOffer={handleToggleCanOffer}
+              onSave={handleSave}
+              saving={verifyStep !== 'idle'}
+            />
 
             {/* 이메일 인증 플로우 */}
             {verifyStep === 'confirm' && (

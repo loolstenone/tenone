@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { LoginModal } from "@/components/LoginModal";
 
 const PREFIX = '/badak';
 const navItems = [
@@ -16,15 +17,21 @@ const navItems = [
     { name: "탐색", href: `${PREFIX}/explore` },
     { name: "모임 개설", href: `${PREFIX}/groups/create` },
     { name: "바닥장 신청", href: `${PREFIX}/apply` },
-    { name: "바닥이란", href: `${PREFIX}/about` },
 ];
 
 export function BadakHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    // 최초 열기 전엔 transition 없음 → 초기 마운트 시 슬금슬금 움직임 방지
     const [hasOpened, setHasOpened] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
+    const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const { isAuthenticated, user } = useAuth();
+
+    const openLogin = (tab: "login" | "signup" = "login") => {
+        setLoginTab(tab);
+        setMobileOpen(false);
+        setLoginOpen(true);
+    };
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -68,12 +75,21 @@ export function BadakHeader() {
                     />
                 </div>
 
-                {/* Mobile: 마이페이지 + 햄버거 */}
+                {/* Mobile: 프로필 + 햄버거 */}
                 <div className="md:hidden flex items-center gap-1">
-                    {isAuthenticated && (
+                    {isAuthenticated ? (
                         <Link href={`${PREFIX}/my`} className="p-2 text-neutral-300 hover:text-white">
                             <User className="h-5 w-5" />
                         </Link>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => openLogin("login")}
+                            className="p-2 text-neutral-300 hover:text-white"
+                            aria-label="로그인"
+                        >
+                            <User className="h-5 w-5" />
+                        </button>
                     )}
                     <button
                         onClick={() => { if (!hasOpened) setHasOpened(true); setMobileOpen(!mobileOpen); }}
@@ -144,25 +160,32 @@ export function BadakHeader() {
                     </Link>
                 ) : (
                     <div className="flex flex-col gap-2">
-                        <Link
-                            href="/login"
-                            onClick={() => setMobileOpen(false)}
+                        <button
+                            type="button"
+                            onClick={() => openLogin("login")}
                             className="rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50 hover:text-white"
                         >
                             로그인
-                        </Link>
-                        <Link
-                            href="/login"
-                            onClick={() => setMobileOpen(false)}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => openLogin("signup")}
                             className="rounded-lg border-none px-4 py-2 text-center text-sm font-semibold"
                             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                         >
                             가입하기
-                        </Link>
+                        </button>
                     </div>
                 )}
             </div>
         </div>
+
+        <LoginModal
+            isOpen={loginOpen}
+            onClose={() => setLoginOpen(false)}
+            accentColor="#1a1a2e"
+            defaultTab={loginTab}
+        />
         </>
     );
 }

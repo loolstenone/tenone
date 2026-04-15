@@ -175,6 +175,7 @@ export const FEED_ITEMS: FeedItem[] = [
     date: '4/19 (토) 14:00',
     location: '성수동',
     tags: ['AI', '실무', '프롬프트'],
+    imageUrl: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=860&h=320&fit=crop&auto=format',
   },
   {
     type: 'needs',
@@ -196,6 +197,7 @@ export const FEED_ITEMS: FeedItem[] = [
     date: '4/22 (화) 19:30',
     location: '강남역',
     tags: ['이직', '커리어', '광고'],
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=320&fit=crop&auto=format',
   },
   {
     type: 'needs',
@@ -217,6 +219,7 @@ export const FEED_ITEMS: FeedItem[] = [
     date: '4/20 (일) 11:00',
     location: '합정',
     tags: ['리더십', '팀장', '고민상담'],
+    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=860&h=320&fit=crop&auto=format',
   },
   {
     type: 'story',

@@ -108,14 +108,31 @@ export async function PUT(request: NextRequest) {
   if (body.interests !== undefined) updates.interests = body.interests;
   if (body.bio !== undefined) updates.bio = body.bio?.trim() || null;
   if (body.experienceYears !== undefined) updates.experience_years = body.experienceYears;
+  if (body.lookingFor !== undefined) updates.looking_for = body.lookingFor;
+  if (body.canOffer !== undefined) updates.can_offer = body.canOffer;
+  if (body.avatarUrl !== undefined) updates.avatar_url = body.avatarUrl;
+  if (body.career !== undefined) updates.career = body.career;
   updates.updated_at = new Date().toISOString();
 
-  const { data: member, error } = await supabase
+  let { data: member, error } = await supabase
     .from('badak_members')
     .update(updates)
     .eq('user_id', user.id)
     .select()
     .single();
+
+  // career 컬럼 미존재 시 fallback: career 제외 후 재시도
+  if (error && body.career !== undefined) {
+    const { career: _c, ...updatesWithoutCareer } = updates as Record<string, unknown> & { career?: unknown };
+    void _c;
+    const retry = await supabase
+      .from('badak_members')
+      .update(updatesWithoutCareer)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+    if (!retry.error) { member = retry.data; error = null; }
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ member });

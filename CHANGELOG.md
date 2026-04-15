@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-04-15 (사무실, 세션 48)
+
+### Badak UX 버그 수정 + 마이페이지 프로필 강화
+
+#### 코드 변경
+- **`features/badak/BadakHeader.tsx`** — navItems에서 "바닥이란" 제거 (UniverseUtilityBar ABOUT과 중복)
+- **`features/badak/cloud/FeedHighlights.tsx`** — PC 마우스 드래그 스크롤 추가 (`isDragging/hasDragged/startX/scrollLeft` ref 패턴). 인라인 CardWrapper 컴포넌트 안티패턴 제거 → 직접 조건부 Link/div 렌더링
+- **`lib/badak-cloud-data.ts`** — FEED_ITEMS 3개(g5/g1/g8)에 `imageUrl` Unsplash URL 추가
+- **`app/(Badak)/badak/groups/[id]/page.tsx`** — 전면 단순화: 게시판/신청 기능 제거(~600줄 삭제). 바닥장 영역 버튼으로 변경 → `MemberProfileSheet` 열기
+- **`app/(Badak)/badak/my/page.tsx`** — `CareerEntry` 인터페이스 추가. `avatarUrl/career` state 추가. ProfileBoostCard: 프로필 사진 업로드(FileReader, 1MB), 이력 CRUD(추가/수정/삭제, 연월 select, isCurrent 체크박스), 미리보기 버튼+모달(아바타+이름+연차+소개+이력). 프로필 헤더에 avatarUrl 반영. call site에 신규 props 전달
+- **`app/api/badak/member/route.ts`** — PUT에 `avatar_url`, `career` 저장 추가. career 컬럼 미존재 시 graceful fallback (career 제외 재시도)
+
+#### 미완 (DB 마이그레이션 필요)
+- `badak_members.career JSONB` 컬럼: `ALTER TABLE badak_members ADD COLUMN IF NOT EXISTS career JSONB DEFAULT '[]';` — Supabase Dashboard SQL Editor에서 수동 실행 필요
+
+---
+
 ## 2026-04-15 (사무실, 세션 47)
 
 ### Badak 유니버스 통합 (Sprint 1-1, 1-4) + 니즈 클라우드 100개
