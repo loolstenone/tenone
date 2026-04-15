@@ -5,7 +5,6 @@ import { Instagram, Youtube, Mail } from "lucide-react";
 
 
 const quickLinks = [
-    { name: "소개", href: "/madleague/about" },
     { name: "동아리", href: "/madleague/clubs" },
     { name: "프로그램", href: "/madleague/programs" },
     { name: "MADzine", href: "/madleague/madzine" },

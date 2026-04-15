@@ -9,7 +9,6 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "소개", href: "/madleague/about" },
     { name: "동아리", href: "/madleague/clubs" },
     { name: "프로그램", href: "/madleague/programs" },
     { name: "MADzine", href: "/madleague/madzine" },
@@ -64,7 +63,6 @@ export function MadLeagueHeader() {
                         profilePath="/madleague/my"
                         accentColor="#EC1D25"
                         signupPath="/signup"
-                        hideAbout
                     />
                 </div>
 

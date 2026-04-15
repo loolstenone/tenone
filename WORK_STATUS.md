@@ -1,6 +1,17 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 52 — Phase 1 + MI-A + M2-A 완료)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 52 Part 5 — MZ-1~8 + 헤더 ABOUT 정리)
+
+## 다음 할 일 (이어서 시작 지점)
+
+1. **M2-C** `/madleague/member/projects` — `mad_competition_teams` + `mad_submissions` 스키마 설계부터 (sql/madleague_phase2_projects.sql 신규)
+2. **M2-E** `/madleague/member/portfolio` + 공개용 `/portfolio/[member-id]`
+3. **MQ-A** `/programs/im` 363줄 legacy 다크 테마 클린업 (나머지 프로그램 페이지와 톤 정리)
+4. **MQ-B** `mad_post_likes` — 커뮤니티 게시글 좋아요 (MADzine 좋아요는 이미 있음, 일반 게시판은 없음)
+5. **M1-G** 동아리 로고 실제 에셋 교체 (현재 이니셜 플레이스홀더)
+
+---
+
 
 ## 세션 52 Part 3 완료 — Intra 관리 + Phase 2 기반
 

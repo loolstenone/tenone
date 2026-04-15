@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52 Part 5) — MADzine 고도화 + 공통 헤더 ABOUT 정리
+
+### MZ-1~8: MADzine 게시판 고도화
+- DB `sql/madleague_phase2_madzine.sql` — `mad_articles`에 author_id/status/excerpt/reject_reason 컬럼, `mad_article_likes`/`mad_article_comments` 테이블, `mad_increment_article_views()` RPC
+- 회원 투고 플로우 `/madleague/madzine/write` — 초안 저장/검토 제출/반려 후 재작성
+- 아티클 상세 `ArticleActions`(좋아요/공유/URL복사) + `ArticleComments`(매드리거 전용) + `ArticleViewPing`(세션당 1회 조회수)
+- Admin API `/api/madleague/admin/articles` — status 필터 + publish/reject/unpublish
+- Intra MI-A 대시보드에 "MADzine 검토" 탭 추가
+
+### 공통 헤더 ABOUT 그룹화 원칙 재확립
+- ABOUT은 **UniverseUtilityBar**(ABOUT 로그인 가입 공유 검색)에 속함. 메인 nav에 두지 않음
+- MadLeagueHeader/Footer의 navItems에서 "소개" 제거
+- RooK/MoNTZ/Jakka/MadLeague 헤더의 잘못된 `hideAbout` prop 삭제 → ABOUT 정상 노출
+- TenOne PublicHeader는 `hideAuth: true`로 로그인/가입 원천 차단 (변경 없음)
+
+---
+
 ## 2026-04-16 (사무실, 세션 52 Part 4) — Phase 2 핵심 기능 (인증서 + 커뮤니티 + 프로필)
 
 ### M2-F: 인증서 시스템 ⭐
