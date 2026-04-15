@@ -193,6 +193,22 @@ export default function BadakNextStage() {
           onPointerLeave={handlePointerUp}
         >
           <div ref={sphereRef} className="absolute inset-0 flex justify-center" style={{ alignItems: 'flex-start', paddingTop: '5%' }}>
+            {/* 클라우드 중앙 레이블 */}
+            <div
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
+              style={{ zIndex: 0 }}
+            >
+              <span
+                className="font-black tracking-widest uppercase"
+                style={{
+                  fontSize: `${Math.round(sphereRadius * 0.18)}px`,
+                  color: 'rgba(255,255,255,0.06)',
+                  letterSpacing: '0.25em',
+                }}
+              >
+                Needs
+              </span>
+            </div>
             {CLOUD_WORDS.map((word, i) => (
               <CloudBubble
                 key={word.text}
