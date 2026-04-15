@@ -26,7 +26,7 @@ export default function BadakLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
+        <div className="min-h-screen bg-[#1a1a2e] text-neutral-900 flex flex-col">
             <BadakHeader />
             <main className="flex-1">
                 {children}
