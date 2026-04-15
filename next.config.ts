@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
       { source: '/goods/:path*', destination: '/', permanent: true },
       // URL 컨벤션 통일 (PascalCase → kebab-case)
       { source: '/CrewInvite', destination: '/crew-invite', permanent: true },
+      // MADLeague: 구 라우트 → 신 사이트맵 (2026-04-16 v2)
+      { source: '/madleague/program', destination: '/madleague/programs', permanent: true },
+      { source: '/madleague/pt', destination: '/madleague/programs/competition', permanent: true },
+      { source: '/madleague/idea-movement', destination: '/madleague/programs/im', permanent: true },
+      { source: '/madleague/idea-movement/:path*', destination: '/madleague/programs/im/:path*', permanent: true },
+      { source: '/madleague/leaguer', destination: '/madleague/member', permanent: true },
     ];
   },
 

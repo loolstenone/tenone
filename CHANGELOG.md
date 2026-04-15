@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52) — MADLeague 사이트 Phase 1 착수
+
+### DB 스키마 + Home 랜딩 + Clubs + 라우트 리팩토링
+
+#### 스펙 문서
+- **`docs/MADLeague_Site_Plan_v2.md`** 신규 — MADLeague 사이트 v2 기획서 (사이트맵, 8개 Phase 1 테이블, 디자인 시스템, 인증서 자동화, 3 Phase 로드맵)
+
+#### DB (Prod `ziotlxkdctlhiwkgmmsh`)
+- **`sql/madleague_phase1.sql`** 신규 — 8개 테이블 생성 + RLS + 시드
+  - `mad_clubs` (7개 동아리: MADLeap, PAM, ADlle, ABC, SUZAK, P:ad, AD Zone)
+  - `mad_cohorts` (14개: 7동아리 × 2024/2025)
+  - `mad_competitions` (3개: 2024 지평주조, 2025 대성학원, 2025 리제로스)
+  - `mad_competition_results`, `mad_archive`, `mad_articles`, `mad_applications`, `mad_hero_applications`
+  - 전 테이블 `tenant_id TEXT DEFAULT 'tenone'` (8원칙 #6 선반영)
+- **`scripts/reseed-madleague.js`** 신규 — Korean UTF-8 인코딩 복구 (최초 bash+curl 경로에서 Windows CP949 변환으로 한글 깨짐 → Node fetch로 재시드)
+- **`scripts/run-sql.js`** 패치 — `SUPABASE_ACCESS_TOKEN` 우선, `SUPABASE_SERVICE_ROLE_KEY_PROD`는 fallback
+
+#### 코드 변경 (UI)
+- **`lib/supabase/madleague.ts`** 신규 — `fetchMadClubs`, `fetchMadClubBySlug`, `fetchMadCompetitions`, `fetchMadHallOfFame`, `fetchMadArticles`, `fetchMadStats`
+- **`app/(MADLeague)/layout.tsx`** — 라이트(`bg-white`) → 다크(`bg-[--mad-black]`). CSS 변수 5개(`--mad-red #EC1D25`, `--mad-black`, `--mad-gold #FFC000`, `--mad-white`, `--mad-gray`) 주입
+- **`features/madleague/MadLeagueHeader.tsx`**
+  - 로고: 초록 `MAD` 블록 → 빨간 점(●) + "MAD League" 워드마크
+  - 액센트: `#0F5132` → `#EC1D25`
+  - navItems: 소개/동아리/프로그램/MADzine/아카이브/지원하기 (모두 `/madleague/*` 절대경로)
+- **`features/madleague/MadLeagueFooter.tsx`** — 동일한 로고/링크 업데이트
+- **`app/(MADLeague)/madleague/page.tsx`** — UnderConstruction stub → 풀 랜딩 (Hero+Numbers+Programs+Clubs+HallOfFame+MADzine+CTA, DB 실시간)
+- **`app/(MADLeague)/madleague/clubs/page.tsx`** 신규 — 7 동아리 리스트
+- **`app/(MADLeague)/madleague/clubs/[slug]/page.tsx`** 신규 — 동아리 상세(히어로, 활동연도, 수상, 갤러리, 지원 CTA)
+- **`app/(MADLeague)/madleague/programs/page.tsx`** 신규 — 프로그램 인덱스(6 카드)
+
+#### 라우트 리팩토링 (구→신)
+- **이동:** `/madleague/pt` → `/madleague/programs/competition`
+- **이동:** `/madleague/idea-movement` → `/madleague/programs/im` (essence 서브도 함께)
+- **삭제:** `/madleague/program` (새 `/madleague/programs`로 대체)
+- **`next.config.ts`** — 301(308) redirects 추가: `/program→/programs`, `/pt→/programs/competition`, `/idea-movement→/programs/im`, `/leaguer→/member`
+
+#### 의사결정
+- 동아리 7개 전부 active 확정 (P:ad 강원, AD Zone 충청 포함)
+- 인증 아키텍처: tenone.biz 통합 Supabase Auth 재사용 (별도 서브프로젝트 없음)
+- `mad_competition_results.team_id`는 Phase 1에서 FK 없이 UUID. Phase 2에 `mad_competition_teams` 생성 시 FK 추가
+- 동아리 컬러 7종(#EC1D25/#0066CC/#FF6B35/#00A86B/#FFC000/#4A90E2/#9B59B6) 임시 지정 — 실제 동아리 로고/브랜딩 들어오면 교체
+
+#### 검증
+- `curl /madleague/*` 라우트 9종 전부 정상 (200 또는 308 리다이렉트)
+- 브라우저 렌더: 한글 정상, Hero/Numbers/Programs/Clubs/HallOfFame 섹션 모두 DB 데이터로 표시
+- `npx tsc --noEmit` madleague 관련 에러 0
+
+---
+
 ## 2026-04-16 (사무실, 세션 51)
 
 ### Badak 이월 항목 일괄 처리 + Phase 0 로드맵 확인

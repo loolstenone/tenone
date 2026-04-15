@@ -1,6 +1,51 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 51)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 52)
+
+---
+
+## 세션 52 완료 항목 — MADLeague 사이트 Phase 1 착수
+
+| 항목 | 내용 |
+|------|------|
+| **기획서** | `docs/MADLeague_Site_Plan_v2.md` — 사이트맵·DB·디자인·인증서 자동화·3 Phase 로드맵 |
+| **DB** | `sql/madleague_phase1.sql` — 8개 테이블 + RLS + 시드 (7 동아리, 14 cohorts, 3 경쟁PT). Prod 실행 완료 |
+| **UTF-8 복구** | `scripts/reseed-madleague.js` — Windows bash+curl 경로 한글 깨짐 → Node fetch 재시드 |
+| **run-sql.js 패치** | `SUPABASE_ACCESS_TOKEN` 우선, SERVICE_ROLE_KEY_PROD fallback |
+| **DB 헬퍼** | `lib/supabase/madleague.ts` — 6개 fetch 함수 (clubs/competitions/hallOfFame/articles/stats/bySlug) |
+| **Layout/Header/Footer** | 라이트→다크 전환. `#EC1D25` 액센트. 로고(빨간 점 + 워드마크). navItems 신규 사이트맵 |
+| **Home 랜딩** | Hero+Numbers+Programs+Clubs+HallOfFame+MADzine+CTA (DB 실시간) |
+| **Clubs** | `/clubs` (7 동아리) + `/clubs/[slug]` (히어로/활동연도/수상/갤러리) |
+| **Programs 인덱스** | `/programs` (6 카드) |
+| **라우트 리팩토링** | `/pt → /programs/competition`, `/idea-movement → /programs/im`, `/program → /programs` 이동 + 301 리다이렉트 |
+
+## 다음 할 일
+
+### MADLeague Phase 1 이어서
+| # | 작업 | 세부 |
+|---|------|------|
+| **M1-A** | 경쟁PT Hall of Fame 고도화 | `/programs/competition` 페이지 현재 구버전(345줄 하드코딩) → DB 연결 + 연도/동아리/과제기업 필터 |
+| **M1-B** | MADzine 페이지 | `/madzine` 카테고리 필터(interview/case/report/cover/news), 아티클 상세 `/madzine/[slug]` |
+| **M1-C** | Archive | `/archive` 연도/동아리/프로그램/수상여부 필터, `/archive/[id]` 상세 |
+| **M1-D** | Apply | `/apply` 지원 폼 (club 쿼리파라미터로 자동 선택), POST /api/madleague/apply |
+| **M1-E** | About 리디자인 | `/about` BI+프로그램 라인업+캐릭터, `/about/story`, `/about/awards` |
+| **M1-F** | HeRo 프로그램 | `/hero` 폼 + /api/madleague/hero |
+| **M1-G** | 동아리 로고 자산 교체 | 현재 임시 컬러 → 실제 로고 이미지 적용 |
+| **M1-H** | Footer 연락 영역 | "전국 5개 권역" → "전국 7개 권역" 수정, 소셜 링크 실제 URL |
+
+### Phase 0 병행 (원래 계획)
+| # | 작업 |
+|---|------|
+| **0-A** | `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트 (mad_* 테이블은 이미 선반영됨) |
+| **0-B** | 고객 신원 4계층 (auth.users → profiles → member_brand_joins → wio_members) |
+| **0-C** | 중복 테이블 정리 (expenses/approvals/timesheets/chat → wio_*) |
+| **0-D** | WIO 서비스 인프라 (wio_tenant_configs, wio_feature_flags) |
+
+### Badak 잔여
+- 멤버 검색/필터 고도화
+- 모임 상세 페이지 완성
+- 알림 시스템
+- 온보딩 플로우
 
 ---
 

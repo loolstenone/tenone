@@ -9,12 +9,12 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "소개", href: "/about" },
-    { name: "프로그램", href: "/program" },
-    { name: "경쟁PT", href: "/pt" },
-    { name: "MADzine", href: "/madzine" },
-    { name: "리퍼", href: "/leaguer" },
-    { name: "커뮤니티", href: "/idea-movement" },
+    { name: "소개", href: "/madleague/about" },
+    { name: "동아리", href: "/madleague/clubs" },
+    { name: "프로그램", href: "/madleague/programs" },
+    { name: "MADzine", href: "/madleague/madzine" },
+    { name: "아카이브", href: "/madleague/archive" },
+    { name: "지원하기", href: "/madleague/apply" },
 ];
 
 export function MadLeagueHeader() {
@@ -32,12 +32,10 @@ export function MadLeagueHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-neutral-900">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-1 shrink-0">
-                    <span className="bg-[#0F5132] text-white font-extrabold text-lg px-2 py-0.5 tracking-tight">
-                        MAD
-                    </span>
-                    <span className="text-white font-bold text-lg tracking-tight">
-                        LEAGUE
+                <Link href="/madleague" className="flex items-center gap-2 shrink-0">
+                    <span className="inline-block h-3 w-3 rounded-full bg-[#EC1D25]" />
+                    <span className="text-white font-extrabold text-lg tracking-tight">
+                        MAD League
                     </span>
                 </Link>
 
@@ -64,7 +62,7 @@ export function MadLeagueHeader() {
                     <UniverseUtilityBar
                         aboutPath="/madleague/about"
                         profilePath="/madleague/my"
-                        accentColor="#0F5132"
+                        accentColor="#EC1D25"
                         signupPath="/signup"
                     />
                 </div>
@@ -98,13 +96,13 @@ export function MadLeagueHeader() {
                     ))}
                     <div className="pt-4 mt-4 border-t border-neutral-800 flex items-center gap-4">
                         {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
+                            <Link href="/madleague/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
                                 <User className="h-4 w-4" /> 마이페이지
                             </Link>
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#0F5132] text-white hover:bg-[#0a3d24] rounded">가입</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white hover:bg-[#0a3d24] rounded">가입</Link>
                             </>
                         )}
                     </div>

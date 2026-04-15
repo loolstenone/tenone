@@ -70,9 +70,11 @@ async function runSQL(serviceRoleKey, sql, label) {
 
 async function main() {
   const env = loadEnv();
-  const serviceRoleKey = env['SUPABASE_SERVICE_ROLE_KEY_PROD'];
+  // Management API는 PAT(SUPABASE_ACCESS_TOKEN)를 사용한다.
+  // 호환성을 위해 SUPABASE_SERVICE_ROLE_KEY_PROD도 받지만, .env.local에는 SUPABASE_ACCESS_TOKEN이 표준.
+  const serviceRoleKey = env['SUPABASE_ACCESS_TOKEN'] || env['SUPABASE_SERVICE_ROLE_KEY_PROD'];
   if (!serviceRoleKey) {
-    console.error('ERROR: SUPABASE_SERVICE_ROLE_KEY_PROD not found in .env.local');
+    console.error('ERROR: SUPABASE_ACCESS_TOKEN (또는 SUPABASE_SERVICE_ROLE_KEY_PROD) not found in .env.local');
     process.exit(1);
   }
   const files = process.argv[2] ? [process.argv[2]] : PENDING_FILES;

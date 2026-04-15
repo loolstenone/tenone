@@ -27,7 +27,16 @@ export default function MadLeagueLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
+        <div
+            className="min-h-screen flex flex-col bg-[var(--mad-black)] text-white"
+            style={{
+                ['--mad-red' as string]: '#EC1D25',
+                ['--mad-black' as string]: '#000000',
+                ['--mad-gold' as string]: '#FFC000',
+                ['--mad-white' as string]: '#FFFFFF',
+                ['--mad-gray' as string]: '#F5F5F5',
+            }}
+        >
             <MadLeagueHeader />
             <main className="flex-1 pt-16">
                 {children}
