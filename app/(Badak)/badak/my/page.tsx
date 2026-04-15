@@ -52,6 +52,7 @@ interface MessageItem {
 
 interface GroupApplicant {
   id: string;
+  memberId?: string;
   name: string;
   job: string;
   message: string;
@@ -188,19 +189,36 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function GroupManageCard({ group, onUpdate }: { group: MyGroup; onUpdate: (g: MyGroup) => void }) {
+function GroupManageCard({
+  group,
+  onUpdate,
+  onApplicantAction,
+}: {
+  group: MyGroup;
+  onUpdate: (g: MyGroup) => void;
+  onApplicantAction?: (groupId: string, membershipId: string, action: 'approved' | 'rejected') => Promise<void>;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [activeSection, setActiveSection] = useState<'applicants' | 'members' | 'notice'>('applicants');
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const pendingCount = group.applicants.filter((a) => a.status === 'pending').length;
   const remaining = group.maxMembers - group.currentMembers;
 
-  const handleApplicantAction = (applicantId: string, action: ApplicantStatus) => {
-    const updated = {
-      ...group,
-      applicants: group.applicants.map((a) => a.id === applicantId ? { ...a, status: action } : a),
-      currentMembers: action === 'approved' ? group.currentMembers + 1 : group.currentMembers,
-    };
-    onUpdate(updated);
+  const handleApplicantAction = async (applicantId: string, action: ApplicantStatus) => {
+    if (action !== 'approved' && action !== 'rejected') return;
+    setProcessingId(applicantId);
+    if (onApplicantAction) {
+      await onApplicantAction(group.id, applicantId, action);
+    } else {
+      // 로컬 fallback (API 없을 때)
+      const updated = {
+        ...group,
+        applicants: group.applicants.map((a) => a.id === applicantId ? { ...a, status: action } : a),
+        currentMembers: action === 'approved' ? group.currentMembers + 1 : group.currentMembers,
+      };
+      onUpdate(updated);
+    }
+    setProcessingId(null);
   };
 
   const toggleJoinType = () => {
@@ -322,14 +340,16 @@ function GroupManageCard({ group, onUpdate }: { group: MyGroup; onUpdate: (g: My
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleApplicantAction(app.id, 'approved')}
-                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border-none py-1.5 text-[11px] font-semibold"
+                            disabled={processingId === app.id}
+                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border-none py-1.5 text-[11px] font-semibold disabled:opacity-50"
                             style={{ background: 'rgba(34,197,94,0.12)', color: '#4ade80' }}
                           >
-                            <UserCheck className="h-3 w-3" /> 승인
+                            <UserCheck className="h-3 w-3" /> {processingId === app.id ? '처리중...' : '승인'}
                           </button>
                           <button
                             onClick={() => handleApplicantAction(app.id, 'rejected')}
-                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/8 bg-transparent py-1.5 text-[11px] text-white/35"
+                            disabled={processingId === app.id}
+                            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/8 bg-transparent py-1.5 text-[11px] text-white/35 disabled:opacity-50"
                           >
                             <UserX className="h-3 w-3" /> 거절
                           </button>
@@ -412,8 +432,13 @@ export default function BadakMyPage() {
   const [myPosts, setMyPosts] = useState<MyPost[]>([]);
   const [myPostsLoading, setMyPostsLoading] = useState(true);
 
-  // 내 모임 (바닥장)
-  const [myGroups, setMyGroups] = useState<MyGroup[]>(MOCK_MY_GROUPS);
+  // 북마크 (실DB)
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+  const [bookmarksLoading, setBookmarksLoading] = useState(true);
+
+  // 내 모임 (실DB)
+  const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
+  const [joinedGroups, setJoinedGroups] = useState<JoinedGroup[]>([]);
   const isLeader = myGroups.length > 0;
 
   // 멤버 역할
@@ -472,9 +497,29 @@ export default function BadakMyPage() {
         const notiData = await notiRes.json();
         setNotifications(notiData.notifications || []);
         setUnreadCount(notiData.unreadCount || 0);
+
+        // 북마크 로드
+        setBookmarksLoading(true);
+        const bmRes = await fetch('/api/badak/bookmarks', { headers });
+        const bmData = await bmRes.json();
+        setBookmarks((bmData.bookmarks || []).map((b: { id: string; item_type: string; item_id: string; title: string; subtitle: string | null; created_at: string }) => ({
+          id: b.id,
+          type: b.item_type as 'need' | 'group' | 'post',
+          title: b.title,
+          subtitle: b.subtitle || '',
+          createdAt: new Date(b.created_at).toLocaleDateString('ko-KR'),
+        })));
+        setBookmarksLoading(false);
+
+        // 내 모임 로드 (개설한 모임 + 참여 신청 모임)
+        const myGroupsRes = await fetch('/api/badak/my/groups', { headers });
+        const myGroupsData = await myGroupsRes.json();
+        setMyGroups(myGroupsData.ledGroups || []);
+        setJoinedGroups(myGroupsData.joinedGroups || []);
       } catch {
         setNickname(user.name || '');
         setMyPostsLoading(false);
+        setBookmarksLoading(false);
       }
     })();
   }, [user]);
@@ -562,6 +607,34 @@ export default function BadakMyPage() {
     setMyGroups((prev) => prev.map((g) => g.id === updated.id ? updated : g));
   };
 
+  const handleApplicantAction = async (groupId: string, membershipId: string, action: 'approved' | 'rejected') => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session) return;
+      const res = await fetch(`/api/badak/groups/${groupId}/members`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ membershipId, action }),
+      });
+      if (!res.ok) return;
+      // 로컬 상태도 동기화
+      setMyGroups((prev) => prev.map((g) => {
+        if (g.id !== groupId) return g;
+        return {
+          ...g,
+          applicants: g.applicants.map((a) => a.id === membershipId ? { ...a, status: action } : a),
+          currentMembers: action === 'approved' ? g.currentMembers + 1 : g.currentMembers,
+          members: action === 'approved'
+            ? [...g.members, ...g.applicants.filter((a) => a.id === membershipId).map((a) => ({ id: a.memberId || a.id, name: a.name, job: a.job, joinedAt: new Date().toLocaleDateString('ko-KR') }))]
+            : g.members,
+        };
+      }));
+    } catch {
+      // silent fail
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
@@ -584,11 +657,11 @@ export default function BadakMyPage() {
           </div>
 
           {/* 참여 중인 모임 요약 */}
-          {MOCK_JOINED.length > 0 && (
+          {joinedGroups.length > 0 && (
             <div className="mt-4 border-t border-white/6 pt-3">
               <div className="mb-2 text-[10px] font-medium text-white/30">참여 중인 모임</div>
               <div className="space-y-1.5">
-                {MOCK_JOINED.map((j) => (
+                {joinedGroups.map((j) => (
                   <div key={j.id} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-white/70">{j.title}</span>
@@ -649,9 +722,11 @@ export default function BadakMyPage() {
         {/* ── 북마크 ── */}
         {activeTab === 'bookmarks' && (
           <div className="space-y-2">
-            {MOCK_BOOKMARKS.length === 0 ? (
+            {bookmarksLoading ? (
+              <div className="flex justify-center py-16"><div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>
+            ) : bookmarks.length === 0 ? (
               <div className="py-16 text-center"><Bookmark className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">북마크가 없습니다</p></div>
-            ) : MOCK_BOOKMARKS.map((item) => (
+            ) : bookmarks.map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.03] p-4 hover:bg-white/[0.06]">
                 <div>
                   <div className="mb-1 flex items-center gap-2">
@@ -757,7 +832,12 @@ export default function BadakMyPage() {
             </div>
 
             {myGroups.map((group) => (
-              <GroupManageCard key={group.id} group={group} onUpdate={handleGroupUpdate} />
+              <GroupManageCard
+                key={group.id}
+                group={group}
+                onUpdate={handleGroupUpdate}
+                onApplicantAction={handleApplicantAction}
+              />
             ))}
           </div>
         )}

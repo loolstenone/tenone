@@ -70,6 +70,18 @@ export async function POST(request: NextRequest) {
   // 조건 2: community 모임은 반드시 관리자 승인 필요 (pending_review)
   const initialStatus = groupType === 'curated' ? 'recruiting' : 'pending_review';
 
+  // schedule 디스플레이 문자열 생성
+  const meetingType = body.meetingType || 'onetime';
+  const scheduleText = (() => {
+    if (meetingType === 'onetime' && body.eventDate) {
+      return new Date(body.eventDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+    }
+    if (meetingType === 'series' && body.seriesCount) {
+      return `${body.seriesCount}회 시리즈`;
+    }
+    return body.recurringSchedule || null;
+  })();
+
   const { data: group, error } = await supabase
     .from('badak_groups')
     .insert({
@@ -79,9 +91,17 @@ export async function POST(request: NextRequest) {
       leader_id: member.id,
       leader_reason: body.leaderReason || null,
       group_type: groupType,
+      meeting_type: meetingType,
+      join_type: body.joinType || 'approval',
       status: initialStatus,
       max_members: body.maxMembers || 20,
       event_date: body.eventDate || null,
+      series_dates: body.seriesDates || null,
+      recurring_schedule: body.recurringSchedule || null,
+      schedule: scheduleText,
+      next_date: (meetingType === 'onetime' || meetingType === 'series') && body.eventDate
+        ? body.eventDate.split('T')[0]
+        : null,
       location: body.location || null,
       location_detail: body.locationDetail || null,
       fee: body.fee || 0,

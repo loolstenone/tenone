@@ -6,22 +6,39 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 const supabase = createClient(url, key);
 
-// GET: 글 상세 + 조회수 증가
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ postId: string }> }) {
+// GET: 글 상세 + 조회수 증가 (로그인 유저: 중복 방지 / 비로그인: 매 요청 +1)
+export async function GET(request: NextRequest, { params }: { params: Promise<{ postId: string }> }) {
   const { postId } = await params;
 
-  // 조회수 증가 (직접 +1)
-  const { data: current } = await supabase
-    .from('badak_community_posts')
-    .select('views_count')
-    .eq('id', postId)
-    .single();
+  const authHeader = request.headers.get('authorization');
+  let shouldIncrement = true;
 
-  if (current) {
-    await supabase
+  if (authHeader) {
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) {
+      // 이미 조회한 기록이 있으면 증가 안 함
+      const { error: insertError } = await supabase
+        .from('badak_community_views')
+        .insert({ post_id: postId, user_id: user.id });
+      // PK 충돌 = 이미 조회함
+      shouldIncrement = !insertError || insertError.code !== '23505';
+    }
+  }
+
+  if (shouldIncrement) {
+    const { data: current } = await supabase
       .from('badak_community_posts')
-      .update({ views_count: (current.views_count || 0) + 1 })
-      .eq('id', postId);
+      .select('views_count')
+      .eq('id', postId)
+      .single();
+
+    if (current) {
+      await supabase
+        .from('badak_community_posts')
+        .update({ views_count: (current.views_count || 0) + 1 })
+        .eq('id', postId);
+    }
   }
 
   const { data: post } = await supabase

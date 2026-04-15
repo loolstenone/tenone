@@ -73,7 +73,7 @@ export async function POST(
   // 모임 정보 확인
   const { data: group } = await supabase
     .from('badak_groups')
-    .select('id, current_members, max_members, status')
+    .select('id, current_members, max_members, status, join_type')
     .eq('id', groupId)
     .single();
 
@@ -97,24 +97,28 @@ export async function POST(
     return NextResponse.json({ error: 'Already applied', status: 'already_applied' }, { status: 409 });
   }
 
-  // 참여 신청 (insert, not upsert)
+  // firstcome: 즉시 승인, approval: 대기
+  const isFirstcome = group.join_type === 'firstcome';
+  const memberStatus = isFirstcome ? 'approved' : 'applied';
+
   const { error } = await supabase
     .from('badak_group_members')
-    .insert({ group_id: groupId, member_id: member.id, status: 'applied' });
+    .insert({ group_id: groupId, member_id: member.id, status: memberStatus });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   // current_members 원자적 증가 (race condition 방지)
   await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
 
-  // 바닥장에게 알림 생성
+  // 바닥장에게 알림 생성 (firstcome은 알림 없이 자동 승인)
   const { data: groupFull } = await supabase
     .from('badak_groups')
     .select('title, leader:badak_members!badak_groups_leader_id_fkey(user_id)')
     .eq('id', groupId)
     .single();
 
-  if (groupFull?.leader) {
+  // firstcome은 자동 승인 → 바닥장 알림 생략
+  if (!isFirstcome && groupFull?.leader) {
     const leaderData = groupFull.leader as unknown as { user_id: string };
     const leaderUserId = leaderData.user_id;
     const { data: applicant } = await supabase
@@ -133,5 +137,5 @@ export async function POST(
     });
   }
 
-  return NextResponse.json({ status: 'applied' });
+  return NextResponse.json({ status: memberStatus });
 }

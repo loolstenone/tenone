@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, MapPin, Users, Banknote, MessageSquare, Pin, ImageIcon, Send } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Banknote, MessageSquare, Pin, ImageIcon, Send, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
 
@@ -52,6 +52,9 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [joined, setJoined] = useState(false);
   const [joinStatus, setJoinStatus] = useState<'none' | 'applied' | 'approved' | 'leader'>('none');
 
+  // 현재 사용자 badak_member id
+  const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
+
   // Board state
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -64,6 +67,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [submittingPost, setSubmittingPost] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
 
+  // 글 수정 모드
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+
   // 모임 정보 로드
   useEffect(() => {
     fetch(`/api/badak/groups?limit=50`)
@@ -75,7 +83,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       .catch(() => {});
   }, [id]);
 
-  // 참여 상태 서버 조회
+  // 참여 상태 + 현재 멤버 ID 서버 조회
   useEffect(() => {
     if (!isAuthenticated) return;
     (async () => {
@@ -83,15 +91,23 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
-        const res = await fetch(`/api/badak/groups/${id}/join`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const headers = { Authorization: `Bearer ${session.access_token}` };
+
+        const [joinRes, memberRes] = await Promise.all([
+          fetch(`/api/badak/groups/${id}/join`, { headers }),
+          fetch('/api/badak/member', { headers }),
+        ]);
+
+        if (joinRes.ok) {
+          const data = await joinRes.json();
           setJoinStatus(data.status || 'none');
           if (data.status === 'applied' || data.status === 'approved' || data.status === 'leader') {
             setJoined(true);
           }
+        }
+        if (memberRes.ok) {
+          const data = await memberRes.json();
+          if (data.member?.id) setCurrentMemberId(data.member.id);
         }
       } catch { /* ignore */ }
     })();
@@ -178,6 +194,46 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       const { url } = await res.json();
       setWriteImages((prev) => [...prev, url]);
     }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('게시글을 삭제하시겠습니까?')) return;
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const res = await fetch(`/api/badak/groups/${id}/posts`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId }),
+    });
+    if (res.ok) {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      if (selectedPost?.id === postId) setSelectedPost(null);
+    }
+  };
+
+  const handleStartEdit = (post: Post) => {
+    setEditingPostId(post.id);
+    setEditTitle(post.title);
+    setEditContent(post.content);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingPostId || !editTitle.trim() || !editContent.trim()) return;
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const res = await fetch(`/api/badak/groups/${id}/posts`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: editingPostId, title: editTitle, content: editContent }),
+    });
+    if (res.ok) {
+      const updated = { ...selectedPost!, title: editTitle, content: editContent } as Post;
+      setSelectedPost(updated);
+      setPosts((prev) => prev.map((p) => p.id === editingPostId ? updated : p));
+    }
+    setEditingPostId(null);
   };
 
   const handleSubmitComment = async () => {
@@ -342,31 +398,41 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               {posts.map((post) => {
                 const author = post.author as Post['author'];
                 return (
-                  <button
-                    key={post.id}
-                    onClick={() => { setSelectedPost(post); loadComments(post.id); }}
-                    className="w-full rounded-xl border border-white/8 p-4 text-left transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div className="flex items-start gap-3">
-                      {post.images?.length > 0 && (
-                        <img src={post.images[0]} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          {post.pinned && <Pin className="h-3 w-3 text-amber-400" />}
-                          <h3 className="text-sm font-semibold text-white/80 truncate">{post.title}</h3>
-                        </div>
-                        <p className="mt-1 text-xs text-white/30 line-clamp-2">{post.content}</p>
-                        <div className="mt-2 flex items-center gap-3 text-[11px] text-white/20">
-                          <span>{author?.display_name}</span>
-                          <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
-                          <span className="flex items-center gap-0.5">
-                            <MessageSquare className="h-3 w-3" /> {post.commentCount}
-                          </span>
+                  <div key={post.id} className="relative rounded-xl border border-white/8 transition-colors hover:bg-white/[0.03]">
+                    <button
+                      onClick={() => { setSelectedPost(post); loadComments(post.id); }}
+                      className="w-full p-4 text-left"
+                    >
+                      <div className="flex items-start gap-3">
+                        {post.images?.length > 0 && (
+                          <img src={post.images[0]} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            {post.pinned && <Pin className="h-3 w-3 text-amber-400" />}
+                            <h3 className="text-sm font-semibold text-white/80 truncate">{post.title}</h3>
+                          </div>
+                          <p className="mt-1 text-xs text-white/30 line-clamp-2">{post.content}</p>
+                          <div className="mt-2 flex items-center gap-3 text-[11px] text-white/20">
+                            <span>{author?.display_name}</span>
+                            <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+                            <span className="flex items-center gap-0.5">
+                              <MessageSquare className="h-3 w-3" /> {post.commentCount}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                    {/* 본인 글 삭제 버튼 */}
+                    {(post.author as Post['author'])?.id === currentMemberId && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }}
+                        className="absolute right-3 top-3 rounded p-1 text-white/15 hover:text-red-400"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -430,18 +496,72 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {/* Post detail */}
       {tab === 'board' && selectedPost && (
         <div className="px-5 pb-28 pt-4">
-          <button onClick={() => setSelectedPost(null)} className="mb-4 text-sm text-white/30 hover:text-white/50">← 목록</button>
+          <button onClick={() => { setSelectedPost(null); setEditingPostId(null); }} className="mb-4 text-sm text-white/30 hover:text-white/50">← 목록</button>
 
-          <h2 className="text-lg font-bold text-white/90">{selectedPost.title}</h2>
-          <div className="mt-2 flex items-center gap-2 text-xs text-white/30">
-            <span>{(selectedPost.author as Post['author'])?.display_name}</span>
-            <span>·</span>
-            <span>{new Date(selectedPost.created_at).toLocaleDateString('ko-KR')}</span>
-          </div>
+          {editingPostId === selectedPost.id ? (
+            /* ── 수정 폼 ── */
+            <div className="space-y-3">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full border-b border-white/10 bg-transparent pb-2 text-lg font-bold text-white outline-none"
+              />
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={8}
+                className="w-full resize-none bg-transparent text-sm leading-relaxed text-white/70 outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={!editTitle.trim() || !editContent.trim()}
+                  className="flex-1 rounded-lg py-2 text-sm font-semibold disabled:opacity-30"
+                  style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                >
+                  저장
+                </button>
+                <button
+                  onClick={() => setEditingPostId(null)}
+                  className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/40"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-start justify-between gap-2">
+                <h2 className="text-lg font-bold text-white/90">{selectedPost.title}</h2>
+                {/* 본인 글 수정/삭제 버튼 */}
+                {(selectedPost.author as Post['author'])?.id === currentMemberId && (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => handleStartEdit(selectedPost)}
+                      className="rounded p-1.5 text-white/20 hover:text-amber-400"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(selectedPost.id)}
+                      className="rounded p-1.5 text-white/20 hover:text-red-400"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-xs text-white/30">
+                <span>{(selectedPost.author as Post['author'])?.display_name}</span>
+                <span>·</span>
+                <span>{new Date(selectedPost.created_at).toLocaleDateString('ko-KR')}</span>
+              </div>
 
-          <div className="mt-4 text-sm leading-relaxed text-white/60 whitespace-pre-line">
-            {selectedPost.content}
-          </div>
+              <div className="mt-4 text-sm leading-relaxed text-white/60 whitespace-pre-line">
+                {selectedPost.content}
+              </div>
+            </>
+          )}
 
           {selectedPost.images?.length > 0 && (
             <div className="mt-4 space-y-2">
