@@ -24,9 +24,10 @@ interface Article {
   id: string; slug: string; title: string; category: string;
   is_published: boolean; is_featured: boolean; published_at: string;
   author_name: string | null; club_id: string | null;
+  status?: string; created_at?: string;
 }
 
-type Tab = 'overview' | 'applications' | 'hero' | 'articles';
+type Tab = 'overview' | 'applications' | 'hero' | 'articles' | 'review';
 
 export default function MADLeagueIntraPage() {
   const [tab, setTab] = useState<Tab>('overview');
@@ -38,7 +39,7 @@ export default function MADLeagueIntraPage() {
   const [apps, setApps] = useState<Application[]>([]);
   const [heroApps, setHeroApps] = useState<HeroApp[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [stats, setStats] = useState({ totalClubs: 0, pendingApps: 0, pendingHero: 0, publishedArticles: 0, totalCrowns: 0 });
+  const [stats, setStats] = useState({ totalClubs: 0, pendingApps: 0, pendingHero: 0, publishedArticles: 0, totalCrowns: 0, pendingReview: 0 });
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState<string | null>(null);
 
@@ -60,9 +61,10 @@ export default function MADLeagueIntraPage() {
         sb.from('mad_competition_results').select('*', { count: 'exact', head: true }).eq('is_crown', true),
         sb.from('mad_articles').select('*', { count: 'exact', head: true }).eq('is_published', true),
       ]);
-      const [appsRes, heroRes] = await Promise.all([
+      const [appsRes, heroRes, reviewRes] = await Promise.all([
         fetch('/api/madleague/admin/applications?status=pending', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
         fetch('/api/madleague/admin/hero?status=pending', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch('/api/madleague/admin/articles?status=pending_review', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
       ]);
       setClubs((clubRes.data ?? []) as Club[]);
       setStats({
@@ -71,6 +73,7 @@ export default function MADLeagueIntraPage() {
         pendingHero: heroRes.applications?.length ?? 0,
         publishedArticles: pubRes.count ?? 0,
         totalCrowns: crownRes.count ?? 0,
+        pendingReview: reviewRes.articles?.length ?? 0,
       });
     } finally {
       setLoading(false);
@@ -95,10 +98,11 @@ export default function MADLeagueIntraPage() {
     setLoading(false);
   }, [token]);
 
-  const loadArticles = useCallback(async () => {
+  const loadArticles = useCallback(async (status?: string) => {
     if (!token) return;
     setLoading(true);
-    const res = await fetch('/api/madleague/admin/articles', { headers: { Authorization: `Bearer ${token}` } });
+    const url = status ? `/api/madleague/admin/articles?status=${status}` : '/api/madleague/admin/articles';
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     setArticles(data.articles ?? []);
     setLoading(false);
@@ -110,6 +114,7 @@ export default function MADLeagueIntraPage() {
     else if (tab === 'applications') loadApps();
     else if (tab === 'hero') loadHero();
     else if (tab === 'articles') loadArticles();
+    else if (tab === 'review') loadArticles('pending_review');
   }, [tab, token, loadOverview, loadApps, loadHero, loadArticles]);
 
   async function actApp(id: string, action: 'accept' | 'reject' | 'reviewing') {
@@ -148,6 +153,23 @@ export default function MADLeagueIntraPage() {
     setProcessing(null);
   }
 
+  async function reviewArticle(id: string, action: 'publish' | 'reject') {
+    if (!token) return;
+    let reason: string | null = null;
+    if (action === 'reject') {
+      reason = prompt('반려 사유를 입력하세요 (작성자에게 노출됩니다)');
+      if (reason === null) return;
+    }
+    setProcessing(id);
+    await fetch('/api/madleague/admin/articles', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ id, action, reject_reason: reason }),
+    });
+    setArticles(prev => prev.filter(a => a.id !== id));
+    setProcessing(null);
+  }
+
   if (authError) {
     return (
       <div className="text-center py-20 text-neutral-500">
@@ -170,10 +192,11 @@ export default function MADLeagueIntraPage() {
       </PageHeader>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <StatCard label="공식 동아리" value={`${stats.totalClubs}개`} sub="전국 7개 권역" icon={<GraduationCap className="h-4 w-4" />} />
         <StatCard label="대기 지원서" value={`${stats.pendingApps}건`} sub="승인 필요" icon={<Users className="h-4 w-4" />} />
         <StatCard label="HeRo 신청" value={`${stats.pendingHero}건`} sub="대기 중" icon={<Star className="h-4 w-4" />} />
+        <StatCard label="검토 대기 글" value={`${stats.pendingReview}건`} sub="MADzine" icon={<Eye className="h-4 w-4" />} />
         <StatCard label="발행 아티클" value={`${stats.publishedArticles}개`} sub="MADzine" icon={<Eye className="h-4 w-4" />} />
         <StatCard label="MAD Crown" value={`${stats.totalCrowns}개`} sub="누적" icon={<Trophy className="h-4 w-4" />} />
       </div>
@@ -184,7 +207,8 @@ export default function MADLeagueIntraPage() {
           ['overview', '개요'],
           ['applications', `지원서 (${stats.pendingApps})`],
           ['hero', `HeRo (${stats.pendingHero})`],
-          ['articles', 'MADzine'],
+          ['review', `투고 검토 (${stats.pendingReview})`],
+          ['articles', '발행 아티클'],
         ] as Array<[Tab, string]>).map(([k, label]) => (
           <button
             key={k}
@@ -406,6 +430,59 @@ export default function MADLeagueIntraPage() {
                   <Link href={`/madleague/madzine/${a.slug}`} target="_blank" className="text-xs text-neutral-400 hover:text-neutral-700">
                     <ExternalLink className="h-3.5 w-3.5" />
                   </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Review (pending_review) */}
+      {tab === 'review' && !loading && (
+        <Card>
+          <SectionTitle title="투고 검토 큐" />
+          {articles.length === 0 ? (
+            <div className="text-center py-10 text-sm text-neutral-400">검토 대기 중인 글이 없습니다.</div>
+          ) : (
+            <div className="space-y-3">
+              {articles.map((a) => (
+                <div key={a.id} className="border border-neutral-200 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 ${
+                          a.category === 'interview' ? 'bg-violet-50 text-violet-700' :
+                          a.category === 'case'      ? 'bg-blue-50 text-blue-700' :
+                          a.category === 'report'    ? 'bg-amber-50 text-amber-700' :
+                          a.category === 'cover'     ? 'bg-rose-50 text-rose-700' :
+                                                        'bg-neutral-100 text-neutral-700'
+                        }`}>{a.category}</span>
+                        <span className="text-xs text-neutral-400">
+                          {a.author_name ?? '익명'} · {a.created_at && new Date(a.created_at).toLocaleDateString('ko-KR')}
+                        </span>
+                      </div>
+                      <div className="font-semibold text-neutral-900">{a.title}</div>
+                      <Link href={`/madleague/madzine/${a.slug}`} target="_blank" className="mt-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                        미리보기 <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        disabled={processing === a.id}
+                        onClick={() => reviewArticle(a.id, 'publish')}
+                        className="inline-flex items-center gap-1 text-xs font-medium px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-neutral-300 text-white transition"
+                      >
+                        <Eye className="h-3.5 w-3.5" /> 발행
+                      </button>
+                      <button
+                        disabled={processing === a.id}
+                        onClick={() => reviewArticle(a.id, 'reject')}
+                        className="inline-flex items-center gap-1 text-xs font-medium px-3 py-2 border border-neutral-300 hover:border-red-500 hover:text-red-600 text-neutral-600 transition"
+                      >
+                        반려
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

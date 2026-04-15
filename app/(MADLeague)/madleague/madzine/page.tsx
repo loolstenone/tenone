@@ -19,17 +19,24 @@ const CATEGORIES = [
 ] as const;
 
 interface PageProps {
-  searchParams: Promise<{ category?: string; club?: string; year?: string }>;
+  searchParams: Promise<{ category?: string; club?: string; year?: string; tag?: string }>;
 }
 
 export default async function MadzinePage({ searchParams }: PageProps) {
-  const { category = 'all', club, year } = await searchParams;
+  const { category = 'all', club, year, tag } = await searchParams;
   const sb = await createClient();
   const clubs = await fetchMadClubs();
+  const { data: { user } } = await sb.auth.getUser();
+  let isMember = false;
+  if (user) {
+    const { data: m } = await sb.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
+    isMember = !!m;
+  }
 
   let q = sb.from('mad_articles').select('*').eq('is_published', true).order('published_at', { ascending: false });
   if (category !== 'all') q = q.eq('category', category);
   if (year) q = q.eq('year', Number(year));
+  if (tag) q = q.contains('tags', [tag]);
   if (club) {
     const target = clubs.find((c) => c.slug === club);
     if (target) q = q.eq('club_id', target.id);
@@ -48,12 +55,20 @@ export default async function MadzinePage({ searchParams }: PageProps) {
   return (
     <div className="bg-white text-neutral-900">
       <section className="border-b border-neutral-200">
-        <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADZINE</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">진짜들이 쓰는 기록</h1>
-          <p className="mt-6 max-w-xl text-neutral-600 leading-relaxed">
-            수상 인터뷰부터 현장 케이스까지. MADLeague 안에서 일어난 실전을 기록한다.
-          </p>
+        <div className="mx-auto max-w-7xl px-6 py-20 flex items-end justify-between flex-wrap gap-6">
+          <div>
+            <div className="text-xs font-bold tracking-widest text-[#EC1D25]">MADZINE</div>
+            <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">진짜들이 쓰는 기록</h1>
+            <p className="mt-6 max-w-xl text-neutral-600 leading-relaxed">
+              수상 인터뷰부터 현장 케이스까지. MADLeague 안에서 일어난 실전을 기록한다.
+              {tag && <span className="block mt-2 text-sm">태그 <strong className="text-[#EC1D25]">#{tag}</strong></span>}
+            </p>
+          </div>
+          {isMember && (
+            <Link href="/madleague/madzine/write" className="inline-flex items-center gap-2 bg-black hover:bg-neutral-800 text-white font-bold px-6 py-3 transition">
+              + 투고
+            </Link>
+          )}
         </div>
       </section>
 
