@@ -1,6 +1,42 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 49)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 50)
+
+---
+
+## 세션 50 완료 항목 — E 시리즈 정리 작업 (E-1 ~ E-4)
+
+| 항목 | 내용 |
+|------|------|
+| **E-1**: TS 에러 수정 | `api/badak/member/route.ts` + `onboard/route.ts` — `SupabaseClient` 타입 import, `affiliations` 명시적 캐스트 |
+| **E-2**: 니즈 승인 API 보안 강화 | `/api/badak/needs/review` — `requireAdmin()` 헬퍼 추가. `badak_members.role` 검증 (`admin`/`super_admin`만) |
+| **E-3**: 커뮤니티 카운터 트리거 | DB: `sync_community_post_likes` + `sync_community_post_comments` AFTER INSERT/DELETE 트리거 적용 |
+| **E-4**: 바닥 만료 배치 | DB: `expire_badak_wants()` 함수 + `/api/cron/badak-expire-wants` Vercel Cron 라우트 |
+| **needs-queue 페이지** | `/intra/ums/badak/needs-queue` — 관리자용 니즈 승인 큐 UI |
+
+## 다음 할 일
+
+### 즉시 처리 필요
+- **vercel.json Cron 등록**: `/api/cron/badak-expire-wants` 를 `"0 0 * * *"` 스케줄로 추가
+- **`CRON_SECRET` 환경 변수**: Vercel Dashboard > 프로젝트 > Settings > Environment Variables에 추가
+- **`career` JSONB 컬럼 마이그레이션**: Supabase 대시보드 SQL Editor에서 실행 필요
+  ```sql
+  ALTER TABLE badak_members ADD COLUMN IF NOT EXISTS career JSONB DEFAULT '[]';
+  ```
+
+### Sprint 2 — HeRo Time + 관리자
+1. `MemberProfileSheet`에 **HeRo Time** 섹션 추가 (크로스 브랜드 커리어 이력)
+2. `/intra/ums/badak/needs-queue` 완성도 높이기 (현재 기본 CRUD)
+
+### Sprint 3 — WIO 역방향 환류
+3. `wio_ui_components.BottomSheet` 추출
+4. `wio_auth.withLoginGate` HOC 추출
+5. `wio_hooks.useOptimisticReaction` 추출
+
+### 이월
+- 마이페이지 북마크/내 모임 실DB 전환 (`badak_bookmarks`, `badak_group_members`)
+- 커뮤니티 조회수 중복 방지
+- `unreadTalkCount` read_by 배열 기반 실집계 구현
 
 ---
 

@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 50)
+
+### E 시리즈 정리 작업 완료 (E-1 ~ E-4)
+
+#### 코드 변경
+- **`app/api/badak/member/route.ts`** (E-1) — `SupabaseClient` 타입 명시적 import. `data as { affiliations: string[] | null }` 캐스트로 TS 에러 해소
+- **`app/api/badak/member/onboard/route.ts`** (E-1) — 동일 패턴 적용
+- **`app/api/badak/needs/review/route.ts`** (E-2, 신규) — `requireAdmin()` 헬퍼: JWT 검증 + `badak_members.role` 체크. GET/PATCH 모두 admin/super_admin만 허용
+- **`app/api/cron/badak-expire-wants/route.ts`** (E-4, 신규) — `CRON_SECRET` Bearer 검증 후 `supabase.rpc('expire_badak_wants')` 호출
+- **`app/intra/ums/badak/needs-queue/page.tsx`** (신규) — 관리자용 니즈 승인 큐 UI. pending_review 목록 + 승인/거절 버튼
+
+#### DB 변경 (E-3, E-4)
+- `sync_community_post_likes` 트리거: `badak_community_likes` AFTER INSERT OR DELETE → `badak_community_posts.likes_count` 업데이트
+- `sync_community_post_comments` 트리거: `badak_community_comments` AFTER INSERT OR DELETE → `badak_community_posts.comments_count` 업데이트
+- `expire_badak_wants()` PL/pgSQL 함수: `status = 'candidate'` + `expires_at < now()` → `status = 'expired'`로 일괄 업데이트
+
+#### 의사결정
+- Vercel Cron 라우트는 `CRON_SECRET` 환경 변수 설정 후 vercel.json에 `"0 0 * * *"` 등록 필요
+- E-3 트리거는 Supabase Management API로 직접 적용 완료 (Dashboard 불필요)
+
+---
+
 ## 2026-04-16 (사무실, 세션 49)
 
 ### WIO Talk + Connections 마이페이지 탭 완성 (Phase C-2)
