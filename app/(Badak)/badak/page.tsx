@@ -18,6 +18,7 @@ export default function BadakNextStage() {
   const [searchResults, setSearchResults] = useState<CloudWord[] | null>(null);
   const [searchText, setSearchText] = useState('');
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
+  const [cloudWords, setCloudWords] = useState<CloudWord[]>(CLOUD_WORDS);
 
   const SUB_COPIES = [
     '회사 밖에서도 통하는 사람이 되고 싶어.',
@@ -36,7 +37,7 @@ export default function BadakNextStage() {
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const velocity = useRef({ x: 0, y: 0 });
-  const autoRef = useRef<number>();
+  const autoRef = useRef<number | undefined>(undefined);
   const feedRef = useRef<HTMLDivElement>(null);
   const sphereRef = useRef<HTMLDivElement>(null);
   const inputAreaRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,16 @@ export default function BadakNextStage() {
     updateRadius();
     window.addEventListener('resize', updateRadius);
     return () => window.removeEventListener('resize', updateRadius);
+  }, []);
+
+  // DB에서 니즈 100개 fetch (실패 시 Mock 유지)
+  useEffect(() => {
+    fetch('/api/badak/needs?limit=100')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.words?.length > 0) setCloudWords(data.words);
+      })
+      .catch(() => {});
   }, []);
 
   // Animation loop — auto-rotate idle + inertia after drag
@@ -139,12 +150,12 @@ export default function BadakNextStage() {
 
     setTimeout(() => {
       setSending(false);
-      const results = CLOUD_WORDS.filter(
+      const results = cloudWords.filter(
         (w) =>
           w.text.includes(text) ||
           text.split('').some((c) => w.text.includes(c) && c.match(/[가-힣]/))
       ).slice(0, 6);
-      setSearchResults(results.length > 0 ? results : CLOUD_WORDS.slice(0, 4));
+      setSearchResults(results.length > 0 ? results : cloudWords.slice(0, 4));
     }, 1200);
   }, []);
 
@@ -209,12 +220,12 @@ export default function BadakNextStage() {
                 Needs
               </span>
             </div>
-            {CLOUD_WORDS.map((word, i) => (
+            {cloudWords.map((word, i) => (
               <CloudBubble
                 key={word.text}
                 word={word}
                 index={i}
-                total={CLOUD_WORDS.length}
+                total={cloudWords.length}
                 rotation={rotation}
                 radius={sphereRadius}
                 onClick={setSelectedWord}

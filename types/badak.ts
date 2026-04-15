@@ -2,26 +2,31 @@
 
 // ── Next Stage 타입 ──
 
+export interface CloudGroup {
+  id: string;
+  title: string;
+  type: 'once' | 'recurring';
+  maxMembers: number;
+  currentMembers: number;
+  leaderName: string;
+  leaderJob: string;
+  eventDate?: string;
+  schedule?: string;
+  location: string;
+  status: 'recruiting' | 'confirmed' | 'closed';
+}
+
 export interface CloudWord {
   text: string;
   size: number;
   hasGroup: boolean;
-  members: number;
+  members: number;           // 총 리액션 합산 (interest + fire)
+  needId?: string;           // DB의 badak_needs.id
+  interestCount?: number;    // 관심 등록 수 (✋)
+  fireCount?: number;        // 불꽃 수 (🔥)
   imageUrl?: string;
-  // 모임방 개설 시 추가 정보
-  group?: {
-    id: string;
-    title: string;
-    type: 'once' | 'recurring';       // 1회성 / 다회성
-    maxMembers: number;
-    currentMembers: number;
-    leaderName: string;
-    leaderJob: string;
-    eventDate?: string;               // 1회성: 모임 날짜
-    schedule?: string;                 // 다회성: 주기 (매주 화 19:00 등)
-    location: string;
-    status: 'recruiting' | 'confirmed' | 'closed';
-  };
+  group?: CloudGroup;        // 하위 호환 (mock 데이터용)
+  groups?: CloudGroup[];     // 실DB: 동일 니즈에 연결된 모임 전체
 }
 
 export interface FeedItem {
