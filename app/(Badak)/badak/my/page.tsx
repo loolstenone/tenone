@@ -1219,9 +1219,7 @@ export default function BadakMyPage() {
           const talksRes = await fetch('/api/badak/talks', { headers });
           const talksData = await talksRes.json();
           setThreads(talksData.threads || []);
-          // unread = threads with lastMessageAt and not read by user (estimate: any thread counts)
-          // 실제 read 추적은 wio_talk_messages.read_by 기반이므로 일단 알림 수 표시 생략
-          setUnreadTalkCount(0);
+          setUnreadTalkCount(talksData.unreadTotal ?? 0);
         } catch { /* silent */ } finally { setTalksLoading(false); }
       } catch {
         setNickname(user.name || '');

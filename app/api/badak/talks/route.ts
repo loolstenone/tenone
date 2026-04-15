@@ -48,5 +48,17 @@ export async function GET(request: NextRequest) {
     };
   });
 
-  return NextResponse.json({ threads: enriched });
+  // 읽지 않은 메시지 수 집계
+  let unreadTotal = 0;
+  if (threads.length > 0) {
+    const threadIds = threads.map((t) => t.id);
+    const { count } = await supabase
+      .from('wio_talk_messages')
+      .select('*', { count: 'exact', head: true })
+      .in('thread_id', threadIds)
+      .not('read_by', 'cs', `{${user.id}}`);
+    unreadTotal = count ?? 0;
+  }
+
+  return NextResponse.json({ threads: enriched, unreadTotal });
 }
