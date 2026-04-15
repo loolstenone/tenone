@@ -29,6 +29,8 @@ export interface UtilityBarConfig {
     loginPath?: string;
     /** 인증 UI 완전 숨김 (기업 전용 사이트) */
     hideAuth?: boolean;
+    /** ABOUT 링크만 숨김 (메인 nav에 이미 있을 때) */
+    hideAbout?: boolean;
 }
 
 const defaultConfig: UtilityBarConfig = {
@@ -71,8 +73,8 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
         <>
             {/* Utility items */}
             <div className="flex items-center gap-4">
-                {/* About (hideAuth 모드에서는 메인 메뉴에 있으므로 숨김) */}
-                {!config.hideAuth && (
+                {/* About (hideAuth/hideAbout 모드에서는 메인 메뉴에 있으므로 숨김) */}
+                {!config.hideAuth && !config.hideAbout && (
                     <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                         ABOUT
                     </Link>

@@ -30,7 +30,7 @@ export function MadLeagueHeader() {
     return (
         <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-neutral-900">
-            <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+            <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center gap-8">
                 {/* Logo */}
                 <Link href="/madleague" className="flex items-center gap-2 shrink-0">
                     <span className="inline-block h-3 w-3 rounded-full bg-[#EC1D25]" />
@@ -64,8 +64,12 @@ export function MadLeagueHeader() {
                         profilePath="/madleague/my"
                         accentColor="#EC1D25"
                         signupPath="/signup"
+                        hideAbout
                     />
                 </div>
+
+                {/* Mobile spacer to push menu button right */}
+                <div className="lg:hidden ml-auto" />
 
                 {/* Mobile menu button */}
                 <button

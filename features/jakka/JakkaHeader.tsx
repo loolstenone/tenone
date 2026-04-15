@@ -58,6 +58,7 @@ export function JakkaHeader() {
                             profilePath="/jakka/my"
                             accentColor="#1a1a2e"
                             signupPath="/signup"
+                            hideAbout
                         />
                     </nav>
 
