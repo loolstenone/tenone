@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -53,6 +53,14 @@ type MeetingType = 'onetime' | 'series' | 'regular' | 'irregular';
 type JoinType = 'approval' | 'firstcome';
 
 export default function CreateGroupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0e0e1a]" />}>
+      <CreateGroupPageInner />
+    </Suspense>
+  );
+}
+
+function CreateGroupPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const wantIdParam = searchParams?.get('want_id') ?? null;
