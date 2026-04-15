@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52 Part 3) — Intra 관리 + Phase 2 기반
+
+### MI-A: Intra MADLeague 관리 대시보드
+- **`/intra/ums/madleague/page.tsx`** 전체 재작성 — Mock 데이터 → 실DB 연동
+  - 4탭: 개요 / 지원서 / HeRo / MADzine
+  - 5개 StatCard (공식 동아리·대기 지원서·HeRo 신청·발행 아티클·MAD Crown)
+  - 지원서 승인/반려 인라인 처리
+  - HeRo 상태 전환 (pending → contacted → matched → closed)
+  - MADzine 발행/추천 토글
+- **Admin API 3종** — `app/api/madleague/admin/*`
+  - `_auth.ts` — `requireIntraAdmin` 가드 (Bearer token + members 테이블 존재 확인 + service_role 클라이언트)
+  - `applications/route.ts` — GET(status 필터) / PATCH(accept·reject·reviewing)
+  - `hero/route.ts` — GET / PATCH(status 업데이트)
+  - `articles/route.ts` — GET / PATCH(is_published·is_featured)
+- 전 API 401 가드 확인
+
+### M2-A: mad_members 테이블 + 가입 플로우 기반
+- **`sql/madleague_phase2_members.sql`** — Prod 적용 완료
+  - `mad_members` 테이블 (auth.users FK, club_id/cohort_id FK, role, status, activity_years[], skill_tags[], portfolio_public)
+  - RLS: 본인 read/update, portfolio_public=true는 anon 읽기
+  - `mad_set_updated_at()` 트리거
+  - **`mad_promote_application_to_member()` 트리거** — `mad_applications.status='accepted'` 시 자동으로 mad_members 생성 + cohort member_count +1
+  - `mad_link_member_to_user()` 함수 (이메일 기반 user_id 연결)
+- **`/api/madleague/member/link`** POST — 로그인한 사용자 이메일로 mad_members 매칭·연결
+- **`/madleague/member/page.tsx`** — 3-state 게이트:
+  - 미로그인 → 로그인/지원 CTA
+  - 로그인 + 멤버 없음 → "내 기록 연동 시도" 버튼 + 지원 안내
+  - 로그인 + 멤버 있음 → 대시보드 (이름/동아리/cohort/활동연도/상태 + Phase 2 예정 섹션)
+- **`MemberLinkButton.tsx`** 클라이언트 연동 버튼
+- 트리거 검증: `test@test.com` 지원서 승인 → mad_members 1건 자동 생성 확인
+
+---
+
 ## 2026-04-16 (사무실, 세션 52) — MADLeague 사이트 Phase 1 완료
 
 ### Phase 1 전체 페이지 완성 (M1-A ~ M1-J)

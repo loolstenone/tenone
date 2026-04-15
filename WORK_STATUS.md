@@ -1,6 +1,20 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 52 — Phase 1 완료)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 52 — Phase 1 + MI-A + M2-A 완료)
+
+## 세션 52 Part 3 완료 — Intra 관리 + Phase 2 기반
+
+| 항목 | 내용 |
+|------|------|
+| **MI-A** Intra 관리 대시보드 | `/intra/ums/madleague` 실DB 연동. 4탭(개요/지원서/HeRo/MADzine), 승인·반려·상태전환·발행토글 |
+| **Admin API 3종** | `/api/madleague/admin/{applications, hero, articles}` + `_auth.ts` (Bearer + members 테이블 검증) |
+| **M2-A** mad_members 테이블 | `sql/madleague_phase2_members.sql` Prod 적용. RLS, updated_at 트리거, auth.users FK |
+| **자동 승격 트리거** | `mad_applications.status='accepted'` → `mad_members` 자동 생성 + cohort count ++ |
+| **계정 연동** | `/api/madleague/member/link` POST — 이메일 기반 user_id 연결 |
+| **/member 페이지** | 3-state 게이트 (미로그인 / 미연동 / 멤버) + Phase 2 Coming Soon |
+
+---
+
 
 ---
 
