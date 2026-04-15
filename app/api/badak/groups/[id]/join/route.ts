@@ -110,30 +110,55 @@ export async function POST(
   // current_members 원자적 증가 (race condition 방지)
   await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
 
-  // 바닥장에게 알림 생성 (firstcome은 알림 없이 자동 승인)
+  // 알림 생성
   const { data: groupFull } = await supabase
     .from('badak_groups')
-    .select('title, leader:badak_members!badak_groups_leader_id_fkey(user_id)')
+    .select('title, leader:badak_members!badak_groups_leader_id_fkey(id, user_id, display_name)')
     .eq('id', groupId)
     .single();
 
-  // firstcome은 자동 승인 → 바닥장 알림 생략
-  if (!isFirstcome && groupFull?.leader) {
-    const leaderData = groupFull.leader as unknown as { user_id: string };
-    const leaderUserId = leaderData.user_id;
-    const { data: applicant } = await supabase
-      .from('badak_members')
-      .select('display_name')
-      .eq('id', member.id)
-      .single();
+  const { data: applicant } = await supabase
+    .from('badak_members')
+    .select('display_name')
+    .eq('id', member.id)
+    .single();
 
+  const groupTitle = groupFull?.title ?? '모임';
+  const applicantName = applicant?.display_name ?? '새 멤버';
+  const leaderData = groupFull?.leader as unknown as { user_id: string; display_name: string } | null;
+
+  // ① 바닥장에게 알림 (승인제 모임만)
+  if (!isFirstcome && leaderData?.user_id) {
     await supabase.from('badak_notifications').insert({
-      user_id: leaderUserId,
+      user_id: leaderData.user_id,
       type: 'join_request',
-      title: `${applicant?.display_name || '새 멤버'}님이 참여를 신청했습니다`,
-      body: groupFull.title,
+      title: `${applicantName}님이 참여를 신청했습니다`,
+      body: groupTitle,
       link: `/badak/groups/${groupId}`,
       metadata: { groupId, memberId: member.id },
+    });
+  }
+
+  // ② 신청자에게 알림
+  if (isFirstcome) {
+    // 선착순: 즉시 승인 알림
+    await supabase.from('badak_notifications').insert({
+      user_id: user.id,
+      type: 'join_approved',
+      title: `"${groupTitle}" 참여가 확정됐어요! 🎉`,
+      body: '바닥장이 일정을 공유할 거예요. 게시판을 확인해보세요.',
+      link: `/badak/groups/${groupId}`,
+      metadata: { groupId },
+    });
+  } else {
+    // 승인제: 신청 접수 알림
+    await supabase.from('badak_notifications').insert({
+      user_id: user.id,
+      type: 'join_pending',
+      title: `"${groupTitle}" 참여 신청이 접수됐어요`,
+      body: `바닥장(${leaderData?.display_name ?? ''})이 검토 후 승인하면 알려드릴게요.`,
+      link: `/badak/groups/${groupId}`,
+      metadata: { groupId },
     });
   }
 

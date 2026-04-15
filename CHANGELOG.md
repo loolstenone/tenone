@@ -4,7 +4,60 @@
 
 ---
 
-## 2026-04-15 (사무실, 세션 46)
+## 2026-04-15 (사무실, 세션 46 — 후반)
+
+### Badak UX 전면 개선 + 유니버스 관점 QA
+
+#### 신규 파일
+- `features/badak/MemberProfileSheet.tsx` — 개설자/멤버 공개 프로필 바텀 시트 (아바타/이름/역할/직무/Bio/개설모임/태그)
+- `app/api/badak/members/[id]/route.ts` — 공개 프로필 API (인증 불필요, 활성 모임 5개 포함)
+- `app/api/badak/groups/[id]/route.ts` — 모임 PATCH (join_type 등 바닥장 전용 필드 변경)
+- `features/badak/cloud/ParticipationBanner.tsx` — 피드 중간 참여 독려 문구 13종 (i=1,6,12 위치 삽입)
+- `features/badak/cloud/QuoteBanner.tsx` — 피드 중간 격언 배너 (i=3,9 위치)
+
+#### NeedDetailSheet 전면 재작성
+- **관련 니즈 클릭 가능** (`span` → `button`) + 정렬 방식 `sin 해시` → `members 수 내림차순(인기순)`
+- **카운트 통일** — 상단 `word.members`와 하단 `interestCount` 불일치 해결 (`Math.max`로 통합)
+- **슬라이딩 애니메이션 제거** — `appeared` 상태로 첫 마운트에만 `badak-fadeUp` 적용 (리렌더링마다 재실행 차단)
+- **불꽃(🔥) 버튼 제거** — 목적 불명확, 관심 버튼만 유지
+- **관심 버튼 낙관적 UI** — `needId` 없는 Mock 데이터도 즉시 +1 반응
+- **텍스트박스 + 버튼 시각적 분리** — 배경색 `rgba(255,255,255,0.04)` vs `rgba(0,0,0,0.25)` 대비
+- **"관심이에요" → "관심있어요"** 어감 수정
+- **15명 로직 변경** — 방 개설 버튼 항상 표시, 15명 달성 = "바닥 공식 런칭"
+- **방 개설 버튼 작동 수정** — `onClose()`/`router.push()` 순서 반전 (router 먼저 → 언마운트 안전), `type="button"` 명시
+
+#### FeedCard 리더 표시 개선
+- "바닥장 김도현" 통합 텍스트 → "김도현" 이름 중심 + `바닥장` 소형 뱃지 분리
+- 아바타 이니셜: "바" → 실제 이름 첫 글자 "김"
+- **리더 영역 클릭 → `MemberProfileSheet` 공개 프로필** (이름/아바타 클릭 가능)
+
+#### 니즈 클라우드 찌그러짐 수정
+- 모바일 sphere radius 120 → 130~170 (화면 폭 42%, 170px 상한)
+- 단어 수 제한 — 모바일 50개 / 데스크탑 80개 (인기순 정렬)
+- `CloudBubble` 반응형 폰트 — 작은 구 9~13px (기존 11~16)
+- 긴 텍스트 자르기 — 모바일 10자+, 데스크탑 14자+ `…`
+- 뒷면 숨김 강화 — `depth<0.15` → `depth<0.2`
+- 컨테이너 비율 `radius*2.8` → `radius*2.4`
+
+#### API 보강
+- `/api/badak/needs` POST — 신규 니즈 생성은 인증 유저만 허용 (스팸 방지). 기존 count++는 누구나 가능
+- `/api/badak/groups/[id]/join` POST — **양방향 알림**: 바닥장(승인제만) + 신청자(선착순 "확정", 승인제 "접수")
+- `PATCH /api/badak/groups/[id]` — 바닥장만 join_type 변경 가능
+
+#### 개선사항 리스트업 (문서)
+- 유니버스 관점 전문가 QA 수행 — 4개 역할(관리자/바닥장/회원/일반유저) 교차 검증
+- Ten:One Universe 8대 원칙 중 5건 위반 식별
+- `/intra/ums/badak` 가이드 분석 — 기존 코어(채팅방 48개, DAM Party 47회차) 연결 누락 발견
+- WIO 역방향 환류 후보 10개 추출 (BottomSheet, withLoginGate HOC, 낙관적 리액션 훅 등)
+
+### 주요 결정사항
+- **`badak_members` 별도 테이블 폐기 방향** — 기존 `members.affiliations=['badak']` 활용
+- **`/badak/admin` 페이지 개발하지 않음** — `/intra/ums/badak`에 통합
+- **HeRo Time** 프로필 섹션 신설 필요 (크로스 브랜드 커리어 이력)
+
+---
+
+## 2026-04-15 (사무실, 세션 46 — 전반)
 
 ### Badak 사이트 정밀 검토 + 12개 이슈 일괄 수정
 

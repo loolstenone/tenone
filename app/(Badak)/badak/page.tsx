@@ -7,16 +7,14 @@ import { CloudBubble } from '@/features/badak/cloud/CloudBubble';
 import { NeedsInput } from '@/features/badak/cloud/NeedsInput';
 import { FeedSection } from '@/features/badak/cloud/FeedSection';
 import { NeedDetailSheet } from '@/features/badak/cloud/NeedDetailSheet';
-import { SearchResultOverlay } from '@/features/badak/cloud/SearchResultOverlay';
 import { getTimeBasedSky } from '@/lib/badak-cloud-data';
+import { createClient } from '@/lib/supabase/client';
 import { ChevronDown } from 'lucide-react';
 
 export default function BadakNextStage() {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
   const [sending, setSending] = useState(false);
-  const [searchResults, setSearchResults] = useState<CloudWord[] | null>(null);
-  const [searchText, setSearchText] = useState('');
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
   const [cloudWords, setCloudWords] = useState<CloudWord[]>(CLOUD_WORDS);
 
@@ -47,7 +45,16 @@ export default function BadakNextStage() {
     const sky = getTimeBasedSky();
     setSkyBg(sky.bg);
     const updateRadius = () => {
-      setSphereRadius(window.innerWidth < 640 ? 120 : 200);
+      const w = window.innerWidth;
+      // 컨테이너 정사각형 크기 = radius * 2.2 (단어 extension 포함)
+      // 모바일: 화면 폭의 60% 기준 (140~180px) — 너무 크면 단어가 화면 밖으로 나감
+      //         Math.min으로 너무 큰 화면에서도 과도하지 않게 cap
+      if (w < 640) {
+        const r = Math.min(170, Math.max(130, Math.floor(w * 0.42)));
+        setSphereRadius(r);
+      } else {
+        setSphereRadius(220);
+      }
     };
     updateRadius();
     window.addEventListener('resize', updateRadius);
@@ -91,7 +98,8 @@ export default function BadakNextStage() {
         } else {
           velocity.current = { x: 0, y: 0 };
           setRotation((prev) => ({
-            x: prev.x,
+            // x-tilt를 서서히 0으로 복귀 → 항상 수평 궤도로 자연스럽게 돌아옴
+            x: prev.x * Math.pow(0.97, dt),
             y: prev.y + IDLE_SPEED * dt,
           }));
         }
@@ -130,12 +138,11 @@ export default function BadakNextStage() {
     // velocity remains — inertia picks up in animation loop
   }, []);
 
-  // Search / send need — spark flies to sphere center
+  // 니즈 제출 — spark 애니메이션 + DB POST
   const handleSend = useCallback((text: string) => {
     setSending(true);
-    setSearchText(text);
 
-    // Calculate spark start (input) and target (sphere center)
+    // spark: 입력창 → 구 중심으로 날아가는 애니메이션
     if (inputAreaRef.current && sphereRef.current) {
       const inputRect = inputAreaRef.current.getBoundingClientRect();
       const sphereRect = sphereRef.current.getBoundingClientRect();
@@ -148,15 +155,23 @@ export default function BadakNextStage() {
       setTimeout(() => setSpark(null), 900);
     }
 
-    setTimeout(() => {
-      setSending(false);
-      const results = cloudWords.filter(
-        (w) =>
-          w.text.includes(text) ||
-          text.split('').some((c) => w.text.includes(c) && c.match(/[가-힣]/))
-      ).slice(0, 6);
-      setSearchResults(results.length > 0 ? results : cloudWords.slice(0, 4));
-    }, 1200);
+    // DB에 니즈 제출 (실패해도 UX 차단 없음, 인증 토큰 첨부)
+    void (async () => {
+      try {
+        const supabase = createClient();
+        const { data: sessionData } = await supabase.auth.getSession();
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const token = sessionData.session?.access_token;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        await fetch('/api/badak/needs', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text }),
+        });
+      } catch { /* silent */ }
+    })();
+
+    setTimeout(() => setSending(false), 800);
   }, []);
 
   const scrollToFeed = () => {
@@ -187,50 +202,65 @@ export default function BadakNextStage() {
           </p>
         </div>
 
-        {/* Needs Cloud — Sphere */}
+        {/* Needs Cloud — Sphere
+            ① flex-1 wrapper: 남은 세로 공간 채우며 구체를 수직 중앙 배치
+            ② 정사각형 inner: 구체 reference frame을 완벽한 정사각형으로 고정
+               → left/top 50%가 항상 같은 픽셀 기준을 가짐 = 찌그러짐 방지
+        */}
         <div
-          className="relative mx-auto flex-1"
-          style={{
-            width: '100%',
-            maxWidth: '500px',
-            minHeight: sphereRadius < 150 ? '320px' : '480px',
-            cursor: isDragging.current ? 'grabbing' : 'grab',
-            touchAction: 'none',
-            userSelect: 'none',
-          }}
+          className="flex-1 flex items-center justify-center"
+          style={{ touchAction: 'none', userSelect: 'none', cursor: isDragging.current ? 'grabbing' : 'grab' }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         >
-          <div ref={sphereRef} className="absolute inset-0 flex justify-center" style={{ alignItems: 'flex-start', paddingTop: '5%' }}>
-            {/* 클라우드 중앙 레이블 */}
-            <div
-              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
-              style={{ zIndex: 0 }}
-            >
-              <span
-                className="font-black tracking-widest uppercase"
-                style={{
-                  fontSize: `${Math.round(sphereRadius * 0.18)}px`,
-                  color: 'rgba(255,255,255,0.06)',
-                  letterSpacing: '0.25em',
-                }}
+          {/* 완전한 정사각형 컨테이너 — radius*2.4 = 구 지름(2r) + 단어 extension 여유 */}
+          <div
+            style={{
+              position: 'relative',
+              width: `${Math.round(sphereRadius * 2.4)}px`,
+              height: `${Math.round(sphereRadius * 2.4)}px`,
+              flexShrink: 0,
+            }}
+          >
+            <div ref={sphereRef} className="absolute inset-0">
+              {/* 클라우드 중앙 레이블 */}
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
+                style={{ zIndex: 0 }}
               >
-                Needs
-              </span>
+                <span
+                  className="font-black tracking-widest uppercase"
+                  style={{
+                    fontSize: `${Math.round(sphereRadius * 0.18)}px`,
+                    color: 'rgba(255,255,255,0.06)',
+                    letterSpacing: '0.25em',
+                  }}
+                >
+                  Needs
+                </span>
+              </div>
+              {(() => {
+                // 모바일(radius<180)에서는 50개만 표시, 그 외 80개
+                // 관심도(members) 높은 순으로 정렬
+                const maxWords = sphereRadius < 180 ? 50 : 80;
+                const sorted = [...cloudWords]
+                  .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
+                  .slice(0, maxWords);
+                return sorted.map((word, i) => (
+                  <CloudBubble
+                    key={word.text}
+                    word={word}
+                    index={i}
+                    total={sorted.length}
+                    rotation={rotation}
+                    radius={sphereRadius}
+                    onClick={setSelectedWord}
+                  />
+                ));
+              })()}
             </div>
-            {cloudWords.map((word, i) => (
-              <CloudBubble
-                key={word.text}
-                word={word}
-                index={i}
-                total={cloudWords.length}
-                rotation={rotation}
-                radius={sphereRadius}
-                onClick={setSelectedWord}
-              />
-            ))}
           </div>
         </div>
 
@@ -275,21 +305,12 @@ export default function BadakNextStage() {
       {selectedWord && (
         <NeedDetailSheet
           word={selectedWord}
+          allWords={cloudWords}
           onClose={() => setSelectedWord(null)}
+          onSelectWord={setSelectedWord}
         />
       )}
 
-      {searchResults && (
-        <SearchResultOverlay
-          inputText={searchText}
-          results={searchResults}
-          onClose={() => setSearchResults(null)}
-          onSelectWord={(w) => {
-            setSearchResults(null);
-            setSelectedWord(w);
-          }}
-        />
-      )}
     </div>
   );
 }

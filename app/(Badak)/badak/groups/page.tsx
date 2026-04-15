@@ -31,7 +31,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g1', title: 'B2B 마케팅 실무 모임', description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다. 퍼포먼스 마케팅부터 콘텐츠 마케팅까지.',
     status: 'recruiting', max_members: 20, current_members: 13,
     event_date: '2026-04-26T14:00:00', location: '강남역', fee: 0,
-    tags: ['B2B', '마케팅', 'SaaS'], cover_image_url: null,
+    tags: ['B2B', '마케팅', 'SaaS'],
+    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '마케터J', job_function: '퍼포먼스 마케팅' },
     need: { display_text: 'B2B 마케팅', count: 28 },
   },
@@ -39,7 +40,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g2', title: '카피라이팅 같이 연습할래?', description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.',
     status: 'confirmed', max_members: 12, current_members: 12,
     event_date: '2026-04-20T19:00:00', location: '성수동', fee: 5000,
-    tags: ['카피', '글쓰기', '광고'], cover_image_url: null,
+    tags: ['카피', '글쓰기', '광고'],
+    cover_image_url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '피장인', job_function: '브랜드 마케터' },
     need: { display_text: '카피라이팅', count: 35 },
   },
@@ -47,7 +49,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g3', title: '소셜미디어 트렌드 분석', description: '매주 소셜미디어 트렌드를 분석하고 인사이트를 공유합니다.',
     status: 'recruiting', max_members: 15, current_members: 8,
     event_date: '2026-05-03T14:00:00', location: '홍대', fee: 0,
-    tags: ['SNS', '트렌드', '분석'], cover_image_url: null,
+    tags: ['SNS', '트렌드', '분석'],
+    cover_image_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '트렌디K', job_function: '소셜미디어 마케터' },
     need: { display_text: '소셜미디어', count: 22 },
   },
@@ -55,7 +58,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g4', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지!',
     status: 'recruiting', max_members: 8, current_members: 5,
     event_date: '2026-05-10T10:00:00', location: '온라인 (Zoom)', fee: 0,
-    tags: ['사이드프로젝트', '기획', '런칭'], cover_image_url: null,
+    tags: ['사이드프로젝트', '기획', '런칭'],
+    cover_image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '기획자A', job_function: 'PM' },
     need: null,
   },
@@ -63,7 +67,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g5', title: 'AI 프롬프트 엔지니어링 스터디', description: 'ChatGPT, Claude 등 AI 도구 활용 마케팅 실습. 매주 과제 기반.',
     status: 'recruiting', max_members: 15, current_members: 11,
     event_date: '2026-04-27T15:00:00', location: '강남역', fee: 10000,
-    tags: ['AI', '프롬프트', 'ChatGPT'], cover_image_url: null,
+    tags: ['AI', '프롬프트', 'ChatGPT'],
+    cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: 'AI마스터', job_function: '그로스 마케터' },
     need: { display_text: 'AI 마케팅', count: 45 },
   },
@@ -71,7 +76,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g6', title: '퍼포먼스 마케팅 네트워킹', description: '페이스북, 구글, 네이버 광고 실무자들의 네트워킹. 비정기 만남.',
     status: 'recruiting', max_members: 30, current_members: 18,
     event_date: '2026-05-17T19:30:00', location: '을지로', fee: 0,
-    tags: ['퍼포먼스', '광고', '네트워킹'], cover_image_url: null,
+    tags: ['퍼포먼스', '광고', '네트워킹'],
+    cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '광고맨P', job_function: '퍼포먼스 마케팅' },
     need: { display_text: '퍼포먼스 광고', count: 31 },
   },
@@ -79,7 +85,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g7', title: '콘텐츠 마케팅 독서 모임', description: '마케팅 관련 책을 함께 읽고 토론합니다. 월 1권.',
     status: 'recruiting', max_members: 10, current_members: 4,
     event_date: '2026-05-24T14:00:00', location: '합정', fee: 0,
-    tags: ['독서', '콘텐츠', '마케팅'], cover_image_url: null,
+    tags: ['독서', '콘텐츠', '마케팅'],
+    cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '콘텐츠러L', job_function: '콘텐츠 마케터' },
     need: null,
   },
@@ -87,7 +94,8 @@ const MOCK_GROUPS: GroupItem[] = [
     id: 'g8', title: '데이터 분석 마케터 모임', description: 'GA4, Mixpanel, Amplitude 등 분석 도구 스터디',
     status: 'confirmed', max_members: 10, current_members: 10,
     event_date: '2026-04-19T14:00:00', location: '삼성역', fee: 15000,
-    tags: ['데이터', 'GA4', '분석'], cover_image_url: null,
+    tags: ['데이터', 'GA4', '분석'],
+    cover_image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=200&fit=crop&auto=format',
     leader: { display_name: '데이터M', job_function: '데이터 분석가' },
     need: { display_text: '데이터 분석', count: 19 },
   },
@@ -129,7 +137,15 @@ function SlideSection({ title, icon, groups, emptyText }: {
 
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:px-6"
+        className="flex gap-3 px-4 pb-2 sm:px-6"
+        style={{
+          overflowX: 'scroll',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-x',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
         {groups.map((g) => (
           <GroupCard key={g.id} group={g} />
@@ -148,16 +164,24 @@ function GroupCard({ group: g }: { group: GroupItem }) {
     switch (g.status) {
       case 'recruiting': return { bg: 'rgba(34,197,94,0.15)', color: '#4ade80', label: '모집중' };
       case 'confirmed': return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa', label: '확정' };
-      case 'closed': return { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', label: '마감' };
+      case 'closed': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨' };
+      case 'ended': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨' };
       default: return { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24', label: '검토중' };
     }
   })();
+
+  const isClosed = g.status === 'closed' || g.status === 'ended';
 
   return (
     <Link
       href={`/badak/groups/${g.id}`}
       className="block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[280px]"
-      style={{ background: 'rgba(255,255,255,0.04)' }}
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        scrollSnapAlign: 'start',
+        opacity: isClosed ? 0.45 : 1,
+        filter: isClosed ? 'grayscale(0.6)' : 'none',
+      }}
     >
       {/* 커버 or 컬러 헤더 */}
       {g.cover_image_url ? (

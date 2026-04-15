@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Crown, ChevronRight, Plus, Users, Flame, Hand } from 'lucide-react';
+import { Crown, ChevronRight, Plus, Users } from 'lucide-react';
 import type { CloudWord, CloudGroup } from '@/types/badak';
 import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
+import { MemberProfileSheet } from '@/features/badak/MemberProfileSheet';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -14,63 +15,67 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
-type PendingAction = 'interest' | 'fire' | 'join' | 'leader' | null;
+const LAUNCH_THRESHOLD = 15; // 공식 런칭 기준 관심 수
+
+type PendingAction = 'interest' | 'join' | 'leader' | null;
 
 interface NeedDetailSheetProps {
   word: CloudWord | null;
   onClose: () => void;
-  allWords?: CloudWord[];  // 관련 니즈 검색용 (실DB 데이터)
+  allWords?: CloudWord[];
+  onSelectWord?: (word: CloudWord) => void;
 }
 
+/** 관련 니즈: 현재 워드와 다른 단어 중 members 수 상위 4개 */
 function getRelatedWords(word: CloudWord, allWords?: CloudWord[]): CloudWord[] {
   const pool = allWords?.length ? allWords : CLOUD_WORDS;
   return pool
     .filter((w) => w.text !== word.text)
-    .sort(() => 0.5 - Math.sin(word.text.length * 7))
+    .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
     .slice(0, 4);
 }
 
-async function reactToNeed(
-  needId: string,
-  reaction: 'interest' | 'fire',
-  message: string,
-  token: string,
-) {
+async function postInterest(needId: string, message: string, token: string) {
   const res = await fetch('/api/badak/needs/react', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ needId, reaction, message }),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ needId, reaction: 'interest', message }),
   });
   return res.json();
 }
 
-export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProps) {
+export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedDetailSheetProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+
   const [message, setMessage] = useState('');
   const [showLogin, setShowLogin] = useState(false);
   const [selectedGroupIdx, setSelectedGroupIdx] = useState(0);
   const [joinDone, setJoinDone] = useState(false);
-  const [reacted, setReacted] = useState<{ interest: boolean; fire: boolean }>({ interest: false, fire: false });
-  const [interestCount, setInterestCount] = useState(word?.interestCount ?? 0);
-  const [fireCount, setFireCount] = useState(word?.fireCount ?? 0);
-  const [reactLoading, setReactLoading] = useState<'interest' | 'fire' | null>(null);
+  const [interested, setInterested] = useState(false);
+  // 카운트 초기값: word.members (실제 관심 인원) 우선, 없으면 interestCount
+  const [count, setCount] = useState(0);
+  const [reactLoading, setReactLoading] = useState(false);
   const pendingAction = useRef<PendingAction>(null);
+  // 첫 마운트 여부 — 애니메이션 재실행 방지
+  const [appeared, setAppeared] = useState(false);
 
   // word 바뀌면 초기화
   useEffect(() => {
     setJoinDone(false);
     setMessage('');
     setSelectedGroupIdx(0);
-    setReacted({ interest: false, fire: false });
-    setInterestCount(word?.interestCount ?? 0);
-    setFireCount(word?.fireCount ?? 0);
-  }, [word?.needId, word?.text, word?.interestCount, word?.fireCount]);
+    setInterested(false);
+    // members = 니즈 제출 인원수(=관심 총합), interestCount는 버튼 클릭 수
+    // 둘 중 큰 값을 표시 (더 정확한 쪽)
+    const base = Math.max(word?.members ?? 0, word?.interestCount ?? 0);
+    setCount(base);
+    // 다음 프레임에서 appeared 설정 → 슬라이드 애니메이션 1회만 실행
+    const t = setTimeout(() => setAppeared(true), 50);
+    return () => clearTimeout(t);
+  }, [word?.needId, word?.text]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 로그인 상태면 내 리액션 조회
+  // 로그인 상태면 내 관심 여부 조회
   useEffect(() => {
     if (!isAuthenticated || !word?.needId) return;
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -79,66 +84,76 @@ export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProp
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
         .then((r) => r.json())
-        .then((d) => setReacted({ interest: !!d.interest, fire: !!d.fire }))
+        .then((d) => setInterested(!!d.interest))
         .catch(() => {});
     });
   }, [isAuthenticated, word?.needId]);
 
-  // 로그인 성공 후 대기 중인 동작 자동 실행
+  // 로그인 성공 후 대기 동작 재실행
   useEffect(() => {
     if (isAuthenticated && pendingAction.current) {
       const action = pendingAction.current;
       pendingAction.current = null;
       setShowLogin(false);
       if (action === 'leader') {
-        onClose();
         router.push('/badak/groups/create');
+        onClose();
+      } else if (action === 'join') {
+        setJoinDone(true);
+      } else if (action === 'interest') {
+        handleInterest();
       }
     }
-  }, [isAuthenticated, onClose, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   if (!word) return null;
 
   const allGroups: CloudGroup[] = word.groups?.length
     ? word.groups
-    : word.group
-      ? [word.group]
-      : [];
+    : word.group ? [word.group] : [];
   const hasGroups = allGroups.length > 0;
   const related = getRelatedWords(word, allWords);
+  const launched = count >= LAUNCH_THRESHOLD;
 
   const requireLogin = (action: PendingAction) => {
     pendingAction.current = action;
     setShowLogin(true);
-    return false;
   };
 
-  const handleReact = async (reaction: 'interest' | 'fire') => {
-    if (!isAuthenticated) return requireLogin(reaction);
-    if (!word.needId) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) return requireLogin(reaction);
-    setReactLoading(reaction);
+  async function handleInterest() {
+    if (!isAuthenticated) { requireLogin('interest'); return; }
+    if (interested) return; // 이미 관심 등록됨
+
+    // 낙관적 UI 업데이트 (needId 없어도 UI는 반응)
+    setInterested(true);
+    setCount((c) => c + 1);
+
+    const needId = word?.needId;
+    if (!needId) return; // Mock 데이터 — UI만 반응
+
     try {
-      const res = await reactToNeed(word.needId, reaction, message, session.access_token);
-      if (res.action === 'added') {
-        setReacted((p) => ({ ...p, [reaction]: true }));
-        if (reaction === 'interest') setInterestCount((c) => c + 1);
-        else setFireCount((c) => c + 1);
-      } else {
-        setReacted((p) => ({ ...p, [reaction]: false }));
-        if (reaction === 'interest') setInterestCount((c) => Math.max(0, c - 1));
-        else setFireCount((c) => Math.max(0, c - 1));
+      setReactLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await postInterest(needId, message, session.access_token);
+      // 서버 응답으로 보정
+      if (res.action === 'removed') {
+        setInterested(false);
+        setCount((c) => Math.max(0, c - 1));
       }
+    } catch {
+      // silent
     } finally {
-      setReactLoading(null);
+      setReactLoading(false);
     }
-  };
+  }
 
   const handleLeader = () => {
-    if (!isAuthenticated) return requireLogin('leader');
-    onClose();
+    if (!isAuthenticated) { requireLogin('leader'); return; }
+    // router.push 먼저 — onClose()가 컴포넌트를 언마운트하기 전에 라우터 실행
     router.push('/badak/groups/create');
+    onClose();
   };
 
   const handleGoGroup = (groupId: string) => {
@@ -146,26 +161,28 @@ export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProp
     router.push(`/badak/groups/${groupId}`);
   };
 
-  // ── 바텀 시트 본문 ──
+  const handleSelectRelated = (w: CloudWord) => {
+    onSelectWord?.(w);
+  };
+
+  // ── 바텀 시트 내용 ──
   const renderBottomContent = () => {
     if (joinDone) {
       return (
-        <div className="py-5 text-center">
-          <div className="mb-2 text-xl">🎉</div>
-          <div className="text-sm text-white/70">
-            참여 신청이 바닥장에게 전달되었습니다!
-          </div>
+        <div className="py-6 text-center">
+          <div className="mb-2 text-2xl">🎉</div>
+          <div className="text-sm font-semibold text-white/80">참여 신청이 전달됐어요!</div>
+          <div className="mt-1 text-xs text-white/35">바닥장이 승인하면 알림으로 알려드려요</div>
         </div>
       );
     }
 
-    // ── 모임방 있음 ──
+    // ── 모임 있음 ──
     if (hasGroups) {
       return (
         <>
-          {/* 여러 모임: 탭 선택 */}
           {allGroups.length > 1 && (
-            <div className="mb-3 flex gap-1.5 overflow-x-auto scrollbar-hide">
+            <div className="mb-3 flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               {allGroups.map((g, i) => (
                 <button
                   key={g.id}
@@ -194,8 +211,8 @@ export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProp
             onMessageChange={setMessage}
           />
 
-          {/* 같은 니즈로 다른 방 개설 안내 */}
           <button
+            type="button"
             onClick={handleLeader}
             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/8 py-2.5 text-xs text-white/35 transition-all hover:border-white/15 hover:text-white/55"
           >
@@ -206,97 +223,95 @@ export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProp
       );
     }
 
-    // ── 모임방 없음 ──
-    const totalCount = interestCount + fireCount;
+    // ── 모임 없음 ──
     return (
       <>
-        <div className="mb-2.5 text-xs text-white/50">
-          {totalCount >= 15
-            ? `${totalCount}명이 관심 — 바닥장을 찾고 있어요!`
-            : `${totalCount}명이 관심 — 15명 모이면 모임을 열 수 있어요`}
+        {/* 관심 현황 */}
+        <div className="mb-1.5 text-xs text-white/50">
+          {launched ? `🎉 ${count}명이 관심 — 공식 런칭 달성!` : `${count}명이 관심`}
         </div>
 
         {/* 진행바 */}
         <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full transition-all"
+            className="h-full rounded-full transition-all duration-500"
             style={{
-              width: `${Math.min(100, (totalCount / 15) * 100)}%`,
-              background: totalCount >= 15
+              width: `${Math.min(100, (count / LAUNCH_THRESHOLD) * 100)}%`,
+              background: launched
                 ? 'linear-gradient(90deg, #22c55e, #16a34a)'
                 : 'linear-gradient(90deg, #ffd93d, #ff6b6b)',
             }}
           />
         </div>
 
-        {/* 리액션 버튼 — 관심 + 불꽃 */}
-        <div className="mb-3 flex gap-2">
-          <button
-            onClick={() => handleReact('interest')}
-            disabled={reactLoading === 'interest'}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all"
-            style={{
-              background: reacted.interest ? 'rgba(255,217,61,0.18)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${reacted.interest ? 'rgba(255,217,61,0.4)' : 'rgba(255,255,255,0.1)'}`,
-              color: reacted.interest ? '#ffd93d' : 'rgba(255,255,255,0.5)',
-              opacity: reactLoading === 'interest' ? 0.6 : 1,
-            }}
-          >
-            <Hand className="h-4 w-4" />
-            관심 {interestCount > 0 && <span className="text-xs opacity-70">{interestCount}</span>}
-          </button>
-          <button
-            onClick={() => handleReact('fire')}
-            disabled={reactLoading === 'fire'}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all"
-            style={{
-              background: reacted.fire ? 'rgba(255,107,107,0.18)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${reacted.fire ? 'rgba(255,107,107,0.4)' : 'rgba(255,255,255,0.1)'}`,
-              color: reacted.fire ? '#ff6b6b' : 'rgba(255,255,255,0.5)',
-              opacity: reactLoading === 'fire' ? 0.6 : 1,
-            }}
-          >
-            <Flame className="h-4 w-4" />
-            불꽃 {fireCount > 0 && <span className="text-xs opacity-70">{fireCount}</span>}
-          </button>
-        </div>
-
-        {/* 한마디 입력 */}
-        <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="어떤 모임을 기대하나요? (선택 — 관심 등록 시 전달됩니다)"
-            className="w-full resize-none border-none bg-transparent px-3 pt-2.5 pb-2 text-xs text-white/80 outline-none placeholder:text-white/25"
-            rows={2}
-          />
-        </div>
-
-        {/* 모임 개설 유도 */}
-        {totalCount >= 15 ? (
-          <button
-            onClick={handleLeader}
-            className="w-full cursor-pointer rounded-xl py-3 text-sm font-bold tracking-tight transition-all"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,217,61,0.15), rgba(255,107,107,0.15))',
-              border: '1px solid rgba(255,217,61,0.25)',
-              color: '#ffd93d',
-            }}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <Crown className="h-4 w-4" />
-              바닥장으로 모임 개설하기
-            </span>
-            <p className="mt-0.5 text-[10px] font-normal opacity-60">
-              {totalCount}명이 기다리고 있어요
-            </p>
-          </button>
+        {/* 관심 등록 영역 */}
+        {!interested ? (
+          <div className="mb-4 rounded-xl border border-white/10 overflow-hidden">
+            {/* 입력 영역 */}
+            <div style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="어떤 모임을 기대하나요? (선택)"
+                className="w-full resize-none border-none bg-transparent px-3 pt-3 pb-3 text-xs text-white/80 outline-none placeholder:text-white/25"
+                rows={2}
+              />
+            </div>
+            {/* 안내 + 버튼 — 배경색으로 명확히 구분 */}
+            <div
+              className="flex items-center justify-between px-3 py-2.5"
+              style={{ background: 'rgba(0,0,0,0.25)', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              <span className="text-[10px] text-white/25">관심 등록 시 바닥장에게 전달됩니다</span>
+              <button
+                onClick={handleInterest}
+                disabled={reactLoading}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                style={{ background: 'rgba(255,217,61,0.18)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.3)' }}
+              >
+                ✋ 관심있어요
+              </button>
+            </div>
+          </div>
         ) : (
-          <div className="flex items-center justify-center gap-2 py-2 text-center text-[11px] text-white/30">
-            <Users className="h-3 w-3" />
-            {15 - totalCount}명 더 모이면 바닥장 지원이 열려요
+          <div
+            className="mb-4 flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold"
+            style={{ background: 'rgba(255,217,61,0.1)', border: '1px solid rgba(255,217,61,0.2)', color: '#ffd93d' }}
+          >
+            ✋ 관심 등록됨 · {count}명
           </div>
         )}
+
+        {/* 방 개설 — 항상 보임 */}
+        <button
+          type="button"
+          onClick={handleLeader}
+          className="w-full cursor-pointer rounded-xl py-3 text-sm font-bold tracking-tight transition-all"
+          style={{
+            background: launched
+              ? 'linear-gradient(135deg, rgba(255,217,61,0.2), rgba(34,197,94,0.2))'
+              : 'rgba(255,255,255,0.05)',
+            border: launched
+              ? '1px solid rgba(255,217,61,0.35)'
+              : '1px solid rgba(255,255,255,0.1)',
+            color: launched ? '#ffd93d' : 'rgba(255,255,255,0.5)',
+          }}
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Crown className="h-4 w-4" />
+            이 관심사로 먼저 방을 개설해 보세요
+          </span>
+          {launched && (
+            <p className="mt-0.5 text-[10px] font-normal opacity-70">
+              {count}명이 기다리고 있어요 · 바닥이 공식 지원합니다
+            </p>
+          )}
+          {!launched && (
+            <p className="mt-0.5 text-[10px] font-normal opacity-40">
+              {LAUNCH_THRESHOLD - count}명 더 모이면 바닥 공식 런칭
+            </p>
+          )}
+        </button>
       </>
     );
   };
@@ -304,65 +319,72 @@ export function NeedDetailSheet({ word, onClose, allWords }: NeedDetailSheetProp
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[1000] mx-auto flex max-w-[860px] flex-col justify-end overflow-hidden backdrop-blur-lg"
-      style={{ background: 'rgba(0,0,0,0.75)' }}
+      className="fixed inset-0 z-[1000] mx-auto flex max-w-[860px] flex-col justify-end overflow-hidden"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
     >
-      {/* Upper area */}
+      {/* 상단 영역 — 니즈 + 관련 니즈 */}
       <div className="flex flex-1 flex-col items-center justify-center overflow-hidden px-4 sm:px-6">
         <div
           className="mb-2 text-xs text-white/40 sm:mb-3 sm:text-sm"
-          style={{ animation: 'badak-fadeUp 0.4s ease both' }}
+          style={appeared ? undefined : { animation: 'badak-fadeUp 0.4s ease both' }}
         >
-          {hasGroups
-            ? `모임 ${allGroups.length}개 개설됨`
-            : '선택한 니즈'}
+          {hasGroups ? `모임 ${allGroups.length}개 개설됨` : '선택한 니즈'}
         </div>
         <div
           className="mb-5 max-w-[90%] rounded-full px-5 py-2.5 text-center text-sm font-bold sm:mb-8 sm:px-8 sm:py-3 sm:text-xl"
           style={{
-            background: hasGroups ? 'rgba(255, 200, 87, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-            border: hasGroups ? '1px solid rgba(255, 200, 87, 0.4)' : '1px solid rgba(255, 255, 255, 0.2)',
+            background: hasGroups ? 'rgba(255,200,87,0.2)' : 'rgba(255,255,255,0.1)',
+            border: hasGroups ? '1px solid rgba(255,200,87,0.4)' : '1px solid rgba(255,255,255,0.2)',
             color: hasGroups ? '#ffd93d' : '#fff',
-            animation: 'badak-fadeUp 0.3s ease both',
+            ...(appeared ? {} : { animation: 'badak-fadeUp 0.3s ease both' }),
           }}
         >
           {hasGroups && <span className="mr-1.5 text-xs opacity-80 sm:mr-2 sm:text-sm">●</span>}
           {word.text}
-          {word.members > 0 && (
-            <span className="ml-1.5 text-xs opacity-50 sm:ml-2 sm:text-sm">{word.members}명</span>
+          {count > 0 && (
+            <span className="ml-1.5 text-xs opacity-50 sm:ml-2 sm:text-sm">{count}명</span>
           )}
         </div>
 
-        <div className="mb-2 text-[10px] text-white/30 sm:text-xs">관련 니즈</div>
-        <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-2 sm:gap-2">
-          {related.map((w, i) => (
-            <span
-              key={w.text}
-              className="rounded-full px-2.5 py-1 text-[10px] sm:px-3 sm:py-1.5 sm:text-xs"
-              style={{
-                background: w.hasGroup ? 'rgba(255, 200, 87, 0.1)' : 'rgba(255, 255, 255, 0.06)',
-                border: w.hasGroup ? '1px solid rgba(255, 200, 87, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: w.hasGroup ? '#ffd93d' : 'rgba(255,255,255,0.5)',
-                animation: 'badak-fadeUp 0.4s ease both',
-                animationDelay: `${0.1 + i * 0.08}s`,
-              }}
-            >
-              {w.text}
-            </span>
-          ))}
-        </div>
+        {/* 관련 니즈 — 클릭 가능한 버튼 */}
+        {related.length > 0 && (
+          <>
+            <div className="mb-2 text-[10px] text-white/30 sm:text-xs">관련 니즈</div>
+            <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-2 sm:gap-2">
+              {related.map((w, i) => (
+                <button
+                  key={w.text}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleSelectRelated(w); }}
+                  className="rounded-full px-2.5 py-1 text-[10px] transition-opacity hover:opacity-80 active:opacity-60 sm:px-3 sm:py-1.5 sm:text-xs"
+                  style={{
+                    background: w.hasGroup ? 'rgba(255,200,87,0.1)' : 'rgba(255,255,255,0.06)',
+                    border: w.hasGroup ? '1px solid rgba(255,200,87,0.2)' : '1px solid rgba(255,255,255,0.1)',
+                    color: w.hasGroup ? '#ffd93d' : 'rgba(255,255,255,0.5)',
+                    ...(appeared ? {} : {
+                      animation: 'badak-fadeUp 0.4s ease both',
+                      animationDelay: `${0.1 + i * 0.08}s`,
+                    }),
+                  }}
+                >
+                  {w.text}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
 
-      {/* Bottom sheet */}
+      {/* 바텀 시트 — appeared 이후 애니메이션 없음 */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full shrink-0 rounded-t-3xl"
         style={{
           background: '#1a1a2e',
           padding: '16px 16px calc(env(safe-area-inset-bottom, 12px) + 12px)',
-          animation: 'badak-fadeUp 0.3s ease',
+          ...(appeared ? {} : { animation: 'badak-fadeUp 0.3s ease' }),
         }}
       >
         {/* 타이틀 */}
@@ -402,14 +424,12 @@ function GroupCard({
   const remaining = g.maxMembers - g.currentMembers;
   const isFull = remaining <= 0;
   const isConfirmed = g.status === 'confirmed';
+  const [showLeaderProfile, setShowLeaderProfile] = useState(false);
 
   return (
     <>
       {/* 모임 정보 카드 */}
-      <div
-        className="mb-3 rounded-xl p-3"
-        style={{ background: 'rgba(255,255,255,0.06)' }}
-      >
+      <div className="mb-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div className="mb-2 flex items-center gap-2">
           <span
             className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
@@ -421,22 +441,32 @@ function GroupCard({
             {g.type === 'recurring' ? '정기 모임' : '1회 모임'}
           </span>
           {isConfirmed && (
-            <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">
-              확정
-            </span>
+            <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">확정</span>
           )}
         </div>
 
-        {/* 바닥장 */}
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/70">
+        {/* 개설자 — 클릭 시 공개 프로필 */}
+        <button
+          type="button"
+          onClick={() => setShowLeaderProfile(true)}
+          className="mb-2 -mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
+        >
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/70">
             {g.leaderName.charAt(0)}
           </div>
           <div>
-            <div className="text-xs font-semibold text-white/90">바닥장 {g.leaderName}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-white/90">{g.leaderName}</span>
+              <span
+                className="rounded-full px-1.5 py-px text-[9px] font-bold"
+                style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d', border: '1px solid rgba(255,217,61,0.2)' }}
+              >
+                바닥장
+              </span>
+            </div>
             <div className="text-[10px] text-white/40">{g.leaderJob}</div>
           </div>
-        </div>
+        </button>
 
         {/* 일정/장소 */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/50">
@@ -444,6 +474,17 @@ function GroupCard({
           {g.location && <span>📍 {g.location}</span>}
         </div>
       </div>
+
+      {/* 개설자 공개 프로필 시트 */}
+      {showLeaderProfile && (
+        <MemberProfileSheet
+          memberId={g.leaderId ?? null}
+          displayName={g.leaderName}
+          job={g.leaderJob}
+          isLeader
+          onClose={() => setShowLeaderProfile(false)}
+        />
+      )}
 
       {/* 인원 현황 */}
       <div className="mb-3">
@@ -499,7 +540,7 @@ function GroupCard({
               rows={2}
             />
             <div className="flex items-center justify-between border-t border-white/5 px-3 py-1.5">
-              <span className="text-[10px] text-white/20">바닥장 {g.leaderName}에게 전달됩니다</span>
+              <span className="text-[10px] text-white/20">{g.leaderName}(바닥장)에게 전달됩니다</span>
               <button
                 onClick={onJoin}
                 className="cursor-pointer rounded-lg border-none px-4 py-1.5 text-xs font-bold"

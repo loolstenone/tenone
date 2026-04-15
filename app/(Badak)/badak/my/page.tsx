@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
 import {
-  FileText, Bookmark, MessageSquare, Settings, LogOut,
+  FileText, Bookmark, Bell, Settings, LogOut,
   ChevronRight, ChevronDown, Eye, MessageCircle, Heart,
   Shield, Mail, Phone, Briefcase, Building2, Tag,
   Check, X, Crown, Users, CalendarDays, MapPin,
-  UserCheck, UserX, Clock, Bell, Megaphone,
-  ToggleLeft, ToggleRight, UserPlus, AlertCircle,
+  UserCheck, UserX, Clock, Megaphone,
+  ToggleLeft, ToggleRight, UserPlus, Pencil,
 } from 'lucide-react';
 
-type TabType = 'posts' | 'bookmarks' | 'notifications' | 'mygroups' | 'settings';
+type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'notifications' | 'settings';
 type ApplicantStatus = 'pending' | 'approved' | 'rejected';
 type JoinType = 'approval' | 'firstcome';
 
@@ -37,18 +37,6 @@ interface BookmarkItem {
   createdAt: string;
 }
 
-interface MessageItem {
-  id: string;
-  direction: 'sent' | 'received';
-  type: 'join' | 'interest' | 'approved' | 'rejected' | 'notice';
-  groupName?: string;
-  needName?: string;
-  counterpartName: string;
-  counterpartJob: string;
-  content: string;
-  createdAt: string;
-  read: boolean;
-}
 
 interface GroupApplicant {
   id: string;
@@ -87,63 +75,8 @@ interface JoinedGroup {
   location: string;
 }
 
-// ── Mock 데이터 ──
-const MOCK_POSTS: MyPost[] = [
-  { id: 'p1', board: 'chat', boardLabel: '수다', title: '마케터가 알아야 할 AI 툴 추천', views: 1204, likes: 67, comments: 32, createdAt: '2026-04-13' },
-  { id: 'p2', board: 'review', boardLabel: '모임 후기', title: '소셜미디어 트렌드 분석 모임 다녀왔어요!', views: 218, likes: 23, comments: 7, createdAt: '2026-04-12' },
-];
 
-const MOCK_BOOKMARKS: BookmarkItem[] = [
-  { id: 'b1', type: 'need', title: '데이터 분석 같이 공부하자', subtitle: '12명 관심', createdAt: '2026-04-13' },
-  { id: 'b2', type: 'group', title: 'B2B 마케팅 실무 모임', subtitle: '정기 모임 · 13/20명', createdAt: '2026-04-11' },
-  { id: 'b3', type: 'post', title: '프리랜서 전향 1년차 후기', subtitle: '수다 · 좋아요 34', createdAt: '2026-04-10' },
-];
 
-const MOCK_MESSAGES: MessageItem[] = [
-  // 받은
-  { id: 'm1', direction: 'received', type: 'join', groupName: 'B2B 마케팅 실무 모임', counterpartName: '마케터J', counterpartJob: '퍼포먼스 마케터 3년차', content: 'B2B 쪽으로 전환하고 싶어서 참여 신청합니다!', createdAt: '2026-04-14', read: false },
-  { id: 'm2', direction: 'received', type: 'join', groupName: 'B2B 마케팅 실무 모임', counterpartName: '그로스해커K', counterpartJob: '그로스 마케터 5년차', content: 'B2B SaaS 경험 많습니다. 같이 나누고 싶어요.', createdAt: '2026-04-13', read: false },
-  // 보낸
-  { id: 'm3', direction: 'sent', type: 'join', groupName: '카피라이팅 같이 연습할래?', counterpartName: '카피장인', counterpartJob: '브랜드 마케터', content: '카피라이팅 실력을 키우고 싶어서 신청합니다!', createdAt: '2026-04-13', read: true },
-  { id: 'm4', direction: 'sent', type: 'interest', needName: '포트폴리오 피드백 받고 싶어', counterpartName: '', counterpartJob: '', content: '이직 준비 중인데 같이 피드백 교환하면 좋겠어요', createdAt: '2026-04-12', read: false },
-  // 알림
-  { id: 'm5', direction: 'received', type: 'approved', groupName: '카피라이팅 같이 연습할래?', counterpartName: '카피장인', counterpartJob: '바닥장', content: '참여가 승인되었습니다! 첫 모임은 4/20(토) 14시입니다.', createdAt: '2026-04-12', read: true },
-];
-
-const MOCK_MY_GROUPS: MyGroup[] = [
-  {
-    id: 'g1', title: 'B2B 마케팅 실무 모임', type: 'recurring', joinType: 'approval',
-    status: 'recruiting', currentMembers: 13, maxMembers: 20,
-    schedule: '매주 금 12:00', location: '삼성역', nextDate: '2026-04-18',
-    applicants: [
-      { id: 'a1', name: '마케터J', job: '퍼포먼스 마케터 3년차', message: 'B2B 쪽으로 전환하고 싶어서 참여 신청합니다!', status: 'pending', appliedAt: '2026-04-14' },
-      { id: 'a2', name: '그로스해커K', job: '그로스 마케터 5년차', message: 'B2B SaaS 경험 많습니다.', status: 'pending', appliedAt: '2026-04-13' },
-      { id: 'a3', name: '콘텐츠러L', job: '콘텐츠 마케터', message: '', status: 'approved', appliedAt: '2026-04-10' },
-      { id: 'a4', name: '데이터M', job: '데이터 분석가', message: '마케팅 데이터 분석 관점에서 참여하고 싶습니다.', status: 'rejected', appliedAt: '2026-04-09' },
-    ],
-    members: [
-      { id: 'mb1', name: '콘텐츠러L', job: '콘텐츠 마케터', joinedAt: '2026-04-10' },
-      { id: 'mb2', name: '기획자A', job: 'PM 4년차', joinedAt: '2026-04-05' },
-      { id: 'mb3', name: '브랜더B', job: '브랜드 마케터', joinedAt: '2026-04-03' },
-    ],
-    notice: '이번 주 금요일 모임은 발표 순서가 있습니다. 각자 B2B 캠페인 사례 1개씩 준비해주세요!',
-  },
-  {
-    id: 'g2', title: '마케터 사이드 프로젝트', type: 'once', joinType: 'firstcome',
-    status: 'confirmed', currentMembers: 6, maxMembers: 6,
-    schedule: '2026-05-10', location: '온라인 (Zoom)',
-    applicants: [],
-    members: [
-      { id: 'mb4', name: '사이드A', job: 'PM', joinedAt: '2026-04-08' },
-      { id: 'mb5', name: '디자이너C', job: 'UX 디자이너', joinedAt: '2026-04-08' },
-    ],
-  },
-];
-
-const MOCK_JOINED: JoinedGroup[] = [
-  { id: 'j1', title: '카피라이팅 같이 연습할래?', type: 'recurring', leaderName: '카피장인', myStatus: 'approved', nextDate: '2026-04-20', schedule: '매주 토 14:00', location: '강남역' },
-  { id: 'j2', title: '소셜미디어 트렌드 같이 분석', type: 'recurring', leaderName: '소셜러', myStatus: 'pending', schedule: '격주 수 19:00', location: '홍대입구역' },
-];
 
 const INDUSTRIES = [
   'IT/테크', '광고/에이전시', '마케팅', '디자인', '미디어/콘텐츠',
@@ -170,8 +103,7 @@ function formatNumber(n: number): string {
   return String(n);
 }
 
-// ── 컴포넌트 ──
-
+// ── StatusBadge ──
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, { bg: string; color: string; label: string }> = {
     recruiting: { bg: 'rgba(34,197,94,0.12)', color: '#4ade80', label: '모집중' },
@@ -189,18 +121,22 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+// ── GroupManageCard ──
 function GroupManageCard({
   group,
   onUpdate,
   onApplicantAction,
+  onToggleJoinType,
 }: {
   group: MyGroup;
   onUpdate: (g: MyGroup) => void;
   onApplicantAction?: (groupId: string, membershipId: string, action: 'approved' | 'rejected') => Promise<void>;
+  onToggleJoinType?: (groupId: string, newType: JoinType) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [activeSection, setActiveSection] = useState<'applicants' | 'members' | 'notice'>('applicants');
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [togglingJoinType, setTogglingJoinType] = useState(false);
   const pendingCount = group.applicants.filter((a) => a.status === 'pending').length;
   const remaining = group.maxMembers - group.currentMembers;
 
@@ -210,7 +146,6 @@ function GroupManageCard({
     if (onApplicantAction) {
       await onApplicantAction(group.id, applicantId, action);
     } else {
-      // 로컬 fallback (API 없을 때)
       const updated = {
         ...group,
         applicants: group.applicants.map((a) => a.id === applicantId ? { ...a, status: action } : a),
@@ -221,13 +156,20 @@ function GroupManageCard({
     setProcessingId(null);
   };
 
-  const toggleJoinType = () => {
-    onUpdate({ ...group, joinType: group.joinType === 'approval' ? 'firstcome' : 'approval' });
+  const toggleJoinType = async () => {
+    const newType: JoinType = group.joinType === 'approval' ? 'firstcome' : 'approval';
+    setTogglingJoinType(true);
+    if (onToggleJoinType) {
+      await onToggleJoinType(group.id, newType);
+    } else {
+      // fallback: 로컬만 변경
+      onUpdate({ ...group, joinType: newType });
+    }
+    setTogglingJoinType(false);
   };
 
   return (
     <div className="rounded-xl border border-white/8 bg-white/[0.03] overflow-hidden">
-      {/* 모임 헤더 */}
       <button onClick={() => setExpanded(!expanded)} className="flex w-full items-center justify-between p-4 text-left">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center gap-2">
@@ -253,12 +195,17 @@ function GroupManageCard({
 
       {expanded && (
         <div className="border-t border-white/6">
-          {/* 모임 설정 바 */}
           <div className="flex items-center justify-between border-b border-white/6 px-4 py-2.5">
             <div className="flex items-center gap-2 text-[11px] text-white/40">
               <span>참여 방식:</span>
-              <button onClick={toggleJoinType} className="flex items-center gap-1 text-white/70">
-                {group.joinType === 'approval' ? (
+              <button
+                onClick={toggleJoinType}
+                disabled={togglingJoinType}
+                className="flex items-center gap-1 text-white/70 disabled:opacity-50"
+              >
+                {togglingJoinType ? (
+                  <span className="text-[11px] text-white/30">변경 중...</span>
+                ) : group.joinType === 'approval' ? (
                   <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-medium text-amber-400">승인제</span></>
                 ) : (
                   <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-medium text-green-400">선착순</span></>
@@ -270,7 +217,6 @@ function GroupManageCard({
             )}
           </div>
 
-          {/* 섹션 탭 */}
           <div className="flex border-b border-white/6">
             {[
               { id: 'applicants' as const, label: '지원 현황', count: pendingCount },
@@ -294,14 +240,12 @@ function GroupManageCard({
             ))}
           </div>
 
-          {/* 지원 현황 */}
           {activeSection === 'applicants' && (
             <div className="p-3 space-y-2">
               {group.applicants.length === 0 ? (
                 <p className="py-6 text-center text-xs text-white/25">지원자가 없습니다</p>
               ) : (
                 <>
-                  {/* 상태 요약 */}
                   <div className="flex gap-2 mb-2">
                     {(['pending', 'approved', 'rejected'] as const).map((s) => {
                       const count = group.applicants.filter((a) => a.status === s).length;
@@ -362,7 +306,6 @@ function GroupManageCard({
             </div>
           )}
 
-          {/* 참여 멤버 */}
           {activeSection === 'members' && (
             <div className="p-3 space-y-1.5">
               {group.members.length === 0 ? (
@@ -386,7 +329,6 @@ function GroupManageCard({
             </div>
           )}
 
-          {/* 공지 */}
           {activeSection === 'notice' && (
             <div className="p-3">
               {group.notice ? (
@@ -407,10 +349,11 @@ function GroupManageCard({
   );
 }
 
+// ── 메인 페이지 ──
 export default function BadakMyPage() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>('posts');
+  const [activeTab, setActiveTab] = useState<TabType>('mygroups');
   const [showLogin, setShowLogin] = useState(false);
   const [notifications, setNotifications] = useState<{ id: string; type: string; title: string; body: string | null; link: string | null; read: boolean; created_at: string }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -446,7 +389,6 @@ export default function BadakMyPage() {
 
   useEffect(() => { if (!isLoading && !isAuthenticated) setShowLogin(true); }, [isLoading, isAuthenticated]);
 
-  // 프로필 + 내 글 실DB 로드
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -456,7 +398,6 @@ export default function BadakMyPage() {
         if (!session) return;
         const headers = { Authorization: `Bearer ${session.access_token}` };
 
-        // 프로필
         const memberRes = await fetch('/api/badak/member', { headers });
         const memberData = await memberRes.json();
         if (memberData.member) {
@@ -470,7 +411,6 @@ export default function BadakMyPage() {
           setNickname(user.name || '');
         }
 
-        // 내 글 (모든 보드에서 내 글)
         setMyPostsLoading(true);
         const boardLabels: Record<string, string> = { chat: '수다', review: '모임 후기', proposal: '모임 제안' };
         const results = await Promise.all(
@@ -492,13 +432,11 @@ export default function BadakMyPage() {
         setMyPosts(mine);
         setMyPostsLoading(false);
 
-        // 알림 로드
         const notiRes = await fetch('/api/badak/notifications', { headers });
         const notiData = await notiRes.json();
         setNotifications(notiData.notifications || []);
         setUnreadCount(notiData.unreadCount || 0);
 
-        // 북마크 로드
         setBookmarksLoading(true);
         const bmRes = await fetch('/api/badak/bookmarks', { headers });
         const bmData = await bmRes.json();
@@ -511,7 +449,6 @@ export default function BadakMyPage() {
         })));
         setBookmarksLoading(false);
 
-        // 내 모임 로드 (개설한 모임 + 참여 신청 모임)
         const myGroupsRes = await fetch('/api/badak/my/groups', { headers });
         const myGroupsData = await myGroupsRes.json();
         setMyGroups(myGroupsData.ledGroups || []);
@@ -524,7 +461,12 @@ export default function BadakMyPage() {
     })();
   }, [user]);
 
-  if (isLoading) return <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]"><div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>;
+  if (isLoading) return (
+    <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+    </div>
+  );
+
   if (!isAuthenticated) return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#1a1a2e] px-6">
       <Shield className="mx-auto mb-4 h-10 w-10 text-white/30" />
@@ -534,16 +476,10 @@ export default function BadakMyPage() {
     </div>
   );
 
-  const initials = user?.name?.substring(0, 1) || '?';
+  const initials = nickname?.substring(0, 1) || user?.name?.substring(0, 1) || '?';
+  const displayName = nickname || user?.name || '회원';
   const pendingApplicants = myGroups.reduce((sum, g) => sum + g.applicants.filter((a) => a.status === 'pending').length, 0);
-
-  const tabs: { id: TabType; label: string; icon: React.ElementType; badge?: number }[] = [
-    { id: 'posts', label: '내 글', icon: FileText },
-    { id: 'bookmarks', label: '북마크', icon: Bookmark },
-    { id: 'notifications', label: '알림', icon: Bell, badge: unreadCount },
-    ...(isLeader ? [{ id: 'mygroups' as const, label: '내 모임', icon: Crown, badge: pendingApplicants }] : []),
-    { id: 'settings', label: '설정', icon: Settings },
-  ];
+  const totalGroupCount = myGroups.length + joinedGroups.length;
 
   const handleToggleInterest = (item: string) => setInterests((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleSave = () => { setVerifyStep('confirm'); setVerificationCode(''); setVerifyError(''); };
@@ -584,7 +520,6 @@ export default function BadakMyPage() {
         setVerifyStep('input');
         return;
       }
-      // 프로필 업데이트 API 호출
       const { createClient } = await import('@/lib/supabase/client');
       const { data: { session } } = await createClient().auth.getSession();
       if (session) {
@@ -607,6 +542,25 @@ export default function BadakMyPage() {
     setMyGroups((prev) => prev.map((g) => g.id === updated.id ? updated : g));
   };
 
+  const handleToggleJoinType = async (groupId: string, newType: JoinType) => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session) return;
+      const res = await fetch(`/api/badak/groups/${groupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ join_type: newType }),
+      });
+      if (res.ok) {
+        setMyGroups((prev) => prev.map((g) => g.id === groupId ? { ...g, joinType: newType } : g));
+      }
+    } catch {
+      // silent fail — 로컬 반영만
+      setMyGroups((prev) => prev.map((g) => g.id === groupId ? { ...g, joinType: newType } : g));
+    }
+  };
+
   const handleApplicantAction = async (groupId: string, membershipId: string, action: 'approved' | 'rejected') => {
     try {
       const { createClient } = await import('@/lib/supabase/client');
@@ -618,7 +572,6 @@ export default function BadakMyPage() {
         body: JSON.stringify({ membershipId, action }),
       });
       if (!res.ok) return;
-      // 로컬 상태도 동기화
       setMyGroups((prev) => prev.map((g) => {
         if (g.id !== groupId) return g;
         return {
@@ -635,73 +588,215 @@ export default function BadakMyPage() {
     }
   };
 
+  // ── 탭 정의 ──
+  const tabs: { id: TabType; label: string; badge?: number }[] = [
+    { id: 'mygroups', label: '내 모임', badge: pendingApplicants },
+    { id: 'posts', label: '내 글' },
+    { id: 'bookmarks', label: '북마크' },
+    { id: 'notifications', label: '알림', badge: unreadCount },
+    { id: 'settings', label: '설정' },
+  ];
+
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
 
-        {/* 프로필 카드 */}
-        <div className="mb-6 rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)' }}>
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full text-xl font-bold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>{initials}</div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-white">{user?.name || '회원'}</h1>
-                {isLeader && <span className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}><Crown className="h-2.5 w-2.5" /> 바닥장</span>}
-              </div>
-              <p className="mt-0.5 text-xs text-white/40">{user?.email}</p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-white/40">{industry || '산업군 미설정'}</span>
-                <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-white/40">{jobFunction || '직무 미설정'}</span>
-              </div>
-            </div>
+      {/* ── 프로필 헤더 (트레바리 스타일: 중앙 정렬) ── */}
+      <div className="px-4 pb-6 pt-8 text-center" style={{ background: 'linear-gradient(180deg, rgba(255,217,61,0.04) 0%, transparent 100%)' }}>
+        {/* 아바타 */}
+        <div className="relative inline-block mb-4">
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold"
+            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d', border: '2px solid rgba(255,217,61,0.2)' }}
+          >
+            {initials}
           </div>
-
-          {/* 참여 중인 모임 요약 */}
-          {joinedGroups.length > 0 && (
-            <div className="mt-4 border-t border-white/6 pt-3">
-              <div className="mb-2 text-[10px] font-medium text-white/30">참여 중인 모임</div>
-              <div className="space-y-1.5">
-                {joinedGroups.map((j) => (
-                  <div key={j.id} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/70">{j.title}</span>
-                      <StatusBadge status={j.myStatus} />
-                    </div>
-                    {j.nextDate && j.myStatus === 'approved' && (
-                      <span className="flex items-center gap-0.5 text-[9px] text-green-400/60">
-                        <CalendarDays className="h-2.5 w-2.5" /> {j.nextDate}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border border-white/10"
+            style={{ background: '#1e1e35' }}
+          >
+            <Pencil className="h-3 w-3 text-white/50" />
+          </button>
         </div>
 
-        {/* 탭 */}
-        <div className="scrollbar-hide mb-5 flex gap-1 overflow-x-auto pb-1">
+        {/* 이름 + 뱃지 */}
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <h1 className="text-lg font-bold text-white">{displayName}</h1>
+          {isLeader && (
+            <span className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+              <Crown className="h-2.5 w-2.5" /> 바닥장
+            </span>
+          )}
+        </div>
+        {/* 직무 + 산업 */}
+        <p className="text-xs text-white/40">
+          {[jobFunction, industry].filter(Boolean).join(' · ') || '직무/산업군을 설정해보세요'}
+        </p>
+      </div>
+
+      {/* ── 스탯 스트립 ── */}
+      <div className="mx-4 mb-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+        <div className="flex divide-x divide-white/6">
+          {[
+            { label: '내 모임', value: totalGroupCount },
+            { label: '작성한 글', value: myPosts.length },
+            { label: '북마크', value: bookmarks.length },
+          ].map((stat) => (
+            <div key={stat.label} className="flex-1 py-4 text-center">
+              <div className="text-lg font-bold text-white">{stat.value}</div>
+              <div className="mt-0.5 text-[10px] text-white/35">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 탭 바 (트레바리 언더라인 스타일) ── */}
+      <div className="sticky top-14 z-30 border-b border-white/6" style={{ background: '#1a1a2e' }}>
+        <div className="scrollbar-hide flex overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="relative flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-                style={{ background: isActive ? 'rgba(255,217,61,0.1)' : 'transparent', color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>
-                <tab.icon className="h-3.5 w-3.5" />
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="relative flex shrink-0 items-center gap-1 px-4 py-3.5 text-[13px] font-medium transition-colors"
+                style={{ color: isActive ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}
+              >
                 {tab.label}
-                {tab.badge && tab.badge > 0 && <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">{tab.badge}</span>}
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                    {tab.badge}
+                  </span>
+                )}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full" style={{ background: '#ffd93d' }} />
+                )}
               </button>
             );
           })}
         </div>
+      </div>
+
+      {/* ── 탭 콘텐츠 ── */}
+      <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6">
+
+        {/* ── 내 모임 ── */}
+        {activeTab === 'mygroups' && (
+          <div className="space-y-4">
+            {/* 개설한 모임 */}
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+                  개설한 모임
+                  {pendingApplicants > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingApplicants}건</span>}
+                </h2>
+                <button
+                  onClick={() => router.push('/badak/groups/create')}
+                  className="flex items-center gap-1 rounded-lg border-none px-3 py-1.5 text-[11px] font-semibold"
+                  style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}
+                >
+                  <UserPlus className="h-3 w-3" /> 새 모임 개설
+                </button>
+              </div>
+
+              {myGroups.length === 0 ? (
+                <div className="rounded-2xl border border-white/6 py-12 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,217,61,0.08)' }}>
+                    <Crown className="h-6 w-6 text-amber-400/40" />
+                  </div>
+                  <p className="mb-1 text-sm font-medium text-white/40">아직 개설한 모임이 없어요</p>
+                  <p className="mb-4 text-xs text-white/20">같은 니즈를 가진 사람들을 모아보세요</p>
+                  <button
+                    onClick={() => router.push('/badak/groups/create')}
+                    className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                    style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                  >
+                    첫 모임 개설하기
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myGroups.map((group) => (
+                    <GroupManageCard
+                      key={group.id}
+                      group={group}
+                      onUpdate={handleGroupUpdate}
+                      onApplicantAction={handleApplicantAction}
+                      onToggleJoinType={handleToggleJoinType}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 참여 중인 모임 */}
+            <div>
+              <h2 className="mb-3 text-xs font-semibold text-white/40 uppercase tracking-wider">참여 중인 모임</h2>
+              {joinedGroups.length === 0 ? (
+                <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(99,102,241,0.08)' }}>
+                    <Users className="h-6 w-6 text-indigo-400/40" />
+                  </div>
+                  <p className="mb-1 text-sm font-medium text-white/40">참여한 모임이 없어요</p>
+                  <p className="mb-4 text-xs text-white/20">바닥 니즈 클라우드에서 모임을 찾아보세요</p>
+                  <button
+                    onClick={() => router.push('/badak')}
+                    className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                    style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}
+                  >
+                    모임 탐색하러 가기
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {joinedGroups.map((j) => (
+                    <div key={j.id} className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-medium text-white/80">{j.title}</span>
+                          <StatusBadge status={j.myStatus} />
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] text-white/25">
+                          <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" /> {j.schedule}</span>
+                          <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" /> {j.location}</span>
+                        </div>
+                      </div>
+                      {j.nextDate && j.myStatus === 'approved' && (
+                        <div className="text-right">
+                          <div className="text-[10px] text-white/30">다음 모임</div>
+                          <div className="text-xs font-semibold text-green-400">{j.nextDate}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── 내 글 ── */}
         {activeTab === 'posts' && (
           <div className="space-y-2">
             {myPostsLoading ? (
-              <div className="flex justify-center py-16"><div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>
+              <div className="flex justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
             ) : myPosts.length === 0 ? (
-              <div className="py-16 text-center"><FileText className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">작성한 글이 없습니다</p></div>
+              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <FileText className="h-6 w-6 text-white/20" />
+                </div>
+                <p className="mb-1 text-sm font-medium text-white/40">작성한 글이 없어요</p>
+                <p className="mb-4 text-xs text-white/20">업계 이야기를 나눠보세요</p>
+                <button
+                  onClick={() => router.push('/badak/community')}
+                  className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}
+                >
+                  커뮤니티 가기
+                </button>
+              </div>
             ) : myPosts.map((post) => (
               <div key={post.id} className="rounded-xl border border-white/6 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]">
                 <div className="mb-1 flex items-center gap-2">
@@ -723,9 +818,24 @@ export default function BadakMyPage() {
         {activeTab === 'bookmarks' && (
           <div className="space-y-2">
             {bookmarksLoading ? (
-              <div className="flex justify-center py-16"><div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" /></div>
+              <div className="flex justify-center py-16">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
             ) : bookmarks.length === 0 ? (
-              <div className="py-16 text-center"><Bookmark className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">북마크가 없습니다</p></div>
+              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <Bookmark className="h-6 w-6 text-white/20" />
+                </div>
+                <p className="mb-1 text-sm font-medium text-white/40">북마크한 항목이 없어요</p>
+                <p className="mb-4 text-xs text-white/20">니즈, 모임, 게시글을 저장해보세요</p>
+                <button
+                  onClick={() => router.push('/badak')}
+                  className="rounded-full border-none px-5 py-2 text-xs font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}
+                >
+                  바닥 탐색하기
+                </button>
+              </div>
             ) : bookmarks.map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.03] p-4 hover:bg-white/[0.06]">
                 <div>
@@ -747,7 +857,7 @@ export default function BadakMyPage() {
           </div>
         )}
 
-        {/* ── 메시지 (통합) ── */}
+        {/* ── 알림 ── */}
         {activeTab === 'notifications' && (
           <div>
             {notifications.length > 0 && unreadCount > 0 && (
@@ -773,7 +883,13 @@ export default function BadakMyPage() {
             )}
             <div className="space-y-2">
               {notifications.length === 0 ? (
-                <div className="py-16 text-center"><Bell className="mx-auto mb-3 h-8 w-8 text-white/15" /><p className="text-sm text-white/30">알림이 없습니다</p></div>
+                <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <Bell className="h-6 w-6 text-white/20" />
+                  </div>
+                  <p className="text-sm font-medium text-white/40">알림이 없어요</p>
+                  <p className="mt-1 text-xs text-white/20">모임 참여 신청이 오면 여기서 확인할 수 있어요</p>
+                </div>
               ) : notifications.map((noti) => {
                 const typeStyles: Record<string, { label: string; color: string; bg: string }> = {
                   join_request: { label: '참여 신청', color: '#4ade80', bg: 'rgba(34,197,94,0.1)' },
@@ -811,34 +927,6 @@ export default function BadakMyPage() {
                 );
               })}
             </div>
-          </div>
-        )}
-
-        {/* ── 내 모임 (바닥장) ── */}
-        {activeTab === 'mygroups' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-white/40">
-                개설한 모임 {myGroups.length}개
-                {pendingApplicants > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingApplicants}건</span>}
-              </div>
-              <button
-                onClick={() => { router.push('/badak/groups/create'); }}
-                className="flex items-center gap-1 rounded-lg border-none px-3 py-1.5 text-[11px] font-semibold"
-                style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}
-              >
-                <UserPlus className="h-3 w-3" /> 새 모임 개설
-              </button>
-            </div>
-
-            {myGroups.map((group) => (
-              <GroupManageCard
-                key={group.id}
-                group={group}
-                onUpdate={handleGroupUpdate}
-                onApplicantAction={handleApplicantAction}
-              />
-            ))}
           </div>
         )}
 
@@ -969,8 +1057,10 @@ export default function BadakMyPage() {
               </div>
             )}
 
-            <button onClick={() => { logout(); router.push('/badak'); }}
-              className="flex w-full items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-xs text-red-400/70 hover:bg-white/[0.06]">
+            <button
+              onClick={() => { logout(); router.push('/badak'); }}
+              className="flex w-full items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-xs text-red-400/70 hover:bg-white/[0.06]"
+            >
               <LogOut className="h-4 w-4" /> 로그아웃
             </button>
           </div>

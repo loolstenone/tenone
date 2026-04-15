@@ -8,6 +8,7 @@ export interface CloudGroup {
   type: 'once' | 'recurring';
   maxMembers: number;
   currentMembers: number;
+  leaderId?: string;   // badak_members.id — 공개 프로필 조회용
   leaderName: string;
   leaderJob: string;
   eventDate?: string;
@@ -34,16 +35,20 @@ export interface FeedItem {
   badge: string;
   title: string;
   // group
+  groupId?: string;   // /badak/groups/[groupId] 링크용
   leader?: string;
+  leaderId?: string;  // badak_members.id — 공개 프로필 조회용
   leaderJob?: string;
   members?: number;
   max?: number;
   date?: string;
   location?: string;
   // needs
+  needId?: string;
   count?: number;
   threshold?: number;
   // story
+  storyId?: string;
   author?: string;
   authorJob?: string;
   // common

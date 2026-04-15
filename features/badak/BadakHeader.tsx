@@ -22,6 +22,8 @@ const navItems = [
 export function BadakHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    // 최초 열기 전엔 transition 없음 → 초기 마운트 시 슬금슬금 움직임 방지
+    const [hasOpened, setHasOpened] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const isActive = (href: string) => {
@@ -31,7 +33,7 @@ export function BadakHeader() {
 
     return (
         <>
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e] text-white">
+        <header className="fixed top-0 left-0 right-0 z-[9997] bg-[#1a1a2e] text-white">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between">
                 {/* Logo */}
                 <Link href={PREFIX} className="shrink-0 flex items-center">
@@ -39,7 +41,7 @@ export function BadakHeader() {
                 </Link>
 
                 {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-1">
+                <div className="hidden md:flex items-center gap-1 ml-10">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
@@ -66,48 +68,101 @@ export function BadakHeader() {
                     />
                 </div>
 
-                {/* Mobile menu button */}
-                <button
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    className="md:hidden p-2 text-neutral-300 hover:text-white"
-                >
-                    {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {/* Mobile: 마이페이지 + 햄버거 */}
+                <div className="md:hidden flex items-center gap-1">
+                    {isAuthenticated && (
+                        <Link href={`${PREFIX}/my`} className="p-2 text-neutral-300 hover:text-white">
+                            <User className="h-5 w-5" />
+                        </Link>
+                    )}
+                    <button
+                        onClick={() => { if (!hasOpened) setHasOpened(true); setMobileOpen(!mobileOpen); }}
+                        className="p-2 text-neutral-300 hover:text-white"
+                        aria-label="메뉴 열기"
+                    >
+                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        {/* 모바일 우측 슬라이드 패널 */}
+        {/* 배경 오버레이 — z-[9998]: 클라우드 버블(max ~100)보다 훨씬 위 */}
+        <div
+            className={clsx(
+                "fixed inset-0 z-[9998] md:hidden transition-opacity duration-300",
+                mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+            onClick={() => setMobileOpen(false)}
+        />
+        {/* 패널 */}
+        <div
+            className={clsx(
+                "fixed top-0 right-0 bottom-0 z-[9999] md:hidden w-64 flex flex-col",
+                hasOpened && "transition-transform duration-300 ease-out",
+                mobileOpen ? "translate-x-0" : "translate-x-full"
+            )}
+            style={{ background: '#12122a', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
+        >
+            {/* 패널 헤더 */}
+            <div className="flex h-14 items-center justify-between px-5 border-b border-white/8">
+                <span className="text-sm font-bold text-white/60">메뉴</span>
+                <button onClick={() => setMobileOpen(false)} className="p-1.5 text-white/40 hover:text-white">
+                    <X className="h-4 w-4" />
                 </button>
+            </div>
+
+            {/* 네비 링크 */}
+            <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={clsx(
+                            "flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                            isActive(item.href)
+                                ? "bg-amber-400/10 text-amber-400"
+                                : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                        )}
+                    >
+                        {item.name}
+                    </Link>
+                ))}
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-[#1a1a2e] border-t border-white/10 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
+            {/* 하단 */}
+            <div className="border-t border-white/8 px-4 py-4">
+                {isAuthenticated ? (
+                    <Link
+                        href={`${PREFIX}/my`}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-neutral-400 hover:bg-white/5 hover:text-white"
+                    >
+                        <User className="h-4 w-4" /> 마이페이지
+                    </Link>
+                ) : (
+                    <div className="flex flex-col gap-2">
                         <Link
-                            key={item.href}
-                            href={item.href}
+                            href="/login"
                             onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors py-2",
-                                isActive(item.href)
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
-                            )}
+                            className="rounded-lg border border-white/10 px-4 py-2 text-center text-sm text-white/50 hover:text-white"
                         >
-                            {item.name}
+                            로그인
                         </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">닉네임 가입</Link>
-                            </>
-                        )}
+                        <Link
+                            href="/login"
+                            onClick={() => setMobileOpen(false)}
+                            className="rounded-lg border-none px-4 py-2 text-center text-sm font-semibold"
+                            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                        >
+                            가입하기
+                        </Link>
                     </div>
-                </div>
-            )}
-        </header>
+                )}
+            </div>
+        </div>
         </>
     );
 }

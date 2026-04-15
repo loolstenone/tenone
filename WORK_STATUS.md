@@ -1,10 +1,66 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-15 (사무실, 세션 46)
+> 마지막 업데이트: 2026-04-15 (사무실, 세션 46 후반)
 
 ---
 
-## 이번 세션 (세션 46) 완료 항목
+## 이번 세션 후반 (세션 46 — UX 개선 + 유니버스 QA) 완료 항목
+
+| 항목 | 내용 |
+|------|------|
+| FeedCard 리더 표시 개선 | "바닥장 김도현" 통합 → "김도현" 이름 중심 + 바닥장 뱃지. 아바타 이니셜도 실제 이름 기준 |
+| 공개 프로필 시트 신설 | `MemberProfileSheet` + `/api/badak/members/[id]` API. 리더/멤버 이름 클릭 시 바텀시트로 프로필 |
+| NeedDetailSheet 전면 재작성 | 관련 니즈 클릭 가능, 카운트 통일, 슬라이딩 애니 제거, 불꽃 제거, 텍스트박스/버튼 시각 분리, "관심이에요"→"관심있어요" |
+| 15명 모임 로직 변경 | 방 개설 버튼 항상 표시 (15명 미달도), 15명 달성 = "바닥 공식 런칭" |
+| 방 개설 버튼 작동 수정 | `router.push()` → `onClose()` 순서로 언마운트 타이밍 이슈 해결, `type="button"` 명시 |
+| 니즈 클라우드 찌그러짐 수정 | 모바일 sphere 130~170px (기존 120), 단어 수 50/80개 제한, 반응형 폰트 9~13px, 긴 텍스트 자르기 |
+| 니즈 POST 스팸 방지 | 신규 니즈 생성은 인증 유저만, count++는 익명도 허용 |
+| 참여 신청 양방향 알림 | 바닥장 + 신청자 모두 알림 (선착순은 "확정" / 승인제는 "접수") |
+| PATCH 모임 엔드포인트 | `/api/badak/groups/[id]` — 바닥장만 join_type 변경. 마이페이지 토글이 DB 반영됨 |
+| 참여 독려 배너 | `ParticipationBanner` 13종 문구 + `QuoteBanner` — 피드 중간 삽입 규칙 (i=1,3,6,9,12) |
+| 유니버스 관점 전문가 QA | 4개 역할 교차 검증, 8대 원칙 위반 5건 식별, `/intra/ums/badak` 가이드 반영 개선사항 리스트업 |
+
+## 다음 할 일 (유니버스 통합 우선)
+
+### Sprint 1 — 기존 Badak 코어 연결 (가장 임팩트 큼)
+1. **`badak_members` 폐기 → `members.affiliations` 기반 재설계**
+   - `MemberProfileSheet` API를 `members` 테이블 쿼리로 변경
+   - 온보딩 = `affiliations` 배열에 `'badak'` 추가하는 단일 작업으로 단순화
+   - 현재 계획된 별도 테이블 SQL 작성 중단
+
+2. **오픈채팅방 페이지 `/badak/rooms` 신설** (48개 채팅방 카테고리별)
+   - `badak_chat_rooms` 테이블 (name, category, kakao_url, member_count, is_active)
+   - 카테고리: 메인/지역/네트워킹/커리어/스터디/프로젝트/기타
+   - `/intra/ums/badak` 가이드에 이미 정의되어 있음
+
+3. **DAM Party 배너 + 신청 페이지 `/badak/dam-party`**
+   - 다음 DAM Party (제48회) 히어로 영역 노출
+   - `wio_events` 활용 + Toss 결제 연동
+
+4. **`/intra/ums/badak` 실데이터 연동**
+   - MAU, 평균 체류시간, 주간 방문 횟수 → 이벤트 로깅 인프라 (`wio_analytics_events`)
+   - 현재 Mock 수치 (4.2%, 68%, 23분, 3.4)
+
+### Sprint 2 — HeRo Time 통합 + 관리자 완성
+5. `MemberProfileSheet`에 **HeRo Time** 섹션 추가 (커리어 타임라인 + 유니버스 여정)
+6. `/intra/ums/badak/needs-queue` — pending_review 니즈 승인 큐
+7. `/intra/ums/badak/rooms` — 채팅방 CRUD
+
+### Sprint 3 — WIO 역방향 환류
+8. `wio_ui_components.BottomSheet` 추출 (Badak 바텀시트 일반화 — appeared 패턴 포함)
+9. `wio_auth.withLoginGate` HOC 추출 (LoginModal + pendingAction 패턴)
+10. `wio_hooks.useOptimisticReaction` 추출 (관심/좋아요/북마크 공통화)
+11. `wio_people.PublicProfile` 컴포넌트 확정 (HeRo Time 포함)
+
+### 이전 세션 이월 (여전히 유효)
+- 마이페이지 북마크/내 모임 실DB 전환 (`badak_bookmarks`, `badak_group_members`)
+- 모임 상세 본인 글 수정/삭제 UI (API 완성됨)
+- firstcome 자동 승인은 join API에서 구현 완료 (이번 세션)
+- `badak_members.role/phone/interests` 컬럼 확인 (폐기 방향이라 보류)
+- 커뮤니티 조회수 중복 방지
+- `RESEND_API_KEY` .env.local 추가
+
+## 이전 세션 전반 (세션 46 전반) 완료 항목
 
 | 항목 | 내용 |
 |------|------|
@@ -21,16 +77,6 @@
 | 알림 시스템 신규 | `badak_notifications` 테이블 + RLS + GET/PUT API + 모임 참여 신청 시 바닥장 알림 생성 |
 | 모임 수정/삭제 API | `/api/badak/groups` PUT/DELETE (리더만, 참여자 있으면 closed 처리) |
 | 마이페이지 메시지→알림 | Mock 메시지 탭 제거 → 실DB 알림 탭 ("모두 읽음" + 읽음/안읽음 스타일) |
-
-## 다음 할 일
-
-- 마이페이지 북마크 탭 실DB 전환 (현재 MOCK_BOOKMARKS) — `badak_bookmarks` 테이블 생성 필요
-- 마이페이지 내 모임 탭 실DB 전환 (현재 MOCK_MY_GROUPS) — `badak_group_members` + `badak_groups` JOIN 쿼리
-- 모임 상세 페이지에서 본인 글 수정/삭제 UI 추가 (API는 완성됨)
-- firstcome 자동 승인 로직 — join API에서 `joinType='firstcome'`이면 status='approved'로 즉시 처리
-- `badak_members`에 `phone`, `interests`, `role` 컬럼 존재 여부 확인 (프로필 수정 API에서 사용)
-- 커뮤니티 글 상세에서 조회수 증가가 정상 작동하는지 확인 (현재 +1 방식, 동일 사용자 중복 증가 방지 없음)
-- `RESEND_API_KEY` .env.local에 추가
 
 ## 이전 세션 (세션 45) 완료 항목
 

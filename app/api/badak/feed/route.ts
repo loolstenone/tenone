@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
     type: string;
     badge: string;
     title: string;
+    groupId?: string;
+    needId?: string;
+    storyId?: string;
     leader?: string;
     leaderJob?: string;
     members?: number;
@@ -67,6 +70,7 @@ export async function GET(request: NextRequest) {
     const leader = g.leader as unknown as { display_name: string; job_function: string; experience_years: number } | null;
     feed.push({
       type: 'group',
+      groupId: g.id,
       badge: isUrgent ? '마감 임박' : '모임 확정',
       title: g.title,
       leader: `바닥장 ${leader?.display_name || ''}`,
@@ -84,6 +88,7 @@ export async function GET(request: NextRequest) {
   for (const n of gatheringNeeds || []) {
     feed.push({
       type: 'needs',
+      needId: n.id,
       badge: '니즈 모이는 중',
       title: n.display_text,
       count: n.count,
@@ -96,6 +101,7 @@ export async function GET(request: NextRequest) {
     const member = s.member as unknown as { display_name: string } | null;
     feed.push({
       type: 'story',
+      storyId: s.id,
       badge: 'Next Stage 스토리',
       title: s.title,
       author: member?.display_name || '',
