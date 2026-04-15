@@ -14,7 +14,7 @@ const navItems = [
     { name: "모임", href: `${PREFIX}/groups` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
     { name: "스토리", href: `${PREFIX}/story` },
-    { name: "탐색", href: `${PREFIX}/explore` },
+    { name: "니즈 탐색", href: `${PREFIX}/explore` },
     { name: "모임 개설", href: `${PREFIX}/groups/create` },
     { name: "바닥장 신청", href: `${PREFIX}/apply` },
 ];

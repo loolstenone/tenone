@@ -1,43 +1,160 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Users, TrendingUp, Sparkles, Crown,
-  Calendar, MapPin, ChevronRight, Flame, ArrowRight,
-  BarChart3, UserPlus, Target,
+  Flame, BarChart3, UserPlus, Target, ChevronRight,
+  UserCircle2, Handshake,
 } from 'lucide-react';
-import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
+import { CLOUD_WORDS as FALLBACK_WORDS } from '@/lib/badak-cloud-data';
 import type { CloudWord } from '@/types/badak';
 import { NeedDetailSheet } from '@/features/badak/cloud/NeedDetailSheet';
+import { MemberProfileSheet } from '@/features/badak/MemberProfileSheet';
+import { MatchCard, type MatchCardData } from '@/features/badak/explore/MatchCard';
+import { WantsCard, type WantsCardData } from '@/features/badak/explore/WantsCard';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
-import Link from 'next/link';
-
-// ── 사용자 프로필 (Mock — 로그인 시 DB에서 조회) ──
-const USER_PROFILE = {
-  industry: '광고/에이전시',
-  jobFunction: '퍼포먼스 마케팅',
-  interests: ['네트워킹', '업무 스킬 향상', '이직 준비'],
-};
+import type { MatchMode } from '@/lib/wio/people/matching';
 
 // 니즈 카테고리 분류
 type NeedCategory = 'all' | 'withGroup' | 'waiting' | 'hot';
+type ExploreTab = 'needs' | 'people' | 'wants';
 
 export default function ExplorePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [dismissedWants, setDismissedWants] = useState<Set<string>>(new Set());
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
+  const [selectedPeer, setSelectedPeer] = useState<{ memberId: string | null; displayName: string; jobFunction: string | null } | null>(null);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<NeedCategory>('all');
+  const [tab, setTab] = useState<ExploreTab>('needs');
+
+  // People 탭 상태
+  const [peopleMode, setPeopleMode] = useState<MatchMode>('needs_match');
+  const [matches, setMatches] = useState<MatchCardData[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesError, setMatchesError] = useState<string | null>(null);
+
+  // Wants 탭 상태
+  const [wants, setWants] = useState<WantsCardData[]>([]);
+  const [wantsLoading, setWantsLoading] = useState(false);
+
+  const fetchWithAuth = useCallback(async (path: string) => {
+    const { createClient } = await import('@/lib/supabase/client');
+    const { data: { session } } = await createClient().auth.getSession();
+    if (!session) return null;
+    const res = await fetch(path, { headers: { Authorization: `Bearer ${session.access_token}` } });
+    if (!res.ok) return null;
+    return res.json();
+  }, []);
+
+  const loadMatches = useCallback(async (mode: MatchMode) => {
+    if (!isAuthenticated) return;
+    setMatchesLoading(true);
+    setMatchesError(null);
+    const data = await fetchWithAuth(`/api/badak/explore/people?mode=${mode}&limit=20`);
+    if (!data) setMatchesError('로그인 후 매칭이 가능해요');
+    else setMatches(data.matches ?? []);
+    setMatchesLoading(false);
+  }, [isAuthenticated, fetchWithAuth]);
+
+  const loadWants = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setWantsLoading(true);
+    const data = await fetchWithAuth('/api/badak/explore/wants?limit=10');
+    setWants(data?.wants ?? []);
+    setWantsLoading(false);
+  }, [isAuthenticated, fetchWithAuth]);
+
+  useEffect(() => {
+    if (tab === 'people') loadMatches(peopleMode);
+  }, [tab, peopleMode, loadMatches]);
+
+  useEffect(() => {
+    if (tab === 'wants') loadWants();
+  }, [tab, loadWants]);
+
+  const [sentConnections, setSentConnections] = useState<Set<string>>(new Set());
+
+  const handleConnect = async (peerUserId: string, type: MatchMode = 'needs_match') => {
+    if (!isAuthenticated) { setShowLogin(true); return; }
+    if (sentConnections.has(peerUserId)) return;
+
+    const connType = type === 'mutual' ? 'partner' : type === 'network' ? 'network' : 'interest';
+
+    const { createClient } = await import('@/lib/supabase/client');
+    const { data: { session } } = await createClient().auth.getSession();
+    if (!session) return;
+
+    const res = await fetch('/api/badak/connections', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ toUserId: peerUserId, type: connType }),
+    });
+
+    if (res.ok) {
+      setSentConnections((prev) => new Set(prev).add(peerUserId));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error ?? '관심 전송 실패');
+    }
+  };
+
+  const handleStartDm = async (peerUserId: string) => {
+    if (!isAuthenticated) { setShowLogin(true); return; }
+
+    const { createClient } = await import('@/lib/supabase/client');
+    const { data: { session } } = await createClient().auth.getSession();
+    if (!session) return;
+
+    // 대화 신청 = partner 타입 connection 요청으로 매핑 (수락 시 Talk 스레드 자동 생성됨)
+    const res = await fetch('/api/badak/connections', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ toUserId: peerUserId, type: 'partner', message: '원츠를 함께 실행해보고 싶어요' }),
+    });
+
+    if (res.ok) {
+      alert('대화 신청을 보냈어요. 상대가 수락하면 Talk 창이 열려요.');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error ?? '대화 신청 실패');
+    }
+  };
+
+  // 실DB에서 니즈 로드 (실패 시 Mock 폴백)
+  const [words, setWords] = useState<CloudWord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/badak/needs?limit=100');
+        const data = await res.json();
+        const fetched = (data.words as CloudWord[]) ?? [];
+        setWords(fetched.length > 0 ? fetched : FALLBACK_WORDS);
+      } catch {
+        setWords(FALLBACK_WORDS);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   // 통계
-  const totalNeeds = CLOUD_WORDS.length;
-  const withGroup = CLOUD_WORDS.filter((w) => w.hasGroup).length;
-  const totalMembers = CLOUD_WORDS.reduce((sum, w) => sum + w.members, 0);
-  const waiting = CLOUD_WORDS.filter((w) => !w.hasGroup && w.members >= 15).length;
+  const totalNeeds = words.length;
+  const withGroup = words.filter((w) => w.hasGroup).length;
+  const totalMembers = words.reduce((sum, w) => sum + w.members, 0);
 
   // 필터링
-  const filtered = CLOUD_WORDS
+  const filtered = words
     .filter((w) => {
       if (search.trim()) {
         const q = search.toLowerCase();
@@ -53,8 +170,8 @@ export default function ExplorePage() {
     })
     .sort((a, b) => b.members - a.members);
 
-  // 추천: 사용자 관심사 매칭
-  const recommended = CLOUD_WORDS.filter((w) => {
+  // 추천: 사용자 관심사 매칭 (Phase 2에서 실제 프로필 기반으로 교체)
+  const recommended = words.filter((w) => {
     const text = w.text.toLowerCase();
     const title = w.group?.title?.toLowerCase() || '';
     return (
@@ -64,8 +181,8 @@ export default function ExplorePage() {
     );
   }).sort((a, b) => b.members - a.members).slice(0, 8);
 
-  // Hot 니즈: 관심 인원 높은 순
-  const hotNeeds = [...CLOUD_WORDS].sort((a, b) => b.members - a.members).slice(0, 8);
+  // Hot 니즈
+  const hotNeeds = [...words].sort((a, b) => b.members - a.members).slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
@@ -74,11 +191,36 @@ export default function ExplorePage() {
         <div className="mb-5 px-4 sm:px-6">
           <div className="mb-1 flex items-center gap-2">
             <Target className="h-5 w-5 text-amber-400" />
-            <h1 className="text-xl font-bold text-white">탐색</h1>
+            <h1 className="text-2xl font-bold text-white">니즈 탐색</h1>
           </div>
-          <p className="text-xs text-white/40">니즈와 원츠가 만나는 곳</p>
+          <p className="mt-1 text-sm text-white/50">니즈와 니즈가 만나 원츠(Wants)가 된다</p>
         </div>
 
+        {/* 탭 */}
+        <div className="mb-5 flex gap-1 px-4 sm:px-6">
+          {([
+            { id: 'needs' as const, label: '니즈', icon: Target },
+            { id: 'people' as const, label: '사람', icon: UserCircle2 },
+            { id: 'wants' as const, label: '원츠', icon: Handshake },
+          ]).map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors"
+              style={{
+                background: tab === id ? 'rgba(255,217,61,0.1)' : 'rgba(255,255,255,0.03)',
+                borderColor: tab === id ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)',
+                color: tab === id ? '#ffd93d' : 'rgba(255,255,255,0.5)',
+              }}
+            >
+              <Icon className="h-4 w-4" /> {label}
+            </button>
+          ))}
+        </div>
+
+        {/* === 니즈 탭 === */}
+        {tab === 'needs' && (
+        <>
         {/* 통계 카드 */}
         <div className="mb-6 flex gap-2 px-4 sm:px-6">
           {[
@@ -164,7 +306,13 @@ export default function ExplorePage() {
             ))}
           </div>
 
-          {filtered.length === 0 && (
+          {loading && words.length === 0 && (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+            </div>
+          )}
+
+          {!loading && filtered.length === 0 && (
             <div className="py-12 text-center">
               <Search className="mx-auto mb-3 h-8 w-8 text-white/15" />
               <p className="text-sm text-white/40">검색 결과가 없습니다</p>
@@ -172,8 +320,157 @@ export default function ExplorePage() {
           )}
         </div>
 
-        {/* 니즈 디테일 시트 */}
+        </>
+        )}
+
+        {/* === 사람 탭 === */}
+        {tab === 'people' && (
+          <div className="px-4 sm:px-6">
+            {/* 모드 스위처 */}
+            <div className="mb-5 flex gap-1.5 overflow-x-auto scrollbar-hide">
+              {([
+                { id: 'needs_match' as const, label: '같은 니즈' },
+                { id: 'mutual' as const, label: '상호 보완' },
+                { id: 'network' as const, label: '업계 네트워킹' },
+              ]).map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setPeopleMode(id)}
+                  className="shrink-0 rounded-full px-4 py-2 text-[13px] font-medium transition-all"
+                  style={{
+                    background: peopleMode === id ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
+                    color: peopleMode === id ? '#ffd93d' : 'rgba(255,255,255,0.5)',
+                    border: `1px solid ${peopleMode === id ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {!isAuthenticated && (
+              <div className="rounded-2xl border border-white/8 p-6 text-center">
+                <UserCircle2 className="mx-auto mb-3 h-10 w-10 text-white/20" />
+                <p className="mb-1 text-base font-semibold text-white/60">로그인하면 매칭이 보여요</p>
+                <p className="mb-4 text-sm text-white/35">니즈와 니즈가 만나는 사람들</p>
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="rounded-xl px-5 py-2.5 text-sm font-semibold"
+                  style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                >
+                  로그인
+                </button>
+              </div>
+            )}
+
+            {isAuthenticated && matchesLoading && (
+              <div className="flex items-center justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
+            )}
+
+            {isAuthenticated && !matchesLoading && matchesError && (
+              <div className="py-16 text-center text-sm text-white/40">{matchesError}</div>
+            )}
+
+            {isAuthenticated && !matchesLoading && !matchesError && matches.length === 0 && (
+              <div className="py-16 text-center">
+                <Sparkles className="mx-auto mb-3 h-10 w-10 text-white/15" />
+                <p className="mb-1 text-base text-white/50">아직 매칭된 사람이 없어요</p>
+                <p className="text-sm text-white/30">프로필을 더 채우거나 니즈에 관심을 표현해보세요</p>
+              </div>
+            )}
+
+            {isAuthenticated && matches.length > 0 && (
+              <div className="space-y-3">
+                {matches.map((m) => (
+                  <MatchCard
+                    key={m.peerId}
+                    match={m}
+                    onProfile={() => setSelectedPeer({
+                      memberId: m.memberId,
+                      displayName: m.displayName,
+                      jobFunction: m.jobFunction,
+                    })}
+                    onConnect={() => handleConnect(m.peerId)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* === 원츠 탭 === */}
+        {tab === 'wants' && (
+          <div className="px-4 sm:px-6">
+            <div className="mb-5 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3">
+              <div className="text-[13px] font-semibold text-amber-400">
+                💡 원츠(Wants)는 니즈와 니즈가 만나서 생긴 공동의 지향이에요
+              </div>
+              <div className="mt-1 text-[11.5px] text-white/50">
+                내 니즈 × 상대 니즈 = 우리가 같이 할 수 있는 일
+              </div>
+            </div>
+
+            {!isAuthenticated && (
+              <div className="rounded-2xl border border-white/8 p-6 text-center">
+                <Handshake className="mx-auto mb-3 h-10 w-10 text-white/20" />
+                <p className="mb-1 text-base font-semibold text-white/60">로그인하면 원츠가 보여요</p>
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="mt-3 rounded-xl px-5 py-2.5 text-sm font-semibold"
+                  style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                >
+                  로그인
+                </button>
+              </div>
+            )}
+
+            {isAuthenticated && wantsLoading && (
+              <div className="flex items-center justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
+            )}
+
+            {isAuthenticated && !wantsLoading && wants.length === 0 && (
+              <div className="py-16 text-center">
+                <Handshake className="mx-auto mb-3 h-10 w-10 text-white/15" />
+                <p className="mb-1 text-base text-white/50">아직 원츠가 생기지 않았어요</p>
+                <p className="text-sm text-white/30">니즈에 관심을 표현하면 원츠가 떠올라요</p>
+              </div>
+            )}
+
+            {isAuthenticated && wants.length > 0 && user?.id && (
+              <div className="space-y-4">
+                {wants
+                  .filter((w, i) => !dismissedWants.has(`${i}-${w.needIds.join(',')}-${w.others[0]?.userId}`))
+                  .map((w, i) => {
+                    const key = `${i}-${w.needIds.join(',')}-${w.others[0]?.userId}`;
+                    return (
+                      <WantsCard
+                        key={key}
+                        want={w}
+                        myUserId={user.id}
+                        onStartDm={handleStartDm}
+                        onDismiss={() => setDismissedWants((prev) => new Set(prev).add(key))}
+                      />
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 시트 */}
         <NeedDetailSheet word={selectedWord} onClose={() => setSelectedWord(null)} />
+        {selectedPeer && (
+          <MemberProfileSheet
+            memberId={selectedPeer.memberId}
+            displayName={selectedPeer.displayName}
+            job={selectedPeer.jobFunction ?? undefined}
+            onClose={() => setSelectedPeer(null)}
+          />
+        )}
         <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
       </div>
     </div>

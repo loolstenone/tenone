@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   Plus, Calendar, MapPin, Users, Search,
-  Crown, Flame, Clock, Sparkles, ChevronRight,
+  Crown, Flame, Clock, Sparkles, ChevronLeft, ChevronRight,
   SlidersHorizontal, ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -122,22 +122,63 @@ function SlideSection({ title, icon, groups, emptyText }: {
   title: string; icon: React.ReactNode; groups: GroupItem[]; emptyText: string;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const hasDragged = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const [grabbing, setGrabbing] = useState(false);
 
   if (groups.length === 0) return null;
 
+  const scroll = (dir: 'left' | 'right') => {
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -300 : 300, behavior: 'smooth' });
+  };
+
+  // PC 마우스 드래그 — FeedHighlights와 동일 패턴
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    isDragging.current = true;
+    hasDragged.current = false;
+    setGrabbing(true);
+    startX.current = e.pageX;
+    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0;
+  };
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
+    const dx = e.pageX - startX.current;
+    if (Math.abs(dx) > 5) hasDragged.current = true;
+    if (scrollRef.current) scrollRef.current.scrollLeft = scrollLeft.current - dx;
+  };
+  const onMouseUp = () => { isDragging.current = false; setGrabbing(false); };
+
   return (
-    <div className="mb-7">
-      <div className="mb-3 flex items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-2">
+    <div className="mb-10">
+      <div className="mb-4 flex items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-2.5">
           {icon}
-          <h2 className="text-sm font-bold text-white">{title}</h2>
-          <span className="text-[10px] text-white/30">{groups.length}</span>
+          <h2 className="text-base font-bold text-white">{title}</h2>
+          <span className="text-xs text-white/35">{groups.length}</span>
+        </div>
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => scroll('left')}
+            className="rounded-full border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
+            aria-label="이전"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="rounded-full border border-white/10 p-1.5 text-white/30 transition-colors hover:border-white/25 hover:text-white/70"
+            aria-label="다음"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
       <div
         ref={scrollRef}
-        className="flex gap-3 px-4 pb-2 sm:px-6"
+        className="flex gap-4 px-4 pb-2 select-none sm:px-6"
         style={{
           overflowX: 'scroll',
           scrollSnapType: 'x mandatory',
@@ -145,10 +186,15 @@ function SlideSection({ title, icon, groups, emptyText }: {
           touchAction: 'pan-x',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
+          cursor: grabbing ? 'grabbing' : 'grab',
         }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
       >
         {groups.map((g) => (
-          <GroupCard key={g.id} group={g} />
+          <GroupCard key={g.id} group={g} hasDragged={hasDragged} />
         ))}
       </div>
     </div>
@@ -156,7 +202,7 @@ function SlideSection({ title, icon, groups, emptyText }: {
 }
 
 // ── 모임 카드 (슬라이드용) ──
-function GroupCard({ group: g }: { group: GroupItem }) {
+function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: React.RefObject<boolean> }) {
   const remaining = g.max_members - g.current_members;
   const isFull = remaining <= 0;
 
@@ -175,7 +221,9 @@ function GroupCard({ group: g }: { group: GroupItem }) {
   return (
     <Link
       href={`/badak/groups/${g.id}`}
-      className="block w-[260px] shrink-0 overflow-hidden rounded-2xl border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[280px]"
+      onClick={(e) => { if (hasDragged?.current) e.preventDefault(); }}
+      draggable={false}
+      className="block w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[300px]"
       style={{
         background: 'rgba(255,255,255,0.04)',
         scrollSnapAlign: 'start',
@@ -199,39 +247,39 @@ function GroupCard({ group: g }: { group: GroupItem }) {
         </div>
       )}
 
-      <div className="p-3.5">
+      <div className="p-5">
         {/* 상태 뱃지 */}
-        <div className="mb-1.5 flex items-center gap-1.5">
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: statusStyle.bg, color: statusStyle.color }}>
+        <div className="mb-3 flex items-center gap-2">
+          <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: statusStyle.bg, color: statusStyle.color }}>
             {statusStyle.label}
           </span>
           {g.fee === 0 ? (
-            <span className="text-[10px] text-green-400/60">무료</span>
+            <span className="text-xs text-green-400/70">무료</span>
           ) : (
-            <span className="text-[10px] text-white/30">{g.fee.toLocaleString()}원</span>
+            <span className="text-xs text-white/40">{g.fee.toLocaleString()}원</span>
           )}
         </div>
 
         {/* 제목 */}
-        <h3 className="mb-2 line-clamp-1 text-[13px] font-bold text-white">{g.title}</h3>
+        <h3 className="mb-3 line-clamp-2 text-[15px] font-bold leading-snug text-white">{g.title}</h3>
 
         {/* 일정/장소 */}
-        <div className="mb-2.5 flex flex-col gap-0.5 text-[11px] text-white/35">
+        <div className="mb-4 flex flex-col gap-1.5 text-[12.5px] text-white/45">
           {g.event_date && (
-            <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(g.event_date)}</span>
+            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {formatDate(g.event_date)}</span>
           )}
           {g.location && (
-            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {g.location}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {g.location}</span>
           )}
         </div>
 
         {/* 인원 바 */}
-        <div className="mb-2.5">
-          <div className="mb-0.5 flex items-center justify-between text-[10px]">
-            <span className="text-white/30">{g.current_members}/{g.max_members}명</span>
-            <span className="text-white/20">{isFull ? '마감' : `잔여 ${remaining}석`}</span>
+        <div className="mb-4">
+          <div className="mb-1 flex items-center justify-between text-[11.5px]">
+            <span className="text-white/45">{g.current_members}/{g.max_members}명</span>
+            <span className="text-white/30">{isFull ? '마감' : `잔여 ${remaining}석`}</span>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-white/8">
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
             <div className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min(100, (g.current_members / g.max_members) * 100)}%`,
@@ -243,16 +291,16 @@ function GroupCard({ group: g }: { group: GroupItem }) {
 
         {/* 바닥장 */}
         {g.leader && (
-          <div className="flex items-center gap-1.5">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold"
+          <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
               style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
               {g.leader.display_name.charAt(0)}
             </div>
-            <span className="text-[10px] text-white/40">
-              <Crown className="mr-0.5 inline h-2.5 w-2.5 text-amber-400/50" />
+            <span className="text-xs text-white/55">
+              <Crown className="mr-0.5 inline h-3 w-3 text-amber-400/60" />
               {g.leader.display_name}
             </span>
-            <span className="text-[9px] text-white/20">{g.leader.job_function}</span>
+            <span className="text-[11px] text-white/30">· {g.leader.job_function}</span>
           </div>
         )}
       </div>
@@ -325,30 +373,30 @@ export default function GroupsPage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="mx-auto max-w-2xl py-6">
+      <div className="mx-auto max-w-3xl py-8 sm:py-10">
         {/* 헤더 */}
-        <div className="mb-5 flex items-center justify-between px-4 sm:px-6">
+        <div className="mb-7 flex items-center justify-between px-5 sm:px-8">
           <div>
-            <h1 className="text-xl font-bold text-white">모임</h1>
-            <p className="mt-0.5 text-xs text-white/40">함께 성장할 모임을 찾아보세요</p>
+            <h1 className="text-2xl font-bold text-white">모임</h1>
+            <p className="mt-1.5 text-sm text-white/50">함께 성장할 모임을 찾아보세요</p>
           </div>
           <Link
             href="/badak/groups/create"
-            className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold no-underline"
+            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold no-underline"
             style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
           >
-            <Plus className="h-3.5 w-3.5" /> 모임 만들기
+            <Plus className="h-4 w-4" /> 모임 만들기
           </Link>
         </div>
 
         {/* 검색 */}
-        <div className="relative mb-6 px-4 sm:px-6">
-          <Search className="absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30 sm:left-9" />
+        <div className="relative mb-8 px-5 sm:px-8">
+          <Search className="absolute left-8 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-white/35 sm:left-11" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); if (e.target.value) setShowAll(true); }}
             placeholder="모임명, 태그, 바닥장 검색"
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/30"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-3.5 pl-12 pr-4 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/30"
           />
         </div>
 
@@ -364,7 +412,7 @@ export default function GroupsPage() {
             {recommendedGroups.length > 0 && (
               <SlideSection
                 title="추천 모임"
-                icon={<Sparkles className="h-4 w-4 text-amber-400" />}
+                icon={<Sparkles className="h-5 w-5 text-amber-400" />}
                 groups={recommendedGroups}
                 emptyText=""
               />
@@ -373,7 +421,7 @@ export default function GroupsPage() {
             {/* Hot 모임 */}
             <SlideSection
               title="Hot 모임"
-              icon={<Flame className="h-4 w-4 text-orange-400" />}
+              icon={<Flame className="h-5 w-5 text-orange-400" />}
               groups={hotGroups}
               emptyText="모집 중인 모임이 없습니다"
             />
@@ -381,18 +429,18 @@ export default function GroupsPage() {
             {/* 최신 모임 */}
             <SlideSection
               title="최신 모임"
-              icon={<Clock className="h-4 w-4 text-blue-400" />}
+              icon={<Clock className="h-5 w-5 text-blue-400" />}
               groups={latestGroups}
               emptyText="등록된 모임이 없습니다"
             />
 
             {/* 전체 보기 버튼 */}
-            <div className="px-4 sm:px-6">
+            <div className="px-5 sm:px-8">
               <button
                 onClick={() => setShowAll(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-xs font-medium text-white/40 transition-all hover:border-white/20 hover:text-white/60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-4 text-sm font-medium text-white/50 transition-all hover:border-white/25 hover:text-white/75"
               >
-                전체 모임 보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체 모임 보기 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </>
@@ -400,31 +448,31 @@ export default function GroupsPage() {
 
         {/* 전체 모임 목록 */}
         {!loading && showAll && (
-          <div className="px-4 sm:px-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white">
-                전체 모임 <span className="ml-1 text-white/30">{allFiltered.length}</span>
+          <div className="px-5 sm:px-8">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-base font-bold text-white">
+                전체 모임 <span className="ml-1.5 text-white/40">{allFiltered.length}</span>
               </h2>
               <button
                 onClick={() => { setShowAll(false); setSearch(''); }}
-                className="text-xs text-white/30 hover:text-white/50"
+                className="text-sm text-white/40 hover:text-white/65"
               >
                 슬라이드 보기
               </button>
             </div>
 
             {allFiltered.length === 0 ? (
-              <div className="py-16 text-center">
-                <SlidersHorizontal className="mx-auto mb-3 h-10 w-10 text-white/15" />
-                <p className="mb-1 text-sm font-medium text-white/40">
+              <div className="py-20 text-center">
+                <SlidersHorizontal className="mx-auto mb-4 h-12 w-12 text-white/15" />
+                <p className="mb-1.5 text-base font-medium text-white/50">
                   {search ? '검색 결과가 없습니다' : '아직 모임이 없습니다'}
                 </p>
-                <p className="text-xs text-white/25">
+                <p className="text-sm text-white/30">
                   {search ? '다른 키워드로 검색해보세요' : '첫 번째 바닥장이 되어보세요!'}
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {allFiltered.map((g) => {
                   const remaining = g.max_members - g.current_members;
                   const isFull = remaining <= 0;
@@ -438,24 +486,24 @@ export default function GroupsPage() {
 
                   return (
                     <Link key={g.id} href={`/badak/groups/${g.id}`}
-                      className="flex gap-3 rounded-xl border border-white/8 p-3 no-underline transition-all hover:border-white/15"
+                      className="flex gap-4 rounded-xl border border-white/8 p-5 no-underline transition-all hover:border-white/15"
                       style={{ background: 'rgba(255,255,255,0.03)' }}>
-                      <div className="flex-1">
-                        <div className="mb-1 flex items-center gap-1.5">
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: st.bg, color: st.color }}>
+                      <div className="flex-1 min-w-0">
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: st.bg, color: st.color }}>
                             {st.label}
                           </span>
-                          {g.fee === 0 && <span className="text-[10px] text-green-400/60">무료</span>}
+                          {g.fee === 0 && <span className="text-xs text-green-400/70">무료</span>}
                         </div>
-                        <h3 className="mb-1 text-[13px] font-bold text-white">{g.title}</h3>
-                        <div className="flex flex-wrap gap-x-3 text-[10px] text-white/30">
-                          {g.event_date && <span className="flex items-center gap-0.5"><Calendar className="h-2.5 w-2.5" /> {formatDate(g.event_date)}</span>}
-                          {g.location && <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" /> {g.location}</span>}
-                          <span className="flex items-center gap-0.5"><Users className="h-2.5 w-2.5" /> {g.current_members}/{g.max_members}</span>
+                        <h3 className="mb-2 text-[15px] font-bold text-white">{g.title}</h3>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-white/40">
+                          {g.event_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(g.event_date)}</span>}
+                          {g.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {g.location}</span>}
+                          <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {g.current_members}/{g.max_members}</span>
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center">
-                        <ChevronRight className="h-4 w-4 text-white/15" />
+                        <ChevronRight className="h-5 w-5 text-white/20" />
                       </div>
                     </Link>
                   );

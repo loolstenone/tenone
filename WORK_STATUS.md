@@ -1,6 +1,31 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-15 (사무실, 세션 48)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 49)
+
+---
+
+## 세션 49 완료 항목 — WIO Talk + Connections 탭 완성 (C-2)
+
+| 항목 | 내용 |
+|------|------|
+| **관심 탭 (connections)** | `/api/badak/connections` GET 연동. 받은 제안 목록(수락/거절 버튼), 보낸 제안 목록. 수락 시 대화 탭으로 자동 이동 + 스레드 오픈 |
+| **대화 탭 (talks)** | `/api/badak/talks` GET 연동. 스레드 목록 + 1:1 메시지 뷰. 5초 폴링. Enter 전송. 모바일: 목록↔메시지 전환 |
+| **state 선언** | `connections`, `pendingIncomingCount`, `threads`, `unreadTalkCount`, `activeThreadId`, `messages`, `messageText`, `sendingMessage`, `connectionsLoading`, `talksLoading` |
+| **핸들러** | `handleConnectionRespond` (PATCH /api/badak/connections), `handleSendMessage` (POST /api/badak/talks/[id]), 폴링 useEffect |
+
+## 다음 할 일
+
+### 즉시 처리 필요
+- **`career` JSONB 컬럼 마이그레이션**: Supabase 대시보드 SQL Editor에서 실행 필요
+  ```sql
+  ALTER TABLE badak_members ADD COLUMN IF NOT EXISTS career JSONB DEFAULT '[]';
+  ```
+
+### E 시리즈 — 정리 작업
+- **E-1**: `api/badak/member*` TS 에러 — `affiliations` 타입 (`members` 테이블 타입 생성 필요)
+- **E-2**: `/api/badak/needs/review` RLS — admin-only 체크
+- **E-3**: `badak_community_posts` 카운터 동기화 DB 트리거
+- **E-4**: `badak_wants` 자동 만료 배치
 
 ---
 

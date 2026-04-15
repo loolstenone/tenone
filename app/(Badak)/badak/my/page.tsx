@@ -13,7 +13,7 @@ import {
   ToggleLeft, ToggleRight, UserPlus, Pencil,
 } from 'lucide-react';
 
-type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'notifications' | 'settings';
+type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'notifications' | 'settings';
 type ApplicantStatus = 'pending' | 'approved' | 'rejected';
 
 // ── 이력 항목 ──
@@ -379,6 +379,14 @@ function ProfileBoostCard({
   career, setCareer,
   lookingFor, onToggleLookingFor,
   canOffer, onToggleCanOffer,
+  instagramUrl, setInstagramUrl,
+  facebookUrl, setFacebookUrl,
+  linkedinUrl, setLinkedinUrl,
+  homepageUrl, setHomepageUrl,
+  profilePublic, setProfilePublic,
+  openToNeeds, setOpenToNeeds,
+  openToPartner, setOpenToPartner,
+  openToNetwork, setOpenToNetwork,
   onSave, saving,
 }: {
   displayName: string;
@@ -388,6 +396,14 @@ function ProfileBoostCard({
   career: CareerEntry[]; setCareer: (v: CareerEntry[]) => void;
   lookingFor: string[]; onToggleLookingFor: (v: string) => void;
   canOffer: string[]; onToggleCanOffer: (v: string) => void;
+  instagramUrl: string; setInstagramUrl: (v: string) => void;
+  facebookUrl: string; setFacebookUrl: (v: string) => void;
+  linkedinUrl: string; setLinkedinUrl: (v: string) => void;
+  homepageUrl: string; setHomepageUrl: (v: string) => void;
+  profilePublic: boolean; setProfilePublic: (v: boolean) => void;
+  openToNeeds: boolean; setOpenToNeeds: (v: boolean) => void;
+  openToPartner: boolean; setOpenToPartner: (v: boolean) => void;
+  openToNetwork: boolean; setOpenToNetwork: (v: boolean) => void;
   onSave: () => void; saving: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -396,6 +412,19 @@ function ProfileBoostCard({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [careerForm, setCareerForm] = useState({ ...EMPTY_CAREER_FORM });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 개인 입력 — 원하는 것 / 줄 수 있는 것 (프리셋에 없는 자유 입력)
+  const [lookingForInput, setLookingForInput] = useState('');
+  const [canOfferInput, setCanOfferInput] = useState('');
+  const MAX_CUSTOM_LEN = 20;
+  const addCustomItem = (raw: string, current: string[], onToggle: (v: string) => void) => {
+    const trimmed = raw.trim().slice(0, MAX_CUSTOM_LEN);
+    if (!trimmed) return;
+    if (current.includes(trimmed)) return; // 중복 방지
+    onToggle(trimmed);
+  };
+  const customLookingFor = lookingFor.filter((v) => !EXPECTATIONS.includes(v));
+  const customCanOffer = canOffer.filter((v) => !EXPECTATIONS.includes(v));
 
   const hasData = !!(avatarUrl || bio || experienceYears !== null || lookingFor.length > 0 || canOffer.length > 0 || career.length > 0);
 
@@ -670,26 +699,260 @@ function ProfileBoostCard({
 
           {/* ── 원하는 것 ── */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-[11px] text-white/40">원하는 것 <span className="text-white/20">(모임에서 얻고 싶은 것)</span></label>
+            <label className="mb-2 flex items-center gap-1.5 text-xs text-white/55">
+              원하는 것 <span className="text-white/30">(모임에서 얻고 싶은 것)</span>
+            </label>
             <div className="flex flex-wrap gap-1.5">
               {EXPECTATIONS.map((exp) => {
                 const sel = lookingFor.includes(exp);
-                return <button key={exp} onClick={() => onToggleLookingFor(exp)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
-                  style={{ background: sel ? 'rgba(96,165,250,0.12)' : 'transparent', borderColor: sel ? 'rgba(96,165,250,0.3)' : 'rgba(255,255,255,0.1)', color: sel ? '#93c5fd' : 'rgba(255,255,255,0.5)' }}>{exp}</button>;
+                return (
+                  <button
+                    key={exp}
+                    onClick={() => onToggleLookingFor(exp)}
+                    className="rounded-full border px-3 py-1.5 text-[11.5px] transition-colors"
+                    style={{
+                      background: sel ? 'rgba(96,165,250,0.12)' : 'transparent',
+                      borderColor: sel ? 'rgba(96,165,250,0.3)' : 'rgba(255,255,255,0.1)',
+                      color: sel ? '#93c5fd' : 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    {exp}
+                  </button>
+                );
               })}
+              {/* 개인 입력 커스텀 태그 */}
+              {customLookingFor.map((exp) => (
+                <button
+                  key={exp}
+                  onClick={() => onToggleLookingFor(exp)}
+                  className="group inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11.5px]"
+                  style={{
+                    background: 'rgba(96,165,250,0.18)',
+                    borderColor: 'rgba(96,165,250,0.4)',
+                    color: '#93c5fd',
+                  }}
+                  title="클릭하면 제거"
+                >
+                  {exp}
+                  <X className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                </button>
+              ))}
+            </div>
+            {/* 직접 입력 */}
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={lookingForInput}
+                onChange={(e) => setLookingForInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addCustomItem(lookingForInput, lookingFor, onToggleLookingFor);
+                    setLookingForInput('');
+                  }
+                }}
+                maxLength={MAX_CUSTOM_LEN}
+                placeholder="직접 입력 (Enter 또는 ,)"
+                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-blue-400/40"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  addCustomItem(lookingForInput, lookingFor, onToggleLookingFor);
+                  setLookingForInput('');
+                }}
+                className="rounded-lg border border-white/10 px-3 py-2 text-[11.5px] font-semibold text-white/60 hover:border-blue-400/30 hover:text-blue-300"
+              >
+                추가
+              </button>
             </div>
           </div>
 
           {/* 줄 수 있는 것 */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-[11px] text-white/40">줄 수 있는 것 <span className="text-white/20">(다른 멤버에게 도움이 될 것)</span></label>
+            <label className="mb-2 flex items-center gap-1.5 text-xs text-white/55">
+              줄 수 있는 것 <span className="text-white/30">(다른 멤버에게 도움이 될 것)</span>
+            </label>
             <div className="flex flex-wrap gap-1.5">
               {EXPECTATIONS.map((exp) => {
                 const sel = canOffer.includes(exp);
-                return <button key={exp} onClick={() => onToggleCanOffer(exp)} className="rounded-full border px-2.5 py-1 text-[10px] transition-colors"
-                  style={{ background: sel ? 'rgba(74,222,128,0.12)' : 'transparent', borderColor: sel ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.1)', color: sel ? '#86efac' : 'rgba(255,255,255,0.5)' }}>{exp}</button>;
+                return (
+                  <button
+                    key={exp}
+                    onClick={() => onToggleCanOffer(exp)}
+                    className="rounded-full border px-3 py-1.5 text-[11.5px] transition-colors"
+                    style={{
+                      background: sel ? 'rgba(74,222,128,0.12)' : 'transparent',
+                      borderColor: sel ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.1)',
+                      color: sel ? '#86efac' : 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    {exp}
+                  </button>
+                );
               })}
+              {/* 개인 입력 커스텀 태그 */}
+              {customCanOffer.map((exp) => (
+                <button
+                  key={exp}
+                  onClick={() => onToggleCanOffer(exp)}
+                  className="group inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11.5px]"
+                  style={{
+                    background: 'rgba(74,222,128,0.18)',
+                    borderColor: 'rgba(74,222,128,0.4)',
+                    color: '#86efac',
+                  }}
+                  title="클릭하면 제거"
+                >
+                  {exp}
+                  <X className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                </button>
+              ))}
             </div>
+            {/* 직접 입력 */}
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={canOfferInput}
+                onChange={(e) => setCanOfferInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addCustomItem(canOfferInput, canOffer, onToggleCanOffer);
+                    setCanOfferInput('');
+                  }
+                }}
+                maxLength={MAX_CUSTOM_LEN}
+                placeholder="직접 입력 (Enter 또는 ,)"
+                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-green-400/40"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  addCustomItem(canOfferInput, canOffer, onToggleCanOffer);
+                  setCanOfferInput('');
+                }}
+                className="rounded-lg border border-white/10 px-3 py-2 text-[11.5px] font-semibold text-white/60 hover:border-green-400/30 hover:text-green-300"
+              >
+                추가
+              </button>
+            </div>
+          </div>
+
+          {/* ── 소셜 / 홈페이지 URL ── */}
+          <div>
+            <label className="mb-2 flex items-center gap-1.5 text-xs text-white/55">
+              소셜 / 홈페이지 <span className="text-white/30">(선택)</span>
+            </label>
+            <div className="space-y-2">
+              {[
+                { icon: '📷', label: 'Instagram', value: instagramUrl, setter: setInstagramUrl, placeholder: 'https://instagram.com/닉네임' },
+                { icon: '👥', label: 'Facebook', value: facebookUrl, setter: setFacebookUrl, placeholder: 'https://facebook.com/아이디' },
+                { icon: '💼', label: 'LinkedIn', value: linkedinUrl, setter: setLinkedinUrl, placeholder: 'https://linkedin.com/in/아이디' },
+                { icon: '🌐', label: '홈페이지', value: homepageUrl, setter: setHomepageUrl, placeholder: 'https://your-site.com' },
+              ].map((s) => (
+                <div key={s.label} className="flex items-center gap-2">
+                  <span className="w-20 shrink-0 text-[11.5px] text-white/45">{s.icon} {s.label}</span>
+                  <input
+                    type="url"
+                    value={s.value}
+                    onChange={(e) => s.setter(e.target.value)}
+                    placeholder={s.placeholder}
+                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── 탐색 매칭 모드 (누구와 연결되고 싶은가) ── */}
+          <div>
+            <label className="mb-2 flex items-center gap-1.5 text-xs text-white/55">
+              탐색에서 나를 노출할 관계 <span className="text-white/30">(니즈와 니즈가 만나 원츠가 돼요)</span>
+            </label>
+            <div className="space-y-2">
+              {[
+                {
+                  key: 'needs',
+                  label: '같은 니즈',
+                  desc: '나와 같은 니즈를 가진 사람과 연결',
+                  checked: openToNeeds,
+                  setter: setOpenToNeeds,
+                  color: '#fbbf24',
+                },
+                {
+                  key: 'partner',
+                  label: '상호 보완 (파트너)',
+                  desc: '내가 원하는 것 ↔ 상대가 줄 수 있는 것 매칭',
+                  checked: openToPartner,
+                  setter: setOpenToPartner,
+                  color: '#60a5fa',
+                },
+                {
+                  key: 'network',
+                  label: '업계 네트워킹',
+                  desc: '같은 산업 · 직무 피어',
+                  checked: openToNetwork,
+                  setter: setOpenToNetwork,
+                  color: '#86efac',
+                },
+              ].map((m) => (
+                <label
+                  key={m.key}
+                  className="flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors"
+                  style={{
+                    background: m.checked ? `${m.color}11` : 'rgba(255,255,255,0.03)',
+                    borderColor: m.checked ? `${m.color}40` : 'rgba(255,255,255,0.08)',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={m.checked}
+                    onChange={(e) => m.setter(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    style={{ accentColor: m.color }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-semibold text-white/85">{m.label}</div>
+                    <div className="mt-0.5 text-[11.5px] text-white/45">{m.desc}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* ── 프로필 정보 공개 여부 ── */}
+          <div
+            className="rounded-xl border px-4 py-3.5"
+            style={{
+              background: profilePublic ? 'rgba(74,222,128,0.05)' : 'rgba(255,255,255,0.03)',
+              borderColor: profilePublic ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.1)',
+            }}
+          >
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={profilePublic}
+                onChange={(e) => setProfilePublic(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-green-400"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-semibold text-white/80">
+                  프로필 정보 공개
+                </div>
+                <div className="mt-1 text-[11.5px] leading-relaxed text-white/45">
+                  {profilePublic
+                    ? '다른 바닥 멤버가 내 프로필(자기소개·경력·원하는 것·SNS 주소)을 볼 수 있어요.'
+                    : '내 이름과 아바타만 공개됩니다. 경력·SNS·상세 정보는 숨겨져요.'}
+                </div>
+                <ul className="mt-2 space-y-0.5 text-[11px] text-white/35">
+                  <li>• 자기소개 · 한줄소개</li>
+                  <li>• 경력 이력 (HeRo Time)</li>
+                  <li>• 원하는 것 / 줄 수 있는 것 태그</li>
+                  <li>• SNS / 홈페이지 주소</li>
+                </ul>
+              </div>
+            </label>
           </div>
 
           {/* ── 버튼 행 ── */}
@@ -797,6 +1060,14 @@ export default function BadakMyPage() {
   const [canOffer, setCanOffer] = useState<string[]>([]);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [career, setCareer] = useState<CareerEntry[]>([]);
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [homepageUrl, setHomepageUrl] = useState('');
+  const [profilePublic, setProfilePublic] = useState(true);
+  const [openToNeeds, setOpenToNeeds] = useState(true);
+  const [openToPartner, setOpenToPartner] = useState(false);
+  const [openToNetwork, setOpenToNetwork] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [verifyStep, setVerifyStep] = useState<'idle' | 'confirm' | 'sending' | 'input' | 'verifying'>('idle');
   const [verificationCode, setVerificationCode] = useState('');
@@ -819,6 +1090,37 @@ export default function BadakMyPage() {
 
   // 멤버 역할
   const [memberRole, setMemberRole] = useState<string>('member');
+
+  // 관심 (connections)
+  interface ConnectionPeer {
+    userId: string; memberId: string | null; displayName: string;
+    avatarUrl: string | null; jobFunction: string | null; experienceYears: number | null;
+  }
+  interface Connection {
+    id: string; type: string; status: string; message: string | null;
+    wantId: string | null; createdAt: string; respondedAt: string | null;
+    peer: ConnectionPeer;
+  }
+  const [connections, setConnections] = useState<{ sent: Connection[]; received: Connection[] }>({ sent: [], received: [] });
+  const [pendingIncomingCount, setPendingIncomingCount] = useState(0);
+  const [connectionsLoading, setConnectionsLoading] = useState(true);
+
+  // 대화 (talks)
+  interface TalkThread {
+    id: string; peerUserId: string; peerName: string; peerAvatar: string | null;
+    peerJob: string | null; subject: string | null; lastMessagePreview: string | null; lastMessageAt: string | null;
+  }
+  interface TalkMessage {
+    id: string; senderId: string; body: string; readBy: string[]; createdAt: string;
+  }
+  const [threads, setThreads] = useState<TalkThread[]>([]);
+  const [unreadTalkCount, setUnreadTalkCount] = useState(0);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<TalkMessage[]>([]);
+  const [messageText, setMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [talksLoading, setTalksLoading] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (!isLoading && !isAuthenticated) setShowLogin(true); }, [isLoading, isAuthenticated]);
 
@@ -845,6 +1147,14 @@ export default function BadakMyPage() {
           setCanOffer(memberData.member.can_offer || []);
           setAvatarUrl(memberData.member.avatar_url || null);
           setCareer(memberData.member.career || []);
+          setInstagramUrl(memberData.member.instagram_url || '');
+          setFacebookUrl(memberData.member.facebook_url || '');
+          setLinkedinUrl(memberData.member.linkedin_url || '');
+          setHomepageUrl(memberData.member.homepage_url || '');
+          setProfilePublic(memberData.member.profile_public !== false);
+          setOpenToNeeds(memberData.member.open_to_needs !== false);
+          setOpenToPartner(memberData.member.open_to_partner === true);
+          setOpenToNetwork(memberData.member.open_to_network !== false);
           setMemberRole(memberData.member.role || 'member');
         } else {
           setNickname(user.name || '');
@@ -892,10 +1202,33 @@ export default function BadakMyPage() {
         const myGroupsData = await myGroupsRes.json();
         setMyGroups(myGroupsData.ledGroups || []);
         setJoinedGroups(myGroupsData.joinedGroups || []);
+
+        // 관심 (connections)
+        setConnectionsLoading(true);
+        try {
+          const connRes = await fetch('/api/badak/connections', { headers });
+          const connData = await connRes.json();
+          setConnections({ sent: connData.sent || [], received: connData.received || [] });
+          const pending = (connData.received || []).filter((c: { status: string }) => c.status === 'pending').length;
+          setPendingIncomingCount(pending);
+        } catch { /* silent */ } finally { setConnectionsLoading(false); }
+
+        // 대화 (talks)
+        setTalksLoading(true);
+        try {
+          const talksRes = await fetch('/api/badak/talks', { headers });
+          const talksData = await talksRes.json();
+          setThreads(talksData.threads || []);
+          // unread = threads with lastMessageAt and not read by user (estimate: any thread counts)
+          // 실제 read 추적은 wio_talk_messages.read_by 기반이므로 일단 알림 수 표시 생략
+          setUnreadTalkCount(0);
+        } catch { /* silent */ } finally { setTalksLoading(false); }
       } catch {
         setNickname(user.name || '');
         setMyPostsLoading(false);
         setBookmarksLoading(false);
+        setConnectionsLoading(false);
+        setTalksLoading(false);
       }
     })();
   }, [user]);
@@ -965,7 +1298,7 @@ export default function BadakMyPage() {
         await fetch('/api/badak/member', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ displayName: nickname, phone, industry, jobFunction, interests, bio, experienceYears, lookingFor, canOffer, avatarUrl, career }),
+          body: JSON.stringify({ displayName: nickname, phone, industry, jobFunction, interests, bio, experienceYears, lookingFor, canOffer, avatarUrl, career, instagramUrl, facebookUrl, linkedinUrl, homepageUrl, profilePublic, openToNeeds, openToPartner, openToNetwork }),
         });
       }
       setSaveSuccess(true); setVerifyStep('idle'); setEditMode(false); setVerificationCode('');
@@ -978,6 +1311,84 @@ export default function BadakMyPage() {
   const handleToggleLookingFor = (item: string) => setLookingFor((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleToggleCanOffer = (item: string) => setCanOffer((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleCancelEdit = () => { setEditMode(false); setVerifyStep('idle'); setVerificationCode(''); setVerifyError(''); };
+
+  // 스레드 메시지 로드 + 폴링
+  useEffect(() => {
+    if (!activeThreadId || !user) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const { data: { session } } = await createClient().auth.getSession();
+        if (!session || cancelled) return;
+        const res = await fetch(`/api/badak/talks/${activeThreadId}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const data = await res.json();
+        if (!cancelled) {
+          setMessages(data.messages || []);
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+        }
+      } catch { /* silent */ }
+    };
+    load();
+    const interval = setInterval(load, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [activeThreadId, user]);
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !activeThreadId || sendingMessage) return;
+    setSendingMessage(true);
+    const text = messageText.trim();
+    setMessageText('');
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session) return;
+      const res = await fetch(`/api/badak/talks/${activeThreadId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ body: text }),
+      });
+      const data = await res.json();
+      if (data.message) {
+        setMessages((prev) => [...prev, data.message]);
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      }
+    } catch { setMessageText(text); } finally { setSendingMessage(false); }
+  };
+
+  const handleConnectionRespond = async (id: string, status: 'accepted' | 'declined' | 'blocked') => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session) return;
+      const res = await fetch('/api/badak/connections', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ id, status }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConnections((prev) => ({
+          ...prev,
+          received: prev.received.map((c) => c.id === id ? { ...c, status } : c),
+        }));
+        setPendingIncomingCount((p) => Math.max(0, p - 1));
+        // 수락 시 대화 탭으로 이동 + 스레드 열기
+        if (status === 'accepted' && data.threadId) {
+          setActiveTab('talks');
+          // 스레드 목록 새로고침
+          const talksRes = await fetch('/api/badak/talks', {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          const talksData = await talksRes.json();
+          setThreads(talksData.threads || []);
+          setActiveThreadId(data.threadId);
+        }
+      }
+    } catch { /* silent */ }
+  };
 
   const handleGroupUpdate = (updated: MyGroup) => {
     setMyGroups((prev) => prev.map((g) => g.id === updated.id ? updated : g));
@@ -1033,6 +1444,8 @@ export default function BadakMyPage() {
   const tabs: { id: TabType; label: string; badge?: number }[] = [
     { id: 'mygroups', label: '내 모임', badge: pendingApplicants },
     { id: 'posts', label: '내 글' },
+    { id: 'connections', label: '관심', badge: pendingIncomingCount },
+    { id: 'talks', label: '대화', badge: unreadTalkCount },
     { id: 'bookmarks', label: '북마크' },
     { id: 'notifications', label: '알림', badge: unreadCount },
     { id: 'settings', label: '설정' },
@@ -1217,6 +1630,254 @@ export default function BadakMyPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ── 관심 (connections) ── */}
+        {activeTab === 'connections' && (
+          <div className="space-y-5">
+            {connectionsLoading ? (
+              <div className="flex justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
+            ) : (
+              <>
+                {/* 받은 제안 */}
+                <div>
+                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+                    받은 제안
+                    {pendingIncomingCount > 0 && <span className="ml-2 text-amber-400">· 대기 {pendingIncomingCount}건</span>}
+                  </h2>
+                  {connections.received.length === 0 ? (
+                    <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                      <Heart className="mx-auto mb-3 h-8 w-8 text-white/10" />
+                      <p className="text-sm text-white/30">받은 제안이 없어요</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {connections.received.map((c) => (
+                        <div key={c.id} className="rounded-xl border border-white/6 bg-white/[0.03] p-4">
+                          <div className="mb-3 flex items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
+                              {c.peer.displayName.substring(0, 1)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-white/90">{c.peer.displayName}</span>
+                                <span className="rounded-full px-2 py-0.5 text-[10px]" style={{
+                                  background: c.type === 'partner' ? 'rgba(99,102,241,0.15)' : c.type === 'network' ? 'rgba(34,197,94,0.12)' : 'rgba(255,217,61,0.12)',
+                                  color: c.type === 'partner' ? '#a5b4fc' : c.type === 'network' ? '#4ade80' : '#ffd93d',
+                                }}>
+                                  {c.type === 'partner' ? '파트너' : c.type === 'network' ? '네트워킹' : '관심'}
+                                </span>
+                                <StatusBadge status={c.status} />
+                              </div>
+                              <p className="text-[11px] text-white/35">{c.peer.jobFunction || '직무 미설정'}</p>
+                            </div>
+                          </div>
+                          {c.message && (
+                            <p className="mb-3 rounded-lg px-3 py-2 text-xs text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                              &ldquo;{c.message}&rdquo;
+                            </p>
+                          )}
+                          {c.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleConnectionRespond(c.id, 'accepted')}
+                                className="flex-1 rounded-lg py-2 text-xs font-semibold"
+                                style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+                              >
+                                수락하기
+                              </button>
+                              <button
+                                onClick={() => handleConnectionRespond(c.id, 'declined')}
+                                className="rounded-lg px-4 py-2 text-xs text-white/30 hover:text-white/50"
+                                style={{ background: 'rgba(255,255,255,0.04)' }}
+                              >
+                                거절
+                              </button>
+                            </div>
+                          )}
+                          {c.status === 'accepted' && (
+                            <button
+                              onClick={() => { setActiveTab('talks'); }}
+                              className="w-full rounded-lg py-2 text-xs font-semibold"
+                              style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' }}
+                            >
+                              대화 보기
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 보낸 제안 */}
+                <div>
+                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">보낸 제안</h2>
+                  {connections.sent.length === 0 ? (
+                    <div className="rounded-2xl border border-white/6 py-10 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                      <UserCheck className="mx-auto mb-3 h-8 w-8 text-white/10" />
+                      <p className="mb-1 text-sm text-white/30">보낸 제안이 없어요</p>
+                      <button
+                        onClick={() => router.push('/badak/explore')}
+                        className="mt-3 rounded-full px-4 py-1.5 text-xs font-semibold"
+                        style={{ background: 'rgba(255,217,61,0.1)', color: '#ffd93d' }}
+                      >
+                        탐색하러 가기
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {connections.sent.map((c) => (
+                        <div key={c.id} className="flex items-center gap-3 rounded-xl border border-white/6 bg-white/[0.03] p-4">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                            {c.peer.displayName.substring(0, 1)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-white/80">{c.peer.displayName}</span>
+                              <span className="rounded-full px-2 py-0.5 text-[10px]" style={{
+                                background: c.type === 'partner' ? 'rgba(99,102,241,0.15)' : c.type === 'network' ? 'rgba(34,197,94,0.12)' : 'rgba(255,217,61,0.12)',
+                                color: c.type === 'partner' ? '#a5b4fc' : c.type === 'network' ? '#4ade80' : '#ffd93d',
+                              }}>
+                                {c.type === 'partner' ? '파트너' : c.type === 'network' ? '네트워킹' : '관심'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-white/35">{c.peer.jobFunction || '직무 미설정'}</p>
+                          </div>
+                          <StatusBadge status={c.status} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── 대화 (talks) ── */}
+        {activeTab === 'talks' && (
+          <div>
+            {talksLoading ? (
+              <div className="flex justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
+            ) : threads.length === 0 ? (
+              <div className="rounded-2xl border border-white/6 py-16 text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <MessageCircle className="mx-auto mb-3 h-10 w-10 text-white/10" />
+                <p className="mb-1 text-sm font-medium text-white/40">아직 대화가 없어요</p>
+                <p className="mb-4 text-xs text-white/20">관심 제안을 수락하면 대화가 시작돼요</p>
+                <button
+                  onClick={() => setActiveTab('connections')}
+                  className="rounded-full px-5 py-2 text-xs font-semibold"
+                  style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}
+                >
+                  제안 확인하기
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-0 sm:flex-row sm:gap-4" style={{ minHeight: 480 }}>
+                {/* 스레드 목록 */}
+                <div className={`sm:w-48 shrink-0 space-y-1 ${activeThreadId ? 'hidden sm:block' : ''}`}>
+                  {threads.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveThreadId(t.id)}
+                      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors"
+                      style={{
+                        background: activeThreadId === t.id ? 'rgba(255,217,61,0.08)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${activeThreadId === t.id ? 'rgba(255,217,61,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                      }}
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
+                        {t.peerName.substring(0, 1)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate text-sm font-semibold text-white/80">{t.peerName}</div>
+                        {t.lastMessagePreview && (
+                          <div className="truncate text-[11px] text-white/30">{t.lastMessagePreview}</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* 메시지 영역 */}
+                {activeThreadId ? (
+                  <div className="flex flex-1 flex-col rounded-2xl border border-white/6 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {/* 헤더 */}
+                    <div className="flex items-center gap-2 border-b border-white/6 px-4 py-3">
+                      <button onClick={() => setActiveThreadId(null)} className="sm:hidden mr-1 text-white/40 hover:text-white/60">
+                        <ChevronRight className="h-4 w-4 rotate-180" />
+                      </button>
+                      <span className="text-sm font-semibold text-white/80">
+                        {threads.find((t) => t.id === activeThreadId)?.peerName || '대화'}
+                      </span>
+                      <span className="text-[11px] text-white/30">
+                        {threads.find((t) => t.id === activeThreadId)?.peerJob || ''}
+                      </span>
+                    </div>
+
+                    {/* 메시지 목록 */}
+                    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ maxHeight: 360 }}>
+                      {messages.length === 0 ? (
+                        <div className="flex h-full items-center justify-center">
+                          <p className="text-xs text-white/20">첫 메시지를 보내보세요</p>
+                        </div>
+                      ) : messages.map((m) => {
+                        const isMine = m.senderId === user?.id;
+                        return (
+                          <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                            <div
+                              className="max-w-[75%] rounded-2xl px-3 py-2 text-sm"
+                              style={{
+                                background: isMine ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.06)',
+                                color: isMine ? '#ffd93d' : 'rgba(255,255,255,0.8)',
+                                borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                              }}
+                            >
+                              {m.body}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* 입력창 */}
+                    <div className="flex items-center gap-2 border-t border-white/6 px-3 py-3">
+                      <input
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
+                        placeholder="메시지 입력..."
+                        className="flex-1 rounded-xl px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none"
+                        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!messageText.trim() || sendingMessage}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full disabled:opacity-30"
+                        style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
+                      >
+                        {sendingMessage ? (
+                          <div className="h-3 w-3 animate-spin rounded-full border border-amber-400 border-t-transparent" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="hidden sm:flex flex-1 items-center justify-center rounded-2xl border border-white/6" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <p className="text-sm text-white/20">대화를 선택해주세요</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -1468,6 +2129,14 @@ export default function BadakMyPage() {
               career={career} setCareer={setCareer}
               lookingFor={lookingFor} onToggleLookingFor={handleToggleLookingFor}
               canOffer={canOffer} onToggleCanOffer={handleToggleCanOffer}
+              instagramUrl={instagramUrl} setInstagramUrl={setInstagramUrl}
+              facebookUrl={facebookUrl} setFacebookUrl={setFacebookUrl}
+              linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl}
+              homepageUrl={homepageUrl} setHomepageUrl={setHomepageUrl}
+              profilePublic={profilePublic} setProfilePublic={setProfilePublic}
+              openToNeeds={openToNeeds} setOpenToNeeds={setOpenToNeeds}
+              openToPartner={openToPartner} setOpenToPartner={setOpenToPartner}
+              openToNetwork={openToNetwork} setOpenToNetwork={setOpenToNetwork}
               onSave={handleSave}
               saving={verifyStep !== 'idle'}
             />

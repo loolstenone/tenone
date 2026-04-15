@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, ArrowRight, Check, ImagePlus, X,
@@ -54,6 +54,9 @@ type JoinType = 'approval' | 'firstcome';
 
 export default function CreateGroupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const wantIdParam = searchParams?.get('want_id') ?? null;
+  const needIdParam = searchParams?.get('need') ?? null;
   const { isAuthenticated, isLoading, user } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [step, setStep] = useState(0);
@@ -85,6 +88,11 @@ export default function CreateGroupPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [needId, setNeedId] = useState('');
+
+  // URL param으로 넘어온 need_id로 프리필
+  useEffect(() => {
+    if (needIdParam) setNeedId(needIdParam);
+  }, [needIdParam]);
   const [tagInput, setTagInput] = useState('');
   const [tagList, setTagList] = useState<string[]>([]);
   const [needSearch, setNeedSearch] = useState('');
@@ -275,7 +283,21 @@ export default function CreateGroupPage() {
 
     if (res.ok) {
       const data = await res.json();
-      router.push(`/badak/groups/${data.group?.id || ''}`);
+      const newGroupId: string | undefined = data.group?.id;
+
+      // Want 프리필로 생성된 모임이면 badak_wants.group_id 업데이트
+      if (wantIdParam && newGroupId) {
+        await fetch('/api/badak/wants', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ id: wantIdParam, groupId: newGroupId, status: 'activated' }),
+        }).catch(() => { /* 비결정적 연결 실패는 모임 생성 성공에 영향 안 줌 */ });
+      }
+
+      router.push(`/badak/groups/${newGroupId || ''}`);
     } else {
       const err = await res.json().catch(() => ({}));
       alert(err.error || '모임 생성에 실패했습니다');
@@ -324,44 +346,44 @@ export default function CreateGroupPage() {
   return (
     <div className="mx-auto min-h-screen max-w-[860px] bg-[#1a1a2e] text-white">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-4">
+      <div className="flex items-center gap-3 px-6 pt-7 pb-5">
         <button onClick={() => step > 0 ? setStep(step - 1) : router.back()} className="text-white/60 hover:text-white">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-bold">모임 만들기</h1>
+        <h1 className="text-xl font-bold">모임 만들기</h1>
         <div className="flex-1" />
-        <span className="text-xs text-white/30">{step + 1} / {STEPS.length}</span>
+        <span className="text-sm text-white/40">{step + 1} / {STEPS.length}</span>
       </div>
 
       {/* Step indicator */}
-      <div className="mb-6 flex gap-1 px-5">
+      <div className="mb-8 flex gap-1.5 px-6">
         {STEPS.map((s, i) => (
           <div key={s} className="flex-1">
             <div
-              className="h-1 rounded-full transition-all"
+              className="h-1.5 rounded-full transition-all"
               style={{ background: i <= step ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.1)' }}
             />
-            <div className={`mt-1.5 text-[10px] ${i <= step ? 'text-white/60' : 'text-white/20'}`}>{s}</div>
+            <div className={`mt-2 text-xs ${i <= step ? 'text-white/65' : 'text-white/25'}`}>{s}</div>
           </div>
         ))}
       </div>
 
       {/* 바닥장 여부 안내 */}
       {!isBadakjang && (
-        <div className="mx-5 mb-4 rounded-xl border p-4"
+        <div className="mx-6 mb-6 rounded-xl border p-5"
           style={{ background: 'rgba(255,217,61,0.04)', borderColor: 'rgba(255,217,61,0.15)' }}>
           <div className="flex items-start gap-3">
-            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/60" />
+            <Crown className="mt-0.5 h-5 w-5 shrink-0 text-amber-400/60" />
             <div>
-              <p className="text-xs font-medium text-white/60">
+              <p className="text-sm font-semibold text-white/70">
                 지금은 <span className="text-amber-400">1회 단발 모임</span>만 개설할 수 있어요
               </p>
-              <p className="mt-1 text-[10px] text-white/30">
+              <p className="mt-1.5 text-xs leading-relaxed text-white/45">
                 바닥장이 되면 연속·정기·비정기 모임도 자유롭게 개설할 수 있습니다.
               </p>
               <Link href="/badak/apply"
-                className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-400/70 hover:text-amber-400">
-                바닥장 신청하기 <ArrowRight className="h-3 w-3" />
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-400/80 hover:text-amber-400">
+                바닥장 신청하기 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
@@ -369,13 +391,13 @@ export default function CreateGroupPage() {
       )}
 
       {/* Step content */}
-      <div className="px-5 pb-32">
+      <div className="px-6 pb-32">
         {/* ── Step 1: 기본 정보 ── */}
         {step === 0 && (
-          <div className="space-y-5">
+          <div className="space-y-7">
             {/* 커버 이미지 */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">커버 이미지 (선택)</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">커버 이미지 (선택)</label>
               {coverImage ? (
                 <div className="relative overflow-hidden rounded-xl">
                   <img src={coverImage} alt="커버" className="h-40 w-full object-cover" />
@@ -396,25 +418,25 @@ export default function CreateGroupPage() {
 
             {/* 모임 제목 */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">모임 제목 *</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">모임 제목 *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)}
                 placeholder="예: AI 실무 프롬프트 스터디"
-                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 모임 소개 */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">모임 소개</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">모임 소개</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)}
                 placeholder={'이 모임에서 무엇을 하나요?\n어떤 사람에게 좋나요?'}
                 rows={4}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
             </div>
 
             {/* 운영방식 */}
             <div>
-              <label className="mb-2 block text-xs font-medium text-white/40">운영방식</label>
-              <div className="flex flex-wrap gap-1.5">
+              <label className="mb-3 block text-sm font-medium text-white/55">운영방식</label>
+              <div className="flex flex-wrap gap-2">
                 {([
                   { id: 'networking', label: '네트워킹' },
                   { id: 'study', label: '스터디' },
@@ -425,10 +447,10 @@ export default function CreateGroupPage() {
                   { id: 'workshop', label: '워크숍/세미나' },
                 ]).map(({ id, label }) => (
                   <button key={id} onClick={() => setGroupCategory(id)}
-                    className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-all"
+                    className="rounded-full px-4 py-2 text-sm font-medium transition-all"
                     style={{
                       background: groupCategory === id ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
-                      color: groupCategory === id ? '#ffd93d' : 'rgba(255,255,255,0.4)',
+                      color: groupCategory === id ? '#ffd93d' : 'rgba(255,255,255,0.5)',
                       border: `1px solid ${groupCategory === id ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)'}`,
                     }}>
                     {label}
@@ -439,8 +461,8 @@ export default function CreateGroupPage() {
 
             {/* 모임 유형 */}
             <div>
-              <label className="mb-2 block text-xs font-medium text-white/40">모임 유형</label>
-              <div className="grid grid-cols-2 gap-2">
+              <label className="mb-3 block text-sm font-medium text-white/55">모임 유형</label>
+              <div className="grid grid-cols-2 gap-3">
                 {([
                   { id: 'onetime' as const, icon: Zap, label: '1회 단발' },
                   { id: 'series' as const, icon: Repeat, label: '연속 모임' },
@@ -452,16 +474,16 @@ export default function CreateGroupPage() {
                     <button key={id}
                       onClick={() => !disabled && setMeetingType(id)}
                       disabled={disabled}
-                      className="relative flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-xs font-semibold transition-all"
+                      className="relative flex items-center justify-center gap-2.5 rounded-xl border px-4 py-4 text-sm font-semibold transition-all"
                       style={{
                         borderColor: meetingType === id ? '#ffd93d' : 'rgba(255,255,255,0.1)',
                         background: meetingType === id ? 'rgba(255,217,61,0.1)' : 'transparent',
-                        color: disabled ? 'rgba(255,255,255,0.2)' : meetingType === id ? '#ffd93d' : 'rgba(255,255,255,0.5)',
+                        color: disabled ? 'rgba(255,255,255,0.2)' : meetingType === id ? '#ffd93d' : 'rgba(255,255,255,0.55)',
                         cursor: disabled ? 'not-allowed' : 'pointer',
                       }}>
-                      <Icon className="h-3.5 w-3.5" /> {label}
+                      <Icon className="h-4 w-4" /> {label}
                       {disabled && (
-                        <span className="absolute -top-1.5 -right-1.5 rounded-full px-1.5 py-0.5 text-[7px] font-bold"
+                        <span className="absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}>
                           바닥장
                         </span>
@@ -470,12 +492,39 @@ export default function CreateGroupPage() {
                   );
                 })}
               </div>
-              <p className="mt-1.5 text-[10px] text-white/25">
+              <p className="mt-2 text-xs text-white/35">
                 {meetingType === 'onetime' && '한 번만 모이는 단발 모임'}
                 {meetingType === 'series' && `총 ${seriesCount}회 연속으로 진행하는 모임`}
                 {meetingType === 'regular' && '매주/격주 등 고정 주기로 반복되는 모임'}
                 {meetingType === 'irregular' && '필요할 때 바닥장이 일정을 잡는 모임'}
               </p>
+
+              {/* 비-바닥장에게 바닥장 권한 신청 CTA — 잠긴 유형 옆에 바로 노출 */}
+              {!isBadakjang && (
+                <Link
+                  href="/badak/apply"
+                  className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors hover:bg-amber-400/10"
+                  style={{
+                    background: 'rgba(255,217,61,0.05)',
+                    borderColor: 'rgba(255,217,61,0.2)',
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Crown className="h-4 w-4 text-amber-400/80" />
+                    <div>
+                      <div className="text-sm font-semibold text-amber-400">
+                        연속·정기·비정기 모임도 열고 싶다면
+                      </div>
+                      <div className="mt-0.5 text-xs text-white/45">
+                        바닥장 권한 신청하고 모든 모임 유형을 잠금 해제하세요
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-amber-400">
+                    신청 <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </Link>
+              )}
               {meetingType === 'series' && (
                 <div className="mt-3">
                   <label className="mb-1.5 block text-[11px] text-white/40">총 회차 (2~8회)</label>
@@ -526,7 +575,7 @@ export default function CreateGroupPage() {
 
             {/* 연결 니즈 */}
             <div ref={needDropdownRef} className="relative">
-              <label className="mb-1.5 block text-xs font-medium text-white/40">
+              <label className="mb-2 block text-sm font-medium text-white/55">
                 연결 니즈 (선택)
                 {title.trim().length >= 2 && (
                   <span className="ml-2 text-[10px] text-amber-400/60">제목 기반 추천순</span>
@@ -635,7 +684,7 @@ export default function CreateGroupPage() {
 
             {/* 태그 */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">태그 (최대 5개)</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">태그 (최대 5개)</label>
               {tagList.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {tagList.map((tag) => (
@@ -727,7 +776,7 @@ export default function CreateGroupPage() {
                 </label>
                 <input value={recurringSchedule} onChange={(e) => setRecurringSchedule(e.target.value)}
                   placeholder="예: 매주 토요일 14:00 / 격주 수요일 19:30"
-                  className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                  className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
                 <p className="mt-1.5 text-[10px] text-white/25">반복 주기를 자유 형식으로 입력해주세요</p>
               </div>
             )}
@@ -740,7 +789,7 @@ export default function CreateGroupPage() {
                 </label>
                 <input value={recurringSchedule} onChange={(e) => setRecurringSchedule(e.target.value)}
                   placeholder="예: 월 1~2회, 바닥장이 일정 공지"
-                  className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                  className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
                 <p className="mt-1.5 text-[10px] text-white/25">대략적인 빈도를 알려주세요. 구체적 일정은 모임 내에서 공지합니다.</p>
               </div>
             )}
@@ -760,7 +809,7 @@ export default function CreateGroupPage() {
 
             {/* 상세 주소 */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">상세 주소 (선택)</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">상세 주소 (선택)</label>
               <input value={locationDetail} onChange={(e) => setLocationDetail(e.target.value)}
                 placeholder="카페명, 건물명, 층수 등"
                 className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
@@ -769,7 +818,7 @@ export default function CreateGroupPage() {
             {/* 참여비 / 인원 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/40">참여비</label>
+                <label className="mb-2 block text-sm font-medium text-white/55">참여비</label>
                 <div className="relative">
                   <input type="number" value={fee} onChange={(e) => setFee(Number(e.target.value))}
                     className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none" />
@@ -777,7 +826,7 @@ export default function CreateGroupPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/40">
+                <label className="mb-2 block text-sm font-medium text-white/55">
                   <Users className="mr-1 inline h-3 w-3" />최대 인원
                 </label>
                 <div className="relative">
@@ -794,11 +843,11 @@ export default function CreateGroupPage() {
         {step === 2 && (
           <div className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">이 모임을 여는 이유 * (10자 이상)</label>
+              <label className="mb-2 block text-sm font-medium text-white/55">이 모임을 여는 이유 * (10자 이상)</label>
               <textarea value={leaderReason} onChange={(e) => setLeaderReason(e.target.value)}
                 placeholder="왜 이 모임을 열고 싶은지, 참여자에게 어떤 도움이 되는지 적어주세요"
                 rows={5}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
               <div className="mt-1 text-right text-[10px] text-white/20">{leaderReason.length}자</div>
             </div>
 

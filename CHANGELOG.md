@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 49)
+
+### WIO Talk + Connections 마이페이지 탭 완성 (Phase C-2)
+
+#### 코드 변경
+- **`app/(Badak)/badak/my/page.tsx`** — 관심·대화 탭 실DB 연동 완성
+  - state: `connections`, `pendingIncomingCount`, `threads`, `unreadTalkCount`, `activeThreadId`, `messages`, `messageText`, `sendingMessage`, `connectionsLoading`, `talksLoading`
+  - useEffect: `/api/badak/connections` + `/api/badak/talks` 병렬 fetch
+  - 폴링 useEffect: `activeThreadId` 변경 시 5초마다 `/api/badak/talks/[id]` GET
+  - `handleConnectionRespond`: PATCH + 수락 시 talks 탭 자동 이동 + 스레드 오픈
+  - `handleSendMessage`: POST + optimistic append + Enter key
+  - 관심 탭 UI: 받은 제안(수락/거절/대화 보기) + 보낸 제안 목록
+  - 대화 탭 UI: 스레드 사이드바 + 메시지 영역(말풍선) + 입력창. 모바일 목록↔메시지 전환
+
+#### 의사결정
+- `unreadTalkCount`: 실시간 추적은 추후 구현, 현재 0으로 초기화 (read_by 배열 기반 집계 필요)
+- 폴링 5초 간격: Supabase Realtime 대신 단순 HTTP polling (WIO Talk 설계 원칙)
+
+---
+
 ## 2026-04-15 (사무실, 세션 48)
 
 ### Badak UX 버그 수정 + 마이페이지 프로필 강화

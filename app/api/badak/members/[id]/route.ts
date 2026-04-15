@@ -20,6 +20,9 @@ export async function GET(
       id, user_id, display_name, avatar_url,
       job_function, industry, experience_years, job_level,
       bio, looking_for, can_offer, interest_tags,
+      career,
+      instagram_url, facebook_url, linkedin_url, homepage_url,
+      profile_public,
       is_active, created_at
     `)
     .eq('id', id)
@@ -43,6 +46,9 @@ export async function GET(
     return NextResponse.json({ error: 'Not a Badak member' }, { status: 404 });
   }
 
+  // 프로필 비공개 설정 존중 — false면 최소 정보만 반환
+  const isPublic = member.profile_public !== false;
+
   // 이름: members.name 우선, 없으면 badak_members.display_name
   const displayName = mainMember?.name || member.display_name;
   // 아바타: members.avatar_url 우선
@@ -62,14 +68,21 @@ export async function GET(
       id: member.id,
       displayName,
       avatarUrl,
-      jobFunction: member.job_function,
-      industry: member.industry,
-      experienceYears: member.experience_years,
-      jobLevel: member.job_level,
-      bio: member.bio,
-      lookingFor: member.looking_for ?? [],
-      canOffer: member.can_offer ?? [],
-      interestTags: member.interest_tags ?? [],
+      jobFunction: isPublic ? member.job_function : null,
+      industry: isPublic ? member.industry : null,
+      experienceYears: isPublic ? member.experience_years : null,
+      jobLevel: isPublic ? member.job_level : null,
+      bio: isPublic ? member.bio : null,
+      lookingFor: isPublic ? (member.looking_for ?? []) : [],
+      canOffer: isPublic ? (member.can_offer ?? []) : [],
+      interestTags: isPublic ? (member.interest_tags ?? []) : [],
+      career: isPublic ? (member.career ?? []) : [],
+      instagramUrl: isPublic ? member.instagram_url : null,
+      facebookUrl: isPublic ? member.facebook_url : null,
+      linkedinUrl: isPublic ? member.linkedin_url : null,
+      homepageUrl: isPublic ? member.homepage_url : null,
+      profilePublic: isPublic,
+      affiliations,
       isActive: member.is_active,
       joinedAt: member.created_at,
     },

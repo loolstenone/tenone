@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Crown, Check, Send, Sparkles, Users, Shield, X } from 'lucide-react';
+import { ArrowLeft, Crown, Check, Send, Sparkles, Users, Shield, X, UserPlus, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
@@ -121,6 +121,51 @@ export default function ApplyPage() {
             바닥으로 돌아가기
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  // 비로그인 게이트 — 바닥장 신청은 회원가입/로그인 필수
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#1a1a2e] pt-14">
+        <div className="mx-auto flex max-w-md flex-col items-center px-6 py-20 text-center">
+          <div
+            className="mb-5 flex h-20 w-20 items-center justify-center rounded-full"
+            style={{ background: 'rgba(255,217,61,0.08)' }}
+          >
+            <Crown className="h-9 w-9 text-amber-400/80" />
+          </div>
+          <h1 className="mb-3 text-2xl font-bold text-white">바닥장 신청</h1>
+          <p className="mb-1 text-base text-white/60">
+            바닥장 신청은 바닥 회원가입이 먼저예요.
+          </p>
+          <p className="mb-8 text-sm text-white/35">
+            가입 후 바로 이 페이지로 돌아와 신청할 수 있습니다.
+          </p>
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => setShowLogin(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold"
+              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
+            >
+              <LogIn className="h-4 w-4" /> 로그인
+            </button>
+            <Link
+              href="/badak/onboard"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-6 py-3.5 text-base font-semibold text-white/80 hover:bg-white/5"
+            >
+              <UserPlus className="h-4 w-4" /> 회원가입
+            </Link>
+          </div>
+          <Link
+            href="/badak"
+            className="mt-6 inline-flex items-center gap-1 text-sm text-white/35 hover:text-white/60"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> 바닥 홈으로
+          </Link>
+        </div>
+        <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
       </div>
     );
   }

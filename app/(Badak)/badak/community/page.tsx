@@ -100,6 +100,19 @@ export default function CommunityPage() {
     return session;
   };
 
+  // 각 보드 글 개수 갱신 (글 작성/삭제 후 호출)
+  const refreshCounts = useCallback(async () => {
+    const results = await Promise.all(
+      (['chat', 'review', 'proposal'] as BoardType[]).map(async (b) => {
+        // count-only endpoint이 없으므로 limit=50으로 가져와서 길이 측정
+        const res = await fetch(`/api/badak/community?board=${b}&limit=50`);
+        const data = await res.json();
+        return [b, data.posts?.length || 0] as const;
+      })
+    );
+    setCounts(Object.fromEntries(results) as Record<BoardType, number>);
+  }, []);
+
   const loadPosts = useCallback(async (board: BoardType) => {
     setLoading(true);
     try {
@@ -112,18 +125,7 @@ export default function CommunityPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const results = await Promise.all(
-        (['chat', 'review', 'proposal'] as BoardType[]).map(async (b) => {
-          const res = await fetch(`/api/badak/community?board=${b}&limit=1`);
-          const data = await res.json();
-          return [b, data.posts?.length || 0] as const;
-        })
-      );
-      setCounts(Object.fromEntries(results) as Record<BoardType, number>);
-    })();
-  }, []);
+  useEffect(() => { refreshCounts(); }, [refreshCounts]);
 
   useEffect(() => { loadPosts(activeBoard); }, [activeBoard, loadPosts]);
 
@@ -207,6 +209,7 @@ export default function CommunityPage() {
     if (res.ok) {
       setSelectedPost(null);
       loadPosts(activeBoard);
+      refreshCounts();
     }
   };
 
@@ -252,6 +255,10 @@ export default function CommunityPage() {
         setEditingPost(null);
         setWriteTitle(''); setWriteContent(''); setWriteTags(''); setWriteRating(0); setWriteTarget('');
         loadPosts(activeBoard);
+        refreshCounts();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || '글 작성에 실패했습니다. 로그인 상태를 확인해주세요.');
       }
     } catch { /* ignore */ }
     setSubmitting(false);

@@ -112,6 +112,14 @@ export async function PUT(request: NextRequest) {
   if (body.canOffer !== undefined) updates.can_offer = body.canOffer;
   if (body.avatarUrl !== undefined) updates.avatar_url = body.avatarUrl;
   if (body.career !== undefined) updates.career = body.career;
+  if (body.instagramUrl !== undefined) updates.instagram_url = body.instagramUrl?.trim() || null;
+  if (body.facebookUrl !== undefined) updates.facebook_url = body.facebookUrl?.trim() || null;
+  if (body.linkedinUrl !== undefined) updates.linkedin_url = body.linkedinUrl?.trim() || null;
+  if (body.homepageUrl !== undefined) updates.homepage_url = body.homepageUrl?.trim() || null;
+  if (body.profilePublic !== undefined) updates.profile_public = !!body.profilePublic;
+  if (body.openToNeeds !== undefined) updates.open_to_needs = !!body.openToNeeds;
+  if (body.openToPartner !== undefined) updates.open_to_partner = !!body.openToPartner;
+  if (body.openToNetwork !== undefined) updates.open_to_network = !!body.openToNetwork;
   updates.updated_at = new Date().toISOString();
 
   let { data: member, error } = await supabase
