@@ -29,7 +29,7 @@ export default function NewsTicker() {
           // 데이터 없으면 Mock
           setItems([
             { id: 't1', site: 'madleague', title: 'MADLeague 시즌 4 참가팀 모집 시작', created_at: '' },
-            { id: 't2', site: 'badak', title: '4월 네트워킹 데이 — 마케팅/광고 업계 밋업', created_at: '' },
+            { id: 't2', site: 'badak', title: '4월 네트워킹 데이 — 업계 밋업', created_at: '' },
             { id: 't3', site: 'tenone', title: 'Ten:One Universe 2026 비전 발표', created_at: '' },
             { id: 't4', site: 'rook', title: 'RooK AI 크리에이터 챌린지 결과 발표', created_at: '' },
             { id: 't5', site: 'hero', title: 'HeRo HIT 검사 2.0 업데이트 출시', created_at: '' },

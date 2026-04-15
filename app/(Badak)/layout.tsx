@@ -8,11 +8,11 @@ export async function generateMetadata(): Promise<Metadata> {
     const db = await getSiteConfigServer('badak');
     const site = siteConfigs.badak;
     return {
-        title: { default: db?.meta_title ?? "Badak — 마케팅/광고 업계 네트워킹", template: `%s | ${db?.name ?? site.name}` },
+        title: { default: db?.meta_title ?? "Badak — 업계 네트워킹 커뮤니티", template: `%s | ${db?.name ?? site.name}` },
         description: db?.meta_description ?? site.meta.description,
         icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
         openGraph: {
-            title: db?.meta_title ?? "Badak — 마케팅/광고 업계 네트워킹 커뮤니티",
+            title: db?.meta_title ?? "Badak — 업계 네트워킹 커뮤니티",
             description: db?.meta_description ?? site.meta.description,
             siteName: 'Ten:One™ Universe',
             type: 'website',

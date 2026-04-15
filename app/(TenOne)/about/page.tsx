@@ -76,7 +76,7 @@ const HISTORY_DATA = [
     { year: "2023", date: "2023.01", title: "유인원 인수 & DAM Party", desc: "대학생 스타트업 인수, 네트워킹 파티 시작" },
     { year: "2022", date: "2022.07", title: "MAD League", desc: "마케팅&광고 대학생 프로젝트 연합", link: "http://MADLeague.net" },
     { year: "2021", date: "2021.11", title: "MAD Leap", desc: "대학생 마케팅/광고 연합동아리 창단" },
-    { year: "2021", date: "2021.02", title: "Badak.biz", desc: "마케팅/광고 업계 네트워킹 커뮤니티", link: "http://badak.biz" },
+    { year: "2021", date: "2021.02", title: "Badak.biz", desc: "업계 네트워킹 커뮤니티", link: "http://badak.biz" },
     { year: "2020", date: "2020.03", title: "Ten:One™ Universe", desc: "세계관의 시작" },
     { year: "2019", date: "2019.10", title: "자각", desc: "하마터면 열심히 안살 뻔 했다." },
 ];
@@ -85,7 +85,7 @@ const years = ['전체', ...Array.from(new Set(HISTORY_DATA.map(h => h.year))).s
 
 // ===== Flywheel Data =====
 const flywheel = [
-    { num: "01", title: "신뢰 기반 네트워크", desc: "마케팅/광고 업계 현업자들의 자발적 참여" },
+    { num: "01", title: "신뢰 기반 네트워크", desc: "업계 현업자들의 자발적 참여" },
     { num: "02", title: "인재 발굴", desc: "대학생부터 현업 전문가까지 기획자를 발굴" },
     { num: "03", title: "프로젝트 실행", desc: "실전 프로젝트로 문제를 해결하고 경험을 축적" },
     { num: "04", title: "성공 경험 공유", desc: "성과를 공유하여 네트워크 전체가 성장" },
@@ -321,7 +321,7 @@ function AboutContent() {
                                 {[
                                     { category: "AI Idol", brands: "LUKI", desc: "인공지능 아이돌 그룹" },
                                     { category: "AI Creator", brands: "RooK", desc: "인공지능 크리에이터 플랫폼" },
-                                    { category: "Community", brands: "Badak", desc: "마케팅/광고 업계 네트워킹" },
+                                    { category: "Community", brands: "Badak", desc: "업계 네트워킹" },
                                     { category: "Project Group", brands: "YouInOne", desc: "프로젝트 그룹 연합" },
                                     { category: "Education", brands: "MAD League", desc: "대학생 마케팅/광고 프로젝트 연합" },
                                     { category: "Fashion", brands: "FWN", desc: "패션 위크 네트워크" },

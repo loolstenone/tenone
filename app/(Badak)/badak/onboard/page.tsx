@@ -176,7 +176,7 @@ export default function OnboardPage() {
             회사 밖에서도 통하는 사람이 되고 싶어.
           </p>
           <p className="text-xs text-neutral-400">
-            마케팅·광고 업계 네트워킹 커뮤니티
+            업계 네트워킹 커뮤니티
           </p>
         </div>
       )}

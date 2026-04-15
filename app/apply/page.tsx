@@ -147,7 +147,7 @@ export default function ApplyPage() {
                             <button type="button" onClick={() => setType("professional")}
                                 className={`flex-1 py-3 text-sm border transition-colors ${type === "professional" ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 hover:border-neutral-400"}`}>
                                 <span className="font-bold">현업자 / 프리랜서</span>
-                                <p className="text-[10px] mt-0.5 opacity-70">마케팅·광고·크리에이티브 업계</p>
+                                <p className="text-[10px] mt-0.5 opacity-70">업계 현업자</p>
                             </button>
                         </div>
 

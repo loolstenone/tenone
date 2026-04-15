@@ -189,7 +189,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         faviconUrl: '/brands/badak/favicon.png', appleTouchIcon: '/brands/badak/favicon.png',
         accentColor: '#2563EB', bgDark: '#1a1a2e',
         colors: { primary: '#2563EB', primaryDark: '#1D4ED8', secondary: '#60A5FA', headerBg: '#ffffff', headerText: '#171717', footerBg: '#1a1a2e', footerText: '#a3a3a3', accent: '#2563EB' },
-        meta: { title: 'Badak — 마케팅 광고 네트워킹 커뮤니티', description: 'Badak - 마케팅 업계 네트워킹 커뮤니티. 약한 연결 고리가 만드는 강력한 기회.', keywords: ['Badak', '네트워킹', '커뮤니티', '마케팅', '광고', 'Ten:One'] },
+        meta: { title: 'Badak — 업계 네트워킹 커뮤니티', description: 'Badak - 업계 네트워킹 커뮤니티. 약한 연결 고리가 만드는 강력한 기회.', keywords: ['Badak', '네트워킹', '커뮤니티', 'Ten:One'] },
         homePath: '/badak', signupPath: '/signup', domain: 'badak.biz',
         nav: [
             { name: '탐색', href: '/badak/explore' },

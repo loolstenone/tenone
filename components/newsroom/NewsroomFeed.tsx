@@ -62,7 +62,7 @@ function getThumbnail(post: FeedPost): string | null {
 
 const MOCK_POSTS: FeedPost[] = [
   { id: 'n1', source_brand: 'madleague', title: 'MADLeague 시즌 4 — 참가 대학 30곳 확정, 120개 팀 킥오프', summary: '전국 30개 대학에서 120개 팀이 참가하는 시즌 4가 4월 1일 킥오프합니다.', thumbnail_url: null, published_at: '2026-03-30T10:00:00Z', view_count: 1240, like_count: 45, url: '/madleague/madzine', category: '공지' },
-  { id: 'n2', source_brand: 'badak', title: '4월 네트워킹 데이 — 마케팅/광고 업계 밋업 참가 신청 오픈', summary: '현업 마케터, 광고인들이 모여 인사이트를 나누는 월간 네트워킹. 참여 신청 오픈!', thumbnail_url: null, published_at: '2026-03-29T14:30:00Z', view_count: 890, like_count: 32, url: '/badak/community', category: '모임' },
+  { id: 'n2', source_brand: 'badak', title: '4월 네트워킹 데이 — 업계 밋업 참가 신청 오픈', summary: '현업 업계인들이 모여 인사이트를 나누는 월간 네트워킹. 참여 신청 오픈!', thumbnail_url: null, published_at: '2026-03-29T14:30:00Z', view_count: 890, like_count: 32, url: '/badak/community', category: '모임' },
   { id: 'n3', source_brand: 'tenone', title: 'Ten:One Universe 2026 비전 — 가치로 연결된 세계관', summary: '올해 Ten:One이 집중하는 3가지 키워드: 본질, 속도, 이행.', thumbnail_url: null, published_at: '2026-03-28T09:00:00Z', view_count: 2100, like_count: 78, url: '/newsroom', category: '비전' },
   { id: 'n4', source_brand: 'rook', title: 'RooK AI 크리에이터 챌린지 — 수상작 발표', summary: 'AI를 활용한 크리에이티브 작품 100점 중 TOP 10을 선정했습니다.', thumbnail_url: null, published_at: '2026-03-27T16:00:00Z', view_count: 560, like_count: 23, url: '/rook/board', category: '이벤트' },
   { id: 'n5', source_brand: 'hero', title: 'HeRo HIT 통합검사 2.0 — 역량 진단의 새로운 기준', summary: 'AI 기반 역량 매칭 알고리즘이 업데이트되었습니다. 더 정밀한 진단을 경험하세요.', thumbnail_url: null, published_at: '2026-03-26T11:00:00Z', view_count: 430, like_count: 19, url: '/hero/hit', category: '업데이트' },
