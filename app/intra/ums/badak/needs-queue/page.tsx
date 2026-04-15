@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Check, X, Flame, Heart, Users } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface NeedReview {
   id: string;
@@ -29,25 +30,41 @@ export default function BadakNeedsQueuePage() {
   const [filter, setFilter] = useState<FilterStatus>('pending_review');
   const [processing, setProcessing] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [authError, setAuthError] = useState(false);
 
-  const fetchNeeds = (status: string) => {
+  useEffect(() => {
+    const sb = createClient();
+    sb.auth.getSession().then(({ data: { session } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
+      if (session?.access_token) {
+        setToken(session.access_token);
+      } else {
+        setAuthError(true);
+      }
+    });
+  }, []);
+
+  const fetchNeeds = useCallback((status: string, tok: string) => {
     setLoading(true);
-    fetch(`/api/badak/needs/review?status=${status}`)
+    fetch(`/api/badak/needs/review?status=${status}`, {
+      headers: { Authorization: `Bearer ${tok}` },
+    })
       .then((r) => r.json())
       .then((data) => setNeeds(data.needs || []))
       .catch(() => setNeeds([]))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
-    fetchNeeds(filter);
-  }, [filter]);
+    if (token) fetchNeeds(filter, token);
+  }, [filter, token, fetchNeeds]);
 
   const handleAction = async (needId: string, action: 'approve' | 'reject') => {
+    if (!token) return;
     setProcessing(needId);
     const res = await fetch('/api/badak/needs/review', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ needId, action }),
     });
 
@@ -84,11 +101,15 @@ export default function BadakNeedsQueuePage() {
         </div>
       </div>
 
-      {loading && (
+      {authError && (
+        <div className="py-20 text-center text-sm text-red-500">로그인이 필요하거나 관리자 권한이 없습니다</div>
+      )}
+
+      {!authError && loading && (
         <div className="py-20 text-center text-sm text-neutral-400">불러오는 중...</div>
       )}
 
-      {!loading && needs.length === 0 && (
+      {!authError && !loading && needs.length === 0 && (
         <div className="py-20 text-center text-sm text-neutral-400">
           {filter === 'pending_review' ? '심사 대기 중인 니즈가 없습니다' : '해당 상태의 니즈가 없습니다'}
         </div>
