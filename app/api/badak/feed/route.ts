@@ -67,13 +67,14 @@ export async function GET(request: NextRequest) {
   // 그룹 → 피드 아이템
   for (const g of groups || []) {
     const isUrgent = g.current_members / g.max_members > 0.9;
-    const leader = g.leader as unknown as { display_name: string; job_function: string; experience_years: number } | null;
+    const leader = g.leader as unknown as { id: string; display_name: string; job_function: string; experience_years: number } | null;
     feed.push({
       type: 'group',
       groupId: g.id,
       badge: isUrgent ? '마감 임박' : '모임 확정',
       title: g.title,
       leader: `바닥장 ${leader?.display_name || ''}`,
+      leaderId: leader?.id,
       leaderJob: `${leader?.job_function || ''} ${leader?.experience_years || ''}년차`,
       members: g.current_members,
       max: g.max_members,

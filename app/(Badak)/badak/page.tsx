@@ -242,9 +242,9 @@ export default function BadakNextStage() {
                 </span>
               </div>
               {(() => {
-                // 모바일(radius<180)에서는 50개만 표시, 그 외 80개
+                // 모바일(radius<180)에서는 60개, 그 외 100개 전체 표시
                 // 관심도(members) 높은 순으로 정렬
-                const maxWords = sphereRadius < 180 ? 50 : 80;
+                const maxWords = sphereRadius < 180 ? 60 : 100;
                 const sorted = [...cloudWords]
                   .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
                   .slice(0, maxWords);

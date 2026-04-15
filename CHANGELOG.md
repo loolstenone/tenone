@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-04-15 (사무실, 세션 47)
+
+### Badak 유니버스 통합 (Sprint 1-1, 1-4) + 니즈 클라우드 100개
+
+#### 신규 파일
+- `app/api/analytics/event/route.ts` — 이벤트 로깅 POST + intra용 집계 GET (MAU/평균 체류/주간 방문)
+- `features/badak/useAnalytics.ts` — 페이지뷰 + `sendBeacon` 언로드 세션 종료 훅
+- `features/badak/BadakAnalytics.tsx` — 서버 컴포넌트 레이아웃 삽입용 클라이언트 래퍼
+- `sql/badak-affiliations-sync.sql` — 기존 badak_members → members.affiliations 싱크 스크립트
+
+#### DB 변경 (Prod)
+- `wio_analytics_events` 테이블 신설 — `event_type`, `brand_id`, `tenant_id`, `user_id`, `session_id`, `page_path`, `properties jsonb`, `duration_sec`. 2개 인덱스(brand+created, user+created). RLS: service insert 허용, 인증 유저 select
+- `badak_needs` 70 → 100행 (30개 추가)
+- `members.affiliations` 싱크 — is_active 기존 badak_members 1명 → `['badak']` 추가
+
+#### 코드 변경
+- **`api/badak/feed/route.ts`** — 피드 응답에 `leaderId: g.leader.id` 포함. 지금까지 없어서 FeedCard → MemberProfileSheet 연결이 항상 Fallback "상세 프로필은 멤버 가입 후 확인" 메시지로 표시됐음
+- **`api/badak/member/route.ts`** (POST) — `badak_members` 생성 후 `members.affiliations`에 `'badak'` 자동 추가 (`addBadakAffiliation` 헬퍼 추가)
+- **`api/badak/member/onboard/route.ts`** (PATCH) — 온보딩 완료 시 `members.affiliations` 동기화
+- **`api/badak/members/[id]/route.ts`** — `members` 테이블 JOIN으로 이름/아바타 최신값 반영. `affiliations`에 `'badak'` 없으면 404 응답
+- **`api/badak/cloud/route.ts`** — 3버그 수정: status 필터 `'active' → 'gathering'` 포함, limit 60→100, 존재하지 않는 `category` 컬럼 제거
+- **`app/(Badak)/badak/page.tsx`** — 클라우드 단어 제한 모바일 50→60 / 데스크탑 80→100
+- **`app/(Badak)/layout.tsx`** — `BadakAnalytics` 컴포넌트 추가 (페이지뷰 자동 기록)
+- **`app/intra/ums/badak/page.tsx`** — 성장 지표 전면 교체
+  - 이번달 신규: 실DB count (지난달 수치도 sub로 표시)
+  - 월간 성장률: 이번달-지난달 / 지난달 * 100 (색상 양수/음수 구분)
+  - MAU/체류시간/방문횟수: 이벤트 수집 데이터 기반, 없으면 "수집 중" 표시
+  - 데이터 출처 하단 안내 문구
+
+#### 의사결정
+- **Sprint 1-2, 1-3 스킵**: 오픈채팅방 페이지(`/badak/rooms`), DAM Party 페이지(`/badak/dam-party`)는 만들지 않기로 결정 (사용자 지시)
+- **로컬 dev 이슈 인식**: `.env.local`에 `SUPABASE_SERVICE_ROLE_KEY` (JWT, `_PROD` 아님) 없음 → 모든 Badak API가 로컬에서 "supabaseKey is required" 실패 → Cloud API는 try/catch로 Mock 폴백, 나머지는 500. Prod 배포 시 Vercel env로 정상 작동
+
+---
+
 ## 2026-04-15 (사무실, 세션 46 — 후반)
 
 ### Badak UX 전면 개선 + 유니버스 관점 QA

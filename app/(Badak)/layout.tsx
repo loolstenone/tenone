@@ -1,5 +1,6 @@
 import { BadakHeader } from "@/features/badak/BadakHeader";
 import { BadakFooter } from "@/features/badak/BadakFooter";
+import { BadakAnalytics } from "@/features/badak/BadakAnalytics";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -28,6 +29,7 @@ export default function BadakLayout({
     return (
         <div className="min-h-screen bg-[#1a1a2e] text-neutral-900 flex flex-col">
             <BadakHeader />
+            <BadakAnalytics />
             <main className="flex-1">
                 {children}
             </main>

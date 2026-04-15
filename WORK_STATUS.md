@@ -1,10 +1,50 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-15 (사무실, 세션 46 후반)
+> 마지막 업데이트: 2026-04-15 (사무실, 세션 47)
 
 ---
 
-## 이번 세션 후반 (세션 46 — UX 개선 + 유니버스 QA) 완료 항목
+## 세션 47 완료 항목 — Badak 유니버스 통합 + 니즈 클라우드 확장
+
+| 항목 | 내용 |
+|------|------|
+| **Sprint 1-1 완료**: `members.affiliations` 소스 오브 트루스화 | POST/onboard에서 `members.affiliations`에 `'badak'` 자동 추가. 기존 badak_members 행 DB 싱크 완료 |
+| Feed API `leaderId` 누락 수정 | 피드 응답에 `leaderId` 포함 → FeedCard → MemberProfileSheet 실제 연결 복구 (지금까지 Fallback만 표시됐음) |
+| `/api/badak/members/[id]` 개선 | `members` 테이블 JOIN → 이름/아바타 최신값 반영. `affiliations`에 `'badak'` 없으면 404 (멤버십 유효성) |
+| **Sprint 1-4 완료**: `/intra/ums/badak` 실데이터 연동 | 월간 신규/성장률 DB 실측. MAU/체류시간/방문횟수는 "수집 중" 상태, 이벤트 쌓이면 자동 전환 |
+| `wio_analytics_events` 테이블 신설 | `event_type`, `brand_id`, `session_id`, `duration_sec` 등. RLS: 쓰기 모두 허용, 읽기는 인증 유저 |
+| `/api/analytics/event` POST/GET | 이벤트 로깅 + intra용 집계 (MAU/평균 체류/주간 방문) |
+| `features/badak/useAnalytics.ts` 훅 | 페이지뷰 + `sendBeacon`으로 언로드 시 세션 종료 이벤트. sessionStorage 기반 sid |
+| `BadakAnalytics` 컴포넌트 | 서버 컴포넌트 레이아웃에 삽입하는 클라이언트 사이드이펙트 래퍼 |
+| **니즈 클라우드 키워드 100개** | DB `badak_needs` 70 → 100 (AI/커리어/툴/재무/브랜드/HR/영업/성장 카테고리 30개 추가) |
+| Cloud API 버그 3건 수정 | status 필터 `'active'` → `'gathering'` 포함, limit 60→100, 존재하지 않는 `category` 컬럼 제거 |
+| 클라우드 단어 제한 상향 | 데스크탑 80 → **100**, 모바일 50 → **60** |
+
+## 다음 할 일
+
+### Sprint 1 잔여 (중단된 것)
+- Sprint 1-2, 1-3 (채팅방 페이지, DAM Party 페이지)은 **만들지 않기로 결정** (2026-04-15 사용자 지시)
+
+### Sprint 2 — HeRo Time + 관리자
+1. `MemberProfileSheet`에 **HeRo Time** 섹션 추가 (크로스 브랜드 커리어 이력)
+2. `/intra/ums/badak/needs-queue` — pending_review 니즈 승인 큐
+
+### Sprint 3 — WIO 역방향 환류
+3. `wio_ui_components.BottomSheet` 추출 (Badak 바텀시트 일반화)
+4. `wio_auth.withLoginGate` HOC 추출
+5. `wio_hooks.useOptimisticReaction` 추출
+6. `wio_people.PublicProfile` 컴포넌트 확정
+
+### 이월
+- 로컬 dev 서버에 `SUPABASE_SERVICE_ROLE_KEY` (JWT, `_PROD` 아님) 없어서 Badak API가 Mock 폴백. `.env.local`에 추가 필요 or vercel env pull
+- 마이페이지 북마크/내 모임 실DB 전환 (`badak_bookmarks`, `badak_group_members`)
+- 모임 상세 본인 글 수정/삭제 UI (API 완성됨)
+- 커뮤니티 조회수 중복 방지
+- `RESEND_API_KEY` .env.local 추가
+
+---
+
+## 이전 세션 (세션 46 후반 — UX 개선 + 유니버스 QA) 완료 항목
 
 | 항목 | 내용 |
 |------|------|

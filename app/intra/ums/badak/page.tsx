@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ExternalLink, Users, MessageCircle, Calendar, UserPlus,
-  Loader2, Hash, MapPin, TrendingUp,
+  Loader2, Hash, MapPin, TrendingUp, BarChart2,
 } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,19 @@ interface MemberRow {
   affiliations: string[];
 }
 
+interface GrowthMetrics {
+  totalMembers: number;
+  thisMonthNew: number;
+  lastMonthNew: number;
+  growthRate: number | null; // %
+}
+
+interface AnalyticsMetrics {
+  mauCount: number | null;
+  avgDurationSec: number | null;
+  avgWeeklyVisits: number | null;
+}
+
 interface ChatRoom {
   name: string;
   category: string;
@@ -27,7 +40,7 @@ interface ChatRoom {
   isActive: boolean;
 }
 
-/* ── Mock: 오픈채팅방 ── */
+/* ── Mock: 오픈채팅방 (DB 연동 전까지) ── */
 const chatRooms: ChatRoom[] = [
   { name: "바닥 메인", category: "메인", members: 487, isActive: true },
   { name: "서울 모임", category: "지역", members: 234, isActive: true },
@@ -53,8 +66,8 @@ const roomCategories = [
 
 /* ── Mock: DAM Party ── */
 const nextDAMParty = {
-  title: "제47회 DAM Party",
-  date: "2026-04-19",
+  title: "제48회 DAM Party",
+  date: "2026-05-17",
   location: "서울 강남 코엑스 컨퍼런스룸",
   expectedAttendees: 120,
   status: "모집중",
@@ -62,8 +75,18 @@ const nextDAMParty = {
 
 export default function BadakPage() {
   const [loading, setLoading] = useState(true);
-  const [totalMembers, setTotalMembers] = useState(0);
   const [recentMembers, setRecentMembers] = useState<MemberRow[]>([]);
+  const [growth, setGrowth] = useState<GrowthMetrics>({
+    totalMembers: 0,
+    thisMonthNew: 0,
+    lastMonthNew: 0,
+    growthRate: null,
+  });
+  const [analytics, setAnalytics] = useState<AnalyticsMetrics>({
+    mauCount: null,
+    avgDurationSec: null,
+    avgWeeklyVisits: null,
+  });
 
   useEffect(() => {
     loadData();
@@ -73,13 +96,44 @@ export default function BadakPage() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+      const lastMonthEnd = monthStart;
 
-      // 총 회원 수 (affiliations에 badak 포함)
-      const { count } = await supabase
+      // 총 회원 수
+      const { count: total } = await supabase
         .from("members")
         .select("*", { count: "exact", head: true })
         .contains("affiliations", ["badak"]);
-      setTotalMembers(count ?? 0);
+
+      // 이번달 신규
+      const { count: thisMonth } = await supabase
+        .from("members")
+        .select("*", { count: "exact", head: true })
+        .contains("affiliations", ["badak"])
+        .gte("created_at", monthStart);
+
+      // 지난달 신규
+      const { count: lastMonth } = await supabase
+        .from("members")
+        .select("*", { count: "exact", head: true })
+        .contains("affiliations", ["badak"])
+        .gte("created_at", lastMonthStart)
+        .lt("created_at", lastMonthEnd);
+
+      // 성장률: (이번달 - 지난달) / (전체 - 이번달) * 100
+      const base = (total ?? 0) - (thisMonth ?? 0);
+      const growthRate = base > 0 && lastMonth != null && lastMonth > 0
+        ? +((((thisMonth ?? 0) - lastMonth) / lastMonth) * 100).toFixed(1)
+        : null;
+
+      setGrowth({
+        totalMembers: total ?? 0,
+        thisMonthNew: thisMonth ?? 0,
+        lastMonthNew: lastMonth ?? 0,
+        growthRate,
+      });
 
       // 최근 가입자 5명
       const { data: recent } = await supabase
@@ -89,6 +143,17 @@ export default function BadakPage() {
         .order("created_at", { ascending: false })
         .limit(5);
       setRecentMembers((recent as MemberRow[]) ?? []);
+
+      // Analytics 지표 (수집 데이터가 있을 때만)
+      const analyticsRes = await fetch("/api/analytics/event?brand=badak");
+      if (analyticsRes.ok) {
+        const data = await analyticsRes.json();
+        setAnalytics({
+          mauCount: data.sampleSize?.pageViews > 0 ? data.mauCount : null,
+          avgDurationSec: data.avgDurationSec,
+          avgWeeklyVisits: data.avgWeeklyVisits,
+        });
+      }
     } catch (err) {
       console.error("Badak data load error:", err);
     } finally {
@@ -98,6 +163,14 @@ export default function BadakPage() {
 
   const totalRoomMembers = chatRooms.reduce((s, r) => s + r.members, 0);
   const totalRooms = roomCategories.reduce((s, c) => s + c.count, 0);
+
+  const mauRatio = analytics.mauCount != null && growth.totalMembers > 0
+    ? +((analytics.mauCount / growth.totalMembers) * 100).toFixed(1)
+    : null;
+
+  const avgDurationMin = analytics.avgDurationSec != null
+    ? Math.round(analytics.avgDurationSec / 60)
+    : null;
 
   if (loading) {
     return (
@@ -124,7 +197,7 @@ export default function BadakPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
           label="총 회원"
-          value={totalMembers.toLocaleString() + "명"}
+          value={growth.totalMembers.toLocaleString() + "명"}
           sub="affiliations: badak"
           icon={<Users className="h-4 w-4" />}
         />
@@ -136,8 +209,8 @@ export default function BadakPage() {
         />
         <StatCard
           label="이번달 신규"
-          value={recentMembers.length + "명"}
-          sub="최근 가입자 기준"
+          value={growth.thisMonthNew + "명"}
+          sub={growth.lastMonthNew > 0 ? `지난달 ${growth.lastMonthNew}명` : "첫 달"}
           icon={<UserPlus className="h-4 w-4" />}
         />
         <StatCard
@@ -243,22 +316,73 @@ export default function BadakPage() {
           <Card>
             <SectionTitle title="성장 지표" />
             <div className="grid grid-cols-2 gap-3">
+              {/* 월간 성장률 — 실데이터 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
-                <p className="text-lg font-semibold text-neutral-800">4.2%</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">월간 성장률</p>
+                {growth.growthRate != null ? (
+                  <>
+                    <p className={`text-lg font-semibold ${growth.growthRate >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                      {growth.growthRate >= 0 ? "+" : ""}{growth.growthRate}%
+                    </p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">월간 성장률</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-semibold text-neutral-800">-</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">월간 성장률</p>
+                  </>
+                )}
               </div>
+
+              {/* MAU 비율 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
-                <p className="text-lg font-semibold text-neutral-800">68%</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">MAU 비율</p>
+                {mauRatio != null ? (
+                  <>
+                    <p className="text-lg font-semibold text-neutral-800">{mauRatio}%</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">MAU 비율</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-neutral-300 mt-1">수집 중</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">MAU 비율</p>
+                  </>
+                )}
               </div>
+
+              {/* 평균 체류시간 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
-                <p className="text-lg font-semibold text-neutral-800">23분</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">평균 체류시간</p>
+                {avgDurationMin != null ? (
+                  <>
+                    <p className="text-lg font-semibold text-neutral-800">{avgDurationMin}분</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">평균 체류시간</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-neutral-300 mt-1">수집 중</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">평균 체류시간</p>
+                  </>
+                )}
               </div>
+
+              {/* 주간 방문 횟수 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
-                <p className="text-lg font-semibold text-neutral-800">3.4</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">주간 방문 횟수</p>
+                {analytics.avgWeeklyVisits != null ? (
+                  <>
+                    <p className="text-lg font-semibold text-neutral-800">{analytics.avgWeeklyVisits}</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">주간 방문 횟수</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-neutral-300 mt-1">수집 중</p>
+                    <p className="text-[10px] text-neutral-400 mt-0.5">주간 방문 횟수</p>
+                  </>
+                )}
               </div>
+            </div>
+
+            {/* 데이터 출처 안내 */}
+            <div className="mt-3 flex items-center gap-1.5 text-[10px] text-neutral-300">
+              <BarChart2 className="h-3 w-3" />
+              월간 성장률: DB 실측 · MAU/체류시간/방문: 이벤트 수집 중 (Badak 방문 시 자동 기록)
             </div>
           </Card>
         </div>

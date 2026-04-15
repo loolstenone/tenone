@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// members.affiliations에 'badak' 추가 (중복 방지)
+async function addBadakAffiliation(client: ReturnType<typeof createClient>, authUserId: string) {
+  const { data } = await client
+    .from('members')
+    .select('affiliations')
+    .eq('auth_id', authUserId)
+    .single();
+  if (!data) return;
+  const current: string[] = data.affiliations ?? [];
+  if (current.includes('badak')) return;
+  await client
+    .from('members')
+    .update({ affiliations: [...current, 'badak'] })
+    .eq('auth_id', authUserId);
+}
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -40,5 +56,9 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // 온보딩 완료 = 정식 바닥 멤버 → members.affiliations 동기화
+  await addBadakAffiliation(supabase, user.id);
+
   return NextResponse.json({ member });
 }

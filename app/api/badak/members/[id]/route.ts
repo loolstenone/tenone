@@ -7,6 +7,7 @@ const supabase = createClient(
 );
 
 // GET /api/badak/members/[id] — 공개 프로필 조회 (인증 불필요)
+// id = badak_members.id
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -16,7 +17,7 @@ export async function GET(
   const { data: member, error } = await supabase
     .from('badak_members')
     .select(`
-      id, display_name, avatar_url,
+      id, user_id, display_name, avatar_url,
       job_function, industry, experience_years, job_level,
       bio, looking_for, can_offer, interest_tags,
       is_active, created_at
@@ -27,6 +28,25 @@ export async function GET(
   if (error || !member) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
+
+  // members 테이블에서 최신 이름/아바타 가져오기 (source of truth)
+  const { data: mainMember } = await supabase
+    .from('members')
+    .select('name, avatar_url, affiliations')
+    .eq('auth_id', member.user_id)
+    .single();
+
+  // 멤버십 확인: members.affiliations에 'badak' 있어야 공개 프로필 노출
+  // (없으면 탈퇴/미온보딩 상태이므로 404 처리)
+  const affiliations: string[] = mainMember?.affiliations ?? [];
+  if (mainMember && !affiliations.includes('badak')) {
+    return NextResponse.json({ error: 'Not a Badak member' }, { status: 404 });
+  }
+
+  // 이름: members.name 우선, 없으면 badak_members.display_name
+  const displayName = mainMember?.name || member.display_name;
+  // 아바타: members.avatar_url 우선
+  const avatarUrl = mainMember?.avatar_url || member.avatar_url;
 
   // 내가 개설한 모임 (공개 상태만)
   const { data: groups } = await supabase
@@ -40,8 +60,8 @@ export async function GET(
   return NextResponse.json({
     member: {
       id: member.id,
-      displayName: member.display_name,
-      avatarUrl: member.avatar_url,
+      displayName,
+      avatarUrl,
       jobFunction: member.job_function,
       industry: member.industry,
       experienceYears: member.experience_years,

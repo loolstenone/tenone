@@ -12,17 +12,18 @@ export async function GET() {
       const supabase = createClient(url, key);
       const { data, error } = await supabase
         .from('badak_needs')
-        .select('id, display_text, count, category, status')
-        .in('status', ['active', 'group_created'])
+        .select('id, display_text, count, interest_count, fire_count, status')
+        .in('status', ['gathering', 'active', 'group_created'])
         .order('count', { ascending: false })
-        .limit(60);
+        .limit(100);
 
       if (!error && data && data.length > 0) {
         const needs = data.map(n => ({
           id: n.id,
           text: n.display_text,
-          count: n.count,
-          category: n.category || '',
+          count: n.count ?? 0,
+          interestCount: n.interest_count ?? 0,
+          fireCount: n.fire_count ?? 0,
           status: n.status,
         }));
         return NextResponse.json({ needs, source: 'db' });

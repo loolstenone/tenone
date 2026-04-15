@@ -6,6 +6,22 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 const supabase = createClient(url, key);
 
+// members.affiliations에 'badak' 추가 (중복 방지)
+async function addBadakAffiliation(client: ReturnType<typeof createClient>, authUserId: string) {
+  const { data } = await client
+    .from('members')
+    .select('affiliations')
+    .eq('auth_id', authUserId)
+    .single();
+  if (!data) return;
+  const current: string[] = data.affiliations ?? [];
+  if (current.includes('badak')) return;
+  await client
+    .from('members')
+    .update({ affiliations: [...current, 'badak'] })
+    .eq('auth_id', authUserId);
+}
+
 // GET: 현재 유저의 badak_members 조회
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -66,6 +82,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // members.affiliations에 'badak' 추가 (멤버십 소스 오브 트루스)
+  await addBadakAffiliation(supabase, user.id);
+
   return NextResponse.json({ member });
 }
 
