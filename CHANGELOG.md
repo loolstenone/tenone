@@ -4,6 +4,40 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52) — MADLeague 사이트 Phase 1 완료
+
+### Phase 1 전체 페이지 완성 (M1-A ~ M1-J)
+
+#### 시드 확장 (`scripts/seed-madleague-results.js`)
+- `mad_competition_results` 9건 (2024 지평주조·2025 대성학원·2025 리제로스 × 1·2·3위, CROWN 3개)
+- `mad_archive` 6건, `mad_articles` 6건
+- `mad_cohorts.member_count` 86명 총집계
+
+#### 신규 페이지 (Phase 1 완성)
+- **`/programs/competition`** 재작성 — DB 드리븐 Hall of Fame, 연도/동아리/과제기업 필터, Process 설명
+- **`/madzine`** 재작성 — 카테고리·연도 필터 (라이트 테마) + **`/madzine/[slug]`** 아티클 상세
+- **`/archive`** + **`/archive/[id]`** — 연도/유형/동아리/수상 4축 필터
+- **`/apply`** + **`/api/madleague/apply`** — 동아리 자동선택(`?club=`), 이메일 검증
+- **`/hero`** + **`/api/madleague/hero`** — 관심분야 복수선택 + 로그인 시 user_id 자동 연동
+- **`/about`** 리디자인 — Mission(MAD 3글자)/Members/Programs/BI/DAMbe/Contact
+- **`/programs/{project, markethon, insight-touring, dam}`** 4개 개별 페이지
+
+#### 수정
+- **`features/madleague/MadLeagueFooter.tsx`** — "5개 권역" → "7개 권역"
+
+#### 의사결정
+- **M1-G (로고 자산) 보류** — 실제 7개 동아리 로고 이미지 확보 전까지 임시 컬러 원 유지
+- **M1-J `/programs/im`** — 기존 363줄 legacy 콘텐츠 유지, 다크 레이아웃으로 래핑만
+
+#### 검증
+- 라우트 16종 전부 200 OK (curl 일괄 확인)
+- `POST /api/madleague/apply` `{"ok":true}` 응답
+- 필터 쿼리스트링 (archive/madzine) 정상 작동
+- 브라우저 렌더: Hall of Fame 수상팀(팀명·동아리 컬러점·수상명·CROWN) 전부 정상
+- `npx tsc --noEmit` 관련 에러 0
+
+---
+
 ## 2026-04-16 (사무실, 세션 52) — MADLeague 사이트 Phase 1 착수
 
 ### DB 스키마 + Home 랜딩 + Clubs + 라우트 리팩토링

@@ -58,7 +58,7 @@ export function MadLeagueFooter() {
                                     info@madleague.net
                                 </a>
                             </li>
-                            <li>전국 5개 권역 대학 네트워크</li>
+                            <li>전국 7개 권역 대학 네트워크</li>
                         </ul>
                         <div className="flex items-center gap-4 mt-4">
                             <a href="#" className="hover:text-white transition-colors" title="Instagram">

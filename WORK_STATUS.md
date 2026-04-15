@@ -1,37 +1,79 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-16 (사무실, 세션 52)
+> 마지막 업데이트: 2026-04-16 (사무실, 세션 52 — Phase 1 완료)
 
 ---
 
-## 세션 52 완료 항목 — MADLeague 사이트 Phase 1 착수
+## 세션 52 완료 항목 — MADLeague 사이트 Phase 1 완료
 
+### 파트 1 — 기반
 | 항목 | 내용 |
 |------|------|
-| **기획서** | `docs/MADLeague_Site_Plan_v2.md` — 사이트맵·DB·디자인·인증서 자동화·3 Phase 로드맵 |
-| **DB** | `sql/madleague_phase1.sql` — 8개 테이블 + RLS + 시드 (7 동아리, 14 cohorts, 3 경쟁PT). Prod 실행 완료 |
-| **UTF-8 복구** | `scripts/reseed-madleague.js` — Windows bash+curl 경로 한글 깨짐 → Node fetch 재시드 |
-| **run-sql.js 패치** | `SUPABASE_ACCESS_TOKEN` 우선, SERVICE_ROLE_KEY_PROD fallback |
-| **DB 헬퍼** | `lib/supabase/madleague.ts` — 6개 fetch 함수 (clubs/competitions/hallOfFame/articles/stats/bySlug) |
-| **Layout/Header/Footer** | 라이트→다크 전환. `#EC1D25` 액센트. 로고(빨간 점 + 워드마크). navItems 신규 사이트맵 |
-| **Home 랜딩** | Hero+Numbers+Programs+Clubs+HallOfFame+MADzine+CTA (DB 실시간) |
-| **Clubs** | `/clubs` (7 동아리) + `/clubs/[slug]` (히어로/활동연도/수상/갤러리) |
-| **Programs 인덱스** | `/programs` (6 카드) |
-| **라우트 리팩토링** | `/pt → /programs/competition`, `/idea-movement → /programs/im`, `/program → /programs` 이동 + 301 리다이렉트 |
+| 기획서 | `docs/MADLeague_Site_Plan_v2.md` |
+| DB | `sql/madleague_phase1.sql` 8 테이블 + RLS + 시드 (7 동아리, 14 cohorts, 3 경쟁PT) |
+| 확장 시드 | `scripts/seed-madleague-results.js` — 9 results, 6 archive, 6 articles |
+| 인코딩 복구 | `scripts/reseed-madleague.js` (Node fetch) |
+| run-sql.js | `SUPABASE_ACCESS_TOKEN` 우선 fallback |
+| DB 헬퍼 | `lib/supabase/madleague.ts` |
+| Layout/Header/Footer | 다크 모드, #EC1D25 액센트, 로고 교체, "7개 권역" |
+
+### 파트 2 — 페이지 (M1-A ~ M1-J)
+| 페이지 | 경로 | 핵심 |
+|-------|------|------|
+| Home | `/madleague` | Hero+Numbers+Programs+Clubs+HallOfFame+MADzine+CTA |
+| About | `/madleague/about` | MAD Mission/Members/Programs/BI/DAMbe/Contact |
+| Clubs | `/clubs`, `/clubs/[slug]` | 동아리 목록 + 상세(활동연도/수상/갤러리) |
+| Programs 인덱스 | `/programs` | 6 카드 |
+| 경쟁PT | `/programs/competition` | **DB 드리븐 Hall of Fame + 필터** |
+| 개별 프로그램 | `/programs/{project, markethon, insight-touring, im, dam}` | 5개 상세 |
+| MADzine | `/madzine`, `/madzine/[slug]` | 카테고리·연도 필터 + 아티클 상세 |
+| Archive | `/archive`, `/archive/[id]` | 4축 필터(연도/유형/동아리/수상) |
+| Apply | `/apply` + `/api/madleague/apply` | 폼 + API |
+| HeRo | `/hero` + `/api/madleague/hero` | 폼 + API |
+
+### 라우트 리팩토링 (301 redirects)
+`/program → /programs`, `/pt → /programs/competition`, `/idea-movement → /programs/im`, `/leaguer → /member`
 
 ## 다음 할 일
 
-### MADLeague Phase 1 이어서
-| # | 작업 | 세부 |
-|---|------|------|
-| **M1-A** | 경쟁PT Hall of Fame 고도화 | `/programs/competition` 페이지 현재 구버전(345줄 하드코딩) → DB 연결 + 연도/동아리/과제기업 필터 |
-| **M1-B** | MADzine 페이지 | `/madzine` 카테고리 필터(interview/case/report/cover/news), 아티클 상세 `/madzine/[slug]` |
-| **M1-C** | Archive | `/archive` 연도/동아리/프로그램/수상여부 필터, `/archive/[id]` 상세 |
-| **M1-D** | Apply | `/apply` 지원 폼 (club 쿼리파라미터로 자동 선택), POST /api/madleague/apply |
-| **M1-E** | About 리디자인 | `/about` BI+프로그램 라인업+캐릭터, `/about/story`, `/about/awards` |
-| **M1-F** | HeRo 프로그램 | `/hero` 폼 + /api/madleague/hero |
-| **M1-G** | 동아리 로고 자산 교체 | 현재 임시 컬러 → 실제 로고 이미지 적용 |
-| **M1-H** | Footer 연락 영역 | "전국 5개 권역" → "전국 7개 권역" 수정, 소셜 링크 실제 URL |
+### MADLeague Phase 1 이월 (자산 대기)
+| # | 작업 |
+|---|------|
+| **M1-G** | 동아리 로고 이미지 7종 확보 후 `mad_clubs.logo_url` 업데이트 (Storage 업로드 포함) |
+| **ML-E** | 실제 MADzine 콘텐츠 이관 (/59 → mad_articles), Hall of Fame 이미지, DAM 히스토리 사진 |
+
+### MADLeague Phase 2 — 멤버 허브 (예상 4주)
+| # | 작업 |
+|---|------|
+| **M2-A** | `mad_members` 테이블 추가 + tenone.biz auth 연동 + 매드리거 가입 플로우 |
+| **M2-B** | `/member` 대시보드 (내 동아리/기수/프로젝트/포트폴리오 완성도) |
+| **M2-C** | `/member/profile` 기본 정보 + 활동 이력 자동 집계 + 스킬 태그 |
+| **M2-D** | `/member/projects` 참여 프로젝트 목록 |
+| **M2-E** | `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]` |
+| **M2-F** | ⭐ `/member/certificate` 인증서 4종 자동 발급 (PDF + QR + 고유코드) |
+| **M2-G** | `/certificate/verify/[code]` 퍼블릭 검증 |
+| **M2-H** | `/competition` 경쟁PT 워크스페이스 + `mad_competition_teams`, `mad_submissions` 테이블 |
+| **M2-I** | `/community` 피드/동아리별/핀보드/공지 + `mad_posts`, `mad_comments` |
+
+### MADLeague Phase 3 — Universe 연계 (예상 3주)
+| # | 작업 |
+|---|------|
+| **M3-A** | `/growth/career` HeRo 연계 |
+| **M3-B** | `/growth/network` Badak 연계 (아무때나 가입) |
+| **M3-C** | `/growth/crew` YouInOne 연계 |
+| **M3-D** | `/programs/dam` 참가신청 학생/현업/기업 탭 통합 |
+
+### Intra 연동
+| # | 작업 |
+|---|------|
+| **MI-A** | Intra에 MADLeague 관리 메뉴 (멤버/동아리/경쟁PT/프로그램/인증서/지원서/MADzine/아카이브 CRUD) |
+
+### 런칭 준비
+| # | 작업 |
+|---|------|
+| **ML-A** | DNS: madleague.net → tenone.biz 연결 |
+| **ML-B** | madleague.tenone.biz 스테이징 |
+| **ML-C** | 구 imweb → 신 사이트 301 전환 |
 
 ### Phase 0 병행 (원래 계획)
 | # | 작업 |
