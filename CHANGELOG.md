@@ -4,6 +4,51 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 53) — Universe Profile 체계 + MyProfileCard 전사이트 적용
+
+### 신규 파일
+- `components/MyProfileCard.tsx` — 전사이트 공통 프로필 카드 (accentColor, siteBadge, children props)
+- `components/UniverseProfile.tsx` — Universe Profile 전체 재작성 (인라인 편집, 아바타 업로드, 서비스 접근모델 뱃지)
+- `lib/supabase/universe-profile.ts` — 양방향 프로필 동기화 모듈
+
+### 수정 파일 (21개)
+- `CLAUDE.md` — Universe Profile 연동 체계, 서비스 접근모델, MyProfileCard 패턴, 아바타 시스템, 공통 데이터 가이드 섹션 추가
+- `types/auth.ts` — User에 `avatarUrl?: string` 추가
+- `lib/auth-context.tsx` — avatarUrl 로딩 + updateProfile에 avatar_url 쓰기
+- `next.config.ts` — Supabase Storage images remotePatterns 추가
+- `app/(TenOne)/profile/page.tsx` — UniverseProfile 컴포넌트로 교체
+- `app/intra/ums/sites/list/page.tsx` — 사이트 on/off 토글 → "닫힘" 뱃지 클릭으로 변경
+- `app/(MADLeague)/madleague/apply/ApplyForm.tsx` — 리디자인 (동아리순/기수직접입력/산업군·직무군 추가)
+- `app/(MADLeague)/madleague/apply/page.tsx` — ApplyForm import 정리
+- 12개 사이트 my 페이지에 MyProfileCard 적용:
+  - `app/(MADLeague)/madleague/my/page.tsx` (#D32F2F, "MAD Leaguer")
+  - `app/(0gamja)/0gamja/my/page.tsx` (#F97316)
+  - `app/(ChangeUp)/changeup/my/page.tsx` (#059669)
+  - `app/(MADLeap)/madleap/my/page.tsx` (#7C3AED, "MADLeap OB")
+  - `app/(Seoul360)/seoul360/my/page.tsx` (#6366F1)
+  - `app/(SmarComm)/smarcomm/my/page.tsx` (#8B5CF6)
+  - `app/(HeRo)/hero/my/page.tsx` (#0EA5E9)
+  - `app/(RooK)/rook/my/page.tsx` (#1E88E5)
+  - `app/(YouInOne)/youinone/my/page.tsx` (#1AAD64, "Crew")
+  - `app/(Mindle)/mindle/my/page.tsx` (#6366F1)
+  - `app/(TenOne)/my/page.tsx` (#171717)
+  - `app/(WIO)/wio/app/my/page.tsx` (아바타 추가)
+  - `app/(Badak)/badak/my/page.tsx` (Universe Profile 링크 추가)
+
+### DB 변경
+- 25개 사이트 `is_open=true` 설정 (Supabase MCP execute_sql)
+- `avatars` 스토리지 버킷 생성 (public, 2MB, jpeg/png/webp/gif) + RLS 정책
+
+### 결정사항
+- 서비스 접근모델 6종 확정: 오픈/구독/구매/멤버십/직원/내부
+- MyProfileCard = 모든 사이트 my 페이지의 프로필 표준 컴포넌트
+- 아바타는 클라이언트에서 256×256 WebP 압축 후 업로드
+- 연락처 포맷 `formatPhone()` 전사이트 일관 적용 (010-0000-0000)
+- Staff는 닫힌 사이트도 "닫힘" 뱃지로 볼 수 있음, 일반 사용자는 오픈 사이트만 표시
+- 후속 과제: SmarComm/WIO/BrandGravity 구독 서비스 헤더 통일
+
+---
+
 ## 2026-04-16 (사무실, 세션 52 Part 6) — MADLeague 전체 리디자인 + 도메인 분기 문서화
 
 ### MADLeague 전체 리디자인

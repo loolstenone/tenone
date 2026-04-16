@@ -64,6 +64,7 @@ export interface User {
     accountType: AccountType;
     primaryType?: string;
     avatarInitials: string;
+    avatarUrl?: string;
 
     // 역할 & 소속
     roles?: string[];             // ['staff'], ['crew', 'madleaguer'] 등

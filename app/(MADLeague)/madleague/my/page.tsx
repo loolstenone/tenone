@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
+import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
-import { User, FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Award } from "lucide-react";
-import { UniverseMembership } from "@/components/UniverseMembership";
+import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -25,8 +25,6 @@ export default function MadLeagueMyPage() {
 
     if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-[#212121]"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#D32F2F] rounded-full animate-spin" /></div>;
 
-    const initials = user?.name?.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() || "?";
-
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-[#212121] text-white">
             <div className="max-w-4xl mx-auto">
@@ -35,15 +33,12 @@ export default function MadLeagueMyPage() {
                     <HitProfileBadge memberId={user?.id} />
                 </div>
 
-                <div className="flex items-center gap-6 mb-10">
-                    <div className="w-20 h-20 rounded-full bg-[#D32F2F]/20 flex items-center justify-center text-2xl font-bold text-[#D32F2F]">{initials}</div>
-                    <div>
-                        <h1 className="text-2xl font-bold">{user?.name || "리거"}</h1>
-                        <p className="text-sm text-neutral-400 mt-1">{user?.email}</p>
-                        <p className="text-xs text-[#D32F2F] mt-1 flex items-center gap-1"><Award className="h-3 w-3" /> MAD Leaguer</p>
-                    </div>
-                </div>
+                {/* 공통 프로필 카드 + MADLeague 전용 정보 */}
+                <MyProfileCard accentColor="#D32F2F" siteBadge="MAD Leaguer">
+                    {/* MADLeague 서비스 프로필 (동아리, 기수 등 — DB 연동 시 표시) */}
+                </MyProfileCard>
 
+                {/* 사이트 전용 콘텐츠 */}
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {[
                         { id: "posts" as const, label: "내 게시글", icon: FileText },
@@ -77,10 +72,6 @@ export default function MadLeagueMyPage() {
                         <LogOut className="h-5 w-5" /><span className="text-sm">로그아웃</span>
                     </button>
                 )}
-
-                <div className="mt-6">
-                    <UniverseMembership />
-                </div>
             </div>
         </div>
     );

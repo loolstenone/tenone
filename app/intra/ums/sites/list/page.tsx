@@ -7,7 +7,7 @@ import { siteConfigs, type SiteIdentifier } from "@/lib/site-config";
 import { upsertSiteConfig, getAllSiteConfigs, toggleSiteOpen, type SiteConfigRow } from "@/lib/supabase/site-configs";
 import {
     Globe, ExternalLink, Search, Settings,
-    LayoutGrid, Check, Loader2, AlertCircle, Power, Image as ImageIcon, Link2, Crown,
+    LayoutGrid, Check, Loader2, AlertCircle, Image as ImageIcon, Link2, Crown,
     Upload, Sparkles, X,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
@@ -284,9 +284,19 @@ export default function SitesListPage() {
                                             {domainCount > 1 && (
                                                 <span className="text-[9px] text-neutral-400 bg-neutral-50 px-1 py-0.5 rounded">{domainCount}도메인</span>
                                             )}
-                                            {!site.isOpen && (
-                                                <span className="text-[9px] font-medium text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded">닫힘</span>
-                                            )}
+                                            <button
+                                                onClick={e => { e.stopPropagation(); if (site.fromDB) handleToggleOpen(site.id, site.isOpen); }}
+                                                disabled={toggling === site.id || !site.fromDB}
+                                                title={site.isOpen ? "사이트 닫기" : "사이트 열기"}
+                                                className={clsx(
+                                                    "text-[9px] font-medium px-1.5 py-0.5 rounded transition-all disabled:opacity-40",
+                                                    site.isOpen
+                                                        ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                                        : "text-orange-500 bg-orange-50 hover:bg-orange-100"
+                                                )}
+                                            >
+                                                {toggling === site.id ? "···" : site.isOpen ? "열림" : "닫힘"}
+                                            </button>
                                         </div>
                                     </div>
                                 </button>
@@ -318,26 +328,6 @@ export default function SitesListPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                {(() => {
-                                    const isOpen = selected.isOpen;
-                                    const isToggling = toggling === selectedSite;
-                                    return (
-                                        <button
-                                            onClick={() => handleToggleOpen(selected.id, isOpen)}
-                                            disabled={isToggling || !selected.fromDB}
-                                            title={!selected.fromDB ? "DB 미등록" : isOpen ? "사이트 닫기" : "사이트 열기"}
-                                            className={clsx(
-                                                "flex items-center gap-1.5 px-3 py-2 text-xs border transition-all disabled:opacity-40",
-                                                isOpen
-                                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                                    : "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
-                                            )}
-                                        >
-                                            {isToggling ? <Loader2 className="h-3 w-3 animate-spin" /> : <Power className="h-3 w-3" />}
-                                            {isOpen ? "운영중" : "닫힘"}
-                                        </button>
-                                    );
-                                })()}
                                 <Link href={`/intra/bums/sites/${selectedSite}`}
                                     className="flex items-center gap-1.5 px-3 py-2 text-xs border border-neutral-200 hover:bg-neutral-50 transition-all">
                                     <LayoutGrid className="h-3 w-3" /> 게시판

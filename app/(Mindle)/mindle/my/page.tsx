@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { MyProfileCard } from "@/components/MyProfileCard";
 import Link from "next/link";
-import { User, Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp, Zap, BarChart3 } from "lucide-react";
+import { Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp } from "lucide-react";
 import { trends, statusBadge } from "@/lib/mindle/trend-data";
-import { UniverseMembership } from "@/components/UniverseMembership";
 
 const INTEREST_OPTIONS = ["AI / Tech", "Marketing", "Consumer", "Business", "Content", "Lifestyle", "Startup", "Design", "Finance"];
 
@@ -21,7 +21,9 @@ export default function MindleMyPage() {
         return (
             <div className="bg-[#0A0A0A] min-h-[60vh] flex items-center justify-center px-6">
                 <div className="text-center">
-                    <User className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
+                    <div className="w-12 h-12 rounded-full bg-[#6366F1]/10 flex items-center justify-center mx-auto mb-4">
+                        <Bookmark className="w-6 h-6 text-[#6366F1]" />
+                    </div>
                     <h2 className="text-white text-xl font-bold mb-2">로그인이 필요합니다</h2>
                     <p className="text-neutral-400 text-sm mb-6">MY 페이지를 이용하려면 로그인해주세요.</p>
                     <Link href="/login?redirect=/mindle/my"
@@ -44,16 +46,7 @@ export default function MindleMyPage() {
     return (
         <div className="bg-[#0A0A0A]">
             <div className="mx-auto max-w-4xl px-6 py-10">
-                {/* Profile Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 rounded-full bg-[#F5C518]/10 flex items-center justify-center">
-                        <User className="w-7 h-7 text-[#F5C518]" />
-                    </div>
-                    <div>
-                        <h1 className="text-white text-xl font-bold">{user?.name || "사용자"}</h1>
-                        <p className="text-neutral-400 text-sm">{user?.email}</p>
-                    </div>
-                </div>
+                <MyProfileCard accentColor="#6366F1" />
 
                 {/* Activity Stats */}
                 <div className="grid grid-cols-4 gap-3 mb-8">
@@ -196,10 +189,6 @@ export default function MindleMyPage() {
                         </div>
                     </div>
                 )}
-
-                <div className="mt-6">
-                    <UniverseMembership />
-                </div>
             </div>
         </div>
     );

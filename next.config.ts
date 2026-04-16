@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'ziotlxkdctlhiwkgmmsh.supabase.co', pathname: '/storage/v1/object/public/**' },
+    ],
+  },
   serverExternalPackages: ['@anthropic-ai/sdk'],
   async redirects() {
     return [

@@ -161,6 +161,131 @@ export async function generateMetadata(): Promise<Metadata> {
 
 ---
 
+## ⚠️ 유니버스 프로필 연동 체계 (절대 잊지 말 것)
+
+> **하나의 계정 → 하나의 프로필 → 모든 서비스에서 동기화**
+> 이 구조를 모르면 프로필 수정이 특정 사이트에만 반영되는 버그가 발생한다.
+
+### 2-Layer 프로필 구조
+
+| Layer | 저장소 | 소유권 | 예시 필드 |
+|-------|--------|--------|----------|
+| **공통 프로필** | `members` 테이블 | 유니버스 전체 | 이름, 이메일, 연락처, 소속, bio, avatar |
+| **서비스 프로필** | 서비스별 테이블 | 각 사이트 | MADLeague 기수, Badak 직무, HeRo HIT유형 |
+
+### 양방향 동기화 흐름
+
+```
+유니버스 프로필 (/profile)     각 사이트 마이페이지 (/madleague/my)
+        │                              │
+        ├─ 공통 필드 수정 ──────────→ members UPDATE ←── 공통 필드 수정 ─┤
+        │                              │                               │
+        └─ 서비스 필드 읽기 ←── 서비스별 테이블 SELECT ── 서비스 필드 수정 ─┘
+```
+
+**동기화 규칙:**
+- 공통 필드(이름, 연락처, 소속 등)는 **어디서 수정하든** `members` 테이블에 반영
+- 서비스 고유 필드(기수, 직무 등)는 **해당 서비스 테이블만** 수정
+- 유니버스 프로필은 서비스 고유 필드를 **읽기만** 함 (수정은 해당 마이페이지에서)
+- `members.affiliations[]`로 이용 중인 서비스 목록 관리
+
+### 핵심 파일
+
+| 파일 | 역할 |
+|------|------|
+| `lib/supabase/universe-profile.ts` | 양방향 동기화 모듈 (공통 CRUD + 서비스별 조회) |
+| `components/UniverseProfile.tsx` | 유니버스 프로필 UI (배너 + 기본정보 + 서비스 현황 + 직원정보) |
+| `components/UniverseMembership.tsx` | ❌ 레거시 — 사용 금지, 전 사이트에서 제거 완료 |
+| `lib/supabase/members.ts` | members 테이블 CRUD |
+| `lib/auth-context.tsx` → `updateProfile()` | 클라이언트 프로필 업데이트 → members + avatar_url 동기화 |
+| `lib/supabase/site-configs.ts` → `getAllSiteConfigs()` | 사이트 is_open 상태 조회 (프로필에서 닫힌 사이트 숨김) |
+
+### 서비스 접근 모델 분류
+
+| 접근 모델 | 서비스 |
+|-----------|--------|
+| **오픈** | 0gamja, FWN, Jakka, Mindle, MoNTZ, Mullaesian, Myverse, NamingFactory, RooK, Seoul360, Townity, TrendHunter |
+| **구독** | BrandGravity, SmarComm, WIO |
+| **구매** | HeRo(상담), Planners(교육), ChangeUp(교육), NatureBox(제품), Badak(모임) |
+| **승인 멤버십** | MADLeague, MADLeap, YouInOne, Domo |
+| **직원** | TenOne, Wiki |
+| **내부** | Dokdae |
+
+### 서비스별 프로필 테이블 매핑
+
+| 서비스 | 테이블 | 고유 필드 |
+|--------|--------|----------|
+| MADLeague | `mad_applications` | club_slug, cohort, activity_year, university, major |
+| Badak | `badak_profiles` | job_function, industry, job_level |
+| HeRo | `career_profiles` | desired_position, desired_industry, skills |
+| (기타 서비스) | 추가 시 `universe-profile.ts`에 조회 함수 추가 |
+
+### 각 사이트 마이페이지 규칙
+
+> **구조: `MyProfileCard` (공통) → 사이트 전용 콘텐츠 (탭, 게시글 등)**
+
+- ✅ 상단에 `<MyProfileCard>` 공통 프로필 카드 (아바타, 이름, 이메일, 연락처, 소속, Universe Profile 링크 포함)
+- ✅ `children`으로 사이트별 프로필 정보 전달 (동아리, 직무 등)
+- ✅ 그 아래에 사이트 전용 콘텐츠 (탭, 게시글, 북마크, 설정 등)
+- ❌ `UniverseProfile` / `UniverseMembership` 컴포넌트 직접 넣지 않는다
+- ❌ 아바타/이름/이메일을 직접 표시하지 않는다 (MyProfileCard가 전담)
+- `/profile` (유니버스 프로필)에서 프로필 수정 + 전체 서비스 현황 관리
+
+**마이페이지 표준 패턴:**
+```tsx
+import { MyProfileCard } from "@/components/MyProfileCard";
+
+// 공통 프로필 카드 + 사이트별 추가 정보
+<MyProfileCard accentColor="#D32F2F" siteBadge="MAD Leaguer">
+    {/* 사이트별 프로필 정보 (선택) */}
+    <div className="grid grid-cols-2 gap-3">
+        <InfoCell label="소속 동아리" value="MADA" />
+        <InfoCell label="기수" value="3기" />
+    </div>
+</MyProfileCard>
+
+// 그 아래에 사이트 전용 콘텐츠
+<div>탭, 게시글, 북마크, 설정 ...</div>
+```
+
+**핵심 파일:**
+| 파일 | 역할 |
+|------|------|
+| `components/MyProfileCard.tsx` | 전 사이트 공통 프로필 카드 (아바타, 기본정보, Universe Profile 링크) |
+| `components/UniverseProfile.tsx` | `/profile` 페이지 전용 (프로필 수정, 서비스 현황, 직원 정보) |
+
+### 프로필 이미지 (아바타) 시스템
+- **Storage:** Supabase `avatars` 버킷 (public, 2MB, jpeg/png/webp/gif)
+- **처리:** 업로드 전 클라이언트에서 256×256 리사이즈 + WebP 압축 (~50KB)
+- **경로:** `avatars/{user.id}/{timestamp}.webp`
+- **DB:** `members.avatar_url` → `auth-context` → `user.avatarUrl`
+- **표시:** `MyProfileCard` + `UniverseProfile` 배너에서 자동 표시
+- **업로드:** UniverseProfile 배너에서 호버 시 카메라 아이콘 → 업로드
+
+### 유니버스 공통 데이터 (전 사이트 공유)
+| 데이터 | 파일 | 용도 |
+|--------|------|------|
+| 산업군 목록 (`INDUSTRIES`) | `lib/badak-constants.ts` | MADLeague 등록, Badak 프로필, HeRo 등 |
+| 직무군 목록 (`JOB_FUNCTIONS`) | `lib/badak-constants.ts` | 동일 |
+| 전화번호 포맷 (`formatPhone`) | `components/MyProfileCard.tsx` | 전 사이트 연락처 표시 |
+
+### 새 사이트 마이페이지 생성 체크리스트
+- [ ] `app/(BrandName)/brandname/my/page.tsx` 생성
+- [ ] `useAuth()` + 미인증 시 `/login` redirect
+- [ ] `<MyProfileCard accentColor="사이트컬러" siteBadge="역할뱃지">` 상단 배치
+- [ ] `children`에 사이트별 프로필 정보 추가 (선택)
+- [ ] 그 아래에 사이트 전용 콘텐츠 (탭, 게시글, 북마크, 설정)
+- [ ] ❌ 아바타/이름/이메일 직접 표시 금지 — `MyProfileCard`가 전담
+
+### 새 서비스 프로필 연동 시 추가 체크리스트
+- [ ] 서비스별 테이블에 `email` 컬럼 있는가? (members 조인 키)
+- [ ] `lib/supabase/universe-profile.ts`에 `get{Service}Profile()` 함수 추가
+- [ ] `getAllServiceProfiles()`에 새 함수 등록
+- [ ] `UniverseProfile.tsx` → `SERVICE_META`에 아이콘·설명·접근모델 추가
+- [ ] 해당 사이트 마이페이지에서 공통 필드 수정 시 `updateUniverseProfile()` 호출
+
+---
+
 ## 기술 스택
 
 - **프레임워크**: Next.js 16 (App Router) + React 19

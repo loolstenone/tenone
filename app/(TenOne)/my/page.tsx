@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
+import { MyProfileCard } from "@/components/MyProfileCard";
 import Link from "next/link";
 import {
-    User, FileText, Bookmark, Heart, Settings, LogOut,
-    ChevronRight, Eye, MessageCircle, Calendar, Award,
+    User, FileText, Bookmark, Settings, LogOut,
+    ChevronRight, Eye, MessageCircle,
 } from "lucide-react";
-import { UniverseMembership } from "@/components/UniverseMembership";
 
 interface MyPost {
     id: string;
@@ -59,10 +59,6 @@ export default function MyPage() {
         );
     }
 
-    const initials = user?.name
-        ? user.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()
-        : "?";
-
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
         { id: "bookmarks" as const, label: "북마크", icon: Bookmark, count: bookmarks.length },
@@ -73,25 +69,7 @@ export default function MyPage() {
         <div className="min-h-screen pt-24 pb-20 px-6" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
             <div className="max-w-4xl mx-auto">
 
-                {/* 프로필 헤더 */}
-                <div className="flex items-center gap-6 mb-10">
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold"
-                        style={{ backgroundColor: "var(--tn-bg-alt)", color: "var(--tn-text-sub)" }}>
-                        {initials}
-                    </div>
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold">{user?.name || "회원"}</h1>
-                        <p className="text-sm mt-1" style={{ color: "var(--tn-text-sub)" }}>{user?.email}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: "var(--tn-text-muted)" }}>
-                            <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> 게시글 {myPosts.length}</span>
-                            <span className="flex items-center gap-1"><Bookmark className="h-3 w-3" /> 북마크 {bookmarks.length}</span>
-                        </div>
-                    </div>
-                    <Link href="/profile" className="px-4 py-2 text-sm border rounded-lg transition-colors hover:opacity-80"
-                        style={{ borderColor: "var(--tn-border)", color: "var(--tn-text-sub)" }}>
-                        프로필 수정
-                    </Link>
-                </div>
+                <MyProfileCard accentColor="#171717" />
 
                 {/* HIT 프로필 */}
                 <div className="mb-6">
@@ -173,10 +151,6 @@ export default function MyPage() {
                         </button>
                     </div>
                 )}
-
-                <div className="mt-6">
-                    <UniverseMembership />
-                </div>
             </div>
         </div>
     );

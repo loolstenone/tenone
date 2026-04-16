@@ -19,12 +19,8 @@ export default async function ApplyPage({ searchParams }: PageProps) {
     <div className="bg-[var(--mad-black,#000)] text-white">
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-3xl px-6 py-20">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">APPLY</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">다음 기수 합류</h1>
-          <p className="mt-6 text-neutral-400 leading-relaxed">
-            전국 7개 권역 동아리 중 하나를 선택하세요.
-            접수된 지원서는 해당 동아리 운영진이 검토 후 연락드립니다.
-          </p>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">REGISTER</div>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">매드리거 등록</h1>
         </div>
       </section>
 

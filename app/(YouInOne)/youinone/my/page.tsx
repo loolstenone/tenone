@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
+import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
-import { User, FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, MessageCircle } from "lucide-react";
-import { UniverseMembership } from "@/components/UniverseMembership";
+import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -25,7 +25,6 @@ export default function YouInOneMyPage() {
 
     if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#1AAD64] rounded-full animate-spin" /></div>;
 
-    const initials = user?.name?.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() || "?";
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
         { id: "bookmarks" as const, label: "북마크", icon: Bookmark, count: 0 },
@@ -40,14 +39,7 @@ export default function YouInOneMyPage() {
                     <HitProfileBadge memberId={user?.id} />
                 </div>
 
-                <div className="flex items-center gap-6 mb-10">
-                    <div className="w-20 h-20 rounded-full bg-[#1AAD64]/20 flex items-center justify-center text-2xl font-bold text-[#1AAD64]">{initials}</div>
-                    <div>
-                        <h1 className="text-2xl font-bold">{user?.name || "회원"}</h1>
-                        <p className="text-sm text-neutral-400 mt-1">{user?.email}</p>
-                        <p className="text-xs text-[#1AAD64] mt-1">YouInOne Member</p>
-                    </div>
-                </div>
+                <MyProfileCard accentColor="#1AAD64" siteBadge="Crew" />
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (
@@ -83,10 +75,6 @@ export default function YouInOneMyPage() {
                         </button>
                     </div>
                 )}
-
-                <div className="mt-6">
-                    <UniverseMembership />
-                </div>
             </div>
         </div>
     );

@@ -3,12 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ClipboardList, FileCheck, Calendar, Target, Bell, ListTodo, Plus,
-  CheckCircle2, Clock, Sparkles, ArrowRight, User, Smile, Meh, Frown, Heart, Zap,
+  CheckCircle2, Clock, Sparkles, ArrowRight, User, Smile, Meh, Frown, Heart, Zap, Globe, ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWIO } from '../layout';
 import { createClient } from '@/lib/supabase/client';
-import { UniverseMembership } from '@/components/UniverseMembership';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -393,10 +392,15 @@ export default function MyHomePage() {
         </button>
       </div>
 
-      {/* Universe 가입 현황 */}
-      <div className="mt-4">
-        <UniverseMembership />
-      </div>
+      {/* Universe Profile */}
+      <Link href="/profile" className="mt-8 flex items-center gap-3 p-4 rounded-xl border border-neutral-700 hover:border-neutral-500 transition-colors group">
+        <Globe className="h-5 w-5 text-neutral-500 group-hover:text-white transition-colors" />
+        <div className="flex-1">
+          <p className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">Universe Profile</p>
+          <p className="text-[11px] text-neutral-500">전체 서비스 프로필 관리</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+      </Link>
     </div>
   );
 }

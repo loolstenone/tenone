@@ -4,14 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
-import { UniverseMembership } from '@/components/UniverseMembership';
+import Link from 'next/link';
 import {
   FileText, Bookmark, Bell, Settings, LogOut,
   ChevronRight, ChevronDown, Eye, MessageCircle, Heart,
   Shield, Mail, Phone, Briefcase, Building2, Tag,
   Check, X, Crown, Users, CalendarDays, MapPin,
   UserCheck, UserX, Clock, Megaphone,
-  ToggleLeft, ToggleRight, UserPlus, Pencil,
+  ToggleLeft, ToggleRight, UserPlus, Pencil, Globe,
 } from 'lucide-react';
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'notifications' | 'settings';
@@ -2193,9 +2193,15 @@ export default function BadakMyPage() {
           </div>
         )}
 
-        <div className="mt-6">
-          <UniverseMembership />
-        </div>
+        {/* Universe Profile */}
+        <Link href="/profile" className="mt-8 flex items-center gap-3 p-4 rounded-xl border border-neutral-700 hover:border-neutral-500 transition-colors group">
+          <Globe className="h-5 w-5 text-neutral-500 group-hover:text-white transition-colors" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">Universe Profile</p>
+            <p className="text-[11px] text-neutral-500">전체 서비스 프로필 관리</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+        </Link>
       </div>
     </div>
   );

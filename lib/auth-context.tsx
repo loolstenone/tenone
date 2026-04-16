@@ -66,6 +66,7 @@ function memberToUser(member: Record<string, unknown>): User {
         accountType,
         primaryType: (member.primary_type as string) || accountType,
         avatarInitials: (member.avatar_initials as string) || ((member.name as string) || '').substring(0, 2).toUpperCase(),
+        avatarUrl: (member.avatar_url as string) || undefined,
 
         // 역할 & 소속
         roles: (member.roles as string[]) || [accountType],
@@ -375,6 +376,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     bio: updates.bio,
                     company: updates.company,
                     avatar_initials: updates.avatarInitials,
+                    avatar_url: updates.avatarUrl,
                     newsletter_subscribed: updates.newsletterSubscribed,
                     updated_at: new Date().toISOString(),
                 })
