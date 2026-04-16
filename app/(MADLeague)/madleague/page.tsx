@@ -1,21 +1,19 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import {
   fetchMadClubs,
   fetchMadHallOfFame,
   fetchMadArticles,
-  fetchMadStats,
 } from '@/lib/supabase/madleague';
+import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
 
 export const revalidate = 300; // 5분 캐시
 
 export default async function Page() {
-  const [clubs, hallOfFame, articles, stats] = await Promise.all([
+  const [clubs, hallOfFame, articles] = await Promise.all([
     fetchMadClubs(),
     fetchMadHallOfFame(3),
     fetchMadArticles({ limit: 4 }),
-    fetchMadStats(),
   ]);
 
   return (
@@ -56,16 +54,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* ─── Numbers ──────────────────────────────── */}
-      <section className="border-y border-neutral-900 bg-black">
-        <div className="mx-auto max-w-7xl px-6 py-16 grid grid-cols-2 sm:grid-cols-4 gap-8">
-          <Stat label="공식 동아리" value={stats.clubCount} suffix="개" />
-          <Stat label="활동연도" value={stats.activityYears} suffix="년" />
-          <Stat label="경쟁PT 누적" value={stats.competitionCount} suffix="회" />
-          <Stat label="MAD Crown" value={stats.crownCount} suffix="개" />
-        </div>
-      </section>
-
       {/* ─── 프로그램 ──────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <SectionHeader eyebrow="PROGRAMS" title="7가지 실전 무대" />
@@ -79,7 +67,7 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* ─── 동아리 ──────────────────────────────── */}
+      {/* ─── 동아리 지도 ─────────────────────────── */}
       <section className="bg-neutral-950 border-y border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-24">
           <SectionHeader
@@ -87,24 +75,8 @@ export default async function Page() {
             title={`전국 ${clubs.length}개 동아리`}
             action={{ href: '/madleague/clubs', label: '동아리 전체 보기' }}
           />
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-            {clubs.map((club) => (
-              <Link
-                key={club.slug}
-                href={`/madleague/clubs/${club.slug}`}
-                className="group relative aspect-square flex flex-col items-center justify-center bg-black border border-neutral-800 hover:border-[#EC1D25] transition"
-              >
-                {club.logo_url ? (
-                  <div className="h-10 w-10 mb-3 flex items-center justify-center">
-                    <Image src={club.logo_url} alt={club.name} width={40} height={40} className="object-contain" />
-                  </div>
-                ) : (
-                  <div className="h-10 w-10 rounded-full mb-3" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
-                )}
-                <div className="font-bold text-white">{club.name}</div>
-                <div className="text-xs text-neutral-500 mt-1">{club.region}</div>
-              </Link>
-            ))}
+          <div className="mt-12 flex justify-center">
+            <KoreaClubMap clubs={clubs} />
           </div>
         </div>
       </section>
@@ -206,18 +178,6 @@ export default async function Page() {
   );
 }
 
-// ────────────────────────────────────────────────
-function Stat({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
-  return (
-    <div>
-      <div className="text-5xl sm:text-6xl font-black tracking-tight tabular-nums">
-        {value}
-        {suffix && <span className="text-2xl text-neutral-500 ml-1">{suffix}</span>}
-      </div>
-      <div className="mt-2 text-sm text-neutral-500 tracking-wider">{label}</div>
-    </div>
-  );
-}
 
 function SectionHeader({
   eyebrow,
