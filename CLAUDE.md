@@ -39,37 +39,51 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 |------|------|
 | `lib/site-config.ts` | 전체 브랜드 설정 + `domainMap` (도메인 → 사이트 ID 매핑) |
 | `lib/site-context.tsx` | 클라이언트에서 `window.location.hostname`으로 사이트 감지 → `useSite()` 훅 제공 |
+| `lib/supabase/site-configs.ts` | DB CRUD (`getSiteConfigServer`/`upsertSiteConfig`/`toggleSiteOpen`) |
+| `components/SiteClosedOverlay.tsx` | `is_open=false` 사이트 전체 차단 (비로그인 시). 마스터/Staff/Admin bypass |
+| `components/UnderConstruction.tsx` | 전용 콘텐츠 없는 사이트의 브랜드 랜딩 페이지 ("준비 중" 아님) |
 | `components/LoginModal.tsx` | 전 브랜드 공통 로그인 모달 (탭: 로그인/회원가입, 소셜/이메일) |
 | `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 (로그인 버튼 → LoginModal 열기) |
 
-### 도메인 분기 원리 (2가지 방식)
+### 도메인 분기 원리 (3단계 감지)
 
-**방식 A — 독립 도메인** (domainMap 기반)
+**① 독립 도메인** (domainMap 기반)
 ```
-madleague.net 접속 → domainMap['madleague.net'] = 'madleague' → isMadLeague = true
-```
-
-**방식 B — tenone.biz 경로 분기** (pathSiteMap 기반, 주요 방식)
-```
-www.tenone.biz/madleague 접속 → pathname.startsWith('/madleague') → isMadLeague = true
-localhost/madleague 접속  → pathname.startsWith('/madleague') → isMadLeague = true (개발환경)
+madleague.net → domainMap['madleague.net'] = 'madleague'
 ```
 
-> ⚠️ **MADLeague 실서버 주소는 `www.tenone.biz/madleague`** (독립 도메인 아님)
-> localhost 개발 시에도 경로 기반으로 isMadLeague가 true가 되므로 별도 설정 불필요
+**② 서브도메인 자동 감지** (`*.tenone.biz` regex)
+```
+domo.tenone.biz → regex /^([a-z0-9-]+)\.tenone\.biz$/ → siteConfigs에 'domo' 있으면 자동 매칭
+```
+
+**③ 경로 분기** (pathSiteMap 기반, localhost 개발용)
+```
+www.tenone.biz/madleague → pathname.startsWith('/madleague')
+localhost/madleague → 동일하게 동작
+```
+
+> ⚠️ 서브도메인은 `siteConfigs`에 키가 있으면 자동 감지. `domainMap`에 따로 추가 불필요.
 
 ### 현재 운영 도메인/경로 목록
-| 브랜드 | 접근 방식 | 주소 | siteId |
-|--------|---------|------|--------|
-| MADLeague | 경로 | www.tenone.biz/madleague | madleague |
-| MADLeap | 경로 | www.tenone.biz/madleap | madleap |
-| Badak | 경로 or 도메인 | badak.biz | badak |
-| RooK | 도메인 | rook.co.kr | rook |
-| YouInOne | 도메인 | youinone.com | youinone |
-| SmarComm | 도메인 | smarcomm.biz | smarcomm |
-| HeRo | 도메인 | hero.ne.kr | hero |
-| 공감자 | 도메인 | 0gamja.com | ogamja |
-| (기타) | 경로 or 서브도메인 | *.tenone.biz | 각 siteId |
+
+> 도메인 감지 순서: ① 독립 도메인(domainMap) → ② *.tenone.biz 서브도메인(자동감지) → ③ 경로 분기(pathSiteMap)
+
+| 브랜드 | 독립 도메인 | 서브도메인 | 경로 | siteId |
+|--------|-----------|----------|------|--------|
+| MADLeague | madleague.net | madleague.tenone.biz | /madleague | madleague |
+| MADLeap | — | madleap.tenone.biz | /madleap | madleap |
+| Badak | badak.biz | badak.tenone.biz | /badak | badak |
+| RooK | rook.co.kr | rook.tenone.biz | /rook | rook |
+| YouInOne | youinone.com | youinone.tenone.biz | /youinone | youinone |
+| SmarComm | smarcomm.biz | smarcomm.tenone.biz | /smarcomm | smarcomm |
+| HeRo | hero.ne.kr | — | /hero | hero |
+| 0gamja | 0gamja.com | — | — | ogamja |
+| BrandGravity | — | brandgravity.tenone.biz | /brandgravity | brandgravity |
+| Wiki | — | wiki.tenone.biz | /wiki | wiki |
+| Dokdae | — | dokdae.tenone.biz | /dokdae | dokdae |
+| Domo | — | domo.tenone.biz | /domo | domo |
+| (기타 20+) | — | {siteId}.tenone.biz | /{siteId} | 각 siteId |
 
 ### 인증 원칙
 - **Auth는 단일 Supabase 프로젝트** `ziotlxkdctlhiwkgmmsh` 하나로 통일
@@ -78,10 +92,73 @@ localhost/madleague 접속  → pathname.startsWith('/madleague') → isMadLeagu
 - 소셜 로그인 redirect: `{origin}/auth/callback` — Supabase 대시보드 Allowed URLs에 **모든 도메인** 등록 필요
 
 ### 새 브랜드 추가 시 체크리스트
-- [ ] `lib/site-config.ts` → `siteConfigs`에 추가
+- [ ] `lib/site-config.ts` → `siteConfigs`에 추가 + `SiteIdentifier` 타입에 추가
 - [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가
+- [ ] `lib/site-context.tsx` → `pathSiteMap`에 경로 매핑 추가
+- [ ] `lib/intra-nav.ts` → 사이드바 브랜드 목록에 추가 (알파벳순)
+- [ ] DB: `ums_sites` 테이블에 INSERT
+- [ ] `app/(BrandName)/layout.tsx` → `generateMetadata()` + `getSiteConfigServer()` 필수
+- [ ] `app/(BrandName)/brandname/page.tsx` → `UnderConstruction` 또는 전용 랜딩
 - [ ] Vercel 프로젝트에 도메인 연결 + env 동일하게 설정
 - [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/auth/callback` 추가
+
+### ⚠️ 사이트 메타데이터 + 작업중 표시 규칙 (절대 엄수)
+
+> **인트라 사이트 관리에서 수정 → DB(`ums_sites`) → 실사이트 반영** 이 유일한 흐름이다.
+
+**DB → 사이트 반영 아키텍처:**
+```
+인트라 저장 → upsertSiteConfig() → ums_sites 테이블
+                                        ↓
+                                  site_configs VIEW
+                                        ↓
+                              getSiteConfigServer() (ISR 10분)
+                                        ↓
+                              각 사이트 generateMetadata()
+```
+
+**모든 브랜드 레이아웃 필수 패턴:**
+```tsx
+export async function generateMetadata(): Promise<Metadata> {
+    const db = await getSiteConfigServer('siteId');
+    const site = siteConfigs.siteId;
+    return {
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
+        icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
+        openGraph: {
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
+        },
+    };
+}
+```
+
+**절대 하지 말 것:**
+- ❌ 레이아웃에 `export const metadata` (정적) 사용 → 반드시 `generateMetadata()` (동적)
+- ❌ 하드코딩 fallback 문자열 (`"Badak — 네트워킹"`) → `site.meta.title` 사용
+- ❌ openGraph에서 ogImage 누락 → 반드시 조건부 images spread 포함
+- ❌ 페이지에 "준비 중", "Coming Soon", "공사중" 텍스트 직접 표시
+- ❌ 사이트 차단을 페이지 컴포넌트에서 처리 → `SiteClosedOverlay`가 전담
+
+**사이트 오픈/차단 시스템:**
+| 상황 | 표시 내용 | 담당 |
+|------|----------|------|
+| `is_open=true` | 사이트 정상 표시 (UnderConstruction 또는 전용 랜딩) | 각 page.tsx |
+| `is_open=false` + 비로그인 | "준비 중입니다" 전체 가림막 | `SiteClosedOverlay` |
+| `is_open=false` + 마스터(lools@tenone.biz) | 가림막 bypass, 사이트 정상 표시 | `SiteClosedOverlay` |
+| `is_open=false` + Staff/Admin | 가림막 bypass, 사이트 정상 표시 | `SiteClosedOverlay` |
+| intra/login/auth 경로 | 항상 접근 가능 | `SiteClosedOverlay` |
+| tenone 사이트 | 항상 접근 가능 | `SiteClosedOverlay` |
+
+**인트라 사이트 관리 (`/intra/ums/sites/list`):**
+- 브랜딩 이미지: 드래그앤드롭 업로드 → Supabase Storage `site-branding` 버킷 → DB 자동 저장
+- SEO 메타: 저장 버튼으로 DB 반영 → ISR 10분 내 실사이트 반영
+- 인공지능 최적화: llms.txt, robots.txt AI 설정, JSON-LD 구조화 데이터
+- 사이트 오픈/닫기: 토글 버튼 → `ums_sites.is_open` 즉시 반영
 
 ---
 
