@@ -14,7 +14,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTab = "login" }: LoginModalProps) {
-    const { login, register, isAuthenticated } = useAuth();
+    const { login, register, isAuthenticated, isLoading } = useAuth();
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -24,8 +24,8 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // auth-context isAuthenticated 변경 시 닫기
-    useEffect(() => { if (isAuthenticated && isOpen) onClose(); }, [isAuthenticated, isOpen, onClose]);
+    // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
+    useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);
     // Supabase SIGNED_IN 즉시 감지 → auth-context 업데이트 기다리지 않고 바로 닫기
     useEffect(() => {
         if (!isOpen) return;
@@ -89,7 +89,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const inputClass = "w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400";
 
     return createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
             <div className="relative z-10 w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
                 {/* 헤더 */}

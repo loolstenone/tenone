@@ -151,7 +151,17 @@ export const modules: NavModule[] = [
                 label: "브랜드별",
                 items: [
                     { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
-                    { name: "Badak", href: "/intra/ums/badak", icon: Globe },
+                    {
+                        name: "Badak", href: "/intra/ums/badak", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/badak" },
+                            { name: "멤버 관리", href: "/intra/ums/badak/members" },
+                            { name: "모임 관리", href: "/intra/ums/badak/groups" },
+                            { name: "커뮤니티 관리", href: "/intra/ums/badak/posts" },
+                            { name: "니즈 관리", href: "/intra/ums/badak/needs" },
+                            { name: "CS/신고", href: "/intra/ums/badak/cs" },
+                        ],
+                    },
                     {
                         name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
                         children: [

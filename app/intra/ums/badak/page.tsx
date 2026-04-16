@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  ExternalLink, Users, MessageCircle, Calendar, UserPlus,
-  Loader2, Hash, MapPin, TrendingUp, BarChart2,
+  ExternalLink, Users, UserPlus, Loader2,
+  MapPin, Calendar, MessageSquare, Cloud,
+  TrendingUp, CheckCircle, Clock, AlertCircle,
 } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
@@ -17,14 +18,54 @@ interface MemberRow {
   avatar_url: string | null;
   avatar_initials: string;
   created_at: string;
-  affiliations: string[];
+}
+
+interface GroupRow {
+  id: string;
+  title: string;
+  status: string;
+  current_members: number;
+  max_members: number;
+  event_date: string | null;
+  location: string | null;
+  created_at: string;
+}
+
+interface NeedRow {
+  id: string;
+  display_text: string;
+  count: number;
+  interest_count: number;
+  status: string;
+}
+
+interface GroupStats {
+  total: number;
+  recruiting: number;
+  confirmed: number;
+  closed: number;
+  recentGroups: GroupRow[];
+}
+
+interface NeedStats {
+  total: number;
+  gathering: number;
+  groupCreated: number;
+  topNeeds: NeedRow[];
+}
+
+interface PostStats {
+  total: number;
+  chat: number;
+  review: number;
+  proposal: number;
 }
 
 interface GrowthMetrics {
   totalMembers: number;
   thisMonthNew: number;
   lastMonthNew: number;
-  growthRate: number | null; // %
+  growthRate: number | null;
 }
 
 interface AnalyticsMetrics {
@@ -33,63 +74,25 @@ interface AnalyticsMetrics {
   avgWeeklyVisits: number | null;
 }
 
-interface ChatRoom {
-  name: string;
-  category: string;
-  members: number;
-  isActive: boolean;
-}
-
-/* ── Mock: 오픈채팅방 (DB 연동 전까지) ── */
-const chatRooms: ChatRoom[] = [
-  { name: "바닥 메인", category: "메인", members: 487, isActive: true },
-  { name: "서울 모임", category: "지역", members: 234, isActive: true },
-  { name: "부산 모임", category: "지역", members: 156, isActive: true },
-  { name: "대구 모임", category: "지역", members: 89, isActive: true },
-  { name: "네트워킹 라운지", category: "네트워킹", members: 312, isActive: true },
-  { name: "취업/이직 정보", category: "커리어", members: 278, isActive: true },
-  { name: "사이드 프로젝트", category: "프로젝트", members: 145, isActive: true },
-  { name: "스터디 모집", category: "스터디", members: 198, isActive: true },
-  { name: "프리랜서 라운지", category: "커리어", members: 167, isActive: true },
-  { name: "창업 네트워킹", category: "네트워킹", members: 203, isActive: true },
-];
-
-const roomCategories = [
-  { name: "메인", count: 3, color: "bg-amber-100 text-amber-700" },
-  { name: "지역", count: 12, color: "bg-blue-100 text-blue-700" },
-  { name: "네트워킹", count: 8, color: "bg-violet-100 text-violet-700" },
-  { name: "커리어", count: 7, color: "bg-emerald-100 text-emerald-700" },
-  { name: "스터디", count: 5, color: "bg-rose-100 text-rose-700" },
-  { name: "프로젝트", count: 4, color: "bg-cyan-100 text-cyan-700" },
-  { name: "기타", count: 3, color: "bg-neutral-100 text-neutral-600" },
-];
-
-/* ── Mock: DAM Party ── */
-const nextDAMParty = {
-  title: "제48회 DAM Party",
-  date: "2026-05-17",
-  location: "서울 강남 코엑스 컨퍼런스룸",
-  expectedAttendees: 120,
-  status: "모집중",
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  recruiting:     { label: "모집중",   color: "bg-emerald-50 text-emerald-700" },
+  pending_review: { label: "검토중",   color: "bg-amber-50 text-amber-700" },
+  confirmed:      { label: "확정",     color: "bg-indigo-50 text-indigo-700" },
+  closed:         { label: "마감",     color: "bg-neutral-100 text-neutral-500" },
 };
 
 export default function BadakPage() {
   const [loading, setLoading] = useState(true);
+  const [growth, setGrowth] = useState<GrowthMetrics>({ totalMembers: 0, thisMonthNew: 0, lastMonthNew: 0, growthRate: null });
   const [recentMembers, setRecentMembers] = useState<MemberRow[]>([]);
-  const [growth, setGrowth] = useState<GrowthMetrics>({
-    totalMembers: 0,
-    thisMonthNew: 0,
-    lastMonthNew: 0,
-    growthRate: null,
-  });
-  const [analytics, setAnalytics] = useState<AnalyticsMetrics>({
-    mauCount: null,
-    avgDurationSec: null,
-    avgWeeklyVisits: null,
-  });
+  const [groupStats, setGroupStats] = useState<GroupStats>({ total: 0, recruiting: 0, confirmed: 0, closed: 0, recentGroups: [] });
+  const [needStats, setNeedStats] = useState<NeedStats>({ total: 0, gathering: 0, groupCreated: 0, topNeeds: [] });
+  const [postStats, setPostStats] = useState<PostStats>({ total: 0, chat: 0, review: 0, proposal: 0 });
+  const [analytics, setAnalytics] = useState<AnalyticsMetrics>({ mauCount: null, avgDurationSec: null, avgWeeklyVisits: null });
 
   useEffect(() => {
     loadData();
+    loadAnalytics();
   }, []);
 
   async function loadData() {
@@ -99,61 +102,61 @@ export default function BadakPage() {
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-      const lastMonthEnd = monthStart;
 
-      // 총 회원 수
-      const { count: total } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .contains("affiliations", ["badak"]);
+      const [
+        { count: total },
+        { count: thisMonth },
+        { count: lastMonth },
+        { data: recent },
+        { data: groups },
+        { data: needs },
+        { count: postTotal },
+        { count: postChat },
+        { count: postReview },
+        { count: postProposal },
+        { count: needTotal },
+        { count: needGathering },
+        { count: needGroupCreated },
+      ] = await Promise.all([
+        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]),
+        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]).gte("created_at", monthStart),
+        supabase.from("members").select("*", { count: "exact", head: true }).contains("affiliations", ["badak"]).gte("created_at", lastMonthStart).lt("created_at", monthStart),
+        supabase.from("members").select("id, name, email, avatar_url, avatar_initials, created_at").contains("affiliations", ["badak"]).order("created_at", { ascending: false }).limit(5),
+        supabase.from("badak_groups").select("id, title, status, current_members, max_members, event_date, location, created_at").order("created_at", { ascending: false }).limit(10),
+        supabase.from("badak_needs").select("id, display_text, count, interest_count, status").order("count", { ascending: false }).limit(10),
+        supabase.from("badak_community_posts").select("*", { count: "exact", head: true }),
+        supabase.from("badak_community_posts").select("*", { count: "exact", head: true }).eq("board", "chat"),
+        supabase.from("badak_community_posts").select("*", { count: "exact", head: true }).eq("board", "review"),
+        supabase.from("badak_community_posts").select("*", { count: "exact", head: true }).eq("board", "proposal"),
+        supabase.from("badak_needs").select("*", { count: "exact", head: true }),
+        supabase.from("badak_needs").select("*", { count: "exact", head: true }).eq("status", "gathering"),
+        supabase.from("badak_needs").select("*", { count: "exact", head: true }).eq("status", "group_created"),
+      ]);
 
-      // 이번달 신규
-      const { count: thisMonth } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .contains("affiliations", ["badak"])
-        .gte("created_at", monthStart);
-
-      // 지난달 신규
-      const { count: lastMonth } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .contains("affiliations", ["badak"])
-        .gte("created_at", lastMonthStart)
-        .lt("created_at", lastMonthEnd);
-
-      // 성장률: (이번달 - 지난달) / (전체 - 이번달) * 100
-      const base = (total ?? 0) - (thisMonth ?? 0);
-      const growthRate = base > 0 && lastMonth != null && lastMonth > 0
+      const growthRate = lastMonth != null && lastMonth > 0
         ? +((((thisMonth ?? 0) - lastMonth) / lastMonth) * 100).toFixed(1)
         : null;
-
-      setGrowth({
-        totalMembers: total ?? 0,
-        thisMonthNew: thisMonth ?? 0,
-        lastMonthNew: lastMonth ?? 0,
-        growthRate,
-      });
-
-      // 최근 가입자 5명
-      const { data: recent } = await supabase
-        .from("members")
-        .select("id, name, email, avatar_url, avatar_initials, created_at, affiliations")
-        .contains("affiliations", ["badak"])
-        .order("created_at", { ascending: false })
-        .limit(5);
+      setGrowth({ totalMembers: total ?? 0, thisMonthNew: thisMonth ?? 0, lastMonthNew: lastMonth ?? 0, growthRate });
       setRecentMembers((recent as MemberRow[]) ?? []);
 
-      // Analytics 지표 (수집 데이터가 있을 때만)
-      const analyticsRes = await fetch("/api/analytics/event?brand=badak");
-      if (analyticsRes.ok) {
-        const data = await analyticsRes.json();
-        setAnalytics({
-          mauCount: data.sampleSize?.pageViews > 0 ? data.mauCount : null,
-          avgDurationSec: data.avgDurationSec,
-          avgWeeklyVisits: data.avgWeeklyVisits,
-        });
-      }
+      const g = (groups ?? []) as GroupRow[];
+      setGroupStats({
+        total: g.length,
+        recruiting: g.filter(x => x.status === "recruiting").length,
+        confirmed: g.filter(x => x.status === "confirmed").length,
+        closed: g.filter(x => x.status === "closed").length,
+        recentGroups: g.slice(0, 6),
+      });
+
+      const n = (needs ?? []) as NeedRow[];
+      setNeedStats({
+        total: needTotal ?? 0,
+        gathering: needGathering ?? 0,
+        groupCreated: needGroupCreated ?? 0,
+        topNeeds: n,
+      });
+
+      setPostStats({ total: postTotal ?? 0, chat: postChat ?? 0, review: postReview ?? 0, proposal: postProposal ?? 0 });
     } catch (err) {
       console.error("Badak data load error:", err);
     } finally {
@@ -161,16 +164,26 @@ export default function BadakPage() {
     }
   }
 
-  const totalRoomMembers = chatRooms.reduce((s, r) => s + r.members, 0);
-  const totalRooms = roomCategories.reduce((s, c) => s + c.count, 0);
+  async function loadAnalytics() {
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch("/api/analytics/event?brand=badak", { signal: controller.signal });
+      clearTimeout(tid);
+      if (res.ok) {
+        const data = await res.json();
+        setAnalytics({
+          mauCount: data.sampleSize?.pageViews > 0 ? data.mauCount : null,
+          avgDurationSec: data.avgDurationSec,
+          avgWeeklyVisits: data.avgWeeklyVisits,
+        });
+      }
+    } catch { /* 수집 중 상태 유지 */ }
+  }
 
+  const avgDurationMin = analytics.avgDurationSec != null ? Math.round(analytics.avgDurationSec / 60) : null;
   const mauRatio = analytics.mauCount != null && growth.totalMembers > 0
-    ? +((analytics.mauCount / growth.totalMembers) * 100).toFixed(1)
-    : null;
-
-  const avgDurationMin = analytics.avgDurationSec != null
-    ? Math.round(analytics.avgDurationSec / 60)
-    : null;
+    ? +((analytics.mauCount / growth.totalMembers) * 100).toFixed(1) : null;
 
   if (loading) {
     return (
@@ -182,109 +195,108 @@ export default function BadakPage() {
 
   return (
     <div>
-      <PageHeader title="Badak 관리" description="바닥 네트워크 커뮤니티 운영 관리">
-        <Link
-          href="/badak"
-          target="_blank"
-          className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700 transition-colors"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          사이트 바로가기
+      <PageHeader title="Badak 관리" description="바닥 네트워크 커뮤니티 운영 현황">
+        <Link href="/badak" target="_blank"
+          className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700 transition-colors">
+          <ExternalLink className="h-3.5 w-3.5" /> 사이트 바로가기
         </Link>
       </PageHeader>
 
-      {/* Stats */}
+      {/* ── 핵심 지표 ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="총 회원"
-          value={growth.totalMembers.toLocaleString() + "명"}
-          sub="affiliations: badak"
-          icon={<Users className="h-4 w-4" />}
-        />
-        <StatCard
-          label="오픈채팅방"
-          value={totalRooms + "개"}
-          sub={`참여자 ${totalRoomMembers.toLocaleString()}명`}
-          icon={<MessageCircle className="h-4 w-4" />}
-        />
-        <StatCard
-          label="이번달 신규"
-          value={growth.thisMonthNew + "명"}
-          sub={growth.lastMonthNew > 0 ? `지난달 ${growth.lastMonthNew}명` : "첫 달"}
-          icon={<UserPlus className="h-4 w-4" />}
-        />
-        <StatCard
-          label="다음 DAM Party"
-          value={nextDAMParty.date.slice(5).replace("-", "/")}
-          sub={nextDAMParty.status}
-          icon={<Calendar className="h-4 w-4" />}
-        />
+        <StatCard label="총 회원" value={growth.totalMembers.toLocaleString() + "명"}
+          sub={growth.thisMonthNew > 0 ? `이번달 +${growth.thisMonthNew}명` : "신규 없음"}
+          icon={<Users className="h-4 w-4" />} />
+        <StatCard label="진행 중인 모임" value={groupStats.recruiting + "개"}
+          sub={`전체 ${groupStats.total}개 · 확정 ${groupStats.confirmed}개`}
+          icon={<Calendar className="h-4 w-4" />} />
+        <StatCard label="니즈 클라우드" value={needStats.total + "개"}
+          sub={`모이는 중 ${needStats.gathering}개 · 모임성사 ${needStats.groupCreated}개`}
+          icon={<Cloud className="h-4 w-4" />} />
+        <StatCard label="커뮤니티 글" value={postStats.total.toLocaleString() + "개"}
+          sub={`수다 ${postStats.chat} · 후기 ${postStats.review} · 제안 ${postStats.proposal}`}
+          icon={<MessageSquare className="h-4 w-4" />} />
       </div>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 오픈채팅방 현황 */}
-        <Card>
-          <SectionTitle title="오픈채팅방 카테고리" />
-          <div className="flex flex-wrap gap-2 mb-5">
-            {roomCategories.map((cat) => (
-              <span
-                key={cat.name}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-sm ${cat.color}`}
-              >
-                <Hash className="h-3 w-3" />
-                {cat.name} {cat.count}
-              </span>
-            ))}
-          </div>
 
-          <SectionTitle title="주요 채팅방 TOP 10" />
-          <div className="space-y-2">
-            {chatRooms.map((room) => (
-              <div
-                key={room.name}
-                className="flex items-center justify-between py-2 px-3 border border-neutral-100 rounded-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-sm text-neutral-700">{room.name}</span>
-                  <span className="text-[10px] text-neutral-400 bg-neutral-50 px-1.5 py-0.5 rounded">
-                    {room.category}
-                  </span>
-                </div>
-                <span className="text-xs text-neutral-400">{room.members}명</span>
+        {/* ── 모임 현황 ── */}
+        <Card>
+          <SectionTitle title="모임 현황" action="전체 보기" actionHref="/badak/groups" />
+
+          {/* 상태 요약 */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[
+              { label: "모집중", value: groupStats.recruiting, icon: <Clock className="h-3.5 w-3.5 text-emerald-500" /> },
+              { label: "확정", value: groupStats.confirmed, icon: <CheckCircle className="h-3.5 w-3.5 text-indigo-500" /> },
+              { label: "마감", value: groupStats.closed, icon: <AlertCircle className="h-3.5 w-3.5 text-neutral-400" /> },
+            ].map(({ label, value, icon }) => (
+              <div key={label} className="flex flex-col items-center gap-1 py-3 bg-neutral-50 rounded-sm">
+                {icon}
+                <span className="text-lg font-semibold text-neutral-800">{value}</span>
+                <span className="text-[10px] text-neutral-400">{label}</span>
               </div>
             ))}
           </div>
+
+          {/* 최근 모임 목록 */}
+          <SectionTitle title="최근 모임" />
+          {groupStats.recentGroups.length === 0 ? (
+            <p className="text-xs text-neutral-400 py-4 text-center">등록된 모임이 없습니다</p>
+          ) : (
+            <div className="space-y-2">
+              {groupStats.recentGroups.map((g) => {
+                const st = STATUS_LABEL[g.status] ?? { label: g.status, color: "bg-neutral-100 text-neutral-500" };
+                return (
+                  <div key={g.id} className="flex items-start justify-between py-2 px-3 border border-neutral-100 rounded-sm">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded ${st.color}`}>{st.label}</span>
+                        <p className="text-sm text-neutral-700 truncate">{g.title}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] text-neutral-400">
+                        {g.location && <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{g.location}</span>}
+                        {g.event_date && <span className="flex items-center gap-0.5"><Calendar className="h-2.5 w-2.5" />{new Date(g.event_date).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })}</span>}
+                      </div>
+                    </div>
+                    <span className="ml-2 shrink-0 text-xs text-neutral-400">{g.current_members}/{g.max_members}명</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
 
-        {/* 우측 패널 */}
+        {/* ── 우측 컬럼 ── */}
         <div className="space-y-6">
-          {/* DAM Party */}
+
+          {/* 니즈 클라우드 TOP 10 */}
           <Card>
-            <SectionTitle title="다음 DAM Party" />
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-800">{nextDAMParty.title}</span>
-                <span className="text-[10px] font-medium px-2 py-0.5 bg-amber-50 text-amber-700 rounded-sm">
-                  {nextDAMParty.status}
-                </span>
+            <SectionTitle title="니즈 클라우드 TOP 10" action="탐색 페이지" actionHref="/badak/explore" />
+            {needStats.topNeeds.length === 0 ? (
+              <p className="text-xs text-neutral-400 py-4 text-center">니즈 데이터가 없습니다</p>
+            ) : (
+              <div className="space-y-1.5">
+                {needStats.topNeeds.map((n, i) => (
+                  <div key={n.id} className="flex items-center gap-2.5 py-1.5 px-2 rounded hover:bg-neutral-50">
+                    <span className="w-4 text-[10px] font-bold text-neutral-300 text-right shrink-0">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-1 bg-neutral-100 rounded-full overflow-hidden mb-1">
+                        <div className="h-full rounded-full bg-amber-400"
+                          style={{ width: `${Math.min(100, (n.count / (needStats.topNeeds[0]?.count || 1)) * 100)}%` }} />
+                      </div>
+                      <p className="text-xs text-neutral-700 truncate">{n.display_text}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="text-xs font-semibold text-neutral-600">{n.count}명</span>
+                      {n.status === "group_created" && (
+                        <div className="text-[9px] text-indigo-500 font-medium">모임성사</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-1.5 text-xs text-neutral-500">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-3.5 w-3.5 text-neutral-400" />
-                  {nextDAMParty.date}
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-neutral-400" />
-                  {nextDAMParty.location}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-3.5 w-3.5 text-neutral-400" />
-                  예상 참석자 {nextDAMParty.expectedAttendees}명
-                </div>
-              </div>
-            </div>
+            )}
           </Card>
 
           {/* 최근 가입자 */}
@@ -297,7 +309,7 @@ export default function BadakPage() {
                 {recentMembers.map((m) => (
                   <div key={m.id} className="flex items-center gap-3 py-1.5">
                     <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-semibold shrink-0">
-                      {m.avatar_initials || m.name.charAt(0)}
+                      {m.avatar_initials || m.name?.charAt(0)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-neutral-800 truncate">{m.name}</p>
@@ -316,7 +328,6 @@ export default function BadakPage() {
           <Card>
             <SectionTitle title="성장 지표" />
             <div className="grid grid-cols-2 gap-3">
-              {/* 월간 성장률 — 실데이터 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
                 {growth.growthRate != null ? (
                   <>
@@ -324,6 +335,7 @@ export default function BadakPage() {
                       {growth.growthRate >= 0 ? "+" : ""}{growth.growthRate}%
                     </p>
                     <p className="text-[10px] text-neutral-400 mt-0.5">월간 성장률</p>
+                    <p className="text-[9px] text-neutral-300 mt-0.5">지난달 {growth.lastMonthNew}명 기준</p>
                   </>
                 ) : (
                   <>
@@ -332,8 +344,6 @@ export default function BadakPage() {
                   </>
                 )}
               </div>
-
-              {/* MAU 비율 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
                 {mauRatio != null ? (
                   <>
@@ -347,8 +357,6 @@ export default function BadakPage() {
                   </>
                 )}
               </div>
-
-              {/* 평균 체류시간 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
                 {avgDurationMin != null ? (
                   <>
@@ -362,8 +370,6 @@ export default function BadakPage() {
                   </>
                 )}
               </div>
-
-              {/* 주간 방문 횟수 — analytics 이벤트 기반 */}
               <div className="text-center py-3 bg-neutral-50 rounded-sm">
                 {analytics.avgWeeklyVisits != null ? (
                   <>
@@ -378,12 +384,9 @@ export default function BadakPage() {
                 )}
               </div>
             </div>
-
-            {/* 데이터 출처 안내 */}
-            <div className="mt-3 flex items-center gap-1.5 text-[10px] text-neutral-300">
-              <BarChart2 className="h-3 w-3" />
-              월간 성장률: DB 실측 · MAU/체류시간/방문: 이벤트 수집 중 (Badak 방문 시 자동 기록)
-            </div>
+            <p className="mt-3 text-[9px] text-neutral-300 text-center">
+              ※ 성장률: DB 실측 · MAU/체류시간/방문: 이벤트 수집 중 (Badak 방문 시 자동 기록)
+            </p>
           </Card>
         </div>
       </div>

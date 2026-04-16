@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     .select(`
       id, title, status, max_members, current_members,
       event_date, location, tags, cover_image_url,
-      leader:badak_members!badak_groups_leader_id_fkey(display_name, job_function, experience_years)
+      leader:badak_members!badak_groups_leader_id_fkey(id, display_name, job_function, experience_years)
     `)
     .in('status', ['recruiting', 'confirmed'])
     .order('event_date', { ascending: true })
@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     needId?: string;
     storyId?: string;
     leader?: string;
+    leaderId?: string;
     leaderJob?: string;
     members?: number;
     max?: number;

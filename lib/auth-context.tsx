@@ -263,25 +263,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ),
             ]);
             const { data, error } = authResult as { data: { user: { id: string; email?: string } } | null; error: { message: string } | null };
-            if (!error && data && data.user) {
-                const u = await syncUserFromSession(data.user);
-                if (u) {
-                    // last_login_at 업데이트
-                    supabase.from('members').update({ last_login_at: new Date().toISOString() }).eq('auth_id', data.user.id).then(() => {});
-                    return { success: true, user: u };
-                }
-            }
             if (error) {
                 console.error('[Auth] Supabase login error:', error.message);
                 if (error.message === 'timeout') {
                     return { success: false, error: '서버 연결에 시간이 걸리고 있습니다. 다시 시도해 주세요.' };
                 }
+                if (error.message?.includes('Email not confirmed')) {
+                    return { success: false, error: '이메일 인증이 필요합니다. 가입 시 받은 인증 메일을 확인해주세요.' };
+                }
+                if (error.message?.includes('Invalid login credentials')) {
+                    return { success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' };
+                }
+                return { success: false, error: error.message || '로그인에 실패했습니다.' };
             }
-        } catch {
-            // Supabase 접속 실패
+            if (data && data.user) {
+                // Supabase 인증 성공 — members 동기화 시도 (실패해도 성공으로 처리)
+                const u = await syncUserFromSession(data.user);
+                if (u) {
+                    supabase.from('members').update({ last_login_at: new Date().toISOString() }).eq('auth_id', data.user.id).then(() => {});
+                }
+                // onAuthStateChange가 SIGNED_IN을 발행하므로 u가 null이어도 인증은 성공
+                return { success: true, user: u ?? undefined };
+            }
+        } catch (e) {
+            console.error('[Auth] login exception:', e);
         }
 
-        return { success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' };
+        return { success: false, error: '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.' };
     }, [supabase, syncUserFromSession]);
 
     // 회원가입: Supabase Auth + members 테이블
