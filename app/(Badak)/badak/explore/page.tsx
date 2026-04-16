@@ -15,10 +15,13 @@ import { WantsCard, type WantsCardData } from '@/features/badak/explore/WantsCar
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
 import type { MatchMode } from '@/lib/wio/people/matching';
+import { INDUSTRIES, JOB_FUNCTIONS } from '@/lib/badak-constants';
+import { Filter } from 'lucide-react';
 
 // 니즈 카테고리 분류
 type NeedCategory = 'all' | 'withGroup' | 'waiting' | 'hot';
 type ExploreTab = 'needs' | 'people' | 'wants';
+type PeopleView = 'match' | 'browse';
 
 export default function ExplorePage() {
   const { isAuthenticated, user } = useAuth();
@@ -31,8 +34,17 @@ export default function ExplorePage() {
   const [tab, setTab] = useState<ExploreTab>('needs');
 
   // People 탭 상태
+  const [peopleView, setPeopleView] = useState<PeopleView>('match');
   const [peopleMode, setPeopleMode] = useState<MatchMode>('needs_match');
   const [matches, setMatches] = useState<MatchCardData[]>([]);
+
+  // 전체 멤버 검색 상태
+  const [browseQuery, setBrowseQuery] = useState('');
+  const [browseIndustry, setBrowseIndustry] = useState('');
+  const [browseJobFn, setBrowseJobFn] = useState('');
+  const [browseMembers, setBrowseMembers] = useState<any[]>([]);
+  const [browseTotal, setBrowseTotal] = useState(0);
+  const [browseLoading, setBrowseLoading] = useState(false);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [matchesError, setMatchesError] = useState<string | null>(null);
 
@@ -67,9 +79,27 @@ export default function ExplorePage() {
     setWantsLoading(false);
   }, [isAuthenticated, fetchWithAuth]);
 
+  const loadBrowse = useCallback(async () => {
+    setBrowseLoading(true);
+    const params = new URLSearchParams();
+    if (browseQuery) params.set('q', browseQuery);
+    if (browseIndustry) params.set('industry', browseIndustry);
+    if (browseJobFn) params.set('job_function', browseJobFn);
+    params.set('limit', '20');
+    const res = await fetch(`/api/badak/members/search?${params}`);
+    const data = await res.json();
+    setBrowseMembers(data.members ?? []);
+    setBrowseTotal(data.total ?? 0);
+    setBrowseLoading(false);
+  }, [browseQuery, browseIndustry, browseJobFn]);
+
   useEffect(() => {
-    if (tab === 'people') loadMatches(peopleMode);
-  }, [tab, peopleMode, loadMatches]);
+    if (tab === 'people' && peopleView === 'match') loadMatches(peopleMode);
+  }, [tab, peopleView, peopleMode, loadMatches]);
+
+  useEffect(() => {
+    if (tab === 'people' && peopleView === 'browse') loadBrowse();
+  }, [tab, peopleView, loadBrowse]);
 
   useEffect(() => {
     if (tab === 'wants') loadWants();
@@ -326,7 +356,97 @@ export default function ExplorePage() {
         {/* === 사람 탭 === */}
         {tab === 'people' && (
           <div className="px-4 sm:px-6">
-            {/* 모드 스위처 */}
+            {/* 뷰 전환: 매칭 / 전체 멤버 */}
+            <div className="mb-4 flex gap-2">
+              <button onClick={() => setPeopleView('match')}
+                className="rounded-lg px-4 py-2 text-[13px] font-semibold transition-all"
+                style={{ background: peopleView === 'match' ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.05)', color: peopleView === 'match' ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>
+                <Sparkles className="inline h-3.5 w-3.5 mr-1" />매칭
+              </button>
+              <button onClick={() => setPeopleView('browse')}
+                className="rounded-lg px-4 py-2 text-[13px] font-semibold transition-all"
+                style={{ background: peopleView === 'browse' ? 'rgba(255,217,61,0.15)' : 'rgba(255,255,255,0.05)', color: peopleView === 'browse' ? '#ffd93d' : 'rgba(255,255,255,0.4)' }}>
+                <Users className="inline h-3.5 w-3.5 mr-1" />전체 멤버
+              </button>
+            </div>
+
+            {/* 전체 멤버 뷰 — 검색 + 필터 */}
+            {peopleView === 'browse' && (
+              <>
+                <div className="mb-4 flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                    <input value={browseQuery} onChange={e => setBrowseQuery(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && loadBrowse()}
+                      placeholder="이름, 직무, 산업으로 검색"
+                      className="w-full rounded-xl bg-white/5 border border-white/8 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-white/30 focus:border-amber-500/30 focus:outline-none" />
+                  </div>
+                  <button onClick={loadBrowse} className="shrink-0 rounded-xl bg-amber-500/15 px-4 text-sm font-medium text-amber-400 hover:bg-amber-500/25 transition-colors">
+                    검색
+                  </button>
+                </div>
+                <div className="mb-5 flex gap-2 overflow-x-auto scrollbar-hide">
+                  <select value={browseIndustry} onChange={e => { setBrowseIndustry(e.target.value); }}
+                    className="shrink-0 rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-xs text-white/60 focus:outline-none">
+                    <option value="">산업군 전체</option>
+                    {INDUSTRIES.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <select value={browseJobFn} onChange={e => { setBrowseJobFn(e.target.value); }}
+                    className="shrink-0 rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-xs text-white/60 focus:outline-none">
+                    <option value="">직무 전체</option>
+                    {JOB_FUNCTIONS.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  {(browseIndustry || browseJobFn) && (
+                    <button onClick={() => { setBrowseIndustry(''); setBrowseJobFn(''); }}
+                      className="shrink-0 text-xs text-white/40 hover:text-white/60">초기화</button>
+                  )}
+                </div>
+
+                {browseLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+                  </div>
+                ) : browseMembers.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <Users className="mx-auto mb-3 h-10 w-10 text-white/15" />
+                    <p className="text-sm text-white/40">검색 결과가 없습니다</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mb-3 text-xs text-white/30">{browseTotal}명의 멤버</p>
+                    <div className="space-y-2">
+                      {browseMembers.map((m: any) => (
+                        <button key={m.id}
+                          onClick={() => setSelectedPeer({ memberId: m.id, displayName: m.display_name, jobFunction: m.job_function })}
+                          className="w-full flex items-center gap-3 rounded-xl border border-white/6 bg-white/[0.03] p-3 hover:bg-white/[0.06] transition-colors text-left">
+                          {m.avatar_url ? (
+                            <img src={m.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-amber-500/15 flex items-center justify-center text-sm font-bold text-amber-400 shrink-0">
+                              {m.display_name?.[0] || '?'}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate">{m.display_name}</p>
+                            <p className="text-xs text-white/40 truncate">
+                              {[m.job_function, m.industry].filter(Boolean).join(' · ') || '프로필 미완성'}
+                            </p>
+                          </div>
+                          {m.experience_years && (
+                            <span className="shrink-0 text-[10px] text-white/30">{m.experience_years}년</span>
+                          )}
+                          <ChevronRight className="h-4 w-4 text-white/20 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* 매칭 뷰 — 기존 모드 스위처 */}
+            {peopleView === 'match' && (
+            <>
             <div className="mb-5 flex gap-1.5 overflow-x-auto scrollbar-hide">
               {([
                 { id: 'needs_match' as const, label: '같은 니즈' },
@@ -396,6 +516,8 @@ export default function ExplorePage() {
                   />
                 ))}
               </div>
+            )}
+            </>
             )}
           </div>
         )}
