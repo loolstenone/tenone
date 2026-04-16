@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowRight, Calendar, GraduationCap, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, Calendar, GraduationCap, MapPin, Sparkles, FolderOpen, LayoutDashboard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { MemberLinkButton } from './MemberLinkButton';
 
@@ -120,6 +120,12 @@ export default async function MemberPage() {
           <Link href="/madleague/member/certificate" className="inline-flex items-center gap-2 border border-[#FFC000] hover:bg-[#FFC000] hover:text-black text-[#FFC000] font-bold px-5 py-2.5 text-sm transition">
             인증서 발급
           </Link>
+          <Link href="/madleague/member/portfolio" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-5 py-2.5 text-sm transition">
+            <LayoutDashboard className="h-3.5 w-3.5" /> 포트폴리오
+          </Link>
+          <Link href="/madleague/member/projects" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-5 py-2.5 text-sm transition">
+            <FolderOpen className="h-3.5 w-3.5" /> 참여 프로젝트
+          </Link>
           <Link href="/madleague/community" className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white font-bold px-5 py-2.5 text-sm transition">
             커뮤니티
           </Link>
@@ -142,11 +148,15 @@ export default async function MemberPage() {
           </div>
           <h2 className="text-2xl font-black mb-6">곧 추가될 기능</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link href="/madleague/member/projects" className="bg-black border border-neutral-800 hover:border-neutral-600 p-4 transition group">
+              <div className="font-bold group-hover:text-white">프로젝트 <span className="text-[10px] font-bold text-[#EC1D25] ml-1">NEW</span></div>
+              <div className="mt-1 text-xs text-neutral-500">참여 중인 경쟁PT·마케톤 이력 + 제출물</div>
+            </Link>
+            <Link href="/madleague/member/portfolio" className="bg-black border border-neutral-800 hover:border-neutral-600 p-4 transition group">
+              <div className="font-bold group-hover:text-white">포트폴리오 <span className="text-[10px] font-bold text-[#EC1D25] ml-1">NEW</span></div>
+              <div className="mt-1 text-xs text-neutral-500">활동 기반 자동 집계 + 퍼블릭 공유</div>
+            </Link>
             {[
-              ['프로젝트', '참여 중인 경쟁PT·PJT·마케톤 이력'],
-              ['포트폴리오', '활동 기반 자동 생성 + 퍼블릭 공유'],
-              ['인증서', '활동인증서·수상확인서·MAD Crown 자동 발급'],
-              ['커뮤니티', '전체 피드 + 동아리별 게시판 + 핀보드'],
               ['경쟁PT 워크스페이스', '브리프·제출·결과'],
               ['성장 경로', 'HeRo·Badak·YouInOne 연계'],
             ].map(([title, desc]) => (

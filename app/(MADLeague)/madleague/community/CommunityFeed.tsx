@@ -19,6 +19,9 @@ interface Post {
   mad_clubs: { slug: string; name: string; color: string | null } | null;
 }
 
+// postId별 { count, liked, processing } 상태
+type LikeState = Record<string, { count: number; liked: boolean; processing: boolean }>;
+
 interface Props {
   initialCategory: string;
   initialClub?: string;
@@ -33,6 +36,7 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [writing, setWriting] = useState(false);
+  const [likes, setLikes] = useState<LikeState>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -42,13 +46,49 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
       if (initialClub) qs.set('club', initialClub);
       const res = await fetch(`/api/madleague/posts?${qs.toString()}`);
       const data = await res.json();
-      setPosts(data.posts ?? []);
+      const fetched: Post[] = data.posts ?? [];
+      setPosts(fetched);
+      // 초기 좋아요 카운트 상태 설정 (liked는 서버 호출 없이 false로 초기화 — UX 충분)
+      setLikes(prev => {
+        const next = { ...prev };
+        fetched.forEach(p => {
+          if (!next[p.id]) next[p.id] = { count: p.likes_count, liked: false, processing: false };
+        });
+        return next;
+      });
     } finally {
       setLoading(false);
     }
   }, [initialCategory, initialClub]);
 
   useEffect(() => { load(); }, [load]);
+
+  async function toggleLike(e: React.MouseEvent, postId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    const cur = likes[postId];
+    if (!cur || cur.processing) return;
+    // optimistic
+    setLikes(prev => ({
+      ...prev,
+      [postId]: { count: cur.liked ? cur.count - 1 : cur.count + 1, liked: !cur.liked, processing: true },
+    }));
+    try {
+      const res = await fetch(`/api/madleague/posts/${postId}/like`, { method: 'POST' });
+      if (!res.ok) {
+        // 롤백
+        setLikes(prev => ({ ...prev, [postId]: { ...cur, processing: false } }));
+      } else {
+        const data = await res.json();
+        setLikes(prev => ({
+          ...prev,
+          [postId]: { count: prev[postId].count, liked: data.liked, processing: false },
+        }));
+      }
+    } catch {
+      setLikes(prev => ({ ...prev, [postId]: { ...cur, processing: false } }));
+    }
+  }
 
   if (loading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-neutral-500" /></div>;
@@ -96,7 +136,15 @@ export function CommunityFeed({ initialCategory, initialClub, clubs }: Props) {
               <div className="font-bold text-white line-clamp-1">{post.title}</div>
               <div className="mt-1 text-sm text-neutral-400 line-clamp-2">{post.content}</div>
               <div className="mt-3 flex items-center gap-4 text-xs text-neutral-500">
-                <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {post.likes_count}</span>
+                <button
+                  onClick={(e) => toggleLike(e, post.id)}
+                  className={`inline-flex items-center gap-1 transition-colors hover:text-[#EC1D25] ${
+                    likes[post.id]?.liked ? 'text-[#EC1D25]' : ''
+                  }`}
+                >
+                  <Heart className={`h-3.5 w-3.5 ${likes[post.id]?.liked ? 'fill-current' : ''}`} />
+                  {likes[post.id]?.count ?? post.likes_count}
+                </button>
                 <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {post.comments_count}</span>
                 {post.mad_members && <span className="ml-auto">{post.mad_members.name}</span>}
               </div>
