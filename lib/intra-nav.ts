@@ -150,7 +150,7 @@ export const modules: NavModule[] = [
             {
                 label: "브랜드별",
                 items: [
-                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "준비중" },
                     {
                         name: "Badak", href: "/intra/ums/badak", icon: Globe,
                         children: [
@@ -170,7 +170,10 @@ export const modules: NavModule[] = [
                             { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
                         ],
                     },
-                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "soon" },
+                    { name: "ChangeUp", href: "/intra/ums/changeup", icon: Globe, badge: "준비중" },
+                    { name: "Domo", href: "/intra/ums/domo", icon: Globe, badge: "준비중" },
+                    { name: "Evolution School", href: "/intra/evolution-school", icon: BookOpen, badge: "준비중" },
+                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "준비중" },
                     {
                         name: "HeRo", href: "/intra/hero/talent", icon: Award,
                         children: [
@@ -181,20 +184,33 @@ export const modules: NavModule[] = [
                             { name: "커리어 이용자", href: "/intra/hero/career" },
                         ],
                     },
+                    { name: "JAKKA", href: "/intra/ums/jakka", icon: Globe, badge: "준비중" },
+                    { name: "Korea360", href: "/intra/ums/seoul360", icon: Globe, badge: "준비중" },
+                    { name: "LUKI", href: "/intra/ums/luki", icon: Globe, badge: "준비중" },
+                    { name: "Dokdae", href: "/intra/ums/dokdae", icon: Globe, badge: "준비중" },
+                    { name: "Korea360", href: "/intra/ums/seoul360", icon: Globe, badge: "준비중" },
+                    { name: "LUKI", href: "/intra/ums/luki", icon: Globe, badge: "준비중" },
                     { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
-                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
-                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
+                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "준비중" },
+                    { name: "Mindle", href: "/intra/ums/mindle", icon: Globe, badge: "준비중" },
+                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "준비중" },
+                    { name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe, badge: "준비중" },
+                    { name: "My Universe", href: "/intra/ums/myverse", icon: Globe, badge: "준비중" },
+                    { name: "Naming Factory", href: "/intra/ums/namingfactory", icon: Globe, badge: "준비중" },
+                    { name: "NatureBox", href: "/intra/ums/naturebox", icon: Globe, badge: "준비중" },
                     {
                         name: "Planner's", href: "/intra/evolution-school", icon: BookOpen,
                         children: [
-                            { name: "Planning", href: "/intra/ums/planners/planning", badge: "soon" },
-                            { name: "GPR", href: "/intra/ums/planners/gpr", badge: "soon" },
-                            { name: "Programs", href: "/intra/ums/planners/programs", badge: "soon" },
+                            { name: "Planning", href: "/intra/ums/planners/planning", badge: "준비중" },
+                            { name: "GPR", href: "/intra/ums/planners/gpr", badge: "준비중" },
+                            { name: "Programs", href: "/intra/ums/planners/programs", badge: "준비중" },
                             { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
-                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
-                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
+                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "준비중" },
+                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "준비중" },
+                    { name: "Townity", href: "/intra/ums/townity", icon: Globe, badge: "준비중" },
+                    { name: "Trend Hunter", href: "/intra/ums/trendhunter", icon: Globe, badge: "준비중" },
                     {
                         name: "WIO", href: "/intra/ums/commerce/subscriptions", icon: Settings,
                         children: [
@@ -202,7 +218,7 @@ export const modules: NavModule[] = [
                             { name: "테넌트", href: "/intra/ums/wio/tenants" },
                         ],
                     },
-                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe, badge: "soon" },
+                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe, badge: "준비중" },
                 ],
             },
         ],

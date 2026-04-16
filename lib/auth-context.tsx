@@ -303,6 +303,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!error && data.user) {
+                // 이미 가입된 이메일: identities가 비어있으면 중복 (Supabase 이메일 열거 방지 동작)
+                if (!data.user.identities || data.user.identities.length === 0) {
+                    return { success: false, error: '이미 가입된 이메일입니다. 로그인해주세요.' };
+                }
+                // 세션이 없으면 이메일 인증 대기 상태 — members INSERT 불가
+                if (!data.session) {
+                    return { success: false, error: '인증 메일을 발송했습니다. 이메일을 확인해주세요.' };
+                }
+
                 // members 테이블에 프로필 생성 (origin_site 기반)
                 const originSite = typeof window !== 'undefined' ? window.location.hostname : 'tenone.biz';
                 const { defaultModuleAccess } = await import('@/types/auth');
@@ -340,7 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (error) {
                 if (error.message.includes('already registered')) {
-                    return { success: false, error: '이미 가입된 이메일입니다.' };
+                    return { success: false, error: '이미 가입된 이메일입니다. 로그인해주세요.' };
                 }
                 return { success: false, error: error.message };
             }

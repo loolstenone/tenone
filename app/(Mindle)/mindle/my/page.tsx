@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { User, Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp, Zap, BarChart3 } from "lucide-react";
 import { trends, statusBadge } from "@/lib/mindle/trend-data";
+import { UniverseMembership } from "@/components/UniverseMembership";
 
 const INTEREST_OPTIONS = ["AI / Tech", "Marketing", "Consumer", "Business", "Content", "Lifestyle", "Startup", "Design", "Finance"];
 
@@ -195,6 +196,10 @@ export default function MindleMyPage() {
                         </div>
                     </div>
                 )}
+
+                <div className="mt-6">
+                    <UniverseMembership />
+                </div>
             </div>
         </div>
     );

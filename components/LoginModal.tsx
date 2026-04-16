@@ -22,6 +22,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [isDuplicate, setIsDuplicate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
@@ -47,7 +48,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         return () => { document.body.style.overflow = ""; };
     }, [isOpen]);
 
-    const resetForm = () => { setName(""); setEmail(""); setPassword(""); setPasswordConfirm(""); setError(""); setShowPassword(false); };
+    const resetForm = () => { setName(""); setEmail(""); setPassword(""); setPasswordConfirm(""); setError(""); setIsDuplicate(false); setShowPassword(false); };
     const switchTab = (t: "login" | "signup") => { resetForm(); setTab(t); };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -70,7 +71,13 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         setIsSubmitting(true);
         try {
             const result = await register(name, email, password, true);
-            if (!result.success) setError(result.error || "회원가입에 실패했습니다.");
+            if (!result.success) {
+                if (result.error?.includes('이미 가입된')) {
+                    setIsDuplicate(true);
+                } else {
+                    setError(result.error || "회원가입에 실패했습니다.");
+                }
+            }
         } catch { setError("회원가입 중 오류가 발생했습니다."); }
         setIsSubmitting(false);
     };
@@ -157,26 +164,46 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
                     {/* 가입 폼 */}
                     {tab === "signup" && (
-                        <form onSubmit={handleSignup} className="space-y-3">
-                            <input type="text" placeholder="닉네임" value={name} onChange={e => setName(e.target.value)} className={inputClass} required />
-                            <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
-                            <div className="relative">
-                                <input type={showPassword ? "text" : "password"} placeholder="비밀번호 (6자 이상)" value={password} onChange={e => setPassword(e.target.value)} className={inputClass + " pr-10"} required />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        isDuplicate ? (
+                            <div className="space-y-4">
+                                <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-5 text-center">
+                                    <div className="text-2xl mb-2">🌐</div>
+                                    <p className="text-sm font-semibold text-neutral-900 mb-1">이미 Ten:One™ Universe 회원입니다</p>
+                                    <p className="text-xs text-neutral-500 mb-1">{email}</p>
+                                    <p className="text-xs text-neutral-400">로그인하면 가입된 서비스 현황을 확인할 수 있습니다.</p>
+                                </div>
+                                <button onClick={() => { setIsDuplicate(false); setError(""); setPassword(""); setPasswordConfirm(""); setTab("login"); }}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                                    style={{ backgroundColor: accentColor }}>
+                                    로그인하기
+                                </button>
+                                <button onClick={() => { setIsDuplicate(false); setError(""); setEmail(""); }}
+                                    className="w-full text-center text-xs text-neutral-400 hover:text-neutral-600 transition-colors">
+                                    다른 이메일로 가입
                                 </button>
                             </div>
-                            <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)}
-                                className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : ''}`} required />
-                            {passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
-                            {error && <p className="text-sm text-red-500">{error}</p>}
-                            <button type="submit" disabled={isSubmitting}
-                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
-                                style={{ backgroundColor: accentColor }}>
-                                {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    : "가입하기"}
-                            </button>
-                        </form>
+                        ) : (
+                            <form onSubmit={handleSignup} className="space-y-3">
+                                <input type="text" placeholder="닉네임" value={name} onChange={e => setName(e.target.value)} className={inputClass} required />
+                                <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
+                                <div className="relative">
+                                    <input type={showPassword ? "text" : "password"} placeholder="비밀번호 (6자 이상)" value={password} onChange={e => setPassword(e.target.value)} className={inputClass + " pr-10"} required />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                <input type="password" placeholder="비밀번호 확인" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)}
+                                    className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : ''}`} required />
+                                {passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
+                                {error && <p className="text-sm text-red-500">{error}</p>}
+                                <button type="submit" disabled={isSubmitting}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
+                                    style={{ backgroundColor: accentColor }}>
+                                    {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        : "가입하기"}
+                                </button>
+                            </form>
+                        )
                     )}
 
                     {/* 탭 전환 링크 */}

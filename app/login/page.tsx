@@ -360,10 +360,14 @@ export default function LoginPage() {
 
         // 외부 도메인(smarcomm.biz, badak.biz 등)에서 접속 시 SSO 자동 시도
         const isTenone = host === 'tenone.biz' || host === 'www.tenone.biz';
-        // tenone.biz에서 /login 접근 → Intra로 리디렉트 (소비자 가입 안 받음)
+        // tenone.biz에서 redirect 없이 직접 /login 접근 → Intra로 리디렉트
+        // redirect 파라미터가 있으면 (예: /profile에서 넘어온 경우) 로그인 폼 표시
         if (isTenone) {
-            window.location.href = '/intra';
-            return;
+            const params = new URLSearchParams(window.location.search);
+            if (!params.get('redirect')) {
+                window.location.href = '/intra';
+                return;
+            }
         }
         const isTenoneSubdomain = host.endsWith('.tenone.biz') || host === 'localhost';
         const isExternal = !isTenone && !isTenoneSubdomain;

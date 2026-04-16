@@ -12,7 +12,6 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 const navItems = [
     { name: "프로그램",  href: "/madleague/programs" },
     { name: "MADzine",  href: "/madleague/madzine" },
-    { name: "아카이브",  href: "/madleague/archive" },
     { name: "지원하기",  href: "/madleague/apply" },
 ];
 

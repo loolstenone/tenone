@@ -8,6 +8,7 @@ import {
 import Link from 'next/link';
 import { useWIO } from '../layout';
 import { createClient } from '@/lib/supabase/client';
+import { UniverseMembership } from '@/components/UniverseMembership';
 
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
@@ -390,6 +391,11 @@ export default function MyHomePage() {
           <Sparkles size={13} />
           {aiLoading ? '분석 중...' : '이번 주 내 업무 요약해줘'}
         </button>
+      </div>
+
+      {/* Universe 가입 현황 */}
+      <div className="mt-4">
+        <UniverseMembership />
       </div>
     </div>
   );

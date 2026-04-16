@@ -8,14 +8,15 @@ export async function generateMetadata(): Promise<Metadata> {
     const db = await getSiteConfigServer('planners');
     const site = siteConfigs.planners;
     return {
-        title: { default: db?.meta_title ?? "Planner's — 우리는 모두 기획자다", template: `%s | ${db?.name ?? "Planner's"}` },
-        description: db?.meta_description ?? "기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.",
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
         icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
         openGraph: {
-            title: db?.meta_title ?? "Planner's — 기획 프레임워크",
-            description: db?.meta_description ?? "기획은 꾀하는 것이고, 계획은 세우는 것이다. Why를 찾고 What을 만드는 사람, 그것이 기획자다.",
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
             siteName: 'Ten:One™ Universe',
             type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
 }

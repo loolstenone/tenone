@@ -4,7 +4,7 @@ export default function Page() {
   return (
     <UnderConstruction
       siteName="독대"
-      tagline="1:1 멘토링 네트워크"
+      tagline="AI Agent 메시징 채널"
       accentColor="#60a5fa"
     />
   );

@@ -60,7 +60,7 @@ export default async function Page() {
           <div className="mt-16 flex flex-col lg:flex-row gap-16 items-start">
             {/* 지도 */}
             <div className="flex-shrink-0 w-full lg:w-auto flex justify-center">
-              <KoreaClubMap clubs={clubs} />
+              <KoreaClubMap />
             </div>
 
             {/* 설명 + 동아리 목록 */}
@@ -83,19 +83,18 @@ export default async function Page() {
                   { region: '광주/전라권', name: 'ABC',       sub: '조선대',      slug: 'abc' },
                   { region: '제주권',     name: 'SUZAK',     sub: '연합',        slug: 'suzak' },
                 ].map((c) => (
-                  <Link
+                  <div
                     key={c.slug}
-                    href={`/madleague/clubs/${c.slug}`}
-                    className="flex items-center gap-4 group hover:bg-neutral-900 px-4 py-3 -mx-4 transition"
+                    className="flex items-center gap-4 px-4 py-3 -mx-4"
                   >
                     <span className="text-xs text-neutral-500 font-bold tracking-wider w-24 shrink-0">
                       {c.region}
                     </span>
-                    <span className="font-black text-2xl text-white group-hover:text-[#EC1D25] transition">
+                    <span className="font-black text-2xl text-white">
                       {c.name}
                       <span className="ml-2 text-sm font-normal text-neutral-500">({c.sub})</span>
                     </span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>

@@ -39,6 +39,11 @@ const pathSiteMap: Array<{ prefix: string; siteId: SiteIdentifier }> = [
     { prefix: '/domo',      siteId: 'domo' },
     { prefix: '/changeup',  siteId: 'changeup' },
     { prefix: '/wio',       siteId: 'wio' },
+    { prefix: '/brandgravity', siteId: 'brandgravity' },
+    { prefix: '/wiki',     siteId: 'wiki' },
+    { prefix: '/dokdae',   siteId: 'dokdae' },
+    { prefix: '/evschool', siteId: 'evschool' },
+    { prefix: '/namingfactory', siteId: 'namingfactory' },
 ];
 
 export function SiteProvider({ children }: { children: ReactNode }) {
@@ -55,7 +60,14 @@ export function SiteProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        // 2. tenone.biz(또는 localhost) 내부에서 경로 기반 감지
+        // 2. *.tenone.biz 서브도메인 감지 (badak.tenone.biz → badak)
+        const subMatch = hostname.match(/^([a-z0-9-]+)\.tenone\.biz$/);
+        if (subMatch && subMatch[1] !== 'www' && subMatch[1] in siteConfigs) {
+            setSiteId(subMatch[1] as SiteIdentifier);
+            return;
+        }
+
+        // 3. tenone.biz(또는 localhost) 내부에서 경로 기반 감지
         const isTenOneDomain = hostname === 'tenone.biz' || hostname === 'www.tenone.biz' || hostname === 'localhost';
         if (isTenOneDomain) {
             const matched = pathSiteMap.find(({ prefix }) => pathname.startsWith(prefix));

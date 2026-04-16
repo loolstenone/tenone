@@ -1,12 +1,10 @@
-import { ChangeUpHeader } from "@/features/changeup/ChangeUpHeader";
-import { ChangeUpFooter } from "@/features/changeup/ChangeUpFooter";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const db = await getSiteConfigServer('changeup');
-    const site = siteConfigs.changeup;
+    const db = await getSiteConfigServer('brandgravity');
+    const site = siteConfigs.brandgravity;
     return {
         title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
         description: db?.meta_description ?? site.meta.description,
@@ -21,18 +19,6 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default function ChangeUpLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
-    return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-            <ChangeUpHeader />
-            <main className="flex-1 pt-14">
-                {children}
-            </main>
-            <ChangeUpFooter />
-        </div>
-    );
+export default function BrandGravityRootLayout({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
 }

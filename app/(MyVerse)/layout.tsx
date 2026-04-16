@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
             description: db?.meta_description ?? site.meta.description,
             siteName: 'Ten:One™ Universe',
             type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
 }

@@ -45,6 +45,8 @@ export interface SiteConfigRow {
     features: { board: boolean; newsletter: boolean; commerce: boolean; chat: boolean };
     created_at: string;
     updated_at: string;
+    is_open: boolean;
+    domains: { domain: string; type: 'independent' | 'subdomain' | 'path' | 'vercel'; status: 'connected' | 'external' }[];
 }
 
 // ── 단건 조회 ──
@@ -71,28 +73,49 @@ export async function getAllSiteConfigs(): Promise<SiteConfigRow[]> {
 }
 
 // ── Upsert (Intra BUMS에서 저장) ──
+// site_configs는 뷰이므로 ums_sites 테이블에 직접 쓴다
+// 뷰↔테이블 컬럼 매핑: site_id→slug, logo_image_url→logo_url, meta_og_image→og_image_url, nav→nav_items
 export async function upsertSiteConfig(
     siteId: SiteIdentifier,
     updates: Partial<Omit<SiteConfigRow, 'site_id' | 'created_at'>>
 ): Promise<SiteConfigRow | null> {
-    const { data, error } = await supabase
-        .from('site_configs')
-        .upsert(
-            {
-                site_id: siteId,
-                ...updates,
-                updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'site_id' }
-        )
-        .select()
-        .single();
+    // 뷰 컬럼명 → 테이블 컬럼명 변환
+    const mapped: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    for (const [key, value] of Object.entries(updates)) {
+        if (key === 'updated_at') continue;
+        switch (key) {
+            case 'logo_image_url': mapped['logo_url'] = value; break;
+            case 'meta_og_image': mapped['og_image_url'] = value; break;
+            case 'nav': mapped['nav_items'] = value; break;
+            default: mapped[key] = value;
+        }
+    }
+
+    const { error } = await supabase
+        .from('ums_sites')
+        .update(mapped)
+        .eq('slug', siteId);
 
     if (error) {
         console.error('[upsertSiteConfig]', error.message);
         throw error;
     }
-    return data as SiteConfigRow;
+
+    // 뷰에서 다시 읽어서 반환
+    return getSiteConfig(siteId);
+}
+
+// ── 사이트 열기/닫기 토글 (ums_sites 직접) ──
+export async function toggleSiteOpen(siteId: SiteIdentifier, isOpen: boolean): Promise<void> {
+    const { error } = await supabase
+        .from('ums_sites')
+        .update({ is_open: isOpen, updated_at: new Date().toISOString() })
+        .eq('slug', siteId);
+
+    if (error) {
+        console.error('[toggleSiteOpen]', error.message);
+        throw error;
+    }
 }
 
 // ── 서버 컴포넌트용 (layout.tsx에서 사용) ──

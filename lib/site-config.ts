@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'mindle' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'mindle' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio' | 'brandgravity' | 'wiki' | 'dokdae' | 'evschool' | 'namingfactory';
 
 // 인증 전용 도메인 (OAuth redirect를 여기로 통일)
 export const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
@@ -554,6 +554,68 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
             { name: '소개', href: '/wio/about' },
         ],
     },
+    brandgravity: {
+        id: 'brandgravity', name: 'Brand Gravity™', logoText: 'Brand Gravity™', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#1E3A5F', bgDark: '#0D1B2A',
+        colors: { primary: '#1E3A5F', primaryDark: '#162D4A', secondary: '#3D5A80', headerBg: '#0D1B2A', headerText: '#ffffff', footerBg: '#0D1B2A', footerText: '#94A3B8', accent: '#E0A458' },
+        meta: { title: 'Brand Gravity™ — 브랜딩 컨설팅', description: '브랜드의 중력을 만드는 전략 컨설팅. Brand Gravity™는 Ten:One™ Universe의 브랜딩 전문 서비스입니다.', keywords: ['Brand Gravity', '브랜딩', '컨설팅', '브랜드 전략', 'Ten:One'] },
+        homePath: '/brandgravity', signupPath: '/signup', domain: 'brandgravity.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [
+            { name: '서비스', href: '/brandgravity/services' },
+            { name: '포트폴리오', href: '/brandgravity/portfolio' },
+            { name: '소개', href: '/brandgravity/about' },
+        ],
+    },
+    wiki: {
+        id: 'wiki', name: 'Universe Wiki', logoText: 'Wiki', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#10B981', bgDark: '#064E3B',
+        colors: { primary: '#10B981', primaryDark: '#059669', secondary: '#34D399', headerBg: '#064E3B', headerText: '#ffffff', footerBg: '#064E3B', footerText: '#94A3B8', accent: '#10B981' },
+        meta: { title: 'Universe Wiki — 지식 허브', description: 'Ten:One™ Universe의 공개 지식 허브. 브랜드, 프로젝트, 운영 노하우를 공유합니다.', keywords: ['Wiki', '지식', 'Ten:One', 'Universe', '위키'] },
+        homePath: '/wiki', signupPath: '/signup', domain: 'wiki.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [
+            { name: '문서', href: '/wiki/docs' },
+            { name: '검색', href: '/wiki/search' },
+        ],
+    },
+    dokdae: {
+        id: 'dokdae', name: '독대', logoText: '독대', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#60A5FA', bgDark: '#0F172A',
+        colors: { primary: '#60A5FA', primaryDark: '#3B82F6', secondary: '#93C5FD', headerBg: '#0F172A', headerText: '#ffffff', footerBg: '#0F172A', footerText: '#94A3B8', accent: '#60A5FA' },
+        meta: { title: '독대 — AI Agent 메시징 채널', description: 'AI Agent(열시일분 등)와 메시지를 주고받는 채널. Ten:One™ Universe.', keywords: ['독대', 'AI Agent', '메시징', '열시일분', 'Ten:One'] },
+        homePath: '/dokdae', signupPath: '/signup', domain: 'dokdae.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [],
+    },
+    evschool: {
+        id: 'evschool', name: 'Evolution School', logoText: 'Evolution School', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#F87171', bgDark: '#1C1917',
+        colors: { primary: '#F87171', primaryDark: '#EF4444', secondary: '#FCA5A5', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#F87171' },
+        meta: { title: 'Evolution School — 실무 교육 플랫폼', description: '실전 중심 교육으로 진짜 실력을 키우는 곳. Evolution School은 Ten:One™ Universe의 교육 브랜드입니다.', keywords: ['Evolution School', '교육', '실무', 'Ten:One'] },
+        homePath: '/evschool', signupPath: '/signup', domain: 'evschool.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [],
+    },
+    namingfactory: {
+        id: 'namingfactory', name: 'Naming Factory', logoText: 'Naming Factory', logoStyle: 'text' as const,
+        faviconUrl: '/favicon.ico', appleTouchIcon: '/favicon.ico',
+        accentColor: '#FCD34D', bgDark: '#1C1917',
+        colors: { primary: '#FCD34D', primaryDark: '#FBBF24', secondary: '#FDE68A', headerBg: '#1C1917', headerText: '#ffffff', footerBg: '#1C1917', footerText: '#94A3B8', accent: '#FCD34D' },
+        meta: { title: 'Naming Factory — 네이밍 서비스', description: '브랜드, 제품, 서비스의 이름을 짓는 전문 네이밍 서비스. Ten:One™ Universe.', keywords: ['Naming Factory', '네이밍', '브랜드명', 'Ten:One'] },
+        homePath: '/namingfactory', signupPath: '/signup', domain: 'namingfactory.tenone.biz',
+        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
+        authMethods: { email: true, google: true, kakao: true },
+        nav: [],
+    },
 };
 
 // 도메인 → 사이트 매핑
@@ -563,22 +625,22 @@ export const domainMap: Record<string, SiteIdentifier> = {
     'www.madleague.net': 'madleague',
     'madleap.co.kr': 'madleap',
     'www.madleap.co.kr': 'madleap',
-    'luki.ai': 'luki',
-    'www.luki.ai': 'luki',
+    'madleap.tenone.biz': 'madleap',
     'rook.co.kr': 'rook',
     'www.rook.co.kr': 'rook',
+    'rook.tenone.biz': 'rook',
     'youinone.com': 'youinone',
     'www.youinone.com': 'youinone',
+    'youinone.tenone.biz': 'youinone',
     'badak.biz': 'badak',
     'www.badak.biz': 'badak',
     'smarcomm.biz': 'smarcomm',
     'www.smarcomm.biz': 'smarcomm',
+    'smarcomm.tenone.biz': 'smarcomm',
     'hero.ne.kr': 'hero',
     'www.hero.ne.kr': 'hero',
     '0gamja.com': 'ogamja',
     'www.0gamja.com': 'ogamja',
-    'seoul360.net': 'seoul360',
-    'www.seoul360.net': 'seoul360',
     'mullaesian.tenone.biz': 'mullaesian',
     'fwn.co.kr': 'fwn',
     'www.fwn.co.kr': 'fwn',
@@ -592,4 +654,9 @@ export const domainMap: Record<string, SiteIdentifier> = {
     'changeup.company': 'changeup',
     'www.changeup.company': 'changeup',
     'planners.tenone.biz': 'planners',
+    'brandgravity.tenone.biz': 'brandgravity',
+    'wiki.tenone.biz': 'wiki',
+    'dokdae.tenone.biz': 'dokdae',
+    'evschool.tenone.biz': 'evschool',
+    'namingfactory.tenone.biz': 'namingfactory',
 };

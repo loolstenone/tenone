@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Save, ArrowLeft, Shield, User, Building2, Mail, Lock, X, Eye, EyeOff, Bookmark } from "lucide-react";
+import { UniverseMembership } from "@/components/UniverseMembership";
 import Link from "next/link";
 
 const inputClass = "w-full border tn-border px-4 py-2.5 text-sm tn-text focus:border-neutral-900 focus:outline-none placeholder:tn-text-sub tn-surface";
@@ -205,6 +206,11 @@ export default function ProfilePage() {
                     </button>
                 </div>
             </form>
+
+            {/* Universe 가입 현황 */}
+            <div className="mt-6">
+                <UniverseMembership />
+            </div>
 
             {/* 북마크 목록 */}
             <BookmarkList userId={user.id} />

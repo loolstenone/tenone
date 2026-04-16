@@ -9,6 +9,7 @@ import {
     User, FileText, Bookmark, Heart, Settings, LogOut,
     ChevronRight, Eye, MessageCircle, Calendar, Award,
 } from "lucide-react";
+import { UniverseMembership } from "@/components/UniverseMembership";
 
 interface MyPost {
     id: string;
@@ -172,6 +173,10 @@ export default function MyPage() {
                         </button>
                     </div>
                 )}
+
+                <div className="mt-6">
+                    <UniverseMembership />
+                </div>
             </div>
         </div>
     );

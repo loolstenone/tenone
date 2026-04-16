@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import { User, FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, MessageCircle } from "lucide-react";
+import { UniverseMembership } from "@/components/UniverseMembership";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -82,6 +83,10 @@ export default function HeRoMyPage() {
                         </button>
                     </div>
                 )}
+
+                <div className="mt-6">
+                    <UniverseMembership />
+                </div>
             </div>
         </div>
     );

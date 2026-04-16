@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
+import { UniverseMembership } from '@/components/UniverseMembership';
 import {
   FileText, Bookmark, Bell, Settings, LogOut,
   ChevronRight, ChevronDown, Eye, MessageCircle, Heart,
@@ -2191,6 +2192,10 @@ export default function BadakMyPage() {
             </button>
           </div>
         )}
+
+        <div className="mt-6">
+          <UniverseMembership />
+        </div>
       </div>
     </div>
   );

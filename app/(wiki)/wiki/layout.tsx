@@ -1,10 +1,24 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { siteConfigs } from "@/lib/site-config";
+import { getSiteConfigServer } from "@/lib/supabase/site-configs";
 
-export const metadata: Metadata = {
-    title: { default: "Ten:One™ Universe Wiki", template: "%s — Ten:One Wiki" },
-    description: "Ten:One Universe의 지식 체계. 브랜드, 에이전트, 의사결정, 프레임워크를 누구나 읽을 수 있는 퍼블릭 위키.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const db = await getSiteConfigServer('wiki');
+    const site = siteConfigs.wiki;
+    return {
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
+        icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
+        openGraph: {
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
+        },
+    };
+}
 
 const NAV_GROUPS = [
     {

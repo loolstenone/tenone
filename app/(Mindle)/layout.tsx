@@ -8,14 +8,15 @@ export async function generateMetadata(): Promise<Metadata> {
     const db = await getSiteConfigServer('mindle');
     const site = siteConfigs.mindle;
     return {
-        title: { default: db?.meta_title ?? "Mindle — 보이기 전에, 먼저 본다", template: `%s | ${db?.name ?? "Mindle"}` },
-        description: db?.meta_description ?? "AI가 분석하는 트렌드 인텔리전스 플랫폼. 신호에서 인사이트를 피워냅니다.",
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
+        description: db?.meta_description ?? site.meta.description,
         icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
         openGraph: {
-            title: db?.meta_title ?? "Mindle — 보이기 전에, 먼저 본다",
-            description: db?.meta_description ?? "AI가 분석하는 트렌드 인텔리전스 플랫폼. 신호에서 인사이트를 피워냅니다.",
+            title: db?.meta_title ?? site.meta.title,
+            description: db?.meta_description ?? site.meta.description,
             siteName: 'Ten:One™ Universe',
             type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
 }

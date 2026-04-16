@@ -8,13 +8,15 @@ export async function generateMetadata(): Promise<Metadata> {
     const db = await getSiteConfigServer('domo');
     const site = siteConfigs.domo;
     return {
-        title: { default: db?.meta_title ?? "Domo — 인생 2회차, 도모하다", template: `%s | ${db?.name ?? site.name}` },
+        title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
         description: db?.meta_description ?? site.meta.description,
         icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
         openGraph: {
-            title: db?.meta_title ?? "Domo — 인생 2회차, 도모하다",
+            title: db?.meta_title ?? site.meta.title,
             description: db?.meta_description ?? site.meta.description,
-            siteName: db?.name ?? site.name,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
 }

@@ -14,7 +14,9 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: db?.meta_title ?? site.meta.title,
             description: db?.meta_description ?? site.meta.description,
-            siteName: db?.name ?? site.name,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
+            ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
 }
