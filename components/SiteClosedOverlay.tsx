@@ -7,7 +7,10 @@ import { createClient } from '@/lib/supabase/client';
 
 /**
  * 사이트가 닫혀 있으면(is_open = false) 전체 화면 가림막을 표시합니다.
- * root layout에 배치. Staff/Admin/마스터 계정은 bypass.
+ * root layout에 배치. 마스터 계정(lools@tenone.biz)만 bypass.
+ *
+ * 인증 확인은 /api/auth/me (서버 쿠키 기반)를 사용하여
+ * 크로스 서브도메인(*.tenone.biz) 세션을 올바르게 읽는다.
  */
 export function SiteClosedOverlay() {
     const { siteId, site } = useSite();
@@ -32,20 +35,21 @@ export function SiteClosedOverlay() {
             return;
         }
 
-        const supabase = createClient();
-
         (async () => {
-            // 1. 로그인 사용자 확인
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                // 마스터 계정만 bypass
-                if (user.email === 'lools@tenone.biz') {
+            // 1. 서버 쿠키 기반 인증 확인 (크로스 서브도메인 지원)
+            try {
+                const res = await fetch('/api/auth/me');
+                const { email } = await res.json();
+                if (email === 'lools@tenone.biz') {
                     setChecked(true);
                     return;
                 }
+            } catch {
+                // API 실패 시 인증 없음으로 처리
             }
 
             // 2. is_open 확인
+            const supabase = createClient();
             const { data } = await supabase
                 .from('ums_sites')
                 .select('is_open')
