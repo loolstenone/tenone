@@ -147,10 +147,9 @@ export async function generateMetadata(): Promise<Metadata> {
 **사이트 오픈/차단 시스템:**
 | 상황 | 표시 내용 | 담당 |
 |------|----------|------|
-| `is_open=true` | 사이트 정상 표시 (UnderConstruction 또는 전용 랜딩) | 각 page.tsx |
-| `is_open=false` + 비로그인 | "준비 중입니다" 전체 가림막 | `SiteClosedOverlay` |
+| `is_open=true` | 누구나 사이트 정상 표시 | 각 page.tsx |
 | `is_open=false` + 마스터(lools@tenone.biz) | 가림막 bypass, 사이트 정상 표시 | `SiteClosedOverlay` |
-| `is_open=false` + Staff/Admin | 가림막 bypass, 사이트 정상 표시 | `SiteClosedOverlay` |
+| `is_open=false` + 그 외 전부 (일반회원/비로그인) | "준비 중입니다" 전체 가림막 | `SiteClosedOverlay` |
 | intra/login/auth 경로 | 항상 접근 가능 | `SiteClosedOverlay` |
 | tenone 사이트 | 항상 접근 가능 | `SiteClosedOverlay` |
 

@@ -38,18 +38,8 @@ export function SiteClosedOverlay() {
             // 1. 로그인 사용자 확인
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                // 마스터 계정 bypass
+                // 마스터 계정만 bypass
                 if (user.email === 'lools@tenone.biz') {
-                    setChecked(true);
-                    return;
-                }
-                // Staff/Admin bypass (auth_id로 조회)
-                const { data: member } = await supabase
-                    .from('members')
-                    .select('account_type')
-                    .eq('auth_id', user.id)
-                    .single();
-                if (member?.account_type === 'staff' || member?.account_type === 'admin') {
                     setChecked(true);
                     return;
                 }
