@@ -5,18 +5,25 @@ let client: ReturnType<typeof createBrowserClient> | null = null;
 /**
  * 브라우저 Supabase 클라이언트 (싱글톤)
  *
- * 쿠키 도메인은 미들웨어(middleware.ts)가 관리:
- *   - *.tenone.biz → domain=.tenone.biz (공유 쿠키)
- *   - 외부 도메인 → domain 미지정 (해당 도메인 전용)
- * 브라우저 클라이언트는 도메인을 지정하지 않는다.
- * (외부 도메인에서 .tenone.biz 쿠키 설정 시 브라우저가 거부)
+ * *.tenone.biz 도메인에서는 cookieOptions.domain='.tenone.biz'로 설정하여
+ * 로그인 세션이 모든 서브도메인(domo.tenone.biz, jakka.tenone.biz 등)에서 공유된다.
+ * 외부 도메인(badak.biz 등)에서는 domain 미지정 (해당 도메인 전용).
  */
 export function createClient() {
     if (client) return client;
+
+    // *.tenone.biz 계열이면 공유 쿠키 도메인 설정
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isTenoneFamily = hostname === 'tenone.biz' || hostname.endsWith('.tenone.biz');
+
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            cookieOptions: {
+                ...(isTenoneFamily && { domain: '.tenone.biz' }),
+                path: '/',
+            },
             auth: {
                 storageKey: 'tenone-auth',
                 persistSession: true,
