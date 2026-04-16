@@ -21,7 +21,6 @@ const moreNav = [
 
 const tailNav = [
     { name: '가격', href: '/wio/pricing' },
-    { name: '소개', href: '/wio/about' },
     { name: '상담', href: '/wio/contact' },
 ];
 

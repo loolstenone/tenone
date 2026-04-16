@@ -265,6 +265,12 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                         </button>
                     </form>
 
+                    <div className="text-center mt-4">
+                        <a href="/reset-password" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+                            비밀번호를 잊으셨나요?
+                        </a>
+                    </div>
+
                     <p className="text-center text-[10px] text-neutral-700 mt-8">
                         Ten:One&trade; Universe Operating System
                     </p>

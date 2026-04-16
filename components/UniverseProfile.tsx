@@ -10,7 +10,7 @@ import Image from 'next/image';
 import {
     Globe, User, Shield, ExternalLink, ArrowRight, Pencil, Check, X, Camera,
     Building2, GraduationCap, Megaphone, Users, Briefcase,
-    Sparkles, Palette, BookOpen, Rocket, Zap, Clock,
+    Sparkles, Palette, BookOpen, Rocket, Zap, Clock, Lock, Eye, EyeOff, ChevronDown, ChevronUp,
 } from 'lucide-react';
 
 /** 전화번호 자동 포맷: 010-1234-5678 */
@@ -123,6 +123,26 @@ function EditField({ label, value, onChange, placeholder }: {
     );
 }
 
+function PasswordField({ label, value, onChange }: {
+    label: string; value: string; onChange: (v: string) => void;
+}) {
+    const [show, setShow] = useState(false);
+    return (
+        <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider tn-text-sub mb-1">{label}</div>
+            <div className="relative">
+                <input type={show ? 'text' : 'password'} value={value} onChange={e => onChange(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full text-sm tn-text bg-transparent border tn-border rounded-lg px-3 py-1.5 pr-9 focus:outline-none focus:ring-1 focus:ring-neutral-400" />
+                <button type="button" onClick={() => setShow(!show)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 tn-text-sub hover:opacity-80">
+                    {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 /* ── 서비스 카드 (통합) ── */
 function ServiceCard({ siteId, siteName, color, serviceData, isClosed }: {
     siteId: string; siteName: string; color: string;
@@ -216,6 +236,38 @@ export function UniverseProfile() {
     const [editForm, setEditForm] = useState({ name: '', phone: '', company: '', bio: '' });
     const [avatarUploading, setAvatarUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 비밀번호 변경
+    const [pwdOpen, setPwdOpen] = useState(false);
+    const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+    const [pwdError, setPwdError] = useState('');
+    const [pwdSuccess, setPwdSuccess] = useState('');
+    const [pwdLoading, setPwdLoading] = useState(false);
+
+    const handlePasswordChange = async () => {
+        setPwdError('');
+        setPwdSuccess('');
+        if (!pwdForm.current) { setPwdError('현재 비밀번호를 입력하세요.'); return; }
+        if (pwdForm.next.length < 6) { setPwdError('새 비밀번호는 6자 이상이어야 합니다.'); return; }
+        if (pwdForm.next !== pwdForm.confirm) { setPwdError('새 비밀번호가 일치하지 않습니다.'); return; }
+        setPwdLoading(true);
+        try {
+            const sb = createClient();
+            // 현재 비밀번호 확인 (재로그인)
+            const { error: signInErr } = await sb.auth.signInWithPassword({
+                email: user?.email || '',
+                password: pwdForm.current,
+            });
+            if (signInErr) { setPwdError('현재 비밀번호가 올바르지 않습니다.'); setPwdLoading(false); return; }
+            // 비밀번호 업데이트
+            const { error: updateErr } = await sb.auth.updateUser({ password: pwdForm.next });
+            if (updateErr) { setPwdError(`변경 실패: ${updateErr.message}`); setPwdLoading(false); return; }
+            setPwdSuccess('비밀번호가 변경되었습니다.');
+            setPwdForm({ current: '', next: '', confirm: '' });
+            setTimeout(() => { setPwdSuccess(''); setPwdOpen(false); }, 2000);
+        } catch { setPwdError('비밀번호 변경 중 오류가 발생했습니다.'); }
+        finally { setPwdLoading(false); }
+    };
 
     // 서비스 프로필 + 사이트 오픈 상태 동시 로드
     useEffect(() => {
@@ -410,6 +462,31 @@ export function UniverseProfile() {
                             </div>
                         )}
                     </>
+                )}
+            </div>
+
+            {/* ── 비밀번호 변경 ── */}
+            <div className="rounded-2xl border tn-border tn-surface p-6">
+                <button onClick={() => setPwdOpen(!pwdOpen)}
+                    className="w-full flex items-center justify-between text-xs font-semibold text-neutral-700">
+                    <span className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 tn-text-sub" /> 비밀번호 변경</span>
+                    {pwdOpen ? <ChevronUp className="h-3.5 w-3.5 tn-text-sub" /> : <ChevronDown className="h-3.5 w-3.5 tn-text-sub" />}
+                </button>
+                {pwdOpen && (
+                    <div className="mt-4 space-y-3">
+                        <PasswordField label="현재 비밀번호" value={pwdForm.current}
+                            onChange={v => setPwdForm(f => ({ ...f, current: v }))} />
+                        <PasswordField label="새 비밀번호" value={pwdForm.next}
+                            onChange={v => setPwdForm(f => ({ ...f, next: v }))} />
+                        <PasswordField label="새 비밀번호 확인" value={pwdForm.confirm}
+                            onChange={v => setPwdForm(f => ({ ...f, confirm: v }))} />
+                        {pwdError && <p className="text-xs text-red-500">{pwdError}</p>}
+                        {pwdSuccess && <p className="text-xs text-emerald-600">{pwdSuccess}</p>}
+                        <button onClick={handlePasswordChange} disabled={pwdLoading}
+                            className="text-xs text-white bg-neutral-900 px-4 py-2 rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+                            {pwdLoading ? '변경 중...' : '비밀번호 변경'}
+                        </button>
+                    </div>
                 )}
             </div>
 

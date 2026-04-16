@@ -247,6 +247,12 @@ function LoginForm() {
                             </button>
                         </div>
 
+                        <div className="mt-3 text-center">
+                            <Link href="/reset-password" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">비밀번호를 잊으셨나요?</Link>
+                        </div>
+                        <p className="text-[11px] text-neutral-600 text-center mt-2">
+                            소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
+                        </p>
                         <div className="mt-4 text-center">
                             <p className="text-sm text-neutral-400">
                                 계정이 없으신가요? <Link href="/signup" className="text-[#D32F2F] font-medium hover:underline">회원가입</Link>
@@ -334,6 +340,12 @@ function LoginForm() {
                     </div>
                     )}
 
+                    <div className="mt-3 text-center">
+                        <Link href="/reset-password" className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors">비밀번호를 잊으셨나요?</Link>
+                    </div>
+                    <p className="text-[11px] text-neutral-400 text-center mt-2">
+                        소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
+                    </p>
                     <div className="mt-4 text-center">
                         <p className="text-sm text-neutral-500">
                             계정이 없으신가요? <Link href={signupPath} className="font-medium hover:underline" style={{ color: primaryColor }}>회원가입</Link>

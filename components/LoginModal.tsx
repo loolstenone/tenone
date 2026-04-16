@@ -206,6 +206,22 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                         )
                     )}
 
+                    {/* 비밀번호 찾기 (로그인 탭일 때만) */}
+                    {tab === "login" && (
+                        <div className="text-center mt-3">
+                            <a href="/reset-password" className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors">
+                                비밀번호를 잊으셨나요?
+                            </a>
+                        </div>
+                    )}
+
+                    {/* 소셜 로그인 안내 */}
+                    {tab === "login" && (
+                        <p className="text-center text-[11px] text-neutral-400 mt-2">
+                            소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
+                        </p>
+                    )}
+
                     {/* 탭 전환 링크 */}
                     <p className="text-center text-sm text-neutral-500 mt-4">
                         {tab === "login" ? (

@@ -13,6 +13,7 @@ import {
   UserCheck, UserX, Clock, Megaphone,
   ToggleLeft, ToggleRight, UserPlus, Pencil, Globe,
 } from 'lucide-react';
+import { MyProfileCard } from '@/components/MyProfileCard';
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'notifications' | 'settings';
 type ApplicantStatus = 'pending' | 'approved' | 'rejected';
@@ -1453,42 +1454,13 @@ export default function BadakMyPage() {
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
 
-      {/* ── 프로필 헤더 (트레바리 스타일: 중앙 정렬) ── */}
-      <div className="px-4 pb-6 pt-8 text-center" style={{ background: 'linear-gradient(180deg, rgba(255,217,61,0.04) 0%, transparent 100%)' }}>
-        {/* 아바타 */}
-        <div className="relative inline-block mb-4">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" style={{ border: '2px solid rgba(255,217,61,0.2)' }} />
-          ) : (
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold"
-              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d', border: '2px solid rgba(255,217,61,0.2)' }}
-            >
-              {initials}
-            </div>
-          )}
-          <button
-            onClick={() => setActiveTab('settings')}
-            className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border border-white/10"
-            style={{ background: '#1e1e35' }}
-          >
-            <Pencil className="h-3 w-3 text-white/50" />
-          </button>
-        </div>
-
-        {/* 이름 + 뱃지 */}
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <h1 className="text-lg font-bold text-white">{displayName}</h1>
-          {isLeader && (
-            <span className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
-              <Crown className="h-2.5 w-2.5" /> 바닥장
-            </span>
-          )}
-        </div>
-        {/* 직무 + 산업 */}
-        <p className="text-xs text-white/40">
-          {[jobFunction, industry].filter(Boolean).join(' · ') || '직무/산업군을 설정해보세요'}
-        </p>
+      {/* ── 프로필 카드 (MyProfileCard 통합) ── */}
+      <div className="px-4 pt-6">
+        <MyProfileCard accentColor="#ffd93d" siteBadge={isLeader ? '바닥장' : undefined}>
+          <p className="text-xs text-white/40">
+            {[jobFunction, industry].filter(Boolean).join(' · ') || '직무/산업군을 설정해보세요'}
+          </p>
+        </MyProfileCard>
       </div>
 
       {/* ── 스탯 스트립 ── */}
@@ -2193,15 +2165,6 @@ export default function BadakMyPage() {
           </div>
         )}
 
-        {/* Universe Profile */}
-        <Link href="/profile" className="mt-8 flex items-center gap-3 p-4 rounded-xl border border-neutral-700 hover:border-neutral-500 transition-colors group">
-          <Globe className="h-5 w-5 text-neutral-500 group-hover:text-white transition-colors" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">Universe Profile</p>
-            <p className="text-[11px] text-neutral-500">전체 서비스 프로필 관리</p>
-          </div>
-          <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
-        </Link>
       </div>
     </div>
   );
