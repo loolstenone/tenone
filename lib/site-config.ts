@@ -558,6 +558,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
 
 // 도메인 → 사이트 매핑
 export const domainMap: Record<string, SiteIdentifier> = {
+    'madleague.tenone.biz': 'madleague',
     'madleague.net': 'madleague',
     'www.madleague.net': 'madleague',
     'madleap.co.kr': 'madleap',

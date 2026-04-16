@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
@@ -9,17 +10,17 @@ import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 const navItems = [
-    { name: "동아리", href: "/madleague/clubs" },
-    { name: "프로그램", href: "/madleague/programs" },
-    { name: "MADzine", href: "/madleague/madzine" },
-    { name: "아카이브", href: "/madleague/archive" },
-    { name: "지원하기", href: "/madleague/apply" },
+    { name: "프로그램",  href: "/madleague/programs" },
+    { name: "MADzine",  href: "/madleague/madzine" },
+    { name: "아카이브",  href: "/madleague/archive" },
+    { name: "지원하기",  href: "/madleague/apply" },
 ];
 
 export function MadLeagueHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const [logoError, setLogoError] = useState(false);
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -31,11 +32,19 @@ export function MadLeagueHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-neutral-900">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center gap-8">
                 {/* Logo */}
-                <Link href="/madleague" className="flex items-center gap-2 shrink-0">
-                    <span className="inline-block h-3 w-3 rounded-full bg-[#EC1D25]" />
-                    <span className="text-white font-extrabold text-lg tracking-tight">
-                        MAD League
-                    </span>
+                <Link href="/madleague" className="shrink-0">
+                    {logoError ? (
+                        <span className="text-white font-extrabold text-lg tracking-tight">MAD LEAGUE</span>
+                    ) : (
+                        <Image
+                            src="/logos/madleague/madleague-circle-sq.png"
+                            alt="MAD League"
+                            width={120}
+                            height={36}
+                            className="object-contain h-9 w-auto"
+                            onError={() => setLogoError(true)}
+                        />
+                    )}
                 </Link>
 
                 {/* Desktop Nav */}
@@ -46,9 +55,7 @@ export function MadLeagueHeader() {
                             href={item.href}
                             className={clsx(
                                 "text-sm font-medium transition-colors whitespace-nowrap",
-                                isActive(item.href)
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
+                                isActive(item.href) ? "text-white" : "text-neutral-400 hover:text-white"
                             )}
                         >
                             {item.name}
@@ -66,7 +73,7 @@ export function MadLeagueHeader() {
                     />
                 </div>
 
-                {/* Mobile spacer to push menu button right */}
+                {/* Mobile spacer */}
                 <div className="lg:hidden ml-auto" />
 
                 {/* Mobile menu button */}
@@ -81,6 +88,19 @@ export function MadLeagueHeader() {
             {/* Mobile menu */}
             {mobileOpen && (
                 <div className="lg:hidden bg-neutral-900 border-t border-neutral-800 px-6 py-6 space-y-3">
+                    {/* 프로그램 그룹 */}
+                    <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-2">PROGRAMS</div>
+                    {programItems.map((p) => (
+                        <Link
+                            key={p.href}
+                            href={p.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="block text-sm font-medium text-neutral-400 hover:text-white transition pl-2"
+                        >
+                            {p.name}
+                        </Link>
+                    ))}
+                    <div className="pt-2 border-t border-neutral-800" />
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
@@ -88,9 +108,7 @@ export function MadLeagueHeader() {
                             onClick={() => setMobileOpen(false)}
                             className={clsx(
                                 "block text-sm font-medium transition-colors",
-                                isActive(item.href)
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
+                                isActive(item.href) ? "text-white" : "text-neutral-400 hover:text-white"
                             )}
                         >
                             {item.name}
@@ -104,7 +122,7 @@ export function MadLeagueHeader() {
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white hover:bg-[#0a3d24] rounded">가입</Link>
+                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
                             </>
                         )}
                     </div>

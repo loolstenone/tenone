@@ -17,12 +17,12 @@ export default async function ClubsPage() {
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Header */}
       <section className="border-b border-neutral-900">
-        <div className="mx-auto max-w-7xl px-6 py-20">
+        <div className="mx-auto max-w-7xl px-6 py-32">
           <div className="text-xs font-bold tracking-widest text-[#EC1D25]">CLUBS</div>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tight">
+          <h1 className="mt-3 text-5xl sm:text-7xl font-black tracking-tight">
             전국 {clubs.length}개 동아리
           </h1>
-          <p className="mt-6 max-w-xl text-neutral-400 leading-relaxed">
+          <p className="mt-8 max-w-xl text-lg text-neutral-400 leading-relaxed">
             수도권부터 제주까지, 대한민국 7개 권역의 대학생 광고·마케팅 동아리가
             하나의 리그로 뭉쳤다.
           </p>
@@ -31,7 +31,7 @@ export default async function ClubsPage() {
 
       {/* Clubs Grid */}
       <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {clubs.map((club) => (
             <Link
               key={club.slug}
@@ -45,17 +45,17 @@ export default async function ClubsPage() {
               ) : (
                 <div className="h-14 w-14 rounded-full mb-6" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
               )}
-              <div className="text-3xl font-black text-white">{club.name}</div>
-              <div className="mt-2 flex items-center gap-1.5 text-sm text-neutral-400">
+              <div className="text-4xl font-black text-white">{club.name}</div>
+              <div className="mt-3 flex items-center gap-1.5 text-base text-neutral-400">
                 <MapPin className="h-3.5 w-3.5" />
                 {club.region}
               </div>
               {club.description && (
-                <p className="mt-6 text-sm text-neutral-500 leading-relaxed line-clamp-3">
+                <p className="mt-6 text-base text-neutral-500 leading-relaxed line-clamp-3">
                   {club.description}
                 </p>
               )}
-              <div className="mt-8 flex items-center gap-2 text-sm font-bold text-neutral-400 group-hover:text-[#EC1D25] transition">
+              <div className="mt-10 flex items-center gap-2 text-base font-bold text-neutral-400 group-hover:text-[#EC1D25] transition">
                 동아리 상세 <ArrowRight className="h-4 w-4" />
               </div>
             </Link>
@@ -65,7 +65,7 @@ export default async function ClubsPage() {
 
       {/* New Club CTA */}
       <section className="bg-neutral-950 border-t border-neutral-900">
-        <div className="mx-auto max-w-7xl px-6 py-20">
+        <div className="mx-auto max-w-7xl px-6 py-32">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <div className="text-xs font-bold tracking-widest text-[#FFC000]">NEW CLUB</div>

@@ -32,7 +32,7 @@ interface Props {
 
 export function KoreaClubMap({ clubs }: Props) {
   return (
-    <div className="relative mx-auto" style={{ maxWidth: 520 }}>
+    <div className="relative mx-auto overflow-hidden rounded-2xl" style={{ maxWidth: 520 }}>
       {/* 지도 배경 */}
       <Image
         src="/logos/madleague/korea-map.png"
@@ -40,7 +40,7 @@ export function KoreaClubMap({ clubs }: Props) {
         width={520}
         height={680}
         className="w-full h-auto select-none"
-        style={{ filter: 'grayscale(1) brightness(0.12) contrast(1.5)' }}
+        style={{ filter: 'none' }}
         priority
       />
 
@@ -58,7 +58,7 @@ export function KoreaClubMap({ clubs }: Props) {
             style={{ top: pos.top, left: pos.left, transform: 'translate(-50%, -50%)' }}
           >
             <div
-              className="flex items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-115"
+              className="flex items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
               style={{
                 width: 60,
                 height: 60,

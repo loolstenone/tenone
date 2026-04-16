@@ -29,6 +29,62 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 
 ---
 
+## ⚠️ 유니버스 도메인 분기 시스템 (절대 잊지 말 것)
+
+> **Google처럼 하나의 코드베이스·하나의 Supabase로 수십 개 브랜드 도메인을 운영한다.**
+> 이 구조를 모르면 로그인 디버깅, 사이트 분기, 인증 설정에서 반복 실수가 발생한다.
+
+### 핵심 파일
+| 파일 | 역할 |
+|------|------|
+| `lib/site-config.ts` | 전체 브랜드 설정 + `domainMap` (도메인 → 사이트 ID 매핑) |
+| `lib/site-context.tsx` | 클라이언트에서 `window.location.hostname`으로 사이트 감지 → `useSite()` 훅 제공 |
+| `components/LoginModal.tsx` | 전 브랜드 공통 로그인 모달 (탭: 로그인/회원가입, 소셜/이메일) |
+| `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 (로그인 버튼 → LoginModal 열기) |
+
+### 도메인 분기 원리 (2가지 방식)
+
+**방식 A — 독립 도메인** (domainMap 기반)
+```
+madleague.net 접속 → domainMap['madleague.net'] = 'madleague' → isMadLeague = true
+```
+
+**방식 B — tenone.biz 경로 분기** (pathSiteMap 기반, 주요 방식)
+```
+www.tenone.biz/madleague 접속 → pathname.startsWith('/madleague') → isMadLeague = true
+localhost/madleague 접속  → pathname.startsWith('/madleague') → isMadLeague = true (개발환경)
+```
+
+> ⚠️ **MADLeague 실서버 주소는 `www.tenone.biz/madleague`** (독립 도메인 아님)
+> localhost 개발 시에도 경로 기반으로 isMadLeague가 true가 되므로 별도 설정 불필요
+
+### 현재 운영 도메인/경로 목록
+| 브랜드 | 접근 방식 | 주소 | siteId |
+|--------|---------|------|--------|
+| MADLeague | 경로 | www.tenone.biz/madleague | madleague |
+| MADLeap | 경로 | www.tenone.biz/madleap | madleap |
+| Badak | 경로 or 도메인 | badak.biz | badak |
+| RooK | 도메인 | rook.co.kr | rook |
+| YouInOne | 도메인 | youinone.com | youinone |
+| SmarComm | 도메인 | smarcomm.biz | smarcomm |
+| HeRo | 도메인 | hero.ne.kr | hero |
+| 공감자 | 도메인 | 0gamja.com | ogamja |
+| (기타) | 경로 or 서브도메인 | *.tenone.biz | 각 siteId |
+
+### 인증 원칙
+- **Auth는 단일 Supabase 프로젝트** `ziotlxkdctlhiwkgmmsh` 하나로 통일
+- 각 도메인의 Vercel 배포에 **동일한 `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY`** 환경변수 필요
+- 로그인 모달은 `LoginModal.tsx`로 통일 (`/login` 페이지가 아님)
+- 소셜 로그인 redirect: `{origin}/auth/callback` — Supabase 대시보드 Allowed URLs에 **모든 도메인** 등록 필요
+
+### 새 브랜드 추가 시 체크리스트
+- [ ] `lib/site-config.ts` → `siteConfigs`에 추가
+- [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가
+- [ ] Vercel 프로젝트에 도메인 연결 + env 동일하게 설정
+- [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/auth/callback` 추가
+
+---
+
 ## 기술 스택
 
 - **프레임워크**: Next.js 16 (App Router) + React 19

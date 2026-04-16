@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Youtube, Mail } from "lucide-react";
 
 
@@ -19,11 +20,14 @@ export function MadLeagueFooter() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {/* Logo & Description */}
                     <div>
-                        <Link href="/madleague" className="flex items-center gap-2 mb-4">
-                            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#EC1D25]" />
-                            <span className="text-white font-extrabold text-base tracking-tight">
-                                MAD League
-                            </span>
+                        <Link href="/madleague" className="inline-block mb-4">
+                            <Image
+                                src="/logos/madleague/footer_Logo.png"
+                                alt="MAD League"
+                                width={90}
+                                height={26}
+                                className="object-contain h-6 w-auto"
+                            />
                         </Link>
                         <p className="text-sm leading-relaxed">
                             Match, Act, Develop.<br />
@@ -53,8 +57,8 @@ export function MadLeagueFooter() {
                         <h4 className="text-white font-semibold text-sm mb-4">Contact</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <a href="mailto:info@madleague.net" className="hover:text-white transition-colors">
-                                    info@madleague.net
+                                <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors">
+                                    lools@tenone.biz
                                 </a>
                             </li>
                             <li>전국 7개 권역 대학 네트워크</li>
@@ -66,7 +70,7 @@ export function MadLeagueFooter() {
                             <a href="#" className="hover:text-white transition-colors" title="YouTube">
                                 <Youtube className="h-5 w-5" />
                             </a>
-                            <a href="mailto:info@madleague.net" className="hover:text-white transition-colors" title="Email">
+                            <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors" title="Email">
                                 <Mail className="h-5 w-5" />
                             </a>
                         </div>

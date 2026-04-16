@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-04-16 (사무실, 세션 52 Part 6) — MADLeague 전체 리디자인 + 도메인 분기 문서화
+
+### MADLeague 전체 리디자인
+- `app/(MADLeague)/madleague/page.tsx` — Hero 단순화(버튼 삭제), Clubs "경쟁을 통한 성장" 2컬럼 레이아웃, CTA DAMbe 캐릭터+lools@tenone.biz
+- `features/madleague/MadLeagueHeader.tsx` — 로고 `madleague-circle-sq.png`, "동아리" 메뉴 삭제
+- `features/madleague/MadLeagueFooter.tsx` — `footer_Logo.png`, 연락처 `lools@tenone.biz`
+- `features/madleague/KoreaClubMap.tsx` — `overflow-hidden rounded-2xl` 라운드 코너
+- `app/(MADLeague)/madleague/programs/layout.tsx` (신규) — sticky 수평 서브내비 6탭
+- `app/(MADLeague)/madleague/programs/competition/page.tsx` — Static 수상작 아카이브 3개 대회
+- `app/(MADLeague)/madleague/programs/{project,markethon,dam,insight-touring}/page.tsx` — 전체 리디자인
+- `app/(MADLeague)/madleague/clubs/page.tsx` — `py-32`, `text-4xl`, 2컬럼 그리드
+- `app/(MADLeague)/madleague/madzine/page.tsx` — 매거진 피처+게시판 하이브리드 다크 레이아웃
+
+### 도메인 분기 시스템 수정·문서화
+- `lib/site-context.tsx` — pathSiteMap 추가. localhost·www.tenone.biz에서 `/madleague` 경로 → `isMadLeague=true`
+- `lib/site-config.ts` — `domainMap`에 `madleague.tenone.biz` 추가
+- `CLAUDE.md` — 유니버스 도메인 분기 시스템 섹션 신규 추가
+
+### 미결
+- `sql/madleague_competition_archive.sql` 작성 완료, PAT 만료로 미실행
+- `lools@tenone.biz` 로그인 실패 미해결 (계정 존재·인증 확인됨, 비밀번호 불일치 의심)
+
+---
+
 ## 2026-04-16 (사무실, 세션 52 Part 5) — MADzine 고도화 + 공통 헤더 ABOUT 정리
 
 ### MZ-1~8: MADzine 게시판 고도화
