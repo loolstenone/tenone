@@ -71,19 +71,35 @@ localhost/madleague → 동일하게 동작
 
 | 브랜드 | 독립 도메인 | 서브도메인 | 경로 | siteId |
 |--------|-----------|----------|------|--------|
+| TenOne | tenone.biz | — | / | tenone |
 | MADLeague | madleague.net | madleague.tenone.biz | /madleague | madleague |
-| MADLeap | — | madleap.tenone.biz | /madleap | madleap |
+| MADLeap | madleap.co.kr | madleap.tenone.biz | /madleap | madleap |
 | Badak | badak.biz | badak.tenone.biz | /badak | badak |
 | RooK | rook.co.kr | rook.tenone.biz | /rook | rook |
 | YouInOne | youinone.com | youinone.tenone.biz | /youinone | youinone |
 | SmarComm | smarcomm.biz | smarcomm.tenone.biz | /smarcomm | smarcomm |
 | HeRo | hero.ne.kr | — | /hero | hero |
-| 0gamja | 0gamja.com | — | — | ogamja |
+| 0gamja | 0gamja.com | — | /0gamja | ogamja |
+| LUKI | — | — | /luki | luki |
+| Seoul360 | — | — | /seoul360 | seoul360 |
+| FWN | fwn.co.kr | — | /fwn | fwn |
+| MoNTZ | — | montz.tenone.biz | /montz | montz |
+| Mullaesian | — | mullaesian.tenone.biz | /mullaesian | mullaesian |
+| TrendHunter | — | trendhunter.tenone.biz | /trendhunter | trendhunter |
+| Mindle | — | — | /mindle | mindle |
+| Townity | — | townity.tenone.biz | /townity | townity |
+| NatureBox | — | naturebox.tenone.biz | /naturebox | naturebox |
+| Myverse | — | myverse.tenone.biz | /myverse | myverse |
+| Domo | — | domo.tenone.biz | /domo | domo |
+| Jakka | — | jakka.tenone.biz | /jakka | jakka |
+| ChangeUp | changeup.company | — | /changeup | changeup |
+| Planner's | — | planners.tenone.biz | /planners | planners |
+| WIO | — | — | /wio | wio |
 | BrandGravity | — | brandgravity.tenone.biz | /brandgravity | brandgravity |
 | Wiki | — | wiki.tenone.biz | /wiki | wiki |
 | Dokdae | — | dokdae.tenone.biz | /dokdae | dokdae |
-| Domo | — | domo.tenone.biz | /domo | domo |
-| (기타 20+) | — | {siteId}.tenone.biz | /{siteId} | 각 siteId |
+| EvoSchool | — | evschool.tenone.biz | /evschool | evschool |
+| NamingFactory | — | namingfactory.tenone.biz | /namingfactory | namingfactory |
 
 ### 인증 원칙
 - **Auth는 단일 Supabase 프로젝트** `ziotlxkdctlhiwkgmmsh` 하나로 통일
