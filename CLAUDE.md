@@ -583,7 +583,7 @@ Ten:One Universe는 여러 브랜드로 구성:
 5. **기존 프론트 143p는 건드리지 않는다.** 백엔드 API를 만들고 연결만.
 
 ### 개발 단계
-- Phase 0: 인프라 기초 (완료)
+- Phase 0: 인프라 기초 (진행 중 — tenant_id 일괄 추가, 중복 테이블 정리 대기)
 - Phase 1: 에이전트 코어 (agent_profiles + Agent Hub + Claude API)
 - Phase 2: 바닥쇠 실전 (첫 독립 에이전트)
 - Phase 3: tenone.biz 모듈 (프론트↔백엔드 연결)
