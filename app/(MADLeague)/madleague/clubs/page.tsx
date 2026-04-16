@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { fetchMadClubs } from '@/lib/supabase/madleague';
 
@@ -37,10 +38,13 @@ export default async function ClubsPage() {
               href={`/madleague/clubs/${club.slug}`}
               className="group relative bg-neutral-950 border border-neutral-900 hover:border-[#EC1D25] transition p-8"
             >
-              <div
-                className="h-14 w-14 rounded-full mb-6"
-                style={{ backgroundColor: club.color ?? '#EC1D25' }}
-              />
+              {club.logo_url ? (
+                <div className="h-14 w-14 mb-6 flex items-center justify-center">
+                  <Image src={club.logo_url} alt={club.name} width={56} height={56} className="object-contain" />
+                </div>
+              ) : (
+                <div className="h-14 w-14 rounded-full mb-6" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+              )}
               <div className="text-3xl font-black text-white">{club.name}</div>
               <div className="mt-2 flex items-center gap-1.5 text-sm text-neutral-400">
                 <MapPin className="h-3.5 w-3.5" />

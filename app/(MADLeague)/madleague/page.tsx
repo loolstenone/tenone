@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import {
   fetchMadClubs,
@@ -93,10 +94,13 @@ export default async function Page() {
                 href={`/madleague/clubs/${club.slug}`}
                 className="group relative aspect-square flex flex-col items-center justify-center bg-black border border-neutral-800 hover:border-[#EC1D25] transition"
               >
-                <div
-                  className="h-10 w-10 rounded-full mb-3"
-                  style={{ backgroundColor: club.color ?? '#EC1D25' }}
-                />
+                {club.logo_url ? (
+                  <div className="h-10 w-10 mb-3 flex items-center justify-center">
+                    <Image src={club.logo_url} alt={club.name} width={40} height={40} className="object-contain" />
+                  </div>
+                ) : (
+                  <div className="h-10 w-10 rounded-full mb-3" style={{ backgroundColor: club.color ?? '#EC1D25' }} />
+                )}
                 <div className="font-bold text-white">{club.name}</div>
                 <div className="text-xs text-neutral-500 mt-1">{club.region}</div>
               </Link>

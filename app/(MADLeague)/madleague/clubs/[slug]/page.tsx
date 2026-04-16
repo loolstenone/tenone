@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MapPin, Calendar, Users, ArrowRight, ChevronLeft } from 'lucide-react';
 import { fetchMadClubBySlug } from '@/lib/supabase/madleague';
@@ -59,10 +60,13 @@ export default async function ClubDetailPage({ params }: PageProps) {
           aria-hidden
         />
         <div className="relative mx-auto max-w-7xl px-6 py-20">
-          <div
-            className="h-20 w-20 rounded-full mb-8"
-            style={{ backgroundColor: accent }}
-          />
+          {club.logo_url ? (
+            <div className="h-20 w-20 mb-8 flex items-center justify-center">
+              <Image src={club.logo_url} alt={club.name} width={80} height={80} className="object-contain" />
+            </div>
+          ) : (
+            <div className="h-20 w-20 rounded-full mb-8" style={{ backgroundColor: accent }} />
+          )}
           <h1 className="text-5xl sm:text-7xl font-black tracking-tight">{club.name}</h1>
           <div className="mt-4 flex items-center gap-2 text-neutral-400">
             <MapPin className="h-4 w-4" />
