@@ -2,27 +2,49 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 /**
- * Supabase recovery 이메일 클릭 시 hash fragment로 돌아오는 경우 처리
- * site_url로 리다이렉트되면서 #access_token=...&type=recovery 가 붙음
- * 이걸 감지해서 /reset-password로 보냄
+ * Supabase recovery 이메일 클릭 시 /reset-password로 자동 이동
+ *
+ * 3가지 방식으로 감지 (Supabase 버전/설정에 따라 다름):
+ * 1. hash fragment: #access_token=...&type=recovery (implicit flow)
+ * 2. query param: ?token_hash=...&type=recovery (PKCE / Dashboard 발송)
+ * 3. onAuthStateChange PASSWORD_RECOVERY 이벤트 (가장 신뢰성 높음)
  */
 export function AuthRecoveryHandler() {
     const router = useRouter();
 
     useEffect(() => {
+        // 방법 1: hash fragment (implicit flow)
         const hash = window.location.hash;
-        if (!hash) return;
-
-        const params = new URLSearchParams(hash.substring(1));
-        const type = params.get('type');
-
-        if (type === 'recovery') {
-            // recovery 토큰이 hash에 있으면 /reset-password로 이동
-            // Supabase client가 자동으로 hash의 access_token을 세션에 저장함
-            router.replace('/reset-password');
+        if (hash) {
+            const params = new URLSearchParams(hash.substring(1));
+            if (params.get('type') === 'recovery') {
+                router.replace('/reset-password');
+                return;
+            }
         }
+
+        // 방법 2: query params (PKCE token_hash / Dashboard 발송)
+        const search = window.location.search;
+        if (search) {
+            const params = new URLSearchParams(search);
+            if (params.get('type') === 'recovery') {
+                router.replace('/reset-password');
+                return;
+            }
+        }
+
+        // 방법 3: onAuthStateChange PASSWORD_RECOVERY 이벤트
+        const supabase = createClient();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                router.replace('/reset-password');
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, [router]);
 
     return null;
