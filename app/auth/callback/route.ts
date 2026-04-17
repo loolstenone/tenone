@@ -52,8 +52,11 @@ export async function GET(request: NextRequest) {
             }
             return NextResponse.redirect(`${origin}${next}`);
         }
+        // 디버깅용: 실제 에러 메시지 노출 (운영 안정화 후 제거)
+        console.error('[auth/callback] exchangeCodeForSession error:', error.message, 'host:', hostname);
+        return NextResponse.redirect(`${origin}/login?error=auth_callback_error&msg=${encodeURIComponent(error.message)}`);
     }
 
-    // 에러 시 로그인 페이지로
-    return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
+    // 코드 자체가 없음
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_error&msg=no_code`);
 }
