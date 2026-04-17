@@ -55,9 +55,26 @@ function loadUserFromStorage(): User | null {
     }
 }
 
-// Supabase members → User 변환 (v2)
+// Supabase members → User 변환 (v3: member_roles 기반)
 function memberToUser(member: Record<string, unknown>): User {
     const accountType = (member.account_type as User['accountType']) || 'member';
+
+    // member_roles에서 권한 도출 (fallback: members 컬럼)
+    type RoleRow = { role: string; context: string; is_active: boolean };
+    const rolesData = (member.member_roles as RoleRow[] | null) ?? [];
+    const activeRoles = rolesData.filter(r => r.is_active !== false);
+
+    const universeRoles = activeRoles.filter(r => r.context === 'universe').map(r => r.role);
+    const moduleRoles   = activeRoles.filter(r => r.context === 'module').map(r => r.role);
+    const brandRoles    = activeRoles.filter(r => r.context === 'brand').map(r => r.role);
+    const hasIntraRole  = activeRoles.some(r => r.role === 'intra_access' || r.role === 'staff' || r.role === 'super_admin' || r.role === 'crew');
+
+    // member_roles 데이터 없으면 members 컬럼 fallback
+    const roles       = universeRoles.length > 0 ? universeRoles : ((member.roles as string[]) || [accountType]);
+    const moduleAccess = moduleRoles.length > 0 ? moduleRoles : ((member.module_access as string[]) || []);
+    const brandAccess  = brandRoles.length > 0 ? brandRoles : ((member.brand_access as string[]) || []);
+    const intraAccess  = rolesData.length > 0 ? hasIntraRole : ((member.intra_access as boolean) ?? accountType !== 'member');
+
     return {
         id: member.id as string,
         name: member.name as string,
@@ -68,16 +85,16 @@ function memberToUser(member: Record<string, unknown>): User {
         avatarInitials: (member.avatar_initials as string) || ((member.name as string) || '').substring(0, 2).toUpperCase(),
         avatarUrl: (member.avatar_url as string) || undefined,
 
-        // 역할 & 소속
-        roles: (member.roles as string[]) || [accountType],
+        // 역할 & 소속 (member_roles 기반)
+        roles,
         affiliations: (member.affiliations as string[]) || [],
         originSite: (member.origin_site as string) || 'tenone.biz',
 
-        // 접근 권한
-        intraAccess: (member.intra_access as boolean) ?? accountType !== 'member',
-        moduleAccess: (member.module_access as User['moduleAccess']) || [],
+        // 접근 권한 (member_roles 기반)
+        intraAccess,
+        moduleAccess: moduleAccess as User['moduleAccess'],
         systemAccess: (member.system_access as SystemAccess[]) || [],
-        brandAccess: (member.brand_access as string[]) || [],
+        brandAccess,
 
         // 프로필 (HR 필드는 tenone_staff_profiles에서)
         department: (member.staff_profile as Record<string, unknown> | null)?.department as string | undefined,
@@ -107,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             let { data: member } = await supabase
                 .from('members')
-                .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type)')
+                .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type), member_roles(role,context,is_active)')
                 .eq('auth_id', sessionUser.id)
                 .single();
 
