@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, Check, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,6 +20,27 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExchanging, setIsExchanging] = useState(false);
+
+  // 이메일 링크 클릭 시 ?code=XXX (PKCE)를 세션으로 교환 → reset 모드 전환
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      setIsExchanging(true);
+      const sb = createClient();
+      sb.auth.exchangeCodeForSession(code).then(({ error: exchErr }) => {
+        if (exchErr) {
+          setError(`재설정 링크가 유효하지 않거나 만료되었습니다: ${exchErr.message}`);
+        } else {
+          setMode('reset');
+          // URL에서 code 제거 (새로고침 시 재사용 방지)
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+        setIsExchanging(false);
+      });
+    }
+  }, []);
 
   // 로그인 상태면 비밀번호 변경 모드
   useEffect(() => {
