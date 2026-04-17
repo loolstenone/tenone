@@ -47,6 +47,7 @@ const domainPrefixMap: Record<string, string> = {
     'brandgravity.co.kr': '/brandgravity',
     'www.brandgravity.co.kr': '/brandgravity',
     'brandgravity.tenone.biz': '/brandgravity',
+    'intra.tenone.biz': '/intra',
     // 추후 추가: 'luki.ai': '/lk'
 };
 
