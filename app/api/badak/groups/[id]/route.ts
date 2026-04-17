@@ -6,39 +6,87 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-// GET /api/badak/groups/[id] — 모임 상세
+// UUID 패턴 감지
+function isUUID(str: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+const GROUP_SELECT = `
+  id, slug, title, tagline, description, intro_who, structure,
+  guide, notice, status, join_type, meeting_type,
+  max_members, current_members,
+  event_date, schedule, next_date, location, location_detail,
+  fee, tags, cover_image_url, series_count, series_dates,
+  leader_reason, leader_career, leader_bio,
+  created_at,
+  leader:badak_members!badak_groups_leader_id_fkey(
+    id, display_name, job_function, experience_years, bio, avatar_url, career, industry
+  ),
+  need:badak_needs!badak_groups_need_id_fkey(
+    id, display_text, count
+  )
+`;
+
+// GET /api/badak/groups/[id] — slug 또는 UUID로 모임 상세 조회
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
-  const { data, error } = await supabase
+  // UUID면 id로, 아니면 slug로 조회
+  const field = isUUID(id) ? 'id' : 'slug';
+  const { data: groupData, error } = await supabase
     .from('badak_groups')
-    .select(`
-      id, title, description, status, meeting_type,
-      max_members, current_members,
-      event_date, schedule, location, location_detail,
-      fee, tags, cover_image_url, created_at,
-      leader:badak_members!badak_groups_leader_id_fkey(
-        id, display_name, job_function, experience_years, bio
-      ),
-      need:badak_needs!badak_groups_need_id_fkey(
-        id, display_text, count
-      )
-    `)
-    .eq('id', id)
+    .select(GROUP_SELECT)
+    .eq(field, id)
     .single();
 
-  if (error || !data) {
+  if (error || !groupData) {
     return NextResponse.json({ error: error?.message || 'Not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ group: data });
+  // 참여 멤버 목록 (approved)
+  const { data: membersData } = await supabase
+    .from('badak_group_members')
+    .select(`
+      member:badak_members!badak_group_members_member_id_fkey(
+        id, display_name, job_function, avatar_url
+      )
+    `)
+    .eq('group_id', groupData.id)
+    .eq('status', 'approved')
+    .limit(20);
+
+  const members = (membersData ?? [])
+    .map((r: { member: unknown }) => r.member)
+    .filter(Boolean);
+
+  // 관련 모임 (같은 태그, 현재 모임 제외)
+  const tags = groupData.tags ?? [];
+  let related: unknown[] = [];
+  if (tags.length > 0) {
+    const { data: relData } = await supabase
+      .from('badak_groups')
+      .select('id, slug, title, current_members, max_members, tags, cover_image_url')
+      .neq('id', groupData.id)
+      .eq('status', 'recruiting')
+      .overlaps('tags', tags)
+      .limit(3);
+    related = relData ?? [];
+  }
+
+  return NextResponse.json({
+    group: {
+      ...groupData,
+      members,
+      reviews: [],
+      related,
+    },
+  });
 }
 
 // PATCH /api/badak/groups/[id] — 모임 설정 변경 (바닥장 전용)
-// 현재 지원 필드: join_type
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -51,7 +99,6 @@ export async function PATCH(
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // 바닥장 확인
   const { data: member } = await supabase
     .from('badak_members')
     .select('id')

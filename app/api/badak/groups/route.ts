@@ -15,9 +15,10 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('badak_groups')
     .select(`
-      id, title, description, status, max_members, current_members,
-      event_date, location, location_detail, fee, tags, cover_image_url, created_at,
-      leader:badak_members!badak_groups_leader_id_fkey(id, display_name, job_function, experience_years),
+      id, slug, title, tagline, description, status, meeting_type, join_type,
+      max_members, current_members,
+      event_date, schedule, next_date, location, location_detail, fee, tags, cover_image_url, created_at,
+      leader:badak_members!badak_groups_leader_id_fkey(id, display_name, job_function, experience_years, avatar_url),
       need:badak_needs!badak_groups_need_id_fkey(id, display_text, count)
     `)
     .order('event_date', { ascending: true })
@@ -88,13 +89,19 @@ export async function POST(request: NextRequest) {
       need_id: body.needId || null,
       title: body.title,
       description: body.description || null,
+      intro_who: body.introWho || null,
+      structure: body.sessions?.length > 0 ? body.sessions : null,
+      guide: body.guide || null,
+      notice: body.notice || null,
       leader_id: member.id,
       leader_reason: body.leaderReason || null,
+      leader_career: body.leaderCareer || null,
       group_type: groupType,
       meeting_type: meetingType,
       join_type: body.joinType || 'approval',
       status: initialStatus,
       max_members: body.maxMembers || 20,
+      series_count: meetingType === 'series' ? (body.seriesCount || null) : null,
       event_date: body.eventDate || null,
       series_dates: body.seriesDates || null,
       recurring_schedule: body.recurringSchedule || null,

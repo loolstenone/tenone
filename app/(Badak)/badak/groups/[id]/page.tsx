@@ -414,7 +414,20 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     fetch(`/api/badak/groups/${slug}`)
       .then(r => r.json())
-      .then(data => setGroup(data.group ? { ...MOCK[slug], ...data.group } : (MOCK[slug] ?? null)))
+      .then(data => {
+        if (data.group) {
+          const g = data.group;
+          setGroup({
+            ...MOCK[slug],
+            ...g,
+            members: g.members ?? MOCK[slug]?.members ?? [],
+            reviews: g.reviews ?? MOCK[slug]?.reviews ?? [],
+            related: g.related ?? MOCK[slug]?.related ?? [],
+          });
+        } else {
+          setGroup(MOCK[slug] ?? null);
+        }
+      })
       .catch(() => setGroup(MOCK[slug] ?? null));
   }, [slug]);
 
