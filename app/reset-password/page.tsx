@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
     if (code) {
       setIsExchanging(true);
       const sb = createClient();
-      sb.auth.exchangeCodeForSession(code).then(({ error: exchErr }) => {
+      sb.auth.exchangeCodeForSession(code).then(({ error: exchErr }: { error: { message: string } | null }) => {
         if (exchErr) {
           setError(`재설정 링크가 유효하지 않거나 만료되었습니다: ${exchErr.message}`);
         } else {

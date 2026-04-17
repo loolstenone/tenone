@@ -502,10 +502,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     // 비밀번호 재설정 이메일 발송
+    // redirectTo를 /auth/callback으로 보내야 서버가 PKCE code를 쿠키와 함께 교환 → /reset-password 리다이렉트
+    // (/reset-password로 직접 보내면 클라이언트가 verifier 쿠키에 접근해야 하는데 브라우저/탭 따라 실패 가능)
     const resetPassword = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/reset-password`,
+                redirectTo: `${window.location.origin}/auth/callback?type=recovery&next=/reset-password`,
             });
             if (error) return { success: false, error: error.message };
             return { success: true };
