@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { createClient } from "@/lib/supabase/client";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -14,7 +13,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTab = "login" }: LoginModalProps) {
-    const { login, register, isAuthenticated, isLoading } = useAuth();
+    const { login, register, loginWithGoogle, loginWithKakao, isAuthenticated, isLoading } = useAuth();
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -27,15 +26,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
     // 인증 완료 시 닫기 (isLoading 중에는 캐시된 상태일 수 있으므로 대기)
     useEffect(() => { if (isAuthenticated && !isLoading && isOpen) onClose(); }, [isAuthenticated, isLoading, isOpen, onClose]);
-    // Supabase SIGNED_IN 즉시 감지 → auth-context 업데이트 기다리지 않고 바로 닫기
-    useEffect(() => {
-        if (!isOpen) return;
-        const sb = createClient();
-        const { data: { subscription } } = sb.auth.onAuthStateChange((event: string) => {
-            if (event === 'SIGNED_IN') onClose();
-        });
-        return () => subscription.unsubscribe();
-    }, [isOpen, onClose]);
+    // isAuthenticated 변경 시 모달 닫기 (소셜 로그인 후 리다이렉트 복귀 시에도 동작)
     useEffect(() => { if (isOpen) setTab(defaultTab); }, [isOpen, defaultTab]);
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -82,13 +73,10 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         setIsSubmitting(false);
     };
 
+    // useAuth()의 소셜 로그인 함수 사용 (중복 로직 제거)
     const handleSocialLogin = async (provider: "google" | "kakao") => {
-        const sb = createClient();
-        const redirectTo = `${window.location.origin}/auth/callback`;
-        document.cookie = `auth_redirect=${encodeURIComponent(window.location.pathname)};path=/;max-age=300;SameSite=Lax`;
-        const { data, error: oauthError } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
-        if (data?.url) window.location.href = data.url;
-        else if (oauthError) setError(`${provider} 실패: ${oauthError.message}`);
+        if (provider === "google") await loginWithGoogle();
+        else await loginWithKakao();
     };
 
     if (!isOpen || typeof window === 'undefined') return null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { User, SystemAccess, IntraModule } from '@/types/auth';
 import { createClient } from '@/lib/supabase/client';
 import { permissionsFromJWT } from '@/lib/supabase/identity';
@@ -147,9 +147,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
+    const isSyncingRef = useRef(false);       // syncUserFromSession 동시 호출 방어
+    const isInitializedRef = useRef(false);   // 초기화 완료 전 onAuthStateChange 중복 방어
 
-    // Supabase 세션에서 members 조회 → User 설정
+    // Supabase 세션에서 members 조회 → User 설정 (동시 호출 방어)
     const syncUserFromSession = useCallback(async (sessionUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }) => {
+        // 이미 sync 중이면 대기 없이 현재 user 반환 (race condition 방어)
+        if (isSyncingRef.current) return user;
+        isSyncingRef.current = true;
         try {
             let { data: member } = await supabase
                 .from('members')
@@ -246,8 +251,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return fallbackUser;
         } catch {
             return null;
+        } finally {
+            isSyncingRef.current = false;
         }
-    }, [supabase]);
+    }, [supabase, user]);
 
     // 초기화: localStorage 즉시 표시 → Supabase 세션 검증 → 불일치 시 정리
     useEffect(() => {
@@ -284,6 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } catch {
                 // Supabase 접속 실패 → localStorage 유지 (오프라인 대응)
             } finally {
+                isInitializedRef.current = true;
                 setIsLoading(false); // 항상 로딩 해제
             }
         }
@@ -291,6 +299,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // 3단계: Auth 상태 변경 리스너 (로그인/로그아웃/토큰갱신)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+            // 초기화 중 SIGNED_IN은 validateSession이 이미 처리 → 스킵 (race condition 방어)
+            if (!isInitializedRef.current && event === 'SIGNED_IN') return;
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (session?.user) {

@@ -2,14 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// Vercel 프리뷰/로컬에서는 .tenone.biz 도메인 쿠키 불필요
-const cookieDomain = process.env.VERCEL_ENV === 'production' ? '.tenone.biz' : undefined;
+/**
+ * 요청 도메인에 맞는 쿠키 도메인 결정
+ * - *.tenone.biz → '.tenone.biz' (서브도메인 간 공유)
+ * - 외부 도메인 (badak.biz, madleague.net 등) → undefined (현재 호스트 전용)
+ */
+function getCookieDomain(hostname: string): string | undefined {
+    if (process.env.VERCEL_ENV !== 'production') return undefined;
+    const host = hostname.split(':')[0];
+    if (host === 'tenone.biz' || host.endsWith('.tenone.biz')) {
+        return '.tenone.biz';
+    }
+    return undefined;
+}
 
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
     const hostname = request.headers.get('host') || '';
     const cookieStore = await cookies();
+    const cookieDomain = getCookieDomain(hostname);
 
     // SmarComm 도메인이면 기본 리다이렉트를 /dashboard로
     const defaultNext = hostname.includes('smarcomm') ? '/dashboard' : '/';

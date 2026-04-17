@@ -28,9 +28,8 @@ export function createClient() {
                 storageKey: 'tenone-auth',
                 persistSession: true,
                 autoRefreshToken: true,
-                // Navigator Lock 경합 방지: 탭 간 lock 없이 in-process로만 실행
-                // (Intra 단일 테넌트 앱에서는 cross-tab 동기화 불필요)
-                lock: async <R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> => fn(),
+                // Navigator Lock 활성화: 동시 탭에서 refresh token 경합 방지
+                // (비활성화 시 2개 이상 탭에서 동시 토큰 갱신 → "Invalid Refresh Token" 에러)
             },
         }
     );
