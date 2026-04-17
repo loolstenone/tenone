@@ -52,7 +52,7 @@ const domainPrefixMap: Record<string, string> = {
 };
 
 // 리라이트 제외 경로 (모든 도메인 공통 — 인증 통일 후 SmarComm 분기 제거)
-const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup'];
+const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
 
 export async function middleware(request: NextRequest) {
     // 1. Supabase 세션 갱신 (모든 요청에서)
