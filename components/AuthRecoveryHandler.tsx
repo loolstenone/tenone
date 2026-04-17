@@ -16,11 +16,14 @@ export function AuthRecoveryHandler() {
     const router = useRouter();
 
     useEffect(() => {
+        const isRecoveryType = (type: string | null) =>
+            type === 'recovery' || type === 'magiclink';
+
         // 방법 1: hash fragment (implicit flow)
         const hash = window.location.hash;
         if (hash) {
             const params = new URLSearchParams(hash.substring(1));
-            if (params.get('type') === 'recovery') {
+            if (isRecoveryType(params.get('type'))) {
                 router.replace('/reset-password');
                 return;
             }
@@ -30,7 +33,7 @@ export function AuthRecoveryHandler() {
         const search = window.location.search;
         if (search) {
             const params = new URLSearchParams(search);
-            if (params.get('type') === 'recovery') {
+            if (isRecoveryType(params.get('type'))) {
                 router.replace('/reset-password');
                 return;
             }
