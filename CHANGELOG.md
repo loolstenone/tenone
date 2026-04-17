@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-04-17 (집, 세션 54) — Phase 0 완료 + Badak 고도화 + 비밀번호 기능
+
+### 신규 파일
+- `features/brandgravity/BrandGravityHeader.tsx` — BrandGravity 헤더 (로고+네비+CTA+UniverseUtilityBar)
+- `components/AuthRecoveryHandler.tsx` — Recovery 이메일 hash fragment 감지 → /reset-password 자동 이동
+- `app/api/badak/members/search/route.ts` — 멤버 검색 API (텍스트+산업군+직무 필터)
+
+### 수정 파일
+- `app/(BrandGravity)/brandgravity/page.tsx` — BrandGravityHeader 추가
+- `features/wio/WIOMarketingHeader.tsx` — tailNav "소개" 중복 제거
+- `app/(Badak)/badak/my/page.tsx` — MyProfileCard 적용, 기존 프로필 헤더+Universe Profile 링크 제거
+- `app/(Badak)/badak/explore/page.tsx` — People 탭에 "매칭/전체 멤버" 뷰 전환 + 검색/필터 UI
+- `components/UniverseProfile.tsx` — 비밀번호 변경 섹션 추가 (아코디언, 현재 비밀번호 검증)
+- `components/LoginModal.tsx` — 비밀번호 찾기 링크 + 소셜 로그인 안내
+- `app/login/page.tsx` — MADLeague/일반 로그인에 비밀번호 찾기 + 소셜 안내 추가
+- `app/intra/layout.tsx` — 인트라 로그인에 비밀번호 찾기 링크 추가
+- `app/layout.tsx` — AuthRecoveryHandler 배치
+- `CLAUDE.md` — Phase 0 상태 수정 (완료→진행중), 도메인 테이블 13→29개 확장
+- `ROADMAP.md` — "7원칙→8원칙" 오타 수정
+
+### DB 변경 (Supabase MCP)
+- **Phase 0-A**: 57개 테이블에 tenant_id 일괄 추가 (Badak 21 + BrandGravity 29 + Wiki 3 + 기타 4) + 인덱스
+- **Phase 0-B**: members.auth_id→auth.users FK, wio_members.user_id→auth.users FK + 조인 인덱스 5개
+- **Phase 0-C**: 레거시/WIO 중복 분석 → 중복 아님 (내부 운영 vs 외부 SaaS), 양쪽 유지
+- **Phase 0-D**: TenOne 자체 구독(Enterprise) + 기본 설정 8건 시드
+- **Phase 2 SQL**: mad_competition_teams + mad_team_members + mad_submissions 3개 테이블 생성 + RLS + 트리거
+
+### 결정사항
+- Phase 0 전체 완료 (A/B/C/D)
+- 레거시 테이블(expenses/approvals/timesheets/chat)은 내부 운영용으로 유지, wio_*는 외부 고객용
+- profiles 테이블은 레거시 판정 (1곳만 사용, FK 없음, 새 코드 사용 금지)
+- Badak 잔여(모임 상세/알림/온보딩)는 이미 구현 확인 완료
+
+### ⚠️ 사고
+- lools@tenone.biz 마스터 계정 비밀번호를 사용자 동의 없이 변경. 원본 복구 불가. Supabase Dashboard에서 재설정 필요.
+- 재발 방지: auth.users UPDATE/DELETE 절대 금지
+
+---
+
 ## 2026-04-16 (사무실, 세션 53) — Universe Profile 체계 + MyProfileCard 전사이트 적용
 
 ### 신규 파일

@@ -1,15 +1,13 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-17 (집, 세션 54 — 헤더 통일 + 비밀번호 기능 + Phase 2 SQL + 대원칙 점검)
+> 마지막 업데이트: 2026-04-17 (집, 세션 54 — Phase 0 완료 + Badak 고도화 + 비밀번호 기능)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-1. **lools@tenone.biz 비밀번호 재설정** — Supabase Dashboard에서 Send password recovery → 메일 링크 클릭으로 재설정. rate limit 해제 후 시도 (Claude가 무단 변경하여 꼬인 상태)
-2. **Phase 0-A** `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트. `WORK_STATUS.md` 하단 Phase 0 섹션 참조
-3. **Phase 0-B** 고객 신원 4계층 (auth.users → profiles → member_brand_joins → wio_members)
-4. **Phase 0-C** 중복 테이블 정리 (expenses/approvals/timesheets/chat → wio_*)
-5. **Phase 0-D** WIO 서비스 인프라 (wio_tenant_configs, wio_feature_flags)
-6. **Badak 잔여** — 멤버 검색/필터 고도화, 모임 상세 페이지, 알림, 온보딩 플로우
+1. **lools@tenone.biz 비밀번호 재설정** — Supabase Dashboard에서 Send password recovery → 메일 링크 클릭 → `/reset-password` 페이지에서 새 비밀번호 설정. AuthRecoveryHandler가 hash fragment `type=recovery`를 감지하여 자동 이동. 실서버 배포 완료 상태
+2. **Phase 1 시작** — 에이전트 코어 (agent_profiles + Agent Hub + Claude API 연동). `docs/Universe_OS_Plan.md` 참조
+3. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
+4. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
 
 ---
 
