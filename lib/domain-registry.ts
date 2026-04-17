@@ -27,6 +27,7 @@ const registry: Record<string, DomainEntry> = {
     // MADLeap
     'madleap.co.kr':            { prefix: '/madleap',    siteId: 'madleap' },
     'www.madleap.co.kr':        { prefix: '/madleap',    siteId: 'madleap' },
+    'madleap.tenone.biz':       { prefix: '/madleap',    siteId: 'madleap' },
     // YouInOne
     'youinone.com':             { prefix: '/youinone',   siteId: 'youinone' },
     'www.youinone.com':         { prefix: '/youinone',   siteId: 'youinone' },
