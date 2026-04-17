@@ -48,7 +48,17 @@ export async function middleware(request: NextRequest) {
     // 보안 검증이 필요한 경우는 API Route에서 getUser() 직접 호출
     await supabase.auth.getSession();
 
-    // 2. /profile/@handle → /profile/handle (@ in URL is pretty, rewrite to route-safe)
+    // 2a. /@handle → /profile/@handle (pretty URL)
+    const atHandleMatch = pathname.match(/^\/@([^/]+)$/);
+    if (atHandleMatch) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/profile/${atHandleMatch[1]}`;
+        const rewrite = NextResponse.rewrite(url, { request });
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c.name, c.value));
+        return rewrite;
+    }
+
+    // 2b. /profile/@handle → /profile/handle (@ in URL is pretty, rewrite to route-safe)
     const atProfileMatch = pathname.match(/^\/profile\/@(.+)$/);
     if (atProfileMatch) {
         const url = request.nextUrl.clone();

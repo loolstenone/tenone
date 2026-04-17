@@ -125,52 +125,35 @@ export default function ApplyPage() {
     );
   }
 
-  // 비로그인 게이트 — 바닥장 신청은 회원가입/로그인 필수
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#1a1a2e] pt-14">
-        <div className="mx-auto flex max-w-md flex-col items-center px-6 py-20 text-center">
-          <div
-            className="mb-5 flex h-20 w-20 items-center justify-center rounded-full"
-            style={{ background: 'rgba(255,217,61,0.08)' }}
-          >
-            <Crown className="h-9 w-9 text-amber-400/80" />
-          </div>
-          <h1 className="mb-3 text-2xl font-bold text-white">바닥장 신청</h1>
-          <p className="mb-1 text-base text-white/60">
-            바닥장 신청은 바닥 회원가입이 먼저예요.
-          </p>
-          <p className="mb-8 text-sm text-white/35">
-            가입 후 바로 이 페이지로 돌아와 신청할 수 있습니다.
-          </p>
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-            <button
-              onClick={() => setShowLogin(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold"
-              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
-            >
-              <LogIn className="h-4 w-4" /> 로그인
+  // 비로그인 오버레이 (폼은 뒤에 보이게)
+  const authOverlay = !isAuthenticated && (
+    <>
+      <div className="fixed inset-0 z-40" style={{ background: 'rgba(15,15,35,0.75)', backdropFilter: 'blur(4px)' }} />
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 pointer-events-none">
+        <div className="flex flex-col items-center rounded-2xl border border-white/10 px-10 py-10 pointer-events-auto"
+          style={{ background: 'rgba(26,26,46,0.95)' }}>
+          <Crown className="mb-4 h-10 w-10 text-amber-400/60" />
+          <p className="mb-1 text-base font-bold text-white">로그인이 필요합니다</p>
+          <p className="mb-6 text-sm text-white/40 text-center">바닥장 신청은 회원 로그인 후 이용할 수 있습니다</p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowLogin(true)}
+              className="rounded-xl border-none px-6 py-2.5 text-sm font-semibold"
+              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+              로그인
             </button>
-            <Link
-              href="/badak/onboard"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-6 py-3.5 text-base font-semibold text-white/80 hover:bg-white/5"
-            >
-              <UserPlus className="h-4 w-4" /> 회원가입
+            <Link href="/badak/onboard"
+              className="rounded-xl border border-white/15 px-6 py-2.5 text-sm font-semibold text-white/70 hover:bg-white/5">
+              회원가입
             </Link>
           </div>
-          <Link
-            href="/badak"
-            className="mt-6 inline-flex items-center gap-1 text-sm text-white/35 hover:text-white/60"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> 바닥 홈으로
-          </Link>
         </div>
-        <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
       </div>
-    );
-  }
+    </>
+  );
 
   return (
+    <>
+    {authOverlay}
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
 
@@ -371,5 +354,6 @@ export default function ApplyPage() {
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
+    </>
   );
 }

@@ -480,7 +480,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     function handleShareCopy() {
         const handle = profile?.handle;
         const url = handle
-            ? `${window.location.origin}/profile/@${handle}`
+            ? `${window.location.origin}/@${handle}`
             : `${window.location.origin}/profile`;
         navigator.clipboard.writeText(url).then(() => {
             setCopied(true);
@@ -801,7 +801,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                             {handleError && <p className="text-[11px] text-red-500 mt-1">{handleError}</p>}
                             {!handleError && handleAvailable === true && <p className="text-[11px] text-emerald-600 mt-1">사용 가능한 ID입니다.</p>}
                             {!handleError && handleAvailable === false && editForm.handle && <p className="text-[11px] text-red-500 mt-1">이미 사용 중인 ID입니다.</p>}
-                            <p className="text-[10px] tn-text-sub mt-0.5">URL: /profile/@{editForm.handle || 'your-handle'}</p>
+                            <p className="text-[10px] tn-text-sub mt-0.5">URL: tenone.biz/@{editForm.handle || 'your-handle'}</p>
                         </div>
 
                         {/* 관심 분야 */}
@@ -829,7 +829,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                     <div key={key} className="flex items-center gap-2">
                                         <span className="text-[11px] tn-text-sub w-24 shrink-0">{label}</span>
                                         <input
-                                            type="url"
+                                            type="text"
                                             value={editForm.socialLinks[key] || ''}
                                             onChange={e => setEditForm(f => ({
                                                 ...f,
@@ -1015,13 +1015,17 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                                     { key: 'youtube',  label: 'YouTube' },
                                                     { key: 'github',   label: 'GitHub' },
                                                     { key: 'website',  label: '웹사이트' },
-                                                ].filter(s => (profile.socialLinks || {})[s.key]).map(({ key, label }) => (
-                                                    <a key={key} href={(profile.socialLinks || {})[key]}
+                                                ].filter(s => (profile.socialLinks || {})[s.key]).map(({ key, label }) => {
+                                                    const raw = (profile.socialLinks || {})[key] || '';
+                                                    const href = raw.startsWith('http://') || raw.startsWith('https://') ? raw : `https://${raw}`;
+                                                    return (
+                                                    <a key={key} href={href}
                                                         target="_blank" rel="noopener noreferrer"
                                                         className="inline-flex items-center gap-1.5 text-xs border tn-border rounded-full px-3 py-1 tn-text-sub hover:tn-text transition-colors">
                                                         <ExternalLink className="h-3 w-3" /> {label}
                                                     </a>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
