@@ -79,12 +79,12 @@ function memberToUser(member: Record<string, unknown>): User {
         systemAccess: (member.system_access as SystemAccess[]) || [],
         brandAccess: (member.brand_access as string[]) || [],
 
-        // 프로필
-        department: member.department as string | undefined,
-        employeeId: member.employee_id as string | undefined,
-        position: member.position as string | undefined,
-        hireDate: member.hire_date as string | undefined,
-        employmentType: member.employment_type as string | undefined,
+        // 프로필 (HR 필드는 tenone_staff_profiles에서)
+        department: (member.staff_profile as Record<string, unknown> | null)?.department as string | undefined,
+        employeeId: (member.staff_profile as Record<string, unknown> | null)?.employee_id as string | undefined,
+        position: (member.staff_profile as Record<string, unknown> | null)?.position as string | undefined ?? member.position as string | undefined,
+        hireDate: (member.staff_profile as Record<string, unknown> | null)?.hire_date as string | undefined,
+        employmentType: (member.staff_profile as Record<string, unknown> | null)?.employment_type as string | undefined,
         phone: member.phone as string | undefined,
         bio: member.bio as string | undefined,
         company: member.company as string | undefined,
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             let { data: member } = await supabase
                 .from('members')
-                .select('*')
+                .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type)')
                 .eq('auth_id', sessionUser.id)
                 .single();
 
