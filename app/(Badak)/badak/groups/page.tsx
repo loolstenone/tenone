@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Plus, Calendar, MapPin, Users, Search,
   Crown, Flame, Clock, Sparkles, ChevronLeft, ChevronRight,
@@ -11,6 +12,7 @@ import { useAuth } from '@/lib/auth-context';
 
 interface GroupItem {
   id: string;
+  slug?: string;
   title: string;
   description: string | null;
   status: string;
@@ -21,14 +23,14 @@ interface GroupItem {
   fee: number;
   tags: string[];
   cover_image_url: string | null;
-  leader: { display_name: string; job_function: string } | null;
+  leader: { display_name: string; job_function: string; avatar_url?: string | null } | null;
   need: { display_text: string; count: number } | null;
 }
 
 // ── Mock 데이터 (DB 연동 전까지) ──
 const MOCK_GROUPS: GroupItem[] = [
   {
-    id: 'g1', title: 'B2B 마케팅 실무 모임', description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다. 퍼포먼스 마케팅부터 콘텐츠 마케팅까지.',
+    id: 'g1', slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다. 퍼포먼스 마케팅부터 콘텐츠 마케팅까지.',
     status: 'recruiting', max_members: 20, current_members: 13,
     event_date: '2026-04-26T14:00:00', location: '강남역', fee: 0,
     tags: ['B2B', '마케팅', 'SaaS'],
@@ -37,7 +39,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: 'B2B 마케팅', count: 28 },
   },
   {
-    id: 'g2', title: '카피라이팅 같이 연습할래?', description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.',
+    id: 'g2', slug: 'copywriting-practice', title: '카피라이팅 같이 연습할래?', description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.',
     status: 'confirmed', max_members: 12, current_members: 12,
     event_date: '2026-04-20T19:00:00', location: '성수동', fee: 5000,
     tags: ['카피', '글쓰기', '광고'],
@@ -46,7 +48,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '카피라이팅', count: 35 },
   },
   {
-    id: 'g3', title: '소셜미디어 트렌드 분석', description: '매주 소셜미디어 트렌드를 분석하고 인사이트를 공유합니다.',
+    id: 'g3', slug: 'sns-content-studio', title: '소셜미디어 트렌드 분석', description: '매주 소셜미디어 트렌드를 분석하고 인사이트를 공유합니다.',
     status: 'recruiting', max_members: 15, current_members: 8,
     event_date: '2026-05-03T14:00:00', location: '홍대', fee: 0,
     tags: ['SNS', '트렌드', '분석'],
@@ -55,7 +57,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '소셜미디어', count: 22 },
   },
   {
-    id: 'g4', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지!',
+    id: 'g4', slug: 'startup-marketer-club', title: '마케터 사이드 프로젝트', description: '마케터끼리 모여서 사이드 프로젝트를 진행합니다. 기획부터 런칭까지!',
     status: 'recruiting', max_members: 8, current_members: 5,
     event_date: '2026-05-10T10:00:00', location: '온라인 (Zoom)', fee: 0,
     tags: ['사이드프로젝트', '기획', '런칭'],
@@ -64,7 +66,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: null,
   },
   {
-    id: 'g5', title: 'AI 프롬프트 엔지니어링 스터디', description: 'ChatGPT, Claude 등 AI 도구 활용 마케팅 실습. 매주 과제 기반.',
+    id: 'g5', slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', description: 'ChatGPT, Claude 등 AI 도구 활용 마케팅 실습. 매주 과제 기반.',
     status: 'recruiting', max_members: 15, current_members: 11,
     event_date: '2026-04-27T15:00:00', location: '강남역', fee: 10000,
     tags: ['AI', '프롬프트', 'ChatGPT'],
@@ -73,7 +75,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: 'AI 마케팅', count: 45 },
   },
   {
-    id: 'g6', title: '퍼포먼스 마케팅 네트워킹', description: '페이스북, 구글, 네이버 광고 실무자들의 네트워킹. 비정기 만남.',
+    id: 'g6', slug: 'performance-case-study', title: '퍼포먼스 마케팅 네트워킹', description: '페이스북, 구글, 네이버 광고 실무자들의 네트워킹. 비정기 만남.',
     status: 'recruiting', max_members: 30, current_members: 18,
     event_date: '2026-05-17T19:30:00', location: '을지로', fee: 0,
     tags: ['퍼포먼스', '광고', '네트워킹'],
@@ -82,7 +84,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '퍼포먼스 광고', count: 31 },
   },
   {
-    id: 'g7', title: '콘텐츠 마케팅 독서 모임', description: '마케팅 관련 책을 함께 읽고 토론합니다. 월 1권.',
+    id: 'g7', slug: 'brand-strategy-reading', title: '콘텐츠 마케팅 독서 모임', description: '마케팅 관련 책을 함께 읽고 토론합니다. 월 1권.',
     status: 'recruiting', max_members: 10, current_members: 4,
     event_date: '2026-05-24T14:00:00', location: '합정', fee: 0,
     tags: ['독서', '콘텐츠', '마케팅'],
@@ -91,7 +93,7 @@ const MOCK_GROUPS: GroupItem[] = [
     need: null,
   },
   {
-    id: 'g8', title: '데이터 분석 마케터 모임', description: 'GA4, Mixpanel, Amplitude 등 분석 도구 스터디',
+    id: 'g8', slug: 'data-analytics-meetup', title: '데이터 분석 마케터 모임', description: 'GA4, Mixpanel, Amplitude 등 분석 도구 스터디',
     status: 'confirmed', max_members: 10, current_members: 10,
     event_date: '2026-04-19T14:00:00', location: '삼성역', fee: 15000,
     tags: ['데이터', 'GA4', '분석'],
@@ -220,7 +222,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
 
   return (
     <Link
-      href={`/badak/groups/${g.id}`}
+      href={`/badak/groups/${g.slug || g.id}`}
       onClick={(e) => { if (hasDragged?.current) e.preventDefault(); }}
       draggable={false}
       className="block w-[280px] shrink-0 overflow-hidden rounded-2xl border border-white/8 no-underline transition-all hover:border-white/15 sm:w-[300px]"
@@ -292,10 +294,15 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
         {/* 바닥장 */}
         {g.leader && (
           <div className="flex items-center gap-2 pt-0.5">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
-              style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
-              {g.leader.display_name.charAt(0)}
-            </div>
+            {g.leader.avatar_url ? (
+              <Image src={g.leader.avatar_url} alt={g.leader.display_name} width={24} height={24}
+                className="h-6 w-6 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                style={{ background: 'rgba(255,217,61,0.12)', color: '#ffd93d' }}>
+                {g.leader.display_name.charAt(0)}
+              </div>
+            )}
             <span className="text-xs text-white/55">
               <Crown className="mr-0.5 inline h-3 w-3 text-amber-400/60" />
               {g.leader.display_name}

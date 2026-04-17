@@ -32,7 +32,7 @@ interface WantsCardProps {
   want: WantsCardData;
   /** 로그인된 내 user_id (Want member_ids에 포함되어야 함) */
   myUserId: string;
-  onStartDm: () => void;
+  onStartDm: (peerUserId: string) => void;
   onDismiss?: () => void;
 }
 
@@ -195,7 +195,7 @@ export function WantsCard({ want, myUserId, onStartDm, onDismiss }: WantsCardPro
           <Users className="h-4 w-4" /> {creating ? '생성 중...' : '모임 만들기'}
         </button>
         <button
-          onClick={onStartDm}
+          onClick={() => onStartDm(want.others[0]?.userId ?? '')}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2.5 text-sm font-semibold text-white/65 hover:border-white/25 hover:text-white/90"
         >
           <MessageCircle className="h-4 w-4" /> 대화 신청

@@ -1,14 +1,12 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-17 (집, 세션 55 — Phase 0 마무리 + DB 마이그레이션)
+> 마지막 업데이트: 2026-04-17 (집, 세션 56 — Universe Profile 공개뷰 + 경력 정보)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-1. **lools@tenone.biz 비밀번호 재설정** — Supabase Dashboard > Authentication > Users에서 직접 "Send recovery email" → 메일 링크 클릭 → `/reset-password`에서 새 비밀번호 설정. Rate limit 소진 시 Dashboard > Auth > Rate Limits에서 한도 조정 필요
-2. **intra.tenone.biz 활성화** — ① Vercel Dashboard에서 도메인 추가 ② DNS CNAME 설정 ③ Supabase Auth > Allowed Redirect URLs에 `https://intra.tenone.biz/auth/callback` 추가. 코드(middleware.ts)는 완료
-3. **0-B Phase C** — members 테이블 permission 컬럼 DROP 대기 (실서버 auth 검증 후). 대상: `account_type`, `intra_access`, `roles[]`, `brand_access[]`, `module_access[]`, `brand_roles`, `system_access[]`
-4. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
-5. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
+1. **0-B Phase C** — members 테이블 permission 컬럼 DROP 대기 (실서버 auth 검증 후). 대상: `account_type`, `intra_access`, `roles[]`, `brand_access[]`, `module_access[]`, `brand_roles`, `system_access[]`
+2. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
+3. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
 
 ---
 

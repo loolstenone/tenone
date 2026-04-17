@@ -157,6 +157,62 @@ export async function getAllServiceProfiles(email: string): Promise<ServiceProfi
         .filter((v): v is ServiceProfileData => v !== null);
 }
 
+/* ── Badak 활동 요약 ── */
+
+export interface BadakActivityData {
+    ledGroups: { id: string; title: string; status: string; currentMembers: number; maxMembers: number }[];
+    joinedGroups: { id: string; title: string; myStatus: string; leaderName: string }[];
+}
+
+export async function getBadakActivity(userId: string, token?: string): Promise<BadakActivityData> {
+    try {
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch('/api/badak/my/groups', { headers, cache: 'no-store' });
+        if (!res.ok) return { ledGroups: [], joinedGroups: [] };
+        const data = await res.json();
+        return {
+            ledGroups: (data.ledGroups || []).map((g: Record<string, unknown>) => ({
+                id: g.id as string,
+                title: g.title as string,
+                status: g.status as string,
+                currentMembers: g.currentMembers as number,
+                maxMembers: g.maxMembers as number,
+            })),
+            joinedGroups: (data.joinedGroups || []).map((g: Record<string, unknown>) => ({
+                id: g.id as string,
+                title: g.title as string,
+                myStatus: g.myStatus as string,
+                leaderName: g.leaderName as string,
+            })),
+        };
+    } catch {
+        return { ledGroups: [], joinedGroups: [] };
+    }
+}
+
+/* ── 핸들 고유값 체크 ── */
+export async function checkHandleAvailable(handle: string, currentUserId?: string): Promise<boolean> {
+    const { data } = await supabase
+        .from('members')
+        .select('id')
+        .eq('handle', handle)
+        .maybeSingle();
+    if (!data) return true;
+    if (currentUserId && data.id === currentUserId) return true;
+    return false;
+}
+
+/** 공개 프로필 조회 by handle */
+export async function getPublicProfile(handle: string) {
+    const { data } = await supabase
+        .from('members')
+        .select('id, name, email, company, bio, avatar_url, affiliations, interests_industry, interests_job, profile_visibility, role, created_at, handle')
+        .eq('handle', handle)
+        .maybeSingle();
+    return data;
+}
+
 /* ── 소속(affiliation) 관리 ── */
 
 /** 서비스 가입 시 affiliations에 추가 */

@@ -9,6 +9,12 @@ import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
+const programItems = [
+    { name: "매드무브먼트", href: "/madleague/idea-movement" },
+    { name: "PT 경쟁 프로그램", href: "/madleague/pt" },
+    { name: "전체 프로그램", href: "/madleague/program" },
+];
+
 const navItems = [
     { name: "프로그램",  href: "/madleague/programs" },
     { name: "MADzine",  href: "/madleague/madzine" },

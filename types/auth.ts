@@ -96,4 +96,40 @@ export interface User {
     // BUMS 권한
     bumsRole?: BumsRole;
     bumsSiteAccess?: string[];
+
+    // 공개 프로필
+    handle?: string;                    // @username (고유값)
+    profileVisibility?: 'public' | 'private';
+    interestsIndustry?: string[];       // 관심 산업군
+    interestsJob?: string[];            // 관심 직무군
+
+    // 필드별 공개 범위
+    privacySettings?: PrivacySettings;
+
+    // 소셜 링크
+    socialLinks?: SocialLinks;
+}
+
+export interface PrivacySettings {
+    email?: boolean;
+    phone?: boolean;
+    company?: boolean;
+    bio?: boolean;
+    hero?: boolean;
+    badak?: boolean;
+    madleague?: boolean;
+    madleap?: boolean;
+    youinone?: boolean;
+    [key: string]: boolean | undefined;   // 서비스 추가 시 확장
+}
+
+export interface SocialLinks {
+    instagram?: string;
+    x?: string;
+    linkedin?: string;
+    youtube?: string;
+    tiktok?: string;
+    github?: string;
+    website?: string;
+    [key: string]: string | undefined;
 }

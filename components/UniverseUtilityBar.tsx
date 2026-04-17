@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { User, LogOut, Share2, Search, Shield, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
@@ -84,8 +85,17 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                     <>
                         {/* 프로필 */}
                         {config.profilePath && (
-                            <Link href={config.profilePath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1">
-                                <User className="h-3 w-3" /> {user?.name?.substring(0, 4) || "MY"}
+                            <Link href={config.profilePath} className="flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity">
+                                {user?.avatarUrl ? (
+                                    <Image src={user.avatarUrl} alt={user.name || ''} width={22} height={22}
+                                        className="h-[22px] w-[22px] rounded-full object-cover" />
+                                ) : (
+                                    <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full text-[10px] font-bold"
+                                        style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}>
+                                        {user?.name?.charAt(0) ?? <User className="h-3 w-3" />}
+                                    </div>
+                                )}
+                                <span className="text-[11px] font-semibold tracking-wider">{user?.name?.substring(0, 6) || "MY"}</span>
                             </Link>
                         )}
                         {/* 인트라 (권한 있는 사용자만) */}

@@ -1233,6 +1233,30 @@ export default function BadakMyPage() {
     })();
   }, [user]);
 
+  // 스레드 메시지 로드 + 폴링 (hooks 순서 규칙: early return 이전에 위치)
+  useEffect(() => {
+    if (!activeThreadId || !user) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const { data: { session } } = await createClient().auth.getSession();
+        if (!session || cancelled) return;
+        const res = await fetch(`/api/badak/talks/${activeThreadId}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const data = await res.json();
+        if (!cancelled) {
+          setMessages(data.messages || []);
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+        }
+      } catch { /* silent */ }
+    };
+    load();
+    const interval = setInterval(load, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [activeThreadId, user]);
+
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
@@ -1311,30 +1335,6 @@ export default function BadakMyPage() {
   const handleToggleLookingFor = (item: string) => setLookingFor((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleToggleCanOffer = (item: string) => setCanOffer((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
   const handleCancelEdit = () => { setEditMode(false); setVerifyStep('idle'); setVerificationCode(''); setVerifyError(''); };
-
-  // 스레드 메시지 로드 + 폴링
-  useEffect(() => {
-    if (!activeThreadId || !user) return;
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const { data: { session } } = await createClient().auth.getSession();
-        if (!session || cancelled) return;
-        const res = await fetch(`/api/badak/talks/${activeThreadId}`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        const data = await res.json();
-        if (!cancelled) {
-          setMessages(data.messages || []);
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-        }
-      } catch { /* silent */ }
-    };
-    load();
-    const interval = setInterval(load, 5000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, [activeThreadId, user]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !activeThreadId || sendingMessage) return;
@@ -1453,6 +1453,7 @@ export default function BadakMyPage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
+      <div className="max-w-2xl mx-auto">
 
       {/* ── 프로필 카드 (MyProfileCard 통합) ── */}
       <div className="px-4 pt-6">
@@ -2164,6 +2165,8 @@ export default function BadakMyPage() {
             </button>
           </div>
         )}
+
+      </div>
 
       </div>
     </div>

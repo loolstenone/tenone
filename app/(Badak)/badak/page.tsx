@@ -16,7 +16,9 @@ export default function BadakNextStage() {
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
   const [sending, setSending] = useState(false);
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
-  const [cloudWords, setCloudWords] = useState<CloudWord[]>(CLOUD_WORDS);
+  const [cloudWords, setCloudWords] = useState<CloudWord[]>(
+    [...CLOUD_WORDS].sort((a, b) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
+  );
 
   const SUB_COPIES = [
     '회사 밖에서도 통하는 사람이 되고 싶어.',
@@ -63,10 +65,14 @@ export default function BadakNextStage() {
 
   // DB에서 니즈 100개 fetch (실패 시 Mock 유지)
   useEffect(() => {
-    fetch('/api/badak/needs?limit=100')
+    fetch('/api/badak/needs?limit=50&sort=members')
       .then((r) => r.json())
       .then((data) => {
-        if (data.words?.length > 0) setCloudWords(data.words);
+        if (data.words?.length > 0) {
+          setCloudWords(
+            [...data.words].sort((a: CloudWord, b: CloudWord) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
+          );
+        }
       })
       .catch(() => {});
   }, []);

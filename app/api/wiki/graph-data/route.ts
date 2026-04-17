@@ -11,7 +11,7 @@ export async function GET() {
         .select("from_slug, to_slug, link_type");
 
     return NextResponse.json({
-        links: (links || []).map(l => ({
+        links: (links || []).map((l: { from_slug: string; to_slug: string; link_type: string }) => ({
             source: l.from_slug,
             target: l.to_slug,
             type: l.link_type,

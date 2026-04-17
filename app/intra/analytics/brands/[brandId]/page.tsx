@@ -50,7 +50,7 @@ export default function BrandAnalyticsPage() {
       .eq("brand_id", brandId)
       .gte("date", since.toISOString().split("T")[0])
       .order("date", { ascending: true })
-      .then(({ data: rows }) => {
+      .then(({ data: rows }: { data: DailySnapshot[] | null }) => {
         if (cancelled) return;
         setData((rows ?? []) as DailySnapshot[]);
         setLoading(false);

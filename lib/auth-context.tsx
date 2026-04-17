@@ -55,6 +55,27 @@ function loadUserFromStorage(): User | null {
     }
 }
 
+/** 이메일로 고유 handle 생성 (중복이면 suffix 추가) */
+async function generateUniqueHandle(
+    email: string,
+    supabase: ReturnType<typeof import('@/lib/supabase/client').createClient>,
+): Promise<string> {
+    const base = email.split('@')[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9_.-]/g, '')
+        .slice(0, 25);
+    const safeBase = base.length >= 3 ? base : (base + '0000').slice(0, 4);
+    let handle = safeBase;
+    let suffix = 2;
+    while (suffix < 1000) {
+        const { data } = await supabase.from('members').select('id').eq('handle', handle).maybeSingle();
+        if (!data) return handle;
+        handle = safeBase + suffix;
+        suffix++;
+    }
+    return safeBase + Date.now().toString().slice(-4);
+}
+
 // Supabase members → User 변환 (v3: member_roles 기반)
 function memberToUser(member: Record<string, unknown>): User {
     const accountType = (member.account_type as User['accountType']) || 'member';
@@ -111,6 +132,14 @@ function memberToUser(member: Record<string, unknown>): User {
         // 포인트
         totalPoints: member.total_points as number | undefined,
         grade: member.grade as string | undefined,
+
+        // 공개 프로필
+        handle: member.handle as string | undefined,
+        profileVisibility: (member.profile_visibility as 'public' | 'private') || 'public',
+        interestsIndustry: (member.interests_industry as string[]) || [],
+        interestsJob: (member.interests_job as string[]) || [],
+        privacySettings: (member.privacy_settings as import('@/types/auth').PrivacySettings) || undefined,
+        socialLinks: (member.social_links as import('@/types/auth').SocialLinks) || undefined,
     };
 }
 
@@ -124,9 +153,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             let { data: member } = await supabase
                 .from('members')
-                .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type), member_roles(role,context,is_active)')
+                .select('*, staff_profile:tenone_staff_profiles(department,employee_id,position,hire_date,employment_type), member_roles!member_roles_member_id_fkey(role,context,is_active)')
                 .eq('auth_id', sessionUser.id)
                 .single();
+
+            // OAuth 메타데이터에서 아바타 URL 추출 (Google: picture/avatar_url, Kakao: picture)
+            const oauthAvatarUrl = (sessionUser.user_metadata?.avatar_url as string)
+                || (sessionUser.user_metadata?.picture as string)
+                || null;
 
             // 소셜 로그인 첫 가입 → 자동 프로필 생성
             if (!member) {
@@ -138,16 +172,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const { defaultModuleAccess } = await import('@/types/auth');
                 const initialType = 'member' as const;
 
+                const oauthHandle = await generateUniqueHandle(sessionUser.email || userName, supabase);
                 const { data: newMember } = await supabase
                     .from('members')
                     .insert({
                         auth_id: sessionUser.id,
                         email: sessionUser.email || '',
                         name: userName,
+                        handle: oauthHandle,
                         account_type: initialType,
                         primary_type: initialType,
                         roles: [initialType],
                         avatar_initials: userName.substring(0, 2).toUpperCase(),
+                        avatar_url: oauthAvatarUrl || null,
                         role: 'Member',
                         origin_site: originSite,
                         intra_access: false,
@@ -170,6 +207,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (member) {
                 const u = memberToUser(member);
+                const pendingUpdates: Record<string, unknown> = {};
+                // 기존 회원인데 DB에 avatar_url 없고 OAuth에 있으면 → DB 저장 + 즉시 반영
+                if (!u.avatarUrl && oauthAvatarUrl) {
+                    u.avatarUrl = oauthAvatarUrl;
+                    pendingUpdates.avatar_url = oauthAvatarUrl;
+                }
+                // 기존 회원인데 handle 없으면 자동 생성
+                if (!u.handle && sessionUser.email) {
+                    const autoHandle = await generateUniqueHandle(sessionUser.email, supabase);
+                    u.handle = autoHandle;
+                    pendingUpdates.handle = autoHandle;
+                }
+                if (Object.keys(pendingUpdates).length > 0) {
+                    supabase.from('members')
+                        .update(pendingUpdates)
+                        .eq('auth_id', sessionUser.id)
+                        .then(() => {});
+                }
                 setUser(u);
                 saveUserToStorage(u);
                 return u;
@@ -336,12 +391,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const initialType = 'member' as const;
                 const initialModules = defaultModuleAccess[initialType] || [];
                 const initials = name.substring(0, 2).toUpperCase();
+                const handle = await generateUniqueHandle(email, supabase);
                 const { data: member, error: memberError } = await supabase
                     .from('members')
                     .insert({
                         auth_id: data.user.id,
                         email,
                         name,
+                        handle,
                         account_type: initialType,
                         primary_type: initialType,
                         roles: [initialType],

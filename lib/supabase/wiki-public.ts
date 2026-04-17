@@ -45,11 +45,11 @@ export async function fetchWikiPage(slug: string): Promise<{
     const linkedSlugs = new Set<string>();
     const linkInfo: Record<string, { type: string; direction: 'from' | 'to' }> = {};
 
-    (outLinks.data || []).forEach(l => {
+    (outLinks.data || []).forEach((l: WikiLink) => {
         linkedSlugs.add(l.to_slug);
         linkInfo[l.to_slug] = { type: l.link_type, direction: 'to' };
     });
-    (inLinks.data || []).forEach(l => {
+    (inLinks.data || []).forEach((l: WikiLink) => {
         linkedSlugs.add(l.from_slug);
         if (!linkInfo[l.from_slug]) {
             linkInfo[l.from_slug] = { type: l.link_type, direction: 'from' };
@@ -63,7 +63,7 @@ export async function fetchWikiPage(slug: string): Promise<{
             .select('*')
             .in('slug', Array.from(linkedSlugs));
 
-        linkedPages = (pages || []).map(p => ({
+        linkedPages = (pages || []).map((p: WikiPage) => ({
             ...p,
             linkType: linkInfo[p.slug]?.type || 'reference',
             direction: linkInfo[p.slug]?.direction || 'to',
@@ -137,7 +137,7 @@ export async function fetchWikiStats(): Promise<{
     ]);
 
     const byCategory: Record<string, number> = {};
-    (pages.data || []).forEach(p => {
+    (pages.data || []).forEach((p: { category: string }) => {
         byCategory[p.category] = (byCategory[p.category] || 0) + 1;
     });
 

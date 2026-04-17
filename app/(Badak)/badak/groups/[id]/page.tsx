@@ -1,15 +1,53 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, MapPin, Users, Banknote, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import {
+  ArrowLeft, Calendar, MapPin, Users, Banknote, ChevronRight,
+  Heart, Share2, Bell, CheckCircle2, Clock, Lock, Bookmark,
+  Star, X, Send, ChevronDown, ChevronUp, MessageCircle,
+} from 'lucide-react';
 import { MemberProfileSheet } from '@/features/badak/MemberProfileSheet';
+import { useAuth } from '@/lib/auth-context';
+
+// ── 타입 정의 ──────────────────────────────────────────
+interface GroupSession {
+  number: number;
+  title: string;
+  description: string;
+  date?: string;
+}
+
+interface GroupReview {
+  id: string;
+  author: string;
+  avatar_url: string | null;
+  job_function: string | null;
+  rating: number;
+  content: string;
+  created_at: string;
+}
+
+interface GroupMember {
+  id: string;
+  display_name: string;
+  job_function: string | null;
+  avatar_url: string | null;
+}
 
 interface GroupDetail {
   id: string;
+  slug: string;
   title: string;
-  description: string | null;
+  tagline: string | null;
+  description: string | null;        // 소개 탭
+  intro_who: string | null;          // 소개 탭 - 이런 분께 추천
+  structure: GroupSession[] | null;  // 구성 탭
+  guide: string | null;              // 상세 안내 탭
+  notice: string | null;             // 주요 공지
   status: string;
+  join_type: 'firstcome' | 'approval';
   meeting_type: 'once' | 'recurring' | null;
   max_members: number;
   current_members: number;
@@ -20,305 +58,848 @@ interface GroupDetail {
   fee: number;
   tags: string[];
   cover_image_url: string | null;
-  leader: { id: string; display_name: string; job_function: string; experience_years: number; bio?: string | null } | null;
+  leader: {
+    id: string; display_name: string; job_function: string;
+    experience_years: number; bio?: string | null; avatar_url?: string | null;
+  } | null;
   need: { id: string; display_text: string; count: number } | null;
+  members: GroupMember[];
+  reviews: GroupReview[];
+  related: { slug: string; title: string; current_members: number; max_members: number; tags: string[]; cover_image_url?: string | null }[];
 }
 
-// ── Mock 상세 데이터 (API 없을 때 fallback) ──
-const MOCK_DETAIL: Record<string, GroupDetail> = {
-  g1: {
-    id: 'g1', title: 'B2B 마케팅 실무 모임',
-    description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다.\n\n퍼포먼스 마케팅부터 콘텐츠 마케팅, ABM 전략까지 함께 배우고 경험을 나눕니다.\n\n• 매주 1명이 실제 캠페인 케이스를 발표\n• 자유 토론 및 피드백\n• 업계 네트워킹',
-    status: 'recruiting', meeting_type: 'recurring', max_members: 20, current_members: 13,
-    event_date: '2026-04-26T14:00:00', schedule: '매주 토 14:00', location: '강남역', location_detail: '스타벅스 강남점 2층',
-    fee: 0, tags: ['B2B', '마케팅', 'SaaS', '실무'],
-    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 리드 제너레이션과 콘텐츠 마케팅을 함께 고민합니다.' },
+// ── Mock 데이터 (slug 기반) ──────────────────────────────
+const MOCK: Record<string, GroupDetail> = {
+  'b2b-marketing-weekly': {
+    id: 'g1', slug: 'b2b-marketing-weekly',
+    title: 'B2B 마케팅 실무 모임',
+    tagline: 'B2B SaaS 마케터들의 케이스 스터디 & 실전 네트워킹',
+    notice: '다음 모임은 4/26(토) 오후 2시, 강남역 스타벅스 2층입니다. 발표자는 사전에 슬랙에 자료 공유 부탁드립니다.',
+    description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다.\n\n리드 제너레이션, ABM, 콘텐츠 마케팅, 파트너십까지 다양한 B2B 마케팅 전략을 실제 케이스 중심으로 공부합니다. 이론보다 현장에서 바로 쓸 수 있는 인사이트를 나눕니다.',
+    intro_who: '• B2B SaaS 또는 기업 솔루션 마케터\n• B2B 마케팅으로 커리어 전환을 준비 중인 분\n• 실전 케이스를 공유하고 피드백받고 싶은 분\n• 같은 고민을 나눌 동료가 필요한 분',
+    structure: [
+      { number: 1, title: '킥오프 — 소개 & 주제 선정', description: '첫 모임. 참여자 소개, 각자의 B2B 마케팅 고민 공유, 앞으로의 발표 주제 리스트 작성' },
+      { number: 2, title: '리드 제너레이션 케이스', description: '실제 집행 중인 캠페인 1건 발표. 목표 KPI, 실제 성과, 배운 것, 개선 포인트 발표 후 Q&A' },
+      { number: 3, title: 'ABM 전략 딥다이브', description: 'Account-Based Marketing 실전 사례. 타겟 선정, 콘텐츠 전략, 영업팀과의 협업 방식 공유' },
+      { number: 4, title: '콘텐츠 마케팅 케이스', description: '블로그, 웨비나, 케이스스터디 등 콘텐츠 에셋 제작 경험 공유 + 배포 전략' },
+      { number: 5, title: '파이프라인 분석 & 자유 주제', description: '실제 파이프라인 데이터 기반으로 MQL→SQL 전환율 개선 사례 + 참여자 자유 주제' },
+      { number: 6, title: '시즌 마무리 & 다음 시즌 준비', description: '지난 5회 리뷰. 가장 도움이 된 인사이트 공유, 다음 시즌 주제 투표, 네트워킹' },
+    ],
+    guide: '📍 장소\n강남역 2번 출구 도보 3분 · 스타벅스 강남점 2층 (세미 프라이빗 공간 예약)\n\n📅 일정\n매주 토요일 오후 2시~4시 (120분). 부득이한 경우 슬랙에서 사전 공지.\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 발표 순서가 돌아오면 반드시 발표 (거르면 다음 시즌 참여 불가)\n• 모임 3회 이상 무단 불참 시 제외\n• 실명 기반 (닉네임 X)\n\n🎒 준비물\n노트북 또는 태블릿. 발표 자료 PPT/Notion 가능.',
+    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
+    max_members: 20, current_members: 13,
+    event_date: '2026-04-26T14:00:00', schedule: '매주 토 14:00~16:00', location: '강남역', location_detail: '스타벅스 강남점 2층',
+    fee: 0, tags: ['B2B', '마케팅', 'SaaS', '케이스스터디'],
+    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 리드 제너레이션과 ABM 전략을 직접 운영 중입니다.', avatar_url: null },
     need: { id: 'n1', display_text: 'B2B 마케팅 같이 공부하고 싶어', count: 28 },
+    members: [
+      { id: 'm1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', avatar_url: null },
+      { id: 'm2', display_name: '그로스K', job_function: '그로스 마케터', avatar_url: null },
+      { id: 'm3', display_name: '브랜드S', job_function: '브랜드 매니저', avatar_url: null },
+      { id: 'm4', display_name: '콘텐츠Y', job_function: 'SNS 마케터', avatar_url: null },
+      { id: 'm5', display_name: '데이터P', job_function: '데이터 분석가', avatar_url: null },
+      { id: 'm6', display_name: '스타트업L', job_function: '스타트업 대표', avatar_url: null },
+    ],
+    reviews: [
+      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08' },
+      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01' },
+      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22' },
+    ],
+    related: [
+      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', current_members: 11, max_members: 15, tags: ['AI', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&h=120&fit=crop' },
+      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스 스터디', current_members: 4, max_members: 12, tags: ['퍼포먼스', 'ROAS'], cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=120&fit=crop' },
+    ],
   },
-  g2: {
-    id: 'g2', title: '카피라이팅 같이 연습할래?',
-    description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.\n\n매주 하나의 테마로 각자 카피를 써오고, 피드백을 주고받습니다.',
-    status: 'confirmed', meeting_type: 'recurring', max_members: 12, current_members: 12,
-    event_date: '2026-04-20T19:00:00', schedule: '매주 일 19:00', location: '성수동', location_detail: null,
-    fee: 5000, tags: ['카피', '글쓰기', '광고'],
-    cover_image_url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l2', display_name: '카피장인', job_function: '브랜드 마케터', experience_years: 7, bio: null },
-    need: { id: 'n2', display_text: '카피라이팅 스터디', count: 35 },
-  },
-  g5: {
-    id: 'g5', title: 'AI 프롬프트 엔지니어링 스터디',
-    description: 'ChatGPT, Claude 등 AI 도구를 마케팅에 실제로 활용하는 방법을 공부합니다.\n\n• 매주 과제 기반 실습\n• 최신 AI 마케팅 트렌드 공유\n• 실무 프롬프트 라이브러리 구축',
-    status: 'recruiting', meeting_type: 'recurring', max_members: 15, current_members: 11,
-    event_date: '2026-04-27T15:00:00', schedule: '매주 일 15:00', location: '강남역', location_detail: '패스트파이브 강남점',
+  'ai-prompt-engineering': {
+    id: 'g5', slug: 'ai-prompt-engineering',
+    title: 'AI 프롬프트 엔지니어링 스터디',
+    tagline: 'ChatGPT·Claude를 마케팅 무기로 만드는 실전 스터디',
+    notice: '4/27(일) 오후 3시, 패스트파이브 강남점. 노트북 필참!',
+    description: 'AI 도구를 마케팅에 실제로 쓰는 방법을 공부합니다.\n\n프롬프트 하나가 업무 2시간을 줄일 수 있어요. 매주 하나의 마케팅 태스크를 정해 실습하고, 서로의 프롬프트를 비교·개선합니다. 누적된 프롬프트 라이브러리는 멤버 전원이 공유합니다.',
+    intro_who: '• AI 도구를 써보려 했지만 어떻게 시작할지 모르는 분\n• 이미 ChatGPT를 쓰지만 더 잘 활용하고 싶은 마케터\n• 업무 자동화로 시간을 절약하고 싶은 분\n• 프롬프트 엔지니어링을 체계적으로 배우고 싶은 분',
+    structure: [
+      { number: 1, title: '기초 — 프롬프트의 원리', description: '좋은 프롬프트 vs 나쁜 프롬프트. 역할 지정, 컨텍스트 제공, 출력 형식 지정 실습' },
+      { number: 2, title: '콘텐츠 작성 자동화', description: 'SNS 카피, 블로그 초안, 이메일 뉴스레터를 AI로 초안 생성 + 인간 편집하는 워크플로 구축' },
+      { number: 3, title: '데이터 분석 & 인사이트 추출', description: 'GA 데이터, 고객 리뷰 등 정형/비정형 데이터를 AI로 분석하고 보고서 초안 만들기' },
+      { number: 4, title: '경쟁사 모니터링 & 리서치', description: '경쟁사 웹사이트, 광고, SNS를 AI로 분석하는 자동화 파이프라인 설계' },
+      { number: 5, title: '캠페인 기획 & A/B테스트 아이디어', description: 'AI로 광고 카피 10개 생성 → 최적 조합 선택 → 실제 테스트 결과 리뷰' },
+      { number: 6, title: '나만의 AI 워크플로 발표', description: '각자 구축한 AI 워크플로를 발표하고 라이브러리로 집대성. 시즌 2 주제 투표' },
+    ],
+    guide: '📍 장소\n패스트파이브 강남점 (강남역 1번 출구 도보 5분)\n\n📅 일정\n매주 일요일 오후 3시~5시. 부득이 온라인 전환 시 슬랙 48시간 전 공지.\n\n💰 회비\n1만원/회 (장소 대관비). 사전 송금 방식.\n\n🎒 준비물\n노트북 필참. ChatGPT Plus 또는 Claude Pro 구독 권장 (무료 버전도 가능).\n\n📋 규칙\n배운 프롬프트는 공유 노션 문서에 기록. 무단결석 2회 이상 시 다음 시즌 신청 불가.',
+    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
+    max_members: 15, current_members: 11,
+    event_date: '2026-04-27T15:00:00', schedule: '매주 일 15:00~17:00', location: '강남역', location_detail: '패스트파이브 강남점',
     fee: 10000, tags: ['AI', '프롬프트', 'ChatGPT', '마케팅'],
-    cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l5', display_name: 'AI마스터', job_function: '그로스 마케터', experience_years: 5, bio: 'AI 마케팅 전도사. 프롬프트 엔지니어링으로 업무 효율 10배 향상 경험을 나눕니다.' },
+    cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l5', display_name: 'AI마스터', job_function: '그로스 마케터', experience_years: 5, bio: 'AI 마케팅 전도사. 프롬프트 엔지니어링으로 업무 효율 3배를 직접 경험하고 나눕니다.', avatar_url: null },
     need: { id: 'n5', display_text: 'AI 마케팅 같이 공부하고 싶어', count: 45 },
+    members: [
+      { id: 'm1', display_name: 'AI마스터', job_function: '그로스 마케터', avatar_url: null },
+      { id: 'm2', display_name: '카피Q', job_function: '카피라이터', avatar_url: null },
+      { id: 'm3', display_name: '기획F', job_function: '마케팅 기획자', avatar_url: null },
+      { id: 'm4', display_name: '데이터H', job_function: '데이터 분석가', avatar_url: null },
+      { id: 'm5', display_name: 'SNS마케R', job_function: 'SNS 마케터', avatar_url: null },
+    ],
+    reviews: [
+      { id: 'r1', author: '카피Q', avatar_url: null, job_function: '카피라이터', rating: 5, content: '카피 작업 시간이 절반으로 줄었어요. 프롬프트 라이브러리를 시즌이 끝나도 계속 쓰고 있습니다.', created_at: '2026-04-10' },
+      { id: 'r2', author: '기획F', avatar_url: null, job_function: '마케팅 기획자', rating: 5, content: '단순히 ChatGPT 사용법이 아니라 워크플로로 연결하는 방법을 배운 게 핵심이었어요. 실무에서 바로 써먹었습니다.', created_at: '2026-04-03' },
+    ],
+    related: [
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
+      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스 스터디', current_members: 4, max_members: 12, tags: ['퍼포먼스'], cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=120&fit=crop' },
+    ],
   },
-  g3: {
-    id: 'g3', title: 'SNS 콘텐츠 기획 & 제작 스터디',
-    description: '인스타그램·유튜브·틱톡 콘텐츠 기획부터 촬영, 편집까지 함께 배워요.\n\n• 매주 한 플랫폼 집중 분석\n• 실제 콘텐츠 만들어보고 피드백\n• 팔로워 성장 전략 공유',
-    status: 'recruiting', meeting_type: 'recurring', max_members: 10, current_members: 6,
+  'copywriting-practice': {
+    id: 'g2', slug: 'copywriting-practice',
+    title: '카피라이팅 같이 연습할래?',
+    tagline: '매주 써보고, 피드백받고, 실력을 키우는 카피 스터디',
+    notice: '4/20(일) 오후 7시, 성수동. 이번 주 테마: 앱스토어 리뷰 유도 카피',
+    description: '광고 카피, SNS 카피, 브랜드 슬로건 등 카피라이팅 실력을 함께 키워봐요.\n\n매주 하나의 테마를 정해 각자 카피를 써옵니다. 다양한 시각으로 같은 주제를 바라보며 서로의 카피에 솔직한 피드백을 주고받습니다.',
+    intro_who: '• 광고 기획자, 카피라이터 지망생\n• 브랜드 메시지를 더 날카롭게 만들고 싶은 마케터\n• "어떻게 쓰지?"에서 "이렇게 쓰면 되겠다"로 가고 싶은 분',
+    structure: [
+      { number: 1, title: '카피의 원칙', description: '좋은 카피와 나쁜 카피의 차이. 국내외 레퍼런스 분석. 첫 번째 과제 발표' },
+      { number: 2, title: '감성 카피 vs 논리 카피', description: '브랜드 성격에 따른 톤 앤 매너 설정. 각자 작성한 카피 리뷰' },
+      { number: 3, title: '한 줄 슬로건 챌린지', description: '동일한 브랜드를 10가지 방식으로 표현. 가장 강한 한 줄 선정' },
+      { number: 4, title: '디지털 광고 카피', description: 'Meta, 구글 광고 카피의 특성과 제한. 실제 광고 카피 작성 실습' },
+    ],
+    guide: '📍 장소\n성수동 (구체적 장소는 슬랙으로 확정 전달)\n\n💰 회비\n5,000원/회 (음료 제공)\n\n📋 규칙\n매주 과제 미제출 시 경고 1회. 경고 2회 시 다음 시즌 참여 불가.\n모든 피드백은 작품을 평가하는 것이지 사람을 평가하지 않습니다.',
+    status: 'confirmed', join_type: 'approval', meeting_type: 'recurring',
+    max_members: 12, current_members: 12,
+    event_date: '2026-04-20T19:00:00', schedule: '매주 일 19:00~21:00', location: '성수동', location_detail: null,
+    fee: 5000, tags: ['카피', '글쓰기', '광고'],
+    cover_image_url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l2', display_name: '카피장인', job_function: '브랜드 마케터', experience_years: 7, bio: null, avatar_url: null },
+    need: { id: 'n2', display_text: '카피라이팅 스터디', count: 35 },
+    members: [
+      { id: 'm1', display_name: '카피장인', job_function: '브랜드 마케터', avatar_url: null },
+      { id: 'm2', display_name: '글쟁이A', job_function: '카피라이터', avatar_url: null },
+      { id: 'm3', display_name: '광고기획B', job_function: '광고 기획자', avatar_url: null },
+    ],
+    reviews: [
+      { id: 'r1', author: '글쟁이A', avatar_url: null, job_function: '카피라이터', rating: 5, content: '혼자 쓰면 독이 오르는데, 여럿이 같은 주제로 쓰니까 완전히 다른 접근들을 볼 수 있었어요. 시각이 엄청 넓어졌습니다.', created_at: '2026-04-12' },
+    ],
+    related: [
+      { slug: 'sns-content-studio', title: 'SNS 콘텐츠 기획 & 제작', current_members: 6, max_members: 10, tags: ['SNS', '콘텐츠'], cover_image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200&h=120&fit=crop' },
+      { slug: 'brand-strategy-reading', title: '브랜드 전략 독서 모임', current_members: 8, max_members: 8, tags: ['브랜딩'], cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=200&h=120&fit=crop' },
+    ],
+  },
+  // 나머지 그룹들 (간략 버전)
+  'sns-content-studio': {
+    id: 'g3', slug: 'sns-content-studio',
+    title: 'SNS 콘텐츠 기획 & 제작 스터디',
+    tagline: '인스타·유튜브·틱톡 콘텐츠를 함께 만들고 성장해요',
+    notice: null,
+    description: '인스타그램·유튜브·틱톡 콘텐츠 기획부터 촬영, 편집까지 함께 배워요.\n\n매주 한 플랫폼을 집중 분석하고, 실제 콘텐츠를 만들어보고 피드백합니다.',
+    intro_who: '• SNS 마케터 또는 콘텐츠 크리에이터\n• 팔로워 성장 전략을 배우고 싶은 분\n• 실제 콘텐츠 제작을 배우고 싶은 분',
+    structure: [
+      { number: 1, title: '인스타그램 릴스 공략', description: '알고리즘 분석 + 바이럴 릴스 해부 + 직접 기획 실습' },
+      { number: 2, title: '유튜브 쇼츠 전략', description: '쇼츠 vs 일반 영상 전략 비교 + 썸네일과 제목 최적화' },
+      { number: 3, title: '틱톡 트렌드 읽기', description: '트렌드 사이클 분석 + 브랜드 활용 사례 + 직접 기획' },
+      { number: 4, title: '콘텐츠 캘린더 만들기', description: '한 달치 콘텐츠 캘린더 설계 + 서로 피드백' },
+    ],
+    guide: '📍 홍대입구 · 공유오피스 3층\n💰 무료\n📋 매주 콘텐츠 1개 제작해오기 (형식 무관)',
+    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
+    max_members: 10, current_members: 6,
     event_date: '2026-04-25T19:30:00', schedule: '격주 금 19:30', location: '홍대입구', location_detail: '공유오피스 3층',
     fee: 0, tags: ['SNS', '콘텐츠', '인스타그램', '유튜브'],
-    cover_image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l3', display_name: '콘텐츠크리에이터K', job_function: 'SNS 마케터', experience_years: 4, bio: '현직 SNS 마케터. 인스타 팔로워 10만 달성 노하우를 나눕니다.' },
+    cover_image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l3', display_name: '콘텐츠크리에이터K', job_function: 'SNS 마케터', experience_years: 4, bio: '현직 SNS 마케터. 인스타 팔로워 10만 달성 노하우를 나눕니다.', avatar_url: null },
     need: { id: 'n3', display_text: 'SNS 콘텐츠 같이 만들고 싶어', count: 22 },
+    members: [{ id: 'm1', display_name: '콘텐츠크리에이터K', job_function: 'SNS 마케터', avatar_url: null }],
+    reviews: [],
+    related: [
+      { slug: 'copywriting-practice', title: '카피라이팅 같이 연습할래?', current_members: 12, max_members: 12, tags: ['카피'], cover_image_url: null },
+      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링', current_members: 11, max_members: 15, tags: ['AI'], cover_image_url: null },
+    ],
   },
-  g4: {
-    id: 'g4', title: '퍼포먼스 마케팅 케이스 스터디',
+  'performance-case-study': {
+    id: 'g4', slug: 'performance-case-study',
+    title: '퍼포먼스 마케팅 케이스 스터디',
+    tagline: 'Facebook·Google·카카오 광고 실전 데이터를 함께 분석',
+    notice: null,
     description: '페이스북/구글/카카오 광고 실전 케이스를 함께 분석합니다.\n\n실제 집행 데이터 기반으로 ROAS 개선 포인트를 찾고, 최적화 전략을 공유합니다.',
-    status: 'needs_gathering', meeting_type: 'recurring', max_members: 12, current_members: 4,
+    intro_who: '• 퍼포먼스 마케터, 그로스 마케터\n• 광고 효율을 높이고 싶은 분\n• 다양한 데이터를 보며 인사이트를 키우고 싶은 분',
+    structure: [
+      { number: 1, title: 'FB 광고 케이스', description: '실제 ROAS 데이터와 최적화 과정 발표' },
+      { number: 2, title: '구글 광고 케이스', description: '검색 광고 + pMax 운용 전략 비교' },
+    ],
+    guide: '📍 온라인 (Zoom)\n💰 무료\n📋 월 2회. 일정은 슬랙에서 투표로 결정',
+    status: 'needs_gathering', join_type: 'firstcome', meeting_type: 'recurring',
+    max_members: 12, current_members: 4,
     event_date: null, schedule: '월 2회 (일정 미정)', location: '온라인', location_detail: null,
     fee: 0, tags: ['퍼포먼스', 'Facebook광고', '구글광고', 'ROAS'],
-    cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l4', display_name: '광고전문P', job_function: '퍼포먼스 마케터', experience_years: 6, bio: null },
+    cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l4', display_name: '광고전문P', job_function: '퍼포먼스 마케터', experience_years: 6, bio: null, avatar_url: null },
     need: { id: 'n4', display_text: '퍼포먼스 마케팅 실무 배우고 싶어', count: 17 },
+    members: [{ id: 'm1', display_name: '광고전문P', job_function: '퍼포먼스 마케터', avatar_url: null }],
+    reviews: [],
+    related: [
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
+      { slug: 'data-analytics-meetup', title: '데이터 분석 마케터 모임', current_members: 10, max_members: 10, tags: ['데이터'], cover_image_url: null },
+    ],
   },
-  g6: {
-    id: 'g6', title: '스타트업 마케터 네트워킹 클럽',
-    description: '스타트업에서 일하는 마케터들의 정보 교류 모임입니다.\n\n규모는 달라도 고민은 비슷해요. 번아웃, 리소스 부족, ROI 증명… 함께 헤쳐나가요.',
-    status: 'recruiting', meeting_type: 'recurring', max_members: 20, current_members: 14,
+  'startup-marketer-club': {
+    id: 'g6', slug: 'startup-marketer-club',
+    title: '스타트업 마케터 네트워킹 클럽',
+    tagline: '리소스 없이도 성과내는 스타트업 마케터들의 모임',
+    notice: null,
+    description: '스타트업에서 일하는 마케터들의 정보 교류 모임입니다.\n\n번아웃, 리소스 부족, ROI 증명, 혼자 다 해야 하는 현실... 같은 고민을 나누는 사람들이 여기 있습니다.',
+    intro_who: '• 스타트업 또는 초기 기업의 마케터\n• 혼자 마케팅 전부를 담당하고 있는 분\n• 같은 처지의 동료를 만나고 싶은 분',
+    structure: [
+      { number: 1, title: '자기소개 & 현재 회사 이야기', description: '각자 회사 규모, 마케팅 현황, 가장 큰 고민 공유' },
+      { number: 2, title: '주제별 딥다이브', description: '당월 투표로 선정된 주제 (예: 소규모 예산 광고, 퇴사 방지 캠페인)' },
+    ],
+    guide: '📍 합정역 · 루프탑 카페\n💰 15,000원 (음료 + 스낵)\n📋 월 1회. 최대한 솔직한 이야기를 나누는 자리입니다.',
+    status: 'recruiting', join_type: 'approval', meeting_type: 'recurring',
+    max_members: 20, current_members: 14,
     event_date: '2026-05-03T18:00:00', schedule: '월 1회 토 18:00', location: '합정역', location_detail: '루프탑 카페',
     fee: 15000, tags: ['스타트업', '네트워킹', '마케터'],
-    cover_image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l6', display_name: '스타트업마케터S', job_function: '그로스 마케터', experience_years: 5, bio: '시리즈B 스타트업 마케팅 리드. 0→1 마케팅 경험 공유.' },
+    cover_image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l6', display_name: '스타트업마케터S', job_function: '그로스 마케터', experience_years: 5, bio: '시리즈B 스타트업 마케팅 리드. 0→1 마케팅 경험 공유.', avatar_url: null },
     need: { id: 'n6', display_text: '스타트업 마케터끼리 만나고 싶어', count: 33 },
+    members: [
+      { id: 'm1', display_name: '스타트업마케터S', job_function: '그로스 마케터', avatar_url: null },
+      { id: 'm2', display_name: '그로스K', job_function: '그로스 해커', avatar_url: null },
+    ],
+    reviews: [],
+    related: [
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
+      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링', current_members: 11, max_members: 15, tags: ['AI'], cover_image_url: null },
+    ],
   },
-  g7: {
-    id: 'g7', title: '브랜드 전략 독서 모임',
+  'brand-strategy-reading': {
+    id: 'g7', slug: 'brand-strategy-reading',
+    title: '브랜드 전략 독서 모임',
+    tagline: '매달 한 권, 브랜드 전략을 함께 읽고 실무에 연결',
+    notice: '이번 달 책: 《포지셔닝》(알 리스/잭 트라우트). 4/28까지 읽어오세요!',
     description: '브랜딩, 마케팅 전략 관련 책을 함께 읽고 토론합니다.\n\n매월 1권 선정 → 각자 읽고 → 인상 깊은 구절 + 실무 연결점 발표',
-    status: 'confirmed', meeting_type: 'recurring', max_members: 8, current_members: 8,
+    intro_who: '• 브랜딩·마케팅 전략을 깊이 공부하고 싶은 분\n• 책을 읽어도 실무 연결이 안 되는 분\n• 다른 사람의 인사이트를 통해 새 시각을 원하는 분',
+    structure: [
+      { number: 1, title: '선정 & 소개', description: '이번 달 책 선정 이유 공유. 각자 기대 포인트 이야기' },
+      { number: 2, title: '독후감 발표', description: '각자 인상 깊은 구절 1~2개 + 실무 연결 포인트 발표' },
+      { number: 3, title: '토론 & 다음 책 선정', description: '공통 인사이트 도출. 다음 달 책 투표' },
+    ],
+    guide: '📍 교대역 (장소는 슬랙 공지)\n💰 무료\n📋 책 미독 시 참여 불가 (예외 없음)',
+    status: 'confirmed', join_type: 'approval', meeting_type: 'recurring',
+    max_members: 8, current_members: 8,
     event_date: '2026-04-28T20:00:00', schedule: '월 1회 월 20:00', location: '교대역', location_detail: null,
     fee: 0, tags: ['브랜딩', '독서', '전략'],
-    cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l7', display_name: '브랜드스토리텔러', job_function: '브랜드 매니저', experience_years: 8, bio: '브랜드를 이야기로 만드는 사람.' },
+    cover_image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l7', display_name: '브랜드스토리텔러', job_function: '브랜드 매니저', experience_years: 8, bio: '브랜드를 이야기로 만드는 사람.', avatar_url: null },
     need: { id: 'n7', display_text: '브랜드 전략 같이 공부하고 싶어', count: 14 },
+    members: [{ id: 'm1', display_name: '브랜드스토리텔러', job_function: '브랜드 매니저', avatar_url: null }],
+    reviews: [],
+    related: [
+      { slug: 'copywriting-practice', title: '카피라이팅 같이 연습할래?', current_members: 12, max_members: 12, tags: ['카피'], cover_image_url: null },
+      { slug: 'startup-marketer-club', title: '스타트업 마케터 네트워킹', current_members: 14, max_members: 20, tags: ['네트워킹'], cover_image_url: null },
+    ],
   },
-  g8: {
-    id: 'g8', title: '데이터 분석 마케터 모임',
+  'data-analytics-meetup': {
+    id: 'g8', slug: 'data-analytics-meetup',
+    title: '데이터 분석 마케터 모임',
+    tagline: 'GA4·Mixpanel·Amplitude 실전 활용 스터디',
+    notice: null,
     description: 'GA4, Mixpanel, Amplitude 등 마케팅 분석 도구를 함께 공부합니다.\n\n데이터 드리븐 마케팅을 지향하는 분들의 실무 스터디',
-    status: 'confirmed', meeting_type: 'once', max_members: 10, current_members: 10,
+    intro_who: '• 데이터 분석에 관심 있는 마케터\n• GA4 전환 후 혼란스러운 분\n• 코호트 분석, 퍼널 분석을 배우고 싶은 분',
+    structure: [
+      { number: 1, title: 'GA4 완전 정복', description: 'UA에서 GA4로의 전환. 핵심 리포트 읽기' },
+      { number: 2, title: 'Mixpanel 실습', description: '이벤트 기반 분석. 코호트 분석 실습' },
+    ],
+    guide: '📍 삼성역 (구체 장소 슬랙 공지)\n💰 15,000원\n📋 1회성 모임. 노트북 필참',
+    status: 'confirmed', join_type: 'firstcome', meeting_type: 'once',
+    max_members: 10, current_members: 10,
     event_date: '2026-04-19T14:00:00', schedule: null, location: '삼성역', location_detail: null,
     fee: 15000, tags: ['데이터', 'GA4', '분석'],
-    cover_image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=860&h=320&fit=crop&auto=format',
-    leader: { id: 'l8', display_name: '데이터M', job_function: '데이터 분석가', experience_years: 4, bio: null },
+    cover_image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l8', display_name: '데이터M', job_function: '데이터 분석가', experience_years: 4, bio: null, avatar_url: null },
     need: { id: 'n8', display_text: '데이터 분석 배우고 싶어', count: 19 },
+    members: [],
+    reviews: [],
+    related: [
+      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스', current_members: 4, max_members: 12, tags: ['퍼포먼스'], cover_image_url: null },
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
+    ],
   },
 };
 
-export default function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const [group, setGroup] = useState<GroupDetail | null>(null);
-  const [showLeaderProfile, setShowLeaderProfile] = useState(false);
+// 구 ID → 슬러그 호환 맵
+const ID_TO_SLUG: Record<string, string> = {
+  g1: 'b2b-marketing-weekly', g2: 'copywriting-practice',
+  g3: 'sns-content-studio', g4: 'performance-case-study',
+  g5: 'ai-prompt-engineering', g6: 'startup-marketer-club',
+  g7: 'brand-strategy-reading', g8: 'data-analytics-meetup',
+};
 
+// ── 컬러 팔레트 ──
+const AVATAR_COLORS = [
+  { bg: 'rgba(255,217,61,0.15)', text: '#ffd93d' },
+  { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc' },
+  { bg: 'rgba(74,222,128,0.12)', text: '#4ade80' },
+  { bg: 'rgba(251,146,60,0.15)', text: '#fb923c' },
+  { bg: 'rgba(236,72,153,0.12)', text: '#f472b6' },
+  { bg: 'rgba(34,211,238,0.12)', text: '#22d3ee' },
+];
+
+// ── 탭 정의 ──
+const TABS = ['소개', '구성', '상세 안내', '후기', '추천 모임'] as const;
+type TabName = typeof TABS[number];
+
+// ── 상태 메타 ──
+const STATUS_META: Record<string, { label: string; bg: string; color: string }> = {
+  recruiting: { label: '모집중', bg: 'rgba(74,222,128,0.12)', color: '#4ade80' },
+  confirmed: { label: '모임 확정', bg: 'rgba(99,102,241,0.12)', color: '#a5b4fc' },
+  needs_gathering: { label: '니즈 모이는 중', bg: 'rgba(255,217,61,0.08)', color: '#ffd93d' },
+  closed: { label: '마감', bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' },
+  ended: { label: '종료', bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' },
+};
+
+type JoinState = 'idle' | 'applying' | 'submitted' | 'joined' | 'waitlisted';
+
+// ── 아바타 컴포넌트 ──
+function Avatar({ name, avatarUrl, idx, size = 40 }: {
+  name: string; avatarUrl?: string | null; idx: number; size?: number;
+}) {
+  const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  if (avatarUrl) {
+    return (
+      <Image src={avatarUrl} alt={name} width={size} height={size}
+        className="rounded-full object-cover shrink-0"
+        style={{ width: size, height: size }} />
+    );
+  }
+  return (
+    <div className="flex shrink-0 items-center justify-center rounded-full font-bold"
+      style={{ width: size, height: size, fontSize: size * 0.35, background: color.bg, color: color.text }}>
+      {name.charAt(0)}
+    </div>
+  );
+}
+
+// ── 별점 ──
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1,2,3,4,5].map(i => (
+        <Star key={i} className="h-3.5 w-3.5"
+          style={{ fill: i <= rating ? '#ffd93d' : 'transparent', color: i <= rating ? '#ffd93d' : 'rgba(255,255,255,0.15)' }} />
+      ))}
+    </div>
+  );
+}
+
+// ── 메인 컴포넌트 ──
+export default function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: rawSlug } = use(params);
+  const { isAuthenticated } = useAuth();
+
+  // slug 또는 구 ID 모두 지원
+  const slug = ID_TO_SLUG[rawSlug] || rawSlug;
+
+  const [group, setGroup] = useState<GroupDetail | null>(null);
+  const [activeTab, setActiveTab] = useState<TabName>('소개');
+  const [joinState, setJoinState] = useState<JoinState>('idle');
+  const [applyMessage, setApplyMessage] = useState('');
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showLeaderProfile, setShowLeaderProfile] = useState(false);
+  const [showNotice, setShowNotice] = useState(true);
+
+  // 섹션 refs
+  const sectionRefs = useRef<Record<TabName, HTMLElement | null>>({
+    소개: null, 구성: null, '상세 안내': null, 후기: null, '추천 모임': null,
+  });
+  const tabBarRef = useRef<HTMLDivElement>(null);
+
+  // 데이터 로드
   useEffect(() => {
-    fetch(`/api/badak/groups/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.group) setGroup(data.group);
-        else {
-          const mock = MOCK_DETAIL[id];
-          if (mock) setGroup(mock);
-        }
-      })
-      .catch(() => {
-        const mock = MOCK_DETAIL[id];
-        if (mock) setGroup(mock);
-      });
-  }, [id]);
+    fetch(`/api/badak/groups/${slug}`)
+      .then(r => r.json())
+      .then(data => setGroup(data.group ? { ...MOCK[slug], ...data.group } : (MOCK[slug] ?? null)))
+      .catch(() => setGroup(MOCK[slug] ?? null));
+  }, [slug]);
+
+  // IntersectionObserver — 스크롤 위치에 따라 활성 탭 업데이트
+  useEffect(() => {
+    if (!group) return;
+    const headerH = (tabBarRef.current?.getBoundingClientRect().bottom ?? 112);
+    const observers: IntersectionObserver[] = [];
+
+    TABS.forEach(tab => {
+      const el = sectionRefs.current[tab];
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveTab(tab); },
+        { rootMargin: `-${headerH}px 0px -50% 0px` }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [group]);
+
+  function scrollToTab(tab: TabName) {
+    const el = sectionRefs.current[tab];
+    if (!el) return;
+    const offset = (tabBarRef.current?.getBoundingClientRect().height ?? 44) + 56 + 8;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+    setActiveTab(tab);
+  }
+
+  function handleShare() {
+    if (navigator.share) navigator.share({ title: group?.title, url: window.location.href });
+    else navigator.clipboard.writeText(window.location.href);
+  }
 
   if (!group) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#1a1a2e]">
-        <div className="text-sm text-white/30">로딩 중...</div>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-amber-400" />
       </div>
     );
   }
 
   const isFull = group.current_members >= group.max_members;
   const isClosed = group.status === 'closed' || group.status === 'ended';
-  const leader = group.leader;
+  const isNeedsGathering = group.status === 'needs_gathering';
+  const fillPct = Math.round((group.current_members / group.max_members) * 100);
+  const statusMeta = STATUS_META[group.status] ?? { label: group.status, bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' };
+  const ctaDone = joinState === 'joined' || joinState === 'submitted' || joinState === 'waitlisted';
+  const ctaDisabled = isClosed || (isFull && !isNeedsGathering);
+
+  const ctaLabel = ctaDone
+    ? (joinState === 'joined' ? '참여 완료' : joinState === 'submitted' ? '신청 완료 — 승인 대기' : '관심 등록 완료')
+    : isClosed ? '모집 종료'
+    : isFull && !isNeedsGathering ? '정원 마감'
+    : isNeedsGathering ? '관심 표시하기'
+    : group.join_type === 'approval' ? '참여 신청하기'
+    : '바로 참여하기';
+
+  function handleJoin() {
+    if (!isAuthenticated || !group) return;
+    if (isNeedsGathering) { setJoinState('waitlisted'); return; }
+    if (group.join_type === 'approval') { setJoinState('applying'); return; }
+    setJoinState('joined');
+  }
 
   return (
-    <div className="mx-auto min-h-screen max-w-[860px] bg-[#1a1a2e] pt-14 text-white">
-      {/* 헤더 */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-4">
-        <Link href="/badak/groups" className="text-white/30 hover:text-white/60">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-lg font-bold">{group.title}</h1>
+    <div className="mx-auto min-h-screen max-w-[640px] bg-[#1a1a2e] pb-28 text-white">
+
+      {/* ── 히어로 ── */}
+      <div className="relative">
+        {group.cover_image_url ? (
+          <img src={group.cover_image_url} alt={group.title}
+            className={`h-64 w-full object-cover ${isClosed ? 'opacity-40 grayscale' : ''}`} />
+        ) : (
+          <div className="h-44 w-full"
+            style={{ background: 'linear-gradient(135deg, rgba(255,217,61,0.1),rgba(139,92,246,0.1),rgba(59,130,246,0.08))' }} />
+        )}
+        {/* 그라디언트 오버레이 */}
+        <div className="absolute inset-0"
+          style={{ background: 'linear-gradient(to top, #1a1a2e 0%, rgba(26,26,46,0.45) 55%, transparent 100%)' }} />
+
+        {/* 상단 액션 바 */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-16">
+          <Link href="/badak/groups"
+            className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.35)' }}>
+            <ArrowLeft className="h-4 w-4 text-white/80" />
+          </Link>
+          <div className="flex gap-1.5">
+            <button onClick={() => setIsBookmarked(!isBookmarked)}
+              className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+              style={{ background: 'rgba(0,0,0,0.35)' }}>
+              <Bookmark className="h-4 w-4"
+                style={{ color: isBookmarked ? '#ffd93d' : 'rgba(255,255,255,0.7)', fill: isBookmarked ? '#ffd93d' : 'none' }} />
+            </button>
+            <button onClick={handleShare}
+              className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
+              style={{ background: 'rgba(0,0,0,0.35)' }}>
+              <Share2 className="h-4 w-4 text-white/70" />
+            </button>
+          </div>
+        </div>
+
+        {/* 히어로 하단 — 타이틀 + 배지 */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+              style={{ background: statusMeta.bg, color: statusMeta.color }}>
+              {statusMeta.label}
+            </span>
+            {group.meeting_type && (
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs backdrop-blur-sm"
+                style={{ background: 'rgba(0,0,0,0.35)', color: 'rgba(255,255,255,0.55)' }}>
+                {group.meeting_type === 'recurring' ? '정기 모임' : '1회 모임'}
+              </span>
+            )}
+            {group.join_type === 'approval' && (
+              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs backdrop-blur-sm"
+                style={{ background: 'rgba(0,0,0,0.35)', color: 'rgba(255,255,255,0.45)' }}>
+                <Lock className="h-3 w-3" />승인제
+              </span>
+            )}
+          </div>
+          <h1 className="text-xl font-extrabold leading-tight text-white drop-shadow">{group.title}</h1>
+          {group.tagline && <p className="mt-1 text-sm text-white/55 drop-shadow">{group.tagline}</p>}
+        </div>
       </div>
 
-      {/* 커버 이미지 */}
-      {group.cover_image_url ? (
-        <img
-          src={group.cover_image_url}
-          alt=""
-          className={`h-48 w-full object-cover ${isClosed ? 'opacity-40 grayscale' : ''}`}
-        />
-      ) : (
-        <div
-          className={`h-28 w-full ${isClosed ? 'opacity-40' : ''}`}
-          style={{ background: 'linear-gradient(135deg, rgba(255,217,61,0.08) 0%, rgba(139,92,246,0.08) 50%, rgba(59,130,246,0.08) 100%)' }}
-        />
+      {/* ── 퀵 스탯 바 ── */}
+      <div className="flex divide-x divide-white/6 border-b border-white/6 px-2"
+        style={{ background: 'rgba(255,255,255,0.02)' }}>
+        {[
+          { icon: <Users className="h-3.5 w-3.5" />, label: `${group.current_members}/${group.max_members}명` },
+          group.location && { icon: <MapPin className="h-3.5 w-3.5" />, label: group.location },
+          group.fee > 0 && { icon: <Banknote className="h-3.5 w-3.5" />, label: `${group.fee.toLocaleString()}원` },
+          group.fee === 0 && { icon: <Banknote className="h-3.5 w-3.5" />, label: '무료' },
+          (group.schedule || group.event_date) && {
+            icon: <Calendar className="h-3.5 w-3.5" />,
+            label: group.schedule ?? new Date(group.event_date!).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }),
+          },
+        ].filter(Boolean).map((item, i) => (item &&
+          <div key={i} className="flex flex-1 items-center justify-center gap-1.5 py-2.5">
+            <span className="text-white/25">{item.icon}</span>
+            <span className="text-[11px] text-white/55">{item.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── 주요 공지 ── */}
+      {group.notice && showNotice && (
+        <div className="mx-4 mt-4 flex gap-3 rounded-xl px-4 py-3"
+          style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
+          <Bell className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <p className="flex-1 text-sm leading-relaxed text-white/70">{group.notice}</p>
+          <button onClick={() => setShowNotice(false)} className="shrink-0 text-white/20 hover:text-white/40">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       )}
 
-      {/* 컨텐츠 */}
-      <div className="px-5 pb-16 pt-5 space-y-5">
-
-        {/* 상태 + 타입 배지 */}
-        <div className="flex flex-wrap gap-2">
-          <span
-            className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-            style={{
-              background: group.status === 'recruiting' ? 'rgba(74,222,128,0.1)' : group.status === 'confirmed' ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.06)',
-              color: group.status === 'recruiting' ? '#4ade80' : group.status === 'confirmed' ? '#a5b4fc' : 'rgba(255,255,255,0.4)',
-            }}
-          >
-            {group.status === 'recruiting' ? '모집중' : group.status === 'confirmed' ? '확정' : '마감'}
+      {/* ── 정원 프로그레스 ── */}
+      <div className="mx-4 mt-4 rounded-xl px-4 py-3"
+        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="mb-1.5 flex justify-between text-xs">
+          <span className="text-white/40">모집 현황</span>
+          <span style={{ color: isFull ? '#f87171' : 'rgba(255,255,255,0.65)' }}>
+            {group.current_members}/{group.max_members}명
+            {!isFull && !isClosed && <span className="ml-1.5 text-white/25">· {group.max_members - group.current_members}자리 남음</span>}
           </span>
-          {group.meeting_type && (
-            <span className="inline-flex items-center rounded-full bg-white/6 px-3 py-1 text-xs text-white/40">
-              {group.meeting_type === 'recurring' ? '🔁 정기 모임' : '1️⃣ 1회 모임'}
-            </span>
-          )}
         </div>
-
-        {/* 연결된 니즈 */}
-        {group.need && (
-          <div
-            className="rounded-xl px-4 py-3"
-            style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}
-          >
-            <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400/50">이 모임의 니즈</div>
-            <p className="text-sm text-white/70">"{group.need.display_text}"</p>
-            <p className="mt-0.5 text-[11px] text-white/30">{group.need.count}명이 같은 니즈를 가지고 있어요</p>
-          </div>
-        )}
-
-        {/* 설명 */}
-        {group.description && (
-          <div
-            className="rounded-xl border border-white/6 px-4 py-4"
-            style={{ background: 'rgba(255,255,255,0.02)' }}
-          >
-            <p className="text-sm leading-relaxed text-white/55 whitespace-pre-line">{group.description}</p>
-          </div>
-        )}
-
-        {/* 바닥장 — 클릭 시 공개 프로필 시트 오픈 */}
-        {leader && (
-          <button
-            type="button"
-            onClick={() => setShowLeaderProfile(true)}
-            className="w-full flex items-start gap-3 rounded-xl border p-4 text-left transition-colors hover:border-amber-400/20"
-            style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
-          >
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-              style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
-            >
-              {leader.display_name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white/85">{leader.display_name}</span>
-                <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">바닥장</span>
-              </div>
-              <div className="mt-0.5 text-xs text-white/35">{leader.job_function} · {leader.experience_years}년차</div>
-              {leader.bio && (
-                <p className="mt-2 text-xs leading-relaxed text-white/40 line-clamp-2">{leader.bio}</p>
-              )}
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-white/20 mt-1" />
-          </button>
-        )}
-
-        {/* 모임 세부 정보 */}
-        <div
-          className="rounded-xl border border-white/8 px-4 py-4 space-y-3"
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-white/30">모임 정보</h3>
-
-          {group.event_date && (
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
-              <span className="text-sm text-white/60">
-                {new Date(group.event_date).toLocaleDateString('ko-KR', {
-                  year: 'numeric', month: 'long', day: 'numeric',
-                  weekday: 'short', hour: '2-digit', minute: '2-digit',
-                })}
-              </span>
-            </div>
-          )}
-          {group.schedule && (
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
-              <span className="text-sm text-white/60">{group.schedule}</span>
-            </div>
-          )}
-          {group.location && (
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
-              <span className="text-sm text-white/60">
-                {group.location}{group.location_detail ? ` · ${group.location_detail}` : ''}
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <Users className="h-4 w-4 shrink-0 text-white/20" />
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm" style={{ color: isFull ? '#f87171' : 'rgba(255,255,255,0.6)' }}>
-                  {group.current_members}/{group.max_members}명
-                  {isFull && <span className="ml-2 text-xs text-red-400">마감 임박</span>}
-                </span>
-                <span className="text-xs text-white/25">{group.max_members - group.current_members}자리 남음</span>
-              </div>
-              <div className="h-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                <div
-                  className="h-full rounded-full transition-[width] duration-700"
-                  style={{
-                    width: `${(group.current_members / group.max_members) * 100}%`,
-                    background: isFull ? '#f87171' : 'linear-gradient(90deg, #ffd93d, #ff9f43)',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          {group.fee > 0 && (
-            <div className="flex items-center gap-3">
-              <Banknote className="h-4 w-4 shrink-0 text-white/20" />
-              <span className="text-sm text-white/60">{group.fee.toLocaleString()}원</span>
-            </div>
-          )}
+        <div className="h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+          <div className="h-full rounded-full"
+            style={{ width: `${fillPct}%`, background: isFull ? 'linear-gradient(90deg,#f87171,#fb923c)' : 'linear-gradient(90deg,#ffd93d,#ff9f43)', transition: 'width 0.7s' }} />
         </div>
-
-        {/* 태그 */}
-        {group.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {group.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full px-3 py-1 text-xs text-white/40"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* 바닥장 공개 프로필 시트 */}
-      {showLeaderProfile && leader && (
+      {/* ── 스티키 탭 바 ── */}
+      <div ref={tabBarRef} className="sticky z-20 mt-4 border-b border-white/6"
+        style={{ top: 56, background: '#1a1a2e' }}>
+        <div className="flex overflow-x-auto scrollbar-hide px-4">
+          {TABS.map(tab => (
+            <button key={tab} onClick={() => scrollToTab(tab)}
+              className="shrink-0 px-4 py-3 text-sm font-medium transition-colors"
+              style={{
+                color: activeTab === tab ? '#ffd93d' : 'rgba(255,255,255,0.4)',
+                borderBottom: activeTab === tab ? '2px solid #ffd93d' : '2px solid transparent',
+                marginBottom: -1,
+              }}>
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 섹션 컨테이너 ── */}
+      <div className="px-4">
+
+        {/* ── 소개 ── */}
+        <section ref={el => { sectionRefs.current['소개'] = el; }} className="pt-6 pb-2">
+          <h2 className="mb-4 text-base font-bold text-white/85">소개</h2>
+
+          {/* 모임 설명 */}
+          {group.description && (
+            <div className="mb-4 rounded-xl px-4 py-4"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="text-sm leading-7 text-white/60 whitespace-pre-line">{group.description}</p>
+            </div>
+          )}
+
+          {/* 이런 분께 추천 */}
+          {group.intro_who && (
+            <div className="mb-4 rounded-xl px-4 py-4"
+              style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-amber-400/50">이런 분께 추천해요</div>
+              <p className="text-sm leading-7 text-white/60 whitespace-pre-line">{group.intro_who}</p>
+            </div>
+          )}
+
+          {/* 연결된 니즈 */}
+          {group.need && (
+            <div className="mb-4 rounded-xl px-4 py-3"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/25">연결된 니즈</div>
+              <p className="text-sm text-white/65">"{group.need.display_text}"</p>
+              <p className="mt-0.5 text-[11px] text-amber-400/50">{group.need.count}명이 같은 니즈를 가지고 있어요</p>
+            </div>
+          )}
+
+          {/* 바닥장 */}
+          {group.leader && (
+            <button type="button" onClick={() => setShowLeaderProfile(true)}
+              className="w-full flex items-start gap-3.5 rounded-xl p-4 text-left transition-colors hover:border-amber-400/20"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <Avatar name={group.leader.display_name} avatarUrl={group.leader.avatar_url} idx={0} size={48} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-white/85">{group.leader.display_name}</span>
+                  <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">바닥장</span>
+                </div>
+                <div className="mt-0.5 text-xs text-white/35">{group.leader.job_function} · {group.leader.experience_years}년차</div>
+                {group.leader.bio && <p className="mt-1.5 text-xs leading-relaxed text-white/40 line-clamp-2">{group.leader.bio}</p>}
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-white/20 mt-1" />
+            </button>
+          )}
+        </section>
+
+        {/* ── 구성 ── */}
+        <section ref={el => { sectionRefs.current['구성'] = el; }} className="pt-6 pb-2">
+          <h2 className="mb-4 text-base font-bold text-white/85">구성</h2>
+          {group.structure?.length ? (
+            <div className="relative">
+              {/* 타임라인 라인 */}
+              <div className="absolute left-[19px] top-2 bottom-2 w-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+              <div className="space-y-1">
+                {group.structure.map(session => (
+                  <div key={session.number} className="flex gap-4">
+                    {/* 번호 원 */}
+                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold z-10"
+                      style={{ background: '#1a1a2e', border: '1.5px solid rgba(255,217,61,0.3)', color: '#ffd93d' }}>
+                      {session.number}
+                    </div>
+                    <div className="flex-1 pb-6 pt-1.5">
+                      <div className="text-sm font-semibold text-white/80">{session.title}</div>
+                      <div className="mt-1 text-xs leading-relaxed text-white/45">{session.description}</div>
+                      {session.date && <div className="mt-1 text-[11px] text-amber-400/40">{session.date}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl px-4 py-8 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="text-sm text-white/30">구성 안내가 준비 중입니다</p>
+            </div>
+          )}
+        </section>
+
+        {/* ── 상세 안내 ── */}
+        <section ref={el => { sectionRefs.current['상세 안내'] = el; }} className="pt-6 pb-2">
+          <h2 className="mb-4 text-base font-bold text-white/85">상세 안내</h2>
+
+          {/* 모임 정보 그리드 */}
+          <div className="mb-4 rounded-xl px-4 py-4 space-y-3"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            {[
+              group.event_date && {
+                icon: <Calendar className="h-3.5 w-3.5 text-amber-400/60" />,
+                label: new Date(group.event_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' }),
+              },
+              group.schedule && { icon: <Clock className="h-3.5 w-3.5 text-amber-400/60" />, label: group.schedule },
+              group.location && {
+                icon: <MapPin className="h-3.5 w-3.5 text-amber-400/60" />,
+                label: `${group.location}${group.location_detail ? ` · ${group.location_detail}` : ''}`,
+              },
+              { icon: <Banknote className="h-3.5 w-3.5 text-amber-400/60" />, label: group.fee > 0 ? `회비 ${group.fee.toLocaleString()}원` : '무료' },
+              { icon: <Users className="h-3.5 w-3.5 text-amber-400/60" />, label: `최대 ${group.max_members}명` },
+            ].filter(Boolean).map((item, i) => (item &&
+              <div key={i} className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-lg shrink-0"
+                  style={{ background: 'rgba(255,217,61,0.08)' }}>{item.icon}</div>
+                <span className="text-sm text-white/60">{item.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 상세 안내 텍스트 */}
+          {group.guide && (
+            <div className="rounded-xl px-4 py-4"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="text-sm leading-7 text-white/55 whitespace-pre-line">{group.guide}</p>
+            </div>
+          )}
+
+          {/* 태그 */}
+          {group.tags?.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {group.tags.map(tag => (
+                <span key={tag} className="rounded-full px-3 py-1.5 text-xs text-white/40"
+                  style={{ background: 'rgba(255,255,255,0.05)' }}>#{tag}</span>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── 후기 ── */}
+        <section ref={el => { sectionRefs.current['후기'] = el; }} className="pt-6 pb-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-bold text-white/85">후기</h2>
+            {group.reviews.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <StarRating rating={Math.round(group.reviews.reduce((s, r) => s + r.rating, 0) / group.reviews.length)} />
+                <span className="text-xs text-white/40">
+                  {(group.reviews.reduce((s, r) => s + r.rating, 0) / group.reviews.length).toFixed(1)}
+                  <span className="ml-1">({group.reviews.length})</span>
+                </span>
+              </div>
+            )}
+          </div>
+
+          {group.reviews.length > 0 ? (
+            <div className="space-y-3">
+              {group.reviews.map((review, i) => (
+                <div key={review.id} className="rounded-xl px-4 py-4 space-y-2"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="flex items-center gap-2.5">
+                    <Avatar name={review.author} avatarUrl={review.avatar_url} idx={i + 1} size={32} />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white/75">{review.author}</span>
+                        {review.job_function && <span className="text-[11px] text-white/30">{review.job_function}</span>}
+                      </div>
+                      <StarRating rating={review.rating} />
+                    </div>
+                    <span className="ml-auto text-[11px] text-white/20">
+                      {new Date(review.created_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-white/55">{review.content}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl px-4 py-10 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <MessageCircle className="mx-auto mb-2 h-8 w-8 text-white/10" />
+              <p className="text-sm text-white/30">아직 후기가 없어요</p>
+              <p className="mt-1 text-xs text-white/20">첫 번째 후기를 남겨보세요</p>
+            </div>
+          )}
+        </section>
+
+        {/* ── 추천 모임 ── */}
+        <section ref={el => { sectionRefs.current['추천 모임'] = el; }} className="pt-6 pb-8">
+          <h2 className="mb-4 text-base font-bold text-white/85">추천 모임</h2>
+          {group.related.length > 0 ? (
+            <div className="space-y-3">
+              {group.related.map(rel => {
+                const relFull = rel.current_members >= rel.max_members;
+                return (
+                  <Link key={rel.slug} href={`/badak/groups/${rel.slug}`}
+                    className="flex items-center gap-3 overflow-hidden rounded-xl transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    {rel.cover_image_url && (
+                      <img src={rel.cover_image_url} alt="" className="h-16 w-20 shrink-0 object-cover" />
+                    )}
+                    <div className={`flex flex-1 min-w-0 flex-col py-3 ${rel.cover_image_url ? '' : 'px-4'}`}>
+                      <p className="truncate text-sm text-white/70">{rel.title}</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {rel.tags.slice(0, 2).map(t => (
+                          <span key={t} className="text-[10px] text-white/30">#{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="shrink-0 px-3 text-right">
+                      <div className="text-xs" style={{ color: relFull ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
+                        {rel.current_members}/{rel.max_members}명
+                      </div>
+                    </div>
+                    <ChevronRight className="mr-3 h-4 w-4 shrink-0 text-white/20" />
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-white/30 text-center py-6">추천 모임을 준비 중입니다</p>
+          )}
+        </section>
+      </div>
+
+      {/* ── 참여 신청 시트 (승인제) ── */}
+      {joinState === 'applying' && (
+        <div className="fixed inset-0 z-40 flex items-end"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={e => { if (e.target === e.currentTarget) setJoinState('idle'); }}>
+          <div className="w-full max-w-[640px] mx-auto rounded-t-2xl px-5 pb-10 pt-5 space-y-4"
+            style={{ background: '#1e1e38', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-white/85">참여 신청 — {group.title}</h3>
+              <button onClick={() => setJoinState('idle')} className="text-white/30 hover:text-white/60">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-white/40">
+              이 모임은 <span className="text-amber-400/70">승인제</span>입니다. 간단한 자기소개와 참여 동기를 남겨주세요.
+            </p>
+            <textarea value={applyMessage} onChange={e => setApplyMessage(e.target.value)}
+              placeholder="예: 퍼포먼스 마케터 3년차입니다. B2B SaaS 케이스를 함께 공부하고 싶어 신청합니다."
+              className="w-full rounded-xl px-4 py-3 text-sm text-white/75 placeholder-white/25 resize-none outline-none"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', minHeight: 100 }} />
+            <button onClick={() => { if (applyMessage.trim()) setJoinState('submitted'); }}
+              disabled={!applyMessage.trim()}
+              className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-30"
+              style={{ background: '#ffd93d', color: '#1a1a2e' }}>
+              <Send className="h-4 w-4" />신청 보내기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── 하단 고정 CTA ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-3"
+        style={{ background: 'linear-gradient(to top, #1a1a2e 70%, transparent 100%)' }}>
+        <div className="mx-auto max-w-[640px]">
+          {(joinState === 'submitted' || joinState === 'waitlisted') && (
+            <div className="mb-2.5 flex items-center gap-2 rounded-xl px-4 py-2.5"
+              style={{ background: joinState === 'submitted' ? 'rgba(99,102,241,0.12)' : 'rgba(255,217,61,0.08)' }}>
+              <CheckCircle2 className="h-4 w-4 shrink-0"
+                style={{ color: joinState === 'submitted' ? '#a5b4fc' : '#ffd93d' }} />
+              <p className="text-xs" style={{ color: joinState === 'submitted' ? 'rgba(165,180,252,0.8)' : 'rgba(255,217,61,0.7)' }}>
+                {joinState === 'submitted' ? '신청이 접수됐어요. 바닥장 승인 후 알려드릴게요.' : '관심 등록 완료! 모임 개설 시 알려드릴게요.'}
+              </p>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <Heart className="h-5 w-5 text-white/35" />
+            </button>
+            <button onClick={handleJoin} disabled={ctaDisabled || ctaDone}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold disabled:cursor-default"
+              style={{
+                background: ctaDone ? 'rgba(255,255,255,0.06)' : ctaDisabled ? 'rgba(255,255,255,0.05)' : '#ffd93d',
+                color: ctaDone ? 'rgba(255,255,255,0.35)' : ctaDisabled ? 'rgba(255,255,255,0.2)' : '#1a1a2e',
+                border: ctaDone || ctaDisabled ? '1px solid rgba(255,255,255,0.08)' : 'none',
+              }}>
+              {ctaDone ? <CheckCircle2 className="h-4 w-4" /> : isNeedsGathering ? <Bell className="h-4 w-4" /> : group.join_type === 'approval' ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+              {ctaLabel}
+            </button>
+          </div>
+          {group.fee > 0 && !ctaDone && !ctaDisabled && (
+            <p className="mt-2 text-center text-[11px] text-white/25">참여 시 회비 {group.fee.toLocaleString()}원이 발생합니다</p>
+          )}
+        </div>
+      </div>
+
+      {/* ── 바닥장 프로필 시트 ── */}
+      {showLeaderProfile && group.leader && (
         <MemberProfileSheet
-          memberId={leader.id}
-          displayName={leader.display_name}
-          job={`${leader.job_function} · ${leader.experience_years}년차`}
+          memberId={group.leader.id}
+          displayName={group.leader.display_name}
+          job={`${group.leader.job_function} · ${group.leader.experience_years}년차`}
           isLeader
           onClose={() => setShowLeaderProfile(false)}
         />

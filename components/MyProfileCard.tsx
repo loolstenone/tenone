@@ -58,7 +58,15 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                     )}
                     <div className="flex-1 min-w-0">
                         <h2 className="text-lg font-bold text-white truncate">{user.name}</h2>
-                        <p className="text-sm text-neutral-400 truncate">{user.email}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm text-neutral-400 truncate">{user.email}</p>
+                            {user.handle && (
+                                <a href={`/profile/@${user.handle}`}
+                                    className="text-[11px] text-neutral-500 hover:text-neutral-300 transition-colors shrink-0">
+                                    @{user.handle}
+                                </a>
+                            )}
+                        </div>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             {isStaff && (
                                 <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white">Staff</span>
@@ -97,7 +105,9 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                     <Globe className="h-4 w-4 text-neutral-500 group-hover:text-white transition-colors" />
                     <div className="flex-1">
                         <p className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors">Universe Profile</p>
-                        <p className="text-[10px] text-neutral-600">프로필 수정 · 전체 서비스 관리</p>
+                        <p className="text-[10px] text-neutral-600">
+                            {user.handle ? `tenone.biz/profile/@${user.handle} · 수정` : '프로필 수정 · 전체 서비스 관리'}
+                        </p>
                     </div>
                     <ChevronRight className="h-3.5 w-3.5 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
                 </Link>

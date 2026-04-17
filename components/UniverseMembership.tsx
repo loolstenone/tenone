@@ -17,8 +17,8 @@ export function UniverseMembership() {
   const { user } = useAuth();
   if (!user) return null;
 
-  const originSite = (user as Record<string, unknown>).originSite as string | undefined;
-  const affiliations = (user as Record<string, unknown>).affiliations as string[] | undefined;
+  const originSite = (user as unknown as Record<string, unknown>).originSite as string | undefined;
+  const affiliations = (user as unknown as Record<string, unknown>).affiliations as string[] | undefined;
 
   return (
     <div className="rounded-2xl border tn-border tn-surface p-8">

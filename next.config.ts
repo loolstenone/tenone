@@ -8,9 +8,21 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'ziotlxkdctlhiwkgmmsh.supabase.co', pathname: '/storage/v1/object/public/**' },
+      // OAuth 프로필 이미지
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },   // Google
+      { protocol: 'https', hostname: 'k.kakaocdn.net' },              // Kakao
+      { protocol: 'https', hostname: 'phinf.pstatic.net' },          // Naver
+      { protocol: 'https', hostname: 'images.unsplash.com' },        // Unsplash (Mock 데이터)
     ],
   },
   serverExternalPackages: ['@anthropic-ai/sdk'],
+  async rewrites() {
+    return [
+      // tenone.biz/@handle → /profile/@handle (유니버스 프로필 단축 URL)
+      { source: '/@:handle', destination: '/profile/@:handle' },
+    ];
+  },
+
   async redirects() {
     return [
       // 삭제된 페이지 — 301 리다이렉트

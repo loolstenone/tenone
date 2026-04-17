@@ -41,7 +41,7 @@ export function AuthRecoveryHandler() {
 
         // 방법 3: onAuthStateChange PASSWORD_RECOVERY 이벤트
         const supabase = createClient();
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string) => {
             if (event === 'PASSWORD_RECOVERY') {
                 router.replace('/reset-password');
             }

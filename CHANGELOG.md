@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-04-17 (집, 세션 56) — Universe Profile 공개뷰 + 경력 정보
+
+### 수정 파일
+- `app/(TenOne)/profile/[handle]/page.tsx` — 소유자 감지(서버 email 비교) + 소유자 시 /profile redirect + 비방문자 로그인 버튼
+- `components/UniverseProfile.tsx` — 공개/미리보기/수정 버튼 이름 행 이동, 공개범위 토글 수정(div+button stopPropagation), socialLinks 공개범위 항목 추가, 미리보기에서 editForm 공개범위 반영, bio line-clamp-3 + 더 보기/접기, 경력 정보 섹션(Badak 직무·산업군·경력 chip)
+- `CLAUDE.md` — UX_GUIDE.md 참조 섹션 추가
+
+### 사용자 직접 처리 완료
+- lools@tenone.biz 비밀번호 재설정 (Supabase Dashboard)
+- intra.tenone.biz 도메인 활성화 (Vercel + DNS + Supabase Auth URL)
+
+---
+
 ## 2026-04-17 (집, 세션 54) — Phase 0 완료 + Badak 고도화 + 비밀번호 기능
 
 ### 신규 파일

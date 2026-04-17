@@ -47,7 +47,7 @@ export default function BrandsListPage() {
       .from("analytics_snapshots")
       .select("brand_id, sessions, pageviews, users, bounce_rate, date")
       .gte("date", since.toISOString().split("T")[0])
-      .then(({ data }) => {
+      .then(({ data }: { data: (BrandSummary & { date: string })[] | null }) => {
         if (cancelled || !data) return;
 
         const agg: Record<string, BrandSummary> = {};

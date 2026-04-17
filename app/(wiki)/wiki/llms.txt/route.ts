@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     const allPages = pages || [];
     const lastUpdated = allPages.length > 0
-        ? new Date(Math.max(...allPages.map(p => new Date(p.updated_at).getTime()))).toISOString().split("T")[0]
+        ? new Date(Math.max(...allPages.map((p: { updated_at: string }) => new Date(p.updated_at).getTime()))).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
 
     let output = `# Ten:One™ Universe Wiki

@@ -63,7 +63,7 @@ export default function AnalyticsOverviewPage() {
       .select("brand_id, sessions, pageviews, users, bounce_rate, avg_session_duration, date, synced_at")
       .gte("date", since.toISOString().split("T")[0])
       .order("date", { ascending: false })
-      .then(({ data }) => {
+      .then(({ data }: { data: (BrandSnapshot & { date: string; synced_at: string })[] | null }) => {
         if (cancelled || !data) return;
 
         const byBrand: Record<string, BrandSnapshot> = {};

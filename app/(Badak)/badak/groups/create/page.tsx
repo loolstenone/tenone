@@ -19,7 +19,7 @@ interface NeedOption {
   hasGroup: boolean;
 }
 
-const STEPS = ['기본 정보', '일정/장소', '바닥장 소개'];
+const STEPS = ['기본 정보', '일정/장소', '콘텐츠 구성', '바닥장 소개'];
 
 const QUICK_DATES = (() => {
   const dates: { label: string; value: string }[] = [];
@@ -96,11 +96,26 @@ function CreateGroupPageInner() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [needId, setNeedId] = useState('');
+  const [slug, setSlug] = useState('');
+  const [slugEdited, setSlugEdited] = useState(false);
 
   // URL param으로 넘어온 need_id로 프리필
   useEffect(() => {
     if (needIdParam) setNeedId(needIdParam);
   }, [needIdParam]);
+
+  // 제목 → slug 자동 생성 (사용자가 직접 수정하지 않은 경우)
+  useEffect(() => {
+    if (slugEdited) return;
+    const generated = title
+      .toLowerCase()
+      .replace(/[^a-z0-9가-힣\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .slice(0, 50);
+    setSlug(generated);
+  }, [title, slugEdited]);
   const [tagInput, setTagInput] = useState('');
   const [tagList, setTagList] = useState<string[]>([]);
   const [needSearch, setNeedSearch] = useState('');
@@ -130,6 +145,14 @@ function CreateGroupPageInner() {
   const [locationDetail, setLocationDetail] = useState('');
   const [fee, setFee] = useState(0);
   const [maxMembers, setMaxMembers] = useState(20);
+
+  // 콘텐츠 구성 (step 2)
+  const [introWho, setIntroWho] = useState(''); // 이런 분께 추천
+  const [sessions, setSessions] = useState<{ title: string; description: string }[]>([
+    { title: '', description: '' },
+  ]);
+  const [guide, setGuide] = useState(''); // 상세 안내
+  const [notice, setNotice] = useState(''); // 주요 공지
 
   // 바닥장 소개
   const [leaderReason, setLeaderReason] = useState('');
@@ -241,7 +264,8 @@ function CreateGroupPageInner() {
       if (meetingType === 'series') return seriesDates[0]?.date?.length > 0 && hasLocation;
       return recurringSchedule.trim().length > 0 && hasLocation;
     }
-    if (step === 2) return leaderReason.trim().length >= 10;
+    if (step === 2) return true; // 콘텐츠 구성은 선택사항
+    if (step === 3) return leaderReason.trim().length >= 10;
     return false;
   };
 
@@ -270,7 +294,12 @@ function CreateGroupPageInner() {
       },
       body: JSON.stringify({
         title,
+        slug: slug || null,
         description,
+        introWho: introWho || null,
+        sessions: sessions.filter((s) => s.title.trim()).length > 0 ? sessions.filter((s) => s.title.trim()) : null,
+        guide: guide || null,
+        notice: notice || null,
         needId: needId || null,
         tags: tagList,
         groupType: groupCategory,
@@ -847,8 +876,119 @@ function CreateGroupPageInner() {
           </div>
         )}
 
-        {/* ── Step 3: 바닥장 소개 ── */}
+        {/* ── Step 3: 콘텐츠 구성 ── */}
         {step === 2 && (
+          <div className="space-y-7">
+            {/* 이런 분께 추천 */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-white/55">이런 분께 추천 (선택)</label>
+              <p className="mb-2 text-xs text-white/30">어떤 분들이 이 모임에 어울리는지 적어주세요</p>
+              <textarea value={introWho} onChange={(e) => setIntroWho(e.target.value)}
+                placeholder={'예: B2B SaaS 마케팅 실무자\n퍼포먼스 마케팅을 처음 배우는 분\n마케터와 네트워킹을 원하는 분'}
+                rows={3}
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+            </div>
+
+            {/* 모임 구성 (세션) */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium text-white/55">모임 구성 (선택)</label>
+                <button
+                  type="button"
+                  onClick={() => setSessions([...sessions, { title: '', description: '' }])}
+                  disabled={sessions.length >= 8}
+                  className="text-xs text-amber-400/70 hover:text-amber-400 disabled:opacity-30"
+                >
+                  + 회차 추가
+                </button>
+              </div>
+              <p className="mb-3 text-xs text-white/30">각 회차(세션)의 주제와 내용을 입력하세요</p>
+              <div className="space-y-3">
+                {sessions.map((session, i) => (
+                  <div key={i} className="flex gap-2">
+                    <div className="mt-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                      style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <input
+                        value={session.title}
+                        onChange={(e) => {
+                          const next = [...sessions];
+                          next[i] = { ...next[i], title: e.target.value };
+                          setSessions(next);
+                        }}
+                        placeholder={`${i + 1}회차 제목`}
+                        className="w-full rounded-lg border border-white/12 bg-white/6 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+                      />
+                      <textarea
+                        value={session.description}
+                        onChange={(e) => {
+                          const next = [...sessions];
+                          next[i] = { ...next[i], description: e.target.value };
+                          setSessions(next);
+                        }}
+                        placeholder="간단한 내용 설명"
+                        rows={2}
+                        className="w-full resize-none rounded-lg border border-white/12 bg-white/6 px-3 py-2 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+                      />
+                    </div>
+                    {sessions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setSessions(sessions.filter((_, j) => j !== i))}
+                        className="mt-3 self-start text-white/25 hover:text-white/60"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 상세 안내 */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-white/55">상세 안내 (선택)</label>
+              <p className="mb-2 text-xs text-white/30">준비물, 진행 방식, 참고 사항 등을 자유롭게 적어주세요</p>
+              <textarea value={guide} onChange={(e) => setGuide(e.target.value)}
+                placeholder={'예: 노트북 지참 필수\n오픈채팅방 참여 후 참석 확정'}
+                rows={4}
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm leading-relaxed text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+            </div>
+
+            {/* 주요 공지 */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-white/55">주요 공지 (선택)</label>
+              <p className="mb-2 text-xs text-white/30">상세 페이지 상단에 눈에 띄게 표시될 공지사항입니다</p>
+              <input value={notice} onChange={(e) => setNotice(e.target.value)}
+                placeholder="예: 4/26 정원이 거의 찼습니다. 서둘러 신청하세요!"
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+            </div>
+
+            {/* URL 슬러그 */}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-white/55">모임 URL (선택)</label>
+              <p className="mb-2 text-xs text-white/30">상세 페이지 주소에 사용됩니다</p>
+              <div className="flex items-center rounded-xl border border-white/12 bg-white/6 overflow-hidden focus-within:border-[#ffd93d]/40">
+                <span className="shrink-0 pl-4 pr-1 text-sm text-white/30">/badak/groups/</span>
+                <input
+                  value={slug}
+                  onChange={(e) => {
+                    setSlugEdited(true);
+                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9가-힣-]/g, '').slice(0, 50));
+                  }}
+                  placeholder="my-group-name"
+                  className="flex-1 bg-transparent py-3 pr-4 text-sm text-white outline-none placeholder:text-white/25"
+                />
+              </div>
+              {slug && <p className="mt-1 text-[11px] text-white/25">badak.biz/groups/{slug}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 4: 바닥장 소개 ── */}
+        {step === 3 && (
           <div className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-white/55">이 모임을 여는 이유 * (10자 이상)</label>
@@ -948,7 +1088,7 @@ function CreateGroupPageInner() {
         className="fixed bottom-0 left-1/2 z-50 w-full max-w-[860px] -translate-x-1/2 border-t border-white/8 px-5 py-4"
         style={{ background: '#1a1a2e' }}
       >
-        {step < 2 ? (
+        {step < 3 ? (
           <button onClick={() => setStep(step + 1)} disabled={!canNext()}
             className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all disabled:opacity-30"
             style={{

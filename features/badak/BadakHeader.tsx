@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -14,7 +15,7 @@ const navItems = [
     { name: "모임", href: `${PREFIX}/groups` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
     { name: "스토리", href: `${PREFIX}/story` },
-    { name: "니즈 탐색", href: `${PREFIX}/explore` },
+    // { name: "니즈 탐색", href: `${PREFIX}/explore` }, // 실제 니즈 데이터 축적 후 오픈
     { name: "모임 개설", href: `${PREFIX}/groups/create` },
     { name: "바닥장 신청", href: `${PREFIX}/apply` },
 ];
@@ -78,8 +79,16 @@ export function BadakHeader() {
                 {/* Mobile: 프로필 + 햄버거 */}
                 <div className="md:hidden flex items-center gap-1">
                     {isAuthenticated ? (
-                        <Link href={`${PREFIX}/my`} className="p-2 text-neutral-300 hover:text-white">
-                            <User className="h-5 w-5" />
+                        <Link href={`${PREFIX}/my`} className="p-1.5">
+                            {user?.avatarUrl ? (
+                                <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
+                                    className="h-7 w-7 rounded-full object-cover" />
+                            ) : (
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
+                                    style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                                    {user?.name?.charAt(0) ?? '?'}
+                                </div>
+                            )}
                         </Link>
                     ) : (
                         <button
@@ -154,9 +163,21 @@ export function BadakHeader() {
                     <Link
                         href={`${PREFIX}/my`}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-neutral-400 hover:bg-white/5 hover:text-white"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-300 hover:bg-white/5 hover:text-white"
                     >
-                        <User className="h-4 w-4" /> 마이페이지
+                        {user?.avatarUrl ? (
+                            <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
+                                className="h-7 w-7 rounded-full object-cover shrink-0" />
+                        ) : (
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                                style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                                {user?.name?.charAt(0) ?? '?'}
+                            </div>
+                        )}
+                        <div className="min-w-0">
+                            <div className="truncate font-medium text-white/80">{user?.name ?? '마이페이지'}</div>
+                            <div className="truncate text-[11px] text-white/35">{user?.email}</div>
+                        </div>
                     </Link>
                 ) : (
                     <div className="flex flex-col gap-2">
