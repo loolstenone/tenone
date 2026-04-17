@@ -1,8 +1,9 @@
 /**
  * Supabase Auth 이메일 템플릿 일괄 업데이트
  *
- * Phase 1: 제목·본문을 한국어 + Ten:One™ Universe 브랜딩으로 전환
- * 실행: node scripts/update-email-templates.js
+ * - 한국어 + Ten:One Universe 브랜딩 (로고 이미지 사용)
+ * - token_hash OTP 방식 (PKCE 대체) → 크로스 디바이스/탭 지원
+ * 실행: node Scripts/update-email-templates.js
  */
 
 const https = require('https');
@@ -26,18 +27,17 @@ if (!PAT) {
     process.exit(1);
 }
 
-// ── 공통 브랜드 래퍼 ──
+// ── 공통 브랜드 래퍼 (로고 이미지 사용) ──
 const brandWrapper = (title, body, buttonText, buttonHref) => `
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Malgun Gothic', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; color: #171717; background: #ffffff;">
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Roboto, 'Malgun Gothic', '맑은 고딕', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; color: #171717; background: #ffffff;">
   <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e5e5e5;">
-    <div style="font-size: 22px; font-weight: 800; letter-spacing: 0.3px;">Ten:One<sup style="font-size: 11px;">&trade;</sup></div>
-    <div style="font-size: 10px; color: #737373; letter-spacing: 2.5px; margin-top: 4px;">UNIVERSE</div>
+    <img src="https://tenone.biz/logo-tenone.png" alt="Ten:One Universe" width="140" style="height: auto; display: inline-block;" />
   </div>
-  <h2 style="font-size: 18px; font-weight: 700; margin: 0 0 16px 0; color: #171717;">${title}</h2>
+  <h2 style="font-size: 18px; font-weight: 700; margin: 0 0 16px 0; color: #171717; letter-spacing: -0.2px;">${title}</h2>
   <div style="font-size: 14px; line-height: 1.7; color: #404040;">${body}</div>
   ${buttonText && buttonHref ? `
   <div style="text-align: center; margin: 32px 0 16px 0;">
-    <a href="${buttonHref}" style="display: inline-block; padding: 12px 36px; background: #171717; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 4px;">${buttonText}</a>
+    <a href="${buttonHref}" style="display: inline-block; padding: 14px 40px; background: #171717; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 4px; letter-spacing: -0.1px;">${buttonText}</a>
   </div>
   <p style="font-size: 12px; color: #a3a3a3; text-align: center; margin: 8px 0 0 0;">
     버튼이 작동하지 않으면 아래 링크를 브라우저에 복사하세요:<br>
@@ -45,12 +45,16 @@ const brandWrapper = (title, body, buttonText, buttonHref) => `
   </p>
   ` : ''}
   <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 11px; color: #a3a3a3; text-align: center; line-height: 1.6;">
-    이 메일은 Ten:One&trade; Universe에서 발송되었습니다.<br>
+    이 메일은 Ten:One Universe에서 발송되었습니다.<br>
     요청하지 않으셨다면 이 메일을 무시하셔도 됩니다.<br>
     <a href="https://tenone.biz" style="color: #737373; text-decoration: none;">tenone.biz</a>
   </div>
 </div>
 `.trim();
+
+// ── OTP token_hash 기반 URL (PKCE 대체, 크로스 디바이스 지원) ──
+const otpUrl = (type, next) =>
+    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=${type}&next=${encodeURIComponent(next)}`;
 
 // ── 템플릿 정의 ──
 const payload = {
@@ -62,40 +66,40 @@ const payload = {
     mailer_subjects_email_change: '[Ten:One] 이메일 변경 확인',
     mailer_subjects_reauthentication: '[Ten:One] 재인증 요청',
 
-    // 본문 템플릿
+    // 본문 템플릿 — 모두 token_hash OTP 방식
     mailer_templates_confirmation_content: brandWrapper(
         '이메일 인증을 완료해주세요',
-        '<p>Ten:One&trade; Universe 가입을 환영합니다!<br>아래 버튼을 눌러 이메일 인증을 완료해주세요.</p>',
+        '<p>Ten:One Universe 가입을 환영합니다.<br>아래 버튼을 눌러 이메일 인증을 완료해주세요.</p>',
         '이메일 인증하기',
-        '{{ .ConfirmationURL }}'
+        otpUrl('email', '/')
     ),
 
     mailer_templates_recovery_content: brandWrapper(
         '비밀번호 재설정',
-        '<p>비밀번호 재설정 요청을 받았습니다.<br>아래 버튼을 눌러 새 비밀번호를 설정해주세요.</p><p style="font-size: 12px; color: #737373;">본인이 요청하지 않으셨다면 이 메일을 무시하시면 됩니다. 비밀번호는 변경되지 않습니다.</p>',
+        '<p>비밀번호 재설정 요청을 받았습니다.<br>아래 버튼을 눌러 새 비밀번호를 설정해주세요.</p><p style="font-size: 12px; color: #737373; margin-top: 16px;">본인이 요청하지 않으셨다면 이 메일을 무시하시면 됩니다. 비밀번호는 변경되지 않습니다.</p>',
         '비밀번호 재설정하기',
-        '{{ .ConfirmationURL }}'
+        otpUrl('recovery', '/reset-password')
     ),
 
     mailer_templates_magic_link_content: brandWrapper(
         '로그인 링크',
-        '<p>아래 버튼을 눌러 Ten:One&trade; Universe에 로그인하세요.<br>이 링크는 일회성으로, 사용 후 만료됩니다.</p>',
+        '<p>아래 버튼을 눌러 Ten:One Universe에 로그인하세요.<br>이 링크는 일회성으로, 사용 후 만료됩니다.</p>',
         '로그인하기',
-        '{{ .ConfirmationURL }}'
+        otpUrl('magiclink', '/')
     ),
 
     mailer_templates_invite_content: brandWrapper(
-        'Ten:One™ Universe에 초대되셨습니다',
-        '<p>반갑습니다!<br>Ten:One&trade; Universe에 초대되셨습니다. 아래 버튼을 눌러 가입을 완료하세요.</p>',
+        'Ten:One Universe에 초대되셨습니다',
+        '<p>반갑습니다.<br>Ten:One Universe에 초대되셨습니다. 아래 버튼을 눌러 가입을 완료하세요.</p>',
         '초대 수락하기',
-        '{{ .ConfirmationURL }}'
+        otpUrl('invite', '/')
     ),
 
     mailer_templates_email_change_content: brandWrapper(
         '이메일 변경 확인',
         '<p>이메일 주소 변경 요청을 받았습니다.<br>{{ .Email }} → <strong>{{ .NewEmail }}</strong></p><p>아래 버튼을 눌러 변경을 확정해주세요.</p>',
         '변경 확인하기',
-        '{{ .ConfirmationURL }}'
+        otpUrl('email_change', '/')
     ),
 
     mailer_templates_reauthentication_content: brandWrapper(
@@ -125,7 +129,7 @@ const req = https.request({
             console.log('✅ Email templates updated successfully');
             console.log(`   HTTP ${res.statusCode}`);
             console.log(`   Subjects: 6 updated`);
-            console.log(`   Templates: 6 updated`);
+            console.log(`   Templates: 6 updated (token_hash OTP + logo)`);
         } else {
             console.log(`❌ HTTP ${res.statusCode}`);
             console.log(body);
