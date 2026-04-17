@@ -37,6 +37,15 @@ export function AuthRecoveryHandler() {
                 router.replace('/reset-password');
                 return;
             }
+            // 방법 2-B: Supabase fallback으로 루트 `?code=XXX`만 온 경우
+            // (Redirect URLs 미등록 시 Site URL로 fallback되어 루트에 code만 옴)
+            // /auth/callback으로 위임 → exchangeCodeForSession → /reset-password 또는 /
+            const code = params.get('code');
+            if (code && window.location.pathname === '/') {
+                // 현재 path가 루트일 때만 (OAuth 콜백 /auth/callback은 이미 code 처리함)
+                window.location.replace(`/auth/callback?code=${encodeURIComponent(code)}&type=recovery`);
+                return;
+            }
         }
 
         // 방법 3: onAuthStateChange PASSWORD_RECOVERY 이벤트
