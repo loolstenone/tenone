@@ -1,12 +1,56 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-17 (집, 세션 56 — Universe Profile 공개뷰 + 경력 정보)
+> 마지막 업데이트: 2026-04-17 밤 (집, 세션 57 — 크로스도메인 인증 대대적 개편 + PKCE 잔여 이슈)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-1. **0-B Phase C** — members 테이블 permission 컬럼 DROP 대기 (실서버 auth 검증 후). 대상: `account_type`, `intra_access`, `roles[]`, `brand_access[]`, `module_access[]`, `brand_roles`, `system_access[]`
-2. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
-3. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
+### 🔴 긴급 미해결 — OAuth PKCE verifier 쿠키 문제
+**증상:** `badak.tenone.biz`에서 Google 로그인 시도 → `/auth/callback`에서 `PKCE code verifier not found in storage` 에러 → `/login?error=auth_callback_error`로 리다이렉트.
+**현재까지 파악:**
+- `hasVerifier=false` (서버에 verifier 쿠키가 오지 않음)
+- 서버가 받는 쿠키: `_ga, _ga_*, tenone-auth.0, tenone-auth.1` (session 쿠키는 있는데 verifier 없음)
+- 미들웨어 `/auth/*` pass-through 적용해도 여전히 실패 → 미들웨어 문제 아님
+- 즉, 클라이언트가 signInWithOAuth 호출 시 verifier 쿠키를 제대로 설정하지 못하거나 Google→Supabase→우리사이트 리다이렉트 체인에서 쿠키 손실 중
+
+**다음 시도 순서:**
+1. 브라우저 DevTools 에서 Google 로그인 클릭 직전/직후 `document.cookie`에 `tenone-auth-code-verifier` 존재 여부 확인
+2. 존재한다면 SameSite/Domain 설정 점검 (cookieOptions.domain=`.tenone.biz`가 `badak.tenone.biz`에서 올바르게 적용되는지)
+3. 존재 안 한다면 `@supabase/ssr` 싱글톤 캐싱 문제 의심 — `createBrowserClient`를 매번 새로 만들도록 테스트
+4. 최후 수단: `/auth/callback`을 클라이언트 페이지로 전환 (서버 대신 client-side `exchangeCodeForSession`) — document.cookie는 확실히 verifier 접근 가능
+
+### 🟡 lools@tenone.biz 비밀번호 복구
+- 사용자가 사무실에서 `/profile` 아코디언으로 비번 변경 → 집에서 새 비번 로그인 안 됨
+- DB `auth.users.updated_at=2026-04-17 22:16 KST`로 변경 자체는 기록됨 (typo 추정)
+- **Claude는 auth.users 직접 수정 금지** (세션 54 사고 원칙)
+- 해결: PKCE 버그 고친 후 정상 `/reset-password` 플로우로 재설정 (또는 사용자가 Supabase Dashboard에서 수동 재설정)
+
+### 🟢 기존 이월
+1. **0-B Phase C** — members 테이블 permission 컬럼 DROP (실서버 auth 검증 후)
+2. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
+3. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관
+
+---
+
+## 세션 57 완료 — 크로스도메인 인증 대대적 개편
+
+| 항목 | 내용 |
+|------|------|
+| **SSOT 도메인 통합** | `lib/domain-registry.ts` 중심으로 middleware/server/callback/client/sso 전부 import 통합. 46개 하드코딩 → 1곳 관리 |
+| **domain-registry 누락 추가** | `intra.tenone.biz` (회귀 버그), `rook/madleague/youinone.tenone.biz`, `myverse.kr` + www 추가 |
+| **Critical 버그 4건** | server.ts/auth-callback cookie domain 동적 감지 (프로덕션 외부도메인 쿠키 깨짐 해소), SSO allowedDomains 누락 4개 추가, auth-context race condition guard |
+| **OTP token_hash 전환** | 이메일 템플릿을 `{{ .ConfirmationURL }}` (PKCE) → `{{ .TokenHash }}` (OTP) 로 변경 + `/auth/confirm` 라우트 신설 (recovery 크로스 디바이스 지원 의도) |
+| **Supabase Redirect URLs API 등록** | Management API 호출로 33개 도메인 `/**` 와일드카드 일괄 등록. 화이트리스트 `auth/callback` + `reset-password` 모두 커버 |
+| **이메일 브랜딩** | Resend SMTP 연결 (`Ten:One™ Universe <noreply@tenone.biz>`, RFC 2047 인코딩), 한국어 제목 6종 + 로고 이미지(`logo-horizontal.png`) 적용 |
+| **middleware /auth/* pass-through** | getSession() 이 stale 세션 감지 시 verifier까지 제거하는 부작용 방지 목적 — 하지만 PKCE 문제는 여전 |
+| **reset-password 페이지** | 클라이언트 `exchangeCodeForSession` fallback + `resetPassword()` redirectTo를 `/auth/callback?type=recovery&next=/reset-password`로 변경 |
+| **AuthRecoveryHandler** | 루트 `?code=` 감지 시 `/auth/callback`으로 위임 |
+| **메모리 3개 신규** | `project_new_domain_procedure.md` (3단계 절차), `project_email_infrastructure.md` (Resend 세팅 완료 기록), `project_domain_migration.md` (Invalid DNS 도메인 이관 예정 기록) |
+
+### ⚠️ 세션 57 이월 사고/주의
+- **PKCE verifier 크로스 디바이스/세션 문제 미해결** — 원인 추정만 되고 실제 재현/수정 완료 못 함
+- **auth/callback 디버그 로깅 남아있음** (커밋 77ad084, 72b039c). 원인 확정 후 원복 필요
+- **Vercel DNS `A @ 216.198.79.1`** 중복 레코드 사용자 삭제 권고 — 아직 미정리
+- **Supabase Redirect URLs** 기존 `/auth/callback` 전용 20개 → `/**` 와일드카드 33개로 교체됨 (API PATCH)
 
 ---
 

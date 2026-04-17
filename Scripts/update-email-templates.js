@@ -31,7 +31,7 @@ if (!PAT) {
 const brandWrapper = (title, body, buttonText, buttonHref) => `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Roboto, 'Malgun Gothic', '맑은 고딕', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; color: #171717; background: #ffffff;">
   <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e5e5e5;">
-    <img src="https://tenone.biz/logo-tenone.png" alt="Ten:One Universe" width="140" style="height: auto; display: inline-block;" />
+    <img src="https://tenone.biz/logo-horizontal.png" alt="Ten:One Universe" width="180" style="height: auto; display: inline-block;" />
   </div>
   <h2 style="font-size: 18px; font-weight: 700; margin: 0 0 16px 0; color: #171717; letter-spacing: -0.2px;">${title}</h2>
   <div style="font-size: 14px; line-height: 1.7; color: #404040;">${body}</div>

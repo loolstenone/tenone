@@ -4,6 +4,66 @@
 
 ---
 
+## 2026-04-17 밤 (집, 세션 57) — 크로스도메인 인증 대대적 개편 + PKCE 잔여 이슈
+
+### 커밋 (이번 세션 push)
+```
+83e82e4 fix: /auth/* 경로에서 미들웨어 세션 갱신 건너뛰기
+72b039c debug: auth/callback 쿠키 스냅샷 로깅 (일시)
+77ad084 debug: auth/callback 에러 메시지를 URL에 노출 (일시적)
+13f186d fix: OTP token_hash 방식으로 이메일 인증 플로우 전환 (PKCE 대체)
+940ecd6 fix: 비번 재설정 플로우를 /auth/callback 경유로 전환
+55b7391 fix: reset-password — PKCE code 세션 교환 처리
+f3bca4d chore: Supabase 이메일 템플릿 일괄 업데이트 스크립트 + next-env
+f5fbe96 fix: domain-registry 누락 도메인 5개 추가
+1ab1a34 fix: AuthRecoveryHandler — Supabase fallback redirect 감지
+f186343 refactor: 도메인·인증 단일 진실 소스(SSOT) 통합
+243ddd7 fix: 크로스도메인 인증 Critical 버그 6건 수정
+f44e564 fix: skipPaths에 /reset-password, /profile 추가
+```
+
+### 신규 파일
+- `app/auth/confirm/route.ts` — OTP token_hash 기반 인증 엔드포인트 (PKCE 대체 목적)
+- `Scripts/update-email-templates.js` — Supabase 이메일 템플릿 일괄 업데이트 (제목 6종 + 본문 HTML + 로고)
+
+### 수정 파일
+- `lib/domain-registry.ts` — 유틸리티 함수 4종 (isTenoneFamily, getCookieDomain, getAllExternalDomains, isExternalDomain) + 누락 도메인 5개(intra/rook/madleague/youinone.tenone.biz, myverse.kr+www) 추가
+- `middleware.ts` — registry import, `/auth/*` pass-through 분기 추가
+- `lib/supabase/server.ts` + `app/auth/callback/route.ts` — 동적 cookie domain (hostname 기반), 외부 도메인 OAuth 쿠키 수용
+- `lib/supabase/client.ts` — isTenoneFamily import, Navigator Lock 재활성화
+- `lib/sso.ts` — EXTERNAL_DOMAINS 자동 파생 (getAllExternalDomains)
+- `app/api/sso/initiate/route.ts` — allowedDomains 자동 파생
+- `lib/auth-context.tsx` — syncUserFromSession 동시 호출 방어(isSyncingRef), 초기화 중 SIGNED_IN 중복 방지(isInitializedRef), resetPassword redirectTo 변경
+- `components/LoginModal.tsx` — useAuth().loginWithGoogle/Kakao로 통합 (중복 제거)
+- `components/AuthRecoveryHandler.tsx` — 루트 `?code=` 감지 → `/auth/callback` 위임
+- `app/reset-password/page.tsx` — 클라이언트 PKCE code 교환 fallback
+
+### Supabase API 조치 (코드 외)
+- Auth URL Configuration: `uri_allow_list` 33개 등록 (`/**` 와일드카드), Site URL = `https://tenone.biz`
+- SMTP: Resend 연결 (host=smtp.resend.com, user=resend, from=noreply@tenone.biz, sender_name=RFC 2047 인코딩된 "Ten:One™ Universe")
+- 이메일 템플릿 6종 한국어 + 로고(`logo-horizontal.png`) + token_hash OTP URL 적용
+
+### 결정사항
+- 도메인 목록/쿠키 로직은 `lib/domain-registry.ts` 단일 진실 소스로 통합. 새 도메인 추가 시 이 파일만 수정.
+- OAuth/recovery는 PKCE 대신 token_hash OTP 플로우로 전환 시도 (크로스 디바이스 지원 목적)
+- `A @ 216.150.1.1` 이 Vercel 권장 IP. 사용자에게 `A @ 216.198.79.1` 중복 삭제 권고 (미정리)
+
+### 메모리 3건 신규
+- `project_domain_migration.md` — Invalid DNS 도메인은 이관 예정, 버그 아님
+- `project_new_domain_procedure.md` — 새 도메인 추가 3단계 절차 (registry / Vercel / Supabase API)
+- `project_email_infrastructure.md` — Resend 이미 세팅 완료 (재질문 금지)
+
+### ⚠️ 미해결 / 이월
+- **OAuth PKCE verifier 쿠키 문제 지속** — badak.tenone.biz Google 로그인 시 `PKCE code verifier not found`. `hasVerifier=false`로 서버에 verifier 쿠키가 오지 않음. 미들웨어 pass-through 적용해도 여전 (원인 불명). 다음 세션에서 클라이언트 cookie 저장 흐름 재검증 필요.
+- **lools@tenone.biz 비밀번호 로그인 불가** — 사무실에서 `/profile`로 변경했지만 집에서 로그인 실패 (typo 추정). Claude는 auth.users 직접 수정 금지 원칙. PKCE 버그 해결 후 정상 `/reset-password` 플로우로 재설정 필요.
+- **auth/callback 디버그 로깅 남아있음** — 커밋 77ad084, 72b039c. PKCE 원인 확정 후 원복.
+- **세션 54 → 56 → 57 3회 연속 OAuth/recovery 버그 반복** — 근본 원인(PKCE 크로스 세션 관리)이 아직 안 잡힘. 다음 세션에서 우선 처리.
+
+### 사용자 직접 처리 대기
+- Vercel DNS: `A @ 216.198.79.1` 삭제 → `216.150.1.1`만 유지
+
+---
+
 ## 2026-04-17 (집, 세션 56) — Universe Profile 공개뷰 + 경력 정보
 
 ### 수정 파일
