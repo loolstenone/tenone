@@ -102,3 +102,41 @@ export const prefixToSiteId: Record<string, SiteIdentifier> = {};
 for (const { prefix, siteId } of Object.values(registry)) {
     if (!prefixToSiteId[prefix]) prefixToSiteId[prefix] = siteId;
 }
+
+// ── 도메인 유틸리티 (모든 인증 파일의 단일 진실 소스) ──
+
+/** hostname이 *.tenone.biz 패밀리인지 판별 */
+export function isTenoneFamily(hostname: string): boolean {
+    const host = hostname.split(':')[0]; // 포트 제거
+    return host === 'tenone.biz' || host === 'www.tenone.biz'
+        || host.endsWith('.tenone.biz') || host === 'localhost';
+}
+
+/**
+ * 요청 도메인에 맞는 쿠키 도메인 결정
+ * - *.tenone.biz → '.tenone.biz' (서브도메인 간 세션 공유)
+ * - 외부 도메인 (badak.biz 등) → undefined (브라우저 기본값 = 현재 호스트)
+ * - 로컬/프리뷰 → undefined
+ */
+export function getCookieDomain(hostname: string): string | undefined {
+    if (process.env.VERCEL_ENV !== 'production') return undefined;
+    return isTenoneFamily(hostname) ? '.tenone.biz' : undefined;
+}
+
+/**
+ * registry에서 외부 도메인(비-tenone.biz) 자동 추출
+ * SSO allowedDomains, EXTERNAL_DOMAINS 등에 사용
+ * → 새 도메인을 registry에 추가하면 자동으로 SSO 허용
+ */
+export function getAllExternalDomains(): string[] {
+    return Object.keys(registry).filter(domain =>
+        !domain.endsWith('.tenone.biz')
+        && domain !== 'localhost'
+    );
+}
+
+/** hostname이 SSO가 필요한 외부 도메인인지 확인 */
+export function isExternalDomain(hostname: string): boolean {
+    const host = hostname.split(':')[0];
+    return getAllExternalDomains().includes(host);
+}

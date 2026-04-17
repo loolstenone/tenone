@@ -1,70 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
 
-// 도메인 → 사이트 프리픽스 매핑
-const domainPrefixMap: Record<string, string> = {
-    'madleague.net': '/madleague',
-    'www.madleague.net': '/madleague',
-    'madleap.co.kr': '/madleap',
-    'www.madleap.co.kr': '/madleap',
-    'youinone.com': '/youinone',
-    'www.youinone.com': '/youinone',
-    'smarcomm.biz': '/smarcomm',
-    'www.smarcomm.biz': '/smarcomm',
-    'smarcomm.tenone.biz': '/smarcomm',
-    'hero.ne.kr': '/hero',
-    'www.hero.ne.kr': '/hero',
-    'rook.co.kr': '/rook',
-    'www.rook.co.kr': '/rook',
-    '0gamja.com': '/0gamja',
-    'www.0gamja.com': '/0gamja',
-    'seoul360.net': '/seoul360',
-    'www.seoul360.net': '/seoul360',
-    'mullaesian.tenone.biz': '/mullaesian',
-    'fwn.co.kr': '/fwn',
-    'www.fwn.co.kr': '/fwn',
-    'montz.tenone.biz': '/montz',
-    'trendhunter.tenone.biz': '/mindle',
-    'mindle.tenone.biz': '/mindle',
-    'myverse.tenone.biz': '/myverse',
-    'badak.biz': '/badak',
-    'www.badak.biz': '/badak',
-    'badak.tenone.biz': '/badak',
-    'townity.tenone.biz': '/townity',
-    'naturebox.tenone.biz': '/naturebox',
-    'domo.tenone.biz': '/domo',
-    'domo.ne.kr': '/domo',
-    'www.domo.ne.kr': '/domo',
-    'hero.tenone.biz': '/hero',
-    'fwn.tenone.biz': '/fwn',
-    '0gamja.tenone.biz': '/0gamja',
-    'changeup.tenone.biz': '/changeup',
-    'jakka.tenone.biz': '/jakka',
-    'planners.tenone.biz': '/planners',
-    'wio.tenone.biz': '/wio',
-    'seoul360.tenone.biz': '/seoul360',
-    'auth.tenone.biz': '/auth-hub',
-    'brandgravity.co.kr': '/brandgravity',
-    'www.brandgravity.co.kr': '/brandgravity',
-    'brandgravity.tenone.biz': '/brandgravity',
-    'intra.tenone.biz': '/intra',
-    // 추후 추가: 'luki.ai': '/lk'
-};
-
-// 리라이트 제외 경로 (모든 도메인 공통 — 인증 통일 후 SmarComm 분기 제거)
+// 리라이트 제외 경로 (모든 도메인 공통 — 인증·프로필은 전 도메인 공유)
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
 
 export async function middleware(request: NextRequest) {
     // 1. Supabase 세션 갱신 (모든 요청에서)
     let response = NextResponse.next({ request });
 
-    // 도메인별 쿠키 범위 결정
+    // 도메인별 쿠키 범위 결정 (domain-registry 단일 진실 소스)
     const hostname = request.headers.get('host') || '';
     const reqDomain = hostname.split(':')[0];
-    const isTenoneFamily = reqDomain === 'tenone.biz' || reqDomain.endsWith('.tenone.biz');
-    const isProduction = process.env.VERCEL_ENV === 'production';
-    // *.tenone.biz → .tenone.biz 공유 쿠키 / 타 루트 도메인 → 도메인 미지정 (해당 도메인 전용)
-    const cookieDomain = isProduction && isTenoneFamily ? '.tenone.biz' : undefined;
+    const cookieDomain = getCookieDomain(hostname);
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
+import { getAllExternalDomains } from '@/lib/domain-registry';
 
 /**
  * SSO Initiate — tenone.biz 에서 호출
@@ -26,22 +27,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Missing or invalid origin' }, { status: 400 });
     }
 
-    // 허용된 도메인만 (보안)
-    const allowedDomains = [
-        'smarcomm.biz', 'www.smarcomm.biz',
-        'badak.biz', 'www.badak.biz',
-        'madleague.net', 'www.madleague.net',
-        'madleap.co.kr', 'www.madleap.co.kr',
-        'youinone.com', 'www.youinone.com',
-        'hero.ne.kr', 'www.hero.ne.kr',
-        'rook.co.kr', 'www.rook.co.kr',
-        '0gamja.com', 'www.0gamja.com',
-        'seoul360.net', 'www.seoul360.net',
-        'fwn.co.kr', 'www.fwn.co.kr',
-        'changeup.company', 'www.changeup.company',
-        'domo.ne.kr', 'www.domo.ne.kr',
-        'brandgravity.co.kr', 'www.brandgravity.co.kr',
-    ];
+    // 허용된 도메인 — domain-registry에서 자동 파생 (수동 관리 불필요)
+    const allowedDomains = getAllExternalDomains();
     const originHost = new URL(origin).hostname;
     if (!allowedDomains.includes(originHost)) {
         return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });

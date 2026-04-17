@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { isTenoneFamily } from '@/lib/domain-registry';
 
 let client: ReturnType<typeof createBrowserClient> | null = null;
 
@@ -12,16 +13,14 @@ let client: ReturnType<typeof createBrowserClient> | null = null;
 export function createClient() {
     if (client) return client;
 
-    // *.tenone.biz 계열이면 공유 쿠키 도메인 설정
     const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-    const isTenoneFamily = hostname === 'tenone.biz' || hostname.endsWith('.tenone.biz');
 
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookieOptions: {
-                ...(isTenoneFamily && { domain: '.tenone.biz' }),
+                ...(isTenoneFamily(hostname) && { domain: '.tenone.biz' }),
                 path: '/',
             },
             auth: {
@@ -29,7 +28,6 @@ export function createClient() {
                 persistSession: true,
                 autoRefreshToken: true,
                 // Navigator Lock 활성화: 동시 탭에서 refresh token 경합 방지
-                // (비활성화 시 2개 이상 탭에서 동시 토큰 갱신 → "Invalid Refresh Token" 에러)
             },
         }
     );
