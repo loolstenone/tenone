@@ -6,6 +6,15 @@ import { domainPrefixMap, getCookieDomain } from '@/lib/domain-registry';
 const skipPaths = ['/intra', '/api', '/_next', '/auth', '/login', '/signup', '/reset-password', '/profile'];
 
 export async function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname;
+
+    // /auth/* 경로는 세션 갱신/검증 건너뛰기 (pass-through)
+    // 이유: getSession()이 stale 세션 감지 시 code-verifier까지 같이 제거하여
+    //      OAuth/recovery 콜백에서 PKCE 교환 실패 (PKCE code verifier not found)
+    if (pathname.startsWith('/auth/')) {
+        return NextResponse.next({ request });
+    }
+
     // 1. Supabase 세션 갱신 (모든 요청에서)
     let response = NextResponse.next({ request });
 
@@ -40,7 +49,6 @@ export async function middleware(request: NextRequest) {
     await supabase.auth.getSession();
 
     // 2. /profile/@handle → /profile/handle (@ in URL is pretty, rewrite to route-safe)
-    const pathname = request.nextUrl.pathname;
     const atProfileMatch = pathname.match(/^\/profile\/@(.+)$/);
     if (atProfileMatch) {
         const url = request.nextUrl.clone();
