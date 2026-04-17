@@ -23,12 +23,14 @@ const registry: Record<string, DomainEntry> = {
     // MADLeague
     'madleague.net':            { prefix: '/madleague',  siteId: 'madleague' },
     'www.madleague.net':        { prefix: '/madleague',  siteId: 'madleague' },
+    'madleague.tenone.biz':     { prefix: '/madleague',  siteId: 'madleague' },
     // MADLeap
     'madleap.co.kr':            { prefix: '/madleap',    siteId: 'madleap' },
     'www.madleap.co.kr':        { prefix: '/madleap',    siteId: 'madleap' },
     // YouInOne
     'youinone.com':             { prefix: '/youinone',   siteId: 'youinone' },
     'www.youinone.com':         { prefix: '/youinone',   siteId: 'youinone' },
+    'youinone.tenone.biz':      { prefix: '/youinone',   siteId: 'youinone' },
     // SmarComm
     'smarcomm.biz':             { prefix: '/smarcomm',   siteId: 'smarcomm' },
     'www.smarcomm.biz':         { prefix: '/smarcomm',   siteId: 'smarcomm' },
@@ -40,6 +42,7 @@ const registry: Record<string, DomainEntry> = {
     // RooK
     'rook.co.kr':               { prefix: '/rook',       siteId: 'rook' },
     'www.rook.co.kr':           { prefix: '/rook',       siteId: 'rook' },
+    'rook.tenone.biz':          { prefix: '/rook',       siteId: 'rook' },
     // 공감자
     '0gamja.com':               { prefix: '/0gamja',     siteId: 'ogamja' },
     'www.0gamja.com':           { prefix: '/0gamja',     siteId: 'ogamja' },
@@ -67,6 +70,8 @@ const registry: Record<string, DomainEntry> = {
     'mullaesian.tenone.biz':    { prefix: '/mullaesian', siteId: 'mullaesian' },
     'montz.tenone.biz':         { prefix: '/montz',      siteId: 'montz' },
     'myverse.tenone.biz':       { prefix: '/myverse',    siteId: 'myverse' },
+    'myverse.kr':               { prefix: '/myverse',    siteId: 'myverse' },
+    'www.myverse.kr':           { prefix: '/myverse',    siteId: 'myverse' },
     'townity.tenone.biz':       { prefix: '/townity',    siteId: 'townity' },
     'naturebox.tenone.biz':     { prefix: '/naturebox',  siteId: 'naturebox' },
     'jakka.tenone.biz':         { prefix: '/jakka',      siteId: 'jakka' },
@@ -83,6 +88,8 @@ const registry: Record<string, DomainEntry> = {
     'brandgravity.tenone.biz':  { prefix: '/brandgravity', siteId: 'tenone' },
     // Auth Hub
     'auth.tenone.biz':          { prefix: '/auth-hub',   siteId: 'tenone' },
+    // Intra (내부 관리자)
+    'intra.tenone.biz':         { prefix: '/intra',      siteId: 'tenone' },
 };
 
 // ── 파생 맵 (자동 생성) ──
