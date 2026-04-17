@@ -52,9 +52,11 @@ export async function GET(request: NextRequest) {
             }
             return NextResponse.redirect(`${origin}${next}`);
         }
-        // 디버깅용: 실제 에러 메시지 노출 (운영 안정화 후 제거)
-        console.error('[auth/callback] exchangeCodeForSession error:', error.message, 'host:', hostname);
-        return NextResponse.redirect(`${origin}/login?error=auth_callback_error&msg=${encodeURIComponent(error.message)}`);
+        // 디버깅용: 실제 에러 + 쿠키 스냅샷 노출 (운영 안정화 후 제거)
+        const allCookieNames = cookieStore.getAll().map(c => c.name).join(',');
+        const hasVerifier = cookieStore.getAll().some(c => c.name.includes('code-verifier'));
+        console.error('[auth/callback] exchange error:', error.message, 'host:', hostname, 'hasVerifier:', hasVerifier, 'cookies:', allCookieNames);
+        return NextResponse.redirect(`${origin}/login?error=auth_callback_error&msg=${encodeURIComponent(error.message)}&hasVerifier=${hasVerifier}&cookies=${encodeURIComponent(allCookieNames.slice(0, 500))}`);
     }
 
     // 코드 자체가 없음
