@@ -1,13 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-17 (집, 세션 54 — Phase 0 완료 + Badak 고도화 + 비밀번호 기능)
+> 마지막 업데이트: 2026-04-17 (집, 세션 55 — Phase 0 마무리 + DB 마이그레이션)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-1. **lools@tenone.biz 비밀번호 재설정** — Supabase Dashboard에서 Send password recovery → 메일 링크 클릭 → `/reset-password` 페이지에서 새 비밀번호 설정. AuthRecoveryHandler가 hash fragment `type=recovery`를 감지하여 자동 이동. 실서버 배포 완료 상태
-2. **Phase 1 시작** — 에이전트 코어 (agent_profiles + Agent Hub + Claude API 연동). `docs/Universe_OS_Plan.md` 참조
-3. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
-4. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
+1. **lools@tenone.biz 비밀번호 재설정** — Supabase Dashboard > Authentication > Users에서 직접 "Send recovery email" → 메일 링크 클릭 → `/reset-password`에서 새 비밀번호 설정. Rate limit 소진 시 Dashboard > Auth > Rate Limits에서 한도 조정 필요
+2. **intra.tenone.biz 활성화** — ① Vercel Dashboard에서 도메인 추가 ② DNS CNAME 설정 ③ Supabase Auth > Allowed Redirect URLs에 `https://intra.tenone.biz/auth/callback` 추가. 코드(middleware.ts)는 완료
+3. **0-B Phase C** — members 테이블 permission 컬럼 DROP 대기 (실서버 auth 검증 후). 대상: `account_type`, `intra_access`, `roles[]`, `brand_access[]`, `module_access[]`, `brand_roles`, `system_access[]`
+4. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트 (자산 대기)
+5. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관 (자산 대기)
+
+---
+
+## 세션 55 완료 — Phase 0 DB 마이그레이션 + 인증 개선
+
+| 항목 | 내용 |
+|------|------|
+| **login redirect 수정** | `app/login/page.tsx` isTenone 블록 제거 — tenone.biz/login에서 ?redirect 없이 /intra로 강제 이동하던 버그 해소 |
+| **intra.tenone.biz 라우팅** | `middleware.ts` domainPrefixMap에 `intra.tenone.biz: /intra` 추가. Vercel 도메인 설정은 사용자 액션 필요 |
+| **auth-context.tsx v3** | `member_roles(role,context,is_active)` + `staff_profile:tenone_staff_profiles(...)` JOIN. memberToUser가 member_roles에서 권한 파생 (members 컬럼 fallback 유지) |
+| **0-B Phase A** | members 테이블 불필요 컬럼 DROP (brands, sites, tags 등 미사용 컬럼 정리) |
+| **0-B Phase B** | 기존 members 권한 데이터 → member_roles 마이그레이션. lools@tenone.biz super_admin, 직원 staff 역할 등록 |
+| **wio_feature_flags** | SmarComm 4플랜 × 7피쳐 + Mindle 2플랜 × 4피쳐 = 36개 추가. 전체 76개 (11플랜) |
+| **wio_tenant_configs** | tenone 기본 설정 8개 확인 완료 (timezone, locale, currency, fiscal_year_start 등) |
+
+### ⚠️ 이월 항목
+- 0-B Phase C (members permission 컬럼 DROP): 실서버에서 member_roles 기반 인증 정상 작동 확인 후 진행
+- intra.tenone.biz: Vercel/DNS/Supabase Auth URL 등록은 사용자가 직접 처리
 
 ---
 
