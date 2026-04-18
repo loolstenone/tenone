@@ -11,9 +11,9 @@ interface Post {
   title: string;
   content: string;
   tags: string[] | null;
-  like_count: number;
-  comment_count: number;
-  view_count: number;
+  likes_count: number;
+  comments_count: number;
+  views_count: number;
   is_hidden: boolean | null;
   created_at: string;
   member_id: string | null;
@@ -43,7 +43,7 @@ export default function BadakPostsPage() {
     try {
       const supabase = createClient();
       let q = supabase.from("badak_community_posts")
-        .select("id, board, title, content, tags, like_count, comment_count, view_count, is_hidden, created_at, member_id")
+        .select("id, board, title, content, tags, likes_count, comments_count, views_count, is_hidden, created_at, member_id")
         .order("created_at", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       if (boardFilter !== "all") q = q.eq("board", boardFilter);
@@ -56,9 +56,12 @@ export default function BadakPostsPage() {
   async function handleHide(postId: string, hide: boolean) {
     setProcessingId(postId);
     try {
-      const supabase = createClient();
-      await supabase.from("badak_community_posts").update({ is_hidden: hide }).eq("id", postId);
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, is_hidden: hide } : p));
+      const res = await fetch("/api/badak/community", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: postId, is_hidden: hide }),
+      });
+      if (res.ok) setPosts(prev => prev.map(p => p.id === postId ? { ...p, is_hidden: hide } : p));
     } finally { setProcessingId(null); }
   }
 
@@ -66,9 +69,8 @@ export default function BadakPostsPage() {
     if (!confirm("게시글을 삭제하시겠습니까? 복구 불가능합니다.")) return;
     setProcessingId(postId);
     try {
-      const supabase = createClient();
-      await supabase.from("badak_community_posts").delete().eq("id", postId);
-      setPosts(prev => prev.filter(p => p.id !== postId));
+      const res = await fetch(`/api/badak/community?id=${postId}`, { method: "DELETE" });
+      if (res.ok) setPosts(prev => prev.filter(p => p.id !== postId));
     } finally { setProcessingId(null); }
   }
 
@@ -127,9 +129,9 @@ export default function BadakPostsPage() {
                         {post.is_hidden && <span className="text-[10px] text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">숨김</span>}
                       </div>
                       <div className="flex items-center gap-3 text-[10px] text-neutral-400">
-                        <span>👍 {post.like_count ?? 0}</span>
-                        <span><MessageSquare className="h-2.5 w-2.5 inline" /> {post.comment_count ?? 0}</span>
-                        <span>조회 {post.view_count ?? 0}</span>
+                        <span>👍 {post.likes_count ?? 0}</span>
+                        <span><MessageSquare className="h-2.5 w-2.5 inline" /> {post.comments_count ?? 0}</span>
+                        <span>조회 {post.views_count ?? 0}</span>
                         <span>{new Date(post.created_at).toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                       </div>
                     </div>

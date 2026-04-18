@@ -6,10 +6,11 @@ import Image from 'next/image';
 import {
   ArrowLeft, Calendar, MapPin, Users, Banknote, ChevronRight,
   Heart, Share2, Bell, CheckCircle2, Clock, Lock, Bookmark,
-  Star, X, Send, ChevronDown, ChevronUp, MessageCircle,
+  Star, X, Send, MessageCircle,
 } from 'lucide-react';
 import { MemberProfileSheet } from '@/features/badak/MemberProfileSheet';
 import { useAuth } from '@/lib/auth-context';
+import { createClient } from '@/lib/supabase/client';
 
 // ── 타입 정의 ──────────────────────────────────────────
 interface GroupSession {
@@ -48,7 +49,10 @@ interface GroupDetail {
   notice: string | null;             // 주요 공지
   status: string;
   join_type: 'firstcome' | 'approval';
-  meeting_type: 'once' | 'recurring' | null;
+  meeting_type: 'onetime' | 'series' | 'recurring' | null;
+  series_count?: number | null;
+  leader_career?: string | null;
+  leader_reason?: string | null;
   max_members: number;
   current_members: number;
   event_date: string | null;
@@ -58,6 +62,7 @@ interface GroupDetail {
   fee: number;
   tags: string[];
   cover_image_url: string | null;
+  created_at?: string;
   leader: {
     id: string; display_name: string; job_function: string;
     experience_years: number; bio?: string | null; avatar_url?: string | null;
@@ -307,7 +312,7 @@ const MOCK: Record<string, GroupDetail> = {
       { number: 2, title: 'Mixpanel 실습', description: '이벤트 기반 분석. 코호트 분석 실습' },
     ],
     guide: '📍 삼성역 (구체 장소 슬랙 공지)\n💰 15,000원\n📋 1회성 모임. 노트북 필참',
-    status: 'confirmed', join_type: 'firstcome', meeting_type: 'once',
+    status: 'confirmed', join_type: 'firstcome', meeting_type: 'onetime',
     max_members: 10, current_members: 10,
     event_date: '2026-04-19T14:00:00', schedule: null, location: '삼성역', location_detail: null,
     fee: 15000, tags: ['데이터', 'GA4', '분석'],
@@ -321,6 +326,48 @@ const MOCK: Record<string, GroupDetail> = {
       { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: null },
     ],
   },
+  'career-transition-agency-inhouse': {
+    id: 'g9', slug: 'career-transition-agency-inhouse',
+    title: '이직 준비 — 에이전시↔인하우스 경험 나누기',
+    tagline: '에이전시와 인하우스를 오간 마케터들의 솔직한 이직 이야기 4회차 시리즈',
+    notice: '4/22(화) 오후 7시 30분, 강남역 3번 출구 도보 2분 · 모노하우스 B1. 노트북 없어도 됩니다.',
+    description: '에이전시와 인하우스를 오간 마케터들이 실제 이직 경험을 솔직하게 나누는 4회차 시리즈 모임입니다.\n\n"에이전시에서 인하우스로 가면 어떤 점이 달라지나요?" "반대로 인하우스에서 에이전시로 가면 어떤가요?" 이 모임은 이론이 아닌 실제 경험자들의 이야기로 채워집니다.\n\n이직을 준비 중이거나, 결정을 앞두고 고민 중인 마케터라면 누구나 환영합니다. 단, 경험을 나눌 준비가 된 분들을 위한 자리입니다.',
+    intro_who: '• 에이전시에서 인하우스로 이직을 고민 중인 마케터\n• 인하우스에서 에이전시로의 전환을 생각 중인 분\n• 이직 경험이 있고 솔직한 이야기를 나누고 싶은 분\n• 커리어 방향을 고민하는 3~7년차 마케터',
+    structure: [
+      { number: 1, title: '킥오프 — 각자의 커리어 맵 공유', description: '참여자 소개 + 에이전시·인하우스 경험 타임라인 그리기. "나는 왜 이직을 결심했나" 3분 발표', date: '2026-04-22' },
+      { number: 2, title: '실패 경험 공유 — 이직 후 현실 충격', description: '이직 후 예상과 달랐던 점, 힘들었던 순간 솔직 공유. 판단 없이 듣는 자리. 토론 중심', date: '2026-04-29' },
+      { number: 3, title: '에이전시 vs 인하우스 — 실전 비교표 만들기', description: '성장, 연봉, 워크라이프밸런스, 커리어 전문성 4가지 축으로 직접 비교. 나만의 기준 찾기', date: '2026-05-06' },
+      { number: 4, title: '성공 이직 로드맵 — 지금 해야 할 것들', description: '이직을 성공시킨 경험자들의 준비 과정 공유. 포트폴리오, 면접, 연봉 협상 실전 팁', date: '2026-05-13' },
+    ],
+    guide: '📍 장소\n강남역 3번 출구 도보 2분 · 모노하우스 B1층 세미나실\n\n📅 일정\n매주 화요일 오후 7시 30분~9시 (4회 연속). 결석 시 다음 회차부터 참여 가능 (자료 공유)\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 에이전시 또는 인하우스 마케터 경력 2년 이상\n• 4회 중 3회 이상 참석 가능한 분\n• 자신의 경험을 솔직하게 나눌 의향이 있는 분\n• 타인의 경험을 경청하고 존중하는 분',
+    status: 'recruiting', join_type: 'firstcome', meeting_type: 'series', series_count: 4,
+    max_members: 25, current_members: 23,
+    event_date: '2026-04-22T19:30:00', schedule: '매주 화 19:30~21:00 (4회)', location: '강남역', location_detail: '모노하우스 B1',
+    fee: 0, tags: ['이직', '에이전시', '인하우스', '커리어'],
+    cover_image_url: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=860&h=400&fit=crop&auto=format',
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    leader: {
+      id: 'l9', display_name: '박서연', job_function: '브랜드 마케터', experience_years: 7,
+      bio: '에이전시 4년(종합광고대행사 AE → 디지털에이전시 팀장) + 인하우스 3년(스타트업 마케팅 리드 → 현재 중견 브랜드팀 매니저)을 거친 마케터입니다.\n\n두 번의 이직 모두 "이 선택이 맞나?" 수백 번 고민했고, 실제로 실패도 했어요. 지금은 그 경험들이 제 커리어의 가장 큰 자산이 됐다고 생각합니다.\n\n이 모임을 만든 이유는 하나예요. 저처럼 고민하는 마케터들이 혼자 결정하지 않았으면 해서요. 같이 고민하면 더 좋은 선택을 할 수 있거든요.',
+      avatar_url: null,
+    },
+    need: { id: 'n9', display_text: '이직 준비 같이 하고 싶어', count: 51 },
+    members: [
+      { id: 'm1', display_name: '박서연', job_function: '브랜드 마케터', avatar_url: null },
+      { id: 'm2', display_name: '퍼포먼스T', job_function: '퍼포먼스 마케터', avatar_url: null },
+      { id: 'm3', display_name: '그로스Y', job_function: '그로스 마케터', avatar_url: null },
+      { id: 'm4', display_name: '콘텐츠H', job_function: '콘텐츠 마케터', avatar_url: null },
+      { id: 'm5', display_name: 'SNS마케L', job_function: 'SNS 마케터', avatar_url: null },
+    ],
+    reviews: [
+      { id: 'r1', author: '퍼포먼스T', avatar_url: null, job_function: '퍼포먼스 마케터', rating: 5, content: '1회차에서 각자의 커리어 맵을 그려보는 시간이 생각보다 엄청난 자극이 됐어요. 다들 솔직하게 이야기해줘서 오히려 더 깊은 대화가 됐습니다. 2회차도 엄청 기대돼요.', created_at: '2026-04-23' },
+      { id: 'r2', author: '그로스Y', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '박서연 바닥장이 판단 없이 다 들어주는 분위기를 만들어줘서 평소엔 말 못했던 이직 실패 경험도 편하게 나눌 수 있었어요. 이런 모임이 진짜 필요했습니다.', created_at: '2026-04-24' },
+    ],
+    related: [
+      { slug: 'startup-marketer-club', title: '스타트업 마케터 네트워킹 클럽', current_members: 14, max_members: 20, tags: ['스타트업', '네트워킹'], cover_image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=200&h=120&fit=crop' },
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', current_members: 13, max_members: 20, tags: ['마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
+    ],
+  },
 };
 
 // 구 ID → 슬러그 호환 맵
@@ -329,6 +376,7 @@ const ID_TO_SLUG: Record<string, string> = {
   g3: 'sns-content-studio', g4: 'performance-case-study',
   g5: 'ai-prompt-engineering', g6: 'startup-marketer-club',
   g7: 'brand-strategy-reading', g8: 'data-analytics-meetup',
+  g9: 'career-transition-agency-inhouse',
 };
 
 // ── 컬러 팔레트 ──
@@ -403,6 +451,17 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showLeaderProfile, setShowLeaderProfile] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(null);
+  const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   // 섹션 refs
   const sectionRefs = useRef<Record<TabName, HTMLElement | null>>({
@@ -417,12 +476,12 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       .then(data => {
         if (data.group) {
           const g = data.group;
+          setGroupId(g.id);
           setGroup({
-            ...MOCK[slug],
             ...g,
-            members: g.members ?? MOCK[slug]?.members ?? [],
-            reviews: g.reviews ?? MOCK[slug]?.reviews ?? [],
-            related: g.related ?? MOCK[slug]?.related ?? [],
+            members: g.members ?? [],
+            reviews: [],  // 별도 useEffect에서 /reviews API로 로드
+            related: g.related ?? [],
           });
         } else {
           setGroup(MOCK[slug] ?? null);
@@ -430,6 +489,51 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       })
       .catch(() => setGroup(MOCK[slug] ?? null));
   }, [slug]);
+
+  // 좋아요 + 참여 상태 로드
+  useEffect(() => {
+    if (!groupId) return;
+    const load = async () => {
+      const { data: { session } } = await createClient().auth.getSession();
+      const token = session?.access_token;
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const [likeRes, joinRes, reviewRes, bookmarkRes] = await Promise.all([
+        fetch(`/api/badak/groups/${groupId}/like`, { headers }),
+        fetch(`/api/badak/groups/${groupId}/join`, { headers }),
+        fetch(`/api/badak/groups/${groupId}/reviews`),
+        token ? fetch('/api/badak/bookmarks', { headers }) : Promise.resolve(null),
+      ]);
+
+      if (likeRes.ok) {
+        const d = await likeRes.json();
+        setIsLiked(d.liked);
+        setLikeCount(d.count);
+      }
+      if (joinRes.ok) {
+        const d = await joinRes.json();
+        if (d.status === 'leader' || d.status === 'approved') setJoinState('joined');
+        else if (d.status === 'applied') setJoinState('submitted');
+      }
+      if (reviewRes.ok) {
+        const d = await reviewRes.json();
+        if (d.reviews?.length > 0) {
+          setGroup(prev => prev ? { ...prev, reviews: d.reviews } : prev);
+        }
+      }
+      if (bookmarkRes?.ok) {
+        const d = await bookmarkRes.json();
+        const existing = d.bookmarks?.find((b: { item_type: string; item_id: string; id: string }) =>
+          b.item_type === 'group' && b.item_id === groupId
+        );
+        if (existing) {
+          setIsBookmarked(true);
+          setBookmarkId(existing.id);
+        }
+      }
+    };
+    load();
+  }, [groupId]);
 
   // IntersectionObserver — 스크롤 위치에 따라 활성 탭 업데이트
   useEffect(() => {
@@ -460,8 +564,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   function handleShare() {
-    if (navigator.share) navigator.share({ title: group?.title, url: window.location.href });
-    else navigator.clipboard.writeText(window.location.href);
+    if (navigator.share) { navigator.share({ title: group?.title, url: window.location.href }); return; }
+    navigator.clipboard.writeText(window.location.href);
+    setToast('링크가 복사됐어요');
+    setTimeout(() => setToast(null), 2500);
   }
 
   if (!group) {
@@ -476,6 +582,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const isClosed = group.status === 'closed' || group.status === 'ended';
   const isNeedsGathering = group.status === 'needs_gathering';
   const fillPct = Math.round((group.current_members / group.max_members) * 100);
+  const remaining = group.max_members - group.current_members;
+  const remainingPct = remaining / group.max_members;
+  const isClosingSoon = !isFull && !isClosed && remainingPct <= 0.10;
+  const isHot = !isFull && !isClosed && !isClosingSoon && remainingPct <= 0.40;
+  const isNew = group.created_at ? (Date.now() - new Date(group.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000 : false;
   const statusMeta = STATUS_META[group.status] ?? { label: group.status, bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' };
   const ctaDone = joinState === 'joined' || joinState === 'submitted' || joinState === 'waitlisted';
   const ctaDisabled = isClosed || (isFull && !isNeedsGathering);
@@ -488,11 +599,126 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     : group.join_type === 'approval' ? '참여 신청하기'
     : '바로 참여하기';
 
-  function handleJoin() {
-    if (!isAuthenticated || !group) return;
+  async function handleLike() {
+    if (!isAuthenticated || !groupId) return;
+    const { data: { session } } = await createClient().auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+    const res = await fetch(`/api/badak/groups/${groupId}/like`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setIsLiked(d.liked);
+      setLikeCount(d.count);
+    }
+  }
+
+  async function handleSubmitReview() {
+    if (!isAuthenticated || !groupId || reviewSubmitting) return;
+    if (!reviewContent.trim()) return;
+    setReviewSubmitting(true);
+    const { data: { session } } = await createClient().auth.getSession();
+    const token = session?.access_token;
+    if (!token) { setReviewSubmitting(false); return; }
+    const res = await fetch(`/api/badak/groups/${groupId}/reviews`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: reviewRating, content: reviewContent.trim() }),
+    });
+    if (res.ok) {
+      // 제출 후 목록 재조회 — POST 응답에는 author 정보 없음
+      const reviewsRes = await fetch(`/api/badak/groups/${groupId}/reviews`);
+      if (reviewsRes.ok) {
+        const d = await reviewsRes.json();
+        setGroup(prev => prev ? { ...prev, reviews: d.reviews ?? [] } : prev);
+      }
+      setReviewContent('');
+      setReviewRating(5);
+      setShowReviewForm(false);
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData?.error ?? '';
+      if (msg.includes('unique') || msg.includes('duplicate') || res.status === 409) {
+        setToast('이미 이 모임에 후기를 남기셨어요');
+        setShowReviewForm(false);
+      } else if (res.status === 404) {
+        setToast('바닥 멤버 프로필이 없습니다. 바닥 가입 후 이용해주세요');
+      } else {
+        setToast('후기 등록에 실패했습니다. 다시 시도해주세요');
+      }
+    }
+    setReviewSubmitting(false);
+  }
+
+  async function handleJoin() {
+    if (!isAuthenticated || !group || !groupId) return;
     if (isNeedsGathering) { setJoinState('waitlisted'); return; }
     if (group.join_type === 'approval') { setJoinState('applying'); return; }
-    setJoinState('joined');
+    setIsJoining(true);
+    const { data: { session } } = await createClient().auth.getSession();
+    const token = session?.access_token;
+    if (!token) { setIsJoining(false); return; }
+    const res = await fetch(`/api/badak/groups/${groupId}/join`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setJoinState(d.status === 'approved' ? 'joined' : 'submitted');
+    }
+    setIsJoining(false);
+  }
+
+  async function handleApplySubmit() {
+    if (!applyMessage.trim() || !groupId || isJoining) return;
+    setIsJoining(true);
+    const { data: { session } } = await createClient().auth.getSession();
+    const token = session?.access_token;
+    if (!token) { setIsJoining(false); return; }
+    const res = await fetch(`/api/badak/groups/${groupId}/join`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: applyMessage }),
+    });
+    if (res.ok) setJoinState('submitted');
+    setIsJoining(false);
+  }
+
+  async function handleBookmark() {
+    if (!isAuthenticated || !groupId || isBookmarkLoading) return;
+    const { data: { session } } = await createClient().auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+    setIsBookmarkLoading(true);
+    if (isBookmarked && bookmarkId) {
+      const res = await fetch(`/api/badak/bookmarks?id=${bookmarkId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setIsBookmarked(false);
+        setBookmarkId(null);
+        setToast('북마크 해제됐어요');
+        setTimeout(() => setToast(null), 2500);
+      }
+    } else {
+      const res = await fetch('/api/badak/bookmarks', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_type: 'group', item_id: groupId, title: group?.title }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setIsBookmarked(true);
+        setBookmarkId(d.bookmark?.id ?? null);
+        setToast('북마크에 저장됐어요');
+        setTimeout(() => setToast(null), 2500);
+      }
+    }
+    setIsBookmarkLoading(false);
   }
 
   return (
@@ -519,7 +745,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <ArrowLeft className="h-4 w-4 text-white/80" />
           </Link>
           <div className="flex gap-1.5">
-            <button onClick={() => setIsBookmarked(!isBookmarked)}
+            <button onClick={handleBookmark} disabled={isBookmarkLoading}
               className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
               style={{ background: 'rgba(0,0,0,0.35)' }}>
               <Bookmark className="h-4 w-4"
@@ -543,7 +769,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             {group.meeting_type && (
               <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs backdrop-blur-sm"
                 style={{ background: 'rgba(0,0,0,0.35)', color: 'rgba(255,255,255,0.55)' }}>
-                {group.meeting_type === 'recurring' ? '정기 모임' : '1회 모임'}
+                {group.meeting_type === 'recurring' ? '정기 모임' : group.meeting_type === 'series' ? `${group.series_count ?? ''}회 시리즈` : '1회 모임'}
               </span>
             )}
             {group.join_type === 'approval' && (
@@ -552,6 +778,18 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 <Lock className="h-3 w-3" />승인제
               </span>
             )}
+            {isClosingSoon && (
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur-sm"
+                style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>🔥 마감임박</span>
+            )}
+            {isHot && (
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>Hot</span>
+            )}
+            {isNew && (
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+                style={{ background: 'rgba(74,222,128,0.15)', color: '#4ade80' }}>New</span>
+            )}
           </div>
           <h1 className="text-xl font-extrabold leading-tight text-white drop-shadow">{group.title}</h1>
           {group.tagline && <p className="mt-1 text-sm text-white/55 drop-shadow">{group.tagline}</p>}
@@ -559,24 +797,37 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* ── 퀵 스탯 바 ── */}
-      <div className="flex divide-x divide-white/6 border-b border-white/6 px-2"
-        style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <div className="flex divide-x divide-white/8 border-b border-white/10 px-2"
+        style={{ background: 'rgba(255,255,255,0.04)' }}>
         {[
-          { icon: <Users className="h-3.5 w-3.5" />, label: `${group.current_members}/${group.max_members}명` },
-          group.location && { icon: <MapPin className="h-3.5 w-3.5" />, label: group.location },
-          group.fee > 0 && { icon: <Banknote className="h-3.5 w-3.5" />, label: `${group.fee.toLocaleString()}원` },
-          group.fee === 0 && { icon: <Banknote className="h-3.5 w-3.5" />, label: '무료' },
+          { icon: <Users className="h-4 w-4" />, label: `${group.current_members}/${group.max_members}명`, color: isFull ? '#f87171' : 'rgba(255,255,255,0.80)' },
+          group.location && { icon: <MapPin className="h-4 w-4" />, label: group.location, color: 'rgba(255,255,255,0.75)' },
+          { icon: <Banknote className="h-4 w-4" />, label: group.fee > 0 ? `${group.fee.toLocaleString()}원` : '무료', color: group.fee === 0 ? '#4ade80' : 'rgba(255,255,255,0.75)' },
           (group.schedule || group.event_date) && {
-            icon: <Calendar className="h-3.5 w-3.5" />,
+            icon: <Calendar className="h-4 w-4" />,
             label: group.schedule ?? new Date(group.event_date!).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }),
+            color: 'rgba(255,255,255,0.75)',
           },
         ].filter(Boolean).map((item, i) => (item &&
-          <div key={i} className="flex flex-1 items-center justify-center gap-1.5 py-2.5">
-            <span className="text-white/25">{item.icon}</span>
-            <span className="text-[11px] text-white/55">{item.label}</span>
+          <div key={i} className="flex flex-1 items-center justify-center gap-1.5 py-3">
+            <span style={{ color: (item as {color: string}).color, opacity: 0.7 }}>{item.icon}</span>
+            <span className="text-xs font-medium" style={{ color: (item as {color: string}).color }}>{item.label}</span>
           </div>
         ))}
       </div>
+
+      {/* ── 잔여석 강조 바 ── */}
+      {!isFull && !isClosed && (
+        <div className="mx-4 mt-3 flex items-center justify-between rounded-xl px-4 py-2.5"
+          style={{ background: isClosingSoon ? 'rgba(251,146,60,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isClosingSoon ? 'rgba(251,146,60,0.3)' : 'rgba(255,255,255,0.09)'}` }}>
+          <span className="text-xs" style={{ color: isClosingSoon ? '#fb923c' : 'rgba(255,255,255,0.45)' }}>
+            {isClosingSoon ? '🔥 마감임박 · 서두르세요!' : '잔여석'}
+          </span>
+          <span className="text-sm font-bold" style={{ color: isClosingSoon ? '#fb923c' : '#fb923c' }}>
+            {remaining}자리
+          </span>
+        </div>
+      )}
 
       {/* ── 주요 공지 ── */}
       {group.notice && showNotice && (
@@ -606,13 +857,36 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
+      {/* ── 일시·장소 요약 ── */}
+      {(group.event_date || group.schedule || group.location) && (
+        <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl px-4 py-3"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {(group.event_date || group.schedule) && (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Calendar className="h-4 w-4 shrink-0 text-amber-400/70" />
+              <span className="truncate text-sm font-medium text-white/75">
+                {group.schedule ?? new Date(group.event_date!).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+              </span>
+            </div>
+          )}
+          {group.location && (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
+              <span className="truncate text-sm font-medium text-white/75">
+                {group.location}{group.location_detail ? ` · ${group.location_detail}` : ''}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── 스티키 탭 바 ── */}
       <div ref={tabBarRef} className="sticky z-20 mt-4 border-b border-white/6"
         style={{ top: 56, background: '#1a1a2e' }}>
-        <div className="flex overflow-x-auto scrollbar-hide px-4">
+        <div className="flex">
           {TABS.map(tab => (
             <button key={tab} onClick={() => scrollToTab(tab)}
-              className="shrink-0 px-4 py-3 text-sm font-medium transition-colors"
+              className="flex-1 py-3 text-sm font-medium transition-colors text-center"
               style={{
                 color: activeTab === tab ? '#ffd93d' : 'rgba(255,255,255,0.4)',
                 borderBottom: activeTab === tab ? '2px solid #ffd93d' : '2px solid transparent',
@@ -670,7 +944,9 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">바닥장</span>
                 </div>
                 <div className="mt-0.5 text-xs text-white/35">{group.leader.job_function} · {group.leader.experience_years}년차</div>
-                {group.leader.bio && <p className="mt-1.5 text-xs leading-relaxed text-white/40 line-clamp-2">{group.leader.bio}</p>}
+                {group.leader_career && <p className="mt-1 text-xs text-white/40 line-clamp-1">{group.leader_career}</p>}
+                {group.leader_reason && <p className="mt-1 text-xs leading-relaxed text-amber-400/50 line-clamp-2">{group.leader_reason}</p>}
+                {!group.leader_career && !group.leader_reason && group.leader.bio && <p className="mt-1.5 text-xs leading-relaxed text-white/40 line-clamp-2">{group.leader.bio}</p>}
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-white/20 mt-1" />
             </button>
@@ -741,7 +1017,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           {group.guide && (
             <div className="rounded-xl px-4 py-4"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <p className="text-sm leading-7 text-white/55 whitespace-pre-line">{group.guide}</p>
+              <div className="text-sm leading-7 text-white/55 whitespace-pre-line"
+                dangerouslySetInnerHTML={{ __html: group.guide.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/75 font-medium">$1</strong>') }} />
             </div>
           )}
 
@@ -770,6 +1047,47 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
           </div>
+
+          {/* 후기 작성 버튼 */}
+          {isAuthenticated && (joinState === 'joined' || !groupId) && !showReviewForm && (
+            <button onClick={() => setShowReviewForm(true)}
+              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium"
+              style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)', color: 'rgba(255,217,61,0.75)' }}>
+              <Star className="h-4 w-4" />후기 남기기
+            </button>
+          )}
+
+          {/* 후기 작성 폼 */}
+          {showReviewForm && (
+            <div className="mb-4 rounded-xl px-4 py-4 space-y-3"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,217,61,0.15)' }}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-white/75">후기 작성</span>
+                <button onClick={() => setShowReviewForm(false)} className="text-white/25 hover:text-white/50">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {/* 별점 선택 */}
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map(i => (
+                  <button key={i} onClick={() => setReviewRating(i)}>
+                    <Star className="h-6 w-6"
+                      style={{ fill: i <= reviewRating ? '#ffd93d' : 'transparent', color: i <= reviewRating ? '#ffd93d' : 'rgba(255,255,255,0.2)' }} />
+                  </button>
+                ))}
+              </div>
+              <textarea value={reviewContent} onChange={e => setReviewContent(e.target.value)}
+                placeholder="모임 참여 경험을 솔직하게 남겨주세요"
+                className="w-full rounded-xl px-3 py-2.5 text-sm text-white/70 placeholder-white/25 resize-none outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', minHeight: 80 }} />
+              <button onClick={handleSubmitReview} disabled={!reviewContent.trim() || reviewSubmitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold disabled:opacity-30"
+                style={{ background: '#ffd93d', color: '#1a1a2e' }}>
+                <Send className="h-4 w-4" />
+                {reviewSubmitting ? '제출 중...' : '후기 등록'}
+              </button>
+            </div>
+          )}
 
           {group.reviews.length > 0 ? (
             <div className="space-y-3">
@@ -861,11 +1179,12 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               placeholder="예: 퍼포먼스 마케터 3년차입니다. B2B SaaS 케이스를 함께 공부하고 싶어 신청합니다."
               className="w-full rounded-xl px-4 py-3 text-sm text-white/75 placeholder-white/25 resize-none outline-none"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', minHeight: 100 }} />
-            <button onClick={() => { if (applyMessage.trim()) setJoinState('submitted'); }}
-              disabled={!applyMessage.trim()}
+            <button onClick={handleApplySubmit}
+              disabled={!applyMessage.trim() || isJoining}
               className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-30"
               style={{ background: '#ffd93d', color: '#1a1a2e' }}>
-              <Send className="h-4 w-4" />신청 보내기
+              {isJoining ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a1a2e]/30 border-t-[#1a1a2e]" /> : <Send className="h-4 w-4" />}
+              {isJoining ? '처리 중…' : '신청 보내기'}
             </button>
           </div>
         </div>
@@ -886,19 +1205,40 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
           <div className="flex gap-2">
-            <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Heart className="h-5 w-5 text-white/35" />
+            {/* 좋아요 버튼 */}
+            <button onClick={handleLike}
+              className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl px-3 transition-colors"
+              style={{
+                background: isLiked ? 'rgba(255,100,130,0.12)' : 'rgba(255,255,255,0.06)',
+                border: isLiked ? '1px solid rgba(255,100,130,0.25)' : '1px solid rgba(255,255,255,0.1)',
+              }}>
+              <Heart className="h-5 w-5"
+                style={{ color: isLiked ? '#ff6482' : 'rgba(255,255,255,0.35)', fill: isLiked ? '#ff6482' : 'none' }} />
+              {likeCount > 0 && (
+                <span className="text-xs font-medium" style={{ color: isLiked ? '#ff6482' : 'rgba(255,255,255,0.3)' }}>
+                  {likeCount}
+                </span>
+              )}
             </button>
-            <button onClick={handleJoin} disabled={ctaDisabled || ctaDone}
+            {/* 잔여 석 */}
+            {!isClosed && !isFull && (
+              <div className="flex h-12 shrink-0 items-center justify-center rounded-xl px-3"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <span className="text-xs text-white/40">잔여</span>
+                <span className="ml-1 text-sm font-bold text-white/65">{group.max_members - group.current_members}</span>
+                <span className="ml-0.5 text-xs text-white/30">석</span>
+              </div>
+            )}
+            {/* 참여 CTA */}
+            <button onClick={handleJoin} disabled={ctaDisabled || ctaDone || isJoining}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold disabled:cursor-default"
               style={{
                 background: ctaDone ? 'rgba(255,255,255,0.06)' : ctaDisabled ? 'rgba(255,255,255,0.05)' : '#ffd93d',
                 color: ctaDone ? 'rgba(255,255,255,0.35)' : ctaDisabled ? 'rgba(255,255,255,0.2)' : '#1a1a2e',
                 border: ctaDone || ctaDisabled ? '1px solid rgba(255,255,255,0.08)' : 'none',
               }}>
-              {ctaDone ? <CheckCircle2 className="h-4 w-4" /> : isNeedsGathering ? <Bell className="h-4 w-4" /> : group.join_type === 'approval' ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}
-              {ctaLabel}
+              {isJoining ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a1a2e]/30 border-t-[#1a1a2e]" /> : ctaDone ? <CheckCircle2 className="h-4 w-4" /> : isNeedsGathering ? <Bell className="h-4 w-4" /> : group.join_type === 'approval' ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+              {isJoining ? '처리 중…' : ctaLabel}
             </button>
           </div>
           {group.fee > 0 && !ctaDone && !ctaDisabled && (
@@ -906,6 +1246,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           )}
         </div>
       </div>
+
+      {/* ── 토스트 ── */}
+      {toast && (
+        <div className="fixed bottom-28 left-1/2 z-50 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-medium text-white/90 shadow-xl"
+          style={{ background: 'rgba(30,30,56,0.95)', border: '1px solid rgba(255,255,255,0.12)', whiteSpace: 'nowrap' }}>
+          {toast}
+        </div>
+      )}
 
       {/* ── 바닥장 프로필 시트 ── */}
       {showLeaderProfile && group.leader && (

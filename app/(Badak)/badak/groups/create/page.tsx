@@ -8,6 +8,7 @@ import {
   ArrowLeft, ArrowRight, Check, ImagePlus, X,
   Calendar, Clock, MapPin, Users, ShieldCheck,
   Zap, Repeat, Target, Crown, Eye, ChevronLeft, ChevronRight,
+  Link as LinkIcon, Move,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
@@ -58,11 +59,11 @@ const QUICK_TIMES = [
 const QUICK_LOCATIONS = ['성수동', '강남역', '홍대', '합정', '을지로', '여의도', '온라인 (Zoom)'];
 
 const FEE_PRESETS = [
-  { label: '5천원', value: 5000 },
-  { label: '1만원', value: 10000 },
-  { label: '2만원', value: 20000 },
   { label: '3만원', value: 30000 },
+  { label: '4만원', value: 40000 },
   { label: '5만원', value: 50000 },
+  { label: '6만원', value: 60000 },
+  { label: '7만원', value: 70000 },
 ];
 
 type MeetingType = 'onetime' | 'series';
@@ -216,7 +217,7 @@ function CreateGroupPageInner() {
   } | null>(null);
 
   useEffect(() => {
-    if (step !== 3 || !isAuthenticated) return;
+    if (!isAuthenticated) return;
     (async () => {
       try {
         const sb = createClient();
@@ -239,7 +240,7 @@ function CreateGroupPageInner() {
       } catch { /* ignore */ }
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, isAuthenticated]);
+  }, [isAuthenticated]);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -280,6 +281,8 @@ function CreateGroupPageInner() {
   const [feeType, setFeeType] = useState<FeeType>('free');
   const [fee, setFee] = useState(0);
   const [feeUnit, setFeeUnit] = useState<FeeUnit>('total');
+  const [rentalCost, setRentalCost] = useState(0);
+  const [otherCost, setOtherCost] = useState(0);
   const [maxMembers, setMaxMembers] = useState(20);
 
   // 콘텐츠 구성
@@ -304,21 +307,24 @@ function CreateGroupPageInner() {
   // 바닥장 소개
   const [leaderReason, setLeaderReason] = useState('');
   const [leaderCareer, setLeaderCareer] = useState('');
-  const [syncBio, setSyncBio] = useState(false);
-  const [syncCareer, setSyncCareer] = useState(false);
+  const [saveToProfile, setSaveToProfile] = useState(false);
 
-  const handleSyncBio = (enabled: boolean) => {
-    setSyncBio(enabled);
-    if (enabled && leaderProfile?.bio) setLeaderReason(leaderProfile.bio);
+  const importCareerFromProfile = () => {
+    if (leaderProfile?.career) setLeaderCareer(leaderProfile.career);
   };
-  const handleSyncCareer = (enabled: boolean) => {
-    setSyncCareer(enabled);
-    if (enabled && leaderProfile?.career) setLeaderCareer(leaderProfile.career);
+  const importBioFromProfile = () => {
+    if (leaderProfile?.bio) setLeaderReason(leaderProfile.bio);
   };
 
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPosition, setCoverPosition] = useState({ x: 50, y: 50 });
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [showCoverDropdown, setShowCoverDropdown] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [coverUrlInput, setCoverUrlInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverDragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // dev 모드
   useEffect(() => {
@@ -353,10 +359,10 @@ function CreateGroupPageInner() {
           setNeeds(
             data.needs
               .filter((n: { hasGroup: boolean }) => !n.hasGroup)
-              .map((n: { text: string; members: number; hasGroup: boolean }, i: number) => ({
-                id: `need-${i}`,
+              .map((n: { id: string; text: string; count?: number; members?: number; hasGroup: boolean }, i: number) => ({
+                id: n.id ?? `need-${i}`,
                 text: n.text,
-                members: n.members,
+                members: n.count ?? n.members ?? 0,
                 hasGroup: false,
               }))
           );
@@ -364,6 +370,12 @@ function CreateGroupPageInner() {
       })
       .catch(() => {});
   }, []);
+
+  // step 1 진입 시 기본 시간 자동 입력
+  useEffect(() => {
+    if (step === 1 && !eventTime) setEventTime('19:00');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -429,7 +441,7 @@ function CreateGroupPageInner() {
   };
 
   const canNext = () => {
-    if (step === 0) return title.trim().length > 0;
+    if (step === 0) return title.trim().length > 0 && tagList.length > 0;
     if (step === 1) {
       const hasLocation = location.trim().length > 0;
       if (meetingType === 'onetime') return eventDate.length > 0 && hasLocation;
@@ -437,7 +449,7 @@ function CreateGroupPageInner() {
       return false;
     }
     if (step === 2) return true;
-    if (step === 3) return leaderReason.trim().length >= 10;
+    if (step === 3) return leaderReason.trim().length >= 10 && leaderCareer.trim().length > 0;
     return false;
   };
 
@@ -456,7 +468,6 @@ function CreateGroupPageInner() {
       : firstDate ? `${firstDate}T00:00:00` : null;
 
     const coverImageUrl = await uploadImage(session.access_token);
-    const effectiveFee = feeType === 'free' ? 0 : fee;
 
     const res = await fetch('/api/badak/groups', {
       method: 'POST',
@@ -481,8 +492,8 @@ function CreateGroupPageInner() {
         seriesDates: meetingType === 'series' ? seriesDates.filter((d) => d.date) : null,
         location,
         locationDetail,
-        fee: effectiveFee,
-        feeUnit: feeType === 'paid' && meetingType === 'series' ? feeUnit : null,
+        fee,
+        feeUnit: fee > 0 && meetingType === 'series' ? 'per_session' : null,
         maxMembers,
         leaderReason,
         leaderCareer: leaderCareer || null,
@@ -493,6 +504,18 @@ function CreateGroupPageInner() {
     if (res.ok) {
       const data = await res.json();
       const newGroupId: string | undefined = data.group?.id;
+
+      if (saveToProfile && (leaderCareer || leaderReason)) {
+        await fetch('/api/badak/member', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            ...(leaderCareer && { career: leaderCareer }),
+            ...(leaderReason && { bio: leaderReason }),
+          }),
+        }).catch(() => {});
+      }
+
       if (wantIdParam && newGroupId) {
         await fetch('/api/badak/wants', {
           method: 'PATCH',
@@ -562,15 +585,14 @@ function CreateGroupPageInner() {
   })();
 
   const previewFee = (() => {
-    if (feeType === 'free') return '무료';
-    const feeStr = fee.toLocaleString() + '원';
-    if (meetingType === 'onetime') return feeStr;
-    return feeUnit === 'per_session' ? `${feeStr}/회` : `총 ${feeStr}`;
+    if (fee === 0) return '무료';
+    if (meetingType === 'series') return `${fee.toLocaleString()}원/회 (총 ${(fee * seriesCount).toLocaleString()}원)`;
+    return `${fee.toLocaleString()}원`;
   })();
 
   // PreviewModal
   const PreviewModal = () => (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4" onClick={() => setShowPreview(false)}>
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center px-4 py-6 overflow-y-auto" onClick={() => setShowPreview(false)}>
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} />
       <div
         className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 shadow-2xl"
@@ -585,78 +607,141 @@ function CreateGroupPageInner() {
           <X className="h-4 w-4" />
         </button>
 
-        {coverImage && <img src={coverImage} alt="커버" className="h-36 w-full object-cover" />}
-        <div className="p-5">
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-wide text-white/30">미리보기</div>
-          <div className="mb-2 flex items-center gap-1.5">
-            <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-              style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
-              {{ onetime: '1회 단발', series: `${seriesCount}회 연속` }[meetingType]}
-            </span>
-            <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-              style={{
-                background: joinType === 'approval' ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
-                color: joinType === 'approval' ? '#fbbf24' : '#4ade80',
-              }}>
-              {joinType === 'approval' ? '승인제' : '선착순'}
-            </span>
+        {/* 커버 이미지 */}
+        {coverImage && (
+          <div className="relative h-48 overflow-hidden">
+            <img src={coverImage} alt="커버" className="h-full w-full object-cover"
+              style={{ objectPosition: `${coverPosition.x}% ${coverPosition.y}%` }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(30,30,56,0.9))' }} />
           </div>
-          <div className="mb-1 text-base font-bold text-white">{title || '(모임 제목 미입력)'}</div>
-          {description && (
-            <div className="mb-3 whitespace-pre-line text-xs leading-relaxed text-white/50">
-              {description.slice(0, 120)}{description.length > 120 ? '...' : ''}
-            </div>
-          )}
-          <div className="flex flex-wrap gap-2 text-xs text-white/40">
-            {previewSchedule && (
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" /> {previewSchedule}
+        )}
+
+        <div className="p-5 space-y-4">
+          {/* 배지 + 제목 */}
+          <div>
+            <div className="mb-1 text-[10px] font-medium uppercase tracking-wide text-white/30">상세 미리보기</div>
+            <div className="mb-2 flex items-center gap-1.5">
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
+                {{ onetime: '1회 단발', series: `${seriesCount}회 연속` }[meetingType]}
               </span>
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                style={{
+                  background: joinType === 'approval' ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
+                  color: joinType === 'approval' ? '#fbbf24' : '#4ade80',
+                }}>
+                {joinType === 'approval' ? '승인제' : '선착순'}
+              </span>
+            </div>
+            <div className="mb-2 text-lg font-bold text-white">{title || '(모임 제목 미입력)'}</div>
+            {description && (
+              <div className="whitespace-pre-line text-xs leading-relaxed text-white/55">{description}</div>
             )}
-            {location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</span>}
-            <span className="flex items-center gap-1"><Users className="h-3 w-3" /> 최대 {maxMembers}명</span>
-            <span>{previewFee}</span>
           </div>
-          {selectedNeed && (
-            <div className="mt-3 flex items-center gap-1.5 text-[10px] text-amber-400/60">
-              <Target className="h-3 w-3" />
-              <span>연결 니즈: {selectedNeed.text}</span>
+
+          {/* 일정/장소/비용 */}
+          <div className="rounded-xl border border-white/8 p-3 space-y-2" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            {previewSchedule && (
+              <div className="flex items-center gap-2 text-xs text-white/60">
+                <Calendar className="h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                <span>{previewSchedule}</span>
+              </div>
+            )}
+            {location && (
+              <div className="flex items-center gap-2 text-xs text-white/60">
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                <span>{location}{locationDetail ? ` · ${locationDetail}` : ''}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-xs text-white/60">
+              <Users className="h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+              <span>최대 {maxMembers}명</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: fee === 0 ? 'rgba(74,222,128,0.8)' : 'rgba(255,217,61,0.8)' }}>
+              <span className="h-3.5 w-3.5 shrink-0 text-center text-[10px]">₩</span>
+              <span>{previewFee}</span>
+            </div>
+          </div>
+
+          {/* 이런 분께 추천 */}
+          {introWho && (
+            <div>
+              <div className="mb-1.5 text-[10px] font-semibold text-white/35">이런 분께 추천</div>
+              <div className="whitespace-pre-line text-xs text-white/55">{introWho}</div>
             </div>
           )}
-          {tagList.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+
+          {/* 모임 구성 (세션) */}
+          {sessions.some((s) => s.title.trim()) && (
+            <div>
+              <div className="mb-2 text-[10px] font-semibold text-white/35">모임 구성</div>
+              <div className="space-y-2">
+                {sessions.filter((s) => s.title.trim()).map((s, i) => (
+                  <div key={i} className="flex gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                      style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                      {i + 1}
+                    </span>
+                    <div>
+                      <div className="text-xs font-medium text-white/75">{s.title}</div>
+                      {s.description && <div className="mt-0.5 text-[10px] text-white/40">{s.description}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 태그 + 니즈 */}
+          {(tagList.length > 0 || selectedNeed) && (
+            <div className="flex flex-wrap gap-1.5">
               {tagList.map((t) => (
                 <span key={t} className="rounded-full px-2 py-0.5 text-[10px] text-white/40" style={{ background: 'rgba(255,255,255,0.05)' }}>#{t}</span>
               ))}
+              {selectedNeed && (
+                <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-amber-400/60" style={{ background: 'rgba(255,217,61,0.06)' }}>
+                  <Target className="h-2.5 w-2.5" />{selectedNeed.text}
+                </span>
+              )}
             </div>
           )}
-          {leaderProfile && (
-            <div className="mt-4 flex items-center gap-2.5 border-t border-white/8 pt-3">
-              {leaderProfile.avatarUrl ? (
-                <Image src={leaderProfile.avatarUrl} alt={leaderProfile.displayName} width={32} height={32}
-                  className="h-8 w-8 rounded-full object-cover shrink-0" />
-              ) : (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                  style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
-                  {leaderProfile.displayName?.charAt(0) ?? '?'}
+
+          {/* 바닥장 소개 */}
+          {(leaderProfile || leaderReason || leaderCareer) && (
+            <div className="border-t border-white/8 pt-4 space-y-2.5">
+              <div className="text-[10px] font-semibold text-white/35">바닥장 소개</div>
+              {leaderProfile && (
+                <div className="flex items-center gap-2.5">
+                  {leaderProfile.avatarUrl ? (
+                    <Image src={leaderProfile.avatarUrl} alt={leaderProfile.displayName} width={36} height={36}
+                      className="h-9 w-9 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                      style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                      {leaderProfile.displayName?.charAt(0) ?? '?'}
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-xs font-semibold text-white/80">{leaderProfile.displayName}</div>
+                    {(leaderProfile.jobFunction || leaderProfile.industry) && (
+                      <div className="text-[10px] text-white/35">
+                        {[leaderProfile.jobFunction, leaderProfile.industry].filter(Boolean).join(' · ')}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-              <div>
-                <div className="text-xs font-semibold text-white/80">{leaderProfile.displayName}</div>
-                {(leaderProfile.jobFunction || leaderProfile.industry) && (
-                  <div className="text-[10px] text-white/35">
-                    {[leaderProfile.jobFunction, leaderProfile.industry].filter(Boolean).join(' · ')}
+              {leaderCareer && (
+                <div className="text-[11px] leading-relaxed text-white/50">{leaderCareer}</div>
+              )}
+              {leaderReason && (
+                <div className="rounded-lg px-3 py-2.5" style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
+                  <div className="mb-1 text-[9px] text-white/25">바닥장의 한마디</div>
+                  <div className="text-xs italic text-white/50">
+                    &ldquo;{leaderReason.slice(0, 100)}{leaderReason.length > 100 ? '...' : ''}&rdquo;
                   </div>
-                )}
-              </div>
-            </div>
-          )}
-          {leaderReason && (
-            <div className="mt-3 rounded-lg px-3 py-2.5" style={{ background: 'rgba(255,217,61,0.04)', border: '1px solid rgba(255,217,61,0.1)' }}>
-              <div className="mb-1 text-[9px] text-white/25">바닥장의 한마디</div>
-              <div className="text-xs italic text-white/50">
-                &ldquo;{leaderReason.slice(0, 100)}{leaderReason.length > 100 ? '...' : ''}&rdquo;
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -731,19 +816,87 @@ function CreateGroupPageInner() {
             <div>
               <label className="mb-3 block text-[15px] font-medium text-white/75">커버 이미지 (선택)</label>
               {coverImage ? (
-                <div className="relative overflow-hidden rounded-xl">
-                  <img src={coverImage} alt="커버" className="h-40 w-full object-cover" />
-                  <button onClick={() => { setCoverImage(null); setCoverFile(null); }}
-                    className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70">
-                    <X className="h-4 w-4" />
-                  </button>
+                <div className="space-y-2">
+                  {/* 이미지 프리뷰 + 드래그 위치 조절 */}
+                  <div className="relative h-40 overflow-hidden rounded-xl cursor-move select-none"
+                    onMouseDown={(e) => {
+                      setIsDraggingCover(true);
+                      coverDragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: coverPosition.x, startPosY: coverPosition.y };
+                    }}
+                    onMouseMove={(e) => {
+                      if (!isDraggingCover || !coverDragRef.current) return;
+                      const dx = ((e.clientX - coverDragRef.current.startX) / 300) * -100;
+                      const dy = ((e.clientY - coverDragRef.current.startY) / 160) * -100;
+                      setCoverPosition({
+                        x: Math.max(0, Math.min(100, coverDragRef.current.startPosX + dx)),
+                        y: Math.max(0, Math.min(100, coverDragRef.current.startPosY + dy)),
+                      });
+                    }}
+                    onMouseUp={() => setIsDraggingCover(false)}
+                    onMouseLeave={() => setIsDraggingCover(false)}>
+                    <img src={coverImage} alt="커버" className="h-full w-full object-cover pointer-events-none"
+                      style={{ objectPosition: `${coverPosition.x}% ${coverPosition.y}%` }} />
+                    {/* 드래그 힌트 */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                      style={{ background: 'rgba(0,0,0,0.25)' }}>
+                      <div className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-white font-medium"
+                        style={{ background: 'rgba(0,0,0,0.5)' }}>
+                        <Move className="h-3.5 w-3.5" /> 드래그해서 위치 조정
+                      </div>
+                    </div>
+                    {/* 삭제 버튼 */}
+                    <button onClick={(e) => { e.stopPropagation(); setCoverImage(null); setCoverFile(null); setCoverPosition({ x: 50, y: 50 }); }}
+                      className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-white/25 text-center">이미지를 드래그해서 위치를 조정하세요</p>
                 </div>
               ) : (
-                <button onClick={() => fileInputRef.current?.click()}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 py-8 text-sm text-white/30 hover:border-white/25 hover:text-white/50"
-                  style={{ background: 'rgba(255,255,255,0.03)' }}>
-                  <ImagePlus className="h-5 w-5" /> 이미지 추가
-                </button>
+                <div className="relative">
+                  <button onClick={() => setShowCoverDropdown(!showCoverDropdown)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 py-8 text-sm text-white/30 hover:border-white/25 hover:text-white/50"
+                    style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <ImagePlus className="h-5 w-5" /> 이미지 추가
+                  </button>
+                  {showCoverDropdown && (
+                    <div className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-xl border border-white/15 shadow-2xl"
+                      style={{ background: '#1e1e38' }}>
+                      <button onClick={() => { fileInputRef.current?.click(); setShowCoverDropdown(false); }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5">
+                        <ImagePlus className="h-4 w-4 text-white/40" /> 파일 업로드
+                      </button>
+                      <button onClick={() => { setShowUrlInput(true); setShowCoverDropdown(false); }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5 border-t border-white/6">
+                        <LinkIcon className="h-4 w-4 text-white/40" /> URL로 삽입
+                      </button>
+                    </div>
+                  )}
+                  {showUrlInput && (
+                    <div className="mt-2 flex gap-2">
+                      <input value={coverUrlInput} onChange={(e) => setCoverUrlInput(e.target.value)}
+                        placeholder="https://example.com/image.jpg"
+                        className="flex-1 rounded-xl border border-white/12 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30" />
+                      <button onClick={() => {
+                        if (coverUrlInput.trim()) {
+                          setCoverImage(coverUrlInput.trim());
+                          setCoverFile(null);
+                          setCoverPosition({ x: 50, y: 50 });
+                        }
+                        setShowUrlInput(false);
+                        setCoverUrlInput('');
+                      }}
+                        className="rounded-xl px-3 py-2.5 text-sm font-medium"
+                        style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                        삽입
+                      </button>
+                      <button onClick={() => { setShowUrlInput(false); setCoverUrlInput(''); }}
+                        className="rounded-xl px-2.5 text-white/30 hover:text-white/50">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             </div>
@@ -926,7 +1079,7 @@ function CreateGroupPageInner() {
               </button>
 
               {needDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-white/15 shadow-2xl"
+                <div className="absolute left-0 right-0 bottom-full z-50 mb-1 overflow-hidden rounded-xl border border-white/15 shadow-2xl"
                   style={{ background: '#1e1e38' }}>
                   <div className="border-b border-white/8 p-2">
                     <input value={needSearch} onChange={(e) => setNeedSearch(e.target.value)}
@@ -987,7 +1140,7 @@ function CreateGroupPageInner() {
 
             {/* 태그 */}
             <div>
-              <label className="mb-3 block text-[15px] font-medium text-white/75">태그 (최대 5개)</label>
+              <label className="mb-3 block text-[15px] font-medium text-white/75">태그 * <span className="text-xs text-white/30 font-normal">(최대 5개)</span></label>
               {tagList.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {tagList.map((tag) => (
@@ -1153,74 +1306,33 @@ function CreateGroupPageInner() {
             {/* 참여비 */}
             <div>
               <label className="mb-3 block text-[15px] font-medium text-white/75">참여비</label>
-              <div className="flex gap-2 mb-3">
-                <button onClick={() => { setFeeType('free'); setFee(0); }}
-                  className="flex flex-1 items-center justify-center rounded-xl border py-2.5 text-sm font-semibold transition-all"
-                  style={{
-                    borderColor: feeType === 'free' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
-                    background: feeType === 'free' ? 'rgba(255,217,61,0.1)' : 'transparent',
-                    color: feeType === 'free' ? '#ffd93d' : 'rgba(255,255,255,0.5)',
-                  }}>
-                  무료
-                </button>
-                <button onClick={() => setFeeType('paid')}
-                  className="flex flex-1 items-center justify-center rounded-xl border py-2.5 text-sm font-semibold transition-all"
-                  style={{
-                    borderColor: feeType === 'paid' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
-                    background: feeType === 'paid' ? 'rgba(255,217,61,0.1)' : 'transparent',
-                    color: feeType === 'paid' ? '#ffd93d' : 'rgba(255,255,255,0.5)',
-                  }}>
-                  유료
-                </button>
-              </div>
-
-              {feeType === 'paid' && (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {FEE_PRESETS.map((p) => (
-                      <Chip key={p.value} selected={fee === p.value} onClick={() => setFee(p.value)}>{p.label}</Chip>
-                    ))}
-                  </div>
-                  <div className="relative">
-                    <input type="number" value={fee || ''} onChange={(e) => setFee(Number(e.target.value))}
-                      placeholder="직접 입력"
-                      className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">원</span>
-                  </div>
-
-                  {/* 연속 모임 — 회당/총액 구분 */}
-                  {meetingType === 'series' && (
-                    <div className="flex gap-2">
-                      <button onClick={() => setFeeUnit('total')}
-                        className="flex flex-1 items-center justify-center rounded-lg border py-2 text-xs font-medium transition-all"
-                        style={{
-                          borderColor: feeUnit === 'total' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
-                          background: feeUnit === 'total' ? 'rgba(255,217,61,0.08)' : 'transparent',
-                          color: feeUnit === 'total' ? '#ffd93d' : 'rgba(255,255,255,0.4)',
-                        }}>
-                        총 참가비
-                      </button>
-                      <button onClick={() => setFeeUnit('per_session')}
-                        className="flex flex-1 items-center justify-center rounded-lg border py-2 text-xs font-medium transition-all"
-                        style={{
-                          borderColor: feeUnit === 'per_session' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
-                          background: feeUnit === 'per_session' ? 'rgba(255,217,61,0.08)' : 'transparent',
-                          color: feeUnit === 'per_session' ? '#ffd93d' : 'rgba(255,255,255,0.4)',
-                        }}>
-                        회당 참가비
-                      </button>
-                    </div>
-                  )}
-
-                  {fee > 0 && (
-                    <div className="text-xs text-white/40">
-                      {meetingType === 'onetime' && `참가비 ${fee.toLocaleString()}원`}
-                      {meetingType === 'series' && feeUnit === 'per_session' && `${fee.toLocaleString()}원/회 × ${seriesCount}회 = 총 ${(fee * seriesCount).toLocaleString()}원`}
-                      {meetingType === 'series' && feeUnit === 'total' && `총 ${fee.toLocaleString()}원 (${Math.round(fee / seriesCount).toLocaleString()}원/회 상당)`}
-                    </div>
-                  )}
+              <div className="space-y-3">
+                <p className="text-xs" style={{ color: 'rgba(255,217,61,0.6)' }}>1회 모임 3~7만원 권장</p>
+                {/* 별도비용 청구 금지 안내 */}
+                <div className="rounded-lg px-3.5 py-3 text-[11px] leading-relaxed" style={{ background: 'rgba(255,100,100,0.07)', border: '1px solid rgba(255,100,100,0.18)', color: 'rgba(255,180,180,0.7)' }}>
+                  <span className="font-semibold" style={{ color: 'rgba(255,130,130,0.9)' }}>별도 비용 청구 불가</span> — 교재·실습·재료비 등 모임에서 발생하는 모든 비용은 참가비에 포함되어야 합니다. 참가자에게 현장에서 추가 비용을 요구할 수 없습니다.
                 </div>
-              )}
+                <div className="flex flex-wrap gap-2">
+                  <Chip selected={fee === 0} onClick={() => setFee(0)}>무료</Chip>
+                  {FEE_PRESETS.map((p) => (
+                    <Chip key={p.value} selected={fee === p.value} onClick={() => setFee(p.value)}>{p.label}</Chip>
+                  ))}
+                </div>
+                <div className="relative">
+                  <input type="number" value={fee || ''} onChange={(e) => setFee(Number(e.target.value))}
+                    placeholder="직접 입력 (0이면 무료)"
+                    className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 pr-8 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">원</span>
+                </div>
+                {fee > 0 && meetingType === 'series' && (
+                  <div className="text-xs text-white/50">
+                    1회당 {fee.toLocaleString()}원 × {seriesCount}회 = 총 {(fee * seriesCount).toLocaleString()}원
+                  </div>
+                )}
+                {fee > 0 && meetingType === 'onetime' && (
+                  <div className="text-xs text-white/50">참가비 {fee.toLocaleString()}원</div>
+                )}
+              </div>
             </div>
 
             {/* 최대 인원 */}
@@ -1234,6 +1346,55 @@ function CreateGroupPageInner() {
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/30">명</span>
               </div>
             </div>
+
+            {/* 비용 산정 가이드 */}
+            {fee > 0 && maxMembers > 0 && (() => {
+              const totalFeePerPerson = meetingType === 'series' ? fee * seriesCount : fee;
+              const totalRevenue = totalFeePerPerson * maxMembers;
+              const platformRate = 25;
+              const platformCut = Math.round(totalRevenue * platformRate / 100);
+              const leaderCut = totalRevenue - platformCut - rentalCost - otherCost;
+              return (
+                <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
+                  <p className="text-xs font-semibold" style={{ color: 'rgba(255,217,61,0.8)' }}>예상 수익 ({maxMembers}명 전원 참여 기준)</p>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span style={{ color: 'rgba(255,255,255,0.4)' }}>총 참가비 수입</span>
+                      <span style={{ color: 'rgba(255,255,255,0.75)' }}>{totalRevenue.toLocaleString()}원</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span style={{ color: 'rgba(255,255,255,0.4)' }}>바닥 플랫폼 수수료 ({platformRate}%)</span>
+                      <span style={{ color: 'rgba(255,100,100,0.7)' }}>−{platformCut.toLocaleString()}원</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span style={{ color: 'rgba(255,255,255,0.4)' }} className="shrink-0">공간 임대 예상 비용</span>
+                      <div className="relative flex-1">
+                        <input type="number" value={rentalCost || ''} onChange={(e) => setRentalCost(Number(e.target.value))}
+                          placeholder="0"
+                          className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white/25">원</span>
+                      </div>
+                      {rentalCost > 0 && <span style={{ color: 'rgba(255,100,100,0.7)' }}>−{rentalCost.toLocaleString()}원</span>}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span style={{ color: 'rgba(255,255,255,0.4)' }} className="shrink-0">기타 비용 <span className="text-white/20">(교재·실습 등)</span></span>
+                      <div className="relative flex-1">
+                        <input type="number" value={otherCost || ''} onChange={(e) => setOtherCost(Number(e.target.value))}
+                          placeholder="0"
+                          className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 pr-6 text-xs text-white outline-none placeholder:text-white/20 focus:border-amber-400/30" />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white/25">원</span>
+                      </div>
+                      {otherCost > 0 && <span style={{ color: 'rgba(255,100,100,0.7)' }}>−{otherCost.toLocaleString()}원</span>}
+                    </div>
+                    <div className="my-1 border-t" style={{ borderColor: 'rgba(255,217,61,0.12)' }} />
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span style={{ color: 'rgba(255,217,61,0.9)' }}>바닥장 예상 수익</span>
+                      <span style={{ color: leaderCut >= 0 ? 'rgba(255,217,61,0.9)' : 'rgba(255,100,100,0.8)' }}>{leaderCut.toLocaleString()}원</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1381,27 +1542,28 @@ function CreateGroupPageInner() {
             {/* 개인 이력 */}
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-[15px] font-medium text-white/75">개인 이력 (선택)</label>
-                <button
-                  type="button"
-                  onClick={() => handleSyncCareer(!syncCareer)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
-                  style={{
-                    background: syncCareer ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
-                    color: syncCareer ? '#ffd93d' : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${syncCareer ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                  }}
-                >
-                  {syncCareer ? '프로필 반영 중' : '프로필 반영'}
-                </button>
+                <label className="text-[15px] font-medium text-white/75">개인 이력 *</label>
+                {leaderProfile?.career && (
+                  <button
+                    type="button"
+                    onClick={importCareerFromProfile}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'rgba(255,255,255,0.4)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    프로필에서 가져오기
+                  </button>
+                )}
               </div>
               <textarea
                 value={leaderCareer}
-                onChange={(e) => { if (!syncCareer) setLeaderCareer(e.target.value); }}
-                disabled={syncCareer}
+                onChange={(e) => setLeaderCareer(e.target.value)}
                 placeholder="주요 경력, 전문 분야, 성과 등을 적어주세요"
                 rows={3}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40 disabled:opacity-50"
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
               />
             </div>
 
@@ -1409,29 +1571,46 @@ function CreateGroupPageInner() {
             <div>
               <div className="mb-3 flex items-center justify-between">
                 <label className="text-[15px] font-medium text-white/75">바닥장 소개 * <span className="text-xs text-white/30 font-normal">(10자 이상)</span></label>
-                <button
-                  type="button"
-                  onClick={() => handleSyncBio(!syncBio)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
-                  style={{
-                    background: syncBio ? 'rgba(255,217,61,0.12)' : 'rgba(255,255,255,0.05)',
-                    color: syncBio ? '#ffd93d' : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${syncBio ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                  }}
-                >
-                  {syncBio ? '프로필 반영 중' : '프로필 반영'}
-                </button>
+                {leaderProfile?.bio && (
+                  <button
+                    type="button"
+                    onClick={importBioFromProfile}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'rgba(255,255,255,0.4)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    프로필에서 가져오기
+                  </button>
+                )}
               </div>
               <textarea
                 value={leaderReason}
-                onChange={(e) => { if (!syncBio) setLeaderReason(e.target.value); }}
-                disabled={syncBio}
+                onChange={(e) => setLeaderReason(e.target.value)}
                 placeholder="왜 이 모임을 열고 싶은지, 참여자에게 어떤 도움이 되는지 적어주세요"
                 rows={5}
-                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40 disabled:opacity-50"
+                className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40"
               />
               <div className="mt-1 text-right text-[10px] text-white/20">{leaderReason.length}자</div>
             </div>
+
+            {/* 마이페이지에도 저장 */}
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/8 px-4 py-3.5"
+              style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div
+                onClick={() => setSaveToProfile(!saveToProfile)}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all"
+                style={{
+                  borderColor: saveToProfile ? '#ffd93d' : 'rgba(255,255,255,0.2)',
+                  background: saveToProfile ? 'rgba(255,217,61,0.15)' : 'transparent',
+                }}
+              >
+                {saveToProfile && <Check className="h-3 w-3 text-amber-400" />}
+              </div>
+              <span className="text-xs text-white/50">이 내용을 마이페이지 이력·소개에도 저장하기</span>
+            </label>
 
             <div className="rounded-xl border border-white/8 px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <p className="text-xs text-white/35 leading-relaxed">

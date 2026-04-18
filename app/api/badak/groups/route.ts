@@ -24,7 +24,11 @@ export async function GET(request: NextRequest) {
     .order('event_date', { ascending: true })
     .limit(limit);
 
-  if (status) query = query.eq('status', status);
+  if (status) {
+    query = query.eq('status', status);
+  } else {
+    query = query.neq('status', 'pending_review');
+  }
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
@@ -51,11 +55,17 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  // 조건 1: 니즈 연결 시 20명 이상 관심이어야 모임 개설 가능
-  if (body.needId) {
+  const groupType = body.groupType || 'community';
+  // community 모임은 반드시 관리자 승인 필요 (pending_review)
+  // curated(관리자 직접 개설)만 바로 recruiting
+  const initialStatus = groupType === 'curated' ? 'recruiting' : 'pending_review';
+
+  // 임계값 체크: curated(직접 개설)인 경우만 15명 기준 적용
+  // pending_review(바닥장 신청)는 관리자가 검토하므로 제한 없음
+  if (groupType === 'curated' && body.needId) {
     const { data: need } = await supabase
       .from('badak_needs')
-      .select('count, threshold')
+      .select('count')
       .eq('id', body.needId)
       .single();
 
@@ -66,10 +76,6 @@ export async function POST(request: NextRequest) {
       );
     }
   }
-
-  const groupType = body.groupType || 'community';
-  // 조건 2: community 모임은 반드시 관리자 승인 필요 (pending_review)
-  const initialStatus = groupType === 'curated' ? 'recruiting' : 'pending_review';
 
   // schedule 디스플레이 문자열 생성
   const meetingType = body.meetingType || 'onetime';
@@ -128,14 +134,6 @@ export async function POST(request: NextRequest) {
     status: 'approved',
   });
 
-  // 연결된 니즈 상태 업데이트
-  if (body.needId) {
-    await supabase
-      .from('badak_needs')
-      .update({ status: 'group_created', updated_at: new Date().toISOString() })
-      .eq('id', body.needId);
-  }
-
   return NextResponse.json({ group });
 }
 
@@ -177,8 +175,26 @@ export async function PUT(request: NextRequest) {
   if (body.maxMembers !== undefined) updates.max_members = body.maxMembers;
   if (body.fee !== undefined) updates.fee = body.fee;
   if (body.tags !== undefined) updates.tags = body.tags;
-  if (body.status !== undefined) updates.status = body.status;
   if (body.coverImageUrl !== undefined) updates.cover_image_url = body.coverImageUrl;
+
+  // 리더가 변경 가능한 상태 전환만 허용
+  if (body.status !== undefined) {
+    const LEADER_ALLOWED: Record<string, string[]> = {
+      recruiting: ['confirmed', 'closed'],
+      confirmed: ['recruiting', 'closed'],
+    };
+    const { data: currentGroup } = await supabase
+      .from('badak_groups')
+      .select('status')
+      .eq('id', body.groupId)
+      .single();
+
+    const allowed = currentGroup ? (LEADER_ALLOWED[currentGroup.status] ?? []) : [];
+    if (!allowed.includes(body.status)) {
+      return NextResponse.json({ error: '허용되지 않은 상태 전환입니다' }, { status: 400 });
+    }
+    updates.status = body.status;
+  }
 
   const { data: updated, error } = await supabase
     .from('badak_groups')

@@ -24,7 +24,8 @@ interface CardInnerProps {
 }
 
 function CardInner({ item, linked = false, onLeaderClick }: CardInnerProps) {
-  const bs = BADGE_STYLES[item.badge] ?? BADGE_STYLES['니즈 모이는 중'];
+  const DEFAULT_BADGE = { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: 'rgba(255,255,255,0.1)' };
+  const bs = BADGE_STYLES[item.badge] ?? DEFAULT_BADGE;
 
   // 리더 이름 파싱 — "바닥장 김도현" → { isLeader: true, name: "김도현" }
   const parseLeader = (raw?: string) => {

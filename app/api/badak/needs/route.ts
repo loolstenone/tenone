@@ -6,8 +6,34 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-// POST: 새 니즈 제출 — 동일 텍스트면 count++, 없으면 신규 생성(pending)
-// 스팸 방지: 신규 니즈 생성은 인증 사용자만 허용. 기존 니즈 count++ 은 누구나 가능.
+const DAILY_LIMIT = 5;
+const MERGE_THRESHOLD = 0.85;
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return request.headers.get('x-real-ip') ?? 'unknown';
+}
+
+async function generateEmbedding(text: string): Promise<number[] | null> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const res = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: 'text-embedding-3-small', input: text }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data?.[0]?.embedding ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// POST: 새 니즈 제출 — 의미 유사(>0.85) 있으면 자동 머지, 없으면 신규 생성(pending)
+// 하루 5개 한도: 비로그인=IP 기준, 로그인=user_id 기준
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -19,10 +45,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '60자 이하로 입력해주세요.' }, { status: 400 });
     }
 
-    // 인증 토큰 추출 (없으면 비로그인 사용자)
+    // 인증 토큰 추출
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-    let isAuthenticated = false;
+    let userId: string | null = null;
 
     if (token) {
       const userClient = createClient(
@@ -30,35 +56,82 @@ export async function POST(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       );
       const { data: { user } } = await userClient.auth.getUser(token);
-      isAuthenticated = !!user;
+      userId = user?.id ?? null;
     }
 
-    // 동일 텍스트 존재 여부 확인 (대소문자·공백 무시)
-    const { data: existing } = await supabase
-      .from('badak_needs')
-      .select('id, count')
-      .ilike('display_text', text)
-      .maybeSingle();
+    const clientIp = getClientIp(request);
 
-    if (existing) {
-      // 기존 니즈 카운트 증가 — 비로그인도 허용 (누구나 공감 가능)
-      await supabase
+    // 1단계: 임베딩 생성 후 의미 유사 니즈 검색
+    const embedding = await generateEmbedding(text);
+
+    if (embedding) {
+      const { data: similar } = await supabase.rpc('match_badak_needs', {
+        query_embedding: embedding,
+        match_threshold: MERGE_THRESHOLD,
+        match_count: 1,
+      });
+      if (similar && similar.length > 0) {
+        const newCount = similar[0].count + 1;
+        await supabase
+          .from('badak_needs')
+          .update({ count: newCount })
+          .eq('id', similar[0].id);
+        return NextResponse.json({ status: 'merged', id: similar[0].id, count: newCount });
+      }
+    } else {
+      // OpenAI 키 없을 때 폴백: 정확한 텍스트 매칭
+      const { data: existing } = await supabase
         .from('badak_needs')
-        .update({ count: existing.count + 1 })
-        .eq('id', existing.id);
-      return NextResponse.json({ status: 'incremented', id: existing.id });
+        .select('id, count')
+        .ilike('display_text', text)
+        .maybeSingle();
+      if (existing) {
+        const newCount = existing.count + 1;
+        await supabase
+          .from('badak_needs')
+          .update({ count: newCount })
+          .eq('id', existing.id);
+        return NextResponse.json({ status: 'incremented', id: existing.id, count: newCount });
+      }
     }
 
-    // 신규 니즈 — 인증 사용자만 생성 허용 (스팸 방지)
-    if (!isAuthenticated) {
-      // 비로그인: 조용히 성공 처리 (클라이언트 UX 유지) — 실제로는 DB 저장 안 함
-      return NextResponse.json({ status: 'submitted', note: 'login_required_for_new' });
+    // 2단계: 신규 니즈 — 하루 5개 한도 체크
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // 로그인 사용자: user_id 기준, 비로그인: IP 기준
+    const rateLimitQuery = userId
+      ? supabase
+          .from('badak_needs')
+          .select('id', { count: 'exact', head: true })
+          .eq('created_by_user_id', userId)
+          .gte('created_at', todayStart.toISOString())
+      : supabase
+          .from('badak_needs')
+          .select('id', { count: 'exact', head: true })
+          .eq('created_by_ip', clientIp)
+          .gte('created_at', todayStart.toISOString());
+
+    const { count: todayCount } = await rateLimitQuery;
+
+    if ((todayCount ?? 0) >= DAILY_LIMIT) {
+      return NextResponse.json(
+        { error: `하루 ${DAILY_LIMIT}개까지 새 니즈를 등록할 수 있습니다.` },
+        { status: 429 },
+      );
     }
 
-    // 신규 니즈 — pending_review 상태로 저장 (Badak이 검토 후 active로 전환)
+    // 3단계: 신규 니즈 — pending_review 상태로 저장 (임베딩 포함)
     const { data: created, error: insertError } = await supabase
       .from('badak_needs')
-      .insert({ display_text: text, count: 1, status: 'pending_review' })
+      .insert({
+        display_text: text,
+        count: 1,
+        status: 'pending_review',
+        created_by_ip: clientIp,
+        created_by_user_id: userId,
+        embedding: embedding ? JSON.stringify(embedding) : null,
+      })
       .select('id')
       .single();
 
@@ -71,6 +144,56 @@ export async function POST(request: NextRequest) {
   }
 }
 
+async function requireAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { data: member } = await supabase
+    .from('badak_members')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+
+  if (member?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  return { userId: user.id };
+}
+
+const VALID_NEED_STATUSES = ['pending_review', 'gathering', 'group_created', 'rejected'] as const;
+
+// PUT: 관리자 상태 변경
+export async function PUT(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
+
+  const body = await request.json();
+  const { id, status } = body;
+  if (!id || !status) return NextResponse.json({ error: 'id and status required' }, { status: 400 });
+  if (!VALID_NEED_STATUSES.includes(status)) {
+    return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+  }
+  const { error } = await supabase.from('badak_needs').update({ status }).eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ updated: true });
+}
+
+// DELETE: 관리자 니즈 삭제
+export async function DELETE(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const { error } = await supabase.from('badak_needs').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ deleted: true });
+}
+
 // GET: 니즈 목록 (관심 인원 많은 순, 최대 100개) + 연결된 모임 전체
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -79,13 +202,14 @@ export async function GET(request: NextRequest) {
   const { data: needs, error } = await supabase
     .from('badak_needs')
     .select(`
-      id, display_text, count, interest_count, fire_count, status,
+      id, display_text, count, interest_count, fire_count, status, tags,
       groups:badak_groups!need_id(
         id, title, meeting_type, max_members, current_members,
         schedule, location, event_date, status,
         leader:badak_members!badak_groups_leader_id_fkey(display_name, job_function)
       )
     `)
+    .not('status', 'in', '("pending_review","rejected")')
     .order('count', { ascending: false })
     .limit(limit);
 

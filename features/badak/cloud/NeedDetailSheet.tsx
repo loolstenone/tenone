@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Crown, ChevronRight, Plus, Users } from 'lucide-react';
+import { Crown, ChevronRight, Plus, ArrowLeft, Share2 } from 'lucide-react';
 import type { CloudWord, CloudGroup } from '@/types/badak';
 import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { useAuth } from '@/lib/auth-context';
@@ -56,9 +56,13 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
   // 카운트 초기값: word.members (실제 관심 인원) 우선, 없으면 interestCount
   const [count, setCount] = useState(0);
   const [reactLoading, setReactLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
   const pendingAction = useRef<PendingAction>(null);
   // 첫 마운트 여부 — 애니메이션 재실행 방지
   const [appeared, setAppeared] = useState(false);
+  // 바닥장 신청 인라인 폼
+  const [showLeaderForm, setShowLeaderForm] = useState(false);
+  const [leaderDone, setLeaderDone] = useState(false);
 
   // word 바뀌면 초기화
   useEffect(() => {
@@ -66,6 +70,8 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
     setMessage('');
     setSelectedGroupIdx(0);
     setInterested(false);
+    setShowLeaderForm(false);
+    setLeaderDone(false);
     // members = 니즈 제출 인원수(=관심 총합), interestCount는 버튼 클릭 수
     // 둘 중 큰 값을 표시 (더 정확한 쪽)
     const base = Math.max(word?.members ?? 0, word?.interestCount ?? 0);
@@ -96,10 +102,9 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       pendingAction.current = null;
       setShowLogin(false);
       if (action === 'leader') {
-        router.push('/badak/groups/create');
-        onClose();
+        setShowLeaderForm(true);
       } else if (action === 'join') {
-        setJoinDone(true);
+        handleJoin();
       } else if (action === 'interest') {
         handleInterest();
       }
@@ -123,11 +128,11 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
 
   async function handleInterest() {
     if (!isAuthenticated) { requireLogin('interest'); return; }
-    if (interested) return; // 이미 관심 등록됨
 
     // 낙관적 UI 업데이트 (needId 없어도 UI는 반응)
-    setInterested(true);
-    setCount((c) => c + 1);
+    const wasInterested = interested;
+    setInterested(!wasInterested);
+    setCount((c) => wasInterested ? Math.max(0, c - 1) : c + 1);
 
     const needId = word?.needId;
     if (!needId) return; // Mock 데이터 — UI만 반응
@@ -137,11 +142,9 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) return;
       const res = await postInterest(needId, message, session.access_token);
-      // 서버 응답으로 보정
-      if (res.action === 'removed') {
-        setInterested(false);
-        setCount((c) => Math.max(0, c - 1));
-      }
+      // 서버 응답으로 보정 (낙관적 업데이트와 불일치 시 롤백)
+      if (res.action === 'added') { setInterested(true); }
+      else if (res.action === 'removed') { setInterested(false); setCount((c) => Math.max(0, c - (wasInterested ? 0 : 1))); }
     } catch {
       // silent
     } finally {
@@ -149,11 +152,31 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
     }
   }
 
+  async function handleJoin() {
+    if (!isAuthenticated) { requireLogin('join'); return; }
+    const groupId = allGroups[selectedGroupIdx]?.id;
+    if (!groupId) return;
+    setJoinLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await fetch(`/api/badak/groups/${groupId}/join`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (res.ok || res.status === 409) setJoinDone(true);
+      else console.error('join error', data.error);
+    } catch {
+      // silent
+    } finally {
+      setJoinLoading(false);
+    }
+  }
+
   const handleLeader = () => {
     if (!isAuthenticated) { requireLogin('leader'); return; }
-    // router.push 먼저 — onClose()가 컴포넌트를 언마운트하기 전에 라우터 실행
-    router.push('/badak/groups/create');
-    onClose();
+    setShowLeaderForm(true);
   };
 
   const handleGoGroup = (groupId: string) => {
@@ -167,6 +190,26 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
 
   // ── 바텀 시트 내용 ──
   const renderBottomContent = () => {
+    if (leaderDone) {
+      return (
+        <div className="py-6 text-center">
+          <div className="mb-2 text-2xl">🙌</div>
+          <div className="text-sm font-semibold text-white/80">바닥장 신청이 완료됐어요!</div>
+          <div className="mt-1 text-xs text-white/35">검토 후 3일 이내 이메일로 연락드릴게요</div>
+        </div>
+      );
+    }
+
+    if (showLeaderForm) {
+      return (
+        <LeaderApplyForm
+          word={word}
+          onBack={() => setShowLeaderForm(false)}
+          onSuccess={() => { setShowLeaderForm(false); setLeaderDone(true); }}
+        />
+      );
+    }
+
     if (joinDone) {
       return (
         <div className="py-6 text-center">
@@ -202,10 +245,8 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
 
           <GroupCard
             group={allGroups[selectedGroupIdx]}
-            onJoin={() => {
-              if (!isAuthenticated) { requireLogin('join'); return; }
-              setJoinDone(true);
-            }}
+            onJoin={handleJoin}
+            joinLoading={joinLoading}
             onGoGroup={handleGoGroup}
             message={message}
             onMessageChange={setMessage}
@@ -388,17 +429,36 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
         }}
       >
         {/* 타이틀 */}
-        <div className="mb-3">
-          <div className="text-base font-bold tracking-tight text-white sm:text-lg">
-            {hasGroups
-              ? allGroups.length > 1
-                ? `"${word.text}" 모임 ${allGroups.length}개`
-                : allGroups[0].title
-              : word.text}
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="text-base font-bold tracking-tight text-white sm:text-lg">
+              {hasGroups
+                ? allGroups.length > 1
+                  ? `"${word.text}" 모임 ${allGroups.length}개`
+                  : allGroups[0].title
+                : word.text}
+            </div>
+            {hasGroups && allGroups.length === 1 && (
+              <p className="mt-0.5 text-[11px] text-white/35">{word.text}</p>
+            )}
           </div>
-          {hasGroups && allGroups.length === 1 && (
-            <p className="mt-0.5 text-[11px] text-white/35">{word.text}</p>
-          )}
+          <button
+            type="button"
+            onClick={async () => {
+              const shareText = `"${word.text}" — 바닥 니즈`;
+              const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/badak` : 'https://badak.biz';
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: shareText, url: shareUrl });
+                } else {
+                  await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+                }
+              } catch { /* 취소 시 무시 */ }
+            }}
+            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 text-white/30 transition-colors hover:border-white/25 hover:text-white/60"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+          </button>
         </div>
 
         {renderBottomContent()}
@@ -407,16 +467,190 @@ export function NeedDetailSheet({ word, onClose, allWords, onSelectWord }: NeedD
   );
 }
 
+// ── 바닥장 신청 폼 ──
+function LeaderApplyForm({
+  word,
+  onBack,
+  onSuccess,
+}: {
+  word: CloudWord | null;
+  onBack: () => void;
+  onSuccess: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [experience, setExperience] = useState('');
+  const [reason, setReason] = useState('');
+  const [plan, setPlan] = useState('');
+  const [contact, setContact] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const canSubmit = name.trim().length > 1 && experience.trim().length > 10 && reason.trim().length >= 20 && contact.trim().length > 3;
+
+  const handleSubmit = async () => {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) { setError('로그인이 필요합니다'); setSubmitting(false); return; }
+      const res = await fetch('/api/badak/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          name: name.trim(),
+          experience: experience.trim(),
+          reason: reason.trim(),
+          plan: plan.trim() || null,
+          contact: contact.trim(),
+          needId: word?.needId ?? null,
+          needText: word?.text ?? null,
+          interests: word?.text ? [word.text] : [],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? '신청 중 오류가 발생했어요'); setSubmitting(false); return; }
+      onSuccess();
+    } catch {
+      setError('네트워크 오류가 발생했어요. 다시 시도해 주세요.');
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* 헤더 */}
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-white/40 transition-colors hover:text-white/70"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+        </button>
+        <div>
+          <div className="text-sm font-bold text-white">바닥장 신청</div>
+          <div className="text-[10px] text-white/35">
+            {word?.text && <span className="text-amber-400/60">&ldquo;{word.text}&rdquo; </span>}
+            관련 모임 바닥장 신청
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {/* 이름 */}
+        <div>
+          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+            이름 <span className="text-amber-400/70">*필수</span>
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={20}
+            placeholder="실명으로 입력해 주세요"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+          />
+        </div>
+
+        {/* 경력·이력 소개 */}
+        <div>
+          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+            경력·이력 소개 <span className="text-amber-400/70">*필수</span>
+          </label>
+          <textarea
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            maxLength={300}
+            rows={3}
+            placeholder="현재 직무, 연차, 전문 분야를 간단히 소개해 주세요"
+            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+          />
+          <div className="mt-0.5 text-right text-[10px] text-white/20">{experience.length}/300</div>
+        </div>
+
+        {/* 신청 이유 */}
+        <div>
+          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+            신청 이유 <span className="text-amber-400/70">*필수 (20자 이상)</span>
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder="이 니즈로 어떤 모임을 만들고 싶은지, 참여자에게 어떤 가치를 줄 수 있는지 알려주세요"
+            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+          />
+          <div className={`mt-0.5 text-right text-[10px] ${reason.length >= 20 ? 'text-green-400/50' : 'text-white/20'}`}>{reason.length}/500</div>
+        </div>
+
+        {/* 활동 계획 (선택) */}
+        <div>
+          <label className="mb-1 block text-[11px] font-semibold text-white/50">활동 계획 <span className="text-white/25">(선택)</span></label>
+          <textarea
+            value={plan}
+            onChange={(e) => setPlan(e.target.value)}
+            maxLength={300}
+            rows={2}
+            placeholder="모임 주제, 주기, 진행 방식 등 (선택)"
+            className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+          />
+        </div>
+
+        {/* 연락처 */}
+        <div>
+          <label className="mb-1 block text-[11px] font-semibold text-white/50">
+            연락처 <span className="text-amber-400/70">*필수</span>
+          </label>
+          <input
+            type="text"
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+            maxLength={100}
+            placeholder="이메일 또는 전화번호"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-amber-400/30"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          {error}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={!canSubmit || submitting}
+        className="mt-4 w-full rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-40"
+        style={{
+          background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #ffb347)' : 'rgba(255,255,255,0.08)',
+          color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
+        }}
+      >
+        {submitting ? '신청 중...' : '바닥장 신청하기'}
+      </button>
+      <p className="mt-2 text-center text-[10px] text-white/20">
+        검토 후 3일 이내 이메일로 결과를 알려드려요
+      </p>
+    </div>
+  );
+}
+
 // ── 모임 카드 ──
 function GroupCard({
   group: g,
   onJoin,
+  joinLoading,
   onGoGroup,
   message,
   onMessageChange,
 }: {
   group: CloudGroup;
   onJoin: () => void;
+  joinLoading?: boolean;
   onGoGroup: (id: string) => void;
   message: string;
   onMessageChange: (v: string) => void;
@@ -543,10 +777,11 @@ function GroupCard({
               <span className="text-[10px] text-white/20">{g.leaderName}(바닥장)에게 전달됩니다</span>
               <button
                 onClick={onJoin}
-                className="cursor-pointer rounded-lg border-none px-4 py-1.5 text-xs font-bold"
+                disabled={joinLoading}
+                className="cursor-pointer rounded-lg border-none px-4 py-1.5 text-xs font-bold disabled:opacity-50"
                 style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
               >
-                참여 신청
+                {joinLoading ? '신청 중…' : '참여 신청'}
               </button>
             </div>
           </div>

@@ -57,7 +57,7 @@ export async function PUT(
     .eq('group_id', groupId)
     .single();
   if (!membership) return NextResponse.json({ error: 'Membership not found' }, { status: 404 });
-  if (membership.status !== 'pending' && membership.status !== 'applied') {
+  if (membership.status !== 'applied') {
     return NextResponse.json({ error: 'Already processed' }, { status: 409 });
   }
 

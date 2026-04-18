@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 
 // 참여 독려 문구 — 바닥장/모임 참여를 이끄는 공감형 메시지
 const MESSAGES = [
@@ -66,9 +66,11 @@ interface ParticipationBannerProps {
 }
 
 export function ParticipationBanner({ offset = 0 }: ParticipationBannerProps) {
-  const msg = useMemo(() => {
+  const [msg, setMsg] = useState(MESSAGES[offset % MESSAGES.length]);
+
+  useEffect(() => {
     const idx = (Math.floor(Math.random() * MESSAGES.length) + offset) % MESSAGES.length;
-    return MESSAGES[idx];
+    setMsg(MESSAGES[idx]);
   }, [offset]);
 
   return (

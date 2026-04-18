@@ -1,5 +1,4 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { isTenoneFamily } from '@/lib/domain-registry';
 
 let client: ReturnType<typeof createBrowserClient> | null = null;
 
@@ -8,19 +7,23 @@ let client: ReturnType<typeof createBrowserClient> | null = null;
  *
  * *.tenone.biz 도메인에서는 cookieOptions.domain='.tenone.biz'로 설정하여
  * 로그인 세션이 모든 서브도메인(domo.tenone.biz, jakka.tenone.biz 등)에서 공유된다.
- * 외부 도메인(badak.biz 등)에서는 domain 미지정 (해당 도메인 전용).
+ * 외부 도메인(badak.biz 등)이나 localhost에서는 domain 미지정 (해당 도메인 전용).
  */
 export function createClient() {
     if (client) return client;
 
     const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    // localhost는 제외 — browser rejects domain='.tenone.biz' on localhost (PKCE verifier cookie drop)
+    const cookieDomain = (hostname === 'tenone.biz' || hostname.endsWith('.tenone.biz'))
+        ? '.tenone.biz'
+        : undefined;
 
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookieOptions: {
-                ...(isTenoneFamily(hostname) && { domain: '.tenone.biz' }),
+                ...(cookieDomain && { domain: cookieDomain }),
                 path: '/',
             },
             auth: {

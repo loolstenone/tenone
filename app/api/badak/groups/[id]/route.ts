@@ -29,10 +29,19 @@ const GROUP_SELECT = `
 
 // GET /api/badak/groups/[id] — slug 또는 UUID로 모임 상세 조회
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+
+  // 인증 토큰 확인 (없으면 비공개 필드 제외)
+  const authHeader = req.headers.get('authorization');
+  let isAuthed = false;
+  if (authHeader) {
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) isAuthed = true;
+  }
 
   // UUID면 id로, 아니면 slug로 조회
   const field = isUUID(id) ? 'id' : 'slug';
@@ -76,9 +85,14 @@ export async function GET(
     related = relData ?? [];
   }
 
+  // 비인증 요청 시 내부 운영 필드 제거
+  const { guide, notice, leader_reason, leader_career, leader_bio, ...publicFields } = groupData as typeof groupData & {
+    guide: unknown; notice: unknown; leader_reason: unknown; leader_career: unknown; leader_bio: unknown;
+  };
+
   return NextResponse.json({
     group: {
-      ...groupData,
+      ...(isAuthed ? groupData : publicFields),
       members,
       reviews: [],
       related,

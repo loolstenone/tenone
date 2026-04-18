@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { CloudWord } from '@/types/badak';
 import { CLOUD_WORDS } from '@/lib/badak-cloud-data';
 import { CloudBubble } from '@/features/badak/cloud/CloudBubble';
@@ -11,14 +11,17 @@ import { getTimeBasedSky } from '@/lib/badak-cloud-data';
 import { createClient } from '@/lib/supabase/client';
 import { ChevronDown } from 'lucide-react';
 
+const COLORS_GROUP = ['#ffd93d', '#fbbf24', '#f59e0b', '#fcd34d'];
+const COLORS_DEFAULT = ['#94a3b8', '#a1a1aa', '#9ca3af', '#cbd5e1'];
+
 export default function BadakNextStage() {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [selectedWord, setSelectedWord] = useState<CloudWord | null>(null);
   const [sending, setSending] = useState(false);
   const [skyBg, setSkyBg] = useState('linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)');
   const [cloudWords, setCloudWords] = useState<CloudWord[]>(
     [...CLOUD_WORDS].sort((a, b) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
   );
+  const [sphereRadius, setSphereRadius] = useState(180);
 
   const SUB_COPIES = [
     '회사 밖에서도 통하는 사람이 되고 싶어.',
@@ -32,8 +35,13 @@ export default function BadakNextStage() {
   ];
   const [subCopy] = useState(() => SUB_COPIES[Math.floor(Math.random() * SUB_COPIES.length)]);
 
-  const [sphereRadius, setSphereRadius] = useState(180);
   const [spark, setSpark] = useState<{ x: number; y: number; tx: number; ty: number } | null>(null);
+
+  // Refs — no setState in hot path
+  const rotationRef = useRef({ x: 0, y: 0 });
+  const wordRefsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const sortedWordsRef = useRef<CloudWord[]>([]);
+  const sphereRadiusRef = useRef(180);
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const velocity = useRef({ x: 0, y: 0 });
@@ -42,18 +50,30 @@ export default function BadakNextStage() {
   const sphereRef = useRef<HTMLDivElement>(null);
   const inputAreaRef = useRef<HTMLDivElement>(null);
 
+  // Sorted words for rendering
+  const sortedWords = useMemo(() => {
+    const maxWords = sphereRadius < 180 ? 60 : 100;
+    return [...cloudWords]
+      .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
+      .slice(0, maxWords);
+  }, [cloudWords, sphereRadius]);
+
+  // Sync refs when sortedWords or radius change
+  useEffect(() => {
+    sortedWordsRef.current = sortedWords;
+  }, [sortedWords]);
+  useEffect(() => {
+    sphereRadiusRef.current = sphereRadius;
+  }, [sphereRadius]);
+
   // Time-based sky + responsive sphere radius
   useEffect(() => {
     const sky = getTimeBasedSky();
     setSkyBg(sky.bg);
     const updateRadius = () => {
       const w = window.innerWidth;
-      // 컨테이너 정사각형 크기 = radius * 2.2 (단어 extension 포함)
-      // 모바일: 화면 폭의 60% 기준 (140~180px) — 너무 크면 단어가 화면 밖으로 나감
-      //         Math.min으로 너무 큰 화면에서도 과도하지 않게 cap
       if (w < 640) {
-        const r = Math.min(170, Math.max(130, Math.floor(w * 0.42)));
-        setSphereRadius(r);
+        setSphereRadius(Math.min(170, Math.max(130, Math.floor(w * 0.42))));
       } else {
         setSphereRadius(220);
       }
@@ -63,21 +83,19 @@ export default function BadakNextStage() {
     return () => window.removeEventListener('resize', updateRadius);
   }, []);
 
-  // DB에서 니즈 100개 fetch (실패 시 Mock 유지)
+  // DB에서 니즈 100개 fetch
   useEffect(() => {
-    fetch('/api/badak/needs?limit=50&sort=members')
+    fetch('/api/badak/needs?limit=100')
       .then((r) => r.json())
       .then((data) => {
         if (data.words?.length > 0) {
-          setCloudWords(
-            [...data.words].sort((a: CloudWord, b: CloudWord) => (b.members ?? 0) - (a.members ?? 0)).slice(0, 50)
-          );
+          setCloudWords(data.words as CloudWord[]);
         }
       })
       .catch(() => {});
   }, []);
 
-  // Animation loop — auto-rotate idle + inertia after drag
+  // Animation loop — pure DOM mutation, zero React re-renders
   useEffect(() => {
     const FRICTION = 0.985;
     const IDLE_SPEED = 0.002;
@@ -85,40 +103,108 @@ export default function BadakNextStage() {
     let lastTime = performance.now();
 
     const animate = (now: number) => {
-      const dt = Math.min((now - lastTime) / 16.67, 3); // normalize to 60fps, cap at 3x
+      const dt = Math.min((now - lastTime) / 16.67, 3);
       lastTime = now;
 
+      // Update rotation
+      const rot = rotationRef.current;
       if (!isDragging.current) {
         const vx = velocity.current.x;
         const vy = velocity.current.y;
-        const hasInertia = Math.abs(vx) > MIN_VELOCITY || Math.abs(vy) > MIN_VELOCITY;
-
-        if (hasInertia) {
+        if (Math.abs(vx) > MIN_VELOCITY || Math.abs(vy) > MIN_VELOCITY) {
           const friction = Math.pow(FRICTION, dt);
           velocity.current.x *= friction;
           velocity.current.y *= friction;
-          setRotation((prev) => ({
-            x: prev.x + velocity.current.x * dt,
-            y: prev.y + velocity.current.y * dt,
-          }));
+          rot.x += velocity.current.x * dt;
+          rot.y += velocity.current.y * dt;
         } else {
           velocity.current = { x: 0, y: 0 };
-          setRotation((prev) => ({
-            // x-tilt를 서서히 0으로 복귀 → 항상 수평 궤도로 자연스럽게 돌아옴
-            x: prev.x * Math.pow(0.97, dt),
-            y: prev.y + IDLE_SPEED * dt,
-          }));
+          rot.x *= Math.pow(0.97, dt);
+          rot.y += IDLE_SPEED * dt;
         }
       }
+
+      // Write positions directly to DOM
+      const words = sortedWordsRef.current;
+      const refs = wordRefsRef.current;
+      const radius = sphereRadiusRef.current;
+      const total = words.length;
+      if (total === 0) {
+        autoRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      const cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
+      const cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
+      const perspective = 600;
+      const isSmall = radius < 180;
+      const baseFontMax = isSmall ? 13 : 22;
+      const baseFontMin = isSmall ? 9 : 14;
+      const maxLen = isSmall ? 10 : 14;
+
+      for (let i = 0; i < total; i++) {
+        const el = refs[i];
+        if (!el) continue;
+        const word = words[i];
+
+        const phi = Math.acos(-1 + (2 * i + 1) / total);
+        const theta = Math.sqrt(total * Math.PI) * phi;
+
+        let sx = Math.cos(theta) * Math.sin(phi);
+        let sy = Math.sin(theta) * Math.sin(phi);
+        let sz = Math.cos(phi);
+
+        // Y-axis rotation
+        const rx = sx * cosY - sz * sinY;
+        sz = sx * sinY + sz * cosY;
+        sx = rx;
+
+        // X-axis rotation
+        const ry = sy * cosX - sz * sinX;
+        sz = sy * sinX + sz * cosX;
+        sy = ry;
+
+        const depth = (sz + 1) / 2;
+
+        if (depth < 0.2) {
+          if (el.style.display !== 'none') el.style.display = 'none';
+          continue;
+        }
+
+        const projScale = perspective / (perspective + radius - sz * radius);
+        const x = sx * radius * projScale;
+        const y = sy * radius * projScale;
+        const scale = projScale * (0.5 + depth * 0.5);
+        const opacity = Math.pow(depth, 1.5) * 0.9 + 0.1;
+        const fontSize = Math.max(baseFontMin, Math.min(baseFontMax, word.size * baseFontMin));
+        const color = (word.hasGroup ? COLORS_GROUP : COLORS_DEFAULT)[i % 4];
+
+        // Update text if maxLen changed
+        const display = word.text.length > maxLen ? word.text.slice(0, maxLen) + '…' : word.text;
+        if (el.textContent !== display) el.textContent = display;
+
+        el.style.display = 'block';
+        el.style.left = `calc(50% + ${x.toFixed(1)}px)`;
+        el.style.top = `calc(50% + ${y.toFixed(1)}px)`;
+        el.style.transform = `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
+        el.style.opacity = opacity.toFixed(3);
+        el.style.zIndex = String(Math.round(depth * 100));
+        el.style.fontSize = `${fontSize.toFixed(1)}px`;
+        el.style.fontWeight = depth > 0.6 ? '700' : '500';
+        el.style.color = color;
+        el.style.textShadow = depth > 0.7 ? '0 1px 6px rgba(0,0,0,0.4)' : 'none';
+        el.style.filter = depth < 0.35 ? `blur(${((1 - depth * 3) * 2).toFixed(1)}px)` : 'none';
+      }
+
       autoRef.current = requestAnimationFrame(animate);
     };
+
     autoRef.current = requestAnimationFrame((t) => { lastTime = t; animate(t); });
     return () => {
       if (autoRef.current) cancelAnimationFrame(autoRef.current);
     };
-  }, []);
+  }, []); // intentionally empty — uses only refs
 
-  // Mouse/touch drag — Google Earth style
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     isDragging.current = true;
     velocity.current = { x: 0, y: 0 };
@@ -133,22 +219,18 @@ export default function BadakNextStage() {
     const vx = -dy * 0.004;
     const vy = dx * 0.004;
     velocity.current = { x: vx, y: vy };
-    setRotation((prev) => ({
-      x: prev.x + vx,
-      y: prev.y + vy,
-    }));
+    rotationRef.current.x += vx;
+    rotationRef.current.y += vy;
   }, []);
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
-    // velocity remains — inertia picks up in animation loop
   }, []);
 
-  // 니즈 제출 — spark 애니메이션 + DB POST
-  const handleSend = useCallback((text: string) => {
+  // 니즈 제출 — spark 애니메이션 + DB POST → 결과 반환
+  const handleSend = useCallback(async (text: string) => {
     setSending(true);
 
-    // spark: 입력창 → 구 중심으로 날아가는 애니메이션
     if (inputAreaRef.current && sphereRef.current) {
       const inputRect = inputAreaRef.current.getBoundingClientRect();
       const sphereRect = sphereRef.current.getBoundingClientRect();
@@ -161,23 +243,24 @@ export default function BadakNextStage() {
       setTimeout(() => setSpark(null), 900);
     }
 
-    // DB에 니즈 제출 (실패해도 UX 차단 없음, 인증 토큰 첨부)
-    void (async () => {
-      try {
-        const supabase = createClient();
-        const { data: sessionData } = await supabase.auth.getSession();
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        const token = sessionData.session?.access_token;
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        await fetch('/api/badak/needs', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ text }),
-        });
-      } catch { /* silent */ }
-    })();
-
-    setTimeout(() => setSending(false), 800);
+    try {
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = sessionData.session?.access_token;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch('/api/badak/needs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      setSending(false);
+      return data as { status: string; count?: number; id?: string };
+    } catch {
+      setSending(false);
+      return { status: 'submitted' };
+    }
   }, []);
 
   const scrollToFeed = () => {
@@ -208,11 +291,7 @@ export default function BadakNextStage() {
           </p>
         </div>
 
-        {/* Needs Cloud — Sphere
-            ① flex-1 wrapper: 남은 세로 공간 채우며 구체를 수직 중앙 배치
-            ② 정사각형 inner: 구체 reference frame을 완벽한 정사각형으로 고정
-               → left/top 50%가 항상 같은 픽셀 기준을 가짐 = 찌그러짐 방지
-        */}
+        {/* Needs Cloud Sphere */}
         <div
           className="flex-1 flex items-center justify-center"
           style={{ touchAction: 'none', userSelect: 'none', cursor: isDragging.current ? 'grabbing' : 'grab' }}
@@ -221,7 +300,6 @@ export default function BadakNextStage() {
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         >
-          {/* 완전한 정사각형 컨테이너 — radius*2.4 = 구 지름(2r) + 단어 extension 여유 */}
           <div
             style={{
               position: 'relative',
@@ -231,7 +309,7 @@ export default function BadakNextStage() {
             }}
           >
             <div ref={sphereRef} className="absolute inset-0">
-              {/* 클라우드 중앙 레이블 */}
+              {/* 중앙 레이블 */}
               <div
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
                 style={{ zIndex: 0 }}
@@ -247,35 +325,25 @@ export default function BadakNextStage() {
                   Needs
                 </span>
               </div>
-              {(() => {
-                // 모바일(radius<180)에서는 60개, 그 외 100개 전체 표시
-                // 관심도(members) 높은 순으로 정렬
-                const maxWords = sphereRadius < 180 ? 60 : 100;
-                const sorted = [...cloudWords]
-                  .sort((a, b) => (b.members ?? 0) - (a.members ?? 0))
-                  .slice(0, maxWords);
-                return sorted.map((word, i) => (
-                  <CloudBubble
-                    key={word.text}
-                    word={word}
-                    index={i}
-                    total={sorted.length}
-                    rotation={rotation}
-                    radius={sphereRadius}
-                    onClick={setSelectedWord}
-                  />
-                ));
-              })()}
+
+              {sortedWords.map((word, i) => (
+                <CloudBubble
+                  key={word.needId ?? word.text}
+                  ref={(el) => { wordRefsRef.current[i] = el; }}
+                  word={word}
+                  maxLen={sphereRadius < 180 ? 10 : 14}
+                  onClick={setSelectedWord}
+                />
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Needs Input — Fixed at bottom of hero */}
+        {/* Needs Input */}
         <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'linear-gradient(transparent 0%, rgba(26,26,46,0.95) 30%)' }}>
           <div ref={inputAreaRef} className="mx-auto max-w-[500px]">
-            <NeedsInput onSend={handleSend} sending={sending} />
+            <NeedsInput onSend={handleSend as (text: string) => Promise<{ status: string; count?: number; id?: string }>} sending={sending} />
           </div>
-          {/* Scroll to feed button */}
           <button
             onClick={scrollToFeed}
             className="mx-auto mt-2 flex items-center gap-1 rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/30 hover:text-white/60 transition-colors cursor-pointer"
@@ -291,7 +359,7 @@ export default function BadakNextStage() {
         <FeedSection />
       </div>
 
-      {/* ===== Spark animation — flies to sphere center ===== */}
+      {/* Spark animation */}
       {spark && (
         <div
           className="pointer-events-none fixed z-[999] h-2 w-2 rounded-full"
@@ -307,7 +375,7 @@ export default function BadakNextStage() {
         />
       )}
 
-      {/* ===== Modals ===== */}
+      {/* Need Detail */}
       {selectedWord && (
         <NeedDetailSheet
           word={selectedWord}
@@ -316,7 +384,6 @@ export default function BadakNextStage() {
           onSelectWord={setSelectedWord}
         />
       )}
-
     </div>
   );
 }

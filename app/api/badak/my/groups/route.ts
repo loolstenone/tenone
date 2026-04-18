@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
           name: m?.display_name || '(알 수 없음)',
           job: expLabel,
           message: a.message || '',
-          status: a.status as 'pending' | 'approved' | 'rejected',
+          status: a.status as 'applied' | 'approved' | 'rejected',
           appliedAt: new Date(a.created_at).toLocaleDateString('ko-KR'),
         };
       });
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
         title: g.title,
         type: (g.meeting_type === 'once' ? 'once' : 'recurring') as 'once' | 'recurring',
         leaderName: g.leader?.display_name || '',
-        myStatus: j.status as 'pending' | 'approved' | 'rejected',
+        myStatus: j.status as 'applied' | 'approved' | 'rejected',
         nextDate: g.next_date || undefined,
         schedule: g.schedule || '',
         location: g.location || '',

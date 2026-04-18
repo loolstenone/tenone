@@ -14,7 +14,7 @@ export interface CloudGroup {
   eventDate?: string;
   schedule?: string;
   location: string;
-  status: 'recruiting' | 'confirmed' | 'closed';
+  status: 'pending_review' | 'recruiting' | 'confirmed' | 'completed' | 'closed';
 }
 
 export interface CloudWord {

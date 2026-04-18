@@ -16,7 +16,7 @@ import {
 import { MyProfileCard } from '@/components/MyProfileCard';
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'notifications' | 'settings';
-type ApplicantStatus = 'pending' | 'approved' | 'rejected';
+type ApplicantStatus = 'applied' | 'approved' | 'rejected';
 
 // ── 이력 항목 ──
 interface CareerEntry {
@@ -152,8 +152,15 @@ function GroupManageCard({
   const [activeSection, setActiveSection] = useState<'applicants' | 'members' | 'notice'>('applicants');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [togglingJoinType, setTogglingJoinType] = useState(false);
-  const pendingCount = group.applicants.filter((a) => a.status === 'pending').length;
+  const pendingCount = group.applicants.filter((a) => a.status === 'applied').length;
   const remaining = group.maxMembers - group.currentMembers;
+  const dDay = (() => {
+    if (!group.nextDate || group.joinType !== 'approval' || pendingCount === 0) return null;
+    const diff = Math.ceil((new Date(group.nextDate).getTime() - Date.now()) / 86400000);
+    if (diff < 0) return '마감';
+    if (diff === 0) return 'D-day';
+    return `D-${diff}`;
+  })();
 
   const handleApplicantAction = async (applicantId: string, action: ApplicantStatus) => {
     if (action !== 'approved' && action !== 'rejected') return;
@@ -195,6 +202,12 @@ function GroupManageCard({
             {pendingCount > 0 && (
               <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
                 {pendingCount}
+              </span>
+            )}
+            {dDay && (
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                style={{ background: dDay === '마감' ? 'rgba(255,255,255,0.06)' : 'rgba(255,107,107,0.15)', color: dDay === '마감' ? 'rgba(255,255,255,0.25)' : '#ff6b6b' }}>
+                승인 {dDay}
               </span>
             )}
           </div>
@@ -295,7 +308,7 @@ function GroupManageCard({
                       ) : (
                         <p className="mb-2 text-[11px] italic text-white/15">메시지 없음</p>
                       )}
-                      {app.status === 'pending' && (
+                      {app.status === 'applied' && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleApplicantAction(app.id, 'approved')}
@@ -1088,10 +1101,10 @@ export default function BadakMyPage() {
   // 내 모임 (실DB)
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
   const [joinedGroups, setJoinedGroups] = useState<JoinedGroup[]>([]);
-  const isLeader = myGroups.length > 0;
 
   // 멤버 역할
   const [memberRole, setMemberRole] = useState<string>('member');
+  const isLeader = memberRole === 'badakjang' || memberRole === 'admin';
 
   // 관심 (connections)
   interface ConnectionPeer {
@@ -1274,7 +1287,7 @@ export default function BadakMyPage() {
 
   const initials = nickname?.substring(0, 1) || user?.name?.substring(0, 1) || '?';
   const displayName = nickname || user?.name || '회원';
-  const pendingApplicants = myGroups.reduce((sum, g) => sum + g.applicants.filter((a) => a.status === 'pending').length, 0);
+  const pendingApplicants = myGroups.reduce((sum, g) => sum + g.applicants.filter((a) => a.status === 'applied').length, 0);
   const totalGroupCount = myGroups.length + joinedGroups.length;
 
   const handleToggleInterest = (item: string) => setInterests((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);

@@ -9,9 +9,12 @@ const supabase = createClient(url, key);
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get('filter') || '전체';
+  const showGroups = filter === '전체' || filter === '모임 확정' || filter === '마감 임박';
+  const showNeeds = filter === '전체' || filter === '니즈 모이는 중';
+  const showStories = filter === '전체' || filter === '스토리';
 
   // 모임 확정/마감 임박
-  const { data: groups } = await supabase
+  const { data: groups } = showGroups ? await supabase
     .from('badak_groups')
     .select(`
       id, title, status, max_members, current_members,
@@ -20,18 +23,18 @@ export async function GET(request: NextRequest) {
     `)
     .in('status', ['recruiting', 'confirmed'])
     .order('event_date', { ascending: true })
-    .limit(10);
+    .limit(10) : { data: [] };
 
   // 니즈 모이는 중
-  const { data: gatheringNeeds } = await supabase
+  const { data: gatheringNeeds } = showNeeds ? await supabase
     .from('badak_needs')
     .select('id, display_text, count, threshold')
     .eq('status', 'gathering')
     .order('count', { ascending: false })
-    .limit(5);
+    .limit(5) : { data: [] };
 
   // 스토리
-  const { data: stories } = await supabase
+  const { data: stories } = showStories ? await supabase
     .from('badak_stories')
     .select(`
       id, title, before_role, after_role,
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest) {
     `)
     .eq('published', true)
     .order('created_at', { ascending: false })
-    .limit(3);
+    .limit(3) : { data: [] };
 
   // Feed items 조합
   type FeedItemOut = {

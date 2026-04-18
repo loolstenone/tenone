@@ -38,10 +38,6 @@ export async function GET(request: NextRequest) {
     .eq('user_id', user.id)
     .single();
 
-  if (user.email === 'lools@tenone.biz') {
-    return NextResponse.json({ member: { ...member, role: 'admin' } });
-  }
-
   return NextResponse.json({ member });
 }
 

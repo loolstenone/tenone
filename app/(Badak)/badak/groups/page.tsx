@@ -9,6 +9,16 @@ import {
   SlidersHorizontal, ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { createClient } from '@/lib/supabase/client';
+
+type CategoryFilter = 'all' | 'free' | 'online' | 'offline' | 'closing_soon';
+const CATEGORIES: { key: CategoryFilter; label: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'free', label: '무료' },
+  { key: 'online', label: '온라인' },
+  { key: 'offline', label: '오프라인' },
+  { key: 'closing_soon', label: '마감임박' },
+];
 
 interface GroupItem {
   id: string;
@@ -25,9 +35,10 @@ interface GroupItem {
   cover_image_url: string | null;
   leader: { display_name: string; job_function: string; avatar_url?: string | null } | null;
   need: { display_text: string; count: number } | null;
+  created_at?: string;
 }
 
-// ── Mock 데이터 (DB 연동 전까지) ──
+// ── Mock 데이터 (개발·데모용 — 실DB에 데이터 없을 때만 사용) ──
 const MOCK_GROUPS: GroupItem[] = [
   {
     id: 'g1', slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임', description: 'B2B SaaS 마케팅 전략과 실무를 나누는 정기 모임입니다. 퍼포먼스 마케팅부터 콘텐츠 마케팅까지.',
@@ -101,14 +112,26 @@ const MOCK_GROUPS: GroupItem[] = [
     leader: { display_name: '데이터M', job_function: '데이터 분석가' },
     need: { display_text: '데이터 분석', count: 19 },
   },
+  {
+    id: 'g9', slug: 'career-transition-agency-inhouse',
+    title: '이직 준비 — 에이전시↔인하우스 경험 나누기',
+    description: '에이전시와 인하우스를 오간 마케터들이 실제 이직 경험을 솔직하게 나누는 4회차 시리즈 모임.',
+    status: 'recruiting', max_members: 25, current_members: 23,
+    event_date: '2026-04-22T19:30:00', location: '강남역', fee: 0,
+    tags: ['이직', '에이전시', '인하우스', '커리어'],
+    cover_image_url: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=560&h=200&fit=crop&auto=format',
+    leader: { display_name: '박서연', job_function: '브랜드 마케터' },
+    need: { display_text: '이직 준비', count: 51 },
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
 ];
 
-// 사용자 프로필 기반 추천 (Mock — 실제는 API에서 매칭)
-const USER_PROFILE = {
-  industry: '광고/에이전시',
-  jobFunction: '퍼포먼스 마케팅',
-  interests: ['네트워킹', '업무 스킬 향상', '이직 준비'],
-};
+interface BadakMemberProfile {
+  id: string;
+  job_function: string | null;
+  industry: string | null;
+  interest_tags: string[] | null;
+}
 
 const formatDate = (dateStr: string | null) => {
   if (!dateStr) return null;
@@ -207,6 +230,10 @@ function SlideSection({ title, icon, groups, emptyText }: {
 function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: React.RefObject<boolean> }) {
   const remaining = g.max_members - g.current_members;
   const isFull = remaining <= 0;
+  const remainingPct = remaining / g.max_members;
+  const isClosingSoon = !isFull && remainingPct <= 0.10;
+  const isHot = !isFull && !isClosingSoon && remainingPct <= 0.40;
+  const isNew = g.created_at ? (Date.now() - new Date(g.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000 : false;
 
   const statusStyle = (() => {
     switch (g.status) {
@@ -251,10 +278,19 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
 
       <div className="p-5">
         {/* 상태 뱃지 */}
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
           <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: statusStyle.bg, color: statusStyle.color }}>
             {statusStyle.label}
           </span>
+          {isClosingSoon && (
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>🔥 마감임박</span>
+          )}
+          {isHot && !isClosingSoon && (
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>Hot</span>
+          )}
+          {isNew && (
+            <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80' }}>New</span>
+          )}
           {g.fee === 0 ? (
             <span className="text-xs text-green-400/70">무료</span>
           ) : (
@@ -319,12 +355,13 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
 export default function GroupsPage() {
   const { user } = useAuth();
   const [groups, setGroups] = useState<GroupItem[]>([]);
+  const [myProfile, setMyProfile] = useState<BadakMemberProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const [category, setCategory] = useState<CategoryFilter>('all');
 
   useEffect(() => {
-    // DB 조회 시도 → 없으면 Mock
     fetch('/api/badak/groups')
       .then((r) => r.json())
       .then((data) => {
@@ -334,6 +371,21 @@ export default function GroupsPage() {
       })
       .catch(() => { setGroups(MOCK_GROUPS); setLoading(false); });
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session) return;
+      try {
+        const res = await fetch('/api/badak/members/me', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const data = await res.json();
+        if (data.member) setMyProfile(data.member);
+      } catch { /* 프로필 없으면 추천 섹션 숨김 */ }
+    })();
+  }, [user?.id]);
 
   // ── 섹션 분류 ──
   // Hot: 인원 충족률 높은 순 (모집중만)
@@ -352,22 +404,24 @@ export default function GroupsPage() {
     })
     .slice(0, 6);
 
-  // 추천: 사용자 직무/관심사 기반 매칭
+  // 추천: 로그인 사용자의 바닥 프로필 기반 매칭
   const recommendedGroups = groups
     .filter((g) => {
       if (g.status !== 'recruiting') return false;
+      if (!myProfile) return false;
+      const interests = myProfile.interest_tags ?? [];
+      const jobFn = myProfile.job_function ?? '';
       const matchTags = g.tags?.some((t) =>
-        USER_PROFILE.interests.some((i) => t.includes(i) || i.includes(t))
+        interests.some((i) => t.includes(i) || i.includes(t))
       );
-      const matchJob = g.leader?.job_function.includes(USER_PROFILE.jobFunction) ||
-        g.need?.display_text.includes('마케팅');
-      const matchDesc = g.title.includes('마케팅') || g.title.includes('네트워킹');
-      return matchTags || matchJob || matchDesc;
+      const matchJob = jobFn && (g.leader?.job_function?.includes(jobFn) ||
+        g.need?.display_text?.includes(jobFn));
+      return matchTags || matchJob;
     })
     .slice(0, 6);
 
-  // 전체 모임 (검색 필터)
-  const allFiltered = groups.filter((g) => {
+  // 전체 모임 (검색 + 카테고리 필터)
+  const searchFiltered = groups.filter((g) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
@@ -377,6 +431,15 @@ export default function GroupsPage() {
       g.need?.display_text.toLowerCase().includes(q)
     );
   });
+
+  const allFiltered = (() => {
+    const loc = (g: GroupItem) => g.location?.toLowerCase() ?? '';
+    if (category === 'free') return searchFiltered.filter(g => g.fee === 0);
+    if (category === 'online') return searchFiltered.filter(g => loc(g).includes('온라인') || loc(g).includes('zoom') || loc(g).includes('zep'));
+    if (category === 'offline') return searchFiltered.filter(g => g.location && !loc(g).includes('온라인') && !loc(g).includes('zoom') && !loc(g).includes('zep'));
+    if (category === 'closing_soon') return searchFiltered.filter(g => { const r = g.max_members - g.current_members; return r > 0 && r <= 3; });
+    return searchFiltered;
+  })();
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
@@ -456,16 +519,34 @@ export default function GroupsPage() {
         {/* 전체 모임 목록 */}
         {!loading && showAll && (
           <div className="px-5 sm:px-8">
-            <div className="mb-5 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-bold text-white">
                 전체 모임 <span className="ml-1.5 text-white/40">{allFiltered.length}</span>
               </h2>
               <button
-                onClick={() => { setShowAll(false); setSearch(''); }}
+                onClick={() => { setShowAll(false); setSearch(''); setCategory('all'); }}
                 className="text-sm text-white/40 hover:text-white/65"
               >
                 슬라이드 보기
               </button>
+            </div>
+
+            {/* 카테고리 필터 칩 */}
+            <div className="mb-5 flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.key}
+                  onClick={() => setCategory(cat.key)}
+                  className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all"
+                  style={{
+                    background: category === cat.key ? '#ffd93d' : 'rgba(255,255,255,0.07)',
+                    color: category === cat.key ? '#1a1a2e' : 'rgba(255,255,255,0.45)',
+                    border: category === cat.key ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
 
             {allFiltered.length === 0 ? (
@@ -479,7 +560,7 @@ export default function GroupsPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {allFiltered.map((g) => {
                   const remaining = g.max_members - g.current_members;
                   const isFull = remaining <= 0;
@@ -492,25 +573,44 @@ export default function GroupsPage() {
                   })();
 
                   return (
-                    <Link key={g.id} href={`/badak/groups/${g.id}`}
-                      className="flex gap-4 rounded-xl border border-white/8 p-5 no-underline transition-all hover:border-white/15"
+                    <Link key={g.id} href={`/badak/groups/${g.slug || g.id}`}
+                      className="flex gap-3 overflow-hidden rounded-xl border border-white/8 no-underline transition-all hover:border-white/15"
                       style={{ background: 'rgba(255,255,255,0.03)' }}>
-                      <div className="flex-1 min-w-0">
-                        <div className="mb-2 flex items-center gap-2">
-                          <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: st.bg, color: st.color }}>
+                      {/* 커버 썸네일 */}
+                      {g.cover_image_url && (
+                        <div className="h-[90px] w-[90px] shrink-0 overflow-hidden">
+                          <img src={g.cover_image_url} alt="" className="h-full w-full object-cover" />
+                        </div>
+                      )}
+                      <div className={`flex flex-1 min-w-0 flex-col justify-center py-3 ${!g.cover_image_url ? 'px-4' : 'pr-3'}`}>
+                        <div className="mb-1 flex items-center gap-1.5">
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: st.bg, color: st.color }}>
                             {st.label}
                           </span>
-                          {g.fee === 0 && <span className="text-xs text-green-400/70">무료</span>}
+                          {g.fee === 0
+                            ? <span className="text-[10px] text-green-400/70">무료</span>
+                            : <span className="text-[10px] text-white/30">{g.fee.toLocaleString()}원</span>
+                          }
+                          {!isFull && remaining <= 3 && (
+                            <span className="text-[10px] text-orange-400/70">잔여 {remaining}석</span>
+                          )}
                         </div>
-                        <h3 className="mb-2 text-[15px] font-bold text-white">{g.title}</h3>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-white/40">
-                          {g.event_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(g.event_date)}</span>}
-                          {g.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {g.location}</span>}
-                          <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {g.current_members}/{g.max_members}</span>
+                        <h3 className="mb-1 text-[14px] font-bold text-white line-clamp-1">{g.title}</h3>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-white/35 mb-1.5">
+                          {g.event_date && <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" /> {formatDate(g.event_date)}</span>}
+                          {g.location && <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" /> {g.location}</span>}
+                          <span className="flex items-center gap-1"><Users className="h-2.5 w-2.5" /> {g.current_members}/{g.max_members}명</span>
                         </div>
+                        {g.tags?.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {g.tags.slice(0, 3).map(t => (
+                              <span key={t} className="text-[10px] text-white/25">#{t}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex shrink-0 items-center">
-                        <ChevronRight className="h-5 w-5 text-white/20" />
+                      <div className="flex shrink-0 items-center pr-3">
+                        <ChevronRight className="h-4 w-4 text-white/15" />
                       </div>
                     </Link>
                   );

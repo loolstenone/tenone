@@ -25,6 +25,31 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ posts: posts || [] });
 }
 
+// PATCH: 관리자 숨김/표시 토글
+export async function PATCH(request: NextRequest) {
+  const body = await request.json();
+  const { id, is_hidden } = body;
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const { error } = await supabase
+    .from('badak_community_posts')
+    .update({ is_hidden })
+    .eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ updated: true });
+}
+
+// DELETE: 관리자 글 삭제
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  await supabase.from('badak_community_comments').delete().eq('post_id', id);
+  await supabase.from('badak_community_likes').delete().eq('post_id', id);
+  const { error } = await supabase.from('badak_community_posts').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ deleted: true });
+}
+
 // POST: 글 작성
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');

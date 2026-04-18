@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, X, Clock, Users, MapPin, Calendar, ChevronDown } from 'lucide-react';
+import { Check, X, Users, MapPin, Calendar, CheckCircle, TrendingUp } from 'lucide-react';
 
 interface GroupReview {
   id: string;
@@ -22,15 +22,25 @@ interface GroupReview {
   leader: { id: string; display_name: string; job_function: string; experience_years: number } | null;
 }
 
-type FilterStatus = 'pending_review' | 'recruiting' | 'rejected';
+type FilterStatus = 'pending_review' | 'recruiting' | 'rejected' | 'completed';
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_review: { label: '심사 대기', color: '#f59e0b', bg: 'bg-amber-500/10' },
-  recruiting: { label: '승인 (모집중)', color: '#22c55e', bg: 'bg-green-500/10' },
-  rejected: { label: '반려', color: '#ef4444', bg: 'bg-red-500/10' },
-  confirmed: { label: '확정', color: '#3b82f6', bg: 'bg-blue-500/10' },
-  closed: { label: '마감', color: '#6b7280', bg: 'bg-neutral-500/10' },
-  completed: { label: '완료', color: '#6b7280', bg: 'bg-neutral-500/10' },
+  recruiting:     { label: '모집중',    color: '#22c55e', bg: 'bg-green-500/10' },
+  rejected:       { label: '반려',      color: '#ef4444', bg: 'bg-red-500/10' },
+  confirmed:      { label: '확정',      color: '#3b82f6', bg: 'bg-blue-500/10' },
+  closed:         { label: '마감',      color: '#6b7280', bg: 'bg-neutral-500/10' },
+  completed:      { label: '완료',      color: '#8b5cf6', bg: 'bg-violet-500/10' },
+};
+
+interface PromotionToast {
+  from: string;
+  to: string;
+  leaderName: string;
+}
+
+const LEVEL_NAMES: Record<string, string> = {
+  S: 'Specialist', A: 'Veteran', B: 'Badakjang', C: 'Rookie',
 };
 
 export default function BadakGroupsReviewPage() {
@@ -39,6 +49,7 @@ export default function BadakGroupsReviewPage() {
   const [processing, setProcessing] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [toast, setToast] = useState<PromotionToast | null>(null);
 
   const fetchGroups = (status: string) => {
     fetch(`/api/badak/groups/review?status=${status}`)
@@ -72,22 +83,60 @@ export default function BadakGroupsReviewPage() {
     setProcessing(null);
   };
 
+  const handleComplete = async (group: GroupReview) => {
+    setProcessing(group.id);
+    const res = await fetch('/api/badak/groups/review', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId: group.id, action: 'complete' }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setGroups((prev) => prev.filter((g) => g.id !== group.id));
+
+      if (data.promoted) {
+        const leaderName = (group.leader as GroupReview['leader'])?.display_name ?? '바닥장';
+        setToast({ from: data.from, to: data.to, leaderName });
+        setTimeout(() => setToast(null), 5000);
+      }
+    }
+    setProcessing(null);
+  };
+
+  const FILTER_TABS: FilterStatus[] = ['pending_review', 'recruiting', 'rejected', 'completed'];
+
   return (
     <div className="space-y-6">
+      {/* 승급 토스트 */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-violet-600 px-5 py-4 shadow-xl text-white">
+          <TrendingUp className="h-5 w-5 shrink-0" />
+          <div>
+            <p className="text-sm font-bold">{toast.leaderName} 자동 승급!</p>
+            <p className="text-xs text-violet-200 mt-0.5">
+              {LEVEL_NAMES[toast.from]} → {LEVEL_NAMES[toast.to]}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Badak 모임 심사</h1>
-          <p className="text-sm text-neutral-500 mt-1">바닥장이 개설한 모임을 심사합니다</p>
+          <h1 className="text-xl font-bold">Badak 모임 관리</h1>
+          <p className="text-sm text-neutral-500 mt-1">모임 심사 및 완료 처리</p>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <span className="text-neutral-400">필터:</span>
-          {(['pending_review', 'recruiting', 'rejected'] as FilterStatus[]).map((s) => {
+          {FILTER_TABS.map((s) => {
             const st = STATUS_LABELS[s];
             return (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filter === s ? st.bg + ' border' : 'border border-neutral-200 text-neutral-500 hover:border-neutral-400'}`}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  filter === s ? st.bg + ' border' : 'border border-neutral-200 text-neutral-500 hover:border-neutral-400'
+                }`}
                 style={filter === s ? { color: st.color, borderColor: st.color + '40' } : undefined}
               >
                 {st.label}
@@ -219,6 +268,23 @@ export default function BadakGroupsReviewPage() {
                     <X className="h-3.5 w-3.5" />
                     {rejectingId === group.id ? '반려 확인' : '반려'}
                   </button>
+                </div>
+              )}
+
+              {/* 완료 처리 (모집중 / 확정 상태) */}
+              {(group.status === 'recruiting' || group.status === 'confirmed') && (
+                <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                  <button
+                    onClick={() => handleComplete(group)}
+                    disabled={processing === group.id}
+                    className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                  >
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    {processing === group.id ? '처리 중…' : '완료 처리'}
+                  </button>
+                  <span className="self-center text-[11px] text-neutral-400">
+                    완료 시 바닥장 완료 횟수 +1 · 승급 조건 자동 확인
+                  </span>
                 </div>
               )}
             </div>

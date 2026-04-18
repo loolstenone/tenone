@@ -107,8 +107,10 @@ export async function POST(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // current_members 원자적 증가 (race condition 방지)
-  await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
+  // 선착순만 즉시 증가. 승인제는 리더 승인 시 증가.
+  if (isFirstcome) {
+    await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
+  }
 
   // 알림 생성
   const { data: groupFull } = await supabase

@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { FeedItem } from '@/types/badak';
-import { FEED_ITEMS } from '@/lib/badak-cloud-data';
 import { FeedCard } from './FeedCard';
 import { FeedHighlights } from './FeedHighlights';
 import { QuoteBanner } from './QuoteBanner';
 import { ParticipationBanner } from './ParticipationBanner';
+import { X, Loader2, CheckCircle } from 'lucide-react';
 
 const TABS = ['전체', '모임 확정', '니즈 모이는 중', '마감 임박', '스토리'];
 const PAGE_SIZE = 4; // 첫 로드 수
@@ -20,24 +20,19 @@ function filterItems(items: FeedItem[], tab: string): FeedItem[] {
 
 export function FeedSection() {
   const [activeTab, setActiveTab] = useState('전체');
-  const [feedItems, setFeedItems] = useState<FeedItem[]>(FEED_ITEMS);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showInquiry, setShowInquiry] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // API 피드 로드
-  useEffect(() => {
-    fetch('/api/badak/feed')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.feed?.length > 0) setFeedItems(data.feed as FeedItem[]);
-      })
-      .catch(() => {});
-  }, []);
-
-  // 탭 전환 시 displayCount 초기화
+  // API 피드 로드 (탭 전환 시 재호출)
   useEffect(() => {
     setDisplayCount(PAGE_SIZE);
+    fetch(`/api/badak/feed?filter=${encodeURIComponent(activeTab)}`)
+      .then((r) => r.json())
+      .then((data) => { setFeedItems((data.feed as FeedItem[]) ?? []); })
+      .catch(() => {});
   }, [activeTab]);
 
   // IntersectionObserver — 센티넬이 보이면 더 로드
@@ -147,6 +142,167 @@ export function FeedSection() {
           </button>
         </div>
       )}
+
+      {/* 문의하기 */}
+      <div className="mt-4 pt-6 border-t border-white/5 text-center">
+        <p className="text-[11px] text-white/20 mb-2">궁금한 점이 있으신가요?</p>
+        <button
+          onClick={() => setShowInquiry(true)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
+          style={{ background: 'rgba(255,255,255,0.04)' }}
+        >
+          문의하기
+        </button>
+      </div>
+
+      {showInquiry && <InquiryModal onClose={() => setShowInquiry(false)} />}
+    </div>
+  );
+}
+
+function InquiryModal({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState('');
+  const [contact, setContact] = useState('');
+  const [category, setCategory] = useState('일반');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+
+  const CATEGORIES = ['일반', '모임 참여', '바닥장 신청', '계정/탈퇴', '오류 신고', '기타'];
+
+  const canSubmit = name.trim().length > 0 && message.trim().length >= 5;
+
+  const handleSubmit = async () => {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const isEmail = contact.includes('@');
+      const res = await fetch('/api/badak/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: isEmail ? contact.trim() : null,
+          phone: !isEmail ? contact.trim() : null,
+          category,
+          message: message.trim(),
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.error || '제출 실패');
+      } else {
+        setDone(true);
+      }
+    } catch {
+      setError('네트워크 오류가 발생했습니다');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.7)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="w-full max-w-[480px] rounded-t-2xl sm:rounded-2xl p-5 pb-8 sm:pb-5"
+        style={{ background: '#1e1e30', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-bold text-white">문의하기</h2>
+          <button onClick={onClose} className="text-white/30 hover:text-white/60 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="text-center py-6">
+            <CheckCircle className="h-10 w-10 text-amber-400 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-white mb-1">문의가 접수됐어요</p>
+            <p className="text-xs text-white/40">빠른 시일 내에 답변드릴게요</p>
+            <button
+              onClick={onClose}
+              className="mt-5 px-6 py-2 rounded-full text-sm font-medium text-white/60 border border-white/10 hover:border-white/20 transition-colors"
+            >
+              닫기
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[11px] text-white/40 mb-1">이름 *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="홍길동"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] text-white/40 mb-1">연락처 (이메일 또는 전화번호)</label>
+              <input
+                type="text"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="email@example.com 또는 010-0000-0000"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] text-white/40 mb-1">문의 유형</label>
+              <div className="flex flex-wrap gap-1.5">
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setCategory(c)}
+                    className="px-2.5 py-1 rounded-full text-[11px] border transition-colors"
+                    style={{
+                      border: category === c ? '1px solid rgba(255,217,61,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                      background: category === c ? 'rgba(255,217,61,0.1)' : 'transparent',
+                      color: category === c ? '#ffd93d' : 'rgba(255,255,255,0.35)',
+                    }}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] text-white/40 mb-1">문의 내용 *</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="궁금한 점이나 불편한 점을 자유롭게 적어주세요"
+                rows={4}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-400/40 resize-none"
+              />
+            </div>
+
+            {error && <p className="text-xs text-red-400">{error}</p>}
+
+            <button
+              onClick={handleSubmit}
+              disabled={!canSubmit || submitting}
+              className="w-full rounded-xl py-2.5 text-sm font-bold transition-all"
+              style={{
+                background: canSubmit ? 'linear-gradient(135deg, #ffd93d, #f59e0b)' : 'rgba(255,255,255,0.08)',
+                color: canSubmit ? '#1a1a2e' : 'rgba(255,255,255,0.2)',
+              }}
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : '문의 보내기'}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
