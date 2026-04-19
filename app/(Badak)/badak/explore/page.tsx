@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Search, Users, TrendingUp, Sparkles,
   Flame, BarChart3, UserPlus, Target,
-  Handshake, Crown, ChevronRight,
+  Handshake, Crown, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import { CLOUD_WORDS as FALLBACK_WORDS } from '@/lib/badak-cloud-data';
 import type { CloudWord } from '@/types/badak';
@@ -427,16 +427,56 @@ function SlideSection({ title, subtitle, icon, words, onSelect }: {
   title: string; subtitle: string; icon: React.ReactNode;
   words: CloudWord[]; onSelect: (w: CloudWord) => void;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const updateButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -260 : 260, behavior: 'smooth' });
+  };
+
   return (
     <div className="mb-6">
-      <div className="mb-3 px-4 sm:px-6">
-        <div className="flex items-center gap-2">
-          {icon}
-          <h2 className="text-sm font-bold text-white">{title}</h2>
+      <div className="mb-3 flex items-center justify-between px-4 sm:px-6">
+        <div>
+          <div className="flex items-center gap-2">
+            {icon}
+            <h2 className="text-sm font-bold text-white">{title}</h2>
+          </div>
+          <p className="mt-0.5 text-[10px] text-white/25">{subtitle}</p>
         </div>
-        <p className="mt-0.5 text-[10px] text-white/25">{subtitle}</p>
+        {/* PC 전용 네비 버튼 */}
+        <div className="hidden sm:flex items-center gap-1">
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canLeft}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5"
+          >
+            <ChevronLeft className="h-4 w-4 text-white/60" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canRight}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 transition-all disabled:opacity-20 hover:enabled:border-white/25 hover:enabled:bg-white/5"
+          >
+            <ChevronRight className="h-4 w-4 text-white/60" />
+          </button>
+        </div>
       </div>
-      <div className="flex gap-2.5 overflow-x-auto px-4 pb-2 scrollbar-hide sm:px-6">
+      <div
+        ref={scrollRef}
+        onScroll={updateButtons}
+        className="flex gap-2.5 overflow-x-auto px-4 pb-2 scrollbar-hide sm:px-6"
+      >
         {words.map((w) => (
           <NeedSlideCard key={w.text} word={w} onClick={() => onSelect(w)} />
         ))}
