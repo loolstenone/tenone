@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -59,7 +59,7 @@ const MOCK_TENANTS: TenantData[] = [
   { id: 't4', name: 'HR테크솔루션', slug: 'hrtech', serviceName: 'HRDesk', domain: '', plan: 'starter', maxMembers: 20, memberCount: 5, isActive: true, modules: ['home', 'people', 'recruit', 'attendance', 'payroll'], createdAt: '2025-01-10', members: [] },
 ];
 
-export default function TenantManagementPage() {
+function TenantManagementPageInner() {
   const { isMaster } = useWIO();
   const searchParams = useSearchParams();
   const [tenants, setTenants] = useState<TenantData[]>(MOCK_TENANTS);
@@ -414,4 +414,12 @@ export default function TenantManagementPage() {
   }
 
   return null;
+}
+
+export default function TenantManagementPage() {
+  return (
+    <Suspense>
+      <TenantManagementPageInner />
+    </Suspense>
+  );
 }

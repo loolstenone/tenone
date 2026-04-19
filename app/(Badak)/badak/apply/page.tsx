@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, Crown, Check, Send, Sparkles, Users, Shield, X } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ function formatPhone(value: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
 
-export default function ApplyPage() {
+function ApplyPageInner() {
   const { isAuthenticated, user } = useAuth();
   const searchParams = useSearchParams();
   const needId = searchParams.get('needId');
@@ -454,5 +454,13 @@ export default function ApplyPage() {
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
     </>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense>
+      <ApplyPageInner />
+    </Suspense>
   );
 }

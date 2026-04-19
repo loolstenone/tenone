@@ -588,10 +588,18 @@ function AboutContent() {
     );
 }
 
-export default function AboutPage() {
+function AboutPageInner() {
     return (
         <Suspense fallback={<div className="min-h-screen tn-surface" />}>
             <AboutContent />
         </Suspense>
     );
+}
+
+export default function AboutPage() {
+  return (
+    <Suspense>
+      <AboutPageInner />
+    </Suspense>
+  );
 }

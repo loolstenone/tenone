@@ -359,7 +359,7 @@ function LoginForm() {
     );
 }
 
-export default function LoginPage() {
+function LoginPageInner() {
     const { isMadLeague } = useSite();
     const [isSmarComm, setIsSmarComm] = useState<boolean | null>(null);
     // 외부 독립 도메인 여부 (tenone.biz, *.tenone.biz, localhost 제외)
@@ -440,4 +440,12 @@ export default function LoginPage() {
             <PublicFooter />
         </div>
     );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
+  );
 }

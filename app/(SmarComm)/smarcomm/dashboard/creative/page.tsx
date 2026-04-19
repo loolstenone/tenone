@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Palette, Type, Image, Video, Plus, Sparkles, ChevronRight, Copy, Check, Loader2 } from 'lucide-react';
 import { MOCK_CREATIVES } from '@/lib/smarcomm/dashboard-data';
@@ -20,7 +20,7 @@ interface GeneratedCreative {
   duration?: string;
 }
 
-export default function CreativePage() {
+function CreativePageInner() {
   const searchParams = useSearchParams();
   const [selectedType, setSelectedType] = useState<'text' | 'banner' | 'video'>('text');
   const [prompt, setPrompt] = useState('');
@@ -209,5 +209,13 @@ export default function CreativePage() {
 
       <NextStepCTA stage="제작 → 실행" title="완성된 소재를 광고 채널에 집행" description="제작된 카피와 배너를 네이버, 메타, 구글 등에서 바로 집행하세요" actionLabel="캠페인 집행" href="/dashboard/campaigns" />
     </div>
+  );
+}
+
+export default function CreativePage() {
+  return (
+    <Suspense>
+      <CreativePageInner />
+    </Suspense>
   );
 }

@@ -19,7 +19,7 @@ function HitTestContent() {
   return <HitTestUI sessionToken={sessionToken} />;
 }
 
-export default function HitATestPage() {
+function HitATestPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -27,6 +27,14 @@ export default function HitATestPage() {
       </div>
     }>
       <HitTestContent />
+    </Suspense>
+  );
+}
+
+export default function HitATestPage() {
+  return (
+    <Suspense>
+      <HitATestPageInner />
     </Suspense>
   );
 }

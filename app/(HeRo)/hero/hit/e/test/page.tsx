@@ -395,7 +395,7 @@ function HitETestContent() {
   );
 }
 
-export default function HitETestPage() {
+function HitETestPageInner() {
   return (
     <Suspense
       fallback={
@@ -405,6 +405,14 @@ export default function HitETestPage() {
       }
     >
       <HitETestContent />
+    </Suspense>
+  );
+}
+
+export default function HitETestPage() {
+  return (
+    <Suspense>
+      <HitETestPageInner />
     </Suspense>
   );
 }

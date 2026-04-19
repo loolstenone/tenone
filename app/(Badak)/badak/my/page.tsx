@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
@@ -1105,7 +1105,7 @@ function ProfileBoostCard({
 }
 
 // ── 메인 페이지 ──
-export default function BadakMyPage() {
+function BadakMyPageInner() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2359,5 +2359,13 @@ export default function BadakMyPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function BadakMyPage() {
+  return (
+    <Suspense>
+      <BadakMyPageInner />
+    </Suspense>
   );
 }

@@ -166,14 +166,6 @@ function MiniCalendar({ selectedDates, onToggle, maxSelections }: {
   );
 }
 
-export default function CreateGroupPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0e0e1a]" />}>
-      <CreateGroupPageInner />
-    </Suspense>
-  );
-}
-
 function CreateGroupPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1863,5 +1855,13 @@ function CreateGroupPageInner() {
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
     </>
+  );
+}
+
+export default function CreateGroupPage() {
+  return (
+    <Suspense>
+      <CreateGroupPageInner />
+    </Suspense>
   );
 }

@@ -26,7 +26,7 @@ function HitBTestContent() {
   return <HitBTestUI sessionToken={sessionToken} hitAResultId={hitAResultId} />;
 }
 
-export default function HitBTestPage() {
+function HitBTestPageInner() {
   return (
     <Suspense
       fallback={
@@ -36,6 +36,14 @@ export default function HitBTestPage() {
       }
     >
       <HitBTestContent />
+    </Suspense>
+  );
+}
+
+export default function HitBTestPage() {
+  return (
+    <Suspense>
+      <HitBTestPageInner />
     </Suspense>
   );
 }

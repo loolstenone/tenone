@@ -167,10 +167,18 @@ function ScanContent() {
   );
 }
 
-export default function ScanPage() {
+function ScanPageInner() {
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-text-muted">로딩 중...</div>}>
       <ScanContent />
+    </Suspense>
+  );
+}
+
+export default function ScanPage() {
+  return (
+    <Suspense>
+      <ScanPageInner />
     </Suspense>
   );
 }

@@ -191,7 +191,7 @@ function HitBIntroContent() {
   );
 }
 
-export default function HitBIntroPage() {
+function HitBIntroPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -199,6 +199,14 @@ export default function HitBIntroPage() {
       </div>
     }>
       <HitBIntroContent />
+    </Suspense>
+  );
+}
+
+export default function HitBIntroPage() {
+  return (
+    <Suspense>
+      <HitBIntroPageInner />
     </Suspense>
   );
 }

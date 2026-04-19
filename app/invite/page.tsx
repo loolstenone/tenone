@@ -258,7 +258,7 @@ function InviteForm() {
     );
 }
 
-export default function InvitePage() {
+function InvitePageInner() {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-white flex items-center justify-center">
@@ -268,4 +268,12 @@ export default function InvitePage() {
             <InviteForm />
         </Suspense>
     );
+}
+
+export default function InvitePage() {
+  return (
+    <Suspense>
+      <InvitePageInner />
+    </Suspense>
+  );
 }

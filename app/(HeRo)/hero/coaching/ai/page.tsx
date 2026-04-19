@@ -94,7 +94,7 @@ const pricing = [
   },
 ];
 
-export default function AICounselingPage() {
+function AICounselingPageInner() {
   return (
     <Suspense fallback={<div className="min-h-screen" />}>
       <AICounselingContent />
@@ -376,5 +376,13 @@ function AICounselingContent() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function AICounselingPage() {
+  return (
+    <Suspense>
+      <AICounselingPageInner />
+    </Suspense>
   );
 }
