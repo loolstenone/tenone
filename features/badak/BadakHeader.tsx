@@ -14,9 +14,9 @@ import { LoginModal } from "@/components/LoginModal";
 const PREFIX = '/badak';
 const navItems = [
     { name: "모임", href: `${PREFIX}/groups` },
+    { name: "관심사 탐험", href: `${PREFIX}/explore` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
     { name: "스토리", href: `${PREFIX}/story` },
-    // { name: "니즈 탐색", href: `${PREFIX}/explore` }, // 실제 니즈 데이터 축적 후 오픈
     { name: "모임 개설", href: `${PREFIX}/groups/create` },
     { name: "바닥장 신청", href: `${PREFIX}/apply` },
 ];
@@ -42,7 +42,7 @@ export function BadakHeader() {
                 });
                 if (!res.ok) return;
                 const json = await res.json();
-                setUnreadCount(json.notifications?.length ?? 0);
+                setUnreadCount(json.unreadCount ?? json.notifications?.length ?? 0);
             } catch { /* silent */ }
         };
         fetchUnread();
@@ -80,7 +80,7 @@ export function BadakHeader() {
                             key={item.href}
                             href={item.href}
                             className={clsx(
-                                "px-3 py-1.5 text-sm font-medium transition-colors rounded",
+                                "min-w-[72px] px-3 py-1.5 text-sm font-medium text-center transition-colors rounded",
                                 isActive(item.href)
                                     ? "text-white bg-white/10"
                                     : "text-neutral-300 hover:text-white hover:bg-white/5"
@@ -186,22 +186,22 @@ export function BadakHeader() {
             style={{ background: '#12122a', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
         >
             {/* 패널 헤더 */}
-            <div className="flex h-14 items-center justify-between px-5 border-b border-white/8">
-                <span className="text-sm font-bold text-white/60">메뉴</span>
+            <div className="flex h-16 items-center justify-between px-5 border-b border-white/8">
+                <span className="text-base font-bold text-white/60">메뉴</span>
                 <button onClick={() => setMobileOpen(false)} className="p-1.5 text-white/40 hover:text-white">
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                 </button>
             </div>
 
             {/* 네비 링크 */}
-            <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+            <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-2">
                 {navItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={clsx(
-                            "flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                            "flex items-center rounded-lg px-4 py-3 text-base font-medium transition-colors",
                             isActive(item.href)
                                 ? "bg-amber-400/10 text-amber-400"
                                 : "text-neutral-400 hover:bg-white/5 hover:text-white"
