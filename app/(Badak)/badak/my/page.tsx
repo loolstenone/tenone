@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
 import Link from 'next/link';
@@ -152,6 +152,8 @@ function GroupManageCard({
   const [activeSection, setActiveSection] = useState<'applicants' | 'members' | 'notice'>('applicants');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [togglingJoinType, setTogglingJoinType] = useState(false);
+  const [pendingJoinType, setPendingJoinType] = useState<JoinType | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{ id: string; action: 'approved' | 'rejected' } | null>(null);
   const pendingCount = group.applicants.filter((a) => a.status === 'applied').length;
   const remaining = group.maxMembers - group.currentMembers;
   const dDay = (() => {
@@ -176,15 +178,18 @@ function GroupManageCard({
       onUpdate(updated);
     }
     setProcessingId(null);
+    setActionFeedback({ id: applicantId, action });
+    setTimeout(() => setActionFeedback(null), 2500);
   };
 
-  const toggleJoinType = async () => {
-    const newType: JoinType = group.joinType === 'approval' ? 'firstcome' : 'approval';
+  const confirmToggleJoinType = async () => {
+    if (!pendingJoinType) return;
+    const newType = pendingJoinType;
+    setPendingJoinType(null);
     setTogglingJoinType(true);
     if (onToggleJoinType) {
       await onToggleJoinType(group.id, newType);
     } else {
-      // fallback: 로컬만 변경
       onUpdate({ ...group, joinType: newType });
     }
     setTogglingJoinType(false);
@@ -223,25 +228,54 @@ function GroupManageCard({
 
       {expanded && (
         <div className="border-t border-white/6">
-          <div className="flex items-center justify-between border-b border-white/6 px-4 py-2.5">
-            <div className="flex items-center gap-2 text-[11px] text-white/40">
-              <span>참여 방식:</span>
-              <button
-                onClick={toggleJoinType}
-                disabled={togglingJoinType}
-                className="flex items-center gap-1 text-white/70 disabled:opacity-50"
-              >
-                {togglingJoinType ? (
-                  <span className="text-[11px] text-white/30">변경 중...</span>
-                ) : group.joinType === 'approval' ? (
-                  <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-medium text-amber-400">승인제</span></>
-                ) : (
-                  <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-medium text-green-400">선착순</span></>
-                )}
-              </button>
+          <div className="border-b border-white/6">
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <div className="flex items-center gap-2 text-[11px] text-white/40">
+                <span>참여 방식:</span>
+                <button
+                  onClick={() => !togglingJoinType && setPendingJoinType(group.joinType === 'approval' ? 'firstcome' : 'approval')}
+                  disabled={togglingJoinType}
+                  className="flex items-center gap-1 text-white/70 disabled:opacity-50"
+                >
+                  {togglingJoinType ? (
+                    <span className="text-[11px] text-white/30">변경 중...</span>
+                  ) : group.joinType === 'approval' ? (
+                    <><ToggleRight className="h-4 w-4 text-amber-400" /> <span className="font-medium text-amber-400">승인제</span></>
+                  ) : (
+                    <><ToggleLeft className="h-4 w-4 text-green-400" /> <span className="font-medium text-green-400">선착순</span></>
+                  )}
+                </button>
+              </div>
+              {remaining > 0 && (
+                <span className="text-[10px] text-white/25">잔여 {remaining}석</span>
+              )}
             </div>
-            {remaining > 0 && (
-              <span className="text-[10px] text-white/25">잔여 {remaining}석</span>
+            {pendingJoinType && (
+              <div className="mx-3 mb-2.5 rounded-xl px-4 py-3" style={{ background: 'rgba(255,217,61,0.07)', border: '1px solid rgba(255,217,61,0.18)' }}>
+                <p className="mb-2.5 text-[12px] font-semibold text-amber-300/90">
+                  {pendingJoinType === 'firstcome' ? '승인제 → 선착순으로 변경하시겠습니까?' : '선착순 → 승인제로 변경하시겠습니까?'}
+                </p>
+                <p className="mb-3 text-[11px] leading-relaxed text-white/40">
+                  {pendingJoinType === 'firstcome'
+                    ? '이후 신청자는 검토 없이 즉시 참여 확정됩니다. 대기 중인 신청자는 별도 처리가 필요합니다.'
+                    : '이후 신청자는 바닥장이 직접 검토 후 승인해야 참여 확정됩니다.'}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={confirmToggleJoinType}
+                    className="flex-1 rounded-lg py-1.5 text-[11px] font-semibold"
+                    style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
+                  >
+                    변경
+                  </button>
+                  <button
+                    onClick={() => setPendingJoinType(null)}
+                    className="rounded-lg border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -287,7 +321,23 @@ function GroupManageCard({
                     })}
                   </div>
                   {group.applicants.map((app) => (
-                    <div key={app.id} className="rounded-lg bg-white/[0.03] p-3">
+                    <div key={app.id} className="rounded-lg p-3 transition-colors"
+                      style={{
+                        background: actionFeedback?.id === app.id
+                          ? actionFeedback.action === 'approved' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.08)'
+                          : 'rgba(255,255,255,0.03)',
+                        border: actionFeedback?.id === app.id
+                          ? actionFeedback.action === 'approved' ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(239,68,68,0.15)'
+                          : '1px solid transparent',
+                      }}>
+                      {actionFeedback?.id === app.id && (
+                        <div className="mb-2 flex items-center gap-1.5">
+                          <Check className="h-3 w-3 shrink-0" style={{ color: actionFeedback.action === 'approved' ? '#4ade80' : '#f87171' }} />
+                          <span className="text-[11px] font-semibold" style={{ color: actionFeedback.action === 'approved' ? '#4ade80' : '#f87171' }}>
+                            {actionFeedback.action === 'approved' ? '승인 완료' : '거절 완료'}
+                          </span>
+                        </div>
+                      )}
                       <div className="mb-1.5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-white/60">
@@ -1058,7 +1108,12 @@ function ProfileBoostCard({
 export default function BadakMyPage() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>('mygroups');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tab = searchParams.get('tab') as TabType | null;
+    const valid: TabType[] = ['mygroups', 'posts', 'bookmarks', 'connections', 'talks', 'notifications', 'settings'];
+    return tab && valid.includes(tab) ? tab : 'mygroups';
+  });
   const [showLogin, setShowLogin] = useState(false);
   const [notifications, setNotifications] = useState<{ id: string; type: string; title: string; body: string | null; link: string | null; read: boolean; created_at: string }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -1466,14 +1521,33 @@ export default function BadakMyPage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
 
       {/* ── 프로필 카드 (MyProfileCard 통합) ── */}
       <div className="px-4 pt-6">
         <MyProfileCard accentColor="#ffd93d" siteBadge={isLeader ? '바닥장' : undefined}>
-          <p className="text-xs text-white/40">
-            {[jobFunction, industry].filter(Boolean).join(' · ') || '직무/산업군을 설정해보세요'}
-          </p>
+          {(jobFunction || industry || experienceYears) ? (
+            <div className="grid grid-cols-2 gap-3">
+              {jobFunction && (
+                <div>
+                  <div className="text-xs font-medium text-neutral-500 mb-0.5">직무</div>
+                  <div className="text-sm text-neutral-300">{jobFunction}</div>
+                </div>
+              )}
+              {industry && (
+                <div>
+                  <div className="text-xs font-medium text-neutral-500 mb-0.5">산업군</div>
+                  <div className="text-sm text-neutral-300">{industry}</div>
+                </div>
+              )}
+              {experienceYears !== null && (
+                <div>
+                  <div className="text-xs font-medium text-neutral-500 mb-0.5">경력</div>
+                  <div className="text-sm text-neutral-300">{experienceYears}년차</div>
+                </div>
+              )}
+            </div>
+          ) : null}
         </MyProfileCard>
       </div>
 
@@ -1521,7 +1595,7 @@ export default function BadakMyPage() {
       </div>
 
       {/* ── 탭 콘텐츠 ── */}
-      <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-5 sm:px-8">
 
         {/* ── 내 모임 ── */}
         {activeTab === 'mygroups' && (
@@ -1982,16 +2056,18 @@ export default function BadakMyPage() {
                   <p className="mt-1 text-xs text-white/20">모임 참여 신청이 오면 여기서 확인할 수 있어요</p>
                 </div>
               ) : notifications.map((noti) => {
-                const typeStyles: Record<string, { label: string; color: string; bg: string }> = {
-                  join_request: { label: '참여 신청', color: '#4ade80', bg: 'rgba(34,197,94,0.1)' },
-                  join_approved: { label: '승인', color: '#a5b4fc', bg: 'rgba(99,102,241,0.12)' },
-                  join_rejected: { label: '거절', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
-                  comment: { label: '댓글', color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
-                  like: { label: '좋아요', color: '#f87171', bg: 'rgba(239,68,68,0.08)' },
-                  group_update: { label: '모임', color: '#a5b4fc', bg: 'rgba(99,102,241,0.1)' },
-                  system: { label: '시스템', color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
+                const TYPE_STYLES: Record<string, { label: string; color: string; bg: string }> = {
+                  join_request:       { label: '참여 신청',   color: '#4ade80', bg: 'rgba(34,197,94,0.1)' },
+                  join_approved:      { label: '승인',        color: '#a5b4fc', bg: 'rgba(99,102,241,0.12)' },
+                  join_rejected:      { label: '거절',        color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
+                  join_pending:       { label: '검토중',      color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
+                  connection_request: { label: '제안',        color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
+                  comment:            { label: '댓글',        color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
+                  like:               { label: '좋아요',      color: '#f87171', bg: 'rgba(239,68,68,0.08)' },
+                  group_update:       { label: '모임',        color: '#a5b4fc', bg: 'rgba(99,102,241,0.1)' },
+                  system:             { label: '시스템',      color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
                 };
-                const s = typeStyles[noti.type] || typeStyles.system;
+                const s = TYPE_STYLES[noti.type] || TYPE_STYLES.system;
                 const ago = (() => {
                   const diff = Date.now() - new Date(noti.created_at).getTime();
                   const mins = Math.floor(diff / 60000);
@@ -2000,11 +2076,33 @@ export default function BadakMyPage() {
                   if (hours < 24) return `${hours}시간 전`;
                   return `${Math.floor(hours / 24)}일 전`;
                 })();
+
+                const handleNotiClick = async () => {
+                  if (!noti.read) {
+                    const { createClient: cc } = await import('@/lib/supabase/client');
+                    const { data: { session: s2 } } = await cc().auth.getSession();
+                    if (s2) {
+                      await fetch('/api/badak/notifications', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s2.access_token}` },
+                        body: JSON.stringify({ notificationId: noti.id }),
+                      });
+                    }
+                    setNotifications(prev => prev.map(n => n.id === noti.id ? { ...n, read: true } : n));
+                    setUnreadCount(prev => Math.max(0, prev - 1));
+                  }
+                  if (noti.link) router.push(noti.link);
+                };
+
                 return (
-                  <div key={noti.id} className="rounded-xl border p-4 transition-colors" style={{
-                    background: noti.read ? 'rgba(255,255,255,0.02)' : 'rgba(255,217,61,0.02)',
-                    borderColor: noti.read ? 'rgba(255,255,255,0.06)' : 'rgba(255,217,61,0.1)',
-                  }}>
+                  <div key={noti.id}
+                    onClick={handleNotiClick}
+                    className="rounded-xl border p-4 transition-colors"
+                    style={{
+                      background: noti.read ? 'rgba(255,255,255,0.02)' : 'rgba(255,217,61,0.02)',
+                      borderColor: noti.read ? 'rgba(255,255,255,0.06)' : 'rgba(255,217,61,0.1)',
+                      cursor: noti.link ? 'pointer' : 'default',
+                    }}>
                     <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {!noti.read && <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
@@ -2014,6 +2112,9 @@ export default function BadakMyPage() {
                     </div>
                     <p className="text-xs font-medium text-white/70">{noti.title}</p>
                     {noti.body && <p className="mt-0.5 text-[11px] text-white/40">{noti.body}</p>}
+                    {noti.link && (
+                      <p className="mt-1.5 text-[10px]" style={{ color: 'rgba(255,217,61,0.4)' }}>확인하기 →</p>
+                    )}
                   </div>
                 );
               })}
