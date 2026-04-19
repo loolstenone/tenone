@@ -28,6 +28,7 @@ interface GroupReview {
   rating: number;
   content: string;
   created_at: string;
+  season_number?: number | null;  // 상속된 후기의 시즌 번호
 }
 
 interface GroupMember {
@@ -51,6 +52,10 @@ interface GroupDetail {
   join_type: 'firstcome' | 'approval';
   meeting_type: 'onetime' | 'series' | 'recurring' | null;
   series_count?: number | null;
+  parent_group_id?: string | null;
+  parent_slug?: string | null;
+  season_number?: number | null;
+  show_leader_reviews?: boolean;
   leader_career?: string | null;
   leader_reason?: string | null;
   max_members: number;
@@ -91,9 +96,10 @@ const MOCK: Record<string, GroupDetail> = {
       { number: 6, title: '시즌 마무리 & 다음 시즌 준비', description: '지난 5회 리뷰. 가장 도움이 된 인사이트 공유, 다음 시즌 주제 투표, 네트워킹' },
     ],
     guide: '📍 장소\n강남역 2번 출구 도보 3분 · 스타벅스 강남점 2층 (세미 프라이빗 공간 예약)\n\n📅 일정\n매주 토요일 오후 2시~4시 (120분). 부득이한 경우 슬랙에서 사전 공지.\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 발표 순서가 돌아오면 반드시 발표 (거르면 다음 시즌 참여 불가)\n• 모임 3회 이상 무단 불참 시 제외\n• 실명 기반 (닉네임 X)\n\n🎒 준비물\n노트북 또는 태블릿. 발표 자료 PPT/Notion 가능.',
-    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
-    max_members: 20, current_members: 13,
-    event_date: '2026-04-26T14:00:00', schedule: '매주 토 14:00~16:00', location: '강남역', location_detail: '스타벅스 강남점 2층',
+    status: 'completed', join_type: 'firstcome', meeting_type: 'recurring',
+    season_number: 1,
+    max_members: 20, current_members: 20,
+    event_date: '2026-03-01T14:00:00', schedule: '매주 토 14:00~16:00 (6회 완료)', location: '강남역', location_detail: '스타벅스 강남점 2층',
     fee: 0, tags: ['B2B', '마케팅', 'SaaS', '케이스스터디'],
     cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=400&fit=crop&auto=format',
     leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 리드 제너레이션과 ABM 전략을 직접 운영 중입니다.', avatar_url: null },
@@ -107,13 +113,63 @@ const MOCK: Record<string, GroupDetail> = {
       { id: 'm6', display_name: '스타트업L', job_function: '스타트업 대표', avatar_url: null },
     ],
     reviews: [
-      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08' },
-      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01' },
-      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22' },
+      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08', season_number: 1 },
+      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01', season_number: 1 },
+      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22', season_number: 1 },
+      { id: 'r4', author: '스타트업L', avatar_url: null, job_function: '스타트업 대표', rating: 5, content: '파이프라인 분석 회차가 가장 좋았어요. 우리 팀 SQL→MQL 전환 문제를 정확히 짚어줬고 덕분에 다음 분기 전략을 완전히 바꿨습니다.', created_at: '2026-03-29', season_number: 1 },
+      { id: 'r5', author: '브랜드S', avatar_url: null, job_function: '브랜드 매니저', rating: 4, content: 'B2B는 처음이라 걱정했는데 다들 친절하게 설명해줘서 따라갈 수 있었어요. 마케터J 바닥장이 분위기를 잘 만들어줬습니다.', created_at: '2026-04-05', season_number: 1 },
     ],
     related: [
+      { slug: 'b2b-marketing-weekly-s2', title: 'B2B 마케팅 실무 모임 시즌 2', current_members: 7, max_members: 20, tags: ['B2B', '마케팅', 'SaaS'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
       { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', current_members: 11, max_members: 15, tags: ['AI', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&h=120&fit=crop' },
-      { slug: 'performance-case-study', title: '퍼포먼스 마케팅 케이스 스터디', current_members: 4, max_members: 12, tags: ['퍼포먼스', 'ROAS'], cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=120&fit=crop' },
+    ],
+  },
+  'b2b-marketing-weekly-s2': {
+    id: 'g1s2', slug: 'b2b-marketing-weekly-s2',
+    title: 'B2B 마케팅 실무 모임 시즌 2',
+    tagline: '시즌 1 참여자들의 강추로 돌아온 B2B 마케팅 케이스 스터디',
+    notice: '시즌 1 참여자 우선 신청 기간: 4/20(일)까지. 이후 일반 모집 진행합니다.',
+    description: '시즌 1에서 진행한 리드 제너레이션·ABM·콘텐츠 마케팅에 이어, 시즌 2는 더 깊은 주제를 다룹니다.\n\n이번 시즌은 실제 ICP(이상 고객 프로필) 정의와 타겟 세그멘테이션, 세일즈 인에이블먼트, 그리고 마케팅-영업 얼라인먼트를 집중적으로 파고듭니다.',
+    intro_who: '• 시즌 1 참여 경험이 있는 B2B 마케터 (우선 모집)\n• B2B SaaS 또는 기업 솔루션 마케터\n• ICP 정의부터 세일즈 협업까지 실전을 배우고 싶은 분\n• 케이스 발표 경험이 있거나 준비된 분',
+    structure: [
+      { number: 1, title: 'ICP 정의 & 세그멘테이션', description: '이상 고객 프로필(ICP)을 데이터 기반으로 정의하는 실전 방법론. 각자 ICP 초안 발표 후 피드백' },
+      { number: 2, title: '세일즈 이네이블먼트 케이스', description: '마케팅이 세일즈에 건네는 콘텐츠·도구·인사이트. 실제 배틀카드, 케이스스터디 제작 사례 공유' },
+      { number: 3, title: 'PLG vs SLG 전략 비교', description: 'Product-Led Growth와 Sales-Led Growth의 차이. SaaS 회사들의 실제 선택과 그 배경 분석' },
+      { number: 4, title: 'ABM 2.0 — 실전 계정 관리', description: '시즌 1에서 배운 ABM을 실제로 어떻게 운용하는지. 계정 리스트업, 개인화 콘텐츠, 성과 측정' },
+      { number: 5, title: '마케팅-영업 얼라인먼트', description: 'MQL 정의 충돌, 리드 퀄리티 이슈 해결 사례. 두 팀이 같은 목표를 바라보게 만드는 방법' },
+      { number: 6, title: '시즌 2 마무리 & 시즌 3 기획', description: '지난 5회 케이스 총정리. 가장 인상 깊은 인사이트 공유, 시즌 3 주제 투표, 파티' },
+    ],
+    guide: '📍 장소\n강남역 2번 출구 도보 3분 · 스타벅스 강남점 2층 (시즌 1과 동일)\n\n📅 일정\n매주 토요일 오후 2시~4시 (120분). 부득이한 경우 슬랙에서 사전 공지.\n\n💰 회비\n무료. 음료는 각자 구매.\n\n📋 참여 조건\n• 발표 순서가 돌아오면 반드시 발표\n• 모임 3회 이상 무단 불참 시 제외\n• 실명 기반 (닉네임 X)',
+    status: 'recruiting', join_type: 'firstcome', meeting_type: 'recurring',
+    season_number: 2,
+    parent_group_id: 'g1',
+    parent_slug: 'b2b-marketing-weekly',
+    max_members: 20, current_members: 7,
+    event_date: '2026-04-26T14:00:00', schedule: '매주 토 14:00~16:00', location: '강남역', location_detail: '스타벅스 강남점 2층',
+    fee: 0, tags: ['B2B', '마케팅', 'SaaS', '케이스스터디', 'ABM'],
+    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=860&h=400&fit=crop&auto=format',
+    leader: { id: 'l1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', experience_years: 3, bio: 'B2B SaaS 스타트업 3년차 마케터. 시즌 1에서 6회 전부 함께한 참여자들의 요청으로 시즌 2를 엽니다.', avatar_url: null },
+    need: { id: 'n1', display_text: 'B2B 마케팅 같이 공부하고 싶어', count: 28 },
+    members: [
+      { id: 'm1', display_name: '마케터J', job_function: '퍼포먼스 마케팅', avatar_url: null },
+      { id: 'm2', display_name: '그로스K', job_function: '그로스 마케터', avatar_url: null },
+      { id: 'm3', display_name: '콘텐츠Y', job_function: 'SNS 마케터', avatar_url: null },
+      { id: 'm4', display_name: '데이터P', job_function: '데이터 분석가', avatar_url: null },
+      { id: 'm5', display_name: '스타트업L', job_function: '스타트업 대표', avatar_url: null },
+      { id: 'm6', display_name: '브랜드S', job_function: '브랜드 매니저', avatar_url: null },
+      { id: 'm7', display_name: '신입마케E', job_function: 'B2B 마케터', avatar_url: null },
+    ],
+    // 시즌 1 후기가 시즌 번호와 함께 표시됨
+    reviews: [
+      { id: 'r1', author: '그로스K', avatar_url: null, job_function: '그로스 마케터', rating: 5, content: '실제 캠페인 데이터를 들고 나오는 사람들 덕분에 이론 책에서 배울 수 없는 것들을 얻었어요. 특히 ABM 케이스는 정말 인상적이었습니다.', created_at: '2026-04-08', season_number: 1 },
+      { id: 'r2', author: '콘텐츠Y', avatar_url: null, job_function: 'SNS 마케터', rating: 5, content: 'B2C만 하다가 B2B로 전환하는 중인데, 이 모임에서 배운 리드 스코어링 방식이 실무에 바로 적용됐어요. 다음 시즌도 꼭 참여할 거예요.', created_at: '2026-04-01', season_number: 1 },
+      { id: 'r3', author: '데이터P', avatar_url: null, job_function: '데이터 분석가', rating: 4, content: '마케터들이 데이터를 어떻게 보는지 배울 수 있어서 좋았습니다. 분석가 입장에서도 얻을 게 많은 모임이에요.', created_at: '2026-03-22', season_number: 1 },
+      { id: 'r4', author: '스타트업L', avatar_url: null, job_function: '스타트업 대표', rating: 5, content: '파이프라인 분석 회차가 가장 좋았어요. 우리 팀 SQL→MQL 전환 문제를 정확히 짚어줬고 덕분에 다음 분기 전략을 완전히 바꿨습니다.', created_at: '2026-03-29', season_number: 1 },
+      { id: 'r5', author: '브랜드S', avatar_url: null, job_function: '브랜드 매니저', rating: 4, content: 'B2B는 처음이라 걱정했는데 다들 친절하게 설명해줘서 따라갈 수 있었어요. 마케터J 바닥장이 분위기를 잘 만들어줬습니다.', created_at: '2026-04-05', season_number: 1 },
+    ],
+    related: [
+      { slug: 'b2b-marketing-weekly', title: 'B2B 마케팅 실무 모임 시즌 1', current_members: 20, max_members: 20, tags: ['B2B', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=120&fit=crop' },
+      { slug: 'ai-prompt-engineering', title: 'AI 프롬프트 엔지니어링 스터디', current_members: 11, max_members: 15, tags: ['AI', '마케팅'], cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&h=120&fit=crop' },
     ],
   },
   'ai-prompt-engineering': {
@@ -390,7 +446,7 @@ const AVATAR_COLORS = [
 ];
 
 // ── 탭 정의 ──
-const TABS = ['소개', '구성', '상세 안내', '후기', '추천 모임'] as const;
+const TABS = ['소개', '구성', '상세 안내', '후기', '참여 이력', '추천 모임'] as const;
 type TabName = typeof TABS[number];
 
 // ── 상태 메타 ──
@@ -458,14 +514,21 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [reviewContent, setReviewContent] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [groupId, setGroupId] = useState<string | null>(null);
+  const [myMemberId, setMyMemberId] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [bookmarkId, setBookmarkId] = useState<string | null>(null);
   const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [myPastGroups, setMyPastGroups] = useState<{
+    id: string; slug: string; title: string; status: string;
+    event_date: string | null; schedule: string | null; cover_image_url: string | null;
+    season_number: number | null;
+  }[]>([]);
+  const [myPastLoading, setMyPastLoading] = useState(false);
 
   // 섹션 refs
   const sectionRefs = useRef<Record<TabName, HTMLElement | null>>({
-    소개: null, 구성: null, '상세 안내': null, 후기: null, '추천 모임': null,
+    소개: null, 구성: null, '상세 안내': null, 후기: null, '참여 이력': null, '추천 모임': null,
   });
   const tabBarRef = useRef<HTMLDivElement>(null);
 
@@ -514,6 +577,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         const d = await joinRes.json();
         if (d.status === 'leader' || d.status === 'approved') setJoinState('joined');
         else if (d.status === 'applied') setJoinState('submitted');
+        if (d.memberId) setMyMemberId(d.memberId);
       }
       if (reviewRes.ok) {
         const d = await reviewRes.json();
@@ -553,6 +617,25 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     });
     return () => observers.forEach(o => o.disconnect());
   }, [group]);
+
+  // 내 참여 이력 로드 (인증된 경우만)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    setMyPastLoading(true);
+    (async () => {
+      const { data: { session } } = await createClient().auth.getSession();
+      const token = session?.access_token;
+      if (!token) { setMyPastLoading(false); return; }
+      const res = await fetch('/api/badak/groups?member=me&status=completed', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setMyPastGroups(d.groups ?? []);
+      }
+      setMyPastLoading(false);
+    })();
+  }, [isAuthenticated]);
 
   function scrollToTab(tab: TabName) {
     const el = sectionRefs.current[tab];
@@ -1048,8 +1131,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
 
-          {/* 후기 작성 버튼 */}
-          {isAuthenticated && (joinState === 'joined' || !groupId) && !showReviewForm && (
+          {/* 후기 작성 버튼 — 종료된 모임 + 참여자만 */}
+          {isAuthenticated && group.status === 'completed' && (joinState === 'joined' || !groupId) && !showReviewForm && (
             <button onClick={() => setShowReviewForm(true)}
               className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium"
               style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)', color: 'rgba(255,217,61,0.75)' }}>
@@ -1089,27 +1172,57 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
+          {/* 이전 시즌 후기 포함 안내 배너 */}
+          {group.parent_group_id && group.reviews.length > 0 && (
+            <div className="mb-3 flex items-center gap-2 rounded-lg px-3 py-2.5"
+              style={{ background: 'rgba(255,217,61,0.05)', border: '1px solid rgba(255,217,61,0.12)' }}>
+              <span className="text-[11px] text-amber-400/60">
+                시즌 {(group.season_number ?? 2) - 1} 참여자들의 후기가 함께 표시됩니다
+              </span>
+              {group.parent_slug && (
+                <Link href={`/badak/groups/${group.parent_slug}`}
+                  className="ml-auto shrink-0 text-[11px] text-amber-400/50 hover:text-amber-400/80 transition-colors">
+                  시즌 1 보기 →
+                </Link>
+              )}
+            </div>
+          )}
+
           {group.reviews.length > 0 ? (
             <div className="space-y-3">
-              {group.reviews.map((review, i) => (
-                <div key={review.id} className="rounded-xl px-4 py-4 space-y-2"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar name={review.author} avatarUrl={review.avatar_url} idx={i + 1} size={32} />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white/75">{review.author}</span>
-                        {review.job_function && <span className="text-[11px] text-white/30">{review.job_function}</span>}
+              {group.reviews.map((review, i) => {
+                const isInherited = group.parent_group_id && review.season_number != null && review.season_number < (group.season_number ?? 1);
+                return (
+                  <div key={review.id} className="rounded-xl px-4 py-4 space-y-2"
+                    style={{
+                      background: isInherited ? 'rgba(255,217,61,0.025)' : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${isInherited ? 'rgba(255,217,61,0.08)' : 'rgba(255,255,255,0.07)'}`,
+                    }}>
+                    <div className="flex items-center gap-2.5">
+                      <Avatar name={review.author} avatarUrl={review.avatar_url} idx={i + 1} size={32} />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-white/75">{review.author}</span>
+                          {review.job_function && <span className="text-[11px] text-white/30">{review.job_function}</span>}
+                        </div>
+                        <StarRating rating={review.rating} />
                       </div>
-                      <StarRating rating={review.rating} />
+                      <div className="ml-auto flex flex-col items-end gap-1">
+                        {isInherited && (
+                          <span className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                            style={{ background: 'rgba(255,217,61,0.1)', color: 'rgba(255,217,61,0.6)', border: '1px solid rgba(255,217,61,0.15)' }}>
+                            시즌 {review.season_number}
+                          </span>
+                        )}
+                        <span className="text-[11px] text-white/20">
+                          {new Date(review.created_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}
+                        </span>
+                      </div>
                     </div>
-                    <span className="ml-auto text-[11px] text-white/20">
-                      {new Date(review.created_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}
-                    </span>
+                    <p className="text-sm leading-relaxed text-white/55">{review.content}</p>
                   </div>
-                  <p className="text-sm leading-relaxed text-white/55">{review.content}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-xl px-4 py-10 text-center"
@@ -1117,6 +1230,69 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               <MessageCircle className="mx-auto mb-2 h-8 w-8 text-white/10" />
               <p className="text-sm text-white/30">아직 후기가 없어요</p>
               <p className="mt-1 text-xs text-white/20">첫 번째 후기를 남겨보세요</p>
+            </div>
+          )}
+        </section>
+
+        {/* ── 참여 이력 ── */}
+        <section ref={el => { sectionRefs.current['참여 이력'] = el; }} className="pt-6 pb-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-bold text-white/85">내 참여 이력</h2>
+            {myPastGroups.length > 0 && (
+              <span className="text-xs text-white/30">총 {myPastGroups.length}개</span>
+            )}
+          </div>
+          {!isAuthenticated ? (
+            <div className="rounded-xl px-4 py-10 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-white/10" />
+              <p className="text-sm text-white/30">로그인하면 내 참여 이력을 볼 수 있어요</p>
+            </div>
+          ) : myPastLoading ? (
+            <div className="space-y-2">
+              {[0, 1].map(i => (
+                <div key={i} className="h-16 animate-pulse rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.04)' }} />
+              ))}
+            </div>
+          ) : myPastGroups.length > 0 ? (
+            <div className="space-y-2">
+              {myPastGroups.map(pg => (
+                <Link key={pg.id} href={`/badak/groups/${pg.slug}`}
+                  className="flex items-center gap-3 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  {pg.cover_image_url ? (
+                    <img src={pg.cover_image_url} alt="" className="h-14 w-18 shrink-0 object-cover" />
+                  ) : (
+                    <div className="h-14 w-16 shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.05)' }} />
+                  )}
+                  <div className="flex-1 min-w-0 py-2">
+                    <p className="truncate text-sm font-medium text-white/75">{pg.title}</p>
+                    {pg.schedule && (
+                      <p className="mt-0.5 truncate text-[11px] text-white/30">{pg.schedule}</p>
+                    )}
+                  </div>
+                  <div className="shrink-0 pr-3 text-right">
+                    <span className="rounded-full px-2 py-0.5 text-[10px]"
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      종료됨
+                    </span>
+                    {pg.season_number && pg.season_number > 1 && (
+                      <div className="mt-1 text-[10px]" style={{ color: 'rgba(255,217,61,0.5)' }}>
+                        시즌 {pg.season_number}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl px-4 py-10 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-white/10" />
+              <p className="text-sm text-white/30">아직 완료한 모임이 없어요</p>
+              <p className="mt-1 text-xs text-white/20">모임에 참여해보세요</p>
             </div>
           )}
         </section>
@@ -1175,6 +1351,14 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <p className="text-xs text-white/40">
               이 모임은 <span className="text-amber-400/70">승인제</span>입니다. 간단한 자기소개와 참여 동기를 남겨주세요.
             </p>
+            <div className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px]"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <span className="text-white/55 font-medium">신청 제출</span>
+              <span className="text-white/20">→</span>
+              <span className="text-white/55 font-medium">바닥장 검토 (1~2일)</span>
+              <span className="text-white/20">→</span>
+              <span className="text-white/55 font-medium">참여 확정 알림</span>
+            </div>
             <textarea value={applyMessage} onChange={e => setApplyMessage(e.target.value)}
               placeholder="예: 퍼포먼스 마케터 3년차입니다. B2B SaaS 케이스를 함께 공부하고 싶어 신청합니다."
               className="w-full rounded-xl px-4 py-3 text-sm text-white/75 placeholder-white/25 resize-none outline-none"
@@ -1194,14 +1378,32 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-3"
         style={{ background: 'linear-gradient(to top, #1a1a2e 70%, transparent 100%)' }}>
         <div className="mx-auto max-w-[640px]">
-          {(joinState === 'submitted' || joinState === 'waitlisted') && (
+          {joinState === 'submitted' && (
+            <div className="mb-2.5 rounded-xl px-4 py-3"
+              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-400" />
+                <p className="text-xs font-semibold text-indigo-300">신청 완료</p>
+              </div>
+              {/* 신청 → 검토 → 확정 흐름 */}
+              <div className="flex items-center gap-1.5">
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                  style={{ background: 'rgba(99,102,241,0.25)', color: '#a5b4fc' }}>① 신청 완료</span>
+                <span className="text-white/20 text-xs">→</span>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)' }}>② 바닥장 검토</span>
+                <span className="text-white/20 text-xs">→</span>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }}>③ 알림 발송</span>
+              </div>
+              <p className="mt-2 text-[11px] text-indigo-300/50">승인되면 알림으로 알려드릴게요. 보통 1~2일 내 검토됩니다.</p>
+            </div>
+          )}
+          {joinState === 'waitlisted' && (
             <div className="mb-2.5 flex items-center gap-2 rounded-xl px-4 py-2.5"
-              style={{ background: joinState === 'submitted' ? 'rgba(99,102,241,0.12)' : 'rgba(255,217,61,0.08)' }}>
-              <CheckCircle2 className="h-4 w-4 shrink-0"
-                style={{ color: joinState === 'submitted' ? '#a5b4fc' : '#ffd93d' }} />
-              <p className="text-xs" style={{ color: joinState === 'submitted' ? 'rgba(165,180,252,0.8)' : 'rgba(255,217,61,0.7)' }}>
-                {joinState === 'submitted' ? '신청이 접수됐어요. 바닥장 승인 후 알려드릴게요.' : '관심 등록 완료! 모임 개설 시 알려드릴게요.'}
-              </p>
+              style={{ background: 'rgba(255,217,61,0.08)', border: '1px solid rgba(255,217,61,0.15)' }}>
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-400" />
+              <p className="text-xs text-amber-400/70">관심 등록 완료! 모임 개설 시 알림으로 알려드릴게요.</p>
             </div>
           )}
           <div className="flex gap-2">
@@ -1243,6 +1445,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           </div>
           {group.fee > 0 && !ctaDone && !ctaDisabled && (
             <p className="mt-2 text-center text-[11px] text-white/25">참여 시 회비 {group.fee.toLocaleString()}원이 발생합니다</p>
+          )}
+          {!ctaDone && !ctaDisabled && !isNeedsGathering && (
+            <p className="mt-1.5 text-center text-[11px] text-white/20">
+              {group.join_type === 'approval'
+                ? '승인제 · 바닥장이 신청서를 검토 후 참여 확정'
+                : '선착순 · 신청 즉시 자동 확정 · 정원 차면 마감'}
+            </p>
           )}
         </div>
       </div>

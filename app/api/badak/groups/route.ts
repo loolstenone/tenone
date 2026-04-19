@@ -11,12 +11,53 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const limit = parseInt(searchParams.get('limit') || '20');
+  const leaderParam = searchParams.get('leader');
+  const memberParam = searchParams.get('member');
+
+  // member=me: 내가 참여(approved)한 모임 목록
+  if (memberParam === 'me') {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { data: member } = await supabase
+      .from('badak_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    if (!member) return NextResponse.json({ groups: [] });
+
+    // 내가 승인된 모임 ID 목록 조회
+    let gmQuery = supabase
+      .from('badak_group_members')
+      .select('group_id')
+      .eq('member_id', member.id)
+      .eq('status', 'approved');
+    const { data: memberships } = await gmQuery;
+    const groupIds = (memberships ?? []).map((m: { group_id: string }) => m.group_id);
+    if (groupIds.length === 0) return NextResponse.json({ groups: [] });
+
+    let q = supabase
+      .from('badak_groups')
+      .select(`
+        id, slug, title, status, meeting_type, max_members, current_members,
+        event_date, schedule, location, fee, tags, cover_image_url, season_number,
+        leader:badak_members!badak_groups_leader_id_fkey(id, display_name, job_function, avatar_url)
+      `)
+      .in('id', groupIds)
+      .order('event_date', { ascending: false });
+    if (status) q = q.eq('status', status);
+    const { data, error } = await q;
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ groups: data || [] });
+  }
 
   let query = supabase
     .from('badak_groups')
     .select(`
       id, slug, title, tagline, description, status, meeting_type, join_type,
-      max_members, current_members,
+      max_members, current_members, season_number, parent_group_id,
       event_date, schedule, next_date, location, location_detail, fee, tags, cover_image_url, created_at,
       leader:badak_members!badak_groups_leader_id_fkey(id, display_name, job_function, experience_years, avatar_url),
       need:badak_needs!badak_groups_need_id_fkey(id, display_text, count)
@@ -24,9 +65,24 @@ export async function GET(request: NextRequest) {
     .order('event_date', { ascending: true })
     .limit(limit);
 
+  if (leaderParam === 'me') {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { data: member } = await supabase
+      .from('badak_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    if (!member) return NextResponse.json({ groups: [] });
+    query = query.eq('leader_id', member.id);
+  }
+
   if (status) {
     query = query.eq('status', status);
-  } else {
+  } else if (leaderParam !== 'me') {
     query = query.neq('status', 'pending_review');
   }
 
@@ -94,6 +150,7 @@ export async function POST(request: NextRequest) {
     .insert({
       need_id: body.needId || null,
       title: body.title,
+      tagline: body.tagline || null,
       description: body.description || null,
       intro_who: body.introWho || null,
       structure: body.sessions?.length > 0 ? body.sessions : null,
@@ -121,6 +178,9 @@ export async function POST(request: NextRequest) {
       tags: body.tags || [],
       cover_image_url: body.coverImageUrl || null,
       current_members: 1,
+      parent_group_id: body.parentGroupId || null,
+      season_number: body.seasonNumber || 1,
+      show_leader_reviews: body.showLeaderReviews || false,
     })
     .select()
     .single();
@@ -133,6 +193,96 @@ export async function POST(request: NextRequest) {
     member_id: member.id,
     status: 'approved',
   });
+
+  // 니즈 자동 매핑 + 알림 (non-blocking)
+  (async () => {
+    try {
+      let linkedNeedId: string | null = body.needId || null;
+
+      if (!linkedNeedId) {
+        // 제목 embedding → 유사 니즈 매핑
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (apiKey) {
+          const embRes = await fetch('https://api.openai.com/v1/embeddings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+            body: JSON.stringify({ model: 'text-embedding-3-small', input: body.title }),
+          });
+          if (embRes.ok) {
+            const embJson = await embRes.json();
+            const embedding = embJson.data?.[0]?.embedding;
+            if (embedding) {
+              const { data: matched } = await supabase.rpc('match_badak_needs', {
+                query_embedding: embedding,
+                match_threshold: 0.6,
+                match_count: 5,
+              });
+              const best = (matched ?? []).find(
+                (r: { id: string; status: string }) => r.status === 'approved',
+              );
+              if (best) {
+                linkedNeedId = best.id;
+                await supabase
+                  .from('badak_groups')
+                  .update({ need_id: linkedNeedId })
+                  .eq('id', group.id);
+              }
+            }
+          }
+        }
+      }
+
+      if (!linkedNeedId) return;
+
+      // 니즈 has_group 플래그 업데이트
+      await supabase
+        .from('badak_needs')
+        .update({ has_group: true })
+        .eq('id', linkedNeedId);
+
+      // 알림 대상: 관심 등록 멤버 + 니즈 작성자
+      const [{ data: interests }, { data: need }] = await Promise.all([
+        supabase
+          .from('badak_need_interests')
+          .select('member_id')
+          .eq('need_id', linkedNeedId),
+        supabase
+          .from('badak_needs')
+          .select('created_by_user_id, display_text')
+          .eq('id', linkedNeedId)
+          .single(),
+      ]);
+
+      const notifyIds = new Set<string>();
+
+      if (interests && interests.length > 0) {
+        const memberIds = interests.map((i: { member_id: string }) => i.member_id);
+        const { data: members } = await supabase
+          .from('badak_members')
+          .select('user_id')
+          .in('id', memberIds);
+        (members ?? []).forEach((m: { user_id: string }) => {
+          if (m.user_id) notifyIds.add(m.user_id);
+        });
+      }
+      if (need?.created_by_user_id) notifyIds.add(need.created_by_user_id);
+      notifyIds.delete(user.id); // 바닥장 본인 제외
+
+      if (notifyIds.size === 0) return;
+
+      const needText = need?.display_text ?? body.title;
+      await supabase.from('badak_notifications').insert(
+        Array.from(notifyIds).map((uid) => ({
+          user_id: uid,
+          type: 'group_matched',
+          title: '관심 니즈의 모임이 생겼어요 🙌',
+          body: `"${needText}" 니즈와 연결된 모임이 열렸어요`,
+          link: `/badak/groups/${group.id}`,
+          metadata: { groupId: group.id, needId: linkedNeedId },
+        })),
+      );
+    } catch { /* 매핑 실패 시 모임 생성에는 영향 없음 */ }
+  })();
 
   return NextResponse.json({ group });
 }

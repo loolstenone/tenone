@@ -6,7 +6,7 @@ import Image from 'next/image';
 import {
   Plus, Calendar, MapPin, Users, Search,
   Crown, Flame, Clock, Sparkles, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowRight,
+  SlidersHorizontal, ArrowRight, LayoutList, CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -124,6 +124,42 @@ const MOCK_GROUPS: GroupItem[] = [
     need: { display_text: '이직 준비', count: 51 },
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
+  {
+    id: 'g10', slug: 'b2b-marketing-season1',
+    title: 'B2B 마케팅 실무 모임 (시즌 1)',
+    description: 'B2B SaaS 마케팅 전략과 실무를 나누었던 지난 시즌 모임. 후기를 남겨보세요.',
+    status: 'completed', max_members: 20, current_members: 18,
+    event_date: '2026-03-15T14:00:00', location: '강남역', fee: 0,
+    tags: ['B2B', '마케팅', 'SaaS'],
+    cover_image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=560&h=200&fit=crop&auto=format',
+    leader: { display_name: '마케터J', job_function: '퍼포먼스 마케팅' },
+    need: { display_text: 'B2B 마케팅', count: 28 },
+    created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'g11', slug: 'ai-prompt-season1',
+    title: 'AI 프롬프트 엔지니어링 스터디 (시즌 1)',
+    description: 'ChatGPT, Claude 등 AI 도구 활용 마케팅 실습. 총 6회 완주한 스터디.',
+    status: 'completed', max_members: 15, current_members: 14,
+    event_date: '2026-02-22T15:00:00', location: '강남역', fee: 10000,
+    tags: ['AI', '프롬프트', 'ChatGPT'],
+    cover_image_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=560&h=200&fit=crop&auto=format',
+    leader: { display_name: 'AI마스터', job_function: '그로스 마케터' },
+    need: { display_text: 'AI 마케팅', count: 45 },
+    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'g12', slug: 'performance-case-season1',
+    title: '퍼포먼스 마케팅 네트워킹 (시즌 1)',
+    description: '페이스북, 구글, 네이버 광고 실무자들의 오프라인 네트워킹 1회차.',
+    status: 'completed', max_members: 30, current_members: 27,
+    event_date: '2026-01-18T19:30:00', location: '을지로', fee: 0,
+    tags: ['퍼포먼스', '광고', '네트워킹'],
+    cover_image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=560&h=200&fit=crop&auto=format',
+    leader: { display_name: '광고맨P', job_function: '퍼포먼스 마케팅' },
+    need: { display_text: '퍼포먼스 광고', count: 31 },
+    created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+  },
 ];
 
 interface BadakMemberProfile {
@@ -237,11 +273,11 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
 
   const statusStyle = (() => {
     switch (g.status) {
-      case 'recruiting': return { bg: 'rgba(34,197,94,0.15)', color: '#4ade80', label: '모집중' };
-      case 'confirmed': return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa', label: '확정' };
-      case 'closed': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨' };
-      case 'ended': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨' };
-      default: return { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24', label: '검토중' };
+      case 'recruiting': return { bg: 'rgba(34,197,94,0.15)', color: '#4ade80', label: '모집중', tip: '지금 참여 신청을 받고 있어요' };
+      case 'confirmed': return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa', label: '확정', tip: '모집이 마감됐고 모임 진행이 확정됐어요' };
+      case 'closed': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨', tip: '이미 종료된 모임이에요' };
+      case 'ended': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)', label: '종료됨', tip: '이미 종료된 모임이에요' };
+      default: return { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24', label: '검토중', tip: '관리자 검토 후 공개돼요' };
     }
   })();
 
@@ -279,7 +315,7 @@ function GroupCard({ group: g, hasDragged }: { group: GroupItem; hasDragged?: Re
       <div className="p-5">
         {/* 상태 뱃지 */}
         <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: statusStyle.bg, color: statusStyle.color }}>
+          <span title={statusStyle.tip} className="rounded-full px-2.5 py-1 text-[11px] font-semibold cursor-default" style={{ background: statusStyle.bg, color: statusStyle.color }}>
             {statusStyle.label}
           </span>
           {isClosingSoon && (
@@ -365,8 +401,11 @@ export default function GroupsPage() {
     fetch('/api/badak/groups')
       .then((r) => r.json())
       .then((data) => {
-        const fetched = data.groups || [];
-        setGroups(fetched.length > 0 ? fetched : MOCK_GROUPS);
+        const fetched: GroupItem[] = data.groups || [];
+        // DB 데이터와 목 데이터 병합 (slug/id 기준 중복 제거, DB 우선)
+        const dbSlugs = new Set(fetched.map((g) => g.slug ?? g.id));
+        const mockOnly = MOCK_GROUPS.filter((g) => !dbSlugs.has(g.slug ?? g.id));
+        setGroups([...fetched, ...mockOnly]);
         setLoading(false);
       })
       .catch(() => { setGroups(MOCK_GROUPS); setLoading(false); });
@@ -420,6 +459,12 @@ export default function GroupsPage() {
     })
     .slice(0, 6);
 
+  // 종료된 모임
+  const completedGroups = [...groups]
+    .filter((g) => g.status === 'completed')
+    .sort((a, b) => (b.event_date ?? '').localeCompare(a.event_date ?? ''))
+    .slice(0, 6);
+
   // 전체 모임 (검색 + 카테고리 필터)
   const searchFiltered = groups.filter((g) => {
     if (!search.trim()) return true;
@@ -450,13 +495,22 @@ export default function GroupsPage() {
             <h1 className="text-2xl font-bold text-white">모임</h1>
             <p className="mt-1.5 text-sm text-white/50">함께 성장할 모임을 찾아보세요</p>
           </div>
-          <Link
-            href="/badak/groups/create"
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold no-underline"
-            style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
-          >
-            <Plus className="h-4 w-4" /> 모임 만들기
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAll((v) => !v)}
+              title={showAll ? '슬라이드 보기' : '리스트 보기'}
+              className="flex items-center justify-center rounded-xl border border-white/10 p-2.5 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
+            >
+              <LayoutList className="h-5 w-5" />
+            </button>
+            <Link
+              href="/badak/groups/create"
+              className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold no-underline"
+              style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}
+            >
+              <Plus className="h-4 w-4" /> 모임 만들기
+            </Link>
+          </div>
         </div>
 
         {/* 검색 */}
@@ -503,6 +557,16 @@ export default function GroupsPage() {
               groups={latestGroups}
               emptyText="등록된 모임이 없습니다"
             />
+
+            {/* 종료된 모임 */}
+            {completedGroups.length > 0 && (
+              <SlideSection
+                title="종료된 모임"
+                icon={<CheckCircle2 className="h-5 w-5 text-white/35" />}
+                groups={completedGroups}
+                emptyText=""
+              />
+            )}
 
             {/* 전체 보기 버튼 */}
             <div className="px-5 sm:px-8">
@@ -566,9 +630,10 @@ export default function GroupsPage() {
                   const isFull = remaining <= 0;
                   const st = (() => {
                     switch (g.status) {
-                      case 'recruiting': return { bg: 'rgba(34,197,94,0.15)', color: '#4ade80', label: '모집중' };
-                      case 'confirmed': return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa', label: '확정' };
-                      default: return { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', label: '마감' };
+                      case 'recruiting': return { bg: 'rgba(34,197,94,0.15)', color: '#4ade80', label: '모집중', tip: '지금 참여 신청을 받고 있어요' };
+                      case 'confirmed': return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa', label: '확정', tip: '모집이 마감됐고 모임 진행이 확정됐어요' };
+                      case 'completed': return { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', label: '종료됨', tip: '모임이 완료됐어요. 후기를 남길 수 있어요' };
+                      default: return { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', label: '마감', tip: '모집이 마감된 모임이에요' };
                     }
                   })();
 
@@ -584,7 +649,7 @@ export default function GroupsPage() {
                       )}
                       <div className={`flex flex-1 min-w-0 flex-col justify-center py-3 ${!g.cover_image_url ? 'px-4' : 'pr-3'}`}>
                         <div className="mb-1 flex items-center gap-1.5">
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: st.bg, color: st.color }}>
+                          <span title={st.tip} className="rounded-full px-2 py-0.5 text-[10px] font-semibold cursor-default" style={{ background: st.bg, color: st.color }}>
                             {st.label}
                           </span>
                           {g.fee === 0

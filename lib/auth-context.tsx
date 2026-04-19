@@ -480,7 +480,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const redirectTo = `${window.location.origin}/auth/callback`;
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo },
+            options: { redirectTo, queryParams: { prompt: 'select_account' } },
         });
         if (data?.url) window.location.href = data.url;
         if (error) console.error('Google OAuth error:', error);
