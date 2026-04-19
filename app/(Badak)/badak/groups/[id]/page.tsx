@@ -524,7 +524,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     event_date: string | null; schedule: string | null; cover_image_url: string | null;
     season_number: number | null;
   }[]>([]);
-  const [myPastLoading, setMyPastLoading] = useState(false);
+  const [myPastLoading, setMyPastLoading] = useState(true);
 
   // 섹션 refs
   const sectionRefs = useRef<Record<TabName, HTMLElement | null>>({
@@ -1262,7 +1262,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   className="flex items-center gap-3 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                   {pg.cover_image_url ? (
-                    <img src={pg.cover_image_url} alt="" className="h-14 w-18 shrink-0 object-cover" />
+                    <img src={pg.cover_image_url} alt="" className="h-14 w-20 shrink-0 object-cover" />
                   ) : (
                     <div className="h-14 w-16 shrink-0"
                       style={{ background: 'rgba(255,255,255,0.05)' }} />
