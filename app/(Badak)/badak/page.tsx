@@ -9,7 +9,7 @@ import { FeedSection } from '@/features/badak/cloud/FeedSection';
 import { NeedDetailSheet } from '@/features/badak/cloud/NeedDetailSheet';
 import { getTimeBasedSky } from '@/lib/badak-cloud-data';
 import { createClient } from '@/lib/supabase/client';
-import { ChevronDown } from 'lucide-react';
+import { Mouse } from 'lucide-react';
 
 const COLORS_GROUP = ['#ffd93d', '#fbbf24', '#f59e0b', '#fcd34d'];
 const COLORS_DEFAULT = ['#94a3b8', '#a1a1aa', '#9ca3af', '#cbd5e1'];
@@ -342,14 +342,13 @@ export default function BadakNextStage() {
         {/* Needs Input */}
         <div className="sticky bottom-0 z-40 px-4 pb-4 pt-2" style={{ background: 'linear-gradient(transparent 0%, rgba(26,26,46,0.95) 30%)' }}>
           <div ref={inputAreaRef} className="mx-auto max-w-[500px]">
-            <NeedsInput onSend={handleSend as (text: string) => Promise<{ status: string; count?: number; id?: string }>} sending={sending} />
+            <NeedsInput onSend={handleSend as (text: string) => Promise<{ status: string; count?: number; id?: string }>} sending={sending} cloudWords={cloudWords} />
           </div>
           <button
             onClick={scrollToFeed}
-            className="mx-auto mt-2 flex items-center gap-1 rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/30 hover:text-white/60 transition-colors cursor-pointer"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
+            className="mx-auto mt-2 flex items-center justify-center text-white/30 hover:text-white/60 transition-colors cursor-pointer"
           >
-            진행 중인 모임 보기 <ChevronDown className="h-3 w-3" />
+            <Mouse className="h-5 w-5" strokeWidth={2.5} />
           </button>
         </div>
       </section>

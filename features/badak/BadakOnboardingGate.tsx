@@ -26,8 +26,8 @@ export function BadakOnboardingGate() {
             if (!res.ok) return;
 
             const { member } = await res.json();
-            // member가 없거나 onboarded가 명시적으로 false인 경우
-            if (member && member.onboarded === false) {
+            // member 레코드 없거나 onboarded가 false이면 온보딩으로
+            if (!member || member.onboarded === false) {
                 router.replace('/badak/onboard');
             }
         };

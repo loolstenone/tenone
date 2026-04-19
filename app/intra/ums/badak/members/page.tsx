@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 
 interface Member {
   id: string;
+  auth_id: string;
   name: string;
   email: string;
   avatar_initials: string;
@@ -16,7 +17,7 @@ interface Member {
 
 interface BadakMember {
   id: string;
-  member_id: string | null;
+  user_id: string | null;
   display_name: string;
   industry: string | null;
   job_function: string | null;
@@ -32,9 +33,11 @@ interface BadakMember {
 interface Application {
   id: string;
   member_id: string | null;
+  user_id: string | null;
   name: string;
   industry: string;
-  motivation: string;
+  reason: string;
+  plan: string;
   created_at: string;
   status: string;
 }
@@ -75,12 +78,12 @@ export default function BadakMembersPage() {
     try {
       const supabase = createClient();
       const [{ data: mems }, { data: bMems }, { data: apps }] = await Promise.all([
-        supabase.from("members").select("id, name, email, avatar_initials, created_at, affiliations")
+        supabase.from("members").select("id, auth_id, name, email, avatar_initials, created_at, affiliations")
           .contains("affiliations", ["badak"]).order("created_at", { ascending: false }),
         supabase.from("badak_members").select(
-          "id, member_id, display_name, industry, job_function, role, is_active, created_at, phone, leader_level, completed_groups_count, specialist_invited"
+          "id, user_id, display_name, industry, job_function, role, is_active, created_at, phone, leader_level, completed_groups_count, specialist_invited"
         ).order("created_at", { ascending: false }),
-        supabase.from("badak_leader_applications").select("id, member_id, name, industry, motivation, created_at, status")
+        supabase.from("badak_leader_applications").select("id, member_id, user_id, name, industry, reason, plan, created_at, status")
           .order("created_at", { ascending: false }).limit(50),
       ]);
       setMembers((mems ?? []) as Member[]);
@@ -136,8 +139,12 @@ export default function BadakMembersPage() {
       await supabase.from("badak_leader_applications").update({ status }).eq("id", appId);
       if (status === "approved") {
         const app = applications.find(a => a.id === appId);
-        if (app?.member_id) {
-          const bm = badakMembers.find(b => b.member_id === app.member_id);
+        if (app) {
+          // user_id로 직접 매칭, 없으면 member_id→auth_id 경유
+          const bm = badakMembers.find(b =>
+            (app.user_id && b.user_id === app.user_id) ||
+            (app.member_id && members.find(m => m.id === app.member_id)?.auth_id === b.user_id)
+          );
           if (bm) {
             await supabase.from("badak_members").update({ role: "badakjang", leader_level: "C" }).eq("id", bm.id);
             setBadakMembers(prev => prev.map(m => m.id === bm.id ? { ...m, role: "badakjang", leader_level: "C" } : m));
@@ -289,7 +296,7 @@ export default function BadakMembersPage() {
 
             <div className="space-y-2">
               {filteredMembers.map(m => {
-                const bm = badakMembers.find(b => b.member_id === m.id);
+                const bm = badakMembers.find(b => b.user_id === m.auth_id);
                 const role = bm?.role ?? "member";
                 const rs = ROLE_STYLE[role] ?? ROLE_STYLE.member;
                 return (
@@ -354,7 +361,7 @@ export default function BadakMembersPage() {
                           <span className="text-sm font-semibold text-neutral-800">{app.name}</span>
                           <span className="text-[10px] text-neutral-400">{app.industry}</span>
                         </div>
-                        <p className="text-xs text-neutral-600 leading-relaxed line-clamp-2">{app.motivation}</p>
+                        <p className="text-xs text-neutral-600 leading-relaxed line-clamp-2">{app.reason}{app.plan ? ` / ${app.plan}` : ""}</p>
                         <p className="text-[10px] text-neutral-400 mt-1">
                           {new Date(app.created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
                         </p>

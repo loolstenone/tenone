@@ -89,13 +89,12 @@ export interface User {
     createdAt?: string;
     newsletterSubscribed?: boolean;
 
-    // 포인트
-    totalPoints?: number;
-    grade?: string;
-
     // BUMS 권한
     bumsRole?: BumsRole;
     bumsSiteAccess?: string[];
+
+    // 온보딩
+    onboardingCompleted?: boolean;      // false면 온보딩 미완료 (소셜 첫 가입)
 
     // 공개 프로필
     handle?: string;                    // @username (고유값)

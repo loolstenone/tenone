@@ -6,6 +6,65 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 const supabase = createClient(url, key);
 
+// GET: 해당 니즈에 관심 표명한 멤버 목록 + 본인 여부
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id: needId } = await params;
+
+  // 본인 여부 확인 (토큰 있을 때만)
+  let myMemberId: string | null = null;
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) {
+      const { data: member } = await supabase
+        .from('badak_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (member) myMemberId = member.id;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from('badak_need_interests')
+    .select(`
+      member_id,
+      badak_members!inner(id, display_name, job_function, avatar_url, profile_public)
+    `)
+    .eq('need_id', needId)
+    .limit(20);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  type RawRow = {
+    member_id: string;
+    badak_members: {
+      id: string;
+      display_name: string | null;
+      job_function: string | null;
+      avatar_url: string | null;
+      profile_public: boolean | null;
+    };
+  };
+
+  const members = (data as unknown as RawRow[]).map((row) => ({
+    id: row.badak_members.id,
+    displayName: row.badak_members.display_name,
+    jobFunction: row.badak_members.job_function,
+    avatarUrl: row.badak_members.avatar_url,
+  }));
+
+  const isInterested = myMemberId
+    ? (data as unknown as RawRow[]).some((row) => row.member_id === myMemberId)
+    : false;
+
+  return NextResponse.json({ members, isInterested, total: members.length });
+}
+
 // POST: 니즈에 관심 표시
 export async function POST(
   request: NextRequest,

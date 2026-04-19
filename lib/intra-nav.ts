@@ -26,7 +26,7 @@ import {
     BookOpen, Compass, HelpCircle,
     ShoppingCart, CalendarClock, LayoutGrid, MessageCircle, Flame,
     Bot, Users, Home, Menu, X, Radio, Mail, Brain, LineChart, Map, RefreshCw,
-    Zap, Layers, PenTool, Eye,
+    Zap, Layers, PenTool, Eye, Coins,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
@@ -143,6 +143,13 @@ export const modules: NavModule[] = [
                             { name: "프로모션", href: "/intra/ums/commerce/promotions" },
                             { name: "손익", href: "/intra/ums/commerce/revenue" },
                             { name: "고객문의", href: "/intra/ums/commerce/inquiry" },
+                        ],
+                    },
+                    {
+                        name: "Universe Coin", href: "/intra/ums/uc", icon: Coins,
+                        children: [
+                            { name: "잔액 현황", href: "/intra/ums/uc" },
+                            { name: "거래 내역", href: "/intra/ums/uc/transactions" },
                         ],
                     },
                 ],

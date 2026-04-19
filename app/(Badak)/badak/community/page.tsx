@@ -83,6 +83,9 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
+  // 삭제 확인
+  const [pendingDeletePostId, setPendingDeletePostId] = useState<string | null>(null);
+
   // 수정
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
@@ -199,7 +202,6 @@ export default function CommunityPage() {
 
   // 글 삭제
   const handleDeletePost = async (postId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
     const session = await getSession();
     if (!session) return;
     const res = await fetch(`/api/badak/community/${postId}`, {
@@ -207,6 +209,7 @@ export default function CommunityPage() {
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
     if (res.ok) {
+      setPendingDeletePostId(null);
       setSelectedPost(null);
       loadPosts(activeBoard);
       refreshCounts();
@@ -287,7 +290,7 @@ export default function CommunityPage() {
     const author = selectedPost.member;
     return (
       <div className="min-h-screen bg-[#1a1a2e] pt-14">
-        <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8">
           <button onClick={() => setSelectedPost(null)} className="mb-4 flex items-center gap-1.5 text-sm text-white/30 hover:text-white/50">
             <ArrowLeft className="h-4 w-4" /> 목록
           </button>
@@ -318,10 +321,38 @@ export default function CommunityPage() {
             {isMyPost(selectedPost) && (
               <div className="flex items-center gap-2">
                 <button onClick={() => startEdit(selectedPost)} className="text-white/25 hover:text-white/50"><Edit3 className="h-3.5 w-3.5" /></button>
-                <button onClick={() => handleDeletePost(selectedPost.id)} className="text-white/25 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
+                <button
+                  onClick={() => setPendingDeletePostId(selectedPost.id)}
+                  className="text-white/25 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             )}
           </div>
+
+          {/* 삭제 확인 배너 */}
+          {pendingDeletePostId === selectedPost.id && (
+            <div className="mt-3 rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)' }}>
+              <p className="mb-1.5 text-[12px] font-semibold text-red-400/90">이 글을 삭제하시겠습니까?</p>
+              <p className="mb-3 text-[11px] text-white/35">삭제된 글은 복구할 수 없습니다. 댓글도 함께 삭제됩니다.</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDeletePost(selectedPost.id)}
+                  className="flex-1 rounded-lg py-1.5 text-[11px] font-semibold transition-colors"
+                  style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171' }}
+                >
+                  삭제
+                </button>
+                <button
+                  onClick={() => setPendingDeletePostId(null)}
+                  className="rounded-lg border border-white/10 px-4 py-1.5 text-[11px] text-white/40"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
 
           {selectedPost.tags?.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -387,7 +418,7 @@ export default function CommunityPage() {
   // ── 목록 뷰 ──
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8">
         <div className="mb-6">
           <h1 className="mb-1 text-lg font-bold text-white">커뮤니티</h1>
           <p className="text-xs text-white/40">바닥 멤버들과 자유롭게 소통하세요</p>

@@ -129,9 +129,8 @@ function memberToUser(member: Record<string, unknown>): User {
         createdAt: member.created_at as string,
         newsletterSubscribed: member.newsletter_subscribed as boolean | undefined,
 
-        // 포인트
-        totalPoints: member.total_points as number | undefined,
-        grade: member.grade as string | undefined,
+        // 온보딩
+        onboardingCompleted: (member.onboarding_completed as boolean) ?? true,
 
         // 공개 프로필
         handle: member.handle as string | undefined,
@@ -195,6 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         intra_access: false,
                         module_access: defaultModuleAccess[initialType] || [],
                         affiliations: [],
+                        onboarding_completed: false,
                     })
                     .select()
                     .single();

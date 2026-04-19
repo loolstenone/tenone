@@ -26,6 +26,7 @@ export interface CloudWord {
   interestCount?: number;    // 관심 등록 수 (✋)
   fireCount?: number;        // 불꽃 수 (🔥)
   imageUrl?: string;
+  createdAt?: string;
   group?: CloudGroup;        // 하위 호환 (mock 데이터용)
   groups?: CloudGroup[];     // 실DB: 동일 니즈에 연결된 모임 전체
 }
@@ -59,6 +60,21 @@ export interface FeedItem {
 export interface SkyInfo {
   bg: string;
   period: 'dawn' | 'morning' | 'day' | 'afternoon' | 'sunset' | 'night';
+}
+
+export interface BrowseMember {
+  id: string;
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  industry: string | null;
+  job_function: string | null;
+  experience_years: number | null;
+  bio: string | null;
+  looking_for: string[] | null;
+  can_offer: string[] | null;
+  interest_tags: string[] | null;
+  created_at: string;
 }
 
 // ── 기존 타입 ──

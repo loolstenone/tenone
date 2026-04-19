@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { earnUC } from '@/lib/supabase/uc';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -73,9 +74,26 @@ export async function PUT(
     .eq('id', membershipId);
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 400 });
 
-  // 승인 시 current_members 증가
+  // 승인 시 current_members 증가 + UC 지급
   if (action === 'approved') {
     await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
+
+    // 승인된 멤버에게 join_group UC 지급
+    const { data: applicantBadakMember } = await supabase
+      .from('badak_members')
+      .select('user_id')
+      .eq('id', membership.member_id)
+      .maybeSingle();
+    if (applicantBadakMember?.user_id) {
+      const { data: ucMember } = await supabase
+        .from('members')
+        .select('id')
+        .eq('auth_id', applicantBadakMember.user_id)
+        .maybeSingle();
+      if (ucMember) {
+        await earnUC(ucMember.id, 'join_group', 'badak');
+      }
+    }
   }
 
   // 신청자에게 알림

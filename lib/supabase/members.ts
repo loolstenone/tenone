@@ -34,6 +34,7 @@ export interface MemberRow {
     total_points: number;
     grade: string;
     newsletter_subscribed: boolean;
+    onboarding_completed: boolean;
     is_active: boolean;
     created_at: string;
     updated_at: string;

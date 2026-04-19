@@ -1,33 +1,26 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-17 밤 (집, 세션 57 — 크로스도메인 인증 대대적 개편 + PKCE 잔여 이슈)
+> 마지막 업데이트: 2026-04-19 (세션 58 — Badak 잔여 4개 태스크 완료 검증)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-### 🔴 긴급 미해결 — OAuth PKCE verifier 쿠키 문제
-**증상:** `badak.tenone.biz`에서 Google 로그인 시도 → `/auth/callback`에서 `PKCE code verifier not found in storage` 에러 → `/login?error=auth_callback_error`로 리다이렉트.
-**현재까지 파악:**
-- `hasVerifier=false` (서버에 verifier 쿠키가 오지 않음)
-- 서버가 받는 쿠키: `_ga, _ga_*, tenone-auth.0, tenone-auth.1` (session 쿠키는 있는데 verifier 없음)
-- 미들웨어 `/auth/*` pass-through 적용해도 여전히 실패 → 미들웨어 문제 아님
-- 즉, 클라이언트가 signInWithOAuth 호출 시 verifier 쿠키를 제대로 설정하지 못하거나 Google→Supabase→우리사이트 리다이렉트 체인에서 쿠키 손실 중
+### 🟢 진행 가능 작업
+1. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
+2. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
+3. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
 
-**다음 시도 순서:**
-1. 브라우저 DevTools 에서 Google 로그인 클릭 직전/직후 `document.cookie`에 `tenone-auth-code-verifier` 존재 여부 확인
-2. 존재한다면 SameSite/Domain 설정 점검 (cookieOptions.domain=`.tenone.biz`가 `badak.tenone.biz`에서 올바르게 적용되는지)
-3. 존재 안 한다면 `@supabase/ssr` 싱글톤 캐싱 문제 의심 — `createBrowserClient`를 매번 새로 만들도록 테스트
-4. 최후 수단: `/auth/callback`을 클라이언트 페이지로 전환 (서버 대신 client-side `exchangeCodeForSession`) — document.cookie는 확실히 verifier 접근 가능
+### 🔵 자산 대기
+- **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
+- **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관
 
-### 🟡 lools@tenone.biz 비밀번호 복구
-- 사용자가 사무실에서 `/profile` 아코디언으로 비번 변경 → 집에서 새 비번 로그인 안 됨
-- DB `auth.users.updated_at=2026-04-17 22:16 KST`로 변경 자체는 기록됨 (typo 추정)
-- **Claude는 auth.users 직접 수정 금지** (세션 54 사고 원칙)
-- 해결: PKCE 버그 고친 후 정상 `/reset-password` 플로우로 재설정 (또는 사용자가 Supabase Dashboard에서 수동 재설정)
+### ✅ 세션 58 완료
+- Badak 잔여 4개 태스크 전부 이미 구현 완료 확인 (신규 코드 불필요)
+- explore 페이지 필터 UI, 모임 상세 후기/참여이력, 알림 시스템, 온보딩 검증 모두 정상 작동
 
-### 🟢 기존 이월
-1. **0-B Phase C** — members 테이블 permission 컬럼 DROP (실서버 auth 검증 후)
-2. **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
-3. **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관
+### ✅ 완료 확인
+- **OAuth PKCE verifier 문제** — `/auth/callback`을 클라이언트 page.tsx로 전환(커밋 a87edb8)으로 해소. 디버그 로그도 제거됨
+- **lools@tenone.biz 비밀번호** — 복구 완료
+- **0-B Phase C** — `members.permission` 컬럼 이미 없음 (확인 완료)
 
 ---
 
@@ -153,11 +146,11 @@
 | **0-C** | 중복 테이블 정리 (expenses/approvals/timesheets/chat → wio_*) |
 | **0-D** | WIO 서비스 인프라 (wio_tenant_configs, wio_feature_flags) |
 
-### Badak 잔여
-- 멤버 검색/필터 고도화
-- 모임 상세 페이지 완성
-- 알림 시스템
-- 온보딩 플로우
+### Badak ✅ 모두 완료
+- ✅ 멤버 검색/필터 고도화 (explore 페이지 SlidersHorizontal 필터 패널 + 칩)
+- ✅ 모임 상세 페이지 완성 (후기 탭 + 참여 이력 탭, API 연결)
+- ✅ 알림 시스템 (BadakHeader 벨 뱃지 + My 탭 + join/approve 이벤트 알림 생성)
+- ✅ 온보딩 플로우 (5단계 canNext 검증, BadakOnboardingGate 가드, API 서버 검증)
 
 ---
 

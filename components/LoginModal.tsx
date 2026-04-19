@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Eye, EyeOff } from "lucide-react";
+import { X, Eye, EyeOff, AtSign, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { createClient } from "@/lib/supabase/client";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -17,6 +18,8 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [handle, setHandle] = useState("");
+    const [loginMode, setLoginMode] = useState<"email" | "handle">("email");
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +42,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         return () => { document.body.style.overflow = ""; };
     }, [isOpen]);
 
-    const resetForm = () => { setName(""); setEmail(""); setPassword(""); setPasswordConfirm(""); setError(""); setIsDuplicate(false); setShowPassword(false); };
+    const resetForm = () => { setName(""); setEmail(""); setHandle(""); setPassword(""); setPasswordConfirm(""); setError(""); setIsDuplicate(false); setShowPassword(false); setLoginMode("email"); };
     const switchTab = (t: "login" | "signup") => { resetForm(); setTab(t); };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -47,7 +50,33 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         setError("");
         setIsSubmitting(true);
         try {
-            const result = await login(email, password);
+            let loginEmail = email;
+
+            // 핸들 로그인: API로 이메일 조회
+            if (loginMode === "handle") {
+                const res = await fetch("/api/auth/handle-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ handle }),
+                });
+                if (!res.ok) {
+                    const { error: msg } = await res.json();
+                    setError(msg || "존재하지 않는 핸들입니다.");
+                    setIsSubmitting(false);
+                    return;
+                }
+                const { email: foundEmail } = await res.json();
+                loginEmail = foundEmail;
+
+                // 직접 Supabase signInWithPassword
+                const supabase = createClient();
+                const { error: signInErr } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
+                if (signInErr) setError("핸들 또는 비밀번호가 올바르지 않습니다.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            const result = await login(loginEmail, password);
             if (!result.success) setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다.");
         } catch { setError("로그인 중 오류가 발생했습니다."); }
         setIsSubmitting(false);
@@ -126,14 +155,35 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
 
                     <div className="flex items-center gap-3 mb-5">
                         <div className="flex-1 h-px bg-neutral-200" />
-                        <span className="text-xs text-neutral-400">또는 이메일로</span>
+                        <span className="text-xs text-neutral-400">또는</span>
                         <div className="flex-1 h-px bg-neutral-200" />
                     </div>
 
                     {/* 로그인 폼 */}
                     {tab === "login" && (
                         <form onSubmit={handleLogin} className="space-y-3">
-                            <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
+                            {/* 이메일 / 핸들 전환 탭 */}
+                            <div className="flex rounded-xl overflow-hidden border border-neutral-200 text-xs font-medium">
+                                <button type="button"
+                                    onClick={() => { setLoginMode("email"); setError(""); }}
+                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "email" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
+                                    <Mail className="w-3.5 h-3.5" /> 이메일
+                                </button>
+                                <button type="button"
+                                    onClick={() => { setLoginMode("handle"); setError(""); }}
+                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "handle" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
+                                    <AtSign className="w-3.5 h-3.5" /> 핸들 ID
+                                </button>
+                            </div>
+
+                            {loginMode === "email" ? (
+                                <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
+                            ) : (
+                                <div className="relative">
+                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm font-medium">@</span>
+                                    <input type="text" placeholder="myhandle" value={handle} onChange={e => setHandle(e.target.value.replace(/^@/, "").toLowerCase())} className={inputClass + " pl-7"} required />
+                                </div>
+                            )}
                             <div className="relative">
                                 <input type={showPassword ? "text" : "password"} placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className={inputClass + " pr-10"} required />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">

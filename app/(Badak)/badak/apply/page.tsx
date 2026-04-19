@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowLeft, Crown, Check, Send, Sparkles, Users, Shield, X, UserPlus, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowLeft, Crown, Check, Send, Sparkles, Users, Shield, X } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { LoginModal } from '@/components/LoginModal';
@@ -12,6 +13,8 @@ const SUGGEST_INTERESTS = [
   '리더십', '프리랜서/창업', '네트워킹', '스터디',
 ];
 
+const PLAN_HINTS = ['주제', '내용', '모임 주기', '모임 형태', '참여 대상', '예상 인원'];
+
 const BENEFITS = [
   { icon: Crown, title: '공식 바닥장 뱃지', desc: '프로필에 바닥장 뱃지가 부여됩니다' },
   { icon: Users, title: '모임 개설 권한', desc: '원하는 주제로 자유롭게 모임을 만들 수 있습니다' },
@@ -19,13 +22,23 @@ const BENEFITS = [
   { icon: Sparkles, title: '바닥장 네트워크', desc: '다른 바닥장들과의 전용 네트워킹에 참여합니다' },
 ];
 
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
 export default function ApplyPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const searchParams = useSearchParams();
+  const needId = searchParams.get('needId');
   const [showLogin, setShowLogin] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   // 폼
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [industry, setIndustry] = useState('');
   const [experience, setExperience] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
@@ -33,6 +46,41 @@ export default function ApplyPage() {
   const [reason, setReason] = useState('');
   const [plan, setPlan] = useState('');
   const [contact, setContact] = useState('');
+
+  // 로그인 사용자 정보 자동 입력
+  useEffect(() => {
+    if (!user) return;
+    if (user.name && !name) setName(user.name);
+    if (user.email && !email) setEmail(user.email);
+    if (user.phone && !contact) setContact(formatPhone(user.phone));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // 바닥 프로필에서 산업군/경력 자동 입력
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('badak_members')
+          .select('display_name, industry, job_function, experience_years')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (!data) return;
+        if (data.display_name && !name) setName(data.display_name);
+        if (data.industry && !industry) setIndustry(data.industry);
+        if (data.experience_years && !experience) {
+          const label = data.job_function
+            ? `${data.job_function} ${data.experience_years}년차`
+            : `${data.experience_years}년차`;
+          setExperience(label);
+        }
+      } catch { /* 무시 */ }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const toggleInterest = (item: string) => {
     setInterests((prev) =>
@@ -57,6 +105,11 @@ export default function ApplyPage() {
   };
 
   const isCustom = (item: string) => !SUGGEST_INTERESTS.includes(item);
+
+  const appendPlanHint = (label: string) => {
+    const line = `• ${label}: `;
+    setPlan((prev) => prev ? `${prev}\n${line}` : line);
+  };
 
   const canSubmit = name.trim() && industry.trim() && experience.trim()
     && interests.length > 0 && reason.trim().length >= 20 && contact.trim();
@@ -83,7 +136,7 @@ export default function ApplyPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ name, industry, experience, interests, reason, plan, contact }),
+        body: JSON.stringify({ name, industry, experience, interests, reason, plan, contact, needId }),
       });
 
       const data = await res.json();
@@ -155,7 +208,7 @@ export default function ApplyPage() {
     <>
     {authOverlay}
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8">
 
         {/* 헤더 */}
         <div className="mb-6">
@@ -170,6 +223,20 @@ export default function ApplyPage() {
             바닥장이 되어 같은 니즈를 가진 사람들의 모임을 이끌어 보세요
           </p>
         </div>
+
+        {/* 연결된 니즈 컨텍스트 */}
+        {needId && (
+          <div className="mb-4 rounded-xl border border-amber-400/20 p-4 flex items-start gap-3"
+            style={{ background: 'rgba(255,217,61,0.06)' }}>
+            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/60" />
+            <div>
+              <p className="text-xs font-semibold text-amber-300/80">니즈 기반 바닥장 신청</p>
+              <p className="mt-0.5 text-xs text-white/40">
+                특정 니즈와 연결된 바닥장 신청입니다. 승인 시 해당 니즈의 공식 바닥장이 됩니다.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* 바닥장이란 */}
         <div className="mb-6 rounded-2xl border border-white/8 p-5" style={{ background: 'rgba(255,255,255,0.02)' }}>
@@ -205,7 +272,26 @@ export default function ApplyPage() {
               className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
           </div>
 
-          {/* 산업군/직무 */}
+          {/* 이메일 + 연락처 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">이메일</label>
+              <input value={email} readOnly
+                className="w-full rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/40 outline-none cursor-default" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/40">연락처 *</label>
+              <input
+                value={contact}
+                onChange={(e) => setContact(formatPhone(e.target.value))}
+                placeholder="010-0000-0000"
+                inputMode="tel"
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40"
+              />
+            </div>
+          </div>
+
+          {/* 산업군/경력 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-white/40">산업군 *</label>
@@ -227,7 +313,6 @@ export default function ApplyPage() {
               이끌고 싶은 분야 * <span className="text-white/20">(최대 5개, 직접 입력 가능)</span>
             </label>
 
-            {/* 선택된 분야 */}
             {interests.length > 0 && (
               <div className="mb-2 flex flex-wrap gap-1.5">
                 {interests.map((item) => (
@@ -246,7 +331,6 @@ export default function ApplyPage() {
               </div>
             )}
 
-            {/* 기본 카테고리 */}
             <div className="mb-2 flex flex-wrap gap-1.5">
               {SUGGEST_INTERESTS.filter((item) => !interests.includes(item)).map((item) => (
                 <button key={item} onClick={() => toggleInterest(item)}
@@ -263,7 +347,6 @@ export default function ApplyPage() {
               ))}
             </div>
 
-            {/* 직접 입력 */}
             {interests.length < 5 && (
               <input value={interestInput}
                 onChange={(e) => {
@@ -282,8 +365,19 @@ export default function ApplyPage() {
                 placeholder="없는 분야는 직접 입력 (Enter 또는 ,)"
                 className="w-full rounded-xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs text-white outline-none placeholder:text-white/20 focus:border-[#74b9ff]/40" />
             )}
-            {interests.some(isCustom) && (
+            {interests.length === 5 && (
+              <p className="mt-1.5 text-[10px] font-semibold" style={{ color: '#ffd93d' }}>
+                ✓ 5개 선택 완료 — 원하면 태그를 눌러 교체할 수 있어요
+              </p>
+            )}
+            {interests.some(isCustom) && interests.length < 5 && (
               <p className="mt-1.5 text-[10px] text-blue-400/50">
+                <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
+                직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
+              </p>
+            )}
+            {interests.some(isCustom) && interests.length === 5 && (
+              <p className="mt-0.5 text-[10px] text-blue-400/50">
                 <Sparkles className="mr-0.5 inline h-2.5 w-2.5" />
                 직접 입력한 분야는 승인 시 바닥 전체 카테고리에 반영됩니다
               </p>
@@ -307,18 +401,23 @@ export default function ApplyPage() {
             <label className="mb-1.5 block text-xs font-medium text-white/40">
               운영 계획 <span className="text-white/20">(선택)</span>
             </label>
+            {/* 작성 가이드 힌트 */}
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {PLAN_HINTS.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => appendPlanHint(label)}
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/45 hover:border-white/20 hover:text-white/65 transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  + {label}
+                </button>
+              ))}
+            </div>
             <textarea value={plan} onChange={(e) => setPlan(e.target.value)}
-              rows={3}
+              rows={4}
               placeholder="모임 주기, 형태, 대상 등 구체적인 계획이 있다면 적어주세요"
               className="w-full resize-none rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
-          </div>
-
-          {/* 연락처 */}
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/40">연락처 *</label>
-            <input value={contact} onChange={(e) => setContact(e.target.value)}
-              placeholder="이메일 또는 전화번호"
-              className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#ffd93d]/40" />
           </div>
 
           {/* 안내 */}

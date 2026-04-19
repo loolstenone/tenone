@@ -35,24 +35,31 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const { industry, industryType, jobFunction, jobFunctionType, phone, displayName } = body;
 
+  const { expectations } = body;
+
   // 필수값 검증
+  if (!displayName?.trim()) return NextResponse.json({ error: '닉네임을 입력해주세요' }, { status: 400 });
   if (!industry?.trim()) return NextResponse.json({ error: '산업군을 선택해주세요' }, { status: 400 });
   if (!jobFunction?.trim()) return NextResponse.json({ error: '직무를 선택해주세요' }, { status: 400 });
-  if (!phone?.trim()) return NextResponse.json({ error: '연락처를 입력해주세요' }, { status: 400 });
+  const cleanPhone = phone?.trim().replace(/[^0-9]/g, '') ?? '';
+  if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+    return NextResponse.json({ error: '올바른 휴대전화 번호를 입력해주세요 (10~11자리)' }, { status: 400 });
+  }
 
   const { data: member, error } = await supabase
     .from('badak_members')
-    .update({
-      display_name: displayName || undefined,
+    .upsert({
+      user_id: user.id,
+      display_name: displayName.trim(),
       industry: industry.trim(),
       industry_type: industryType || 'current',
       job_function: jobFunction.trim(),
       job_function_type: jobFunctionType || 'current',
-      phone: phone.trim(),
+      phone: cleanPhone,
+      interests: Array.isArray(expectations) && expectations.length > 0 ? expectations : undefined,
       onboarded: true,
       updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', user.id)
+    }, { onConflict: 'user_id' })
     .select()
     .single();
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { earnUC } from '@/lib/supabase/uc';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -35,7 +36,7 @@ export async function GET(
     .single();
 
   if (group?.leader_id === member.id) {
-    return NextResponse.json({ status: 'leader' });
+    return NextResponse.json({ status: 'leader', memberId: member.id });
   }
 
   // 참여 상태 확인
@@ -46,7 +47,7 @@ export async function GET(
     .eq('member_id', member.id)
     .maybeSingle();
 
-  return NextResponse.json({ status: membership?.status || 'none' });
+  return NextResponse.json({ status: membership?.status || 'none', memberId: member.id });
 }
 
 // POST: 모임 참여 신청
@@ -110,6 +111,16 @@ export async function POST(
   // 선착순만 즉시 증가. 승인제는 리더 승인 시 증가.
   if (isFirstcome) {
     await supabase.rpc('badak_increment_group_members', { group_uuid: groupId });
+
+    // UC 코인 지급 (선착순 즉시 승인)
+    const { data: memberRow } = await supabase
+      .from('members')
+      .select('id')
+      .eq('auth_id', user.id)
+      .maybeSingle();
+    if (memberRow) {
+      await earnUC(memberRow.id, 'join_group', 'badak');
+    }
   }
 
   // 알림 생성

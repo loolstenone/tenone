@@ -14,7 +14,7 @@ import { LoginModal } from "@/components/LoginModal";
 const PREFIX = '/badak';
 const navItems = [
     { name: "모임", href: `${PREFIX}/groups` },
-    { name: "관심사 탐험", href: `${PREFIX}/explore` },
+    { name: "니즈 탐색", href: `${PREFIX}/explore` },
     { name: "커뮤니티", href: `${PREFIX}/community` },
     { name: "스토리", href: `${PREFIX}/story` },
     { name: "모임 개설", href: `${PREFIX}/groups/create` },

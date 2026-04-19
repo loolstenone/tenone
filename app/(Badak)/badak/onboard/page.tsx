@@ -47,6 +47,7 @@ export default function OnboardPage() {
   const [phone, setPhone] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
 
   // Auto-fill from user data
@@ -59,6 +60,12 @@ export default function OnboardPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
   const toggleExpectation = (exp: string) => {
     setExpectations((prev) =>
       prev.includes(exp) ? prev.filter((e) => e !== exp) : [...prev, exp]
@@ -70,13 +77,14 @@ export default function OnboardPage() {
     if (step === 1) return expectations.length > 0;
     if (step === 2) return industry.length > 0;
     if (step === 3) return jobFunction.length > 0;
-    if (step === 4) return phone.trim().length >= 10 && emailVerified;
+    if (step === 4) return displayName.trim().length >= 2 && phone.trim().length >= 10 && emailVerified;
     return false;
   };
 
   const handleSendVerification = async () => {
     if (!email.includes('@')) return;
     setVerificationSent(true);
+    setResendCooldown(30);
     // 유니버스 가입 시 이미 인증된 경우 스킵
     if (user?.email === email) {
       setEmailVerified(true);
@@ -335,13 +343,16 @@ export default function OnboardPage() {
                 ) : (
                   <button
                     onClick={handleSendVerification}
-                    disabled={!email.includes('@') || verificationSent}
+                    disabled={!email.includes('@') || resendCooldown > 0}
                     className="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-semibold text-blue-600 disabled:opacity-40"
                   >
-                    {verificationSent ? '전송됨' : '인증하기'}
+                    {resendCooldown > 0 ? `${resendCooldown}초 후 재발송` : verificationSent ? '재발송' : '인증하기'}
                   </button>
                 )}
               </div>
+              {verificationSent && !emailVerified && (
+                <p className="mt-1 text-[11px] text-blue-500">인증 메일을 보냈습니다. 받지 못하셨나요?{resendCooldown > 0 ? ` ${resendCooldown}초 후 재발송 가능합니다.` : ' 재발송 버튼을 눌러보세요.'}</p>
+              )}
               {user?.email && (
                 <p className="mt-1 text-[11px] text-green-500">유니버스 가입 시 인증된 이메일입니다</p>
               )}
@@ -351,13 +362,19 @@ export default function OnboardPage() {
               <label className="mb-1.5 block text-xs font-medium text-neutral-500">휴대전화 번호 *</label>
               <input
                 type="tel"
-                value={phone}
+                value={phone.length <= 3 ? phone : phone.length <= 7 ? `${phone.slice(0,3)}-${phone.slice(3)}` : `${phone.slice(0,3)}-${phone.slice(3,7)}-${phone.slice(7)}`}
                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="01012345678"
-                maxLength={11}
-                className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                placeholder="010-1234-5678"
+                maxLength={13}
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-400 ${
+                  phone.length > 0 && phone.length < 10 ? 'border-red-200 bg-red-50' : 'border-neutral-200'
+                }`}
               />
-              <p className="mt-1 text-[11px] text-neutral-400">모임 확정 시 안내 문자를 보내드려요</p>
+              {phone.length > 0 && phone.length < 10 ? (
+                <p className="mt-1 text-[11px] text-red-400">올바른 번호를 입력해주세요</p>
+              ) : (
+                <p className="mt-1 text-[11px] text-neutral-400">모임 확정 시 안내 문자를 보내드려요</p>
+              )}
             </div>
           </div>
 

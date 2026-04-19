@@ -149,7 +149,7 @@ export function MemberProfileSheet({
                   </span>
                 )}
                 {profile?.isActive && (
-                  <span className="flex items-center gap-1 text-[10px]" style={{ color: '#4ade80' }}>
+                  <span className="flex items-center gap-1 text-xs" style={{ color: '#4ade80' }}>
                     <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
                     활동 중
                   </span>
@@ -242,7 +242,7 @@ export function MemberProfileSheet({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[13px] font-semibold text-white/80">{g.title}</div>
-                    <div className="mt-1 flex items-center gap-3 text-[10px] text-white/30">
+                    <div className="mt-1 flex items-center gap-3 text-xs text-white/30">
                       {g.location && (
                         <span className="flex items-center gap-0.5">
                           <MapPin className="h-2.5 w-2.5" /> {g.location}

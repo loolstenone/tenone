@@ -123,6 +123,47 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // 승인 시 후속 처리 (non-blocking)
+  if (status === 'approved' && data?.user_id) {
+    (async () => {
+      try {
+        // 바닥장 역할 부여
+        await supabase
+          .from('badak_members')
+          .update({ role: 'leader' })
+          .eq('user_id', data.user_id);
+
+        // 신청자 알림
+        await supabase.from('badak_notifications').insert({
+          user_id: data.user_id,
+          type: 'leader_approved',
+          title: '바닥장 신청이 승인됐습니다 🎉',
+          body: data.need_text
+            ? `"${data.need_text}" 니즈의 공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!`
+            : '공식 바닥장이 되었습니다. 이제 모임을 개설할 수 있어요!',
+          link: '/badak',
+          metadata: { applicationId: data.id, needId: data.need_id },
+        });
+      } catch { /* 알림 실패는 무시 */ }
+    })();
+  } else if (status === 'rejected' && data?.user_id) {
+    (async () => {
+      try {
+        await supabase.from('badak_notifications').insert({
+          user_id: data.user_id,
+          type: 'leader_rejected',
+          title: '바닥장 신청 결과 안내',
+          body: note
+            ? `아쉽게도 이번 신청은 승인되지 않았습니다. 사유: ${note}`
+            : '아쉽게도 이번 신청은 승인되지 않았습니다. 다음에 다시 도전해보세요!',
+          link: '/badak/apply',
+          metadata: { applicationId: data.id },
+        });
+      } catch { /* 알림 실패는 무시 */ }
+    })();
+  }
+
   return NextResponse.json({ application: data });
 }
 

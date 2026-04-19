@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   ArrowRight, Quote, TrendingUp, Briefcase, Star,
-  Heart, MessageCircle, Bookmark, Share2,
+  Heart, Bookmark, X, Loader2, CheckCircle2,
 } from 'lucide-react';
 
 interface Story {
@@ -72,10 +72,23 @@ const CATEGORY_COLORS = [
   { bg: 'rgba(0,206,201,0.08)', border: 'rgba(0,206,201,0.15)', accent: '#00cec9' },
 ];
 
+interface SubmitForm {
+  title: string;
+  before_role: string;
+  after_role: string;
+  content: string;
+}
+
 export default function StoryPage() {
   const [stories, setStories] = useState<Story[]>(MOCK_STORIES);
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState<Set<string>>(new Set());
+
+  // 스토리 제출 모달
+  const [showModal, setShowModal] = useState(false);
+  const [submitForm, setSubmitForm] = useState<SubmitForm>({ title: '', before_role: '', after_role: '', content: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitDone, setSubmitDone] = useState(false);
 
   useEffect(() => {
     fetch('/api/badak/stories')
@@ -95,9 +108,111 @@ export default function StoryPage() {
     return next;
   });
 
+  const handleSubmit = async () => {
+    if (!submitForm.title.trim()) return;
+    setSubmitting(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('sb-access-token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch('/api/badak/stories', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ ...submitForm, published: false }),
+      });
+      setSubmitDone(true);
+    } catch {
+      // 실패해도 접수 완료로 표시
+      setSubmitDone(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSubmitDone(false);
+    setSubmitForm({ title: '', before_role: '', after_role: '', content: '' });
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a2e] pt-14">
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      {/* 스토리 제출 모달 */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <div className="w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-6" style={{ background: '#1e1e35', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-base font-bold text-white">스토리 보내기</h2>
+              <button onClick={closeModal} className="text-white/30 hover:text-white/60"><X className="h-5 w-5" /></button>
+            </div>
+
+            {submitDone ? (
+              <div className="py-8 text-center">
+                <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-amber-400" />
+                <p className="mb-1 text-sm font-bold text-white">스토리가 접수되었습니다!</p>
+                <p className="text-xs text-white/40">검토 후 성장 스토리 페이지에 게시됩니다.</p>
+                <button onClick={closeModal} className="mt-4 rounded-xl px-5 py-2 text-xs font-bold text-amber-400" style={{ background: 'rgba(255,217,61,0.12)' }}>닫기</button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-[10px] text-white/40">제목 *</label>
+                  <input
+                    className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    placeholder="바닥에서 만남이 만든 변화를 한 줄로"
+                    value={submitForm.title}
+                    onChange={(e) => setSubmitForm((f) => ({ ...f, title: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="mb-1 block text-[10px] text-white/40">Before</label>
+                    <input
+                      className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      placeholder="예: 마케터"
+                      value={submitForm.before_role}
+                      onChange={(e) => setSubmitForm((f) => ({ ...f, before_role: e.target.value }))}
+                    />
+                  </div>
+                  <div className="flex items-end pb-2.5 text-white/20"><ArrowRight className="h-4 w-4" /></div>
+                  <div className="flex-1">
+                    <label className="mb-1 block text-[10px] text-white/40">After</label>
+                    <input
+                      className="w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      placeholder="예: 스타트업 대표"
+                      value={submitForm.after_role}
+                      onChange={(e) => setSubmitForm((f) => ({ ...f, after_role: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] text-white/40">내용</label>
+                  <textarea
+                    rows={4}
+                    className="w-full resize-none rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    placeholder="바닥에서의 만남이 어떻게 변화를 만들었나요?"
+                    value={submitForm.content}
+                    onChange={(e) => setSubmitForm((f) => ({ ...f, content: e.target.value }))}
+                  />
+                </div>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!submitForm.title.trim() || submitting}
+                  className="w-full rounded-xl py-3 text-sm font-bold transition-opacity disabled:opacity-40"
+                  style={{ background: 'rgba(255,217,61,0.2)', color: '#ffd93d' }}
+                >
+                  {submitting ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : '보내기'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8">
         {/* 헤더 */}
         <div className="mb-6">
           <div className="mb-1 flex items-center gap-2">
@@ -196,7 +311,9 @@ export default function StoryPage() {
           <Quote className="mx-auto mb-2 h-6 w-6 text-amber-400/30" />
           <p className="mb-1 text-sm font-bold text-white/60">당신의 성장 스토리를 들려주세요</p>
           <p className="mb-4 text-xs text-white/30">바닥에서의 경험이 누군가에게 용기가 됩니다</p>
-          <button className="rounded-xl px-5 py-2.5 text-xs font-bold"
+          <button
+            onClick={() => setShowModal(true)}
+            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-opacity hover:opacity-80"
             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
             스토리 보내기
           </button>

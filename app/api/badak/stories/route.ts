@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { earnUC } from '@/lib/supabase/uc';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -27,13 +28,28 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ stories: data || [] });
 }
 
-// POST: 스토리 생성 (관리자)
+// POST: 스토리 생성 (유저 제출 또는 관리자)
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { title, content, before_role, after_role, member_id, published } = body;
 
   if (!title?.trim()) {
     return NextResponse.json({ error: '제목을 입력해주세요' }, { status: 400 });
+  }
+
+  // 인증 토큰으로 멤버 확인 (유저 제출 시)
+  let resolvedMemberId = member_id || null;
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  if (token && !member_id) {
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) {
+      const { data: bm } = await supabase
+        .from('badak_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (bm) resolvedMemberId = bm.id;
+    }
   }
 
   const { data, error } = await supabase
@@ -44,13 +60,29 @@ export async function POST(request: NextRequest) {
       content: content?.trim() || null,
       before_role: before_role?.trim() || null,
       after_role: after_role?.trim() || null,
-      member_id: member_id || null,
+      member_id: resolvedMemberId,
       published: published ?? false,
     })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // UC 코인 지급 (로그인한 유저가 제출한 경우)
+  if (token && resolvedMemberId) {
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (user) {
+      const { data: memberRow } = await supabase
+        .from('members')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      if (memberRow) {
+        await earnUC(memberRow.id, 'submit_story', 'badak');
+      }
+    }
+  }
+
   return NextResponse.json({ story: data });
 }
 

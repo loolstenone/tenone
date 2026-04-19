@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseProfile } from "@/components/UniverseProfile";
 import { ProfileComments } from "@/components/ProfileComments";
+import { UCBalanceCard } from "@/components/UCBalanceCard";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -32,6 +33,7 @@ export default function ProfilePage() {
                     />
                 )}
             </UniverseProfile>
+            <UCBalanceCard />
         </div>
     );
 }

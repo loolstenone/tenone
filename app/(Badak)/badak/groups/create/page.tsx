@@ -187,6 +187,14 @@ function CreateGroupPageInner() {
   const [needs, setNeeds] = useState<NeedOption[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
+  // 시즌 연속 시스템
+  const [showPreStep, setShowPreStep] = useState<boolean | null>(null); // null = 로딩 중
+  const [creationType, setCreationType] = useState<'new' | 'continuation' | null>(null);
+  const [previousGroups, setPreviousGroups] = useState<{ id: string; title: string; season_number: number; slug: string }[]>([]);
+  const [parentGroupId, setParentGroupId] = useState<string | null>(null);
+  const [seasonNumber, setSeasonNumber] = useState<number>(1);
+  const [showLeaderReviews, setShowLeaderReviews] = useState(false);
+
   // 바닥장 여부
   const [isBadakjang, setIsBadakjang] = useState(false);
   useEffect(() => {
@@ -203,6 +211,25 @@ function CreateGroupPageInner() {
         const { member } = await res.json();
         if (member?.role === 'badakjang' || member?.role === 'admin') setIsBadakjang(true);
       } catch { /* ignore */ }
+    })();
+  }, [isAuthenticated]);
+
+  // 이전 완료 모임 로드 (시즌 연속 여부 판단)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const sb = createClient();
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { setShowPreStep(false); return; }
+        const res = await fetch('/api/badak/groups?leader=me&status=completed', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const { groups } = await res.json();
+        const prev = (groups ?? []) as { id: string; title: string; season_number: number; slug: string }[];
+        setPreviousGroups(prev);
+        setShowPreStep(prev.length > 0);
+      } catch { setShowPreStep(false); }
     })();
   }, [isAuthenticated]);
 
@@ -244,6 +271,7 @@ function CreateGroupPageInner() {
 
   // Form state
   const [title, setTitle] = useState('');
+  const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
   const [needId, setNeedId] = useState('');
 
@@ -453,6 +481,24 @@ function CreateGroupPageInner() {
     return false;
   };
 
+  const getMissingFields = (): string[] => {
+    const missing: string[] = [];
+    if (step === 0) {
+      if (!title.trim()) missing.push('모임 제목');
+      if (tagList.length === 0) missing.push('태그 최소 1개');
+    }
+    if (step === 1) {
+      if (meetingType === 'onetime' && !eventDate) missing.push('날짜');
+      if (meetingType === 'series' && !seriesDates[0]?.date) missing.push('첫 회차 날짜');
+      if (!location.trim()) missing.push('기본 장소');
+    }
+    if (step === 3) {
+      if (!leaderCareer.trim()) missing.push('개인 이력');
+      if (leaderReason.trim().length < 10) missing.push('바닥장 소개 (10자 이상)');
+    }
+    return missing;
+  };
+
   const handleSubmit = async () => {
     if (!isAuthenticated) { setShowLogin(true); return; }
     setSubmitting(true);
@@ -477,6 +523,7 @@ function CreateGroupPageInner() {
       },
       body: JSON.stringify({
         title,
+        tagline: tagline || null,
         description,
         introWho: introWho || null,
         sessions: sessions.filter((s) => s.title.trim()).length > 0 ? sessions.filter((s) => s.title.trim()) : null,
@@ -498,6 +545,9 @@ function CreateGroupPageInner() {
         leaderReason,
         leaderCareer: leaderCareer || null,
         coverImageUrl,
+        parentGroupId: creationType === 'continuation' ? parentGroupId : null,
+        seasonNumber: creationType === 'continuation' ? seasonNumber : 1,
+        showLeaderReviews: creationType === 'new' ? showLeaderReviews : false,
       }),
     });
 
@@ -754,39 +804,50 @@ function CreateGroupPageInner() {
     {authOverlay}
     {showPreview && <PreviewModal />}
 
-    <div className="mx-auto min-h-screen max-w-[860px] bg-[#1a1a2e] text-white">
+    <div className="mx-auto min-h-screen max-w-3xl bg-[#1a1a2e] text-white">
       {/* Header */}
       <div className="flex items-center gap-3 px-6 pt-7 pb-5">
-        <button onClick={() => step > 0 ? setStep(step - 1) : router.back()} className="text-white/60 hover:text-white">
+        <button
+          onClick={() => {
+            if (showPreStep && creationType !== null) { setCreationType(null); return; }
+            if (!showPreStep && step === 0 && previousGroups.length > 0) { setShowPreStep(true); setCreationType(null); return; }
+            step > 0 ? setStep(step - 1) : router.back();
+          }}
+          className="text-white/60 hover:text-white"
+        >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-xl font-bold">모임 만들기</h1>
         <div className="flex-1" />
-        <button
-          onClick={() => setShowPreview(true)}
-          className="flex items-center gap-1.5 rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
-          style={{ background: 'rgba(255,255,255,0.04)' }}
-        >
-          <Eye className="h-3.5 w-3.5" /> 미리보기
-        </button>
-        <span className="text-sm text-white/40">{step + 1} / {STEPS.length}</span>
+        {!showPreStep && (
+          <button
+            onClick={() => setShowPreview(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
+            style={{ background: 'rgba(255,255,255,0.04)' }}
+          >
+            <Eye className="h-3.5 w-3.5" /> 미리보기
+          </button>
+        )}
+        {!showPreStep && <span className="text-sm text-white/40">{step + 1} / {STEPS.length}</span>}
       </div>
 
       {/* Step indicator */}
-      <div className="mb-10 flex gap-2 px-6">
-        {STEPS.map((s, i) => (
-          <div key={s} className="flex-1">
-            <div
-              className="h-1.5 rounded-full transition-all"
-              style={{ background: i <= step ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.1)' }}
-            />
-            <div className={`mt-2.5 text-[13px] font-medium ${i <= step ? 'text-white/80' : 'text-white/35'}`}>{s}</div>
-          </div>
-        ))}
-      </div>
+      {!showPreStep && (
+        <div className="mb-10 flex gap-2 px-6">
+          {STEPS.map((s, i) => (
+            <div key={s} className="flex-1">
+              <div
+                className="h-1.5 rounded-full transition-all"
+                style={{ background: i <= step ? 'linear-gradient(90deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.1)' }}
+              />
+              <div className={`mt-2.5 text-[13px] font-medium ${i <= step ? 'text-white/80' : 'text-white/35'}`}>{s}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 바닥장 여부 안내 */}
-      {!isBadakjang && (
+      {!isBadakjang && !showPreStep && (
         <div className="mx-6 mb-6 rounded-xl border p-5"
           style={{ background: 'rgba(255,217,61,0.04)', borderColor: 'rgba(255,217,61,0.15)' }}>
           <div className="flex items-start gap-3">
@@ -807,8 +868,136 @@ function CreateGroupPageInner() {
         </div>
       )}
 
+      {/* ── 프리스텝: 새 모임 vs 다음 시즌 ── */}
+      {showPreStep && (
+        <div className="px-6 pb-6">
+          <div className="mb-8">
+            <h2 className="text-lg font-bold text-white mb-1">어떤 모임인가요?</h2>
+            <p className="text-sm text-white/45">이전에 진행한 모임이 있어요. 새 모임인지, 다음 시즌인지 선택해 주세요.</p>
+          </div>
+
+          <div className="space-y-3 mb-8">
+            {/* 새로운 모임 */}
+            <button
+              onClick={() => setCreationType('new')}
+              className="w-full rounded-2xl border p-5 text-left transition-all"
+              style={{
+                borderColor: creationType === 'new' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
+                background: creationType === 'new' ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.02)',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                  style={{ borderColor: creationType === 'new' ? '#ffd93d' : 'rgba(255,255,255,0.2)' }}>
+                  {creationType === 'new' && <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white/80 mb-1">새로운 모임</div>
+                  <div className="text-xs text-white/40 leading-relaxed">완전히 새로운 주제나 형식의 모임을 열어요. 이전 모임의 후기를 이 모임에 함께 보여줄 수도 있어요.</div>
+                </div>
+              </div>
+              {creationType === 'new' && (
+                <div className="mt-4 ml-8">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowLeaderReviews((v) => !v); }}
+                    className="flex items-center gap-2.5 rounded-xl border p-3 w-full transition-all"
+                    style={{
+                      borderColor: showLeaderReviews ? 'rgba(255,217,61,0.3)' : 'rgba(255,255,255,0.08)',
+                      background: showLeaderReviews ? 'rgba(255,217,61,0.05)' : 'transparent',
+                    }}
+                  >
+                    <div className="relative h-5 w-9 shrink-0 rounded-full transition-colors"
+                      style={{ background: showLeaderReviews ? '#ffd93d' : 'rgba(255,255,255,0.15)' }}>
+                      <div className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all"
+                        style={{ left: showLeaderReviews ? '17px' : '2px' }} />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-medium text-white/70">이전 모임 후기 함께 보여주기</div>
+                      <div className="text-[10px] text-white/35 mt-0.5">바닥장으로서의 지난 후기가 이 모임 페이지에 표시됩니다</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </button>
+
+            {/* 기존 모임 다음 시즌 */}
+            <button
+              onClick={() => setCreationType('continuation')}
+              className="w-full rounded-2xl border p-5 text-left transition-all"
+              style={{
+                borderColor: creationType === 'continuation' ? '#ffd93d' : 'rgba(255,255,255,0.1)',
+                background: creationType === 'continuation' ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.02)',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                  style={{ borderColor: creationType === 'continuation' ? '#ffd93d' : 'rgba(255,255,255,0.2)' }}>
+                  {creationType === 'continuation' && <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white/80 mb-1">기존 모임 다음 시즌</div>
+                  <div className="text-xs text-white/40 leading-relaxed">이전 시즌의 연장선으로 모임을 이어가요. 이전 시즌 후기가 자동으로 이어집니다.</div>
+                </div>
+              </div>
+              {creationType === 'continuation' && (
+                <div className="mt-4 ml-8 space-y-2" onClick={(e) => e.stopPropagation()}>
+                  {previousGroups.map((g) => {
+                    const isSelected = parentGroupId === g.id;
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => {
+                          setParentGroupId(g.id);
+                          setSeasonNumber(g.season_number + 1);
+                        }}
+                        className="flex w-full items-center justify-between rounded-xl border p-3 transition-all"
+                        style={{
+                          borderColor: isSelected ? '#ffd93d' : 'rgba(255,255,255,0.08)',
+                          background: isSelected ? 'rgba(255,217,61,0.05)' : 'transparent',
+                        }}
+                      >
+                        <div className="text-left">
+                          <div className="text-xs font-medium text-white/70">{g.title}</div>
+                          <div className="text-[10px] text-white/35 mt-0.5">시즌 {g.season_number} 완료</div>
+                        </div>
+                        {isSelected && (
+                          <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
+                            시즌 {seasonNumber}로 개설
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              if (!creationType) return;
+              if (creationType === 'continuation' && !parentGroupId) return;
+              setShowPreStep(false);
+            }}
+            disabled={!creationType || (creationType === 'continuation' && !parentGroupId)}
+            className="w-full rounded-2xl py-4 text-sm font-semibold transition-all"
+            style={{
+              background: (!creationType || (creationType === 'continuation' && !parentGroupId))
+                ? 'rgba(255,255,255,0.06)'
+                : 'rgba(255,217,61,0.15)',
+              color: (!creationType || (creationType === 'continuation' && !parentGroupId))
+                ? 'rgba(255,255,255,0.25)'
+                : '#ffd93d',
+            }}
+          >
+            다음 <ArrowRight className="inline h-4 w-4 ml-1" />
+          </button>
+        </div>
+      )}
+
       {/* Step content */}
-      <div className="px-6 pb-6">
+      {!showPreStep && <div className="px-6 pb-6">
         {/* ── Step 1: 기본 정보 ── */}
         {step === 0 && (
           <div className="space-y-9">
@@ -907,6 +1096,16 @@ function CreateGroupPageInner() {
               <input value={title} onChange={(e) => setTitle(e.target.value)}
                 placeholder="예: AI 실무 프롬프트 스터디"
                 className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
+            </div>
+
+            {/* 한 줄 소개 */}
+            <div>
+              <label className="mb-3 block text-[15px] font-medium text-white/75">한 줄 소개</label>
+              <input value={tagline} onChange={(e) => setTagline(e.target.value)}
+                maxLength={60}
+                placeholder="예: 에이전시↔인하우스를 오간 마케터들의 솔직한 이직 이야기"
+                className="w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3.5 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-[#ffd93d]/40" />
+              <p className="mt-1.5 text-xs text-white/30">모임 상세 페이지 제목 아래에 표시됩니다 ({tagline.length}/60)</p>
             </div>
 
             {/* 모임 소개 */}
@@ -1041,7 +1240,9 @@ function CreateGroupPageInner() {
                 </button>
               </div>
               <p className="mt-1.5 text-[10px] text-white/25">
-                {joinType === 'approval' ? '바닥장이 신청자를 확인 후 승인합니다' : '인원 내 자동 참여됩니다'}
+                {joinType === 'approval'
+                  ? '신청자 프로필을 확인하고 직접 승인·거절합니다. 모임 분위기를 지킬 수 있어요.'
+                  : '신청 즉시 자동 확정됩니다. 정원이 차면 더 이상 신청할 수 없습니다.'}
               </p>
             </div>
 
@@ -1623,27 +1824,41 @@ function CreateGroupPageInner() {
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Bottom CTA */}
-      <div className="px-6 pb-10 pt-4">
+      {!showPreStep && <div className="px-6 pb-10 pt-4">
         {step < 3 ? (
-          <button onClick={() => setStep(step + 1)} disabled={!canNext()}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
-            style={{
-              background: canNext() ? 'linear-gradient(135deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.08)',
-              color: canNext() ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
-            }}>
-            다음 <ArrowRight className="h-4 w-4" />
-          </button>
+          <>
+            <button onClick={() => setStep(step + 1)} disabled={!canNext()}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
+              style={{
+                background: canNext() ? 'linear-gradient(135deg, #ffd93d, #ff6b6b)' : 'rgba(255,255,255,0.08)',
+                color: canNext() ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
+              }}>
+              다음 <ArrowRight className="h-4 w-4" />
+            </button>
+            {!canNext() && getMissingFields().length > 0 && (
+              <p className="mt-2.5 text-center text-xs text-white/30">
+                필수 입력: <span className="text-white/50">{getMissingFields().join(' · ')}</span>
+              </p>
+            )}
+          </>
         ) : (
-          <button onClick={handleSubmit} disabled={!canNext() || submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
-            style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}>
-            {submitting ? '생성 중...' : '모임 개설하기'} <Check className="h-4 w-4" />
-          </button>
+          <>
+            <button onClick={handleSubmit} disabled={!canNext() || submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold shadow-lg transition-all disabled:opacity-30"
+              style={{ background: 'linear-gradient(135deg, #ffd93d, #ff6b6b)', color: '#1a1a2e' }}>
+              {submitting ? '생성 중...' : '모임 개설하기'} <Check className="h-4 w-4" />
+            </button>
+            {!canNext() && getMissingFields().length > 0 && (
+              <p className="mt-2.5 text-center text-xs text-white/30">
+                필수 입력: <span className="text-white/50">{getMissingFields().join(' · ')}</span>
+              </p>
+            )}
+          </>
         )}
-      </div>
+      </div>}
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>

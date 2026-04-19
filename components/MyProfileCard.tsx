@@ -60,25 +60,30 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                         <h2 className="text-lg font-bold text-white truncate">{user.name}</h2>
                         <div className="flex items-center gap-2">
                             <p className="text-sm text-neutral-400 truncate">{user.email}</p>
-                            {user.handle && (
+                            {user.handle ? (
                                 <a href={`/profile/@${user.handle}`}
-                                    className="text-[11px] text-neutral-500 hover:text-neutral-300 transition-colors shrink-0">
+                                    className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors shrink-0">
                                     @{user.handle}
                                 </a>
+                            ) : (
+                                <Link href="/profile"
+                                    className="text-xs text-neutral-600 hover:text-amber-400 transition-colors shrink-0 border border-neutral-700 rounded px-1.5 py-0.5">
+                                    핸들 수정
+                                </Link>
                             )}
                         </div>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             {isStaff && (
-                                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white">Staff</span>
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white">Staff</span>
                             )}
                             {siteBadge && (
-                                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
                                     style={{ backgroundColor: accentColor + '20', color: accentColor }}>
                                     {siteBadge}
                                 </span>
                             )}
                             {user.company && (
-                                <span className="text-[11px] text-neutral-500 flex items-center gap-1">
+                                <span className="text-xs text-neutral-500 flex items-center gap-1">
                                     <Building2 className="h-3 w-3" /> {user.company}
                                 </span>
                             )}
@@ -101,11 +106,11 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
                 )}
 
                 {/* Universe Profile 링크 */}
-                <Link href="/profile" className="flex items-center gap-3 p-3 rounded-xl border border-neutral-700/50 hover:border-neutral-500 transition-colors group">
+                <Link href={user.handle ? `/profile/@${user.handle}` : '/profile'} className="flex items-center gap-3 p-3 rounded-xl border border-neutral-700/50 hover:border-neutral-500 transition-colors group">
                     <Globe className="h-4 w-4 text-neutral-500 group-hover:text-white transition-colors" />
                     <div className="flex-1">
                         <p className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors">Universe Profile</p>
-                        <p className="text-[10px] text-neutral-600">
+                        <p className="text-xs text-neutral-600">
                             {user.handle ? `tenone.biz/profile/@${user.handle} · 수정` : '프로필 수정 · 전체 서비스 관리'}
                         </p>
                     </div>
@@ -119,7 +124,7 @@ export function MyProfileCard({ accentColor, siteBadge, children }: MyProfileCar
 function InfoCell({ label, value }: { label: string; value: string }) {
     return (
         <div>
-            <div className="text-[10px] font-medium text-neutral-500 mb-0.5">{label}</div>
+            <div className="text-xs font-medium text-neutral-500 mb-0.5">{label}</div>
             <div className="text-sm text-neutral-300">{value}</div>
         </div>
     );

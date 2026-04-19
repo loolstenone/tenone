@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { MyProfileCard } from '@/components/MyProfileCard';
 
-type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'notifications' | 'settings';
+type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'needs' | 'notifications' | 'settings';
 type ApplicantStatus = 'applied' | 'approved' | 'rejected';
 
 // ── 이력 항목 ──
@@ -1111,7 +1111,7 @@ export default function BadakMyPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const tab = searchParams.get('tab') as TabType | null;
-    const valid: TabType[] = ['mygroups', 'posts', 'bookmarks', 'connections', 'talks', 'notifications', 'settings'];
+    const valid: TabType[] = ['mygroups', 'posts', 'bookmarks', 'connections', 'talks', 'needs', 'notifications', 'settings'];
     return tab && valid.includes(tab) ? tab : 'mygroups';
   });
   const [showLogin, setShowLogin] = useState(false);
@@ -1191,6 +1191,17 @@ export default function BadakMyPage() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [talksLoading, setTalksLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 관심 니즈 (needs)
+  interface MyNeed {
+    id: string;
+    displayText: string | null;
+    count: number;
+    status: string | null;
+    interestedAt: string;
+  }
+  const [myNeeds, setMyNeeds] = useState<MyNeed[]>([]);
+  const [myNeedsLoading, setMyNeedsLoading] = useState(true);
 
   useEffect(() => { if (!isLoading && !isAuthenticated) setShowLogin(true); }, [isLoading, isAuthenticated]);
 
@@ -1291,12 +1302,21 @@ export default function BadakMyPage() {
           setThreads(talksData.threads || []);
           setUnreadTalkCount(talksData.unreadTotal ?? 0);
         } catch { /* silent */ } finally { setTalksLoading(false); }
+
+        // 관심 니즈 (needs)
+        setMyNeedsLoading(true);
+        try {
+          const needsRes = await fetch('/api/badak/needs/my-interests', { headers });
+          const needsData = await needsRes.json();
+          setMyNeeds(needsData.needs || []);
+        } catch { /* silent */ } finally { setMyNeedsLoading(false); }
       } catch {
         setNickname(user.name || '');
         setMyPostsLoading(false);
         setBookmarksLoading(false);
         setConnectionsLoading(false);
         setTalksLoading(false);
+        setMyNeedsLoading(false);
       }
     })();
   }, [user]);
@@ -1514,6 +1534,7 @@ export default function BadakMyPage() {
     { id: 'posts', label: '내 글' },
     { id: 'connections', label: '관심', badge: pendingIncomingCount },
     { id: 'talks', label: '대화', badge: unreadTalkCount },
+    { id: 'needs', label: '관심 니즈' },
     { id: 'bookmarks', label: '북마크' },
     { id: 'notifications', label: '알림', badge: unreadCount },
     { id: 'settings', label: '설정' },
@@ -1979,6 +2000,56 @@ export default function BadakMyPage() {
           </div>
         )}
 
+        {/* ── 관심 니즈 ── */}
+        {activeTab === 'needs' && (
+          <div className="space-y-2">
+            {myNeedsLoading ? (
+              <div className="flex justify-center py-16">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-amber-400" />
+              </div>
+            ) : myNeeds.length === 0 ? (
+              <div className="py-16 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
+                  <FileText className="h-5 w-5 text-white/20" />
+                </div>
+                <p className="text-sm text-white/35">관심 표명한 니즈가 없어요</p>
+                <Link href="/badak/explore" className="mt-3 inline-block text-xs" style={{ color: '#ffd93d' }}>
+                  니즈 탐색하러 가기 →
+                </Link>
+              </div>
+            ) : (
+              myNeeds.map((need) => (
+                <Link href="/badak/explore" key={need.id}>
+                  <div
+                    className="flex items-center justify-between rounded-xl px-4 py-3.5 transition-colors hover:bg-white/[0.04]"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-white/85">{need.displayText ?? '(텍스트 없음)'}</p>
+                      <div className="mt-0.5 flex items-center gap-2 text-[10px] text-white/35">
+                        <span>{need.count}명 관심</span>
+                        {need.status && need.status !== 'active' && (
+                          <span
+                            className="rounded-full px-1.5 py-px text-[9px] font-semibold"
+                            style={
+                              need.status === 'launched'
+                                ? { background: 'rgba(34,197,94,0.15)', color: '#4ade80' }
+                                : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }
+                            }
+                          >
+                            {need.status === 'launched' ? '런칭됨' : need.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-white/20" />
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        )}
+
         {/* ── 북마크 ── */}
         {activeTab === 'bookmarks' && (
           <div className="space-y-2">
@@ -2065,6 +2136,10 @@ export default function BadakMyPage() {
                   comment:            { label: '댓글',        color: '#ffd93d', bg: 'rgba(255,217,61,0.1)' },
                   like:               { label: '좋아요',      color: '#f87171', bg: 'rgba(239,68,68,0.08)' },
                   group_update:       { label: '모임',        color: '#a5b4fc', bg: 'rgba(99,102,241,0.1)' },
+                  group_matched:      { label: '모임 매칭',   color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+                  leader_approved:    { label: '바닥장 승인', color: '#ffd93d', bg: 'rgba(255,217,61,0.12)' },
+                  leader_rejected:    { label: '바닥장 거절', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
+                  new_message:        { label: '메시지',      color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
                   system:             { label: '시스템',      color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
                 };
                 const s = TYPE_STYLES[noti.type] || TYPE_STYLES.system;

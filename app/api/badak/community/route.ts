@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { earnUC } from '@/lib/supabase/uc';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -89,6 +90,18 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // UC 코인 지급 (게시글 작성, review 보드 제외 — write_review로 별도 처리)
+  if (board !== 'review') {
+    const { data: memberRow } = await supabase
+      .from('members')
+      .select('id')
+      .eq('auth_id', user.id)
+      .maybeSingle();
+    if (memberRow) {
+      await earnUC(memberRow.id, 'write_post', 'badak');
+    }
+  }
 
   return NextResponse.json({ post }, { status: 201 });
 }

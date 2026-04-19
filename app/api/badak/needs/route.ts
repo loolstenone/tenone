@@ -194,15 +194,23 @@ export async function DELETE(request: NextRequest) {
   return NextResponse.json({ deleted: true });
 }
 
-// GET: 니즈 목록 (관심 인원 많은 순, 최대 100개) + 연결된 모임 전체
+// GET: 니즈 목록 + 연결된 모임 전체
+// Query params:
+//   limit   — 최대 반환 수 (기본 200, 최대 1000)
+//   sort    — count(기본) | created_at
+//   from    — 생성일 시작 (ISO 날짜, inclusive)
+//   to      — 생성일 끝 (ISO 날짜, inclusive)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const limit = Math.min(parseInt(searchParams.get('limit') || '100'), 100);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '200'), 1000);
+  const sort = searchParams.get('sort') === 'created_at' ? 'created_at' : 'count';
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
 
-  const { data: needs, error } = await supabase
+  let query = supabase
     .from('badak_needs')
     .select(`
-      id, display_text, count, interest_count, fire_count, status, tags,
+      id, display_text, count, interest_count, fire_count, status, tags, created_at,
       groups:badak_groups!need_id(
         id, title, meeting_type, max_members, current_members,
         schedule, location, event_date, status,
@@ -210,8 +218,18 @@ export async function GET(request: NextRequest) {
       )
     `)
     .not('status', 'in', '("pending_review","rejected")')
-    .order('count', { ascending: false })
+    .order(sort, { ascending: sort === 'created_at' ? false : false })
     .limit(limit);
+
+  if (from) query = query.gte('created_at', from);
+  if (to) {
+    // to 날짜의 끝까지 포함 (23:59:59)
+    const toEnd = new Date(to);
+    toEnd.setDate(toEnd.getDate() + 1);
+    query = query.lt('created_at', toEnd.toISOString());
+  }
+
+  const { data: needs, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
@@ -259,6 +277,7 @@ export async function GET(request: NextRequest) {
       members: n.count,
       interestCount: n.interest_count ?? 0,
       fireCount: n.fire_count ?? 0,
+      createdAt: n.created_at ?? undefined,
       groups,
       group: groups[0] ?? undefined, // 하위 호환
     };

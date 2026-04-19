@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { getCookieDomain } from '@/lib/domain-registry';
+import { earnUC } from '@/lib/supabase/uc';
 import type { EmailOtpType } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 /**
  * OTP 기반 인증 확인 엔드포인트 (PKCE 대체)
@@ -45,11 +52,23 @@ export async function GET(request: NextRequest) {
         }
     );
 
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+    const { data: verifyData, error } = await supabase.auth.verifyOtp({ token_hash, type });
 
     if (error) {
         console.error('[auth/confirm] verifyOtp error:', error.message);
         return NextResponse.redirect(`${origin}/login?error=otp_invalid&msg=${encodeURIComponent(error.message)}`);
+    }
+
+    // 이메일 인증 완료 시 signup_complete UC 지급
+    if (type === 'signup' && verifyData?.user) {
+        const { data: memberRow } = await supabaseAdmin
+            .from('members')
+            .select('id')
+            .eq('auth_id', verifyData.user.id)
+            .maybeSingle();
+        if (memberRow) {
+            await earnUC(memberRow.id, 'signup_complete', null);
+        }
     }
 
     // 성공 → next 경로로 리다이렉트 (세션 쿠키 이미 설정됨)

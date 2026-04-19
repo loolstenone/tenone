@@ -20,7 +20,7 @@ export default function AuthCallbackPage() {
             }
 
             const supabase = createClient();
-            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
 
             if (error) {
                 console.error('[auth/callback] exchange error:', error.message);
@@ -37,7 +37,23 @@ export default function AuthCallbackPage() {
 
             if (type === 'recovery') {
                 router.replace('/reset-password');
-            } else if (pendingRedirect) {
+                return;
+            }
+
+            // 소셜 신규 가입 온보딩 체크
+            if (sessionData?.user) {
+                const { data: member } = await supabase
+                    .from('members')
+                    .select('onboarding_completed')
+                    .eq('auth_id', sessionData.user.id)
+                    .single();
+                if (member && member.onboarding_completed === false) {
+                    router.replace('/onboarding');
+                    return;
+                }
+            }
+
+            if (pendingRedirect) {
                 router.replace(pendingRedirect);
             } else {
                 const defaultNext = window.location.hostname.includes('smarcomm') ? '/dashboard' : '/';
