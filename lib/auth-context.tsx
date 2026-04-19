@@ -98,6 +98,7 @@ function memberToUser(member: Record<string, unknown>): User {
 
     return {
         id: member.id as string,
+        authId: member.auth_id as string | undefined,
         name: member.name as string,
         email: member.email as string,
         role: (member.role as User['role']) || 'Viewer',

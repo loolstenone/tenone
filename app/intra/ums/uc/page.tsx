@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/intra/IntraUI";
-import { Search, Coins, TrendingUp, Gift, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Coins, TrendingUp, Gift, Loader2, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 
 interface UCMember {
     member_id: string;
@@ -52,6 +52,10 @@ export default function UCBalancesPage() {
     const [grantForm, setGrantForm] = useState<GrantForm>({ memberId: "", actionKey: "admin_grant", amount: 0, brandId: "", note: "" });
     const [grantLoading, setGrantLoading] = useState(false);
     const [grantResult, setGrantResult] = useState<string | null>(null);
+
+    // 미지급 UC 일괄 지급
+    const [backfillLoading, setBackfillLoading] = useState(false);
+    const [backfillResult, setBackfillResult] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -124,6 +128,28 @@ export default function UCBalancesPage() {
         }
     }
 
+    async function handleBackfill() {
+        setBackfillLoading(true);
+        setBackfillResult(null);
+        try {
+            const res = await fetch("/api/uc/admin/backfill", { method: "POST" });
+            const result = await res.json();
+            if (res.ok) {
+                if (result.granted === 0) {
+                    setBackfillResult("지급 대상 없음");
+                } else {
+                    setBackfillResult(`${result.granted}명에게 ${result.amount?.toLocaleString()} UC 지급 완료`);
+                    load();
+                }
+            } else {
+                setBackfillResult(`오류: ${result.error}`);
+            }
+        } finally {
+            setBackfillLoading(false);
+            setTimeout(() => setBackfillResult(null), 4000);
+        }
+    }
+
     const SortIcon = ({ col }: { col: "balance" | "lifetime_earned" }) =>
         sortBy === col
             ? sortAsc ? <ChevronUp className="h-3 w-3 inline ml-0.5" /> : <ChevronDown className="h-3 w-3 inline ml-0.5" />
@@ -132,12 +158,25 @@ export default function UCBalancesPage() {
     return (
         <div className="p-6 max-w-5xl">
             <PageHeader title="Universe Coin 잔액" description="전체 회원 UC 보유 현황 및 수동 지급/차감">
-                <button
-                    onClick={() => setShowGrant(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                    <Gift className="h-4 w-4" /> 수동 지급/차감
-                </button>
+                <div className="flex items-center gap-2">
+                    {backfillResult && (
+                        <span className="text-xs text-emerald-600 font-medium">{backfillResult}</span>
+                    )}
+                    <button
+                        onClick={handleBackfill}
+                        disabled={backfillLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-700 hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                    >
+                        {backfillLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                        미지급 일괄 지급
+                    </button>
+                    <button
+                        onClick={() => setShowGrant(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                        <Gift className="h-4 w-4" /> 수동 지급/차감
+                    </button>
+                </div>
             </PageHeader>
 
             {/* 요약 통계 */}

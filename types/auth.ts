@@ -58,6 +58,7 @@ export type BumsRole = 'admin' | 'editor' | 'contributor';
 
 export interface User {
     id: string;
+    authId?: string;        // Supabase auth UUID (auth.uid()) — jakka/서비스별 RLS용
     name: string;
     email: string;
     role: UserRole;

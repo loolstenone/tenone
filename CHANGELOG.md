@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-20 (세션 59) — Jakka 비주얼 폴리시 + 마켓 신설
+
+### 변경 파일
+- `features/jakka/JakkaInstaLayout.tsx` — 모바일 헤더 아이콘 진하게(stroke-[2] text-neutral-900), 브랜드 링크 섹션 삭제, copyright 포맷 교정, 나침반→Store 아이콘 교체, 마켓 링크 연결
+- `app/(Jakka)/jakka/profile/page.tsx` — 이름/핸들 순서 수정, 전체 타이포 강화(font-black)
+- `app/(Jakka)/jakka/explore/page.tsx` — 작가명 font-black, 상태 배지 border 스타일
+- `app/(Jakka)/jakka/market/page.tsx` (신규) — 작품·굿즈·피규어 판매 스토어, 카테고리 필터, LIMITED/재고 뱃지
+- `app/(Jakka)/jakka/category/page.tsx` (신규) — 카테고리 인덱스 (사진 갤러리용, 현재 미연결)
+
+### 결정사항
+- 나침반 아이콘 = 마켓 (Store 아이콘으로 교체)
+- 마켓 컨셉 = 서비스 의뢰 X, 실물 작품/굿즈/피규어 판매 O
+- copyright 포맷: `© JAKKA. Powered by Ten:One™ Universe.` (데스크탑 사이드바와 통일)
+
+---
+
 ## 2026-04-17 밤 (집, 세션 57) — 크로스도메인 인증 대대적 개편 + PKCE 잔여 이슈
 
 ### 커밋 (이번 세션 push)

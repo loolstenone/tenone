@@ -1,20 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { LoginModal } from '@/components/LoginModal';
+import { ChevronLeft } from 'lucide-react';
 
-const TOTAL_STEPS = 5;
-
-const EXPECTATIONS = [
-  '취업 준비', '이직 준비', '구인 (채용)', '구직 활동',
-  '업무 스킬 향상', '커리어 전환', '창업/사업 준비',
-  '사이드 프로젝트', '네트워킹', '업계 정보 교류',
-  '파트너/제휴 구하기', '스터디/스킬 교환',
-  '사업 투자/펀딩', '멘토링', '프리랜서 전환', '해외 진출',
-];
+const ACCENT = '#ffd93d';
 
 const INDUSTRIES = [
   'IT/테크', '광고/에이전시', '마케팅', '디자인', '미디어/콘텐츠',
@@ -30,71 +23,64 @@ const JOB_FUNCTIONS = [
   '크리에이티브 디렉션', '영상 제작', 'SNS 운영', 'CS/운영', '기타',
 ];
 
+function formatPhoneInput(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+}
+
 export default function OnboardPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [error, setError] = useState('');
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Form state
-  const [expectations, setExpectations] = useState<string[]>([]);
+  const [displayName, setDisplayName] = useState('');
+  const [handle, setHandle] = useState('');
+  const [handleError, setHandleError] = useState('');
   const [industry, setIndustry] = useState('');
   const [industryType, setIndustryType] = useState<'current' | 'desired'>('current');
   const [jobFunction, setJobFunction] = useState('');
   const [jobFunctionType, setJobFunctionType] = useState<'current' | 'desired'>('current');
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [verificationSent, setVerificationSent] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [showLogin, setShowLogin] = useState(false);
 
-  // Auto-fill from user data
   useEffect(() => {
     if (user) {
       setDisplayName(user.name || '');
-      setEmail(user.email || '');
-      // Supabase auth 유저는 이미 이메일 인증됨
-      if (user.email) setEmailVerified(true);
+      setHandle(user.handle || '');
     }
   }, [user]);
 
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendCooldown]);
-
-  const toggleExpectation = (exp: string) => {
-    setExpectations((prev) =>
-      prev.includes(exp) ? prev.filter((e) => e !== exp) : [...prev, exp]
-    );
+  const validateHandle = (v: string) => {
+    if (!v) return '';
+    if (v.length < 3) return '3자 이상 입력해주세요';
+    if (!/^[a-z0-9_]+$/.test(v)) return '영문 소문자, 숫자, _만 사용 가능해요';
+    return '';
   };
 
-  const canNext = () => {
-    if (step === 0) return true; // 슬로건 — 항상 통과
-    if (step === 1) return expectations.length > 0;
-    if (step === 2) return industry.length > 0;
-    if (step === 3) return jobFunction.length > 0;
-    if (step === 4) return displayName.trim().length >= 2 && phone.trim().length >= 10 && emailVerified;
-    return false;
+  const handleHandleChange = (v: string) => {
+    const cleaned = v.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    setHandle(cleaned);
+    setHandleError(validateHandle(cleaned));
   };
 
-  const handleSendVerification = async () => {
-    if (!email.includes('@')) return;
-    setVerificationSent(true);
-    setResendCooldown(30);
-    // 유니버스 가입 시 이미 인증된 경우 스킵
-    if (user?.email === email) {
-      setEmailVerified(true);
-      return;
-    }
-    // 새 이메일이면 인증 메일 발송 (실제 구현 시 API 호출)
-    setEmailVerified(true); // Mock: 바로 인증 처리
+  const canSubmit = () => {
+    if (!displayName.trim() || displayName.trim().length < 2) return false;
+    if (!industry) return false;
+    if (!jobFunction) return false;
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10 || digits.length > 11) return false;
+    if (handle && handleError) return false;
+    return true;
   };
 
   const handleSubmit = async () => {
+    setError('');
     setSubmitting(true);
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -107,13 +93,13 @@ export default function OnboardPage() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        displayName: displayName || user?.name,
+        displayName: displayName.trim(),
+        handle: handle.trim() || undefined,
         industry,
         industryType,
         jobFunction,
         jobFunctionType,
-        phone,
-        expectations,
+        phone: phone.replace(/\D/g, ''),
       }),
     });
 
@@ -121,324 +107,258 @@ export default function OnboardPage() {
       router.push('/badak');
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(err.error || '프로필 저장에 실패했습니다');
+      setError(err.error || '저장에 실패했습니다. 다시 시도해주세요.');
     }
     setSubmitting(false);
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white px-6">
+      <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6">
         <div className="text-center">
-          <div className="mb-6 text-xl font-bold">로그인이 필요합니다</div>
+          <div className="mb-2 text-3xl font-black" style={{ color: ACCENT }}>바닥</div>
+          <p className="mb-6 text-sm text-neutral-400">로그인이 필요합니다</p>
           <button
             onClick={() => setShowLogin(true)}
-            className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white"
+            className="rounded-xl px-6 py-3 text-sm font-bold text-black"
+            style={{ backgroundColor: ACCENT }}
           >
-            로그인하기
+            로그인 / 가입하기
           </button>
-          <div className="mt-4 text-sm text-neutral-400">
-            계정이 없으신가요?{' '}
-            <button onClick={() => setShowLogin(true)} className="font-semibold text-blue-600">
-              가입하기
-            </button>
-          </div>
         </div>
         <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
       </div>
     );
   }
 
+  /* ── Step 0: Welcome ── */
+  if (step === 0) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-between bg-[#0d0d0d] px-6 py-16">
+        <div />
+
+        <div className="w-full max-w-[400px] text-center">
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black"
+            style={{ backgroundColor: ACCENT + '20', color: ACCENT }}>
+            바
+          </div>
+          <h1 className="mb-3 text-3xl font-black leading-tight text-white" style={{ letterSpacing: '-0.04em' }}>
+            회사 밖에서 통하는<br />
+            <span style={{ color: ACCENT }}>내 업계 사람들</span>
+          </h1>
+          <p className="mb-2 text-base text-neutral-400" style={{ letterSpacing: '-0.02em' }}>
+            취업·이직·네트워킹까지
+          </p>
+          <p className="text-sm text-neutral-600">
+            같은 업계 사람들과 오프라인에서 직접 만나요
+          </p>
+
+          <div className="mt-10 grid grid-cols-3 gap-3">
+            {[
+              { icon: '🤝', label: '업계 네트워킹' },
+              { icon: '💼', label: '취업·이직 정보' },
+              { icon: '🚀', label: '사이드 프로젝트' },
+            ].map(({ icon, label }) => (
+              <div key={label} className="rounded-xl bg-neutral-900 py-3 px-2 text-center">
+                <div className="mb-1 text-xl">{icon}</div>
+                <div className="text-[11px] text-neutral-400">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-full max-w-[400px]">
+          <button
+            onClick={() => setStep(1)}
+            className="w-full rounded-2xl py-4 text-base font-bold text-black transition-opacity hover:opacity-90"
+            style={{ backgroundColor: ACCENT }}
+          >
+            프로필 만들기 →
+          </button>
+          <p className="mt-3 text-center text-xs text-neutral-600">
+            1분이면 충분해요
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Step 1: 프로필 입력 ── */
   return (
-    <div className="mx-auto min-h-screen max-w-[480px] bg-white px-6 pt-12 pb-32">
-      {/* Progress */}
-      {step > 0 && (
-        <div className="mb-8 flex gap-1">
-          {Array.from({ length: TOTAL_STEPS - 1 }, (_, i) => (
-            <div
-              key={i}
-              className="h-1 flex-1 rounded-full"
-              style={{ background: i < step ? '#2563eb' : '#e5e7eb' }}
+    <div className="min-h-screen bg-[#0d0d0d]">
+      {/* Header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800/60 bg-[#0d0d0d]/90 px-4 py-3 backdrop-blur">
+        <button onClick={() => setStep(0)} className="p-1 text-neutral-500 hover:text-neutral-300">
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <span className="text-xs font-medium text-neutral-500">프로필 설정</span>
+        <div className="w-7" />
+      </div>
+
+      <div ref={formRef} className="mx-auto max-w-[480px] px-5 pb-32 pt-6">
+        <h1 className="mb-1 text-2xl font-black text-white" style={{ letterSpacing: '-0.04em' }}>
+          나를 소개해요
+        </h1>
+        <p className="mb-8 text-sm text-neutral-500">
+          같은 업계 멤버들이 나를 찾을 수 있어요
+        </p>
+
+        <div className="space-y-6">
+          {/* 닉네임 */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              닉네임 *
+            </label>
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="바닥에서 불릴 이름"
+              maxLength={20}
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
             />
-          ))}
-        </div>
-      )}
-
-      {/* ── Step 0: 슬로건 + 태그라인 ── */}
-      {step === 0 && (
-        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-          <div
-            className="mb-3 text-3xl font-black tracking-tight text-neutral-900"
-            style={{ letterSpacing: '-0.04em' }}
-          >
-            Badak
-          </div>
-          <h1
-            className="mb-4 text-xl font-bold leading-relaxed text-neutral-800"
-            style={{ letterSpacing: '-0.03em' }}
-          >
-            지식도 취미도 다 좋은데<br />
-            난 좀 더 <span className="text-blue-600">성장</span>하고 싶어
-          </h1>
-          <p className="mb-2 text-sm text-neutral-500" style={{ letterSpacing: '-0.02em' }}>
-            회사 밖에서도 통하는 사람이 되고 싶어.
-          </p>
-          <p className="text-xs text-neutral-400">
-            업계 네트워킹 커뮤니티
-          </p>
-        </div>
-      )}
-
-      {/* ── Step 1: 기대하는 것 ── */}
-      {step === 1 && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold text-neutral-900">
-            바닥에서 뭘 하고 싶으세요?
-          </h1>
-          <p className="mb-6 text-sm text-neutral-500">복수 선택 가능해요</p>
-
-          <div className="flex flex-wrap gap-2">
-            {EXPECTATIONS.map((exp) => {
-              const selected = expectations.includes(exp);
-              return (
-                <button
-                  key={exp}
-                  onClick={() => toggleExpectation(exp)}
-                  className="rounded-lg border px-3.5 py-2.5 text-sm transition-all"
-                  style={{
-                    borderColor: selected ? '#2563eb' : '#e5e7eb',
-                    background: selected ? '#eff6ff' : 'white',
-                    color: selected ? '#2563eb' : '#374151',
-                    fontWeight: selected ? 600 : 400,
-                  }}
-                >
-                  {exp}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 2: 산업군 ── */}
-      {step === 2 && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold text-neutral-900">어떤 업계에 계신가요?</h1>
-          <p className="mb-6 text-sm text-neutral-500">현재 근무 중이거나 희망하는 산업을 선택해주세요</p>
-
-          <div className="mb-4 flex gap-2">
-            {(['current', 'desired'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setIndustryType(t)}
-                className="rounded-full border px-4 py-1.5 text-xs font-medium transition-all"
-                style={{
-                  borderColor: industryType === t ? '#2563eb' : '#e5e7eb',
-                  background: industryType === t ? '#eff6ff' : 'white',
-                  color: industryType === t ? '#2563eb' : '#6b7280',
-                }}
-              >
-                {t === 'current' ? '현재 근무 중' : '희망 업계'}
-              </button>
-            ))}
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {INDUSTRIES.map((ind) => (
-              <button
-                key={ind}
-                onClick={() => setIndustry(ind)}
-                className="rounded-lg border px-3 py-2 text-sm transition-all"
-                style={{
-                  borderColor: industry === ind ? '#2563eb' : '#e5e7eb',
-                  background: industry === ind ? '#eff6ff' : 'white',
-                  color: industry === ind ? '#2563eb' : '#374151',
-                  fontWeight: industry === ind ? 600 : 400,
-                }}
-              >
-                {ind}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 3: 직무 ── */}
-      {step === 3 && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold text-neutral-900">어떤 일을 하세요?</h1>
-          <p className="mb-6 text-sm text-neutral-500">현재 담당하거나 희망하는 직무를 선택해주세요</p>
-
-          <div className="mb-4 flex gap-2">
-            {(['current', 'desired'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setJobFunctionType(t)}
-                className="rounded-full border px-4 py-1.5 text-xs font-medium transition-all"
-                style={{
-                  borderColor: jobFunctionType === t ? '#2563eb' : '#e5e7eb',
-                  background: jobFunctionType === t ? '#eff6ff' : 'white',
-                  color: jobFunctionType === t ? '#2563eb' : '#6b7280',
-                }}
-              >
-                {t === 'current' ? '현재 직무' : '희망 직무'}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {JOB_FUNCTIONS.map((jf) => (
-              <button
-                key={jf}
-                onClick={() => setJobFunction(jf)}
-                className="rounded-lg border px-3 py-2 text-sm transition-all"
-                style={{
-                  borderColor: jobFunction === jf ? '#2563eb' : '#e5e7eb',
-                  background: jobFunction === jf ? '#eff6ff' : 'white',
-                  color: jobFunction === jf ? '#2563eb' : '#374151',
-                  fontWeight: jobFunction === jf ? 600 : 400,
-                }}
-              >
-                {jf}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 4: 연락처 + 이메일 인증 ── */}
-      {step === 4 && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold text-neutral-900">거의 다 됐어요!</h1>
-          <p className="mb-8 text-sm text-neutral-500">
-            모임 안내와 매칭 알림을 보내드려요. 프로필에 공개되지 않습니다.
-          </p>
-
-          <div className="space-y-5">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-500">닉네임</label>
+          {/* 핸들 */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              핸들 (선택)
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-neutral-500">@</span>
               <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="바닥에서 사용할 이름"
-                className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                value={handle}
+                onChange={(e) => handleHandleChange(e.target.value)}
+                placeholder="my_handle"
+                maxLength={20}
+                className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-8 pr-4 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
+                style={handle && !handleError ? { borderColor: ACCENT + '60' } : {}}
               />
             </div>
+            {handleError ? (
+              <p className="mt-1.5 text-[11px] text-red-400">{handleError}</p>
+            ) : handle ? (
+              <p className="mt-1.5 text-[11px] text-neutral-500">tenone.biz/profile/@{handle} 로 공개돼요</p>
+            ) : (
+              <p className="mt-1.5 text-[11px] text-neutral-600">프로필 URL에 사용돼요. 나중에도 설정 가능해요</p>
+            )}
+          </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-500">이메일 *</label>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setEmailVerified(false); setVerificationSent(false); }}
-                  placeholder="name@company.com"
-                  className="flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
-                  readOnly={!!user?.email}
-                />
-                {emailVerified ? (
-                  <div className="flex items-center rounded-xl bg-green-50 px-4 text-xs font-semibold text-green-600">
-                    인증됨
-                  </div>
-                ) : (
+          {/* 산업군 */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                업계 *
+              </label>
+              <div className="flex gap-1">
+                {(['current', 'desired'] as const).map((t) => (
                   <button
-                    onClick={handleSendVerification}
-                    disabled={!email.includes('@') || resendCooldown > 0}
-                    className="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-semibold text-blue-600 disabled:opacity-40"
+                    key={t}
+                    onClick={() => setIndustryType(t)}
+                    className="rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
+                    style={industryType === t
+                      ? { backgroundColor: ACCENT + '20', color: ACCENT }
+                      : { backgroundColor: 'transparent', color: '#6b7280' }}
                   >
-                    {resendCooldown > 0 ? `${resendCooldown}초 후 재발송` : verificationSent ? '재발송' : '인증하기'}
+                    {t === 'current' ? '현직' : '희망'}
                   </button>
-                )}
+                ))}
               </div>
-              {verificationSent && !emailVerified && (
-                <p className="mt-1 text-[11px] text-blue-500">인증 메일을 보냈습니다. 받지 못하셨나요?{resendCooldown > 0 ? ` ${resendCooldown}초 후 재발송 가능합니다.` : ' 재발송 버튼을 눌러보세요.'}</p>
-              )}
-              {user?.email && (
-                <p className="mt-1 text-[11px] text-green-500">유니버스 가입 시 인증된 이메일입니다</p>
-              )}
             </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-neutral-500">휴대전화 번호 *</label>
-              <input
-                type="tel"
-                value={phone.length <= 3 ? phone : phone.length <= 7 ? `${phone.slice(0,3)}-${phone.slice(3)}` : `${phone.slice(0,3)}-${phone.slice(3,7)}-${phone.slice(7)}`}
-                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="010-1234-5678"
-                maxLength={13}
-                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-400 ${
-                  phone.length > 0 && phone.length < 10 ? 'border-red-200 bg-red-50' : 'border-neutral-200'
-                }`}
-              />
-              {phone.length > 0 && phone.length < 10 ? (
-                <p className="mt-1 text-[11px] text-red-400">올바른 번호를 입력해주세요</p>
-              ) : (
-                <p className="mt-1 text-[11px] text-neutral-400">모임 확정 시 안내 문자를 보내드려요</p>
-              )}
+            <div className="flex flex-wrap gap-1.5">
+              {INDUSTRIES.map((ind) => {
+                const sel = industry === ind;
+                return (
+                  <button
+                    key={ind}
+                    onClick={() => setIndustry(sel ? '' : ind)}
+                    className="rounded-lg px-3 py-2 text-sm font-medium transition-all"
+                    style={sel
+                      ? { backgroundColor: ACCENT, color: '#000', fontWeight: 700 }
+                      : { backgroundColor: '#1a1a1a', color: '#9ca3af', border: '1px solid #2a2a2a' }}
+                  >
+                    {ind}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="mt-8 rounded-xl border border-neutral-100 bg-neutral-50 p-5">
-            <div className="mb-1 text-[10px] font-medium uppercase text-neutral-400">내 프로필 미리보기</div>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                {(displayName || '?').charAt(0)}
-              </div>
-              <div>
-                <div className="font-bold text-neutral-900">{displayName || '닉네임 없음'}</div>
-                <div className="text-xs text-neutral-500">
-                  {industry} · {jobFunction}
-                  <span className="ml-1 text-neutral-300">
-                    ({industryType === 'current' ? '재직' : '희망'})
-                  </span>
-                </div>
-                {expectations.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {expectations.slice(0, 3).map((e) => (
-                      <span key={e} className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-500">{e}</span>
-                    ))}
-                    {expectations.length > 3 && (
-                      <span className="text-[10px] text-neutral-400">+{expectations.length - 3}</span>
-                    )}
-                  </div>
-                )}
+          {/* 직무 */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                직무 *
+              </label>
+              <div className="flex gap-1">
+                {(['current', 'desired'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setJobFunctionType(t)}
+                    className="rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
+                    style={jobFunctionType === t
+                      ? { backgroundColor: ACCENT + '20', color: ACCENT }
+                      : { backgroundColor: 'transparent', color: '#6b7280' }}
+                  >
+                    {t === 'current' ? '현직' : '희망'}
+                  </button>
+                ))}
               </div>
             </div>
+            <div className="flex flex-wrap gap-1.5">
+              {JOB_FUNCTIONS.map((jf) => {
+                const sel = jobFunction === jf;
+                return (
+                  <button
+                    key={jf}
+                    onClick={() => setJobFunction(sel ? '' : jf)}
+                    className="rounded-lg px-3 py-2 text-sm font-medium transition-all"
+                    style={sel
+                      ? { backgroundColor: ACCENT, color: '#000', fontWeight: 700 }
+                      : { backgroundColor: '#1a1a1a', color: '#9ca3af', border: '1px solid #2a2a2a' }}
+                  >
+                    {jf}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 전화번호 */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              전화번호 *
+            </label>
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={formatPhoneInput(phone)}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+              placeholder="010-1234-5678"
+              maxLength={13}
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600"
+            />
+            <p className="mt-1.5 text-[11px] text-neutral-600">모임 확정 시 안내 문자만 발송돼요. 공개되지 않아요.</p>
           </div>
         </div>
-      )}
 
-      {/* ── Bottom CTA ── */}
-      <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[480px] -translate-x-1/2 border-t border-neutral-100 bg-white px-6 py-4">
-        <div className="flex gap-3">
-          {step > 0 && (
-            <button
-              onClick={() => setStep(step - 1)}
-              className="rounded-xl border border-neutral-200 px-6 py-3 text-sm font-medium text-neutral-500 hover:bg-neutral-50"
-            >
-              이전
-            </button>
-          )}
-          {step < TOTAL_STEPS - 1 ? (
-            <button
-              onClick={() => setStep(step + 1)}
-              disabled={!canNext()}
-              className="flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-30"
-              style={{ background: canNext() ? '#2563eb' : '#d1d5db' }}
-            >
-              {step === 0 ? '시작하기' : '다음'}
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={!canNext() || submitting}
-              className="flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-30"
-              style={{ background: '#2563eb' }}
-            >
-              {submitting ? '저장 중...' : '프로필 완성하기'}
-            </button>
-          )}
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-800/50 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-800/60 bg-[#0d0d0d]/95 px-5 py-4 backdrop-blur">
+        <div className="mx-auto max-w-[480px]">
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit() || submitting}
+            className="w-full rounded-2xl py-4 text-base font-bold text-black transition-opacity disabled:opacity-30"
+            style={{ backgroundColor: ACCENT }}
+          >
+            {submitting ? '저장 중...' : '바닥 입장하기'}
+          </button>
         </div>
       </div>
     </div>

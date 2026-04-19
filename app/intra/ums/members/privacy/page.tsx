@@ -90,18 +90,19 @@ export default function PrivacyPage() {
         try {
             const supabase = createClient();
 
-            const [membersRes, newsletterRes, requestsRes] = await Promise.all([
-                supabase.from("members").select("id", { count: "exact", head: true }),
-                supabase.from("newsletter_subscribers").select("email").eq("status", "active"),
+            // 통계는 service role API 경유 (RLS 우회)
+            const [membersApiRes, requestsRes] = await Promise.all([
+                fetch('/api/intra/members'),
                 supabase.from("privacy_deletion_requests")
                     .select("*")
                     .order("deadline_at", { ascending: true }),
             ]);
 
-            const totalMembers = membersRes.count ?? 0;
+            const membersJson = membersApiRes.ok ? await membersApiRes.json() : {};
+            const totalMembers: number = membersJson.totalMembersCount ?? 0;
+            const newsletterCount: number = membersJson.newsletterCount ?? 0;
 
             // 마케팅 동의율: newsletter_subscribers / members
-            const newsletterCount = (newsletterRes.data ?? []).length;
             const marketingRate = totalMembers > 0
                 ? ((newsletterCount / totalMembers) * 100).toFixed(1)
                 : "0";
@@ -165,7 +166,7 @@ export default function PrivacyPage() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="개인정보 관리" description="삭제 요청 처리 및 개인정보보호법 컴플라이언스">
+            <PageHeader title="유니버스 개인정보 관리" description="삭제 요청 처리 및 개인정보보호법 컴플라이언스">
                 <button
                     onClick={() => setShowForm(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors"

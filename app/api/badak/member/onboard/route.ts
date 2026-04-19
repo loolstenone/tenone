@@ -33,9 +33,7 @@ export async function PATCH(request: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const { industry, industryType, jobFunction, jobFunctionType, phone, displayName } = body;
-
-  const { expectations } = body;
+  const { industry, industryType, jobFunction, jobFunctionType, phone, displayName, handle, expectations } = body;
 
   // 필수값 검증
   if (!displayName?.trim()) return NextResponse.json({ error: '닉네임을 입력해주세요' }, { status: 400 });
@@ -65,8 +63,37 @@ export async function PATCH(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
+  // members 테이블도 동기화 (phone, name, handle, onboarding_completed)
+  const membersUpdate: Record<string, unknown> = {
+    name: displayName.trim(),
+    phone: cleanPhone,
+    onboarding_completed: true,
+    updated_at: new Date().toISOString(),
+  };
+  if (handle?.trim()) {
+    const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (cleanHandle.length >= 3) membersUpdate.handle = cleanHandle;
+  }
+  await supabase
+    .from('members')
+    .update(membersUpdate)
+    .eq('auth_id', user.id);
+
   // 온보딩 완료 = 정식 바닥 멤버 → members.affiliations 동기화
   await addBadakAffiliation(supabase, user.id);
+
+  // 가입 완료 UC 지급 (최초 1회)
+  try {
+    const { data: memberRow } = await supabase
+      .from('members')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+    if (memberRow) {
+      const { earnUC } = await import('@/lib/supabase/uc');
+      await earnUC(memberRow.id, 'signup_complete', null);
+    }
+  } catch { /* UC 지급 실패는 온보딩을 막지 않는다 */ }
 
   return NextResponse.json({ member });
 }

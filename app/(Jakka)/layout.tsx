@@ -1,5 +1,4 @@
-import { JakkaHeader } from "@/features/jakka/JakkaHeader";
-import { JakkaFooter } from "@/features/jakka/JakkaFooter";
+import { JakkaInstaLayout } from "@/features/jakka/JakkaInstaLayout";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -14,7 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: db?.meta_title ?? site.meta.title,
             description: db?.meta_description ?? site.meta.description,
-            siteName: db?.name ?? site.name,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
             ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
@@ -25,13 +25,5 @@ export default function JakkaLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-            <JakkaHeader />
-            <main className="flex-1 pt-14">
-                {children}
-            </main>
-            <JakkaFooter />
-        </div>
-    );
+    return <JakkaInstaLayout>{children}</JakkaInstaLayout>;
 }

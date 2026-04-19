@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, ChevronDown, Loader2, X, AtSign, Mail, Phone, Calendar, Tag, Newspaper, ExternalLink } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Search, ChevronDown, Loader2, X, AtSign, Mail, Phone, Calendar, Tag, Newspaper, ExternalLink, CircleDollarSign } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 
 /* ── 유형 정의 ── */
@@ -119,15 +118,16 @@ interface MemberDisplay {
     roles: string[];
     isNewsletterSub: boolean;
     signupSource: string | null;
+    ucBalance: number;
 }
 
 /* ── Mock fallback ── */
 const mockMembers: MemberDisplay[] = [
-    { id: "1",  name: "김민지", email: "minji@example.com",    handle: "@minji",   phone: "010-1234-5678", bio: null, company: "텐원", position: "마케터", type: "복합",   brands: ["MADLeap", "SmarComm"],  subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", createdAt: "2025-01-10", roles: [], isNewsletterSub: true,  signupSource: null },
-    { id: "2",  name: "이준혁", email: "junhyuk@example.com",  handle: "@junhyuk", phone: null,           bio: null, company: null,  position: null,    type: "구독",   brands: ["WIO Orbi"],            subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", createdAt: "2025-02-01", roles: [], isNewsletterSub: false, signupSource: null },
-    { id: "3",  name: "박서윤", email: "seoyoon@example.com",  handle: null,       phone: "010-9999-0001", bio: null, company: null,  position: null,    type: "서비스", brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", createdAt: "2025-03-05", roles: [], isNewsletterSub: false, signupSource: "MADLeague 추천" },
-    { id: "4",  name: "정하은", email: "haeun@example.com",    handle: "@haeun",   phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["Mindle"],              subs: [], lastActive: "2026-03-27", createdAt: "2025-04-11", roles: [], isNewsletterSub: true,  signupSource: null },
-    { id: "5",  name: "최다운", email: "dawoon@example.com",   handle: null,       phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["HeRo", "Badak"],       subs: [], lastActive: "2026-03-28", createdAt: "2025-05-20", roles: [], isNewsletterSub: false, signupSource: null },
+    { id: "1",  name: "김민지", email: "minji@example.com",    handle: "@minji",   phone: "010-1234-5678", bio: null, company: "텐원", position: "마케터", type: "복합",   brands: ["MADLeap", "SmarComm"],  subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", createdAt: "2025-01-10", roles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
+    { id: "2",  name: "이준혁", email: "junhyuk@example.com",  handle: "@junhyuk", phone: null,           bio: null, company: null,  position: null,    type: "구독",   brands: ["WIO Orbi"],            subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", createdAt: "2025-02-01", roles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
+    { id: "3",  name: "박서윤", email: "seoyoon@example.com",  handle: null,       phone: "010-9999-0001", bio: null, company: null,  position: null,    type: "서비스", brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", createdAt: "2025-03-05", roles: [], isNewsletterSub: false, signupSource: "MADLeague 추천", ucBalance: 0 },
+    { id: "4",  name: "정하은", email: "haeun@example.com",    handle: "@haeun",   phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["Mindle"],              subs: [], lastActive: "2026-03-27", createdAt: "2025-04-11", roles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
+    { id: "5",  name: "최다운", email: "dawoon@example.com",   handle: null,       phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["HeRo", "Badak"],       subs: [], lastActive: "2026-03-28", createdAt: "2025-05-20", roles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
 ];
 
 export default function UniverseMembers() {
@@ -142,30 +142,23 @@ export default function UniverseMembers() {
     useEffect(() => {
         async function loadData() {
             try {
-                const supabase = createClient();
-
-                const { data: rawMembers, error } = await supabase
-                    .from("members")
-                    .select("id, name, email, handle, phone, bio, company, position, affiliations, roles, last_login_at, created_at, signup_source")
-                    .order("created_at", { ascending: false })
-                    .limit(500);
-
-                if (error || !rawMembers?.length) return;
-
-                const [subsRes, newsletterRes] = await Promise.all([
-                    supabase.from("subscriptions").select("member_id, service, plan").eq("status", "active"),
-                    supabase.from("newsletter_subscribers").select("email").eq("status", "active"),
-                ]);
+                const res = await fetch('/api/intra/members');
+                if (!res.ok) {
+                    console.error('Members API error:', res.status);
+                    return;
+                }
+                const json = await res.json();
+                const rawMembers = json.members ?? [];
+                if (!rawMembers.length) return;
 
                 const subsMap: Record<string, { service: string; plan: string }[]> = {};
-                (subsRes.data || []).forEach((s: { member_id: string; service: string; plan: string }) => {
+                (json.subscriptions || []).forEach((s: { member_id: string; service: string; plan: string }) => {
                     if (!subsMap[s.member_id]) subsMap[s.member_id] = [];
                     subsMap[s.member_id].push({ service: s.service, plan: s.plan });
                 });
 
-                const newsletterEmails = new Set<string>(
-                    (newsletterRes.data || []).map((r: { email: string }) => r.email.toLowerCase())
-                );
+                const newsletterEmails = new Set<string>(json.newsletterEmails ?? []);
+                const ucBalances: Record<string, number> = json.ucBalances ?? {};
 
                 const typeCounts: Record<MemberType, number> = { 잠재: 0, 서비스: 0, 멤버십: 0, 구독: 0, 복합: 0, 기타: 0 };
 
@@ -200,6 +193,7 @@ export default function UniverseMembers() {
                         roles: m.roles ?? [],
                         isNewsletterSub: newsletterEmails.has(m.email.toLowerCase()),
                         signupSource: m.signup_source ?? null,
+                        ucBalance: ucBalances[m.id] ?? 0,
                     };
                 });
 
@@ -429,6 +423,12 @@ export default function UniverseMembers() {
                                     <div className="flex items-center gap-2.5">
                                         <Calendar className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
                                         <span className="text-sm text-neutral-700">가입 {selected.createdAt}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2.5">
+                                        <CircleDollarSign className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                                        <span className="text-sm text-neutral-700">
+                                            {selected.ucBalance.toLocaleString()} UC
+                                        </span>
                                     </div>
                                     {selected.signupSource && (
                                         <div className="flex items-center gap-2.5">

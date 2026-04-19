@@ -193,7 +193,13 @@ export const modules: NavModule[] = [
                             { name: "커리어 이용자", href: "/intra/hero/career" },
                         ],
                     },
-                    { name: "JAKKA", href: "/intra/ums/jakka", icon: Globe, badge: "soon" },
+                    {
+                        name: "JAKKA", href: "/intra/ums/jakka", icon: Globe,
+                        children: [
+                            { name: "창작자 관리", href: "/intra/ums/jakka" },
+                            { name: "광고 관리", href: "/intra/ums/jakka/notices" },
+                        ],
+                    },
                     { name: "Korea360", href: "/intra/ums/seoul360", icon: Globe, badge: "soon" },
                     { name: "LUKI", href: "/intra/ums/luki", icon: Globe, badge: "soon" },
                     { name: "Dokdae", href: "/intra/ums/dokdae", icon: Globe, badge: "soon" },

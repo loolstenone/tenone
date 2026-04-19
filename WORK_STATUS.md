@@ -1,17 +1,23 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-19 (세션 58 — Badak 잔여 4개 태스크 완료 검증)
+> 마지막 업데이트: 2026-04-20 (세션 59 — Jakka 비주얼 폴리시 + 마켓 신설)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
-1. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
-2. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
-3. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+1. **Jakka 마켓** — DB 테이블(`jakka_products`) + 실제 상품 등록/조회 연결 (현재 mock 데이터)
+2. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
+3. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
+4. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
 
 ### 🔵 자산 대기
 - **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
 - **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관
+
+### ✅ 세션 59 완료
+- **Jakka 비주얼 폴리시** — 프로필 페이지(이름/핸들 순서, 타이포 강화), explore 페이지(작가명 font-black), 모바일 헤더 아이콘 진하게
+- **모바일 메뉴** — 브랜드 링크 섹션 삭제, copyright를 `© JAKKA. Powered by Ten:One™ Universe.` 포맷으로 교체
+- **마켓 신설** — `/jakka/market` 페이지: 작품·굿즈·피규어·프린트 판매 스토어. Store 아이콘, 카테고리 필터, LIMITED/재고 뱃지, 카트 hover. 현재 mock 데이터
 
 ### ✅ 세션 58 완료
 - Badak 잔여 4개 태스크 전부 이미 구현 완료 확인 (신규 코드 불필요)
