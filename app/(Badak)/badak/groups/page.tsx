@@ -6,7 +6,7 @@ import Image from 'next/image';
 import {
   Plus, Calendar, MapPin, Users, Search,
   Crown, Flame, Clock, Sparkles, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowRight, LayoutList, CheckCircle2,
+  SlidersHorizontal, ArrowRight, LayoutList, LayoutGrid, CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -496,13 +496,6 @@ export default function GroupsPage() {
             <p className="mt-1.5 text-sm text-white/50">함께 성장할 모임을 찾아보세요</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowAll((v) => !v)}
-              title={showAll ? '슬라이드 보기' : '리스트 보기'}
-              className="flex items-center justify-center rounded-xl border border-white/10 p-2.5 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
-            >
-              <LayoutList className="h-5 w-5" />
-            </button>
             <Link
               href="/badak/groups/create"
               className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold no-underline"
@@ -570,12 +563,21 @@ export default function GroupsPage() {
 
             {/* 전체 보기 버튼 */}
             <div className="px-5 sm:px-8">
-              <button
-                onClick={() => setShowAll(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-4 text-sm font-medium text-white/50 transition-all hover:border-white/25 hover:text-white/75"
-              >
-                전체 모임 보기 <ArrowRight className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 py-4 text-sm font-medium text-white/50 transition-all hover:border-white/25 hover:text-white/75"
+                >
+                  전체 모임 보기 <ArrowRight className="h-4 w-4" />
+                </button>
+                <button
+                  title="리스트 보기"
+                  onClick={() => setShowAll(true)}
+                  className="flex items-center justify-center rounded-xl border border-white/10 p-4 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
+                >
+                  <LayoutList className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -587,12 +589,22 @@ export default function GroupsPage() {
               <h2 className="text-base font-bold text-white">
                 전체 모임 <span className="ml-1.5 text-white/40">{allFiltered.length}</span>
               </h2>
-              <button
-                onClick={() => { setShowAll(false); setSearch(''); setCategory('all'); }}
-                className="text-sm text-white/40 hover:text-white/65"
-              >
-                슬라이드 보기
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  title="슬라이드 보기"
+                  onClick={() => { setShowAll(false); setSearch(''); setCategory('all'); }}
+                  className="flex items-center justify-center rounded-lg border border-white/10 p-1.5 text-white/40 transition-all hover:border-white/25 hover:text-white/70"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  title="리스트 보기"
+                  className="flex items-center justify-center rounded-lg border border-[#ffd93d]/40 bg-[#ffd93d]/10 p-1.5 text-[#ffd93d]/70"
+                  disabled
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* 카테고리 필터 칩 */}
