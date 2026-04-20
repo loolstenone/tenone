@@ -140,24 +140,28 @@ export function renderConfirmHtml(props: ConfirmTemplateProps): string {
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
-          <!-- 헤더 -->
+          <!-- 헤더 (Ten:One 로고) -->
           <tr>
-            <td style="background:#000;padding:24px 40px;text-align:center;">
-              <span style="display:inline-block;background:${brandColor};color:${brandColor === '#000000' ? '#fff' : '#000'};font-size:11px;font-weight:800;letter-spacing:2px;padding:5px 12px;">${brandName.toUpperCase().replace('™','™')}</span>
+            <td style="background:#fff;padding:32px 40px 20px 40px;text-align:center;border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;border-top:1px solid #e8e8e8;">
+              <img src="${siteUrl}/logo-horizontal.png" alt="Ten:One Universe" width="160" style="display:inline-block;max-width:160px;height:auto;"/>
+              <p style="margin:14px 0 0 0;color:#999;font-size:10px;font-weight:700;letter-spacing:3px;">NEWSLETTER · ${brandName.toUpperCase()}</p>
             </td>
           </tr>
 
           <!-- 본문 -->
           <tr>
-            <td style="background:#fff;padding:48px 40px 32px 40px;border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;text-align:center;">
-              <p style="margin:0 0 8px 0;font-size:13px;color:#999;">구독 확인</p>
-              <h1 style="margin:0 0 20px 0;font-size:22px;font-weight:800;color:#0a0a0a;line-height:1.4;">${nickname}님, 반갑습니다!</h1>
-              <p style="margin:0 0 32px 0;font-size:15px;color:#444;line-height:1.7;">
-                <strong>${brandName}</strong> 뉴스레터 구독을 신청해주셨습니다.<br/>
-                아래 버튼을 눌러 구독을 완료해주세요.
+            <td style="background:#fff;padding:24px 40px 32px 40px;border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;text-align:center;">
+              <hr style="border:none;border-top:1px solid #f0f0f0;margin:0 0 32px 0;"/>
+              <h1 style="margin:0 0 20px 0;font-size:22px;font-weight:800;color:#0a0a0a;line-height:1.4;">${nickname}님, 고맙습니다 🙏</h1>
+              <p style="margin:0 0 14px 0;font-size:15px;color:#444;line-height:1.7;">
+                <strong>${brandName}</strong> 뉴스레터를 신청해주셔서 감사합니다.<br/>
+                앞으로 좋은 소식으로 찾아뵙겠습니다.
+              </p>
+              <p style="margin:0 0 32px 0;font-size:14px;color:#666;line-height:1.7;">
+                구독을 완료하려면 아래 버튼을 눌러<br/>이메일 인증을 마쳐주세요.
               </p>
               <a href="${confirmUrl}" style="display:inline-block;background:${brandColor};color:${brandColor === '#000000' || brandColor === '#0a0a0a' ? '#fff' : '#000'};font-size:14px;font-weight:700;padding:16px 40px;text-decoration:none;letter-spacing:0.3px;">
-                구독 확인하기 →
+                이메일 인증하기 →
               </a>
               <p style="margin:24px 0 0 0;font-size:11px;color:#bbb;line-height:1.6;">
                 버튼이 작동하지 않으면 아래 링크를 복사해 브라우저에 붙여넣으세요.<br/>
@@ -170,6 +174,9 @@ export function renderConfirmHtml(props: ConfirmTemplateProps): string {
           <tr>
             <td style="background:#fff;padding:20px 40px 32px 40px;border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;text-align:center;">
               <hr style="border:none;border-top:1px solid #f0f0f0;margin:0 0 20px 0;"/>
+              <p style="margin:0 0 6px 0;font-size:11px;color:#999;">
+                신청 사이트: <strong style="color:#666;">${brandName}</strong>
+              </p>
               <p style="margin:0 0 6px 0;font-size:11px;color:#999;">
                 Ten:One™ Universe · <a href="${siteUrl}" style="color:#999;text-decoration:none;">tenone.biz</a>
               </p>
@@ -189,12 +196,16 @@ export function renderConfirmHtml(props: ConfirmTemplateProps): string {
 
 export function renderConfirmText(props: ConfirmTemplateProps): string {
   const { nickname, brandName, confirmUrl } = props;
-  return `${nickname}님, ${brandName} 뉴스레터 구독을 확인해주세요.
+  return `${nickname}님, ${brandName} 뉴스레터를 신청해주셔서 감사합니다.
 
-구독 확인 링크: ${confirmUrl}
+앞으로 좋은 소식으로 찾아뵙겠습니다.
+아래 링크를 눌러 이메일 인증을 완료해주세요.
+
+인증 링크: ${confirmUrl}
+
+신청 사이트: ${brandName}
+Ten:One™ Universe · tenone.biz
 
 본인이 신청하지 않은 경우 이 메일을 무시하시면 됩니다.
-
-Ten:One™ Universe · tenone.biz
 `;
 }

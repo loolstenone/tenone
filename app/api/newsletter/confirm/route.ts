@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const supabase = getAdminClient();
     const { error } = await supabase
         .from('newsletter_subscribers')
-        .update({ is_active: true })
+        .update({ is_active: true, confirmed_at: new Date().toISOString() })
         .eq('id', subscriberId);
 
     if (error) {

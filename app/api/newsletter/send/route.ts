@@ -32,6 +32,8 @@ interface SendBody {
   fromName?: string;
   siteIds?: string[];
   tags?: string[];
+  testEmails?: string[];     // 테스트 발송: 지정 주소로만 발송 (발송 상태 변경 안 함)
+  scheduledAt?: string;      // 예약 발송: ISO 시각 (미래면 큐에만 저장하고 종료)
 }
 
 export async function POST(request: NextRequest) {
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({})) as SendBody;
-  const { issueId, fromName, siteIds, tags } = body;
+  const { issueId, fromName, siteIds, tags, testEmails, scheduledAt } = body;
   if (!issueId) {
     return NextResponse.json({ error: 'issueId가 필요합니다.' }, { status: 400 });
   }
@@ -67,49 +69,69 @@ export async function POST(request: NextRequest) {
   if (issueErr || !issue) {
     return NextResponse.json({ error: '이슈를 찾을 수 없습니다.' }, { status: 404 });
   }
-  if (issue.status === 'sent') {
+  if (issue.status === 'sent' && !testEmails) {
     return NextResponse.json({ error: '이미 발송된 뉴스레터입니다.' }, { status: 400 });
   }
   if (!issue.title || !issue.content) {
     return NextResponse.json({ error: '제목과 본문을 먼저 작성해주세요.' }, { status: 400 });
   }
 
-  // 활성 구독자 조회 (타겟 필터 적용)
-  let query = supabase
-    .from('newsletter_subscribers')
-    .select('id, email, name')
-    .eq('is_active', true);
-
-  // 사이트 필터
-  if (siteIds && siteIds.length > 0) {
-    query = query.in('site_id', siteIds);
+  // 예약 발송: 미래 시각이면 저장만 하고 종료 (크론이 처리)
+  if (scheduledAt && !testEmails) {
+    const scheduleDate = new Date(scheduledAt);
+    if (scheduleDate.getTime() > Date.now() + 60_000) {
+      await supabase.from('newsletter_issues').update({
+        status: 'scheduled',
+        scheduled_at: scheduleDate.toISOString(),
+        from_name: fromName || null,
+        target_site_ids: siteIds && siteIds.length > 0 ? siteIds : null,
+        target_tags: tags && tags.length > 0 ? tags : null,
+      }).eq('id', issueId);
+      return NextResponse.json({ ok: true, scheduled: true, scheduledAt: scheduleDate.toISOString() });
+    }
   }
 
-  const { data: subscribers, error: subErr } = await query;
+  // 테스트 발송: 지정 주소만 대상 (DB 상태 변경 없음)
+  let filtered: Array<{ id: string; email: string; name?: string }>;
+  if (testEmails && testEmails.length > 0) {
+    filtered = testEmails.map((e) => ({ id: `test-${e}`, email: e, name: 'Test' }));
+  } else {
+    // 활성 구독자 조회 (타겟 필터 적용)
+    let query = supabase
+      .from('newsletter_subscribers')
+      .select('id, email, name')
+      .eq('is_active', true);
 
-  if (subErr) {
-    return NextResponse.json({ error: `구독자 조회 실패: ${subErr.message}` }, { status: 500 });
-  }
+    if (siteIds && siteIds.length > 0) {
+      query = query.in('site_id', siteIds);
+    }
 
-  let filtered = subscribers || [];
+    const { data: subscribers, error: subErr } = await query;
 
-  // 태그 필터: subscriber_tags에서 해당 태그를 가진 구독자만
-  if (tags && tags.length > 0 && filtered.length > 0) {
-    const { data: taggedRows } = await supabase
-      .from('subscriber_tags')
-      .select('subscriber_id')
-      .in('tag', tags);
+    if (subErr) {
+      return NextResponse.json({ error: `구독자 조회 실패: ${subErr.message}` }, { status: 500 });
+    }
 
-    if (taggedRows && taggedRows.length > 0) {
-      const taggedIds = new Set(taggedRows.map((r: { subscriber_id: string }) => r.subscriber_id));
-      filtered = filtered.filter((s: { id: string }) => taggedIds.has(s.id));
-    } else {
-      filtered = [];
+    filtered = subscribers || [];
+
+    // 태그 필터: subscriber_tags에서 해당 태그를 가진 구독자만
+    if (tags && tags.length > 0 && filtered.length > 0) {
+      const { data: taggedRows } = await supabase
+        .from('subscriber_tags')
+        .select('subscriber_id')
+        .in('tag', tags);
+
+      if (taggedRows && taggedRows.length > 0) {
+        const taggedIds = new Set(taggedRows.map((r: { subscriber_id: string }) => r.subscriber_id));
+        filtered = filtered.filter((s: { id: string }) => taggedIds.has(s.id));
+      } else {
+        filtered = [];
+      }
     }
   }
 
   if (filtered.length === 0) {
-    return NextResponse.json({ error: '대상 구독자가 없습니다.' }, { status: 400 });
+    return NextResponse.json({ error: '대상 수신자가 없습니다.' }, { status: 400 });
   }
 
   // From 이름 결정
@@ -147,14 +169,35 @@ export async function POST(request: NextRequest) {
         errors.push(`배치 ${Math.floor(i / BATCH_SIZE) + 1}: ${batchErr.message}`);
       } else {
         sent += batchResult?.data?.length ?? batch.length;
+
+        // email_sends 기록 (테스트 발송은 기록 생략)
+        if (!testEmails) {
+          const resendIds = batchResult?.data ?? [];
+          const nowIso = new Date().toISOString();
+          const rows = batch.map((sub: { id: string; email: string; name?: string }, idx: number) => ({
+            kind: 'newsletter' as const,
+            source_id: String(issueId),
+            subscriber_id: sub.id,
+            from_addr: FROM_EMAIL,
+            to_addr: sub.email,
+            reply_to: 'lools@tenone.biz',
+            subject: issue.title,
+            resend_id: resendIds[idx]?.id ?? null,
+            status: 'sent' as const,
+            sent_at: nowIso,
+          }));
+          if (rows.length > 0) {
+            await supabase.from('email_sends').insert(rows);
+          }
+        }
       }
     } catch (e) {
       errors.push(`배치 ${Math.floor(i / BATCH_SIZE) + 1}: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
     }
   }
 
-  // 발송 완료 상태 업데이트
-  if (sent > 0) {
+  // 발송 완료 상태 업데이트 (테스트 발송 제외)
+  if (sent > 0 && !testEmails) {
     await supabase.from('newsletter_issues').update({
       status: 'sent',
       sent_at: new Date().toISOString(),

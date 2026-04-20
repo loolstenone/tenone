@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Send, Edit2, Trash2, Calendar, Tag, X, ChevronDown } from "lucide-react";
+import { Plus, Send, Edit2, Trash2, Calendar, Tag, X, ChevronDown, BarChart3 } from "lucide-react";
+import Link from "next/link";
 import { PageHeader } from "@/components/intra/IntraUI";
 import clsx from "clsx";
 import { createClient } from "@/lib/supabase/client";
@@ -13,7 +14,7 @@ interface NewsletterIssue {
     title: string;
     content: string | null;
     blocks: NewsletterBlock[] | null;
-    status: "draft" | "scheduled" | "sent";
+    status: "draft" | "scheduled" | "sending" | "sent";
     scheduled_at: string | null;
     sent_at: string | null;
     recipient_count: number;
@@ -28,10 +29,11 @@ interface NewsletterIssue {
 interface Site { id: string; name: string; slug: string; }
 interface Subscriber { id: string; status: string; siteId?: string; tags: string[]; }
 
-const statusLabel: Record<string, string> = { draft: "작성중", scheduled: "예약", sent: "발송완료" };
+const statusLabel: Record<string, string> = { draft: "작성중", scheduled: "예약", sending: "발송중", sent: "발송완료" };
 const statusStyle: Record<string, string> = {
     draft: "bg-neutral-100 text-neutral-500",
-    scheduled: "bg-neutral-200 text-neutral-700",
+    scheduled: "bg-blue-100 text-blue-700",
+    sending: "bg-amber-100 text-amber-700 animate-pulse",
     sent: "bg-neutral-900 text-white",
 };
 
@@ -52,6 +54,8 @@ export default function IssuesPage() {
     const [sendFromName, setSendFromName] = useState("");
     const [sendSiteIds, setSendSiteIds] = useState<string[]>([]);
     const [sendTags, setSendTags] = useState<string[]>([]);
+    const [testEmails, setTestEmails] = useState("");
+    const [scheduleAt, setScheduleAt] = useState("");
 
     const supabase = createClient();
 
@@ -133,6 +137,33 @@ export default function IssuesPage() {
         setSendFromName("");
         setSendSiteIds([]);
         setSendTags([]);
+        setTestEmails("");
+        setScheduleAt("");
+    };
+
+    const handleTestSend = async () => {
+        if (!sendModal) return;
+        const emails = testEmails.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+        if (emails.length === 0) { alert("테스트할 이메일을 입력해주세요."); return; }
+        setSending(sendModal.id);
+        try {
+            const res = await fetch("/api/newsletter/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    issueId: sendModal.id,
+                    fromName: sendFromName || undefined,
+                    testEmails: emails,
+                }),
+            });
+            const data = await res.json() as { ok?: boolean; sent?: number; error?: string };
+            if (!res.ok) alert(`테스트 발송 실패: ${data.error || "알 수 없는 오류"}`);
+            else alert(`테스트 발송 완료: ${data.sent}명`);
+        } catch (e) {
+            alert(`테스트 발송 오류: ${e instanceof Error ? e.message : "알 수 없는 오류"}`);
+        } finally {
+            setSending(null);
+        }
     };
 
     const toggleSiteId = (siteId: string) =>
@@ -151,6 +182,10 @@ export default function IssuesPage() {
     const handleSendConfirm = async () => {
         if (!sendModal) return;
         if (estimatedRecipients === 0) { alert("대상 구독자가 없습니다."); return; }
+        const isScheduled = !!scheduleAt;
+        if (!isScheduled) {
+            if (!confirm(`${estimatedRecipients}명에게 지금 발송하시겠습니까?`)) return;
+        }
         setSending(sendModal.id);
         try {
             const res = await fetch("/api/newsletter/send", {
@@ -161,11 +196,16 @@ export default function IssuesPage() {
                     fromName: sendFromName || undefined,
                     siteIds: sendSiteIds.length > 0 ? sendSiteIds : undefined,
                     tags: sendTags.length > 0 ? sendTags : undefined,
+                    scheduledAt: isScheduled ? new Date(scheduleAt).toISOString() : undefined,
                 }),
             });
-            const data = await res.json() as { ok?: boolean; sent?: number; total?: number; errors?: string[]; error?: string };
+            const data = await res.json() as { ok?: boolean; scheduled?: boolean; scheduledAt?: string; sent?: number; total?: number; errors?: string[]; error?: string };
             if (!res.ok) {
                 alert(`발송 실패: ${data.error || "알 수 없는 오류"}`);
+            } else if (data.scheduled) {
+                alert(`예약 완료: ${new Date(data.scheduledAt!).toLocaleString("ko-KR")}`);
+                setIssues((prev) => prev.map((i) => i.id === sendModal.id ? { ...i, status: "scheduled" as const, scheduled_at: data.scheduledAt ?? null } : i));
+                setSendModal(null);
             } else {
                 alert(`발송 완료: ${data.sent}/${data.total}명${data.errors?.length ? `\n오류 ${data.errors.length}건` : ""}`);
                 setIssues((prev) => prev.map((i) => i.id === sendModal.id ? { ...i, status: "sent" as const, recipient_count: data.sent ?? 0 } : i));
@@ -210,6 +250,11 @@ export default function IssuesPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
+                                {nl.status === "sent" && (
+                                    <Link href={`/intra/ums/newsletter/issues/${nl.id}/analytics`} className="p-1.5 hover:bg-neutral-100 rounded" aria-label="분석" title="발송 분석">
+                                        <BarChart3 className="h-3 w-3 text-neutral-400 hover:text-neutral-700" />
+                                    </Link>
+                                )}
                                 <button onClick={() => openEditor(nl)} className="p-1.5 hover:bg-neutral-100 rounded" aria-label="수정"><Edit2 className="h-3 w-3 text-neutral-400" /></button>
                                 {nl.status === "draft" && (
                                     <button onClick={() => openSendModal(nl)} disabled={sending === nl.id}
@@ -297,6 +342,25 @@ export default function IssuesPage() {
                                         </div>
                                     </div>
                                 )}
+                                <div className="border-t border-neutral-100 pt-4">
+                                    <label className="text-xs text-neutral-500 mb-2 block font-medium">테스트 발송 (쉼표로 여러 개)</label>
+                                    <div className="flex gap-2">
+                                        <input type="text" value={testEmails} onChange={e => setTestEmails(e.target.value)}
+                                            placeholder="test1@example.com, test2@example.com"
+                                            className="flex-1 px-3 py-2 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                        <button onClick={handleTestSend} disabled={sending === sendModal.id}
+                                            className="px-3 py-2 text-xs border border-neutral-300 rounded hover:bg-neutral-50 disabled:opacity-40 whitespace-nowrap">
+                                            테스트 발송
+                                        </button>
+                                    </div>
+                                    <p className="text-[11px] text-neutral-400 mt-1">이슈 상태와 수신자 기록에 영향 없음</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs text-neutral-500 mb-2 block font-medium">예약 발송 (선택)</label>
+                                    <input type="datetime-local" value={scheduleAt} onChange={e => setScheduleAt(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                    <p className="text-[11px] text-neutral-400 mt-1">비워두면 즉시 발송 · 미래 시각 지정 시 큐 저장 (크론 10분 간격)</p>
+                                </div>
                                 <div className="p-3 bg-neutral-50 rounded flex items-center justify-between">
                                     <span className="text-xs text-neutral-500">예상 수신자</span>
                                     <span className="text-lg font-bold">{estimatedRecipients}<span className="text-xs font-normal text-neutral-400 ml-1">명</span></span>
@@ -307,7 +371,7 @@ export default function IssuesPage() {
                                 <button onClick={handleSendConfirm} disabled={sending === sendModal.id || estimatedRecipients === 0}
                                     className="flex items-center gap-1.5 px-4 py-2 text-sm bg-neutral-900 text-white rounded hover:bg-neutral-800 disabled:opacity-50">
                                     <Send className="h-3.5 w-3.5" />
-                                    {sending === sendModal.id ? "발송 중..." : "발송하기"}
+                                    {sending === sendModal.id ? "처리 중..." : scheduleAt ? "예약 저장" : "지금 발송"}
                                 </button>
                             </div>
                         </div>

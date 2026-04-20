@@ -12,17 +12,28 @@ function getAdminClient() {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenone.biz';
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL || 'noreply@tenone.biz';
+const REPLY_TO = process.env.NEWSLETTER_REPLY_TO || 'lools@tenone.biz';
 
-/** 브랜드별 확인 메일 설정 */
-const BRAND_CONFIG: Record<string, { name: string; color: string; fromName: string }> = {
-    mindle:  { name: 'Mindle',           color: '#F5C518', fromName: 'Mindle Newsletter' },
-    tenone:  { name: 'Ten:One™ Universe', color: '#000000', fromName: 'Ten:One™ Universe' },
-    hero:    { name: 'HeRo',             color: '#0a0a0a', fromName: 'HeRo Newsletter' },
-    badak:   { name: 'Badak',            color: '#0a0a0a', fromName: 'Badak Newsletter' },
-    myverse: { name: 'Myverse',          color: '#6366f1', fromName: 'Myverse Newsletter' },
-    jakka:   { name: 'JAKKA',            color: '#171717', fromName: 'JAKKA Newsletter' },
-    montz:   { name: 'MoNTZ',            color: '#c8a97e', fromName: 'MoNTZ Newsletter' },
+/** 브랜드별 확인 메일 설정 — fromName은 "{브랜드} · Ten:One™ Universe" 자동 생성 */
+const BRAND_CONFIG: Record<string, { name: string; color: string }> = {
+    mindle:  { name: 'Mindle',            color: '#F5C518' },
+    tenone:  { name: 'Ten:One™ Universe', color: '#000000' },
+    hero:    { name: 'HeRo',              color: '#0a0a0a' },
+    badak:   { name: 'Badak',             color: '#0a0a0a' },
+    myverse: { name: 'Myverse',           color: '#6366f1' },
+    jakka:   { name: 'JAKKA',             color: '#171717' },
+    montz:   { name: 'MoNTZ',             color: '#c8a97e' },
 };
+
+function getFromName(brandName: string): string {
+    return brandName === 'Ten:One™ Universe' ? brandName : `${brandName} · Ten:One™ Universe`;
+}
+
+function getSubject(brandName: string): string {
+    return brandName === 'Ten:One™ Universe'
+        ? `[Ten:One™ Universe] 뉴스레터 구독 인증`
+        : `[${brandName}] 뉴스레터 구독 인증 · Ten:One™ Universe`;
+}
 
 /** 구독자 id → base64url 토큰 */
 function makeToken(id: string): string {
@@ -75,10 +86,13 @@ export async function POST(request: NextRequest) {
             const confirmUrl = `${SITE_URL}/api/newsletter/confirm?token=${token}`;
 
             const resend = new Resend(resendKey);
-            await resend.emails.send({
-                from: `${brand.fromName} <${FROM_EMAIL}>`,
+            const fromHeader = `${getFromName(brand.name)} <${FROM_EMAIL}>`;
+            const subject = getSubject(brand.name);
+            const { data: sent } = await resend.emails.send({
+                from: fromHeader,
                 to: email,
-                subject: `[${brand.name}] 뉴스레터 구독을 확인해주세요`,
+                replyTo: REPLY_TO,
+                subject,
                 html: renderConfirmHtml({
                     nickname: displayName || '구독자',
                     brandName: brand.name,
@@ -93,6 +107,21 @@ export async function POST(request: NextRequest) {
                     confirmUrl,
                     siteUrl: SITE_URL,
                 }),
+            });
+
+            // 발송 기록
+            await supabase.from('email_sends').insert({
+                kind: 'confirm',
+                source_id: subscriber.id,
+                subscriber_id: subscriber.id,
+                member_id: memberId || null,
+                from_addr: FROM_EMAIL,
+                to_addr: email,
+                reply_to: REPLY_TO,
+                subject,
+                resend_id: sent?.id ?? null,
+                status: sent?.id ? 'sent' : 'failed',
+                sent_at: sent?.id ? new Date().toISOString() : null,
             });
         }
 
