@@ -29,7 +29,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'tenone_auth_user';
-const STORAGE_TTL_MS = 30 * 60 * 1000; // 30분 — 이후엔 Supabase 세션 재검증 강제
+const STORAGE_TTL_MS = 4 * 60 * 60 * 1000; // 4시간 — 이후엔 Supabase 세션 재검증 강제
 
 function saveUserToStorage(user: User) {
     try {

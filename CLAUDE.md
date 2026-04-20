@@ -1,11 +1,32 @@
-# CLAUDE.md - TenOne Project Guide
+# CLAUDE.md — Ten:One™ Universe 개발 가이드
 
-## 프로젝트 개요
+> **이 문서는 유니버스 공통 가이드다.** 브랜드별 세부 규칙은 `app/(BrandName)/CLAUDE.md`에 있으며,
+> 해당 브랜드 파일을 편집할 때 Claude Code가 자동으로 함께 로드한다.
 
-TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스택 웹 애플리케이션이다.
-퍼블릭 포털(브랜드 쇼케이스)과 인트라 오피스(내부 관리 대시보드)로 구성된다.
+## 문서 체계
 
-**4대 제품 — Intra에서 통제·운영·관리:**
+```
+CLAUDE.md                          # [지금 이 파일] 유니버스 공통 가이드
+app/(BrandName)/CLAUDE.md          # 브랜드별 가이드 (26+ 개, 자동 로드)
+ROADMAP.md                         # 전체 로드맵
+WORK_STATUS.md                     # 현재 진행 상황
+CHANGELOG.md                       # 날짜별 변경 이력
+docs/Universe_Coin_Policy.md       # UC 정책 상세
+docs/WIO_Master_Architecture.md    # WIO 설계 단일 진실 소스
+UX_GUIDE.md                        # UX 디테일 표준
+```
+
+**작동 원리**: Claude Code는 편집하는 파일 경로의 **모든 상위 CLAUDE.md를 자동 로드**한다.
+`app/(Badak)/badak/my/page.tsx` 편집 → 루트 `CLAUDE.md` + `app/(Badak)/CLAUDE.md` 둘 다 컨텍스트에 포함.
+
+---
+
+## 0. 프로젝트 개요
+
+Ten:One™ Universe는 하나의 코드베이스·하나의 Supabase로 **26+ 개 브랜드 도메인**을 운영하는 풀스택 웹 애플리케이션이다. 퍼블릭 포털(브랜드 쇼케이스) + 인트라 오피스(내부 관리) + AI 에이전트 런타임으로 구성된다.
+
+### 4대 제품 — Intra에서 통제·운영·관리
+
 | 제품 | 역할 | Intra 연결점 |
 |------|------|------------|
 | **Mindle** | 데이터·트렌드 연료 공급 | BUMS > 콘텐츠 > 뉴스레터·트렌드 카드 |
@@ -13,10 +34,7 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 | **WIO** | 업무 자동화 솔루션 | Universe > 구독 + WIO Orbi |
 | **AI Agent** | 6개 에이전트 운영 엔진 | Agent Hub |
 
-## AI Agent Team — 3축 체계
-
-> **OpenClaw** = Peter Steinberger 개발 오픈소스 AI 에이전트 프레임워크 (MIT). 텐원 PC에 상주하며 에이전트를 자율 실행.
-> **Claude Code(나)는 OpenClaw용 커스텀 스킬을 개발하고, OpenClaw이 그 스킬을 실행한다.**
+### AI Agent Team — 3축 체계
 
 | 축 | 도구 | 역할 | 상시 가동 |
 |---|------|------|----------|
@@ -24,50 +42,82 @@ TenOne은 "Ten:One Universe"라는 멀티 브랜드 생태계를 위한 풀스�
 | 실행 | **OpenClaw** (PC 상주) | 에이전트 런타임, 자율 실행, 메시징, 소셜 게시 | ✅ |
 | 개발 | **Claude Code** | 코드/빌드/배포, OpenClaw 커스텀 스킬 개발 | ❌ |
 
-**OpenClaw 핵심:** Lobster(YAML 워크플로우 엔진) + ClawHub 스킬 마켓 + 로컬 영구 메모리(`~/.openclaw/`)
-**Claude Code 산출물 위치:** `C:\Users\텐원\TenOne\skills\` (커스텀 스킬), `~/.openclaw/workflows/` (Lobster YAML)
+> **OpenClaw** = Peter Steinberger 개발 오픈소스 AI 에이전트 프레임워크 (MIT). 텐원 PC에 상주.
+> **Lobster**(YAML 워크플로우) + **ClawHub** 스킬 마켓 + 로컬 영구 메모리(`~/.openclaw/`)
+> Claude Code 산출물: `C:\Users\텐원\TenOne\skills\` (커스텀 스킬), `~/.openclaw/workflows/` (Lobster YAML)
+
+### 기술 스택
+
+- **프레임워크**: Next.js 16 (App Router) + React 19
+- **언어**: TypeScript (strict mode)
+- **스타일링**: Tailwind CSS v4 + PostCSS
+- **아이콘**: Lucide-React
+- **빌드**: Standalone (Vercel 자동 배포)
+- **DB/Auth**: Supabase 단일 프로젝트 `ziotlxkdctlhiwkgmmsh`
+
+### 핵심 명령어
+
+```bash
+npm run dev        # 개발 서버
+npm run build      # 프로덕션 빌드
+npm run lint       # ESLint
+```
+
+### 프로젝트 구조
+
+```
+app/
+  (public)/        # 퍼블릭 페이지 (about, brands, contact, history, universe, profile)
+  (BrandName)/     # 각 브랜드별 페이지 그룹 — 각 그룹 루트에 CLAUDE.md
+  intra/           # 내부 오피스 대시보드
+    erp/           # ERP (CRM, HR, 재무)
+    marketing/     # 마케팅 (campaigns, leads, deals, content, analytics)
+    studio/        # 스튜디오 (brands, schedule, assets, workflow)
+    ums/           # 유니버스 멤버 관리 (members, sites, uc, per-brand)
+    wiki/          # 내부 위키
+  api/             # Route Handlers
+  auth/            # 인증 콜백/확인
+
+components/        # 재사용 컴포넌트
+features/          # 브랜드별 feature 컴포넌트 (features/badak/, features/jakka/ 등)
+lib/               # 핵심 로직 및 Context (auth, supabase, site-config, domain-registry)
+types/             # TypeScript 타입 정의
+public/            # 정적 파일
+sql/               # SQL 마이그레이션 파일
+docs/              # 설계 문서
+```
 
 ---
 
-## ⚠️ 유니버스 도메인 분기 시스템 (절대 잊지 말 것)
+# 1. 유니버스 공통 원칙
+
+## 1.1 도메인 분기 시스템
 
 > **Google처럼 하나의 코드베이스·하나의 Supabase로 수십 개 브랜드 도메인을 운영한다.**
 > 이 구조를 모르면 로그인 디버깅, 사이트 분기, 인증 설정에서 반복 실수가 발생한다.
 
 ### 핵심 파일
+
 | 파일 | 역할 |
 |------|------|
 | `lib/site-config.ts` | 전체 브랜드 설정 + `domainMap` (도메인 → 사이트 ID 매핑) |
 | `lib/site-context.tsx` | 클라이언트에서 `window.location.hostname`으로 사이트 감지 → `useSite()` 훅 제공 |
+| `lib/domain-registry.ts` | 도메인 SSOT — middleware/server/callback/sso 전부 이 파일을 import |
 | `lib/supabase/site-configs.ts` | DB CRUD (`getSiteConfigServer`/`upsertSiteConfig`/`toggleSiteOpen`) |
-| `components/SiteClosedOverlay.tsx` | `is_open=false` 사이트 전체 차단 (비로그인 시). 마스터/Staff/Admin bypass |
-| `components/UnderConstruction.tsx` | 전용 콘텐츠 없는 사이트의 브랜드 랜딩 페이지 ("준비 중" 아님) |
-| `components/LoginModal.tsx` | 전 브랜드 공통 로그인 모달 (탭: 로그인/회원가입, 소셜/이메일) |
-| `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 (로그인 버튼 → LoginModal 열기) |
+| `components/SiteClosedOverlay.tsx` | `is_open=false` 사이트 전체 차단. 마스터/Staff/Admin bypass |
+| `components/UnderConstruction.tsx` | 전용 콘텐츠 없는 사이트의 브랜드 랜딩 페이지 |
+| `components/LoginModal.tsx` | 전 브랜드 공통 로그인 모달 |
+| `components/UniverseUtilityBar.tsx` | 전 브랜드 공통 헤더 우측 |
 
-### 도메인 분기 원리 (3단계 감지)
+### 도메인 감지 3단계
 
-**① 독립 도메인** (domainMap 기반)
-```
-madleague.net → domainMap['madleague.net'] = 'madleague'
-```
-
-**② 서브도메인 자동 감지** (`*.tenone.biz` regex)
-```
-domo.tenone.biz → regex /^([a-z0-9-]+)\.tenone\.biz$/ → siteConfigs에 'domo' 있으면 자동 매칭
-```
-
-**③ 경로 분기** (pathSiteMap 기반, localhost 개발용)
-```
-www.tenone.biz/madleague → pathname.startsWith('/madleague')
-localhost/madleague → 동일하게 동작
-```
+**① 독립 도메인** (domainMap): `madleague.net` → `'madleague'`
+**② 서브도메인 자동 감지** (`*.tenone.biz` regex): `domo.tenone.biz` → siteConfigs에 키 있으면 매칭
+**③ 경로 분기** (pathSiteMap, localhost 개발용): `www.tenone.biz/madleague`
 
 > ⚠️ 서브도메인은 `siteConfigs`에 키가 있으면 자동 감지. `domainMap`에 따로 추가 불필요.
 
-### 현재 운영 도메인/경로 목록
-
-> 도메인 감지 순서: ① 독립 도메인(domainMap) → ② *.tenone.biz 서브도메인(자동감지) → ③ 경로 분기(pathSiteMap)
+### 현재 운영 도메인/경로 (29개)
 
 | 브랜드 | 독립 도메인 | 서브도메인 | 경로 | siteId |
 |--------|-----------|----------|------|--------|
@@ -89,7 +139,7 @@ localhost/madleague → 동일하게 동작
 | Mindle | — | — | /mindle | mindle |
 | Townity | — | townity.tenone.biz | /townity | townity |
 | NatureBox | — | naturebox.tenone.biz | /naturebox | naturebox |
-| Myverse | — | myverse.tenone.biz | /myverse | myverse |
+| Myverse | myverse.kr | myverse.tenone.biz | /myverse | myverse |
 | Domo | — | domo.tenone.biz | /domo | domo |
 | Jakka | — | jakka.tenone.biz | /jakka | jakka |
 | ChangeUp | changeup.company | — | /changeup | changeup |
@@ -101,28 +151,8 @@ localhost/madleague → 동일하게 동작
 | EvoSchool | — | evschool.tenone.biz | /evschool | evschool |
 | NamingFactory | — | namingfactory.tenone.biz | /namingfactory | namingfactory |
 
-### 인증 원칙
-- **Auth는 단일 Supabase 프로젝트** `ziotlxkdctlhiwkgmmsh` 하나로 통일
-- 각 도메인의 Vercel 배포에 **동일한 `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY`** 환경변수 필요
-- 로그인 모달은 `LoginModal.tsx`로 통일 (`/login` 페이지가 아님)
-- 소셜 로그인 redirect: `{origin}/auth/callback` — Supabase 대시보드 Allowed URLs에 **모든 도메인** 등록 필요
+### 사이트 메타데이터 아키텍처
 
-### 새 브랜드 추가 시 체크리스트
-- [ ] `lib/site-config.ts` → `siteConfigs`에 추가 + `SiteIdentifier` 타입에 추가
-- [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가
-- [ ] `lib/site-context.tsx` → `pathSiteMap`에 경로 매핑 추가
-- [ ] `lib/intra-nav.ts` → 사이드바 브랜드 목록에 추가 (알파벳순)
-- [ ] DB: `ums_sites` 테이블에 INSERT
-- [ ] `app/(BrandName)/layout.tsx` → `generateMetadata()` + `getSiteConfigServer()` 필수
-- [ ] `app/(BrandName)/brandname/page.tsx` → `UnderConstruction` 또는 전용 랜딩
-- [ ] Vercel 프로젝트에 도메인 연결 + env 동일하게 설정
-- [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/auth/callback` 추가
-
-### ⚠️ 사이트 메타데이터 + 작업중 표시 규칙 (절대 엄수)
-
-> **인트라 사이트 관리에서 수정 → DB(`ums_sites`) → 실사이트 반영** 이 유일한 흐름이다.
-
-**DB → 사이트 반영 아키텍처:**
 ```
 인트라 저장 → upsertSiteConfig() → ums_sites 테이블
                                         ↓
@@ -154,146 +184,140 @@ export async function generateMetadata(): Promise<Metadata> {
 ```
 
 **절대 하지 말 것:**
-- ❌ 레이아웃에 `export const metadata` (정적) 사용 → 반드시 `generateMetadata()` (동적)
-- ❌ 하드코딩 fallback 문자열 (`"Badak — 네트워킹"`) → `site.meta.title` 사용
+- ❌ 레이아웃에 `export const metadata` (정적) 사용 → 반드시 `generateMetadata()`
+- ❌ 하드코딩 fallback 문자열 → `site.meta.title` 사용
 - ❌ openGraph에서 ogImage 누락 → 반드시 조건부 images spread 포함
 - ❌ 페이지에 "준비 중", "Coming Soon", "공사중" 텍스트 직접 표시
 - ❌ 사이트 차단을 페이지 컴포넌트에서 처리 → `SiteClosedOverlay`가 전담
 
-**사이트 오픈/차단 시스템:**
+### 사이트 오픈/차단 시스템
+
 | 상황 | 표시 내용 | 담당 |
 |------|----------|------|
-| `is_open=true` | 누구나 사이트 정상 표시 | 각 page.tsx |
-| `is_open=false` + 마스터(lools@tenone.biz) | 가림막 bypass, 사이트 정상 표시 | `SiteClosedOverlay` |
-| `is_open=false` + 그 외 전부 (일반회원/비로그인) | "준비 중입니다" 전체 가림막 | `SiteClosedOverlay` |
+| `is_open=true` | 누구나 정상 표시 | 각 page.tsx |
+| `is_open=false` + 마스터 | 가림막 bypass | `SiteClosedOverlay` |
+| `is_open=false` + 그 외 | "준비 중입니다" 가림막 | `SiteClosedOverlay` |
 | intra/login/auth 경로 | 항상 접근 가능 | `SiteClosedOverlay` |
 | tenone 사이트 | 항상 접근 가능 | `SiteClosedOverlay` |
 
-**인트라 사이트 관리 (`/intra/ums/sites/list`):**
-- 브랜딩 이미지: 드래그앤드롭 업로드 → Supabase Storage `site-branding` 버킷 → DB 자동 저장
-- SEO 메타: 저장 버튼으로 DB 반영 → ISR 10분 내 실사이트 반영
-- 인공지능 최적화: llms.txt, robots.txt AI 설정, JSON-LD 구조화 데이터
-- 사이트 오픈/닫기: 토글 버튼 → `ums_sites.is_open` 즉시 반영
+---
+
+## 1.2 인증 SSOT
+
+- **단일 Supabase** `ziotlxkdctlhiwkgmmsh` 하나로 전 도메인 통일
+- 각 도메인의 Vercel 배포에 **동일한** `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` 필요
+- 로그인 모달은 `LoginModal.tsx`로 통일 (`/login` 페이지가 아님)
+- 소셜 로그인 redirect: `{origin}/auth/callback` — Supabase Allowed URLs `/**` 와일드카드 33개 등록됨
+- 이메일 인증: OTP `{{ .TokenHash }}` 방식 (PKCE 아님) → `/auth/confirm` 라우트
+- 이메일 발송: Resend SMTP (`Ten:One™ Universe <noreply@tenone.biz>`)
+- 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
+- **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접
 
 ---
 
-## ⚠️ 유니버스 프로필 연동 체계 (절대 잊지 말 것)
+## 1.3 프로필 3계층 체계
 
 > **하나의 계정 → 하나의 프로필 → 모든 서비스에서 동기화**
-> 이 구조를 모르면 프로필 수정이 특정 사이트에만 반영되는 버그가 발생한다.
 
-### 2-Layer 프로필 구조
+### 3계층 구조
 
 | Layer | 저장소 | 소유권 | 예시 필드 |
 |-------|--------|--------|----------|
-| **공통 프로필** | `members` 테이블 | 유니버스 전체 | 이름, 이메일, 연락처, 소속, bio, avatar |
-| **서비스 프로필** | 서비스별 테이블 | 각 사이트 | MADLeague 기수, Badak 직무, HeRo HIT유형 |
+| **Layer 1: 기본 정보** | `auth.users` | Supabase Auth | email, password, provider |
+| **Layer 2: 공통 프로필** | `members` 테이블 | 유니버스 전체 | name, phone, company, bio, avatar_url, affiliations |
+| **Layer 3: 특화 프로필** | 서비스별 테이블 | 각 브랜드 | `mad_applications`, `badak_profiles`, `career_profiles` 등 |
 
 ### 양방향 동기화 흐름
 
 ```
-유니버스 프로필 (/profile)     각 사이트 마이페이지 (/madleague/my)
+유니버스 프로필 (/profile)     각 브랜드 마이페이지 (/[brand]/my)
         │                              │
         ├─ 공통 필드 수정 ──────────→ members UPDATE ←── 공통 필드 수정 ─┤
         │                              │                               │
-        └─ 서비스 필드 읽기 ←── 서비스별 테이블 SELECT ── 서비스 필드 수정 ─┘
+        └─ 특화 필드 읽기 ←── 서비스별 테이블 SELECT ── 특화 필드 수정 ─┘
 ```
 
 **동기화 규칙:**
-- 공통 필드(이름, 연락처, 소속 등)는 **어디서 수정하든** `members` 테이블에 반영
-- 서비스 고유 필드(기수, 직무 등)는 **해당 서비스 테이블만** 수정
-- 유니버스 프로필은 서비스 고유 필드를 **읽기만** 함 (수정은 해당 마이페이지에서)
+- 공통 필드는 **어디서 수정하든** `members`에 반영
+- 특화 필드는 **해당 서비스 테이블만** 수정
+- 유니버스 프로필은 특화 필드를 **읽기만** 함
 - `members.affiliations[]`로 이용 중인 서비스 목록 관리
 
 ### 핵심 파일
 
 | 파일 | 역할 |
 |------|------|
-| `lib/supabase/universe-profile.ts` | 양방향 동기화 모듈 (공통 CRUD + 서비스별 조회) |
-| `components/UniverseProfile.tsx` | 유니버스 프로필 UI (배너 + 기본정보 + 서비스 현황 + 직원정보) |
-| `components/UniverseMembership.tsx` | ❌ 레거시 — 사용 금지, 전 사이트에서 제거 완료 |
+| `lib/supabase/universe-profile.ts` | 양방향 동기화 모듈 |
 | `lib/supabase/members.ts` | members 테이블 CRUD |
-| `lib/auth-context.tsx` → `updateProfile()` | 클라이언트 프로필 업데이트 → members + avatar_url 동기화 |
-| `lib/supabase/site-configs.ts` → `getAllSiteConfigs()` | 사이트 is_open 상태 조회 (프로필에서 닫힌 사이트 숨김) |
+| `components/UniverseProfile.tsx` | `/profile` 전용 (프로필 수정 + 서비스 현황 + 직원 정보) |
+| `components/MyProfileCard.tsx` | 전 브랜드 공통 프로필 카드 |
+| `lib/auth-context.tsx` → `updateProfile()` | members + avatar_url 동기화 |
 
-### 서비스 접근 모델 분류
+### 각 브랜드 마이페이지 표준 패턴
 
-| 접근 모델 | 서비스 |
-|-----------|--------|
-| **오픈** | 0gamja, FWN, Jakka, Mindle, MoNTZ, Mullaesian, Myverse, NamingFactory, RooK, Seoul360, Townity, TrendHunter |
-| **구독** | BrandGravity, SmarComm, WIO |
-| **구매** | HeRo(상담), Planners(교육), ChangeUp(교육), NatureBox(제품), Badak(모임) |
-| **승인 멤버십** | MADLeague, MADLeap, YouInOne, Domo |
-| **직원** | TenOne, Wiki |
-| **내부** | Dokdae |
-
-### 서비스별 프로필 테이블 매핑
-
-| 서비스 | 테이블 | 고유 필드 |
-|--------|--------|----------|
-| MADLeague | `mad_applications` | club_slug, cohort, activity_year, university, major |
-| Badak | `badak_profiles` | job_function, industry, job_level |
-| HeRo | `career_profiles` | desired_position, desired_industry, skills |
-| (기타 서비스) | 추가 시 `universe-profile.ts`에 조회 함수 추가 |
-
-### 각 사이트 마이페이지 규칙
-
-> **구조: `MyProfileCard` (공통) → 사이트 전용 콘텐츠 (탭, 게시글 등)**
-
-- ✅ 상단에 `<MyProfileCard>` 공통 프로필 카드 (아바타, 이름, 이메일, 연락처, 소속, Universe Profile 링크 포함)
-- ✅ `children`으로 사이트별 프로필 정보 전달 (동아리, 직무 등)
-- ✅ 그 아래에 사이트 전용 콘텐츠 (탭, 게시글, 북마크, 설정 등)
-- ❌ `UniverseProfile` / `UniverseMembership` 컴포넌트 직접 넣지 않는다
-- ❌ 아바타/이름/이메일을 직접 표시하지 않는다 (MyProfileCard가 전담)
-- `/profile` (유니버스 프로필)에서 프로필 수정 + 전체 서비스 현황 관리
-
-**마이페이지 표준 패턴:**
 ```tsx
 import { MyProfileCard } from "@/components/MyProfileCard";
 
-// 공통 프로필 카드 + 사이트별 추가 정보
 <MyProfileCard accentColor="#D32F2F" siteBadge="MAD Leaguer">
-    {/* 사이트별 프로필 정보 (선택) */}
+    {/* 브랜드별 특화 정보 (선택) */}
     <div className="grid grid-cols-2 gap-3">
         <InfoCell label="소속 동아리" value="MADA" />
         <InfoCell label="기수" value="3기" />
     </div>
 </MyProfileCard>
 
-// 그 아래에 사이트 전용 콘텐츠
+{/* 그 아래에 브랜드 전용 콘텐츠 */}
 <div>탭, 게시글, 북마크, 설정 ...</div>
 ```
 
-**핵심 파일:**
-| 파일 | 역할 |
-|------|------|
-| `components/MyProfileCard.tsx` | 전 사이트 공통 프로필 카드 (아바타, 기본정보, Universe Profile 링크) |
-| `components/UniverseProfile.tsx` | `/profile` 페이지 전용 (프로필 수정, 서비스 현황, 직원 정보) |
+**금지사항:**
+- ❌ `UniverseProfile` 컴포넌트 직접 넣기
+- ❌ 아바타/이름/이메일 직접 표시 (`MyProfileCard`가 전담)
+- ❌ `UniverseMembership` (레거시 — 전 사이트 제거 완료)
 
-### 프로필 이미지 (아바타) 시스템
-- **Storage:** Supabase `avatars` 버킷 (public, 2MB, jpeg/png/webp/gif)
-- **처리:** 업로드 전 클라이언트에서 256×256 리사이즈 + WebP 압축 (~50KB)
-- **경로:** `avatars/{user.id}/{timestamp}.webp`
-- **DB:** `members.avatar_url` → `auth-context` → `user.avatarUrl`
-- **표시:** `MyProfileCard` + `UniverseProfile` 배너에서 자동 표시
-- **업로드:** UniverseProfile 배너에서 호버 시 카메라 아이콘 → 업로드
+### 프로필 이미지 (아바타)
 
-### 유니버스 공통 데이터 (전 사이트 공유)
+- **Storage**: Supabase `avatars` 버킷 (public, 2MB, jpeg/png/webp/gif)
+- **처리**: 업로드 전 클라이언트에서 256×256 리사이즈 + WebP 압축 (~50KB)
+- **경로**: `avatars/{user.id}/{timestamp}.webp`
+- **DB**: `members.avatar_url` → `auth-context` → `user.avatarUrl`
+- **업로드**: UniverseProfile 배너 호버 시 카메라 아이콘
+
+### 유니버스 공통 데이터
+
 | 데이터 | 파일 | 용도 |
 |--------|------|------|
-| 산업군 목록 (`INDUSTRIES`) | `lib/badak-constants.ts` | MADLeague 등록, Badak 프로필, HeRo 등 |
-| 직무군 목록 (`JOB_FUNCTIONS`) | `lib/badak-constants.ts` | 동일 |
-| 전화번호 포맷 (`formatPhone`) | `components/MyProfileCard.tsx` | 전 사이트 연락처 표시 |
+| 산업군 (`INDUSTRIES`) | `lib/badak-constants.ts` | MADLeague, Badak, HeRo 등 |
+| 직무군 (`JOB_FUNCTIONS`) | `lib/badak-constants.ts` | 동일 |
+| 전화번호 포맷 (`formatPhone`) | `components/MyProfileCard.tsx` | 전 브랜드 |
 
-### 새 사이트 마이페이지 생성 체크리스트
-- [ ] `app/(BrandName)/brandname/my/page.tsx` 생성
-- [ ] `useAuth()` + 미인증 시 `/login` redirect
-- [ ] `<MyProfileCard accentColor="사이트컬러" siteBadge="역할뱃지">` 상단 배치
-- [ ] `children`에 사이트별 프로필 정보 추가 (선택)
-- [ ] 그 아래에 사이트 전용 콘텐츠 (탭, 게시글, 북마크, 설정)
-- [ ] ❌ 아바타/이름/이메일 직접 표시 금지 — `MyProfileCard`가 전담
+---
 
-### 새 서비스 프로필 연동 시 추가 체크리스트
+## 1.4 서비스 접근 모델 6종
+
+> **모든 브랜드는 6가지 접근 모델 중 하나에 속한다.** 가입 경로·권한·UC 지급이 여기서 파생된다.
+
+| 접근 모델 | 가입 경로 | 멤버 권한 | 해당 브랜드 |
+|-----------|----------|----------|-----------|
+| **오픈** | 이메일만 있으면 즉시 이용 | member | 0gamja, FWN, Jakka, Mindle, MoNTZ, Mullaesian, Myverse, NamingFactory, RooK, Seoul360, Townity, TrendHunter |
+| **구독** | 플랜 선택 + 결제 | subscriber | BrandGravity, SmarComm, WIO |
+| **구매** | 건별 결제 (상담·교육·제품·모임비) | purchaser | HeRo, Planner's, ChangeUp, NatureBox, Badak |
+| **승인 멤버십** | 신청서 → 운영진 심사/승인 | approved_member, leader | MADLeague, MADLeap, YouInOne, Domo |
+| **직원** | 입사 → tenone_staff_profiles 등록 | staff, manager, super_admin | TenOne, Wiki |
+| **내부** | 외부 노출 없음 (기록 전용) | internal | Dokdae |
+
+### 브랜드별 특화 프로필 테이블 매핑
+
+| 브랜드 | 테이블 | 고유 필드 |
+|--------|--------|----------|
+| MADLeague | `mad_applications` | club_slug, cohort, activity_year, university, major |
+| Badak | `badak_profiles` | job_function, industry, job_level |
+| HeRo | `career_profiles` | desired_position, desired_industry, skills |
+| Jakka | `jakka_profiles` | handle, category, bio |
+| (기타) | 추가 시 `universe-profile.ts`에 조회 함수 추가 |
+
+### 새 서비스 프로필 연동 체크리스트
+
 - [ ] 서비스별 테이블에 `email` 컬럼 있는가? (members 조인 키)
 - [ ] `lib/supabase/universe-profile.ts`에 `get{Service}Profile()` 함수 추가
 - [ ] `getAllServiceProfiles()`에 새 함수 등록
@@ -302,165 +326,152 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 
 ---
 
-## 기술 스택
+## 1.5 유니버스 코인 (UC) 정책
 
-- **프레임워크**: Next.js 16 (App Router) + React 19
-- **언어**: TypeScript (strict mode)
-- **스타일링**: Tailwind CSS v4 + PostCSS
-- **아이콘**: Lucide-React
-- **빌드**: Standalone (Google Cloud Run 배포)
-- **데이터**: 현재 Mock 데이터 (백엔드/DB 미연동)
+> **1 UC = 1 KRW** | 탈퇴 시 소멸 | 재가입 시 0 재시작
+> 상세: [docs/Universe_Coin_Policy.md](docs/Universe_Coin_Policy.md)
 
-## 핵심 명령어
+### 원칙
 
-```bash
-npm run dev        # 개발 서버
-npm run build      # 프로덕션 빌드
-npm run lint       # ESLint
+| 원칙 | 내용 |
+|------|------|
+| 가치 비례 | 유니버스 기여가 클수록 많이 지급 |
+| 남용 방지 | 월별 횟수 상한 (monthly_cap) 전 액션 적용 |
+| 서비스 연동 | 특정 서비스 전용은 해당 `brand_id` / 전 브랜드 공통은 `brand_id=NULL` |
+| 일회성 구분 | 전체 1회(GLOBAL) vs 브랜드별 1회(PER_BRAND) |
+| 사용 제한 | 결제 건별 **최대 10%** UC 차감 (현금 환급 불가) |
+
+### 핵심 테이블/API
+
+| 리소스 | 위치 |
+|--------|------|
+| 테이블 | `uc_balances`, `uc_transactions`, `uc_rules` (`sql/universe-coin-tables.sql`) |
+| 클라이언트 | `lib/supabase/uc.ts` |
+| API | `app/api/uc/{balance,earn,redeem,restore,transactions}/route.ts` |
+| 관리 API | `app/api/uc/admin/{grant,transaction,backfill}/route.ts` |
+| UI | `components/UCBalanceCard.tsx` |
+| 인트라 관리 | `app/intra/ums/uc/`, `app/intra/ums/uc/transactions/` |
+
+### 주요 액션 단가 (요약)
+
+| 카테고리 | 예시 | 지급액 |
+|---------|------|--------|
+| 온보딩 | `signup_complete` / `profile_complete` / `profile_advanced` | 최대 6,500 UC (생애 1회) |
+| 커뮤니티 | `write_post` / `write_comment` / `post_featured` | 월 최대 8,000 UC |
+| 마케팅 기여 | `submit_story` / `submit_interview` / `submit_article` | 월 최대 16,000 UC |
+| 리뷰 | `write_review` | 월 1회 2,000 UC |
+
+---
+
+## 1.6 권한 체계 — `member_roles` 기반
+
+> **모든 권한은 `member_roles(user_id, role, context, is_active)`에서 파생된다.**
+> `members` 테이블의 권한 컬럼은 제거됨 (0-B Phase 완료).
+
+### role 분류
+
+| role | 부여 조건 | 접근 범위 |
+|------|----------|----------|
+| `member` | 기본 회원 | 본인 데이터 |
+| `subscriber` | 구독 결제 완료 | 구독 기능 활성 |
+| `purchaser` | 건별 결제 완료 | 구매 항목 접근 |
+| `approved_member` | 멤버십 심사 승인 | 해당 커뮤니티 참여 |
+| `leader` | 그룹/모임 리더 | 해당 그룹 관리 (context 종속) |
+| `staff` | TenOne 직원 | Intra 접근 |
+| `manager` | 매니저급 직원 | 담당 브랜드 관리 |
+| `super_admin` | 마스터 (lools@tenone.biz) | 전체 시스템 |
+
+### context 규약
+
+- `brand:[siteId]` — 특정 브랜드 한정 (예: `brand:badak`, `brand:madleague`)
+- `global` — 유니버스 전체
+- `staff` — 직원 영역
+
+### 인증 흐름
+
+```
+auth.users → member_roles 조회 → role + context 집합 → User 객체 권한 필드
 ```
 
-> ⚠️ **배포는 git push만으로 한다. Claude는 절대 `vercel deploy` 또는 `npm run deploy:*`를 실행하지 않는다.**
-> Vercel이 GitHub push를 감지해 자동 빌드·배포한다. Claude가 직접 deploy 명령을 실행하면
-> 동일 커밋이 중복 빌드되어 빌드 크레딧이 낭비된다 (실제 1시간에 18회 빌드 → $1.95 소진 사례).
-> 배포 확인이 필요하면 Vercel Dashboard에서 확인한다.
+- `lib/auth-context.tsx`가 `member_roles(role,context,is_active)` + `staff_profile:tenone_staff_profiles(...)` JOIN
+- 각 API 핸들러는 user에서 role/context 꺼내 권한 검증
+- RLS 정책도 `member_roles`를 참조 (service_role은 bypass)
 
-## Supabase SQL 직접 실행
+---
 
-> **Claude가 SQL을 직접 실행한다. 사용자가 Dashboard에서 수동으로 실행할 필요 없다.**
+## 1.7 WIO 모듈 공유 원칙
 
-- **PAT**: `.env.local`의 `SUPABASE_ACCESS_TOKEN` (Supabase Management API용)
-- **실행 스크립트**: `scripts/run-sql.js` — `queries` 배열에 SQL 추가 후 `node scripts/run-sql.js`
-- **API**: `POST https://api.supabase.com/v1/projects/ziotlxkdctlhiwkgmmsh/database/query`
-  - DDL(CREATE TABLE 등) 성공 응답: HTTP 201, body `[]`
-  - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
+> WIO는 Ten:One Universe의 **공유 IT 인프라**다. 각 브랜드는 WIO 모듈을 가져다 쓴다. 별도 백엔드를 만들지 않는다.
+> **완전 설계서**: [docs/WIO_Master_Architecture.md](docs/WIO_Master_Architecture.md)
 
-**새 테이블 필요 시 워크플로우:**
-1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + 시드)
-2. `scripts/run-sql.js`에 쿼리 추가하거나 직접 curl/node로 실행
-3. 사용자에게 Dashboard 접속 요청 불필요 — Claude가 직접 처리
-
-## 프로젝트 구조
-
-```
-app/
-  (public)/        # 퍼블릭 페이지 (about, brands, contact, history, universe, profile)
-  intra/           # 내부 오피스 대시보드
-    erp/           # ERP (CRM: people/segments/import, HR: staff/gpr)
-    marketing/     # 마케팅 (campaigns, leads, deals, content, analytics)
-    studio/        # 스튜디오 (brands, schedule, assets, universe, workflow)
-    wiki/          # 내부 위키
-  login/           # 로그인
-  signup/          # 회원가입
-
-components/        # 재사용 컴포넌트 (AppShell, Sidebar류, Modal류, workflow/)
-lib/               # 핵심 로직 및 Context/데이터 (auth, crm, staff, gpr, marketing, workflow)
-types/             # TypeScript 타입 정의 (brand, crm, staff, marketing, workflow 등)
-public/            # 정적 파일 (로고, 파비콘)
-```
-
-## 아키텍처 패턴
-
-- **상태 관리**: React Context (auth, crm, staff, gpr, marketing, workflow 각각 별도 context)
-- **데이터**: `lib/*-data.ts`에 Mock 데이터, `lib/*-context.tsx`에 상태 로직
-- **타입**: `types/` 디렉토리에 모든 인터페이스 정의 (strict typing)
-- **라우팅**: Next.js App Router, `(public)` 그룹으로 퍼블릭/인트라 레이아웃 분리
-- **경로 별칭**: `@/*` → 프로젝트 루트
-
-## 아키텍처 철학: WIO 중심 솔루션 공유
-
-> **⚠️ WIO 완전 설계서: `docs/WIO_Master_Architecture.md` (단일 진실 소스)**
-> 모든 WIO 관련 설계·가격·모듈·체크리스트는 이 문서에 있다.
-> 개발 시작 전 반드시 읽을 것.
-
-> WIO는 Ten:One Universe의 **공유 IT 인프라**다.
-> 각 브랜드는 WIO의 모듈을 가져다 쓴다. 별도 백엔드를 만들지 않는다.
+### WIO 모듈 사용 매핑
 
 | WIO 모듈 | 사용 브랜드 | 용도 |
 |----------|-----------|------|
-| ERP (재무/HR/결재/GPR) | **TenOne 인트라** | 기업 운영 |
-| Project + People + Talk | **MADLeague, MADLeap** | 커뮤니티 멤버·프로젝트 관리 |
-| Marketing + Campaign | **SmarComm** | 마케팅 커뮤니케이션 솔루션 |
-| Crawler + Content Pipeline | **Mindle** | 크롤링→트렌드 콘텐츠 생산 |
-| Sales + CRM | **HeRo, Badak** | 인재 매칭, 네트워킹 |
-| Learn + Wiki | **Evolution School, Planner's** | 교육·지식 관리 |
-| Timesheet + Finance | **YouInOne** | 크루 시수·정산 |
+| ERP (재무/HR/결재/GPR) | TenOne 인트라 | 기업 운영 |
+| Project + People + Talk | MADLeague, MADLeap | 커뮤니티 멤버·프로젝트 관리 |
+| Marketing + Campaign | SmarComm | 마케팅 커뮤니케이션 |
+| Crawler + Content Pipeline | Mindle | 크롤링→트렌드 콘텐츠 |
+| Sales + CRM | HeRo, Badak | 인재 매칭, 네트워킹 |
+| Learn + Wiki | Evolution School, Planner's | 교육·지식 관리 |
+| Timesheet + Finance | YouInOne | 크루 시수·정산 |
 
-**WIO 설계 원칙:**
+### 3대 자원 — 모든 모듈의 기준
 
-> 세상에 필요한 모든 기능을 모듈로 만든다.
-> 필요에 따라 끼워 넣으면 된다.
-
-**3대 자원 — 모든 모듈이 지켜야 할 기준:**
-| 자원 | 의미 | 모듈에서의 역할 |
-|------|------|----------------|
+| 자원 | 의미 | 모듈 역할 |
+|------|------|----------|
 | **사람** | 누가, 몇 명, 어떤 역할 | People, Team, Permission |
 | **돈** | 얼마, 수익, 비용, 정산 | Finance, Budget, Billing |
 | **시간** | 언제까지, 몇 시간, 일정 | Timesheet, Schedule, Deadline |
 
 모든 WIO 모듈은 사람·돈·시간 중 최소 하나를 관리한다.
-모듈 간 연결도 이 3가지를 기준으로 흐른다:
-- Project → **사람**(투입 인원) + **돈**(예산/수익) + **시간**(기간/마감)
-- Sales → **사람**(담당자) + **돈**(딜 가치) + **시간**(클로즈 기한)
-- Content → **사람**(작성자) + **시간**(발행 일정)
 
-**구현 원칙:**
-- 새 기능은 먼저 WIO 모듈로 만들고, 각 브랜드가 import해서 사용
-- DB 테이블은 `[module]_[resource]` 네이밍 (멀티테넌트, brand_id 기반 RLS)
-- 각 브랜드 사이트는 WIO API를 호출하거나 `lib/supabase/wio.ts`를 직접 사용
-- **새 모듈 체크리스트** (`docs/WIO_Master_Architecture.md` PART 10 참조):
-  - □ 모든 테이블에 brand_id 컬럼이 있는가?
-  - □ RLS 정책이 brand_id 기반으로 적용됐는가?
-  - □ TenOne super_admin은 전체 접근 가능한가?
-  - □ 모듈 간 연동은 API/이벤트로만 하고 직접 JOIN은 없는가?
-  - □ API 응답 구조가 APIResponse<T> 형식을 따르는가?
-  - □ 이 모듈을 외부 기업이 써도 작동하는가?
-  - □ 7가지 입장(사용자·관리자·TenOne·외부·보안·확장·AI) 검증 완료?
-- **핵심 포지셔닝**: "입력을 없앤다. AI가 80%를 채운다."
-
-**WIO 가격 (확정):**
-| Free(0원/5명) | Starter(4.9만/20명) | Pro(14.9만/100명) | Business(39.9만/무제한) | Enterprise(협의) |
-
-### WIO 서비스 2-Tier 모델
-
-> WIO(= SmarComm 포함)의 모든 서비스는 2가지 형태로 제공된다.
+### WIO 2-Tier 모델
 
 | Tier | 이름 | 설명 | DB 격리 |
 |------|------|------|---------|
-| **규격 서비스** | Subscription | 등급별 기능 제한, 셀프서비스 온보딩, 동일 코드 | `tenant_id` + feature flags |
-| **맞춤 서비스** | Custom Installation | 클라이언트 최적화 용역, WIO팀 직접 설치 | `tenant_id` + custom config |
+| **규격 서비스** | Subscription | 등급별 기능 제한, 셀프서비스 | `tenant_id` + feature flags |
+| **맞춤 서비스** | Custom Installation | 클라이언트 최적화 용역 | `tenant_id` + custom config |
 
-**맞춤 서비스 목록 (확장됨):**
-- TenOne.biz (첫 번째 고객 = 자사)
-- 이후 외부 고객: XXXX, VVVV, AAAA...
+### WIO 가격
 
-**SmarComm도 동일 구조:**
-- 규격: 구독형 캠페인/자동화/CRM (등급별 제한)
-- 맞춤: 특정 기업 마케팅 스택 최적화 설치
+| Free | Starter | Pro | Business | Enterprise |
+|------|---------|-----|----------|-----------|
+| 0원/5명 | 4.9만/20명 | 14.9만/100명 | 39.9만/무제한 | 협의 |
 
 ### 기술 환류 원칙 (Tech Flywheel)
 
-> **맞춤 서비스 개발 과정에서 만든 기술적 진보는 모아서 규격 서비스 업그레이드에 활용한다.**
-
 ```
-맞춤 서비스 개발 → 기술 진보 발생 → WIO 코어 흡수 → 규격 서비스 업그레이드 → 다음 맞춤은 더 높은 베이스 → (반복)
+맞춤 서비스 개발 → 기술 진보 → WIO 코어 흡수 → 규격 서비스 업그레이드 → (반복)
 ```
 
-**흡수 기준:**
 | 구분 | 처리 |
 |------|------|
-| 일반화 가능한 기능 | WIO 코어 흡수 → 규격 서비스 포함 |
-| 특정 고객 데이터/도메인 | 고객 tenant에만 유지 |
+| 일반화 가능 기능 | WIO 코어 흡수 → 규격 서비스 포함 |
+| 특정 고객 데이터 | 고객 tenant에만 유지 |
 | UI 커스텀 | 테마/config로 추상화 후 흡수 |
-| 고객 전용 비즈니스 로직 | 맞춤 레이어 유지 (흡수 불가) |
+| 고객 전용 로직 | 맞춤 레이어 유지 |
 
-### 테넌트 격리 아키텍처
+### 새 모듈 체크리스트 (docs/WIO_Master_Architecture.md PART 10)
+
+- [ ] 모든 테이블에 brand_id 컬럼?
+- [ ] RLS 정책이 brand_id 기반?
+- [ ] TenOne super_admin은 전체 접근?
+- [ ] 모듈 간 연동은 API/이벤트로만 (직접 JOIN 금지)?
+- [ ] API 응답 구조가 APIResponse<T> 형식?
+- [ ] 외부 기업이 써도 작동?
+- [ ] 7가지 입장(사용자·관리자·TenOne·외부·보안·확장·AI) 검증 완료?
+
+---
+
+## 1.8 테넌트 격리 아키텍처
 
 ```
 tenant_id = 계약 단위 (TenOne, XXXX Corp, VVVV Inc...)
 brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 ```
 
-- 내부 브랜드: `tenant_id = 'tenone'` + `brand_id`로 구분
+- 내부 브랜드: `tenant_id='tenone'` + `brand_id`로 구분
 - 외부 고객: 각자 `tenant_id` 보유
 - Universe 분석 레이어 (Mindle/Whole See): 전체 tenant 크로스 분석 (PII 제거)
 
@@ -472,61 +483,261 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 | 내부 운영 (자사) | `wio_*` | tenone 고정 | X (코드는 WIO 소유) |
 | Universe 운영 | `brand_id` 기반 | N/A | X |
 
-## 브랜드 시스템
-
-Ten:One Universe는 여러 브랜드로 구성:
-- LUKI (AI 그룹), RooK (AI 크리에이터), Badak (네트워크), MAD League (대학 동아리 연합) 등
-- 카테고리: AI Idol, AI Creator, Community, Project Group, Fashion, Character, Corporate, Startup, Content
-- 브랜드 간 관계: Parent, Collaboration, Rivals, Support
-
-## 코딩 컨벤션
-
-- 한국어 UI/주석 사용
-- 컴포넌트: PascalCase 파일명
-- 타입 정의는 반드시 `types/` 디렉토리에
-- Context 패턴: `lib/{feature}-context.tsx` + `lib/{feature}-data.ts`
-- 스타일: Tailwind 유틸리티 클래스 사용, 커스텀 CSS 최소화
-
 ---
 
-## 집/사무실 동기화 시스템
+## 1.9 인트라 통합 관리
 
-### 관리 파일 구조
+> **인트라는 유니버스의 유일한 통합 관리 콘솔이다.**
+> 4대 제품·26+ 브랜드·모든 멤버·모든 UC 거래가 여기서 제어된다.
 
-| 파일 | 역할 | 언제 읽는가 |
-|------|------|------------|
-| `CLAUDE.md` | 프로젝트 가이드 + 동기화 규칙 | 매 대화 자동 로드 |
-| `ROADMAP.md` | 전체 로드맵 + 체크리스트 | 작업 방향 결정 시 |
-| `WORK_STATUS.md` | 현재 진행 상황 + 다음 할 일 | 작업 시작/종료 시 |
-| `CHANGELOG.md` | 날짜별 변경 이력 | 맥락 파악 필요 시 |
+### 주요 관리 영역
 
-### ⚠️ 집 ↔ 사무실 작업 연속성 규칙
+| 영역 | 경로 | 역할 |
+|------|------|------|
+| ERP | `/intra/erp` | CRM(people/segments), HR(staff/gpr), 재무 |
+| Marketing | `/intra/marketing` | 캠페인, leads, deals, 콘텐츠, 분석 |
+| Studio | `/intra/studio` | 브랜드, 일정, 에셋, workflow |
+| UMS — Sites | `/intra/ums/sites/list` | 사이트 메타, 오픈/차단, 브랜딩, SEO |
+| UMS — Members | `/intra/ums/members/list` | 전 멤버 검색/필터, 프로필, 권한 |
+| UMS — Privacy | `/intra/ums/members/privacy` | 개인정보 로그, 탈퇴 처리 |
+| UMS — UC | `/intra/ums/uc` | UC 정책/잔액/지급 관리 |
+| UMS — UC 거래 | `/intra/ums/uc/transactions` | 모든 UC 거래 원장 |
+| UMS — 브랜드별 | `/intra/ums/{brand}/*` | Badak·Jakka 등 브랜드 전용 관리 |
+| Wiki | `/intra/wiki` | 내부 지식 베이스 |
 
-> **목적**: 사용자가 집에서든 사무실에서든, 새 클로드 세션이든,
-> "작업 시작"만 말하면 **어제 퇴근 직전 상태 그대로** 이어서 작업할 수 있어야 한다.
-> 이 규칙의 모든 단계는 **건너뛰기 금지**이며, 순서대로 실행한다.
+### 권한 게이트
 
-**브랜치 정책: master 단일 브랜치. 집/사무실 모두 master에서 작업.**
+- Intra 접근: `role IN ('staff','manager','super_admin')`
+- 브랜드별 관리 패널: `role='manager'` + `context='brand:{siteId}'` 또는 `super_admin`
+- 마스터 전용: `super_admin` (lools@tenone.biz)
 
----
-
-#### "작업 시작" 프로토콜
-
-> **⛔ 이 6단계는 어떤 상황에서도 건너뛰기 금지. Plan Mode든, 권한 제한이든, 1번부터 순서대로 실행한다.**
-> Plan Mode가 활성화되어 있으면 "pull부터 해야 합니다. Plan Mode를 해제합니다"라고 말하고 해제 후 실행.
-> read-only 제한으로 실행 불가능한 단계가 있으면, 사용자에게 즉시 알리고 해결한 뒤 다음 단계로 진행.
+### 인트라 ↔ 사이트 반영 흐름
 
 ```
-1. git checkout master          ← 항상 master로 (어떤 브랜치에 있든 무조건)
-2. git pull origin master       ← ⛔ 절대 생략 금지. 원격 변경 없이 작업 시작하면 충돌·중복 작업 발생
-3. 상황 파악                     ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md 순서로 읽기
-4. 개발 서버 실행                 ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
+인트라 수정 → upsertSiteConfig() → ums_sites 테이블 → site_configs VIEW
+                                                         ↓
+                                    getSiteConfigServer() (ISR 10분)
+                                                         ↓
+                                         각 사이트 generateMetadata()
+```
+
+- 브랜딩 이미지: 드래그앤드롭 → Supabase Storage `site-branding` 버킷
+- SEO 메타: 저장 → DB 반영 → ISR 10분 내 실사이트 반영
+- AI 최적화: llms.txt, robots.txt AI 설정, JSON-LD 구조화 데이터
+- 사이트 오픈/닫기: 토글 → `ums_sites.is_open` 즉시 반영
+
+---
+
+## 1.10 개발 규칙 — 모순 방지 8원칙
+
+| # | 규칙 | 위반 시 문제 |
+|---|------|------------|
+| 1 | 구독 테이블은 `wio_subscription_plans` 하나만 쓴다 | 브랜드마다 구독 테이블 → 관리 불가 |
+| 2 | Intra 전용 운영 테이블을 새로 만들지 않는다 (WIO 사용) | Intra·WIO 기능 이중 구현 |
+| 3 | 브랜드 사이트는 Supabase만 바라본다 (Intra API 직접 호출 금지) | 브랜드 간 의존성 |
+| 4 | SmarComm WS = WIO MKT-* 위의 어플리케이션 (이중 구현 금지) | 마케팅 기능 중복 |
+| 5 | 에이전트는 사람과 같은 API를 쓴다 | 에이전트 전용 API → UI 동기화 깨짐 |
+| 6 | 모든 테이블에 `brand_id` 또는 `tenant_id`가 있다 | RLS 격리 불가 |
+| 7 | `site_configs.site_id`와 각 브랜드 layout 식별자가 일치해야 한다 | SEO·테마 연동 깨짐 |
+| 8 | 맞춤 서비스 개발 기술은 WIO 코어에 환류한다 (Tech Flywheel) | 기술 자산 사장 |
+
+### 새 테이블 생성 전 체크리스트
+
+- [ ] WIO 기존 테이블로 해결 안 되는가?
+- [ ] `brand_id` 또는 `tenant_id` 컬럼이 있는가?
+- [ ] RLS 정책이 `brand_id`/`tenant_id` 기반인가?
+- [ ] 외부 기업이 써도 작동하는가?
+- [ ] 맞춤 서비스에서 나온 기능이라면, 규격 서비스로 환류 가능한가?
+
+---
+
+# 2. 브랜드별 가이드 규약
+
+## 2.1 계층형 CLAUDE.md 체계
+
+각 브랜드 그룹 루트(`app/(BrandName)/CLAUDE.md`)에 브랜드 전용 가이드를 둔다.
+Claude Code는 해당 브랜드 파일을 편집할 때 **자동으로 함께 로드**한다. 수동 참조 불필요.
+
+## 2.2 브랜드 CLAUDE.md 템플릿
+
+```markdown
+# [BrandName] 브랜드 가이드
+
+## 정체성
+- 한 줄 소개:
+- 톤앤매너:
+- 주 컬러: (hex)
+- 디자인 방향:
+
+## 접근 모델
+- 유형: [오픈/구독/구매/멤버십/직원/내부]
+- 가입 경로:
+- 멤버 권한: [member/leader/...]
+
+## 프로필 특화
+- 특화 테이블: `[brand]_profiles` (또는 해당)
+- 고유 필드:
+- universe-profile.ts 조회 함수: `get{Brand}Profile()`
+
+## 권한 체계
+- role 종류: [member, leader, admin, ...]
+- context: `brand:[siteId]`
+- 인트라 관리 권한: `/intra/ums/[brand]/*`
+
+## UC 정책 특이사항
+- 브랜드 전용 액션: (있으면 action_key 나열)
+- brand_id 지정 여부:
+
+## 핵심 파일
+- `app/(BrandName)/layout.tsx` — generateMetadata
+- `app/(BrandName)/[brand]/page.tsx` — 랜딩
+- `app/(BrandName)/[brand]/my/page.tsx` — 마이페이지 (MyProfileCard)
+- `features/[brand]/` — 브랜드 전용 컴포넌트
+- `lib/supabase/[brand].ts` — DB 클라이언트
+- `app/api/[brand]/*` — 브랜드 전용 API
+
+## 인트라 관리 경로
+- `/intra/ums/[brand]/...`
+
+## 개발 주의사항
+- (브랜드 고유 제약/결정사항/피해야 할 패턴)
+
+## 현재 상태
+- Phase:
+- 이월 작업:
+```
+
+## 2.3 브랜드 CLAUDE.md 자동 갱신 규칙
+
+> **원칙**: 세션 중 `app/(BrandName)/` 하위 파일을 하나라도 편집했으면,
+> "작업 종료" 프로토콜 1단계에서 **반드시** 해당 브랜드의 `app/(BrandName)/CLAUDE.md`도 함께 갱신한다.
+
+### 트리거 감지 방법
+
+작업 종료 시점에 다음 명령으로 이번 세션에 건드린 브랜드를 식별:
+
+```bash
+git diff --name-only origin/master...HEAD | grep -oP 'app/\(\K[^)]+' | sort -u
+```
+
+또는 스테이지된 변경에서:
+```bash
+git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
+```
+
+→ 출력된 각 브랜드명에 대해 `app/(BrandName)/CLAUDE.md`를 갱신 대상에 포함.
+
+### 갱신 대상 섹션 (템플릿 기준)
+
+| 섹션 | 갱신 조건 |
+|------|----------|
+| **현재 상태 — Phase** | 마일스톤 완료·새 Phase 진입 시 |
+| **현재 상태 — 이월 작업** | 작업 완료 / 신규 이월 발생 시 |
+| **핵심 파일** | 새 파일 추가·주요 파일 삭제 시 |
+| **개발 주의사항** | 사고·교훈·결정사항 발생 시 |
+| **접근 모델 / 권한 체계** | 모델·권한 구조 변경 시 |
+| **UC 정책 특이사항** | 브랜드 전용 action_key 추가·변경 시 |
+| **프로필 특화** | 특화 테이블·필드 변경 시 |
+
+### 갱신 양식 (간결하게)
+
+```markdown
+## 현재 상태
+- Phase: M2 진행 중 (2026-04-20 업데이트)
+- 이월 작업:
+  - M2-C: /member/projects 참여 프로젝트 목록
+  - M2-E: /member/portfolio + 퍼블릭 포트폴리오
+- 최근 결정: ...
+```
+
+### Claude가 수행해야 할 절차
+
+"작업 종료"를 받으면 다음을 순서대로 실행:
+
+1. `git diff --name-only origin/master...HEAD`로 변경 파일 목록 확인
+2. `app/(BrandName)/` 경로에서 브랜드명 추출 (중복 제거)
+3. 각 브랜드의 `app/(BrandName)/CLAUDE.md`를 Read
+4. 이번 세션 변경사항을 반영해 해당 브랜드 CLAUDE.md의 "현재 상태" 등을 Edit
+5. 이후 기존 작업 종료 프로토콜(WORK_STATUS → CHANGELOG → ROADMAP → commit → push) 계속
+
+> ⚠️ 브랜드 CLAUDE.md가 아직 존재하지 않는 브랜드(Step 3 전 단계)는 건너뛰고 이후 세션에서 일괄 생성.
+
+---
+
+## 2.4 새 브랜드 추가 체크리스트
+
+- [ ] `lib/site-config.ts` → `siteConfigs`에 추가 + `SiteIdentifier` 타입에 추가
+- [ ] `lib/site-config.ts` → `domainMap`에 도메인 매핑 추가 (독립 도메인일 경우)
+- [ ] `lib/site-context.tsx` → `pathSiteMap`에 경로 매핑 추가
+- [ ] `lib/domain-registry.ts` → 서브도메인/외부 도메인 등록 (해당 시)
+- [ ] `lib/intra-nav.ts` → 사이드바 브랜드 목록에 추가 (알파벳순)
+- [ ] DB: `ums_sites` 테이블에 INSERT
+- [ ] `app/(BrandName)/layout.tsx` → `generateMetadata()` + `getSiteConfigServer()` 필수
+- [ ] `app/(BrandName)/CLAUDE.md` → 템플릿 기반 브랜드 가이드 생성
+- [ ] `app/(BrandName)/brandname/page.tsx` → `UnderConstruction` 또는 전용 랜딩
+- [ ] `app/(BrandName)/brandname/my/page.tsx` → `<MyProfileCard>` 적용
+- [ ] Vercel 프로젝트에 도메인 연결 + env 동일하게 설정
+- [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/**` 추가
+- [ ] 특화 프로필 테이블 필요 시 `universe-profile.ts`에 조회 함수 추가
+- [ ] `UniverseProfile.tsx` → `SERVICE_META`에 아이콘·설명·접근모델 등록
+
+---
+
+# 3. 동기화 필수 파일 (집↔사무실)
+
+> **목적**: 집/사무실/새 Claude 세션 — 어디서든 "작업 시작"만 말하면 어제 상태 그대로 이어받아야 한다.
+> 아래 파일들은 **반드시** 커밋·푸시되어야 다음 장소에서 이어갈 수 있다.
+
+> **브랜치 정책**: master 단일 브랜치. 집/사무실 모두 master에서 작업.
+
+## 3.1 push/pull 대상 (git 추적 필수)
+
+| 분류 | 파일 | 역할 | 갱신 타이밍 |
+|------|------|------|-----------|
+| **지시** | `CLAUDE.md` | 유니버스 공통 가이드 (이 파일) | 원칙·프로토콜 변경 시 |
+| **지시** | `app/(BrandName)/CLAUDE.md` | 브랜드별 가이드 | 브랜드 정책·구조 변경 시 |
+| **상태** | `WORK_STATUS.md` | 현재 진행 상황 + 다음 할 일 | 작업 시작/종료 시 |
+| **기록** | `CHANGELOG.md` | 날짜별 변경 이력 | 작업 종료 시 |
+| **계획** | `ROADMAP.md` | 전체 로드맵 + 체크리스트 | 마일스톤 완료/추가 시 |
+| **설계** | `docs/Universe_Coin_Policy.md` | UC 정책 상세 | 정책 변경 시 |
+| **설계** | `docs/WIO_Master_Architecture.md` | WIO 단일 진실 소스 | WIO 설계 변경 시 |
+| **설계** | `docs/Universe_OS_Plan.md` | UOS Phase 계획 | Phase 진행 시 |
+| **UX** | `UX_GUIDE.md` | UX 디테일 표준 | 신규 UX 패턴 확정 시 |
+| **스키마** | `sql/*.sql` | SQL 마이그레이션 | 새 테이블·정책 생성 시 |
+| **코드** | `app/`, `components/`, `features/`, `lib/`, `types/` | 애플리케이션 코드 | 작업 진행 시 |
+
+## 3.2 push/pull 대상이 아닌 것 (gitignore)
+
+- `.env.local` — 환경변수 (Vercel에서 개별 관리)
+- `node_modules/` — 의존성
+- `.next/` — 빌드 산출물
+- 로컬 스크래치 파일, 임시 메모
+
+## 3.3 관리 파일 읽는 순서 (작업 시작 시)
+
+1. `WORK_STATUS.md` — 어제 멈춘 지점 파악
+2. `CHANGELOG.md` — 최근 변경 맥락
+3. `ROADMAP.md` — 전체 방향성
+4. (해당 브랜드 작업이면) `app/(BrandName)/CLAUDE.md` — 브랜드 컨텍스트
+
+---
+
+# 4. 작업 프로토콜
+
+## 4.1 "작업 시작" 프로토콜
+
+> **⛔ 이 6단계는 어떤 상황에서도 건너뛰기 금지. Plan Mode든, 권한 제한이든, 1번부터 순서대로 실행한다.**
+> Plan Mode 활성 시 "pull부터 해야 합니다. Plan Mode를 해제합니다" 말하고 해제 후 실행.
+> read-only 제한으로 실행 불가한 단계는 사용자에게 즉시 알리고 해결 후 진행.
+
+```
+1. git checkout master          ← 항상 master로 (어떤 브랜치에 있든)
+2. git pull origin master       ← ⛔ 절대 생략 금지. 생략하면 충돌·중복 작업
+3. 상황 파악                     ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md 순서
+4. 개발 서버 실행 (필요 시)      ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
 5. 브리핑 보고                   ← 아래 양식으로 사용자에게 보고
 6. 사용자 확인 후 작업 시작
 ```
-
-**위반 사례 (반복 금지):**
-- 2026-04-14: Plan Mode 핑계로 git pull 생략 → 원격 변경 모르고 작업 → push 시 충돌
 
 **브리핑 양식:**
 ```
@@ -537,154 +748,85 @@ Ten:One Universe는 여러 브랜드로 구성:
 - 이슈/주의: [있으면]
 ```
 
----
+**위반 사례 (반복 금지):**
+- 2026-04-14: Plan Mode 핑계로 git pull 생략 → 원격 변경 모르고 작업 → push 시 충돌
 
-#### "작업 종료" 프로토콜
+## 4.2 "작업 종료" 프로토콜
 
 > **⛔ 사용자가 "작업 종료"라고 말했을 때만 실행. Claude가 임의로 실행 금지.**
 
 ```
-1. 작업 기록        ← WORK_STATUS.md (오늘 한 것 + 다음 할 것)
-                     CHANGELOG.md (날짜/장소/파일/결정사항)
-                     ROADMAP.md (완료 체크 + 새 항목)
-2. git add + commit ← 코드 + 관리 파일 모두
-3. git push origin master ← ⛔ 이 순간에만 push. 세션 중 유일한 1회.
+1. 변경 브랜드 식별
+   git diff --name-only origin/master...HEAD | grep -oP 'app/\(\K[^)]+' | sort -u
+2. 작업 기록 (아래 4개 파일 세트)
+   - WORK_STATUS.md (오늘 한 것 + 다음 할 것)
+   - CHANGELOG.md (날짜/장소/파일/결정사항)
+   - ROADMAP.md (완료 체크 + 새 항목)
+   - ⭐ 1단계에서 식별된 각 브랜드의 `app/(BrandName)/CLAUDE.md` 갱신
+        → 현재 상태(Phase/이월), 핵심 파일, 주의사항 반영
+        → 상세: [2.3 브랜드 CLAUDE.md 자동 갱신 규칙](#23-브랜드-claudemd-자동-갱신-규칙)
+3. git add + commit ← 코드 + 관리 파일 + 브랜드 CLAUDE.md 모두
+4. git push origin master ← ⛔ 이 순간에만 push. 세션 중 유일한 1회.
 ```
 
----
+### "다음 할 일" 작성 원칙
 
-### ⛔ 비용 관리 — 절대 엄수
+- ❌ "스캔 페이지 개선" (막연함)
+- ✅ "스캔 페이지 > 경쟁사 비교 섹션 > 레이더 차트 아래 상세 테이블 추가. Mock 데이터 3개, 컬럼은 항목/자사/경쟁사A/경쟁사B. `components/ScanPage.tsx` 350줄부터."
 
-> **위반 시 실제 금전적 손실이 발생한다. 아래 규칙은 코딩 컨벤션이 아니라 운영 규칙이다.**
+## 4.3 비용 관리 — 절대 엄수
+
+> **위반 시 실제 금전적 손실 발생. 아래는 코딩 컨벤션이 아니라 운영 규칙.**
 
 | 규칙 | 이유 | 위반 사례 |
 |------|------|----------|
-| **push는 "작업 종료" 시 1회 OR 명시적 배포 요청 시 1회** | push 1회 = Vercel 빌드 1회 = 크레딧 소진. 요청 후에는 즉시 commit-only 모드로 복귀 | 2026-04-13: 세션 중 18회 push → $1.95 / 2026-04-15: "실서버 반영" 1회 요청에 이후 변경마다 계속 push |
-| **`vercel deploy` 직접 실행 금지** | 중복 빌드 발생 | 2026-04-13: Claude가 직접 deploy 18회 |
-| **commit은 로컬에서 자유** | 로컬 commit = 비용 $0 | — |
-| **`npm run dev`로 로컬 확인** | 로컬 서버 = 비용 $0 | — |
+| **push는 "작업 종료" 또는 명시적 배포 요청 시 1회만** | push 1회 = Vercel 빌드 1회 = 크레딧 소진 | 2026-04-13: 세션 중 18회 push → $1.95 / 2026-04-15: "실서버 반영" 1회 요청에 이후 변경마다 계속 push |
+| **`vercel deploy` / `npm run deploy:*` 직접 실행 금지** | 중복 빌드 발생 — git push가 유일한 배포 경로 | 2026-04-13: Claude가 직접 deploy 18회 |
+| **commit은 로컬에서 자유** | 로컬 commit = $0 | — |
+| **`npm run dev`로 로컬 확인** | 로컬 서버 = $0 | — |
 | **On-Demand 상한 $100 설정됨** | 초과 과금 방어 | — |
-| **서브에이전트는 Haiku로 실행** | 토큰 비용 80% 절감 | — |
+| **서브에이전트는 Haiku로** | 토큰 비용 80% 절감 | — |
 | **기본 모델은 Sonnet** | Opus는 복잡한 아키텍처/디버깅만 | — |
 
-**WORK_STATUS.md "다음 할 일"은 이렇게 쓴다:**
-- ❌ "스캔 페이지 개선" (막연함)
-- ✅ "스캔 페이지 > 경쟁사 비교 섹션 > 레이더 차트 아래에 상세 테이블 추가. 현재 Mock 데이터 3개 있고, 컬럼은 항목/자사/경쟁사A/경쟁사B. components/ScanPage.tsx 350번째 줄부터."
+## 4.4 Context Rot 방지 + 토큰 최적화
 
----
+### Compact 타이밍
+- `/compact` — 마일스톤 사이에서만 (리서치→구현 전, 디버깅→다음 기능 전, 모듈 완료 후)
+- `/clear` — 완전히 다른 작업 전환 시
+- ❌ 구현 도중 compact (변수·경로 유실)
+- ❌ auto-compaction 의존 (작업 중간 트리거 위험)
 
-#### 절대 하지 말 것
-- ❌ master 확인/전환 없이 시작하기 (develop 등 다른 브랜치에서 작업 금지)
-- ❌ pull 안 하고 로컬 파일만 보고 시작하기
-- ❌ 화면 안 보고 코드만 보고 판단하기
-- ❌ push 빼먹기 (다음 장소에서 못 이어감)
-- ❌ 작업 중간에 push하기 (Vercel 배포 트리거 → 크레딧 소진. push는 "작업 종료" 또는 명시적 배포 요청 시 1회. 요청 후 다음 변경은 다시 commit-only)
-- ❌ 실제로 안 한 작업을 완료라고 기록하기
-- ❌ "다음 할 일"을 막연하게 쓰기
-- ❌ "작업 종료할까요?" / "이어갈까요?" 등 묻지 않기 — 사용자가 말할 때까지 계속 진행
-- ❌ 각 서비스의 디자인 톤앤매너를 무시하고 코드만 짜기 — 반드시 기존 테마에 맞출 것
-- ❌ `vercel deploy` / `npm run deploy:*` 직접 실행 — git push → Vercel 자동배포가 유일한 배포 경로. 중복 빌드 = 크레딧 낭비
+### 컨텍스트 윈도우 관리
+- 루트 `CLAUDE.md`는 계속 성장하지만, 토큰 경고 시 상세는 브랜드 CLAUDE.md나 `docs/`로 분산
+- 마지막 20%에서 대규모 리팩토링 금지 → 먼저 `/compact`
+- `/cost` `/context`로 수시 확인
 
----
+### MCP 서버 제한
+- 프로젝트당 MCP 10개 이하, 활성 도구 80개 이하
+- 미사용 MCP 비활성화
 
-## Universe Operating System (UOS)
+### 서브에이전트 활용
+- 파일 탐색·읽기 많은 작업 → 서브에이전트 위임
+- 메인 세션에서 파일 10개+ 금지
+- 서브에이전트는 Haiku (비용 80% 절감)
 
-> **이것은 일반적인 웹앱이 아니다.** AI 에이전트가 Universe를 운영하는 시스템이다.
+### 토큰 경고 신호 — 즉시 `/compact` 또는 `/clear`
+- 같은 실수 2~3번 반복
+- 이전 규칙 까먹음
+- 시키지 않은 파일 건드림
+- 응답 품질 하락
 
-### 핵심 원칙 (모든 개발에 적용)
-1. **모든 API = 두 소비자:** 프론트엔드 UI + AI 에이전트. 둘 다 같은 API를 쓴다.
-2. **agent_profiles = 심장:** System Prompt, 지식, 도구가 정의되고 Claude API 호출 시 조립된다.
-3. **agent_messages = 추적:** 모든 에이전트 행위가 로그된다. 추적 가능성이 생명줄.
-4. **모듈 = Tool:** WIO 모듈이 완성되면 자동으로 해당 에이전트의 Tool이 된다.
-5. **기존 프론트 143p는 건드리지 않는다.** 백엔드 API를 만들고 연결만.
+## 4.5 QA Protocol
 
-### 개발 단계
-- Phase 0: 인프라 기초 (진행 중 — tenant_id 일괄 추가, 중복 테이블 정리 대기)
-- Phase 1: 에이전트 코어 (agent_profiles + Agent Hub + Claude API)
-- Phase 2: 바닥쇠 실전 (첫 독립 에이전트)
-- Phase 3: tenone.biz 모듈 (프론트↔백엔드 연결)
-- Phase 4: 에이전트 확장 (브랜드 에이전트 추가)
-
-### 상세 계획: `docs/Universe_OS_Plan.md` 참조
-
----
-
-## 개발 규칙 — 모순 방지 8원칙 (위반 금지)
-
-> 출처: `TenOne_Universe_Architecture_v1.md` Section 11 + 2026-04-03 확정
-
-| # | 규칙 | 위반 시 문제 |
-|---|------|------------|
-| 1 | 구독 테이블은 `wio_subscription_plans` 하나만 쓴다 | 브랜드마다 구독 테이블 → 관리 불가 |
-| 2 | Intra 전용 운영 테이블을 새로 만들지 않는다 (WIO 테이블 사용) | Intra·WIO 기능 이중 구현 |
-| 3 | 브랜드 사이트는 Supabase만 바라본다 (Intra API 직접 호출 금지) | 브랜드 간 의존성 발생 |
-| 4 | SmarComm WS = WIO MKT-* 위의 어플리케이션 (이중 구현 금지) | 마케팅 기능 중복 |
-| 5 | 에이전트는 사람과 같은 API를 쓴다 | 에이전트 전용 API → UI 동기화 깨짐 |
-| 6 | 모든 테이블에 brand_id 또는 tenant_id가 있다 | RLS 격리 불가 |
-| 7 | site_configs의 site_id와 각 브랜드 layout의 식별자가 일치해야 한다 | SEO·테마 연동 깨짐 |
-| 8 | 맞춤 서비스 개발 기술은 WIO 코어에 환류한다 (Tech Flywheel) | 기술 자산 사장, 규격 서비스 정체 |
-
-## 새 테이블 생성 전 체크리스트
-
-- [ ] WIO 기존 테이블로 해결 안 되는가?
-- [ ] brand_id 또는 tenant_id 컬럼이 있는가?
-- [ ] RLS 정책이 brand_id/tenant_id 기반인가?
-- [ ] 외부 기업이 써도 작동하는가?
-- [ ] 이 기능이 맞춤 서비스에서 나왔다면, 규격 서비스로 환류 가능한가?
-
----
-
-## UX 가이드
-
-> **`UX_GUIDE.md`** — 사용자 편의 디테일 표준 (스켈레톤, 토글, 복사 피드백, 댓글 펼침 등)
-> 새 UI 작업 시 반드시 참조. 🟢 Standard는 기본 적용, 🟡 Proposed는 협의 후 적용.
-
----
-
-## 현재 상태
-
-- Intra 143p: UI + DB 대부분 완성
-- 4대 제품 통제 레이어: 구축 중 (Phase 1)
-- 구독 인프라: 미구현 (Phase 2)
-- 에이전트: Agent Hub 코드 완성, Prod DB 실행 필요
-- 상세 로드맵: `ROADMAP.md` 참조
-- 작업 현황: `WORK_STATUS.md` 참조
-- 변경 이력: `CHANGELOG.md` 참조
-- 아키텍처: `TenOne_Universe_Architecture_v1.md` (G드라이브)
-- 4대 제품: `TenOne_4Products.md` (G드라이브)
-
----
-
-## QA Protocol
-
-"QA해줘" 또는 "보안 점검" 시 아래 프로토콜을 실행한다.
+"QA해줘" 또는 "보안 점검" 시 아래 실행.
 
 ### 코드 리뷰 기준
 
-**구조**
-- 파일 200~400줄 기본, 800줄 초과 시 분리
-- 기능/도메인 기준 구성 (타입 기준 X)
-- early return 패턴 (3단계+ 중첩 금지)
-
-**불변성 (Critical)**
-- 객체 mutation 금지 — `{ ...obj, key: newValue }`
-- 배열 mutation 금지 — push/splice 대신 map/filter/spread
-- 함수 인자 직접 수정 금지
-
-**에러 핸들링**
-- 빈 catch 금지 — 에러를 조용히 삼키지 않는다
-- UI: 사용자 친화적 메시지 / 서버: 상세 로깅
-- 모든 레벨에서 에러 처리
-
-**입력 검증**
-- 시스템 경계에서 스키마 검증
-- 외부 데이터는 절대 신뢰하지 않는다
-- 빠른 실패, 명확한 메시지
-
-**React/Next.js**
-- useEffect 의존성 배열 완전성
-- 리스트 key에 index 금지 (고유 ID 사용)
-- 서버 컴포넌트 vs 클라이언트 컴포넌트 구분
+**구조**: 파일 200~400줄 기본, 800줄 초과 시 분리 / early return (3단계+ 중첩 금지)
+**불변성 (Critical)**: 객체·배열 mutation 금지, 함수 인자 직접 수정 금지
+**에러 핸들링**: 빈 catch 금지 / UI는 친화적 메시지, 서버는 상세 로깅
+**입력 검증**: 시스템 경계에서 스키마 검증, 외부 데이터 불신
+**React/Next.js**: useEffect 의존성 완전성, 리스트 key에 index 금지
 
 ### TypeScript + 빌드
 
@@ -692,32 +834,14 @@ Ten:One Universe는 여러 브랜드로 구성:
 npx tsc --noEmit       # 타입 에러 0
 npx eslint . --ext .ts,.tsx
 npm run build          # 빌드 에러 0
-npm audit --audit-level=high  # 의존성 보안
+npm audit --audit-level=high
 ```
-
-빌드 실패 시: 에러 분석 → 하나씩 수정 → 수정마다 재검증.
 
 ### 보안 감사
 
-**Phase 1: 체크리스트 스캔**
-
-A. 시크릿 노출 — settings.json 하드코딩, .env gitignore, service_role 프론트 노출, ANTHROPIC_BASE_URL 변조
-B. 권한 과다 — RLS disabled 테이블, anon key write, 인증 없는 공개 API
-C. MCP 위험 — 비공식 MCP, 파일쓰기 과도한 MCP, 활성 10개 초과
-D. 훅/인젝션 — hooks.json 외부 URL, CLAUDE.md 프롬프트 인젝션, 클론 레포 .claude/ 의심 설정
-E. 인프라 — Claude Code 1.0.111+ (CVE-2025-59536), ANTHROPIC_BASE_URL 무결, Node.js 18+
-F. 공급망 — PR 히든 diff 인젝션, npm audit, 외부 레포 .claude/ 수동 점검
-G. 에이전트 통신 — can_invoke 최소 권한, 하위→상위 호출 불가, 챗봇 입력 새니타이징
-H. 런타임 — API 폭증(3배+), 프로젝트 밖 파일 접근, agent_messages error 급증
-I. 출력 — 콘텐츠 script/onclick, 외부 URL 무단 삽입, 크롤링 이미지 저작권
-J. 샌드박싱 — Cloud Run 서비스 간 격리, 에이전트→Prod DB 직접 접근 차단
-
-**Phase 2: 레드팀/블루팀 (서브에이전트)**
-
-서브에이전트 A (레드팀): "현재 설정에서 악용 가능한 취약점을 모두 찾아라. 외부 공격자, 악의적 MCP, 프롬프트 인젝션 포함."
-서브에이전트 B (블루팀): "레드팀 취약점에 대한 현재 방어 상태를 평가하고 수정 방안을 우선순위로 제시하라."
-
-**Phase 3:** Critical/High/Medium/Low 분류. Critical/High 즉시 보고.
+**Phase 1 체크리스트**: 시크릿·권한·MCP·훅/인젝션·인프라·공급망·에이전트·런타임·출력·샌드박싱
+**Phase 2 레드팀/블루팀**: 서브에이전트 2개로 레드/블루 역할 분담
+**Phase 3 분류**: Critical/High/Medium/Low, Critical/High 즉시 보고
 
 ### 코드 메트릭 (분기 점검)
 
@@ -728,40 +852,107 @@ grep -r 'console.log' src --include='*.ts' --include='*.tsx' | wc -l
 grep -rn 'TODO\|FIXME' src | wc -l
 ```
 
-## Context Rot 방지 + 토큰 최적화
+---
 
-### 모델 선택 (일상 워크플로우)
-- 기본: Sonnet (코딩 80%는 Sonnet으로 충분)
-- 복잡한 아키텍처/디버깅만: `/model opus`로 전환 → 끝나면 `/model sonnet` 복귀
+## 부록 A. 절대 하지 말 것 (통합)
 
-### Compact 타이밍 (strategic-compact 패턴)
-- `/compact` — 마일스톤 사이에서만 실행:
-  - 리서치 완료 → 구현 시작 전
-  - 디버깅 완료 → 다음 기능 전
-  - 한 모듈 끝 → 다른 모듈 전
-- `/clear` — 완전히 다른 작업 전환 시 (무료, 즉시)
-- ❌ 절대 금지: 구현 도중 compact (변수명·파일경로·부분 상태 유실)
-- ❌ 절대 금지: auto-compaction에 의존 (작업 도중 트리거될 수 있음)
+### 배포·Git
+- ❌ `vercel deploy` / `npm run deploy:*` 직접 실행
+- ❌ 작업 중간 push (크레딧 소진)
+- ❌ master 외 브랜치에서 작업
+- ❌ pull 없이 로컬 파일만 보고 시작
+- ❌ 화면 안 보고 코드만 보고 판단
+- ❌ push 빼먹기 (다음 장소에서 못 이어감)
 
-### 컨텍스트 윈도우 관리
-- CLAUDE.md는 2,000~3,000 토큰 이하 유지. 넘으면 압축.
-- 컨텍스트 윈도우 마지막 20%에서는 대규모 리팩토링/멀티파일 작업 금지.
-  → 토큰 부족하면 먼저 /compact 후 작업 재개.
-- `/cost` — 세션 비용 수시 확인
-- `/context` — 카테고리별 토큰 사용량 확인
+### 인증·DB
+- ❌ `auth.users` 테이블 UPDATE/DELETE (Supabase Dashboard에서 사용자가 직접)
+- ❌ RLS disabled 테이블 생성
+- ❌ `tenant_id` / `brand_id` 없는 신규 테이블
+- ❌ 프론트엔드에 `service_role` 키 노출
 
-### MCP 서버 제한
-- 프로젝트당 MCP 10개 이하, 활성 도구 80개 이하
-- 사용 안 하는 MCP는 비활성화 (토큰 절약)
+### 프로필·메타
+- ❌ `UniverseMembership` 사용 (레거시)
+- ❌ 각 브랜드 마이페이지에서 아바타/이름/이메일 직접 표시 (MyProfileCard 전담)
+- ❌ 레이아웃에 `export const metadata` (정적)
+- ❌ 페이지에 "준비 중" / "Coming Soon" 텍스트 직접 표시
 
-### 서브에이전트 활용
-- 파일 탐색/읽기가 많은 작업 → 서브에이전트(Task tool)에 위임
-- 메인 세션에서 파일 10개+ 읽지 않는다 → 서브에이전트가 요약해서 보고
-- 서브에이전트는 Haiku 모델로 실행 (비용 80% 절감)
+### 커뮤니케이션
+- ❌ 실제 안 한 작업을 완료로 기록
+- ❌ "다음 할 일"을 막연하게 작성
+- ❌ "작업 종료할까요?" 등 자발적 묻기 — 사용자가 말할 때까지 계속 진행
+- ❌ 각 서비스의 톤앤매너 무시
 
-### 토큰 경고 신호
-아래 상황이 발생하면 즉시 /compact 또는 /clear:
-- 같은 실수를 2~3번 반복
-- 이전에 알려준 규칙을 까먹음
-- 시키지 않은 파일을 건드림
-- 응답 품질이 눈에 띄게 떨어짐
+---
+
+## 부록 B. 코딩 컨벤션
+
+- 한국어 UI/주석 사용
+- 컴포넌트: PascalCase 파일명
+- 타입 정의는 반드시 `types/` 디렉토리에
+- Context 패턴: `lib/{feature}-context.tsx` + `lib/{feature}-data.ts`
+- 스타일: Tailwind 유틸리티 클래스 사용, 커스텀 CSS 최소화
+- 경로 별칭: `@/*` → 프로젝트 루트
+
+---
+
+## 부록 C. 상태 관리 아키텍처
+
+- **상태**: React Context (auth, crm, staff, gpr, marketing, workflow 각각 별도)
+- **데이터**: `lib/*-data.ts` (Mock) + `lib/*-context.tsx` (상태 로직)
+- **타입**: `types/` 디렉토리에 모든 인터페이스
+- **라우팅**: Next.js App Router, `(public)` / `(BrandName)` 그룹으로 레이아웃 분리
+
+---
+
+## 부록 D. Supabase SQL 직접 실행
+
+> **Claude가 SQL을 직접 실행한다. 사용자가 Dashboard에서 수동으로 실행할 필요 없다.**
+
+- **PAT**: `.env.local`의 `SUPABASE_ACCESS_TOKEN`
+- **실행 스크립트**: `scripts/run-sql.js` — `queries` 배열에 SQL 추가 후 `node scripts/run-sql.js`
+- **API**: `POST https://api.supabase.com/v1/projects/ziotlxkdctlhiwkgmmsh/database/query`
+  - DDL 성공 응답: HTTP 201, body `[]`
+  - SELECT 성공 응답: HTTP 201, body `[{...rows}]`
+
+**새 테이블 워크플로우:**
+1. `sql/` 폴더에 SQL 파일 작성 (CREATE TABLE + INDEX + RLS + 시드)
+2. `scripts/run-sql.js`에 추가 또는 직접 실행
+3. Dashboard 접속 요청 불필요
+
+---
+
+## 부록 E. Universe Operating System (UOS)
+
+> 이것은 일반적인 웹앱이 아니다. AI 에이전트가 Universe를 운영하는 시스템이다.
+
+### 핵심 원칙
+
+1. 모든 API = 두 소비자: 프론트엔드 UI + AI 에이전트
+2. `agent_profiles` = 심장 (System Prompt, 지식, 도구)
+3. `agent_messages` = 추적 (모든 에이전트 행위 로그)
+4. 모듈 = Tool (WIO 모듈 완성 시 자동으로 해당 에이전트의 Tool)
+5. 기존 프론트 143p는 건드리지 않는다 — 백엔드 API만 만들고 연결
+
+### 개발 단계
+
+- Phase 0: 인프라 기초 (진행 중 — tenant_id 일괄 추가, 중복 테이블 정리)
+- Phase 1: 에이전트 코어 (agent_profiles + Agent Hub + Claude API)
+- Phase 2: 바닥쇠 실전 (첫 독립 에이전트)
+- Phase 3: tenone.biz 모듈 (프론트↔백엔드 연결)
+- Phase 4: 에이전트 확장 (브랜드 에이전트 추가)
+
+상세: [docs/Universe_OS_Plan.md](docs/Universe_OS_Plan.md)
+
+---
+
+## 부록 F. 현재 상태
+
+- Intra 143p: UI + DB 대부분 완성
+- 4대 제품 통제 레이어: 구축 중 (Phase 1)
+- 구독 인프라: 미구현 (Phase 2)
+- 에이전트: Agent Hub 코드 완성, Prod DB 실행 필요
+- 상세 로드맵: [ROADMAP.md](ROADMAP.md)
+- 작업 현황: [WORK_STATUS.md](WORK_STATUS.md)
+- 변경 이력: [CHANGELOG.md](CHANGELOG.md)
+- 아키텍처: `TenOne_Universe_Architecture_v1.md` (G드라이브)
+- 4대 제품: `TenOne_4Products.md` (G드라이브)

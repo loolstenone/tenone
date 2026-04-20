@@ -16,7 +16,56 @@
 
 ## 🏗️ UI 컴포넌트 표준
 
-> **JAKKA 가이드와 동일** (`app/(Jakka)/CLAUDE.md § UI 컴포넌트 표준` 참조). 차이점만 아래에 기재.
+> **이 섹션이 곧 법이다. 매 컴포넌트 저장 전 반드시 체크한다.**
+
+### ⚠️ 타이포그래피 — 절대 규칙 (반복 위반 금지)
+
+| 용도 | **허용 토큰** | ❌ 절대 금지 |
+|------|-------------|------------|
+| 제목·본문·버튼 라벨·날짜·마감일·출연료 등 **정보성 텍스트** | `text-neutral-900` | `text-neutral-600/700`으로 쓰기 |
+| 보조 본문 (부제·설명·역할·태그) | `text-neutral-700` 이상 | `text-neutral-500/600`으로 쓰기 |
+| 섹션 레이블 (ALL-CAPS 모노, 장식용) | `text-neutral-500` | 실제 정보에 쓰기 |
+| placeholder·비활성 상태 | `text-neutral-400` | 실제 정보에 쓰기 |
+
+```
+❌ font-bold + text-neutral-500 조합 (굵은데 흐릿 = 즉시 수정)
+❌ font-medium 사용 — 반드시 font-bold 이상
+❌ font-semibold → font-bold로 통일
+❌ 날짜·마감일·페이 등 핵심 정보에 text-neutral-700 이하
+```
+
+### ✅ 표준 스니펫
+
+```tsx
+// 날짜·마감·페이 등 정보 → neutral-900
+<span className="text-[12px] font-bold text-neutral-900">2025.05.31</span>
+
+// 보조 정보 (역할·설명) → neutral-700 이상
+<p className="text-[11px] font-bold text-neutral-700">주인공 상대역 (여, 20대)</p>
+
+// 섹션 레이블 (유일하게 neutral-500 허용, ALL-CAPS 조건)
+<p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">마감</p>
+
+// 뒤로가기·보조 링크
+<Link className="text-[12px] font-semibold text-neutral-700 hover:text-neutral-900">← 목록</Link>
+```
+
+### 컴포넌트 저장 전 체크리스트
+
+- [ ] 날짜·마감·페이·이메일 등 실제 정보 → `text-neutral-900`?
+- [ ] 역할·태그·부제 등 보조 정보 → `text-neutral-700` 이상?
+- [ ] 버튼 라벨에 `text-neutral-600` 이하 없나?
+- [ ] `font-bold`인데 `text-neutral-500` 이하 없나?
+- [ ] `font-medium` / `font-semibold` 사용 없나? (→ `font-bold`로)
+
+### 선(Divider) 시스템
+
+| 용도 | 클래스 |
+|------|--------|
+| 페이지 헤더 하단, 테이블 헤더, 스티키 바 | `border-b border-neutral-200` |
+| 콘텐츠 내부 행 구분 | `border-b border-neutral-100` |
+
+❌ `border-neutral-300` 구조 선에 사용 금지
 
 ### MoNTZ 전용 규칙
 

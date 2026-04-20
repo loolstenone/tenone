@@ -3,6 +3,11 @@ import { createClient } from "@/lib/supabase/client";
 export type MontzCreatorType = "model" | "actor" | "both";
 export type MontzAvailability = "active" | "selective" | "inactive";
 export type MontzAuditionType = "드라마" | "영화" | "뮤지컬" | "모델" | "광고" | "CF" | "기타";
+export type MontzGender = "female" | "male";
+export type MontzAgeGroup = "어린이" | "10대" | "20~30대" | "40~50대" | "60대+";
+export type MontzSpecialty = "전신" | "부분" | "피팅" | "나레이터";
+
+export type MontzHeroMode = "latest" | "followers" | "verified" | "manual";
 
 export interface MontzCreator {
     id: string;
@@ -10,10 +15,16 @@ export interface MontzCreator {
     handle: string;
     display_name: string;
     type: MontzCreatorType;
+    gender: MontzGender | null;
+    age_group: MontzAgeGroup | null;
+    specialties: MontzSpecialty[];
     avatar_url: string | null;
     cover_url: string | null;
     bio: string | null;
     height: number | null;
+    // 몸무게: 본인이 공개 동의한 경우에만 표시 (show_weight=true)
+    weight: number | null;
+    show_weight: boolean;
     bust: number | null;
     waist: number | null;
     hip: number | null;
@@ -24,7 +35,13 @@ export interface MontzCreator {
     follower_count: number;
     work_count: number;
     is_verified: boolean;
+    birth_year: number | null;
+    birth_month: number | null;
+    description: string | null;
+    career: string | null;
+    tags: string[];
     portfolio_links: string[];
+    is_hero: boolean;
     created_at: string;
 }
 
@@ -60,96 +77,116 @@ export interface MontzAudition {
 
 // ── mock data ────────────────────────────────────────────────────
 
-const mockCreators: MontzCreator[] = [
+const MOCK_DEFAULTS = { birth_year: null, birth_month: null, description: null, career: null, tags: [] };
+
+const mockCreators: MontzCreator[] = ([
     {
         id: "1", user_id: null, handle: "jiwon.oh", display_name: "오지원",
-        type: "model",
+        type: "model", gender: "female", age_group: "20~30대",
+        specialties: ["전신", "피팅"],
         avatar_url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop&crop=faces",
         cover_url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=400&fit=crop",
         bio: "패션 모델 / 런웨이 · 화보 전문. 서울 기반 활동 중.",
-        height: 174, bust: 82, waist: 59, hip: 88, shoe_size: 250,
+        height: 174, weight: null, show_weight: false,
+        bust: 82, waist: 59, hip: 88, shoe_size: 250,
         hair_color: "검정", eye_color: "갈색",
         availability_status: "active", follower_count: 1240, work_count: 38,
-        is_verified: true, portfolio_links: [], created_at: "2025-01-10T09:00:00Z",
+        is_verified: true, portfolio_links: [], is_hero: false, created_at: "2025-01-10T09:00:00Z",
     },
     {
         id: "2", user_id: null, handle: "minho.k", display_name: "강민호",
-        type: "actor",
+        type: "actor", gender: "male", age_group: "20~30대",
+        specialties: ["전신", "나레이터"],
         avatar_url: "https://images.unsplash.com/photo-1500048993953-d23a436266cf?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "연극·영화 배우. 홍익대 연극학과 졸업.",
-        height: 181, bust: 95, waist: 76, hip: 97, shoe_size: 275,
+        height: 181, weight: 75, show_weight: true,
+        bust: null, waist: null, hip: null, shoe_size: 275,
         hair_color: "검정", eye_color: "갈색",
         availability_status: "selective", follower_count: 890, work_count: 22,
-        is_verified: false, portfolio_links: [], created_at: "2025-02-14T09:00:00Z",
+        is_verified: false, portfolio_links: [], is_hero: false, created_at: "2025-02-14T09:00:00Z",
     },
     {
         id: "3", user_id: null, handle: "sora.lee", display_name: "이소라",
-        type: "both",
+        type: "both", gender: "female", age_group: "20~30대",
+        specialties: ["전신", "피팅", "나레이터"],
         avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "모델 & 배우. CF · 드라마 출연 가능.",
-        height: 169, bust: 83, waist: 61, hip: 90, shoe_size: 240,
+        height: 169, weight: null, show_weight: false,
+        bust: 83, waist: 61, hip: 90, shoe_size: 240,
         hair_color: "갈색", eye_color: "갈색",
         availability_status: "active", follower_count: 2100, work_count: 55,
-        is_verified: true, portfolio_links: [], created_at: "2024-12-01T09:00:00Z",
+        is_verified: true, portfolio_links: [], is_hero: false, created_at: "2024-12-01T09:00:00Z",
     },
     {
         id: "4", user_id: null, handle: "jaemin.yoon", display_name: "윤재민",
-        type: "model",
+        type: "model", gender: "male", age_group: "20~30대",
+        specialties: ["전신", "피팅"],
         avatar_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "남성 패션 모델. 런웨이·에디토리얼.",
-        height: 185, bust: 98, waist: 79, hip: 99, shoe_size: 280,
+        height: 185, weight: 78, show_weight: true,
+        bust: null, waist: null, hip: null, shoe_size: 280,
         hair_color: "검정", eye_color: "검정",
         availability_status: "active", follower_count: 3400, work_count: 67,
-        is_verified: true, portfolio_links: [], created_at: "2024-09-20T09:00:00Z",
+        is_verified: true, portfolio_links: [], is_hero: false, created_at: "2024-09-20T09:00:00Z",
     },
     {
         id: "5", user_id: null, handle: "hyunjoo.b", display_name: "박현주",
-        type: "actor",
+        type: "actor", gender: "female", age_group: "20~30대",
+        specialties: ["전신", "부분"],
         avatar_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "뮤지컬 배우. 한국예술종합학교 졸업.",
-        height: 163, bust: 80, waist: 57, hip: 85, shoe_size: 235,
+        height: 163, weight: null, show_weight: false,
+        bust: 80, waist: 57, hip: 85, shoe_size: 235,
         hair_color: "검정", eye_color: "검정",
         availability_status: "selective", follower_count: 750, work_count: 18,
-        is_verified: false, portfolio_links: [], created_at: "2025-03-05T09:00:00Z",
+        is_verified: false, portfolio_links: [], is_hero: false, created_at: "2025-03-05T09:00:00Z",
     },
     {
         id: "6", user_id: null, handle: "dayeon.m", display_name: "문다연",
-        type: "model",
+        type: "model", gender: "female", age_group: "20~30대",
+        specialties: ["부분", "피팅"],
         avatar_url: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "상업·잡지 모델. 뷰티·패션 전문.",
-        height: 171, bust: 85, waist: 63, hip: 92, shoe_size: 250,
+        height: 171, weight: null, show_weight: false,
+        bust: 85, waist: 63, hip: 92, shoe_size: 250,
         hair_color: "갈색", eye_color: "갈색",
         availability_status: "active", follower_count: 1820, work_count: 44,
-        is_verified: true, portfolio_links: [], created_at: "2025-01-22T09:00:00Z",
+        is_verified: true, portfolio_links: [], is_hero: false, created_at: "2025-01-22T09:00:00Z",
     },
     {
         id: "7", user_id: null, handle: "sungjun.c", display_name: "최성준",
-        type: "actor",
+        type: "actor", gender: "male", age_group: "40~50대",
+        specialties: ["전신", "나레이터"],
         avatar_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "영화·드라마 배우. 단편 영화 주연 다수.",
-        height: 178, bust: 93, waist: 74, hip: 95, shoe_size: 270,
+        height: 178, weight: 72, show_weight: true,
+        bust: null, waist: null, hip: null, shoe_size: 270,
         hair_color: "검정", eye_color: "갈색",
         availability_status: "inactive", follower_count: 310, work_count: 12,
-        is_verified: false, portfolio_links: [], created_at: "2025-04-01T09:00:00Z",
+        is_verified: false, portfolio_links: [], is_hero: false, created_at: "2025-04-01T09:00:00Z",
     },
     {
         id: "8", user_id: null, handle: "nara.shin", display_name: "신나라",
-        type: "both",
+        type: "both", gender: "female", age_group: "20~30대",
+        specialties: ["피팅", "나레이터"],
         avatar_url: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&h=800&fit=crop&crop=faces",
         cover_url: null,
         bio: "모델·배우. 광고·CF 전문.",
-        height: 167, bust: 84, waist: 60, hip: 88, shoe_size: 245,
+        height: 167, weight: null, show_weight: false,
+        bust: 84, waist: 60, hip: 88, shoe_size: 245,
         hair_color: "검정", eye_color: "갈색",
         availability_status: "active", follower_count: 2680, work_count: 71,
-        is_verified: true, portfolio_links: [], created_at: "2024-11-15T09:00:00Z",
+        is_verified: true, portfolio_links: [], is_hero: false, created_at: "2024-11-15T09:00:00Z",
     },
-];
+] as Omit<MontzCreator, "birth_year"|"birth_month"|"description"|"career"|"tags">[]).map((c) => ({
+    ...MOCK_DEFAULTS, ...c,
+})) as MontzCreator[];
 
 const mockWorks: MontzWork[] = [
     {
@@ -243,18 +280,50 @@ export async function getFeaturedCreators(limit = 8): Promise<MontzCreator[]> {
     return data;
 }
 
-export async function getAllCreators(type?: MontzCreatorType, availability?: MontzAvailability): Promise<MontzCreator[]> {
+export async function getCreatorsPaged(offset: number, limit = 12): Promise<{ creators: MontzCreator[]; hasMore: boolean }> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from("montz_creators")
+        .select("*")
+        .order("follower_count", { ascending: false })
+        .range(offset, offset + limit - 1);
+    if (error || !data) {
+        const sliced = mockCreators.slice(offset, offset + limit);
+        return { creators: sliced, hasMore: offset + limit < mockCreators.length };
+    }
+    return { creators: data, hasMore: data.length === limit };
+}
+
+export interface CreatorFilters {
+    type?: MontzCreatorType;
+    gender?: MontzGender;
+    ageGroup?: MontzAgeGroup;
+    specialty?: MontzSpecialty;
+}
+
+export async function getAllCreators(filters: CreatorFilters = {}): Promise<MontzCreator[]> {
     const supabase = createClient();
     let query = supabase.from("montz_creators").select("*").order("follower_count", { ascending: false });
-    if (type) query = query.eq("type", type);
-    if (availability) query = query.eq("availability_status", availability);
+    if (filters.type) query = query.eq("type", filters.type);
+    if (filters.gender) query = query.eq("gender", filters.gender);
+    if (filters.ageGroup) query = query.eq("age_group", filters.ageGroup);
+    if (filters.specialty) query = query.contains("specialties", [filters.specialty]);
     const { data, error } = await query;
-    if (error || !data?.length) {
+    if (error) {
         let mock = [...mockCreators];
-        if (type) mock = mock.filter((c) => c.type === type || c.type === "both");
-        if (availability) mock = mock.filter((c) => c.availability_status === availability);
+        if (filters.type) mock = mock.filter((c) => c.type === filters.type || c.type === "both");
+        if (filters.gender) mock = mock.filter((c) => c.gender === filters.gender);
+        if (filters.ageGroup) mock = mock.filter((c) => c.age_group === filters.ageGroup);
+        if (filters.specialty) mock = mock.filter((c) => c.specialties.includes(filters.specialty!));
         return mock;
     }
+    return data ?? [];
+}
+
+export async function getCreatorByUserId(userId: string): Promise<MontzCreator | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("montz_creators").select("*").eq("user_id", userId).single();
+    if (error || !data) return null;
     return data;
 }
 
@@ -286,4 +355,70 @@ export async function getActiveAuditions(): Promise<MontzAudition[]> {
         .order("created_at", { ascending: false });
     if (error || !data?.length) return mockAuditions;
     return data;
+}
+
+export async function getHeroCreator(): Promise<MontzCreator | null> {
+    const supabase = createClient();
+    // 수동 지정된 히어로 먼저
+    const { data: hero } = await supabase
+        .from("montz_creators")
+        .select("*")
+        .eq("is_hero", true)
+        .single();
+    if (hero) return hero;
+    // 폴백: 팔로워 최다
+    const { data } = await supabase
+        .from("montz_creators")
+        .select("*")
+        .order("follower_count", { ascending: false })
+        .limit(1)
+        .single();
+    return data ?? mockCreators[0] ?? null;
+}
+
+export async function setHeroCreator(creatorId: string): Promise<void> {
+    const supabase = createClient();
+    await supabase.from("montz_creators").update({ is_hero: false }).neq("id", creatorId);
+    await supabase.from("montz_creators").update({ is_hero: true }).eq("id", creatorId);
+}
+
+// ── admin functions ───────────────────────────────────────────────
+
+export async function getAllMontzCreatorsAdmin(): Promise<MontzCreator[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from("montz_creators")
+        .select("*")
+        .order("created_at", { ascending: false });
+    if (error) return mockCreators;
+    return data ?? [];
+}
+
+export async function getAllMontzAuditions(): Promise<MontzAudition[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from("montz_auditions")
+        .select("*")
+        .order("sort_order")
+        .order("created_at", { ascending: false });
+    if (error) return mockAuditions;
+    return data ?? [];
+}
+
+export async function upsertMontzAudition(
+    draft: Omit<MontzAudition, "created_at"> & { id?: string }
+): Promise<MontzAudition | null> {
+    const supabase = createClient();
+    const { id, ...rest } = draft;
+    if (id) {
+        const { data } = await supabase.from("montz_auditions").update(rest).eq("id", id).select().single();
+        return data ?? null;
+    }
+    const { data } = await supabase.from("montz_auditions").insert(rest).select().single();
+    return data ?? null;
+}
+
+export async function deleteMontzAudition(id: string): Promise<void> {
+    const supabase = createClient();
+    await supabase.from("montz_auditions").delete().eq("id", id);
 }

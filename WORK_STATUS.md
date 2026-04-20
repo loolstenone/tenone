@@ -1,6 +1,6 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-20 (세션 59 — Jakka 비주얼 폴리시 + 마켓 신설)
+> 마지막 업데이트: 2026-04-20 (세션 60 — 유니버스 CLAUDE.md 계층 시스템 구축)
 
 ## 다음 할 일 (이어서 시작 지점)
 
@@ -13,6 +13,13 @@
 ### 🔵 자산 대기
 - **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
 - **MADLeague ML-E** — 실제 MADzine 콘텐츠 이관
+
+### ✅ 세션 60 완료 — 유니버스 CLAUDE.md 계층 시스템
+- **루트 CLAUDE.md 개편** — 1.5 UC 정책, 1.6 권한체계, 1.9 인트라 관리, 2.3 브랜드 CLAUDE.md 자동 갱신 규칙 추가
+- **브랜드 CLAUDE.md 29개 생성** — 전 브랜드 정체성·접근모델·프로필·권한·UC·핵심파일·현재상태 기록
+  - 7개 (Badak, Jakka, MADLeague, SmarComm, HeRo, WIO, TenOne) — 상세 작성
+  - 22개 (RooK, MADLeap, YouInOne, Domo, 0gamja, FWN, MoNTZ, Mullaesian, TrendHunter, Mindle, Townity, NatureBox, Myverse, ChangeUp, Planners, BrandGravity, Wiki, Dokdae, EvoSchool, NamingFactory, Seoul360, LUKI) — 템플릿 기반 작성
+- **자동 갱신 규칙** — 작업 종료 시 `git diff --name-only origin/master...HEAD | grep -oP 'app/\(\K[^]+'` 로 브랜드 감지 → 해당 CLAUDE.md 갱신
 
 ### ✅ 세션 59 완료
 - **Jakka 비주얼 폴리시** — 프로필 페이지(이름/핸들 순서, 타이포 강화), explore 페이지(작가명 font-black), 모바일 헤더 아이콘 진하게

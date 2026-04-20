@@ -6,11 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, BadgeCheck, ExternalLink } from "lucide-react";
 import { getCreatorByHandle, getCreatorWorks, type MontzCreator, type MontzWork, type MontzAvailability } from "@/lib/supabase/montz";
+import { useAuth } from "@/lib/auth-context";
 
 const AVAIL_LABEL: Record<MontzAvailability, string> = {
     active: "활동중",
-    selective: "외부활동",
-    inactive: "비활동",
+    selective: "조건부",
+    inactive: "휴식",
 };
 const AVAIL_COLOR: Record<MontzAvailability, string> = {
     active: "bg-emerald-50 text-emerald-700",
@@ -26,6 +27,7 @@ const TYPE_LABEL = { model: "모델", actor: "배우", both: "모델·배우" };
 
 export default function MontzProfilePage() {
     const { handle } = useParams<{ handle: string }>();
+    const { user } = useAuth();
     const [creator, setCreator] = useState<MontzCreator | null>(null);
     const [works, setWorks] = useState<MontzWork[]>([]);
     const [loading, setLoading] = useState(true);
@@ -50,23 +52,36 @@ export default function MontzProfilePage() {
     }
 
     if (!creator) {
+        const isOwnHandle = user?.email?.split("@")[0] === handle || user?.name?.toLowerCase().replace(/\s/g, "") === handle;
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <p className="text-[16px] font-bold text-neutral-900">크리에이터를 찾을 수 없습니다.</p>
-                <Link href="/montz/explore" className="text-[13px] text-neutral-500 hover:text-neutral-900">
-                    탐색 페이지로 돌아가기
-                </Link>
+            <div className="flex flex-col items-center justify-center min-h-screen gap-3 px-8 text-center">
+                {isOwnHandle ? (
+                    <>
+                        <p className="text-[20px] font-black text-neutral-900">@{handle}</p>
+                        <p className="text-[13px] text-neutral-500 mb-2">아직 MoNTZ 프로필이 없습니다.<br />지금 바로 만들어보세요.</p>
+                        <Link href="/montz/profile" className="text-[13px] font-bold text-white bg-neutral-900 px-6 py-2.5 hover:bg-neutral-700 transition-colors">
+                            프로필 만들기
+                        </Link>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-[16px] font-bold text-neutral-900">크리에이터를 찾을 수 없습니다.</p>
+                        <Link href="/montz/explore" className="text-[13px] text-neutral-500 hover:text-neutral-900">
+                            탐색 페이지로 돌아가기
+                        </Link>
+                    </>
+                )}
             </div>
         );
     }
 
-    const hasMeasurements = creator.height || creator.bust;
+    const hasMeasurements = creator.height || creator.bust || (creator.show_weight && creator.weight) || creator.shoe_size;
 
     return (
         <div className="min-h-screen bg-white">
             {/* Back */}
             <div className="px-5 pt-5 pb-1">
-                <Link href="/montz/explore" className="inline-flex items-center gap-1.5 text-[12px] font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
+                <Link href="/montz/explore" className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-neutral-700 hover:text-neutral-900 transition-colors">
                     <ArrowLeft className="h-3 w-3" />
                     탐색으로
                 </Link>
@@ -76,7 +91,12 @@ export default function MontzProfilePage() {
             {creator.cover_url && (
                 <div className="relative w-full aspect-[3/1] bg-neutral-100 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={creator.cover_url} alt="" className="w-full h-full object-cover" />
+                    <img
+                        src={creator.cover_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none"; }}
+                    />
                 </div>
             )}
 
@@ -105,7 +125,14 @@ export default function MontzProfilePage() {
                                 {creator.display_name}
                             </p>
                             {creator.is_verified && (
-                                <BadgeCheck className="h-4 w-4 shrink-0" style={{ color: "#c8a97e" }} />
+                                <div className="relative group">
+                                    <BadgeCheck className="h-4 w-4 shrink-0 cursor-default" style={{ color: "#c8a97e" }} />
+                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block z-10 pointer-events-none">
+                                        <div className="bg-neutral-900 text-white text-[11px] font-medium px-2.5 py-1.5 whitespace-nowrap">
+                                            MoNTZ가 확인한 공식 계정
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                         </div>
                         <p className="text-[12px] font-mono text-neutral-500 mb-2">@{creator.handle}</p>
@@ -135,7 +162,7 @@ export default function MontzProfilePage() {
                     ))}
                 </div>
 
-                {/* Measurements */}
+                {/* Measurements — 본인이 공개 설정한 항목만 표시 */}
                 {hasMeasurements && (
                     <div className="grid grid-cols-2 gap-2 mb-4">
                         {creator.height && (
@@ -144,10 +171,16 @@ export default function MontzProfilePage() {
                                 <p className="text-[14px] font-black text-neutral-900">{creator.height} cm</p>
                             </div>
                         )}
+                        {creator.show_weight && creator.weight && (
+                            <div className="border border-neutral-100 px-3 py-2">
+                                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-0.5">몸무게</p>
+                                <p className="text-[14px] font-black text-neutral-900">{creator.weight} kg</p>
+                            </div>
+                        )}
                         {creator.bust && (
                             <div className="border border-neutral-100 px-3 py-2">
-                                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-0.5">가슴·허리·엉덩이</p>
-                                <p className="text-[14px] font-black text-neutral-900">{creator.bust}·{creator.waist}·{creator.hip}</p>
+                                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-0.5">바스트·웨스트·힙</p>
+                                <p className="text-[14px] font-black text-neutral-900">{creator.bust} / {creator.waist} / {creator.hip}</p>
                             </div>
                         )}
                         {creator.shoe_size && (
@@ -156,18 +189,12 @@ export default function MontzProfilePage() {
                                 <p className="text-[14px] font-black text-neutral-900">{creator.shoe_size} mm</p>
                             </div>
                         )}
-                        {(creator.hair_color || creator.eye_color) && (
-                            <div className="border border-neutral-100 px-3 py-2">
-                                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-0.5">헤어·눈</p>
-                                <p className="text-[14px] font-black text-neutral-900">{creator.hair_color} · {creator.eye_color}</p>
-                            </div>
-                        )}
                     </div>
                 )}
 
                 {/* Bio */}
                 {creator.bio && (
-                    <p className="text-[13px] text-neutral-700 leading-relaxed mb-4">{creator.bio}</p>
+                    <p className="text-[13px] text-neutral-900 leading-relaxed mb-4">{creator.bio}</p>
                 )}
 
                 {/* Portfolio Links */}
@@ -175,7 +202,7 @@ export default function MontzProfilePage() {
                     <div className="flex flex-wrap gap-2 mb-4">
                         {creator.portfolio_links.map((link, i) => (
                             <a key={i} href={link} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-900 border border-neutral-300 px-2 py-1 hover:border-neutral-900 transition-colors">
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-900 border border-neutral-300 px-2 py-1 hover:border-neutral-900 transition-colors">
                                 <ExternalLink className="h-3 w-3" />
                                 링크
                             </a>
@@ -189,13 +216,16 @@ export default function MontzProfilePage() {
                         팔로우
                     </button>
                     <button className="flex-1 py-2.5 text-[13px] font-bold text-neutral-900 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors">
-                        연락하기
+                        DM 보내기
                     </button>
                 </div>
             </div>
 
             {/* Portfolio Grid */}
             <div className="border-t border-neutral-200">
+            <div className="px-5 py-3 border-b border-neutral-100">
+                <p className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] uppercase">포트폴리오</p>
+            </div>
                 {works.length === 0 ? (
                     <div className="py-16 text-center">
                         <p className="text-[13px] text-neutral-500">아직 등록된 작업이 없습니다.</p>

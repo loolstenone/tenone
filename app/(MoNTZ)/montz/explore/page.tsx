@@ -2,30 +2,40 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
-import { getAllCreators, type MontzCreator, type MontzCreatorType, type MontzAvailability } from "@/lib/supabase/montz";
+import { Search, BadgeCheck } from "lucide-react";
+import {
+    getAllCreators,
+    type MontzCreator,
+    type MontzCreatorType,
+    type MontzGender,
+    type MontzAgeGroup,
+    type MontzSpecialty,
+    type MontzAvailability,
+} from "@/lib/supabase/montz";
 import { PageHeader } from "@/features/jakka/PageHeader";
 
-const TYPE_TABS: { key: "all" | MontzCreatorType; label: string }[] = [
-    { key: "all", label: "전체" },
-    { key: "model", label: "모델" },
-    { key: "actor", label: "배우" },
-    { key: "both", label: "모델·배우" },
-];
-
 const AVAIL_LABEL: Record<MontzAvailability, string> = {
-    active: "활동중",
-    selective: "외부활동",
-    inactive: "비활동",
+    active: "활동중", selective: "조건부", inactive: "휴식",
 };
-
 const AVAIL_DOT: Record<MontzAvailability, string> = {
-    active: "bg-emerald-400",
-    selective: "bg-amber-400",
-    inactive: "bg-neutral-300",
+    active: "bg-emerald-400", selective: "bg-amber-400", inactive: "bg-neutral-300",
 };
-
 const TYPE_LABEL = { model: "모델", actor: "배우", both: "모델·배우" };
+
+function PillBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`shrink-0 text-[12px] font-bold px-3 py-1.5 border transition-colors ${
+                active
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-neutral-300 text-neutral-500 hover:border-neutral-700"
+            }`}
+        >
+            {label}
+        </button>
+    );
+}
 
 function CreatorCard({ creator }: { creator: MontzCreator }) {
     return (
@@ -45,17 +55,30 @@ function CreatorCard({ creator }: { creator: MontzCreator }) {
                     <span className="text-[10px] font-bold text-white">{TYPE_LABEL[creator.type]}</span>
                 </div>
                 {creator.is_verified && (
-                    <div className="absolute bottom-2 left-2 px-1.5 py-0.5" style={{ backgroundColor: "#c8a97e" }}>
-                        <span className="text-[10px] font-bold text-white">인증</span>
+                    <div className="absolute bottom-2 left-2 group">
+                        <BadgeCheck className="h-5 w-5 drop-shadow" style={{ color: "#c8a97e" }} />
+                        <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover:block z-10 pointer-events-none">
+                            <div className="bg-neutral-900 text-white text-[11px] font-medium px-2.5 py-1.5 whitespace-nowrap">
+                                MoNTZ가 확인한 공식 계정
+                            </div>
+                        </div>
                     </div>
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
             </div>
             <div className="pt-2.5">
                 <p className="text-[14px] font-black text-neutral-900 leading-none mb-1">{creator.display_name}</p>
-                <p className="text-[11px] font-mono text-neutral-500 mb-1.5">@{creator.handle}</p>
+                <p className="text-[11px] font-mono text-neutral-500 mb-1">@{creator.handle}</p>
+                <div className="flex flex-wrap gap-1">
+                    {creator.age_group && (
+                        <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5">{creator.age_group}</span>
+                    )}
+                    {creator.specialties.slice(0, 2).map((s) => (
+                        <span key={s} className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5">{s}</span>
+                    ))}
+                </div>
                 {creator.height && (
-                    <p className="text-[11px] text-neutral-700">
+                    <p className="text-[11px] text-neutral-700 mt-1">
                         {creator.height}cm
                         {creator.bust && ` · ${creator.bust}-${creator.waist}-${creator.hip}`}
                     </p>
@@ -65,27 +88,48 @@ function CreatorCard({ creator }: { creator: MontzCreator }) {
     );
 }
 
+type TypeFilter = "all" | MontzCreatorType;
+type GenderFilter = "all" | MontzGender;
+type AgeFilter = "all" | MontzAgeGroup;
+type SpecialtyFilter = "all" | MontzSpecialty;
+
+const AGE_GROUPS: MontzAgeGroup[] = ["어린이", "10대", "20~30대", "40~50대", "60대+"];
+const SPECIALTIES: MontzSpecialty[] = ["전신", "부분", "피팅", "나레이터"];
+
 export default function MontzExplorePage() {
     const [creators, setCreators] = useState<MontzCreator[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeType, setActiveType] = useState<"all" | MontzCreatorType>("all");
     const [search, setSearch] = useState("");
+
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+    const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
+    const [ageFilter, setAgeFilter] = useState<AgeFilter>("all");
+    const [specialtyFilter, setSpecialtyFilter] = useState<SpecialtyFilter>("all");
 
     useEffect(() => {
         setLoading(true);
-        getAllCreators(
-            activeType === "all" ? undefined : activeType,
-        ).then((data) => { setCreators(data); setLoading(false); });
-    }, [activeType]);
+        getAllCreators({
+            type: typeFilter === "all" ? undefined : typeFilter,
+            gender: genderFilter === "all" ? undefined : genderFilter,
+            ageGroup: ageFilter === "all" ? undefined : ageFilter,
+            specialty: specialtyFilter === "all" ? undefined : specialtyFilter,
+        }).then((data) => { setCreators(data); setLoading(false); });
+    }, [typeFilter, genderFilter, ageFilter, specialtyFilter]);
 
     const filtered = search
-        ? creators.filter(
-            (c) =>
-                c.display_name.includes(search) ||
-                c.handle.includes(search) ||
-                (c.bio ?? "").includes(search),
+        ? creators.filter((c) =>
+            c.display_name.includes(search) ||
+            c.handle.includes(search) ||
+            (c.bio ?? "").includes(search),
         )
         : creators;
+
+    const activeFilterCount = [
+        typeFilter !== "all",
+        genderFilter !== "all",
+        ageFilter !== "all",
+        specialtyFilter !== "all",
+    ].filter(Boolean).length;
 
     return (
         <div className="min-h-screen bg-white">
@@ -103,40 +147,69 @@ export default function MontzExplorePage() {
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="이름, 핸들, 전문 분야 검색"
+                        placeholder="이름, 핸들 검색"
                         className="w-full border border-neutral-300 pl-8 pr-3 py-2 text-[13px] placeholder:text-neutral-400 focus:outline-none focus:border-neutral-500"
                     />
                 </div>
             </div>
 
-            {/* Type Tabs */}
-            <div className="sticky top-[44px] md:top-0 z-10 bg-white border-b border-neutral-200 px-5 py-2.5">
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-                    {TYPE_TABS.map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveType(tab.key)}
-                            className={`shrink-0 text-[12px] font-bold px-3 py-1.5 border transition-colors ${
-                                activeType === tab.key
-                                    ? "border-neutral-900 bg-neutral-900 text-white"
-                                    : "border-neutral-300 text-neutral-500 hover:border-neutral-700"
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
+            {/* Filters */}
+            <div className="sticky top-[44px] md:top-0 z-10 bg-white border-b border-neutral-200">
+                {/* 직종 */}
+                <div className="px-5 pt-2.5 pb-1.5 flex gap-1.5 overflow-x-auto scrollbar-none border-b border-neutral-100">
+                    {(["all", "model", "actor"] as const).map((k) => (
+                        <PillBtn key={k} label={k === "all" ? "전체" : k === "model" ? "모델" : "배우"} active={typeFilter === k} onClick={() => setTypeFilter(k)} />
+                    ))}
+                </div>
+                {/* 성별 */}
+                <div className="px-5 pt-1.5 pb-1.5 flex gap-1.5 overflow-x-auto scrollbar-none border-b border-neutral-100">
+                    {(["all", "female", "male"] as const).map((k) => (
+                        <PillBtn key={k} label={k === "all" ? "남·여" : k === "female" ? "여자" : "남자"} active={genderFilter === k} onClick={() => setGenderFilter(k)} />
+                    ))}
+                </div>
+                {/* 분야 */}
+                <div className="px-5 pt-1.5 pb-1.5 flex gap-1.5 overflow-x-auto scrollbar-none border-b border-neutral-100">
+                    <PillBtn label="전체" active={specialtyFilter === "all"} onClick={() => setSpecialtyFilter("all")} />
+                    {SPECIALTIES.map((s) => (
+                        <PillBtn key={s} label={s} active={specialtyFilter === s} onClick={() => setSpecialtyFilter(s)} />
+                    ))}
+                </div>
+                {/* 연령대 */}
+                <div className="px-5 pt-1.5 pb-2.5 flex gap-1.5 overflow-x-auto scrollbar-none">
+                    <PillBtn label="전 연령" active={ageFilter === "all"} onClick={() => setAgeFilter("all")} />
+                    {AGE_GROUPS.map((a) => (
+                        <PillBtn key={a} label={a} active={ageFilter === a} onClick={() => setAgeFilter(a)} />
                     ))}
                 </div>
             </div>
 
+            {/* Result count */}
+            {!loading && (
+                <div className="px-5 pt-3 pb-1 flex items-center justify-between">
+                    <p className="text-[11px] text-neutral-500">
+                        {filtered.length}명
+                        {activeFilterCount > 0 && <span className="ml-1 text-neutral-400">· 필터 {activeFilterCount}개 적용 중</span>}
+                    </p>
+                    {activeFilterCount > 0 && (
+                        <button
+                            onClick={() => { setTypeFilter("all"); setGenderFilter("all"); setAgeFilter("all"); setSpecialtyFilter("all"); }}
+                            className="text-[11px] text-neutral-500 hover:text-neutral-900 underline"
+                        >
+                            필터 초기화
+                        </button>
+                    )}
+                </div>
+            )}
+
             {/* Grid */}
-            <div className="px-5 py-5">
+            <div className="px-5 py-4">
                 {loading ? (
                     <div className="flex justify-center py-16">
                         <div className="w-5 h-5 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="py-16 text-center text-[13px] text-neutral-500">
-                        크리에이터가 없습니다.
+                        조건에 맞는 크리에이터가 없습니다.
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -56,8 +56,11 @@ export default function IntraLayout({ children }: { children: React.ReactNode })
                 const user = sessionData?.session?.user ?? null;
 
                 if (!user) {
-                    sessionStorage.removeItem(INTRA_VERIFIED_KEY);
-                    setStatus("login");
+                    if (!isCached) {
+                        sessionStorage.removeItem(INTRA_VERIFIED_KEY);
+                        setStatus("login");
+                    }
+                    // isCached면 무시 — 세션이 일시적으로 불안정할 수 있음, SIGNED_OUT 이벤트가 진짜 로그아웃 처리
                     return;
                 }
 

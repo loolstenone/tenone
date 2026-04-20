@@ -3,12 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 /**
  * POST /api/auth/handle-login
- * 핸들로 이메일을 조회해서 반환 — 클라이언트가 signInWithPassword로 로그인
+ * 핸들로 이메일을 조회해서 반환 — SECURITY DEFINER 함수로 RLS 우회
  * Body: { handle: string }
  * Response: { email: string }
  */
@@ -23,15 +23,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '핸들은 3자 이상이어야 합니다.' }, { status: 400 });
     }
 
-    const { data: member } = await supabase
-        .from('members')
-        .select('email')
-        .eq('handle', cleaned)
-        .single();
+    const { data: email, error } = await supabase.rpc('get_email_by_handle', { p_handle: cleaned });
 
-    if (!member?.email) {
+    if (error || !email) {
         return NextResponse.json({ error: '존재하지 않는 핸들입니다.' }, { status: 404 });
     }
 
-    return NextResponse.json({ email: member.email });
+    return NextResponse.json({ email });
 }

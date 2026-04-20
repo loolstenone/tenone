@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-04-20 (세션 60) — 유니버스 CLAUDE.md 계층 시스템 구축
+
+### 변경 파일
+- `CLAUDE.md` — 1.5 UC 정책 요약, 1.6 권한 체계(member_roles), 1.9 인트라 통합 관리, 2.3 브랜드 자동 갱신 규칙, 4.2 작업 종료 프로토콜 개선
+- `app/(Badak)/CLAUDE.md` (신규) — Badak 브랜드 가이드 전문
+- `app/(Jakka)/CLAUDE.md` (신규) — Jakka 브랜드 가이드 전문
+- `app/(MADLeague)/CLAUDE.md` (신규) — MADLeague 브랜드 가이드 전문
+- `app/(SmarComm)/CLAUDE.md` (신규) — SmarComm 브랜드 가이드 전문
+- `app/(HeRo)/CLAUDE.md` (신규) — HeRo 브랜드 가이드 전문
+- `app/(WIO)/CLAUDE.md` (신규) — WIO 멀티테넌트 인프라 가이드
+- `app/(TenOne)/CLAUDE.md` (신규) — TenOne 마스터 포탈 가이드
+- `app/(RooK)/CLAUDE.md` ~ `app/(LUKI)/CLAUDE.md` (신규 22개) — 전 브랜드 CLAUDE.md 일괄 생성
+
+### 결정사항
+- 계층형 CLAUDE.md 체계: 루트(유니버스 공통) + 브랜드별(자동 로드)
+- 작업 종료 시마다 해당 브랜드 CLAUDE.md 자동 감지·갱신 (git diff 활용)
+- 29개 브랜드 전부 커버 완료
+
+---
+
 ## 2026-04-20 (세션 59) — Jakka 비주얼 폴리시 + 마켓 신설
 
 ### 변경 파일

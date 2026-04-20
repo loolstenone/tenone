@@ -4,23 +4,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Home, Search, Video, Upload, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings } from "lucide-react";
+import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 
 const sidebarItems = [
     { icon: Home, label: "홈", href: "/montz" },
     { icon: Search, label: "탐색", href: "/montz/explore" },
-    { icon: Video, label: "오디션", href: "/montz/audition" },
-    { icon: Upload, label: "업로드", href: "/montz/upload" },
+    { icon: Megaphone, label: "오디션", href: "/montz/audition" },
     { icon: User, label: "내 프로필", href: "/montz/profile" },
 ];
 
 const bottomNavItems = [
     { icon: Home, href: "/montz" },
     { icon: Search, href: "/montz/explore" },
-    { icon: Video, href: "/montz/audition" },
-    { icon: Upload, href: "/montz/upload" },
+    { icon: Megaphone, href: "/montz/audition" },
     { icon: User, href: "/montz/profile" },
 ];
 
@@ -106,7 +104,7 @@ function MobileAuthButton() {
         <>
             <button
                 onClick={() => setLoginOpen(true)}
-                className="text-[12px] font-semibold border border-neutral-900 px-3 py-1 hover:bg-neutral-900 hover:text-white transition-colors"
+                className="text-[12px] font-black text-neutral-900 border border-neutral-900 px-3 py-1 hover:bg-neutral-900 hover:text-white transition-colors"
             >
                 로그인
             </button>
@@ -134,10 +132,6 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     </div>
 
                     <nav className="px-4 py-4 space-y-1 border-b border-neutral-100">
-                        <Link href="/montz/upload" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
-                            <Upload className="h-4 w-4 stroke-[1.5] text-neutral-400" />
-                            포트폴리오 업로드
-                        </Link>
                         <Link href="/montz/settings" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
                             <Settings className="h-4 w-4 stroke-[1.5] text-neutral-400" />
                             설정
@@ -178,8 +172,8 @@ export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
             {/* Mobile Top Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200 md:hidden">
                 <div className="flex items-center justify-between px-4 h-[44px]">
-                    <Link href="/montz" className="text-sm font-semibold tracking-[0.2em] text-neutral-900 border border-neutral-900 px-2.5 py-1">
-                        M<span style={{ color: GOLD }}>o</span>NTZ
+                    <Link href="/montz" className="text-[24px] font-black tracking-tight text-neutral-900">
+                        M<span style={{ color: "#FFC000" }}>o</span>NTZ
                     </Link>
                     <div className="flex items-center gap-3">
                         <MobileAuthButton />
@@ -197,10 +191,12 @@ export function MontzInstaLayout({ children }: { children: React.ReactNode }) {
             <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-[72px] xl:w-[245px] border-r border-neutral-200 flex-col z-50 bg-white">
                 <div className="px-3 xl:px-5 pt-7 pb-5">
                     <Link href="/montz">
-                        <span className="hidden xl:inline-block text-sm font-semibold tracking-[0.2em] text-neutral-900 border border-neutral-900 px-2.5 py-1">
-                            M<span style={{ color: GOLD }}>o</span>NTZ
+                        <span className="hidden xl:inline-block text-[20px] font-black tracking-tight text-neutral-900">
+                            M<span style={{ color: "#FFC000" }}>o</span>NTZ
                         </span>
-                        <span className="xl:hidden inline-block text-[10px] font-semibold tracking-[0.2em] border border-neutral-900 px-1.5 py-0.5">MT</span>
+                        <span className="xl:hidden text-[16px] font-black tracking-tight text-neutral-900">
+                            M<span style={{ color: "#FFC000" }}>o</span>NTZ
+                        </span>
                     </Link>
                 </div>
 
