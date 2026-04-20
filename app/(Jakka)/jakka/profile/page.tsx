@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Settings, Share2, Check, Link as LinkIcon, ExternalLink, Plus, Star, Globe, Loader2, Heart } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { LoginModal } from "@/components/LoginModal";
 import {
     getMyCreatorProfile, getWorksByCreator, updateCreatorProfile, createCreatorProfile,
     isHandleAvailable, generateHandle,
@@ -101,11 +101,22 @@ export default function JakkaProfilePage() {
     const [likedWorks, setLikedWorks] = useState<JakkaWork[]>([]);
     const [sectionLoaded, setSectionLoaded] = useState<Set<MySection>>(new Set(["posts"]));
 
+    const [showLogin, setShowLogin] = useState(false);
+
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
+        if (!isAuthenticated || !user) { setShowLogin(true); return; }
+        setShowLogin(false);
         loadProfile();
     }, [authLoading, isAuthenticated, user]);
+
+    if (!authLoading && !isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-white">
+                <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} accentColor="#171717" />
+            </div>
+        );
+    }
 
     async function loadProfile() {
         if (!user) return;

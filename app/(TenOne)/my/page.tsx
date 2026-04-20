@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { LoginModal } from "@/components/LoginModal";
 import { useRouter } from "next/navigation";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
@@ -33,12 +33,6 @@ export default function MyPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            router.push(currentLoginHref());
-        }
-    }, [isLoading, isAuthenticated, router]);
-
-    useEffect(() => {
         if (!user?.id) return;
         setLoading(true);
 
@@ -53,10 +47,17 @@ export default function MyPage() {
         setLoading(false);
     }, [user?.id]);
 
-    if (isLoading || !isAuthenticated) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--tn-bg)" }}>
                 <div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" />
+            </div>
+        );
+    }
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)" }}>
+                <LoginModal isOpen={true} onClose={() => {}} accentColor="#171717" />
             </div>
         );
     }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { AuthGate } from "@/components/AuthGate";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
@@ -18,17 +18,10 @@ export default function PlannersMyPage() {
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
 
-    useEffect(() => { if (!isLoading && !isAuthenticated) router.push(currentLoginHref()); }, [isLoading, isAuthenticated, router]);
     useEffect(() => {
         if (!user?.id) return;
         fetch(`/api/board/posts?site=planners&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
-
-    if (isLoading || !isAuthenticated) return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-950">
-            <div className="h-6 w-6 border-2 border-[#2DD4BF]/20 border-t-[#2DD4BF] rounded-full animate-spin" />
-        </div>
-    );
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
@@ -37,6 +30,7 @@ export default function PlannersMyPage() {
     ];
 
     return (
+        <AuthGate accentColor="#2DD4BF" bgClassName="bg-neutral-950">
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <MyProfileCard accentColor="#2DD4BF" siteBadge="Planner's" />
@@ -91,5 +85,6 @@ export default function PlannersMyPage() {
                 )}
             </div>
         </div>
+        </AuthGate>
     );
 }

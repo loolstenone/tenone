@@ -218,37 +218,50 @@ export async function generateMetadata(): Promise<Metadata> {
 > **대원칙**: 브랜드 사이트에서 로그인/가입을 시작하면, 완료 후 **해당 브랜드 사이트의 원래 페이지**로 복귀한다.
 > 절대 `tenone.biz`로 튕겨 나가지 않는다 — 방문자 이탈의 가장 큰 원인.
 
-**구현 규약:**
+**세부 원칙 A: 브랜드 보호 페이지에서 로그인 요구 시 → `/login` 이동 금지, LoginModal 팝업**
+
+> Badak 표준: 비로그인 상태로 브랜드 마이페이지(`/{brand}/my`) 접근 시 **현재 페이지 위에 LoginModal 팝업**을 띄운다.
+> `router.push('/login')` 하지 않는다. 로그인 완료 → 모달 닫힘 → 그 자리에 머문다.
+
+**세부 원칙 B: 외부 `/login` 링크 (네비·푸터·CTA 등)에서 `/login`으로 이동할 때는 `?redirect={현재경로}` 전달**
+
+**구현 규약 (원칙별 매핑):**
 
 | 상황 | 규칙 |
 |------|------|
-| `/login` / `/signup`으로 이동하는 모든 Link·버튼 | 반드시 `?redirect={현재경로}` 전달 |
-| `router.push('/login')` / `redirect('/login')` | 반드시 `loginHref(pathname)` 사용 |
+| 브랜드 마이페이지(`/{brand}/my`) 비인증 접근 | `<LoginModal isOpen={true} onClose={() => {}} accentColor="#..." />` 렌더 (Badak 패턴) |
+| 공용 `<AuthGate>` 래퍼 선택 가능 | `components/AuthGate.tsx` 써서 `<AuthGate accentColor bgClassName>` 으로 감싸도 됨 |
+| `/login`으로 이동하는 Link·버튼 (헤더, 푸터, CTA) | 반드시 `loginHref(pathname)` 사용 (`?redirect=` 전달) |
+| `router.push('/login')` / `redirect('/login')` | 반드시 `loginHref(pathname)` 또는 `currentLoginHref()` 사용 |
 | 소셜 로그인 클릭 | `auth-context`가 `auth_redirect` 쿠키로 자동 저장 (auto) |
-| LoginModal 사용 브랜드 | 모달이 현재 페이지 위에 열리므로 추가 조치 불필요 (auto) |
+| InstaLayout 계열(Jakka/MoNTZ) 등 모달 기반 헤더 | 모달이 현재 페이지 위에 열리므로 추가 조치 불필요 (auto) |
 
-**표준 헬퍼** — `lib/login-href.ts`
+**표준 헬퍼** — `lib/login-href.ts` & `components/AuthGate.tsx`
 
 ```tsx
+// (1) 외부 /login 링크 — Link·버튼·router.push
 import { usePathname } from "next/navigation";
 import { loginHref, signupHref } from "@/lib/login-href";
 
 const pathname = usePathname();
-
-// ✅ Link
 <Link href={loginHref(pathname)}>로그인</Link>
 <Link href={loginHref(pathname, "signup")}>회원가입</Link>
-
-// ✅ router.push
 router.push(loginHref(pathname));
 
-// ✅ 보호 페이지 자동 리다이렉트
-useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push(loginHref(pathname));
-}, [isLoading, isAuthenticated, router, pathname]);
+// (2) 브랜드 마이페이지 비인증 처리 — LoginModal 팝업 (Badak 표준)
+import { LoginModal } from "@/components/LoginModal";
+
+if (isLoading) return <SpinnerScreen />;
+if (!isAuthenticated) return (
+    <div className="min-h-screen bg-neutral-950">
+        <LoginModal isOpen={true} onClose={() => {}} accentColor="#BRAND_COLOR" />
+    </div>
+);
+// (선택) <AuthGate accentColor bgClassName> 래퍼 사용도 가능
 ```
 
 **절대 하지 말 것:**
+- ❌ 브랜드 마이페이지에서 `router.push('/login')` — 사용자가 보던 페이지에서 튕겨 나감. LoginModal 팝업이 표준.
 - ❌ `<Link href="/login">` (파라미터 없음) — 로그인 후 브랜드 홈('/')으로만 감, 원래 페이지 상실
 - ❌ `router.push("/login")` 하드코딩 — 동일 사유
 - ❌ 브랜드 헤더에서 `window.location.href = 'https://tenone.biz/login'` — tenone 이탈

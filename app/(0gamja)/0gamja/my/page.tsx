@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { AuthGate } from "@/components/AuthGate";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
@@ -18,13 +18,10 @@ export default function OgamjaMyPage() {
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
 
-    useEffect(() => { if (!isLoading && !isAuthenticated) router.push(currentLoginHref()); }, [isLoading, isAuthenticated, router]);
     useEffect(() => {
         if (!user?.id) return;
         fetch(`/api/board/posts?site=0gamja&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
-
-    if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#F97316] rounded-full animate-spin" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
@@ -33,6 +30,7 @@ export default function OgamjaMyPage() {
     ];
 
     return (
+        <AuthGate accentColor="#F97316" bgClassName="bg-neutral-900">
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-900 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <MyProfileCard accentColor="#F97316" />
@@ -75,5 +73,6 @@ export default function OgamjaMyPage() {
                 )}
             </div>
         </div>
+        </AuthGate>
     );
 }

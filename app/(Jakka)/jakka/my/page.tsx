@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { LoginModal } from "@/components/LoginModal";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,8 +32,9 @@ export default function JakkaMyPage() {
     const [productsLoading, setProductsLoading] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"posts" | "products" | "bookmarks" | "settings">("posts");
+    const [showLogin, setShowLogin] = useState(false);
 
-    useEffect(() => { if (!isLoading && !isAuthenticated) router.push(currentLoginHref()); }, [isLoading, isAuthenticated, router]);
+    useEffect(() => { if (!isLoading && !isAuthenticated) setShowLogin(true); else if (isAuthenticated) setShowLogin(false); }, [isLoading, isAuthenticated]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -58,9 +59,14 @@ export default function JakkaMyPage() {
         setDeletingId(null);
     }
 
-    if (isLoading || !isAuthenticated) return (
+    if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-neutral-950">
             <div className="h-6 w-6 border-2 border-[#D4D4D4]/20 border-t-[#D4D4D4] rounded-full animate-spin" />
+        </div>
+    );
+    if (!isAuthenticated) return (
+        <div className="min-h-screen bg-neutral-950">
+            <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} accentColor="#D4D4D4" />
         </div>
     );
 

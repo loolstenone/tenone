@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { currentLoginHref } from "@/lib/login-href";
+import { LoginModal } from "@/components/LoginModal";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
@@ -19,13 +19,13 @@ export default function MadLeagueMyPage() {
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
 
-    useEffect(() => { if (!isLoading && !isAuthenticated) router.push(currentLoginHref()); }, [isLoading, isAuthenticated, router]);
     useEffect(() => {
         if (!user?.id) return;
         fetch(`/api/board/posts?site=madleague&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
-    if (isLoading || !isAuthenticated) return <div className="min-h-screen flex items-center justify-center bg-[#212121]"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#D32F2F] rounded-full animate-spin" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-[#212121]"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#D32F2F] rounded-full animate-spin" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-[#212121]"><LoginModal isOpen={true} onClose={() => {}} accentColor="#D32F2F" /></div>;
 
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-[#212121] text-white">
