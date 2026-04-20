@@ -9,6 +9,7 @@ import { useSite } from '@/lib/site-context';
 import Link from 'next/link';
 import { PublicHeader } from '@/features/tenone/PublicHeader';
 import { PublicFooter } from '@/features/tenone/PublicFooter';
+import { TenOneThemeWrapper } from '@/features/tenone/TenOneThemeWrapper';
 import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
 import { loginHref } from '@/lib/login-href';
@@ -271,7 +272,7 @@ function TenOneSignupPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <TenOneThemeWrapper>
             <PublicHeader />
             <div className="flex-1 flex items-center justify-center px-5 py-16 mt-16">
                 <div className="w-full max-w-sm">
@@ -344,6 +345,6 @@ function TenOneSignupPage() {
                 </div>
             </div>
             <PublicFooter />
-        </div>
+        </TenOneThemeWrapper>
     );
 }

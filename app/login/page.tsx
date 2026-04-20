@@ -8,6 +8,7 @@ import { LogIn, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { PublicHeader } from '@/features/tenone/PublicHeader';
 import { PublicFooter } from '@/features/tenone/PublicFooter';
+import { TenOneThemeWrapper } from '@/features/tenone/TenOneThemeWrapper';
 import { MadLeagueHeader } from '@/features/madleague/MadLeagueHeader';
 import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
@@ -435,11 +436,11 @@ function LoginPageInner() {
 
     // tenone.biz 서브도메인 (myverse.tenone.biz 등)
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <TenOneThemeWrapper>
             <PublicHeader />
             <main className="flex-1 pt-16">{loginForm}</main>
             <PublicFooter />
-        </div>
+        </TenOneThemeWrapper>
     );
 }
 
