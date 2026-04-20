@@ -6,6 +6,7 @@ import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
+import { CapabilitySection } from "@/components/CapabilitySection";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -34,9 +35,8 @@ export default function MadLeagueMyPage() {
                 </div>
 
                 {/* 공통 프로필 카드 + MADLeague 전용 정보 */}
-                <MyProfileCard accentColor="#D32F2F" siteBadge="MAD Leaguer">
-                    {/* MADLeague 서비스 프로필 (동아리, 기수 등 — DB 연동 시 표시) */}
-                </MyProfileCard>
+                <MyProfileCard accentColor="#D32F2F" siteBadge="MAD Leaguer" />
+                {user?.id && <CapabilitySection memberId={user.id} brandId="madleague" accentColor="#D32F2F" className="mb-6" />}
 
                 {/* 사이트 전용 콘텐츠 */}
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">

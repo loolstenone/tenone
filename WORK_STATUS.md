@@ -1,17 +1,22 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-20 (세션 61 — Capability 기반 회원 모델 + Vercel 빌드 수선)
+> 마지막 업데이트: 2026-04-20 (세션 62 — Capability 백필·UI 통합 + CapabilitySection 컴포넌트)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
-1. **Capability 모델 데이터 이관** — 기존 Badak 모임 owner, MADLeague 현역, Jakka creator 등을 `member_capability_roles`로 백필
-2. **Universe Profile UI 재구성** — capability별 섹션으로 표시 (`getCapabilityAggregation()` 활용, CLAUDE.md §1.6.1 레시피 4)
-3. **브랜드 My page 표준 컴포넌트** — `<CapabilitySection capability="meetup">` 등 재사용 블록 제작
-4. **Jakka 마켓** — DB 테이블(`jakka_products`) + 실제 상품 등록/조회 연결 (현재 mock 데이터)
-5. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
-6. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
-7. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+1. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+2. **Jakka `jakka_products` DB 연결** — market 페이지 mock → 실 DB (`jakka_products` 테이블 생성, `app/api/jakka/products` 라우트 연결). `sql/jakka-products-table.sql` 작성 완료, 실행 필요
+3. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합** — 현재 MADLeague·Jakka만 연결됨
+
+### ✅ 세션 62 완료 — Capability 백필·UI 통합 + CapabilitySection 컴포넌트
+- **`lib/supabase/capabilities.ts` 신규** — `getCapabilityAggregation()` / `getMemberCapabilityRoles()` 등 클라이언트 함수 모음
+- **`sql/capability-backfill.sql` 신규 + 실행** — Jakka creator / Badak community+meetup / MADLeague club+community 기존 회원 백필 (Production 실행 완료)
+- **`components/UniverseProfile.tsx`** — "서비스 권한" 섹션 추가 (capability별 컬러 뱃지, 브랜드별 그룹핑, 소유자 전용)
+- **`components/CapabilitySection.tsx` 신규** — 브랜드 마이페이지용 재사용 capability 뱃지 블록 (dark-theme, `brandId` + `memberId` props)
+- **`app/(MADLeague)/madleague/my/page.tsx`** — `<CapabilitySection brandId="madleague">` 통합 (기존 placeholder 주석 대체)
+- **`app/(Jakka)/jakka/my/page.tsx`** — `<CapabilitySection brandId="jakka">` 통합
+- **`lib/supabase/jakka.ts` + `sql/jakka-products-table.sql`** — `jakka_products` 스키마 준비 (이전 세션 분)
 
 ### ✅ 세션 61 완료 — Capability 기반 회원 모델 + Vercel 빌드 수선
 - **DB 스키마 3개 테이블 신설** — `capabilities`, `brand_capabilities`, `member_capability_roles` (RLS + 3 인덱스, `sql/capability-model.sql` SSOT)

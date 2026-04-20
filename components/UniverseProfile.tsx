@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { siteConfigs, type SiteIdentifier } from '@/lib/site-config';
 import { getAllServiceProfiles, type ServiceProfileData, getBadakActivity, type BadakActivityData, checkHandleAvailable } from '@/lib/supabase/universe-profile';
+import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supabase/capabilities';
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
@@ -334,6 +335,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     const [siteConfigsLoaded, setSiteConfigsLoaded] = useState(false);
     const [badakActivity, setBadakActivity] = useState<BadakActivityData | null>(null);
     const [ucBalance, setUcBalance] = useState<number | null>(null);
+    const [capabilityRoles, setCapabilityRoles] = useState<CapabilityAggregation[]>([]);
 
     /* ── 편집 상태 (소유자 전용) ── */
     const [editing, setEditing] = useState(false);
@@ -416,6 +418,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 setUcBalance(balance ?? 0);
             }
         });
+    }, [isOwner, user]);
+
+    /* ── Capability 역할 (소유자만) ── */
+    useEffect(() => {
+        if (!isOwner || !user) return;
+        getCapabilityAggregation(user.id).then(setCapabilityRoles).catch(() => {});
     }, [isOwner, user]);
 
     /* ── 공유 메뉴 외부 클릭 닫기 ── */
@@ -1220,6 +1228,51 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                         )}
                     </div>
                 )}
+
+                {/* ── 서비스 권한 (Capability) ── */}
+                {isOwner && capabilityRoles.length > 0 && (() => {
+                    const CAPABILITY_KO: Record<string, string> = {
+                        community: '커뮤니티', meetup: '밋업', club: '클럽', portfolio: '포트폴리오',
+                        membership: '멤버십', course: '코스', showcase: '쇼케이스', subscription: '구독', purchase: '구매',
+                    };
+                    const CAP_COLOR: Record<string, string> = {
+                        community: '#22c55e', meetup: '#f59e0b', club: '#8b5cf6', portfolio: '#3b82f6',
+                        membership: '#6366f1', course: '#14b8a6', showcase: '#ec4899', subscription: '#3b82f6', purchase: '#f59e0b',
+                    };
+                    const grouped = capabilityRoles.reduce<Record<string, CapabilityAggregation[]>>((acc, r) => {
+                        (acc[r.brand_id] ??= []).push(r);
+                        return acc;
+                    }, {});
+                    return (
+                        <div className="px-8 py-5 border-t tn-border">
+                            <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
+                                <Sparkles className="h-3.5 w-3.5" style={{ color: '#3b82f6' }} /> 서비스 권한
+                            </h2>
+                            <div className="space-y-2.5">
+                                {Object.entries(grouped).map(([brandId, roles]) => {
+                                    const brandName = (siteConfigs as Record<string, { name: string } | undefined>)[brandId]?.name ?? brandId;
+                                    return (
+                                        <div key={brandId} className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-[11px] font-semibold tn-text w-20 shrink-0">{brandName}</span>
+                                            <div className="flex flex-wrap gap-1">
+                                                {roles.map(r => {
+                                                    const color = CAP_COLOR[r.capability_key] ?? '#6b7280';
+                                                    return (
+                                                        <span key={r.capability_key + r.role}
+                                                            className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                                                            style={{ backgroundColor: color + '18', color }}>
+                                                            {CAPABILITY_KO[r.capability_key] ?? r.capability_key} · {r.role}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* ── 직원 정보 ── */}
                 {isOwner && isStaff && (

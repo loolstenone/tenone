@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-04-20 (세션 62) — Capability 백필·UI 통합 + CapabilitySection 컴포넌트
+
+### 변경 파일
+- `lib/supabase/capabilities.ts` (신규) — Capability 클라이언트 함수 모음 (`getCapabilityAggregation`, `getMemberCapabilityRoles`, `assignCapabilityRole` 등)
+- `sql/capability-backfill.sql` (신규) — 기존 Jakka/Badak/MADLeague 회원 `member_capability_roles` 백필 6개 INSERT
+- `components/UniverseProfile.tsx` — "서비스 권한" 섹션 추가 (capability × brand 컬러 뱃지, 소유자만 표시)
+- `components/CapabilitySection.tsx` (신규) — 브랜드 마이페이지용 재사용 capability 섹션 컴포넌트
+- `app/(MADLeague)/madleague/my/page.tsx` — CapabilitySection 통합
+- `app/(Jakka)/jakka/my/page.tsx` — CapabilitySection 통합
+
+### DB 변경 (Production `ziotlxkdctlhiwkgmmsh`)
+- `member_capability_roles` 백필 실행 — Jakka creator 2행, Badak member/participant, MADLeague club/community
+
+### 결정사항
+- `CapabilitySection`은 dark-theme 전용 (`border-white/10 bg-white/5`) — 브랜드 마이페이지 표준 블록
+- `accentColor` prop 미전달 시 capability별 기본 컬러 사용 (club=보라, meetup=앰버 등)
+
+---
+
 ## 2026-04-20 (세션 61) — Capability 기반 회원 모델 + Vercel 빌드 수선
 
 ### 변경 파일

@@ -298,8 +298,8 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 |------|------|
 | **Phase** | Beta (2026-04-20) — 크리에이터 포트폴리오 기본 완성. 마켓 신설 진행. |
 | **개발 수준** | 포트폴리오·탐색·업로드 완성. 마켓·찾기 기능 진행 중. |
-| **이월 작업** | `jakka_products` DB 테이블 + 실제 상품 등록·조회 연결 (현재 mock) |
-| **최근 결정** | 프로필 페이지 타이포 강화 (font-black), copyright 포맷 통일 |
+| **이월 작업** | `jakka_products` DB 테이블 실행 (`sql/jakka-products-table.sql` 준비 완료) + market page DB 연결 |
+| **최근 결정** | 마이페이지에 `<CapabilitySection brandId="jakka">` 통합 / 프로필 페이지 타이포 강화 / copyright 포맷 통일 |
 
 ---
 

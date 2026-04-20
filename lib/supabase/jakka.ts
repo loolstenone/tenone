@@ -1282,3 +1282,129 @@ export function generateHandle(email: string): string {
     const base = email.split('@')[0].replace(/[^a-z0-9_]/gi, '').toLowerCase();
     return `@${base}`;
 }
+
+// ─── 마켓 (jakka_products) ───────────────────────────────────────────────────
+
+export type ProductCategory = '원화' | '프린트' | '굿즈' | '피규어' | '포스터' | '사진' | 'NFT' | '기타';
+export type ProductStatus = 'active' | 'sold_out' | 'hidden';
+
+export interface JakkaProduct {
+    id: string;
+    creator_id: string;
+    creator?: JakkaCreator;
+    title: string;
+    description: string | null;
+    category: ProductCategory;
+    price: number;
+    currency: 'KRW' | 'ETH';
+    thumb_url: string | null;
+    images: string[];
+    is_limited: boolean;
+    stock: number | null;
+    sold_count: number;
+    status: ProductStatus;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface GetProductsOptions {
+    category?: ProductCategory | '전체';
+    search?: string;
+    limit?: number;
+    offset?: number;
+}
+
+export async function getProducts(opts: GetProductsOptions = {}): Promise<(JakkaProduct & { creator: JakkaCreator })[]> {
+    const { category, search, limit = 40, offset = 0 } = opts;
+    try {
+        let q = supabase
+            .from('jakka_products')
+            .select('*, creator:jakka_creators(*)')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (category && category !== '전체') q = q.eq('category', category);
+        if (search) q = q.or(`title.ilike.%${search}%`);
+
+        const { data } = await q;
+        return (data ?? []) as (JakkaProduct & { creator: JakkaCreator })[];
+    } catch { return []; }
+}
+
+export async function getProductById(id: string): Promise<(JakkaProduct & { creator: JakkaCreator }) | null> {
+    try {
+        const { data } = await supabase
+            .from('jakka_products')
+            .select('*, creator:jakka_creators(*)')
+            .eq('id', id)
+            .single();
+        return data as (JakkaProduct & { creator: JakkaCreator }) | null;
+    } catch { return null; }
+}
+
+export async function getProductsByCreator(creatorId: string, includeHidden = false): Promise<JakkaProduct[]> {
+    try {
+        let q = supabase
+            .from('jakka_products')
+            .select('*')
+            .eq('creator_id', creatorId)
+            .order('created_at', { ascending: false });
+        if (!includeHidden) q = q.neq('status', 'hidden');
+        const { data } = await q;
+        return (data ?? []) as JakkaProduct[];
+    } catch { return []; }
+}
+
+export async function createProduct(params: {
+    creatorId: string;
+    title: string;
+    description?: string;
+    category: ProductCategory;
+    price: number;
+    currency?: 'KRW' | 'ETH';
+    thumbUrl?: string;
+    images?: string[];
+    isLimited?: boolean;
+    stock?: number;
+}): Promise<JakkaProduct | null> {
+    try {
+        const { data } = await supabase
+            .from('jakka_products')
+            .insert({
+                creator_id: params.creatorId,
+                title: params.title,
+                description: params.description ?? null,
+                category: params.category,
+                price: params.price,
+                currency: params.currency ?? 'KRW',
+                thumb_url: params.thumbUrl ?? null,
+                images: params.images ?? [],
+                is_limited: params.isLimited ?? false,
+                stock: params.stock ?? null,
+            })
+            .select()
+            .single();
+        return data as JakkaProduct | null;
+    } catch { return null; }
+}
+
+export async function updateProduct(
+    productId: string,
+    updates: Partial<Pick<JakkaProduct, 'title' | 'description' | 'category' | 'price' | 'thumb_url' | 'images' | 'is_limited' | 'stock' | 'status'>>
+): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('jakka_products')
+            .update(updates)
+            .eq('id', productId);
+        return !error;
+    } catch { return false; }
+}
+
+export async function deleteProduct(productId: string): Promise<boolean> {
+    try {
+        const { error } = await supabase.from('jakka_products').delete().eq('id', productId);
+        return !error;
+    } catch { return false; }
+}

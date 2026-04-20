@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
+import { CapabilitySection } from "@/components/CapabilitySection";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -38,6 +39,7 @@ export default function JakkaMyPage() {
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <MyProfileCard accentColor="#D4D4D4" siteBadge="Jakka" />
+                {user?.id && <CapabilitySection memberId={user.id} brandId="jakka" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-800">
                     {tabs.map(tab => (
