@@ -30,6 +30,11 @@ function rowToPerson(r: Record<string, unknown>): Person {
         lastContacted: r.last_contacted as string | undefined,
         notes: r.notes as string | undefined,
         createdAt: ((r.created_at as string) || '').split('T')[0],
+        memberId: (r.member_id as string) || undefined,
+        lifecycleStage: (r.lifecycle_stage as Person['lifecycleStage']) || undefined,
+        lastTouchedAt: (r.last_touched_at as string) || undefined,
+        doNotEmail: !!r.do_not_email,
+        doNotContact: !!r.do_not_contact,
     };
 }
 

@@ -1,6 +1,21 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-04-02
+> 마지막 업데이트: 2026-04-21 (세션 65 — 이메일/CRM 6-Phase 완결)
+
+---
+
+## 📧 이메일/CRM 인프라 (세션 65 완결)
+
+- [x] **Phase 1 — 발송 기반**: `email_sends`/`email_events`/`email_senders`, Resend Webhook, 바운스 자동 비활성
+- [x] **Phase 2 — 뉴스레터 발송**: 테스트·예약 발송, Vercel Cron, 분석 페이지
+- [x] **Phase 3 — CRM People**: lifecycle_stage, touchpoints, 자동 흡수 트리거, 상세 타임라인
+- [x] **Phase 4 — 세그먼트**: 규칙 엔진(14필드·10연산자), 빌더 UI + 실시간 미리보기
+- [x] **Phase 5 — 브로드캐스트**: `crm_campaigns`, 변수 치환, 3-Step 발송 마법사
+- [x] **Phase 6 — 운영**: 통합 수신거부, 발송 한도 대시보드, 발신자 관리
+- [ ] 인트라 네비에 신규 경로 4개 링크 추가 (`segments`/`broadcast`/`email/usage`/`email/senders`)
+- [ ] Resend Pro 업그레이드 (본격 사업 시작 시)
+
+---
 > 기준 문서: TenOne_Universe_Architecture_v1.md / TenOne_4Products.md
 > **핵심 원칙: 4대 제품(Mindle·SmarComm·WIO·AI Agent)을 Intra에서 통제·운영·관리**
 

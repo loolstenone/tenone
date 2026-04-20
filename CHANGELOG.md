@@ -4,6 +4,57 @@
 
 ---
 
+## 2026-04-21 (세션 65) — 이메일/CRM 6-Phase 고도화 풀 구축
+
+### Phase 1 — 발송 기반 정비
+- `sql/email-infrastructure.sql` — `email_sends`/`email_events`/`email_senders` 신설, `newsletter_subscribers` 지표 컬럼 확장
+- `app/api/webhooks/resend/route.ts` — Svix 서명 검증, 이벤트 기록, 바운스 3회 자동 비활성, 스팸 신고 즉시 비활성
+- `lib/email/senders.ts` — 발신자 레지스트리(noreply/news/hello/ceo), `buildFromHeader()` 헬퍼
+- Resend Dashboard Webhook 엔드포인트 등록 + `RESEND_WEBHOOK_SECRET` Vercel env 등록 완료
+
+### Phase 2 — 뉴스레터 발송 UI
+- 발송 API에 `testEmails`/`scheduledAt` 추가 — 테스트 발송 · 예약 발송 지원
+- 발송 모달 리뉴얼 — 테스트 입력란 + datetime picker + "지금 발송/예약 저장" 토글
+- 분석 페이지 `/intra/ums/newsletter/issues/[id]/analytics` — 발송·전달·오픈·클릭·바운스·신고 카운트 + 수신자별 상태표
+- Vercel Cron `/api/newsletter/cron/dispatch` 10분 간격 — scheduled 상태 자동 발송
+
+### Phase 3 — CRM People 확장
+- `sql/crm-phase3.sql` — `crm_people` 확장(member_id, primary_brand_id, lifecycle_stage, last_touched_at, do_not_email, ...), `crm_touchpoints` 신설
+- 자동 흡수 트리거: members INSERT → crm_people 생성/연결, email_sends(crm_broadcast) → crm_touchpoints
+- 백필 완료: 5명 members → crm_people 전부 연결
+- 상세 페이지 `/intra/marketing/crm/people/[id]` — 프로필·라이프사이클 스텝퍼·연락 설정·유입 정보·타임라인·메모 추가
+- 목록 개선: 라이프사이클 필터·배지, 가입회원/메일금지 태그, 다중 선택 체크박스, 상세 링크
+
+### Phase 4 — 세그먼트 빌더
+- `sql/crm-segments.sql` — `crm_segments` 테이블 + 기본 시드 4종
+- `lib/crm-segments.ts` — 규칙 엔진(14필드·10연산자·AND/OR·상대시각 토큰 `now-7d` 해석)
+- `app/api/intra/crm/segments/preview/route.ts` — 실시간 카운트 + 샘플 10건
+- UI: 카드 그리드(색상·설명·실시간 카운트·조건 요약) + 규칙 빌더 모달(필드·연산자·값 + 미리보기)
+
+### Phase 5 — CRM 브로드캐스트
+- `sql/crm-campaigns.sql` — `crm_campaigns` 테이블(segment/person_ids, sender, subject, body, status, scheduled_at)
+- `lib/email/crm-template.ts` — 변수 치환(`{{name}}` 등) + CRM HTML 템플릿(로고·브랜드·본문·CTA 버튼·수신거부)
+- `app/api/intra/crm/broadcast/send/route.ts` — 세그먼트 resolve + person_ids 합집합 + do_not_email 필터 + 50건 배치 + email_sends 기록 + 테스트·예약 발송
+- UI: 목록 `/intra/marketing/crm/broadcast` + 3-Step 편집기(수신자·메시지·발송, 세일즈/초대/공지/일반 템플릿 4종)
+
+### Phase 6 — 운영 인프라
+- `app/unsubscribe/page.tsx` + `app/api/unsubscribe/route.ts` — 통합 수신거부(subscriber/person 자동 분기, RFC 8058 One-Click)
+- `/intra/ums/email/usage` — 발송 한도 대시보드(종류별 집계, 발신자별 사용률 게이지, 도메인별 건강도 30일)
+- `/intra/ums/email/senders` — 발신자 CRUD, 활성 토글, 용도별 분류, warming 가이드
+
+### 인증 메일 양식 개편 (선행)
+- 상단 Ten:One 가로 로고 + `NEWSLETTER · {BRAND}` 라벨
+- 인사말 `{닉네임}님 고맙습니다 🙏` + 감사 문구 + "이메일 인증하기" CTA
+- 발신 `noreply@tenone.biz` + Reply-To `lools@tenone.biz` — 개인 메일함 답장 수신
+- 제목 `[JAKKA] 뉴스레터 구독 인증 · Ten:One™ Universe` 브랜드 듀얼 브랜딩
+- `NewsletterSubscribeForm` 전 25+ 사이트 표준 양식 적용(닉네임 필수, 동의 체크, 표준 제목/부제)
+
+### 파일 변경
+- 신규 SQL: `email-infrastructure.sql`, `crm-phase3.sql`, `crm-segments.sql`, `crm-campaigns.sql` (4개 전부 Prod 적용 완료)
+- 신규 페이지 9개, 신규 API 4개, 신규 라이브러리 3개
+
+---
+
 ## 2026-04-21 (세션 64) — Jakka 마켓 완결: 디테일 8기능 + 입점 승인제 + 판매자 센터
 
 ### Phase A — 마켓 상품 디테일 페이지 확장

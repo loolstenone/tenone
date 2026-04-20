@@ -1,15 +1,33 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-21 (세션 64 — Jakka 마켓 디테일 전체 + 입점 승인제 + 판매자 센터)
+> 마지막 업데이트: 2026-04-21 (세션 65 — 이메일/CRM 6-Phase 고도화 풀 구축)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
-1. **Jakka 마켓 — 승인/반려 이메일 알림** — 현재 상태만 DB 반영. Resend로 작가에게 결과 통지 필요
-2. **Jakka 마켓 — 정산 리포트 자동 생성** — 월 2회(1일/15일) 기준. `completed` 주문 집계 → 수수료 차감 → PDF/CSV
-3. **Jakka 마켓 — 구매 실결제 통합** — 현재 "구매 문의 접수" MVP. 토스페이/포트원 연동 검토
-4. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-5. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합** — 현재 MADLeague·Jakka만 연결됨
+1. **인트라 네비 링크 추가** — `/intra/marketing/crm/segments`, `/intra/marketing/crm/broadcast`, `/intra/ums/email/usage`, `/intra/ums/email/senders` (lib/intra-nav.ts 갱신)
+2. **Resend Pro 업그레이드** — 본격 사업 시작 시점 (Free 100/일 → Pro 50k/월)
+3. **Jakka 마켓 — 승인/반려 이메일 알림** — 이제 CRM 브로드캐스트 + 템플릿 엔진으로 구현 가능
+4. **Jakka 마켓 — 정산 리포트 자동 생성** — 월 2회(1일/15일)
+5. **Jakka 마켓 — 구매 실결제 통합** — 토스페이/포트원 연동 검토
+6. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+7. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
+
+### ✅ 세션 65 완료 — 이메일/CRM 6-Phase 고도화
+
+**Phase 1 — 발송 기반 정비**: `email_sends`/`email_events`/`email_senders` 신설, Resend Webhook `/api/webhooks/resend` (Svix + 바운스 자동 비활성), `lib/email/senders.ts`, `RESEND_WEBHOOK_SECRET` Vercel env 등록
+
+**Phase 2 — 뉴스레터 발송 UI**: 테스트 발송 + 예약 datetime picker, Vercel Cron `/api/newsletter/cron/dispatch` 10분 간격, 분석 페이지 `/intra/ums/newsletter/issues/[id]/analytics`
+
+**Phase 3 — CRM People 확장**: `crm_people` 확장(member_id, lifecycle_stage, do_not_email, ...), `crm_touchpoints` 신설, 자동 흡수 트리거, 상세 페이지 `/intra/marketing/crm/people/[id]`, 목록 라이프사이클 필터·다중선택
+
+**Phase 4 — 세그먼트 빌더**: `crm_segments` 테이블, `lib/crm-segments.ts` 규칙 엔진(14필드·10연산자·AND/OR·상대시각), 프리뷰 API, UI 빌더 모달 + 실시간 미리보기
+
+**Phase 5 — CRM 브로드캐스트**: `crm_campaigns` 테이블, `lib/email/crm-template.ts`(변수 치환·CRM HTML 템플릿), 발송 API(세그먼트 resolve·do_not_email 필터), 3-Step 편집기(수신자·메시지·발송, 세일즈/초대/공지/일반 4템플릿)
+
+**Phase 6 — 운영 인프라**: 통합 수신거부 `/unsubscribe` + `/api/unsubscribe`(RFC 8058 One-Click), 발송 한도 대시보드 `/intra/ums/email/usage`, 발신자 관리 `/intra/ums/email/senders`
+
+**인증 메일 양식 개편**: 상단 Ten:One 로고, `{닉네임}님 고맙습니다 🙏` 감사 문구, 브랜드×Ten:One 듀얼 브랜딩, noreply 발신 + Reply-To lools@tenone.biz, 전 25+ 사이트 표준 폼 적용
 
 ### ✅ 세션 64 완료 — Jakka 마켓 디테일 전체 + 입점 승인제 + 판매자 센터
 **Phase A (마켓 디테일 8기능)**

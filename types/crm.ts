@@ -1,5 +1,19 @@
 export type PersonType = 'Student' | 'Professional' | 'Mentor' | 'Partner' | 'Client' | 'Vendor' | 'Other';
 export type PersonStatus = 'Active' | 'Lead' | 'Inactive' | 'Alumni';
+export type LifecycleStage = 'lead' | 'mql' | 'sql' | 'customer' | 'churned' | 'archived';
+export type TouchpointType = 'email_sent' | 'email_opened' | 'email_clicked' | 'meeting' | 'call' | 'form' | 'note' | 'deal_created' | 'purchase';
+
+export interface Touchpoint {
+    id: string;
+    personId: string;
+    type: TouchpointType | string;
+    subject?: string;
+    body?: string;
+    createdBy?: string;
+    meta?: Record<string, unknown>;
+    occurredAt: string;
+    createdAt: string;
+}
 export type DealStage = 'Lead' | 'Contacted' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost';
 export type ActivityType = 'Meeting' | 'Call' | 'Email' | 'Note' | 'Event';
 export type OrgType = 'Partner' | 'Client' | 'Vendor' | 'Sponsor';
@@ -21,6 +35,11 @@ export interface Person {
     lastContacted?: string;
     createdAt: string;
     notes?: string;
+    memberId?: string;
+    lifecycleStage?: LifecycleStage;
+    lastTouchedAt?: string;
+    doNotEmail?: boolean;
+    doNotContact?: boolean;
 }
 
 export interface Organization {
