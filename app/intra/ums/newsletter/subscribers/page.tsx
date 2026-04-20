@@ -30,6 +30,7 @@ export default function SubscribersPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [tagInput, setTagInput] = useState<string | null>(null);
     const [tagValue, setTagValue] = useState("");
+    const [sourceFilter, setSourceFilter] = useState<string | null>(null);
 
     const supabase = createClient();
 
@@ -100,6 +101,7 @@ export default function SubscribersPage() {
 
     const filteredSubscribers = subscribers.filter((s) => {
         if (typeFilter !== "전체" && s.type !== typeFilter) return false;
+        if (sourceFilter && s.source !== sourceFilter && !(s.tags ?? []).includes(sourceFilter)) return false;
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             return s.email.toLowerCase().includes(q) || (s.name || "").toLowerCase().includes(q);
@@ -107,11 +109,59 @@ export default function SubscribersPage() {
         return true;
     });
 
+    // 소스별 집계 (source 또는 태그에서 취합)
+    const sourceCounts: Record<string, number> = {};
+    for (const s of subscribers) {
+        const keys = new Set<string>();
+        if (s.source) keys.add(s.source);
+        for (const t of s.tags ?? []) keys.add(t);
+        if (keys.size === 0) keys.add("(미지정)");
+        for (const k of keys) sourceCounts[k] = (sourceCounts[k] ?? 0) + 1;
+    }
+    const sortedSources = Object.entries(sourceCounts).sort((a, b) => b[1] - a[1]);
+
     if (loading) return <div className="flex justify-center py-20"><div className="h-6 w-6 border-2 border-neutral-300 border-t-neutral-800 rounded-full animate-spin" /></div>;
 
     return (
         <div>
             <PageHeader title="구독자" description={`전체 ${subscribers.length}명 · 활성 ${subscribers.filter((s) => s.status === "active").length}명`} />
+
+            {/* 브랜드/소스별 신청 현황 */}
+            <div className="mb-4 border border-neutral-200 bg-white p-3">
+                <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-[0.15em]">신청 페이지별 구독자</p>
+                    {sourceFilter && (
+                        <button onClick={() => setSourceFilter(null)} className="text-[11px] text-neutral-500 hover:text-neutral-900 underline">
+                            필터 해제
+                        </button>
+                    )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {sortedSources.length === 0 ? (
+                        <span className="text-[11px] text-neutral-400">데이터 없음</span>
+                    ) : sortedSources.map(([src, cnt]) => (
+                        <button
+                            key={src}
+                            onClick={() => setSourceFilter(sourceFilter === src ? null : src)}
+                            className={clsx(
+                                "inline-flex items-center gap-1 px-2 py-1 text-[11px] border transition-colors",
+                                sourceFilter === src
+                                    ? "border-neutral-900 bg-neutral-900 text-white"
+                                    : "border-neutral-200 text-neutral-700 hover:border-neutral-500",
+                            )}
+                        >
+                            <Globe className="h-2.5 w-2.5" />
+                            {src}
+                            <span className={clsx(
+                                "ml-0.5 px-1 text-[10px]",
+                                sourceFilter === src ? "bg-white/20" : "bg-neutral-100",
+                            )}>
+                                {cnt}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             <div className="flex items-center gap-3 mb-4">
                 <div className="relative flex-1">
