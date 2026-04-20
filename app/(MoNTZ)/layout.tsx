@@ -1,5 +1,4 @@
-import { MoNTZHeader } from "@/features/montz/MoNTZHeader";
-import { MoNTZFooter } from "@/features/montz/MoNTZFooter";
+import { MontzInstaLayout } from "@/features/montz/MontzInstaLayout";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -14,7 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: db?.meta_title ?? site.meta.title,
             description: db?.meta_description ?? site.meta.description,
-            siteName: db?.name ?? site.name,
+            siteName: 'Ten:One™ Universe',
+            type: 'website',
             ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
     };
@@ -25,13 +25,5 @@ export default function MoNTZLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-        <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-            <MoNTZHeader />
-            <main className="flex-1">
-                {children}
-            </main>
-            <MoNTZFooter />
-        </div>
-    );
+    return <MontzInstaLayout>{children}</MontzInstaLayout>;
 }
