@@ -331,7 +331,7 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                         <span className="hidden xl:inline-block text-sm font-semibold tracking-[0.3em] text-neutral-900 border border-neutral-900 px-2.5 py-1">
                             JAKKA
                         </span>
-                        <span className="xl:hidden inline-block text-[10px] font-semibold tracking-[0.2em] border border-neutral-900 px-1.5 py-0.5">JK</span>
+                        <span className="xl:hidden inline-block text-[10px] font-black text-neutral-900 tracking-[0.2em] border border-neutral-900 px-1.5 py-0.5">JK</span>
                     </Link>
                 </div>
 

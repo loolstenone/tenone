@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, Plus } from "lucide-react";
+import { Search, ShoppingCart, Plus, Store } from "lucide-react";
 import { PageHeader } from "@/features/jakka/PageHeader";
 import { getProducts, getMyCreatorProfile, type JakkaProduct, type JakkaCreator, type ProductCategory } from "@/lib/supabase/jakka";
 import { useAuth } from "@/lib/auth-context";
@@ -107,19 +107,29 @@ export default function MarketPage() {
                 subtitle="작가의 작품·굿즈·피규어를 직접 구매하세요."
                 action={isCreator ? (
                     sellerStatus === "approved" ? (
-                        <Link
-                            href="/jakka/market/upload"
-                            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                            상품 등록
-                        </Link>
+                        <div className="flex flex-col items-stretch gap-1.5">
+                            <Link
+                                href="/jakka/seller"
+                                className="inline-flex items-center justify-center gap-1.5 text-[12px] font-bold text-white bg-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-700 transition-colors"
+                            >
+                                <Store className="w-3.5 h-3.5" />
+                                판매자 센터
+                            </Link>
+                            <Link
+                                href="/jakka/market/upload"
+                                className="inline-flex items-center justify-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                상품 등록
+                            </Link>
+                        </div>
                     ) : (
                         <Link
                             href="/jakka/market/apply"
                             className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
                         >
-                            {sellerStatus === "pending" ? "심사 진행 중" : "입점 신청"}
+                            <Store className="w-3.5 h-3.5" />
+                            {sellerStatus === "pending" ? "심사 진행 중" : "입점 승인"}
                         </Link>
                     )
                 ) : undefined}
