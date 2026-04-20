@@ -213,6 +213,57 @@ export async function generateMetadata(): Promise<Metadata> {
 - 크로스도메인 쿠키: `lib/domain-registry.ts`의 `getCookieDomain()` 동적 감지
 - **auth.users 테이블 UPDATE/DELETE 금지** — 비밀번호·계정 작업은 사용자가 Dashboard에서 직접
 
+### 1.2.1 로그인/가입 복귀 원칙 (이탈 방지)
+
+> **대원칙**: 브랜드 사이트에서 로그인/가입을 시작하면, 완료 후 **해당 브랜드 사이트의 원래 페이지**로 복귀한다.
+> 절대 `tenone.biz`로 튕겨 나가지 않는다 — 방문자 이탈의 가장 큰 원인.
+
+**구현 규약:**
+
+| 상황 | 규칙 |
+|------|------|
+| `/login` / `/signup`으로 이동하는 모든 Link·버튼 | 반드시 `?redirect={현재경로}` 전달 |
+| `router.push('/login')` / `redirect('/login')` | 반드시 `loginHref(pathname)` 사용 |
+| 소셜 로그인 클릭 | `auth-context`가 `auth_redirect` 쿠키로 자동 저장 (auto) |
+| LoginModal 사용 브랜드 | 모달이 현재 페이지 위에 열리므로 추가 조치 불필요 (auto) |
+
+**표준 헬퍼** — `lib/login-href.ts`
+
+```tsx
+import { usePathname } from "next/navigation";
+import { loginHref, signupHref } from "@/lib/login-href";
+
+const pathname = usePathname();
+
+// ✅ Link
+<Link href={loginHref(pathname)}>로그인</Link>
+<Link href={loginHref(pathname, "signup")}>회원가입</Link>
+
+// ✅ router.push
+router.push(loginHref(pathname));
+
+// ✅ 보호 페이지 자동 리다이렉트
+useEffect(() => {
+    if (!isLoading && !isAuthenticated) router.push(loginHref(pathname));
+}, [isLoading, isAuthenticated, router, pathname]);
+```
+
+**절대 하지 말 것:**
+- ❌ `<Link href="/login">` (파라미터 없음) — 로그인 후 브랜드 홈('/')으로만 감, 원래 페이지 상실
+- ❌ `router.push("/login")` 하드코딩 — 동일 사유
+- ❌ 브랜드 헤더에서 `window.location.href = 'https://tenone.biz/login'` — tenone 이탈
+- ❌ signup ↔ login 상호 전환에서 redirect 파라미터 누락
+
+**흐름 요약:**
+
+```
+jakka.tenone.biz/market 방문 (비로그인)
+   ↓ 프로필 버튼 클릭
+/login?redirect=%2Fmarket  (같은 hostname 유지)
+   ↓ 로그인 성공
+jakka.tenone.biz/market  (원래 페이지 복귀) ✅
+```
+
 ---
 
 ## 1.3 프로필 3계층 체계

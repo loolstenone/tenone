@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "What We Do", href: "/whatwedo" },
@@ -109,7 +110,7 @@ export function YouInOneHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">로그인</Link>
+                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">로그인</Link>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">가입</Link>
                             </>
                         )}

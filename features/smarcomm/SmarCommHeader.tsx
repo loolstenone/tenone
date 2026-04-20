@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
+import { loginHref } from '@/lib/login-href';
 
 export default function SmarCommHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,7 +45,7 @@ export default function SmarCommHeader() {
               <Link href="/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
             ) : (
               <>
-                <Link href="/login" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
+                <Link href={loginHref(currentPath)} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
                 <Link href="/signup" className="mt-1 rounded-full bg-text px-4 py-2.5 text-center text-sm font-semibold text-white" onClick={() => setMenuOpen(false)}>무료 가입</Link>
               </>
             )}

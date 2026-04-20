@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "뚜르 드 문래", href: "/#tour" },
@@ -13,6 +15,7 @@ const navItems = [
 ];
 
 export function MullaesianHeader() {
+    const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
@@ -80,7 +83,7 @@ export function MullaesianHeader() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
+                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
                                 <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">가입</Link>
                             </>
                         )}

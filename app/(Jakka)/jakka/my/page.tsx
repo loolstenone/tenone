@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,7 +33,7 @@ export default function JakkaMyPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"posts" | "products" | "bookmarks" | "settings">("posts");
 
-    useEffect(() => { if (!isLoading && !isAuthenticated) router.push("/login"); }, [isLoading, isAuthenticated, router]);
+    useEffect(() => { if (!isLoading && !isAuthenticated) router.push(currentLoginHref()); }, [isLoading, isAuthenticated, router]);
 
     useEffect(() => {
         if (!user?.id) return;

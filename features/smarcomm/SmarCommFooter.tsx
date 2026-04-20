@@ -1,7 +1,11 @@
-import Link from 'next/link';
+'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { loginHref, signupHref } from '@/lib/login-href';
 
 export default function SmarCommFooter() {
+  const pathname = usePathname();
   return (
     <footer className="border-t border-border px-5 py-10">
       <div className="mx-auto max-w-6xl">
@@ -17,8 +21,8 @@ export default function SmarCommFooter() {
             </p>
           </div>
           <div className="flex gap-6 text-xs text-text-muted">
-            <Link href="/login" className="transition-colors hover:text-text-sub">로그인</Link>
-            <Link href="/signup" className="transition-colors hover:text-text-sub">회원가입</Link>
+            <Link href={loginHref(pathname)} className="transition-colors hover:text-text-sub">로그인</Link>
+            <Link href={signupHref(pathname)} className="transition-colors hover:text-text-sub">회원가입</Link>
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 text-xs text-text-muted">

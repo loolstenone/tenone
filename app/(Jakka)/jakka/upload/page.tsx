@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import {
     getMyCreatorProfile, uploadWorkImage, createWork, updateCreatorProfile,
     type JakkaCreator,
@@ -43,7 +44,7 @@ export default function UploadPage() {
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push("/login"); return; }
+        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
         getMyCreatorProfile(user.authId ?? user.id).then((c) => {
             if (!c) { router.push("/jakka/profile"); return; }
             setCreator(c);

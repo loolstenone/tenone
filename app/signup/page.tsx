@@ -11,6 +11,7 @@ import { PublicHeader } from '@/features/tenone/PublicHeader';
 import { PublicFooter } from '@/features/tenone/PublicFooter';
 import SmarCommHeader from '@/features/smarcomm/SmarCommHeader';
 import { createClient } from '@/lib/supabase/client';
+import { loginHref } from '@/lib/login-href';
 
 // --- SmarComm 전용 회원가입 컴포넌트 ---
 function SmarCommSignupForm() {
@@ -142,7 +143,7 @@ function SmarCommSignupForm() {
                     </div>
 
                     <div className="mt-5 text-center text-sm text-neutral-400">
-                        이미 계정이 있으신가요? <Link href="/login" className="font-medium text-neutral-900">로그인</Link>
+                        이미 계정이 있으신가요? <Link href={loginHref(typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null)} className="font-medium text-neutral-900">로그인</Link>
                     </div>
                 </div>
             </main>
@@ -338,7 +339,7 @@ function TenOneSignupPage() {
                     </div>
 
                     <div className="mt-5 text-center text-sm text-neutral-400">
-                        이미 계정이 있으신가요? <Link href="/login" className="font-medium text-neutral-900">로그인</Link>
+                        이미 계정이 있으신가요? <Link href={loginHref(typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null)} className="font-medium text-neutral-900">로그인</Link>
                     </div>
                 </div>
             </div>

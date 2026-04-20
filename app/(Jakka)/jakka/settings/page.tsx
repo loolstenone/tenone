@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, X, Loader2, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import {
     getMyCreatorProfile, updateCreatorProfile, isHandleAvailable,
     type JakkaCreator, type EducationItem, type CareerItem,
@@ -74,7 +75,7 @@ export default function JakkaSettingsPage() {
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push("/login"); return; }
+        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
         load();
     }, [authLoading, isAuthenticated, user]);
 

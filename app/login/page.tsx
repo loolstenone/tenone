@@ -11,6 +11,7 @@ import { PublicFooter } from '@/features/tenone/PublicFooter';
 import { MadLeagueHeader } from '@/features/madleague/MadLeagueHeader';
 import { MadLeagueFooter } from '@/features/madleague/MadLeagueFooter';
 import { createClient } from '@/lib/supabase/client';
+import { signupHref } from '@/lib/login-href';
 
 // --- SmarComm 전용 로그인 컴포넌트 (완전 분리) ---
 function SmarCommLoginForm() {
@@ -111,7 +112,7 @@ function SmarCommLoginForm() {
                         <Link href="/reset-password" className="text-xs text-neutral-700 hover:text-neutral-900 underline transition-colors">비밀번호를 잊으셨나요?</Link>
                     </div>
                     <div className="mt-3 text-center text-sm text-neutral-700">
-                        계정이 없으신가요? <Link href="/signup" className="font-bold text-neutral-900 underline">회원가입</Link>
+                        계정이 없으신가요? <Link href={signupHref(redirectTo !== '/' ? redirectTo : null)} className="font-bold text-neutral-900 underline">회원가입</Link>
                     </div>
                 </div>
             </main>
@@ -255,7 +256,7 @@ function LoginForm() {
                         </p>
                         <div className="mt-4 text-center">
                             <p className="text-sm text-neutral-400">
-                                계정이 없으신가요? <Link href="/signup" className="text-[#D32F2F] font-medium hover:underline">회원가입</Link>
+                                계정이 없으신가요? <Link href={signupHref(redirectTo !== '/' ? redirectTo : null)} className="text-[#D32F2F] font-medium hover:underline">회원가입</Link>
                             </p>
                         </div>
                     </div>
@@ -348,7 +349,7 @@ function LoginForm() {
                     </p>
                     <div className="mt-4 text-center">
                         <p className="text-sm text-neutral-700">
-                            계정이 없으신가요? <Link href={signupPath} className="font-medium hover:underline" style={{ color: primaryColor }}>회원가입</Link>
+                            계정이 없으신가요? <Link href={signupPath === '/signup' ? signupHref(redirectTo !== '/' ? redirectTo : null) : signupPath} className="font-medium hover:underline" style={{ color: primaryColor }}>회원가입</Link>
                         </p>
                     </div>
                 </div>

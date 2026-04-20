@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ImagePlus, X, Loader2, Package } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import {
     getProductById,
     getMyCreatorProfile,
@@ -46,7 +47,7 @@ export default function MarketEditPage({ params }: { params: Promise<{ id: strin
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push("/login"); return; }
+        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
 
         Promise.all([
             getMyCreatorProfile(user.authId ?? user.id),

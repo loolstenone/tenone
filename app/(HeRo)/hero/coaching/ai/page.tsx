@@ -3,12 +3,13 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import {
   Sparkles, ArrowRight, CheckCircle, MessageCircle,
   Shield, Clock, Brain, Users, FileText, Zap, X, AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { loginHref } from "@/lib/login-href";
 
 const RED = "#E53935";
 
@@ -104,6 +105,7 @@ function AICounselingPageInner() {
 
 function AICounselingContent() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const resultId = searchParams.get("resultId");
   const { isAuthenticated, user } = useAuth();
   const [hitModal, setHitModal] = useState<{ show: boolean; type: 'login' | 'hitA' | 'hitB' | 'ready' }>({ show: false, type: 'login' });
@@ -286,7 +288,7 @@ function AICounselingContent() {
                   <AlertCircle className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
                   <h3 className="text-lg font-bold text-neutral-900 mb-2">로그인이 필요합니다</h3>
                   <p className="text-sm text-neutral-500 mb-6">서비스를 이용하려면 먼저 로그인해주세요.</p>
-                  <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
+                  <Link href={loginHref(pathname)} className="inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl" style={{ backgroundColor: RED }}>
                     로그인하기
                   </Link>
                 </div>

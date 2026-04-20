@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ImagePlus, X, Loader2, Package } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import {
     getMyCreatorProfile,
     createProduct,
@@ -39,7 +40,7 @@ export default function MarketUploadPage() {
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push("/login"); return; }
+        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
         getMyCreatorProfile(user.authId ?? user.id).then((c) => {
             if (!c) { router.push("/jakka/profile"); return; }
             setCreator(c);

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Settings, Share2, Check, Link as LinkIcon, ExternalLink, Plus, Star, Globe, Loader2, Heart } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { currentLoginHref } from "@/lib/login-href";
 import {
     getMyCreatorProfile, getWorksByCreator, updateCreatorProfile, createCreatorProfile,
     isHandleAvailable, generateHandle,
@@ -102,7 +103,7 @@ export default function JakkaProfilePage() {
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isAuthenticated || !user) { router.push("/login"); return; }
+        if (!isAuthenticated || !user) { router.push(currentLoginHref()); return; }
         loadProfile();
     }, [authLoading, isAuthenticated, user]);
 
