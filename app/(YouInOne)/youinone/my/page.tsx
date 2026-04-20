@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
@@ -40,6 +41,8 @@ export default function YouInOneMyPage() {
                 </div>
 
                 <MyProfileCard accentColor="#1AAD64" siteBadge="Crew" />
+
+                {user?.id && <CapabilitySection memberId={user.id} brandId="youinone" accentColor="#1AAD64" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (

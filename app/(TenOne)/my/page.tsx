@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
 import {
     User, FileText, Bookmark, Settings, LogOut,
@@ -70,6 +71,8 @@ export default function MyPage() {
             <div className="max-w-4xl mx-auto">
 
                 <MyProfileCard accentColor="#171717" />
+
+                {user?.id && <CapabilitySection memberId={user.id} brandId="tenone" accentColor="#171717" className="mb-6" />}
 
                 {/* HIT 프로필 */}
                 <div className="mb-6">

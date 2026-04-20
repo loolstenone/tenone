@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-20 (세션 63) — Jakka 마켓 DB 연결 + 상품 상세 페이지
+
+### 변경 파일
+- `app/(Jakka)/jakka/market/[id]/page.tsx` (신규) — 상품 상세 페이지 (이미지 갤러리, 가격/재고, 작가 소개)
+- `app/(Jakka)/jakka/market/page.tsx` — `getProducts()` 실 DB 연결 (mock → Supabase `jakka_products`)
+- `app/(Jakka)/CLAUDE.md` — 현재 상태 업데이트 (마켓 DB 연결 완료)
+
+### DB 변경
+- `jakka_products` 테이블: 이전 세션에서 이미 Production 실행 완료 확인
+
+### 결정사항
+- 마켓 상품 상세: `client-side` fetch (`useEffect` + `getProductById`) — SSR 없음 (빠른 첫 화면은 skeleton으로 처리)
+- 작가 링크: handle에서 `@` 제거 → `/jakka/${handle.replace('@', '')}` 라우팅
+
+---
+
 ## 2026-04-20 (세션 62) — Capability 백필·UI 통합 + CapabilitySection 컴포넌트
 
 ### 변경 파일

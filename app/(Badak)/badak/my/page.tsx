@@ -14,6 +14,7 @@ import {
   ToggleLeft, ToggleRight, UserPlus, Pencil, Globe,
 } from 'lucide-react';
 import { MyProfileCard } from '@/components/MyProfileCard';
+import { CapabilitySection } from '@/components/CapabilitySection';
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'needs' | 'notifications' | 'settings';
 type ApplicantStatus = 'applied' | 'approved' | 'rejected';
@@ -1570,6 +1571,7 @@ function BadakMyPageInner() {
             </div>
           ) : null}
         </MyProfileCard>
+        {user?.id && <CapabilitySection memberId={user.id} brandId="badak" accentColor="#D32F2F" className="mt-4" />}
       </div>
 
       {/* ── 스탯 스트립 ── */}

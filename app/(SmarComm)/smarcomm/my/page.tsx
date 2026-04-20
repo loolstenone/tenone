@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
@@ -34,6 +35,8 @@ export default function SmarCommMyPage() {
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-900 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <MyProfileCard accentColor="#8B5CF6" />
+
+                {user?.id && <CapabilitySection memberId={user.id} brandId="smarcomm" accentColor="#8B5CF6" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (

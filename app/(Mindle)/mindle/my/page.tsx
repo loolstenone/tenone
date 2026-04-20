@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
 import { Bookmark, Bell, Settings, Clock, Eye, Trash2, Plus, X, TrendingUp } from "lucide-react";
 import { trends, statusBadge } from "@/lib/mindle/trend-data";
@@ -47,6 +48,8 @@ export default function MindleMyPage() {
         <div className="bg-[#0A0A0A]">
             <div className="mx-auto max-w-4xl px-6 py-10">
                 <MyProfileCard accentColor="#6366F1" />
+
+                {user?.id && <CapabilitySection memberId={user.id} brandId="mindle" accentColor="#6366F1" className="mb-6" />}
 
                 {/* Activity Stats */}
                 <div className="grid grid-cols-4 gap-3 mb-8">

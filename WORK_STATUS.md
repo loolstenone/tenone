@@ -1,13 +1,19 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-20 (세션 62 — Capability 백필·UI 통합 + CapabilitySection 컴포넌트)
+> 마지막 업데이트: 2026-04-20 (세션 63 — Jakka 마켓 DB 연결 + 상품 상세 페이지)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
 1. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-2. **Jakka `jakka_products` DB 연결** — market 페이지 mock → 실 DB (`jakka_products` 테이블 생성, `app/api/jakka/products` 라우트 연결). `sql/jakka-products-table.sql` 작성 완료, 실행 필요
+2. **Jakka 마켓 상품 관리** — 내 상품 목록·수정·삭제 UI (현재 등록·조회·상세 완성, 수정/삭제 UI 없음)
 3. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합** — 현재 MADLeague·Jakka만 연결됨
+
+### ✅ 세션 63 완료 — Jakka 마켓 DB 연결 + 상품 상세 페이지
+- **`jakka_products` Production DB** — 이전 세션에서 이미 생성 완료 확인 (15컬럼 전부 존재)
+- **`app/(Jakka)/jakka/market/[id]/page.tsx` 신규** — 상품 상세 페이지: 이미지 갤러리(메인+썸네일 스트립), 가격(KRW/ETH), LIMITED/SOLD OUT 처리, "구매 문의" 버튼, 판매정보 테이블, 작가 소개 섹션
+- **`app/(Jakka)/jakka/market/upload/page.tsx` 신규** — 크리에이터 상품 등록 페이지: 이미지 최대 6장, 카테고리/제목/가격/설명/한정판 입력
+- **`app/(Jakka)/jakka/market/page.tsx`** — `getProducts()` 실 DB 연결 + 크리에이터에게만 "상품 등록" 버튼 표시
 
 ### ✅ 세션 62 완료 — Capability 백필·UI 통합 + CapabilitySection 컴포넌트
 - **`lib/supabase/capabilities.ts` 신규** — `getCapabilityAggregation()` / `getMemberCapabilityRoles()` 등 클라이언트 함수 모음

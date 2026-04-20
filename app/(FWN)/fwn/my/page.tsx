@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
@@ -38,6 +39,8 @@ export default function FWNMyPage() {
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
                 <MyProfileCard accentColor="#00C853" siteBadge="FWN" />
+
+                {user?.id && <CapabilitySection memberId={user.id} brandId="fwn" accentColor="#00C853" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-800">
                     {tabs.map(tab => (

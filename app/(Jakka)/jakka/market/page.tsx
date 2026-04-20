@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, Plus } from "lucide-react";
 import { PageHeader } from "@/features/jakka/PageHeader";
-import { getProducts, type JakkaProduct, type JakkaCreator, type ProductCategory } from "@/lib/supabase/jakka";
+import { getProducts, getMyCreatorProfile, type JakkaProduct, type JakkaCreator, type ProductCategory } from "@/lib/supabase/jakka";
+import { useAuth } from "@/lib/auth-context";
 
 const CATEGORIES = ["전체", "원화", "프린트", "굿즈", "피규어", "포스터", "사진", "NFT"];
 
@@ -71,10 +72,17 @@ function SkeletonCard() {
 }
 
 export default function MarketPage() {
+    const { user, isAuthenticated } = useAuth();
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("전체");
     const [products, setProducts] = useState<(JakkaProduct & { creator: JakkaCreator })[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCreator, setIsCreator] = useState(false);
+
+    useEffect(() => {
+        if (!isAuthenticated || !user) return;
+        getMyCreatorProfile(user.authId ?? user.id).then((c) => setIsCreator(!!c));
+    }, [isAuthenticated, user]);
 
     useEffect(() => {
         setLoading(true);
@@ -94,6 +102,15 @@ export default function MarketPage() {
                 eyebrow="Market"
                 title="마켓"
                 subtitle="작가의 작품·굿즈·피규어를 직접 구매하세요."
+                action={isCreator ? (
+                    <Link
+                        href="/jakka/market/upload"
+                        className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                        상품 등록
+                    </Link>
+                ) : undefined}
             />
 
             <div className="max-w-4xl mx-auto px-5 py-8">
