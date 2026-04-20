@@ -10,6 +10,7 @@ import {
     BookOpen, Megaphone, ChevronLeft, ChevronRight, Loader2, X, Check
 } from "lucide-react";
 import { getCreators, type JakkaCreator } from "@/lib/supabase/jakka";
+import { PageHeader } from "@/features/jakka/PageHeader";
 
 const categories = [
     { id: "전체",          label: "전체",          icon: Layers },
@@ -18,7 +19,6 @@ const categories = [
     { id: "브랜딩/편집",   label: "브랜딩/편집",   icon: LayoutTemplate },
     { id: "UI/UX",        label: "UI/UX",         icon: MousePointer },
     { id: "일러스트",      label: "일러스트",       icon: Paintbrush },
-    { id: "디지털 아트",   label: "디지털 아트",    icon: Sparkles },
     { id: "AI",           label: "AI",             icon: Bot },
     { id: "캐릭터 디자인", label: "캐릭터 디자인", icon: Smile },
     { id: "제품/패키지",   label: "제품/패키지",   icon: Package },
@@ -71,18 +71,18 @@ function JobCard({ ad }: { ad: typeof jobAds[0] }) {
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[9px] font-mono text-neutral-300 tracking-widest uppercase">스폰서</span>
-                    <span className="text-[9px] text-neutral-300">·</span>
+                    <span className="text-[9px] font-mono text-neutral-500 tracking-widest uppercase">스폰서</span>
+                    <span className="text-[9px] text-neutral-500">·</span>
                     <span className="text-[11px] text-neutral-500">{ad.company}</span>
                 </div>
                 <p className="text-[14px] font-semibold tracking-tight truncate">{ad.title}</p>
                 <div className="flex gap-1.5 mt-1">
                     {ad.tags.map((t) => (
-                        <span key={t} className="text-[10px] text-neutral-400">#{t}</span>
+                        <span key={t} className="text-[10px] text-neutral-600">#{t}</span>
                     ))}
                 </div>
             </div>
-            <ArrowRight className="h-3.5 w-3.5 text-neutral-300 group-hover:text-neutral-600 transition-colors shrink-0" />
+            <ArrowRight className="h-3.5 w-3.5 text-neutral-500 group-hover:text-neutral-600 transition-colors shrink-0" />
         </a>
     );
 }
@@ -120,7 +120,7 @@ function CreatorRow({
             <div className="relative z-10 flex-1 min-w-0 pr-24 md:pr-4">
                 <div className="flex items-baseline gap-2.5 mb-1">
                     <span className="text-[18px] font-black tracking-tight text-neutral-900">{creator.display_name}</span>
-                    <span className="text-[12px] text-neutral-400 font-mono">{creator.handle}</span>
+                    <span className="text-[12px] text-neutral-600 font-mono">{creator.handle}</span>
                 </div>
                 {info && <p className="text-[13px] font-medium text-neutral-600 mb-2.5">{info}</p>}
                 <div className="flex items-center gap-2.5 flex-wrap">
@@ -128,7 +128,7 @@ function CreatorRow({
                         {creator.status}
                     </span>
                     {creator.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="text-[12px] font-semibold text-neutral-400">#{tag}</span>
+                        <span key={tag} className="text-[12px] font-semibold text-neutral-600">#{tag}</span>
                     ))}
                 </div>
             </div>
@@ -165,8 +165,8 @@ function AdInquiryBanner() {
 
     return (
         <>
-            <div className="mx-4 my-6 border border-neutral-200 p-4 bg-neutral-50">
-                <p className="text-[10px] font-mono text-neutral-400 tracking-[0.2em] uppercase mb-2">채용 공고 · 제휴 광고</p>
+            <div className="mx-4 my-6 border border-neutral-300 p-4 bg-neutral-50">
+                <p className="text-[10px] font-mono text-neutral-600 tracking-[0.2em] uppercase mb-2">채용 공고 · 제휴 광고</p>
                 <p className="text-[14px] font-semibold mb-1">자까에서 크리에이터를 채용하세요</p>
                 <p className="text-[12px] text-neutral-500 mb-3 leading-relaxed">
                     디자이너, 작가, 아티스트를 찾는 기업과 스튜디오의 공고를 작가 피드에 노출합니다.
@@ -185,10 +185,10 @@ function AdInquiryBanner() {
                     <div className="relative w-full max-w-[480px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl p-6 pb-8 md:pb-6">
                         <div className="flex items-center justify-between mb-5">
                             <div>
-                                <p className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase mb-0.5">채용 공고 · 제휴 광고</p>
+                                <p className="text-[10px] font-mono text-neutral-600 tracking-widest uppercase mb-0.5">채용 공고 · 제휴 광고</p>
                                 <h3 className="text-[17px] font-bold">문의하기</h3>
                             </div>
-                            <button onClick={() => setOpen(false)} className="p-1 text-neutral-400 hover:text-neutral-900">
+                            <button onClick={() => setOpen(false)} className="p-1 text-neutral-600 hover:text-neutral-900">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -201,12 +201,12 @@ function AdInquiryBanner() {
                                 <p className="text-[15px] font-semibold">문의가 접수됐습니다</p>
                                 <p className="text-[13px] text-neutral-500">영업일 기준 1~2일 내로 연락드리겠습니다.</p>
                                 <button onClick={() => { setOpen(false); setDone(false); setForm({ category: "", company: "", name: "", email: "", message: "" }); }}
-                                    className="mt-2 text-[12px] text-neutral-400 underline">닫기</button>
+                                    className="mt-2 text-[12px] text-neutral-600 underline">닫기</button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase block mb-1.5">문의 유형 *</label>
+                                    <label className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase block mb-1.5">문의 유형 *</label>
                                     <div className="flex flex-wrap gap-2">
                                         {["광고", "제휴", "협업", "채용공고", "기타"].map((opt) => (
                                             <button
@@ -216,7 +216,7 @@ function AdInquiryBanner() {
                                                 className={`px-3 py-1.5 text-[12px] font-medium border transition-colors ${
                                                     form.category === opt
                                                         ? "border-neutral-900 bg-neutral-900 text-white"
-                                                        : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                                                        : "border-neutral-300 text-neutral-600 hover:border-neutral-400"
                                                 }`}
                                             >
                                                 {opt}
@@ -226,44 +226,44 @@ function AdInquiryBanner() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase block mb-1.5">회사/기관</label>
+                                        <label className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase block mb-1.5">회사/기관</label>
                                         <input
                                             value={form.company}
                                             onChange={(e) => setForm(f => ({ ...f, company: e.target.value }))}
                                             placeholder="카카오, 스튜디오 가나..."
-                                            className="w-full border border-neutral-200 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
+                                            className="w-full border border-neutral-300 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase block mb-1.5">담당자 *</label>
+                                        <label className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase block mb-1.5">담당자 *</label>
                                         <input
                                             required
                                             value={form.name}
                                             onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                                             placeholder="홍길동"
-                                            className="w-full border border-neutral-200 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
+                                            className="w-full border border-neutral-300 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase block mb-1.5">이메일 *</label>
+                                    <label className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase block mb-1.5">이메일 *</label>
                                     <input
                                         required
                                         type="email"
                                         value={form.email}
                                         onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
                                         placeholder="contact@company.com"
-                                        className="w-full border border-neutral-200 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
+                                        className="w-full border border-neutral-300 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase block mb-1.5">문의 내용</label>
+                                    <label className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase block mb-1.5">문의 내용</label>
                                     <textarea
                                         value={form.message}
                                         onChange={(e) => setForm(f => ({ ...f, message: e.target.value }))}
                                         placeholder="공고 종류, 예산, 기간 등 자유롭게 적어주세요"
                                         rows={3}
-                                        className="w-full border border-neutral-200 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors resize-none"
+                                        className="w-full border border-neutral-300 px-3 py-2 text-[14px] focus:outline-none focus:border-neutral-900 transition-colors resize-none"
                                     />
                                 </div>
                                 {error && <p className="text-[12px] text-red-500">{error}</p>}
@@ -334,13 +334,19 @@ export default function JakkaExplorePage() {
 
 
     return (
-        <div className="md:flex md:min-h-screen">
+        <div className="min-h-screen bg-white">
+            <PageHeader
+                eyebrow="Explore"
+                title="작가 탐색"
+                subtitle="분야·학교·태그로 원하는 크리에이터를 찾아보세요."
+            />
+            <div className="md:flex">
             {/* Left: list column */}
             <div className="flex-1 min-w-0">
                 {/* Search Bar */}
                 <div className="sticky top-[44px] md:top-0 z-10 bg-white px-4 py-3 border-b border-neutral-200">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 stroke-[1.5]" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600 stroke-[1.5]" />
                         <input
                             type="text"
                             value={query}
@@ -352,12 +358,12 @@ export default function JakkaExplorePage() {
                 </div>
 
                 {/* Category filter */}
-                <div className="relative border-b border-neutral-100">
+                <div className="relative border-b border-neutral-200">
                     <button
                         onClick={() => scrollCategories("left")}
                         className="hidden md:flex absolute left-0 top-0 bottom-0 z-10 items-center px-1.5 bg-gradient-to-r from-white via-white/90 to-transparent"
                     >
-                        <ChevronLeft className="h-4 w-4 text-neutral-400" />
+                        <ChevronLeft className="h-4 w-4 text-neutral-600" />
                     </button>
 
                     <div
@@ -375,7 +381,7 @@ export default function JakkaExplorePage() {
                                     className={`shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[56px] ${
                                         isActive
                                             ? "text-neutral-900"
-                                            : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50"
+                                            : "text-neutral-600 hover:text-neutral-700 hover:bg-neutral-50"
                                     }`}
                                 >
                                     <Icon className={`h-5 w-5 transition-all ${isActive ? "stroke-[2]" : "stroke-[1.5]"}`} />
@@ -394,13 +400,13 @@ export default function JakkaExplorePage() {
                         onClick={() => scrollCategories("right")}
                         className="hidden md:flex absolute right-0 top-0 bottom-0 z-10 items-center px-1.5 bg-gradient-to-l from-white via-white/90 to-transparent"
                     >
-                        <ChevronRight className="h-4 w-4 text-neutral-400" />
+                        <ChevronRight className="h-4 w-4 text-neutral-600" />
                     </button>
                 </div>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+                        <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
                     </div>
                 ) : (
                     <>
@@ -416,7 +422,7 @@ export default function JakkaExplorePage() {
                             </section>
                         ) : (
                             <div className="py-20 text-center">
-                                <p className="text-[13px] text-neutral-400">검색 결과가 없습니다</p>
+                                <p className="text-[13px] text-neutral-600">검색 결과가 없습니다</p>
                             </div>
                         )}
                     </>
@@ -441,7 +447,7 @@ export default function JakkaExplorePage() {
 
                 {/* Recommendations */}
                 <div className="px-5 pt-6 pb-4">
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-[0.2em] uppercase mb-4">
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-[0.2em] uppercase mb-4">
                         회원님을 위한 자까 추천
                     </p>
                     <div className="space-y-4">
@@ -457,20 +463,21 @@ export default function JakkaExplorePage() {
                                         {preview ? (
                                             <Image src={preview} alt="" fill className="object-cover" sizes="40px" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-[14px] font-bold text-neutral-400">
+                                            <div className="w-full h-full flex items-center justify-center text-[14px] font-bold text-neutral-600">
                                                 {c.display_name.charAt(0)}
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-[13px] font-semibold truncate group-hover:underline">{c.display_name}</p>
-                                        <p className="text-[11px] text-neutral-400 truncate">{c.field ?? c.handle}</p>
+                                        <p className="text-[11px] text-neutral-600 truncate">{c.field ?? c.handle}</p>
                                     </div>
                                 </Link>
                             );
                         })}
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart } from "lucide-react";
+import { PageHeader } from "@/features/jakka/PageHeader";
 
 const CATEGORIES = ["전체", "원화", "프린트", "굿즈", "피규어", "포스터", "사진", "NFT"];
 
@@ -130,8 +131,8 @@ function ProductCard({ product }: { product: Product }) {
                 </div>
             </div>
 
-            <p className="text-[11px] text-neutral-400 font-mono mb-0.5">{product.creator.handle}</p>
-            <p className="text-[13px] font-semibold text-neutral-900 leading-snug mb-1.5 line-clamp-2">{product.title}</p>
+            <p className="text-[11px] text-neutral-500 font-mono mb-0.5">{product.creator.handle}</p>
+            <p className="text-[13px] font-bold text-neutral-900 leading-snug mb-1.5 line-clamp-2">{product.title}</p>
             <p className="text-[14px] font-black text-neutral-900">{priceLabel}</p>
         </Link>
     );
@@ -148,24 +149,26 @@ export default function MarketPage() {
     });
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="mb-6">
-                <h1 className="text-[22px] font-black tracking-tight text-neutral-900 mb-1">마켓</h1>
-                <p className="text-[13px] text-neutral-500">작가의 작품, 굿즈, 피규어를 직접 구매하세요.</p>
-            </div>
+        <div className="min-h-screen bg-white">
+            <PageHeader
+                eyebrow="Market"
+                title="마켓"
+                subtitle="작가의 작품·굿즈·피규어를 직접 구매하세요."
+            />
 
+            <div className="max-w-4xl mx-auto px-5 py-8">
             <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-600" />
                 <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="작품명, 작가 이름 검색"
-                    className="w-full border border-neutral-200 pl-8 pr-3 py-2 text-[13px] placeholder:text-neutral-400 focus:outline-none focus:border-neutral-500"
+                    className="w-full border border-neutral-300 pl-8 pr-3 py-2 text-[13px] placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500"
                 />
             </div>
 
-            <div className="flex gap-1.5 flex-wrap mb-8">
+            <div className="flex gap-1.5 flex-wrap pb-5 mb-6 border-b border-neutral-200">
                 {CATEGORIES.map((cat) => (
                     <button
                         key={cat}
@@ -173,7 +176,7 @@ export default function MarketPage() {
                         className={`text-[11px] px-2.5 py-1 border transition-colors ${
                             category === cat
                                 ? "border-neutral-900 bg-neutral-900 text-white"
-                                : "border-neutral-200 text-neutral-500 hover:border-neutral-400"
+                                : "border-neutral-300 text-neutral-500 hover:border-neutral-400"
                         }`}
                     >
                         {cat}
@@ -182,7 +185,7 @@ export default function MarketPage() {
             </div>
 
             {filtered.length === 0 ? (
-                <div className="py-20 text-center text-[13px] text-neutral-400">상품이 없습니다.</div>
+                <div className="py-20 text-center text-[13px] text-neutral-600">상품이 없습니다.</div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     {filtered.map((p) => (
@@ -190,6 +193,7 @@ export default function MarketPage() {
                     ))}
                 </div>
             )}
+            </div>
         </div>
     );
 }

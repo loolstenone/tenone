@@ -42,9 +42,9 @@ export default function JakkaMyPage() {
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-800">
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#D4D4D4] text-[#D4D4D4]" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}>
+                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#D4D4D4] text-[#D4D4D4]" : "border-transparent text-neutral-500 hover:text-neutral-500"}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
-                            {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400">{tab.count}</span>}
+                            {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-600">{tab.count}</span>}
                         </button>
                     ))}
                 </div>

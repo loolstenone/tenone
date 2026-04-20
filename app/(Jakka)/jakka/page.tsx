@@ -22,13 +22,13 @@ function NoticeCard({ notice }: { notice: JakkaNotice }) {
                     <p className="text-[13px] text-neutral-600 mb-2.5">{notice.role}</p>
                     <div className="flex gap-1.5 flex-wrap">
                         {notice.tags.map((t) => (
-                            <span key={t} className="text-[11px] text-neutral-600 bg-white border border-neutral-200 px-2 py-0.5">
+                            <span key={t} className="text-[11px] text-neutral-600 bg-white border border-neutral-300 px-2 py-0.5">
                                 {t}
                             </span>
                         ))}
                     </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-neutral-400 mt-1 shrink-0" />
+                <ArrowRight className="h-4 w-4 text-neutral-600 mt-1 shrink-0" />
             </div>
         </div>
     );
@@ -59,15 +59,34 @@ function HeroActions({ creator, userId }: { creator: JakkaCreator; userId?: stri
                     <span className="text-[10px] opacity-80">{likeCount}</span>
                 </button>
             )}
-            <button className="flex flex-col items-center gap-0.5 text-white">
+            <button
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const url = typeof window !== "undefined" ? `${window.location.origin}/jakka/${creator.handle}` : "";
+                    if (navigator.share) {
+                        navigator.share({ title: creator.display_name, url }).catch(() => {});
+                    } else {
+                        navigator.clipboard?.writeText(url);
+                    }
+                }}
+                className="flex flex-col items-center gap-0.5 text-white"
+            >
                 <Share2 className="h-5 w-5 stroke-white/90" />
-                <span className="text-[10px] opacity-80">추천</span>
+                <span className="text-[10px] opacity-80">공유</span>
             </button>
         </div>
     );
 }
 
-function CreatorCard({ creator }: { creator: JakkaCreator }) {
+const PEEK_VARIANTS = [
+    { box: "right-0 top-0 h-full w-[110px]", gradient: "bg-gradient-to-r from-white via-white/30 to-transparent", offset: "translateX(8px)" },
+    { box: "right-0 top-0 w-[150px] h-[60%]", gradient: "bg-gradient-to-bl from-transparent via-white/40 to-white", offset: "translate(8px,-4px)" },
+    { box: "right-0 bottom-0 w-[150px] h-[65%]", gradient: "bg-gradient-to-tl from-transparent via-white/40 to-white", offset: "translate(8px,4px)" },
+    { box: "right-0 top-0 w-[120px] h-full", gradient: "bg-gradient-to-b from-white/10 via-white/40 to-white", offset: "translateY(-6px)" },
+] as const;
+
+function CreatorCard({ creator, index = 0 }: { creator: JakkaCreator; index?: number }) {
     const [hovered, setHovered] = useState(false);
     const [isHoverDevice, setIsHoverDevice] = useState(true);
 
@@ -76,8 +95,9 @@ function CreatorCard({ creator }: { creator: JakkaCreator }) {
     }, []);
 
     const previewImage = creator.featured_work?.images?.[0] ?? null;
-    const imgOpacity = hovered ? 1 : isHoverDevice ? 0.28 : 0.5;
-    const imgTransform = hovered ? "translateX(0)" : isHoverDevice ? "translateX(8px)" : "translateX(0)";
+    const variant = PEEK_VARIANTS[index % PEEK_VARIANTS.length];
+    const imgOpacity = hovered ? 1 : isHoverDevice ? 0.32 : 0.55;
+    const imgTransform = hovered ? "translate(0,0)" : isHoverDevice ? variant.offset : "translate(0,0)";
 
     return (
         <Link
@@ -88,21 +108,21 @@ function CreatorCard({ creator }: { creator: JakkaCreator }) {
         >
             {previewImage && (
                 <div
-                    className="absolute right-0 top-0 h-full w-[110px] pointer-events-none"
+                    className={`absolute pointer-events-none ${variant.box}`}
                     style={{
                         opacity: imgOpacity,
                         transform: imgTransform,
                         transition: "opacity 0.4s ease, transform 0.4s ease",
                     }}
                 >
-                    <Image src={previewImage} alt="" fill className="object-cover" sizes="110px" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white via-white/30 to-transparent" />
+                    <Image src={previewImage} alt="" fill className="object-cover" sizes="150px" />
+                    <div className={`absolute inset-0 ${variant.gradient}`} />
                 </div>
             )}
 
             <div className="relative z-10 pr-28">
                 <div className="flex items-baseline gap-2.5 mb-1">
-                    <span className="text-[18px] font-semibold tracking-tight">{creator.display_name}</span>
+                    <span className="text-[18px] font-bold tracking-tight text-neutral-900">{creator.display_name}</span>
                     <span className="text-[13px] text-neutral-600 font-mono">{creator.handle}</span>
                 </div>
                 <p className="text-[13px] text-neutral-700 mb-3">
@@ -140,7 +160,7 @@ export default function JakkaPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
             </div>
         );
     }
@@ -175,7 +195,7 @@ export default function JakkaPage() {
     return (
         <div className="min-h-screen bg-white">
             {/* ── 히어로 (레이블 없이 — 노출 자체가 추천) ── */}
-            <section className="border-b border-neutral-200">
+            <section className="border-b border-neutral-300">
                 <div className="relative aspect-square bg-neutral-100">
                     {(() => {
                         const heroImg = todayCreator.featured_work?.images?.[0] ?? null;
@@ -218,11 +238,11 @@ export default function JakkaPage() {
 
             {/* ── 창작자 + 공고 피드 ── */}
             {feedItems.length > 0 && (
-                <section className="border-b border-neutral-200">
+                <section className="border-b border-neutral-300">
                     <div className="h-3" />
-                    {feedItems.map((item) =>
+                    {feedItems.map((item, i) =>
                         item.type === "creator"
-                            ? <CreatorCard key={item.data.id} creator={item.data} />
+                            ? <CreatorCard key={item.data.id} creator={item.data} index={i} />
                             : <NoticeCard key={item.data.id} notice={item.data} />
                     )}
                 </section>

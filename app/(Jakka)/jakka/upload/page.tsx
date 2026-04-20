@@ -15,7 +15,7 @@ import {
 
 const categories = [
     "영상/모션", "그래픽 디자인", "브랜딩/편집", "UI/UX", "일러스트",
-    "디지털 아트", "AI", "캐릭터 디자인", "제품/패키지", "포토그래피",
+    "AI", "캐릭터 디자인", "제품/패키지", "포토그래피",
     "타이포그래피", "공예", "파인아트", "굿즈", "피규어", "소품/악세사리",
     "글/소설", "카피/광고",
 ];
@@ -115,7 +115,7 @@ export default function UploadPage() {
     if (authLoading || !creator) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
             </div>
         );
     }
@@ -144,7 +144,7 @@ export default function UploadPage() {
 
                 {/* Image Upload */}
                 <div>
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase mb-3">이미지</p>
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase mb-3">이미지</p>
                     <div className="flex gap-2 flex-wrap">
                         {images.map((entry, i) => (
                             <div key={i} className="relative w-[100px] h-[100px] bg-neutral-100 overflow-hidden rounded-sm group">
@@ -165,10 +165,10 @@ export default function UploadPage() {
                         {images.length < 10 && (
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="w-[100px] h-[100px] border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-1.5 rounded-sm hover:border-neutral-400 hover:bg-neutral-50 transition-colors"
+                                className="w-[100px] h-[100px] border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center gap-1.5 rounded-sm hover:border-neutral-400 hover:bg-neutral-50 transition-colors"
                             >
-                                <ImagePlus className="h-5 w-5 text-neutral-300" />
-                                <span className="text-[10px] text-neutral-300">추가</span>
+                                <ImagePlus className="h-5 w-5 text-neutral-500" />
+                                <span className="text-[10px] text-neutral-500">추가</span>
                             </button>
                         )}
                     </div>
@@ -180,26 +180,26 @@ export default function UploadPage() {
                         className="hidden"
                         onChange={handleFileChange}
                     />
-                    <p className="text-[11px] text-neutral-400 mt-2">최대 10장 · 첫 번째 이미지가 대표 이미지입니다</p>
+                    <p className="text-[11px] text-neutral-600 mt-2">최대 10장 · 첫 번째 이미지가 대표 이미지입니다</p>
                 </div>
 
                 {/* Title */}
                 <div>
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase mb-2">제목 *</p>
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase mb-2">제목 *</p>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="작업 제목을 입력하세요"
                         maxLength={60}
-                        className="w-full border border-neutral-200 px-3 py-2.5 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors"
+                        className="w-full border border-neutral-300 px-3 py-2.5 text-[15px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
                     />
-                    <p className="text-[11px] text-neutral-300 mt-1 text-right">{title.length}/60</p>
+                    <p className="text-[11px] text-neutral-500 mt-1 text-right">{title.length}/60</p>
                 </div>
 
                 {/* Category */}
                 <div>
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase mb-3">카테고리 *</p>
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase mb-3">카테고리 *</p>
                     <div className="flex flex-wrap gap-2">
                         {categories.map((c) => (
                             <button
@@ -208,7 +208,7 @@ export default function UploadPage() {
                                 className={`px-3 py-1.5 text-[13px] border transition-colors ${
                                     category === c
                                         ? "border-neutral-900 bg-neutral-900 text-white"
-                                        : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                                        : "border-neutral-300 text-neutral-600 hover:border-neutral-400"
                                 }`}
                             >
                                 {c}
@@ -219,27 +219,27 @@ export default function UploadPage() {
 
                 {/* Description */}
                 <div>
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase mb-2">작업 설명</p>
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase mb-2">작업 설명</p>
                     <textarea
                         value={desc}
                         onChange={(e) => setDesc(e.target.value)}
                         placeholder="어떤 작업인지, 어떤 의도로 만들었는지 자유롭게 적어주세요"
                         rows={4}
                         maxLength={500}
-                        className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors resize-none leading-relaxed"
+                        className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors resize-none leading-relaxed"
                     />
-                    <p className="text-[11px] text-neutral-300 mt-1 text-right">{desc.length}/500</p>
+                    <p className="text-[11px] text-neutral-500 mt-1 text-right">{desc.length}/500</p>
                 </div>
 
                 {/* Tags */}
                 <div>
-                    <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase mb-2">태그 (최대 5개)</p>
+                    <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase mb-2">태그 (최대 5개)</p>
                     <input
                         type="text"
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         placeholder="일러스트, 캐릭터, 귀여움"
-                        className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors"
+                        className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
                     />
                     {tags.length > 0 && (
                         <div className="flex gap-1.5 flex-wrap mt-2">
@@ -250,14 +250,14 @@ export default function UploadPage() {
                             ))}
                         </div>
                     )}
-                    <p className="text-[11px] text-neutral-400 mt-1.5">쉼표(,)로 구분해서 입력하세요</p>
+                    <p className="text-[11px] text-neutral-600 mt-1.5">쉼표(,)로 구분해서 입력하세요</p>
                 </div>
 
                 {/* Featured toggle */}
                 <div className="flex items-center justify-between py-3 border-t border-neutral-100">
                     <div>
                         <p className="text-[14px] font-medium">대표작으로 설정</p>
-                        <p className="text-[12px] text-neutral-400">프로필 상단에 강조 표시됩니다</p>
+                        <p className="text-[12px] text-neutral-600">프로필 상단에 강조 표시됩니다</p>
                     </div>
                     <button
                         onClick={() => setFeatured(!featured)}
@@ -274,7 +274,7 @@ export default function UploadPage() {
                     className={`w-full py-3.5 text-[14px] font-semibold transition-colors flex items-center justify-center gap-2 ${
                         canSubmit && !submitting
                             ? "bg-neutral-900 text-white hover:opacity-80"
-                            : "bg-neutral-100 text-neutral-300 cursor-not-allowed"
+                            : "bg-neutral-100 text-neutral-500 cursor-not-allowed"
                     }`}
                 >
                     {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

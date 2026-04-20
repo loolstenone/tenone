@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ExternalLink, Loader2, PenSquare, X, ChevronDown } from "lucide-react";
 import { getActiveNotices, type JakkaNotice } from "@/lib/supabase/jakka";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/features/jakka/PageHeader";
 
 type NoticeType = JakkaNotice["type"];
 
@@ -115,10 +116,10 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                 {/* 헤더 */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 sticky top-0 bg-white z-10">
                     <div>
-                        <p className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase">WANTS</p>
+                        <p className="text-[11px] font-mono text-neutral-600 tracking-widest uppercase">WANTS</p>
                         <p className="text-[15px] font-black text-neutral-900 leading-none mt-0.5">공고 신청</p>
                     </div>
-                    <button onClick={onClose} className="p-1.5 text-neutral-400 hover:text-neutral-900">
+                    <button onClick={onClose} className="p-1.5 text-neutral-600 hover:text-neutral-900">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
@@ -127,7 +128,7 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                     <div className="px-5 py-12 text-center">
                         <p className="text-[32px] mb-2">✓</p>
                         <p className="text-[16px] font-black text-neutral-900 mb-1">신청이 접수되었습니다</p>
-                        <p className="text-[13px] text-neutral-400 mb-6">검토 후 1~2 영업일 내에 게시됩니다.</p>
+                        <p className="text-[13px] text-neutral-600 mb-6">검토 후 1~2 영업일 내에 게시됩니다.</p>
                         <button
                             onClick={onClose}
                             className="text-[13px] font-bold border border-neutral-900 px-5 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
@@ -144,11 +145,11 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 <select
                                     value={form.type}
                                     onChange={(e) => set("type", e.target.value)}
-                                    className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] font-semibold appearance-none focus:outline-none focus:border-neutral-500 bg-white pr-8"
+                                    className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] font-semibold appearance-none focus:outline-none focus:border-neutral-500 bg-white pr-8"
                                 >
                                     {TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
                                 </select>
-                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600 pointer-events-none" />
                             </div>
                         </div>
 
@@ -160,7 +161,7 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 value={form.company}
                                 onChange={(e) => set("company", e.target.value)}
                                 placeholder="예: 텐원 스튜디오"
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                                 required
                             />
                         </div>
@@ -173,20 +174,20 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 value={form.role}
                                 onChange={(e) => set("role", e.target.value)}
                                 placeholder="예: 브랜드 디자이너 채용"
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                                 required
                             />
                         </div>
 
                         {/* 태그 */}
                         <div>
-                            <label className="block text-[13px] font-bold text-neutral-900 mb-1.5">태그 <span className="font-normal normal-case text-neutral-400">(쉼표로 구분)</span></label>
+                            <label className="block text-[13px] font-bold text-neutral-900 mb-1.5">태그 <span className="font-normal normal-case text-neutral-600">(쉼표로 구분)</span></label>
                             <input
                                 type="text"
                                 value={form.tags}
                                 onChange={(e) => set("tags", e.target.value)}
                                 placeholder="예: 그래픽디자인, 브랜딩, 정규직"
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                             />
                         </div>
 
@@ -198,7 +199,7 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 value={form.deadline}
                                 onChange={(e) => set("deadline", e.target.value)}
                                 placeholder="예: 2025.08.31 또는 상시"
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                             />
                         </div>
 
@@ -210,7 +211,7 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 value={form.href}
                                 onChange={(e) => set("href", e.target.value)}
                                 placeholder="https://..."
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                             />
                         </div>
 
@@ -222,10 +223,10 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                                 value={form.contact_email}
                                 onChange={(e) => set("contact_email", e.target.value)}
                                 placeholder="contact@company.com"
-                                className="w-full border border-neutral-200 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
+                                className="w-full border border-neutral-300 px-3 py-2.5 text-[14px] focus:outline-none focus:border-neutral-500"
                                 required
                             />
-                            <p className="text-[11px] text-neutral-400 mt-1">검토 결과를 이메일로 안내드립니다.</p>
+                            <p className="text-[11px] text-neutral-600 mt-1">검토 결과를 이메일로 안내드립니다.</p>
                         </div>
 
                         <button
@@ -236,7 +237,7 @@ function SubmitModal({ onClose }: { onClose: () => void }) {
                             {submitting ? "신청 중…" : "신청하기"}
                         </button>
 
-                        <p className="text-[11px] text-neutral-400 text-center pb-1">
+                        <p className="text-[11px] text-neutral-600 text-center pb-1">
                             상단 고정 광고 문의: <a href="mailto:hello@tenone.biz" className="underline">hello@tenone.biz</a>
                         </p>
                     </form>
@@ -263,23 +264,20 @@ export default function WantsPage() {
 
     return (
         <div className="min-h-screen bg-white">
-            {/* 헤더 */}
-            <div className="px-5 pt-8 pb-5 border-b border-neutral-100">
-                <div className="flex items-end justify-between">
-                    <div>
-                        <p className="text-[11px] font-mono text-neutral-400 tracking-[0.3em] uppercase mb-1">JAKKA</p>
-                        <h1 className="text-[32px] font-black tracking-tight leading-none mb-1.5">WANTS</h1>
-                        <p className="text-[13px] font-semibold text-neutral-700">채용, 공모전, 파트너십, 외주 등 창작자를 찾는 기회들</p>
-                    </div>
+            <PageHeader
+                eyebrow="Wants"
+                title="공고"
+                subtitle="채용·공모전·파트너십·외주 — 창작자를 찾는 기회들"
+                action={(
                     <button
                         onClick={() => setModalOpen(true)}
-                        className="flex items-center gap-1.5 text-[13px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors shrink-0"
+                        className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
                     >
                         <PenSquare className="h-3.5 w-3.5" />
                         글쓰기
                     </button>
-                </div>
-            </div>
+                )}
+            />
 
             {/* 고정 광고 (최대 2개) */}
             {pinnedNotices.length > 0 && (
@@ -293,14 +291,14 @@ export default function WantsPage() {
             )}
 
             {/* 타입 필터 */}
-            <div className="sticky top-[44px] md:top-0 z-10 bg-white border-b border-neutral-100 px-5 py-2.5">
+            <div className="sticky top-[44px] md:top-0 z-10 bg-white border-b border-neutral-200 px-5 py-2.5">
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
                     <button
                         onClick={() => setActiveType("전체")}
                         className={`shrink-0 text-[12px] font-bold px-3 py-1.5 border transition-colors ${
                             activeType === "전체"
                                 ? "border-neutral-900 bg-neutral-900 text-white"
-                                : "border-neutral-200 text-neutral-500 hover:border-neutral-400"
+                                : "border-neutral-300 text-neutral-500 hover:border-neutral-400"
                         }`}
                     >
                         전체
@@ -315,7 +313,7 @@ export default function WantsPage() {
                                 className={`shrink-0 text-[12px] font-bold px-3 py-1.5 border transition-colors ${
                                     isActive
                                         ? `border-transparent ${s.bg} ${s.text}`
-                                        : "border-neutral-200 text-neutral-500 hover:border-neutral-400"
+                                        : "border-neutral-300 text-neutral-500 hover:border-neutral-400"
                                 }`}
                             >
                                 {type}
@@ -329,11 +327,11 @@ export default function WantsPage() {
             <div>
                 {loading ? (
                     <div className="flex justify-center py-16">
-                        <Loader2 className="h-5 w-5 animate-spin text-neutral-300" />
+                        <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
                     </div>
                 ) : filteredRegular.length === 0 ? (
                     <div className="py-16 text-center">
-                        <p className="text-[14px] text-neutral-400">등록된 공고가 없습니다.</p>
+                        <p className="text-[14px] text-neutral-600">등록된 공고가 없습니다.</p>
                     </div>
                 ) : (
                     <div className="divide-y divide-neutral-100">

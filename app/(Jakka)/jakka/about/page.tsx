@@ -1,74 +1,46 @@
-"use client";
-
 export default function JakkaAboutPage() {
     return (
-        <section className="py-12 md:py-20">
-            <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
-                    {/* 프로필 사진 */}
-                    <div className="relative overflow-hidden bg-neutral-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&h=1000&fit=crop"
-                            alt="JAKKA 프로필"
-                            className="w-full aspect-[3/4] object-cover"
-                        />
-                        <p className="absolute bottom-0 left-0 bg-white/90 px-3 py-1.5 text-xs text-neutral-600">
-                            자화상
-                        </p>
-                    </div>
+        <div className="min-h-screen bg-white">
+            <div className="max-w-xl mx-auto px-6 py-16 md:py-24">
 
-                    {/* 소개 텍스트 */}
-                    <div>
-                        <h1 className="text-xl md:text-3xl font-light tracking-tight text-neutral-900 mb-6">
-                            안녕하세요
-                        </h1>
-                        <div className="space-y-4 text-sm text-neutral-600 leading-relaxed">
-                            <p>
-                                사진작가 JAKKA입니다. 인물, 스포츠, 항공, 콘서트 등
-                                다양한 장르의 사진을 촬영하고 있습니다.
-                            </p>
-                            <p>
-                                순간의 감정과 에너지를 렌즈에 담아
-                                보는 이에게 그 순간을 전달하는 것이 제 작업의 목표입니다.
-                            </p>
-                            <p>
-                                촬영 문의나 협업 제안은 아래 연락처로 보내주세요.
-                            </p>
-                        </div>
+                <p className="text-[11px] font-mono text-neutral-400 tracking-[0.2em] uppercase mb-10">About JAKKA</p>
 
-                        {/* 연락처 */}
-                        <div className="mt-10 pt-6 border-t border-neutral-200">
-                            <h2 className="text-xs font-semibold text-neutral-900 uppercase tracking-wider mb-4">
-                                Contact
-                            </h2>
-                            <div className="space-y-2 text-sm text-neutral-600">
-                                <p>
-                                    <span className="text-neutral-400 mr-2">Email</span>
-                                    tenone.biz/contact
-                                </p>
-                                <p>
-                                    <span className="text-neutral-400 mr-2">Instagram</span>
-                                    @jakka_photo
-                                </p>
-                            </div>
-                        </div>
+                <h1 className="text-[28px] md:text-[36px] font-black tracking-tight text-neutral-900 leading-snug mb-10">
+                    창작물보다<br />창작한 사람이<br />먼저 보여야 한다.
+                </h1>
 
-                        {/* 장비 */}
-                        <div className="mt-8 pt-6 border-t border-neutral-200">
-                            <h2 className="text-xs font-semibold text-neutral-900 uppercase tracking-wider mb-4">
-                                Equipment
-                            </h2>
-                            <div className="space-y-1 text-sm text-neutral-500">
-                                <p>Nikon Z9</p>
-                                <p>Nikon Z 24-70mm f/2.8 S</p>
-                                <p>Nikon Z 70-200mm f/2.8 VR S</p>
-                                <p>DJI Mavic 3 Pro</p>
-                            </div>
-                        </div>
-                    </div>
+                <div className="space-y-6 text-[15px] text-neutral-700 leading-[1.9]">
+                    <p>
+                        포트폴리오 서비스는 많다. 그런데 대부분은 제작물만 있다.
+                        그 제작물을 만들어낸 사람이 없다.
+                    </p>
+                    <p>
+                        졸업전시회를 봐도 그렇다. 교수가 주인공이거나,
+                        학교 이름이 앞에 나온다. 직접 밤을 새워 만든 작가는
+                        어딘가 뒤에 있다.
+                    </p>
+                    <p>
+                        JAKKA는 그 반대를 만들고 싶었다.
+                    </p>
+                    <p>
+                        작품보다 작가가 먼저 보이는 곳.
+                        이름도, 어떤 사람인지도, 무엇을 좋아하는지도 —
+                        창작물 이전에 창작자 자신이 보이는 포트폴리오.
+                    </p>
+                    <p>
+                        그리고 그 창작자들이 한데 모여 사는 마을.
+                        서로의 작업을 보고, 팔로우하고, 영향을 주고받는 —
+                        작가들이 주인공인 공간.
+                    </p>
                 </div>
+
+                <div className="mt-16 pt-8 border-t border-neutral-100">
+                    <p className="text-[13px] text-neutral-400">
+                        JAKKA는 Ten:One™ Universe의 크리에이터 포트폴리오 플랫폼입니다.
+                    </p>
+                </div>
+
             </div>
-        </section>
+        </div>
     );
 }

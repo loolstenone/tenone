@@ -3,26 +3,31 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Home, Search, Bookmark, Bell, User, MoreHorizontal, Store, LogOut, X, Briefcase } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, LogOut, X, Briefcase, Image as ImageIcon, Settings, HelpCircle, Info } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
+import {
+    getNotifications,
+    getUnreadCount,
+    markAllRead,
+    type JakkaNotification,
+} from "@/lib/supabase/jakka";
 
 const sidebarItems = [
     { icon: Home, label: "홈", href: "/jakka" },
     { icon: Search, label: "작가 탐색", href: "/jakka/explore" },
-    { icon: Store, label: "마켓", href: "/jakka/market" },
-    { icon: Bookmark, label: "저장한 작가", href: "#" },
+    { icon: ImageIcon, label: "쇼케이스", href: "/jakka/showcase" },
+    { icon: ShoppingBag, label: "마켓", href: "/jakka/market" },
     { icon: Briefcase, label: "WANTS", href: "/jakka/wants" },
-    { icon: Bell, label: "알림", href: "#" },
     { icon: User, label: "내 포트폴리오", href: "/jakka/profile" },
 ];
 
 const bottomNavItems = [
     { icon: Home, href: "/jakka" },
     { icon: Search, href: "/jakka/explore" },
-    { icon: Store, href: "/jakka/market" },
-    { icon: Bookmark, href: "#" },
+    { icon: ImageIcon, href: "/jakka/showcase" },
+    { icon: ShoppingBag, href: "/jakka/market" },
     { icon: Briefcase, href: "/jakka/wants" },
     { icon: User, href: "/jakka/profile" },
 ];
@@ -55,11 +60,11 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
                     </div>
                     {!compact && (
                         <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold truncate">{user?.name}</p>
-                            <p className="text-[11px] text-neutral-400 truncate">{user?.email}</p>
+                            <p className="text-[13px] font-bold text-neutral-900 truncate">{user?.name}</p>
+                            <p className="text-[11px] text-neutral-600 truncate">{user?.email}</p>
                         </div>
                     )}
-                    <button onClick={() => logout()} className="p-1.5 text-neutral-400 hover:text-neutral-900 transition-colors">
+                    <button onClick={() => logout()} className="p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors">
                         <LogOut className="h-4 w-4" />
                     </button>
                 </div>
@@ -73,14 +78,14 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
             <div className={`flex ${compact ? "flex-col gap-1 px-2" : "flex-col gap-2 px-3"}`}>
                 <button
                     onClick={() => { setLoginTab("login"); setLoginOpen(true); }}
-                    className="w-full py-2 text-[12px] font-semibold border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors"
+                    className="w-full py-2 text-[12px] font-bold text-neutral-900 border border-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
                     로그인
                 </button>
                 {!compact && (
                     <button
                         onClick={() => { setLoginTab("signup"); setLoginOpen(true); }}
-                        className="w-full py-2 text-[12px] font-semibold border border-neutral-200 hover:bg-neutral-50 transition-colors"
+                        className="w-full py-2 text-[12px] font-bold text-neutral-900 border border-neutral-300 hover:bg-neutral-50 transition-colors"
                     >
                         가입하기
                     </button>
@@ -92,14 +97,22 @@ function AuthSection({ compact = false }: { compact?: boolean }) {
 }
 
 function MobileAuthButton() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user, logout } = useAuth();
     const [loginOpen, setLoginOpen] = useState(false);
 
     if (isAuthenticated) {
         return (
-            <Link href="/jakka/profile" className="p-0.5">
-                <User className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
-            </Link>
+            <button onClick={() => logout()} title="로그아웃" className="group">
+                <div className="w-[28px] h-[28px] rounded-full bg-neutral-200 overflow-hidden border border-neutral-300 group-hover:border-neutral-500 transition-colors">
+                    {user?.avatarUrl ? (
+                        <Image src={user.avatarUrl} alt="" width={28} height={28} className="object-cover w-full h-full" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-neutral-600">
+                            {user?.name?.charAt(0) ?? "U"}
+                        </div>
+                    )}
+                </div>
+            </button>
         );
     }
 
@@ -113,6 +126,90 @@ function MobileAuthButton() {
             </button>
             <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
         </>
+    );
+}
+
+function NotificationSheet({ open, onClose, userId }: { open: boolean; onClose: () => void; userId: string }) {
+    const [notifs, setNotifs] = useState<JakkaNotification[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!open) return;
+        setLoading(true);
+        getNotifications(userId).then((data) => { setNotifs(data); setLoading(false); });
+    }, [open, userId]);
+
+    const handleMarkAll = useCallback(async () => {
+        await markAllRead(userId);
+        setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    }, [userId]);
+
+    const notifLabel = (n: JakkaNotification): string => {
+        if (n.type === 'follow') return `${n.actor_name ?? '누군가'}님이 팔로우했습니다`;
+        if (n.type === 'new_work') return `${n.actor_name ?? '팔로잉'}님이 새 작업을 올렸습니다${n.reference_title ? ` — ${n.reference_title}` : ''}`;
+        if (n.type === 'dm') return `${n.actor_name ?? '누군가'}님의 메시지`;
+        if (n.type === 'sale') return `작업이 판매되었습니다${n.reference_title ? ` — ${n.reference_title}` : ''}`;
+        return '새 알림';
+    };
+
+    if (!open) return null;
+
+    return (
+        <div className="fixed inset-0 z-[160] flex">
+            <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+            <div className="relative w-[340px] bg-white h-full flex flex-col shadow-xl ml-auto">
+                <div className="flex items-center justify-between px-4 h-[52px] border-b border-neutral-100 shrink-0">
+                    <span className="text-[13px] font-bold text-neutral-900">알림</span>
+                    <div className="flex items-center gap-3">
+                        {notifs.some((n) => !n.is_read) && (
+                            <button onClick={handleMarkAll} className="text-[11px] text-neutral-500 hover:text-neutral-900 transition-colors">
+                                모두 읽음
+                            </button>
+                        )}
+                        <button onClick={onClose} className="p-1 text-neutral-400 hover:text-neutral-900">
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto">
+                    {loading ? (
+                        <div className="flex items-center justify-center h-32 text-[13px] text-neutral-400">불러오는 중...</div>
+                    ) : notifs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-48 gap-2">
+                            <Bell className="h-8 w-8 stroke-[1.5] text-neutral-200" />
+                            <p className="text-[13px] text-neutral-400">새 알림이 없습니다</p>
+                        </div>
+                    ) : (
+                        <ul>
+                            {notifs.map((n) => (
+                                <li key={n.id} className={`flex items-start gap-3 px-4 py-3.5 border-b border-neutral-50 ${n.is_read ? '' : 'bg-neutral-50'}`}>
+                                    <div className="w-8 h-8 rounded-full bg-neutral-200 overflow-hidden shrink-0 mt-0.5">
+                                        {n.actor_avatar ? (
+                                            <Image src={n.actor_avatar} alt="" width={32} height={32} className="object-cover w-full h-full" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-[11px] font-bold text-neutral-500">
+                                                {n.actor_name?.charAt(0) ?? '?'}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[13px] text-neutral-800 leading-snug">{notifLabel(n)}</p>
+                                        {n.actor_handle && (
+                                            <p className="text-[11px] text-neutral-400 mt-0.5">{n.actor_handle}</p>
+                                        )}
+                                        <p className="text-[11px] text-neutral-300 mt-0.5">
+                                            {new Date(n.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 shrink-0 mt-1.5" />}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -135,19 +232,30 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     </div>
 
                     <nav className="px-4 py-4 space-y-1 border-b border-neutral-100">
-                        {sidebarItems.map((item) => (
-                            <Link
-                                key={item.label}
-                                href={item.href}
-                                onClick={onClose}
-                                className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900"
-                            >
-                                <item.icon className="h-4 w-4 stroke-[1.5] text-neutral-400" />
-                                {item.label}
-                            </Link>
-                        ))}
+                        <Link href="/jakka/settings" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
+                            <Settings className="h-4 w-4 stroke-[1.5] text-neutral-400" />
+                            설정
+                        </Link>
+                        <Link href="/jakka/upload" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
+                            <ImageIcon className="h-4 w-4 stroke-[1.5] text-neutral-400" />
+                            작업 올리기
+                        </Link>
+                        <Link href="/jakka/wants/new" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
+                            <Briefcase className="h-4 w-4 stroke-[1.5] text-neutral-400" />
+                            공고 올리기
+                        </Link>
                     </nav>
 
+                    <nav className="px-4 py-4 space-y-1">
+                        <Link href="/jakka/about" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700">
+                            <Info className="h-4 w-4 stroke-[1.5] text-neutral-300" />
+                            JAKKA 소개
+                        </Link>
+                        <Link href="/jakka/help" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-500 hover:text-neutral-700">
+                            <HelpCircle className="h-4 w-4 stroke-[1.5] text-neutral-300" />
+                            도움말
+                        </Link>
+                    </nav>
                 </div>
 
                 <div className="px-4 py-4 border-t border-neutral-100">
@@ -166,7 +274,22 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const { isAuthenticated, user } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) { setUnreadCount(0); return; }
+        getUnreadCount(user.id).then(setUnreadCount);
+        const timer = setInterval(() => getUnreadCount(user.id!).then(setUnreadCount), 60_000);
+        return () => clearInterval(timer);
+    }, [isAuthenticated, user?.id]);
+
+    const handleOpenNotif = useCallback(() => {
+        setNotifOpen(true);
+        setUnreadCount(0);
+    }, []);
 
     return (
         <div className="min-h-screen bg-white">
@@ -177,7 +300,14 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                         JAKKA
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Bell className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
+                        <button onClick={handleOpenNotif} className="relative p-0.5">
+                            <Bell className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] bg-neutral-900 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
                         <MobileAuthButton />
                         <button onClick={() => setMenuOpen(true)} className="p-0.5">
                             <MoreHorizontal className="h-[22px] w-[22px] stroke-[2] text-neutral-900" />
@@ -188,6 +318,11 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
 
             {/* Mobile Menu Drawer */}
             <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+
+            {/* Notification Sheet */}
+            {isAuthenticated && user?.id && (
+                <NotificationSheet open={notifOpen} onClose={() => setNotifOpen(false)} userId={user.id} />
+            )}
 
             {/* Desktop Left Sidebar */}
             <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-[72px] xl:w-[245px] border-r border-neutral-200 flex-col z-50 bg-white">
@@ -219,6 +354,24 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                         );
                     })}
                 </nav>
+
+                {/* Notification bell (desktop) */}
+                <div className="px-3 pb-2">
+                    <button
+                        onClick={handleOpenNotif}
+                        className="relative flex items-center gap-4 p-3 rounded-xl w-full hover:bg-neutral-100 transition-colors"
+                    >
+                        <div className="relative shrink-0">
+                            <Bell className="h-[26px] w-[26px] stroke-[1.5] text-neutral-600" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-neutral-900 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </div>
+                        <span className="hidden xl:block text-[15px] text-neutral-700">알림</span>
+                    </button>
+                </div>
 
                 {/* Login / Profile */}
                 <div className="px-0 xl:px-2 pb-3 border-t border-neutral-100 pt-3">
@@ -252,10 +405,11 @@ export function JakkaInstaLayout({ children }: { children: React.ReactNode }) {
                     {bottomNavItems.map((item, i) => {
                         const isActive = pathname === item.href;
                         return (
-                            <Link key={i} href={item.href} className="flex items-center justify-center p-2">
+                            <Link key={i} href={item.href} className="relative flex flex-col items-center justify-center gap-1 p-2">
                                 <item.icon
-                                    className={`h-[26px] w-[26px] transition-all ${isActive ? "stroke-[2.2] fill-neutral-900" : "stroke-[1.5] text-neutral-600"}`}
+                                    className={`h-[24px] w-[24px] transition-all ${isActive ? "stroke-[2.2] text-neutral-900" : "stroke-[1.5] text-neutral-500"}`}
                                 />
+                                <span className={`h-[3px] w-[3px] rounded-full transition-colors ${isActive ? "bg-neutral-900" : "bg-transparent"}`} />
                             </Link>
                         );
                     })}

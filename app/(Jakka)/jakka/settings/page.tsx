@@ -12,7 +12,7 @@ import {
 
 const STATUS_OPTIONS = ["재학 중", "졸업", "재직 중", "프리랜서", "취업 준비 중", "구직 중", "휴학 중", "활동 중단"];
 const FIELD_OPTIONS = [
-    "그래픽 디자인", "브랜딩/편집", "UI/UX", "영상/모션", "일러스트", "디지털 아트",
+    "그래픽 디자인", "브랜딩/편집", "UI/UX", "영상/모션", "일러스트",
     "AI 아트", "캐릭터 디자인", "제품/패키지", "포토그래피", "타이포그래피",
     "파인아트", "공예", "글/소설", "카피/광고", "기타",
 ];
@@ -37,7 +37,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-const inputCls = "w-full border border-neutral-200 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors bg-white";
+const inputCls = "w-full border border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors bg-white";
 const selectCls = `${inputCls} appearance-none`;
 
 export default function JakkaSettingsPage() {
@@ -164,7 +164,7 @@ export default function JakkaSettingsPage() {
     if (authLoading || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
             </div>
         );
     }
@@ -244,7 +244,7 @@ export default function JakkaSettingsPage() {
                                 maxLength={80}
                                 className={inputCls}
                             />
-                            <p className="text-[11px] text-neutral-400 mt-1 text-right">{statement.length}/80</p>
+                            <p className="text-[11px] text-neutral-600 mt-1 text-right">{statement.length}/80</p>
                         </Field>
 
                         <Field label="소개">
@@ -256,7 +256,7 @@ export default function JakkaSettingsPage() {
                                 maxLength={300}
                                 className={`${inputCls} resize-none leading-relaxed`}
                             />
-                            <p className="text-[11px] text-neutral-400 mt-1 text-right">{bio.length}/300</p>
+                            <p className="text-[11px] text-neutral-600 mt-1 text-right">{bio.length}/300</p>
                         </Field>
                     </div>
                 </section>
@@ -296,7 +296,7 @@ export default function JakkaSettingsPage() {
                                 placeholder="일러스트, 캐릭터, 귀여움"
                                 className={inputCls}
                             />
-                            <p className="text-[11px] text-neutral-400 mt-1">쉼표(,)로 구분</p>
+                            <p className="text-[11px] text-neutral-600 mt-1">쉼표(,)로 구분</p>
                             {tagInput.length > 0 && (
                                 <div className="flex gap-1.5 flex-wrap mt-2">
                                     {tagInput.split(",").map((t) => t.trim().replace(/^#/, "")).filter(Boolean).slice(0, 10).map((t) => (
@@ -322,17 +322,17 @@ export default function JakkaSettingsPage() {
                     </div>
 
                     {education.length === 0 && (
-                        <p className="text-[13px] text-neutral-400 text-center py-4 border border-dashed border-neutral-200">
+                        <p className="text-[13px] text-neutral-600 text-center py-4 border border-dashed border-neutral-300">
                             학력을 추가해 주세요
                         </p>
                     )}
 
                     <div className="space-y-4">
                         {education.map((edu, i) => (
-                            <div key={i} className="border border-neutral-200 p-4 relative">
+                            <div key={i} className="border border-neutral-300 p-4 relative">
                                 <button
                                     onClick={() => removeEdu(i)}
-                                    className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-700 transition-colors"
+                                    className="absolute top-3 right-3 text-neutral-600 hover:text-neutral-700 transition-colors"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -384,7 +384,7 @@ export default function JakkaSettingsPage() {
                                             placeholder={edu.is_current ? "재학중" : "2024"}
                                             disabled={edu.is_current}
                                             maxLength={4}
-                                            className={`${inputCls} disabled:bg-neutral-50 disabled:text-neutral-400`}
+                                            className={`${inputCls} disabled:bg-neutral-50 disabled:text-neutral-600`}
                                         />
                                     </div>
                                 </div>
@@ -420,17 +420,17 @@ export default function JakkaSettingsPage() {
                     </div>
 
                     {career.length === 0 && (
-                        <p className="text-[13px] text-neutral-400 text-center py-4 border border-dashed border-neutral-200">
+                        <p className="text-[13px] text-neutral-600 text-center py-4 border border-dashed border-neutral-300">
                             경력을 추가해 주세요
                         </p>
                     )}
 
                     <div className="space-y-4">
                         {career.map((c, i) => (
-                            <div key={i} className="border border-neutral-200 p-4 relative">
+                            <div key={i} className="border border-neutral-300 p-4 relative">
                                 <button
                                     onClick={() => removeCareer(i)}
-                                    className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-700 transition-colors"
+                                    className="absolute top-3 right-3 text-neutral-600 hover:text-neutral-700 transition-colors"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -472,7 +472,7 @@ export default function JakkaSettingsPage() {
                                             placeholder={c.is_current ? "재직중" : "2024"}
                                             disabled={c.is_current}
                                             maxLength={4}
-                                            className={`${inputCls} disabled:bg-neutral-50 disabled:text-neutral-400`}
+                                            className={`${inputCls} disabled:bg-neutral-50 disabled:text-neutral-600`}
                                         />
                                     </div>
                                     <div className="col-span-2">
@@ -519,7 +519,7 @@ export default function JakkaSettingsPage() {
                     </div>
 
                     {links.length === 0 && (
-                        <p className="text-[13px] text-neutral-400 text-center py-4 border border-dashed border-neutral-200">
+                        <p className="text-[13px] text-neutral-600 text-center py-4 border border-dashed border-neutral-300">
                             포트폴리오, SNS, 사이트 링크를 추가해 주세요
                         </p>
                     )}
@@ -542,7 +542,7 @@ export default function JakkaSettingsPage() {
                                 />
                                 <button
                                     onClick={() => removeLink(i)}
-                                    className="mt-2.5 text-neutral-400 hover:text-neutral-700 transition-colors shrink-0"
+                                    className="mt-2.5 text-neutral-600 hover:text-neutral-700 transition-colors shrink-0"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -558,7 +558,7 @@ export default function JakkaSettingsPage() {
                     className={`w-full py-3.5 text-[14px] font-semibold transition-colors flex items-center justify-center gap-2 ${
                         !saving && handleAvailable !== false
                             ? "bg-neutral-900 text-white hover:opacity-80"
-                            : "bg-neutral-100 text-neutral-300 cursor-not-allowed"
+                            : "bg-neutral-100 text-neutral-500 cursor-not-allowed"
                     }`}
                 >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
