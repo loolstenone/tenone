@@ -198,6 +198,8 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "창작자 관리", href: "/intra/ums/jakka" },
                             { name: "마켓 판매자 심사", href: "/intra/ums/jakka/sellers" },
+                            { name: "마켓 관리", href: "/intra/ums/jakka/market" },
+                            { name: "쇼케이스 관리", href: "/intra/ums/jakka/showcases" },
                             { name: "광고 관리", href: "/intra/ums/jakka/notices" },
                         ],
                     },

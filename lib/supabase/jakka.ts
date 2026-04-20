@@ -434,6 +434,15 @@ export interface JakkaShowcase {
     admin_user_id: string | null;
     rejected_at: string | null;
     approved_at: string | null;
+    start_time: string | null;
+    end_time: string | null;
+    open_hours: string | null;
+    closed_days: string | null;
+    admission_fee: string | null;
+    reservation_url: string | null;
+    parking_info: string | null;
+    contact_phone: string | null;
+    contact_email: string | null;
     created_at: string;
     updated_at: string;
     organizer?: JakkaCreator;
@@ -501,6 +510,8 @@ export async function createShowcase(params: {
     location?: string;
     startDate: string;
     endDate: string;
+    startTime?: string;
+    endTime?: string;
     approverEmails: [string, string, string];
     publishMode?: 'immediate' | 'scheduled';
 }): Promise<{ showcase: JakkaShowcase; approvals: JakkaShowcaseApproval[] } | null> {
@@ -518,6 +529,8 @@ export async function createShowcase(params: {
             location: params.location || null,
             start_date: params.startDate,
             end_date: params.endDate,
+            start_time: params.startTime || null,
+            end_time: params.endTime || null,
             publish_mode: params.publishMode ?? 'immediate',
         })
         .select()
@@ -846,6 +859,8 @@ export interface JakkaShowcaseArtist {
     creator_id: string;
     role: 'organizer' | 'participant' | 'admin' | 'member';
     invite_status?: string;
+    statement: string | null;
+    statement_updated_at: string | null;
     created_at: string;
     creator?: JakkaCreator;
 }
@@ -856,6 +871,8 @@ export interface JakkaShowcaseWork {
     work_id: string;
     creator_id: string;
     display_order: number;
+    caption: string | null;
+    title_override: string | null;
     created_at: string;
     work?: JakkaWork;
 }
@@ -944,6 +961,137 @@ export async function getShowcaseByIdentifier(identifier: string): Promise<Jakka
 }
 
 /** 쇼케이스 핸들 설정 (관리자 전용) */
+// ── 쇼케이스 작가 업데이트 ───────────────────────────────────
+
+export interface ShowcaseUpdate {
+    id: string;
+    showcase_id: string;
+    author_id: string;
+    title: string | null;
+    body: string;
+    image_url: string | null;
+    is_pinned: boolean;
+    created_at: string;
+    updated_at: string;
+    author_name?: string | null;
+    author_handle?: string | null;
+}
+
+export async function getShowcaseUpdates(showcaseId: string): Promise<ShowcaseUpdate[]> {
+    try {
+        const { data } = await supabase
+            .from('jakka_showcase_updates')
+            .select('*')
+            .eq('showcase_id', showcaseId)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false });
+        const rows = (data ?? []) as unknown as Omit<ShowcaseUpdate, 'author_name' | 'author_handle'>[];
+        if (rows.length === 0) return [];
+        const authorIds = Array.from(new Set(rows.map((r) => r.author_id)));
+        const { data: creators } = await supabase
+            .from('jakka_creators')
+            .select('user_id, handle, display_name')
+            .in('user_id', authorIds);
+        const creatorRows = (creators ?? []) as Array<{ user_id: string; handle: string; display_name: string }>;
+        const nameMap: Record<string, { name: string; handle: string }> = Object.fromEntries(
+            creatorRows.map((c) => [c.user_id, { name: c.display_name, handle: c.handle }])
+        );
+        return rows.map((r) => ({
+            ...r,
+            author_name: nameMap[r.author_id]?.name ?? null,
+            author_handle: nameMap[r.author_id]?.handle ?? null,
+        }));
+    } catch { return []; }
+}
+
+export async function createShowcaseUpdate(
+    showcaseId: string,
+    authorId: string,
+    input: { title?: string; body: string; imageUrl?: string; isPinned?: boolean },
+): Promise<ShowcaseUpdate | null> {
+    try {
+        const { data, error } = await supabase
+            .from('jakka_showcase_updates')
+            .insert({
+                showcase_id: showcaseId,
+                author_id: authorId,
+                title: input.title ?? null,
+                body: input.body,
+                image_url: input.imageUrl ?? null,
+                is_pinned: input.isPinned ?? false,
+            })
+            .select()
+            .single();
+        if (error || !data) return null;
+        return data as unknown as ShowcaseUpdate;
+    } catch { return null; }
+}
+
+export async function deleteShowcaseUpdate(updateId: string): Promise<boolean> {
+    try {
+        const { error } = await supabase.from('jakka_showcase_updates').delete().eq('id', updateId);
+        return !error;
+    } catch { return false; }
+}
+
+// ── 참가 작가 statement / 작품 caption 편집 ─────────────────
+
+export async function updateShowcaseArtistStatement(
+    showcaseId: string,
+    creatorId: string,
+    statement: string,
+): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('jakka_showcase_artists')
+            .update({ statement: statement || null, statement_updated_at: new Date().toISOString() })
+            .eq('showcase_id', showcaseId)
+            .eq('creator_id', creatorId);
+        return !error;
+    } catch { return false; }
+}
+
+export async function updateShowcaseWorkCaption(
+    showcaseWorkId: string,
+    input: { caption?: string | null; title_override?: string | null; display_order?: number },
+): Promise<boolean> {
+    try {
+        const payload: Record<string, unknown> = {};
+        if (input.caption !== undefined) payload.caption = input.caption || null;
+        if (input.title_override !== undefined) payload.title_override = input.title_override || null;
+        if (input.display_order !== undefined) payload.display_order = input.display_order;
+        const { error } = await supabase
+            .from('jakka_showcase_works')
+            .update(payload)
+            .eq('id', showcaseWorkId);
+        return !error;
+    } catch { return false; }
+}
+
+export async function updateShowcaseVisitInfo(
+    showcaseId: string,
+    userId: string,
+    info: {
+        start_time?: string | null;
+        end_time?: string | null;
+        open_hours?: string | null;
+        closed_days?: string | null;
+        admission_fee?: string | null;
+        reservation_url?: string | null;
+        parking_info?: string | null;
+        contact_phone?: string | null;
+        contact_email?: string | null;
+    },
+): Promise<{ ok: boolean; error?: string }> {
+    const { error } = await supabase
+        .from('jakka_showcases')
+        .update(info)
+        .eq('id', showcaseId)
+        .eq('admin_user_id', userId);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+}
+
 export async function setShowcaseHandle(showcaseId: string, userId: string, handle: string): Promise<{ ok: boolean; error?: string }> {
     const normalized = handle.startsWith('@') ? handle : `@${handle}`;
     const { error } = await supabase

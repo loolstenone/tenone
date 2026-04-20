@@ -27,7 +27,9 @@ export default function NewShowcasePage() {
     const [category, setCategory] = useState("");
     const [location, setLocation] = useState("");
     const [startDate, setStartDate] = useState("");
+    const [startTime, setStartTime] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [endTime, setEndTime] = useState("");
     const [coverImage, setCoverImage] = useState("");
     const [coverPosition, setCoverPosition] = useState(50); // object-position-y %
     // 참여 작가 핸들 (대표자 제외 최대 10명)
@@ -89,6 +91,8 @@ export default function NewShowcasePage() {
                 location: location.trim() || undefined,
                 startDate,
                 endDate,
+                startTime: startTime || undefined,
+                endTime: endTime || undefined,
                 approverEmails: [emails[0], emails[1], emails[2]],
                 publishMode,
             });
@@ -184,6 +188,12 @@ export default function NewShowcasePage() {
                     </Field>
                     <Field label="종료일" required>
                         <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputCls} />
+                    </Field>
+                    <Field label="오픈 시각">
+                        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputCls} />
+                    </Field>
+                    <Field label="종료 시각">
+                        <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputCls} />
                     </Field>
                 </div>
 

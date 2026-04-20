@@ -251,6 +251,12 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 | `features/jakka/PurchaseModal.tsx` | 구매 문의 접수 모달 |
 | `app/intra/ums/jakka/sellers/page.tsx` | 인트라 마켓 판매자 심사 |
 | `app/api/intra/jakka/sellers/route.ts` | 심사 승인·반려 API |
+| `app/(Jakka)/jakka/showcase/[slug]/page.tsx` | 쇼케이스 상세 (공유·위치·관람정보·작가 업데이트·참가 작가 편집·카운트다운) |
+| `app/(Jakka)/jakka/showcase/new/page.tsx` | 쇼케이스 신청 (3명 승인·오픈시간 분단위·publish_mode) |
+| `app/intra/ums/jakka/market/page.tsx` | 인트라 마켓 관리 (개요/상품/주문 + 매출·수수료) |
+| `app/intra/ums/jakka/showcases/page.tsx` | 인트라 쇼케이스 관리 (5탭 + 강제 승인/반려/종료) |
+| `app/api/intra/jakka/market/route.ts` | 인트라 마켓 조회 API (products/orders/stats) |
+| `app/api/intra/jakka/showcases/route.ts` | 인트라 쇼케이스 조회/조치 API |
 | `app/(Jakka)/jakka/category/page.tsx` | 카테고리 인덱스 |
 | `app/(Jakka)/jakka/[handle]/page.tsx` | 크리에이터 포트폴리오 공개 |
 | `app/(Jakka)/jakka/profile/page.tsx` | 크리에이터 프로필 (본인 편집) |
