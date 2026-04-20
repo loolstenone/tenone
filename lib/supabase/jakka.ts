@@ -1302,6 +1302,7 @@ export interface JakkaProduct {
     is_limited: boolean;
     stock: number | null;
     sold_count: number;
+    likes_count: number;
     status: ProductStatus;
     created_at: string;
     updated_at: string;
@@ -1407,4 +1408,62 @@ export async function deleteProduct(productId: string): Promise<boolean> {
         const { error } = await supabase.from('jakka_products').delete().eq('id', productId);
         return !error;
     } catch { return false; }
+}
+
+// ───── 상품 좋아요 (Phase A-1) ─────
+
+export async function isProductLiked(productId: string, userId: string): Promise<boolean> {
+    try {
+        const { data } = await supabase
+            .from('jakka_product_likes')
+            .select('product_id')
+            .eq('product_id', productId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        return !!data;
+    } catch { return false; }
+}
+
+/** 좋아요 토글. 성공 시 { liked: 새 상태 } 반환. */
+export async function toggleProductLike(
+    productId: string,
+    userId: string,
+): Promise<{ liked: boolean } | null> {
+    try {
+        const { data: existing } = await supabase
+            .from('jakka_product_likes')
+            .select('product_id')
+            .eq('product_id', productId)
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (existing) {
+            await supabase
+                .from('jakka_product_likes')
+                .delete()
+                .eq('product_id', productId)
+                .eq('user_id', userId);
+            return { liked: false };
+        } else {
+            await supabase
+                .from('jakka_product_likes')
+                .insert({ product_id: productId, user_id: userId });
+            return { liked: true };
+        }
+    } catch { return null; }
+}
+
+export async function getLikedProducts(userId: string): Promise<JakkaProduct[]> {
+    try {
+        const { data } = await supabase
+            .from('jakka_product_likes')
+            .select('product_id, jakka_products(*, creator:jakka_creators(*))')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        type Row = { product_id: string; jakka_products: JakkaProduct | null };
+        return (data as unknown as Row[] | null ?? [])
+            .map(r => r.jakka_products)
+            .filter((p): p is JakkaProduct => !!p && p.status === 'active');
+    } catch { return []; }
 }
