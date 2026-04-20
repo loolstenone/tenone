@@ -270,64 +270,72 @@ function LoginForm() {
 
     // 브랜드 사이트 로그인 (동적 사이트명 + 브랜드 컬러)
     const siteName = site?.name || 'Ten:One™';
-    const primaryColor = site?.colors?.primary || '#171717'; // 브랜드 primary, 없으면 neutral-900
+    // TenOne 자체는 테마 반응형(`var(--tn-text)`). 브랜드 사이트는 해당 브랜드 primary 유지.
+    const isTenoneSite = !site || siteId === 'tenone';
+    const brandPrimary = site?.colors?.primary;
+    const primaryColor = isTenoneSite ? 'var(--tn-text)' : (brandPrimary || 'var(--tn-text)');
+    const buttonBg = primaryColor;
+    const buttonText = isTenoneSite ? 'var(--tn-bg)' : '#ffffff';
     const signupPath = site?.signupPath || '/signup';
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "var(--tn-bg)" }}>
             <div className="w-full max-w-md">
                 <div className="text-center mb-10">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-wider text-neutral-900">{siteName}</h1>
-                    <p className="text-sm text-neutral-700 mt-2">{siteName}에 로그인</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-wider" style={{ color: "var(--tn-text)" }}>{siteName}</h1>
+                    <p className="text-sm mt-2" style={{ color: "var(--tn-text-sub)" }}>{siteName}에 로그인</p>
                 </div>
 
-                <div className="border border-neutral-200 p-8">
+                <div className="border p-8" style={{ borderColor: "var(--tn-border)", backgroundColor: "var(--tn-surface)" }}>
                     <div className="mb-6">
-                        <h2 className="text-xl font-bold text-neutral-900">로그인</h2>
-                        <p className="text-sm text-neutral-700 mt-1">계정에 로그인하세요</p>
+                        <h2 className="text-xl font-bold" style={{ color: "var(--tn-text)" }}>로그인</h2>
+                        <p className="text-sm mt-1" style={{ color: "var(--tn-text-sub)" }}>계정에 로그인하세요</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">이메일</label>
+                            <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: "var(--tn-text-sub)" }}>이메일</label>
                             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                                 placeholder="email@example.com" required
-                                className="w-full border border-neutral-300 px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900"
-                                style={{ '--tw-ring-color': primaryColor } as React.CSSProperties} />
+                                className="w-full border px-4 py-3 text-sm focus:outline-none"
+                                style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)", borderColor: "var(--tn-border)" } as React.CSSProperties} />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">비밀번호</label>
+                            <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: "var(--tn-text-sub)" }}>비밀번호</label>
                             <div className="relative">
                                 <input id="password" type={showPassword ? 'text' : 'password'} value={password}
                                     onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
-                                    className="w-full border border-neutral-300 px-4 py-3 pr-12 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900" />
+                                    className="w-full border px-4 py-3 pr-12 text-sm focus:outline-none"
+                                    style={{ backgroundColor: "var(--tn-surface)", color: "var(--tn-text)", borderColor: "var(--tn-border)" }} />
                                 <button type="button"
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowPassword(prev => !prev); }}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 transition-colors">
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                                    style={{ color: "var(--tn-text-muted)" }}>
                                     {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                                 </button>
                             </div>
                         </div>
 
                         {error && (
-                            <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+                            <div className="border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">{error}</div>
                         )}
 
                         <button type="submit" disabled={isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-                            style={{ backgroundColor: primaryColor }}>
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                            style={{ backgroundColor: buttonBg, color: buttonText }}>
                             {isSubmitting ? (
-                                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div className="h-4 w-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
                             ) : (<><LogIn className="h-4 w-4" /> 로그인</>)}
                         </button>
                     </form>
 
                     {(site?.authMethods?.google || site?.authMethods?.kakao) && (
-                    <div className="mt-6 pt-6 border-t border-neutral-100 space-y-3">
-                        <p className="text-xs text-neutral-600 text-center">또는 소셜 계정으로 로그인</p>
+                    <div className="mt-6 pt-6 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
+                        <p className="text-xs text-center" style={{ color: "var(--tn-text-muted)" }}>또는 소셜 계정으로 로그인</p>
                         {site?.authMethods?.google && (
                         <button onClick={loginWithGoogle} type="button"
-                            className="w-full flex items-center justify-center gap-3 border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors">
+                            className="w-full flex items-center justify-center gap-3 border px-4 py-3 text-sm font-medium transition-colors hover:opacity-80"
+                            style={{ color: "var(--tn-text-sub)", borderColor: "var(--tn-border)", backgroundColor: "var(--tn-surface)" }}>
                             <svg className="h-4 w-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             Google로 로그인
                         </button>
@@ -343,19 +351,19 @@ function LoginForm() {
                     )}
 
                     <div className="mt-3 text-center">
-                        <Link href="/reset-password" className="text-xs text-neutral-700 hover:text-neutral-900 underline transition-colors">비밀번호를 잊으셨나요?</Link>
+                        <Link href="/reset-password" className="text-xs underline transition-colors hover:opacity-80" style={{ color: "var(--tn-text-sub)" }}>비밀번호를 잊으셨나요?</Link>
                     </div>
-                    <p className="text-[11px] text-neutral-600 text-center mt-2">
+                    <p className="text-[11px] text-center mt-2" style={{ color: "var(--tn-text-muted)" }}>
                         소셜 계정(Google/카카오)으로 가입하셨다면 위 소셜 버튼으로 로그인하세요.
                     </p>
                     <div className="mt-4 text-center">
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-sm" style={{ color: "var(--tn-text-sub)" }}>
                             계정이 없으신가요? <Link href={signupPath === '/signup' ? signupHref(redirectTo !== '/' ? redirectTo : null) : signupPath} className="font-medium hover:underline" style={{ color: primaryColor }}>회원가입</Link>
                         </p>
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-neutral-600 mt-8">&copy; {new Date().getFullYear()} {siteName}. Powered by Ten:One™ Universe.</p>
+                <p className="text-center text-xs mt-8" style={{ color: "var(--tn-text-muted)" }}>&copy; Ten:One™ Universe.</p>
             </div>
         </div>
     );
