@@ -2,16 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 
-const adminSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
-
 /**
  * DELETE /api/account/delete
  * 계정 탈퇴: members 익명화 + auth user 삭제
  */
 export async function DELETE(request: NextRequest) {
+    const adminSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
     const supabase = await createServerClient();
     const { data: { user }, error: sessionError } = await supabase.auth.getUser();
 
