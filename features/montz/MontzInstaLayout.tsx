@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings } from "lucide-react";
+import { Home, Search, Megaphone, User, LogOut, X, MoreHorizontal, Info, HelpCircle, Settings, Mail } from "lucide-react";
+import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 
@@ -114,6 +115,7 @@ function MobileAuthButton() {
 }
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const [newsletterOpen, setNewsletterOpen] = useState(false);
     if (!open) return null;
     return (
         <div className="fixed inset-0 z-[150] flex">
@@ -132,6 +134,13 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     </div>
 
                     <nav className="px-4 py-4 space-y-1 border-b border-neutral-100">
+                        <button
+                            onClick={() => setNewsletterOpen(true)}
+                            className="w-full flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900"
+                        >
+                            <Mail className="h-4 w-4 stroke-[1.5] text-neutral-400" />
+                            뉴스레터 구독
+                        </button>
                         <Link href="/montz/settings" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
                             <Settings className="h-4 w-4 stroke-[1.5] text-neutral-400" />
                             설정
@@ -159,6 +168,14 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     </p>
                 </div>
             </div>
+            <NewsletterModal
+                isOpen={newsletterOpen}
+                onClose={() => setNewsletterOpen(false)}
+                source="montz"
+                title="MoNTZ 뉴스레터"
+                subtitle="새 전시·작가 프로필·이벤트 소식을 받아보세요."
+                accentColor="#c8a97e"
+            />
         </div>
     );
 }

@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, LogOut, X, Briefcase, Image as ImageIcon, Settings, HelpCircle, Info } from "lucide-react";
+import { Home, Search, Bell, User, MoreHorizontal, ShoppingBag, LogOut, X, Briefcase, Image as ImageIcon, Settings, HelpCircle, Info, Mail } from "lucide-react";
+import NewsletterModal from "@/components/newsletter/NewsletterModal";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import {
@@ -214,6 +215,7 @@ function NotificationSheet({ open, onClose, userId }: { open: boolean; onClose: 
 }
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const [newsletterOpen, setNewsletterOpen] = useState(false);
     if (!open) return null;
     return (
         <div className="fixed inset-0 z-[150] flex">
@@ -232,6 +234,13 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     </div>
 
                     <nav className="px-4 py-4 space-y-1 border-b border-neutral-100">
+                        <button
+                            onClick={() => setNewsletterOpen(true)}
+                            className="w-full flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900"
+                        >
+                            <Mail className="h-4 w-4 stroke-[1.5] text-neutral-400" />
+                            뉴스레터 구독
+                        </button>
                         <Link href="/jakka/settings" onClick={onClose} className="flex items-center gap-3 py-2.5 text-[14px] text-neutral-700 hover:text-neutral-900">
                             <Settings className="h-4 w-4 stroke-[1.5] text-neutral-400" />
                             설정
@@ -268,6 +277,14 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                 </div>
 
             </div>
+            <NewsletterModal
+                isOpen={newsletterOpen}
+                onClose={() => setNewsletterOpen(false)}
+                source="jakka"
+                title="JAKKA 뉴스레터"
+                subtitle="새 쇼케이스·마켓 신작·작가 소식을 가장 먼저 받아보세요."
+                accentColor="#171717"
+            />
         </div>
     );
 }

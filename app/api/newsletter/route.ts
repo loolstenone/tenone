@@ -20,6 +20,8 @@ const BRAND_CONFIG: Record<string, { name: string; color: string; fromName: stri
     hero:    { name: 'HeRo',             color: '#0a0a0a', fromName: 'HeRo Newsletter' },
     badak:   { name: 'Badak',            color: '#0a0a0a', fromName: 'Badak Newsletter' },
     myverse: { name: 'Myverse',          color: '#6366f1', fromName: 'Myverse Newsletter' },
+    jakka:   { name: 'JAKKA',            color: '#171717', fromName: 'JAKKA Newsletter' },
+    montz:   { name: 'MoNTZ',            color: '#c8a97e', fromName: 'MoNTZ Newsletter' },
 };
 
 /** 구독자 id → base64url 토큰 */
