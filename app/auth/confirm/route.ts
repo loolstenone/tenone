@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { getCookieDomain } from '@/lib/domain-registry';
 import { earnUC } from '@/lib/supabase/uc';
 import type { EmailOtpType } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabaseAdmin = createAdminClient();
 
 /**
  * OTP 기반 인증 확인 엔드포인트 (PKCE 대체)

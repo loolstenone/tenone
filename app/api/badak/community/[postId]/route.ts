@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-const supabase = createClient(url, key);
+const supabase = createAdminClient();
 
 // GET: 글 상세 + 조회수 증가 (로그인 유저: 중복 방지 / 비로그인: 매 요청 +1)
 export async function GET(request: NextRequest, { params }: { params: Promise<{ postId: string }> }) {

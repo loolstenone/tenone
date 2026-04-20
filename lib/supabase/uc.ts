@@ -1,9 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabase = createAdminClient();
 
 // 유저 전체 기준 1회 (brand_id 무관)
 const LIFE_ONCE_GLOBAL = new Set([

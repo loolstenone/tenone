@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // members.affiliations에 'badak' 추가 (중복 방지)
 async function addBadakAffiliation(client: SupabaseClient, authUserId: string) {
@@ -18,10 +19,7 @@ async function addBadakAffiliation(client: SupabaseClient, authUserId: string) {
     .eq('auth_id', authUserId);
 }
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-const supabase = createClient(url, key);
+const supabase = createAdminClient();
 
 // PATCH: 온보딩 필수 정보 입력
 export async function PATCH(request: NextRequest) {

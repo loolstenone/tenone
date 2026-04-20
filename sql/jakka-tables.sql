@@ -85,6 +85,21 @@ CREATE POLICY "jakka_follows_delete" ON jakka_follows FOR DELETE USING (
     auth.uid() = (SELECT user_id FROM jakka_creators WHERE id = follower_id)
 );
 
+-- ─── jakka_bookmarks ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS jakka_bookmarks (
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    creator_id  uuid NOT NULL REFERENCES jakka_creators(id) ON DELETE CASCADE,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, creator_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_jakka_bookmarks_creator ON jakka_bookmarks(creator_id);
+
+ALTER TABLE jakka_bookmarks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "jakka_bookmarks_select" ON jakka_bookmarks FOR SELECT USING (true);
+CREATE POLICY "jakka_bookmarks_insert" ON jakka_bookmarks FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "jakka_bookmarks_delete" ON jakka_bookmarks FOR DELETE USING (auth.uid() = user_id);
+
 -- ─── jakka_likes ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jakka_likes (
     user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -157,3 +172,19 @@ $$;
 CREATE TRIGGER trg_jakka_likes_count
 AFTER INSERT OR DELETE ON jakka_likes
 FOR EACH ROW EXECUTE FUNCTION jakka_update_likes_count();
+
+CREATE OR REPLACE FUNCTION jakka_update_bookmarks_count()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE jakka_creators SET bookmarks_count = bookmarks_count + 1 WHERE id = NEW.creator_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE jakka_creators SET bookmarks_count = GREATEST(bookmarks_count - 1, 0) WHERE id = OLD.creator_id;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER trg_jakka_bookmarks_count
+AFTER INSERT OR DELETE ON jakka_bookmarks
+FOR EACH ROW EXECUTE FUNCTION jakka_update_bookmarks_count();

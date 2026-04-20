@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createAdmin } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const supabase = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabase = createAdminClient();
 
 // GET /api/badak/members/me — 현재 로그인 사용자의 바닥 멤버 프로필
 export async function GET(request: NextRequest) {

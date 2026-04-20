@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { randomBytes } from 'crypto';
 import { getAllExternalDomains } from '@/lib/domain-registry';
 
@@ -61,10 +61,7 @@ export async function GET(request: NextRequest) {
     const token = randomBytes(32).toString('hex');
 
     // service_role 키로 sso_tokens 테이블에 INSERT (RLS 우회)
-    const adminClient = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+const adminClient = createAdminClient();
 
     const { error } = await adminClient.from('sso_tokens').insert({
         token,

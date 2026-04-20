@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * SSO Exchange — 타 도메인(smarcomm.biz 등)에서 호출
@@ -25,10 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     // service_role로 토큰 조회 (RLS ��회)
-    const adminClient = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+const adminClient = createAdminClient();
 
     const { data: ssoToken, error: fetchError } = await adminClient
         .from('sso_tokens')

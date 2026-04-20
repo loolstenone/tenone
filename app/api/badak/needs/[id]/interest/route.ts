@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-const supabase = createClient(url, key);
+const supabase = createAdminClient();
 
 // GET: 해당 니즈에 관심 표명한 멤버 목록 + 본인 여부
 export async function GET(

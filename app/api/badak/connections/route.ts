@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getOrCreateDirectThread } from '@/lib/wio/talk';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-const supabase = createClient(url, key);
+const supabase = createAdminClient();
 
 // 일일 전송 상한
 const DAILY_LIMIT = 5;
