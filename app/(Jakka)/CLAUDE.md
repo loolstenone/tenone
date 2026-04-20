@@ -243,6 +243,14 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 | `app/(Jakka)/jakka/page.tsx` | 갤러리 홈 (추천 작품·작가) |
 | `app/(Jakka)/jakka/explore/page.tsx` | 작품 탐색 (카테고리·필터·검색) |
 | `app/(Jakka)/jakka/market/page.tsx` | 마켓 (판매 상품 카테고리) |
+| `app/(Jakka)/jakka/market/[id]/page.tsx` | 상품 상세 (찜·공유·관련작품·스펙·조회수·입고알림·Q&A·구매플로우) |
+| `app/(Jakka)/jakka/market/apply/page.tsx` | 마켓 입점 신청 (소개·포트폴리오·정산계좌·약관) |
+| `app/(Jakka)/jakka/market/upload/page.tsx` | 작품 등록 (승인 작가만) |
+| `app/(Jakka)/jakka/market/edit/[id]/page.tsx` | 상품 수정 |
+| `app/(Jakka)/jakka/seller/page.tsx` | 판매자 센터 (홈·상품·주문·문의·설정 탭) |
+| `features/jakka/PurchaseModal.tsx` | 구매 문의 접수 모달 |
+| `app/intra/ums/jakka/sellers/page.tsx` | 인트라 마켓 판매자 심사 |
+| `app/api/intra/jakka/sellers/route.ts` | 심사 승인·반려 API |
 | `app/(Jakka)/jakka/category/page.tsx` | 카테고리 인덱스 |
 | `app/(Jakka)/jakka/[handle]/page.tsx` | 크리에이터 포트폴리오 공개 |
 | `app/(Jakka)/jakka/profile/page.tsx` | 크리에이터 프로필 (본인 편집) |
@@ -296,10 +304,33 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta (2026-04-20) — 크리에이터 포트폴리오 기본 완성. 마켓 목록·상세 완성. |
-| **개발 수준** | 포트폴리오·탐색·업로드·마켓(목록+상세) 완성. 마켓 상품 등록 UI 미완. |
-| **이월 작업** | 마켓 상품 수정·삭제 UI (마이페이지 내 "내 상품" 탭에서) |
-| **최근 결정** | `jakka_products` Production DB 확인 완료 / 상세·등록 모두 client-side / 마켓 목록에 크리에이터 전용 "상품 등록" 버튼 추가 |
+| **Phase** | Beta (2026-04-21) — 마켓 디테일 8기능 + 입점 승인제 + 판매자 센터 완성 |
+| **개발 수준** | 포트폴리오·탐색·업로드 + 마켓 전체 플로우(목록→상세→신청→승인→등록→판매→정산) 완성 |
+| **이월 작업** | 입점 승인/반려 시 이메일 알림, 정산 리포트 자동 생성, 구매 실결제 통합 |
+| **최근 결정** | NFT 카테고리 완전 제거 (실체 없이 메타데이터만 있는 상태라 제거) / 플랫폼 수수료 15% 기본 / 주문 MVP = 구매 문의 접수 (실결제 후속) / 품절 시 입고 알림 신청 |
+
+### Phase A 마켓 디테일 (2026-04-20~21)
+
+- **A-1 찜·공유**: `jakka_product_likes` + likes_count 트리거, X/Threads 공유
+- **A-2 관련 작품**: 같은 작가/같은 카테고리 각 4개
+- **A-3 작품 스펙**: dimensions·material·production_year·edition·is_signed·has_certificate
+- **A-4 조회수**: `view_count` + `jakka_increment_product_view` RPC
+- **A-5 입고 알림**: `jakka_product_notify` (품절 상품 버튼 동적 전환)
+- **A-6 Q&A**: `jakka_product_qna` (공개/비공개, 작가 답변, 삭제)
+- **A-7 ~~NFT~~**: 삭제됨 (실체 없음)
+- **A-8 구매 플로우**: `jakka_orders` + `PurchaseModal` (배송지/메시지, status 6단계)
+
+### Phase B 입점 승인제
+
+- `jakka_creators.seller_status` (none/pending/approved/rejected/suspended)
+- `jakka_seller_applications` 테이블
+- `/jakka/market/apply` 신청 폼, `/jakka/market/upload` 승인자 게이트
+- `/intra/ums/jakka/sellers` 인트라 심사 페이지 + `/api/intra/jakka/sellers`
+
+### Phase C 판매자 센터
+
+- `/jakka/seller` 단일 페이지 5탭 (홈/상품/주문/문의/설정)
+- 대기 알림·통계(조회·찜·매출)·주문 상태 전환·Q&A 답변·수수료 확인
 
 ---
 

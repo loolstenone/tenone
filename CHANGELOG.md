@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-04-21 (세션 64) — Jakka 마켓 완결: 디테일 8기능 + 입점 승인제 + 판매자 센터
+
+### Phase A — 마켓 상품 디테일 페이지 확장
+- **A-1 찜/공유**: `jakka_product_likes` 테이블, `likes_count` 트리거, 로그인 게이트 + 낙관적 UI, 링크복사/X/Threads 공유 드롭다운
+- **A-2 관련 작품**: 같은 작가/같은 카테고리 각 4개 그리드. `RelatedCard` 컴포넌트
+- **A-3 스펙**: `dimensions`/`material`/`production_year`/`edition_number`·`edition_total`/`is_signed`/`has_certificate`
+- **A-4 조회수**: `view_count` + `jakka_increment_product_view(uuid)` RPC (anon/authenticated 호출 가능)
+- **A-5 입고 알림**: `jakka_product_notify` — 품절 상품에서 "입고 시 알림" 토글
+- **A-6 Q&A**: `jakka_product_qna` — 공개/비공개, 작가 답변, 삭제 (RLS 복합 조건)
+- **A-7 NFT 제거**: 실체 없는 메타데이터만 있는 상태라 완전 제거 (카테고리 CHECK, currency ETH, NFT 전용 컬럼 6개, wallet_address 삭제)
+- **A-8 구매 플로우**: `jakka_orders` 테이블 + `features/jakka/PurchaseModal` (수량·배송지·메시지·작가전달, status 6단계: pending→confirmed→paid→shipped→completed/cancelled)
+- **더미 상품 20개 seed** — 한린·유나·민서·지우·태호 등 15작가 다양한 카테고리/가격대
+- **RLS 수정**: sold_out 상품도 퍼블릭 조회 허용 (기존 active만 허용하던 정책)
+
+### Phase B — 마켓 입점 승인제
+- `jakka_creators` 확장: `seller_status` (none/pending/approved/rejected/suspended), `seller_approved_at`, `seller_commission_rate` (기본 0.15)
+- **`jakka_seller_applications`** 신규: 자기소개, 주력 카테고리, 포트폴리오 URL, 개인/사업자 구분, 사업자번호, 세금계산서 이메일, 정산 계좌 3개 필드, 약관 동의 3종
+- RLS: 본인 신청 조회·생성·수정(pending만)
+- **`/jakka/market/apply`** — 승인 전/pending/rejected/approved 4가지 상태별 UI 분기
+- **`/jakka/market/upload`** — `seller_status!=='approved'` 시 `/apply`로 리다이렉트
+- **`/jakka/market`** — 버튼 상태 분기 (상품 등록 / 심사 진행 중 / 입점 신청)
+- **`/api/intra/jakka/sellers`** GET/POST — 조회 + 승인/반려 (service_role)
+- **`/intra/ums/jakka/sellers`** — 탭(대기/승인/반려), 상세 모달, 반려 메모 필수
+- `lib/intra-nav.ts` — Jakka UMS에 "마켓 판매자 심사" 추가
+
+### Phase C — 승인 작가 판매자 센터
+- **`/jakka/seller`** 단일 페이지 5탭
+  - **홈**: 4개 통계 카드 (등록/조회/찜/매출) + 대기 주문·문의 알림 + 최근 주문 5건
+  - **상품**: 상태별 뱃지 (판매중/품절/비공개), 조회·찜·판매 수, 보기·수정 링크
+  - **주문**: 상태 뱃지 + 다음 상태 전환 버튼, 배송지·메시지 표시
+  - **문의**: 답변 대기 뱃지, 상품 링크, 인라인 답변 폼
+  - **설정**: 작가 정보·승인일·수수료율, 정산 안내
+
+### 라이브러리·타입
+- `lib/supabase/jakka.ts` — 20+ 신규 함수 (isProductLiked, toggleProductLike, getRelatedProducts*, incrementProductView, isNotifyRegistered, toggleNotifyRegistration, getProductQnas, createProductQuestion, answerProductQuestion, deleteProductQuestion, createOrder, getOrdersByCreator, updateOrderStatus, getQnasByCreator, getMySellerApplication, createSellerApplication, withdrawSellerApplication)
+- `JakkaProduct` 타입에 likes_count/view_count/dimensions/material/production_year/edition_*/is_signed/has_certificate 추가
+- `JakkaCreator`에 seller_status/seller_approved_at/seller_commission_rate 추가
+
+### DB 마이그레이션 (Production 적용 완료)
+10개 SQL 파일: jakka-product-likes, jakka-product-specs, jakka-product-views, jakka-product-notify, jakka-product-qna, jakka-products-seed, jakka-product-rls-fix, jakka-product-nft (후 롤백), jakka-remove-nft, jakka-orders, jakka-seller-applications
+
+### 결정 사항
+- **NFT 제거**: 메타데이터 컬럼·가짜 컨트랙트 주소만 있고 지갑 연결·민팅·온체인 이전 실체 없음. 카테고리·currency ENUM 전부 원상 복귀
+- **구매 MVP = 문의 접수**: 실결제 통합은 후속. 주문 row 생성 + 작가에게 이메일/알림
+- **플랫폼 수수료 15%**: 일괄 적용. 정산은 월 2회 (1·15일) 예정
+- **입점 승인은 운영진 검토**: `super_admin` 또는 `manager:brand:jakka`가 `/intra/ums/jakka/sellers`에서 처리
+
+---
+
 ## 2026-04-20 (세션 63) — Jakka 마켓 DB 연결 + 상품 상세 페이지
 
 ### 변경 파일

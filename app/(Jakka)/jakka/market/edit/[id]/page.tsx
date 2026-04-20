@@ -15,7 +15,7 @@ import {
     type JakkaProduct,
 } from "@/lib/supabase/jakka";
 
-const CATEGORIES: ProductCategory[] = ["원화", "프린트", "굿즈", "피규어", "포스터", "사진", "NFT"];
+const CATEGORIES: ProductCategory[] = ["원화", "프린트", "굿즈", "피규어", "포스터", "사진", "기타"];
 
 interface ImageEntry {
     file?: File;
@@ -38,7 +38,7 @@ export default function MarketEditPage({ params }: { params: Promise<{ id: strin
     const [category, setCategory] = useState<ProductCategory | "">("");
     const [desc, setDesc] = useState("");
     const [price, setPrice] = useState("");
-    const [currency, setCurrency] = useState<"KRW" | "ETH">("KRW");
+    const currency = "KRW" as const;
     const [isLimited, setIsLimited] = useState(false);
     const [stock, setStock] = useState("");
     const [status, setStatus] = useState<"active" | "sold_out" | "hidden">("active");
@@ -63,7 +63,6 @@ export default function MarketEditPage({ params }: { params: Promise<{ id: strin
             setCategory(p.category as ProductCategory);
             setDesc(p.description ?? "");
             setPrice(String(p.price));
-            setCurrency(p.currency as "KRW" | "ETH");
             setIsLimited(p.is_limited);
             setStock(p.stock != null ? String(p.stock) : "");
             setStatus(p.status as "active" | "sold_out" | "hidden");
@@ -261,32 +260,19 @@ export default function MarketEditPage({ params }: { params: Promise<{ id: strin
                         가격 <span className="text-red-500">*</span>
                     </p>
                     <div className="flex gap-2">
-                        <div className="flex border border-neutral-300 overflow-hidden">
-                            {(["KRW", "ETH"] as const).map((c) => (
-                                <button
-                                    key={c}
-                                    type="button"
-                                    onClick={() => setCurrency(c)}
-                                    className={`text-[11px] font-bold px-3 py-2.5 transition-colors ${
-                                        currency === c
-                                            ? "bg-neutral-900 text-white"
-                                            : "text-neutral-500 hover:text-neutral-900"
-                                    }`}
-                                >
-                                    {c}
-                                </button>
-                            ))}
+                        <div className="flex items-center border border-neutral-300 px-3 bg-neutral-50 text-[11px] font-bold text-neutral-700">
+                            KRW
                         </div>
                         <input
                             type="text"
                             inputMode="decimal"
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
-                            placeholder={currency === "KRW" ? "예: 150000" : "예: 0.05"}
+                            placeholder="예: 150000"
                             className="flex-1 border border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-700"
                         />
                     </div>
-                    {price && !isNaN(parseFloat(price.replace(/,/g, ""))) && currency === "KRW" && (
+                    {price && !isNaN(parseFloat(price.replace(/,/g, ""))) && (
                         <p className="mt-1 text-[11px] text-neutral-700">
                             {Number(price.replace(/,/g, "")).toLocaleString()}원
                         </p>

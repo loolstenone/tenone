@@ -1,13 +1,50 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-20 (세션 63 — Jakka 마켓 DB 연결 + 상품 상세 페이지)
+> 마지막 업데이트: 2026-04-21 (세션 64 — Jakka 마켓 디테일 전체 + 입점 승인제 + 판매자 센터)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
-1. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-2. **Jakka 마켓 상품 관리** — 내 상품 목록·수정·삭제 UI (현재 등록·조회·상세 완성, 수정/삭제 UI 없음)
-3. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합** — 현재 MADLeague·Jakka만 연결됨
+1. **Jakka 마켓 — 승인/반려 이메일 알림** — 현재 상태만 DB 반영. Resend로 작가에게 결과 통지 필요
+2. **Jakka 마켓 — 정산 리포트 자동 생성** — 월 2회(1일/15일) 기준. `completed` 주문 집계 → 수수료 차감 → PDF/CSV
+3. **Jakka 마켓 — 구매 실결제 통합** — 현재 "구매 문의 접수" MVP. 토스페이/포트원 연동 검토
+4. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+5. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합** — 현재 MADLeague·Jakka만 연결됨
+
+### ✅ 세션 64 완료 — Jakka 마켓 디테일 전체 + 입점 승인제 + 판매자 센터
+**Phase A (마켓 디테일 8기능)**
+- A-1: 찜·공유 — `jakka_product_likes` + `likes_count` 트리거, 낙관적 UI, X/Threads 공유 드롭다운
+- A-2: 관련 작품 — `getRelatedProductsByCreator` / `getRelatedProductsByCategory`, `RelatedCard` 컴포넌트
+- A-3: 작품 스펙 — `dimensions`/`material`/`production_year`/`edition_number`/`edition_total`/`is_signed`/`has_certificate`
+- A-4: 조회수 — `view_count` 컬럼 + `jakka_increment_product_view` SECURITY DEFINER RPC
+- A-5: 입고 알림 — `jakka_product_notify` (품절 상품에서 버튼 토글)
+- A-6: Q&A — `jakka_product_qna` (공개/비공개, 작가 답변, 삭제)
+- ~~A-7 NFT~~ — 실체 없어 완전 제거 (카테고리·currency·컬럼·전용 필드 전부 삭제)
+- A-8: 구매 플로우 — `jakka_orders` + `PurchaseModal` (수량·배송·메시지, status 6단계)
+- 더미 상품 20개 seed / RLS sold_out 퍼블릭 허용 fix
+
+**Phase B (입점 승인제)**
+- `jakka_creators.seller_status` (none/pending/approved/rejected/suspended) + `seller_commission_rate` 15%
+- `jakka_seller_applications` 테이블 + RLS
+- `/jakka/market/apply` — 입점 신청 폼 (소개·카테고리·포트폴리오·사업자/개인·정산계좌·약관 3종)
+- `/jakka/market/upload` — `seller_status='approved'` 게이트
+- `/intra/ums/jakka/sellers` — 인트라 심사 페이지 (대기/승인/반려 탭, 상세 모달)
+- `/api/intra/jakka/sellers` — 승인·반려 API (service_role)
+- `lib/intra-nav.ts` — "마켓 판매자 심사" 메뉴 추가
+
+**Phase C (판매자 센터)**
+- `/jakka/seller` — 5탭 (홈·상품·주문·문의·설정)
+- 홈: 4개 통계 카드 (등록/조회/찜/매출) + 대기 알림 + 최근 주문 5건
+- 상품: 상태별 뱃지·통계·수정/보기 링크
+- 주문: 상태별 색상 뱃지 + 다음 상태 전환 버튼 (pending→confirmed/cancelled, confirmed→paid, paid→shipped, shipped→completed)
+- 문의: 답변 대기 뱃지, 인라인 답변 폼
+- 설정: 작가 정보, 수수료율, 정산 안내
+
+**DB 마이그레이션 10개 적용 (Production)**
+- jakka-product-likes, jakka-product-specs, jakka-product-views, jakka-product-notify
+- jakka-product-qna, jakka-products-seed, jakka-product-rls-fix
+- jakka-product-nft (이후 jakka-remove-nft로 롤백)
+- jakka-orders, jakka-seller-applications
 
 ### ✅ 세션 63 완료 — Jakka 마켓 DB 연결 + 상품 상세 페이지
 - **`jakka_products` Production DB** — 이전 세션에서 이미 생성 완료 확인 (15컬럼 전부 존재)

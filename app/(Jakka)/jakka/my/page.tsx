@@ -187,9 +187,7 @@ export default function JakkaMyPage() {
                                                 )}
                                             </div>
                                             <p className="text-xs text-neutral-400 mt-0.5">
-                                                {product.currency === "ETH"
-                                                    ? `${product.price} ETH`
-                                                    : `${Number(product.price).toLocaleString()}원`}
+                                                {Number(product.price).toLocaleString()}원
                                                 {product.sold_count > 0 && ` · ${product.sold_count}개 판매`}
                                             </p>
                                         </div>

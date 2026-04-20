@@ -48,6 +48,9 @@ export interface JakkaCreator {
     works_count: number;
     bookmarks_count: number;
     is_public: boolean;
+    seller_status: 'none' | 'pending' | 'approved' | 'rejected' | 'suspended';
+    seller_approved_at: string | null;
+    seller_commission_rate: number;
     created_at: string;
     updated_at: string;
     featured_work?: JakkaWork | null;
@@ -1285,7 +1288,7 @@ export function generateHandle(email: string): string {
 
 // ─── 마켓 (jakka_products) ───────────────────────────────────────────────────
 
-export type ProductCategory = '원화' | '프린트' | '굿즈' | '피규어' | '포스터' | '사진' | 'NFT' | '기타';
+export type ProductCategory = '원화' | '프린트' | '굿즈' | '피규어' | '포스터' | '사진' | '기타';
 export type ProductStatus = 'active' | 'sold_out' | 'hidden';
 
 export interface JakkaProduct {
@@ -1296,14 +1299,22 @@ export interface JakkaProduct {
     description: string | null;
     category: ProductCategory;
     price: number;
-    currency: 'KRW' | 'ETH';
+    currency: 'KRW';
     thumb_url: string | null;
     images: string[];
     is_limited: boolean;
     stock: number | null;
     sold_count: number;
     likes_count: number;
+    view_count: number;
     status: ProductStatus;
+    dimensions: string | null;
+    material: string | null;
+    production_year: number | null;
+    edition_number: number | null;
+    edition_total: number | null;
+    is_signed: boolean;
+    has_certificate: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -1344,6 +1355,44 @@ export async function getProductById(id: string): Promise<(JakkaProduct & { crea
     } catch { return null; }
 }
 
+/** 특정 상품을 제외한 동일 작가 active 상품 */
+export async function getRelatedProductsByCreator(
+    creatorId: string,
+    excludeProductId: string,
+    limit = 4,
+): Promise<JakkaProduct[]> {
+    try {
+        const { data } = await supabase
+            .from('jakka_products')
+            .select('*')
+            .eq('creator_id', creatorId)
+            .eq('status', 'active')
+            .neq('id', excludeProductId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+        return (data ?? []) as JakkaProduct[];
+    } catch { return []; }
+}
+
+/** 동일 카테고리 다른 작가 active 상품 */
+export async function getRelatedProductsByCategory(
+    category: ProductCategory,
+    excludeCreatorId: string,
+    limit = 4,
+): Promise<(JakkaProduct & { creator: JakkaCreator })[]> {
+    try {
+        const { data } = await supabase
+            .from('jakka_products')
+            .select('*, creator:jakka_creators(*)')
+            .eq('category', category)
+            .eq('status', 'active')
+            .neq('creator_id', excludeCreatorId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+        return (data ?? []) as (JakkaProduct & { creator: JakkaCreator })[];
+    } catch { return []; }
+}
+
 export async function getProductsByCreator(creatorId: string, includeHidden = false): Promise<JakkaProduct[]> {
     try {
         let q = supabase
@@ -1363,7 +1412,7 @@ export async function createProduct(params: {
     description?: string;
     category: ProductCategory;
     price: number;
-    currency?: 'KRW' | 'ETH';
+    currency?: 'KRW';
     thumbUrl?: string;
     images?: string[];
     isLimited?: boolean;
@@ -1450,6 +1499,377 @@ export async function toggleProductLike(
                 .insert({ product_id: productId, user_id: userId });
             return { liked: true };
         }
+    } catch { return null; }
+}
+
+// ─── 마켓 입점 신청 (jakka_seller_applications) ──────────────────────────
+
+export type SellerStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'suspended';
+export type SellerApplicationStatus = 'pending' | 'approved' | 'rejected' | 'withdrawn';
+
+export interface SellerApplication {
+    id: string;
+    creator_id: string;
+    intro: string;
+    primary_category: string;
+    portfolio_urls: string[];
+    sample_work_ids: string[];
+    sample_image_urls: string[];
+    seller_type: 'individual' | 'business';
+    business_name: string | null;
+    business_number: string | null;
+    tax_invoice_email: string | null;
+    bank_name: string | null;
+    bank_account_number: string | null;
+    bank_account_holder: string | null;
+    agreed_terms: boolean;
+    agreed_fee: boolean;
+    agreed_privacy: boolean;
+    status: SellerApplicationStatus;
+    reviewer_id: string | null;
+    reviewer_note: string | null;
+    reviewed_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateSellerApplicationInput {
+    creatorId: string;
+    intro: string;
+    primaryCategory: string;
+    portfolioUrls?: string[];
+    sampleWorkIds?: string[];
+    sampleImageUrls?: string[];
+    sellerType: 'individual' | 'business';
+    businessName?: string;
+    businessNumber?: string;
+    taxInvoiceEmail?: string;
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountHolder?: string;
+    agreedTerms: boolean;
+    agreedFee: boolean;
+    agreedPrivacy: boolean;
+}
+
+export async function getMySellerApplication(creatorId: string): Promise<SellerApplication | null> {
+    try {
+        const { data } = await supabase
+            .from('jakka_seller_applications')
+            .select('*')
+            .eq('creator_id', creatorId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        return (data as unknown as SellerApplication) ?? null;
+    } catch { return null; }
+}
+
+export async function createSellerApplication(
+    input: CreateSellerApplicationInput,
+): Promise<SellerApplication | null> {
+    try {
+        const { data, error } = await supabase
+            .from('jakka_seller_applications')
+            .insert({
+                creator_id: input.creatorId,
+                intro: input.intro,
+                primary_category: input.primaryCategory,
+                portfolio_urls: input.portfolioUrls ?? [],
+                sample_work_ids: input.sampleWorkIds ?? [],
+                sample_image_urls: input.sampleImageUrls ?? [],
+                seller_type: input.sellerType,
+                business_name: input.businessName ?? null,
+                business_number: input.businessNumber ?? null,
+                tax_invoice_email: input.taxInvoiceEmail ?? null,
+                bank_name: input.bankName ?? null,
+                bank_account_number: input.bankAccountNumber ?? null,
+                bank_account_holder: input.bankAccountHolder ?? null,
+                agreed_terms: input.agreedTerms,
+                agreed_fee: input.agreedFee,
+                agreed_privacy: input.agreedPrivacy,
+            })
+            .select()
+            .single();
+        if (error || !data) return null;
+
+        // creator의 seller_status를 pending으로
+        await supabase
+            .from('jakka_creators')
+            .update({ seller_status: 'pending' })
+            .eq('id', input.creatorId);
+
+        return data as unknown as SellerApplication;
+    } catch { return null; }
+}
+
+export async function getOrdersByCreator(creatorId: string): Promise<(JakkaOrder & { product?: JakkaProduct })[]> {
+    try {
+        const { data } = await supabase
+            .from('jakka_orders')
+            .select('*, product:jakka_products(id, title, thumb_url, price, currency)')
+            .eq('creator_id', creatorId)
+            .order('created_at', { ascending: false });
+        return (data as unknown as (JakkaOrder & { product?: JakkaProduct })[] | null) ?? [];
+    } catch { return []; }
+}
+
+export async function updateOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    note?: string,
+    trackingNumber?: string,
+): Promise<boolean> {
+    try {
+        const payload: Record<string, unknown> = { status };
+        if (note !== undefined) payload.creator_note = note;
+        if (trackingNumber !== undefined) payload.tracking_number = trackingNumber;
+        const { error } = await supabase.from('jakka_orders').update(payload).eq('id', orderId);
+        return !error;
+    } catch { return false; }
+}
+
+export async function getQnasByCreator(creatorId: string): Promise<(ProductQna & { product_title?: string })[]> {
+    try {
+        const { data: products } = await supabase
+            .from('jakka_products')
+            .select('id, title')
+            .eq('creator_id', creatorId);
+        const prodRows = (products ?? []) as Array<{ id: string; title: string }>;
+        const productMap: Record<string, string> = Object.fromEntries(prodRows.map((p) => [p.id, p.title]));
+        const productIds = Object.keys(productMap);
+        if (productIds.length === 0) return [];
+        const { data: qnas } = await supabase
+            .from('jakka_product_qna')
+            .select('*')
+            .in('product_id', productIds)
+            .order('created_at', { ascending: false });
+        const qnaRows = (qnas ?? []) as unknown as Array<Omit<ProductQna, 'asker_name' | 'asker_handle'>>;
+        if (qnaRows.length === 0) return [];
+        const askerIds = Array.from(new Set(qnaRows.map((q) => q.asker_id)));
+        const { data: members } = askerIds.length > 0
+            ? await supabase.from('members').select('id, name, email').in('id', askerIds)
+            : { data: [] as Array<{ id: string; name: string | null; email: string | null }> };
+        const memberRows = (members ?? []) as Array<{ id: string; name: string | null; email: string | null }>;
+        const nameMap: Record<string, { name: string | null; email: string | null }> = Object.fromEntries(memberRows.map((m) => [m.id, { name: m.name, email: m.email }]));
+        return qnaRows.map((r) => ({
+            ...r,
+            asker_name: nameMap[r.asker_id]?.name ?? null,
+            asker_handle: nameMap[r.asker_id]?.email?.split('@')[0] ?? null,
+            product_title: productMap[r.product_id],
+        })) as unknown as (ProductQna & { product_title?: string })[];
+    } catch { return []; }
+}
+
+export async function withdrawSellerApplication(applicationId: string): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('jakka_seller_applications')
+            .update({ status: 'withdrawn' })
+            .eq('id', applicationId);
+        return !error;
+    } catch { return false; }
+}
+
+// ─── 주문 (jakka_orders) ──────────────────────────────────────────────────
+
+export type OrderStatus = 'pending' | 'confirmed' | 'paid' | 'shipped' | 'completed' | 'cancelled';
+
+export interface JakkaOrder {
+    id: string;
+    product_id: string;
+    buyer_id: string;
+    creator_id: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+    currency: 'KRW';
+    buyer_name: string | null;
+    buyer_phone: string | null;
+    buyer_email: string | null;
+    shipping_postcode: string | null;
+    shipping_address1: string | null;
+    shipping_address2: string | null;
+    message: string | null;
+    status: OrderStatus;
+    creator_note: string | null;
+    tracking_number: string | null;
+    status_changed_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateOrderInput {
+    productId: string;
+    buyerId: string;
+    creatorId: string;
+    quantity: number;
+    unitPrice: number;
+    currency: 'KRW';
+    buyerName?: string;
+    buyerPhone?: string;
+    buyerEmail?: string;
+    shippingPostcode?: string;
+    shippingAddress1?: string;
+    shippingAddress2?: string;
+    message?: string;
+}
+
+export async function createOrder(input: CreateOrderInput): Promise<JakkaOrder | null> {
+    try {
+        const { data, error } = await supabase
+            .from('jakka_orders')
+            .insert({
+                product_id: input.productId,
+                buyer_id: input.buyerId,
+                creator_id: input.creatorId,
+                quantity: input.quantity,
+                unit_price: input.unitPrice,
+                total_price: input.unitPrice * input.quantity,
+                currency: input.currency,
+                buyer_name: input.buyerName ?? null,
+                buyer_phone: input.buyerPhone ?? null,
+                buyer_email: input.buyerEmail ?? null,
+                shipping_postcode: input.shippingPostcode ?? null,
+                shipping_address1: input.shippingAddress1 ?? null,
+                shipping_address2: input.shippingAddress2 ?? null,
+                message: input.message ?? null,
+            })
+            .select()
+            .single();
+        if (error || !data) return null;
+        return data as unknown as JakkaOrder;
+    } catch { return null; }
+}
+
+// ─── 상품 Q&A ─────────────────────────────────────────────────────────────
+
+export interface ProductQna {
+    id: string;
+    product_id: string;
+    asker_id: string;
+    asker_name: string | null;
+    asker_handle: string | null;
+    question: string;
+    answer: string | null;
+    answered_at: string | null;
+    is_private: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export async function getProductQnas(productId: string): Promise<ProductQna[]> {
+    try {
+        const { data, error } = await supabase
+            .from('jakka_product_qna')
+            .select('*')
+            .eq('product_id', productId)
+            .order('created_at', { ascending: false });
+        if (error || !data) return [];
+        const rows = data as unknown as Omit<ProductQna, 'asker_name' | 'asker_handle'>[];
+        const askerIds = Array.from(new Set(rows.map((r) => r.asker_id)));
+        let nameMap: Record<string, { name: string | null; email: string | null }> = {};
+        if (askerIds.length > 0) {
+            const { data: members } = await supabase
+                .from('members')
+                .select('id, name, email')
+                .in('id', askerIds);
+            const memberRows = (members ?? []) as Array<{ id: string; name: string | null; email: string | null }>;
+            nameMap = Object.fromEntries(memberRows.map((m) => [m.id, { name: m.name, email: m.email }]));
+        }
+        return rows.map((r) => ({
+            ...r,
+            asker_name: nameMap[r.asker_id]?.name ?? null,
+            asker_handle: nameMap[r.asker_id]?.email?.split('@')[0] ?? null,
+        }));
+    } catch { return []; }
+}
+
+export async function createProductQuestion(
+    productId: string,
+    askerId: string,
+    question: string,
+    isPrivate = false,
+): Promise<ProductQna | null> {
+    try {
+        const { data, error } = await supabase
+            .from('jakka_product_qna')
+            .insert({ product_id: productId, asker_id: askerId, question, is_private: isPrivate })
+            .select()
+            .single();
+        if (error || !data) return null;
+        return data as unknown as ProductQna;
+    } catch { return null; }
+}
+
+export async function answerProductQuestion(
+    qnaId: string,
+    answer: string,
+): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('jakka_product_qna')
+            .update({ answer, answered_at: new Date().toISOString() })
+            .eq('id', qnaId);
+        return !error;
+    } catch { return false; }
+}
+
+export async function deleteProductQuestion(qnaId: string): Promise<boolean> {
+    try {
+        const { error } = await supabase.from('jakka_product_qna').delete().eq('id', qnaId);
+        return !error;
+    } catch { return false; }
+}
+
+/** 입고 알림 신청 여부 */
+export async function isNotifyRegistered(productId: string, userId: string): Promise<boolean> {
+    try {
+        const { data } = await supabase
+            .from('jakka_product_notify')
+            .select('product_id')
+            .eq('product_id', productId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        return !!data;
+    } catch { return false; }
+}
+
+/** 입고 알림 등록/해제 토글. 등록된 상태면 제거, 아니면 추가. */
+export async function toggleNotifyRegistration(
+    productId: string,
+    userId: string,
+    email?: string,
+): Promise<{ registered: boolean } | null> {
+    try {
+        const { data: existing } = await supabase
+            .from('jakka_product_notify')
+            .select('product_id')
+            .eq('product_id', productId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (existing) {
+            await supabase
+                .from('jakka_product_notify')
+                .delete()
+                .eq('product_id', productId)
+                .eq('user_id', userId);
+            return { registered: false };
+        } else {
+            await supabase
+                .from('jakka_product_notify')
+                .insert({ product_id: productId, user_id: userId, email: email ?? null });
+            return { registered: true };
+        }
+    } catch { return null; }
+}
+
+/** 조회수 1 증가. 결과는 증가 후 view_count. 실패 시 null. */
+export async function incrementProductView(productId: string): Promise<number | null> {
+    try {
+        const { data, error } = await supabase.rpc('jakka_increment_product_view', { p_id: productId });
+        if (error) return null;
+        return typeof data === 'number' ? data : null;
     } catch { return null; }
 }
 

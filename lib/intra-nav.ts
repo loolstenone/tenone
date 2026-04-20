@@ -197,6 +197,7 @@ export const modules: NavModule[] = [
                         name: "JAKKA", href: "/intra/ums/jakka", icon: Globe,
                         children: [
                             { name: "창작자 관리", href: "/intra/ums/jakka" },
+                            { name: "마켓 판매자 심사", href: "/intra/ums/jakka/sellers" },
                             { name: "광고 관리", href: "/intra/ums/jakka/notices" },
                         ],
                     },

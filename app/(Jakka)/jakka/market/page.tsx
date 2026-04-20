@@ -7,11 +7,10 @@ import { PageHeader } from "@/features/jakka/PageHeader";
 import { getProducts, getMyCreatorProfile, type JakkaProduct, type JakkaCreator, type ProductCategory } from "@/lib/supabase/jakka";
 import { useAuth } from "@/lib/auth-context";
 
-const CATEGORIES = ["전체", "원화", "프린트", "굿즈", "피규어", "포스터", "사진", "NFT"];
+const CATEGORIES = ["전체", "원화", "프린트", "굿즈", "피규어", "포스터", "사진", "기타"];
 
 function ProductCard({ product }: { product: JakkaProduct & { creator: JakkaCreator } }) {
-    const isNFT = product.category === "NFT";
-    const priceLabel = isNFT ? `${product.price} ETH` : `${product.price.toLocaleString()}원`;
+    const priceLabel = `${product.price.toLocaleString()}원`;
     const isSoldOut = product.status === "sold_out" || (product.stock !== null && product.stock === 0);
 
     return (
@@ -78,10 +77,14 @@ export default function MarketPage() {
     const [products, setProducts] = useState<(JakkaProduct & { creator: JakkaCreator })[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreator, setIsCreator] = useState(false);
+    const [sellerStatus, setSellerStatus] = useState<string>("none");
 
     useEffect(() => {
         if (!isAuthenticated || !user) return;
-        getMyCreatorProfile(user.authId ?? user.id).then((c) => setIsCreator(!!c));
+        getMyCreatorProfile(user.authId ?? user.id).then((c) => {
+            setIsCreator(!!c);
+            setSellerStatus(c?.seller_status ?? "none");
+        });
     }, [isAuthenticated, user]);
 
     useEffect(() => {
@@ -103,13 +106,22 @@ export default function MarketPage() {
                 title="마켓"
                 subtitle="작가의 작품·굿즈·피규어를 직접 구매하세요."
                 action={isCreator ? (
-                    <Link
-                        href="/jakka/market/upload"
-                        className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
-                    >
-                        <Plus className="w-3.5 h-3.5" />
-                        상품 등록
-                    </Link>
+                    sellerStatus === "approved" ? (
+                        <Link
+                            href="/jakka/market/upload"
+                            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                        >
+                            <Plus className="w-3.5 h-3.5" />
+                            상품 등록
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/jakka/market/apply"
+                            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-900 border border-neutral-900 px-3 py-2 hover:bg-neutral-900 hover:text-white transition-colors"
+                        >
+                            {sellerStatus === "pending" ? "심사 진행 중" : "입점 신청"}
+                        </Link>
+                    )
                 ) : undefined}
             />
 
