@@ -293,6 +293,85 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 
 ---
 
+## 1.3.1 Capability 기반 회원 모델 (SSOT for 활동·역할)
+
+> **원칙**: 브랜드에서 **기능(capability)을 분리**한다. 브랜드는 capability를 "탑재"만 하고,
+> 회원은 `capability × 브랜드` 조합으로 **역할 인스턴스를 누적**한다.
+> 한 사람이 유니버스를 돌아다니며 MADLeague 현역 → Badak 바닥장 → Jakka 창작자로 성장하는 여정을 모두 포착한다.
+
+### 왜 capability 분리인가
+
+**기존 사고**: "Badak 회원", "MADLeague 현역" — 브랜드가 역할을 정의 → 브랜드마다 회원 개념이 따로 굴러감
+**현재 사고**: "meetup 개설자 @ Badak", "club 현역 @ MADLeague 2024" — 기능이 역할을 정의, 브랜드는 기능을 탑재한 공간
+
+한 개인이 성장해 여러 브랜드에서 다양한 역할을 쌓아가는 것을 시스템이 자연스럽게 받쳐준다.
+
+### 3테이블 구조
+
+| 테이블 | 역할 |
+|--------|------|
+| `capabilities` | 유니버스 공용 기능 모듈 레지스트리 (확장 가능) |
+| `brand_capabilities` | 각 브랜드가 어떤 capability를 탑재했는지 |
+| `member_capability_roles` | 회원의 capability×브랜드별 역할 인스턴스 누적 |
+
+### Capability 목록 (9종, 확장 가능)
+
+| key | name_ko | 내장 roles | 대표 브랜드 |
+|-----|---------|-----------|------------|
+| `community` | 커뮤니티 | member | **전 브랜드 기본 탑재** (게시글·문의·반응) |
+| `meetup` | 모임 | owner, participant | Badak, Rook, Townity, Domo |
+| `club` | 동아리 | 현역, 임원, OB | MADLeague, MADLeap |
+| `portfolio` | 포트폴리오 | creator | MoNTZ, Jakka, HeRo |
+| `membership` | 승인 멤버십 | applicant, approved | YouInOne, Domo |
+| `course` | 강의 | instructor, taker | MADLeap, HeRo, Badak, EvoSchool 등 |
+| `showcase` | 일시 이벤트 | host, visitor | Jakka, Seoul360, MoNTZ, Mullaesian |
+| `subscription` | 정기 구독 | subscriber | SmarComm, WIO, Mindle, MyVerse, BrandGravity |
+| `purchase` | 건별 구매 | buyer | Planner's, HeRo, NatureBox, ChangeUp 등 |
+
+> 내부 서비스(TenOne·Wiki·Dokdae)는 capability 모델 대상 아님 — `member_roles`(staff/manager/super_admin)로 계속 관리.
+
+### 한 사람의 Universe 여정 예시
+
+```
+(club,         madleague,  현역,      {year:2023, club:MADA})
+(club,         madleague,  임원,      {year:2024, role:회장})
+(course,       hero,       수강자,     {test:career01})
+(club,         madleague,  OB,        {grad_year:2024})   ← 2025 자동 전환
+(community,    badak,      member)
+(portfolio,    jakka,      creator)
+(meetup,       badak,      owner,     {meetup:'바닥장X'})  ← 2026 성장
+(course,       badak,      instructor,{course:'...'})
+(subscription, wio,        subscriber,{plan:pro})
+```
+
+모든 변화는 **행 추가**. 과거 이력 보존, 현재는 `valid_until IS NULL` 필터.
+
+### 자라나는 브랜드 대응
+
+Mindle·FWN·TrendHunter처럼 처음엔 `community`만 있는 브랜드가 수익화하면:
+- 정기 뉴스레터 구독 → `subscription` 탑재
+- 개별 리포트 판매 → `purchase` 탑재
+- 오프라인 모임 → `meetup` 탑재
+
+brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 불필요.
+
+### 작업 규약
+
+- **신규 브랜드 추가 시**: `brand_capabilities` 시드에 해당 브랜드 × capability 조합 INSERT
+- **capability 추가 시**: `capabilities` 테이블에 row + 연결되는 브랜드의 `brand_capabilities` row 생성
+- **회원 역할 변화**: 기존 row UPDATE 금지 → 새 row INSERT (valid_from·valid_until로 시간 관리)
+- **OB 전환**: 현역 row의 `valid_until` 설정 + OB role row INSERT
+- **Universe Profile 집계**: `member_capability_roles`를 capability별 그룹핑 → 섹션 렌더
+- **스키마 파일**: `sql/capability-model.sql`
+
+### 기존 모델과의 관계
+
+- `member_roles`(staff/manager/super_admin) → **권한 체계** 그대로 유지 (1.6절)
+- `members.affiliations[]` → **이용 중인 브랜드 목록** 계속 관리
+- 특화 프로필 테이블(`mad_applications`, `badak_profiles` 등) → **프로필 데이터**는 유지하되, 역할/상태는 `member_capability_roles`로 이관 권장
+
+---
+
 ## 1.4 서비스 접근 모델 6종
 
 > **모든 브랜드는 6가지 접근 모델 중 하나에 속한다.** 가입 경로·권한·UC 지급이 여기서 파생된다.
@@ -396,6 +475,136 @@ auth.users → member_roles 조회 → role + context 집합 → User 객체 권
 - `lib/auth-context.tsx`가 `member_roles(role,context,is_active)` + `staff_profile:tenone_staff_profiles(...)` JOIN
 - 각 API 핸들러는 user에서 role/context 꺼내 권한 검증
 - RLS 정책도 `member_roles`를 참조 (service_role은 bypass)
+
+---
+
+## 1.6.1 Capability 레시피 — 즉시 쓸 수 있는 패턴 모음
+
+> 이 레시피를 그대로 복사·수정해서 쓰면 설명 없이 작업 가능하다.
+
+### 📥 레시피 1. 회원이 새 역할을 획득했을 때 (INSERT)
+
+**상황**: Badak에서 누군가 모임을 개설 → `meetup owner` 역할 획득
+
+```typescript
+// app/api/badak/meetups/create/route.ts 등에서
+await supabaseAdmin.from('member_capability_roles').insert({
+  member_id: member.id,
+  brand_id: 'badak',
+  capability_key: 'meetup',
+  role: 'owner',
+  context: { meetup_id: newMeetup.id, meetup_name: newMeetup.name },
+  // valid_from은 now() 기본값, valid_until은 NULL(진행 중)
+});
+```
+
+**상황**: MADLeague 현역 가입
+
+```typescript
+await supabaseAdmin.from('member_capability_roles').insert({
+  member_id, brand_id: 'madleague', capability_key: 'club',
+  role: '현역',
+  context: { year: 2026, club: 'MADA', university: '홍익대' },
+});
+```
+
+### 🔄 레시피 2. 역할 전환 (OB 전환, 강사 승격 등)
+
+**원칙**: 기존 row UPDATE 금지. **valid_until 설정 + 새 row INSERT**.
+
+```typescript
+// MADA 2024 현역 → OB 전환
+const today = new Date().toISOString();
+
+// 1. 기존 현역 row 종료
+await supabaseAdmin
+  .from('member_capability_roles')
+  .update({ valid_until: today })
+  .eq('member_id', memberId)
+  .eq('brand_id', 'madleague')
+  .eq('capability_key', 'club')
+  .eq('role', '현역')
+  .is('valid_until', null);
+
+// 2. OB 신규 row
+await supabaseAdmin.from('member_capability_roles').insert({
+  member_id: memberId,
+  brand_id: 'madleague',
+  capability_key: 'club',
+  role: 'OB',
+  context: { grad_year: 2024, club: 'MADA' },
+});
+```
+
+### 📖 레시피 3. 현재 활성 역할만 조회
+
+```typescript
+const { data: activeRoles } = await supabase
+  .from('member_capability_roles')
+  .select('brand_id, capability_key, role, context')
+  .eq('member_id', memberId)
+  .is('valid_until', null);
+```
+
+### 🧮 레시피 4. Universe Profile 집계 (capability별 섹션)
+
+```typescript
+// lib/supabase/universe-profile.ts에 추가
+export async function getCapabilityAggregation(memberId: string) {
+  const { data } = await supabase
+    .from('member_capability_roles')
+    .select('capability_key, brand_id, role, context, valid_until')
+    .eq('member_id', memberId);
+
+  // capability별로 그룹핑 — 현재 진행 + 과거 이력 분리
+  const grouped: Record<string, { active: any[]; history: any[] }> = {};
+  for (const row of data ?? []) {
+    grouped[row.capability_key] ??= { active: [], history: [] };
+    (row.valid_until ? grouped[row.capability_key].history : grouped[row.capability_key].active).push(row);
+  }
+  return grouped;
+}
+```
+
+**UI 렌더**:
+```tsx
+// components/UniverseProfile.tsx
+{Object.entries(capabilities).map(([key, { active, history }]) => (
+  <Section title={CAPABILITY_LABELS[key]}>
+    {active.map(r => <RoleBadge key={r.id} label={`${r.brand_id} · ${r.role}`} />)}
+    {history.length > 0 && <HistoryFold items={history} />}
+  </Section>
+))}
+```
+
+### 🆕 레시피 5. 새 브랜드가 기능 추가
+
+```sql
+-- Mindle이 오프라인 모임 시작
+INSERT INTO brand_capabilities(brand_id, capability_key) VALUES ('mindle', 'meetup')
+ON CONFLICT DO NOTHING;
+```
+
+파일도 갱신: `sql/capability-model.sql`의 시드 블록에 row 추가(재실행 대비).
+
+### 🆕 레시피 6. 완전히 새 capability 추가 (예: `mentor`)
+
+```sql
+INSERT INTO capabilities(key, name_ko, description, built_in_roles) VALUES
+('mentor', '멘토링', '1:1 또는 그룹 멘토링', ARRAY['mentor','mentee']);
+
+INSERT INTO brand_capabilities(brand_id, capability_key) VALUES
+('hero', 'mentor'), ('badak', 'mentor');
+```
+
+CLAUDE.md의 capability 표에도 추가. 코드에서 `CAPABILITY_LABELS['mentor'] = '멘토링'` 상수 갱신.
+
+### ⚠️ 금지 패턴
+
+- ❌ `member_capability_roles` row UPDATE로 role 변경 (→ 이력 유실)
+- ❌ `valid_until`을 과거 시점으로 거꾸로 쓰기 (→ 정합성 깨짐)
+- ❌ `brand_capabilities`에 없는 capability로 role INSERT (→ 무결성 위반, 앱 레벨 체크 필요)
+- ❌ capability 키 이름 임의 변경 (→ `capabilities.key`는 불변 약속)
 
 ---
 
@@ -672,6 +881,8 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 - [ ] `lib/domain-registry.ts` → 서브도메인/외부 도메인 등록 (해당 시)
 - [ ] `lib/intra-nav.ts` → 사이드바 브랜드 목록에 추가 (알파벳순)
 - [ ] DB: `ums_sites` 테이블에 INSERT
+- [ ] DB: `brand_capabilities`에 최소 `community` row INSERT (+ 해당 브랜드가 쓰는 capability 전부)
+  → 시드 파일 `sql/capability-model.sql`에도 같은 row 추가해 재실행 시 보존
 - [ ] `app/(BrandName)/layout.tsx` → `generateMetadata()` + `getSiteConfigServer()` 필수
 - [ ] `app/(BrandName)/CLAUDE.md` → 템플릿 기반 브랜드 가이드 생성
 - [ ] `app/(BrandName)/brandname/page.tsx` → `UnderConstruction` 또는 전용 랜딩

@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-04-20 (세션 61) — Capability 기반 회원 모델 + Vercel 빌드 수선
+
+### 변경 파일
+- `sql/capability-model.sql` (신규) — 3테이블 DDL + 9 capability + 26 브랜드 × 64 연결 시드
+- `CLAUDE.md` — §1.3.1 Capability 기반 회원 모델, §1.6.1 Capability 레시피 6종 + 금지 패턴, §2.4 체크리스트에 `brand_capabilities` 단계 추가
+- `lib/supabase/admin.ts` (신규) — `createAdminClient()` 팩토리, placeholder fallback으로 빌드 시 throw 방지
+- `lib/supabase/uc.ts` — 모듈 레벨 createClient → `createAdminClient()`
+- `app/auth/confirm/route.ts` — 동일
+- `app/api/` 55개 라우트 — 모듈 레벨 createClient 전수 치환
+- `app/api/auth/handle-login/route.ts` — SECURITY DEFINER RPC `get_email_by_handle` 사용 (RLS bypass)
+- `app/intra/layout.tsx` — `isCached` 보호로 일시적 세션 null에 로그아웃 방지
+- `lib/auth-context.tsx` — localStorage TTL 30분 → 4시간
+
+### DB 변경 (Production `ziotlxkdctlhiwkgmmsh`)
+- `capabilities` 테이블 신설 (9행 시드)
+- `brand_capabilities` 테이블 신설 (64행 시드, 26개 브랜드 전체 `community` 기본 탑재)
+- `member_capability_roles` 테이블 신설 (RLS + `idx_mcr_member`/`idx_mcr_brand_cap`/`idx_mcr_active` 인덱스)
+- `get_email_by_handle(text)` SQL 함수 신설 (SECURITY DEFINER)
+
+### 결정사항
+- **브랜드에서 기능 분리**: 한 사람이 유니버스를 이동하며 역할을 누적하는 구조(MADLeague 현역 → Badak 바닥장 → Jakka 창작자)를 capability × brand × role 매트릭스로 자연 표현
+- **내부 서비스 제외**: TenOne·Wiki·Dokdae는 capability 모델 비대상, 기존 `member_roles`(staff/manager/super_admin)로 관리
+- **역할 이력 보존 원칙**: `member_capability_roles`는 UPDATE 금지, 전환 시 `valid_until` + 새 row INSERT
+- **빌드 안전장치**: 모든 admin Supabase 클라이언트는 중앙 `createAdminClient()`만 사용 (env 미존재 환경에서도 빌드 통과)
+
+### 장소
+집
+
+---
+
 ## 2026-04-20 (세션 60) — 유니버스 CLAUDE.md 계층 시스템 구축
 
 ### 변경 파일

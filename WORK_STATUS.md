@@ -1,14 +1,28 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-20 (세션 60 — 유니버스 CLAUDE.md 계층 시스템 구축)
+> 마지막 업데이트: 2026-04-20 (세션 61 — Capability 기반 회원 모델 + Vercel 빌드 수선)
 
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🟢 진행 가능 작업
-1. **Jakka 마켓** — DB 테이블(`jakka_products`) + 실제 상품 등록/조회 연결 (현재 mock 데이터)
-2. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
-3. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
-4. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+1. **Capability 모델 데이터 이관** — 기존 Badak 모임 owner, MADLeague 현역, Jakka creator 등을 `member_capability_roles`로 백필
+2. **Universe Profile UI 재구성** — capability별 섹션으로 표시 (`getCapabilityAggregation()` 활용, CLAUDE.md §1.6.1 레시피 4)
+3. **브랜드 My page 표준 컴포넌트** — `<CapabilitySection capability="meetup">` 등 재사용 블록 제작
+4. **Jakka 마켓** — DB 테이블(`jakka_products`) + 실제 상품 등록/조회 연결 (현재 mock 데이터)
+5. **MADLeague M2-C** — `/member/projects` 참여 프로젝트 목록
+6. **MADLeague M2-E** — `/member/portfolio` + 퍼블릭 `/portfolio/[member-id]`
+7. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+
+### ✅ 세션 61 완료 — Capability 기반 회원 모델 + Vercel 빌드 수선
+- **DB 스키마 3개 테이블 신설** — `capabilities`, `brand_capabilities`, `member_capability_roles` (RLS + 3 인덱스, `sql/capability-model.sql` SSOT)
+- **9 capability 시드** — community/meetup/club/portfolio/membership/course/showcase/subscription/purchase
+- **26 브랜드 × capability 매트릭스** — 총 64개 브랜드-기능 연결 (community는 전 브랜드 기본 탑재)
+- **CLAUDE.md §1.3.1 신설** — "Capability 기반 회원 모델" (원칙·왜·3테이블·9종·성장 대응·작업 규약·기존 모델 관계)
+- **CLAUDE.md §1.6.1 신설** — "Capability 레시피 6종" (INSERT/역할전환/조회/집계/브랜드확장/새capability + 금지 패턴 4종)
+- **§2.4 체크리스트 갱신** — 새 브랜드 추가 시 `brand_capabilities` INSERT 단계 추가
+- **Vercel 빌드 수선** — `lib/supabase/admin.ts` 팩토리 신설(placeholder fallback), 55개 API 라우트의 모듈 레벨 `createClient(url, SERVICE_ROLE_KEY)` 제거, `lib/supabase/uc.ts`·`app/auth/confirm/route.ts`·배지·온보드 import 수정
+- **핸들 로그인** — `get_email_by_handle` SECURITY DEFINER RPC 적용(RLS bypass)
+- **Intra 세션 유지** — `intra/layout.tsx` isCached 보호, `auth-context` localStorage TTL 30분→4시간
 
 ### 🔵 자산 대기
 - **MADLeague M1-G** — 동아리 로고 7종 확보 후 `mad_clubs.logo_url` 업데이트
