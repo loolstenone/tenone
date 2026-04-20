@@ -281,8 +281,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                 isOpen={newsletterOpen}
                 onClose={() => setNewsletterOpen(false)}
                 source="jakka"
-                title="JAKKA 뉴스레터"
-                subtitle="새 쇼케이스·마켓 신작·작가 소식을 가장 먼저 받아보세요."
+                brandName="JAKKA"
                 accentColor="#171717"
             />
         </div>

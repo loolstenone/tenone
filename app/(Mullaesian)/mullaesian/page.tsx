@@ -213,11 +213,7 @@ export default function MullaesianHome() {
 
             {/* ── 뉴스레터 구독 ── */}
             <section className="py-16 px-6 border-t border-neutral-200">
-                <NewsletterSubscribeForm
-                    source="mullaesian"
-                    accentColor="#007BBF"
-                    subtitle="문래지앙 소식을 가장 먼저 받아보세요."
-                />
+                <NewsletterSubscribeForm source="mullaesian" brandName="문래지앙" accentColor="#007BBF" />
             </section>
 
             {/* ── Contact 섹션 ── */}

@@ -172,8 +172,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                 isOpen={newsletterOpen}
                 onClose={() => setNewsletterOpen(false)}
                 source="montz"
-                title="MoNTZ 뉴스레터"
-                subtitle="새 전시·작가 프로필·이벤트 소식을 받아보세요."
+                brandName="MoNTZ"
                 accentColor="#c8a97e"
             />
         </div>

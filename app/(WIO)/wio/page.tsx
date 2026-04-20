@@ -330,12 +330,7 @@ export default function WIOHome() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-800">
-        <NewsletterSubscribeForm
-          source="wio"
-          dark
-          accentColor="#534AB7"
-          subtitle="WIO 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="wio" brandName="WIO" dark accentColor="#534AB7" />
       </section>
 
       {/* ═══════ CTA ═══════ */}

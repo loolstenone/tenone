@@ -7,6 +7,7 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     source: string;
+    brandName?: string;
     title?: string;
     subtitle?: string;
     accentColor?: string;
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export default function NewsletterModal({
-    isOpen, onClose, source, title, subtitle, accentColor = "#171717", dark = false,
+    isOpen, onClose, source, brandName, title, subtitle, accentColor = "#171717", dark = false,
 }: Props) {
     if (!isOpen) return null;
     return (
@@ -30,6 +31,7 @@ export default function NewsletterModal({
                 <div className="p-6">
                     <NewsletterSubscribeForm
                         source={source}
+                        brandName={brandName}
                         title={title}
                         subtitle={subtitle}
                         accentColor={accentColor}

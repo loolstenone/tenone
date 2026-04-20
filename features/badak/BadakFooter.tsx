@@ -6,13 +6,7 @@ export function BadakFooter() {
     return (
         <footer className="bg-[#1a1a2e] text-neutral-400 border-t border-neutral-800">
             <div className="mx-auto max-w-2xl px-6 py-12">
-                <NewsletterSubscribeForm
-                    source="badak"
-                    dark
-                    accentColor="#D32F2F"
-                    title="Badak 뉴스레터"
-                    subtitle="직무 커뮤니티 소식과 신규 모임을 이메일로 받아보세요."
-                />
+                <NewsletterSubscribeForm source="badak" brandName="Badak" dark accentColor="#D32F2F" />
             </div>
             <div className="border-t border-neutral-800">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 py-6">

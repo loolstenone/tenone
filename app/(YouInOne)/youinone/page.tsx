@@ -423,12 +423,7 @@ export default function YouInOneHomePage() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-800">
-        <NewsletterSubscribeForm
-          source="youinone"
-          dark
-          accentColor="#22c55e"
-          subtitle="YouInOne 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="youinone" brandName="YouInOne" dark accentColor="#22c55e" />
       </section>
 
       {/* ── CTA ── */}

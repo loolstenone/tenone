@@ -387,12 +387,7 @@ export default function DomoHome() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-stone-700 bg-[#1C1917]">
-        <NewsletterSubscribeForm
-          source="domo"
-          dark
-          accentColor="#D97706"
-          subtitle="domo 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="domo" brandName="Domo" dark accentColor="#D97706" />
       </section>
 
       {/* ── CTA ── */}

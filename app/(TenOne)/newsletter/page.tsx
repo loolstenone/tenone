@@ -107,7 +107,7 @@ export default function NewsletterPage() {
                         <p className="text-xs tn-text-sub">메일함을 확인하고 구독을 완료해주세요.</p>
                     </div>
                 ) : (
-                    <NewsletterSubscribeForm source="tenone-newsletter" />
+                    <NewsletterSubscribeForm source="tenone-newsletter" brandName="Ten:One™ Universe" />
                 )}
             </div>
 

@@ -441,12 +441,7 @@ export default function LandingPage() {
 
         {/* ── 뉴스레터 구독 ── */}
         <section className="py-16 px-6 border-t border-neutral-800">
-          <NewsletterSubscribeForm
-            source="smarcomm"
-            dark
-            accentColor="#2563EB"
-            subtitle="SmarComm 소식을 가장 먼저 받아보세요."
-          />
+          <NewsletterSubscribeForm source="smarcomm" brandName="SmarComm" dark accentColor="#2563EB" />
         </section>
 
         {/* CTA */}

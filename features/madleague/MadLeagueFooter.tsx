@@ -18,13 +18,7 @@ export function MadLeagueFooter() {
     return (
         <footer className="bg-[#212121] text-neutral-400">
             <div className="mx-auto max-w-2xl px-6 py-10 border-b border-neutral-800">
-                <NewsletterSubscribeForm
-                    source="madleague"
-                    dark
-                    accentColor="#D32F2F"
-                    title="MAD League 뉴스레터"
-                    subtitle="경쟁PT 일정·참여팀 소식·MADzine 발행 알림을 받아보세요."
-                />
+                <NewsletterSubscribeForm source="madleague" brandName="MAD League" dark accentColor="#D32F2F" />
             </div>
             <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">

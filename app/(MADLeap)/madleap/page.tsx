@@ -490,12 +490,7 @@ export default function MadLeapHome() {
 
             {/* ── 뉴스레터 구독 ── */}
             <section className="py-16 px-6 border-t border-neutral-800">
-              <NewsletterSubscribeForm
-                source="madleap"
-                dark
-                accentColor="#4361ee"
-                subtitle="MADLeap 소식을 가장 먼저 받아보세요."
-              />
+              <NewsletterSubscribeForm source="madleap" brandName="MAD Leap" dark accentColor="#4361ee" />
             </section>
 
             {/* ── Bottom CTA ── */}

@@ -355,12 +355,7 @@ export default function RooKHome() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-800">
-        <NewsletterSubscribeForm
-          source="rook"
-          dark
-          accentColor="#185FA5"
-          subtitle="RooK 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="rook" brandName="RooK" dark accentColor="#185FA5" />
       </section>
 
       {/* ━━ RooKie CTA ━━ */}

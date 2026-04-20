@@ -198,11 +198,7 @@ export default function NatureBoxHome() {
 
             {/* ── 뉴스레터 구독 ── */}
             <section className="py-16 px-6 border-t border-neutral-200">
-                <NewsletterSubscribeForm
-                    source="naturebox"
-                    accentColor="#6B8E23"
-                    subtitle="자연함 소식을 가장 먼저 받아보세요."
-                />
+                <NewsletterSubscribeForm source="naturebox" brandName="자연함" accentColor="#6B8E23" />
             </section>
 
             {/* ── 오시는 길 (Visit) ── */}

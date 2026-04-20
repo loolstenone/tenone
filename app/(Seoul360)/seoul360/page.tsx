@@ -228,11 +228,7 @@ export default function Seoul360Home() {
 
             {/* ── 뉴스레터 구독 ── */}
             <section className="py-16 px-6 border-t border-neutral-200">
-                <NewsletterSubscribeForm
-                    source="seoul360"
-                    accentColor="#F5C518"
-                    subtitle="Seoul/360° 소식을 가장 먼저 받아보세요."
-                />
+                <NewsletterSubscribeForm source="seoul360" brandName="Seoul/360°" accentColor="#F5C518" />
             </section>
 
             {/* Quick Navigation Cards */}

@@ -160,12 +160,7 @@ export default function EvoSchoolPage() {
 
                 {/* ── 뉴스레터 구독 ── */}
                 <section className="py-16 px-6 border-t border-neutral-800">
-                  <NewsletterSubscribeForm
-                    source="evschool"
-                    dark
-                    accentColor="#06b6d4"
-                    subtitle="Evolution School 소식을 가장 먼저 받아보세요."
-                  />
+                  <NewsletterSubscribeForm source="evschool" brandName="Evolution School" dark accentColor="#06b6d4" />
                 </section>
 
                 {/* CTA */}

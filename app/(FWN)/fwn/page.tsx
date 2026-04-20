@@ -307,12 +307,7 @@ export default function FWNHome() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-800">
-        <NewsletterSubscribeForm
-          source="fwn"
-          dark
-          accentColor="#FFFFFF"
-          subtitle="FWN 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="fwn" brandName="FWN" dark accentColor="#FFFFFF" />
       </section>
 
       {/* ── Ten:One Universe 연결 ── */}

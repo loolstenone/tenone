@@ -363,12 +363,7 @@ export default function BrandGravityPage() {
 
                 {/* 뉴스레터 */}
                 <section className="py-16 px-6 border-t border-neutral-800 mb-16">
-                    <NewsletterSubscribeForm
-                        source="brandgravity"
-                        dark
-                        accentColor="#F59E0B"
-                        subtitle="Brand Gravity 인사이트를 구독하세요."
-                    />
+                    <NewsletterSubscribeForm source="brandgravity" brandName="Brand Gravity" dark accentColor="#F59E0B" />
                 </section>
 
                 {/* CTA */}

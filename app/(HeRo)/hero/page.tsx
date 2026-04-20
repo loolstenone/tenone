@@ -477,11 +477,7 @@ export default function HeRoHomePage() {
 
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-200">
-        <NewsletterSubscribeForm
-          source="hero"
-          accentColor="#E53935"
-          subtitle="HeRo 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="hero" brandName="HeRo" accentColor="#E53935" />
       </section>
 
       {/* ━━━ 7. CTA ━━━ */}

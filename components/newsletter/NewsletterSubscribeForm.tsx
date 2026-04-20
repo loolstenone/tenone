@@ -4,22 +4,32 @@ import { useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react';
 
 interface NewsletterSubscribeFormProps {
+  /** 신청 출처 (DB 저장 + 태그). 예: 'jakka', 'badak', 'madleague' */
   source: string;
+  /** 브랜드명 (제목 자동 생성). 예: 'JAKKA', 'Badak', 'MAD League' */
+  brandName?: string;
   dark?: boolean;
   accentColor?: string;
+  /** 제목 오버라이드 (기본: `${brandName} 뉴스레터`) */
   title?: string;
+  /** 부제 오버라이드 (기본: 표준 문구) */
   subtitle?: string;
 }
+
+const STANDARD_SUBTITLE = 'Ten:One™ Universe의 다양한 소식을 받아 보세요';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export default function NewsletterSubscribeForm({
   source,
+  brandName,
   dark = false,
   accentColor = '#171717',
-  title = '뉴스레터 구독',
-  subtitle = '새로운 소식을 가장 먼저 받아보세요.',
+  title,
+  subtitle,
 }: NewsletterSubscribeFormProps) {
+  const resolvedTitle = title ?? `${brandName ?? '뉴스레터'} 뉴스레터`;
+  const resolvedSubtitle = subtitle ?? STANDARD_SUBTITLE;
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [agree, setAgree] = useState(false);
@@ -79,8 +89,8 @@ export default function NewsletterSubscribeForm({
         <Mail className="h-4 w-4" style={{ color: accentColor }} />
         <p className={`text-xs tracking-[0.2em] uppercase font-medium ${subText}`}>Newsletter</p>
       </div>
-      <h3 className={`text-lg font-bold text-center mb-1 ${text}`}>{title}</h3>
-      <p className={`text-xs text-center mb-5 ${subText}`}>{subtitle}</p>
+      <h3 className={`text-lg font-bold text-center mb-1 ${text}`}>{resolvedTitle}</h3>
+      <p className={`text-xs text-center mb-5 ${subText}`}>{resolvedSubtitle}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
@@ -88,7 +98,7 @@ export default function NewsletterSubscribeForm({
             type="text"
             value={nickname}
             onChange={e => { setNickname(e.target.value); setNicknameError(''); }}
-            placeholder="닉네임 *"
+            placeholder="닉네임 (필수)"
             className={`w-full px-4 py-3 text-sm border rounded-lg focus:outline-none ${inputBg}`}
           />
           {nicknameError && <p className="text-[10px] text-red-400 mt-1">{nicknameError}</p>}
@@ -98,7 +108,7 @@ export default function NewsletterSubscribeForm({
             type="email"
             value={email}
             onChange={e => { setEmail(e.target.value); setEmailError(''); }}
-            placeholder="이메일 주소 *"
+            placeholder="이메일 주소 (필수)"
             className={`w-full px-4 py-3 text-sm border rounded-lg focus:outline-none ${inputBg}`}
           />
           {emailError && <p className="text-[10px] text-red-400 mt-1">{emailError}</p>}
@@ -111,7 +121,7 @@ export default function NewsletterSubscribeForm({
             className="mt-0.5 shrink-0"
           />
           <span className={`text-[10px] ${checkText}`}>
-            뉴스레터 발송을 위한 이메일 수집 및 수신에 동의합니다.
+            <b>뉴스레터 수신 동의</b> · 발송을 위한 이메일 수집·이용에 동의합니다.
           </span>
         </label>
         {error && <p className="text-[10px] text-red-400">{error}</p>}

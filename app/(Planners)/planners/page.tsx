@@ -193,11 +193,7 @@ export default function PlannersPage() {
       <ExploreSection />
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-200">
-        <NewsletterSubscribeForm
-          source="planners"
-          accentColor="#1a1a1a"
-          subtitle="Planner's 소식을 가장 먼저 받아보세요."
-        />
+        <NewsletterSubscribeForm source="planners" brandName="Planner's" accentColor="#1a1a1a" />
       </section>
       <AboutSection />
     </main>

@@ -254,11 +254,7 @@ export default function TownityHome() {
 
             {/* ── 뉴스레터 구독 ── */}
             <section className="py-16 px-6 border-t border-neutral-200">
-                <NewsletterSubscribeForm
-                    source="townity"
-                    accentColor="#10B981"
-                    subtitle="Townity 소식을 가장 먼저 받아보세요."
-                />
+                <NewsletterSubscribeForm source="townity" brandName="Townity" accentColor="#10B981" />
             </section>
 
             {/* ── Contact ── */}

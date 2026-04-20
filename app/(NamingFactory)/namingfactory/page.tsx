@@ -136,11 +136,7 @@ export default function NamingFactoryPage() {
 
                 {/* ── 뉴스레터 구독 ── */}
                 <section className="py-16 px-6 border-t border-neutral-200">
-                    <NewsletterSubscribeForm
-                        source="namingfactory"
-                        accentColor="#7C3AED"
-                        subtitle="Naming Factory 소식을 가장 먼저 받아보세요."
-                    />
+                    <NewsletterSubscribeForm source="namingfactory" brandName="Naming Factory" accentColor="#7C3AED" />
                 </section>
 
                 {/* CTA */}

@@ -372,13 +372,7 @@ export default function MindleHomePage() {
 
       {/* ── 뉴스레터 구독 CTA ── */}
       <section className="px-6 py-16 border-t border-indigo-500/10">
-        <NewsletterSubscribeForm
-          source="mindle"
-          dark
-          accentColor="#6366f1"
-          title="트렌드 브리핑"
-          subtitle="AI가 분석한 트렌드 리포트를 받아보세요."
-        />
+        <NewsletterSubscribeForm source="mindle" brandName="Mindle" dark accentColor="#6366f1" />
       </section>
 
       {/* ── Ten:One Universe 연결 ── */}
