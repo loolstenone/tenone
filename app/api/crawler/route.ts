@@ -9,7 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { postAgentMessage } from '@/lib/supabase/chat';
 import { MINDLE_CATEGORY_LIST_FOR_PROMPT } from '@/constants/mindle-categories';
 
@@ -71,7 +71,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}));
     const action = (body as { action?: string }).action || 'crawl';
-    const supabase = await createClient();
+    const supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
 
     if (action === 'crawl') {
         // 활성 소스에서 RSS 수집
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
 
                 // collected_data에 저장 (중복 방지: url 기준)
                 for (const item of items.slice(0, 10)) {
-                    await supabase.from('collected_data').upsert({
+                    const { error: upsertErr } = await supabase.from('collected_data').upsert({
                         url: item.link,
                         title: item.title,
                         content: item.description,
@@ -104,8 +107,9 @@ export async function POST(request: NextRequest) {
                         published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
                         status: 'raw',
                         tenant_id: 'tenone',
-                    }, { onConflict: 'url' }).select();
-                    totalCollected++;
+                    }, { onConflict: 'url', ignoreDuplicates: true });
+                    if (!upsertErr) totalCollected++;
+                    else errors.push(`${src.name} upsert: ${upsertErr.message}`);
                 }
 
                 // 소스 마지막 크롤 시간 업데이트

@@ -19,6 +19,11 @@ function getServiceClient() {
     );
 }
 
+// Vercel Cron은 GET만 지원 — GET → POST 로직 위임
+export async function GET(request: NextRequest) {
+    return POST(request);
+}
+
 export async function POST(request: NextRequest) {
     // Cron 인증 (Admin API Key 또는 Vercel Cron Secret)
     const authHeader = request.headers.get('authorization');

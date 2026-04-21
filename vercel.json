@@ -41,6 +41,10 @@
     {
       "path": "/api/cron/analytics-sync",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/newsletter-crawl",
+      "schedule": "0 1 * * *"
     }
   ]
 }

@@ -9,7 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { postAgentMessage } from '@/lib/supabase/chat';
 
 // ── TenOne 관련성 프로파일 ──────────────────────────────────
@@ -107,7 +107,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}));
     const action = (body as { action?: string }).action || 'crawl';
-    const supabase = await createClient();
+    const supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
 
     // ── tenone tenant_id 조회 ──
     const { data: tenant } = await supabase

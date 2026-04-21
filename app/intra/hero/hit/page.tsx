@@ -66,7 +66,7 @@ export default function HitUsersPage() {
                 sb.from("hit_sessions").select("*").order("created_at", { ascending: false }).limit(200),
                 sb.from("hit_responses").select("*", { count: "exact", head: true }),
             ]);
-            const all = sessRes.data ?? [];
+            const all = (sessRes.data ?? []) as Session[];
             setSessions(all);
             const byType: Record<string, number> = {};
             all.forEach(s => { byType[s.test_type] = (byType[s.test_type] ?? 0) + 1; });
