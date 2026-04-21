@@ -85,7 +85,7 @@ export default function AgentCommPage() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="에이전트 소통"
+                title="에이전트 지시"
                 description="AI 에이전트 채널 현황 및 메시지 모니터링"
             />
 

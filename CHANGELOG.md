@@ -4,6 +4,78 @@
 
 ---
 
+## 2026-04-21 (세션 66) — 유니버스 아키텍처 대규모 재편 + GA4 파이프라인
+
+### Universe Dashboard 재편 (Stage-Aware)
+- `app/intra/ums/page.tsx` — Phase Ribbon · Hero Strip 5카드 · Action Hub · 참고 지표 5허브
+- Mock fallback 제거, 중복 지표(SITE·MEMBER·Capability Matrix 등) 정리
+- Part A 3레이어: L1 Hero · L2 Capability 요약 · L5 Action Hub
+- `CapabilityMatrix` 전체 매트릭스 → Standard 관리로 이전
+
+### Intelligence 모듈 체계화 (INTEL → Intelligence)
+- 3 중분류: 타겟 행동 데이터 · 정보 발굴(Whole See) · Agent Team
+- 2-depth 사이드바 + 본문 상단 탭 패턴 통일 (ERP·MARKETING 동일 적용)
+- `app/intra/intel/page.tsx` 3-Pane 대시보드 (Analytics·Whole See·Agent)
+- Agent Hub 중복 제거: `/intra/ums/agent/*` → `/intra/agent/*` 이동
+- Mindle vs Whole See 분리: Mindle=UMS 브랜드, Whole See=INTEL 정보 수집
+- `/intra/intel/wholesee/{trends,pipeline,newsletter,sources,crawling}` 5페이지
+- `/intra/intel/wholesee/sources` redirect → `/intra/ums/external/sources` (SSOT)
+
+### UMS Mindle 브랜드 관리 부활
+- `/intra/ums/mindle` 대시보드 (3 management cards)
+- `/intra/ums/mindle/{members,content}` 리디렉트
+
+### Standard 관리 (13종 SSOT)
+- `/intra/ums/standard/*` 13개 페이지
+- 회원·UC·산업군/직무군·News Letter·Capability·권한 체계·약관/개인정보
+- 사이트·도메인·접근 모델·WIO 요금제·테넌트·개발 규칙·이메일 템플릿
+
+### 외부 리소스 관리
+- `/intra/ums/external/{page,dev-env,apis,sources}` 4페이지
+- 개발 환경 7종: Vercel·Supabase·GitHub·Resend·GCP·Cron·Domain
+- 외부 API 46건 11카테고리 (한국 네이버·카카오·토스페이·PortOne 포함)
+- 크롤링·RSS·뉴스레터 3탭 분리 + 추가 모달 + 작동 검증
+- `/api/external/verify` + `/api/external/sources` API
+- `mindle_sources` 55건 (RSS 38·Web 16·Newsletter 1) — 한국 마케팅·트렌드·IT 매체 34개 추가 · URL 검증 및 정정
+
+### Action Hub Registry (유니버스 표준 패턴)
+- `lib/action-hub-registry.ts` SSOT + 11 초기 엔트리 (approval·cs·privacy·payment 카테고리)
+- Dashboard가 Registry iterate → count 병렬 쿼리 → category 그룹핑 렌더링
+- CLAUDE.md §1.9.1 신설 + §2.4 체크리스트 갱신 + 브랜드 템플릿에 `Action Hub Entries` 섹션
+
+### HIT 관리 재구조
+- `/intra/hero/hit` 임베드된 10문항 설문 제거 → 세션 목록으로 전환
+- `/intra/hero/hit/{structure,questions,answers}` 3 관리 페이지 신설
+- 2,034 질문 · 15 모듈 · 7 타입 매트릭스 · 216 sub_domain 시각화
+- HeRo 사이드바 children 추가 (HIT 이용자·구성·질문 관리·답변 구성)
+
+### GA4 Sync 파이프라인
+- `/api/cron/analytics-sync` Vercel Cron (`0 18 * * *` = 03:00 KST) + Bearer `CRON_SECRET` auth
+- `/api/analytics/env-check` + `/intra/analytics/sync` UI 6단계 셋업 가이드
+- `GA4_PROPERTY_ID=259262675` · `GA4_SERVICE_ACCOUNT_JSON` Vercel 등록
+- Service Account `ga4-sync@smarcomm.iam.gserviceaccount.com` → GA4 뷰어
+- Custom dimension `brand_id` 이벤트 범위 등록
+- 직접 API 호출 확인: `{"results":[],"synced_at":"..."}` (인증 OK, GTM 연결 대기)
+
+### 사이드바 재편 (2-depth + 본문 상단 탭)
+- Intelligence·ERP·MARKETING 동일 패턴 적용
+- UMS 사이드바에 외부 리소스 · Standard 관리 추가
+- HeRo 섹션에 HIT 3개 관리 항목 추가
+- Whole See에 `RSS 제거` → 외부 리소스로 redirect
+
+### CLAUDE.md 갱신
+- §1.9.1 Action Hub Registry 신설
+- Mindle·Whole See 역할 구분 명시 (4대 제품 표)
+- §2.4 체크리스트: brand_capabilities + Action Hub Registry
+- 브랜드 템플릿: Action Hub Entries 섹션 추가
+
+### 실데이터 정정 (Bug Fix)
+- Dashboard: `subscriptions` → `wio_subscriptions` (테이블 없음 이슈)
+- Dashboard: `revenue.created_at` → `recorded_at` (컬럼명 불일치)
+- intra-nav.ts: Korea360·LUKI 중복 제거
+
+---
+
 ## 2026-04-21 (세션 65) — 이메일/CRM 6-Phase 고도화 풀 구축
 
 ### Phase 1 — 발송 기반 정비

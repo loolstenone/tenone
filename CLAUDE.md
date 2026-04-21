@@ -29,10 +29,23 @@ Ten:One™ Universe는 하나의 코드베이스·하나의 Supabase로 **26+ �
 
 | 제품 | 역할 | Intra 연결점 |
 |------|------|------------|
-| **Mindle** | 데이터·트렌드 연료 공급 | BUMS > 콘텐츠 > 뉴스레터·트렌드 카드 |
+| **Mindle** | **트렌드 콘텐츠 브랜드** — Whole See의 정보를 가장 적극 활용해 독자에게 전달 | UMS > Mindle (사이트·회원·콘텐츠) |
 | **SmarComm** | 마케팅 자동화 OS | Marketing 섹션 ↔ SmarComm WS |
 | **WIO** | 업무 자동화 솔루션 | Universe > 구독 + WIO Orbi |
-| **AI Agent** | 6개 에이전트 운영 엔진 | Agent Hub |
+| **AI Agent** | 6개 에이전트 운영 엔진 | INTEL > Agent Hub |
+
+### 정보 공급 엔진 — Whole See
+
+Mindle·SmarComm·전 브랜드가 공통으로 쓰는 **정보 취합·분류·분석 인프라**.
+INTEL 레이어에 속하며, 외부 정보를 유니버스에 들여오는 "눈" 역할.
+
+| 구성 | 역할 |
+|------|------|
+| **Whole See** (INTEL) | RSS·웹·뉴스레터·소셜 크롤링 · AI 분류 · 트렌드 카드 생성 · 파이프라인 |
+| **Mindle** (브랜드) | Whole See 원천에서 선별 · 큐레이션 · 뉴스레터 발행 · 독자 전달 |
+| **기타 브랜드** | Whole See 원천을 부분 활용 (브랜드별 필요에 따라) |
+
+> **원칙**: 크롤링·분석은 Whole See(INTEL) 공동 인프라, 각 브랜드는 UMS에서 자기 콘텐츠·회원·사이트만 관리.
 
 ### AI Agent Team — 3축 체계
 
@@ -801,6 +814,67 @@ brand_id  = 유니버스 내부 브랜드 구분 (LUKI, Badak, MADLeague...)
 
 ---
 
+## 1.9.1 Action Hub Registry — 브랜드 액션 자동 집계 SSOT
+
+> **원칙**: 각 브랜드의 "처리 대기 액션"(승인·CS·개인정보·결제 등)은 하나의 레지스트리에 등록하고,
+> Dashboard Action Hub가 자동으로 pending count를 집계해 카드로 표시한다.
+
+### SSOT 파일
+
+`lib/action-hub-registry.ts` — 전 유니버스 공통 레지스트리
+
+```typescript
+export const ACTION_HUB_REGISTRY: ActionEntry[] = [
+  {
+    key: "jakka_seller_applications",
+    label: "Jakka 판매자 심사",
+    table: "jakka_seller_applications",
+    filter: { column: "status", value: "pending" },
+    href: "/intra/ums/jakka/sellers",
+    brand_id: "jakka",
+    category: "approval",
+    priority: "high",
+  },
+  // ...
+];
+```
+
+### 작동 원리
+
+1. Dashboard 로드 시 레지스트리의 각 entry에 대해 `SELECT count(*) WHERE {filter}` 병렬 실행
+2. count > 0인 항목만 카드로 렌더링 (category 그룹핑 + priority 정렬)
+3. 클릭 시 `href`의 관리 페이지로 이동
+
+### 카테고리 6종
+
+| category | 의미 | 예시 |
+|---|---|---|
+| `approval` | 승인 대기 | 지원서, 심사 |
+| `cs` | 고객 응대 | 문의, Q&A 미답변 |
+| `privacy` | 개인정보 | 탈퇴 요청 |
+| `moderation` | 콘텐츠 모더레이션 | 신고 처리 |
+| `payment` | 결제 | 주문 확정 대기 |
+| `agent` | 에이전트 | 지시 대기, 메시지 |
+
+### Priority 3단계
+
+`critical` (🚩 즉시) · `high` (↑ 24h 내) · `normal` (일반)
+
+### 새 브랜드 추가 시 (§2.4 체크리스트 연동)
+
+- [ ] 브랜드에 관리자 처리 필요 테이블이 있으면 `ACTION_HUB_REGISTRY`에 entry 추가
+- [ ] 브랜드 CLAUDE.md `## Action Hub Entries` 섹션에 등록 내역 기록
+- [ ] 테이블 스키마에 `status` 컬럼이 있고 `'pending'` 같은 대기 상태 값을 사용하는지 확인
+- [ ] `href`가 실제 존재하는 관리 페이지인지 확인
+
+### 금지 패턴
+
+- ❌ Dashboard Action Hub에 브랜드별 쿼리 하드코딩 (레지스트리 통과 필수)
+- ❌ 브랜드 사이트 자체 대시보드에 동일 count 재구현 (SSOT 위반)
+- ❌ `status` 컬럼 없이 pending 의미를 다른 방식으로 표현 (예: boolean `is_reviewed`)
+
+---
+
 ## 1.10 개발 규칙 — 모순 방지 8원칙
 
 | # | 규칙 | 위반 시 문제 |
@@ -860,6 +934,11 @@ Claude Code는 해당 브랜드 파일을 편집할 때 **자동으로 함께 �
 ## UC 정책 특이사항
 - 브랜드 전용 액션: (있으면 action_key 나열)
 - brand_id 지정 여부:
+
+## Action Hub Entries
+- (관리자 처리 필요 테이블이 있으면 나열)
+- 예: `{brand}_applications` · status='pending' · /intra/ums/{brand}/applications · category=approval · priority=normal
+- `lib/action-hub-registry.ts`에 등록된 항목과 일치해야 함
 
 ## 핵심 파일
 - `app/(BrandName)/layout.tsx` — generateMetadata
@@ -955,6 +1034,8 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
 - [ ] Supabase Auth > Allowed Redirect URLs에 `https://새도메인/**` 추가
 - [ ] 특화 프로필 테이블 필요 시 `universe-profile.ts`에 조회 함수 추가
 - [ ] `UniverseProfile.tsx` → `SERVICE_META`에 아이콘·설명·접근모델 등록
+- [ ] **Action Hub**: 관리자 처리 필요 테이블이 있으면 `lib/action-hub-registry.ts`에 entry 추가 (승인·CS·개인정보·결제 유형별)
+- [ ] 브랜드 CLAUDE.md에 `## Action Hub Entries` 섹션으로 등록 내역 기록
 
 ---
 

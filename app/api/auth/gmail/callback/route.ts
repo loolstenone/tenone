@@ -15,14 +15,14 @@ export async function GET(request: NextRequest) {
 
     if (error) {
         return new NextResponse(
-            `<html><body><h2>Gmail 인증 실패</h2><p>${error}</p><a href="/intra/ums/mindle/sources">돌아가기</a></body></html>`,
+            `<html><body><h2>Gmail 인증 실패</h2><p>${error}</p><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
     }
 
     if (!code) {
         return new NextResponse(
-            `<html><body><h2>인증 코드 없음</h2><a href="/intra/ums/mindle/sources">돌아가기</a></body></html>`,
+            `<html><body><h2>인증 코드 없음</h2><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
     }
@@ -79,14 +79,14 @@ export async function GET(request: NextRequest) {
                 <h2>Gmail 연결 완료</h2>
                 <p><strong>${email}</strong> 계정이 Mindle 뉴스레터 수집에 연결되었습니다.</p>
                 <p style="color:#888;margin-top:20px">이제 Cron이 자동으로 뉴스레터를 수집합니다.</p>
-                <a href="/intra/ums/mindle/sources" style="display:inline-block;margin-top:20px;padding:10px 20px;background:#111;color:#fff;text-decoration:none">RSS 소스 관리로 돌아가기</a>
+                <a href="/intra/intel/wholesee/sources" style="display:inline-block;margin-top:20px;padding:10px 20px;background:#111;color:#fff;text-decoration:none">RSS 소스 관리로 돌아가기</a>
             </body></html>`,
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
     } catch (e) {
         console.error('[Gmail OAuth] 오류:', e);
         return new NextResponse(
-            `<html><body><h2>Gmail 인증 오류</h2><p>${e instanceof Error ? e.message : 'Unknown error'}</p><a href="/intra/ums/mindle/sources">돌아가기</a></body></html>`,
+            `<html><body><h2>Gmail 인증 오류</h2><p>${e instanceof Error ? e.message : 'Unknown error'}</p><a href="/intra/intel/wholesee/sources">돌아가기</a></body></html>`,
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
     }

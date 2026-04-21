@@ -234,7 +234,7 @@ export default function AgentHubPage() {
     return (
         <div className="flex flex-col gap-4">
             <PageHeader
-                title="Agent Hub"
+                title="에이전트 현황 (대시보드)"
                 description="AI 에이전트 팀 운영 관제 센터"
             />
 

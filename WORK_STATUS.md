@@ -1,17 +1,67 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-21 (세션 65 — 이메일/CRM 6-Phase 고도화 풀 구축)
+> 마지막 업데이트: 2026-04-21 (세션 66 — 유니버스 아키텍처 대규모 재편 + GA4 파이프라인)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-### 🟢 진행 가능 작업
-1. **인트라 네비 링크 추가** — `/intra/marketing/crm/segments`, `/intra/marketing/crm/broadcast`, `/intra/ums/email/usage`, `/intra/ums/email/senders` (lib/intra-nav.ts 갱신)
-2. **Resend Pro 업그레이드** — 본격 사업 시작 시점 (Free 100/일 → Pro 50k/월)
-3. **Jakka 마켓 — 승인/반려 이메일 알림** — 이제 CRM 브로드캐스트 + 템플릿 엔진으로 구현 가능
-4. **Jakka 마켓 — 정산 리포트 자동 생성** — 월 2회(1일/15일)
-5. **Jakka 마켓 — 구매 실결제 통합** — 토스페이/포트원 연동 검토
-6. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-7. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
+### 🟢 진행 가능 작업 (GA4 파이프라인 마무리)
+1. **GTM 설정**: `brand_id` dataLayer 변수 생성 + GA4 Configuration 태그 event parameter 추가 → 24~48h 후 데이터 집계 시작
+2. **Analytics 브랜드별 대시보드 실데이터화** (GA4 데이터 쌓이면)
+
+### 🟢 기존 이월 작업
+3. **Resend Pro 업그레이드** — 본격 사업 시작 시점
+4. **Jakka 마켓 — 승인/반려 이메일 알림** (CRM 브로드캐스트 활용)
+5. **Jakka 마켓 — 정산 리포트 자동 생성** (월 2회)
+6. **Jakka 마켓 — 구매 실결제 통합** (토스페이/포트원)
+7. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+8. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
+
+### 🟢 컨설팅 권장 Tier 1 (컨설팅 리포트 참조)
+9. UMS > Agent 관리 메뉴 신설 (Intelligence 경계 명확화)
+10. Standard > 산업군/직무군 → DB 이관 + 편집 UI
+
+### ✅ 세션 66 완료 — Universe Dashboard + Intelligence + Standard 관리 + GA4 파이프라인
+
+**A. Universe Dashboard 재편 (Stage-Aware)**
+- Phase Ribbon · Hero Strip 5카드(브랜드·Capability·에이전트·회원·매출) · Action Hub · 참고 지표 5허브 · 브랜드별·최근 활동
+- Mock fallback 제거, 중복(SITE·MEMBER·Capability Matrix 등) 정리
+
+**B. Intelligence 모듈 체계화 (INTEL → Intelligence)**
+- 3 중분류: 타겟 행동 데이터 · 정보 발굴(Whole See) · Agent Team
+- 2-depth 사이드바 + 본문 상단 탭 패턴 (ERP·MARKETING 동일 적용)
+- `/intra/intel/page.tsx` 3-Pane 대시보드 신설 (Analytics·Whole See·Agent)
+- Mindle ↔ Whole See 분리 (Mindle=브랜드·UMS / Whole See=정보 수집·INTEL)
+- `/intra/intel/wholesee/{trends,pipeline,newsletter,sources,crawling}` 5페이지
+
+**C. UMS Mindle 브랜드 관리 부활**
+- `/intra/ums/mindle` 대시보드 + members·content 리디렉트
+
+**D. Standard 관리 신설 (13종 SSOT)**
+- 회원·UC·산업군/직무군·News Letter·Capability·권한 체계·약관/개인정보
+- 사이트·도메인·접근 모델·WIO 요금제·테넌트·개발 규칙·이메일 템플릿
+
+**E. 외부 리소스 관리 (`/intra/ums/external`)**
+- 개요·개발 환경(7종: Vercel·Supabase·GitHub·Resend·GCP·Cron·Domain)·외부 API(46건 11카테고리)·크롤링·RSS·뉴스레터 3탭 분리
+- `/api/external/verify` 검증 엔드포인트 + `/api/external/sources` 추가 API
+- `mindle_sources` 55건 (RSS 38·Web 16·Newsletter 1) — 한국 마케팅·트렌드·IT 매체 34개 추가
+
+**F. Action Hub Registry (유니버스 표준 패턴)**
+- `lib/action-hub-registry.ts` SSOT + 11 초기 엔트리
+- Dashboard가 Registry 기반 자동 렌더링
+- CLAUDE.md §1.9.1 + §2.4 체크리스트 갱신
+
+**G. HIT 관리 재구조**
+- `/intra/hero/hit` 임베드된 설문 제거, 세션/결과 목록화
+- `/intra/hero/hit/{structure,questions,answers}` 3 관리 페이지 신설
+- 2,034 질문 · 15 모듈 · 7 타입 매트릭스
+
+**H. GA4 Sync 인프라**
+- `/api/cron/analytics-sync` Vercel Cron(03:00 KST) + Bearer auth
+- `/api/analytics/env-check` + UI 6단계 셋업 가이드
+- `GA4_PROPERTY_ID=259262675` · `GA4_SERVICE_ACCOUNT_JSON` Vercel 등록 완료
+- Service Account: `ga4-sync@smarcomm.iam.gserviceaccount.com` → GA4 뷰어
+- Custom dimension `brand_id` 이벤트 범위 등록
+- ⚠️ **남은 작업**: GTM 변수 + 태그 설정 → 데이터 실유입
 
 ### ✅ 세션 65 완료 — 이메일/CRM 6-Phase 고도화
 

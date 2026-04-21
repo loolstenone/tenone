@@ -109,11 +109,11 @@ export default function MindleTrendsPage() {
                         </p>
                     </div>
                     <div className="flex justify-center gap-2">
-                        <Link href="/intra/ums/mindle/sources"
+                        <Link href="/intra/intel/wholesee/sources"
                             className="px-4 py-2 text-xs bg-neutral-900 text-white hover:bg-neutral-700 transition-colors">
                             RSS 소스 관리
                         </Link>
-                        <Link href="/intra/ums/mindle/pipeline"
+                        <Link href="/intra/intel/wholesee/pipeline"
                             className="px-4 py-2 text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors">
                             파이프라인 보기
                         </Link>

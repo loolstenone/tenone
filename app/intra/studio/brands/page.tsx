@@ -15,7 +15,7 @@ const INTRA_PATHS: Record<string, string> = {
     brandgravity: "/intra/gravity",
     hero: "/intra/hero/talent",
     wio: "/intra/ums/commerce/subscriptions",
-    mindle: "/intra/ums/mindle/trends",
+    mindle: "/intra/intel/wholesee/trends",
     smarcomm: "/intra/ums/smarcomm",
     planners: "/intra/evolution-school",
     luki: "/intra/ums/madleague",  // 동일 섹션
