@@ -485,6 +485,7 @@ export const modules: NavModule[] = [
             {
                 items: [
                     { name: "Intelligence 대시보드", href: "/intra/intel", icon: LayoutDashboard, exact: true },
+                    { name: "데이터 헬스", href: "/intra/intel/pipeline-health", icon: Activity },
                     {
                         name: "타겟 행동 데이터",
                         href: "/intra/analytics",
