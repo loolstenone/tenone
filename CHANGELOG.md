@@ -4,6 +4,64 @@
 
 ---
 
+## 2026-04-21 (세션 66 추가분) — 인트라 재편·디테일 정비 (Commit 2~9)
+
+### Commit `06cb1599` — Tier 1+2: 네이밍·Wiki·Agent/CS 허브
+- 5 모듈 Title Case 통일 + tagline (My/Universe/Marketing/ERP/Intelligence)
+- `next.config.ts`: `/intra/wiki/*` → `wiki.tenone.biz` 301 permanent redirect
+- Agent 관리 3페이지 (`/intra/ums/agents/*`) + CS 통합 허브 (`/intra/ums/cs`)
+
+### Commit `922d11ca` — 산업군/직무군 DB 이관
+- `taxonomies` 테이블 + 68 seed · `/api/intra/taxonomies` CRUD
+- Standard > 산업군/직무군 편집 UI (인라인·활성 토글·Core 보호)
+
+### Commit `ccc3338b` — Tier 3-#8 권한별 Dynamic Sidebar
+- `roles?: VisibleRole[]` 필드 + `canSeeByRole()` 헬퍼
+- My(전체) · Universe·Marketing(staff+) · ERP·Intelligence(manager+)
+
+### Commit `b56e7274` — Agent 관리 Phase 2
+- 인라인 편집 (display_name·temp·max_tokens·is_active)
+- 시스템 프롬프트 모달 + version 자동 증가
+- 삭제 안전장치 (active=true 금지, critical risk 금지)
+
+### Commit `a4febe04` — Opportunity 3-Layer 분할
+- Marketing 제거 → ERP 프로젝트 + Intelligence Whole See 양쪽 진입
+- `/intra/intel/wholesee/opportunities` Intake 모니터링 페이지
+- Action Hub Registry `opportunity_new` · `opportunity_bidding` 추가
+
+### Commit `79712e9e` — 브랜드 네이밍·일관성 정비
+- siteConfigs canonical 동기화: Brand Gravity™ · SmarComm. · Seoul/360°
+- Planner's children에 Evolution School 포함
+- WIO children 정비
+
+### Commit `863c9858` — 브랜드명 영문 통일
+- Korea360 (자체) · Seoul/360° 분리 유지
+- 한글 병기 제거 → 영문 단일 (0gamja, Dokdae, Mullaesian, NatureBox, Townity)
+- 최종 27 브랜드 단일 알파벳 리스트
+
+### Commit `32f44fbc` — Data Pipeline Health 모니터링 시스템
+- `/api/intra/pipeline-health` PIPELINE_REGISTRY 15 엔트리
+- `/intra/intel/pipeline-health` 대시보드 (5 카테고리 · healthy/stale/empty/error 4-state)
+- Intelligence 사이드바에 "데이터 헬스" 추가
+
+### 진단 결과 (세션 66 종료 시점)
+- 🟢 정상: RSS 크롤 (31/38 활성), 웹 크롤 (16/16), 에이전트 메시지 (24h 27건)
+- 🔴 **Critical**: `collected_data` 19일 정체 (4/2 이후), `wio_opportunities` 0건, Gmail 수집 9일 정체
+- 🟡 **Empty**: `analytics_snapshots` (GA4 48h 대기), `badak_feedbacks`, `jakka_product_qna`
+
+### 세션 66 전체 Commit 9개
+1. `7c51537b` 유니버스 아키텍처 대규모 재편 + GA4 파이프라인
+2. `06cb1599` Tier 1+2: 네이밍·Wiki·Agent/CS 허브
+3. `922d11ca` 산업군/직무군 DB 이관
+4. `ccc3338b` Tier 3-#8: 권한별 Dynamic Sidebar
+5. `b56e7274` Agent Phase 2: 인라인 편집
+6. `a4febe04` Opportunity 3-Layer 분할
+7. `79712e9e` 브랜드 네이밍 정비
+8. `863c9858` 브랜드명 영문 통일
+9. `32f44fbc` Data Pipeline Health 모니터링
+
+---
+
 ## 2026-04-21 (세션 66) — 유니버스 아키텍처 대규모 재편 + GA4 파이프라인
 
 ### Universe Dashboard 재편 (Stage-Aware)

@@ -1,26 +1,79 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-21 (세션 66 — 유니버스 아키텍처 대규모 재편 + GA4 파이프라인)
+> 마지막 업데이트: 2026-04-21 (세션 66 — 인트라 재편 대장정 · 9 commits)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-### 🟢 진행 가능 작업 (GA4 파이프라인 마무리)
-1. **GTM 설정**: `brand_id` dataLayer 변수 생성 + GA4 Configuration 태그 event parameter 추가 → 24~48h 후 데이터 집계 시작
-2. **Analytics 브랜드별 대시보드 실데이터화** (GA4 데이터 쌓이면)
+### 🔴 Critical — 파이프라인 디버깅 (세션 66 진단 결과)
+1. **RSS 크롤 → collected_data 저장 중단** (4/3부터 INSERT 0건, last_crawled_at은 계속 갱신)
+   - 원인 추정: `parseRssItems()` 반환값이 []가 되어 upsert 루프 스킵
+   - 진단: `/intra/intel/pipeline-health` 페이지 활용
+2. **`wio_opportunities` 0건 유지** — 크롤러 스텁 or 파싱 실패
+3. **Gmail 뉴스레터 수집 9일 정체** (4/12 이후) — OAuth 토큰 만료 또는 Cron 호출 이슈
+
+### 🟢 GA4 파이프라인 마무리
+4. **GA4 데이터 집계 확인** (48h 대기 후 `/intra/analytics/sync` 실행)
+5. **Analytics 브랜드별 대시보드 실데이터화** (데이터 축적 후)
 
 ### 🟢 기존 이월 작업
-3. **Resend Pro 업그레이드** — 본격 사업 시작 시점
-4. **Jakka 마켓 — 승인/반려 이메일 알림** (CRM 브로드캐스트 활용)
-5. **Jakka 마켓 — 정산 리포트 자동 생성** (월 2회)
-6. **Jakka 마켓 — 구매 실결제 통합** (토스페이/포트원)
-7. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-8. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
+6. **Resend Pro 업그레이드** — 본격 사업 시작 시점
+7. **Jakka 마켓 — 승인/반려 이메일 알림** (CRM 브로드캐스트 활용)
+8. **Jakka 마켓 — 정산 리포트 · 구매 실결제 통합** (토스페이/포트원)
+9. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
+10. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
 
-### 🟢 컨설팅 권장 Tier 1 (컨설팅 리포트 참조)
-9. UMS > Agent 관리 메뉴 신설 (Intelligence 경계 명확화)
-10. Standard > 산업군/직무군 → DB 이관 + 편집 UI
+### 🟢 Tier 3 컨설팅 권장 (잔여)
+11. BI 일원화 (ERP BI + Intel Analytics 연동) — GA4 데이터 축적 후
+12. Legal 버전 관리 + Data Governance 허브
+13. Role Brand Context 필터 (brand:madleague 등 세분화)
+14. 점진적 `badak-constants.ts` → taxonomies DB fetch 전환
 
-### ✅ 세션 66 완료 — Universe Dashboard + Intelligence + Standard 관리 + GA4 파이프라인
+### ✅ 세션 66 추가 완료 — 인트라 재편·디테일 정비 (Commit 2~9)
+
+**Commit `06cb1599`**: Tier 1+2 네이밍·Wiki·Agent/CS 허브
+- 5 모듈 Title Case 통일 (My·Universe·Marketing·ERP·Intelligence) + tagline
+- Wiki 강제 이전 → wiki.tenone.biz (next.config 301 redirect, My > 커뮤니티·지식으로 연결)
+- Universe > Agent 관리 (3 페이지): 프로파일·프롬프트·도구
+- Universe > CS 통합 허브: 4 소스 Registry (contact·jakka_qna·badak·jakka_orders)
+
+**Commit `922d11ca`**: 산업군/직무군 DB 이관
+- `taxonomies` 테이블 + 68 시드 (38 job_function + 30 industry)
+- `/api/intra/taxonomies` CRUD (GET·POST·PATCH·DELETE)
+- Standard > 산업군/직무군 편집 UI (인라인 편집·활성 토글·Core 보호)
+
+**Commit `ccc3338b`**: Tier 3-#8 권한별 Dynamic Sidebar
+- `NavModule`·`MenuItem`·`SubItem`에 `roles?: VisibleRole[]` 추가
+- 모듈별 role 정책: My(전체) · Universe·Marketing(staff+) · ERP·Intelligence(manager+)
+- `canSeeByRole()` 헬퍼 + IntraSidebar 필터링
+
+**Commit `b56e7274`**: Agent 관리 Phase 2
+- `/api/intra/agents` CRUD (화이트리스트 필드, 삭제 안전장치 2중)
+- 인라인 편집: display_name · temperature · max_tokens · is_active 토글
+- 시스템 프롬프트 풀텍스트 모달 (저장 시 version++)
+
+**Commit `a4febe04`**: Opportunity 3-Layer 분할
+- Marketing에서 제거 → ERP 프로젝트 · Intelligence Whole See 양쪽 진입점
+- `/intra/intel/wholesee/opportunities` 신규 (Intake 모니터링)
+- Action Hub Registry에 `opportunity_new` (high) · `opportunity_bidding` (critical)
+
+**Commit `79712e9e`**: 브랜드 네이밍·일관성 전면 정비
+- siteConfigs canonical name 동기화: Brand Gravity™ · SmarComm. · Seoul/360°
+- Planner's children에 Evolution School 포함 (독립 항목 제거)
+- WIO children 정비 (테넌트 + WIO 구독자 분리)
+
+**Commit `863c9858`**: 브랜드명 영문 통일 + 사용자 수정
+- Korea360 (자체 브랜드) / Seoul/360° 별도 유지
+- 한글 병기 제거 → 영문 단일 (0gamja · Dokdae · Mullaesian · NatureBox · Townity)
+- 최종 27개 브랜드 단일 알파벳 리스트
+
+**Commit `32f44fbc`**: Data Pipeline Health 모니터링 시스템
+- `/api/intra/pipeline-health` PIPELINE_REGISTRY 15 엔트리
+- `/intra/intel/pipeline-health` 대시보드
+- 카테고리 5종: intake·analysis·activity·revenue·cs
+- 자동 stale 감지 (expected_interval_hours 초과 시)
+- **진단 결과**: RSS/웹 크롤 정상, collected_data 19일 정체, opportunity 0건, Gmail 9일 정체
+
+### ✅ 세션 66 완료 — Universe Dashboard + Intelligence + Standard 관리 + GA4 파이프라인 (Commit 1)
 
 **A. Universe Dashboard 재편 (Stage-Aware)**
 - Phase Ribbon · Hero Strip 5카드(브랜드·Capability·에이전트·회원·매출) · Action Hub · 참고 지표 5허브 · 브랜드별·최근 활동
