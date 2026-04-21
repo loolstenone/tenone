@@ -152,6 +152,7 @@ export async function POST(request: NextRequest) {
                         updated_at: new Date().toISOString(),
                     }, { onConflict: 'url,tenant_id', ignoreDuplicates: true });
                     if (!error) totalCollected++;
+                    else errors.push(`${src.name} upsert: ${error.message}`);
                 }
             } catch (err) {
                 errors.push(`${src.name}: ${err instanceof Error ? err.message : 'Unknown'}`);
@@ -248,7 +249,7 @@ export async function POST(request: NextRequest) {
                     estimated_value: card.budget_min,
                     budget_max: card.budget_max,
                     deadline: card.deadline,
-                    relevance_score: filter.score / 10,
+                    relevance_score: filter.score,
                     status: 'new',
                     updated_at: new Date().toISOString(),
                 }).eq('id', item.id);
