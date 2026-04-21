@@ -1,15 +1,60 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-21 (세션 66 — 인트라 재편 대장정 · 9 commits)
+> 마지막 업데이트: 2026-04-22 (세션 73 — MADLeague UX 정비)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-### 🔴 Critical — 파이프라인 디버깅 (세션 66 진단 결과)
-1. **RSS 크롤 → collected_data 저장 중단** (4/3부터 INSERT 0건, last_crawled_at은 계속 갱신)
-   - 원인 추정: `parseRssItems()` 반환값이 []가 되어 upsert 루프 스킵
-   - 진단: `/intra/intel/pipeline-health` 페이지 활용
-2. **`wio_opportunities` 0건 유지** — 크롤러 스텁 or 파싱 실패
-3. **Gmail 뉴스레터 수집 9일 정체** (4/12 이후) — OAuth 토큰 만료 또는 Cron 호출 이슈
+### ✅ 세션 73 — MADLeague UX 정비 (2026-04-22)
+- ✅ **헤더 간소화**: `MadLeagueHeader.tsx` navItems에서 "매드리거" 항목 제거 → 프로그램·아레나·MADzine 3개 유지
+- ✅ **아레나 섹션 추가**: `arena/page.tsx` SECTIONS에 프로젝트(`/madleague/projects`)·경쟁PT 워크스페이스(`/madleague/pt`) 추가 (총 3섹션 라이브)
+- ✅ **마이페이지 탭 제거**: `my/page.tsx` 커뮤니티 탭·탭 UI·관련 state/useEffect 전체 제거 → 동아리 회장 패널·아레나 바로가기 배너·로그아웃 직접 나열로 단순화
+
+### 🟡 MADLeague 미구현 페이지 (아레나에서 링크 연결됨)
+- `/madleague/projects` — 매드리거 프로젝트 워크스페이스 (페이지 미구현, 링크 추가됨)
+- `/madleague/pt` — 경쟁PT 워크스페이스 (페이지 미구현, 링크 추가됨)
+
+### ✅ Phase 0-C: 중복 테이블 정리 완료 (세션 71)
+- ✅ 코드 레벨 전체 이관 완료 (12개 파일)
+  - `lib/supabase/erp.ts`, `myverse.ts`, `projects.ts`
+  - `app/api/timesheets/route.ts`, `approvals/route.ts`, `approvals/[id]/route.ts`
+  - `app/intra/erp/hr/certificates/page.tsx`
+  - `lib/supabase/chat.ts`
+  - `app/api/messenger/service-hook/route.ts`, `action-callback/route.ts`
+  - `app/api/agent/briefing/route.ts`
+  - `local-agent-bridge/src/listener.ts`
+- ⚠️ 레거시 테이블 드롭은 Phase 1 이후 (현재 old 테이블 유지)
+
+### ✅ Phase 0-D: WIO 서비스 인프라 완료 (세션 72)
+- ✅ `wio_tenant_configs` 확인 (8 rows, RLS on)
+- ✅ `wio_feature_flags` 확인 (76 rows, RLS on)
+- ✅ `wio_subscription_plans` 확인 (11 rows, service_type 컬럼 존재)
+- ✅ `lib/supabase/erp.ts` fetchApprovals/fetchExpenses에 tenantId 옵션 추가 (기본값 'tenone')
+
+### ✅ Phase 1-D: Agent Hub 활성화 완료 (세션 70)
+- ✅ `/api/agent/badaksoe` — 바당쇠 Badak 모임 코디네이터 엔드포인트 구현 (4 task_type)
+- ✅ 10:01 Vrief 위젯 — Intra Dashboard(`myverse/page.tsx`)에 열시일분 브리핑 위젯 추가
+- ✅ ROADMAP.md Phase 1-D 완료 체크
+
+### ✅ Phase 1-C: WIO 테넌트 관리 완료 (세션 69)
+- ✅ `/intra/ums/wio/tenants` — 실제 구현 (wio_tenants + wio_members 집계, 플랜 필터, 모듈 상세)
+- ✅ `/intra/ums/commerce/subscriptions` — 구독 관리 UI 이미 완성 확인
+- ✅ WIO Demo/SaaS/Master 모드 — `app/(WIO)/wio/app/layout.tsx` 확인 완료
+
+### ✅ Phase 1-B: SmarComm 활성화 완료 (세션 이전)
+- ✅ Preview gate 제거 (layout.tsx 코멘트 확인)
+
+### ✅ Phase 1-A: Mindle 관리 완료 (세션 이전 + 버그 수정)
+- ✅ newsletter_subscribers source='mindle' 필터 수정 (site_id → source)
+
+
+### ✅ 세션 67 완료 — 파이프라인 디버깅 3건
+1. ✅ **RSS 크롤 → collected_data 저장 중단** — `parseRssItems()` Atom `<entry>`/`<link href>` 지원 추가 (세션 66 후반)
+2. ✅ **`wio_opportunities` 0건** — 두 가지 수정:
+   - DB: `wio_opportunities(url, tenant_id)` unique index 생성 (upsert onConflict 동작을 위해)
+   - 파서: `parseRssOpportunities()` Atom format + `<link href="..."/>` self-closing 지원 추가
+3. ✅ **Gmail 뉴스레터 수집 9일 정체** — 두 가지 수정:
+   - `crawler/route.ts`: `mailto:` 소스 HTTP 요청 skip guard 추가 (`error_count: 227` 방지)
+   - `newsletter-crawl/route.ts`: `mindle_sources.last_crawled_at` 갱신을 `emails.length === 0` 체크 앞으로 이동
 
 ### 🟢 GA4 파이프라인 마무리
 4. **GA4 데이터 집계 확인** (48h 대기 후 `/intra/analytics/sync` 실행)
@@ -17,16 +62,16 @@
 
 ### 🟢 기존 이월 작업
 6. **Resend Pro 업그레이드** — 본격 사업 시작 시점
-7. **Jakka 마켓 — 승인/반려 이메일 알림** (CRM 브로드캐스트 활용)
-8. **Jakka 마켓 — 정산 리포트 · 구매 실결제 통합** (토스페이/포트원)
-9. **Phase 0-A** — `tenant_id` 63개 테이블 일괄 추가 + RLS 업데이트
-10. **Badak/Rook 등 추가 브랜드 My page에 `<CapabilitySection>` 통합**
+7. ✅ **Jakka 마켓 — 승인/반려 이메일 알림** — 이미 구현됨 (`app/api/intra/jakka/sellers/route.ts`, Resend HTML 템플릿 완성)
+8. **Jakka 마켓 — 구매 실결제 통합** (토스페이/포트원) — 별도 세션 필요
+9. ✅ **Phase 0-A** — `tenant_id` 39개 테이블 일괄 추가 완료 (jakka 26 + montz 4 + badak 2 + infra 7) + 인덱스 16개 생성. 마이그레이션: `sql/phase-0a-add-tenant-id.sql`. RLS 정책 업데이트는 Phase 0-B로 이월.
+10. ✅ **Badak/Rook 등 추가 브랜드 My page `<CapabilitySection>` 통합** — 이미 완료
 
 ### 🟢 Tier 3 컨설팅 권장 (잔여)
 11. BI 일원화 (ERP BI + Intel Analytics 연동) — GA4 데이터 축적 후
 12. Legal 버전 관리 + Data Governance 허브
-13. Role Brand Context 필터 (brand:madleague 등 세분화)
-14. 점진적 `badak-constants.ts` → taxonomies DB fetch 전환
+13. ✅ Role Brand Context 필터 (brand:madleague 등 세분화) — `/api/intra/members` member_roles 조회 추가, 드로어 역할 표시 role@context 형식, optgroup 필터 드롭다운
+14. ✅ 점진적 `badak-constants.ts` → taxonomies DB fetch 전환
 
 ### ✅ 세션 66 추가 완료 — 인트라 재편·디테일 정비 (Commit 2~9)
 

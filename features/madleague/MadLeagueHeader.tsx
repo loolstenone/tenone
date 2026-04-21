@@ -11,15 +11,15 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { loginHref } from "@/lib/login-href";
 
 const programItems = [
-    { name: "매드무브먼트", href: "/madleague/idea-movement" },
+    { name: "아이디어 무브먼트", href: "/madleague/idea-movement" },
     { name: "PT 경쟁 프로그램", href: "/madleague/pt" },
     { name: "전체 프로그램", href: "/madleague/program" },
 ];
 
 const navItems = [
     { name: "프로그램",  href: "/madleague/programs" },
+    { name: "아레나",    href: "/madleague/arena" },
     { name: "MADzine",  href: "/madleague/madzine" },
-    { name: "지원하기",  href: "/madleague/apply" },
 ];
 
 export function MadLeagueHeader() {

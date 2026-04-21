@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-04-22 (세션 73) — MADLeague UX 정비
+
+### 변경 파일
+- `features/madleague/MadLeagueHeader.tsx` — navItems "매드리거" 제거, 3항목 유지 (프로그램·아레나·MADzine)
+- `app/(MADLeague)/madleague/arena/page.tsx` — SECTIONS 3종 라이브 (게시판·프로젝트·경쟁PT 워크스페이스)
+- `app/(MADLeague)/madleague/my/page.tsx` — 탭 UI 완전 제거, 커뮤니티 탭 삭제, 아레나 바로가기 배너로 단순화
+
+### 결정사항
+- 마이페이지는 탭 없이 동아리 회장 패널 → 아레나 바로가기 → 로그아웃 순서로 직렬 배치
+- `/madleague/projects`, `/madleague/pt`는 페이지 미구현 상태로 링크만 추가 (다음 세션 구현)
+
+---
+
 ## 2026-04-21 (세션 66 추가분) — 인트라 재편·디테일 정비 (Commit 2~9)
 
 ### Commit `06cb1599` — Tier 1+2: 네이밍·Wiki·Agent/CS 허브
