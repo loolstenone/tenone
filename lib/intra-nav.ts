@@ -31,10 +31,15 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type { SystemAccess, IntraModule } from "@/types/auth";
 
+/** 사용자 역할 (OR 조건) — 명시되면 해당 role 중 하나를 가진 사용자만 볼 수 있음 */
+export type VisibleRole = "staff" | "manager" | "super_admin" | "member" | "leader" | "subscriber" | "purchaser" | "approved_member";
+
 export interface SubItem {
     name: string;
     href: string;
     badge?: "soon" | "beta" | "new";
+    /** 표시 가능 role (OR). 미지정 시 인트라 접근자 전체에게 표시. */
+    roles?: VisibleRole[];
 }
 
 export interface MenuItem {
@@ -45,6 +50,8 @@ export interface MenuItem {
     staffOnly?: boolean;
     exact?: boolean;
     badge?: "soon" | "beta" | "new";
+    /** 표시 가능 role (OR). 미지정 시 인트라 접근자 전체에게 표시. */
+    roles?: VisibleRole[];
 }
 
 export interface MenuSection {
@@ -62,6 +69,18 @@ export interface NavModule {
     intraModule?: IntraModule;
     sections: MenuSection[];
     dynamic?: boolean;
+    /** 표시 가능 role (OR). 미지정 시 인트라 접근자 전체에게 표시. */
+    roles?: VisibleRole[];
+}
+
+/**
+ * 사이드바 아이템/모듈이 현재 사용자에게 표시 가능한지 판정.
+ * roles가 undefined이면 인트라 모든 사용자에게 표시.
+ * roles가 명시됐으면 userRoles와 하나라도 교집합이 있어야 표시.
+ */
+export function canSeeByRole(itemRoles: VisibleRole[] | undefined, userRoles: string[]): boolean {
+    if (!itemRoles || itemRoles.length === 0) return true;
+    return itemRoles.some(r => userRoles.includes(r));
 }
 
 export const modules: NavModule[] = [
@@ -75,6 +94,7 @@ export const modules: NavModule[] = [
         href: "/intra/workspace",
         icon: Home,
         intraModule: "myverse" as IntraModule,
+        // 인트라 접근자 전체 (staff / manager / super_admin)
         sections: [
             {
                 items: [
@@ -108,6 +128,7 @@ export const modules: NavModule[] = [
         href: "/intra/ums",
         icon: Globe,
         intraModule: "universe" as IntraModule,
+        roles: ["staff", "manager", "super_admin"],
         sections: [
             {
                 label: "통합 관리",
@@ -304,6 +325,7 @@ export const modules: NavModule[] = [
         href: "/intra/marketing",
         icon: Megaphone,
         intraModule: "smarcomm" as IntraModule,
+        roles: ["staff", "manager", "super_admin"],
         sections: [
             {
                 items: [
@@ -350,6 +372,7 @@ export const modules: NavModule[] = [
         icon: Building2,
         access: "erp-hr" as SystemAccess,
         intraModule: "erp" as IntraModule,
+        roles: ["manager", "super_admin"],
         sections: [
             {
                 items: [
@@ -455,6 +478,7 @@ export const modules: NavModule[] = [
         href: "/intra/intel",
         icon: Brain,
         intraModule: "universe" as IntraModule,
+        roles: ["manager", "super_admin"],
         sections: [
             {
                 items: [

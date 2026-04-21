@@ -10,7 +10,7 @@ import {
     LayoutDashboard, FileText, BarChart3, Settings,
 } from "lucide-react";
 import clsx from "clsx";
-import { modules } from "@/lib/intra-nav";
+import { modules, canSeeByRole } from "@/lib/intra-nav";
 
 export function IntraSidebar() {
     const pathname = usePathname();
@@ -70,11 +70,10 @@ export function IntraSidebar() {
     };
 
     // 모듈 접근 필터
-    // layout.tsx가 이미 인증을 완료했으므로, user가 아직 null(로딩중)이면 전체 표시
-    // layout.tsx가 이미 인증 + 권한 체크를 완료했으므로
-    // 사이드바에서는 모든 모듈을 표시한다.
-    // staffOnly 아이템만 isStaff 체크.
-    const visibleModules = modules;
+    // 역할 기반 필터링: user.roles 와 module.roles 교집합 체크 (Tier 3 Dynamic Sidebar)
+    // user 로딩 중이면 전체 표시 (깜빡임 방지), 로딩 완료 후 roles 필터 적용.
+    const userRoles: string[] = (user?.roles as string[] | undefined) ?? [];
+    const visibleModules = user ? modules.filter(mod => canSeeByRole(mod.roles, userRoles)) : modules;
 
     return (
         <>
@@ -164,6 +163,7 @@ export function IntraSidebar() {
                                             )}
                                             {section.items
                                                 .filter((item) => !item.staffOnly || isStaff)
+                                                .filter((item) => canSeeByRole(item.roles, userRoles))
                                                 .map((item) => (
                                                     <Link
                                                         key={item.name}
