@@ -220,9 +220,9 @@ export const modules: NavModule[] = [
                 ],
             },
             {
-                label: "브랜드별",
+                label: "브랜드별 (알파벳순)",
                 items: [
-                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    // 브랜드명은 lib/site-config.ts siteConfigs의 canonical name과 일치시킴
                     {
                         name: "Badak", href: "/intra/ums/badak", icon: Globe,
                         children: [
@@ -237,7 +237,7 @@ export const modules: NavModule[] = [
                         ],
                     },
                     {
-                        name: "Brand Gravity", href: "/intra/gravity", icon: Brain,
+                        name: "Brand Gravity™", href: "/intra/gravity", icon: Brain,
                         children: [
                             { name: "전체 현황", href: "/intra/gravity" },
                             { name: "클라이언트", href: "/intra/gravity/clients" },
@@ -271,9 +271,7 @@ export const modules: NavModule[] = [
                             { name: "광고 관리", href: "/intra/ums/jakka/notices" },
                         ],
                     },
-                    { name: "Korea360", href: "/intra/ums/seoul360", icon: Globe, badge: "soon" },
                     { name: "LUKI", href: "/intra/ums/luki", icon: Globe, badge: "soon" },
-                    { name: "Dokdae", href: "/intra/ums/dokdae", icon: Globe, badge: "soon" },
                     { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
                     { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
                     {
@@ -285,31 +283,34 @@ export const modules: NavModule[] = [
                         ],
                     },
                     { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
-                    { name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe, badge: "soon" },
                     { name: "My Universe", href: "/intra/ums/myverse", icon: Globe, badge: "soon" },
                     { name: "Naming Factory", href: "/intra/ums/namingfactory", icon: Globe, badge: "soon" },
-                    { name: "NatureBox", href: "/intra/ums/naturebox", icon: Globe, badge: "soon" },
                     {
-                        name: "Planner's", href: "/intra/evolution-school", icon: BookOpen,
+                        name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
                         children: [
                             { name: "Planning", href: "/intra/ums/planners/planning", badge: "soon" },
                             { name: "GPR", href: "/intra/ums/planners/gpr", badge: "soon" },
                             { name: "Programs", href: "/intra/ums/planners/programs", badge: "soon" },
-                            { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
                     { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
-                    { name: "SmarComm", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
-                    { name: "Townity", href: "/intra/ums/townity", icon: Globe, badge: "soon" },
+                    { name: "Seoul/360°", href: "/intra/ums/seoul360", icon: Globe, badge: "soon" },
+                    { name: "SmarComm.", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
                     { name: "Trend Hunter", href: "/intra/ums/trendhunter", icon: Globe, badge: "soon" },
                     {
-                        name: "WIO", href: "/intra/ums/commerce/subscriptions", icon: Settings,
+                        name: "WIO", href: "/intra/ums/wio/tenants", icon: Settings,
                         children: [
-                            { name: "구독 관리", href: "/intra/ums/commerce/subscriptions" },
                             { name: "테넌트", href: "/intra/ums/wio/tenants" },
+                            { name: "구독 관리 →", href: "/intra/ums/commerce/subscriptions" },
                         ],
                     },
-                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Globe, badge: "soon" },
+                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Users, badge: "soon" },
+                    // 한글 브랜드 (Korean-name brands)
+                    { name: "공감자 (0gamja)", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    { name: "독대 (Dokdae)", href: "/intra/ums/dokdae", icon: Globe, badge: "soon" },
+                    { name: "문래지앙 (Mullaesian)", href: "/intra/ums/mullaesian", icon: Globe, badge: "soon" },
+                    { name: "자연함 (NatureBox)", href: "/intra/ums/naturebox", icon: Globe, badge: "soon" },
+                    { name: "타우니티 (Townity)", href: "/intra/ums/townity", icon: Globe, badge: "soon" },
                 ],
             },
         ],
