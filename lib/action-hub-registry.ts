@@ -153,6 +153,28 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "payment",
         priority: "high",
     },
+
+    // ── 비즈니스 기회 (Opportunity) — Whole See 수집 → ERP 운영
+    {
+        key: "opportunity_new",
+        label: "신규 수주 기회 (미검토)",
+        table: "wio_opportunities",
+        filter: { column: "status", value: "new" },
+        href: "/intra/opportunity",
+        brand_id: "global",
+        category: "approval",
+        priority: "high",
+    },
+    {
+        key: "opportunity_bidding",
+        label: "입찰 진행 중",
+        table: "wio_opportunities",
+        filter: { column: "status", value: "bidding" },
+        href: "/intra/opportunity",
+        brand_id: "global",
+        category: "approval",
+        priority: "critical",
+    },
 ];
 
 /** category별 라벨 */

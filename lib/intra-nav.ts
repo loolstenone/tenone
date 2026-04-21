@@ -321,7 +321,7 @@ export const modules: NavModule[] = [
     // ══════════════════════════════════════════════════════════
     {
         name: "Marketing",
-        tagline: "캠페인 · CRM · 콘텐츠 · 기회",
+        tagline: "캠페인 · CRM · 콘텐츠",
         href: "/intra/marketing",
         icon: Megaphone,
         intraModule: "smarcomm" as IntraModule,
@@ -355,7 +355,7 @@ export const modules: NavModule[] = [
                             { name: "자동화", href: "/intra/studio/workflow/automation", badge: "soon" },
                         ],
                     },
-                    { name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp },
+                    // Opportunity는 ERP > 프로젝트 · Intelligence > Whole See로 분산 배치 (2026-04-21)
                     // Wiki는 My > 커뮤니티·지식으로 이동 (2026-04-21) · 외부 wiki.tenone.biz SSOT
                 ],
             },
@@ -422,6 +422,7 @@ export const modules: NavModule[] = [
                             { name: "프로젝트 관리", href: "/intra/project/management" },
                             { name: "Job 관리", href: "/intra/project/jobs" },
                             { name: "Partner Pool", href: "/intra/partner-pool" },
+                            { name: "수주 파이프라인 (Opportunity)", href: "/intra/opportunity" },
                             { name: "프로젝트 손익", href: "/intra/project/financials", badge: "soon" },
                             { name: "입찰관리", href: "/intra/project/management/bidding", badge: "soon" },
                             { name: "협력사", href: "/intra/project/management/vendors", badge: "soon" },
@@ -503,6 +504,7 @@ export const modules: NavModule[] = [
                             { name: "콘텐츠 파이프라인", href: "/intra/intel/wholesee/pipeline" },
                             { name: "뉴스레터 수집 현황", href: "/intra/intel/wholesee/newsletter" },
                             { name: "크롤러 상태", href: "/intra/intel/wholesee/crawling" },
+                            { name: "기회 수집 (Opportunity)", href: "/intra/intel/wholesee/opportunities" },
                             { name: "소스 관리 (편집 →)", href: "/intra/intel/wholesee/sources" },
                         ],
                     },
