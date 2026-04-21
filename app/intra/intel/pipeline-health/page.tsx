@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 import {
-    Activity, Loader2, CheckCircle2, AlertTriangle, Clock, Zap, RefreshCw,
+    Activity, Loader2, CheckCircle2, AlertTriangle, Clock, Zap, RefreshCw, Play,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 
@@ -70,6 +70,30 @@ export default function PipelineHealthPage() {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<HealthResponse | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [triggering, setTriggering] = useState<string | null>(null);
+    const [triggerLog, setTriggerLog] = useState<{ action: string; ts: string; result: string }[]>([]);
+
+    async function trigger(action: string) {
+        setTriggering(action);
+        try {
+            const res = await fetch("/api/intra/pipeline-trigger", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action }),
+            });
+            const j = await res.json();
+            setTriggerLog(prev => [{
+                action,
+                ts: new Date().toLocaleTimeString(),
+                result: JSON.stringify(j.result ?? j, null, 0).slice(0, 200),
+            }, ...prev].slice(0, 10));
+        } catch (e) {
+            setTriggerLog(prev => [{ action, ts: new Date().toLocaleTimeString(), result: String(e) }, ...prev].slice(0, 10));
+        } finally {
+            setTriggering(null);
+            setTimeout(load, 2000);
+        }
+    }
 
     async function load() {
         setRefreshing(true);
@@ -208,6 +232,35 @@ export default function PipelineHealthPage() {
                     </div>
                 );
             })}
+
+            {/* 수동 트리거 */}
+            <div>
+                <h2 className="text-sm font-semibold text-neutral-900 mb-3">수동 실행</h2>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
+                    {([
+                        { action: "crawl", label: "RSS 크롤", color: "border-blue-300 hover:bg-blue-50 text-blue-700" },
+                        { action: "process", label: "트렌드 처리", color: "border-violet-300 hover:bg-violet-50 text-violet-700" },
+                        { action: "opportunity_crawl", label: "기회 크롤", color: "border-emerald-300 hover:bg-emerald-50 text-emerald-700" },
+                        { action: "opportunity_process", label: "기회 처리", color: "border-teal-300 hover:bg-teal-50 text-teal-700" },
+                        { action: "newsletter", label: "뉴스레터 수집", color: "border-amber-300 hover:bg-amber-50 text-amber-700" },
+                    ] as const).map(({ action, label, color }) => (
+                        <button key={action} onClick={() => trigger(action)} disabled={!!triggering}
+                            className={`flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-semibold border rounded-lg transition-colors ${color} disabled:opacity-40`}>
+                            {triggering === action
+                                ? <Loader2 className="h-3 w-3 animate-spin" />
+                                : <Play className="h-3 w-3" />}
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                {triggerLog.length > 0 && (
+                    <div className="bg-neutral-900 rounded-lg p-3 font-mono text-[10px] text-neutral-300 space-y-1 max-h-40 overflow-y-auto">
+                        {triggerLog.map((l, i) => (
+                            <div key={i}><span className="text-neutral-500">[{l.ts}]</span> <span className="text-emerald-400">{l.action}</span> → {l.result}</div>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {/* 설명 */}
             <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 text-[11px] text-neutral-700 leading-relaxed">

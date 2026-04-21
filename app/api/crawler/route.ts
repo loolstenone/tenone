@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
                         title: item.title,
                         content: item.description,
                         source_name: item.source,
+                        source_type: 'rss',
                         category: item.category,
                         published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
                         status: 'raw',
