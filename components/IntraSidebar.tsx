@@ -145,6 +145,13 @@ export function IntraSidebar() {
                                 )}
                             </button>
 
+                            {/* Module tagline (모듈 헤더 바로 아래, 펼쳤을 때만) */}
+                            {isExpanded && mod.tagline && (
+                                <p className="text-[10px] text-neutral-500 px-3 pb-1 -mt-0.5 pl-10 leading-snug">
+                                    {mod.tagline}
+                                </p>
+                            )}
+
                             {/* Expanded sub-menu */}
                             {isExpanded && hasSections && (
                                 <div className="ml-3 pl-3 border-l border-neutral-800 mt-1 space-y-1">

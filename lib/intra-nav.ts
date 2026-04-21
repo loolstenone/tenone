@@ -54,6 +54,8 @@ export interface MenuSection {
 
 export interface NavModule {
     name: string;
+    /** 사이드바 모듈 헤더 아래 표시되는 한 줄 설명 */
+    tagline?: string;
     href: string;
     icon: LucideIcon;
     access?: SystemAccess;
@@ -68,7 +70,8 @@ export const modules: NavModule[] = [
     //  MY — 개인 워크스페이스
     // ══════════════════════════════════════════════════════════
     {
-        name: "MY",
+        name: "My",
+        tagline: "내 일 · 내 일정 · 내 포인트",
         href: "/intra/workspace",
         icon: Home,
         intraModule: "myverse" as IntraModule,
@@ -85,11 +88,12 @@ export const modules: NavModule[] = [
                 ],
             },
             {
-                label: "커뮤니티",
+                label: "커뮤니티 · 지식",
                 items: [
                     { name: "공지사항", href: "/intra/comm/notice", icon: ClipboardList },
                     { name: "자유게시판", href: "/intra/comm/free", icon: FileText },
                     { name: "전체 일정", href: "/intra/comm/calendar", icon: Calendar },
+                    { name: "Wiki ↗", href: "https://wiki.tenone.biz", icon: BookOpen },
                 ],
             },
         ],
@@ -99,7 +103,8 @@ export const modules: NavModule[] = [
     //  UNIVERSE — 브랜드/회원 통합 관리
     // ══════════════════════════════════════════════════════════
     {
-        name: "UNIVERSE",
+        name: "Universe",
+        tagline: "브랜드 · 회원 · 유니버스 운영",
         href: "/intra/ums",
         icon: Globe,
         intraModule: "universe" as IntraModule,
@@ -152,6 +157,15 @@ export const modules: NavModule[] = [
                         children: [
                             { name: "잔액 현황", href: "/intra/ums/uc" },
                             { name: "거래 내역", href: "/intra/ums/uc/transactions" },
+                        ],
+                    },
+                    { name: "CS 통합", href: "/intra/ums/cs", icon: MessageCircle },
+                    {
+                        name: "Agent 관리", href: "/intra/ums/agents", icon: Bot,
+                        children: [
+                            { name: "에이전트 프로파일", href: "/intra/ums/agents" },
+                            { name: "시스템 프롬프트", href: "/intra/ums/agents/prompts" },
+                            { name: "도구·지식 참조", href: "/intra/ums/agents/tools" },
                         ],
                     },
                     {
@@ -285,7 +299,8 @@ export const modules: NavModule[] = [
     //  MARKETING — 캠페인 · CRM · 콘텐츠 스튜디오 · 위키
     // ══════════════════════════════════════════════════════════
     {
-        name: "MARKETING",
+        name: "Marketing",
+        tagline: "캠페인 · CRM · 콘텐츠 · 기회",
         href: "/intra/marketing",
         icon: Megaphone,
         intraModule: "smarcomm" as IntraModule,
@@ -319,15 +334,7 @@ export const modules: NavModule[] = [
                         ],
                     },
                     { name: "Opportunity", href: "/intra/opportunity", icon: TrendingUp },
-                    {
-                        name: "위키", href: "/intra/wiki/culture", icon: BookOpen,
-                        children: [
-                            { name: "컬처", href: "/intra/wiki/culture" },
-                            { name: "온보딩", href: "/intra/wiki/onboarding" },
-                            { name: "핸드북", href: "/intra/wiki/handbook" },
-                            { name: "FAQ", href: "/intra/wiki/faq" },
-                        ],
-                    },
+                    // Wiki는 My > 커뮤니티·지식으로 이동 (2026-04-21) · 외부 wiki.tenone.biz SSOT
                 ],
             },
         ],
@@ -338,6 +345,7 @@ export const modules: NavModule[] = [
     // ══════════════════════════════════════════════════════════
     {
         name: "ERP",
+        tagline: "사람 · 돈 · 시간 · 프로젝트",
         href: "/intra/erp",
         icon: Building2,
         access: "erp-hr" as SystemAccess,
@@ -443,6 +451,7 @@ export const modules: NavModule[] = [
     // ══════════════════════════════════════════════════════════
     {
         name: "Intelligence",
+        tagline: "관측 · 정보 발굴 · AI 지휘",
         href: "/intra/intel",
         icon: Brain,
         intraModule: "universe" as IntraModule,

@@ -36,6 +36,9 @@ const nextConfig: NextConfig = {
       { source: '/madleague/idea-movement', destination: '/madleague/programs/im', permanent: true },
       { source: '/madleague/idea-movement/:path*', destination: '/madleague/programs/im/:path*', permanent: true },
       { source: '/madleague/leaguer', destination: '/madleague/member', permanent: true },
+      // Wiki 강제 이동 — 모든 /intra/wiki/* → wiki.tenone.biz (SSOT)
+      { source: '/intra/wiki', destination: 'https://wiki.tenone.biz', permanent: true },
+      { source: '/intra/wiki/:path*', destination: 'https://wiki.tenone.biz/:path*', permanent: true },
     ];
   },
 
