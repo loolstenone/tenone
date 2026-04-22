@@ -27,9 +27,13 @@ export async function POST(req: NextRequest) {
             brand_id: "hero",
         }, { onConflict: "email" });
 
-        if (error) throw error;
+        if (error) {
+            console.error("[hero/tih] supabase error:", JSON.stringify(error));
+            throw error;
+        }
         return NextResponse.json({ ok: true }, { status: 201 });
     } catch (e: any) {
+        console.error("[hero/tih] catch:", e?.message, e?.code, e?.details);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
