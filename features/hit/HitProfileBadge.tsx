@@ -25,17 +25,37 @@ const DISC_COLORS: Record<string, string> = {
 /**
  * HeRo 프로필 카드 — HIT 결과 + 서비스 이용 내역
  * 모든 사이트의 /my 페이지에 삽입 가능
+ *
+ * @param respectOptIn  true면 members.privacy_settings.hero_badge_public=true인 경우만 표시
+ *                      (타 브랜드 사이트는 true로 · HeRo 자기 사이트는 false로 항상 노출)
  */
-export default function HitProfileBadge({ memberId }: { memberId?: string }) {
+export default function HitProfileBadge({ memberId, respectOptIn = false }: { memberId?: string; respectOptIn?: boolean }) {
   const [hitA, setHitA] = useState<HitResult | null>(null);
   const [hitB, setHitB] = useState<HitBResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     if (!memberId) { setLoading(false); return; }
 
     import('@/lib/supabase/client').then(({ createClient }) => {
       const sb = createClient();
+
+      // opt-in 체크 (respectOptIn=true일 때만)
+      if (respectOptIn) {
+        sb.from('members')
+          .select('privacy_settings')
+          .eq('id', memberId)
+          .maybeSingle()
+          .then(({ data }: { data: Record<string, unknown> | null }) => {
+            const settings = data?.privacy_settings as Record<string, unknown> | undefined;
+            if (settings?.hero_badge_public !== true) {
+              setHidden(true);
+              setLoading(false);
+            }
+          })
+          .catch(() => {});
+      }
 
       // HIT A 결과
       sb.from('hit_a_results')
@@ -79,6 +99,7 @@ export default function HitProfileBadge({ memberId }: { memberId?: string }) {
   }, [memberId]);
 
   if (loading) return null;
+  if (hidden) return null; // respectOptIn=true이고 사용자가 off 한 경우
 
   // HIT 결과 없으면 검사 유도
   if (!hitA && !hitB) {
