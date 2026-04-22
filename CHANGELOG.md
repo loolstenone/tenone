@@ -56,6 +56,37 @@ Tetrad 매칭 설계(TIH × HIT + JD × JH)를 실제 DB·인프라로 구현. �
 - 기존 6건 HIT-A 결과: 이메일·세션 식별 불가 → 복구 불가 확정
 - `hero_profiles` 0건: 트리거 배포로 향후 자동 생성
 
+### Tetrad 사용자 측 완성 (Phase 2-5 + 확장)
+
+**JH (인재 측 Job Hope):**
+- `lib/hero/jh-questions.ts` — 12문항 정의 (pick2/pick3/single/text)
+- `app/api/hero/jh/route.ts` — GET (조회) · POST (upsert · 11필수 모두 답 시 status=active)
+- `app/(HeRo)/hero/jh/page.tsx` — 조회 + 수정 진입 (미작성 시 CTA)
+- `app/(HeRo)/hero/jh/write/page.tsx` — 12문항 단일 페이지 · sticky 진행률 · localStorage 자동저장 · 실무 매칭 필드 (규모·근무형태·지리·처우 하한)
+- `app/(HeRo)/hero/my/page.tsx` — HitProfileBadge 아래 JH 카드 추가 (none/draft/active 상태별)
+
+**기업 측 (Company + JD):**
+- `app/(HeRo)/hero/company/page.tsx` — 기업 허브 (active/pending 기업 + 신규 등록 CTA)
+- `app/(HeRo)/hero/company/register/page.tsx` — 기업 신규 등록 (INDUSTRIES 공통 · SIZE_OPTIONS)
+- `app/(HeRo)/hero/company/[id]/jd/page.tsx` — 해당 기업의 JD 목록 + 상태 배지
+- `app/(HeRo)/hero/company/[id]/jd/new/page.tsx` · `[jdId]/page.tsx` — 신규/편집 (JDEditor 재사용)
+- `features/hero/JDEditor.tsx` — 7블록 에디터 컴포넌트 + ArrayInput (Enter 추가·삭제)
+- `app/api/hero/jd/route.ts` — GET (목록/단일) · POST (upsert) · active 담당자만, viewer는 읽기만
+
+### Tetrad 사용자 플로우 전체
+
+```
+인재 funnel:
+  [HIT 검사] → [회원 전환] → [JH 작성] → hero_jh_responses.status='active'
+                                          ↓
+                                    매칭 엔진 대상
+
+기업 funnel:
+  [기업 등록] → [TIH 제출] → [JD 작성·발행] → hero_jd.status='published'
+                                                ↓
+                                          매칭 엔진 대상
+```
+
 ---
 
 ## 2026-04-22 (세션 77) — Priority 4브랜드 실데이터 연동 + 빌드 에러 수정

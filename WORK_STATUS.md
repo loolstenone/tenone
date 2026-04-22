@@ -8,8 +8,9 @@
 - **Phase 3-A 미완**: Universe Badge opt-in UI (`/profile` 에 "HeRo 유형 표시 여부" 토글) — 전 브랜드 프로필 영향
 - **Phase 4 예정**: 매칭 엔진 (벡터 추출 · 1차 공간 축소 · 2차 블랙 필터 · 3차 AI 큐레이션)
 - **Phase 5 예정**: 질문 DB 단일화 (24개 하드코딩 `.ts` → `hit_questions`)
-- **실기기 검증 필요**: TIH 실제 제출 / HIT 로그인 상태 검사 → `hero_profiles` 자동 생성 확인
+- **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 플로우 E2E / TIH 제출 → hero_profiles 자동 생성
 - **strengths/cautions 편집**: hero-types 모달 JSONB 배열 편집기 추가
+- **JH entry navigation**: 전 브랜드 마이페이지에서 JH 유도 고려 (opt-in으로)
 
 ### 🔴 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
 - 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
@@ -19,8 +20,12 @@
 - ✅ **Phase 1**: `hero_company_members` 테이블 · `/api/hero/company/register` · `/intra/hero/companies` 기업 풀 관리 + 담당자 승인 UI
 - ✅ **Phase 2**: `hero_jd` + `hero_jh_responses` DB · `/intra/hero/jd` (7블록) + `/intra/hero/jh` (12문항) 관리 페이지
 - ✅ **Phase 3-B**: `/intra/hero/hero-types` 64 영웅 유형 편집 UI (Universe Badge SSOT)
+- ✅ **사용자 측 완성** (Tetrad 4요소 전부 입력 경로 구축):
+  - **JH**: `/hero/jh` 조회 · `/hero/jh/write` 12문항 작성 · `/api/hero/jh` GET/POST · hero/my 진입 카드
+  - **기업**: `/hero/company` 허브 · `/hero/company/register` 기업 등록 · `/hero/company/[id]/jd` JD 목록 · `/new` + `/[jdId]` 편집
+  - **JDEditor**: 7블록 재사용 컴포넌트 · ArrayInput · draft/published/archived
 - ✅ **HeRo CLAUDE.md 전면 개편**: Tetrad · funnel (개인 5단계 + 기업 3단계) · Universe Badge · DB 네이밍 체계 · UC/SSOT 적용 원칙
-- ✅ **Nav 재편**: HeRo 탭 11개 (기업 측 4 · 인재 측 3 · 공통 4)
+- ✅ **Nav 재편**: HeRo Intra 탭 11개 (기업 측 4 · 인재 측 3 · 공통 4)
 - Badak: `대시보드` 탭 실제 구현 (현재 group/posts/needs 탭만 있고 대시보드 stub 없음)
 - HeRo: `/intra/hero/talent` 페이지 실제 구현 (회원 목록, HIT 이용자 현황)
 
