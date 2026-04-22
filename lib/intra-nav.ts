@@ -223,7 +223,15 @@ export const modules: NavModule[] = [
                 label: "브랜드별 (알파벳순)",
                 items: [
                     // 브랜드명 영문 통일 (canonical + English only)
-                    { name: "0gamja", href: "/intra/ums/0gamja", icon: Globe, badge: "soon" },
+                    {
+                        name: "0gamja", href: "/intra/ums/0gamja", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/0gamja" },
+                            { name: "회원 관리", href: "/intra/ums/0gamja/members", badge: "soon" },
+                            { name: "커뮤니티", href: "/intra/ums/0gamja/community", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/0gamja/cs", badge: "soon" },
+                        ],
+                    },
                     {
                         name: "Badak", href: "/intra/ums/badak", icon: Globe,
                         children: [
@@ -240,56 +248,178 @@ export const modules: NavModule[] = [
                     {
                         name: "Brand Gravity™", href: "/intra/gravity", icon: Brain,
                         children: [
-                            { name: "전체 현황", href: "/intra/gravity" },
+                            { name: "대시보드", href: "/intra/gravity" },
                             { name: "클라이언트", href: "/intra/gravity/clients" },
+                            { name: "손익 관리", href: "/intra/gravity/revenue" },
                             { name: "콘텐츠 브리프", href: "/intra/gravity/briefs" },
+                            { name: "고객 문의", href: "/intra/gravity/cs" },
                         ],
                     },
-                    { name: "ChangeUp", href: "/intra/ums/changeup", icon: Globe, badge: "soon" },
-                    { name: "Dokdae", href: "/intra/ums/dokdae", icon: Globe, badge: "soon" },
-                    { name: "Domo", href: "/intra/ums/domo", icon: Globe, badge: "soon" },
-                    { name: "FWN", href: "/intra/ums/fwn", icon: Globe, badge: "soon" },
                     {
-                        name: "HeRo", href: "/intra/hero/talent", icon: Award,
+                        name: "ChangeUp", href: "/intra/ums/changeup", icon: Globe,
                         children: [
-                            { name: "인재 관리", href: "/intra/hero/talent" },
+                            { name: "대시보드", href: "/intra/ums/changeup" },
+                            { name: "회원 관리", href: "/intra/ums/changeup/members", badge: "soon" },
+                            { name: "주문 관리", href: "/intra/ums/changeup/orders", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/changeup/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "Dokdae", href: "/intra/ums/dokdae", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/dokdae" },
+                            { name: "기록 관리", href: "/intra/ums/dokdae/records", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "Domo", href: "/intra/ums/domo", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/domo" },
+                            { name: "회원 관리", href: "/intra/ums/domo/members" },
+                            { name: "심사 관리", href: "/intra/ums/domo/applications" },
+                            { name: "모임 관리", href: "/intra/ums/domo/meetups" },
+                            { name: "고객 문의", href: "/intra/ums/domo/cs" },
+                        ],
+                    },
+                    {
+                        name: "FWN", href: "/intra/ums/fwn", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/fwn" },
+                            { name: "회원 관리", href: "/intra/ums/fwn/members", badge: "soon" },
+                            { name: "커뮤니티", href: "/intra/ums/fwn/community", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/fwn/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "HeRo", href: "/intra/hero", icon: Award,
+                        children: [
+                            // ── 공통 탭 (순서 고정) ──
+                            { name: "대시보드", href: "/intra/hero" },
+                            { name: "회원 관리", href: "/intra/hero/talent" },
+                            // ── 브랜드 특화 ──
                             { name: "HIT 이용자", href: "/intra/hero/hit" },
                             { name: "HIT 구성", href: "/intra/hero/hit/structure" },
-                            { name: "HIT 질문 관리", href: "/intra/hero/hit/questions" },
-                            { name: "HIT 답변 구성", href: "/intra/hero/hit/answers" },
+                            { name: "HIT 질문", href: "/intra/hero/hit/questions" },
                             { name: "AI 상담", href: "/intra/hero/ai-counseling" },
-                            { name: "이력서 이용자", href: "/intra/hero/resume" },
-                            { name: "커리어 이용자", href: "/intra/hero/career" },
+                            { name: "이력서", href: "/intra/hero/resume" },
+                            { name: "커리어", href: "/intra/hero/career" },
                             { name: "씨치 라이트", href: "/intra/hero/search-light" },
+                            // ── 공통 탭 (마지막 고정) ──
+                            { name: "고객 문의", href: "/intra/hero/cs" },
                         ],
                     },
                     {
                         name: "JAKKA", href: "/intra/ums/jakka", icon: Globe,
                         children: [
-                            { name: "창작자 관리", href: "/intra/ums/jakka" },
-                            { name: "마켓 판매자 심사", href: "/intra/ums/jakka/sellers" },
+                            // ── 공통 탭 ──
+                            { name: "대시보드", href: "/intra/ums/jakka" },
+                            { name: "회원 관리", href: "/intra/ums/jakka/members" },
+                            // ── 브랜드 특화 ──
+                            { name: "판매자 심사", href: "/intra/ums/jakka/sellers" },
                             { name: "마켓 관리", href: "/intra/ums/jakka/market" },
                             { name: "쇼케이스 관리", href: "/intra/ums/jakka/showcases" },
                             { name: "광고 관리", href: "/intra/ums/jakka/notices" },
+                            // ── 공통 탭 (마지막) ──
+                            { name: "고객 문의", href: "/intra/ums/jakka/cs" },
                         ],
                     },
-                    { name: "Korea360", href: "/intra/ums/korea360", icon: Globe, badge: "soon" },
-                    { name: "LUKI", href: "/intra/ums/luki", icon: Globe, badge: "soon" },
-                    { name: "MAD League", href: "/intra/ums/madleague", icon: Users },
-                    { name: "MADLeap", href: "/intra/ums/madleap", icon: Users, badge: "soon" },
+                    {
+                        name: "Korea360", href: "/intra/ums/korea360", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/korea360" },
+                            { name: "콘텐츠 관리", href: "/intra/ums/korea360/content", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/korea360/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "LUKI", href: "/intra/ums/luki", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/luki" },
+                            { name: "회원 관리", href: "/intra/ums/luki/members", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/luki/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "MAD League", href: "/intra/ums/madleague", icon: Users,
+                        children: [
+                            // ── 공통 탭 ──
+                            { name: "대시보드", href: "/intra/ums/madleague" },
+                            { name: "회원 관리", href: "/intra/ums/madleague/members" },
+                            // ── 브랜드 특화 ──
+                            { name: "심사 관리", href: "/intra/ums/madleague/applications" },
+                            { name: "콘텐츠 관리", href: "/intra/ums/madleague/articles" },
+                            // ── 공통 탭 (마지막) ──
+                            { name: "고객 문의", href: "/intra/ums/madleague/cs" },
+                        ],
+                    },
+                    {
+                        name: "MADLeap", href: "/intra/ums/madleap", icon: Users,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/madleap" },
+                            { name: "회원 관리", href: "/intra/ums/madleap/members", badge: "soon" },
+                            { name: "심사 관리", href: "/intra/ums/madleap/applications", badge: "soon" },
+                            { name: "교육 관리", href: "/intra/ums/madleap/courses", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/madleap/cs", badge: "soon" },
+                        ],
+                    },
                     {
                         name: "Mindle", href: "/intra/ums/mindle", icon: Globe,
                         children: [
+                            // ── 공통 탭 ──
                             { name: "대시보드", href: "/intra/ums/mindle" },
-                            { name: "회원 (구독자)", href: "/intra/ums/mindle/members" },
-                            { name: "콘텐츠 (발행)", href: "/intra/ums/mindle/content" },
+                            { name: "회원 관리", href: "/intra/ums/mindle/members" },
+                            { name: "손익 관리", href: "/intra/ums/mindle/revenue" },
+                            // ── 브랜드 특화 ──
+                            { name: "콘텐츠 관리", href: "/intra/ums/mindle/content" },
+                            // ── 공통 탭 (마지막) ──
+                            { name: "고객 문의", href: "/intra/ums/mindle/cs" },
                         ],
                     },
-                    { name: "MoNTZ", href: "/intra/ums/montz", icon: Globe, badge: "soon" },
-                    { name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe, badge: "soon" },
-                    { name: "My Universe", href: "/intra/ums/myverse", icon: Globe, badge: "soon" },
-                    { name: "Naming Factory", href: "/intra/ums/namingfactory", icon: Globe, badge: "soon" },
-                    { name: "NatureBox", href: "/intra/ums/naturebox", icon: Globe, badge: "soon" },
+                    {
+                        name: "MoNTZ", href: "/intra/ums/montz", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/montz" },
+                            { name: "회원 관리", href: "/intra/ums/montz/members", badge: "soon" },
+                            { name: "포트폴리오", href: "/intra/ums/montz/portfolio", badge: "soon" },
+                            { name: "쇼케이스", href: "/intra/ums/montz/showcase", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/montz/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "Mullaesian", href: "/intra/ums/mullaesian", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/mullaesian" },
+                            { name: "회원 관리", href: "/intra/ums/mullaesian/members", badge: "soon" },
+                            { name: "쇼케이스", href: "/intra/ums/mullaesian/showcase", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/mullaesian/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "My Universe", href: "/intra/ums/myverse", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/myverse" },
+                            { name: "회원 관리", href: "/intra/ums/myverse/members", badge: "soon" },
+                            { name: "손익 관리", href: "/intra/ums/myverse/revenue", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/myverse/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "Naming Factory", href: "/intra/ums/namingfactory", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/namingfactory" },
+                            { name: "회원 관리", href: "/intra/ums/namingfactory/members", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/namingfactory/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "NatureBox", href: "/intra/ums/naturebox", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/naturebox" },
+                            { name: "회원 관리", href: "/intra/ums/naturebox/members", badge: "soon" },
+                            { name: "주문 관리", href: "/intra/ums/naturebox/orders", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/naturebox/cs", badge: "soon" },
+                        ],
+                    },
                     {
                         name: "Planner's", href: "/intra/ums/planners", icon: BookOpen,
                         children: [
@@ -299,11 +429,52 @@ export const modules: NavModule[] = [
                             { name: "Evolution School", href: "/intra/evolution-school" },
                         ],
                     },
-                    { name: "RooK", href: "/intra/ums/rook", icon: Globe, badge: "soon" },
-                    { name: "Seoul/360°", href: "/intra/ums/seoul360", icon: Globe, badge: "soon" },
-                    { name: "SmarComm.", href: "/intra/ums/smarcomm", icon: Globe, badge: "soon" },
-                    { name: "Townity", href: "/intra/ums/townity", icon: Globe, badge: "soon" },
-                    { name: "Trend Hunter", href: "/intra/ums/trendhunter", icon: Globe, badge: "soon" },
+                    {
+                        name: "RooK", href: "/intra/ums/rook", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/rook" },
+                            { name: "회원 관리", href: "/intra/ums/rook/members" },
+                            { name: "커뮤니티", href: "/intra/ums/rook/community" },
+                            { name: "고객 문의", href: "/intra/ums/rook/cs" },
+                        ],
+                    },
+                    {
+                        name: "Seoul/360°", href: "/intra/ums/seoul360", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/seoul360" },
+                            { name: "콘텐츠 관리", href: "/intra/ums/seoul360/content", badge: "soon" },
+                            { name: "쇼케이스", href: "/intra/ums/seoul360/showcase", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/seoul360/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "SmarComm.", href: "/intra/ums/smarcomm", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/smarcomm" },
+                            { name: "회원 관리", href: "/intra/ums/smarcomm/members", badge: "soon" },
+                            { name: "손익 관리", href: "/intra/ums/smarcomm/revenue", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/smarcomm/cs", badge: "soon" },
+                        ],
+                    },
+                    {
+                        name: "Townity", href: "/intra/ums/townity", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/townity" },
+                            { name: "회원 관리", href: "/intra/ums/townity/members" },
+                            { name: "모임 관리", href: "/intra/ums/townity/meetups" },
+                            { name: "커뮤니티", href: "/intra/ums/townity/community" },
+                            { name: "고객 문의", href: "/intra/ums/townity/cs" },
+                        ],
+                    },
+                    {
+                        name: "Trend Hunter", href: "/intra/ums/trendhunter", icon: Globe,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/trendhunter" },
+                            { name: "회원 관리", href: "/intra/ums/trendhunter/members", badge: "soon" },
+                            { name: "콘텐츠 관리", href: "/intra/ums/trendhunter/content", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/trendhunter/cs", badge: "soon" },
+                        ],
+                    },
                     {
                         name: "WIO", href: "/intra/ums/wio/tenants", icon: Settings,
                         children: [
@@ -311,7 +482,16 @@ export const modules: NavModule[] = [
                             { name: "WIO 구독자", href: "/intra/ums/wio/subscriptions" },
                         ],
                     },
-                    { name: "YouInOne", href: "/intra/ums/youinone", icon: Users, badge: "soon" },
+                    {
+                        name: "YouInOne", href: "/intra/ums/youinone", icon: Users,
+                        children: [
+                            { name: "대시보드", href: "/intra/ums/youinone" },
+                            { name: "회원 관리", href: "/intra/ums/youinone/members", badge: "soon" },
+                            { name: "심사 관리", href: "/intra/ums/youinone/applications", badge: "soon" },
+                            { name: "손익 관리", href: "/intra/ums/youinone/revenue", badge: "soon" },
+                            { name: "고객 문의", href: "/intra/ums/youinone/cs", badge: "soon" },
+                        ],
+                    },
                 ],
             },
         ],
