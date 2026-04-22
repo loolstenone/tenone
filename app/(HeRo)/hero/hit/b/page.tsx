@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { Brain, Compass, Target, Shield, Clock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
@@ -38,6 +39,7 @@ const modules = [
 
 function HitBIntroContent() {
   const router = useRouter();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const hitAResultId = searchParams.get("a");
   const [starting, setStarting] = useState(false);
@@ -69,7 +71,7 @@ function HitBIntroContent() {
       const res = await fetch("/api/hit/b/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hitAResultId }),
+        body: JSON.stringify({ hitAResultId, memberId: user?.id }),
       });
       const data = await res.json();
       if (data.sessionToken) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Users, Target, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
@@ -30,6 +31,7 @@ const modules = [
 
 export default function HitAIntroPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [starting, setStarting] = useState(false);
   const [pageLoadTime] = useState(Date.now());
 
@@ -39,7 +41,7 @@ export default function HitAIntroPage() {
       const res = await fetch("/api/hit/a/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _ts: pageLoadTime, _hp: "" }),
+        body: JSON.stringify({ memberId: user?.id, _ts: pageLoadTime, _hp: "" }),
       });
       const data = await res.json();
       if (data.sessionToken) {

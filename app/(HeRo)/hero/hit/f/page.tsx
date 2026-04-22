@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { Clock as ClockIcon, Timer, Brain, Battery, Rocket, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const modules = [
   {
@@ -38,6 +39,7 @@ const modules = [
 
 function HitFIntroContent() {
   const router = useRouter();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const hitAResultId = searchParams.get("a");
   const [starting, setStarting] = useState(false);
@@ -67,7 +69,7 @@ function HitFIntroContent() {
       const res = await fetch("/api/hit/f/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hitAResultId }),
+        body: JSON.stringify({ hitAResultId, memberId: user?.id }),
       });
       const data = await res.json();
       if (data.sessionToken) {
