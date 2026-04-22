@@ -11,8 +11,8 @@ const sPowers = ["주도", "실행", "창의", "관계", "분석", "조화", "�
 type Section0 = { industry: string; jobFunction: string };
 type Section1 = { q1: string; q2: string; q3: string; q4: string };
 type Section2 = { guardian: number; pioneer: number; connector: number };
-type Section3 = { q1: string; q2_a: string; q2_b: string; q3: string; q4: string; q5: string; q6: string };
-type Section4 = { q1: string; q2: string; q3: string; q4: string; q5: string; q6: string };
+type Section3 = { q1: string; q2_a: string; q2_b: string; q3: string; q4: string; q5: string };
+type Section4 = { q1: string; q2: string; q3: string; q4: string; q5: string };
 type Section5 = { q1: string };
 type Section6 = { q1: string };
 
@@ -33,8 +33,8 @@ const INIT: TIHData = {
     s0: { industry: "", jobFunction: "" },
     s1: { q1: "", q2: "", q3: "", q4: "" },
     s2: { guardian: 33, pioneer: 34, connector: 33 },
-    s3: { q1: "", q2_a: "", q2_b: "", q3: "", q4: "", q5: "", q6: "" },
-    s4: { q1: "", q2: "", q3: "", q4: "", q5: "", q6: "" },
+    s3: { q1: "", q2_a: "", q2_b: "", q3: "", q4: "", q5: "" },
+    s4: { q1: "", q2: "", q3: "", q4: "", q5: "" },
     s5: { q1: "" },
     s6: { q1: "" },
     contactCompany: "",
@@ -67,37 +67,31 @@ function Progress({ step }: { step: number }) {
 
 export default function TIHTestPage() {
     const [step, setStep] = useState(0);
-    const [data, setData] = useState<TIHData>(() => {
-        if (typeof window === "undefined") return INIT;
-        try {
-            const saved = localStorage.getItem(LS_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                return { ...INIT, ...parsed.data };
-            }
-        } catch { /* 무시 */ }
-        return INIT;
-    });
+    const [data, setData] = useState<TIHData>(INIT);
     const [done, setDone] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    // 진행률 자동 저장
-    useEffect(() => {
-        if (done) return;
-        try { localStorage.setItem(LS_KEY, JSON.stringify({ step, data })); } catch { /* 무시 */ }
-    }, [step, data, done]);
+    const [hydrated, setHydrated] = useState(false);
 
-    // step 복원
+    // 클라이언트 hydration 후 localStorage 복원 (SSR mismatch 방지)
     useEffect(() => {
         try {
             const saved = localStorage.getItem(LS_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
+                if (parsed.data) setData({ ...INIT, ...parsed.data });
                 if (typeof parsed.step === "number") setStep(parsed.step);
             }
         } catch { /* 무시 */ }
+        setHydrated(true);
     }, []);
+
+    // 진행률 자동 저장 — hydration 완료 후에만 저장 (복원 전 step:0 덮어쓰기 방지)
+    useEffect(() => {
+        if (!hydrated || done) return;
+        try { localStorage.setItem(LS_KEY, JSON.stringify({ step, data })); } catch { /* 무시 */ }
+    }, [step, data, done, hydrated]);
 
     const update = <K extends keyof TIHData>(section: K, partial: Partial<TIHData[K]>) =>
         setData((prev) => ({ ...prev, [section]: { ...(prev[section] as object), ...partial } }));
@@ -108,8 +102,8 @@ export default function TIHTestPage() {
         if (step === 0) return !!(data.s0.industry && data.s0.jobFunction);
         if (step === 1) return !!(data.s1.q1 && data.s1.q2 && data.s1.q3 && data.s1.q4);
         if (step === 2) return s2Total === 100;
-        if (step === 3) return !!(data.s3.q1 && data.s3.q2_a && data.s3.q2_b && data.s3.q3 && data.s3.q4 && data.s3.q5 && data.s3.q6);
-        if (step === 4) return !!(data.s4.q1 && data.s4.q2 && data.s4.q3 && data.s4.q4 && data.s4.q5 && data.s4.q6);
+        if (step === 3) return !!(data.s3.q1 && data.s3.q2_a && data.s3.q2_b && data.s3.q3 && data.s3.q4 && data.s3.q5);
+        if (step === 4) return !!(data.s4.q1 && data.s4.q2 && data.s4.q3 && data.s4.q4 && data.s4.q5);
         if (step === 5) return !!data.s5.q1;
         if (step === 6) return true; // Section 6 선택
         if (step === 7) return !!(data.contactCompany && data.contactName && data.contactEmail);
@@ -213,21 +207,21 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">이 자리를 열게 만든 실제 고민을 한 줄로 고른다면?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리를 만들게 된 가장 큰 이유는?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "일이 안 돌아간다" },
-                                        { v: "b", l: "일이 돌아가긴 하는데 더 크게 못 간다" },
-                                        { v: "c", l: "사람이 자꾸 바뀐다" },
-                                        { v: "d", l: "방향은 보이는데 밀고 갈 손이 없다" },
-                                        { v: "e", l: "내부가 계속 어긋난다" },
-                                        { v: "f", l: "창업·확장 타이밍에 누군가 필요하다" },
+                                        { v: "a", l: "지금 업무가 제대로 돌아가지 않는다" },
+                                        { v: "b", l: "현상 유지는 되는데, 더 크게 나아가지 못하고 있다" },
+                                        { v: "c", l: "사람이 자꾸 떠나 공백이 반복된다" },
+                                        { v: "d", l: "방향은 보이는데 실행할 사람이 없다" },
+                                        { v: "e", l: "팀 내 소통과 협업이 계속 어긋난다" },
+                                        { v: "f", l: "창업·확장 단계에서 핵심 인재가 필요하다" },
                                     ].map((o) => <Radio key={o.v} name="s1q2" value={o.v} label={o.l} selected={data.s1.q2} onChange={(v) => update("s1", { q2: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">이 자리에 오는 사람이 팀에 미칠 영향을 어떻게 상상하시나요?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리에 오는 사람이 팀에 어떤 변화를 가져오길 바라시나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "조용히 자리를 채워주길 바란다" },
@@ -378,49 +372,36 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">반대로 과하면 곤란한 축</p>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {[...sPowers, "없음"].map((sp) => (
-                                        <button key={sp} type="button" onClick={() => update("s3", { q3: sp })}
-                                            className={`py-2 text-sm rounded-lg border font-medium transition-colors ${data.s3.q3 === sp ? "text-white border-transparent" : "border-neutral-200 text-neutral-600 hover:border-neutral-300"}`}
-                                            style={data.s3.q3 === sp ? { backgroundColor: HERO_RED } : undefined}>
-                                            {sp}
-                                        </button>
-                                    ))}
+                                <p className="text-sm font-semibold mb-3">이 자리에 어울리는 업무 스타일은?</p>
+                                <div className="space-y-2">
+                                    {[
+                                        { v: "a", l: "빠르게 판단하고 돌파한다" },
+                                        { v: "b", l: "에너지와 열정으로 사람을 움직인다" },
+                                        { v: "c", l: "흔들리지 않고 안정적으로 오래 간다" },
+                                        { v: "d", l: "정확하고 꼼꼼하게 일을 완성한다" },
+                                    ].map((o) => <Radio key={o.v} name="s3q3" value={o.v} label={o.l} selected={data.s3.q3} onChange={(v) => update("s3", { q3: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">반응 스타일</p>
+                                <p className="text-sm font-semibold mb-3">이 자리에서 일하는 방식의 무게 중심은?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "빠르게 판단하고 돌파" },
-                                        { v: "b", l: "에너지로 사람을 움직임" },
-                                        { v: "c", l: "안정적으로 오래 감" },
-                                        { v: "d", l: "정확하고 꼼꼼함" },
+                                        { v: "a", l: "구체적인 사실과 데이터를 중심으로 판단한다" },
+                                        { v: "b", l: "전체 그림과 패턴, 가능성을 먼저 본다" },
                                     ].map((o) => <Radio key={o.v} name="s3q4" value={o.v} label={o.l} selected={data.s3.q4} onChange={(v) => update("s3", { q4: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">일을 풀어가는 방식</p>
+                                <p className="text-sm font-semibold mb-3">이 자리의 직속 리더는 어떤 스타일인가요?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "구체적 사실·데이터 중심" },
-                                        { v: "b", l: "전체 그림·가능성·패턴 중심" },
+                                        { v: "a", l: "지시가 명확하고 성과 지향적이다" },
+                                        { v: "b", l: "자율성을 존중하고 위임을 잘 한다" },
+                                        { v: "c", l: "구성원의 성장을 돕는 코칭형이다" },
+                                        { v: "d", l: "수평적으로 함께 협업하는 스타일이다" },
                                     ].map((o) => <Radio key={o.v} name="s3q5" value={o.v} label={o.l} selected={data.s3.q5} onChange={(v) => update("s3", { q5: v })} />)}
-                                </div>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold mb-3">직속 리더 스타일</p>
-                                <div className="space-y-2">
-                                    {[
-                                        { v: "a", l: "지시 명확·성과 지향" },
-                                        { v: "b", l: "위임·자율 존중" },
-                                        { v: "c", l: "코칭·육성" },
-                                        { v: "d", l: "수평·협업" },
-                                    ].map((o) => <Radio key={o.v} name="s3q6" value={o.v} label={o.l} selected={data.s3.q6} onChange={(v) => update("s3", { q6: v })} />)}
                                 </div>
                             </div>
                         </div>
@@ -431,80 +412,68 @@ export default function TIHTestPage() {
                 {step === 4 && (
                     <div>
                         <h2 className="text-xl font-bold mb-1">일하는 결</h2>
-                        <p className="text-sm text-neutral-500 mb-8">조직 환경을 솔직하게 묘사해 주세요.</p>
+                        <p className="text-sm text-neutral-500 mb-8">팀의 일하는 방식과 분위기를 솔직하게 알려 주세요.</p>
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-semibold mb-3">이 팀에서 일하는 리듬</p>
+                                <p className="text-sm font-semibold mb-3">이 팀에서 일하는 속도와 리듬은?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "단거리 스프린트가 반복된다" },
-                                        { v: "b", l: "마라톤처럼 길게 끌고 간다" },
-                                        { v: "c", l: "파도처럼 집중기와 회복기가 나뉜다" },
-                                        { v: "d", l: "안정적이고 예측 가능하다" },
+                                        { v: "a", l: "빠른 스프린트가 반복되는 방식이다" },
+                                        { v: "b", l: "마라톤처럼 꾸준하고 길게 간다" },
+                                        { v: "c", l: "집중 기간과 여유 기간이 번갈아 온다" },
+                                        { v: "d", l: "안정적이고 예측 가능한 흐름이다" },
                                     ].map((o) => <Radio key={o.v} name="s4q1" value={o.v} label={o.l} selected={data.s4.q1} onChange={(v) => update("s4", { q1: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">이 자리에 먼저 있던 분은 지금 어떻게 지내시는지?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리의 이전 담당자는 어떤 사유로 자리를 비웠나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "내부 다른 역할로 이동" },
-                                        { v: "b", l: "승진·확장" },
-                                        { v: "c", l: "외부로 이직 (좋은 관계)" },
+                                        { v: "b", l: "승진·업무 확장으로 역할 변경" },
+                                        { v: "c", l: "외부로 이직 (원만하게 마무리)" },
                                         { v: "d", l: "개인 사정으로 이탈" },
-                                        { v: "e", l: "신설 포지션" },
-                                        { v: "f", l: "여러 명이 거쳐 감" },
+                                        { v: "e", l: "신설 포지션 (이전 담당자 없음)" },
+                                        { v: "f", l: "여러 명이 거쳐 간 자리" },
                                     ].map((o) => <Radio key={o.v} name="s4q2" value={o.v} label={o.l} selected={data.s4.q2} onChange={(v) => update("s4", { q2: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">의사결정이 이 조직에서 움직이는 속도는?</p>
+                                <p className="text-sm font-semibold mb-3">이 조직에서 의사결정이 이루어지는 속도는?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "사안에 따라 다르지만 필요시 즉시" },
-                                        { v: "b", l: "며칠 안에 정리됨" },
-                                        { v: "c", l: "주·월 단위 회의에서 결정" },
-                                        { v: "d", l: "상부 판단을 기다림" },
+                                        { v: "a", l: "사안에 따라 다르지만, 필요하면 즉시 결정한다" },
+                                        { v: "b", l: "며칠 안에 정리된다" },
+                                        { v: "c", l: "주·월 단위 회의를 통해 결정한다" },
+                                        { v: "d", l: "상부 승인을 기다려야 한다" },
                                     ].map((o) => <Radio key={o.v} name="s4q3" value={o.v} label={o.l} selected={data.s4.q3} onChange={(v) => update("s4", { q3: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">구성원이 개인 시간을 쓰는 방식</p>
+                                <p className="text-sm font-semibold mb-3">팀 내 리더와 구성원 사이의 분위기는?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "자유롭다" },
-                                        { v: "b", l: "서로 배려한다" },
-                                        { v: "c", l: "정해진 규칙이 있다" },
-                                        { v: "d", l: "바쁘다 보니 여유가 많지는 않다" },
+                                        { v: "a", l: "친구처럼 수평적이다" },
+                                        { v: "b", l: "서로 존중하며 격의 없이 소통한다" },
+                                        { v: "c", l: "역할과 책임이 명확히 구분된다" },
+                                        { v: "d", l: "공식적이고 위계가 뚜렷하다" },
                                     ].map((o) => <Radio key={o.v} name="s4q4" value={o.v} label={o.l} selected={data.s4.q4} onChange={(v) => update("s4", { q4: v })} />)}
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">리더와 구성원 사이의 거리감</p>
+                                <p className="text-sm font-semibold mb-3">실수가 생겼을 때 팀이 보이는 첫 반응은?</p>
                                 <div className="space-y-2">
                                     {[
-                                        { v: "a", l: "수평·친구 같다" },
-                                        { v: "b", l: "존중하되 격의 없다" },
-                                        { v: "c", l: "명확한 역할 구분" },
-                                        { v: "d", l: "공식적·위계적" },
+                                        { v: "a", l: "원인을 함께 짚고 다음을 준비한다" },
+                                        { v: "b", l: "빠르게 수습하고 앞으로 나아간다" },
+                                        { v: "c", l: "책임 소재부터 확인한다" },
+                                        { v: "d", l: "사안의 크기에 따라 다르게 대응한다" },
                                     ].map((o) => <Radio key={o.v} name="s4q5" value={o.v} label={o.l} selected={data.s4.q5} onChange={(v) => update("s4", { q5: v })} />)}
-                                </div>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold mb-3">실수가 생겼을 때 팀이 반응하는 첫 움직임</p>
-                                <div className="space-y-2">
-                                    {[
-                                        { v: "a", l: "원인을 함께 복기한다" },
-                                        { v: "b", l: "빠르게 수습하고 다음으로 간다" },
-                                        { v: "c", l: "책임 소재를 먼저 확인한다" },
-                                        { v: "d", l: "사안 규모에 따라 다르다" },
-                                    ].map((o) => <Radio key={o.v} name="s4q6" value={o.v} label={o.l} selected={data.s4.q6} onChange={(v) => update("s4", { q6: v })} />)}
                                 </div>
                             </div>
                         </div>
@@ -518,10 +487,10 @@ export default function TIHTestPage() {
                         <p className="text-sm text-neutral-500 mb-8">솔직할수록 매칭의 정확도가 높아집니다.</p>
                         <div className="space-y-2">
                             {[
-                                { v: "a", l: "지나친 개인주의 (팀 조율 실패)" },
-                                { v: "b", l: "지나친 의존성 (스스로 결정 못함)" },
-                                { v: "c", l: "지나친 공격성 (관계 파괴)" },
-                                { v: "d", l: "지나친 회피성 (책임 기피)" },
+                                { v: "a", l: "팀워크보다 개인 방식을 고집하는 사람" },
+                                { v: "b", l: "스스로 판단하지 못하고 모든 것을 의존하는 사람" },
+                                { v: "c", l: "강하게 밀어붙이다 관계를 망가뜨리는 사람" },
+                                { v: "d", l: "어려운 상황에서 책임을 피하는 사람" },
                             ].map((o) => <Radio key={o.v} name="s5q1" value={o.v} label={o.l} selected={data.s5.q1} onChange={(v) => update("s5", { q1: v })} />)}
                         </div>
                     </div>
@@ -598,7 +567,7 @@ export default function TIHTestPage() {
 
                     {step < TOTAL_STEPS - 1 ? (
                         <button
-                            onClick={() => setStep((s) => s + 1)}
+                            onClick={() => { setStep((s) => s + 1); window.scrollTo({ top: 0, behavior: "instant" }); }}
                             disabled={!canNext()}
                             className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{ backgroundColor: HERO_RED }}
