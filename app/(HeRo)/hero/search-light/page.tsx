@@ -126,16 +126,15 @@ export default function SearchLightPage() {
                         background: "radial-gradient(ellipse, rgba(229,57,53,0.20) 0%, rgba(229,57,53,0.06) 55%, transparent 100%)",
                         filter: "blur(8px)",
                     }} />
-                    {/* 로고 — 배트시그널처럼 아웃라인 */}
+                    {/* 로고 — 배트시그널 투영 (모바일 호환: solid fill + glow) */}
                     <div style={{
                         position: "relative",
                         fontSize: "clamp(56px, 9vw, 110px)",
                         fontWeight: 900,
                         fontFamily: "system-ui, sans-serif",
                         letterSpacing: "-3px",
-                        color: "transparent",
-                        WebkitTextStroke: "2.5px rgba(229,57,53,0.6)",
-                        textShadow: "0 0 40px rgba(229,57,53,0.4), 0 0 80px rgba(229,57,53,0.2), 0 0 160px rgba(229,57,53,0.08)",
+                        color: "rgba(229,57,53,0.55)",
+                        textShadow: "0 0 20px rgba(229,57,53,0.9), 0 0 50px rgba(229,57,53,0.6), 0 0 100px rgba(229,57,53,0.3), 0 0 180px rgba(229,57,53,0.12)",
                         userSelect: "none",
                         whiteSpace: "nowrap",
                     }}>
