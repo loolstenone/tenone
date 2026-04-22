@@ -296,15 +296,16 @@ export const modules: NavModule[] = [
                             // ── 공통 ──
                             { name: "대시보드", href: "/intra/hero" },
                             { name: "인재 풀", href: "/intra/hero/talent" },
-                            // ── 기업 (Phase 1) ──
+                            // ── 기업 측 (Tetrad) ──
                             { name: "기업 풀", href: "/intra/hero/companies" },
                             { name: "TIH 요청", href: "/intra/hero/search-light" },
-                            // ── 검사 (HIT) ──
+                            { name: "JD 관리", href: "/intra/hero/jd" },
+                            // ── 인재 측 (Tetrad) ──
                             { name: "HIT 현황", href: "/intra/hero/hit" },
+                            { name: "JH 응답", href: "/intra/hero/jh" },
                             // ── 보조 ──
                             { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서", href: "/intra/hero/resume" },
-                            { name: "커리어", href: "/intra/hero/career" },
                             // ── 공통 (마지막) ──
                             { name: "고객 문의", href: "/intra/hero/cs" },
                         ],
