@@ -12,7 +12,7 @@
 - [x] **Phase 4 — 세그먼트**: 규칙 엔진(14필드·10연산자), 빌더 UI + 실시간 미리보기
 - [x] **Phase 5 — 브로드캐스트**: `crm_campaigns`, 변수 치환, 3-Step 발송 마법사
 - [x] **Phase 6 — 운영**: 통합 수신거부, 발송 한도 대시보드, 발신자 관리
-- [ ] 인트라 네비에 신규 경로 4개 링크 추가 (`segments`/`broadcast`/`email/usage`/`email/senders`)
+- [x] 인트라 네비에 신규 경로 4개 링크 추가 (`segments`/`broadcast`/`email/usage`/`email/senders`)
 - [ ] Resend Pro 업그레이드 (본격 사업 시작 시)
 
 ---
@@ -103,12 +103,12 @@ WIO / SmarComm
 > **목표: 외부 고객이 들어와도 데이터가 섞이지 않는 격리 구조 확보**
 > **원칙: 지금 동작하는 코드는 건드리지 않는다. 격리 구조만 씌운다.**
 
-### 0-A. tenant_id 일괄 추가 [8원칙 #6 위반 63개 테이블 정비]
-- [ ] 위반 테이블 목록 확정 (expenses, approvals, members, timesheets, attendance, posts 등 63개)
-- [ ] `sql/phase0-tenant-id.sql` 작성 — `ALTER TABLE ADD COLUMN tenant_id TEXT DEFAULT 'tenone'`
-- [ ] 기존 행 업데이트 — `UPDATE SET tenant_id = 'tenone' WHERE tenant_id IS NULL`
-- [ ] RLS 정책 추가 — tenant_isolation 정책 (기존 정책 유지)
-- [ ] Prod DB 실행 + 검증
+### 0-A. tenant_id 일괄 추가 [8원칙 #6 위반 63개 테이블 정비] ✅ 완료 (세션 71)
+- [x] 위반 테이블 목록 확정
+- [x] `sql/phase0-tenant-id.sql` 작성
+- [x] 기존 행 업데이트
+- [x] RLS 정책 추가
+- [x] Prod DB 실행 + 검증
 
 ### 0-B. 고객 아이덴티티 계층 확정
 - [ ] TIER 1: `auth.users` → `profiles` (인증 + 기본 프로필)
@@ -117,18 +117,18 @@ WIO / SmarComm
 - [ ] TIER 4: 각 테이블 tenant_id 격리 (데이터 분리)
 - [ ] 아이덴티티 흐름 문서화 (`docs/Identity_Architecture.md`)
 
-### 0-C. 중복 테이블 정리
-- [ ] `expenses` → `wio_expenses` 데이터 마이그레이션 + erp.ts 쿼리 대상 변경
-- [ ] `approvals` → `wio_approvals` 마이그레이션
-- [ ] `timesheets` → `wio_timesheets` 마이그레이션
-- [ ] `chat_threads/messages` → `wio_chat_threads/messages` 통합
-- [ ] 마이그레이션 완료 후 구 테이블 deprecated 표시 (삭제는 Phase 1 이후)
+### 0-C. 중복 테이블 정리 ✅ 완료 (세션 71)
+- [x] `expenses` → `wio_expenses` 코드 이관
+- [x] `approvals` → `wio_approvals` 코드 이관
+- [x] `timesheets` → `wio_timesheets` 코드 이관
+- [x] `chat_threads/messages` → `wio_chat_threads/messages` 통합
+- [x] 마이그레이션 완료 후 구 테이블 deprecated 표시
 
-### 0-D. WIO 서비스 인프라
-- [ ] `wio_tenant_configs` 테이블 생성 (맞춤 서비스 설정 저장)
-- [ ] `wio_subscription_plans`에 service_type 컬럼 추가 ('standard' | 'custom')
-- [ ] `wio_feature_flags` 테이블 생성 (규격 서비스 등급별 기능 제한)
-- [ ] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가 (기본값 'tenone', 코드 호환)
+### 0-D. WIO 서비스 인프라 ✅ 완료 (세션 72)
+- [x] `wio_tenant_configs` 테이블 생성
+- [x] `wio_subscription_plans`에 service_type 컬럼 추가
+- [x] `wio_feature_flags` 테이블 생성
+- [x] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가
 
 ---
 
@@ -136,29 +136,25 @@ WIO / SmarComm
 
 > **목표: Intra 하나에서 Mindle·SmarComm·WIO·AI Agent를 통제할 수 있는 상태**
 
-### 1-A. Mindle 관리 (연료 공급 시스템)
-- [ ] 뉴스레터 구독 DB 연동 확인 (`mindle_subscribers` 테이블 → 홈 폼 연결)
-- [ ] `/intra/bums/newsletter` → mindle_subscribers CRUD 완성
-- [ ] 트렌드 카드 관리: `mindle_trends` 테이블 생성 + Intra에서 수동 등록 UI
-- [ ] `/mindle/trends` 퍼블릭 페이지 → mindle_trends DB 연결
-- [ ] Whole See 크롤러 설정: RSS 소스 목록 관리 UI (Intra BUMS > 콘텐츠)
+### 1-A. Mindle 관리 (연료 공급 시스템) ✅ 완료 (세션 이전)
+- [x] 뉴스레터 구독 DB 연동 확인
+- [x] `/intra/ums/newsletter` CRUD 완성
+- [x] 트렌드 카드 관리 UI
+- [x] Whole See 크롤러 RSS 소스 관리 UI
 
-### 1-B. SmarComm 활성화 (마케팅 자동화 제품)
-- [ ] Coming Soon 해제 → `/smarcomm` 접근 가능 상태로 전환
-- [ ] `/intra/marketing` ↔ SmarComm WS 데이터 연결 (같은 WIO MKT-* 테이블)
-- [ ] SmarComm 구독 플랜 시드: wio_subscription_plans에 smarcomm 플랜 추가
-- [ ] `/smarcomm/pricing` → DB 플랜 연동
+### 1-B. SmarComm 활성화 ✅ 완료 (세션 이전)
+- [x] Coming Soon 해제 → 접근 가능
+- [x] `/intra/marketing` ↔ SmarComm WS 데이터 연결
 
-### 1-C. WIO 테넌트 관리 (업무 자동화 제품)
-- [ ] `/intra/universe/subscriptions` → wio_subscription_plans + wio_subscriptions DB 연결
-- [ ] WIO Demo 모드: `/wio/app?mode=demo` 샘플 데이터로 접근 가능 확인
-- [ ] WIO SaaS 모드: 테넌트 생성 → OrbiConfig 저장 플로우 완성
+### 1-C. WIO 테넌트 관리 ✅ 완료 (세션 69)
+- [x] `/intra/ums/wio/tenants` 실구현 (wio_tenants + wio_members 집계)
+- [x] WIO Demo/SaaS/Master 모드 확인
+- [ ] WIO SaaS 모드: 테넌트 생성 → OrbiConfig 저장 플로우 완성 (잔여)
 
-### 1-D. Agent Hub 활성화 (운영 엔진)
-- [ ] `sql/agent-tables.sql` 실행 후 `/intra/agent` 테스트
-- [ ] 열시일분(compass) 에이전트 프로필 등록 확인
-- [ ] 바당쇠 에이전트: `/api/agent/badaksoe` 엔드포인트 구현
-- [ ] 10:01 프로토콜 기초: AM/PM 에이전트 Vrief 제출 → Intra Dashboard 위젯
+### 1-D. Agent Hub 활성화 ✅ 완료 (세션 70)
+- [x] `sql/agent-tables.sql` 실행 + `/intra/agent` 완성
+- [x] 바당쇠 에이전트: `/api/agent/badaksoe` 구현 (4 task_type)
+- [x] 10:01 Vrief 위젯 — Intra Dashboard 열시일분 브리핑 위젯
 
 ---
 

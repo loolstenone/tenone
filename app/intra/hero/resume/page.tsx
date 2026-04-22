@@ -31,7 +31,7 @@ export default function ResumeUsersPage() {
         members!inner(name, email)
       `)
       .order('updated_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data }: { data: any[] | null }) => {
         setRows((data || []).map((r: any) => ({
           ...r,
           member_name: r.members?.name ?? null,

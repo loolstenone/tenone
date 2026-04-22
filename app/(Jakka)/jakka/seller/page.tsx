@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Package, ShoppingBag, MessageCircle, Settings, Plus, Edit3, Eye, TrendingUp, Check, Truck, X as XIcon, Clock } from "lucide-react";
+import { Package, ShoppingBag, MessageCircle, Settings, Plus, Edit3, Eye, TrendingUp, Check, Truck, X as XIcon, Clock, BarChart3 } from "lucide-react";
 import { PageHeader } from "@/features/jakka/PageHeader";
 import {
     getMyCreatorProfile,
@@ -21,7 +21,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { currentLoginHref } from "@/lib/login-href";
 
-type Tab = "home" | "products" | "orders" | "qna" | "settings";
+type Tab = "home" | "products" | "orders" | "qna" | "settlement" | "settings";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
     pending: "문의 접수",
@@ -107,6 +107,7 @@ export default function SellerCenterPage() {
         { id: "products", label: "상품", icon: Package, badge: activeProducts.length },
         { id: "orders", label: "주문", icon: ShoppingBag, badge: pendingOrders.length },
         { id: "qna", label: "문의", icon: MessageCircle, badge: unansweredQnas.length },
+        { id: "settlement", label: "정산", icon: BarChart3 },
         { id: "settings", label: "설정", icon: Settings },
     ];
 
@@ -260,6 +261,14 @@ export default function SellerCenterPage() {
 
                     {/* 문의 탭 */}
                     {tab === "qna" && <QnaPanel qnas={qnas} creatorHandle={creator.handle} onAnswer={handleAnswerQna} />}
+
+                    {/* 정산 탭 */}
+                    {tab === "settlement" && (
+                        <SettlementPanel
+                            orders={orders}
+                            commissionRate={creator.seller_commission_rate}
+                        />
+                    )}
 
                     {/* 설정 탭 */}
                     {tab === "settings" && (
@@ -472,6 +481,139 @@ function QnaPanel({
                     )}
                 </div>
             ))}
+        </div>
+    );
+}
+
+/* ── 정산 패널 ── */
+type SettlementPeriod = "this_month" | "last_month" | "all";
+
+function SettlementPanel({
+    orders,
+    commissionRate,
+}: {
+    orders: (JakkaOrder & { product?: JakkaProduct })[];
+    commissionRate: number;
+}) {
+    const [period, setPeriod] = useState<SettlementPeriod>("this_month");
+
+    const now = new Date();
+    const thisMonth = { year: now.getFullYear(), month: now.getMonth() };
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = { year: lastMonthDate.getFullYear(), month: lastMonthDate.getMonth() };
+
+    const completedOrders = orders.filter((o) => o.status === "completed");
+
+    const filtered = completedOrders.filter((o) => {
+        if (period === "all") return true;
+        const d = new Date(o.created_at);
+        const target = period === "this_month" ? thisMonth : lastMonth;
+        return d.getFullYear() === target.year && d.getMonth() === target.month;
+    });
+
+    const totalSales = filtered.reduce((s, o) => s + Number(o.total_price), 0);
+    const commission = Math.floor(totalSales * commissionRate);
+    const settlement = totalSales - commission;
+
+    const PERIODS: { id: SettlementPeriod; label: string }[] = [
+        { id: "this_month", label: "이번 달" },
+        { id: "last_month", label: "지난 달" },
+        { id: "all", label: "전체" },
+    ];
+
+    return (
+        <div className="space-y-5">
+            {/* 기간 필터 */}
+            <div className="flex gap-1.5">
+                {PERIODS.map((p) => (
+                    <button
+                        key={p.id}
+                        onClick={() => setPeriod(p.id)}
+                        className={`text-[12px] font-bold px-3 py-1.5 border transition-colors ${
+                            period === p.id
+                                ? "border-neutral-900 bg-neutral-900 text-white"
+                                : "border-neutral-300 text-neutral-500 hover:border-neutral-700"
+                        }`}
+                    >
+                        {p.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* 요약 카드 */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                    { label: "완료 주문", value: `${filtered.length}건` },
+                    { label: "총 판매금액", value: `${totalSales.toLocaleString()}원` },
+                    { label: `플랫폼 수수료 (${Math.round(commissionRate * 100)}%)`, value: `${commission.toLocaleString()}원` },
+                    { label: "정산 예정금액", value: `${settlement.toLocaleString()}원`, highlight: true },
+                ].map((s) => (
+                    <div key={s.label} className={`border p-3 ${s.highlight ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200"}`}>
+                        <p className={`text-[10px] font-bold uppercase tracking-[0.1em] mb-1 ${s.highlight ? "text-neutral-400" : "text-neutral-500"}`}>
+                            {s.label}
+                        </p>
+                        <p className={`text-[15px] font-bold ${s.highlight ? "text-white" : "text-neutral-900"}`}>
+                            {s.value}
+                        </p>
+                    </div>
+                ))}
+            </div>
+
+            {/* 안내 */}
+            <div className="bg-neutral-50 border border-neutral-200 p-3 text-[11px] text-neutral-500 leading-relaxed">
+                정산은 매월 말일 기준으로 "완료" 상태 주문에 대해 처리됩니다. 결제 시스템 연동 후 자동 정산이 시작됩니다.
+            </div>
+
+            {/* 완료 주문 목록 */}
+            <div>
+                <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-[0.15em] mb-3">
+                    완료 주문 내역
+                </p>
+                {filtered.length === 0 ? (
+                    <div className="text-center py-10 text-[12px] text-neutral-400">
+                        <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                        해당 기간에 완료된 주문이 없습니다.
+                    </div>
+                ) : (
+                    <div className="border border-neutral-200 overflow-hidden">
+                        <table className="w-full text-[11px]">
+                            <thead>
+                                <tr className="bg-neutral-50 border-b border-neutral-200 text-left">
+                                    <th className="px-3 py-2 font-bold text-neutral-500">날짜</th>
+                                    <th className="px-3 py-2 font-bold text-neutral-500">상품명</th>
+                                    <th className="px-3 py-2 font-bold text-neutral-500 text-right">판매금액</th>
+                                    <th className="px-3 py-2 font-bold text-neutral-500 text-right">수수료</th>
+                                    <th className="px-3 py-2 font-bold text-neutral-500 text-right">정산금액</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100">
+                                {filtered.map((o) => {
+                                    const sale = Number(o.total_price);
+                                    const fee = Math.floor(sale * commissionRate);
+                                    const net = sale - fee;
+                                    return (
+                                        <tr key={o.id} className="hover:bg-neutral-50">
+                                            <td className="px-3 py-2 text-neutral-500 whitespace-nowrap">{o.created_at.substring(0, 10)}</td>
+                                            <td className="px-3 py-2 text-neutral-900 max-w-[140px] truncate">{o.product?.title ?? "—"}</td>
+                                            <td className="px-3 py-2 text-right font-medium">{sale.toLocaleString()}원</td>
+                                            <td className="px-3 py-2 text-right text-neutral-500">−{fee.toLocaleString()}원</td>
+                                            <td className="px-3 py-2 text-right font-bold text-neutral-900">{net.toLocaleString()}원</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                            <tfoot>
+                                <tr className="bg-neutral-50 border-t-2 border-neutral-200">
+                                    <td colSpan={2} className="px-3 py-2 font-bold text-neutral-900">합계</td>
+                                    <td className="px-3 py-2 text-right font-bold">{totalSales.toLocaleString()}원</td>
+                                    <td className="px-3 py-2 text-right text-neutral-500">−{commission.toLocaleString()}원</td>
+                                    <td className="px-3 py-2 text-right font-bold text-neutral-900">{settlement.toLocaleString()}원</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

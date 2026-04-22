@@ -39,7 +39,7 @@ export default function MadLeagueMyPage() {
             .select('role, club_id, name, activity_years, cohort, university')
             .eq('user_id', user.id)
             .maybeSingle()
-            .then(async ({ data: member }) => {
+            .then(async ({ data: member }: { data: any }) => {
                 if (member) {
                     const info: MadMemberInfo = { ...member };
                     if (member.club_id) {
@@ -70,7 +70,7 @@ export default function MadLeagueMyPage() {
             .eq('status', 'pending')
             .eq('applicant_role', 'member')
             .order('created_at', { ascending: false })
-            .then(({ data }) => setPendingApps(data ?? []));
+            .then(({ data }: { data: any[] | null }) => setPendingApps(data ?? []));
     }, [madInfo?.club_id, madInfo?.role]);
 
     async function handleApprove(appId: string) {
