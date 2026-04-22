@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-04-22 (세션 74) — MADLeague 아레나 워크스페이스 완성
+
+### 신규 파일
+- `app/(MADLeague)/madleague/projects/page.tsx` — 프로젝트 워크스페이스 (인증 게이트, 내 팀·진행 중·지난 기록)
+- `app/(MADLeague)/madleague/pt/page.tsx` — 경쟁PT 워크스페이스 (대회별 섹션, 내 팀 패널, 제출물 상태)
+
+### 수정 파일
+- `next.config.ts` — `/madleague/pt → /madleague/programs/competition` 301 리디렉트 제거
+
+### 결정사항
+- `/madleague/pt`는 Hall of Fame(공개 아카이브)과 분리된 매드리거 전용 워크스페이스로 분리
+- 두 페이지 모두 `members` + `member_roles(brand:madleague)` 기반 인증 게이트 적용
+
+---
+
 ## 2026-04-22 (세션 73) — MADLeague UX 정비
 
 ### 변경 파일

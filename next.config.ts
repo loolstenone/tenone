@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
       { source: '/CrewInvite', destination: '/crew-invite', permanent: true },
       // MADLeague: 구 라우트 → 신 사이트맵 (2026-04-16 v2)
       { source: '/madleague/program', destination: '/madleague/programs', permanent: true },
-      { source: '/madleague/pt', destination: '/madleague/programs/competition', permanent: true },
+      // /madleague/pt — 워크스페이스 페이지로 전환 (리디렉트 제거됨)
       { source: '/madleague/idea-movement', destination: '/madleague/programs/im', permanent: true },
       { source: '/madleague/idea-movement/:path*', destination: '/madleague/programs/im/:path*', permanent: true },
       { source: '/madleague/leaguer', destination: '/madleague/member', permanent: true },
