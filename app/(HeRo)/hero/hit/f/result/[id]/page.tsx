@@ -289,31 +289,31 @@ export default function HitFResultPage() {
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Timer className="h-4 w-4 text-[#E53935]" />
+                <Timer className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">공백 기간:</span> {result.breakMonths}개월
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Brain className="h-4 w-4 text-[#E53935]" />
+                <Brain className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">잠재 역량:</span> {result.latentScore}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Battery className="h-4 w-4 text-[#E53935]" />
+                <Battery className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">회복탄력성:</span> {result.resilienceScore}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Rocket className="h-4 w-4 text-[#E53935]" />
+                <Rocket className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">재진입 준비도:</span> {result.reentryReadiness}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Navigation className="h-4 w-4 text-[#E53935]" />
+                <Navigation className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">추천 경로:</span> {routeInfo.label}
                 </p>

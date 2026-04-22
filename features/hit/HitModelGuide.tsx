@@ -23,9 +23,11 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           각 검사를 독립적으로 해석하는 기존 방식의 한계를 넘어 <strong className="text-neutral-900">인공지능 기반의 교차분석</strong>을 적용합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          HIT는 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
-          성격유형(MBTI)과 행동유형(DISC)을 측정하고, 이 세 가지 결과를 AI 알고리즘으로 교차 분석하여
-          개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>을 도출합니다.
+          HIT A는 개인의 타고난 기질과 성장 과정에서 형성된 기저요인(UF)을 먼저 측정한 뒤,
+          성격유형(MBTI) · 행동유형(DISC) · 인성 · 적성까지 통합 측정하고,
+          이 결과를 AI 알고리즘으로 교차 분석하여 개인 고유의 <strong className="text-neutral-900">핵심 강점(S-Power)</strong>과 64유형을 도출합니다.
+          <strong className="text-neutral-900">HIT B ~ F</strong>는 HIT A의 결과를 기반으로
+          신입 · 이직 · 리더십 전환 · 인생 2막 · 경력 복귀 등 <strong className="text-neutral-900">생애주기별 국면</strong>에 맞춘 심화 진단을 제공합니다.
           단일 검사로는 보이지 않던 내면과 외면의 일치/불일치, 강점의 발현 맥락까지 포착하는 것이 HIT의 차별점입니다.
         </p>
         <div className="border border-neutral-200 rounded-xl p-5 bg-neutral-50">
@@ -101,31 +103,46 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           <span className="text-sm font-semibold text-neutral-700 text-right">DISC 검사</span>
         </div>
 
+        {/* 인성 */}
+        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+          <span className="text-[15px] font-semibold text-neutral-800">인성</span>
+          <p className="text-center text-sm text-neutral-500">진정성 · 관계성 · 정서 · 윤리 · 성장</p>
+          <span className="text-sm font-semibold text-neutral-700 text-right">인성 검사</span>
+        </div>
+
+        {/* 적성 */}
+        <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-5 border-b border-neutral-100">
+          <span className="text-[15px] font-semibold text-neutral-800">적성</span>
+          <p className="text-center text-sm text-neutral-500">Holland RIASEC 6 차원</p>
+          <span className="text-sm font-semibold text-neutral-700 text-right">기초 적성검사</span>
+        </div>
+
         {/* 강점 */}
         <div className="grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 bg-neutral-50">
           <span className="text-[15px] font-semibold text-neutral-800">강점</span>
-          <p className="text-center text-sm text-neutral-400">MBTI + DISC 교차분석 → S-Power 도출</p>
+          <p className="text-center text-sm text-neutral-400">UF × MBTI × DISC × 인성 × 적성 교차분석 → S-Power 도출</p>
           <span className="text-sm text-neutral-400 text-right">종합 산출</span>
         </div>
 
         {/* 구분선 */}
         <div className="border-t-2 border-neutral-300" />
 
-        {/* HIT B 헤더 */}
+        {/* HIT B ~ F 헤더 */}
         <div className="grid grid-cols-[90px_1fr_120px] bg-neutral-100 text-sm font-semibold text-neutral-600 px-6 py-3 border-b border-neutral-200">
-          <span>HIT B</span>
-          <span className="text-center">검사의 개념 및 구조</span>
+          <span>HIT B ~ F</span>
+          <span className="text-center">생애주기별 심화 진단</span>
           <span className="text-right">검사 항목</span>
         </div>
 
         {[
-          { name: "인성", scope: "공통", test: "인성 검사" },
-          { name: "적성", scope: "공통", test: "기초직무적성검사" },
-          { name: "역량", scope: "직무별 (적성결과 or 희망)", test: "기초직무역량검사" },
-          { name: "취업", scope: "직무별 (적성결과 or 희망)", test: "취업준비도검사" },
-        ].map((r, i) => (
-          <div key={r.name} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < 3 ? "border-b border-neutral-100" : ""}`}>
-            <span className="text-[15px] font-semibold text-neutral-800">{r.name}</span>
+          { k: "B", scope: "신입 · 사회 초년", test: "취업준비도 · 역량" },
+          { k: "C", scope: "경력 이직 고민", test: "이직 전환 진단" },
+          { k: "D", scope: "시니어 리더십 전환", test: "리더십 전환 진단" },
+          { k: "E", scope: "인생 2막 준비", test: "인생 2막 설계" },
+          { k: "F", scope: "경력 공백 · 복귀", test: "재진입 로드맵" },
+        ].map((r, i, arr) => (
+          <div key={r.k} className={`grid grid-cols-[90px_1fr_120px] items-center px-6 py-4 ${i < arr.length - 1 ? "border-b border-neutral-100" : ""}`}>
+            <span className="text-[15px] font-semibold text-neutral-800">HIT {r.k}</span>
             <span className="text-sm text-neutral-500 text-center">{r.scope}</span>
             <span className="text-sm font-semibold text-neutral-700 text-right">{r.test}</span>
           </div>
@@ -264,14 +281,74 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
         </p>
       </div>
 
+      {/* 인성 */}
+      <div className="mb-14">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700">HIT A</span>
+          <span className="text-lg font-bold text-neutral-900">인성검사</span>
+          <span className="text-sm text-neutral-400 ml-auto">5 차원</span>
+        </div>
+        <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
+          성격·행동으로 드러나는 외면 너머, 사람이 일과 관계에서 보여주는 <strong className="text-neutral-800">내면의 결</strong>을 측정합니다.
+          동일한 DISC D형이라도 인성의 결이 다르면 조직에서 발휘하는 영향은 전혀 다릅니다.
+        </p>
+        <div className="grid grid-cols-5 gap-3">
+          {[
+            { n: "진정성", e: "Integrity", d: "말과 행동의 일치" },
+            { n: "관계성", e: "Relational", d: "타인과의 연결 감수성" },
+            { n: "정서", e: "Emotional", d: "감정 조절·회복력" },
+            { n: "윤리", e: "Ethics", d: "원칙·책임" },
+            { n: "성장", e: "Growth", d: "학습·변화 의지" },
+          ].map((c) => (
+            <div key={c.e} className="bg-neutral-50 rounded-lg p-3 text-center">
+              <p className="text-sm font-semibold text-neutral-700 mb-0.5">{c.n}</p>
+              <p className="text-[11px] text-neutral-400 mb-1">{c.e}</p>
+              <p className="text-[11px] text-neutral-500 leading-snug">{c.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 적성 */}
+      <div className="mb-14">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700">HIT A</span>
+          <span className="text-lg font-bold text-neutral-900">기초 적성검사</span>
+          <span className="text-sm text-neutral-400 ml-auto">RIASEC 6 차원</span>
+        </div>
+        <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
+          Holland의 직업 흥미 이론(RIASEC)에 기반해 어떤 환경에서 에너지가 솟고, 어떤 활동에 몰입하는지를 측정합니다.
+          상위 3 코드(Holland Code)가 직무·환경 매칭의 기준점이 됩니다.
+        </p>
+        <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-sm text-neutral-500 leading-relaxed">
+          <span className="font-semibold text-neutral-600">이론적 근거</span> — John L. Holland의 직업 흥미 이론(1959).
+          사람과 환경의 적합도(Person-Environment Fit)가 커리어 만족을 예측한다는 모델입니다.
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { k: "R", n: "현실형 Realistic", d: "도구·제작·실체" },
+            { k: "I", n: "탐구형 Investigative", d: "분석·연구·원리" },
+            { k: "A", n: "예술형 Artistic", d: "표현·창작·감성" },
+            { k: "S", n: "사회형 Social", d: "돕고·가르치고·연결" },
+            { k: "E", n: "진취형 Enterprising", d: "설득·리더·사업" },
+            { k: "C", n: "관습형 Conventional", d: "체계·정확·관리" },
+          ].map((h) => (
+            <div key={h.k} className="bg-neutral-50 rounded-lg p-3">
+              <p className="text-xs font-bold text-neutral-700">{h.k} · {h.n}</p>
+              <p className="text-[11px] text-neutral-500 mt-0.5">{h.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 교차분석 → S-Power 연결 */}
       <div className="border-l-2 border-amber-300 bg-neutral-50 rounded-r-xl pl-5 pr-6 py-5 mb-14">
         <p className="text-[15px] text-neutral-600 leading-[1.9]">
-          <span className="font-semibold text-neutral-800">MBTI x DISC x UF 교차분석 → S-Power</span> :
-          성격(내면)과 행동(외면)의 교차점에서 개인 고유의 핵심 강점이 드러납니다.
-          DISC D(주도)+MBTI T(사고)의 교차는 냉철한 결단력이라는 구체적 강점으로,
-          D+P(인식)의 교차는 기회 포착형 리더십으로 발현됩니다.
-          여기에 기저요인(UF)이 강점의 발현 맥락과 잠재력을 해석하는 가중치로 작용합니다.
+          <span className="font-semibold text-neutral-800">UF × MBTI × DISC × 인성 × 적성 교차분석 → S-Power</span> :
+          다섯 축의 교차점에서 개인 고유의 핵심 강점이 드러납니다.
+          DISC D(주도) + MBTI T(사고)의 교차는 <strong>냉철한 결단력</strong>으로,
+          I(사교) + A(예술)의 교차는 <strong>창의적 설득력</strong>으로 발현됩니다.
+          여기에 기저요인(UF)과 인성의 결이 가중치로 작용해 "같은 강점도 다르게 쓰이는" 맥락을 만듭니다.
         </p>
       </div>
 
@@ -283,7 +360,7 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
           <span className="text-sm text-neutral-400 ml-auto">종합 산출</span>
         </div>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          MBTI와 DISC의 교차분석에 기저요인(UF)을 가중하여 8가지 핵심 역량 차원을 산출합니다.
+          UF · MBTI · DISC · 인성 · 적성 다섯 축을 교차 가중해 8가지 핵심 역량 차원을 산출합니다.
           상위 3개 강점이 핵심 경쟁력으로, 하위 2개가 성장 영역으로 리포트에 반영됩니다.
         </p>
         <div className="grid grid-cols-4 gap-4">
@@ -304,42 +381,88 @@ export default function HitModelGuide({ mode = "modal" }: HitModelGuideProps) {
       {/* 구분선 */}
       <div className="border-t border-neutral-200 my-12" />
 
-      {/* HIT B */}
+      {/* HIT B ~ F — 생애주기별 심화 */}
       <div className="mb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700">HIT B</span>
-          <span className="text-lg font-bold text-neutral-900">심화 직무 분석</span>
-          <span className="text-sm text-neutral-400 ml-auto">HIT A 완료 후 진행</span>
+        <div className="text-center mb-8">
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">심화 검사</p>
+          <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT B ~ F · 생애주기별 특화 진단</h3>
+          <p className="text-sm text-neutral-500 leading-relaxed">
+            HIT A 완료 이후, 지금 내 국면의 구체적 질문에 맞춰 다음 한 걸음을 설계하는 심화 진단입니다.
+            현재 상황에 맞는 1~2개만 선택해도 충분합니다.
+          </p>
         </div>
-        <p className="text-[15px] text-neutral-600 leading-[1.9] mb-6">
-          HIT A의 결과를 기반으로 인성, 적성, 역량, 취업준비도를 직무별로 심화 분석합니다.
-          적성검사 결과 또는 본인 희망 직무에 따라 맞춤형 검사가 제공됩니다.
-        </p>
-        <div className="border border-neutral-200 rounded-xl divide-y divide-neutral-100 overflow-hidden">
+
+        <div className="space-y-4">
           {[
-            { name: "인성", scope: "전체 공통 (84문항)", test: "인성 검사" },
-            { name: "적성", scope: "전체 공통 · RIASEC (60문항)", test: "기초직무적성검사" },
-            { name: "역량", scope: "직무별 분기 (48문항)", test: "기초직무역량검사" },
-            { name: "취업", scope: "직무별 분기 (32문항)", test: "취업준비도검사" },
-          ].map((r) => (
-            <div key={r.name} className="flex items-center px-6 py-5">
-              <span className="text-[15px] font-semibold text-neutral-800 w-16">{r.name}</span>
-              <span className="text-sm text-neutral-500 flex-1">{r.scope}</span>
-              <span className="text-sm font-semibold text-neutral-700">{r.test}</span>
+            {
+              key: "B",
+              title: "신입 · 사회 초년",
+              tone: "text-green-700 bg-green-50",
+              desc: "첫 회사 · 첫 직무를 준비하거나 시작한 시기. HIT A의 적성과 희망 직무를 기반으로 직무별 역량(48문항)과 취업준비도(32문항)를 진단해 어디서부터 채워야 할지 방향을 잡아줍니다.",
+              dims: ["직무 역량", "취업준비도", "자기 PR", "포트폴리오"],
+            },
+            {
+              key: "C",
+              title: "경력 이직 고민",
+              tone: "text-blue-700 bg-blue-50",
+              desc: "1~3년 경력을 쌓고 다음 회사를 고민하는 시기. 경력 자본 · 이직 동기 · 전환 가능성 · 준비도를 측정해 어디로 · 언제 움직일지 방향을 잡아줍니다.",
+              dims: ["경력 자본", "이직 동기", "전환 가능성", "준비도"],
+            },
+            {
+              key: "D",
+              title: "시니어 리더십 전환",
+              tone: "text-red-700 bg-red-50",
+              desc: "실무자에서 리더 · 임원으로 넘어가는 지점. 전문성 · 리더십 · 정체성 · 네트워크 · 준비도를 측정해 리더십 전환 지도를 제시합니다.",
+              dims: ["전문성", "리더십", "정체성", "네트워크", "준비도"],
+            },
+            {
+              key: "E",
+              title: "인생 2막 준비",
+              tone: "text-amber-700 bg-amber-50",
+              desc: "주된 경력을 마치고 다음 장을 설계하는 시기. 삶의 만족도 · 방향 탐색 · 레거시 · 사회적 연결 · 준비도로 인생 2막의 설계도를 그립니다.",
+              dims: ["삶의 만족도", "방향 탐색", "레거시", "사회적 연결", "준비도"],
+            },
+            {
+              key: "F",
+              title: "경력 공백 · 복귀 준비",
+              tone: "text-violet-700 bg-violet-50",
+              desc: "육아 · 학업 · 건강 등으로 비운 시간 이후 돌아오는 시기. 공백 맥락 · 잠재 역량 · 회복탄력성 · 재진입 준비도를 측정해 재진입 로드맵을 만듭니다.",
+              dims: ["공백 맥락", "잠재 역량", "회복탄력성", "재진입 준비도"],
+            },
+          ].map((t) => (
+            <div key={t.key} className="border border-neutral-200 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${t.tone}`}>HIT {t.key}</span>
+                <span className="text-base font-bold text-neutral-900">{t.title}</span>
+              </div>
+              <p className="text-sm text-neutral-600 leading-relaxed mb-3">{t.desc}</p>
+              <div className="flex flex-wrap gap-2">
+                {t.dims.map((d) => (
+                  <span key={d} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full">{d}</span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
+
+        <p className="text-center text-xs text-neutral-400 mt-6">
+          HIT B ~ F는 HIT A가 완료된 상태에서만 의미 있게 해석됩니다.
+        </p>
       </div>
 
       {/* 요약 */}
       <div className="bg-neutral-50 rounded-xl p-8 mb-8">
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
-          <span className="font-bold text-neutral-900">HIT A</span>는 타고난 기질과 성장 과정의 영향(기저요인)을 바탕으로,
-          성격유형(MBTI)과 행동유형(DISC)을 측정하고 교차분석하여 개인의 핵심 강점(S-Power)을 도출합니다.
+          <span className="font-bold text-neutral-900">HIT A</span>는 기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성 다섯 축을 통합 측정하고,
+          이 결과를 교차분석하여 개인의 핵심 강점(S-Power)과 64유형 프로필을 도출합니다.
         </p>
         <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
           <span className="font-bold text-neutral-900">HIT B</span>는 HIT A의 결과를 기반으로
-          인성, 적성, 역량, 취업준비도를 직무별로 심화 분석합니다.
+          직무별 역량과 취업준비도를 심화 분석합니다.
+        </p>
+        <p className="text-[15px] text-neutral-600 leading-[1.9] mb-4">
+          <span className="font-bold text-neutral-900">HIT C ~ F</span>는 생애주기별 심화 진단으로,
+          이직 · 리더십 전환 · 인생 2막 · 경력 공백 복귀 같은 구체적 국면에서 다음 한 걸음을 설계합니다.
         </p>
         <p className="text-sm text-neutral-400 leading-relaxed">
           HeRo만의 통합적이고 일관적인 검사 방법을 통해 미래의 가치를 만들어낼 잠재인재를 발굴합니다.

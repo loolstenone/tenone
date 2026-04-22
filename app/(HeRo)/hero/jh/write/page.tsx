@@ -139,10 +139,10 @@ export default function JHWritePage() {
             <div className="min-h-screen bg-white flex items-center justify-center p-6 pt-24">
                 <div className="max-w-md text-center">
                     <CheckCircle className="h-16 w-16 mx-auto mb-6" style={{ color: HERO_RED }} />
-                    <h1 className="text-2xl font-bold mb-3">JH 작성 완료</h1>
+                    <h1 className="text-2xl font-bold mb-3">희망 직무 작성 완료</h1>
                     <p className="text-neutral-500 mb-6">
-                        당신의 "자리의 바람"이 매칭 엔진에 등록되었습니다.
-                        HeRo 팀이 맞닿는 자리를 찾으면 조용히 연락드립니다.
+                        작성하신 희망 직무가 HeRo 매칭에 반영됐습니다.
+                        HeRo 팀이 어울릴 만한 자리를 찾으면 연락드립니다.
                     </p>
                     <div className="flex items-center justify-center gap-2">
                         <button onClick={() => router.push("/hero/my")} className="px-5 py-2.5 text-white font-semibold rounded-lg" style={{ backgroundColor: HERO_RED }}>
@@ -167,12 +167,12 @@ export default function JHWritePage() {
 
                 <div className="mb-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
-                        <Sparkles className="h-3.5 w-3.5" /> Job Hope — 자리의 바람
+                        <Sparkles className="h-3.5 w-3.5" /> Job Hope — 희망 직무
                     </div>
                     <h1 className="text-2xl font-extrabold mb-2">당신은 어떤 문제를 풀러 왔고, 어디로 가고 싶은가</h1>
                     <p className="text-sm text-neutral-500">
                         구직 조건(규모·연봉·근무형태)은 뒤의 실무 필드에서 따로 받습니다.
-                        이 12문항은 영웅의 좌표를 그립니다. 4~7분 소요.
+                        12문항으로 어울리는 자리의 방향을 정리합니다. 4~7분 정도 걸립니다.
                     </p>
                 </div>
 

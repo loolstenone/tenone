@@ -9,7 +9,7 @@ import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
-import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Compass } from "lucide-react";
+import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Compass, Building2 } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -57,14 +57,14 @@ export default function HeRoMyPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-neutral-100">
-                                {jhStatus === "active" ? "Job Hope · 매칭 대기 중" : jhStatus === "draft" ? "Job Hope · 작성 중 (이어서)" : "Job Hope · 자리의 바람"}
+                                {jhStatus === "active" ? "희망 직무 · 매칭 진행 중" : jhStatus === "draft" ? "희망 직무 · 작성 중 (이어서 쓰기)" : "희망 직무 작성하기"}
                             </p>
                             <p className="text-xs text-neutral-400">
                                 {jhStatus === "active"
-                                    ? "매칭 엔진이 당신의 좌표를 읽고 있습니다"
+                                    ? "HeRo가 어울리는 자리를 찾고 있습니다"
                                     : jhStatus === "draft"
-                                    ? "남은 문항을 마저 답해보세요"
-                                    : "12문항으로 당신의 좌표를 그립니다 · 4~7분"}
+                                    ? "남은 문항을 마저 답해 주세요"
+                                    : "12문항으로 원하는 자리의 방향을 정리합니다 · 4~7분"}
                             </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-neutral-500" />
@@ -79,12 +79,25 @@ export default function HeRoMyPage() {
                 {user?.id && (
                     <div className="mb-8">
                         <h2 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <span>받은 매칭</span>
+                            <span>매칭 현황</span>
                             <span className="h-px flex-1 bg-neutral-800" />
                         </h2>
-                        <MatchingInbox side="talent" memberId={user.id} accentColor="#E53935" />
+                        <MatchingInbox side="talent" memberId={user.id} accentColor="#E53935" theme="dark" />
                     </div>
                 )}
+
+                {/* 기업 회원 허브 안내 */}
+                <Link href="/hero/company"
+                    className="mb-8 flex items-center gap-3 px-4 py-3 border border-neutral-700 hover:border-neutral-500 rounded-xl transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-neutral-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-neutral-100">기업으로 인재를 찾으시나요?</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">회사를 등록하고 필요한 자리를 적어 주시면 HeRo가 인재를 이어드립니다</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-neutral-500" />
+                </Link>
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (

@@ -29,7 +29,7 @@ export default async function CommunityPage({ searchParams }: PageProps) {
     return (
       <div className="bg-[var(--mad-black,#000)] text-white min-h-[60vh]">
         <div className="mx-auto max-w-3xl px-6 py-24">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">COMMUNITY</div>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · 게시판</div>
           <h1 className="mt-3 text-4xl sm:text-5xl font-black">매드리거만 접근 가능합니다</h1>
           <p className="mt-6 text-neutral-400">로그인 후 매드리거 연동을 완료하면 커뮤니티에 참여할 수 있습니다.</p>
           <Link href="/login?redirect=/madleague/community" className="mt-8 inline-block bg-[#EC1D25] text-white font-bold px-8 py-4">로그인</Link>
@@ -38,8 +38,29 @@ export default async function CommunityPage({ searchParams }: PageProps) {
     );
   }
 
-  const { data: member } = await sb.from('mad_members').select('id').eq('user_id', user.id).maybeSingle();
-  if (!member) redirect('/madleague/member');
+  // members 테이블에서 member_id 조회 → member_roles 승인 체크
+  const { data: memberRow } = await sb.from('members').select('id').eq('auth_id', user.id).maybeSingle();
+  if (!memberRow) redirect('/madleague/apply');
+
+  const { data: roleRow } = await sb
+    .from('member_roles')
+    .select('id')
+    .eq('member_id', memberRow.id)
+    .in('role', ['approved_member', 'leader', 'mentor', 'corporate', 'staff', 'manager', 'super_admin'])
+    .eq('context', 'brand:madleague')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  // super_admin(마스터)은 context 무관하게 통과
+  const { data: globalAdmin } = roleRow ? { data: null } : await sb
+    .from('member_roles')
+    .select('id')
+    .eq('member_id', memberRow.id)
+    .eq('role', 'super_admin')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (!roleRow && !globalAdmin) redirect('/madleague/apply');
 
   const clubs = await fetchMadClubs();
 
@@ -47,8 +68,8 @@ export default async function CommunityPage({ searchParams }: PageProps) {
     <div className="bg-[var(--mad-black,#000)] text-white">
       <section className="border-b border-neutral-900">
         <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">COMMUNITY</div>
-          <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">매드리거 커뮤니티</h1>
+          <div className="text-xs font-bold tracking-widest text-[#EC1D25]">ARENA · 게시판</div>
+          <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">매드 아레나</h1>
           <p className="mt-4 text-sm text-neutral-400">매드리거 간 자유 소통 공간. 글은 승인된 매드리거만 볼 수 있습니다.</p>
         </div>
       </section>

@@ -78,17 +78,17 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                 <div className="flex items-start justify-between mb-8 flex-wrap gap-3">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
-                            <FileText className="h-3.5 w-3.5" /> JD · Job Description
+                            <FileText className="h-3.5 w-3.5" /> 직무 설명 (Job Description)
                         </div>
-                        <h1 className="text-2xl font-extrabold mb-1">자리의 실체를 서술합니다</h1>
+                        <h1 className="text-2xl font-extrabold mb-1">자리의 내용을 적어 주세요</h1>
                         <p className="text-sm text-neutral-500">
-                            TIH가 자리의 이유라면 JD는 자리의 실체. 7블록 500~800자로 영웅이 읽는 문서를 만듭니다.
+                            TIH가 "왜 사람이 필요한가"라면, 직무 설명은 "어떤 자리인가"입니다. 7개 블록, 500~800자로 지원자가 읽게 될 소개를 작성합니다.
                         </p>
                     </div>
                     <Link href={`/hero/company/${companyId}/jd/new`}
                         className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-lg"
                         style={{ backgroundColor: HERO_RED }}>
-                        <Plus className="h-4 w-4" /> 새 JD 작성
+                        <Plus className="h-4 w-4" /> 새 직무 설명 작성
                     </Link>
                 </div>
 
@@ -97,11 +97,11 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                 ) : jds.length === 0 ? (
                     <div className="bg-white border-2 border-dashed border-neutral-200 rounded-xl p-12 text-center">
                         <FileText className="h-10 w-10 mx-auto mb-3 text-neutral-300" />
-                        <p className="text-sm text-neutral-400 mb-5">아직 작성된 JD가 없습니다</p>
+                        <p className="text-sm text-neutral-400 mb-5">아직 작성된 직무 설명이 없습니다</p>
                         <Link href={`/hero/company/${companyId}/jd/new`}
                             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-lg"
                             style={{ backgroundColor: HERO_RED }}>
-                            <Plus className="h-4 w-4" /> 첫 번째 JD 작성
+                            <Plus className="h-4 w-4" /> 첫 번째 직무 설명 작성
                         </Link>
                     </div>
                 ) : (

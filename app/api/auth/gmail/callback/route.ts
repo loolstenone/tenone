@@ -28,8 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const origin = request.nextUrl.origin;
-        const redirectUri = `${origin}/api/auth/gmail/callback`;
+        const redirectUri = `https://tenone.biz/api/auth/gmail/callback`;
 
         // code → tokens 교환
         const tokens = await exchangeCode(code, redirectUri);

@@ -48,15 +48,15 @@ export default function JHViewPage() {
             <div className="min-h-screen bg-neutral-50 pt-24 pb-20">
                 <div className="max-w-2xl mx-auto px-6 text-center">
                     <Compass className="h-12 w-12 mx-auto mb-5 text-neutral-300" />
-                    <h1 className="text-2xl font-extrabold mb-3">Job Hope — 자리의 바람</h1>
+                    <h1 className="text-2xl font-extrabold mb-3">Job Hope — 희망 직무</h1>
                     <p className="text-sm text-neutral-500 mb-8">
-                        당신이 풀고 싶은 문제, 닿고 싶은 자리를 12문항으로 좌표화합니다.<br />
-                        HeRo 매칭 엔진이 TIH·HIT·JD와 함께 읽어 당신에게 맞닿는 기회를 조용히 제안합니다.
+                        당신이 풀고 싶은 문제, 원하는 자리의 방향을 12문항으로 정리합니다.<br />
+                        HeRo가 기업 쪽 정보(TIH·직무 설명)와 HIT 결과를 함께 읽어 어울릴 만한 기회를 제안합니다.
                     </p>
                     <Link href="/hero/jh/write"
                         className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-lg"
                         style={{ backgroundColor: HERO_RED }}>
-                        JH 작성 시작 <ArrowRight className="h-4 w-4" />
+                        희망 직무 작성 시작 <ArrowRight className="h-4 w-4" />
                     </Link>
                     <p className="text-xs text-neutral-400 mt-3">4~7분 소요 · 자동 저장</p>
                 </div>
@@ -79,7 +79,7 @@ export default function JHViewPage() {
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
                             <Compass className="h-3.5 w-3.5" /> Job Hope
                         </div>
-                        <h1 className="text-2xl font-extrabold mb-1">내가 쓴 자리의 바람</h1>
+                        <h1 className="text-2xl font-extrabold mb-1">내가 쓴 희망 직무</h1>
                         <p className="text-sm text-neutral-500">
                             상태: <span className="font-semibold">{jh.status === "active" ? "매칭 대기" : jh.status === "draft" ? "작성 중" : jh.status}</span>
                             {" · "}
@@ -121,7 +121,7 @@ export default function JHViewPage() {
                 </div>
 
                 <div className="mt-6 p-4 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600">
-                    💡 JH는 언제든 업데이트 가능합니다. 성장하면서 방향이 바뀔 수 있습니다.
+                    💡 희망 직무는 언제든 고쳐 쓸 수 있습니다. 성장하면서 방향이 바뀔 수 있으니까요.
                 </div>
             </div>
         </div>

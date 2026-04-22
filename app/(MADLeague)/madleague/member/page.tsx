@@ -55,7 +55,7 @@ export default async function MemberPage() {
             이 계정에 연결된 매드리거 기록을 찾을 수 없습니다.
           </p>
           <div className="mt-6 bg-neutral-950 border border-neutral-900 p-6">
-            <div className="text-sm font-bold mb-2">가능한 이유</div>
+            <div className="text-sm font-bold mb-2">이런 경우를 확인해보세요</div>
             <ul className="text-sm text-neutral-400 space-y-1 list-disc list-inside">
               <li>지원서가 아직 승인되지 않았습니다.</li>
               <li>지원서 이메일과 가입 이메일이 다릅니다. (같게 맞춰주세요)</li>

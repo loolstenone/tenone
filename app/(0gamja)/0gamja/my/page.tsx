@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { AuthGate } from "@/components/AuthGate";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
@@ -33,6 +34,11 @@ export default function OgamjaMyPage() {
         <AuthGate accentColor="#F97316" bgClassName="bg-neutral-900">
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-900 text-neutral-100">
             <div className="max-w-4xl mx-auto">
+                {user?.id && (
+                    <div className="mb-4">
+                        <HitProfileBadge memberId={user.id} respectOptIn />
+                    </div>
+                )}
                 <MyProfileCard accentColor="#F97316" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="ogamja" accentColor="#F97316" className="mb-6" />}

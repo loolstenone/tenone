@@ -16,6 +16,7 @@ export interface MadClub {
   established_year: number | null;
   joined_madleague_year: number | null;
   sort_order: number;
+  president_member_id: string | null;
 }
 
 export interface MadCompetition {

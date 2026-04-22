@@ -43,19 +43,45 @@ interface RssItem {
     category: string;
 }
 
-/** RSS XML에서 아이템 추출 (간이 파서) */
+/** RSS/Atom XML에서 아이템 추출 */
 function parseRssItems(xml: string, sourceName: string, category: string): RssItem[] {
     const items: RssItem[] = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+
+    // RSS <item> + Atom <entry> 둘 다 지원
+    const itemRegex = /<(?:item|entry)>([\s\S]*?)<\/(?:item|entry)>/gi;
     let match;
     while ((match = itemRegex.exec(xml)) !== null) {
         const block = match[1];
-        const title = block.match(/<title><!\[CDATA\[(.*?)\]\]>|<title>(.*?)<\/title>/)?.[1] || block.match(/<title>(.*?)<\/title>/)?.[1] || '';
-        const link = block.match(/<link>(.*?)<\/link>/)?.[1] || '';
-        const desc = block.match(/<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/)?.[1] || '';
-        const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || '';
+
+        // title: CDATA 또는 plain
+        const titleMatch =
+            block.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
+            block.match(/<title[^>]*>([\s\S]*?)<\/title>/);
+        const title = (titleMatch?.[1] ?? '').replace(/<[^>]*>/g, '').trim();
+
+        // link: <link href="..."/> (Atom), CDATA, 또는 plain <link>url</link>
+        const linkMatch =
+            block.match(/<link[^>]+href=["'](https?:\/\/[^"']+)["']/) ||
+            block.match(/<link[^>]*><!\[CDATA\[(https?:\/\/[^\]]*)\]\]><\/link>/) ||
+            block.match(/<link[^>]*>(https?:\/\/[^<\s]+)<\/link>/);
+        const link = (linkMatch?.[1] ?? '').trim();
+
+        // description / content
+        const descMatch =
+            block.match(/<description[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
+            block.match(/<description[^>]*>([\s\S]*?)<\/description>/) ||
+            block.match(/<content[^>]*>([\s\S]*?)<\/content>/);
+        const desc = (descMatch?.[1] ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 500);
+
+        // pubDate / published / updated
+        const dateMatch =
+            block.match(/<pubDate[^>]*>(.*?)<\/pubDate>/) ||
+            block.match(/<published[^>]*>(.*?)<\/published>/) ||
+            block.match(/<updated[^>]*>(.*?)<\/updated>/);
+        const pubDate = dateMatch?.[1] ?? '';
+
         if (title && link) {
-            items.push({ title: title.trim(), link: link.trim(), description: desc.replace(/<[^>]*>/g, '').trim().slice(0, 500), pubDate, source: sourceName, category });
+            items.push({ title, link, description: desc, pubDate, source: sourceName, category });
         }
     }
     return items;
@@ -90,6 +116,7 @@ export async function POST(request: NextRequest) {
         const errors: string[] = [];
 
         for (const src of sources) {
+            if (!src.url.startsWith('http')) continue; // mailto: 등 비-HTTP 소스 건너뜀
             try {
                 const res = await fetch(src.url, { signal: AbortSignal.timeout(10000) });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);

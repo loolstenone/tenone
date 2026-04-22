@@ -74,9 +74,9 @@ const tracks = [
 ];
 
 const stages = [
-    { icon: GraduationCap, label: "Entry", desc: "입문 단계", color: "bg-red-100 text-red-700" },
-    { icon: Briefcase, label: "Growth", desc: "성장 단계", color: "bg-red-200 text-red-800" },
-    { icon: TrendingUp, label: "Senior", desc: "시니어 단계", color: "bg-red-300 text-white" },
+    { icon: GraduationCap, label: "Entry", desc: "입문 단계", color: "bg-neutral-100 text-neutral-700" },
+    { icon: Briefcase, label: "Growth", desc: "성장 단계", color: "bg-neutral-200 text-neutral-800" },
+    { icon: TrendingUp, label: "Senior", desc: "시니어 단계", color: "bg-neutral-700 text-white" },
     { icon: Crown, label: "C-Level", desc: "경영진 단계", color: "text-white", bg: HERO_RED },
 ];
 
@@ -196,8 +196,8 @@ export default function CoachingPage() {
                 </div>
             </section>
 
-            {/* ── Tab Navigation ── */}
-            <div className="sticky top-0 z-30 bg-white border-b border-neutral-200">
+            {/* ── Tab Navigation (스크롤 시 헤더 아래 고정) ── */}
+            <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200 shadow-sm">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="flex gap-0 overflow-x-auto">
                         {tabs.map((tab) => (
@@ -205,7 +205,7 @@ export default function CoachingPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={clsx(
-                                    "relative px-6 py-4 text-sm font-semibold transition-colors whitespace-nowrap shrink-0",
+                                    "relative px-6 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap shrink-0",
                                     activeTab === tab.id
                                         ? "text-neutral-900"
                                         : "text-neutral-400 hover:text-neutral-600"
@@ -307,8 +307,8 @@ function ResumeSection() {
                     {/* Features */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
                         {features.map((f) => (
-                            <div key={f.title} className="border border-neutral-200 rounded-xl p-6 hover:border-red-300 transition-colors text-center">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-red-50" style={{ color: HERO_RED }}>
+                            <div key={f.title} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors text-center">
+                                <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-neutral-100 text-neutral-500">
                                     <f.icon className="h-6 w-6" />
                                 </div>
                                 <h3 className="font-bold mb-2">{f.title}</h3>
@@ -401,9 +401,9 @@ function MentorSection({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...filteredMentors].sort((a, b) => b.matchScore - a.matchScore).map((mentor) => (
-                            <div key={mentor.id} className="border border-neutral-200 rounded-xl p-6 hover:border-red-300 transition-colors">
+                            <div key={mentor.id} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-14 h-14 bg-red-50 flex items-center justify-center rounded-full text-lg font-bold flex-shrink-0" style={{ color: HERO_RED }}>
+                                    <div className="w-14 h-14 bg-neutral-100 text-neutral-700 flex items-center justify-center rounded-full text-lg font-bold flex-shrink-0">
                                         {mentor.photo}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -487,7 +487,7 @@ function CareerSection() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {tracks.map((track) => (
-                            <div key={track.code} className="border border-neutral-200 rounded-xl p-6 hover:border-red-300 transition-colors">
+                            <div key={track.code} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-12 h-12 text-white rounded-lg flex items-center justify-center" style={{ backgroundColor: HERO_RED }}>
                                         <track.icon className="h-6 w-6" />
@@ -515,7 +515,7 @@ function CareerSection() {
                                     <p className="text-xs text-neutral-400 mb-2">핵심 역량</p>
                                     <div className="flex flex-wrap gap-1.5">
                                         {track.skills.map((skill) => (
-                                            <span key={skill} className="text-xs px-2 py-0.5 bg-red-50 rounded-full" style={{ color: HERO_RED }}>{skill}</span>
+                                            <span key={skill} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full">{skill}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -523,9 +523,9 @@ function CareerSection() {
                         ))}
                     </div>
 
-                    <div className="mt-10 p-4 bg-red-50 rounded-lg border border-red-100 text-center">
+                    <div className="mt-10 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-center">
                         <p className="text-sm text-neutral-700">
-                            <span className="font-bold" style={{ color: HERO_RED }}>HIT 진단</span>을 완료하면 AI가 나에게 맞는 트랙과 현재 단계를 추천합니다
+                            <span className="font-semibold text-neutral-900">HIT 진단</span>을 완료하면 AI가 나에게 맞는 트랙과 현재 단계를 추천합니다
                         </p>
                     </div>
                 </div>
@@ -572,9 +572,9 @@ function BrandingSection() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {brandingPrograms.map((prog) => (
-                            <div key={prog.title} className="border border-neutral-200 rounded-xl p-6 hover:border-red-300 transition-colors">
+                            <div key={prog.title} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center" style={{ color: HERO_RED }}>
+                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center">
                                         <prog.icon className="h-6 w-6" />
                                     </div>
                                     <div>
@@ -622,7 +622,7 @@ function BrandingSection() {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {["#전략", "#연결", "#세계관", "#AI", "#브랜드", "#리더십"].map((kw) => (
-                                <span key={kw} className="text-xs px-2.5 py-1 bg-red-50 rounded-full font-medium" style={{ color: HERO_RED }}>{kw}</span>
+                                <span key={kw} className="text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full font-medium">{kw}</span>
                             ))}
                         </div>
                     </div>

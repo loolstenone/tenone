@@ -47,7 +47,7 @@ const NEXT_STATUS: Record<string, string[]> = {
 };
 
 import { useEffect, useState } from "react";
-import { Network, Users, Building2, Loader2, Search, AlertTriangle, Handshake, Sparkles, Eye } from "lucide-react";
+import { Network, Users, Building2, Loader2, Search, AlertTriangle, Handshake, Sparkles, Eye, Settings2, Save, CheckCircle2, Circle } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -86,6 +86,33 @@ interface MatchRow {
     ai_match_report: string | null;
     created_at: string;
     hero_companies: { company_name: string } | null;
+    trial_start: string | null;
+    trial_end: string | null;
+    trial_result: string | null;
+    fee_type: string | null;
+    fee_rate: number | null;
+    fee_amount: number | null;
+    fee_paid: boolean | null;
+    talent_satisfaction: number | null;
+    company_satisfaction: number | null;
+    talent_feedback: string | null;
+    company_feedback: string | null;
+    would_recommend: boolean | null;
+}
+
+interface ManageForm {
+    trial_start: string;
+    trial_end: string;
+    trial_result: string;
+    fee_type: string;
+    fee_rate: string;
+    fee_amount: string;
+    fee_paid: boolean;
+    talent_satisfaction: string;
+    company_satisfaction: string;
+    talent_feedback: string;
+    company_feedback: string;
+    would_recommend: boolean | null;
 }
 
 interface Curation {
@@ -105,6 +132,9 @@ export default function HeroMatchingPage() {
     const [transitioning, setTransitioning] = useState<string | null>(null);
     const [curating, setCurating] = useState<string | null>(null);
     const [curationView, setCurationView] = useState<{ id: string; data: Curation } | null>(null);
+    const [managing, setManaging] = useState<MatchRow | null>(null);
+    const [manageForm, setManageForm] = useState<ManageForm | null>(null);
+    const [managingSaving, setManagingSaving] = useState(false);
 
     useEffect(() => { load(); }, []);
 
@@ -113,7 +143,7 @@ export default function HeroMatchingPage() {
         const sb = createClient();
         const [tihRes, matchesRes] = await Promise.all([
             sb.from("hero_tih_responses").select("*").order("created_at", { ascending: false }).limit(100),
-            sb.from("hero_matches").select("id, profile_member_id, company_id, match_status, match_type, created_at, hero_companies(company_name)").order("created_at", { ascending: false }).limit(50),
+            sb.from("hero_matches").select("id, profile_member_id, company_id, match_status, match_type, ai_match_report, created_at, trial_start, trial_end, trial_result, fee_type, fee_rate, fee_amount, fee_paid, talent_satisfaction, company_satisfaction, talent_feedback, company_feedback, would_recommend, hero_companies(company_name)").order("created_at", { ascending: false }).limit(50),
         ]);
         setTihs((tihRes.data ?? []) as unknown as TIHRow[]);
         setMatches((matchesRes.data ?? []) as unknown as MatchRow[]);
@@ -184,6 +214,58 @@ export default function HeroMatchingPage() {
             setCurationView({ id: match.id, data: parsed });
         } catch {
             setCurationView({ id: match.id, data: { for_company: match.ai_match_report } });
+        }
+    }
+
+    function openManage(match: MatchRow) {
+        setManaging(match);
+        setManageForm({
+            trial_start: match.trial_start ?? "",
+            trial_end: match.trial_end ?? "",
+            trial_result: match.trial_result ?? "",
+            fee_type: match.fee_type ?? "",
+            fee_rate: match.fee_rate != null ? String(match.fee_rate) : "",
+            fee_amount: match.fee_amount != null ? String(match.fee_amount) : "",
+            fee_paid: match.fee_paid ?? false,
+            talent_satisfaction: match.talent_satisfaction != null ? String(match.talent_satisfaction) : "",
+            company_satisfaction: match.company_satisfaction != null ? String(match.company_satisfaction) : "",
+            talent_feedback: match.talent_feedback ?? "",
+            company_feedback: match.company_feedback ?? "",
+            would_recommend: match.would_recommend,
+        });
+    }
+
+    async function saveManage() {
+        if (!managing || !manageForm) return;
+        setManagingSaving(true);
+        try {
+            const body: Record<string, unknown> = {
+                trialStart: manageForm.trial_start || null,
+                trialEnd: manageForm.trial_end || null,
+                trialResult: manageForm.trial_result || null,
+                feeType: manageForm.fee_type || null,
+                feeRate: manageForm.fee_rate === "" ? null : Number(manageForm.fee_rate),
+                feeAmount: manageForm.fee_amount === "" ? null : Number(manageForm.fee_amount),
+                feePaid: manageForm.fee_paid,
+                talentSatisfaction: manageForm.talent_satisfaction === "" ? null : Number(manageForm.talent_satisfaction),
+                companySatisfaction: manageForm.company_satisfaction === "" ? null : Number(manageForm.company_satisfaction),
+                talentFeedback: manageForm.talent_feedback || null,
+                companyFeedback: manageForm.company_feedback || null,
+                wouldRecommend: manageForm.would_recommend,
+            };
+            const res = await fetch(`/api/hero/matching/${managing.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) { const d = await res.json(); throw new Error(d.error || `오류 ${res.status}`); }
+            setManaging(null);
+            setManageForm(null);
+            await load();
+        } catch (e) {
+            alert(e instanceof Error ? e.message : "저장 실패");
+        } finally {
+            setManagingSaving(false);
         }
     }
 
@@ -373,6 +455,7 @@ export default function HeroMatchingPage() {
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">type</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">생성</th>
+                                            <th className="text-right px-3 py-2 font-semibold text-neutral-600">수수료/트라이얼</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">AI</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">전이</th>
                                         </tr>
@@ -393,6 +476,14 @@ export default function HeroMatchingPage() {
                                                     <td className="px-3 py-2 text-neutral-500">{m.match_type}</td>
                                                     <td className="px-3 py-2 text-right text-[10px] text-neutral-400">
                                                         {new Date(m.created_at).toLocaleDateString("ko-KR")}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right">
+                                                        <button onClick={() => openManage(m)}
+                                                            className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 border border-neutral-200 rounded hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600 font-semibold">
+                                                            <Settings2 className="h-3 w-3" />
+                                                            {m.trial_start || m.fee_amount != null ? "편집" : "설정"}
+                                                            {m.fee_paid && <CheckCircle2 className="h-3 w-3 text-emerald-500 ml-0.5" />}
+                                                        </button>
                                                     </td>
                                                     <td className="px-3 py-2 text-right">
                                                         {m.ai_match_report ? (
@@ -436,6 +527,149 @@ export default function HeroMatchingPage() {
                         1차 공간 축소: TIH 산업·직무·3축 × JH preferred_state · 2차 하드 필터: risk_flags × avoid_traits 교차 감지
                         <span className="ml-1 text-neutral-400">· 3차 AI 큐레이션: tetrad_match_v1 프롬프트 사용</span>
                     </div>
+
+                    {/* 수수료/트라이얼 관리 모달 */}
+                    {managing && manageForm && (
+                        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setManaging(null)}>
+                            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
+                                    <div className="flex items-center gap-2">
+                                        <Settings2 className="h-4 w-4 text-rose-500" />
+                                        <h3 className="text-sm font-bold">수수료 · 트라이얼 · 피드백</h3>
+                                        <span className="text-[10px] text-neutral-400">{managing.hero_companies?.company_name}</span>
+                                    </div>
+                                    <button onClick={() => setManaging(null)} className="text-xs text-neutral-400 hover:text-neutral-600">닫기</button>
+                                </div>
+
+                                <div className="p-5 space-y-5">
+                                    {/* 수수료 섹션 */}
+                                    <section>
+                                        <p className="text-xs font-bold text-neutral-700 mb-2">💰 수수료 (placement fee)</p>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">유형 (fee_type)</label>
+                                                <select value={manageForm.fee_type}
+                                                    onChange={e => setManageForm({ ...manageForm, fee_type: e.target.value })}
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400">
+                                                    <option value="">-</option>
+                                                    <option value="percentage">%</option>
+                                                    <option value="flat">정액</option>
+                                                    <option value="none">없음</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">요율 (%)</label>
+                                                <input type="number" step="0.1" value={manageForm.fee_rate}
+                                                    onChange={e => setManageForm({ ...manageForm, fee_rate: e.target.value })}
+                                                    placeholder="15"
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">금액 (KRW)</label>
+                                                <input type="number" value={manageForm.fee_amount}
+                                                    onChange={e => setManageForm({ ...manageForm, fee_amount: e.target.value })}
+                                                    placeholder="0"
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                        </div>
+                                        <label className="flex items-center gap-1.5 text-xs text-neutral-700 mt-2 cursor-pointer">
+                                            <input type="checkbox" checked={manageForm.fee_paid}
+                                                onChange={e => setManageForm({ ...manageForm, fee_paid: e.target.checked })} />
+                                            수금 완료 (fee_paid)
+                                        </label>
+                                    </section>
+
+                                    {/* 트라이얼 섹션 */}
+                                    <section className="pt-4 border-t border-neutral-100">
+                                        <p className="text-xs font-bold text-neutral-700 mb-2">📅 트라이얼</p>
+                                        <div className="grid grid-cols-2 gap-2 mb-2">
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">시작일</label>
+                                                <input type="date" value={manageForm.trial_start}
+                                                    onChange={e => setManageForm({ ...manageForm, trial_start: e.target.value })}
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">종료일</label>
+                                                <input type="date" value={manageForm.trial_end}
+                                                    onChange={e => setManageForm({ ...manageForm, trial_end: e.target.value })}
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                        </div>
+                                        <label className="text-[10px] text-neutral-500 block mb-0.5">결과 (trial_result)</label>
+                                        <select value={manageForm.trial_result}
+                                            onChange={e => setManageForm({ ...manageForm, trial_result: e.target.value })}
+                                            className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400">
+                                            <option value="">-</option>
+                                            <option value="in_progress">진행 중</option>
+                                            <option value="success">성공 (→hired)</option>
+                                            <option value="failed">실패</option>
+                                            <option value="extended">연장</option>
+                                        </select>
+                                    </section>
+
+                                    {/* 피드백 섹션 */}
+                                    <section className="pt-4 border-t border-neutral-100">
+                                        <p className="text-xs font-bold text-neutral-700 mb-2">💬 양측 피드백</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">인재 만족도 (1-5)</label>
+                                                <input type="number" min={1} max={5} value={manageForm.talent_satisfaction}
+                                                    onChange={e => setManageForm({ ...manageForm, talent_satisfaction: e.target.value })}
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                                <textarea value={manageForm.talent_feedback}
+                                                    onChange={e => setManageForm({ ...manageForm, talent_feedback: e.target.value })}
+                                                    rows={3} placeholder="인재 측 피드백"
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded mt-1.5 resize-none focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-neutral-500 block mb-0.5">기업 만족도 (1-5)</label>
+                                                <input type="number" min={1} max={5} value={manageForm.company_satisfaction}
+                                                    onChange={e => setManageForm({ ...manageForm, company_satisfaction: e.target.value })}
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400" />
+                                                <textarea value={manageForm.company_feedback}
+                                                    onChange={e => setManageForm({ ...manageForm, company_feedback: e.target.value })}
+                                                    rows={3} placeholder="기업 측 피드백"
+                                                    className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded mt-1.5 resize-none focus:outline-none focus:border-neutral-400" />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 mt-3">
+                                            <span className="text-[10px] text-neutral-500">추천 의향 (would_recommend)</span>
+                                            <div className="flex items-center gap-2">
+                                                {[
+                                                    { v: true, label: "예" },
+                                                    { v: false, label: "아니오" },
+                                                    { v: null, label: "미응답" },
+                                                ].map(opt => (
+                                                    <button key={String(opt.v)} type="button"
+                                                        onClick={() => setManageForm({ ...manageForm, would_recommend: opt.v })}
+                                                        className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
+                                                            manageForm.would_recommend === opt.v
+                                                                ? "bg-neutral-900 text-white border-neutral-900"
+                                                                : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400"
+                                                        }`}>
+                                                        {manageForm.would_recommend === opt.v
+                                                            ? <CheckCircle2 className="h-3 w-3" />
+                                                            : <Circle className="h-3 w-3" />}
+                                                        {opt.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                <div className="px-5 py-3 border-t border-neutral-200 flex items-center justify-end gap-2 bg-neutral-50">
+                                    <button onClick={() => setManaging(null)} className="text-xs text-neutral-500 hover:text-neutral-700 px-3 py-1.5">취소</button>
+                                    <button onClick={saveManage} disabled={managingSaving}
+                                        className="flex items-center gap-1.5 text-xs bg-neutral-900 text-white px-3 py-1.5 rounded hover:bg-neutral-700 disabled:opacity-50">
+                                        {managingSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                        저장
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 큐레이션 뷰 모달 */}
                     {curationView && (

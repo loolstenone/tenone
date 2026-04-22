@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import {
     ArrowRight, ClipboardList,
@@ -109,6 +110,11 @@ export default function MadLeagueMyPage() {
         <div className="min-h-screen bg-black text-white">
             <div className="max-w-4xl mx-auto px-6 pt-24 pb-4">
                 {/* 공통 프로필 카드 + MADLeague 특화 정보 */}
+                {user?.id && (
+                    <div className="mb-4">
+                        <HitProfileBadge memberId={user.id} respectOptIn />
+                    </div>
+                )}
                 <MyProfileCard accentColor="#EC1D25" siteBadge={roleLabel}>
                     {madStatus === 'active' && madInfo && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">

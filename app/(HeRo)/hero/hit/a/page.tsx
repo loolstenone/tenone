@@ -84,7 +84,7 @@ export default function HitAIntroPage() {
           <div className="space-y-4">
             {modules.map((m, i) => (
               <div key={i} className="flex items-start gap-4 p-5 border border-neutral-200 rounded-xl">
-                <div className="w-10 h-10 bg-red-50 text-[#E53935] rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <m.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">

@@ -27,10 +27,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     // Cron 인증 (Admin API Key 또는 Vercel Cron Secret)
     const authHeader = request.headers.get('authorization');
-    const cronSecret = request.headers.get('x-vercel-cron');
     const adminKey = process.env.ADMIN_API_KEY;
+    const cronKey = process.env.CRON_SECRET;
 
-    if (!cronSecret && authHeader !== `Bearer ${adminKey}`) {
+    if (
+        authHeader !== `Bearer ${adminKey}` &&
+        authHeader !== `Bearer ${cronKey}`
+    ) {
         return errorResponse('Unauthorized', 401);
     }
 
@@ -101,6 +104,14 @@ export async function POST(request: NextRequest) {
                     }
                 }
 
+                // mindle_sources 마지막 크롤링 시간 갱신 (이메일 유무 무관)
+                await supabase.from('mindle_sources').update({
+                    last_crawled_at: new Date().toISOString(),
+                    crawl_count: (tokenRow as Record<string, unknown>).crawl_count
+                        ? Number((tokenRow as Record<string, unknown>).crawl_count) + 1
+                        : 1,
+                }).eq('url', `mailto:${tokenRow.email}`);
+
                 if (emails.length === 0) {
                     results.push({ email: tokenRow.email, found: messages.length, created: 0 });
                     continue;
@@ -132,14 +143,6 @@ export async function POST(request: NextRequest) {
                         error: `API ${res.status}`,
                     });
                 }
-
-                // mindle_sources 마지막 크롤링 시간 갱신
-                await supabase.from('mindle_sources').update({
-                    last_crawled_at: new Date().toISOString(),
-                    crawl_count: (tokenRow as Record<string, unknown>).crawl_count
-                        ? Number((tokenRow as Record<string, unknown>).crawl_count) + 1
-                        : 1,
-                }).eq('url', `mailto:${tokenRow.email}`);
 
             } catch (e) {
                 results.push({

@@ -9,8 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUrl } from '@/lib/gmail/client';
 
 export async function GET(request: NextRequest) {
-    const origin = request.nextUrl.origin;
-    const redirectUri = `${origin}/api/auth/gmail/callback`;
+    const redirectUri = `https://tenone.biz/api/auth/gmail/callback`;
     const authUrl = getAuthUrl(redirectUri);
 
     return NextResponse.redirect(authUrl);

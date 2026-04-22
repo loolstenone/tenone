@@ -128,6 +128,67 @@
 
 ---
 
+## 🎨 UI/UX 규약 — 색·클릭 SSOT
+
+> **원칙**: 빨간색은 "행동을 유도하는 자리"에만 쓴다. 그 외에는 중립색. 클릭 가능 여부는 1초 안에 판별되어야 한다.
+> 이 규약이 없으면 CTA가 묻히고, 장식이 버튼처럼 보이며, 사용자는 어디를 눌러야 할지 고민한다.
+
+### 색 레이어 정의
+
+| 레이어 | 용도 | 허용 색 | 예시 |
+|---|---|---|---|
+| **Action** | CTA 버튼, 활성 탭, 폼 제출, 포커스 | `bg-[#E53935]` + `text-white` · hover `bg-red-700` | "HIT - A 시작하기", 헤더 활성 메뉴 |
+| **Accent** | 로고, 주 진입점 카드 테두리, 최상단 eyebrow 1곳 | `border-[#E53935]` (강조 면적 최소) | 랜딩 `border-2 border-[#E53935]` |
+| **State** | 활성·선택·진행 중 상태 pill | `bg-red-50 text-[#E53935]` | "공통 기반" 배지, "진행 중" 상태 |
+| **Content** | 정보성 아이콘, 태그, 순번, 섹션 라벨 | `text-neutral-400 ~ 700` | Brain/Target/Clock 아이콘, 태그 칩 |
+| **Disabled** | 잠금·비활성 요소 | `bg-neutral-100 text-neutral-400` + `cursor-not-allowed` | "HIT - A 완료 후 이용 가능" |
+
+### 빨간색 남발 금지 체크리스트
+
+작업 끝낸 페이지에 빨간 요소를 세어보고 다음을 지켰는지 확인:
+
+- [ ] **아이브로 빨강은 페이지당 최대 1곳** (랜딩 히어로의 "HERO INTEGRATED TEST"처럼) · 섹션 타이틀 eyebrow는 중립색
+- [ ] **피처 리스트 아이콘은 중립색** (`text-neutral-400`) · 단 주 카드 1장에서만 빨강 허용
+- [ ] **태그 칩은 기본 중립색** (`bg-neutral-100 text-neutral-600`) · 빨강은 "선택됨"·"진행 중" 같은 상태 전달 시에만
+- [ ] **순번 원형 ① ② ③은 중립색** (`bg-neutral-900 text-white` 또는 `bg-neutral-200 text-neutral-700`)
+- [ ] **CTA 버튼은 페이지당 primary 1개 원칙** · 추가 버튼은 outline/border 스타일
+- [ ] **본문 bold 텍스트에 `text-[#E53935]` 금지** · 강조는 `font-semibold` + 중립색으로
+
+### 클릭 가능성 시각 규약
+
+모든 요소는 "클릭 가능"·"상태 표시"·"장식" 셋 중 하나로 명확히 읽혀야 한다.
+
+| 분류 | 필수 스타일 | 금지 |
+|---|---|---|
+| **클릭 가능 (버튼·링크·카드)** | hover 효과(`hover:shadow-lg`/`hover:bg-*`) · cursor pointer (기본) · 필요 시 화살표 `<ArrowRight>` | hover 없음 |
+| **클릭 가능한 카드 전체** | 전체를 `<Link>`로 감싸기 · `hover:shadow-lg transition-shadow` · 내부 별도 버튼 중복 금지 | 버튼만 `<Link>`, 카드는 `<div>` (영역 불명) |
+| **상태 pill (선택됨·활성)** | `rounded-full` · 색만으로 상태 표현 · hover 없음 | 버튼형 외곽선 |
+| **정보 태그 (비클릭)** | `rounded-full` + `bg-neutral-100` · hover 없음 · cursor default | `bg-red-50` (버튼으로 오인) |
+| **비활성 버튼** | `cursor-not-allowed` + `aria-disabled="true"` + `bg-neutral-100 text-neutral-400` + Lock 아이콘 | `cursor` 누락 |
+| **순수 장식 (원형 번호·아이콘 배지)** | hover 없음 · 버튼 모양 금지 | pill·shadow·border 과다 |
+
+### 적용 체크 — 페이지 단위
+
+새 페이지 만들 때 또는 수정 후 다음 순서로 점검:
+
+1. 페이지 스크린샷 축소해서 **빨간 요소만 세어보기** → 3개 이하가 이상적 (CTA + 브랜드 + 상태)
+2. 클릭 가능한 요소 전부 hover 확인 → 시각 변화 없으면 규약 위반
+3. 비활성 요소에 마우스 올려 cursor 확인 → `not-allowed` 아니면 규약 위반
+4. 태그 칩·순번 원형·아이콘에 빨강 들어갔는지 확인 → State 의미 없으면 중립색으로 교체
+
+### 적용 대상 페이지 (우선순위)
+
+| 순위 | 경로 | 주요 이슈 (세션 80 기준) |
+|---|---|---|
+| 1 | `/hero/hit` 랜딩 | 빨강 8+ 지점 · 태그·순번·아이콘 전반 |
+| 2 | `/hero/hit/{a~f}/*` 검사·결과 | 태그·아이콘 |
+| 3 | `/hero/my` | 프로필 카드 클릭 영역 |
+| 4 | `/hero/coaching`·서브탭 | 서브탭 상태 |
+| 5 | `/hero/search-light` · `/jh`·`/jd`·`/company` | 폼 칩 |
+| 6 | `/hero` 랜딩 · 공통 헤더/푸터 | 최종 정돈 |
+
+---
+
 ## 프로필 특화 — 실제 DB 반영
 
 ### 핵심 테이블
@@ -449,14 +510,14 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Tetrad Complete (2026-04-22 세션 78) — 4요소 입력 + 매칭 엔진 v1 + AI 큐레이션 + 인박스 전 루프 완성 |
-| **운영 중** | HIT A/B 검사 · 이력서 CRUD · **신규**: JH 작성 · 기업 등록 · TIH/JD 발행 · AI 큐레이션 |
-| **인프라 배포 완료 (세션 78)** | hero_profiles 자동 동기화 트리거 · UC 규칙 16종 시드 · hero_company_members · hero_jd + hero_jh_responses · 벡터 추출 트리거 3종 · 매칭 엔진 SQL 함수 2종 · hero_matches 8-state lifecycle · tetrad_match_v1 프롬프트 |
-| **사용자 측 완성** | `/hero/jh/write` 12문항 · `/hero/company/register` · `/hero/company/[id]/jd/new` 7블록 · `/hero/my` 받은 매칭 인박스 · `/hero/company` 기업별 큐레이션 수신 · `/profile` Universe Badge opt-in |
-| **Intra 관리 완성** | `/intra/hero/companies` 기업 풀 · `/intra/hero/jd` · `/intra/hero/jh` · `/intra/hero/hero-types` 64 영웅 유형 편집 · `/intra/hero/matching` 엔진 + AI 큐레이션 + 상태 전이 |
-| **이월 (다음 세션)** | **A**: 전 브랜드 /my 페이지에 HitProfileBadge respectOptIn 삽입 (21개) · **B**: 실기기 E2E 검증 7개 시나리오 · **C**: Phase 5 질문 DB 단일화 · **D**: strengths/cautions 편집기 · **E**: 수수료/트라이얼 UI |
-| **보류 (사업 시작)** | 결제 PG (Stripe/Toss) · 유료 gate 활성화 |
-| **최근 결정 (세션 78)** | HIT Hero Type = Universe-wide Identity Badge · 매칭 비공개 원칙 (점수·순위 숨김) · 질문 DB 단일화 Phase 5로 보류 · Tetrad 엔진 v1은 SQL RPC로 구현 · AI 큐레이션은 Claude Sonnet 4 |
+| **Phase** | UI/UX + 모델 정교화 (2026-04-23 세션 80) — UI/UX SSOT · HIT 모델 재정의 · 요금·탤런트 에이전시 신설 |
+| **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · **신규**: /hero/pricing · /hero/talent-agent · /hero/talent-agent/apply |
+| **세션 80 주요 결정** | ① UI/UX 색·클릭 SSOT 5 레이어 문서화 · ② HIT A에 인성·적성 포함(DB 실측) · ③ HIT B~F 생애주기별 심화로 재정의 · ④ 요금 4티어(무료/14,900/39,900/99,000) · ⑤ 프로=AI코칭/프리미엄=전문가1:1 · ⑥ BCDEF는 1인 1개만(동시 불가) |
+| **신규 인프라 (세션 80)** | `hero_talent_applications` 테이블 + RLS · `POST /api/hero/talent-agent/apply` · HIT A 가상 더미 5건 재시드 |
+| **사용자 측 완성 (세션 80 추가)** | `/hero/pricing` 4티어 + Talent Agent CTA + Search Light 구직자/구인기업 · `/hero/talent-agent` 랜딩 + Universe Stages 6 브랜드 · `/hero/talent-agent/apply` 폼 · 비회원 teaser 흐림 처리 · HitModelGuide 모달 완전 개편 |
+| **이월 (다음 세션)** | **A**: 전 브랜드 /my 페이지 HitProfileBadge 일괄 삽입 (21개) · **B**: 탤런트 에이전시 신청 Action Hub 등록 + Intra 관리 페이지 · **C**: 실기기 E2E 검증 · **D**: 결제 PG 연동(Stripe/Toss) · **E**: Phase 5 질문 DB 단일화 |
+| **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 확정 |
+| **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 |
 
 ---
 

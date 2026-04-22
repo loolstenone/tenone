@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Printer, ArrowLeft, Sparkles } from "lucide-react";
+import { Printer, ArrowLeft, Sparkles, ArrowRight } from "lucide-react";
 import HitModelGuideModal from "@/features/hit/HitModelGuideModal";
 import HitModelGuide from "@/features/hit/HitModelGuide";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
@@ -191,10 +191,10 @@ export default function HitAReportPage() {
       {/* ── 인쇄 버튼 (화면에서만 보임) ── */}
       <div className="no-print flex items-center justify-between mb-8">
         <Link
-          href={`/hero/hit/a/result/${resultId}`}
+          href="/hero/my"
           className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700"
         >
-          <ArrowLeft className="h-4 w-4" /> 결과 페이지로 돌아가기
+          <ArrowLeft className="h-4 w-4" /> 마이페이지로
         </Link>
         <div className="flex items-center gap-2">
           <HitModelGuideModal />
@@ -450,6 +450,55 @@ export default function HitAReportPage() {
           HeRo Integrated Test (HIT) | Ten:One Universe | {formattedDate}
         </p>
       </div>
+
+      {/* ── HIT A 이후 추가 검사 (보고서 범위 밖, 인쇄 시 숨김) ── */}
+      <section className="no-print mt-20">
+        {/* 구분 — 점선 사이의 + 마크 */}
+        <div className="relative mb-12" aria-hidden="true">
+          <div className="border-t border-dashed border-neutral-300" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-white px-4">
+              <div className="w-12 h-12 rounded-full border border-dashed border-neutral-300 flex items-center justify-center text-2xl font-light text-neutral-400">
+                +
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-dashed border-neutral-300 mt-[46px]" />
+        </div>
+
+        <div className="text-center mb-8">
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">HIT A + 심화</p>
+          <h3 className="text-xl font-extrabold text-neutral-900 mb-2">여기서 한 걸음 더</h3>
+          <p className="text-sm text-neutral-500 leading-relaxed">
+            지금 내 상황에 맞는 검사 하나를 골라 다음을 설계하세요.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            { k: "B", title: "신입 · 사회 초년", dims: "직무 역량 · 취업준비도", tone: "border-green-200 hover:border-green-400" },
+            { k: "C", title: "경력 이직 고민", dims: "경력 자본 · 이직 동기 · 전환 가능성", tone: "border-blue-200 hover:border-blue-400" },
+            { k: "D", title: "시니어 리더십 전환", dims: "전문성 · 리더십 · 정체성 · 네트워크", tone: "border-red-200 hover:border-red-400" },
+            { k: "E", title: "인생 2막 준비", dims: "삶의 만족도 · 방향 탐색 · 레거시", tone: "border-amber-200 hover:border-amber-400" },
+            { k: "F", title: "경력 공백 · 복귀", dims: "공백 맥락 · 잠재 역량 · 회복탄력성", tone: "border-violet-200 hover:border-violet-400" },
+          ].map((t) => (
+            <Link
+              key={t.k}
+              href={`/hero/hit/${t.k.toLowerCase()}`}
+              className={`group flex items-center gap-4 p-5 border-2 rounded-xl bg-white transition-colors ${t.tone}`}
+            >
+              <div className="w-11 h-11 shrink-0 rounded-lg bg-neutral-100 text-neutral-700 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center font-bold text-base transition-colors">
+                {t.k}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-neutral-900">{t.title}</p>
+                <p className="text-xs text-neutral-500 mt-0.5 truncate">{t.dims}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* ── AI 상담 플로팅 버튼 (우하단, 인쇄 시 숨김) ── */}
       <Link

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
@@ -43,6 +44,11 @@ export default function MoNTZMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
+                {user?.id && (
+                    <div className="mb-4">
+                        <HitProfileBadge memberId={user.id} respectOptIn />
+                    </div>
+                )}
                 <MyProfileCard accentColor="#c8a97e" siteBadge="MoNTZ" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="montz" accentColor="#c8a97e" className="mb-6" />}

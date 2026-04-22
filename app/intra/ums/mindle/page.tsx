@@ -53,9 +53,9 @@ export default function MindleUMSDashboard() {
                     trendsTotal, siteRow, recent,
                 ] = await Promise.all([
                     sb.from("newsletter_subscribers").select("*", { count: "exact", head: true })
-                        .eq("site_id", "mindle").eq("is_active", true),
+                        .eq("source", "mindle").eq("is_active", true),
                     sb.from("newsletter_subscribers").select("*", { count: "exact", head: true })
-                        .eq("site_id", "mindle"),
+                        .eq("source", "mindle"),
                     sb.from("newsletter_issues").select("*", { count: "exact", head: true }),
                     sb.from("newsletter_issues").select("*", { count: "exact", head: true }).eq("status", "sent"),
                     sb.from("newsletter_issues").select("*", { count: "exact", head: true }).eq("status", "draft"),

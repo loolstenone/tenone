@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         if (side === "talent") {
             const { data, error } = await sb
                 .from("hero_matches")
-                .select("id, match_status, status_changed_at, created_at, ai_match_report, hero_companies(company_name, industry)")
+                .select("id, match_status, status_changed_at, created_at, ai_match_report, trial_start, trial_end, trial_result, hero_companies(company_name, industry)")
                 .eq("profile_member_id", memberId)
                 .in("match_status", ["curated", "contacted", "interviewing", "trial", "hired", "declined", "withdrawn"])
                 .order("updated_at", { ascending: false });
@@ -65,6 +65,9 @@ export async function GET(req: NextRequest) {
                     industry: (m.hero_companies as { industry: string | null } | null)?.industry ?? null,
                     curation: report?.for_talent ?? null,
                     signalNotes: report?.signal_notes ?? [],
+                    trialStart: m.trial_start,
+                    trialEnd: m.trial_end,
+                    trialResult: m.trial_result,
                 };
             });
 
@@ -91,7 +94,7 @@ export async function GET(req: NextRequest) {
 
             const { data, error } = await sb
                 .from("hero_matches")
-                .select("id, profile_member_id, match_status, status_changed_at, created_at, ai_match_report")
+                .select("id, profile_member_id, match_status, status_changed_at, created_at, ai_match_report, trial_start, trial_end, trial_result")
                 .eq("company_id", companyId)
                 .order("updated_at", { ascending: false });
 
@@ -108,6 +111,9 @@ export async function GET(req: NextRequest) {
                     talentAnonymousId: (m.profile_member_id as string | null)?.slice(0, 8) ?? "unknown",
                     curation: report?.for_company ?? null,
                     signalNotes: report?.signal_notes ?? [],
+                    trialStart: m.trial_start,
+                    trialEnd: m.trial_end,
+                    trialResult: m.trial_result,
                 };
             });
 

@@ -10,13 +10,14 @@ import {
     Mail, Building2, Calendar, Target, Edit2, BookOpen, Clock,
     FileCheck, User, FolderKanban, ChevronRight, CreditCard,
     GraduationCap, Wallet, DollarSign, TrendingUp, AlertCircle, CheckCircle2,
-    FileText, Palmtree, Stamp, FileSignature, Inbox
+    FileText, Palmtree, Stamp, FileSignature, Inbox, BrainCircuit, RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { SystemAccessInfo } from "@/types/auth";
 import type { SystemAccess } from "@/types/auth";
+import { createClient } from "@/lib/supabase/client";
 import { gradeConfig, getPointsToNextGrade } from "@/types/point";
 
 const MOCK_PROJECTS: { name: string; code: string; role: string; progress: number; status: "진행중" | "계획" | "완료" }[] = [];
@@ -80,10 +81,34 @@ export default function MyversePage() {
     const { user, isStaff } = useAuth();
     const [dbNotices, setDbNotices] = useState<{ title: string; badge: string; date: string }[]>([]);
     const [dbSchedule, setDbSchedule] = useState<{ time: string; title: string; type: string }[]>([]);
+    const [vrief, setVrief] = useState<{ type: string; text: string; timestamp: string } | null>(null);
+    const [vriefLoading, setVriefLoading] = useState(false);
     const [dbApprovals, setDbApprovals] = useState<Awaited<ReturnType<typeof myverseDb.fetchMyApprovals>> | null>(null);
     const [dbProjects, setDbProjects] = useState<Awaited<ReturnType<typeof myverseDb.fetchMyProjects>> | null>(null);
     const [dbEducation, setDbEducation] = useState<Awaited<ReturnType<typeof myverseDb.fetchMyEnrollments>> | undefined>(undefined);
     const [dbAttendance, setDbAttendance] = useState<Awaited<ReturnType<typeof myverseDb.fetchMyAttendance>> | undefined>(undefined);
+
+    // 최신 Vrief(브리핑) 로드
+    useEffect(() => {
+        const sb = createClient();
+        sb.from('agent_messages')
+            .select('payload, created_at')
+            .eq('message_type', 'vrief')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+            .then(({ data }) => {
+                if (data) {
+                    const payload = data.payload as { text?: string; type?: string; timestamp?: string };
+                    setVrief({
+                        type: payload.type ?? 'am',
+                        text: payload.text ?? '',
+                        timestamp: payload.timestamp ?? data.created_at ?? '',
+                    });
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         // DB에서 공지사항 로드
@@ -172,6 +197,66 @@ export default function MyversePage() {
         <div>
             {/* 인사말 + 격언 */}
             <PageHeader title={`안녕하세요, ${user.name}님`} description={todayQuote} />
+
+            {/* 10:01 Vrief 브리핑 위젯 (마스터·직원만) */}
+            {isStaff && (
+                <div className="border border-neutral-200 bg-white p-4 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <BrainCircuit className="h-4 w-4 text-violet-500" />
+                            <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                                열시일분 · {vrief ? (vrief.type === 'pm' ? 'PM 10:01 성과 보고' : 'AM 10:01 브리핑') : '오늘의 브리핑'}
+                            </span>
+                            {vrief?.timestamp && (
+                                <span className="text-[10px] text-neutral-300">
+                                    {new Date(vrief.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            )}
+                        </div>
+                        <button
+                            onClick={async () => {
+                                setVriefLoading(true);
+                                try {
+                                    const hour = new Date().getHours();
+                                    const type = hour < 16 ? 'am' : 'pm';
+                                    const res = await fetch('/api/agent/vrief', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ADMIN_API_KEY ?? ''}`,
+                                        },
+                                        body: JSON.stringify({ type }),
+                                    });
+                                    if (res.ok) {
+                                        const data = await res.json() as { type: string; response: string };
+                                        setVrief({ type: data.type, text: data.response, timestamp: new Date().toISOString() });
+                                    }
+                                } catch {}
+                                setVriefLoading(false);
+                            }}
+                            disabled={vriefLoading}
+                            className="flex items-center gap-1 text-[10px] text-neutral-400 hover:text-violet-600 transition-colors disabled:opacity-40"
+                        >
+                            <RefreshCw className={`h-3 w-3 ${vriefLoading ? 'animate-spin' : ''}`} />
+                            새 브리핑
+                        </button>
+                    </div>
+                    {vrief ? (
+                        <div className="text-[11px] text-neutral-600 leading-relaxed line-clamp-4 whitespace-pre-wrap">
+                            {vrief.text.replace(/^#+\s*/gm, '').slice(0, 400)}{vrief.text.length > 400 ? '…' : ''}
+                        </div>
+                    ) : (
+                        <div className="text-[11px] text-neutral-300 text-center py-3">
+                            오늘 브리핑이 없습니다 — 새 브리핑을 요청하세요
+                        </div>
+                    )}
+                    {vrief && (
+                        <Link href="/intra/agent?tab=briefing" className="mt-2 inline-flex items-center gap-1 text-[10px] text-violet-600 hover:underline">
+                            전체 브리핑 보기 <ChevronRight className="h-3 w-3" />
+                        </Link>
+                    )}
+                </div>
+            )}
 
             {/* 전체 현황: 공지 + 일정 (직원만) */}
             {isStaff && (

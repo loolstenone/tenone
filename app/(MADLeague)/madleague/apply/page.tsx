@@ -1,4 +1,5 @@
 import { fetchMadClubs } from '@/lib/supabase/madleague';
+import { getAllTaxonomies } from '@/lib/supabase/taxonomies';
 import { ApplyForm } from './ApplyForm';
 
 export const revalidate = 300;
@@ -14,7 +15,7 @@ interface PageProps {
 
 export default async function ApplyPage({ searchParams }: PageProps) {
   const { club } = await searchParams;
-  const clubs = await fetchMadClubs();
+  const [clubs, taxonomies] = await Promise.all([fetchMadClubs(), getAllTaxonomies()]);
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       <section className="border-b border-neutral-900">
@@ -25,7 +26,7 @@ export default async function ApplyPage({ searchParams }: PageProps) {
       </section>
 
       <section className="mx-auto max-w-3xl px-6 py-12">
-        <ApplyForm clubs={clubs} preselectedClub={club} />
+        <ApplyForm clubs={clubs} preselectedClub={club} industries={taxonomies.industry} jobFunctions={taxonomies.job_function} />
       </section>
     </div>
   );

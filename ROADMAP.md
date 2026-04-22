@@ -103,32 +103,30 @@ WIO / SmarComm
 > **목표: 외부 고객이 들어와도 데이터가 섞이지 않는 격리 구조 확보**
 > **원칙: 지금 동작하는 코드는 건드리지 않는다. 격리 구조만 씌운다.**
 
-### 0-A. tenant_id 일괄 추가 [8원칙 #6 위반 63개 테이블 정비] ✅ 완료 (세션 71)
-- [x] 위반 테이블 목록 확정
-- [x] `sql/phase0-tenant-id.sql` 작성
-- [x] 기존 행 업데이트
-- [x] RLS 정책 추가
-- [x] Prod DB 실행 + 검증
+### 0-A. tenant_id 일괄 추가 ✅ 완료 (세션 73 확인)
+- [x] 위반 테이블 목록 확정 — DB 조회 결과 누락 테이블 2개 (`capabilities`, `wio_tenants`) 모두 tenant 불필요 (전역 레지스트리 / 테넌트 테이블 자체)
+- [x] 기존 Phase 0-C/D 작업으로 이미 대부분 정비 완료 — 63개 추정치는 과대 산정이었음
+- [x] `capabilities` / `wio_tenants` — 구조상 tenant_id 불필요 (intentional)
 
-### 0-B. 고객 아이덴티티 계층 확정
-- [ ] TIER 1: `auth.users` → `profiles` (인증 + 기본 프로필)
-- [ ] TIER 2: `member_brand_joins` (Universe SSO — 다중 브랜드 가입)
-- [ ] TIER 3: `wio_members` (WIO 서비스 멤버 — tenant_id 기반)
-- [ ] TIER 4: 각 테이블 tenant_id 격리 (데이터 분리)
-- [ ] 아이덴티티 흐름 문서화 (`docs/Identity_Architecture.md`)
+### 0-B. 고객 아이덴티티 계층 확정 ✅ 완료 (세션 73 확인)
+- [x] TIER 1: `auth.users` → `members` (auth_id FK, 메인 프로필 테이블)
+- [x] TIER 2: `member_brand_joins` (Universe SSO — 다중 브랜드 가입, tenant_id 포함) ✅ 존재
+- [x] TIER 3: `wio_members` (WIO 서비스 멤버 — tenant_id 기반) ✅ 존재
+- [x] TIER 4: 각 테이블 tenant_id/brand_id 격리 — Phase 0-A에서 확인 완료
+- [x] 아이덴티티 흐름 문서화 (`docs/Identity_Architecture.md`) ✅ 존재 (3계층 다중 페르소나 설계)
 
 ### 0-C. 중복 테이블 정리 ✅ 완료 (세션 71)
-- [x] `expenses` → `wio_expenses` 코드 이관
-- [x] `approvals` → `wio_approvals` 코드 이관
-- [x] `timesheets` → `wio_timesheets` 코드 이관
-- [x] `chat_threads/messages` → `wio_chat_threads/messages` 통합
-- [x] 마이그레이션 완료 후 구 테이블 deprecated 표시
+- [x] `expenses` → `wio_expenses` 코드 참조 전환 (erp.ts)
+- [x] `approvals` → `wio_approvals` 코드 참조 전환 (erp.ts, myverse.ts, 인증서 페이지, API 3개)
+- [x] `timesheets` → `wio_timesheets` 코드 참조 전환 (projects.ts, myverse.ts, timesheets API)
+- [x] `chat_threads/messages` → `wio_chat_threads/wio_chat_messages` 전환 (chat.ts, messenger API 2개, briefing, local-agent-bridge)
+- 구 테이블 삭제는 Phase 1 이후
 
 ### 0-D. WIO 서비스 인프라 ✅ 완료 (세션 72)
-- [x] `wio_tenant_configs` 테이블 생성
-- [x] `wio_subscription_plans`에 service_type 컬럼 추가
-- [x] `wio_feature_flags` 테이블 생성
-- [x] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가
+- [x] `wio_tenant_configs` 테이블 생성 (맞춤 서비스 설정 저장) — 8 rows, RLS on
+- [x] `wio_subscription_plans`에 service_type 컬럼 추가 ('standard' | 'custom') — 11 rows
+- [x] `wio_feature_flags` 테이블 생성 (규격 서비스 등급별 기능 제한) — 76 rows, RLS on
+- [x] `lib/supabase/erp.ts`에 tenant_id 필터 옵션 추가 (기본값 'tenone', 코드 호환)
 
 ---
 
@@ -136,11 +134,12 @@ WIO / SmarComm
 
 > **목표: Intra 하나에서 Mindle·SmarComm·WIO·AI Agent를 통제할 수 있는 상태**
 
-### 1-A. Mindle 관리 (연료 공급 시스템) ✅ 완료 (세션 이전)
-- [x] 뉴스레터 구독 DB 연동 확인
-- [x] `/intra/ums/newsletter` CRUD 완성
-- [x] 트렌드 카드 관리 UI
-- [x] Whole See 크롤러 RSS 소스 관리 UI
+### 1-A. Mindle 관리 (연료 공급 시스템) ✅ 완료 (세션 73 확인)
+- [x] 뉴스레터 구독 DB 연동 — `newsletter_subscribers` (source='mindle' 필터), UMS 대시보드 DB 연결 완료
+- [x] `/intra/ums/newsletter` CRUD 완성 (구독자/이슈 관리 통합)
+- [x] 트렌드 카드 관리: `mindle_trends` 테이블 + Pipeline UI (수집→검토→승인→발행 4단계)
+- [x] `/mindle/trends` 퍼블릭 페이지 → mindle_trends DB 연결 완료
+- [x] Whole See 크롤러 설정: `/intra/ums/external/sources` RSS/웹/뉴스레터 3탭 관리 UI
 
 ### 1-B. SmarComm 활성화 ✅ 완료 (세션 이전)
 - [x] Coming Soon 해제 → 접근 가능
@@ -151,10 +150,11 @@ WIO / SmarComm
 - [x] WIO Demo/SaaS/Master 모드 확인
 - [ ] WIO SaaS 모드: 테넌트 생성 → OrbiConfig 저장 플로우 완성 (잔여)
 
-### 1-D. Agent Hub 활성화 ✅ 완료 (세션 70)
-- [x] `sql/agent-tables.sql` 실행 + `/intra/agent` 완성
-- [x] 바당쇠 에이전트: `/api/agent/badaksoe` 구현 (4 task_type)
-- [x] 10:01 Vrief 위젯 — Intra Dashboard 열시일분 브리핑 위젯
+### 1-D. Agent Hub 활성화 (운영 엔진) ✅ 완료
+- [x] `sql/agent-tables.sql` 실행 후 `/intra/agent` 테스트
+- [x] 열시일분(compass) 에이전트 프로필 등록 확인
+- [x] 바당쇠 에이전트: `/api/agent/badaksoe` 엔드포인트 구현
+- [x] 10:01 프로토콜 기초: AM/PM 에이전트 Vrief 제출 → Intra Dashboard 위젯
 
 ---
 

@@ -3,23 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Youtube, Mail } from "lucide-react";
-import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
-
-
 const quickLinks = [
     { name: "동아리", href: "/madleague/clubs" },
     { name: "프로그램", href: "/madleague/programs" },
     { name: "MADzine", href: "/madleague/madzine" },
     { name: "아카이브", href: "/madleague/archive" },
-    { name: "지원하기", href: "/madleague/apply" },
+    { name: "마이페이지", href: "/madleague/my" },
 ];
 
 export function MadLeagueFooter() {
     return (
         <footer className="bg-[#212121] text-neutral-400">
-            <div className="mx-auto max-w-2xl px-6 py-10 border-b border-neutral-800">
-                <NewsletterSubscribeForm source="madleague" brandName="MAD League" dark accentColor="#D32F2F" />
-            </div>
             <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {/* Logo & Description */}

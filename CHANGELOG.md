@@ -4,6 +4,63 @@
 
 ---
 
+## 2026-04-23 — 세션 80 · HeRo UI/UX 규약 수립 + HIT 모델 재정의 + 요금·탤런트 에이전시 신설
+
+### HeRo UI/UX 색·클릭 SSOT 수립 및 전면 적용
+- HeRo CLAUDE.md에 "🎨 UI/UX 규약 — 색·클릭 SSOT" 섹션 추가 (Action/Accent/State/Content/Disabled 5 레이어)
+- Priority 1~6 순차 적용: /hero/hit 랜딩 · hit/{a~f}/* 검사·결과·리포트 · /hero/my · /hero/coaching · /hero/search-light · /hero/jh·jd·company · /hero 랜딩 + 공통 헤더/푸터 (총 15+ 파일)
+- 잠금 UI 표준: `<button disabled aria-disabled cursor-not-allowed>` + Lock 아이콘
+- 빨강 사용 면적 대폭 축소 (페이지당 평균 8+ → 3~4개로)
+
+### HIT 검사 모델 재정의 (DB 실측 기반)
+- HIT A: UF + MBTI + DISC + **인성 + 적성** 통합 측정 → S-Power + 64유형 (인성·적성이 HIT B → HIT A로 재귀속)
+- HIT B~F: 생애주기별 심화 진단 (B=신입/C=이직/D=시니어/E=2막/F=복귀)
+- `/hero/hit` 랜딩 A/B 카드 + System 구성 + 3단계 여정 + BCDEF 심화 카드 전면 재작성
+- HitModelGuide 모달: HIT A 섹션에 인성·적성 상세 추가 (각 5차원/RIASEC 6차원) · HIT B~F 통합 "생애주기별 특화 진단" 섹션 신설 · 교차분석 표현 "UF × MBTI × DISC × 인성 × 적성"으로 갱신
+
+### 비회원 티저 + 회원 풀리포트 게이팅
+- /hero/hit/a/result/[id] — 비회원: 강점 #1만 공개 + 나머지 `blur-[3px]` + 회원가입 CTA / 회원: 전체 통합 보고서
+- max-w-lg(모바일형) → max-w-3xl(데스크톱형) · 고정 540px 박스 제거 · 하단 dot 인디케이터 → 상단 pill 탭
+- 비회원 CTA는 "무료 회원가입하고 전체 보기" 로 구분 (HitADeepCTA는 로그인 시에만)
+
+### HIT A 가상 더미 데이터 5건
+- 기존 더미 7건 + 세션 16건 + 응답 1,709건 전부 삭제 (HIT 확정 모델 이전 데이터 정리)
+- 신규: D-INTJ · I-ENFP · S-ISFJ · C-INTP · D-ESTJ — 리포트 모듈 13~14개씩 · AI 내러티브 · S-Power · UF · 인성 · 적성 완비
+- `sql/hit-a-dummy-5.sql`
+
+### 요금 안내 독립 페이지 + 4티어 구조
+- `/hero/pricing` 신규 페이지 (이전까지 /hero/coaching/ai 하단에 섞여 있음 → 분리)
+- 4티어: 무료 · 스탠다드 14,900원 · **프로 39,900원 (신규)** · 프리미엄 99,000원
+- 프로 = AI 커리어 코칭 풀스택 / 프리미엄 = 전문가 1:1 상담
+- BCDEF는 한 사람당 라이프스테이지 1개 — "전부 언락" 문구 제거, 상위 티어는 주변 서비스 깊이로 차별화
+- 카드 높이·버튼 정렬 (`flex-col` + `flex-1` + `self-start`) · 모바일 가로 스냅 슬라이더
+
+### 탤런트 에이전시 신설 (신청 기능 포함)
+- 헤더 메뉴 "탤런트 에이전시" 추가
+- `/hero/talent-agent` 랜딩 — 히어로 · Why HeRo 3단 · How it works 4단계 · 기본 혜택 6개 · Universe Stages(6 브랜드) · 빨간 CTA
+- `/hero/talent-agent/apply` 신청 페이지 — 이름/이메일 필수 · 분야 7칩 · 단계 6칩 · 소개·목표·포트폴리오 선택
+- API `POST /api/hero/talent-agent/apply`
+- DB `hero_talent_applications` (status 5단계) + RLS
+
+### 메뉴 순서·네이밍 정리
+- 최종 순서: HIT 검사 · AI 상담 · 커리어 코칭 · 탤런트 에이전시 · 요금 안내 · 씨치 라이트
+- 헤더 nav prefix-match 버그 수정 (`/hero/coaching/ai` 진입 시 AI 상담/커리어 코칭 동시 활성 → 최장 접두 매칭)
+- 검색 라이트 랜딩에 구직자·구인기업 CTA 병렬 배치
+
+### Universe 오디션장 카피 갱신 (실서버 ums_sites 메타 기반)
+- Badak: "성장을 꿈꾸는 사람들의 업계 네트워킹" (마케팅 한정 제거)
+- JAKKA: "디자인·아트·크리에이티브" (사진 포트폴리오 제거)
+- MoNTZ: "모델·배우·크리에이터" (포토그래피 제거)
+- ChangeUp: "창업 교육·실전 플랫폼" (청소년 연령 표현 제거)
+- MAD League: "실전 프로젝트 경쟁 PT로 성장하는"
+
+### 기타
+- HIT A 보고서 하단 BCDEF 이어서 섹션 (보고서 범위 밖 · `no-print` · +마크 구분자)
+- "결과 페이지로 돌아가기" → "마이페이지로" (회원용 back-link 목적지 수정)
+- /hero/my 기업 허브 카드 중립색화 (JH가 primary)
+
+---
+
 ## 2026-04-22 (세션 78 최종) — HeRo Matching Tetrad 전체 구축 완료
 
 ### 세션 성과 한 줄

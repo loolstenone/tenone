@@ -11,7 +11,7 @@ export async function fetchMyApprovals(memberId: string) {
     try {
         // 결재 대기 (내가 결재해야 할 건 — approval_line JSONB에서 검색)
         const { data: pending } = await supabase
-            .from('approvals')
+            .from('wio_approvals')
             .select('*')
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
@@ -26,7 +26,7 @@ export async function fetchMyApprovals(memberId: string) {
 
         // 내가 기안한 건 (진행 중)
         const { data: myDrafts } = await supabase
-            .from('approvals')
+            .from('wio_approvals')
             .select('*')
             .eq('drafter_id', memberId)
             .in('status', ['pending', 'in-progress'])
@@ -109,7 +109,7 @@ export async function fetchMyAttendance(memberId: string) {
         const today = now.toISOString().split('T')[0];
 
         const { data } = await supabase
-            .from('timesheets')
+            .from('wio_timesheets')
             .select('*')
             .eq('member_id', memberId)
             .gte('work_date', monthStart)

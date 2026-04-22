@@ -8,6 +8,7 @@ import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supa
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
+import type { TaxonomyKind } from '@/lib/supabase/taxonomies';
 import Image from 'next/image';
 import {
     Globe, User, Shield, ExternalLink, Pencil, Check, X, Camera,
@@ -375,6 +376,20 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     const [pwdError, setPwdError] = useState('');
     const [pwdSuccess, setPwdSuccess] = useState('');
     const [pwdLoading, setPwdLoading] = useState(false);
+
+    /* ── Taxonomies (직무/산업 드롭다운) ── */
+    const [jobFunctions, setJobFunctions] = useState<string[]>([...JOB_FUNCTIONS]);
+    const [industries, setIndustries] = useState<string[]>([...INDUSTRIES]);
+    useEffect(() => {
+        fetch('/api/taxonomies')
+            .then(r => r.ok ? r.json() as Promise<Record<TaxonomyKind, string[]>> : null)
+            .then(data => {
+                if (!data) return;
+                if (data.job_function?.length) setJobFunctions(data.job_function);
+                if (data.industry?.length) setIndustries(data.industry);
+            })
+            .catch(() => {});
+    }, []);
 
     /* ── 서비스 프로필 로드 ── */
     useEffect(() => {
@@ -898,9 +913,9 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
 
                         {/* 관심 분야 */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <TagSelector label="관심 직무" values={editForm.interestsJob} all={JOB_FUNCTIONS}
+                            <TagSelector label="관심 직무" values={editForm.interestsJob} all={jobFunctions}
                                 onChange={v => setEditForm(f => ({ ...f, interestsJob: v }))} />
-                            <TagSelector label="관심 산업" values={editForm.interestsIndustry} all={INDUSTRIES}
+                            <TagSelector label="관심 산업" values={editForm.interestsIndustry} all={industries}
                                 onChange={v => setEditForm(f => ({ ...f, interestsIndustry: v }))} />
                         </div>
 

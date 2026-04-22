@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { MyProfileCard } from "@/components/MyProfileCard";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -91,6 +92,11 @@ export default function JakkaMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
+                {user?.id && (
+                    <div className="mb-4">
+                        <HitProfileBadge memberId={user.id} respectOptIn />
+                    </div>
+                )}
                 <MyProfileCard accentColor="#D4D4D4" siteBadge="Jakka" />
                 {user?.id && <CapabilitySection memberId={user.id} brandId="jakka" className="mb-6" />}
 

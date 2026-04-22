@@ -18,9 +18,11 @@ export async function fetchApprovals(options?: {
     status?: string;
     requesterId?: string;
     limit?: number;
+    tenantId?: string;
 }) {
-    let query = supabase.from('approvals').select('*, drafter:members!approvals_drafter_id_fkey(name)', { count: 'exact' });
+    let query = supabase.from('wio_approvals').select('*, drafter:members!wio_approvals_drafter_id_fkey(name)', { count: 'exact' });
 
+    query = query.eq('tenant_id', options?.tenantId ?? DEFAULT_TENANT);
     if (options?.status && options.status !== 'all') query = query.eq('status', options.status);
     if (options?.requesterId) query = query.eq('drafter_id', options.requesterId);
 
@@ -34,7 +36,7 @@ export async function fetchApprovals(options?: {
 
 export async function createApproval(approval: Record<string, unknown>) {
     const { data, error } = await supabase
-        .from('approvals')
+        .from('wio_approvals')
         .insert(approval)
         .select()
         .single();
@@ -46,7 +48,7 @@ export async function updateApprovalStatus(id: string, status: string, memo?: st
     const updates: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
     if (memo) updates.memo = memo;
     const { data, error } = await supabase
-        .from('approvals')
+        .from('wio_approvals')
         .update(updates)
         .eq('id', id)
         .select()
@@ -134,8 +136,9 @@ export async function createNotification(notif: {
 
 // ── Expenses (경비) ──
 
-export async function fetchExpenses(params?: { memberId?: string; projectId?: string; status?: string; limit?: number }) {
-    let query = supabase.from('expenses').select('*').order('expense_date', { ascending: false });
+export async function fetchExpenses(params?: { memberId?: string; projectId?: string; status?: string; limit?: number; tenantId?: string }) {
+    let query = supabase.from('wio_expenses').select('*').order('expense_date', { ascending: false });
+    query = query.eq('tenant_id', params?.tenantId ?? DEFAULT_TENANT);
     if (params?.memberId) query = query.eq('member_id', params.memberId);
     if (params?.projectId) query = query.eq('project_id', params.projectId);
     if (params?.status) query = query.eq('status', params.status);
@@ -146,23 +149,23 @@ export async function fetchExpenses(params?: { memberId?: string; projectId?: st
 }
 
 export async function createExpense(input: Record<string, unknown>) {
-    const { data, error } = await supabase.from('expenses').insert(input).select().single();
+    const { data, error } = await supabase.from('wio_expenses').insert(input).select().single();
     if (error) throw error;
     return data;
 }
 
 export async function updateExpense(id: string, input: Record<string, unknown>) {
-    const { data, error } = await supabase.from('expenses').update(input).eq('id', id).select().single();
+    const { data, error } = await supabase.from('wio_expenses').update(input).eq('id', id).select().single();
     if (error) throw error;
     return data;
 }
 
 export async function updateExpenseByApproval(approvalId: string, status: string) {
     // approvals.reference_id → expenses.id 연결: 결재 승인/반려 시 경비 상태 동기화
-    const { data: approval } = await supabase.from('approvals').select('reference_id, reference_type').eq('id', approvalId).single();
+    const { data: approval } = await supabase.from('wio_approvals').select('reference_id, reference_type').eq('id', approvalId).single();
     if (approval?.reference_type === 'expense' && approval?.reference_id) {
         const expenseStatus = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status;
-        await supabase.from('expenses').update({ status: expenseStatus, updated_at: new Date().toISOString() }).eq('id', approval.reference_id);
+        await supabase.from('wio_expenses').update({ status: expenseStatus, updated_at: new Date().toISOString() }).eq('id', approval.reference_id);
     }
 }
 

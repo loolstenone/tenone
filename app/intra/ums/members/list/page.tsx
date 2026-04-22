@@ -101,6 +101,8 @@ const brandColors: Record<string, string> = {
 const brandOptions = ["MADLeague", "MADLeap", "Badak", "SmarComm", "WIO", "WIO Orbi", "HeRo", "Planner's", "Evolution School", "Mindle", "RooK", "ChangeUp", "YouInOne", "Domo"];
 const TYPE_ORDER: MemberType[] = ["잠재", "서비스", "멤버십", "구독", "복합", "기타"];
 
+interface RoleEntry { role: string; context: string | null; }
+
 interface MemberDisplay {
     id: string;
     name: string;
@@ -116,6 +118,7 @@ interface MemberDisplay {
     lastActive: string;
     createdAt: string;
     roles: string[];
+    memberRoles: RoleEntry[];
     isNewsletterSub: boolean;
     signupSource: string | null;
     ucBalance: number;
@@ -123,17 +126,18 @@ interface MemberDisplay {
 
 /* ── Mock fallback ── */
 const mockMembers: MemberDisplay[] = [
-    { id: "1",  name: "김민지", email: "minji@example.com",    handle: "@minji",   phone: "010-1234-5678", bio: null, company: "텐원", position: "마케터", type: "복합",   brands: ["MADLeap", "SmarComm"],  subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", createdAt: "2025-01-10", roles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
-    { id: "2",  name: "이준혁", email: "junhyuk@example.com",  handle: "@junhyuk", phone: null,           bio: null, company: null,  position: null,    type: "구독",   brands: ["WIO Orbi"],            subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", createdAt: "2025-02-01", roles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
-    { id: "3",  name: "박서윤", email: "seoyoon@example.com",  handle: null,       phone: "010-9999-0001", bio: null, company: null,  position: null,    type: "서비스", brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", createdAt: "2025-03-05", roles: [], isNewsletterSub: false, signupSource: "MADLeague 추천", ucBalance: 0 },
-    { id: "4",  name: "정하은", email: "haeun@example.com",    handle: "@haeun",   phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["Mindle"],              subs: [], lastActive: "2026-03-27", createdAt: "2025-04-11", roles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
-    { id: "5",  name: "최다운", email: "dawoon@example.com",   handle: null,       phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["HeRo", "Badak"],       subs: [], lastActive: "2026-03-28", createdAt: "2025-05-20", roles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
+    { id: "1",  name: "김민지", email: "minji@example.com",    handle: "@minji",   phone: "010-1234-5678", bio: null, company: "텐원", position: "마케터", type: "복합",   brands: ["MADLeap", "SmarComm"],  subs: [{ service: "SmarComm", plan: "Pro" }], lastActive: "2026-03-29", createdAt: "2025-01-10", roles: [], memberRoles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
+    { id: "2",  name: "이준혁", email: "junhyuk@example.com",  handle: "@junhyuk", phone: null,           bio: null, company: null,  position: null,    type: "구독",   brands: ["WIO Orbi"],            subs: [{ service: "WIO Orbi", plan: "Business" }], lastActive: "2026-03-29", createdAt: "2025-02-01", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
+    { id: "3",  name: "박서윤", email: "seoyoon@example.com",  handle: null,       phone: "010-9999-0001", bio: null, company: null,  position: null,    type: "서비스", brands: ["Evolution School", "HeRo"], subs: [{ service: "Evolution School", plan: "Standard" }], lastActive: "2026-03-28", createdAt: "2025-03-05", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: "MADLeague 추천", ucBalance: 0 },
+    { id: "4",  name: "정하은", email: "haeun@example.com",    handle: "@haeun",   phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["Mindle"],              subs: [], lastActive: "2026-03-27", createdAt: "2025-04-11", roles: [], memberRoles: [], isNewsletterSub: true,  signupSource: null, ucBalance: 0 },
+    { id: "5",  name: "최다운", email: "dawoon@example.com",   handle: null,       phone: null,           bio: null, company: null,  position: null,    type: "서비스", brands: ["HeRo", "Badak"],       subs: [], lastActive: "2026-03-28", createdAt: "2025-05-20", roles: [], memberRoles: [], isNewsletterSub: false, signupSource: null, ucBalance: 0 },
 ];
 
 export default function UniverseMembers() {
     const [search, setSearch]           = useState("");
     const [typeFilter, setTypeFilter]   = useState<MemberType | null>(null);
     const [brandFilter, setBrandFilter] = useState<string | null>(null);
+    const [roleFilter, setRoleFilter]   = useState<string | null>(null);
     const [loading, setLoading]         = useState(true);
     const [typeDefs, setTypeDefs]       = useState<TypeDef[]>([]);
     const [members, setMembers]         = useState<MemberDisplay[]>(mockMembers);
@@ -159,6 +163,7 @@ export default function UniverseMembers() {
 
                 const newsletterEmails = new Set<string>(json.newsletterEmails ?? []);
                 const ucBalances: Record<string, number> = json.ucBalances ?? {};
+                const memberRolesMap: Record<string, RoleEntry[]> = json.memberRoles ?? {};
 
                 const typeCounts: Record<MemberType, number> = { 잠재: 0, 서비스: 0, 멤버십: 0, 구독: 0, 복합: 0, 기타: 0 };
 
@@ -191,6 +196,7 @@ export default function UniverseMembers() {
                         lastActive: m.last_login_at ? m.last_login_at.split("T")[0] : "-",
                         createdAt: m.created_at ? m.created_at.split("T")[0] : "-",
                         roles: m.roles ?? [],
+                        memberRoles: memberRolesMap[m.id] ?? [],
                         isNewsletterSub: newsletterEmails.has(m.email.toLowerCase()),
                         signupSource: m.signup_source ?? null,
                         ucBalance: ucBalances[m.id] ?? 0,
@@ -222,8 +228,16 @@ export default function UniverseMembers() {
         if (search && !m.name.includes(search) && !m.email.includes(search)) return false;
         if (typeFilter && m.type !== typeFilter) return false;
         if (brandFilter && !m.brands.includes(brandFilter)) return false;
+        if (roleFilter) {
+            // brand:xxx 형태면 context 매칭, 그냥 role명이면 role 매칭
+            if (roleFilter.startsWith('brand:')) {
+                if (!m.memberRoles.some(r => r.context === roleFilter)) return false;
+            } else {
+                if (!m.memberRoles.some(r => r.role === roleFilter)) return false;
+            }
+        }
         return true;
-    }), [search, typeFilter, brandFilter, members]);
+    }), [search, typeFilter, brandFilter, roleFilter, members]);
 
     if (loading) {
         return (
@@ -233,7 +247,7 @@ export default function UniverseMembers() {
         );
     }
 
-    const hasFilter = !!(typeFilter || brandFilter || search);
+    const hasFilter = !!(typeFilter || brandFilter || roleFilter || search);
 
     return (
         <div className="space-y-6">
@@ -260,8 +274,32 @@ export default function UniverseMembers() {
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400 pointer-events-none" />
                     </div>
+                    <div className="relative">
+                        <select value={roleFilter || ""} onChange={e => setRoleFilter(e.target.value || null)}
+                            className={`appearance-none pl-3 pr-7 py-1.5 text-xs border rounded-md focus:outline-none focus:border-neutral-400 bg-white ${roleFilter ? "border-amber-400 text-amber-700" : "border-neutral-200 text-neutral-600"}`}>
+                            <option value="">권한</option>
+                            <optgroup label="Role">
+                                <option value="approved_member">approved_member</option>
+                                <option value="leader">leader</option>
+                                <option value="staff">staff</option>
+                                <option value="manager">manager</option>
+                                <option value="super_admin">super_admin</option>
+                            </optgroup>
+                            <optgroup label="Brand Context">
+                                <option value="brand:madleague">brand:madleague</option>
+                                <option value="brand:madleap">brand:madleap</option>
+                                <option value="brand:badak">brand:badak</option>
+                                <option value="brand:rook">brand:rook</option>
+                                <option value="brand:youinone">brand:youinone</option>
+                                <option value="brand:domo">brand:domo</option>
+                                <option value="brand:jakka">brand:jakka</option>
+                                <option value="brand:hero">brand:hero</option>
+                            </optgroup>
+                        </select>
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400 pointer-events-none" />
+                    </div>
                     {hasFilter && (
-                        <button onClick={() => { setTypeFilter(null); setBrandFilter(null); setSearch(""); }}
+                        <button onClick={() => { setTypeFilter(null); setBrandFilter(null); setRoleFilter(null); setSearch(""); }}
                             className="text-xs text-neutral-400 hover:text-neutral-600 px-2 py-1.5 flex items-center gap-1">
                             <X className="h-3 w-3" />초기화
                         </button>
@@ -497,13 +535,14 @@ export default function UniverseMembers() {
                             )}
 
                             {/* 역할 */}
-                            {(selected.roles?.length ?? 0) > 0 && (
+                            {(selected.memberRoles?.length ?? 0) > 0 && (
                                 <section>
                                     <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wide mb-2">권한</p>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {selected.roles.map(r => (
-                                            <span key={r} className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 flex items-center gap-1">
-                                                <Tag className="h-2.5 w-2.5" />{r}
+                                        {selected.memberRoles.map((r, i) => (
+                                            <span key={i} className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 flex items-center gap-1">
+                                                <Tag className="h-2.5 w-2.5" />
+                                                {r.role}{r.context ? <span className="opacity-60 ml-0.5">@ {r.context}</span> : null}
                                             </span>
                                         ))}
                                     </div>

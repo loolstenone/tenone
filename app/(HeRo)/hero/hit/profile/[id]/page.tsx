@@ -242,7 +242,7 @@ export default function IntegratedProfilePage() {
 
       {/* ── HIT B Section ── */}
       <div className="mt-12 mb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-[#E53935] text-xs font-bold rounded-full">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-neutral-100 text-neutral-600 text-xs font-bold rounded-full">
           PART 2 — 나의 커리어
         </div>
       </div>

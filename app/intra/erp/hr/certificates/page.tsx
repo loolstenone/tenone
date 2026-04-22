@@ -51,7 +51,7 @@ export default function CertificatesPage() {
                 if (!email) return;
                 // 발급 이력 조회 (certificates 테이블 = 외부 증명서 시스템과 다름, approvals 테이블에서 type=certificate 찾기)
                 const { data: rows } = await supabase
-                    .from('approvals')
+                    .from('wio_approvals')
                     .select('subtype, created_at, description')
                     .eq('type', 'certificate')
                     .order('created_at', { ascending: false })

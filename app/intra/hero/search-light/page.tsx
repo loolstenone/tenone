@@ -63,7 +63,7 @@ export default function SearchLightIntraPage() {
                 <div>
                     <h1 className="text-lg font-bold">Search Light · 기업 요청</h1>
                     <p className="text-sm text-neutral-400 mt-0.5">
-                        TIH 검사 제출 {rows.length}건 · 사전 등록 {waitlist.length}건
+                        TIH 작성 제출 {rows.length}건 · 사전 등록 {waitlist.length}건
                     </p>
                 </div>
                 <div className="relative">
@@ -85,11 +85,11 @@ export default function SearchLightIntraPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* TIH 응답 목록 */}
                     <div className="lg:col-span-2">
-                        <h2 className="text-sm font-semibold text-neutral-500 mb-3">TIH 검사 제출</h2>
+                        <h2 className="text-sm font-semibold text-neutral-500 mb-3">TIH 작성 제출</h2>
                         {filtered.length === 0 ? (
                             <div className="border border-neutral-200 rounded-lg p-12 text-center">
                                 <Building2 className="h-8 w-8 text-neutral-200 mx-auto mb-3" />
-                                <p className="text-sm text-neutral-400">제출된 TIH 검사가 없습니다</p>
+                                <p className="text-sm text-neutral-400">제출된 TIH 작성가 없습니다</p>
                             </div>
                         ) : (
                             <div className="border border-neutral-200 rounded-lg overflow-hidden">

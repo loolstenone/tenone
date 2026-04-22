@@ -19,7 +19,7 @@ export type ChatMessage = MessengerMessage;
 
 export async function fetchThreads(userId: string): Promise<ChatThread[]> {
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .contains('participants', [userId])
         .order('updated_at', { ascending: false });
@@ -40,7 +40,7 @@ export async function createThread(params: {
     }
 
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .insert({
             name: params.name || null,
             is_group: params.isGroup,
@@ -55,7 +55,7 @@ export async function createThread(params: {
 
 async function findDirectThread(userA: string, userB: string): Promise<ChatThread | null> {
     const { data } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .eq('is_group', false)
         .contains('participants', [userA])
@@ -67,7 +67,7 @@ async function findDirectThread(userA: string, userB: string): Promise<ChatThrea
 
 export async function fetchMessages(threadId: string, limit = 50): Promise<ChatMessage[]> {
     const { data, error } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .select('*')
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true })
@@ -84,7 +84,7 @@ export async function sendMessage(params: {
     type?: string;
 }): Promise<ChatMessage | null> {
     const { data, error } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .insert({
             thread_id: params.threadId,
             sender_id: params.senderId,
@@ -100,7 +100,7 @@ export async function sendMessage(params: {
 
     // 스레드 updated_at 갱신
     await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', params.threadId);
 
@@ -110,7 +110,7 @@ export async function sendMessage(params: {
 export async function markAsRead(threadId: string, userId: string): Promise<void> {
     // 해당 스레드의 읽지 않은 메시지에 userId 추가
     const { data: unread } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .select('id, read_by')
         .eq('thread_id', threadId)
         .not('read_by', 'cs', `{${userId}}`);
@@ -118,7 +118,7 @@ export async function markAsRead(threadId: string, userId: string): Promise<void
     if (unread && unread.length > 0) {
         for (const msg of unread) {
             await supabase
-                .from('chat_messages')
+                .from('wio_chat_messages')
                 .update({ read_by: [...(msg.read_by || []), userId] })
                 .eq('id', msg.id);
         }
@@ -138,7 +138,7 @@ export function subscribeToMessages(
             {
                 event: 'INSERT',
                 schema: 'public',
-                table: 'chat_messages',
+                table: 'wio_chat_messages',
                 filter: `thread_id=eq.${threadId}`,
             },
             (payload: { new: Record<string, unknown> }) => {
@@ -163,7 +163,7 @@ export function subscribeToAllThreads(
             {
                 event: 'INSERT',
                 schema: 'public',
-                table: 'chat_messages',
+                table: 'wio_chat_messages',
             },
             (payload: { new: Record<string, unknown> }) => {
                 callback(payload.new as unknown as ChatMessage);
@@ -191,7 +191,7 @@ export function getLastMessage(messages: ChatMessage[]): ChatMessage | null {
 /** 채널 목록 조회 (thread_type='channel') */
 export async function fetchChannels(): Promise<ChatThread[]> {
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .eq('thread_type', 'channel')
         .order('name');
@@ -207,7 +207,7 @@ export async function postAgentMessage(params: {
 }): Promise<ChatMessage | null> {
     // 채널 스레드 찾기
     const { data: threads } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('id')
         .eq('thread_type', 'channel')
         .eq('name', params.channelName)
@@ -220,7 +220,7 @@ export async function postAgentMessage(params: {
 
     const threadId = threads[0].id;
     const { data, error } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .insert({
             thread_id: threadId,
             sender_id: '00000000-0000-0000-0000-000000000000', // 에이전트 시스템 ID
@@ -237,7 +237,7 @@ export async function postAgentMessage(params: {
 
     // 스레드 updated_at 갱신
     await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', threadId);
 
@@ -254,7 +254,7 @@ export async function findOrCreateAgentDM(params: {
 }): Promise<ChatThread | null> {
     // 기존 agent_dm 스레드 찾기
     const { data: existing } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .eq('thread_type', 'agent_dm')
         .eq('agent_name', params.agentName)
@@ -264,7 +264,7 @@ export async function findOrCreateAgentDM(params: {
 
     // 새로 생성
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .insert({
             name: params.agentName,
             is_group: false,
@@ -283,7 +283,7 @@ export async function findOrCreateAgentDM(params: {
 /** 서비스 스레드 목록 조회 */
 export async function fetchServiceThreads(): Promise<ChatThread[]> {
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .eq('thread_type', 'service')
         .order('updated_at', { ascending: false });
@@ -294,7 +294,7 @@ export async function fetchServiceThreads(): Promise<ChatThread[]> {
 /** 에이전트 DM 스레드 목록 조회 */
 export async function fetchAgentDMThreads(userId: string): Promise<ChatThread[]> {
     const { data, error } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('*')
         .eq('thread_type', 'agent_dm')
         .contains('participants', [userId])
@@ -332,7 +332,7 @@ export async function updateActionStatus(
     userId: string
 ): Promise<boolean> {
     const { data: msg } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .select('action_payload')
         .eq('id', messageId)
         .single();
@@ -351,7 +351,7 @@ export async function updateActionStatus(
     };
 
     const { error } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .update({ action_payload: updated })
         .eq('id', messageId);
 
@@ -370,7 +370,7 @@ export async function sendAgentMessage(params: {
     metadata?: Record<string, unknown>;
 }): Promise<ChatMessage | null> {
     const { data, error } = await supabase
-        .from('chat_messages')
+        .from('wio_chat_messages')
         .insert({
             thread_id: params.threadId,
             sender_id: '00000000-0000-0000-0000-000000000000',
@@ -390,7 +390,7 @@ export async function sendAgentMessage(params: {
     if (error) { console.error('sendAgentMessage:', error.message); return null; }
 
     await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', params.threadId);
 

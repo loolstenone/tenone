@@ -46,17 +46,27 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
         if (hitARes.data?.hit_a_result_id) {
             const { data: result } = await sb
                 .from("hit_a_results")
-                .select("type_code")
+                .select("type_code, type_name_ko, type_nickname")
                 .eq("id", hitARes.data.hit_a_result_id)
                 .maybeSingle();
 
             if (result?.type_code) {
+                // hit_hero_types(64종)에 정확히 매칭되는 row가 있으면 그것을,
+                // 없으면 hit_a_results의 필드로 폴백 (DISC 2-letter 형식 대응)
                 const { data: type } = await sb
                     .from("hit_hero_types")
                     .select("type_code, character_name, character_label")
                     .eq("type_code", result.type_code)
                     .maybeSingle();
-                if (type) setHeroType(type as HeroTypeInfo);
+                if (type) {
+                    setHeroType(type as HeroTypeInfo);
+                } else {
+                    setHeroType({
+                        type_code: result.type_code,
+                        character_name: (result.type_nickname as string) || (result.type_name_ko as string) || result.type_code,
+                        character_label: (result.type_name_ko as string) || "",
+                    });
+                }
             }
         }
 

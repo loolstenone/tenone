@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     if (!threadId) {
       // 서비스 전용 스레드 찾거나 생성
       const { data: existing } = await supabase
-        .from('chat_threads')
+        .from('wio_chat_threads')
         .select('id')
         .eq('thread_type', 'service')
         .eq('service_name', service)
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         threadId = existing[0].id;
       } else {
         const { data: newThread } = await supabase
-          .from('chat_threads')
+          .from('wio_chat_threads')
           .insert({
             name: hook.display_name,
             is_group: false,
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     };
 
     const { data: message, error: msgError } = await supabase
-      .from('chat_messages')
+      .from('wio_chat_messages')
       .insert(messageData)
       .select('id')
       .single();
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     // 4. 스레드 updated_at 갱신
     await supabase
-      .from('chat_threads')
+      .from('wio_chat_threads')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', threadId);
 

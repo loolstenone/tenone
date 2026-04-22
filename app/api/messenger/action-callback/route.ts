@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // 1. 원본 메시지 조회
     const { data: message } = await supabase
-      .from('chat_messages')
+      .from('wio_chat_messages')
       .select('*')
       .eq('id', message_id)
       .single();
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     };
 
     await supabase
-      .from('chat_messages')
+      .from('wio_chat_messages')
       .update({ action_payload: updatedPayload })
       .eq('id', message_id);
 
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
           }
         : null;
 
-      await supabase.from('chat_messages').insert({
+      await supabase.from('wio_chat_messages').insert({
         thread_id,
         sender_id: '00000000-0000-0000-0000-000000000000',
         sender_name: message.sender_name,
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
           const hubResult = await hubRes.json();
 
           // 에이전트 응답을 같은 스레드에 메시지로 추가
-          await supabase.from('chat_messages').insert({
+          await supabase.from('wio_chat_messages').insert({
             thread_id,
             sender_id: '00000000-0000-0000-0000-000000000000',
             sender_name: agent_name,
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. 시스템 메시지: 사용자가 무엇을 선택했는지 기록
-    await supabase.from('chat_messages').insert({
+    await supabase.from('wio_chat_messages').insert({
       thread_id,
       sender_id: userId,
       sender_name: userName,

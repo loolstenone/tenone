@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, LogOut, Settings, Menu, X, KeyRound, ExternalLink,
@@ -53,6 +53,8 @@ function demoTenant(): WIOTenant {
 export default function WIOAppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const forceDemoMode = searchParams.get('mode') === 'demo';
   const [tenant, setTenant] = useState<WIOTenant | null>(null);
   const [member, setMember] = useState<WIOMember | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,6 +130,13 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
       return out;
     };
 
+    // ?mode=demo → 즉시 데모 모드
+    if (forceDemoMode) {
+      clearTimeout(timeout);
+      fallback();
+      return;
+    }
+
     const init = async () => {
       try {
         const sb = createClient();
@@ -191,9 +200,9 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
         fallback();
       }
     };
-    init();
+    if (!forceDemoMode) init();
     return () => { cancelled = true; clearTimeout(timeout); };
-  }, [router]);
+  }, [router, forceDemoMode]);
 
   if (loading) {
     return (
@@ -331,6 +340,8 @@ export default function WIOAppLayout({ children }: { children: React.ReactNode }
   const enabledModuleKeys = (() => {
     if (isDemo) return ALL_MODULE_KEYS as unknown as string[];
     if (orbiConfig.enabledModules.length > 0) return [...new Set(['home', ...orbiConfig.enabledModules])];
+    // 새 테넌트: OrbiConfig 미설정 → 플랜의 modules로 초기화
+    if (tenant?.modules && tenant.modules.length > 0) return [...new Set(['home', ...tenant.modules])];
     return ['home'];
   })();
 

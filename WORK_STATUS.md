@@ -1,6 +1,31 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 78 종료 — HeRo Matching Tetrad 전체 구축 완료 · Phase 0~4 + 3-A)
+> 마지막 업데이트: 2026-04-23 (세션 80 종료 — HeRo UI/UX 규약 + HIT 모델 재정의 + 요금·탤런트 에이전시)
+
+## 이번 세션 핵심 성과
+
+1. **UI/UX SSOT 수립**: HeRo CLAUDE.md에 색·클릭 규약 5 레이어(Action/Accent/State/Content/Disabled) 문서화 + 전 페이지 적용 → 빨강 남발 해소·클릭 가능성 명확화
+2. **HIT 모델 재정의**: HIT A가 UF+MBTI+DISC+인성+적성 → S-Power+64유형. HIT B~F는 생애주기별 심화(신입/이직/시니어/2막/복귀). HitModelGuide 모달 전면 재작성
+3. **비회원 티저/회원 풀리포트 게이팅**: /hero/hit/a/result/[id] 탭 슬라이드 + 흐림 처리 + 회원가입 CTA
+4. **더미 데이터 5건**: 기존 잡다한 더미 정리 후 5 유형(D-INTJ/I-ENFP/S-ISFJ/C-INTP/D-ESTJ) 풀 데이터로 재시드
+5. **요금 안내 독립 페이지**: /hero/pricing 신규 · 4티어(무료/스탠다드14,900/프로39,900/프리미엄99,000) · 프로=AI코칭 / 프리미엄=전문가1:1
+6. **탤런트 에이전시 메뉴 + 신청 기능**: /hero/talent-agent 랜딩 + /apply 폼 · DB 테이블 + API + RLS
+7. **검색 라이트 랜딩 개선**: 구직자·구인기업 CTA 병렬 · Universe 오디션장 6 브랜드 실서버 메타 기반 카피
+
+## 다음 할 일 (다음 세션)
+
+### 🟢 진행 중 결정 필요
+- Pricing FAQ 실제 약관 연결 (환불 정책 확정)
+- 탤런트 에이전시 신청 Action Hub 등록 (`lib/action-hub-registry.ts`에 `hero_talent_applications` entry 추가)
+- 탤런트 에이전시 신청 Intra 관리 페이지 `/intra/hero/talent-agent/applications` 구현
+
+### 🟡 이월 (세션 78에서 넘어온 것 중 미완)
+- 전 브랜드 /my 페이지 HitProfileBadge 일괄 삽입 (21개 · 이번 세션 dirty만 반영)
+- 실기기 E2E 검증 7개 시나리오
+- Phase 5 질문 DB 단일화
+- strengths/cautions 편집기
+
+---
 
 ## 다음 할 일 (집에서 이어서 — 구체 실행 순서)
 

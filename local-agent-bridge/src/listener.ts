@@ -46,7 +46,7 @@ export class SupabaseListener {
                 {
                     event: "INSERT",
                     schema: "public",
-                    table: "chat_messages",
+                    table: "wio_chat_messages",
                 },
                 (payload) => {
                     const msg = payload.new as ChatMessage;
@@ -96,7 +96,7 @@ export class SupabaseListener {
 
         // 응답을 chat_messages에 기록
         const senderType = result.runtime === "local" ? "local_agent" : "agent";
-        await this.supabase.from("chat_messages").insert({
+        await this.supabase.from("wio_chat_messages").insert({
             thread_id: msg.thread_id,
             sender_id: "00000000-0000-0000-0000-000000000000",
             sender_name: result.respondedBy,
@@ -114,14 +114,14 @@ export class SupabaseListener {
 
         // 스레드 updated_at 갱신
         await this.supabase
-            .from("chat_threads")
+            .from("wio_chat_threads")
             .update({ updated_at: new Date().toISOString() })
             .eq("id", msg.thread_id);
     }
 
     private async getThread(threadId: string): Promise<ChatThread | null> {
         const { data } = await this.supabase
-            .from("chat_threads")
+            .from("wio_chat_threads")
             .select("id, agent_name, agent_runtime, thread_type")
             .eq("id", threadId)
             .single();

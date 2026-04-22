@@ -1,48 +1,23 @@
 "use client";
 
 /**
- * 매칭 인박스 컴포넌트 — 기업/인재 공용
- * - side='talent': 내 매칭 (기업명 공개 · for_talent 서술)
- * - side='company': 기업 매칭 (인재 익명 ID · for_company 서술)
+ * 매칭 인박스 컴포넌트 — 기업/인재 공용 (티저 모드)
  *
- * 비공개 원칙: 점수·순위·벡터 노출 금지
+ * 원칙: 매칭 결과물(큐레이션 본문·기업명·인재 식별자·주의 신호)은
+ *       HeRo의 유료 수익원이므로 사용자에게 직접 노출하지 않는다.
+ *       카운트와 진행 단계만 보여주고, "매칭 의뢰하기" CTA로 안내.
+ *
+ * - side='talent'  → "당신을 찾는 회사 N곳이 준비됐습니다"
+ * - side='company' → "조건에 맞는 영웅 N명이 준비됐습니다"
  */
 
 import { useEffect, useState } from "react";
-import { Sparkles, Loader2, Building2, User, AlertTriangle, ChevronRight, Handshake, X as XIcon } from "lucide-react";
-
-const STATUS_LABEL: Record<string, string> = {
-    proposed: "검토 중",
-    curated: "새 매칭",
-    contacted: "연락 진행",
-    interviewing: "면접 중",
-    trial: "트라이얼",
-    hired: "성사",
-    declined: "거절",
-    withdrawn: "철회",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-    proposed: "bg-neutral-100 text-neutral-500",
-    curated: "bg-rose-50 text-rose-700 border border-rose-200",
-    contacted: "bg-indigo-50 text-indigo-700",
-    interviewing: "bg-violet-50 text-violet-700",
-    trial: "bg-amber-50 text-amber-700",
-    hired: "bg-emerald-50 text-emerald-700",
-    declined: "bg-neutral-50 text-neutral-400",
-    withdrawn: "bg-neutral-50 text-neutral-400",
-};
+import { Sparkles, Loader2, Building2, Users, Handshake, MessageCircle } from "lucide-react";
 
 interface InboxItem {
     id: string;
     status: string;
-    statusChangedAt: string | null;
     createdAt: string;
-    curation: string | null;
-    signalNotes: string[];
-    companyName?: string | null;
-    industry?: string | null;
-    talentAnonymousId?: string;
 }
 
 export default function MatchingInbox({
@@ -50,16 +25,25 @@ export default function MatchingInbox({
     memberId,
     companyId,
     accentColor = "#E53935",
+    theme = "light",
 }: {
     side: "talent" | "company";
     memberId: string;
     companyId?: string;
     accentColor?: string;
+    theme?: "light" | "dark";
 }) {
     const [items, setItems] = useState<InboxItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selected, setSelected] = useState<InboxItem | null>(null);
-    const [acting, setActing] = useState<string | null>(null);
+    const [requesting, setRequesting] = useState(false);
+
+    const isDark = theme === "dark";
+    const primaryText = isDark ? "text-neutral-100" : "text-neutral-900";
+    const secondaryText = isDark ? "text-neutral-400" : "text-neutral-500";
+    const mutedText = isDark ? "text-neutral-500" : "text-neutral-400";
+    const cardBg = isDark
+        ? "bg-neutral-800/60 border-neutral-700"
+        : "bg-white border-neutral-200";
 
     async function load() {
         setLoading(true);
@@ -78,161 +62,120 @@ export default function MatchingInbox({
 
     useEffect(() => { if (memberId) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [memberId, companyId, side]);
 
-    async function react(id: string, action: "interested" | "pass") {
-        setActing(id);
+    async function requestMatching() {
+        setRequesting(true);
         try {
-            const next = action === "interested" ? "contacted" : "declined";
-            const res = await fetch(`/api/hero/matching/${id}`, {
-                method: "PATCH",
+            const res = await fetch("/api/hero/matching/request", {
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: next }),
+                body: JSON.stringify({ side, memberId, companyId }),
             });
-            if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
-            setSelected(null);
-            await load();
+            if (!res.ok) throw new Error("요청 실패");
+            alert("매칭 의뢰가 접수되었습니다. 담당자가 곧 연락드립니다.");
         } catch (e) {
-            alert(e instanceof Error ? e.message : "처리 실패");
+            alert(e instanceof Error ? e.message : "요청 실패");
         } finally {
-            setActing(null);
+            setRequesting(false);
         }
     }
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 text-xs text-neutral-400 py-4">
-                <Loader2 className="h-4 w-4 animate-spin" /> 매칭 확인 중...
+            <div className={`flex items-center gap-2 text-xs py-4 ${secondaryText}`}>
+                <Loader2 className="h-4 w-4 animate-spin" /> 매칭 준비 현황 확인 중
             </div>
         );
     }
 
-    if (items.length === 0) {
-        return (
-            <div className="border border-dashed border-neutral-300 rounded-lg p-6 text-center">
-                <Sparkles className="h-8 w-8 text-neutral-300 mx-auto mb-2" />
-                <p className="text-sm text-neutral-500">
-                    아직 도착한 매칭이 없습니다
-                </p>
-                <p className="text-[11px] text-neutral-400 mt-1">
-                    {side === "talent"
-                        ? "JH · HIT를 완성하면 매칭 풀에 진입합니다"
-                        : "TIH · JD 발행 후 HeRo가 조용히 매칭을 찾습니다"}
-                </p>
-            </div>
-        );
-    }
+    // 진행 단계별 개수 계산 (상세 본문은 숨김)
+    const visibleCount = items.filter(i =>
+        ["curated", "contacted", "interviewing", "trial", "hired"].includes(i.status)
+    ).length;
+    const activeCount = items.filter(i =>
+        ["contacted", "interviewing", "trial"].includes(i.status)
+    ).length;
+
+    const headline = side === "talent"
+        ? visibleCount > 0
+            ? `당신을 찾는 회사 ${visibleCount}곳이 준비됐습니다`
+            : "아직 준비된 추천이 없습니다"
+        : visibleCount > 0
+            ? `조건에 맞는 인재 ${visibleCount}명이 준비됐습니다`
+            : "아직 매칭된 인재가 없습니다";
+
+    const sub = side === "talent"
+        ? visibleCount > 0
+            ? "HeRo가 정리한 추천 내용은 매칭 의뢰를 접수하시면 전달드립니다."
+            : "희망 직무(JH)와 HIT 검사를 완성하시면 적합한 회사와 이어드립니다."
+        : visibleCount > 0
+            ? "추천 인재의 상세 내용은 매칭 의뢰를 접수하시면 전달드립니다."
+            : "TIH 응답과 직무 설명(JD)이 올라오면 조건에 맞는 분을 찾기 시작합니다.";
 
     return (
-        <>
-            <div className="space-y-2">
-                {items.map(it => {
-                    const st = STATUS_COLOR[it.status] ?? STATUS_COLOR.proposed;
-                    const primaryLabel = side === "talent"
-                        ? (it.companyName || "기업 정보 준비 중")
-                        : `영웅 #${it.talentAnonymousId}`;
-                    const subLabel = side === "talent"
-                        ? (it.industry || "-")
-                        : "HeRo 인재 풀";
-                    return (
-                        <button key={it.id} onClick={() => setSelected(it)}
-                            className="w-full text-left bg-white border border-neutral-200 rounded-lg p-4 hover:border-rose-300 hover:shadow-sm transition-all">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    {side === "talent"
-                                        ? <Building2 className="h-4 w-4 text-neutral-400 shrink-0" />
-                                        : <User className="h-4 w-4 text-neutral-400 shrink-0" />
-                                    }
-                                    <p className="text-sm font-semibold truncate">{primaryLabel}</p>
-                                </div>
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${st}`}>
-                                    {STATUS_LABEL[it.status] ?? it.status}
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-neutral-400 mb-2">{subLabel}</p>
-                            {it.curation && (
-                                <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
-                                    {it.curation}
-                                </p>
-                            )}
-                            <div className="flex items-center justify-between mt-2">
-                                {it.signalNotes.length > 0 ? (
-                                    <span className="text-[10px] text-amber-600 flex items-center gap-1">
-                                        <AlertTriangle className="h-3 w-3" /> 주의 신호 {it.signalNotes.length}
-                                    </span>
-                                ) : <span />}
-                                <span className="text-[10px] text-neutral-300 flex items-center gap-0.5">
-                                    자세히 <ChevronRight className="h-3 w-3" />
-                                </span>
-                            </div>
-                        </button>
-                    );
-                })}
+        <div className={`border rounded-xl p-5 ${cardBg}`}>
+            <div className="flex items-start gap-3 mb-4">
+                <div
+                    className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${accentColor}15` }}
+                >
+                    {side === "talent"
+                        ? <Building2 className="h-5 w-5" style={{ color: accentColor }} />
+                        : <Users className="h-5 w-5" style={{ color: accentColor }} />
+                    }
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold ${primaryText}`}>{headline}</p>
+                    <p className={`text-xs mt-1 leading-relaxed ${secondaryText}`}>{sub}</p>
+                </div>
             </div>
 
-            {/* 상세 모달 */}
-            {selected && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-                    <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="px-5 py-4 border-b border-neutral-200 flex items-start justify-between">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold mb-2" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
-                                    <Sparkles className="h-3 w-3" /> HeRo Matching
-                                </div>
-                                <h3 className="text-base font-bold">
-                                    {side === "talent" ? selected.companyName : `영웅 #${selected.talentAnonymousId}`}
-                                </h3>
-                                {side === "talent" && selected.industry && (
-                                    <p className="text-xs text-neutral-500 mt-0.5">{selected.industry}</p>
-                                )}
-                            </div>
-                            <button onClick={() => setSelected(null)} className="text-neutral-400 hover:text-neutral-700">
-                                <XIcon className="h-4 w-4" />
-                            </button>
-                        </div>
-
-                        <div className="p-5 space-y-4">
-                            {selected.curation ? (
-                                <div className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">
-                                    {selected.curation}
-                                </div>
-                            ) : (
-                                <p className="text-xs text-neutral-400 text-center py-6">
-                                    큐레이션이 아직 생성되지 않았습니다. HeRo가 곧 준비할게요.
-                                </p>
-                            )}
-
-                            {selected.signalNotes.length > 0 && (
-                                <div className="pt-4 border-t border-neutral-100">
-                                    <p className="text-xs font-bold text-amber-700 mb-2 flex items-center gap-1">
-                                        <AlertTriangle className="h-3.5 w-3.5" /> 확인해볼 지점
-                                    </p>
-                                    <ul className="space-y-1 text-xs text-amber-900 list-disc ml-5">
-                                        {selected.signalNotes.map((n, i) => <li key={i}>{n}</li>)}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 액션 버튼 — curated 상태에서만 */}
-                        {selected.status === "curated" && (
-                            <div className="px-5 py-3 border-t border-neutral-200 bg-neutral-50 flex items-center gap-2">
-                                <button onClick={() => react(selected.id, "pass")} disabled={acting === selected.id}
-                                    className="flex-1 text-xs font-semibold text-neutral-600 border border-neutral-300 rounded-lg py-2 hover:bg-neutral-100 disabled:opacity-40">
-                                    {acting === selected.id ? <Loader2 className="h-3 w-3 animate-spin mx-auto" /> : "지금은 아니에요"}
-                                </button>
-                                <button onClick={() => react(selected.id, "interested")} disabled={acting === selected.id}
-                                    className="flex-1 text-xs font-bold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40"
-                                    style={{ backgroundColor: accentColor }}>
-                                    {acting === selected.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Handshake className="h-3 w-3" /> 관심 있어요</>}
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="px-5 py-2 border-t border-neutral-100 text-[10px] text-neutral-400 text-center">
-                            ⚠️ 매칭 점수·순위는 양쪽에 공개되지 않습니다 (Tetrad 원칙)
-                        </div>
-                    </div>
+            {/* 진행 단계 요약 — 세부 정보 없이 카운트만 */}
+            {items.length > 0 && (
+                <div className={`grid grid-cols-3 gap-2 mb-4 text-center`}>
+                    <StageBadge label="큐레이션" count={visibleCount} theme={theme} />
+                    <StageBadge label="진행 중" count={activeCount} theme={theme} />
+                    <StageBadge label="누적" count={items.length} theme={theme} />
                 </div>
             )}
-        </>
+
+            {/* CTA */}
+            {visibleCount > 0 ? (
+                <button
+                    onClick={requestMatching}
+                    disabled={requesting}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-white disabled:opacity-50 transition-opacity"
+                    style={{ backgroundColor: accentColor }}
+                >
+                    {requesting
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <><Handshake className="h-4 w-4" /> 매칭 의뢰하기</>
+                    }
+                </button>
+            ) : (
+                <div className={`text-center py-3 text-[11px] ${mutedText}`}>
+                    <Sparkles className="h-5 w-5 mx-auto mb-1 opacity-50" />
+                    준비가 완료되면 알려드립니다
+                </div>
+            )}
+
+            <p className={`text-[10px] mt-3 text-center ${mutedText}`}>
+                <MessageCircle className="inline h-3 w-3 mr-0.5" />
+                상세 큐레이션은 HeRo 담당자가 유료 서비스로 전달드립니다
+            </p>
+        </div>
+    );
+}
+
+function StageBadge({ label, count, theme }: { label: string; count: number; theme: "light" | "dark" }) {
+    const isDark = theme === "dark";
+    const bg = isDark ? "bg-neutral-800" : "bg-neutral-50";
+    const border = isDark ? "border-neutral-700" : "border-neutral-200";
+    const labelColor = isDark ? "text-neutral-400" : "text-neutral-500";
+    const countColor = isDark ? "text-neutral-100" : "text-neutral-900";
+    return (
+        <div className={`py-2 rounded-lg border ${bg} ${border}`}>
+            <p className={`text-[10px] ${labelColor}`}>{label}</p>
+            <p className={`text-sm font-bold ${countColor}`}>{count}</p>
+        </div>
     );
 }

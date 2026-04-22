@@ -314,10 +314,7 @@ export default function HeRoHomePage() {
       <section className="py-24 bg-neutral-50">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="text-center mb-16">
-            <p
-              className="text-sm font-bold uppercase tracking-widest mb-3"
-              style={{ color: RED }}
-            >
+            <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
               Hero&apos;s Journey
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
@@ -415,10 +412,7 @@ export default function HeRoHomePage() {
       <section className="py-24 bg-white">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="text-center mb-16">
-            <p
-              className="text-sm font-bold uppercase tracking-widest mb-3"
-              style={{ color: RED }}
-            >
+            <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
               64 Types
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">

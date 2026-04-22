@@ -14,6 +14,7 @@ import {
   ToggleLeft, ToggleRight, UserPlus, Pencil, Globe,
 } from 'lucide-react';
 import { MyProfileCard } from '@/components/MyProfileCard';
+import HitProfileBadge from '@/features/hit/HitProfileBadge';
 import { CapabilitySection } from '@/components/CapabilitySection';
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'needs' | 'notifications' | 'settings';
@@ -1547,6 +1548,11 @@ function BadakMyPageInner() {
 
       {/* ── 프로필 카드 (MyProfileCard 통합) ── */}
       <div className="px-4 pt-6">
+        {user?.id && (
+            <div className="mb-4">
+                <HitProfileBadge memberId={user.id} respectOptIn />
+            </div>
+        )}
         <MyProfileCard accentColor="#ffd93d" siteBadge={isLeader ? '바닥장' : undefined}>
           {(jobFunction || industry || experienceYears) ? (
             <div className="grid grid-cols-2 gap-3">

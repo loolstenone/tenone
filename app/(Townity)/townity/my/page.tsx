@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
@@ -43,6 +44,11 @@ export default function TownityMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
+                {user?.id && (
+                    <div className="mb-6">
+                        <HitProfileBadge memberId={user.id} respectOptIn />
+                    </div>
+                )}
                 <MyProfileCard accentColor="#10B981" siteBadge="Townity" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="townity" accentColor="#10B981" className="mb-6" />}

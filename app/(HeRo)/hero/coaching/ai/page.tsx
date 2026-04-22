@@ -199,7 +199,7 @@ function AICounselingContent() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {topics.map((topic) => (
-              <div key={topic} className="border border-neutral-200 rounded-xl p-5 hover:border-red-200 transition-colors">
+              <div key={topic} className="border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 transition-colors">
                 <p className="text-sm text-neutral-700 leading-relaxed">{topic}</p>
               </div>
             ))}
@@ -229,8 +229,25 @@ function AICounselingContent() {
         </div>
       </section>
 
-      {/* ── 요금 ── */}
-      <section className="py-20">
+      {/* ── 요금 안내 이동 안내 ── */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-2">Pricing</p>
+          <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-3">요금은 별도 안내 페이지에서 확인하세요</h2>
+          <p className="text-sm text-neutral-500 mb-6">
+            무료 · 스탠다드 · 프로 · 프리미엄 4개 플랜의 혜택을 한눈에 비교할 수 있습니다.
+          </p>
+          <Link
+            href="/hero/pricing"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E53935] text-white text-sm font-bold hover:bg-red-700 transition-colors"
+          >
+            요금 안내 보기 <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 기존 요금 카드 섹션은 /hero/pricing 으로 이관됨 — 아래 모달은 다른 경로에서 호출될 수 있어 유지 */}
+      <section className="hidden">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">요금 안내</h2>

@@ -1312,3 +1312,130 @@ grep -rn 'TODO\|FIXME' src | wc -l
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 - 아키텍처: `TenOne_Universe_Architecture_v1.md` (G드라이브)
 - 4대 제품: `TenOne_4Products.md` (G드라이브)
+
+---
+
+## 부록 G. 외부 리소스 운영 절차
+
+> **외부 리소스 = 코드베이스 밖에서 설정하는 SaaS/플랫폼.**
+> UI로 직접 조작해야 하며, Claude Code가 브라우저를 통해 작업한다.
+> 보안 자격증명이 아닌 절차 지식은 여기에 정리한다.
+
+---
+
+### G.1 Google Tag Manager (GTM)
+
+#### 기본 정보
+
+| 항목 | 값 |
+|------|-----|
+| 컨테이너 ID | `GTM-564KNJ9S` |
+| 환경변수 | `NEXT_PUBLIC_GTM_ID` (`.env.local`) |
+| 계정/컨테이너 | accounts/6349483070/containers/249197853 |
+| GA4 측정 ID | `G-6N89DJMB7C` |
+| 연동 방식 | `components/Analytics.tsx` → dataLayer push → GTM → GA4 |
+
+#### SPA 트래킹 구조
+
+Next.js SPA는 페이지 이동 시 HTML 새로고침이 없으므로 GTM의 "All Pages" 트리거가 초기 로드만 잡는다.
+해결책: `Analytics.tsx`가 pathname 변경마다 dataLayer에 커스텀 이벤트를 push, GTM 맞춤 이벤트 트리거로 감지.
+
+```
+pathname 변경
+  → Analytics.tsx: window.dataLayer.push({ event: "page_view", page_path, brand_id: siteId })
+  → GTM: CE - page_view 트리거 감지
+  → TenOne_Tag: GA4 이벤트 전송 (매개변수: brand_id)
+  → GA4: 전체 브랜드 페이지뷰 집계
+```
+
+#### 구축된 구성 요소
+
+| 이름 | 유형 | 설명 |
+|------|------|------|
+| `Google 태그` | 태그 | GA4 기본 연결 태그 |
+| `TenOne_Tag` | GA4 이벤트 태그 | 이벤트명 `page_view`, 매개변수 `brand_id: {{DLV - brand_id}}` |
+| `DLV - brand_id` | 데이터 영역 변수 | dataLayer에서 `brand_id` 값 읽음 |
+| `CE - page_view` | 맞춤 이벤트 트리거 | `event: "page_view"` 감지 |
+
+#### GTM UI 조작 절차
+
+**태그 편집 (트리거 교체 등)**
+1. GTM 좌측 메뉴 "태그" 클릭
+2. 편집할 태그 행 클릭 → 상세 화면 진입
+3. 우측 상단 **연필(✏️) 아이콘** 클릭 → 편집 모드 진입
+   - ⚠️ 편집 모드 진입 전에는 트리거 클릭해도 피커가 열리지 않음
+4. 트리거 섹션까지 스크롤
+5. 기존 트리거 삭제: 해당 행 **hover → X 버튼** 클릭
+6. 새 트리거 추가: **`+` 버튼** 클릭 → 트리거 피커에서 선택
+7. 우측 상단 **"저장"** 클릭
+
+**맞춤 이벤트 트리거 생성**
+1. GTM 좌측 메뉴 "트리거" 클릭
+2. 우측 상단 **"새로 만들기"** 클릭
+3. 트리거 유형: **"맞춤 이벤트"** 선택
+4. 이벤트 이름: `page_view` (Analytics.tsx의 `event` 값과 일치해야 함)
+5. 이름 저장 후 **"저장"** 클릭
+
+**컨테이너 게시 (변경사항 적용)**
+1. GTM 우측 상단 **"제출"** 버튼 클릭
+2. 버전 이름/설명 입력 (예: "SPA page_view 트리거 교체")
+3. **"게시"** 클릭
+   - ⚠️ 게시 전까지 실제 사이트에 적용되지 않음
+
+**데이터 영역 변수(DLV) 생성**
+1. GTM 좌측 메뉴 "변수" 클릭
+2. "사용자 정의 변수" 섹션 "새로 만들기" 클릭
+3. 변수 유형: **"데이터 영역 변수"** 선택
+4. 데이터 영역 변수 이름: dataLayer push 객체의 키와 정확히 일치 (예: `brand_id`)
+
+#### TenOne_Tag 현재 설정 목표
+
+- 트리거: `CE - page_view` (All Pages 트리거는 제거)
+- 이벤트명: `page_view`
+- 매개변수: `brand_id` = `{{DLV - brand_id}}`
+
+---
+
+### G.2 Vercel
+
+> 코드 변경은 `git push origin master`로만 배포. `vercel deploy` 직접 실행 금지 (크레딧 소진).
+
+| 항목 | 내용 |
+|------|------|
+| 배포 트리거 | `git push origin master` → 자동 빌드 |
+| 환경변수 관리 | Vercel Dashboard > Project > Settings > Environment Variables |
+| On-Demand 상한 | $100 설정됨 |
+| 도메인 연결 | Vercel Dashboard > Project > Settings > Domains |
+
+#### 새 도메인 추가 3단계
+
+1. `lib/domain-registry.ts` 에 도메인 등록
+2. Vercel Dashboard > Domains에 도메인 추가
+3. Supabase Auth > Redirect URLs에 `https://새도메인/**` 추가
+
+---
+
+### G.3 Supabase
+
+> Claude가 SQL을 직접 실행한다 (부록 D 참조). Dashboard 수동 실행 불필요.
+
+| 항목 | 내용 |
+|------|------|
+| 프로젝트 ID | `ziotlxkdctlhiwkgmmsh` |
+| PAT | `.env.local`의 `SUPABASE_ACCESS_TOKEN` |
+| Auth SMTP | Resend 연결 완료 (`noreply@tenone.biz`) |
+| Storage 버킷 | `avatars` (프로필), `site-branding` (브랜드 이미지) |
+
+---
+
+### G.4 Resend
+
+> 이메일 발송 인프라. 이미 세팅 완료 — "SMTP 필요한가요?" 묻지 말 것.
+
+| 항목 | 내용 |
+|------|------|
+| 검증 도메인 | `tenone.biz` |
+| 발신 주소 | `noreply@tenone.biz` |
+| 환경변수 | `RESEND_API_KEY` |
+| Supabase 연결 | Auth SMTP로 연결 완료 |
+| 뉴스레터 | `NEWSLETTER_FROM_EMAIL`, `NEWSLETTER_FROM_NAME` |

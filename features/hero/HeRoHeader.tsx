@@ -15,6 +15,8 @@ const navItems = [
     { name: "HIT 검사", href: "/hero/hit" },
     { name: "AI 상담", href: "/hero/coaching/ai" },
     { name: "커리어 코칭", href: "/hero/coaching" },
+    { name: "탤런트 에이전시", href: "/hero/talent-agent" },
+    { name: "요금 안내", href: "/hero/pricing" },
     { name: "씨치 라이트", href: "/hero/search-light" },
 ];
 
@@ -32,10 +34,12 @@ export function HeRoHeader() {
         setLoginOpen(true);
     };
 
-    const isActive = (href: string) => {
-        if (href === "/") return pathname === "/";
-        return pathname.startsWith(href);
-    };
+    // 가장 길게 매칭되는 nav item 하나만 활성 (접두 중복 방지)
+    const activeHref = navItems
+        .filter((it) => pathname === it.href || pathname.startsWith(it.href + "/"))
+        .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
+    const isActive = (href: string) => activeHref === href;
 
     return (
         <>
@@ -89,7 +93,7 @@ export function HeRoHeader() {
                                 <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
                                     className="h-7 w-7 rounded-full object-cover" />
                             ) : (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600">
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
                                     {user?.name?.charAt(0) ?? '?'}
                                 </div>
                             )}
@@ -176,7 +180,7 @@ export function HeRoHeader() {
                             <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
                                 className="h-7 w-7 rounded-full object-cover shrink-0" />
                         ) : (
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
                                 {user?.name?.charAt(0) ?? '?'}
                             </div>
                         )}

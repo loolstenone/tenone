@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight, Sparkles, Users,
-  RefreshCw, ChevronLeft, ChevronRight,
+  RefreshCw, ChevronLeft, ChevronRight, Lock,
 } from "lucide-react";
 import HeroTypeCard from "@/features/hit/HeroTypeCard";
 import MBTISpectrum from "@/features/hit/MBTISpectrum";
@@ -17,6 +17,7 @@ import HitPdfButton from "@/features/hit/HitPdfButton";
 import HitShareButtons from "@/features/hit/HitShareButtons";
 import { HitADeepCTA } from "@/features/hit/HitADeepCTA";
 import { getHeroGreeting } from "@/lib/hit/hero-agent-system";
+import { useAuth } from "@/lib/auth-context";
 import type { HitAResult } from "@/types/hit";
 
 // 마크다운 → 순수 텍스트
@@ -43,6 +44,7 @@ const TOTAL_PAGES = 6;
 export default function HitAResultPage() {
   const params = useParams();
   const resultId = params.id as string;
+  const { isAuthenticated } = useAuth();
   const [result, setResult] = useState<HitAResult | null>(null);
   const [heroType, setHeroType] = useState<HeroTypeData | null>(null);
   const [reportModules, setReportModules] = useState<Record<string, { title: string; content: string }> | null>(null);
@@ -272,8 +274,8 @@ export default function HitAResultPage() {
 
       // ── Page 5: 통합 보고서 (회원) or 안내 (비회원) ──
       case 4:
-        // 모듈 콘텐츠가 있으면 실제 보고서 렌더링
-        if (reportModules && Object.keys(reportModules).length > 0) {
+        // 회원 + 모듈 콘텐츠가 있으면 실제 보고서 렌더링
+        if (isAuthenticated && reportModules && Object.keys(reportModules).length > 0) {
           // 카테고리별 그룹핑
           const discMods = Object.entries(reportModules).filter(([k]) => k.startsWith('DISC-'));
           const mbtiMods = Object.entries(reportModules).filter(([k]) => k.startsWith('MBTI-'));
@@ -283,12 +285,11 @@ export default function HitAResultPage() {
           const commMods = Object.entries(reportModules).filter(([k]) => k.startsWith('COMM-'));
 
           return (
-            <div key="p4" className="h-full flex flex-col">
-              {/* 고정 헤더 */}
-              <h2 className="text-lg font-bold mb-4 flex-shrink-0">HIT 통합 보고서</h2>
+            <div key="p4">
+              <h2 className="text-lg font-bold mb-6">HIT 통합 보고서</h2>
 
-              {/* 스크롤 가능 모듈 영역 */}
-              <div className="flex-1 overflow-y-auto space-y-6 pr-1 min-h-0">
+              {/* 모듈 영역 */}
+              <div className="space-y-6">
                 {/* DISC 해설 */}
                 {discMods.length > 0 && (
                   <div>
@@ -368,54 +369,70 @@ export default function HitAResultPage() {
                 )}
               </div>
 
-              {/* 고정 푸터 */}
-              <div className="pt-4 border-t border-neutral-100 text-center flex-shrink-0">
+              {/* 푸터 */}
+              <div className="mt-8 pt-4 border-t border-neutral-100 text-center">
                 <HitPdfButton resultId={resultId} typeCode={result.typeCode} />
               </div>
             </div>
           );
         }
 
-        // 비회원: 안내
+        // 비회원: 미리보기 + 잠금
         return (
           <div key="p4">
-            <h2 className="text-lg font-bold mb-6">HIT 통합 보고서</h2>
+            <h2 className="text-lg font-bold mb-1">HIT 통합 보고서</h2>
+            <p className="text-xs text-neutral-400 mb-6">보고서 일부를 먼저 보여드립니다</p>
 
-            <div className="space-y-2 mb-8">
-              {(heroType?.strengths || []).slice(0, 3).map((s, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
-                  <span className="text-xs font-bold text-green-600 w-5">{i + 1}</span>
-                  <span className="text-sm text-neutral-700">{s.title}</span>
-                  <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
-                </div>
-              ))}
-              {(heroType?.cautions || []).slice(0, 2).map((c, i) => (
-                <div key={`c${i}`} className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
-                  <span className="text-xs font-bold text-amber-500 w-5">!</span>
-                  <span className="text-sm text-neutral-700">{c.title}</span>
-                  <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
-                </div>
-              ))}
-              <div className="flex items-center gap-3 py-2.5 border-b border-neutral-100">
-                <span className="text-xs font-bold text-blue-500 w-5">◎</span>
-                <span className="text-sm text-neutral-700">소통 스타일 · 적합 방향</span>
-                <span className="ml-auto text-xs text-neutral-300">상세 해설 →</span>
+            {/* 첫 강점 공개 */}
+            {heroType?.strengths?.[0] && (
+              <div className="mb-4 p-4 bg-neutral-50 border-l-2 border-neutral-800 rounded-r-lg">
+                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">핵심 강점 #1</p>
+                <p className="text-sm font-semibold text-neutral-800 mb-1.5">{heroType.strengths[0].title}</p>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  {cleanMarkdown(heroType.strengths[0].desc || "").slice(0, 90)}…
+                </p>
               </div>
+            )}
+
+            {/* 나머지 항목 — 흐림 처리 */}
+            <div className="relative mb-6">
+              <div className="space-y-1.5 blur-[3px] pointer-events-none select-none opacity-70">
+                {(heroType?.strengths || []).slice(1, 3).map((s, i) => (
+                  <div key={i} className="p-3 bg-neutral-50 rounded-lg">
+                    <p className="text-[11px] text-neutral-400 mb-0.5">핵심 강점 #{i + 2}</p>
+                    <p className="text-sm font-semibold text-neutral-700">{s.title}</p>
+                  </div>
+                ))}
+                {(heroType?.cautions || []).slice(0, 2).map((c, i) => (
+                  <div key={`c${i}`} className="p-3 bg-neutral-50 rounded-lg">
+                    <p className="text-[11px] text-neutral-400 mb-0.5">주의점 #{i + 1}</p>
+                    <p className="text-sm font-semibold text-neutral-700">{c.title}</p>
+                  </div>
+                ))}
+                <div className="p-3 bg-neutral-50 rounded-lg">
+                  <p className="text-[11px] text-neutral-400 mb-0.5">소통 · 적합 방향</p>
+                  <p className="text-sm font-semibold text-neutral-700">업무에서 나타나는 스타일과 잘 맞는 역할</p>
+                </div>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
             </div>
 
-            <div className="border border-neutral-200 rounded-xl p-6 text-center bg-neutral-50">
-              <p className="text-sm text-neutral-600 mb-1">
-                DISC 상세 · MBTI 해설 · 교차 분석 · S-Power · 소통 스타일까지
+            {/* 가입 CTA */}
+            <div className="border border-neutral-200 rounded-xl p-6 text-center bg-white">
+              <Lock className="h-5 w-5 text-neutral-400 mx-auto mb-3" />
+              <p className="text-[15px] font-bold text-neutral-900 mb-2">
+                전체 보고서는 회원에게 공개됩니다
               </p>
-              <p className="text-base font-bold text-neutral-800 mb-4">
-                가입하시면 HIT 통합 보고서를 보실 수 있습니다
+              <p className="text-xs text-neutral-500 leading-relaxed mb-5">
+                DISC 행동 해설 · MBTI 스펙트럼 · 교차 분석<br />
+                S-Power 주강점 · 성장 영역 · 소통 스타일
               </p>
               <Link href={`/signup?from=hit&resultId=${resultId}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#E53935] text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
-                회원가입하기 <ArrowRight className="h-4 w-4" />
+                무료 회원가입 <ArrowRight className="h-4 w-4" />
               </Link>
-              <p className="text-xs text-neutral-400 mt-3">
-                검사 데이터는 자동으로 연결됩니다
+              <p className="text-[11px] text-neutral-400 mt-3">
+                지금 본 검사 결과가 자동으로 연결됩니다
               </p>
             </div>
           </div>
@@ -497,34 +514,35 @@ export default function HitAResultPage() {
   };
 
   return (
-    <div className="mx-auto max-w-lg px-6 py-8 min-h-[70vh] flex flex-col">
-      {/* ── 페이지 인디케이터 ── */}
-      <div className="flex items-center justify-center gap-1.5 mb-6">
+    <div className="mx-auto max-w-3xl px-6 py-10 min-h-[70vh] flex flex-col">
+      {/* ── 섹션 탭 ── */}
+      <div className="flex items-center justify-center gap-1 mb-8 overflow-x-auto">
         {pageLabels.map((label, i) => (
           <button
             key={i}
             onClick={() => { setDirection(i > currentPage ? 'next' : 'prev'); setCurrentPage(i); }}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentPage ? 'w-6 bg-[#E53935]' : 'w-1.5 bg-neutral-200 hover:bg-neutral-300'
+            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
+              i === currentPage
+                ? 'bg-[#E53935] text-white'
+                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
             }`}
             title={label}
-          />
+          >
+            {label}
+          </button>
         ))}
       </div>
 
-      {/* ── 콘텐츠 — 모든 페이지 동일 높이 고정 ── */}
-      <div className="h-[540px] overflow-hidden">
-        <div
-          key={currentPage}
-          className="h-full overflow-y-auto"
-          style={{ animation: 'fadeIn 0.3s ease-out' }}
-        >
-          {renderPage()}
-        </div>
+      {/* ── 콘텐츠 ── */}
+      <div
+        key={currentPage}
+        style={{ animation: 'fadeIn 0.3s ease-out' }}
+      >
+        {renderPage()}
       </div>
 
       {/* ── 네비게이션 ── */}
-      <div className="flex items-center justify-between mt-8 pt-4 border-t border-neutral-100">
+      <div className="flex items-center justify-between mt-10 pt-4 border-t border-neutral-100">
         <button
           onClick={goPrev}
           disabled={currentPage === 0}
@@ -546,8 +564,35 @@ export default function HitAResultPage() {
         </button>
       </div>
 
-      {/* HIT A 심화 검사 CTA */}
-      <HitADeepCTA resultId={resultId} hasDeep={hasDeep} />
+      {/* 비회원 — 가입 CTA · 회원 — 심화 검사 CTA */}
+      {isAuthenticated ? (
+        <HitADeepCTA resultId={resultId} hasDeep={hasDeep} />
+      ) : (
+        <section className="mt-16 mb-10">
+          <div className="rounded-2xl border border-[#E53935]/30 bg-[#E53935]/5 p-8 text-center">
+            <div className="mx-auto mb-4 w-11 h-11 rounded-full bg-[#E53935]/10 flex items-center justify-center">
+              <Lock size={18} className="text-[#E53935]" />
+            </div>
+            <p className="text-sm text-neutral-500 mb-1">지금 보신 요약 너머에</p>
+            <p className="text-xl font-bold text-neutral-900 mb-2">
+              전체 통합 보고서가 준비되어 있습니다
+            </p>
+            <p className="text-xs text-neutral-500 mb-6 leading-relaxed">
+              DISC 행동 해설 · MBTI 스펙트럼 · 교차 분석<br />
+              S-Power 주강점 · 성장 영역 · 소통 스타일까지
+            </p>
+            <Link
+              href={`/signup?from=hit&resultId=${resultId}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E53935] text-white text-sm font-medium hover:bg-red-700 transition-colors"
+            >
+              무료 회원가입하고 전체 보기 <ArrowRight size={16} />
+            </Link>
+            <p className="text-[11px] text-neutral-400 mt-3">
+              지금 본 검사 결과가 자동으로 연결됩니다
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* CSS Animation */}
       {/* 히어로 AI 채팅 */}

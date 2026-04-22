@@ -100,7 +100,7 @@ async function collectDailyContext(): Promise<string> {
 
 async function publishToChannel(content: string): Promise<boolean> {
     const supabase = getServiceClient();
-    const { error } = await supabase.from('chat_messages').insert({
+    const { error } = await supabase.from('wio_chat_messages').insert({
         thread_id: BRIEFING_THREAD_ID,
         sender_name: AGENT_DISPLAY,
         content,

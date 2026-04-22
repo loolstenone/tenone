@@ -213,25 +213,25 @@ export default function HitDResultPage() {
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Crown className="h-4 w-4 text-[#E53935]" />
+                <Crown className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">리더십 유형:</span> {leadershipInfo.label}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Microscope className="h-4 w-4 text-[#E53935]" />
+                <Microscope className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">전문성 깊이:</span> {result.expertise_depth}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Shuffle className="h-4 w-4 text-[#E53935]" />
+                <Shuffle className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">정체성 유연성:</span> {result.identity_flexibility}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Globe className="h-4 w-4 text-[#E53935]" />
+                <Globe className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">시니어 준비도:</span> {result.senior_readiness}%
                 </p>

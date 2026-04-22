@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Sparkles, Edit, Save, X, Loader2, Search, ImageIcon } from "lucide-react";
+import { Sparkles, Save, X, Loader2, Search, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,8 +18,8 @@ interface HeroType {
     character_name: string;
     character_label: string;
     profile_overview: string | null;
-    strengths: unknown;
-    cautions: unknown;
+    strengths: string[];
+    cautions: string[];
     fit_direction: string | null;
     illustration_url: string | null;
 }
@@ -44,7 +44,11 @@ export default function HeroTypesPage() {
             .from("hit_hero_types")
             .select("*")
             .order("type_code");
-        setRows((data ?? []) as HeroType[]);
+        setRows((data ?? []).map((r: Record<string, unknown>) => ({
+            ...r,
+            strengths: Array.isArray(r.strengths) ? (r.strengths as string[]) : [],
+            cautions: Array.isArray(r.cautions) ? (r.cautions as string[]) : [],
+        })) as HeroType[]);
         setLoading(false);
     }
 
@@ -72,6 +76,8 @@ export default function HeroTypesPage() {
                 profile_overview: editing.profile_overview,
                 fit_direction: editing.fit_direction,
                 illustration_url: editing.illustration_url,
+                strengths: editing.strengths.filter(s => s.trim()),
+                cautions: editing.cautions.filter(s => s.trim()),
             })
             .eq("type_code", editing.type_code);
 
@@ -183,12 +189,16 @@ export default function HeroTypesPage() {
                                         </div>
                                     </Field>
 
-                                    <div className="pt-3 border-t border-neutral-100 text-[10px] text-neutral-400 space-y-1">
-                                        <p><strong>strengths/cautions</strong>는 JSONB — 별도 에디터 필요 (Phase 4 예정).</p>
-                                        <p>현재 값: strengths {Array.isArray(editing.strengths) ? `[${(editing.strengths as unknown[]).length}개]` : "—"}
-                                            · cautions {Array.isArray(editing.cautions) ? `[${(editing.cautions as unknown[]).length}개]` : "—"}
-                                        </p>
-                                    </div>
+                                    <JsonArrayField
+                                        label="강점 (strengths)"
+                                        items={editing.strengths}
+                                        onChange={items => setEditing({ ...editing, strengths: items })}
+                                    />
+                                    <JsonArrayField
+                                        label="주의점 (cautions)"
+                                        items={editing.cautions}
+                                        onChange={items => setEditing({ ...editing, cautions: items })}
+                                    />
                                 </div>
 
                                 <div className="px-5 py-3 border-t border-neutral-200 flex items-center justify-end gap-2 bg-neutral-50">
@@ -222,6 +232,59 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         <div>
             <label className="text-[11px] font-semibold text-neutral-600 block mb-1">{label}</label>
             {children}
+        </div>
+    );
+}
+
+function JsonArrayField({ label, items, onChange }: {
+    label: string;
+    items: string[];
+    onChange: (items: string[]) => void;
+}) {
+    function update(idx: number, val: string) {
+        const next = [...items];
+        next[idx] = val;
+        onChange(next);
+    }
+    function remove(idx: number) {
+        onChange(items.filter((_, i) => i !== idx));
+    }
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-neutral-600">{label}</label>
+                <button
+                    type="button"
+                    onClick={() => onChange([...items, ""])}
+                    className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-800 transition-colors"
+                >
+                    <Plus className="h-3 w-3" />
+                    추가
+                </button>
+            </div>
+            <div className="space-y-1.5">
+                {items.length === 0 && (
+                    <p className="text-[11px] text-neutral-400 italic py-1">항목 없음 — 추가 버튼을 눌러 작성하세요</p>
+                )}
+                {items.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-neutral-400 font-mono w-4 shrink-0 text-right">{idx + 1}</span>
+                        <input
+                            value={item}
+                            onChange={e => update(idx, e.target.value)}
+                            className="flex-1 px-2.5 py-1 text-xs border border-neutral-200 rounded focus:outline-none focus:border-neutral-400"
+                            placeholder="내용을 입력하세요"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => remove(idx)}
+                            className="text-neutral-300 hover:text-rose-400 transition-colors"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

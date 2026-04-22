@@ -44,7 +44,8 @@ function getAnthropicClient(): Anthropic | null {
 // ── RSS 소스 정의 ───────────────────────────────────────────
 const OPPORTUNITY_SOURCES = [
     // 공모전/대외활동
-    { name: '대티즌', url: 'https://www.detizen.com/index_rss.php', type: 'competition', active: true },
+    // 대티즌 RSS 폐지됨 (2026-04 확인: React SPA HTML 반환, XML 아님)
+    { name: '대티즌', url: 'https://www.detizen.com/index_rss.php', type: 'competition', active: false },
     // RSS 미지원 (2026-04 확인): 위비티(wevity.com), 캠퍼스픽, 링커리어, K-스타트업
     // { name: '위비티', url: 'https://www.wevity.com/rss.php', type: 'competition', active: false },
 
@@ -68,22 +69,40 @@ interface RawOpportunity {
 
 function parseRssOpportunities(xml: string, sourceName: string, sourceType: string): RawOpportunity[] {
     const items: RawOpportunity[] = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+    const itemRegex = /<(?:item|entry)>([\s\S]*?)<\/(?:item|entry)>/gi;
     let match;
     while ((match = itemRegex.exec(xml)) !== null) {
         const block = match[1];
-        const title = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]>/)?.[1]
-            || block.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '';
-        const link = block.match(/<link>([\s\S]*?)<\/link>/)?.[1]
-            || block.match(/<guid[^>]*>([\s\S]*?)<\/guid>/)?.[1] || '';
-        const desc = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]>/)?.[1]
-            || block.match(/<description>([\s\S]*?)<\/description>/)?.[1] || '';
-        const pubDate = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || null;
+
+        const titleMatch =
+            block.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
+            block.match(/<title[^>]*>([\s\S]*?)<\/title>/);
+        const title = (titleMatch?.[1] ?? '').replace(/<[^>]*>/g, '').trim();
+
+        const linkMatch =
+            block.match(/<link[^>]+href=["'](https?:\/\/[^"']+)["']/) ||
+            block.match(/<link[^>]*><!\[CDATA\[(https?:\/\/[^\]]*)\]\]><\/link>/) ||
+            block.match(/<link[^>]*>(https?:\/\/[^<\s]+)<\/link>/) ||
+            block.match(/<guid[^>]*>(https?:\/\/[^<\s]+)<\/guid>/);
+        const link = (linkMatch?.[1] ?? '').trim();
+
+        const descMatch =
+            block.match(/<description[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
+            block.match(/<description[^>]*>([\s\S]*?)<\/description>/) ||
+            block.match(/<content[^>]*>([\s\S]*?)<\/content>/);
+        const desc = (descMatch?.[1] ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 500);
+
+        const dateMatch =
+            block.match(/<pubDate[^>]*>(.*?)<\/pubDate>/) ||
+            block.match(/<published[^>]*>(.*?)<\/published>/) ||
+            block.match(/<updated[^>]*>(.*?)<\/updated>/);
+        const pubDate = dateMatch?.[1] ?? null;
+
         if (title && link) {
             items.push({
-                rawTitle: title.replace(/<[^>]*>/g, '').trim(),
-                url: link.trim(),
-                description: desc.replace(/<[^>]*>/g, '').trim().slice(0, 500),
+                rawTitle: title,
+                url: link,
+                description: desc,
                 pubDate,
                 sourceName,
                 sourceType,

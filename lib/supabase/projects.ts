@@ -131,7 +131,7 @@ export async function fetchTimesheets(options: {
     projectId?: string;
     weekStart?: string;
 }) {
-    let query = supabase.from('timesheets').select('*, project:projects(name, code), job:jobs(name)');
+    let query = supabase.from('wio_timesheets').select('*, project:projects(name, code), job:jobs(name)');
 
     if (options.memberId) query = query.eq('member_id', options.memberId);
     if (options.projectId) query = query.eq('project_id', options.projectId);
@@ -149,7 +149,7 @@ export async function fetchTimesheets(options: {
 
 export async function upsertTimesheet(ts: Record<string, unknown>) {
     const { data, error } = await supabase
-        .from('timesheets')
+        .from('wio_timesheets')
         .upsert(ts, { onConflict: 'member_id,job_id,work_date' })
         .select()
         .single();
@@ -187,7 +187,7 @@ export async function fetchMemberActiveJobs(memberId: string) {
 
 export async function fetchAllTimesheetsForMember(memberId: string) {
     const { data, error } = await supabase
-        .from('timesheets')
+        .from('wio_timesheets')
         .select('job_id, work_date, hours')
         .eq('member_id', memberId)
         .order('work_date', { ascending: true });
@@ -198,7 +198,7 @@ export async function fetchAllTimesheetsForMember(memberId: string) {
 // 특정 Job의 actual_hours를 timesheets 합계로 재계산하여 jobs 테이블에 반영
 export async function recalcActualHours(jobId: string): Promise<void> {
     const { data } = await supabase
-        .from('timesheets')
+        .from('wio_timesheets')
         .select('hours')
         .eq('job_id', jobId);
     const total = (data || []).reduce((s: number, r: { hours: number }) => s + (r.hours || 0), 0);

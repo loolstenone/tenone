@@ -323,6 +323,7 @@ export const modules: NavModule[] = [
                             // ── 브랜드 특화 ──
                             { name: "판매자 심사", href: "/intra/ums/jakka/sellers" },
                             { name: "마켓 관리", href: "/intra/ums/jakka/market" },
+                            { name: "정산 관리", href: "/intra/ums/jakka/settlements" },
                             { name: "쇼케이스 관리", href: "/intra/ums/jakka/showcases" },
                             { name: "광고 관리", href: "/intra/ums/jakka/notices" },
                             // ── 공통 탭 (마지막) ──

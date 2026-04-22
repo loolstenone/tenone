@@ -8,7 +8,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient();
     const body = await request.json();
 
-    const { data, error } = await supabase.from('approvals')
+    const { data, error } = await supabase.from('wio_approvals')
         .update({ ...body, updated_at: new Date().toISOString() })
         .eq('id', id).select().single();
 

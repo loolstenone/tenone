@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { MapPin, Calendar, Users, ArrowRight, ChevronLeft } from 'lucide-react';
+import { MapPin, Calendar, Users, ArrowRight, ChevronLeft, Settings } from 'lucide-react';
 import { fetchMadClubBySlug } from '@/lib/supabase/madleague';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const revalidate = 300;
 
@@ -40,16 +41,44 @@ export default async function ClubDetailPage({ params }: PageProps) {
   const totalMembers = cohorts.reduce((sum, c) => sum + (c.member_count ?? 0), 0);
   const accent = club.color ?? '#EC1D25';
 
+  // 회장 여부 확인 (관리 링크 노출용)
+  let canManage = false;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const adminClient = createAdminClient();
+      const { data: memberRow } = await adminClient.from('members').select('id').eq('auth_id', user.id).maybeSingle();
+      if (memberRow) {
+        const isPresident = club.president_member_id === memberRow.id;
+        const [staffRole, mentorRole] = await Promise.all([
+          adminClient.from('member_roles').select('role')
+            .eq('member_id', memberRow.id).in('role', ['staff', 'manager', 'super_admin']).eq('is_active', true).maybeSingle(),
+          adminClient.from('member_roles').select('role')
+            .eq('member_id', memberRow.id).eq('role', 'mentor').eq('context', 'brand:madleague').eq('is_active', true).maybeSingle(),
+        ]);
+        canManage = isPresident || !!staffRole.data || !!mentorRole.data;
+      }
+    }
+  } catch { /* 비로그인 시 무시 */ }
+
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
       {/* Back link */}
-      <div className="mx-auto max-w-7xl px-6 pt-8">
+      <div className="mx-auto max-w-7xl px-6 pt-8 flex items-center justify-between">
         <Link
           href="/madleague/clubs"
           className="inline-flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition"
         >
           <ChevronLeft className="h-4 w-4" /> 동아리 목록
         </Link>
+        {canManage && (
+          <Link
+            href={`/madleague/clubs/${slug}/manage`}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:border-neutral-400 hover:text-white transition"
+          >
+            <Settings className="h-3.5 w-3.5" /> 지원서 관리
+          </Link>
+        )}
       </div>
 
       {/* Hero */}

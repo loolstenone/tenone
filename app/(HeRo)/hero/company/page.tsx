@@ -62,10 +62,10 @@ export default function HeroCompanyHubPage() {
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-xs font-bold rounded-full mb-3" style={{ color: HERO_RED }}>
                         <Building2 className="h-3.5 w-3.5" /> 기업 회원 허브
                     </div>
-                    <h1 className="text-2xl font-extrabold mb-2">당신의 자리를 서술하세요</h1>
+                    <h1 className="text-2xl font-extrabold mb-2">찾고 있는 자리를 알려주세요</h1>
                     <p className="text-sm text-neutral-500">
-                        TIH로 자리의 이유를, JD로 자리의 실체를 적습니다.<br />
-                        HeRo가 당신의 고민과 맞닿는 영웅을 조용히 연결합니다.
+                        TIH에 조직의 상황과 필요한 사람의 결을, JD에 자리의 내용을 적어 주시면<br />
+                        HeRo가 조건에 맞는 인재를 찾아 연결해 드립니다.
                     </p>
                 </div>
 
@@ -105,16 +105,16 @@ export default function HeroCompanyHubPage() {
                                                     className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-rose-50 rounded-lg transition-colors">
                                                     <div className="flex items-center gap-2">
                                                         <FileText className="h-4 w-4 text-rose-500" />
-                                                        <span className="text-sm font-medium">JD 관리</span>
+                                                        <span className="text-sm font-medium">직무 설명 관리</span>
                                                     </div>
                                                     <ArrowRight className="h-3.5 w-3.5 text-neutral-400" />
                                                 </Link>
                                             </div>
 
-                                            {/* 매칭 인박스 */}
+                                            {/* 매칭 현황 */}
                                             {user?.id && c.hero_companies?.id && (
                                                 <div className="pt-4 border-t border-neutral-100">
-                                                    <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">받은 매칭 큐레이션</p>
+                                                    <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">매칭 현황</p>
                                                     <MatchingInbox side="company" memberId={user.id} companyId={c.hero_companies.id} accentColor="#E53935" />
                                                 </div>
                                             )}
@@ -152,7 +152,7 @@ export default function HeroCompanyHubPage() {
                                     </div>
                                     <div>
                                         <p className="font-semibold">기업 신규 등록</p>
-                                        <p className="text-xs text-neutral-500">우리 회사를 등록하고 영웅을 찾아보세요</p>
+                                        <p className="text-xs text-neutral-500">우리 회사를 등록하고 필요한 인재를 찾아보세요</p>
                                     </div>
                                 </div>
                                 <ArrowRight className="h-4 w-4 text-neutral-400" />
@@ -163,10 +163,10 @@ export default function HeroCompanyHubPage() {
 
                 {/* 안내 */}
                 <div className="mt-10 p-4 bg-neutral-100 border border-neutral-200 rounded-lg text-xs text-neutral-600 space-y-2">
-                    <p><strong>Matching Tetrad — 기업 측 입력:</strong></p>
-                    <p>• <strong>TIH</strong> (자리의 이유): 조직 현재, 고민, 3축 배분 · 22문항 · 7~8분</p>
-                    <p>• <strong>JD</strong> (자리의 실체): 7블록 서사 · 500~800자 · 영웅이 읽는 문서</p>
-                    <p className="text-neutral-400 mt-1">TIH와 JD는 함께 읽힙니다 — 둘 다 있어야 매칭 품질이 올라갑니다.</p>
+                    <p><strong>기업 측에서 작성하는 두 가지 문서</strong></p>
+                    <p>• <strong>TIH</strong> — 조직 상황과 원하는 사람의 결 (22문항, 약 7~8분)</p>
+                    <p>• <strong>직무 설명(JD)</strong> — 자리의 내용 (7개 블록, 500~800자)</p>
+                    <p className="text-neutral-400 mt-1">두 문서가 모두 있어야 매칭 정확도가 올라갑니다.</p>
                 </div>
             </div>
         </div>

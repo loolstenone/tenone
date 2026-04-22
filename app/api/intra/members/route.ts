@@ -46,17 +46,25 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 구독 정보 (active), 뉴스레터 구독자, UC 잔액 병렬 조회
-    const [subsRes, newslettersRes, ucBalancesRes] = await Promise.all([
+    // 구독 정보 (active), 뉴스레터 구독자, UC 잔액, member_roles 병렬 조회
+    const [subsRes, newslettersRes, ucBalancesRes, memberRolesRes] = await Promise.all([
         admin.from('subscriptions').select('member_id, service, plan').eq('status', 'active'),
         admin.from('newsletter_subscribers').select('email').eq('status', 'active'),
         admin.from('uc_balances').select('member_id, balance'),
+        admin.from('member_roles').select('member_id, role, context').eq('is_active', true),
     ]);
 
     const newsletterEmails = (newslettersRes.data ?? []).map((r: { email: string }) => r.email.toLowerCase());
     const ucMap: Record<string, number> = {};
     (ucBalancesRes.data ?? []).forEach((b: { member_id: string; balance: number }) => {
         ucMap[b.member_id] = b.balance;
+    });
+
+    // member_id → [{role, context}]
+    const rolesMap: Record<string, { role: string; context: string | null }[]> = {};
+    (memberRolesRes.data ?? []).forEach((r: { member_id: string; role: string; context: string | null }) => {
+        if (!rolesMap[r.member_id]) rolesMap[r.member_id] = [];
+        rolesMap[r.member_id].push({ role: r.role, context: r.context });
     });
 
     return NextResponse.json({
@@ -66,5 +74,6 @@ export async function GET(request: NextRequest) {
         totalMembersCount: totalCount ?? (members?.length ?? 0),
         newsletterCount: newsletterEmails.length,
         ucBalances: ucMap,
+        memberRoles: rolesMap,
     });
 }

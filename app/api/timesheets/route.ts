@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const weekStart = searchParams.get('weekStart');
     const projectId = searchParams.get('projectId');
 
-    let query = supabase!.from('timesheets')
+    let query = supabase!.from('wio_timesheets')
         .select('*, project:projects(id, code, name), job:jobs(id, code, name)');
 
     if (memberId) query = query.eq('member_id', memberId);
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         return errorResponse('1~100 entries allowed');
     }
 
-    const { data, error } = await supabase!.from('timesheets')
+    const { data, error } = await supabase!.from('wio_timesheets')
         .upsert(entries, { onConflict: 'member_id,job_id,work_date' })
         .select();
 

@@ -317,25 +317,25 @@ export default function HitCResultPage() {
             </div>
             <div className="bg-neutral-50 p-5 rounded-xl space-y-3">
               <div className="flex items-center gap-3">
-                <Briefcase className="h-4 w-4 text-[#E53935]" />
+                <Briefcase className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">경력 자본:</span> {result.capitalTotal}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Target className="h-4 w-4 text-[#E53935]" />
+                <Target className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">동기 유형:</span> {motivationInfo.label}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <TrendingUp className="h-4 w-4 text-[#E53935]" />
+                <TrendingUp className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">전환 가능성:</span> {result.transferabilityIndex}%
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <AlertTriangle className="h-4 w-4 text-[#E53935]" />
+                <AlertTriangle className="h-4 w-4 text-neutral-400" />
                 <p className="text-sm text-neutral-600">
                   <span className="font-bold">준비도:</span> {result.readinessGrade}등급 ({result.readinessTotal}%)
                 </p>

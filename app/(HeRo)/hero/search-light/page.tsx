@@ -9,7 +9,7 @@ const matchFlow = [
     {
         step: "TIH",
         name: "Trust · Intent · Hiring",
-        desc: "기업의 진짜 고민과 원하는 인재상을 22문항으로 파악합니다. JD가 자리의 스펙이라면, TIH는 자리의 이유입니다.",
+        desc: "조직의 상황과 필요한 사람의 결을 22문항으로 정리합니다. JD가 '어떤 자리인가'라면, TIH는 '왜 사람이 필요한가'를 담습니다.",
         icon: Lightbulb,
         color: "from-amber-500 to-orange-500",
     },
@@ -138,7 +138,7 @@ export default function SearchLightPage() {
                 </div>
 
                 {/* 텍스트 콘텐츠 — 좌하단 */}
-                <div className="relative flex flex-col justify-end h-screen pb-20 px-10 md:px-16" style={{ zIndex: 20, maxWidth: "600px" }}>
+                <div className="relative flex flex-col justify-end h-screen pb-20 px-10 md:px-16" style={{ zIndex: 20, maxWidth: "640px" }}>
                     <p className="text-[10px] tracking-[0.3em] uppercase text-red-400/70 mb-5 font-medium">
                         Search Light
                     </p>
@@ -149,13 +149,19 @@ export default function SearchLightPage() {
                         단순 JD 등록이 아닙니다.<br />
                         기업의 진짜 고민과 원하는 인재상을 연결합니다.
                     </p>
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-3">
                         <Link
                             href="/hero/search-light/tih"
-                            className="flex items-center gap-2 px-8 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
+                            className="flex items-center gap-2 px-7 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            인재 찾기 의뢰 <ArrowRight className="h-4 w-4" />
+                            인재 찾기 의뢰 · 기업 <ArrowRight className="h-4 w-4" />
+                        </Link>
+                        <Link
+                            href="/hero/jh/write"
+                            className="flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg backdrop-blur-sm border border-white/20 transition-colors"
+                        >
+                            희망 직무 작성 · 구직자 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -182,21 +188,6 @@ export default function SearchLightPage() {
                         ))}
                     </div>
 
-                    {/* Tetrad diagram (text) */}
-                    <div className="bg-[#0a0a14] rounded-xl p-6 text-center">
-                        <p className="text-xs text-neutral-500 mb-4 font-mono">MATCHING TETRAD · TIH × HIT · JD × JH</p>
-                        <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto text-sm">
-                            <div className="text-right space-y-2">
-                                <div className="text-amber-400 font-bold">TIH</div>
-                                <div className="text-sky-400 font-bold">JD</div>
-                            </div>
-                            <div className="border-l border-neutral-700 pl-4 space-y-2">
-                                <div className="text-red-400 font-bold">HIT ←→</div>
-                                <div className="text-purple-400 font-bold">JH ←→</div>
-                            </div>
-                        </div>
-                        <p className="text-xs text-neutral-600 mt-4">기업 측 · · · · · · · · · · · · · · · 인재 측</p>
-                    </div>
                 </div>
             </section>
 
@@ -225,7 +216,7 @@ export default function SearchLightPage() {
             <section className="py-20 bg-neutral-50">
                 <div className="mx-auto max-w-4xl px-6">
                     <div className="text-center mb-10">
-                        <h2 className="text-2xl font-bold mb-3">TIH 검사란?</h2>
+                        <h2 className="text-2xl font-bold mb-3">TIH 작성이란?</h2>
                         <p className="text-neutral-500 text-sm max-w-xl mx-auto">
                             Trust · Intent · Hiring — 기업의 고민을 22문항으로 구조화합니다. 7~8분 소요.
                         </p>
@@ -251,13 +242,19 @@ export default function SearchLightPage() {
                         ))}
                     </div>
 
-                    <div className="text-center">
+                    <div className="flex flex-wrap items-center justify-center gap-3">
                         <Link
                             href="/hero/search-light/tih"
-                            className="inline-flex items-center gap-2 px-8 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center gap-2 px-7 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            인재 찾기 의뢰 <ArrowRight className="h-4 w-4" />
+                            인재 찾기 의뢰 · 기업 <ArrowRight className="h-4 w-4" />
+                        </Link>
+                        <Link
+                            href="/hero/jh/write"
+                            className="inline-flex items-center gap-2 px-7 py-3 border border-neutral-300 text-neutral-800 font-bold rounded-lg hover:bg-neutral-50 transition-colors"
+                        >
+                            희망 직무 작성 · 구직자 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>

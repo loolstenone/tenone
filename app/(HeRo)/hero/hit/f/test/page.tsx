@@ -1,13 +1,10 @@
 "use client";
 
 import { Suspense } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
-import {
-  hitFModules,
-  allFQuestions,
-} from "@/lib/hit/data/f-questions";
+import { createClient } from "@/lib/supabase/client";
 import { JOB_VELOCITY_TABLE } from "@/lib/hit/cvi";
 
 type FModuleType = 'break_context' | 'latent_skills' | 'resilience' | 'reentry';
@@ -38,6 +35,8 @@ const TRANSITION_MESSAGES: Record<string, string> = {
   'resilience\u2192reentry': '마지막! 재진입 준비도를 확인합니다',
 };
 
+const MODULE_ORDER: FModuleType[] = ['break_context', 'latent_skills', 'resilience', 'reentry'];
+
 const AVG_SECONDS_PER_QUESTION = 6;
 
 const LIKERT_LABELS = ['매우\n비동의', '보통', '매우\n동의'];
@@ -67,6 +66,15 @@ const JOB_CATEGORIES = Object.entries(JOB_VELOCITY_TABLE)
     return { value: key, label: labels[key] || key };
   });
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function HitFTestContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -80,32 +88,7 @@ function HitFTestContent() {
   const [breakMonths, setBreakMonths] = useState<number>(0);
   const [jobCategory, setJobCategory] = useState<string>('');
 
-  // Shuffle function
-  const shuffle = <T,>(arr: T[]): T[] => {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  };
-
-  // Build question list -- grouped by module, shuffled within each module
-  const allQuestions = useMemo<QuestionItem[]>(() => {
-    const result: QuestionItem[] = [];
-    for (const mod of hitFModules) {
-      const tagged: QuestionItem[] = mod.questions.map((q) => ({
-        module: mod.key as FModuleType,
-        id: q.id,
-        text: q.text,
-        subscale: q.subscale,
-        reverse: q.reverse,
-      }));
-      result.push(...shuffle(tagged));
-    }
-    return result;
-  }, []);
-
+  const [allQuestions, setAllQuestions] = useState<QuestionItem[]>([]);
   const [responses, setResponses] = useState<Map<string, Response>>(new Map());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,10 +102,35 @@ function HitFTestContent() {
   const currentModule = currentQuestion?.module ?? 'break_context';
   const answeredCount = responses.size;
 
-  // Restore session on mount
+  // Load questions from DB then restore session
   useEffect(() => {
-    if (!sessionToken) { setIsRestored(true); return; }
-    async function restoreSession() {
+    async function init() {
+      const sb = createClient();
+      const { data: rows } = await sb
+        .from('hit_questions')
+        .select('id, module, question_text, sub_domain, reverse_scored')
+        .eq('test_type', 'F')
+        .order('module')
+        .order('question_index');
+
+      if (!rows) { setIsRestored(true); return; }
+
+      const grouped = new Map<FModuleType, QuestionItem[]>(MODULE_ORDER.map((m) => [m, []]));
+      for (const row of rows) {
+        const mod = row.module as FModuleType;
+        grouped.get(mod)?.push({
+          module: mod,
+          id: row.id,
+          text: row.question_text,
+          subscale: row.sub_domain ?? '',
+          reverse: row.reverse_scored ?? false,
+        });
+      }
+      const questions: QuestionItem[] = [];
+      for (const mod of MODULE_ORDER) questions.push(...shuffle(grouped.get(mod)!));
+      setAllQuestions(questions);
+
+      if (!sessionToken) { setIsRestored(true); return; }
       try {
         const res = await fetch(`/api/hit/f/session/${sessionToken}`);
         if (res.ok) {
@@ -134,10 +142,8 @@ function HitFTestContent() {
               restored.set(r.question_id, { selectedOption: r.selected_option, optionValue: r.option_value });
             }
             setResponses(restored);
-            const firstUnanswered = allQuestions.findIndex((q) => !restored.has(q.id));
-            if (firstUnanswered >= 0) {
-              setCurrentIndex(firstUnanswered);
-            }
+            const firstUnanswered = questions.findIndex((q) => !restored.has(q.id));
+            if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
           }
         }
       } catch {
@@ -146,8 +152,8 @@ function HitFTestContent() {
         setIsRestored(true);
       }
     }
-    restoreSession();
-  }, [sessionToken, allQuestions]);
+    init();
+  }, [sessionToken]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -237,7 +243,6 @@ function HitFTestContent() {
 
       fireAndForgetSave(q.id, q.module, currentIndex, likertValue - 1, optionValue);
 
-      // Auto-advance after 400ms
       if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
 
       autoAdvanceTimer.current = setTimeout(() => {
@@ -269,11 +274,9 @@ function HitFTestContent() {
   const remainingQuestions = total - answeredCount;
   const estimatedMinutes = Math.max(1, Math.ceil((remainingQuestions * AVG_SECONDS_PER_QUESTION) / 60));
 
-  // Get current Likert value for current question
   const currentResponse = currentQuestion ? responses.get(currentQuestion.id) : undefined;
   const currentLikertValue = currentResponse ? currentResponse.selectedOption + 1 : null;
 
-  // Progress percent
   const progressPercent = total > 0 ? (answeredCount / total) * 100 : 0;
 
   if (!sessionToken) {
@@ -408,7 +411,6 @@ function HitFTestContent() {
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
-          {/* Back button */}
           {currentIndex > 0 && (
             <button
               type="button"
@@ -422,7 +424,6 @@ function HitFTestContent() {
 
           {currentQuestion && (
             <div className="transition-opacity duration-200">
-              {/* Question */}
               <div className="text-center mb-10">
                 <span className="inline-block px-3 py-1 rounded-full bg-neutral-100 text-xs text-neutral-500 font-medium mb-4">
                   Q{currentIndex + 1}
@@ -432,7 +433,6 @@ function HitFTestContent() {
                 </p>
               </div>
 
-              {/* Likert Scale -- inline */}
               <div className="max-w-md mx-auto">
                 <div className="w-full">
                   <div className="flex items-center justify-between gap-1.5 sm:gap-2">

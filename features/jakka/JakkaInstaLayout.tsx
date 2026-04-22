@@ -121,7 +121,7 @@ function MobileAuthButton() {
         <>
             <button
                 onClick={() => setLoginOpen(true)}
-                className="text-[12px] font-semibold border border-neutral-900 px-3 py-1 hover:bg-neutral-900 hover:text-white transition-colors"
+                className="text-[13px] font-bold text-neutral-900 hover:text-neutral-500 transition-colors"
             >
                 로그인
             </button>
