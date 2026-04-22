@@ -82,40 +82,42 @@ export function HeRoHeader() {
 
             {/* Mobile menu */}
             {mobileOpen && (
-                <div className="lg:hidden bg-white border-t border-neutral-200 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors py-1",
-                                isActive(item.href)
-                                    ? "text-[#E53935]"
-                                    : "text-neutral-500 hover:text-neutral-900"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <Link
-                        href="/hero/about"
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-sm font-medium text-neutral-500 hover:text-neutral-900 py-1"
-                    >
-                        About
-                    </Link>
-                    <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
+                <div className="lg:hidden bg-white border-t border-neutral-200 px-6 py-6">
+                    <div className="flex flex-col items-end space-y-3">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setMobileOpen(false)}
+                                className={clsx(
+                                    "text-sm font-medium transition-colors py-1",
+                                    isActive(item.href)
+                                        ? "text-[#E53935]"
+                                        : "text-neutral-500 hover:text-neutral-900"
+                                )}
+                            >
+                                {item.name}
                             </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#E53935] text-white hover:bg-red-700 rounded">가입</Link>
-                            </>
-                        )}
+                        ))}
+                        <Link
+                            href="/hero/about"
+                            onClick={() => setMobileOpen(false)}
+                            className="text-sm font-medium text-neutral-500 hover:text-neutral-900 py-1"
+                        >
+                            About
+                        </Link>
+                        <div className="pt-4 mt-4 border-t border-neutral-200 w-full flex items-center justify-end gap-4">
+                            {isAuthenticated ? (
+                                <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
+                                    <User className="h-4 w-4" /> 마이페이지
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
+                                    <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#E53935] text-white hover:bg-red-700 rounded">가입</Link>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
