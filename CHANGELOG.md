@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-22 (세션 76) — Intra Universe 브랜드별 관리 체계 전면 구축
+
+### 신규 파일 (45개)
+- `lib/intra-nav.ts` — 전 브랜드 children 탭 구조 정의 (badge:soon 제거 → 탭 배열 추가)
+- `app/intra/gravity/cs/page.tsx` — Brand Gravity™ 고객문의
+- `app/intra/gravity/revenue/page.tsx` — Brand Gravity™ 손익관리 (3Phase 로드맵)
+- `app/intra/hero/page.tsx` — HeRo 대시보드 리팩 (stats + 빠른 이동)
+- `app/intra/hero/cs/page.tsx` — HeRo 고객문의
+- `app/intra/ums/jakka/members/page.tsx` — JAKKA 회원(창작자) 관리 분리
+- `app/intra/ums/jakka/cs/page.tsx` — JAKKA 고객문의
+- `app/intra/ums/madleague/members/page.tsx` — MADLeague 회원 관리 분리
+- `app/intra/ums/madleague/applications/page.tsx` — MADLeague 심사 관리
+- `app/intra/ums/madleague/articles/page.tsx` — MADLeague 콘텐츠 관리
+- `app/intra/ums/madleague/cs/page.tsx` — MADLeague 고객문의
+- `app/intra/ums/mindle/revenue/page.tsx` — Mindle 손익관리 (뉴스레터 구독 stats)
+- `app/intra/ums/mindle/cs/page.tsx` — Mindle 고객문의
+- `app/intra/ums/rook/` — RooK 대시보드·회원·커뮤니티·CS 4파일
+- `app/intra/ums/townity/` — Townity 대시보드·회원·모임·커뮤니티·CS 5파일
+- `app/intra/ums/domo/` — Domo 대시보드·회원·심사·모임·CS 5파일
+- P4 브랜드 16개 대시보드 stub: 0gamja/ChangeUp/Dokdae/FWN/Korea360/LUKI/MADLeap/MoNTZ/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/SmarComm/TrendHunter/YouInOne
+
+### 결정사항
+- 공통 탭 순서 표준: 대시보드(1) → 회원관리(2) → 손익관리(결제 있는 브랜드만) → 브랜드 특화 → 고객문의(마지막)
+- P4 브랜드는 nav 탭 구조만 확정하고 실제 데이터 페이지는 추후 구현 (stub + badge:soon)
+- `.then(({ data }) =>` 패턴 → `.then(res =>` 로 TS strict 모드 대응
+
+---
+
 ## 2026-04-22 (세션 75) — HeRo TIH UX 전면 정비
 
 ### 수정 파일

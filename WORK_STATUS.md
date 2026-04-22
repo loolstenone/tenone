@@ -1,14 +1,29 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 75 — HeRo TIH UX 전면 정비)
+> 마지막 업데이트: 2026-04-22 (세션 76 — Intra Universe 브랜드별 관리 체계 전면 구축)
 
 ## 다음 할 일 (이어서 시작 지점)
+
+### 🔴 세션 76 이월 — P4 브랜드 서브 페이지 구현
+- 16개 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/MADLeap/MoNTZ/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/SmarComm/TrendHunter/YouInOne) 대시보드 stub → 실제 데이터 연동
+  - 우선순위: YouInOne(승인멤버십), MADLeap(교육), MoNTZ(포트폴리오), SmarComm(구독손익)
+- Badak: `대시보드` 탭 실제 구현 (현재 group/posts/needs 탭만 있고 대시보드 stub 없음)
+- HeRo: `/intra/hero/talent` 페이지 실제 구현 (회원 목록, HIT 이용자 현황)
 
 ### 🔴 세션 75 이월 — TIH 제출 에러 최종 확인
 - ⚠️ **TIH 500 에러**: `createAdminClient` 전환 fix 배포 완료, 실기기 제출 테스트 미완
   - 테스트 후 성공 → `app/api/hero/tih/route.ts` debug `console.error` 3줄 제거
   - 테스트 후 실패 → Vercel 로그 확인 (이미 상세 출력 심어둠)
 - `/hero/coaching/ai` 결제 PG 연동 — **사업 시작 시점으로 보류** (Stripe/Toss)
+
+### ✅ 세션 76 — Intra Universe 브랜드별 관리 체계 전면 구축 (2026-04-22)
+- ✅ **공통 탭 순서 표준** 확립: 대시보드→회원관리→손익관리→브랜드특화→고객문의
+- ✅ **Brand Gravity™**: 손익관리·고객문의 신설 + nav 탭 5개(대시보드/클라이언트/손익/브리프/CS)
+- ✅ **RooK**: 대시보드·회원관리·커뮤니티·고객문의 4탭 신설
+- ✅ **Townity**: 대시보드·회원관리·모임관리·커뮤니티·고객문의 5탭 신설
+- ✅ **Domo**: 대시보드·회원관리·심사관리·모임관리·고객문의 5탭 신설 (승인멤버십)
+- ✅ **P4 16개 브랜드** nav children 탭 구조 정의 + 대시보드 stub 페이지 생성
+- ✅ **빌드 검증**: exit code 0
 
 ### ✅ 세션 75 — HeRo TIH UX 전면 정비 (2026-04-22)
 - ✅ **씨치 라이트**: 버튼명 "인재 찾기 의뢰" / "사전 등록" 섹션 전면 제거
