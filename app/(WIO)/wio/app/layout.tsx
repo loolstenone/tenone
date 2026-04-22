@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, LogOut, Settings, Menu, X, KeyRound, ExternalLink,
@@ -53,8 +53,7 @@ function demoTenant(): WIOTenant {
 export default function WIOAppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const forceDemoMode = searchParams.get('mode') === 'demo';
+  const forceDemoMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'demo';
   const [tenant, setTenant] = useState<WIOTenant | null>(null);
   const [member, setMember] = useState<WIOMember | null>(null);
   const [loading, setLoading] = useState(true);
