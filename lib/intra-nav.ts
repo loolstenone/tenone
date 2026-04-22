@@ -293,18 +293,19 @@ export const modules: NavModule[] = [
                     {
                         name: "HeRo", href: "/intra/hero", icon: Globe,
                         children: [
-                            // ── 공통 탭 (순서 고정) ──
+                            // ── 공통 ──
                             { name: "대시보드", href: "/intra/hero" },
-                            { name: "회원 관리", href: "/intra/hero/talent" },
-                            // ── 브랜드 특화 ──
-                            { name: "HIT 이용자", href: "/intra/hero/hit" },
-                            { name: "HIT 구성", href: "/intra/hero/hit/structure" },
-                            { name: "HIT 질문", href: "/intra/hero/hit/questions" },
+                            { name: "인재 풀", href: "/intra/hero/talent" },
+                            // ── 기업 (Phase 1) ──
+                            { name: "기업 풀", href: "/intra/hero/companies" },
+                            { name: "TIH 요청", href: "/intra/hero/search-light" },
+                            // ── 검사 (HIT) ──
+                            { name: "HIT 현황", href: "/intra/hero/hit" },
+                            // ── 보조 ──
                             { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서", href: "/intra/hero/resume" },
                             { name: "커리어", href: "/intra/hero/career" },
-                            { name: "씨치 라이트", href: "/intra/hero/search-light" },
-                            // ── 공통 탭 (마지막 고정) ──
+                            // ── 공통 (마지막) ──
                             { name: "고객 문의", href: "/intra/hero/cs" },
                         ],
                     },
