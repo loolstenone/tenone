@@ -8,7 +8,7 @@
 - ⚠️ **TIH 500 에러**: `createAdminClient` 전환 fix 배포 완료, 실기기 제출 테스트 미완
   - 테스트 후 성공 → `app/api/hero/tih/route.ts` debug `console.error` 3줄 제거
   - 테스트 후 실패 → Vercel 로그 확인 (이미 상세 출력 심어둠)
-- `/hero/coaching/ai` 결제 PG 연동 (이월 유지)
+- `/hero/coaching/ai` 결제 PG 연동 — **사업 시작 시점으로 보류** (Stripe/Toss)
 
 ### ✅ 세션 75 — HeRo TIH UX 전면 정비 (2026-04-22)
 - ✅ **씨치 라이트**: 버튼명 "인재 찾기 의뢰" / "사전 등록" 섹션 전면 제거
