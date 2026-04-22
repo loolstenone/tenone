@@ -87,6 +87,29 @@ Tetrad 매칭 설계(TIH × HIT + JD × JH)를 실제 DB·인프라로 구현. �
                                           매칭 엔진 대상
 ```
 
+### Phase 4 매칭 엔진 v1 (추가)
+
+**벡터 추출 트리거 (DB 배포):**
+- `extract_tih_vectors()`: TIH JSONB → Section 0/2/3 파생 컬럼 + risk_flags (블랙 플래그)
+- `extract_jh_axes()`: JH 12문항 → derived_axes JSONB (12 키 표준화)
+- `extract_jd_vector()`: JD blocks → derived_vector (품질/구조 지표)
+
+**매칭 엔진 SQL 함수 (DB 배포):**
+- `hero_match_candidates_for_tih(_tih_id)`: 기업→인재 후보 + 점수 breakdown
+- `hero_match_candidates_for_jh(_jh_id)`: 인재→기업 역방향 큐레이션
+
+**블랙 플래그 자동 감지:**
+- TIH Section 4 q2(이탈 사유), q3(의사결정 속도), q5(실수 대응) → risk_flags
+- JH avoid_traits 교차 체크 → conflict 문자열 (blame_culture vs avoid_a 등)
+
+**신규 파일:**
+- `sql/hero-matching-vectors.sql`
+- `sql/hero-matching-engine-v1.sql`
+- `app/intra/hero/matching/page.tsx` — TIH 클릭 → RPC로 실시간 후보 계산 · 점수 breakdown · 블랙 플래그 경고
+
+**대시보드:**
+- HeRo Intra 대시보드에 Tetrad 지표 4개 + Funnel 가시화 추가
+
 ---
 
 ## 2026-04-22 (세션 77) — Priority 4브랜드 실데이터 연동 + 빌드 에러 수정
