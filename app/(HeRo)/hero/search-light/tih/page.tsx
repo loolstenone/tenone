@@ -1,27 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, ArrowLeft, CheckCircle, Lightbulb } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, Lightbulb, Pointer } from "lucide-react";
 import { INDUSTRIES, JOB_FUNCTIONS } from "@/lib/badak-constants";
 
 const HERO_RED = "#E53935";
 
-const heroTracks = [
-    "마케팅 / 브랜드 (CMO 트랙)",
-    "기술 / 개발 (CTO 트랙)",
-    "전략 / 기획 (CSO 트랙)",
-    "사업 / 영업 (CBO 트랙)",
-    "HR / 조직",
-    "파이낸스 / 재무",
-    "UX / 디자인",
-    "데이터 / AI",
-    "콘텐츠 / 크리에이티브",
-    "PM / 프로덕트",
-];
-
 const sPowers = ["주도", "실행", "창의", "관계", "분석", "조화", "돌파", "수호"];
 
-type Section0 = { industry: string; jobFunction: string; track: string };
+type Section0 = { industry: string; jobFunction: string };
 type Section1 = { q1: string; q2: string; q3: string; q4: string };
 type Section2 = { guardian: number; pioneer: number; connector: number };
 type Section3 = { q1: string; q2_a: string; q2_b: string; q3: string; q4: string; q5: string; q6: string };
@@ -43,7 +30,7 @@ interface TIHData {
 }
 
 const INIT: TIHData = {
-    s0: { industry: "", jobFunction: "", track: "" },
+    s0: { industry: "", jobFunction: "" },
     s1: { q1: "", q2: "", q3: "", q4: "" },
     s2: { guardian: 33, pioneer: 34, connector: 33 },
     s3: { q1: "", q2_a: "", q2_b: "", q3: "", q4: "", q5: "", q6: "" },
@@ -118,7 +105,7 @@ export default function TIHTestPage() {
     const s2Total = data.s2.guardian + data.s2.pioneer + data.s2.connector;
 
     const canNext = (): boolean => {
-        if (step === 0) return !!(data.s0.industry && data.s0.jobFunction && data.s0.track);
+        if (step === 0) return !!(data.s0.industry && data.s0.jobFunction);
         if (step === 1) return !!(data.s1.q1 && data.s1.q2 && data.s1.q3 && data.s1.q4);
         if (step === 2) return s2Total === 100;
         if (step === 3) return !!(data.s3.q1 && data.s3.q2_a && data.s3.q2_b && data.s3.q3 && data.s3.q4 && data.s3.q5 && data.s3.q6);
@@ -182,7 +169,7 @@ export default function TIHTestPage() {
                 {/* ── Step 0: 포지션 분류 ── */}
                 {step === 0 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 0 · 포지션 분류</h2>
+                        <h2 className="text-xl font-bold mb-1">포지션 분류</h2>
                         <p className="text-sm text-neutral-500 mb-8">어떤 자리를 찾고 계신가요?</p>
 
                         <div className="space-y-6">
@@ -202,14 +189,6 @@ export default function TIHTestPage() {
                                     {JOB_FUNCTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold mb-2">HeRo 트랙</label>
-                                <select value={data.s0.track} onChange={(e) => update("s0", { track: e.target.value })}
-                                    className="w-full border border-neutral-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                                    <option value="">선택해 주세요</option>
-                                    {heroTracks.map((t) => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                            </div>
                         </div>
                     </div>
                 )}
@@ -217,12 +196,12 @@ export default function TIHTestPage() {
                 {/* ── Step 1: 고민의 지형 ── */}
                 {step === 1 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 1 · 고민의 지형</h2>
+                        <h2 className="text-xl font-bold mb-1">고민의 지형</h2>
                         <p className="text-sm text-neutral-500 mb-8">지금 조직이 서 있는 지점을 솔직하게 골라 주세요.</p>
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-1-1. 지금 조직이 서 있는 지점에 가장 가까운 것은?</p>
+                                <p className="text-sm font-semibold mb-3">지금 조직이 서 있는 지점에 가장 가까운 것은?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "지키는 국면 — 있는 것을 흔들림 없이 돌려야 한다" },
@@ -234,7 +213,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-1-2. 이 자리를 열게 만든 실제 고민을 한 줄로 고른다면?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리를 열게 만든 실제 고민을 한 줄로 고른다면?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "일이 안 돌아간다" },
@@ -248,7 +227,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-1-3. 이 자리에 오는 사람이 팀에 미칠 영향을 어떻게 상상하시나요?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리에 오는 사람이 팀에 미칠 영향을 어떻게 상상하시나요?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "조용히 자리를 채워주길 바란다" },
@@ -260,7 +239,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-1-4. 이 사람과 함께하고 싶은 시간의 길이는?</p>
+                                <p className="text-sm font-semibold mb-3">이 사람과 함께하고 싶은 시간의 길이는?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "당면한 문제 해결까지 (프로젝트성)" },
@@ -277,22 +256,45 @@ export default function TIHTestPage() {
                 {/* ── Step 2: 3축 배분 ── */}
                 {step === 2 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 2 · 3축 배분</h2>
-                        <p className="text-sm text-neutral-500 mb-8">이 자리에 오는 사람에게 100점을 나눠 담는다면? (총합 100점 고정)</p>
+                        <h2 className="text-xl font-bold mb-1">3축 배분</h2>
+                        <p className="text-sm text-neutral-500 mb-2">이 자리에 오는 사람에게 100점을 나눠 담는다면?</p>
+                        <div className="flex items-center gap-1.5 text-xs text-neutral-400 mb-6">
+                            <Pointer className="h-3.5 w-3.5" />
+                            <span>슬라이더를 좌우로 드래그해 조절하세요 · 세 축의 합이 자동으로 100점 유지됩니다</span>
+                        </div>
 
-                        <div className="space-y-6">
+                        {/* 분배 시각화 바 */}
+                        <div className="flex rounded-full overflow-hidden h-4 mb-8 gap-0.5">
+                            <div className="transition-all duration-200" style={{ width: `${data.s2.guardian}%`, backgroundColor: "#E53935" }} />
+                            <div className="transition-all duration-200" style={{ width: `${data.s2.pioneer}%`, backgroundColor: "#FF7043" }} />
+                            <div className="transition-all duration-200" style={{ width: `${data.s2.connector}%`, backgroundColor: "#FFA726" }} />
+                        </div>
+                        <div className="flex text-xs mb-6 gap-4">
                             {[
-                                { key: "guardian" as const, label: "수호자", desc: "맡은 일에 충실하고 기준을 지킨다" },
-                                { key: "pioneer" as const, label: "개척자", desc: "없던 것을 만들고 뚫어낸다" },
-                                { key: "connector" as const, label: "결속자", desc: "사람과 관계를 잇고 팀을 묶는다" },
-                            ].map(({ key, label, desc }) => (
+                                { key: "guardian" as const, label: "수호자", color: "#E53935" },
+                                { key: "pioneer" as const, label: "개척자", color: "#FF7043" },
+                                { key: "connector" as const, label: "결속자", color: "#FFA726" },
+                            ].map(({ key, label, color }) => (
+                                <div key={key} className="flex items-center gap-1">
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                                    <span className="text-neutral-500">{label} <span className="font-bold text-neutral-700">{data.s2[key]}점</span></span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-7">
+                            {[
+                                { key: "guardian" as const, label: "수호자", desc: "맡은 일에 충실하고 기준을 지킨다", color: "#E53935" },
+                                { key: "pioneer" as const, label: "개척자", desc: "없던 것을 만들고 뚫어낸다", color: "#FF7043" },
+                                { key: "connector" as const, label: "결속자", desc: "사람과 관계를 잇고 팀을 묶는다", color: "#FFA726" },
+                            ].map(({ key, label, desc, color }) => (
                                 <div key={key}>
                                     <div className="flex items-center justify-between mb-2">
                                         <div>
                                             <span className="font-semibold text-sm">{label}</span>
-                                            <span className="text-xs text-neutral-500 ml-2">{desc}</span>
+                                            <span className="text-xs text-neutral-400 ml-2">{desc}</span>
                                         </div>
-                                        <span className="text-lg font-black" style={{ color: HERO_RED }}>{data.s2[key]}점</span>
+                                        <span className="text-xl font-black tabular-nums" style={{ color }}>{data.s2[key]}</span>
                                     </div>
                                     <input
                                         type="range"
@@ -311,18 +313,15 @@ export default function TIHTestPage() {
                                                     ? Math.max(0, remaining - others.slice(0, -1).reduce((a, ok) => a + updated[ok], 0))
                                                     : Math.max(0, Math.round(data.s2[k] * ratio));
                                             });
-                                            // 반올림 오차 보정
                                             const diff = 100 - (updated.guardian + updated.pioneer + updated.connector);
                                             if (diff !== 0) updated[others[others.length - 1]] += diff;
                                             update("s2", updated);
                                         }}
-                                        className="w-full accent-red-600"
+                                        className="w-full"
+                                        style={{ accentColor: color }}
                                     />
                                 </div>
                             ))}
-                            <div className={`text-center text-sm font-bold py-2 rounded-lg ${s2Total === 100 ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
-                                총합 {s2Total}점 {s2Total === 100 ? "✓" : `(${s2Total > 100 ? s2Total - 100 + "점 초과" : 100 - s2Total + "점 부족"})`}
-                            </div>
                         </div>
                     </div>
                 )}
@@ -330,12 +329,12 @@ export default function TIHTestPage() {
                 {/* ── Step 3: 자리의 구체 ── */}
                 {step === 3 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 3 · 자리의 구체</h2>
+                        <h2 className="text-xl font-bold mb-1">자리의 구체</h2>
                         <p className="text-sm text-neutral-500 mb-8">이 자리에서 원하는 역할의 구체적인 모습</p>
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-1. 이 자리의 결정 권한 범위는?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리의 결정 권한 범위는?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "주어진 일의 실행" },
@@ -347,7 +346,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-2. 가장 필요한 힘 (S-Power 8축 중 택2)</p>
+                                <p className="text-sm font-semibold mb-3">가장 필요한 힘 (S-Power 8축 중 택2)</p>
                                 <div className="grid grid-cols-4 gap-2">
                                     {sPowers.map((sp) => {
                                         const sel = data.s3.q2_a === sp || data.s3.q2_b === sp;
@@ -379,7 +378,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-3. 반대로 과하면 곤란한 축</p>
+                                <p className="text-sm font-semibold mb-3">반대로 과하면 곤란한 축</p>
                                 <div className="grid grid-cols-4 gap-2">
                                     {[...sPowers, "없음"].map((sp) => (
                                         <button key={sp} type="button" onClick={() => update("s3", { q3: sp })}
@@ -392,7 +391,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-4. 반응 스타일</p>
+                                <p className="text-sm font-semibold mb-3">반응 스타일</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "빠르게 판단하고 돌파" },
@@ -404,7 +403,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-5. 일을 풀어가는 방식</p>
+                                <p className="text-sm font-semibold mb-3">일을 풀어가는 방식</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "구체적 사실·데이터 중심" },
@@ -414,7 +413,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-3-6. 직속 리더 스타일</p>
+                                <p className="text-sm font-semibold mb-3">직속 리더 스타일</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "지시 명확·성과 지향" },
@@ -431,12 +430,12 @@ export default function TIHTestPage() {
                 {/* ── Step 4: 일하는 결 ── */}
                 {step === 4 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 4 · 일하는 결</h2>
+                        <h2 className="text-xl font-bold mb-1">일하는 결</h2>
                         <p className="text-sm text-neutral-500 mb-8">조직 환경을 솔직하게 묘사해 주세요.</p>
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-1. 이 팀에서 일하는 리듬</p>
+                                <p className="text-sm font-semibold mb-3">이 팀에서 일하는 리듬</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "단거리 스프린트가 반복된다" },
@@ -448,7 +447,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-2. 이 자리에 먼저 있던 분은 지금 어떻게 지내시는지?</p>
+                                <p className="text-sm font-semibold mb-3">이 자리에 먼저 있던 분은 지금 어떻게 지내시는지?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "내부 다른 역할로 이동" },
@@ -462,7 +461,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-3. 의사결정이 이 조직에서 움직이는 속도는?</p>
+                                <p className="text-sm font-semibold mb-3">의사결정이 이 조직에서 움직이는 속도는?</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "사안에 따라 다르지만 필요시 즉시" },
@@ -474,7 +473,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-4. 구성원이 개인 시간을 쓰는 방식</p>
+                                <p className="text-sm font-semibold mb-3">구성원이 개인 시간을 쓰는 방식</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "자유롭다" },
@@ -486,7 +485,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-5. 리더와 구성원 사이의 거리감</p>
+                                <p className="text-sm font-semibold mb-3">리더와 구성원 사이의 거리감</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "수평·친구 같다" },
@@ -498,7 +497,7 @@ export default function TIHTestPage() {
                             </div>
 
                             <div>
-                                <p className="text-sm font-semibold mb-3">TIH-4-6. 실수가 생겼을 때 팀이 반응하는 첫 움직임</p>
+                                <p className="text-sm font-semibold mb-3">실수가 생겼을 때 팀이 반응하는 첫 움직임</p>
                                 <div className="space-y-2">
                                     {[
                                         { v: "a", l: "원인을 함께 복기한다" },
@@ -515,7 +514,7 @@ export default function TIHTestPage() {
                 {/* ── Step 5: 피하고 싶은 유형 ── */}
                 {step === 5 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 5 · 피하고 싶은 유형</h2>
+                        <h2 className="text-xl font-bold mb-1">피하고 싶은 유형</h2>
                         <p className="text-sm text-neutral-500 mb-8">솔직할수록 매칭의 정확도가 높아집니다.</p>
                         <div className="space-y-2">
                             {[
@@ -531,7 +530,7 @@ export default function TIHTestPage() {
                 {/* ── Step 6: 한 줄 묘사 (선택) ── */}
                 {step === 6 && (
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Section 6 · 한 줄 묘사 <span className="text-sm font-normal text-neutral-400">(선택)</span></h2>
+                        <h2 className="text-xl font-bold mb-1">한 줄 묘사 <span className="text-sm font-normal text-neutral-400">(선택)</span></h2>
                         <p className="text-sm text-neutral-500 mb-8">
                             이 사람을 한 줄로 묘사한다면? AI가 위 구조에 덧입혀 미세 가중치를 조정합니다.
                         </p>
