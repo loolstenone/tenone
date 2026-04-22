@@ -260,6 +260,7 @@ export const modules: NavModule[] = [
                             { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서 이용자", href: "/intra/hero/resume" },
                             { name: "커리어 이용자", href: "/intra/hero/career" },
+                            { name: "씨치 라이트", href: "/intra/hero/search-light" },
                         ],
                     },
                     {

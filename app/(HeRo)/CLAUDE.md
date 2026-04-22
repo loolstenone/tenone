@@ -74,8 +74,10 @@
 | `app/(HeRo)/hero/hit/[type]/test/page.tsx` | 검사 실시 페이지 |
 | `app/(HeRo)/hero/hit/[type]/result/[id]/page.tsx` | 검사 결과 (A~F 각각 별도 구현) |
 | `app/(HeRo)/hero/resume/workspace/page.tsx` | 이력서 등록·관리 워크스페이스 (DB 연결) |
-| `app/(HeRo)/hero/coaching/page.tsx` | 코칭 프로그램 |
+| `app/(HeRo)/hero/coaching/page.tsx` | 코칭 허브 (이력서·멘토링·커리어 로드맵·퍼스널 브랜딩 4탭) |
 | `app/(HeRo)/hero/coaching/ai/page.tsx` | AI 상담 (챗봇) |
+| `app/(HeRo)/hero/search-light/page.tsx` | 씨치 라이트 랜딩 (기업 인재 요청) |
+| `app/(HeRo)/hero/search-light/tih/page.tsx` | TIH 검사 (22문항 멀티스텝) |
 | `app/(HeRo)/hero/career/page.tsx` | 커리어 경로 (직무별 추천) |
 | `app/(HeRo)/hero/audition/page.tsx` | 면접 준비 (AI 피드백) |
 | `app/(HeRo)/hero/branding/page.tsx` | 자기소개 포장 |
@@ -105,6 +107,7 @@
 | `/intra/hero/branding` | 자기소개 브랜딩 |
 | `/intra/hero/ai-counseling` | AI 상담 설정 |
 | `/intra/hero/talent` | 인재 풀 관리 |
+| `/intra/hero/search-light` | 씨치 라이트 기업 요청 관리 (TIH 응답 + 사전 등록) |
 
 ---
 
@@ -132,10 +135,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Launch (2026-04-22 업데이트) — HIT A~F 전체 완성, 이력서 워크스페이스 신설 |
-| **개발 수준** | 검사 시스템 완성(A~F). 이력서 CRUD 완성. AI 코칭 결제 연동 대기. |
-| **이월 작업** | `/hero/coaching/ai` 결제 PG 연동 / `/hero/for-business` 기업 신청 플로우 |
-| **최근 결정** | 인트라 관리 경로 14개 확인 및 CLAUDE.md 정정 (기존 "없음" → 실제 경로 나열) |
+| **Phase** | Launch (2026-04-22 업데이트) — 씨치 라이트 신설, 커리어 코칭 4탭 재편 |
+| **개발 수준** | 검사 시스템(A~F) + 이력서 CRUD + 씨치 라이트(TIH) 완성. |
+| **이월 작업** | `/hero/coaching/ai` 결제 PG 연동 / 씨치 라이트 DB 테이블 생성(`sql/hero-search-light.sql`) |
+| **최근 결정** | 커리어 코칭 = 이력서·멘토링·커리어 로드맵·퍼스널 브랜딩 4탭 허브 / 헤더 nav에 씨치 라이트 추가 / TIH 22문항 멀티스텝 구현 / 인트라 `/intra/hero/search-light` 신설 |
 
 ---
 

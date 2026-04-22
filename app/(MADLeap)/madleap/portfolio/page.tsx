@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ExternalLink, Award, Filter } from "lucide-react";
 
 /* ── Portfolio Data ── */
@@ -326,9 +327,9 @@ export default function MadLeapPortfolioPage() {
                 <div className="mx-auto max-w-3xl px-6 text-center">
                     <h2 className="text-xl font-bold mb-3">나의 프로젝트를 추가하고 싶다면?</h2>
                     <p className="text-neutral-500 text-sm mb-6">매드립 리퍼라면 누구나 포트폴리오를 등록할 수 있습니다</p>
-                    <button className="px-6 py-3 bg-[#4361ee] text-white font-medium hover:bg-[#3451de] transition-colors rounded-lg inline-flex items-center gap-2">
+                    <Link href="/madleap/my" className="px-6 py-3 bg-[#4361ee] text-white font-medium hover:bg-[#3451de] transition-colors rounded-lg inline-flex items-center gap-2">
                         포트폴리오 등록 <ExternalLink className="h-4 w-4" />
-                    </button>
+                    </Link>
                 </div>
             </section>
         </>

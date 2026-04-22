@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Youtube, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const navLinks = [
     { name: "HIT 검사", href: "/hero/hit" },
     { name: "AI 상담", href: "/hero/coaching/ai" },
     { name: "커리어 코칭", href: "/hero/coaching" },
-    { name: "커리어 로드맵", href: "/hero/career" },
-    { name: "이력서", href: "/hero/resume" },
-    { name: "Hero in", href: "/hero/journey" },
-    { name: "About", href: "/hero/about" },
+    { name: "씨치 라이트", href: "/hero/search-light" },
+    { name: "이력서", href: "/hero/resume/workspace" },
 ];
 
 export function HeRoFooter() {
@@ -62,12 +60,6 @@ export function HeRoFooter() {
                             <li>인재 발굴 · 성장 플랫폼</li>
                         </ul>
                         <div className="flex items-center gap-4 mt-4">
-                            <a href="#" className="hover:text-white transition-colors" title="Instagram">
-                                <Instagram className="h-5 w-5" />
-                            </a>
-                            <a href="#" className="hover:text-white transition-colors" title="YouTube">
-                                <Youtube className="h-5 w-5" />
-                            </a>
                             <a href="mailto:lools@tenone.biz" className="hover:text-white transition-colors" title="Email">
                                 <Mail className="h-5 w-5" />
                             </a>

@@ -200,6 +200,7 @@ export interface PostListParams {
     period?: 'all' | 'today' | 'week' | 'month' | 'year';
     page?: number;
     limit?: number;
+    author_id?: string;
 }
 
 export interface PostListResponse {

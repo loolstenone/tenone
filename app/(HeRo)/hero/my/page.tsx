@@ -21,11 +21,11 @@ export default function HeRoMyPage() {
 
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=hero&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=hero&limit=20&status=published&author_id=${user.id}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#0EA5E9] rounded-full animate-spin" /></div>;
-    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#0EA5E9" /></div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#E53935] rounded-full animate-spin" /></div>;
+    if (!isAuthenticated) return <div className="min-h-screen bg-neutral-900"><LoginModal isOpen={true} onClose={() => {}} accentColor="#E53935" /></div>;
 
     const tabs = [
         { id: "posts" as const, label: "내 게시글", icon: FileText, count: myPosts.length },
@@ -41,14 +41,14 @@ export default function HeRoMyPage() {
                     <HitProfileBadge memberId={user?.id} />
                 </div>
 
-                <MyProfileCard accentColor="#0EA5E9" />
+                <MyProfileCard accentColor="#E53935" />
 
-                {user?.id && <CapabilitySection memberId={user.id} brandId="hero" accentColor="#0EA5E9" className="mb-6" />}
+                {user?.id && <CapabilitySection memberId={user.id} brandId="hero" accentColor="#E53935" className="mb-6" />}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#0EA5E9] text-[#0EA5E9]" : "border-transparent text-neutral-500"}`}>
+                            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-colors ${activeTab === tab.id ? "border-[#E53935] text-[#E53935]" : "border-transparent text-neutral-500"}`}>
                             <tab.icon className="h-4 w-4" /> {tab.label}
                             {tab.count !== undefined && <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-500">{tab.count}</span>}
                         </button>

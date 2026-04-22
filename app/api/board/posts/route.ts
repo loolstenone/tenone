@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
         period: (searchParams.get('period') as PostListParams['period']) || 'all',
         page: parseInt(searchParams.get('page') || '1'),
         limit: parseInt(searchParams.get('limit') || '12'),
+        author_id: searchParams.get('author_id') || undefined,
     };
 
     try {

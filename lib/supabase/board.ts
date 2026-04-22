@@ -92,7 +92,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
     const {
         site, board, category, tag, status,
         search, sort = 'latest', period = 'all',
-        page = 1, limit = 12,
+        page = 1, limit = 12, author_id,
     } = params;
 
     let query = supabase
@@ -102,6 +102,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostListRespon
 
     if (board) query = query.eq('board', board);
     if (category) query = query.eq('category', category);
+    if (author_id) query = query.eq('author_id', author_id);
     if (status) query = query.eq('status', status);
     else query = query.eq('status', 'published');
     if (tag) query = query.contains('tags', [tag]);
