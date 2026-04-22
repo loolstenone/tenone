@@ -108,7 +108,10 @@ function AICounselingContent() {
   const pathname = usePathname();
   const resultId = searchParams.get("resultId");
   const { isAuthenticated, user } = useAuth();
-  const [hitModal, setHitModal] = useState<{ show: boolean; type: 'login' | 'hitA' | 'hitB' | 'ready' }>({ show: false, type: 'login' });
+  const [hitModal, setHitModal] = useState<{ show: boolean; type: 'login' | 'hitA' | 'hitB' | 'ready' | 'done' }>({ show: false, type: 'login' });
+  const [selectedPlan, setSelectedPlan] = useState<string>('standard');
+  const [waitlistNote, setWaitlistNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handlePurchase = async (planIndex: number) => {
     // 체험은 바로 진행
@@ -133,6 +136,7 @@ function AICounselingContent() {
       } else if (!hit.hasB) {
         setHitModal({ show: true, type: 'hitB' });
       } else {
+        setSelectedPlan(planIndex === 2 ? 'premium' : 'standard');
         setHitModal({ show: true, type: 'ready' });
       }
     } catch {
@@ -318,13 +322,71 @@ function AICounselingContent() {
                 </div>
               )}
               {hitModal.type === 'ready' && (
+                <div>
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="h-8 w-8" style={{ color: RED }} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-1 text-center">AI 상담 사전 신청</h3>
+                  <p className="text-sm text-neutral-500 mb-5 text-center">
+                    결제 시스템 오픈 전 사전 신청하시면 우선 알림을 드립니다.
+                  </p>
+                  <div className="space-y-3 mb-5">
+                    <div>
+                      <label className="text-xs font-medium text-neutral-600 mb-1 block">신청 플랜</label>
+                      <select
+                        value={selectedPlan}
+                        onChange={e => setSelectedPlan(e.target.value)}
+                        className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-400"
+                      >
+                        <option value="standard">스탠다드 (9,900원)</option>
+                        <option value="premium">프리미엄 (99,000원)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-neutral-600 mb-1 block">
+                        상담 관심사 <span className="text-neutral-400 font-normal">(선택)</span>
+                      </label>
+                      <textarea
+                        value={waitlistNote}
+                        onChange={e => setWaitlistNote(e.target.value)}
+                        placeholder="어떤 커리어 고민이 있으신가요?"
+                        rows={2}
+                        className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-400 resize-none"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    disabled={submitting}
+                    onClick={async () => {
+                      setSubmitting(true);
+                      await fetch('/api/hero/coaching-waitlist', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plan: selectedPlan, note: waitlistNote }),
+                      });
+                      setSubmitting(false);
+                      setHitModal({ show: true, type: 'done' });
+                    }}
+                    className="w-full py-3 rounded-xl text-sm font-bold text-white transition-opacity disabled:opacity-60"
+                    style={{ backgroundColor: RED }}
+                  >
+                    {submitting ? "신청 중..." : "사전 신청하기"}
+                  </button>
+                </div>
+              )}
+              {hitModal.type === 'done' && (
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="h-8 w-8 text-green-500" />
                   </div>
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2">결제 준비 중</h3>
-                  <p className="text-sm text-neutral-500 mb-6">결제 시스템이 곧 오픈됩니다. 조금만 기다려주세요.</p>
-                  <button onClick={() => setHitModal({ show: false, type: 'login' })} className="px-6 py-3 border border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50">
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">신청 완료!</h3>
+                  <p className="text-sm text-neutral-500 mb-6">
+                    AI 상담 오픈 시 가장 먼저 안내드리겠습니다.
+                  </p>
+                  <button
+                    onClick={() => setHitModal({ show: false, type: 'login' })}
+                    className="px-6 py-3 border border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50"
+                  >
                     확인
                   </button>
                 </div>

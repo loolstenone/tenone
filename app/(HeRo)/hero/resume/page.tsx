@@ -103,10 +103,10 @@ export default function ResumePage() {
                             Before/After 비교로 명확한 개선 효과를 확인할 수 있습니다.
                         </p>
                         <Link
-                            href="/signup"
+                            href="/hero/resume/workspace"
                             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"
                         >
-                            이력서 분석 신청 <ArrowRight className="h-4 w-4" />
+                            이력서 등록·분석 신청 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -196,11 +196,12 @@ export default function ResumePage() {
                                 {plan.note && (
                                     <p className="text-xs text-neutral-400 mb-4 border-t border-neutral-100 pt-4">{plan.note}</p>
                                 )}
-                                <button
+                                <Link
+                                    href="/hero/resume/workspace"
                                     className={`w-full block text-center py-3 rounded-xl text-sm font-bold transition-colors ${plan.highlight ? "bg-[#E53935] text-white hover:bg-red-700" : "border border-neutral-300 text-neutral-700 hover:bg-neutral-50"}`}
                                 >
                                     신청하기
-                                </button>
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -213,10 +214,10 @@ export default function ResumePage() {
                     <h2 className="text-2xl font-bold mb-3">이력서를 분석해보세요</h2>
                     <p className="text-neutral-500 mb-8">AI 기본 분석은 무료로 이용할 수 있습니다</p>
                     <Link
-                        href="/signup"
+                        href="/hero/resume/workspace"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors rounded-lg"
                     >
-                        무료 분석 시작 <ArrowRight className="h-4 w-4" />
+                        이력서 등록하기 <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
             </section>

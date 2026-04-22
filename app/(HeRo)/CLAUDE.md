@@ -72,7 +72,8 @@
 | `app/(HeRo)/hero/page.tsx` | 랜딩 (검사 소개·CTA) |
 | `app/(HeRo)/hero/hit/[type]/page.tsx` | HIT 검사 (6개 페이지: A, B, C, D, E, F) |
 | `app/(HeRo)/hero/hit/[type]/test/page.tsx` | 검사 실시 페이지 |
-| `app/(HeRo)/hero/hit/results/page.tsx` | 검사 결과 (유형별 설명) |
+| `app/(HeRo)/hero/hit/[type]/result/[id]/page.tsx` | 검사 결과 (A~F 각각 별도 구현) |
+| `app/(HeRo)/hero/resume/workspace/page.tsx` | 이력서 등록·관리 워크스페이스 (DB 연결) |
 | `app/(HeRo)/hero/coaching/page.tsx` | 코칭 프로그램 |
 | `app/(HeRo)/hero/coaching/ai/page.tsx` | AI 상담 (챗봇) |
 | `app/(HeRo)/hero/career/page.tsx` | 커리어 경로 (직무별 추천) |
@@ -88,7 +89,22 @@
 
 ## 인트라 관리 경로
 
-- 없음 (외부 커리어 상담 도구로 운영)
+| 경로 | 역할 |
+|------|------|
+| `/intra/hero` | HeRo 대시보드 |
+| `/intra/hero/hit` | HIT 검사 현황 |
+| `/intra/hero/hit/structure` | 검사 구조 설정 |
+| `/intra/hero/hit/questions` | 문항 관리 |
+| `/intra/hero/hit/answers` | 응답 데이터 조회 |
+| `/intra/hero/hit/report` | 리포트 관리 |
+| `/intra/hero/resume` | 이력서 이용자 목록 |
+| `/intra/hero/resume/consulting` | 컨설팅 신청 관리 |
+| `/intra/hero/career` | 커리어 데이터 |
+| `/intra/hero/career/roadmap` | 커리어 로드맵 |
+| `/intra/hero/career/mentor` | 멘토 관리 |
+| `/intra/hero/branding` | 자기소개 브랜딩 |
+| `/intra/hero/ai-counseling` | AI 상담 설정 |
+| `/intra/hero/talent` | 인재 풀 관리 |
 
 ---
 
@@ -116,10 +132,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Launch (2026-04-20) — 검사 시스템 안정화 완료. |
-| **개발 수준** | 검사·결과·코칭 기본 완성. AI 상담 고도화 진행. |
-| **이월 작업** | 없음 — 기본 기능 확정 |
-| **최근 결정** | 검사별 페이지 단순화, 결과 해석 상세화 |
+| **Phase** | Launch (2026-04-22 업데이트) — HIT A~F 전체 완성, 이력서 워크스페이스 신설 |
+| **개발 수준** | 검사 시스템 완성(A~F). 이력서 CRUD 완성. AI 코칭 결제 연동 대기. |
+| **이월 작업** | `/hero/coaching/ai` 결제 PG 연동 / `/hero/for-business` 기업 신청 플로우 |
+| **최근 결정** | 인트라 관리 경로 14개 확인 및 CLAUDE.md 정정 (기존 "없음" → 실제 경로 나열) |
 
 ---
 

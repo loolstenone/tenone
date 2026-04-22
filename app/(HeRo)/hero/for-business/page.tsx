@@ -131,10 +131,28 @@ export default function ForBusinessPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/hero/business-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "신청 중 오류가 발생했습니다.");
+        return;
+      }
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -480,13 +498,17 @@ export default function ForBusinessPage() {
                   className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 resize-none"
                 />
               </div>
+              {error && (
+                <p className="text-sm text-red-500 text-center">{error}</p>
+              )}
               <button
                 type="submit"
-                className="w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+                disabled={submitting}
+                className="w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60"
                 style={{ backgroundColor: HERO_RED }}
               >
                 <Send className="w-4 h-4" />
-                문의하기
+                {submitting ? "신청 중..." : "문의하기"}
               </button>
             </form>
           )}
