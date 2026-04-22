@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
-import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
+import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye, Compass } from "lucide-react";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
@@ -18,10 +19,15 @@ export default function HeRoMyPage() {
     const router = useRouter();
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
+    const [jhStatus, setJhStatus] = useState<"none" | "draft" | "active" | null>(null);
 
     useEffect(() => {
         if (!user?.id) return;
         fetch(`/api/board/posts?site=hero&limit=20&status=published&author_id=${user.id}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/hero/jh?memberId=${user.id}`).then(r => r.json()).then(d => {
+            if (!d.jh) setJhStatus("none");
+            else setJhStatus(d.jh.status === "active" ? "active" : "draft");
+        }).catch(() => setJhStatus("none"));
     }, [user?.id]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#E53935] rounded-full animate-spin" /></div>;
@@ -40,6 +46,29 @@ export default function HeRoMyPage() {
                 <div className="mb-6">
                     <HitProfileBadge memberId={user?.id} />
                 </div>
+
+                {/* JH 카드 — 매칭 Tetrad 인재 측 입력 */}
+                {jhStatus && (
+                    <Link href={jhStatus === "none" ? "/hero/jh/write" : "/hero/jh"}
+                        className="mb-6 flex items-center gap-3 px-4 py-3 border border-dashed border-neutral-700 rounded-xl hover:border-[#E53935] hover:bg-red-500/5 transition-colors">
+                        <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                            <Compass className="h-5 w-5 text-[#E53935]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-neutral-100">
+                                {jhStatus === "active" ? "Job Hope · 매칭 대기 중" : jhStatus === "draft" ? "Job Hope · 작성 중 (이어서)" : "Job Hope · 자리의 바람"}
+                            </p>
+                            <p className="text-xs text-neutral-400">
+                                {jhStatus === "active"
+                                    ? "매칭 엔진이 당신의 좌표를 읽고 있습니다"
+                                    : jhStatus === "draft"
+                                    ? "남은 문항을 마저 답해보세요"
+                                    : "12문항으로 당신의 좌표를 그립니다 · 4~7분"}
+                            </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-neutral-500" />
+                    </Link>
+                )}
 
                 <MyProfileCard accentColor="#E53935" />
 
