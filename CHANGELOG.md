@@ -4,6 +4,89 @@
 
 ---
 
+## 2026-04-22 (세션 78 최종) — HeRo Matching Tetrad 전체 구축 완료
+
+### 세션 성과 한 줄
+**HeRo가 Tetrad 4요소(TIH·HIT·JD·JH)를 실제로 수집·매칭·큐레이션하는 살아있는 시스템이 됨.**
+설계→DB→API→Intra→사용자 UI→AI 큐레이션→인박스까지 전 루프 연결. 매칭 비공개 원칙 준수.
+
+### 마지막 변경 (세션 종료 시점)
+- `app/(RooK)/rook/my/page.tsx` · `app/(TenOne)/my/page.tsx` · `app/(YouInOne)/youinone/my/page.tsx`: HitProfileBadge에 respectOptIn prop 추가
+
+### 다음 세션 최우선 작업
+1. **A**: 21개 브랜드 /my 페이지에 HitProfileBadge 일괄 삽입 (respectOptIn=true)
+2. **B**: 실기기 E2E 7개 시나리오 검증 (상세는 WORK_STATUS.md)
+
+### 세션 78 신규 테이블 / DB 기능
+- `hero_company_members` (N:M, 3 role × 3 status, RLS)
+- `hero_jd` (7블록 JSONB, draft/published/archived, derived_vector)
+- `hero_jh_responses` (12문항 + 실무 필드, 본인 RLS, derived_axes)
+- `hero_tih_responses` 확장: company_id · submitted_by_member_id · derived_{industry,job_function,guardian,pioneer,connector,s_power_primary,secondary,risk_flags}
+- `hero_matches` 확장: 8-state CHECK · tih/jd/jh FK · match_score_breakdown · risk_notes
+- 트리거 10종: hero_profiles 자동 동기화 (6종) · TIH/JH/JD 벡터 추출 (3종) · hero_matches status_changed_at
+- SQL 함수 2종: hero_match_candidates_for_tih / _for_jh
+- hit_ai_prompts 'tetrad_match_v1' 프롬프트 시드
+- uc_earn_rules HeRo 전용 16종 시드
+
+### 세션 78 신규 API (12종)
+- POST /api/hero/company/register
+- GET/POST /api/hero/jh
+- GET/POST /api/hero/jd · GET/PATCH /api/hero/jd (implied)
+- POST/GET /api/hero/matching
+- GET/PATCH /api/hero/matching/[id]
+- POST /api/hero/matching/[id]/curate
+- GET /api/hero/matching/inbox
+
+### 세션 78 신규 페이지
+- `/hero/jh` + `/hero/jh/write`
+- `/hero/company` + `/hero/company/register` + `/hero/company/[id]/jd` + `/new` + `/[jdId]`
+- `/intra/hero/companies` + `/jd` + `/jh` + `/hero-types` + `/matching`
+
+### 세션 78 신규 컴포넌트
+- `features/hero/JDEditor.tsx` (7블록 + ArrayInput)
+- `features/hero/MatchingInbox.tsx` (talent/company 양측)
+- `features/hero/HeroBadgeOptIn.tsx` (Universe Badge 토글)
+- `lib/hero/jh-questions.ts` (12문항 정의)
+
+### 세션 78 수정 컴포넌트
+- `features/hit/HitProfileBadge.tsx`: respectOptIn prop 추가
+- `app/(TenOne)/profile/page.tsx`: HeroBadgeOptIn 삽입
+- `app/(HeRo)/hero/my/page.tsx`: JH 카드 진입점 + 매칭 인박스 추가
+- HIT A~F intro 6파일: useAuth memberId 전달
+- Jakka 3 API route: getAdmin() 래퍼 (빌드 에러 수정)
+
+### 세션 78 주요 결정
+1. **매칭 비공개**: 점수·순위·벡터는 양측(기업/인재) 모두에게 노출 금지 → Intra만 볼 수 있음
+2. **Badge opt-in 기본값 off**: `members.privacy_settings.hero_badge_public` 기본 false, 사용자 명시 활성화 필요
+3. **AI 큐레이션 = 상태 전이 계기**: proposed → AI 생성 → curated (기업이 결정 가능한 최소 상태)
+4. **질문 DB 단일화 보류**: 2,034문항이 DB에 있지만 하드코딩과 공존 (Phase 5)
+5. **산업/직무 공통 SSOT**: `lib/badak-constants.ts`의 INDUSTRIES/JOB_FUNCTIONS 재사용
+
+### 커밋 (17개, 전부 master 푸시 완료)
+
+```
+3027c58e docs(hero): 브랜드 가이드 전면 개편
+4b06e474 feat(hero): Phase 0 funnel·UC·trigger
+a69efd02 feat(hero): Phase 1 기업 회원 인프라
+75745bd3 feat(hero): Phase 2 JD/JH DB + Intra 관리
+bde7d0fa feat(hero): Phase 3-B 64 영웅 유형 편집
+f203bc3b docs(session78): Phase 0~3-B 기록
+5a9208aa feat(hero): JH 사용자 페이지 + API
+c98c6148 feat(hero): 기업 허브 + 등록
+ff3ddb7d feat(hero): JD 에디터 + API
+10ed4510 feat(hero): Phase 4-1~4 벡터 추출 + 대시보드
+31b7c1ec feat(hero): Phase 4-5 매칭 엔진 v1
+1db36fd1 feat(hero): Phase 4-5 매칭 확정 + 상태 전이
+f699f5b3 feat(hero): Phase 4-6 AI 큐레이션
+32ffc1db docs(session78): Phase 4-5+4-6 기록
+f4b857a6 feat(hero): Phase 4-7 매칭 인박스
+c87363c2 feat(hero): Phase 3-A Universe Badge opt-in
+ff2e9c20 docs(session78): Phase 4-7 + 3-A 기록
++ [다음 커밋] feat(hero): HitProfileBadge respectOptIn 3개 + 세션 종료 문서
+```
+
+---
+
 ## 2026-04-22 (세션 78) — HeRo Matching Tetrad 인프라 구축 (Phase 0~3)
 
 ### 목표

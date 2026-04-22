@@ -38,7 +38,7 @@ export default function RooKMyPage() {
             <div className="max-w-4xl mx-auto">
                 {/* HIT 프로필 */}
                 <div className="mb-6">
-                    <HitProfileBadge memberId={user?.id} />
+                    <HitProfileBadge memberId={user?.id} respectOptIn />
                 </div>
 
                 <MyProfileCard accentColor="#1E88E5" />

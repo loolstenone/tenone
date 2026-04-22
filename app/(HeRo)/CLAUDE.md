@@ -449,13 +449,14 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Launch (2026-04-22 세션 76 업데이트) — Tetrad 매칭 설계 확정, 구현 계획 수립 중 |
-| **운영 중** | HIT A/B 검사 (단 모두 비회원) · TIH 제출 (0건) · 이력서 CRUD |
-| **설계 완료** | Matching Tetrad (TIH × HIT + JD × JH) · 회원/기업 funnel · Universe Badge |
-| **이월 작업** | **Phase 0**: funnel 연결 진단 (비회원→회원 link 왜 안 되나) · TIH 저장 왜 0건인지 실기기 검증 |
-| **계획 작업** | **Phase 1**: 기업 회원 인프라 (hero_company_members 테이블) · JD/JH DB · 매칭 관리 Intra |
+| **Phase** | Tetrad Complete (2026-04-22 세션 78) — 4요소 입력 + 매칭 엔진 v1 + AI 큐레이션 + 인박스 전 루프 완성 |
+| **운영 중** | HIT A/B 검사 · 이력서 CRUD · **신규**: JH 작성 · 기업 등록 · TIH/JD 발행 · AI 큐레이션 |
+| **인프라 배포 완료 (세션 78)** | hero_profiles 자동 동기화 트리거 · UC 규칙 16종 시드 · hero_company_members · hero_jd + hero_jh_responses · 벡터 추출 트리거 3종 · 매칭 엔진 SQL 함수 2종 · hero_matches 8-state lifecycle · tetrad_match_v1 프롬프트 |
+| **사용자 측 완성** | `/hero/jh/write` 12문항 · `/hero/company/register` · `/hero/company/[id]/jd/new` 7블록 · `/hero/my` 받은 매칭 인박스 · `/hero/company` 기업별 큐레이션 수신 · `/profile` Universe Badge opt-in |
+| **Intra 관리 완성** | `/intra/hero/companies` 기업 풀 · `/intra/hero/jd` · `/intra/hero/jh` · `/intra/hero/hero-types` 64 영웅 유형 편집 · `/intra/hero/matching` 엔진 + AI 큐레이션 + 상태 전이 |
+| **이월 (다음 세션)** | **A**: 전 브랜드 /my 페이지에 HitProfileBadge respectOptIn 삽입 (21개) · **B**: 실기기 E2E 검증 7개 시나리오 · **C**: Phase 5 질문 DB 단일화 · **D**: strengths/cautions 편집기 · **E**: 수수료/트라이얼 UI |
 | **보류 (사업 시작)** | 결제 PG (Stripe/Toss) · 유료 gate 활성화 |
-| **최근 결정** | HIT Hero Type을 Universe-wide Badge로 공식화 · 질문 DB 단일화는 Phase 4로 보류 |
+| **최근 결정 (세션 78)** | HIT Hero Type = Universe-wide Identity Badge · 매칭 비공개 원칙 (점수·순위 숨김) · 질문 DB 단일화 Phase 5로 보류 · Tetrad 엔진 v1은 SQL RPC로 구현 · AI 큐레이션은 Claude Sonnet 4 |
 
 ---
 

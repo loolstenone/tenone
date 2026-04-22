@@ -78,7 +78,7 @@ export default function MyPage() {
 
                 {/* HIT 프로필 */}
                 <div className="mb-6">
-                    <HitProfileBadge memberId={user?.id} />
+                    <HitProfileBadge memberId={user?.id} respectOptIn />
                 </div>
 
                 {/* 탭 */}

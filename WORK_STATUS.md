@@ -1,10 +1,170 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 78 — HeRo Matching Tetrad 인프라 구축 Phase 0~3)
+> 마지막 업데이트: 2026-04-22 (세션 78 종료 — HeRo Matching Tetrad 전체 구축 완료 · Phase 0~4 + 3-A)
 
-## 다음 할 일 (이어서 시작 지점)
+## 다음 할 일 (집에서 이어서 — 구체 실행 순서)
 
-### 🔴 세션 78 이월 — HeRo 진행 중인 작업
+### 🟢 A. [30분] 전 브랜드 /my 페이지에 HitProfileBadge 일괄 삽입
+
+**상태**: TenOne/YouInOne/RooK 3개는 `respectOptIn` prop만 추가됨 (이번 세션에서 dirty 상태로 발견되어 커밋). 나머지 21개 브랜드는 HitProfileBadge 아예 없음 → **신규 삽입** 필요.
+
+**대상 (21개)**:
+```
+app/(0gamja)/0gamja/my/page.tsx
+app/(Badak)/badak/my/page.tsx
+app/(BrandGravity)/brandgravity/my/page.tsx
+app/(ChangeUp)/changeup/my/page.tsx
+app/(Domo)/domo/my/page.tsx
+app/(FWN)/fwn/my/page.tsx
+app/(Jakka)/jakka/my/page.tsx
+app/(MADLeague)/madleague/my/page.tsx
+app/(MADLeap)/madleap/my/page.tsx
+app/(Mindle)/mindle/my/page.tsx
+app/(MoNTZ)/montz/my/page.tsx
+app/(Mullaesian)/mullaesian/my/page.tsx
+app/(NamingFactory)/namingfactory/my/page.tsx
+app/(NatureBox)/naturebox/my/page.tsx
+app/(Planners)/planners/my/page.tsx
+app/(Seoul360)/seoul360/my/page.tsx
+app/(SmarComm)/smarcomm/my/page.tsx
+app/(TrendHunter)/trendhunter/my/page.tsx
+app/(LUKI)/luki/my/page.tsx
+app/(Korea360)/korea360/my/page.tsx
+app/(MyVerse)/myverse/my/page.tsx
+```
+
+**삽입 양식** (각 파일의 auth context user 변수명 확인 후):
+```tsx
+import HitProfileBadge from "@/features/hit/HitProfileBadge";
+
+// 렌더링 중 최상단 (MyProfileCard 위):
+{user?.id && (
+    <div className="mb-4">
+        <HitProfileBadge memberId={user.id} respectOptIn />
+    </div>
+)}
+```
+
+**주의**: HeRo 자기 사이트(`app/(HeRo)/hero/my/page.tsx`)는 **건드리지 말 것** — respectOptIn 없는 상태가 정상 (자기 사이트에서는 항상 노출).
+
+---
+
+### 🟠 B. [2~3시간] 실기기 E2E 검증 (7개 시나리오)
+
+각 시나리오를 실기기(모바일+데스크탑 각 1회)로 테스트하고 결과를 기록.
+
+**B-1. HIT 로그인 사용자 검사 → hero_profiles 자동 생성**
+- 로그인 상태로 /hero/hit/a 시작 → 완료
+- DB 검증: `SELECT id, member_id FROM hit_a_results ORDER BY created_at DESC LIMIT 1;` → member_id NOT NULL 확인
+- 트리거 확인: `SELECT COUNT(*) FROM hero_profiles;` → 1 증가 확인
+
+**B-2. TIH 제출 → 파생 벡터 자동 추출**
+- /hero/search-light/tih 22문항 작성 → 제출
+- DB 검증: `SELECT derived_industry, derived_guardian, derived_pioneer, derived_connector, derived_risk_flags FROM hero_tih_responses ORDER BY created_at DESC LIMIT 1;`
+- 세션 75 이월 "TIH 500 에러"가 실제로 해결됐는지 같이 확인
+
+**B-3. 기업 등록 → TIH 연결 → JD 발행**
+- /hero/company/register 기업 등록 (로그인 필요)
+- /hero/search-light/tih 같은 이메일로 제출 → `hero_tih_responses.company_id` 자동 FK 연결 확인
+- /hero/company → 내 기업 카드에서 "JD 관리" → /new 7블록 작성 → "발행"
+- DB: `SELECT status, derived_vector FROM hero_jd ORDER BY created_at DESC LIMIT 1;`
+
+**B-4. JH 작성**
+- /hero/jh/write 12문항 + 실무 필드 → 제출
+- DB: `SELECT status, derived_axes FROM hero_jh_responses WHERE member_id=...;` → status='active'
+- /hero/my 접속 → JH 카드 "매칭 대기 중" 표시 확인
+
+**B-5. Intra 매칭 엔진**
+- /intra/hero/matching → TIH 클릭 → 후보 리스트 RPC 호출 (network 탭 확인)
+- "매칭 제안" 클릭 → hero_matches INSERT, status='proposed'
+- "AI 생성" 클릭 → Claude API 호출 (응답 10~20초 소요) → ai_match_report JSON 저장 · status='curated' 전이
+- 상태 전이 버튼: contacted → interviewing → trial → hired 순서 테스트
+
+**B-6. 양측 인박스 수신**
+- 인재 계정 /hero/my "받은 매칭" 섹션 → curated 상태 카드 표시
+- 카드 클릭 → for_talent 서술 + signal_notes 표시
+- "관심 있어요" 클릭 → status=contacted 전이
+- 기업 담당자 계정 /hero/company → 내 기업 카드 "받은 큐레이션" 섹션 → for_company 서술 (익명 ID) 확인
+
+**B-7. Universe Badge opt-in**
+- /profile → HeroBadgeOptIn 토글 ON
+- 다른 브랜드 /my (A에서 삽입 완료 후) → HIT 배지 표시 확인
+- 토글 OFF → 재접속 → 배지 사라짐 확인
+
+---
+
+### 🟡 C. [4~6시간] Phase 5 — 질문 DB 단일화
+
+**현재 상태**:
+- `hit_questions` 테이블에 2,034문항 이미 시드됨 (A 522 · B 802 · C 122 · D 142 · E 142 · F 154 · likert7 150)
+- 사용자 페이지가 읽는 건: HIT B만 DB · 나머지(A/C/D/E/F)는 `lib/hit/data/*.ts` 24개 파일 하드코딩
+- TIH: 완전 하드코딩 (`app/(HeRo)/hero/search-light/tih/page.tsx` 안)
+
+**작업 단계**:
+1. diff 스크립트 작성 — 하드코딩 질문과 DB 질문이 실제로 같은지 검증
+2. HIT A/C/D/E/F 테스트 페이지에서 DB fetch로 전환 (HIT B 패턴 참고: `/api/hit/b/questions`)
+3. `/api/hit/a/questions` 등 라우트 신설 또는 통합 `/api/hit/questions?test_type=A&module=base`
+4. 하드코딩 `.ts` 24개 삭제 또는 fallback으로만 유지
+
+**리스크**: HIT A는 이미 실사용 중(6건). 검사 도중 DB 구조 바꾸면 세션 깨질 수 있음. 새 세션만 DB 경로 쓰게 feature flag 추가 권장.
+
+---
+
+### 🟡 D. [1시간] strengths/cautions JSONB 편집기 확장
+
+**위치**: `app/intra/hero/hero-types/page.tsx` 모달
+**현재**: profile_overview · fit_direction · illustration_url 편집 가능. strengths/cautions는 요약만 표시.
+**작업**: `features/hero/JDEditor.tsx`의 ArrayInput 컴포넌트를 재사용해서 strengths[] · cautions[] 편집 UI 추가.
+
+---
+
+### 🟡 E. [2~3시간] 수수료·트라이얼 관리 UI
+
+**DB 필드 (이미 존재)**: `hero_matches.trial_start/end/result`, `fee_type/rate/amount/paid`
+**API (이미 구현)**: `PATCH /api/hero/matching/[id]` — 모든 필드 받음
+**작업**: `/intra/hero/matching` 상세 패널 또는 별도 `/intra/hero/matching/[id]` 페이지에 트라이얼 날짜 입력 + 수수료 계산 UI
+
+---
+
+### 🔵 F. [점진 개선] 벡터 추출 정교화
+
+**문제**: 1차 공간 축소 로직이 너무 단순 — TIH 산업/직무 존재 여부만 가산
+**아이디어**:
+- JH에는 산업/직무 직접 질문 없음 → HIT B의 competency_track에서 산업 추정 가능
+- JH 실무 필드 (company_size_ranges, locations) + TIH의 size_category 교차 매칭 추가
+- AI 큐레이션 결과의 사용자 피드백(관심/거절)을 학습 데이터로 누적 → 향후 가중치 조정
+
+---
+
+### 🟢 G. [30분] 매칭 결과 사용자 UI 개선 (선택)
+
+**현재**: MatchingInbox는 curated 상태부터 노출 · interviewing/trial 상태에서 사용자 액션 없음
+**작업**: "면접 완료 표시" · "트라이얼 시작 통보" 등 사용자 자체 상태 보고 버튼 (기업/인재 자율)
+
+---
+
+## 이월 레거시 작업 (세션 77 이전)
+
+### 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
+- 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
+
+### 세션 75 이월 — TIH 제출 에러 최종 확인
+- ⚠️ **TIH 500 에러**: `createAdminClient` 전환 fix 배포 완료, 실기기 제출 테스트 미완
+- 세션 78 B-2에서 함께 검증
+
+---
+
+## 집에서 시작할 때 체크리스트
+
+1. `git checkout master && git pull origin master` — 이번 세션 커밋 (17개) 전부 다운로드
+2. `WORK_STATUS.md` 이 파일 다시 읽기
+3. `CHANGELOG.md` 세션 78 섹션 훑기 (Phase별 변경 사항)
+4. `app/(HeRo)/CLAUDE.md` 현재 상태 섹션 확인
+5. **우선순위 제안**: A (30분, 즉시 가치) → B-3/B-5 (실기기 검증, Tetrad 루프 확인) → 나머지
+
+---
+
+## 🔴 세션 78 이월 — 상세 기술 컨텍스트
 - **Phase 5 예정**: 질문 DB 단일화 (24개 하드코딩 `.ts` → `hit_questions`)
 - **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 / TIH 제출 → hero_profiles 자동 생성 / AI 큐레이션 실 호출 / Universe Badge 토글
 - **strengths/cautions 편집**: hero-types 모달 JSONB 배열 편집기 추가
