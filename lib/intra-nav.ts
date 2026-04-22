@@ -303,6 +303,8 @@ export const modules: NavModule[] = [
                             // ── 인재 측 (Tetrad) ──
                             { name: "HIT 현황", href: "/intra/hero/hit" },
                             { name: "JH 응답", href: "/intra/hero/jh" },
+                            // ── 매칭 ──
+                            { name: "매칭", href: "/intra/hero/matching" },
                             // ── Universe Identity ──
                             { name: "영웅 유형", href: "/intra/hero/hero-types" },
                             // ── 보조 ──
