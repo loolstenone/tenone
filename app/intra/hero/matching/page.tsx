@@ -6,10 +6,48 @@
  * - TIH 선택 → 후보 인재 자동 계산 (hero_match_candidates_for_tih RPC)
  * - 매칭 로직 v1은 1차 공간 축소 + 2차 블랙 플래그 교차만
  *   3차 AI 큐레이션은 Phase 4-6
+ *
+ * 상태 lifecycle:
+ *   proposed → curated → contacted → interviewing → trial → hired
+ *                                                           → declined
+ *                                                           → withdrawn
  */
 
+const STATUS_LABEL: Record<string, string> = {
+    proposed: "제안",
+    curated: "큐레이션",
+    contacted: "연락",
+    interviewing: "면접",
+    trial: "트라이얼",
+    hired: "입사",
+    declined: "거절",
+    withdrawn: "철회",
+};
+
+const STATUS_COLOR: Record<string, string> = {
+    proposed: "bg-neutral-100 text-neutral-600",
+    curated: "bg-blue-50 text-blue-700",
+    contacted: "bg-indigo-50 text-indigo-700",
+    interviewing: "bg-violet-50 text-violet-700",
+    trial: "bg-amber-50 text-amber-700",
+    hired: "bg-emerald-50 text-emerald-700",
+    declined: "bg-rose-50 text-rose-700",
+    withdrawn: "bg-neutral-50 text-neutral-400",
+};
+
+const NEXT_STATUS: Record<string, string[]> = {
+    proposed: ["curated", "contacted", "withdrawn"],
+    curated: ["contacted", "withdrawn"],
+    contacted: ["interviewing", "declined", "withdrawn"],
+    interviewing: ["trial", "hired", "declined", "withdrawn"],
+    trial: ["hired", "declined"],
+    hired: [],
+    declined: [],
+    withdrawn: [],
+};
+
 import { useEffect, useState } from "react";
-import { Network, Users, Building2, Loader2, Play, Search, AlertTriangle, ArrowRight } from "lucide-react";
+import { Network, Users, Building2, Loader2, Search, AlertTriangle, Check, Handshake } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -56,6 +94,8 @@ export default function HeroMatchingPage() {
     const [selectedTih, setSelectedTih] = useState<TIHRow | null>(null);
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [searchingCandidates, setSearchingCandidates] = useState(false);
+    const [confirming, setConfirming] = useState<string | null>(null);
+    const [transitioning, setTransitioning] = useState<string | null>(null);
 
     useEffect(() => { load(); }, []);
 
@@ -79,6 +119,55 @@ export default function HeroMatchingPage() {
         const { data } = await sb.rpc("hero_match_candidates_for_tih", { _tih_id: tih.id });
         setCandidates((data ?? []) as Candidate[]);
         setSearchingCandidates(false);
+    }
+
+    async function proposeMatch(candidate: Candidate) {
+        if (!selectedTih) return;
+        setConfirming(candidate.jh_id);
+        try {
+            const res = await fetch("/api/hero/matching", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    tihResponseId: selectedTih.id,
+                    memberId: candidate.member_id,
+                    jhResponseId: candidate.jh_id,
+                    scoreBreakdown: {
+                        industry: candidate.score_industry,
+                        job_function: candidate.score_job_function,
+                        axis_distance: candidate.score_axis_distance,
+                        total: candidate.score_total,
+                    },
+                    riskNotes: candidate.risk_match ? [candidate.risk_match] : [],
+                    matchType: "tetrad_v1",
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `서버 오류 (${res.status})`);
+            alert(data.message || `매칭 제안 완료 (status: ${data.status})`);
+            await load();
+        } catch (e) {
+            alert(e instanceof Error ? e.message : "매칭 제안 실패");
+        } finally {
+            setConfirming(null);
+        }
+    }
+
+    async function updateStatus(id: string, nextStatus: string) {
+        setTransitioning(id);
+        try {
+            const res = await fetch(`/api/hero/matching/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: nextStatus }),
+            });
+            if (!res.ok) { const d = await res.json(); throw new Error(d.error || `오류 ${res.status}`); }
+            await load();
+        } catch (e) {
+            alert(e instanceof Error ? e.message : "상태 변경 실패");
+        } finally {
+            setTransitioning(null);
+        }
     }
 
     const stats = {
@@ -187,6 +276,7 @@ export default function HeroMatchingPage() {
                                         <div className="space-y-2 max-h-[500px] overflow-y-auto">
                                             {candidates.sort((a, b) => b.score_total - a.score_total).map((c, i) => {
                                                 const conflict = (c.risk_match as { conflict?: string | null })?.conflict;
+                                                const isConfirming = confirming === c.jh_id;
                                                 return (
                                                     <div key={c.jh_id} className={`p-3 rounded-lg border ${
                                                         conflict ? "border-amber-200 bg-amber-50/50" : "border-neutral-200 bg-white"
@@ -198,19 +288,27 @@ export default function HeroMatchingPage() {
                                                             </p>
                                                             <span className="text-sm font-bold text-rose-600">{c.score_total.toFixed(0)}</span>
                                                         </div>
-                                                        <div className="grid grid-cols-3 gap-1 text-[10px] text-neutral-500">
+                                                        <div className="grid grid-cols-3 gap-1 text-[10px] text-neutral-500 mb-1.5">
                                                             <div>산업 {c.score_industry}</div>
                                                             <div>직무 {c.score_job_function}</div>
                                                             <div>3축 {c.score_axis_distance.toFixed(0)}</div>
                                                         </div>
                                                         {conflict && (
-                                                            <div className="mt-1.5 text-[10px] text-amber-700 flex items-center gap-1">
+                                                            <div className="mb-1.5 text-[10px] text-amber-700 flex items-center gap-1">
                                                                 <AlertTriangle className="h-3 w-3" /> {conflict}
                                                             </div>
                                                         )}
-                                                        <div className="mt-1 flex items-center gap-1 text-[10px]">
-                                                            {c.hit_a_result_id && <span className="bg-rose-100 text-rose-700 px-1 rounded">HIT-A</span>}
-                                                            {c.hit_b_result_id && <span className="bg-rose-100 text-rose-700 px-1 rounded">HIT-B</span>}
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-1 text-[10px]">
+                                                                {c.hit_a_result_id && <span className="bg-rose-100 text-rose-700 px-1 rounded">HIT-A</span>}
+                                                                {c.hit_b_result_id && <span className="bg-rose-100 text-rose-700 px-1 rounded">HIT-B</span>}
+                                                                {!c.hit_a_result_id && !c.hit_b_result_id && <span className="text-neutral-400">HIT 미완료</span>}
+                                                            </div>
+                                                            <button onClick={() => proposeMatch(c)} disabled={isConfirming}
+                                                                className="flex items-center gap-1 px-2 py-1 text-[10px] font-semibold bg-neutral-900 text-white rounded hover:bg-neutral-700 disabled:opacity-40">
+                                                                {isConfirming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Handshake className="h-3 w-3" />}
+                                                                매칭 제안
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 );
@@ -241,22 +339,44 @@ export default function HeroMatchingPage() {
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">type</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">생성</th>
+                                            <th className="text-right px-3 py-2 font-semibold text-neutral-600">전이</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {matches.map(m => (
-                                            <tr key={m.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
-                                                <td className="px-3 py-2 font-medium">{m.hero_companies?.company_name || "-"}</td>
-                                                <td className="px-3 py-2 font-mono text-[10px]">{m.profile_member_id?.slice(0, 8)}…</td>
-                                                <td className="px-3 py-2">
-                                                    <span className="text-[10px] bg-neutral-100 px-1.5 py-0.5 rounded">{m.match_status}</span>
-                                                </td>
-                                                <td className="px-3 py-2 text-neutral-500">{m.match_type}</td>
-                                                <td className="px-3 py-2 text-right text-[10px] text-neutral-400">
-                                                    {new Date(m.created_at).toLocaleDateString("ko-KR")}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {matches.map(m => {
+                                            const nextOptions = NEXT_STATUS[m.match_status] ?? [];
+                                            const isTransitioning = transitioning === m.id;
+                                            return (
+                                                <tr key={m.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                                                    <td className="px-3 py-2 font-medium">{m.hero_companies?.company_name || "-"}</td>
+                                                    <td className="px-3 py-2 font-mono text-[10px]">{m.profile_member_id?.slice(0, 8)}…</td>
+                                                    <td className="px-3 py-2">
+                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${STATUS_COLOR[m.match_status] ?? "bg-neutral-100"}`}>
+                                                            {STATUS_LABEL[m.match_status] ?? m.match_status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-neutral-500">{m.match_type}</td>
+                                                    <td className="px-3 py-2 text-right text-[10px] text-neutral-400">
+                                                        {new Date(m.created_at).toLocaleDateString("ko-KR")}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right">
+                                                        {nextOptions.length > 0 ? (
+                                                            <div className="flex items-center gap-1 justify-end">
+                                                                {nextOptions.map(opt => (
+                                                                    <button key={opt} onClick={() => updateStatus(m.id, opt)} disabled={isTransitioning}
+                                                                        className={`text-[10px] px-1.5 py-0.5 rounded font-semibold transition-opacity ${STATUS_COLOR[opt] ?? "bg-neutral-100"} disabled:opacity-40`}
+                                                                        title={`${STATUS_LABEL[m.match_status]} → ${STATUS_LABEL[opt] ?? opt}`}>
+                                                                        → {STATUS_LABEL[opt] ?? opt}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] text-neutral-300">종료</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
