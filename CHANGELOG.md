@@ -4,6 +4,60 @@
 
 ---
 
+## 2026-04-22 (세션 78) — HeRo Matching Tetrad 인프라 구축 (Phase 0~3)
+
+### 목표
+Tetrad 매칭 설계(TIH × HIT + JD × JH)를 실제 DB·인프라로 구현. 비회원→회원→유료 funnel과 Universe Badge 통합.
+
+### DB 마이그레이션 (배포 완료)
+- **hero_profiles 자동 동기화 트리거**: hit_{a~f}_results INSERT/UPDATE 시 member_id 기반 upsert (6 트리거)
+- **uc_earn_rules 16종 시드**: HeRo 전용 액션 (HIT 완료 · JH 작성 · TIH/JD 등록 · 매칭 성사 · Badge opt-in)
+- **hero_company_members**: members × hero_companies N:M 연결 (role 3종 · status 3종 · RLS)
+- **hero_tih_responses 확장**: company_id + submitted_by_member_id FK
+- **hero_jd**: 7블록 JSONB 스키마 + draft/published/archived + derived_vector
+- **hero_jh_responses**: 12문항 + practical_filters + derived_axes + 본인만 RLS
+- **uc_earn_rules unique index** (action_key + brand_id)
+
+### 신규 API
+- `POST /api/hero/company/register` — 기업 가입 + representative 연결 + 기존 TIH 자동 link
+
+### 수정 파일 (코드)
+- `app/(HeRo)/hero/hit/{a,b,c,d,e,f}/page.tsx` — useAuth로 memberId를 session POST body에 전달
+
+### 신규 파일 (Intra)
+- `app/intra/hero/companies/page.tsx` — 기업 풀 + Reputation Vector + 담당자 승인
+- `app/intra/hero/jd/page.tsx` — JD 7블록 상세 뷰어 + 상태 필터
+- `app/intra/hero/jh/page.tsx` — JH 12문항 상세 + 실무 필드
+- `app/intra/hero/hero-types/page.tsx` — 64 영웅 유형 편집기 (Universe Badge SSOT)
+
+### 신규 SQL 파일
+- `sql/hero-profiles-auto-sync.sql`
+- `sql/hero-uc-earn-rules.sql`
+- `sql/hero-company-members.sql`
+- `sql/hero-jd-jh.sql`
+
+### 가이드 업데이트
+- `app/(HeRo)/CLAUDE.md` 전면 개편 (+402줄):
+  - Matching Tetrad 제품 본질
+  - Funnel 3단계 × 2주체 (개인 5 / 기업 3)
+  - HIT Hero Type = Universe-wide Identity Badge
+  - Universe 공통 SSOT 적용 원칙 (INDUSTRIES · JOB_FUNCTIONS · UC · Capability)
+  - DB 테이블·필드 네이밍 체계
+  - HIT 정의 정정: Holland Interest → **HeRo Identification Test**
+
+### 결정사항
+- **질문 DB 단일화는 Phase 5로 보류**: 24개 하드코딩 `.ts` 유지 + DB 공존
+- **Universe Badge opt-in UI**(Phase 3-A): 전 브랜드 프로필 영향 → 별도 세션에서 작업
+- **나머지 HIT 구성/질문 편집 UI**: Phase 4 매칭 엔진 후 통합 질문 관리 구축 시 함께
+
+### 진단 결과
+- `hit_sessions` 16건 · `hit_a_results` 6건 · `hit_b_results` 3건 **모두 member_id NULL**: HIT intro 페이지에서 memberId 미전달 → 수정됨
+- `hero_tih_responses` 0건: 코드 정상, 실유입 부재 → 실기기 검증 필요
+- 기존 6건 HIT-A 결과: 이메일·세션 식별 불가 → 복구 불가 확정
+- `hero_profiles` 0건: 트리거 배포로 향후 자동 생성
+
+---
+
 ## 2026-04-22 (세션 77) — Priority 4브랜드 실데이터 연동 + 빌드 에러 수정
 
 ### 신규/수정 파일

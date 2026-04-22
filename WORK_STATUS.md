@@ -1,11 +1,26 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 77 — Priority 4브랜드 실데이터 연동 완성)
+> 마지막 업데이트: 2026-04-22 (세션 78 — HeRo Matching Tetrad 인프라 구축 Phase 0~3)
 
 ## 다음 할 일 (이어서 시작 지점)
 
+### 🔴 세션 78 이월 — HeRo 진행 중인 작업
+- **Phase 3-A 미완**: Universe Badge opt-in UI (`/profile` 에 "HeRo 유형 표시 여부" 토글) — 전 브랜드 프로필 영향
+- **Phase 4 예정**: 매칭 엔진 (벡터 추출 · 1차 공간 축소 · 2차 블랙 필터 · 3차 AI 큐레이션)
+- **Phase 5 예정**: 질문 DB 단일화 (24개 하드코딩 `.ts` → `hit_questions`)
+- **실기기 검증 필요**: TIH 실제 제출 / HIT 로그인 상태 검사 → `hero_profiles` 자동 생성 확인
+- **strengths/cautions 편집**: hero-types 모달 JSONB 배열 편집기 추가
+
 ### 🔴 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
 - 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
+
+### ✅ 세션 78 — HeRo Matching Tetrad 인프라 구축 (2026-04-22)
+- ✅ **Phase 0**: HIT A~F intro 6파일 `memberId` 전달 · `hero_profiles` 자동 동기화 트리거 배포 · UC 규칙 16개 시드 · TIH 저장 체인 검증
+- ✅ **Phase 1**: `hero_company_members` 테이블 · `/api/hero/company/register` · `/intra/hero/companies` 기업 풀 관리 + 담당자 승인 UI
+- ✅ **Phase 2**: `hero_jd` + `hero_jh_responses` DB · `/intra/hero/jd` (7블록) + `/intra/hero/jh` (12문항) 관리 페이지
+- ✅ **Phase 3-B**: `/intra/hero/hero-types` 64 영웅 유형 편집 UI (Universe Badge SSOT)
+- ✅ **HeRo CLAUDE.md 전면 개편**: Tetrad · funnel (개인 5단계 + 기업 3단계) · Universe Badge · DB 네이밍 체계 · UC/SSOT 적용 원칙
+- ✅ **Nav 재편**: HeRo 탭 11개 (기업 측 4 · 인재 측 3 · 공통 4)
 - Badak: `대시보드` 탭 실제 구현 (현재 group/posts/needs 탭만 있고 대시보드 stub 없음)
 - HeRo: `/intra/hero/talent` 페이지 실제 구현 (회원 목록, HIT 이용자 현황)
 
