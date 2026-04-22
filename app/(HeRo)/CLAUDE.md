@@ -105,7 +105,6 @@
 | `/intra/hero/career` | 커리어 데이터 |
 | `/intra/hero/career/roadmap` | 커리어 로드맵 |
 | `/intra/hero/career/mentor` | 멘토 관리 |
-| `/intra/hero/branding` | 자기소개 브랜딩 |
 | `/intra/hero/ai-counseling` | AI 상담 설정 |
 | `/intra/hero/talent` | 인재 풀 관리 |
 | `/intra/hero/search-light` | 씨치 라이트 기업 요청 관리 (TIH 응답 + 사전 등록) |
