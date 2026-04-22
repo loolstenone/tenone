@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight, CheckCircle, Search, Lightbulb, Shield, Eye, Users, Send } from "lucide-react";
+import { ArrowRight, Search, Lightbulb, Shield, Eye, Users } from "lucide-react";
 
 const HERO_RED = "#E53935";
 
@@ -37,30 +36,6 @@ const principles = [
 ];
 
 export default function SearchLightPage() {
-    const [waitlistEmail, setWaitlistEmail] = useState("");
-    const [waitlistCompany, setWaitlistCompany] = useState("");
-    const [submitted, setSubmitted] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [waitlistError, setWaitlistError] = useState<string | null>(null);
-
-    async function handleWaitlist(e: React.FormEvent) {
-        e.preventDefault();
-        setSubmitting(true);
-        setWaitlistError(null);
-        try {
-            const res = await fetch("/api/hero/search-light-waitlist", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: waitlistEmail, company: waitlistCompany }),
-            });
-            if (!res.ok) throw new Error(`오류가 발생했습니다 (${res.status}). 다시 시도해 주세요.`);
-            setSubmitted(true);
-        } catch (e) {
-            setWaitlistError(e instanceof Error ? e.message : "등록에 실패했습니다. 다시 시도해 주세요.");
-        } finally {
-            setSubmitting(false);
-        }
-    }
 
     return (
         <div className="bg-white min-h-screen">
@@ -126,20 +101,40 @@ export default function SearchLightPage() {
                         background: "radial-gradient(ellipse, rgba(229,57,53,0.20) 0%, rgba(229,57,53,0.06) 55%, transparent 100%)",
                         filter: "blur(8px)",
                     }} />
-                    {/* 로고 — 배트시그널 투영 (모바일 호환: solid fill + glow) */}
-                    <div style={{
-                        position: "relative",
-                        fontSize: "clamp(56px, 9vw, 110px)",
-                        fontWeight: 900,
-                        fontFamily: "system-ui, sans-serif",
-                        letterSpacing: "-3px",
-                        color: "rgba(229,57,53,0.55)",
-                        textShadow: "0 0 20px rgba(229,57,53,0.9), 0 0 50px rgba(229,57,53,0.6), 0 0 100px rgba(229,57,53,0.3), 0 0 180px rgba(229,57,53,0.12)",
-                        userSelect: "none",
-                        whiteSpace: "nowrap",
-                    }}>
-                        HeRo
-                    </div>
+                    {/* 로고 — SVG 텍스트 아웃라인 + glow (모바일 완전 호환) */}
+                    <svg
+                        viewBox="0 0 420 130"
+                        style={{ width: "clamp(200px, 38vw, 480px)", overflow: "visible", display: "block" }}
+                        aria-label="HeRo"
+                    >
+                        <defs>
+                            <filter id="hero-glow" x="-30%" y="-60%" width="160%" height="220%">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur2" />
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur3" />
+                                <feMerge>
+                                    <feMergeNode in="blur3" />
+                                    <feMergeNode in="blur2" />
+                                    <feMergeNode in="blur1" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <text
+                            x="50%" y="88%"
+                            textAnchor="middle"
+                            fontFamily="system-ui, -apple-system, sans-serif"
+                            fontWeight="900"
+                            fontSize="110"
+                            letterSpacing="-4"
+                            fill="none"
+                            stroke="rgba(229,57,53,0.7)"
+                            strokeWidth="2.5"
+                            filter="url(#hero-glow)"
+                        >
+                            HeRo
+                        </text>
+                    </svg>
                 </div>
 
                 {/* 텍스트 콘텐츠 — 좌하단 */}
@@ -160,14 +155,8 @@ export default function SearchLightPage() {
                             className="flex items-center gap-2 px-8 py-3.5 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            TIH 검사 시작 <ArrowRight className="h-4 w-4" />
+                            인재 찾기 의뢰 <ArrowRight className="h-4 w-4" />
                         </Link>
-                        <a
-                            href="#waitlist"
-                            className="flex items-center gap-2 px-8 py-3.5 text-white font-medium rounded-lg border border-neutral-700 hover:border-neutral-500 transition-colors"
-                        >
-                            사전 등록
-                        </a>
                     </div>
                 </div>
             </section>
@@ -268,61 +257,12 @@ export default function SearchLightPage() {
                             className="inline-flex items-center gap-2 px-8 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: HERO_RED }}
                         >
-                            TIH 검사 시작 <ArrowRight className="h-4 w-4" />
+                            인재 찾기 의뢰 <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
             </section>
 
-            {/* ── 사전 등록 ── */}
-            <section id="waitlist" className="py-20 bg-[#0a0a14]">
-                <div className="mx-auto max-w-lg px-6 text-center">
-                    <h2 className="text-2xl font-bold text-white mb-3">기업 사전 등록</h2>
-                    <p className="text-neutral-400 text-sm mb-10">
-                        현재 HeRo 인재 풀을 구축 중입니다.<br />
-                        사전 등록 기업은 오픈 시 우선 매칭 서비스를 받습니다.
-                    </p>
-
-                    {submitted ? (
-                        <div className="text-center py-8">
-                            <CheckCircle className="h-12 w-12 mx-auto mb-4" style={{ color: HERO_RED }} />
-                            <p className="text-white font-bold text-lg mb-2">등록이 완료되었습니다</p>
-                            <p className="text-neutral-400 text-sm">인재 풀 구축 완료 시 가장 먼저 연락 드리겠습니다.</p>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleWaitlist} className="space-y-4">
-                            <input
-                                type="text"
-                                required
-                                placeholder="기업명"
-                                value={waitlistCompany}
-                                onChange={(e) => setWaitlistCompany(e.target.value)}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-red-500"
-                            />
-                            <input
-                                type="email"
-                                required
-                                placeholder="이메일"
-                                value={waitlistEmail}
-                                onChange={(e) => setWaitlistEmail(e.target.value)}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-red-500"
-                            />
-                            {waitlistError && (
-                                <p className="text-sm text-red-400 text-left">{waitlistError}</p>
-                            )}
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full flex items-center justify-center gap-2 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60"
-                                style={{ backgroundColor: HERO_RED }}
-                            >
-                                <Send className="h-4 w-4" />
-                                {submitting ? "등록 중..." : "사전 등록하기"}
-                            </button>
-                        </form>
-                    )}
-                </div>
-            </section>
         </div>
     );
 }
