@@ -87,6 +87,45 @@ Tetrad 매칭 설계(TIH × HIT + JD × JH)를 실제 DB·인프라로 구현. �
                                           매칭 엔진 대상
 ```
 
+### Phase 4-7 매칭 인박스 (사용자 측 큐레이션 수신)
+
+**API:**
+- GET /api/hero/matching/inbox?side=talent&memberId=xxx
+- GET /api/hero/matching/inbox?side=company&memberId=xxx&companyId=yyy
+
+**공용 컴포넌트:**
+- `features/hero/MatchingInbox.tsx` — talent/company 양측 분기
+- 카드 리스트 + 상세 모달 + 관심/거절 버튼 (curated 상태에서만)
+
+**통합:**
+- `/hero/my` 마이페이지에 "받은 매칭" 섹션
+- `/hero/company` 허브 각 기업 카드에 "받은 큐레이션" 섹션
+
+**비공개 원칙:**
+- 점수·순위·벡터 숨김
+- 인재 측: 기업명·업종·for_talent 서술·signal_notes
+- 기업 측: 인재 익명 ID · for_company 서술 · signal_notes
+
+---
+
+### Phase 3-A Universe Badge Opt-in
+
+**DB:** `members.privacy_settings.hero_badge_public` (기존 JSONB 활용 · 마이그레이션 불필요)
+
+**신규 컴포넌트:**
+- `features/hero/HeroBadgeOptIn.tsx`
+  - HIT A 완료자: 토글 (기본 off · opt-in 원칙)
+  - 미완료자: 검사 유도 CTA
+  - 영웅 유형 정보 표시 (type_code + character_name + character_label)
+
+**수정:**
+- `features/hit/HitProfileBadge.tsx` — `respectOptIn` prop 추가
+- `app/(TenOne)/profile/page.tsx` — HeroBadgeOptIn 삽입
+
+**다음 작업 (이월):** 전 브랜드 /my 페이지에 `<HitProfileBadge respectOptIn />` 일괄 삽입
+
+---
+
 ### Phase 4-5+4-6 매칭 워크플로우 + AI 큐레이션
 
 **매칭 lifecycle (DB 배포):**

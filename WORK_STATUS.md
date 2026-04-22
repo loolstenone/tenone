@@ -5,17 +5,25 @@
 ## 다음 할 일 (이어서 시작 지점)
 
 ### 🔴 세션 78 이월 — HeRo 진행 중인 작업
-- **Phase 3-A 미완**: Universe Badge opt-in UI (`/profile` 에 "HeRo 유형 표시 여부" 토글) — 전 브랜드 프로필 영향
 - **Phase 5 예정**: 질문 DB 단일화 (24개 하드코딩 `.ts` → `hit_questions`)
-- **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 / TIH 제출 → hero_profiles 자동 생성 / AI 큐레이션 실 호출
+- **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 / TIH 제출 → hero_profiles 자동 생성 / AI 큐레이션 실 호출 / Universe Badge 토글
 - **strengths/cautions 편집**: hero-types 모달 JSONB 배열 편집기 추가
-- **JH entry navigation**: 전 브랜드 마이페이지에서 JH 유도 고려 (opt-in으로)
 - **벡터 추출 정교화**: JH industry/job_function 직접 질문이 없음 → 산업/직무 매칭은 JH/HIT 결과에서 간접 추정 필요
-- **매칭 결과를 사용자에게 전달하는 경로**: 기업 대시보드 · 인재 마이페이지에 큐레이션 수신 UI (현재는 Intra 관리자만 접근 가능)
 - **수수료·트라이얼 관리 UI**: hero_matches 필드는 있으나 Intra UI 미구현
+- **전 브랜드 /my 페이지에 HitProfileBadge 삽입**: `respectOptIn=true`로 각 브랜드 마이페이지에 일괄 추가 (Badak/MADLeague/Jakka 등)
 
 ### 🔴 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
 - 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
+
+### ✅ 세션 78 추가 — Phase 4-7 + Phase 3-A (2026-04-22)
+- ✅ **매칭 인박스 (Phase 4-7)**: `/api/hero/matching/inbox` · `MatchingInbox` 공용 컴포넌트
+  - 인재 측: `/hero/my`에 "받은 매칭" 섹션 (기업명 공개 · for_talent 서술 · 관심/거절 버튼)
+  - 기업 측: `/hero/company` 각 기업 카드에 "받은 큐레이션" (인재 익명 ID · for_company 서술)
+  - Tetrad 비공개 원칙 준수 (점수·순위·벡터 숨김)
+- ✅ **Universe Badge opt-in (Phase 3-A)**: `HeroBadgeOptIn` 컴포넌트 · `/profile` 삽입
+  - `members.privacy_settings.hero_badge_public` (기본 false · 사용자 opt-in)
+  - HIT A 완료자에게 토글 · 미완료자에게 검사 유도
+  - `HitProfileBadge`에 `respectOptIn` prop 추가 (타 브랜드는 true로 삽입)
 
 ### ✅ 세션 78 추가 — Phase 4 매칭 엔진 v1 + AI 큐레이션 (2026-04-22)
 - ✅ **벡터 추출 트리거**: TIH/JH/JD 응답 → 파생 컬럼 자동 계산 (derived_industry · derived_guardian · derived_axes · derived_vector)
