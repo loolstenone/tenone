@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-);
+function getAdmin() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } },
+    );
+}
 
 // GET /api/intra/jakka/sellers?status=pending
 export async function GET(req: NextRequest) {
+    const supabaseAdmin = getAdmin();
     const status = req.nextUrl.searchParams.get("status") ?? "pending";
     const { data, error } = await supabaseAdmin
         .from("jakka_seller_applications")
@@ -22,6 +25,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/intra/jakka/sellers — { applicationId, action: 'approve'|'reject', note?, reviewerId }
 export async function POST(req: NextRequest) {
+    const supabaseAdmin = getAdmin();
     const body = await req.json();
     const { applicationId, action, note, reviewerId } = body as {
         applicationId: string;

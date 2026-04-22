@@ -1,12 +1,11 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 76 — Intra Universe 브랜드별 관리 체계 전면 구축)
+> 마지막 업데이트: 2026-04-22 (세션 77 — Priority 4브랜드 실데이터 연동 완성)
 
 ## 다음 할 일 (이어서 시작 지점)
 
-### 🔴 세션 76 이월 — P4 브랜드 서브 페이지 구현
-- 16개 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/MADLeap/MoNTZ/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/SmarComm/TrendHunter/YouInOne) 대시보드 stub → 실제 데이터 연동
-  - 우선순위: YouInOne(승인멤버십), MADLeap(교육), MoNTZ(포트폴리오), SmarComm(구독손익)
+### 🔴 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
+- 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
 - Badak: `대시보드` 탭 실제 구현 (현재 group/posts/needs 탭만 있고 대시보드 stub 없음)
 - HeRo: `/intra/hero/talent` 페이지 실제 구현 (회원 목록, HIT 이용자 현황)
 
@@ -15,6 +14,13 @@
   - 테스트 후 성공 → `app/api/hero/tih/route.ts` debug `console.error` 3줄 제거
   - 테스트 후 실패 → Vercel 로그 확인 (이미 상세 출력 심어둠)
 - `/hero/coaching/ai` 결제 PG 연동 — **사업 시작 시점으로 보류** (Stripe/Toss)
+
+### ✅ 세션 77 — Priority 4브랜드 실데이터 연동 완성 (2026-04-22)
+- ✅ **MADLeap**: 대시보드·회원·지원서 심사(4단계)·강좌·고객문의 5탭 신설 (`mad_applications` brand_id='madleap')
+- ✅ **MoNTZ**: 대시보드 실데이터(montz_creators/works/auditions) + 창작자 관리 신설
+- ✅ **YouInOne**: 대시보드·지원서(capability model 승인/거절)·회원·손익·고객문의 5탭 신설
+- ✅ **SmarComm**: 대시보드·회원·손익(MRR 계산·플랜별 구성)·고객문의 4탭 신설
+- ✅ **Jakka API 빌드 에러 3건 수정**: sellers/market/showcases route 모두 `getAdmin()` 래퍼로 전환 (module-level createClient → runtime)
 
 ### ✅ 세션 76 — Intra Universe 브랜드별 관리 체계 전면 구축 (2026-04-22)
 - ✅ **공통 탭 순서 표준** 확립: 대시보드→회원관리→손익관리→브랜드특화→고객문의

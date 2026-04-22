@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-22 (세션 77) — Priority 4브랜드 실데이터 연동 + 빌드 에러 수정
+
+### 신규/수정 파일
+- `app/intra/ums/madleap/page.tsx` — 대시보드 실데이터 (mad_applications brand_id='madleap')
+- `app/intra/ums/madleap/applications/page.tsx` — 4단계 심사 (pending/reviewing/accepted/rejected)
+- `app/intra/ums/madleap/members/page.tsx` — 승인된 회원 목록
+- `app/intra/ums/madleap/courses/page.tsx` — 강좌 관리 stub
+- `app/intra/ums/madleap/cs/page.tsx` — 고객문의
+- `app/intra/ums/montz/page.tsx` — 대시보드 실데이터 (montz_creators/works/auditions)
+- `app/intra/ums/montz/members/page.tsx` — 창작자 목록 (type 필터, verified 배지)
+- `app/intra/ums/youinone/page.tsx` — 대시보드 (capability model + wio_projects)
+- `app/intra/ums/youinone/applications/page.tsx` — capability model 승인/거절 (valid_until + INSERT)
+- `app/intra/ums/youinone/members/page.tsx` — 승인 멤버 목록
+- `app/intra/ums/youinone/revenue/page.tsx` — WIO 타임시트 연동 준비 중 stub
+- `app/intra/ums/youinone/cs/page.tsx` — 고객문의
+- `app/intra/ums/smarcomm/page.tsx` — 대시보드 (wio_subscription_plans service_type='smarcomm')
+- `app/intra/ums/smarcomm/revenue/page.tsx` — 플랜별 구성 + MRR + 수익화 로드맵
+- `app/intra/ums/smarcomm/members/page.tsx` — 구독 회원 목록
+- `app/intra/ums/smarcomm/cs/page.tsx` — 고객문의
+- `app/api/intra/jakka/sellers/route.ts` — getAdmin() 래퍼 (GET+POST 모두)
+- `app/api/intra/jakka/market/route.ts` — getAdmin() 래퍼
+- `app/api/intra/jakka/showcases/route.ts` — getAdmin() 래퍼 (GET+POST)
+
+### 수정사항
+- Jakka 3개 API route: module-level `createClient(SERVICE_ROLE_KEY)` → `getAdmin()` 함수 래퍼 (Next.js 빌드 타임 env 미로드 에러 수정)
+
+---
+
 ## 2026-04-22 (세션 76) — Intra Universe 브랜드별 관리 체계 전면 구축
 
 ### 신규 파일 (45개)

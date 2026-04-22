@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-);
+function getAdmin() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } },
+    );
+}
 
 // GET /api/intra/jakka/showcases?status=pending|approved|rejected|ended|all
 export async function GET(req: NextRequest) {
+    const supabaseAdmin = getAdmin();
     const status = req.nextUrl.searchParams.get("status") ?? "all";
 
     let query = supabaseAdmin
@@ -60,6 +63,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/intra/jakka/showcases — { showcaseId, action: 'approve'|'reject'|'end', reviewerId }
 export async function POST(req: NextRequest) {
+    const supabaseAdmin = getAdmin();
     const { showcaseId, action, reviewerId } = await req.json();
     if (!showcaseId || !action || !reviewerId) {
         return NextResponse.json({ error: "showcaseId, action, reviewerId required" }, { status: 400 });
