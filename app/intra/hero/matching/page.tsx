@@ -47,7 +47,7 @@ const NEXT_STATUS: Record<string, string[]> = {
 };
 
 import { useEffect, useState } from "react";
-import { Network, Users, Building2, Loader2, Search, AlertTriangle, Check, Handshake } from "lucide-react";
+import { Network, Users, Building2, Loader2, Search, AlertTriangle, Handshake, Sparkles, Eye } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -83,8 +83,15 @@ interface MatchRow {
     company_id: string;
     match_status: string;
     match_type: string;
+    ai_match_report: string | null;
     created_at: string;
     hero_companies: { company_name: string } | null;
+}
+
+interface Curation {
+    for_company?: string;
+    for_talent?: string;
+    signal_notes?: string[];
 }
 
 export default function HeroMatchingPage() {
@@ -96,6 +103,8 @@ export default function HeroMatchingPage() {
     const [searchingCandidates, setSearchingCandidates] = useState(false);
     const [confirming, setConfirming] = useState<string | null>(null);
     const [transitioning, setTransitioning] = useState<string | null>(null);
+    const [curating, setCurating] = useState<string | null>(null);
+    const [curationView, setCurationView] = useState<{ id: string; data: Curation } | null>(null);
 
     useEffect(() => { load(); }, []);
 
@@ -150,6 +159,31 @@ export default function HeroMatchingPage() {
             alert(e instanceof Error ? e.message : "매칭 제안 실패");
         } finally {
             setConfirming(null);
+        }
+    }
+
+    async function generateCuration(matchId: string) {
+        setCurating(matchId);
+        try {
+            const res = await fetch(`/api/hero/matching/${matchId}/curate`, { method: "POST" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `오류 ${res.status}`);
+            setCurationView({ id: matchId, data: data.curation });
+            await load();
+        } catch (e) {
+            alert(e instanceof Error ? e.message : "큐레이션 생성 실패");
+        } finally {
+            setCurating(null);
+        }
+    }
+
+    function viewCuration(match: MatchRow) {
+        if (!match.ai_match_report) return;
+        try {
+            const parsed = JSON.parse(match.ai_match_report);
+            setCurationView({ id: match.id, data: parsed });
+        } catch {
+            setCurationView({ id: match.id, data: { for_company: match.ai_match_report } });
         }
     }
 
@@ -339,6 +373,7 @@ export default function HeroMatchingPage() {
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">상태</th>
                                             <th className="text-left px-3 py-2 font-semibold text-neutral-600">type</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">생성</th>
+                                            <th className="text-right px-3 py-2 font-semibold text-neutral-600">AI</th>
                                             <th className="text-right px-3 py-2 font-semibold text-neutral-600">전이</th>
                                         </tr>
                                     </thead>
@@ -358,6 +393,19 @@ export default function HeroMatchingPage() {
                                                     <td className="px-3 py-2 text-neutral-500">{m.match_type}</td>
                                                     <td className="px-3 py-2 text-right text-[10px] text-neutral-400">
                                                         {new Date(m.created_at).toLocaleDateString("ko-KR")}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right">
+                                                        {m.ai_match_report ? (
+                                                            <button onClick={() => viewCuration(m)} className="inline-flex items-center gap-1 text-[10px] text-rose-600 hover:text-rose-800 font-semibold">
+                                                                <Eye className="h-3 w-3" /> 보기
+                                                            </button>
+                                                        ) : (
+                                                            <button onClick={() => generateCuration(m.id)} disabled={curating === m.id}
+                                                                className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded font-semibold disabled:opacity-40">
+                                                                {curating === m.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                                                생성
+                                                            </button>
+                                                        )}
                                                     </td>
                                                     <td className="px-3 py-2 text-right">
                                                         {nextOptions.length > 0 ? (
@@ -386,8 +434,57 @@ export default function HeroMatchingPage() {
                     <div className="mt-6 p-3 border border-neutral-200 bg-neutral-50 rounded text-[11px] text-neutral-600">
                         <strong className="block mb-1">🌐 Tetrad Engine v1</strong>
                         1차 공간 축소: TIH 산업·직무·3축 × JH preferred_state · 2차 하드 필터: risk_flags × avoid_traits 교차 감지
-                        <span className="ml-1 text-neutral-400">— Phase 4-6: AI 큐레이션 (hit_ai_prompts 활용) 예정</span>
+                        <span className="ml-1 text-neutral-400">· 3차 AI 큐레이션: tetrad_match_v1 프롬프트 사용</span>
                     </div>
+
+                    {/* 큐레이션 뷰 모달 */}
+                    {curationView && (
+                        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setCurationView(null)}>
+                            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
+                                    <h3 className="text-sm font-bold flex items-center gap-2">
+                                        <Sparkles className="h-4 w-4 text-rose-500" /> AI 큐레이션
+                                    </h3>
+                                    <button onClick={() => setCurationView(null)} className="text-xs text-neutral-400 hover:text-neutral-600">닫기</button>
+                                </div>
+                                <div className="p-5 space-y-5">
+                                    {curationView.data.for_company && (
+                                        <div>
+                                            <p className="text-xs font-bold text-neutral-700 mb-1.5 flex items-center gap-1">
+                                                <Building2 className="h-3.5 w-3.5 text-neutral-500" /> 기업에게 (for_company)
+                                            </p>
+                                            <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed bg-blue-50/30 p-3 rounded">
+                                                {curationView.data.for_company}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {curationView.data.for_talent && (
+                                        <div>
+                                            <p className="text-xs font-bold text-neutral-700 mb-1.5 flex items-center gap-1">
+                                                <Users className="h-3.5 w-3.5 text-neutral-500" /> 인재에게 (for_talent)
+                                            </p>
+                                            <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed bg-rose-50/30 p-3 rounded">
+                                                {curationView.data.for_talent}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {curationView.data.signal_notes && curationView.data.signal_notes.length > 0 && (
+                                        <div>
+                                            <p className="text-xs font-bold text-amber-700 mb-1.5 flex items-center gap-1">
+                                                <AlertTriangle className="h-3.5 w-3.5" /> 주의 신호 (양쪽 비공개)
+                                            </p>
+                                            <ul className="list-disc ml-5 text-xs text-amber-900 space-y-0.5">
+                                                {curationView.data.signal_notes.map((n, i) => <li key={i}>{n}</li>)}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="px-5 py-2 border-t border-neutral-200 bg-neutral-50 text-[10px] text-neutral-500">
+                                    ⚠️ 매칭 점수·벡터·순위는 양쪽에 노출 금지 (Tetrad 비공개 원칙)
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>
