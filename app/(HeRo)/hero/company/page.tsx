@@ -12,6 +12,7 @@ import { Building2, Plus, Loader2, ArrowRight, Clock, CheckCircle2, FileText, Co
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { createClient } from "@/lib/supabase/client";
+import MatchingInbox from "@/features/hero/MatchingInbox";
 
 const HERO_RED = "#E53935";
 
@@ -76,7 +77,7 @@ export default function HeroCompanyHubPage() {
                         {active.length > 0 && (
                             <div className="mb-8">
                                 <h2 className="text-sm font-semibold text-neutral-700 mb-3">내가 소속된 기업</h2>
-                                <div className="space-y-3">
+                                <div className="space-y-6">
                                     {active.map(c => (
                                         <div key={c.id} className="bg-white border border-neutral-200 rounded-xl p-5 hover:shadow-md transition-shadow">
                                             <div className="flex items-start justify-between mb-3">
@@ -91,7 +92,7 @@ export default function HeroCompanyHubPage() {
                                                     <CheckCircle2 className="h-3 w-3" /> {roleLabel(c.role)}
                                                 </span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-2">
+                                            <div className="grid grid-cols-2 gap-2 mb-4">
                                                 <Link href={`/hero/search-light/tih?company=${c.hero_companies?.id}`}
                                                     className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-rose-50 rounded-lg transition-colors">
                                                     <div className="flex items-center gap-2">
@@ -109,6 +110,14 @@ export default function HeroCompanyHubPage() {
                                                     <ArrowRight className="h-3.5 w-3.5 text-neutral-400" />
                                                 </Link>
                                             </div>
+
+                                            {/* 매칭 인박스 */}
+                                            {user?.id && c.hero_companies?.id && (
+                                                <div className="pt-4 border-t border-neutral-100">
+                                                    <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">받은 매칭 큐레이션</p>
+                                                    <MatchingInbox side="company" memberId={user.id} companyId={c.hero_companies.id} accentColor="#E53935" />
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

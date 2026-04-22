@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import HitProfileBadge from "@/features/hit/HitProfileBadge";
+import MatchingInbox from "@/features/hero/MatchingInbox";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
@@ -73,6 +74,17 @@ export default function HeRoMyPage() {
                 <MyProfileCard accentColor="#E53935" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="hero" accentColor="#E53935" className="mb-6" />}
+
+                {/* 매칭 인박스 — 큐레이션 수신 */}
+                {user?.id && (
+                    <div className="mb-8">
+                        <h2 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span>받은 매칭</span>
+                            <span className="h-px flex-1 bg-neutral-800" />
+                        </h2>
+                        <MatchingInbox side="talent" memberId={user.id} accentColor="#E53935" />
+                    </div>
+                )}
 
                 <div className="flex items-center gap-1 mb-8 border-b border-neutral-700">
                     {tabs.map(tab => (
