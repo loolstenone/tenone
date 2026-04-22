@@ -87,6 +87,38 @@ Tetrad 매칭 설계(TIH × HIT + JD × JH)를 실제 DB·인프라로 구현. �
                                           매칭 엔진 대상
 ```
 
+### Phase 4-5+4-6 매칭 워크플로우 + AI 큐레이션
+
+**매칭 lifecycle (DB 배포):**
+- hero_matches 8-state CHECK 제약: proposed/curated/contacted/interviewing/trial/hired/declined/withdrawn
+- tih_response_id · jd_id · jh_response_id · match_score_breakdown · risk_notes · curator_member_id · status_changed_at 추가
+- status 변경 시 자동 timestamp 트리거
+
+**매칭 API:**
+- POST /api/hero/matching: 후보 → proposed INSERT (중복 체크)
+- GET /api/hero/matching: 필터 (companyId/memberId/status)
+- PATCH /api/hero/matching/[id]: status 전이 + 피드백/만족도/수수료 업데이트
+- GET /api/hero/matching/[id]: 단일 조회
+
+**Intra 매칭 관리 확장:**
+- 후보 카드 "매칭 제안" 버튼
+- 매칭 이력 테이블: 상태 색상 배지 · 허용 전이만 버튼 표시 · AI 생성/보기 컬럼
+
+**AI 큐레이션 (Phase 4-6):**
+- hit_ai_prompts 'tetrad_match_v1' 프롬프트 시드 (Sonnet 4, 2500 tokens)
+- POST /api/hero/matching/[id]/curate:
+  1. 매칭 + TIH + JH + JD + HIT A/B 병렬 로드
+  2. 프롬프트 템플릿 {{TIH_JSON}} 등 치환
+  3. Anthropic SDK 호출 → JSON 파싱
+  4. ai_match_report 저장 + proposed → curated 전이
+- Intra 큐레이션 뷰 모달:
+  - for_company (기업에게, blue-tinted)
+  - for_talent (인재에게, rose-tinted)
+  - signal_notes (양쪽 비공개 주의 신호, amber)
+  - 비공개 원칙 안내
+
+---
+
 ### Phase 4 매칭 엔진 v1 (추가)
 
 **벡터 추출 트리거 (DB 배포):**

@@ -6,23 +6,31 @@
 
 ### 🔴 세션 78 이월 — HeRo 진행 중인 작업
 - **Phase 3-A 미완**: Universe Badge opt-in UI (`/profile` 에 "HeRo 유형 표시 여부" 토글) — 전 브랜드 프로필 영향
-- **Phase 4-6 남음**: AI 큐레이션 (hit_ai_prompts 호출 · 자연어 매칭 근거 생성 · 기업/인재 양쪽 비공개 서술)
 - **Phase 5 예정**: 질문 DB 단일화 (24개 하드코딩 `.ts` → `hit_questions`)
-- **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 플로우 E2E / TIH 제출 → hero_profiles 자동 생성
+- **실기기 검증 필요**: JH 제출 / 기업 등록 → JD 작성 → 발행 / TIH 제출 → hero_profiles 자동 생성 / AI 큐레이션 실 호출
 - **strengths/cautions 편집**: hero-types 모달 JSONB 배열 편집기 추가
 - **JH entry navigation**: 전 브랜드 마이페이지에서 JH 유도 고려 (opt-in으로)
 - **벡터 추출 정교화**: JH industry/job_function 직접 질문이 없음 → 산업/직무 매칭은 JH/HIT 결과에서 간접 추정 필요
+- **매칭 결과를 사용자에게 전달하는 경로**: 기업 대시보드 · 인재 마이페이지에 큐레이션 수신 UI (현재는 Intra 관리자만 접근 가능)
+- **수수료·트라이얼 관리 UI**: hero_matches 필드는 있으나 Intra UI 미구현
 
 ### 🔴 세션 77 이월 — 나머지 P4 브랜드 데이터 연동
 - 12개 잔여 P4 브랜드(0gamja/ChangeUp/FWN/Korea360/LUKI/Mullaesian/MyVerse/NamingFactory/NatureBox/Seoul360/TrendHunter) 대시보드 stub → 실제 데이터 연동
 
-### ✅ 세션 78 추가 — Phase 4 매칭 엔진 v1 (2026-04-22)
+### ✅ 세션 78 추가 — Phase 4 매칭 엔진 v1 + AI 큐레이션 (2026-04-22)
 - ✅ **벡터 추출 트리거**: TIH/JH/JD 응답 → 파생 컬럼 자동 계산 (derived_industry · derived_guardian · derived_axes · derived_vector)
 - ✅ **블랙 플래그 자동 감지**: TIH Section 4 응답 → risk_flags JSONB (이탈/의사결정/비난 문화)
-- ✅ **매칭 엔진 SQL 함수** 2종 배포:
-  - `hero_match_candidates_for_tih(_tih_id)` · 기업→인재 후보 (1차+2차)
-  - `hero_match_candidates_for_jh(_jh_id)` · 인재→기업 큐레이션 (역방향)
-- ✅ **Intra 매칭 관리** (`/intra/hero/matching`): TIH 클릭 → RPC로 실시간 후보 계산 · 점수 breakdown · 블랙 플래그 conflict 경고
+- ✅ **매칭 엔진 SQL 함수** 2종 배포 (hero_match_candidates_for_tih/jh)
+- ✅ **매칭 워크플로우 완성**:
+  - hero_matches 8-state lifecycle (proposed→curated→contacted→interviewing→trial→hired / declined / withdrawn)
+  - POST /api/hero/matching: 후보 → 매칭 제안 (중복 체크)
+  - PATCH /api/hero/matching/[id]: 상태 전이 + 피드백/만족도/수수료
+  - Intra 매칭 관리 "매칭 제안" 버튼 · "전이" 컬럼 (허용된 다음 상태만)
+- ✅ **AI 큐레이션 (Phase 4-6)**:
+  - `tetrad_match_v1` 프롬프트 시드 (Claude Sonnet 4)
+  - POST /api/hero/matching/[id]/curate: 4요소 + 점수 + 위험 → Claude API → 양쪽 서술 JSON
+  - Intra 매칭 이력 "AI" 컬럼: 생성 버튼 · 보기 모달 (for_company / for_talent / signal_notes)
+  - Tetrad 비공개 원칙 준수 (점수·순위 노출 금지)
 - ✅ **HeRo 대시보드 Tetrad 섹션**: 기업 풀 · JD · JH · 매칭 지표 + Funnel 가시화
 
 ### ✅ 세션 78 — HeRo Matching Tetrad 인프라 구축 (2026-04-22)
