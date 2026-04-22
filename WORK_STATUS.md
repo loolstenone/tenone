@@ -1,8 +1,27 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-22 (세션 74 — MADLeague 아레나 워크스페이스 완성)
+> 마지막 업데이트: 2026-04-22 (세션 75 — HeRo TIH UX 전면 정비)
 
 ## 다음 할 일 (이어서 시작 지점)
+
+### 🔴 세션 75 이월 — TIH 제출 에러 최종 확인
+- ⚠️ **TIH 500 에러**: `createAdminClient` 전환 fix 배포 완료, 실기기 제출 테스트 미완
+  - 테스트 후 성공 → `app/api/hero/tih/route.ts` debug `console.error` 3줄 제거
+  - 테스트 후 실패 → Vercel 로그 확인 (이미 상세 출력 심어둠)
+- `/hero/coaching/ai` 결제 PG 연동 (이월 유지)
+
+### ✅ 세션 75 — HeRo TIH UX 전면 정비 (2026-04-22)
+- ✅ **씨치 라이트**: 버튼명 "인재 찾기 의뢰" / "사전 등록" 섹션 전면 제거
+- ✅ **TIH Section 0**: HeRo 트랙 제거 (산업+직무 2개만 유지)
+- ✅ **TIH 3축 배분**: Pointer 아이콘 + 컬러 진행 바 + 색상별 슬라이더로 재디자인
+- ✅ **TIH 질문 번호 제거**: 모든 TIH-X-X. 접두사 삭제
+- ✅ **TIH DB 테이블**: `hero_tih_responses` + `hero_search_light_waitlist` Supabase 생성
+- ✅ **TIH hydration fix**: `hydrated` 플래그로 SSR mismatch + useEffect race 해결 → 다음 버튼 정상 작동
+- ✅ **TIH API**: `createAdminClient` 전환 (RLS upsert 권한 오류 수정)
+- ✅ **TIH scroll-to-top**: 스텝 이동 시 `window.scrollTo({ top:0, behavior:"instant" })`
+- ✅ **TIH 중복 질문 제거**: Section3 q3(과하면 곤란한 축) + Section4 q4(개인 시간 방식) 삭제
+- ✅ **TIH 한국어 교정**: 모든 질문·옵션 문어체 → 구어체 자연스럽게 재작성
+- ✅ **모바일 메뉴**: Badak 드로어 패턴 (슬라이드 트랜지션 + 프로필 카드 + LoginModal 연동)
 
 ### ✅ 세션 73 — MADLeague UX 정비 (2026-04-22)
 - ✅ **헤더 간소화**: `MadLeagueHeader.tsx` navItems에서 "매드리거" 항목 제거 → 프로그램·아레나·MADzine 3개 유지

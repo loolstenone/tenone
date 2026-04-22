@@ -135,10 +135,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Launch (2026-04-22 업데이트) — 씨치 라이트 신설, 커리어 코칭 4탭 재편 |
-| **개발 수준** | 검사 시스템(A~F) + 이력서 CRUD + 씨치 라이트(TIH) 완성. |
-| **이월 작업** | `/hero/coaching/ai` 결제 PG 연동 / 씨치 라이트 DB 테이블 생성(`sql/hero-search-light.sql`) |
-| **최근 결정** | 커리어 코칭 = 이력서·멘토링·커리어 로드맵·퍼스널 브랜딩 4탭 허브 / 헤더 nav에 씨치 라이트 추가 / TIH 22문항 멀티스텝 구현 / 인트라 `/intra/hero/search-light` 신설 |
+| **Phase** | Launch (2026-04-22 세션 75 업데이트) — TIH UX 전면 정비 완료 |
+| **개발 수준** | 검사 시스템(A~F) + 이력서 CRUD + 씨치 라이트(TIH) 완성. DB 테이블(`hero_tih_responses`, `hero_search_light_waitlist`) Supabase 생성 완료. |
+| **이월 작업** | `/hero/coaching/ai` 결제 PG 연동 / TIH 제출 500 에러 실기기 최종 확인(fix 배포됨, 테스트 미완) |
+| **최근 결정** | TIH API → `createAdminClient` 전환(RLS upsert UPDATE 우회) / Section3 q3·Section4 q4 중복 질문 제거 / TIH 모바일 메뉴 Badak 드로어 패턴 적용 / 씨치 라이트 "사전 등록" 섹션 제거·버튼명 "인재 찾기 의뢰"로 변경 |
 
 ---
 

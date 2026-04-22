@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-22 (세션 75) — HeRo TIH UX 전면 정비
+
+### 수정 파일
+- `app/(HeRo)/hero/search-light/page.tsx` — 버튼명 "인재 찾기 의뢰", 사전 등록 섹션 제거
+- `app/(HeRo)/hero/search-light/tih/page.tsx` — Section0 HeRo 트랙 제거, 3축 배분 재디자인, 질문 번호 제거, hydration fix(hydrated 플래그), scroll-to-top, Section3 q3·Section4 q4 중복 질문 삭제, 전체 한국어 문장 교정
+- `app/api/hero/tih/route.ts` — createAdminClient 전환, console.error 디버그 추가
+- `features/hero/HeRoHeader.tsx` — 모바일 메뉴 Badak 드로어 패턴(슬라이드, 프로필 카드, LoginModal)
+
+### 결정사항
+- TIH API는 upsert(onConflict:email) 방식 유지 — 재제출 시 덮어쓰기
+- Section3 q3(S-Power 부정 축) 제거: 3축 배분과 개념 중복
+- Section4 q4(개인 시간 방식) 제거: 맥락 이탈 질문
+- 모바일 메뉴는 Badak과 동일한 패턴으로 유니버스 표준화
+
+---
+
 ## 2026-04-22 (세션 74) — MADLeague 아레나 워크스페이스 완성
 
 ### 신규 파일
