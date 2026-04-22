@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ExternalLink, Users, ClipboardCheck, FileText, Search, Loader2 } from "lucide-react";
+import { ExternalLink, Users, ClipboardCheck, FileText, Search, Loader2, Building2, Compass, Sparkles, Network } from "lucide-react";
 import { PageHeader, StatCard, Card, SectionTitle } from "@/components/intra/IntraUI";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,6 +14,14 @@ interface HeroStats {
     hitInProgress: number;
     resumes: number;
     tihRequests: number;
+    companies: number;
+    companiesActiveMembers: number;
+    jdTotal: number;
+    jdPublished: number;
+    jhTotal: number;
+    jhActive: number;
+    heroProfiles: number;
+    matches: number;
 }
 
 interface RecentHit {
@@ -33,7 +41,15 @@ interface RecentResume {
 
 export default function HeroDashboardPage() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<HeroStats>({ members: 0, membersThisMonth: 0, hitTotal: 0, hitCompleted: 0, hitInProgress: 0, resumes: 0, tihRequests: 0 });
+    const [stats, setStats] = useState<HeroStats>({
+        members: 0, membersThisMonth: 0,
+        hitTotal: 0, hitCompleted: 0, hitInProgress: 0,
+        resumes: 0, tihRequests: 0,
+        companies: 0, companiesActiveMembers: 0,
+        jdTotal: 0, jdPublished: 0,
+        jhTotal: 0, jhActive: 0,
+        heroProfiles: 0, matches: 0,
+    });
     const [recentHits, setRecentHits] = useState<RecentHit[]>([]);
     const [recentResumes, setRecentResumes] = useState<RecentResume[]>([]);
 
@@ -53,6 +69,14 @@ export default function HeroDashboardPage() {
             { count: hitInProgress },
             { count: resumes },
             { count: tihRequests },
+            { count: companies },
+            { count: companiesActiveMembers },
+            { count: jdTotal },
+            { count: jdPublished },
+            { count: jhTotal },
+            { count: jhActive },
+            { count: heroProfiles },
+            { count: matches },
             { data: hits },
             { data: resumeData },
         ] = await Promise.all([
@@ -63,6 +87,14 @@ export default function HeroDashboardPage() {
             sb.from("hit_sessions").select("*", { count: "exact", head: true }).in("status", ["in_progress", "active"]),
             sb.from("resumes").select("*", { count: "exact", head: true }),
             sb.from("hero_tih_responses").select("*", { count: "exact", head: true }),
+            sb.from("hero_companies").select("*", { count: "exact", head: true }),
+            sb.from("hero_company_members").select("*", { count: "exact", head: true }).eq("status", "active"),
+            sb.from("hero_jd").select("*", { count: "exact", head: true }),
+            sb.from("hero_jd").select("*", { count: "exact", head: true }).eq("status", "published"),
+            sb.from("hero_jh_responses").select("*", { count: "exact", head: true }),
+            sb.from("hero_jh_responses").select("*", { count: "exact", head: true }).eq("status", "active"),
+            sb.from("hero_profiles").select("*", { count: "exact", head: true }),
+            sb.from("hero_matches").select("*", { count: "exact", head: true }),
             sb.from("hit_sessions").select("id, test_type, status, started_at, completed_at").order("created_at", { ascending: false }).limit(5),
             sb.from("resumes").select("id, title, created_at, members!inner(name)").order("created_at", { ascending: false }).limit(5),
         ]);
@@ -75,6 +107,14 @@ export default function HeroDashboardPage() {
             hitInProgress: hitInProgress ?? 0,
             resumes: resumes ?? 0,
             tihRequests: tihRequests ?? 0,
+            companies: companies ?? 0,
+            companiesActiveMembers: companiesActiveMembers ?? 0,
+            jdTotal: jdTotal ?? 0,
+            jdPublished: jdPublished ?? 0,
+            jhTotal: jhTotal ?? 0,
+            jhActive: jhActive ?? 0,
+            heroProfiles: heroProfiles ?? 0,
+            matches: matches ?? 0,
         });
         setRecentHits((hits ?? []) as RecentHit[]);
         setRecentResumes((resumeData ?? []) as RecentResume[]);
@@ -112,6 +152,61 @@ export default function HeroDashboardPage() {
                         <StatCard label="씨치 라이트 요청" value={stats.tihRequests.toLocaleString() + "건"}
                             sub="TIH 제출 누계"
                             icon={<Search className="h-4 w-4" />} />
+                    </div>
+
+                    {/* Matching Tetrad 지표 */}
+                    <div className="mb-8">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Network className="h-4 w-4 text-rose-500" />
+                            <h2 className="text-sm font-bold">Matching Tetrad</h2>
+                            <span className="text-[10px] text-neutral-400">TIH · HIT · JD · JH 4요소 유입 현황</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <StatCard label="기업 풀"
+                                value={stats.companies.toLocaleString() + "개"}
+                                sub={`활성 담당자 ${stats.companiesActiveMembers}명`}
+                                icon={<Building2 className="h-4 w-4" />} />
+                            <StatCard label="JD 발행"
+                                value={stats.jdPublished.toLocaleString() + "건"}
+                                sub={`전체 ${stats.jdTotal}건 (draft 포함)`}
+                                icon={<FileText className="h-4 w-4" />} />
+                            <StatCard label="JH 매칭 대기"
+                                value={stats.jhActive.toLocaleString() + "명"}
+                                sub={`전체 ${stats.jhTotal}건 (draft 포함)`}
+                                icon={<Compass className="h-4 w-4" />} />
+                            <StatCard label="매칭 성사"
+                                value={stats.matches.toLocaleString() + "건"}
+                                sub={`통합 프로필 ${stats.heroProfiles}명`}
+                                icon={<Sparkles className="h-4 w-4" />} />
+                        </div>
+                        {/* Tetrad Funnel 가시화 */}
+                        <div className="mt-4 p-3 border border-neutral-200 bg-gradient-to-r from-neutral-50 to-rose-50/30 rounded-lg">
+                            <p className="text-[10px] text-neutral-500 font-semibold mb-2">Tetrad Funnel — 좌우 교차 매칭 후보 깊이</p>
+                            <div className="grid grid-cols-2 gap-4 text-[11px]">
+                                <div>
+                                    <p className="font-semibold text-neutral-600 mb-1">기업 측</p>
+                                    <div className="flex items-center gap-1">
+                                        <span className="font-mono">{stats.companies}</span>
+                                        <span className="text-neutral-400">기업 →</span>
+                                        <span className="font-mono">{stats.tihRequests}</span>
+                                        <span className="text-neutral-400">TIH →</span>
+                                        <span className="font-mono text-rose-600">{stats.jdPublished}</span>
+                                        <span className="text-neutral-400">JD 공개</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-neutral-600 mb-1">인재 측</p>
+                                    <div className="flex items-center gap-1">
+                                        <span className="font-mono">{stats.members}</span>
+                                        <span className="text-neutral-400">회원 →</span>
+                                        <span className="font-mono">{stats.hitCompleted}</span>
+                                        <span className="text-neutral-400">HIT 완료 →</span>
+                                        <span className="font-mono text-rose-600">{stats.jhActive}</span>
+                                        <span className="text-neutral-400">JH 작성</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
