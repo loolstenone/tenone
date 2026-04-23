@@ -14,6 +14,7 @@ import {
   Target,
   FileText,
   Handshake,
+  Briefcase,
   Zap,
   CheckCircle2,
   Circle,
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 import { GoalsTab } from "@/features/hero/GoalsTab";
+import { JobsTab } from "@/features/hero/JobsTab";
 
 const RED = "#E53935";
 
@@ -63,6 +65,7 @@ const TABS = [
   { key: "herotype",  label: "Hero Type", icon: Target },
   { key: "goals",     label: "목표·성취", icon: Target },
   { key: "record",    label: "기록",      icon: FileText },
+  { key: "jobs",      label: "채용 피드", icon: Briefcase },
   { key: "matching",  label: "매칭",      icon: Handshake },
 ] as const;
 
@@ -147,6 +150,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         {tab === "herotype" && <HeroTypeTab status={status} />}
         {tab === "goals"    && <GoalsTab memberId={memberId} />}
         {tab === "record"   && <RecordTab />}
+        {tab === "jobs"     && <JobsTab memberId={memberId} />}
         {tab === "matching" && <MatchingTab status={status} memberId={memberId} />}
       </div>
     </div>
@@ -155,15 +159,29 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
 
 /* ═════════════════════════ Journey 지도 ═════════════════════════ */
 
+function streakBadge(streak: number): { label: string; emoji: string } | null {
+  if (streak >= 100) return { label: "100일 전설", emoji: "🏆" };
+  if (streak >= 30)  return { label: "30일 챔피언", emoji: "⭐" };
+  if (streak >= 7)   return { label: "7일 달성", emoji: "🔥" };
+  return null;
+}
+
 function JourneyMap({ status }: { status: JourneyStatus }) {
   const currentIdx = status.stageIndex - 1;
+  const badge = streakBadge(status.streak);
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 mb-6">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#E53935] text-xs font-bold">
           <Flame className="w-3.5 h-3.5" />
           {status.streak}일째 방문
         </div>
+        {badge && (
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 text-xs font-bold">
+            <span>{badge.emoji}</span>
+            {badge.label}
+          </div>
+        )}
         <div className="text-xs text-neutral-500">
           현재 스테이지: <span className="font-bold text-neutral-900">{STAGES[currentIdx]?.label}</span> · {STAGES[currentIdx]?.subtitle}
         </div>
@@ -363,6 +381,7 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
   const [note, setNote] = useState<string>(status.todayCheckin?.note ?? "");
   const [saving, setSaving] = useState(false);
 
+  const [toast, setToast] = useState<string | null>(null);
   const save = async () => {
     setSaving(true);
     try {
@@ -371,7 +390,16 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ memberId, energyLevel: energy, note }),
       });
-      if (res.ok) onRefresh();
+      if (res.ok) {
+        const data = await res.json() as { earned?: { action: string; amount: number }[] };
+        const totalUC = (data.earned ?? []).reduce((s, e) => s + e.amount, 0);
+        const hasStreak = (data.earned ?? []).some(e => e.action.startsWith("hero_streak_"));
+        if (totalUC > 0) {
+          setToast(hasStreak ? `🎉 스트릭 달성! +${totalUC} UC 적립` : `+${totalUC} UC 적립`);
+          setTimeout(() => setToast(null), 3500);
+        }
+        onRefresh();
+      }
     } finally {
       setSaving(false);
     }
@@ -417,8 +445,13 @@ function CheckinCard({ status, memberId, onRefresh }: { status: JourneyStatus; m
         className="w-full py-3 rounded-lg text-white font-bold text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
         style={{ backgroundColor: RED }}
       >
-        {saving ? "저장 중..." : status.todayCheckedIn ? "갱신 +0 UC" : "저장 +50 UC"}
+        {saving ? "저장 중..." : status.todayCheckedIn ? "갱신" : "저장 +50 UC"}
       </button>
+      {toast && (
+        <div className="mt-3 px-3 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg text-center text-sm font-bold text-amber-800 animate-pulse">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

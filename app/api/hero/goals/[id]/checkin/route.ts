@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { earnUC } from "@/lib/supabase/uc";
 
 interface VriefProgress { code: string; level: number }
 interface GprProgress { metric?: string; current: number }
@@ -92,7 +93,14 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
             await sb.from("hero_goals").update({ progress_percent: pct }).eq("id", goalId);
         }
 
-        return NextResponse.json({ ok: true, checkin });
+        // UC 적립 (주간 cap 5회)
+        const earned: { action: string; amount: number }[] = [];
+        try {
+            const r = await earnUC(body.memberId, "hero_goal_weekly_checkin", "hero");
+            if (r.granted) earned.push({ action: "hero_goal_weekly_checkin", amount: r.amount });
+        } catch { /* silent */ }
+
+        return NextResponse.json({ ok: true, checkin, earned });
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "unknown";
         return NextResponse.json({ error: msg }, { status: 500 });
