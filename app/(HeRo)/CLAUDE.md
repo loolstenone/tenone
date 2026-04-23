@@ -521,7 +521,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Journey 워크스페이스 + 브랜드 포지셔닝 교체 (2026-04-23 세션 81) |
+| **Phase** | P3 색 SSOT 전 페이지 감사 완료 (2026-04-24 세션 82) |
 | **포지셔닝** | **HeRo = Talent Agency** · Human enhancement & Recruit Optimization · "플랫폼" 아닌 "인재 기획사" |
 | **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · /hero/pricing · /hero/talent-agent · **/hero/journey 워크스페이스 (신규)** |
 | **세션 81 주요 결정** | ① Journey가 HeRo의 리텐션 엔진 — 설명이 아닌 도구 · ② 탭은 액션 단위(verb) · ③ Vrief × GPR 이중축을 목표 관리 표준 · ④ 스트릭 + 주간 체크인 + 매칭 피드 3중 루프 · ⑤ 브랜드 컨셉 "Talent Agency"로 재정의 · ⑥ 64 영웅 유형 영화 IP 제거·현대 직업 원형으로 전면 리네이밍 |
@@ -529,8 +529,9 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | **사용자 측 완성 (세션 81)** | `/hero/journey` auth 분기 (비로그인 마케팅 + 로그인 워크스페이스) · 탭 6개 · Today 위젯 5개 · 스트릭 배지 + UC 토스트 · 목표 CRUD + 주간 체크인 · 채용 피드 |
 | **64 유형 SSOT 개편 (세션 81)** | character_name 64개 "The + 직업원형"으로 리네이밍 · character_label 구조 변경 · profile_overview 4문단 표준 · strengths/cautions/fit_direction JSONB 표준화 · 디자인 시스템 2문서 (`docs/hero-types-design-system.md` + `docs/hero-types-pilot-prompts.md`) |
 | **헤더 변경 (세션 81)** | ABOUT · Journey · Profile · 공유 · 검색 순서 (UniverseUtilityBar workspace 위치 이동, 전 브랜드 공통 영향) |
-| **이월 (집에서 이어감)** | **P0-A**: 주간 이메일 리포트 (월요일 09:00 배치, Resend 템플릿 + pg_cron) · **P0-B**: 채용 피드 "관심 있어요" 버튼 → `hero_matches` 연결 · **P0-C**: 성과 한 줄 캡처 (`hero_achievements` 테이블) · **P1-D**: 스테이지 승급 축하 이벤트 · **P1-E**: 코칭 세션 이력 탭 · **P1-F**: 월간 회고 · **P2**: 고아 페이지 정리 (`/hero/audition`·`/hero/for-business`) · 상세는 WORK_STATUS.md |
+| **이월** | Intra 관리 7페이지 신설 (jd/jh/companies/report-modules/ai-prompts/funnel/talent-agent) · 64캐릭터 일러스트 양산 · HIT 질문 DB 단일화 (24파일→hit_questions) · HitProfileBadge 21개 브랜드 삽입 · 상세는 WORK_STATUS.md |
 | **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 |
+| **색 SSOT 확정 (세션 82)** | Action/Accent/State layer만 HeRo Red · `group-hover:text-[#E53935]` on `font-bold` titles = hover-only affordance = ACCEPTABLE · per-card outline red = ACCEPTABLE · semantic red = 항상 ACCEPTABLE |
 | **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 (Tetrad) · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 · Journey 리텐션 엔진 · Talent Agency 포지셔닝 |
 
 ---

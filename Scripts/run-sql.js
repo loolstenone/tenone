@@ -34,6 +34,8 @@ const PENDING_FILES = [
   'agent-tables.sql',
   'workflow-tables.sql',
   'badaksoe-rooms-table.sql',
+  'hero-achievements.sql',
+  'hero-reflections.sql',
 ];
 
 async function runSQL(serviceRoleKey, sql, label) {

@@ -7,7 +7,7 @@
  */
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/lib/supabase/api-utils';
-import { createClient } from '@/lib/supabase/client';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('resultId와 memberId는 필수입니다.', 400);
     }
 
-    const supabase = createClient();
+    const supabase = createAdminClient();
 
     // hit_a_results의 member_id 업데이트 (null인 경우만)
     const { error: aError } = await supabase

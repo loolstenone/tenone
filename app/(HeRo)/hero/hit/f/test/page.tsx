@@ -307,7 +307,7 @@ function HitFTestContent() {
       <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <p className="text-xs font-bold text-[#E53935] uppercase tracking-widest mb-2">HIT F</p>
+            <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">HIT F</p>
             <h1 className="text-xl font-extrabold mb-2">기본 정보 입력</h1>
             <p className="text-sm text-neutral-500">CVI(경력유효성지수) 산출에 필요한 정보입니다.</p>
           </div>

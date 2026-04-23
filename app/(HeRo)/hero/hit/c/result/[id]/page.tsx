@@ -441,7 +441,7 @@ export default function HitCResultPage() {
               <div className="mt-2 pt-2 border-t border-neutral-100">
                 <div className="flex justify-between text-sm">
                   <span className="font-bold text-neutral-700">종합 준비도</span>
-                  <span className="font-extrabold text-[#E53935]">{result.readinessTotal}%</span>
+                  <span className="font-extrabold text-neutral-900">{result.readinessTotal}%</span>
                 </div>
               </div>
             </div>
@@ -459,9 +459,9 @@ export default function HitCResultPage() {
                 <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-3">주요 갭 영역</h3>
                 <div className="space-y-2">
                   {result.gapAreas.map((gap, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg">
-                      <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
-                      <span className="text-xs text-red-700">{gap}</span>
+                    <div key={i} className="flex items-center gap-2 bg-neutral-100 px-3 py-2 rounded-lg">
+                      <AlertTriangle className="h-3.5 w-3.5 text-neutral-400 flex-shrink-0" />
+                      <span className="text-xs text-neutral-700">{gap}</span>
                     </div>
                   ))}
                 </div>
@@ -495,7 +495,7 @@ export default function HitCResultPage() {
                 <Link href={`/hero/hit/profile/${result.id}`}
                   className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#E53935] text-white rounded-lg flex items-center justify-center font-bold text-sm">A+C</div>
+                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+C</div>
                     <div className="flex-1">
                       <p className="font-bold text-neutral-800">통합 프로필 보기</p>
                       <p className="text-xs text-neutral-500 mt-0.5">HIT A + C 결과를 한눈에</p>

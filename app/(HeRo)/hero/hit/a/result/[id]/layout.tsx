@@ -33,13 +33,22 @@ export async function generateMetadata({
       };
     }
 
-    const { type_code, type_name_ko, type_nickname, disc_primary } = data;
-    const title = `${type_code} - ${type_name_ko}`;
-    const description = type_nickname
-      ? `나의 영웅 유형: ${type_code} "${type_nickname}" (${type_name_ko}). HeRo Talent Agency HIT 검사 결과`
-      : `나의 영웅 유형: ${type_code} (${type_name_ko}). HeRo Talent Agency HIT 검사 결과`;
+    const { type_code, type_nickname, disc_primary } = data;
 
-    const ogImageUrl = `${BASE_URL}/api/og/hit?type=${encodeURIComponent(type_code || '')}&name=${encodeURIComponent(type_name_ko || '')}&nick=${encodeURIComponent(type_nickname || '')}`;
+    // hit_hero_types.character_name이 SSOT (type_name_ko는 구버전 이름)
+    const { data: ht } = await supabase
+      .from('hit_hero_types')
+      .select('character_name')
+      .eq('type_code', type_code)
+      .maybeSingle();
+    const displayName = ht?.character_name ?? data.type_name_ko;
+
+    const title = `${type_code} - ${displayName}`;
+    const description = type_nickname
+      ? `나의 영웅 유형: ${type_code} "${type_nickname}" (${displayName}). HeRo Talent Agency HIT 검사 결과`
+      : `나의 영웅 유형: ${type_code} (${displayName}). HeRo Talent Agency HIT 검사 결과`;
+
+    const ogImageUrl = `${BASE_URL}/api/og/hit?type=${encodeURIComponent(type_code || '')}&name=${encodeURIComponent(displayName || '')}&nick=${encodeURIComponent(type_nickname || '')}`;
 
     return {
       title,

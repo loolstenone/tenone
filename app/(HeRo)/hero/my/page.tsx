@@ -53,7 +53,7 @@ export default function HeRoMyPage() {
                     <Link href={jhStatus === "none" ? "/hero/jh/write" : "/hero/jh"}
                         className="mb-6 flex items-center gap-3 px-4 py-3 border border-dashed border-neutral-700 rounded-xl hover:border-[#E53935] hover:bg-red-500/5 transition-colors">
                         <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
-                            <Compass className="h-5 w-5 text-[#E53935]" />
+                            <Compass className="h-5 w-5 text-neutral-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-neutral-100">
@@ -114,14 +114,14 @@ export default function HeRoMyPage() {
                         {myPosts.length === 0 ? (
                             <div className="py-16 text-center text-neutral-500"><FileText className="h-8 w-8 mx-auto mb-3 opacity-50" /><p className="text-sm">아직 작성한 게시글이 없습니다.</p></div>
                         ) : myPosts.map(post => (
-                            <div key={post.id} className="py-4 flex items-center justify-between hover:opacity-80 cursor-pointer">
+                            <Link key={post.id} href={`/hero/community/post/${post.id}`} className="py-4 flex items-center justify-between hover:opacity-80 transition-opacity">
                                 <div><p className="font-medium text-sm">{post.title}</p>
                                     <div className="flex gap-3 mt-1 text-xs text-neutral-500">
                                         <span>{post.board}</span><span className="flex items-center gap-1"><Eye className="h-3 w-3" />{post.view_count}</span><span>{post.created_at?.substring(0, 10)}</span>
                                     </div>
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-neutral-600" />
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

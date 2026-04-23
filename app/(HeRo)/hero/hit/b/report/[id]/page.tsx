@@ -155,7 +155,7 @@ export default function HitBReportPage() {
         {/* 요약 카드 */}
         <div className="border-l-[3px] border-[#E53935] pl-6 mb-8">
           <div className="flex items-baseline gap-3 mb-1">
-            <span className="text-2xl font-extrabold text-[#E53935]">{result.hollandCode}</span>
+            <span className="text-2xl font-extrabold text-neutral-900">{result.hollandCode}</span>
             <span className="text-lg font-bold text-neutral-900">{trackName}</span>
           </div>
           <p className="text-xs text-neutral-400 mb-4">
@@ -265,7 +265,7 @@ export default function HitBReportPage() {
       {/* ── AI 상담 플로팅 ── */}
       <Link
         href={`/hero/coaching/ai?resultId=${resultId}`}
-        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white font-bold rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl transition-all hover:scale-105"
+        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white font-bold rounded-full shadow-lg hover:bg-neutral-700 hover:shadow-xl transition-all hover:scale-105"
       >
         <Sparkles className="h-5 w-5" /> AI 상담
       </Link>

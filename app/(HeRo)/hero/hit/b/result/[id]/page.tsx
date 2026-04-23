@@ -281,7 +281,7 @@ export default function HitBResultPage() {
                 <Link href={`/hero/hit/profile/${result.id}`}
                   className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#E53935] text-white rounded-lg flex items-center justify-center font-bold text-sm">A+B</div>
+                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+B</div>
                     <div className="flex-1">
                       <p className="font-bold text-neutral-800">통합 프로필 보기</p>
                       <p className="text-xs text-neutral-500 mt-0.5">HIT A + B 결과를 한눈에</p>

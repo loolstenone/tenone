@@ -99,8 +99,7 @@ export default function CompanyJdListPage({ params }: { params: Promise<{ id: st
                         <FileText className="h-10 w-10 mx-auto mb-3 text-neutral-300" />
                         <p className="text-sm text-neutral-400 mb-5">아직 작성된 직무 설명이 없습니다</p>
                         <Link href={`/hero/company/${companyId}/jd/new`}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-lg"
-                            style={{ backgroundColor: HERO_RED }}>
+                            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-300 text-neutral-700 hover:border-neutral-400 transition-colors">
                             <Plus className="h-4 w-4" /> 첫 번째 직무 설명 작성
                         </Link>
                     </div>

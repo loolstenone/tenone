@@ -179,7 +179,7 @@ export default function ResumePage() {
                                 className={`border rounded-2xl p-8 ${plan.highlight ? "border-[#E53935] ring-2 ring-red-100" : "border-neutral-200"}`}
                             >
                                 {plan.highlight && (
-                                    <span className="text-xs px-3 py-1 bg-[#E53935] text-white rounded-full font-medium mb-4 inline-block">
+                                    <span className="text-xs px-3 py-1 bg-red-50 text-[#E53935] rounded-full font-medium mb-4 inline-block">
                                         추천
                                     </span>
                                 )}

@@ -201,8 +201,8 @@ export default function SearchLightPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {principles.map((p) => (
                             <div key={p.title} className="text-center">
-                                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${HERO_RED}15` }}>
-                                    <p.icon className="h-7 w-7" style={{ color: HERO_RED }} />
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-neutral-100">
+                                    <p.icon className="h-7 w-7 text-neutral-500" />
                                 </div>
                                 <h3 className="font-bold mb-2">{p.title}</h3>
                                 <p className="text-sm text-neutral-500">{p.desc}</p>
@@ -237,7 +237,7 @@ export default function SearchLightPage() {
                                 <p className="text-[10px] text-neutral-400 font-mono mb-1">{item.section}</p>
                                 <p className="text-xs font-bold text-neutral-800">{item.label}</p>
                                 {item.q && <p className="text-xs text-neutral-500 mt-0.5">{item.q}</p>}
-                                <p className="text-xs font-semibold mt-1" style={{ color: HERO_RED }}>{item.time}</p>
+                                <p className="text-xs font-semibold mt-1 text-neutral-500">{item.time}</p>
                             </div>
                         ))}
                     </div>

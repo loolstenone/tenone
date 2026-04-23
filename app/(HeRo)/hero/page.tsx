@@ -168,7 +168,7 @@ export default function HeRoHomePage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-5 leading-tight">
                 We believe in
                 <br />
-                <span style={{ color: RED }}>your talent</span>
+                <span>your talent</span>
               </h1>
 
               <p className="text-sm md:text-base text-neutral-500 mb-8 leading-relaxed max-w-md mx-auto md:mx-0">
@@ -196,11 +196,8 @@ export default function HeRoHomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
           {/* 인재 */}
           <div className="relative flex flex-col items-center justify-center px-8 py-20 bg-white group">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
-              style={{ backgroundColor: `${RED}10` }}
-            >
-              <Users className="h-8 w-8" style={{ color: RED }} />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-neutral-100">
+              <Users className="h-8 w-8 text-neutral-500" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-neutral-900 mb-3">
               인재
@@ -246,10 +243,7 @@ export default function HeRoHomePage() {
       <section className="py-24 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center mb-16">
-            <p
-              className="text-sm font-bold uppercase tracking-widest mb-3"
-              style={{ color: RED }}
-            >
+            <p className="text-sm font-bold uppercase tracking-widest mb-3 text-neutral-500">
               Services
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
@@ -413,13 +407,7 @@ export default function HeRoHomePage() {
                 href="/hero/hit"
                 className="border border-neutral-200 rounded-2xl p-6 text-center hover:border-[#E53935] hover:shadow-md transition-all group"
               >
-                <div
-                  className="inline-flex px-3 h-7 items-center rounded-full mx-auto mb-4 text-[11px] font-mono font-bold"
-                  style={{
-                    backgroundColor: `${RED}10`,
-                    color: RED,
-                  }}
-                >
+                <div className="inline-flex px-3 h-7 items-center rounded-full mx-auto mb-4 text-[11px] font-mono font-bold bg-neutral-100 text-neutral-700">
                   {t.code}
                 </div>
                 <p className="text-sm font-bold text-neutral-900 group-hover:text-[#E53935] transition-colors leading-snug">

@@ -180,7 +180,7 @@ export default function CoachingPage() {
                         <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                             이력서, 멘토링, 로드맵, 브랜딩을
                             <br />
-                            <span style={{ color: HERO_RED }}>하나의 코칭</span>으로
+                            <span>하나의 코칭</span>으로
                         </h1>
                         <p className="text-lg text-neutral-600 mb-8">
                             HIT 진단 결과를 기반으로 커리어 전 과정을 통합 코칭합니다.
@@ -410,11 +410,11 @@ function MentorSection({
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="text-base font-bold">{mentor.name}</h3>
                                             <div className="flex items-center gap-0.5">
-                                                <Star className="h-3 w-3" style={{ color: HERO_RED, fill: HERO_RED }} />
+                                                <Star className="h-3 w-3 text-neutral-400" />
                                                 <span className="text-xs font-bold text-neutral-600">{mentor.matchScore}</span>
                                             </div>
                                         </div>
-                                        <p className="text-xs mb-1" style={{ color: HERO_RED }}>{mentor.field}</p>
+                                        <p className="text-xs mb-1 text-neutral-500">{mentor.field}</p>
                                         <p className="text-xs text-neutral-500">{mentor.career}</p>
                                     </div>
                                 </div>
@@ -431,7 +431,7 @@ function MentorSection({
                                     <button
                                         onClick={() => applyMentor(mentor)}
                                         disabled={applyStates[mentor.id] === "loading"}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors disabled:opacity-60"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-[#E53935] text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60"
                                         style={{ color: HERO_RED }}
                                     >
                                         <MessageCircle className="h-4 w-4" />
@@ -585,7 +585,7 @@ function BrandingSection() {
                                 <div className="grid grid-cols-2 gap-2">
                                     {prog.features.map((f) => (
                                         <div key={f} className="flex items-center gap-2">
-                                            <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: HERO_RED }} />
+                                            <CheckCircle className="h-3.5 w-3.5 flex-shrink-0 text-neutral-400" />
                                             <span className="text-xs text-neutral-600">{f}</span>
                                         </div>
                                     ))}
@@ -615,7 +615,7 @@ function BrandingSection() {
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
-                            <span className="text-xs px-3 py-1 text-white rounded-full" style={{ backgroundColor: HERO_RED }}>ENTJ</span>
+                            <span className="text-xs px-3 py-1 bg-neutral-900 text-white rounded-full">ENTJ</span>
                             <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">D 주도성</span>
                             <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">전략적 사고 92점</span>
                             <span className="text-xs px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full">리더십 90점</span>

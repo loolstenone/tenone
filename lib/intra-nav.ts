@@ -309,6 +309,11 @@ export const modules: NavModule[] = [
                             { name: "탤런트 에이전시", href: "/intra/hero/talent-agent/applications" },
                             // ── Universe Identity ──
                             { name: "영웅 유형", href: "/intra/hero/hero-types" },
+                            // ── 콘텐츠·AI ──
+                            { name: "리포트 모듈", href: "/intra/hero/report-modules" },
+                            { name: "AI 프롬프트", href: "/intra/hero/ai-prompts" },
+                            // ── 분석 ──
+                            { name: "Funnel 분석", href: "/intra/hero/funnel" },
                             // ── 보조 ──
                             { name: "AI 상담", href: "/intra/hero/ai-counseling" },
                             { name: "이력서", href: "/intra/hero/resume" },

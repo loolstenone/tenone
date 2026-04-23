@@ -295,7 +295,7 @@ export default function HitDResultPage() {
             <h2 className="text-lg font-bold mb-4">정체성 유연성</h2>
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <div className="text-center mb-6">
-                <p className="text-4xl font-extrabold text-[#E53935]">{result.identity_flexibility}%</p>
+                <p className="text-4xl font-extrabold text-neutral-900">{result.identity_flexibility}%</p>
                 <p className="text-xs text-neutral-400 mt-1">정체성 유연성 지수</p>
               </div>
               {/* Identity sub-scores — we need to derive from expertise_domains or separate fields */}
@@ -357,9 +357,9 @@ export default function HitDResultPage() {
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         {i === 0 && <TrendingUp className="h-4 w-4 text-[#E53935]" />}
-                        <p className={`font-bold text-sm ${i === 0 ? 'text-[#E53935]' : 'text-neutral-800'}`}>{role.role}</p>
+                        <p className="font-bold text-sm text-neutral-800">{role.role}</p>
                       </div>
-                      <span className={`text-sm font-mono font-bold ${i === 0 ? 'text-[#E53935]' : 'text-neutral-500'}`}>{role.fit_score}%</span>
+                      <span className={`text-sm font-mono font-bold ${i === 0 ? 'text-neutral-800' : 'text-neutral-500'}`}>{role.fit_score}%</span>
                     </div>
                     <p className="text-xs text-neutral-500">{role.description}</p>
                     {/* Fit bar */}
@@ -399,7 +399,7 @@ export default function HitDResultPage() {
                 <Link href={`/hero/hit/profile/${result.id}`}
                   className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#E53935] text-white rounded-lg flex items-center justify-center font-bold text-sm">A+D</div>
+                    <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold text-sm">A+D</div>
                     <div className="flex-1">
                       <p className="font-bold text-neutral-800">통합 프로필 보기</p>
                       <p className="text-xs text-neutral-500 mt-0.5">HIT A + D 결과를 한눈에</p>

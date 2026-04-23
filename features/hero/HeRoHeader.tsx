@@ -167,7 +167,7 @@ export function HeRoHeader() {
                             "flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors mb-2",
                             pathname.startsWith("/hero/journey")
                                 ? "bg-[#E53935] text-white"
-                                : "bg-red-50 text-[#E53935] hover:bg-red-100"
+                                : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
                         )}
                     >
                         나의 Journey

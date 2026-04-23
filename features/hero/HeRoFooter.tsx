@@ -30,7 +30,7 @@ export function HeRoFooter() {
                         </Link>
                         <p className="text-sm leading-relaxed">
                             Human enhancement &amp; Recruit Optimization.<br />
-                            <span className="text-[11px] tracking-[0.3em] uppercase text-[#E53935] font-bold">Talent Agency</span>
+                            <span className="text-[11px] tracking-[0.3em] uppercase text-neutral-300 font-bold">Talent Agency</span>
                         </p>
                     </div>
 

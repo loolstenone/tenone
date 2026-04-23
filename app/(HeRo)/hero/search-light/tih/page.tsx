@@ -153,7 +153,7 @@ export default function TIHTestPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-2 mb-4">
-                        <Lightbulb className="h-5 w-5" style={{ color: HERO_RED }} />
+                        <Lightbulb className="h-5 w-5 text-neutral-400" />
                         <span className="text-sm font-bold uppercase tracking-wider" style={{ color: HERO_RED }}>TIH · Trust, Intent, Hiring</span>
                     </div>
                     <Progress step={step + 1} />

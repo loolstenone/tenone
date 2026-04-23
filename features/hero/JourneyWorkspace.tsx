@@ -617,7 +617,7 @@ function StageUpModal({ from, to, ucAwarded, onClose }: {
           <div className="flex items-center justify-center gap-3 py-3 bg-neutral-50 rounded-xl">
             <span className="text-sm font-bold text-neutral-500">{from}</span>
             <span className="text-[#E53935] font-black">→</span>
-            <span className="text-sm font-black text-[#E53935]">{to}</span>
+            <span className="text-sm font-black text-neutral-900">{to}</span>
           </div>
 
           {/* UC 적립 */}

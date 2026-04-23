@@ -316,7 +316,7 @@ function AICounselingContent() {
               )}
               {hitModal.type === 'hitA' && (
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
                   <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT A 검사를 먼저 완료해주세요</h3>
@@ -328,7 +328,7 @@ function AICounselingContent() {
               )}
               {hitModal.type === 'hitB' && (
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
                   <h3 className="text-lg font-bold text-neutral-900 mb-2">HIT B 검사를 완료하면 더 정확합니다</h3>
@@ -340,7 +340,7 @@ function AICounselingContent() {
               )}
               {hitModal.type === 'ready' && (
                 <div>
-                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-8 w-8" style={{ color: RED }} />
                   </div>
                   <h3 className="text-lg font-bold text-neutral-900 mb-1 text-center">AI 상담 사전 신청</h3>

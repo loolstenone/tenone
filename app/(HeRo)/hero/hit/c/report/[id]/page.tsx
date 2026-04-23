@@ -239,7 +239,7 @@ export default function HitCReportPage() {
         {/* 요약 카드 */}
         <div className="border-l-[3px] border-[#E53935] pl-6 mb-8">
           <div className="flex items-baseline gap-3 mb-1">
-            <span className="text-2xl font-extrabold text-[#E53935]">{result.readinessGrade}등급</span>
+            <span className="text-2xl font-extrabold text-neutral-900">{result.readinessGrade}등급</span>
             <span className="text-lg font-bold text-neutral-900">{gradeLabel}</span>
           </div>
           <p className="text-xs text-neutral-400 mb-4">
@@ -318,7 +318,7 @@ export default function HitCReportPage() {
         <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">전환 가능성</h2>
         <div className="border border-neutral-200 rounded-xl p-6 mb-8">
           <div className="text-center mb-6">
-            <p className="text-4xl font-extrabold text-[#E53935]">{result.transferabilityIndex}%</p>
+            <p className="text-4xl font-extrabold text-neutral-900">{result.transferabilityIndex}%</p>
             <p className="text-xs text-neutral-400 mt-1">전환 가능성 지수</p>
           </div>
           <ScoreBar label="스킬 이동성" value={result.transferabilitySkillPortability} />
@@ -345,7 +345,7 @@ export default function HitCReportPage() {
           <ScoreBar label="갭 인식" value={result.readinessGapAwareness} />
           <div className="mt-3 pt-3 border-t border-neutral-100 flex justify-between text-sm">
             <span className="font-bold text-neutral-700">종합 준비도</span>
-            <span className="font-extrabold text-[#E53935]">{result.readinessTotal}%</span>
+            <span className="font-extrabold text-neutral-900">{result.readinessTotal}%</span>
           </div>
         </div>
 
@@ -398,7 +398,7 @@ export default function HitCReportPage() {
       {/* ── AI 상담 플로팅 ── */}
       <Link
         href={`/hero/coaching/ai?resultId=${resultId}`}
-        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white font-bold rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl transition-all hover:scale-105"
+        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white font-bold rounded-full shadow-lg hover:bg-neutral-700 hover:shadow-xl transition-all hover:scale-105"
       >
         <Sparkles className="h-5 w-5" /> AI 상담
       </Link>

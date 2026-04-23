@@ -203,7 +203,7 @@ export default function HitDReportPage() {
         {/* 요약 카드 */}
         <div className="border-l-[3px] border-[#E53935] pl-6 mb-8">
           <div className="flex items-baseline gap-3 mb-1">
-            <span className="text-2xl font-extrabold text-[#E53935]">{leadershipLabel}</span>
+            <span className="text-2xl font-extrabold text-neutral-900">{leadershipLabel}</span>
             <span className="text-lg font-bold text-neutral-900">{journeyLabel}</span>
           </div>
           <p className="text-xs text-neutral-400 mb-4">
@@ -247,7 +247,7 @@ export default function HitDReportPage() {
         <h2 className="text-xl font-bold mb-8 pt-8 border-t-2 border-neutral-200">정체성 유연성</h2>
         <div className="border border-neutral-200 rounded-xl p-6 mb-8">
           <div className="text-center mb-4">
-            <p className="text-4xl font-extrabold text-[#E53935]">{result.identity_flexibility}%</p>
+            <p className="text-4xl font-extrabold text-neutral-900">{result.identity_flexibility}%</p>
             <p className="text-xs text-neutral-400 mt-1">정체성 유연성 지수</p>
           </div>
           <p className="text-sm text-neutral-600 leading-relaxed text-center">
@@ -284,9 +284,9 @@ export default function HitDReportPage() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {i === 0 && <TrendingUp className="h-4 w-4 text-[#E53935]" />}
-                  <p className={`font-bold ${i === 0 ? 'text-[#E53935]' : 'text-neutral-800'}`}>{role.role}</p>
+                  <p className={`font-bold ${i === 0 ? 'text-neutral-900' : 'text-neutral-800'}`}>{role.role}</p>
                 </div>
-                <span className={`text-lg font-mono font-bold ${i === 0 ? 'text-[#E53935]' : 'text-neutral-500'}`}>{role.fit_score}%</span>
+                <span className={`text-lg font-mono font-bold ${i === 0 ? 'text-neutral-900' : 'text-neutral-500'}`}>{role.fit_score}%</span>
               </div>
               <p className="text-sm text-neutral-600">{role.description}</p>
               <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mt-3">
@@ -324,7 +324,7 @@ export default function HitDReportPage() {
       {/* ── AI 상담 플로팅 ── */}
       <Link
         href={`/hero/coaching/ai?resultId=${resultId}`}
-        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white font-bold rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl transition-all hover:scale-105"
+        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white font-bold rounded-full shadow-lg hover:bg-neutral-700 hover:shadow-xl transition-all hover:scale-105"
       >
         <Sparkles className="h-5 w-5" /> AI 상담
       </Link>

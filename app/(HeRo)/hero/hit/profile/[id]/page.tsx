@@ -318,7 +318,7 @@ export default function IntegratedProfilePage() {
       {/* Journey Stage */}
       <section className="mt-8 text-center">
         <p className="text-xs text-neutral-400 mb-2">현재 여정 단계</p>
-        <span className="inline-block px-4 py-2 bg-[#E53935] text-white text-sm font-bold rounded-full">
+        <span className="inline-block px-4 py-2 bg-red-50 text-[#E53935] text-sm font-bold rounded-full">
           {JOURNEY_STAGE_NAMES[hitB.journeyStage] || hitB.journeyStage}
         </span>
       </section>

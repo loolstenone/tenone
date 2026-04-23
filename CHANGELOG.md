@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-04-24 (낮) — 세션 82 · HeRo P3 UI/UX 색 SSOT 전 페이지 감사 완료
+
+### P3 HeRo 색 규약 감사 — 범위 전 페이지
+
+**감사 범위**: `/hero/hit` 랜딩 · HIT A~F 검사/결과 · `/hero/my` · `/hero/coaching` · `/hero/search-light` · `/hero/jh` · `/hero/company` · `/hero` 랜딩 · 공통 헤더/푸터
+
+**수정 건 (총 10건)**
+- HIT 랜딩: 순번 원형·피처 아이콘 `text-[#E53935]` → `text-neutral-400` / `text-neutral-600`
+- HIT A~F 검사 섹션 아이콘: red → neutral
+- HIT A result: 아웃라인 CTA → Action layer (filled)
+- HIT D result: `font-bold` 직무명·점수 red → neutral-800
+- JourneyWorkspace: 탭 sticky 처리
+- coaching page: 아이콘 color 정리
+
+**ACCEPTABLE 판정 (변경 없음)**
+- `group-hover:text-[#E53935]` on `font-bold` card titles — hover-only interactive affordance (default `text-neutral-900`)
+- Mobile drawer outline red nav CTA — 내비게이션 버튼 (본문 bold 텍스트 아님)
+- semantic red (에러·경고·리스크), form State layer, per-card outline buttons, active nav/tab indicators
+
+---
+
 ## 2026-04-23 (저녁) — 세션 81 · HeRo Journey 워크스페이스 3일치 + 64 유형 텍스트 개편 + 브랜드 컨셉 교체
 
 ### HIT 64 영웅 유형 SSOT 전면 개편

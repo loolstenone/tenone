@@ -387,7 +387,7 @@ export default function HitFResultPage() {
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <LatentRadar />
               <div className="text-center mt-2">
-                <span className="text-2xl font-extrabold text-[#E53935]">{result.latentScore}%</span>
+                <span className="text-2xl font-extrabold text-neutral-900">{result.latentScore}%</span>
                 <p className="text-xs text-neutral-400">종합 잠재 역량</p>
               </div>
             </div>
@@ -416,7 +416,7 @@ export default function HitFResultPage() {
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-neutral-700">회복탄력성</h3>
-                <span className="text-xl font-extrabold text-[#E53935]">{result.resilienceScore}%</span>
+                <span className="text-xl font-extrabold text-neutral-900">{result.resilienceScore}%</span>
               </div>
               <ScoreBar label="정서적 회복력" value={result.resilienceScores.emotional_resilience ?? 0} color="bg-purple-500" />
               <ScoreBar label="자신감" value={result.resilienceScores.confidence ?? 0} color="bg-blue-500" />
@@ -427,7 +427,7 @@ export default function HitFResultPage() {
             <div className="border border-neutral-200 rounded-xl p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-neutral-700">재진입 준비도</h3>
-                <span className="text-xl font-extrabold text-[#E53935]">{result.reentryReadiness}%</span>
+                <span className="text-xl font-extrabold text-neutral-900">{result.reentryReadiness}%</span>
               </div>
               <ScoreBar label="실질적 준비" value={result.practicalReadiness} color="bg-emerald-500" />
               <ScoreBar label="복귀 동기" value={result.reentryMotivation} color="bg-amber-500" />

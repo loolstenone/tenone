@@ -31,13 +31,13 @@ export default function HitOverviewPage() {
 
           {/* 공통 기반: A */}
           <div className="rounded-xl border-2 border-[#E53935] bg-red-50/40 p-5 mb-4 flex items-center gap-4">
-            <div className="w-11 h-11 shrink-0 bg-[#E53935] text-white rounded-lg flex items-center justify-center font-bold">
+            <div className="w-11 h-11 shrink-0 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold">
               A
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-sm font-bold">나에 대한 이해</span>
-                <span className="text-[11px] px-2 py-0.5 bg-[#E53935] text-white rounded-full">공통 기반</span>
+                <span className="text-[11px] px-2 py-0.5 bg-red-50 text-[#E53935] rounded-full font-medium">공통 기반</span>
               </div>
               <p className="text-xs text-neutral-500">기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성을 교차 분석해 S-Power 강점과 64유형을 도출합니다.</p>
             </div>
@@ -74,7 +74,7 @@ export default function HitOverviewPage() {
             {/* HIT A */}
             <div className="border-2 border-[#E53935] rounded-2xl p-8 hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-[#E53935] text-white rounded-xl flex items-center justify-center font-bold text-lg">
+                <div className="w-12 h-12 bg-neutral-900 text-white rounded-xl flex items-center justify-center font-bold text-lg">
                   A
                 </div>
                 <div>

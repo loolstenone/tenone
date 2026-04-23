@@ -60,12 +60,13 @@ export default function HitAResultPage() {
       .then(r => r.json())
       .then(async (data) => {
         if (data.error) { setLoading(false); return; }
+        let htData: { character_name?: string } | null = null;
         if (data.type_code) {
           try {
             const { createClient } = await import("@/lib/supabase/client");
             const sb = createClient();
-            const { data: ht } = await sb.from("hit_hero_types").select("strengths,cautions,fit_direction,profile_overview").eq("type_code", data.type_code).maybeSingle();
-            if (ht) setHeroType(ht);
+            const { data: ht } = await sb.from("hit_hero_types").select("character_name,strengths,cautions,fit_direction,profile_overview").eq("type_code", data.type_code).maybeSingle();
+            if (ht) { setHeroType(ht); htData = ht; }
           } catch {}
         }
         setResult({
@@ -77,7 +78,7 @@ export default function HitAResultPage() {
           discDScore: data.disc_d_score, discIScore: data.disc_i_score,
           discSScore: data.disc_s_score, discCScore: data.disc_c_score,
           baseSummary: data.base_summary, baseScores: data.base_scores || {},
-          typeCode: data.type_code, typeNameKo: data.type_name_ko,
+          typeCode: data.type_code, typeNameKo: htData?.character_name ?? data.type_name_ko,
           typeNickname: data.type_nickname, typeCategory: data.type_category,
           typeTraits: data.type_traits, typeCareers: data.type_careers,
           aiNarrative: data.ai_narrative, sPowerScores: data.s_power_scores,
@@ -449,7 +450,7 @@ export default function HitAResultPage() {
               <Link href="/hero/hit/b"
                 className="block border-2 border-[#E53935] rounded-xl p-5 hover:bg-red-50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#E53935] text-white rounded-lg flex items-center justify-center font-bold">B</div>
+                  <div className="w-10 h-10 bg-neutral-900 text-white rounded-lg flex items-center justify-center font-bold">B</div>
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">HIT - B 이어서 받기</p>
                     <p className="text-xs text-neutral-500 mt-0.5">적성, 역량, 준비도까지 확인하세요</p>

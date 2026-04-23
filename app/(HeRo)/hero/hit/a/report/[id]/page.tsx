@@ -49,16 +49,17 @@ export default function HitAReportPage() {
           setLoading(false);
           return;
         }
+        let htData: { character_name?: string } | null = null;
         if (data.type_code) {
           try {
             const { createClient } = await import("@/lib/supabase/client");
             const sb = createClient();
             const { data: ht } = await sb
               .from("hit_hero_types")
-              .select("strengths,cautions,fit_direction,profile_overview")
+              .select("character_name,strengths,cautions,fit_direction,profile_overview")
               .eq("type_code", data.type_code)
               .maybeSingle();
-            if (ht) setHeroType(ht);
+            if (ht) { setHeroType(ht); htData = ht; }
           } catch {}
         }
         setResult({
@@ -79,7 +80,7 @@ export default function HitAReportPage() {
           baseSummary: data.base_summary,
           baseScores: data.base_scores || {},
           typeCode: data.type_code,
-          typeNameKo: data.type_name_ko,
+          typeNameKo: htData?.character_name ?? data.type_name_ko,
           typeNickname: data.type_nickname,
           typeCategory: data.type_category,
           typeTraits: data.type_traits,
@@ -503,7 +504,7 @@ export default function HitAReportPage() {
       {/* ── AI 상담 플로팅 버튼 (우하단, 인쇄 시 숨김) ── */}
       <Link
         href={`/hero/coaching/ai?resultId=${resultId}`}
-        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-[#E53935] text-white font-bold rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl transition-all hover:scale-105"
+        className="no-print fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white font-bold rounded-full shadow-lg hover:bg-neutral-700 hover:shadow-xl transition-all hover:scale-105"
       >
         <Sparkles className="h-5 w-5" />
         AI 상담
