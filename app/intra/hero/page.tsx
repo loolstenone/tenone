@@ -149,7 +149,7 @@ export default function HeroDashboardPage() {
                         <StatCard label="이력서 등록" value={stats.resumes.toLocaleString() + "건"}
                             sub="이력서 워크스페이스 이용자"
                             icon={<FileText className="h-4 w-4" />} />
-                        <StatCard label="씨치 라이트 요청" value={stats.tihRequests.toLocaleString() + "건"}
+                        <StatCard label="써치 라이트 요청" value={stats.tihRequests.toLocaleString() + "건"}
                             sub="TIH 제출 누계"
                             icon={<Search className="h-4 w-4" />} />
                     </div>
@@ -264,7 +264,7 @@ export default function HeroDashboardPage() {
                         {[
                             { label: "HIT 이용자 현황", sub: "세션·완료·진행 중", href: "/intra/hero/hit" },
                             { label: "AI 상담 설정", sub: "챗봇·프롬프트 관리", href: "/intra/hero/ai-counseling" },
-                            { label: "씨치 라이트", sub: "TIH 응답 · 기업 요청", href: "/intra/hero/search-light" },
+                            { label: "써치 라이트", sub: "TIH 응답 · 기업 요청", href: "/intra/hero/search-light" },
                             { label: "이력서 컨설팅", sub: "컨설팅 신청 관리", href: "/intra/hero/resume/consulting" },
                         ].map(({ label, sub, href }) => (
                             <Link key={href} href={href}

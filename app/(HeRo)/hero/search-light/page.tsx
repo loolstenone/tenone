@@ -58,7 +58,7 @@ export default function SearchLightPage() {
                     `,
                 }} />
 
-                {/* 씨치라이트 빔 — 좌하단 한 점에서 우상단으로 */}
+                {/* 써치라이트 빔 — 좌하단 한 점에서 우상단으로 */}
                 {/* HeRo 로고 위치(top:28%, left:58%)에서 빔 폭 = HeRo 텍스트 너비 ~22% 기준 역산 */}
                 {/* 넓은 외곽 확산광 */}
                 <div className="pointer-events-none absolute inset-0" style={{

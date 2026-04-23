@@ -8,7 +8,7 @@ const navLinks = [
     { name: "HIT 검사", href: "/hero/hit" },
     { name: "AI 상담", href: "/hero/coaching/ai" },
     { name: "커리어 코칭", href: "/hero/coaching" },
-    { name: "씨치 라이트", href: "/hero/search-light" },
+    { name: "써치 라이트", href: "/hero/search-light" },
     { name: "이력서", href: "/hero/resume/workspace" },
 ];
 

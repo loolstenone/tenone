@@ -17,7 +17,7 @@ const navItems = [
     { name: "커리어 코칭", href: "/hero/coaching" },
     { name: "탤런트 에이전시", href: "/hero/talent-agent" },
     { name: "요금 안내", href: "/hero/pricing" },
-    { name: "씨치 라이트", href: "/hero/search-light" },
+    { name: "써치 라이트", href: "/hero/search-light" },
 ];
 
 export function HeRoHeader() {
@@ -80,6 +80,8 @@ export function HeRoHeader() {
                     <UniverseUtilityBar
                         aboutPath="/hero/about"
                         profilePath="/hero/my"
+                        workspacePath="/hero/journey"
+                        workspaceLabel="Journey"
                         accentColor="#E53935"
                         signupPath="/signup"
                     />
@@ -144,6 +146,20 @@ export function HeRoHeader() {
 
             {/* 네비 링크 */}
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                {isAuthenticated && (
+                    <Link
+                        href="/hero/journey"
+                        onClick={() => setMobileOpen(false)}
+                        className={clsx(
+                            "flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors mb-2",
+                            pathname.startsWith("/hero/journey")
+                                ? "bg-[#E53935] text-white"
+                                : "bg-red-50 text-[#E53935] hover:bg-red-100"
+                        )}
+                    >
+                        나의 Journey
+                    </Link>
+                )}
                 {navItems.map((item) => (
                     <Link
                         key={item.href}

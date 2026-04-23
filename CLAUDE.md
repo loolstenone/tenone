@@ -1122,6 +1122,12 @@ git status --short | grep -oP 'app/\(\K[^)]+' | sort -u
         → 상세: [2.3 브랜드 CLAUDE.md 자동 갱신 규칙](#23-브랜드-claudemd-자동-갱신-규칙)
 3. git add + commit ← 코드 + 관리 파일 + 브랜드 CLAUDE.md 모두
 4. git push origin master ← ⛔ 이 순간에만 push. 세션 중 유일한 1회.
+5. Drive 동기화 ← push 직후, 변경된 CLAUDE.md만 업로드
+   - 대상: 1단계에서 식별된 브랜드 CLAUDE.md + 루트 CLAUDE.md (변경 시)
+   - 방법: 각 파일 `cat FILE | base64 -w 0` → Drive MCP create_file
+   - 폴더: "00 Claude > 00 Sync Snapshots" (ID: 19waMOJaiWtce0WtIiPBlXvs3mOkVvRPp)
+   - 파일명: "[브랜드명] CLAUDE.md" (예: "HeRo CLAUDE.md")
+   - 중복 허용: 동일 제목 파일 여러 개 가능, Claude Chat은 최신본 사용
 ```
 
 ### "다음 할 일" 작성 원칙

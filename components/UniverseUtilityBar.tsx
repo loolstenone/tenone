@@ -149,6 +149,11 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
 
                 {!config.hideAuth && isAuthenticated ? (
                     <>
+                        {config.workspacePath && (
+                            <Link href={config.workspacePath} className="text-[11px] font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity">
+                                {config.workspaceLabel}
+                            </Link>
+                        )}
                         {config.profilePath && (
                             <Link href={config.profilePath} className="flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity">
                                 {user?.avatarUrl ? (
@@ -161,11 +166,6 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                                     </div>
                                 )}
                                 <span className="text-[11px] font-semibold tracking-wider">{user?.name?.substring(0, 6) || "MY"}</span>
-                            </Link>
-                        )}
-                        {config.workspacePath && (
-                            <Link href={config.workspacePath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
-                                {config.workspaceLabel}
                             </Link>
                         )}
                         {config.adminPath && isAdmin && (

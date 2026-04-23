@@ -55,11 +55,11 @@ const services = [
   {
     icon: Handshake,
     num: "03",
-    title: "기업 매칭",
-    desc: "무대를 만들어줍니다",
+    title: "써치 라이트",
+    desc: "기업–인재를 연결합니다",
     detail:
-      "검증된 인재 프로필을 파트너 기업에 연결합니다. 당신에게 맞는 무대를 찾아드립니다.",
-    href: "/hero/for-business",
+      "검증된 인재 프로필과 기업의 실제 고민을 Tetrad 매칭으로 연결합니다. 양쪽 모두에게 맞는 무대를 찾아드립니다.",
+    href: "/hero/search-light",
   },
 ];
 
@@ -73,16 +73,16 @@ const journey = [
   { label: "Legend", icon: Crown, desc: "전설이 되다" },
 ];
 
-/* ── 64유형 미리보기 (대표 8개) ── */
+/* ── 64유형 미리보기 (대표 8개 · hit_hero_types 실제 데이터 기반) ── */
 const previewTypes = [
-  { code: "SCE", name: "전략가", alias: "The Strategist" },
-  { code: "CMA", name: "크리에이터", alias: "The Creator" },
-  { code: "DMR", name: "데이터 마스터", alias: "The Analyst" },
-  { code: "BLR", name: "브랜드 빌더", alias: "The Builder" },
-  { code: "GRC", name: "그로스 해커", alias: "The Hacker" },
-  { code: "NTW", name: "네트워커", alias: "The Connector" },
-  { code: "STR", name: "스토리텔러", alias: "The Storyteller" },
-  { code: "PFM", name: "퍼포먼서", alias: "The Performer" },
+  { code: "D-ENTJ", name: "큰 그림을 짜는 경영 전략가", alias: "The Global Executive" },
+  { code: "I-ENFP", name: "마음을 여는 이야기꾼", alias: "The Brand Storyteller" },
+  { code: "S-ISFJ", name: "자리에서 빛을 내는 헌신가", alias: "The Devoted Caregiver" },
+  { code: "C-INTJ", name: "철저히 설계하는 전략가", alias: "The Precision Architect" },
+  { code: "D-ENFP", name: "열정으로 새 판을 여는 개척자", alias: "The Founder Evangelist" },
+  { code: "I-INFJ", name: "깊은 통찰로 곁을 지키는 상담가", alias: "The Quiet Counselor" },
+  { code: "S-INTJ", name: "긴 호흡으로 쌓는 지식 보유자", alias: "The Knowledge Keeper" },
+  { code: "C-ISTP", name: "관찰로 문제를 푸는 엔지니어", alias: "The Analytic Engineer" },
 ];
 
 /* ── 파트너 캐러셀 ── */
@@ -174,7 +174,7 @@ export default function HeRoHomePage() {
               <p className="text-sm md:text-base text-neutral-500 mb-8 leading-relaxed max-w-md mx-auto md:mx-0">
                 인재 기획사 HeRo.
                 <br />
-                당신의 숨겨진 재능을 발견하고, 무대 위에 세웁니다.
+                당신의 숨겨진 재능을 발견하고, 멋진 무대를 찾습니다.
               </p>
 
               <div className="flex flex-wrap justify-center md:justify-start">
@@ -188,20 +188,6 @@ export default function HeRoHomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ━━━ 2. 한 줄 정의 ━━━ */}
-      <section className="py-24 bg-neutral-50">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <h2 className="text-2xl md:text-4xl font-bold text-neutral-900 mb-4">
-            HeRo는{" "}
-            <span style={{ color: RED }}>인재 기획사</span>
-            입니다.
-          </h2>
-          <p className="text-lg md:text-xl text-neutral-500 leading-relaxed">
-            CMO, CTO, CSO, CBO를 길러냅니다.
-          </p>
         </div>
       </section>
 
@@ -247,10 +233,10 @@ export default function HeRoHomePage() {
               HeRo가 최적의 인재를 매칭합니다.
             </p>
             <Link
-              href="/hero/for-business"
+              href="/hero/search-light"
               className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-neutral-900 transition-all"
             >
-              기업 문의 <ArrowRight className="h-4 w-4" />
+              인재 찾기 (써치 라이트) <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -416,21 +402,22 @@ export default function HeRoHomePage() {
               64 Types
             </p>
             <h2 className="text-2xl md:text-4xl font-bold text-neutral-900">
-              64가지 마케팅 유형
+              64가지 영웅 유형
             </h2>
             <p className="text-neutral-500 mt-3">
-              당신은 어떤 유형일까요?
+              DISC × MBTI 조합으로 당신만의 커리어 원형을 찾아드립니다.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {previewTypes.map((t) => (
-              <div
+              <Link
                 key={t.code}
-                className="border border-neutral-200 rounded-2xl p-6 text-center hover:border-[#E53935] hover:shadow-md transition-all group cursor-default"
+                href="/hero/hit"
+                className="border border-neutral-200 rounded-2xl p-6 text-center hover:border-[#E53935] hover:shadow-md transition-all group"
               >
                 <div
-                  className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-sm font-bold"
+                  className="inline-flex px-3 h-7 items-center rounded-full mx-auto mb-4 text-[11px] font-mono font-bold"
                   style={{
                     backgroundColor: `${RED}10`,
                     color: RED,
@@ -438,11 +425,11 @@ export default function HeRoHomePage() {
                 >
                   {t.code}
                 </div>
-                <p className="font-bold text-neutral-900 group-hover:text-[#E53935] transition-colors">
+                <p className="text-sm font-bold text-neutral-900 group-hover:text-[#E53935] transition-colors leading-snug">
                   {t.name}
                 </p>
                 <p className="text-xs text-neutral-400 mt-1">{t.alias}</p>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -492,16 +479,16 @@ export default function HeRoHomePage() {
               HIT 무료 검사 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/hero/coaching"
+              href="/hero/talent-agent/apply"
               className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors"
             >
-              HeRo 오디션 지원
+              HeRo 오디션 지원 <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/hero/for-business"
+              href="/hero/search-light"
               className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/50 text-white/90 font-bold rounded-xl hover:border-white hover:text-white transition-colors"
             >
-              기업 문의
+              기업 문의 <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
