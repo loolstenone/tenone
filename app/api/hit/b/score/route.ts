@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
             `희망 직무 트랙: ${competencyTrack}\n` +
             `공통 기초역량: ${JSON.stringify(scored.coreCompetencyScores)} (종합 ${scored.coreCompetencyOverall}점, ${scored.coreCompetencyGrade}등급)\n` +
             `직무별 역량(${competencyTrack}): ${JSON.stringify(scored.trackScores)} (종합 ${scored.trackOverallScore}점, ${scored.trackOverallGrade}등급)\n` +
-            `준비도: 자기이해 ${scored.readinessScores.self_understanding} / 직무이해 ${scored.readinessScores.job_understanding} / 역량준비 ${scored.readinessScores.skill_readiness} / 실행준비 ${scored.readinessScores.action_readiness}\n` +
+            `준비도: 자기이해 ${scored.readinessScores.self} / 포트폴리오 ${scored.readinessScores.portfolio} / 면접준비 ${scored.readinessScores.interview} / 네트워킹 ${scored.readinessScores.network}\n` +
             `준비도 종합: ${scored.readinessTotal}점 (${scored.readinessGrade}등급)\n` +
             `보완 필요 영역: ${scored.readinessGaps.join(', ') || '없음'}\n` +
             (scored.chDeepScores ? `CH 심화(신입맥락): 완벽주의${scored.chDeepScores.scores.perfectionism} 민감성${scored.chDeepScores.scores.sensitivity} 긴장${scored.chDeepScores.scores.tension} 온정${scored.chDeepScores.scores.warmth} 사회적담대함${scored.chDeepScores.scores.social_boldness} 낙관성${scored.chDeepScores.scores.optimism} 통제력${scored.chDeepScores.scores.control} 자기규율${scored.chDeepScores.scores.self_discipline} 독립성${scored.chDeepScores.scores.independence} 지적호기심${scored.chDeepScores.scores.intellect}\n` : '') +
@@ -142,11 +142,11 @@ export async function POST(request: NextRequest) {
       competency_common: scored.coreCompetencyScores,
       competency_track: competencyTrack,
       competency_track_scores: scored.trackScores,
-      // 준비도 (신규 컬럼 기준)
-      readiness_self:   scored.readinessScores.self_understanding,
-      readiness_job:    scored.readinessScores.job_understanding,
-      readiness_skill:  scored.readinessScores.skill_readiness,
-      readiness_action: scored.readinessScores.action_readiness,
+      // 준비도
+      readiness_self:      scored.readinessScores.self,
+      readiness_portfolio: scored.readinessScores.portfolio,
+      readiness_interview: scored.readinessScores.interview,
+      readiness_network:   scored.readinessScores.network,
       readiness_total: scored.readinessTotal,
       readiness_grade: scored.readinessGrade,
       readiness_gaps: scored.readinessGaps,

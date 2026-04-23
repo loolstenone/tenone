@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { chDeepQuestions } from '@/lib/hit/data/ch-deep-questions';
-import { apDeepQuestions } from '@/lib/hit/data/ap-deep-questions';
 
 interface DeepQuestion {
   id: string;
@@ -23,11 +21,23 @@ export function HitDeepTestUI({ hitAResultId }: Props) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allQuestions, setAllQuestions] = useState<DeepQuestion[]>([]);
 
-  const allQuestions: DeepQuestion[] = useMemo(() => [
-    ...chDeepQuestions.map(q => ({ id: q.id, module: 'character_deep' as const, text: q.text })),
-    ...apDeepQuestions.map(q => ({ id: q.id, module: 'aptitude_deep' as const, text: q.text })),
-  ], []);
+  // DB에서 deep 문항 로드
+  useEffect(() => {
+    fetch('/api/hit/a/deep/questions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.questions?.length > 0) {
+          setAllQuestions(data.questions.map((q: { id: string; module: 'character_deep' | 'aptitude_deep'; question_text: string }) => ({
+            id: q.id,
+            module: q.module,
+            text: q.question_text,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // 세션 생성
   useEffect(() => {

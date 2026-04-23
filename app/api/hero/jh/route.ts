@@ -59,12 +59,25 @@ export async function POST(req: NextRequest) {
 
         const finalStatus = status ?? (isComplete ? "active" : "draft");
 
+        // derived_axes 자동 계산
+        // jh7: preferred_state (a=guardian/안정, b=pioneer/개척, c=connector/팀, d=균형, e=null)
+        // jh11: avoid_traits (pick2 배열 → 피하고 싶은 조직 특성)
+        const preferredStateRaw = responses["jh7"];
+        const preferredState = typeof preferredStateRaw === "string" && ["a","b","c","d"].includes(preferredStateRaw)
+            ? preferredStateRaw : null;
+        const avoidTraitsRaw = responses["jh11"];
+        const avoidTraits = Array.isArray(avoidTraitsRaw) ? avoidTraitsRaw : [];
+        const derivedAxes: Record<string, unknown> = {};
+        if (preferredState) derivedAxes.preferred_state = preferredState;
+        if (avoidTraits.length > 0) derivedAxes.avoid_traits = avoidTraits;
+
         const { data, error } = await sb
             .from("hero_jh_responses")
             .upsert({
                 member_id: memberId,
                 responses,
                 practical_filters: practicalFilters ?? {},
+                derived_axes: derivedAxes,
                 status: finalStatus,
                 submitted_at: isComplete ? new Date().toISOString() : null,
             }, { onConflict: "member_id" })

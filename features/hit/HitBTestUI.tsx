@@ -6,10 +6,6 @@ import { ArrowLeft, Clock } from 'lucide-react';
 import HitProgressBar from './HitProgressBar';
 import LikertScale from './LikertScale';
 import HitInterestSelector from './HitInterestSelector';
-import { personalityQuestions } from '@/lib/hit/data/personality-questions';
-import { riasecQuestions } from '@/lib/hit/data/riasec-questions';
-import { competencyQuestions } from '@/lib/hit/data/competency-questions';
-import { readinessQuestions } from '@/lib/hit/data/readiness-questions';
 import type { CompetencyTrack } from '@/types/hit';
 
 type ModuleType = 'personality' | 'riasec' | 'competency' | 'readiness';
@@ -59,12 +55,31 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const [selectedJobFunction, setSelectedJobFunction] = useState<string>('');
   const [riasecScores, setRiasecScores] = useState<{ r: number; i: number; a: number; s: number; e: number; c: number } | null>(null);
 
-  // DB에서 로드된 역량/준비도 문항
+  // DB 문항 상태
+  const [dbPersonalityQuestions, setDbPersonalityQuestions] = useState<QuestionItem[]>([]);
+  const [dbRiasecQuestions, setDbRiasecQuestions] = useState<QuestionItem[]>([]);
   const [dbCompQuestions, setDbCompQuestions] = useState<QuestionItem[]>([]);
   const [dbReadyQuestions, setDbReadyQuestions] = useState<QuestionItem[]>([]);
+  const [baseQuestionsLoaded, setBaseQuestionsLoaded] = useState(false);
   const [dbQuestionsLoaded, setDbQuestionsLoaded] = useState(false);
 
-  // 트랙 선택 후 DB에서 문항 로드
+  type ApiQ = { id: string; text: string; subscale: string; reverse: boolean; track: string | null };
+  const toItem = (mod: ModuleType) => (q: ApiQ): QuestionItem =>
+    ({ module: mod, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track ?? undefined });
+
+  // 마운트 시 personality/riasec 로드
+  useEffect(() => {
+    fetch('/api/hit/b/questions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.personality?.length > 0) setDbPersonalityQuestions(data.personality.map(toItem('personality')));
+        if (data.riasec?.length > 0) setDbRiasecQuestions(data.riasec.map(toItem('riasec')));
+      })
+      .finally(() => setBaseQuestionsLoaded(true));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 트랙 선택 후 competency/readiness 로드
   useEffect(() => {
     if (!selectedTrack) return;
     setDbQuestionsLoaded(false);
@@ -73,16 +88,13 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
       .then(r => r.json())
       .then(data => {
         if (data.competency?.length > 0) {
-          setDbCompQuestions(data.competency.map((q: { id: string; text: string; subscale: string; reverse: boolean; track: string | null }) => ({
-            module: 'competency' as ModuleType, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track,
-          })));
-          setDbReadyQuestions(data.readiness.map((q: { id: string; text: string; subscale: string; reverse: boolean; track: string | null }) => ({
-            module: 'readiness' as ModuleType, id: q.id, text: q.text, subscale: q.subscale, reverse: q.reverse, track: q.track,
-          })));
+          setDbCompQuestions(data.competency.map(toItem('competency')));
+          setDbReadyQuestions(data.readiness.map(toItem('readiness')));
         }
         setDbQuestionsLoaded(true);
       })
-      .catch(() => setDbQuestionsLoaded(true)); // fallback to hardcoded
+      .catch(() => setDbQuestionsLoaded(true));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTrack]);
 
   // 셔플 함수
@@ -95,39 +107,24 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
     return a;
   };
 
-  // Build question list
+  // Build question list (모두 DB에서 로드)
   const allQuestions = useMemo<QuestionItem[]>(() => {
-    const tagged = <T extends { id: string; text: string; subscale: string; reverse?: boolean; track?: string }>(
-      qs: T[],
-      mod: ModuleType,
-    ): QuestionItem[] =>
-      qs.map((q) => ({
-        module: mod, id: q.id, text: q.text, subscale: q.subscale,
-        reverse: q.reverse, track: 'track' in q ? (q as { track?: string }).track : undefined,
-      }));
+    if (!baseQuestionsLoaded) return [];
 
-    // 인성 + RIASEC (항상 프론트 하드코딩)
-    const personalityItems = shuffle(tagged(personalityQuestions, 'personality'));
-    const riasecItems = shuffle(tagged(riasecQuestions, 'riasec'));
+    const personalityItems = shuffle([...dbPersonalityQuestions]);
+    const riasecItems = shuffle([...dbRiasecQuestions]);
 
-    // 역량 + 준비도: DB 문항 우선, 없으면 프론트 하드코딩 fallback
-    let compItems: QuestionItem[];
-    let readyItems: QuestionItem[];
-
-    if (dbQuestionsLoaded && dbCompQuestions.length > 0) {
-      // DB 문항 사용
-      compItems = shuffle(dbCompQuestions);
-      readyItems = shuffle(dbReadyQuestions);
-    } else {
-      // 프론트 하드코딩 fallback (기존 마케팅 트랙)
-      const commonComp = competencyQuestions.filter(q => !q.track);
-      const trackComp = selectedTrack ? competencyQuestions.filter(q => q.track === selectedTrack) : [];
-      compItems = shuffle([...tagged(commonComp, 'competency'), ...tagged(trackComp, 'competency')]);
-      readyItems = shuffle(tagged(readinessQuestions, 'readiness'));
+    if (!dbQuestionsLoaded || dbCompQuestions.length === 0) {
+      return [...personalityItems, ...riasecItems];
     }
 
-    return [...personalityItems, ...riasecItems, ...compItems, ...readyItems];
-  }, [selectedTrack, dbQuestionsLoaded, dbCompQuestions, dbReadyQuestions]);
+    return [
+      ...personalityItems,
+      ...riasecItems,
+      ...shuffle([...dbCompQuestions]),
+      ...shuffle([...dbReadyQuestions]),
+    ];
+  }, [baseQuestionsLoaded, dbPersonalityQuestions, dbRiasecQuestions, dbQuestionsLoaded, dbCompQuestions, dbReadyQuestions]);
 
   const [responses, setResponses] = useState<Map<string, Response>>(new Map());
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -340,7 +337,7 @@ export default function HitBTestUI({ sessionToken, hitAResultId }: HitBTestUIPro
   const currentResponse = currentQuestion ? responses.get(currentQuestion.id) : undefined;
   const currentLikertValue = currentResponse ? currentResponse.selectedOption + 1 : null;
 
-  if (!isRestored) {
+  if (!isRestored || !baseQuestionsLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />

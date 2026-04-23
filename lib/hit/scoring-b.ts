@@ -130,43 +130,45 @@ export function scoreTrackCompetency(responses: ResponseRow[]): {
   return { trackScores, trackGrades, trackOverallScore, trackOverallGrade };
 }
 
-// ── 모듈3: 공통 준비도 채점 (readiness_core) ──────────────────────
+// ── 모듈3: 공통 준비도 채점 (readiness) ──────────────────────────
+// DB subscale: self, portfolio, interview, network
+// DB column:   readiness_self, readiness_portfolio, readiness_interview, readiness_network
 
 export function scoreCoreReadiness(responses: ResponseRow[]): {
   scores: {
-    self_understanding:  number;
-    job_understanding:   number;
-    skill_readiness:     number;
-    action_readiness:    number;
+    self:      number;
+    portfolio: number;
+    interview: number;
+    network:   number;
   };
   grades: {
-    self_understanding:  'A' | 'B' | 'C' | 'D';
-    job_understanding:   'A' | 'B' | 'C' | 'D';
-    skill_readiness:     'A' | 'B' | 'C' | 'D';
-    action_readiness:    'A' | 'B' | 'C' | 'D';
+    self:      'A' | 'B' | 'C' | 'D';
+    portfolio: 'A' | 'B' | 'C' | 'D';
+    interview: 'A' | 'B' | 'C' | 'D';
+    network:   'A' | 'B' | 'C' | 'D';
   };
   readinessTotal: number;
   readinessGrade: 'A' | 'B' | 'C' | 'D';
   gaps: string[];
 } {
-  const ready = responses.filter(r => r.module === 'readiness_core');
+  const ready = responses.filter(r => r.module === 'readiness' || r.module === 'readiness_core');
   const subscaleMap = buildSubscaleMap(ready);
 
-  const su = scaleToHundred(subscaleMap['self_understanding'] || []);
-  const ju = scaleToHundred(subscaleMap['job_understanding']  || []);
-  const sr = scaleToHundred(subscaleMap['skill_readiness']    || []);
-  const ar = scaleToHundred(subscaleMap['action_readiness']   || []);
+  const se = scaleToHundred(subscaleMap['self']      || []);
+  const po = scaleToHundred(subscaleMap['portfolio'] || []);
+  const iv = scaleToHundred(subscaleMap['interview'] || []);
+  const nw = scaleToHundred(subscaleMap['network']   || []);
 
-  const readinessTotal = Math.round((su + ju + sr + ar) / 4);
+  const readinessTotal = Math.round((se + po + iv + nw) / 4);
 
   const AREA_LABELS: Record<string, string> = {
-    self_understanding: '자기이해',
-    job_understanding:  '직무이해',
-    skill_readiness:    '역량준비',
-    action_readiness:   '실행준비',
+    self:      '자기이해',
+    portfolio: '포트폴리오',
+    interview: '면접준비',
+    network:   '네트워킹',
   };
 
-  const areaScores = { self_understanding: su, job_understanding: ju, skill_readiness: sr, action_readiness: ar };
+  const areaScores = { self: se, portfolio: po, interview: iv, network: nw };
   const gaps: string[] = [];
   for (const [key, score] of Object.entries(areaScores)) {
     if (score < 50) gaps.push(AREA_LABELS[key] || key);
@@ -175,10 +177,10 @@ export function scoreCoreReadiness(responses: ResponseRow[]): {
   return {
     scores: areaScores,
     grades: {
-      self_understanding: gradeScore(su),
-      job_understanding:  gradeScore(ju),
-      skill_readiness:    gradeScore(sr),
-      action_readiness:   gradeScore(ar),
+      self:      gradeScore(se),
+      portfolio: gradeScore(po),
+      interview: gradeScore(iv),
+      network:   gradeScore(nw),
     },
     readinessTotal,
     readinessGrade: gradeScore(readinessTotal),
@@ -369,18 +371,18 @@ export interface HitBScoreResult {
   trackGrades:       Record<string, 'A' | 'B' | 'C' | 'D'>;
   trackOverallScore: number;
   trackOverallGrade: 'A' | 'B' | 'C' | 'D';
-  // 준비도
+  // 준비도 (subscale: self/portfolio/interview/network)
   readinessScores: {
-    self_understanding: number;
-    job_understanding:  number;
-    skill_readiness:    number;
-    action_readiness:   number;
+    self:      number;
+    portfolio: number;
+    interview: number;
+    network:   number;
   };
   readinessGrades: {
-    self_understanding: 'A' | 'B' | 'C' | 'D';
-    job_understanding:  'A' | 'B' | 'C' | 'D';
-    skill_readiness:    'A' | 'B' | 'C' | 'D';
-    action_readiness:   'A' | 'B' | 'C' | 'D';
+    self:      'A' | 'B' | 'C' | 'D';
+    portfolio: 'A' | 'B' | 'C' | 'D';
+    interview: 'A' | 'B' | 'C' | 'D';
+    network:   'A' | 'B' | 'C' | 'D';
   };
   readinessTotal: number;
   readinessGrade: 'A' | 'B' | 'C' | 'D';
