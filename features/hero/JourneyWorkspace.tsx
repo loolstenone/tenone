@@ -26,6 +26,7 @@ import {
   Star,
 } from "lucide-react";
 import MatchingInbox from "@/features/hero/MatchingInbox";
+import { GoalsTab } from "@/features/hero/GoalsTab";
 
 const RED = "#E53935";
 
@@ -60,6 +61,7 @@ const STAGES: { key: Stage; label: string; subtitle: string; icon: React.Compone
 const TABS = [
   { key: "today",     label: "Today",     icon: Flame },
   { key: "herotype",  label: "Hero Type", icon: Target },
+  { key: "goals",     label: "목표·성취", icon: Target },
   { key: "record",    label: "기록",      icon: FileText },
   { key: "matching",  label: "매칭",      icon: Handshake },
 ] as const;
@@ -143,6 +145,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         {/* 탭 콘텐츠 */}
         {tab === "today"    && <TodayTab status={status} memberId={memberId} onRefresh={load} />}
         {tab === "herotype" && <HeroTypeTab status={status} />}
+        {tab === "goals"    && <GoalsTab memberId={memberId} />}
         {tab === "record"   && <RecordTab />}
         {tab === "matching" && <MatchingTab status={status} memberId={memberId} />}
       </div>
