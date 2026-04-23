@@ -10,7 +10,7 @@
  * 미끼: 2 — DECOY (validity)
  */
 
-import type { LikertQuestion } from './personality-questions';
+import type { LikertQuestion } from '@/types/hit';
 
 export type CSection = 'capital' | 'motivation' | 'transferability' | 'readiness' | 'decoy';
 export type CModuleKey = 'careerCapital' | 'motivation' | 'transferability' | 'readiness';

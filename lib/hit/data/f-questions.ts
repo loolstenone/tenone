@@ -16,7 +16,7 @@
  * 미끼: 2 (f_val01 @ 45번째, f_val02 @ 110번째)
  */
 
-import type { LikertQuestion } from './personality-questions';
+import type { LikertQuestion } from '@/types/hit';
 
 export type FSection =
   | 'latent_capability'

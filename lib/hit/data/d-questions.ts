@@ -11,7 +11,7 @@
  * 미끼: 2 — DECOY (validity)
  */
 
-import type { LikertQuestion } from './personality-questions';
+import type { LikertQuestion } from '@/types/hit';
 
 export type DSection = 'expertise' | 'leadership' | 'identity' | 'network' | 'readiness' | 'decoy';
 
