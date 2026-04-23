@@ -13,7 +13,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 const USER_TRANSITIONS: Record<string, string[]> = {
     contacted:    ["interviewing", "withdrawn"],
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         }
 
         // 인증 확인
-        const sbUser = createServerClient();
+        const sbUser = await createServerClient();
         const { data: { user } } = await sbUser.auth.getUser();
         if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
