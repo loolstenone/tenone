@@ -4,6 +4,82 @@
 
 ---
 
+## 2026-04-23 (저녁) — 세션 81 · HeRo Journey 워크스페이스 3일치 + 64 유형 텍스트 개편 + 브랜드 컨셉 교체
+
+### HIT 64 영웅 유형 SSOT 전면 개편
+- character_name 64개 리네이밍: "The + 현대 직업 원형" 형식, 영화 IP 참조 제거 (D-ENTJ→"The Global Executive" 등)
+- character_label 64개: `[MBTI 특성] + [DISC 방향성]` 구조로 변별력 확보 (기존 C그룹 "신중한 ~" 반복 해소)
+- profile_overview 64개: 4문단 표준 (핵심·빛나는 순간·경계할 그림자·잘 맞는 환경) · 영화 IP 참조 0
+- strengths/cautions/fit_direction 64개 JSONB 배열로 긍정·성장 언어 표준화
+- 디자인 시스템 문서 `docs/hero-types-design-system.md` + 파일럿 프롬프트 `docs/hero-types-pilot-prompts.md`
+- 인트라 /intra/hero/hero-types 필터 수정 (잘못된 C/P → 올바른 D/I/S/C형)
+
+### HeRo Journey 워크스페이스 — 리텐션 엔진 구축 (Day 1~3)
+**포지셔닝**: 설명 페이지 아님 · 실제로 커리어를 빌드업하는 도구 · 매일 방문하도록 설계
+
+**DB 인프라**
+- `hero_daily_checkins` (에너지·한 줄 성과, 하루 1회)
+- `hero_goals` + `hero_goal_checkins` (Vrief × GPR 이중축 + 주간 체크인)
+- `hero_journey_stage()` · `hero_streak()` 함수
+- `uc_earn_rules` 시드 8종 (brand_id='hero')
+
+**API (신규 8개)**
+- `/api/hero/journey/status` · `/checkin`
+- `/api/hero/goals` · `/[id]` · `/[id]/checkin`
+- `/api/hero/jobs/feed` — JH 기반 매칭 정렬
+
+**사용자 측**
+- `/hero/journey` 단일 URL · auth 분기 (비로그인=6단계 마케팅 / 로그인=워크스페이스)
+- 탭 6개: Today · Hero Type · 목표·성취 · 기록 · 채용 피드 · 매칭
+- Today 위젯: Journey 지도 · 스트릭 · 해금 체크리스트 · 오늘의 미션(동적) · 30초 체크인 · 받은 매칭
+- 스트릭 배지: 7일 🔥 · 30일 ⭐ · 100일 🏆
+- UC 자동 적립 + 토스트 (스트릭 달성 시 강조)
+- Goals 탭: Vrief(역량 0→5) + GPR(업적 목표값) 편집기 + 주간 체크인 모달 + 진행률 자동 계산
+- Jobs 탭: 매칭 점수 비공개, "왜 맞는가" 서술 3줄만 (Tetrad 원칙)
+
+**헤더**
+- ABOUT · Journey · Profile · Logout · 공유 · 검색 순서
+- UniverseUtilityBar workspacePath 위치를 profile 앞으로 이동 (전 브랜드 공통)
+- `/hero/career` → `/hero/journey` 301 redirect
+
+### 브랜드 컨셉 전면 교체 — Talent Agency 포지셔닝
+- OLD: "Hidden Intelligence & Real Opportunity" / 인재 발굴·성장 플랫폼
+- NEW: **"Human enhancement & Recruit Optimization"** / **Talent Agency**
+- HeRo 재정의: "플랫폼" → "인재 기획사" (연예 기획사 원형)
+- 적용: HeRoFooter · about 페이지 · site-config · seed SQL · DB ums_sites 실시간
+
+### 랜딩 페이지 디테일
+- 히어로 서브카피 "당신의 숨겨진 재능을 발견하고, 멋진 무대를 찾습니다"
+- "HeRo는 인재 기획사입니다" 섹션 삭제 (중복 제거)
+- 서비스 #3 "기업 매칭" → "써치 라이트 (기업-인재)" + /hero/search-light 연결
+- "64가지 마케팅 유형" → "64가지 영웅 유형" + 실제 DISC 데이터 8개
+- 64 유형 카드 Link로 변환 (클릭 가능)
+- CTA 링크 정비: 오디션 지원 → talent-agent/apply, 기업 문의 → search-light
+- 씨치 라이트 → 써치 라이트 전체 통일
+
+### 빌드 에러 수정
+- `lib/hit/data/{c,d,e,f}-questions.ts`: 삭제된 `./personality-questions` → `@/types/hit`
+- `/api/hero/matching/[id]/report/route.ts`: `createServerClient` → `createClient` 별칭 + await
+
+### 주요 결정 누적
+1. Journey가 HeRo의 리텐션 엔진 — 설명이 아닌 도구
+2. 탭은 액션 단위(verb) · 모든 카드에 동사 버튼
+3. 매칭 루프: 스트릭(매일) + 목표 체크인(매주) + 매칭 피드(매일 갱신)
+4. Vrief × GPR 이중축을 목표 관리 표준으로 · 진행률 자동 계산
+5. 매칭 점수는 비공개 · 서술만 공개 (Tetrad 원칙 유지)
+
+### 커밋 이력 (세션 81)
+- `0e69ff9e` fix(hero/hit): DB→코드 일관성 5개 버그 + 매칭 엔진 v3 (이월분)
+- `a1182974` fix(hero): 영웅 유형 그룹 필터 D/I/S/C형
+- `01a9b76e` fix(hit): import 경로 + 64 유형 텍스트 개편
+- `9e215bc1` fix(hero): report route createServerClient 교체
+- `cc3e3a1e` feat(hero): Journey Day 1 MVP
+- `cc540ee1` feat(hero): Journey Day 2 목표·성취 (Vrief × GPR)
+- `db2f514a` refactor(hero): 브랜드 컨셉 Talent Agency로 교체
+- `fc7317fc` feat(hero): Journey Day 3 채용 피드 + UC + 배지
+
+---
+
 ## 2026-04-23 — 세션 80 · HeRo UI/UX 규약 수립 + HIT 모델 재정의 + 요금·탤런트 에이전시 신설
 
 ### HeRo UI/UX 색·클릭 SSOT 수립 및 전면 적용

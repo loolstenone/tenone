@@ -202,7 +202,10 @@
 | `hero_tih_responses` | 기업 TIH 응답 | **0건 · 검증 필요** |
 | `hero_companies` | 기업 프로필 + Reputation | 0건 |
 | `hero_matches` | 매칭 (profile × company) | 0건 · 엔진 미구현 |
-| `hit_hero_types` | 64 영웅 유형 SSOT | 64개 시드 완료 |
+| `hit_hero_types` | 64 영웅 유형 SSOT | 64개 v2 완료 (현대 직업 원형, "The + 역할") |
+| `hero_daily_checkins` | Journey 일일 체크인 (에너지·한 줄) | 세션 81 |
+| `hero_goals` | 목표 (Vrief × GPR 이중축) | 세션 81 |
+| `hero_goal_checkins` | 목표 주간 체크인 | 세션 81 |
 | `hit_report_modules` | 리포트 조립 모듈 | 324개 시드 완료 |
 | `hit_ai_prompts` | AI 프롬프트 SSOT | 4개 시드 완료 |
 | `hit_competency_tracks` | 22개 역량 트랙 | 시드 완료 |
@@ -431,6 +434,14 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | `app/(HeRo)/hero/search-light/tih/page.tsx` | TIH 22문항 (기업 작성, 비회원 허용) |
 | `app/(HeRo)/hero/coaching/ai/page.tsx` | AI 상담 (유료 gate) |
 | `app/(HeRo)/hero/resume/workspace/page.tsx` | 이력서 CRUD |
+| `app/(HeRo)/hero/journey/page.tsx` | **Journey 워크스페이스 엔트리** (auth 분기) |
+| `app/(HeRo)/hero/journey/_landing.tsx` | 비로그인 6단계 마케팅 |
+| `features/hero/JourneyWorkspace.tsx` | 로그인 워크스페이스 쉘 + Today/Map/체크인 |
+| `features/hero/GoalsTab.tsx` | 목표·성취 탭 (Vrief × GPR) |
+| `features/hero/JobsTab.tsx` | 맞춤 채용 피드 탭 |
+| `app/api/hero/journey/{status,checkin}/route.ts` | Journey 상태 + 일일 체크인 |
+| `app/api/hero/goals/[id]/{checkin}/route.ts` | 목표 CRUD + 주간 체크인 |
+| `app/api/hero/jobs/feed/route.ts` | JH 기반 채용 피드 |
 | `features/hit/HitProfileBadge.tsx` | **Universe 전용 HIT badge 컴포넌트** |
 | `features/hit/HitTestUI.tsx` | HIT A 검사 UI (하드코딩 import) |
 | `features/hit/HitBTestUI.tsx` | HIT B 검사 UI |
@@ -510,14 +521,17 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | UI/UX + 모델 정교화 (2026-04-23 세션 80) — UI/UX SSOT · HIT 모델 재정의 · 요금·탤런트 에이전시 신설 |
-| **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · **신규**: /hero/pricing · /hero/talent-agent · /hero/talent-agent/apply |
-| **세션 80 주요 결정** | ① UI/UX 색·클릭 SSOT 5 레이어 문서화 · ② HIT A에 인성·적성 포함(DB 실측) · ③ HIT B~F 생애주기별 심화로 재정의 · ④ 요금 4티어(무료/14,900/39,900/99,000) · ⑤ 프로=AI코칭/프리미엄=전문가1:1 · ⑥ BCDEF는 1인 1개만(동시 불가) |
-| **신규 인프라 (세션 80)** | `hero_talent_applications` 테이블 + RLS · `POST /api/hero/talent-agent/apply` · HIT A 가상 더미 5건 재시드 |
-| **사용자 측 완성 (세션 80 추가)** | `/hero/pricing` 4티어 + Talent Agent CTA + Search Light 구직자/구인기업 · `/hero/talent-agent` 랜딩 + Universe Stages 6 브랜드 · `/hero/talent-agent/apply` 폼 · 비회원 teaser 흐림 처리 · HitModelGuide 모달 완전 개편 |
-| **이월 (다음 세션)** | **A**: 전 브랜드 /my 페이지 HitProfileBadge 일괄 삽입 (21개) · **B**: 탤런트 에이전시 신청 Action Hub 등록 + Intra 관리 페이지 · **C**: 실기기 E2E 검증 · **D**: 결제 PG 연동(Stripe/Toss) · **E**: Phase 5 질문 DB 단일화 |
-| **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 확정 |
-| **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 |
+| **Phase** | Journey 워크스페이스 + 브랜드 포지셔닝 교체 (2026-04-23 세션 81) |
+| **포지셔닝** | **HeRo = Talent Agency** · Human enhancement & Recruit Optimization · "플랫폼" 아닌 "인재 기획사" |
+| **운영 중** | HIT A/B 검사 · 이력서 · 매칭 Tetrad · /hero/pricing · /hero/talent-agent · **/hero/journey 워크스페이스 (신규)** |
+| **세션 81 주요 결정** | ① Journey가 HeRo의 리텐션 엔진 — 설명이 아닌 도구 · ② 탭은 액션 단위(verb) · ③ Vrief × GPR 이중축을 목표 관리 표준 · ④ 스트릭 + 주간 체크인 + 매칭 피드 3중 루프 · ⑤ 브랜드 컨셉 "Talent Agency"로 재정의 · ⑥ 64 영웅 유형 영화 IP 제거·현대 직업 원형으로 전면 리네이밍 |
+| **신규 인프라 (세션 81)** | `hero_daily_checkins` · `hero_goals` · `hero_goal_checkins` 테이블 · `hero_journey_stage()` · `hero_streak()` 함수 · `uc_earn_rules` brand='hero' 8종 시드 · API 8개(status/checkin/goals/goals-checkin/jobs-feed) · `features/hero/JourneyWorkspace.tsx` · `GoalsTab.tsx` · `JobsTab.tsx` |
+| **사용자 측 완성 (세션 81)** | `/hero/journey` auth 분기 (비로그인 마케팅 + 로그인 워크스페이스) · 탭 6개 · Today 위젯 5개 · 스트릭 배지 + UC 토스트 · 목표 CRUD + 주간 체크인 · 채용 피드 |
+| **64 유형 SSOT 개편 (세션 81)** | character_name 64개 "The + 직업원형"으로 리네이밍 · character_label 구조 변경 · profile_overview 4문단 표준 · strengths/cautions/fit_direction JSONB 표준화 · 디자인 시스템 2문서 (`docs/hero-types-design-system.md` + `docs/hero-types-pilot-prompts.md`) |
+| **헤더 변경 (세션 81)** | ABOUT · Journey · Profile · 공유 · 검색 순서 (UniverseUtilityBar workspace 위치 이동, 전 브랜드 공통 영향) |
+| **이월 (집에서 이어감)** | **P0-A**: 주간 이메일 리포트 (월요일 09:00 배치, Resend 템플릿 + pg_cron) · **P0-B**: 채용 피드 "관심 있어요" 버튼 → `hero_matches` 연결 · **P0-C**: 성과 한 줄 캡처 (`hero_achievements` 테이블) · **P1-D**: 스테이지 승급 축하 이벤트 · **P1-E**: 코칭 세션 이력 탭 · **P1-F**: 월간 회고 · **P2**: 고아 페이지 정리 (`/hero/audition`·`/hero/for-business`) · 상세는 WORK_STATUS.md |
+| **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 |
+| **최근 결정 누적** | HIT Hero Type = Universe badge · 매칭 비공개 (Tetrad) · 인성·적성 = HIT A · BCDEF = 1인 1개 · 빨강은 Action/Accent/State만 · 요금 4티어 · Journey 리텐션 엔진 · Talent Agency 포지셔닝 |
 
 ---
 
