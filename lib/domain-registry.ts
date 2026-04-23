@@ -57,7 +57,6 @@ const registry: Record<string, DomainEntry> = {
     'www.badak.biz':            { prefix: '/badak',      siteId: 'badak' },
     'badak.tenone.biz':         { prefix: '/badak',      siteId: 'badak' },
     // Mindle
-    'trendhunter.tenone.biz':   { prefix: '/mindle',     siteId: 'trendhunter' },
     'mindle.tenone.biz':        { prefix: '/mindle',     siteId: 'mindle' },
     // FWN
     'fwn.co.kr':                { prefix: '/fwn',        siteId: 'fwn' },

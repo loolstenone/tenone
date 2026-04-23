@@ -10,7 +10,6 @@ const universeProjects = [
     { name: "몬츠", href: "https://montz.tenone.biz" },
     { name: "스크리블", href: "https://scribble.tenone.biz" },
     { name: "아이디어 무브먼트", href: "https://ideamovement.tenone.biz" },
-    { name: "트렌드 헌터", href: "https://trendhunter.tenone.biz" },
     { name: "브랜드 그래비티", href: "https://brandgravity.tenone.biz" },
     { name: "스마컴", href: "https://smarcomm.tenone.biz" },
     { name: "마이버스", href: "https://myverse.tenone.biz" },

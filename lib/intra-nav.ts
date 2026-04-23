@@ -305,6 +305,8 @@ export const modules: NavModule[] = [
                             { name: "JH 응답", href: "/intra/hero/jh" },
                             // ── 매칭 ──
                             { name: "매칭", href: "/intra/hero/matching" },
+                            // ── 탤런트 에이전시 ──
+                            { name: "탤런트 에이전시", href: "/intra/hero/talent-agent/applications" },
                             // ── Universe Identity ──
                             { name: "영웅 유형", href: "/intra/hero/hero-types" },
                             // ── 보조 ──
@@ -471,15 +473,6 @@ export const modules: NavModule[] = [
                             { name: "모임 관리", href: "/intra/ums/townity/meetups" },
                             { name: "커뮤니티", href: "/intra/ums/townity/community" },
                             { name: "고객 문의", href: "/intra/ums/townity/cs" },
-                        ],
-                    },
-                    {
-                        name: "Trend Hunter", href: "/intra/ums/trendhunter", icon: Globe,
-                        children: [
-                            { name: "대시보드", href: "/intra/ums/trendhunter" },
-                            { name: "회원 관리", href: "/intra/ums/trendhunter/members", badge: "soon" },
-                            { name: "콘텐츠 관리", href: "/intra/ums/trendhunter/content", badge: "soon" },
-                            { name: "고객 문의", href: "/intra/ums/trendhunter/cs", badge: "soon" },
                         ],
                     },
                     {

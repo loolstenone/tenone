@@ -25,7 +25,7 @@ const BRAND_LABEL: Record<string, string> = {
     mindle: "Mindle", rook: "RooK", changeup: "ChangeUp",
     youinone: "YouInOne", domo: "Domo", myverse: "Myverse",
     brandgravity: "BrandGravity", "0gamja": "0gamja", fwn: "FWN",
-    montz: "MoNTZ", mullaesian: "Mullaesian", trendhunter: "TrendHunter",
+    montz: "MoNTZ", mullaesian: "Mullaesian",
     seoul360: "Seoul360", townity: "Townity", jakka: "Jakka", naturebox: "NatureBox",
 };
 const VALID_BRAND_IDS = new Set(Object.keys(BRAND_LABEL));
@@ -42,7 +42,7 @@ const SUB_LABEL: Record<string, string> = {
 
 /* 브랜드 → 유형 매핑 (표시명 기준) */
 const POTENTIAL_BRANDS  = new Set(["MADLeague", "MADLeap", "ChangeUp", "Evolution School"]);
-const SERVICE_BRANDS    = new Set(["Badak", "HeRo", "Planner's", "Mindle", "RooK", "0gamja", "FWN", "MoNTZ", "Mullaesian", "TrendHunter", "Seoul360", "Townity", "Jakka", "NatureBox"]);
+const SERVICE_BRANDS    = new Set(["Badak", "HeRo", "Planner's", "Mindle", "RooK", "0gamja", "FWN", "MoNTZ", "Mullaesian", "Seoul360", "Townity", "Jakka", "NatureBox"]);
 const MEMBERSHIP_BRANDS = new Set(["YouInOne", "Domo", "Myverse"]);
 const SUBSCRIBE_BRANDS  = new Set(["SmarComm", "WIO", "WIO Orbi", "BrandGravity"]);
 

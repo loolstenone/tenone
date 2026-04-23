@@ -73,7 +73,6 @@ const SERVICE_META: Record<string, { icon: typeof Globe; desc: string; intro: st
     rook:          { icon: Palette,       desc: 'AI 크리에이터',             intro: 'AI 기반 콘텐츠 제작과 크리에이티브 워크를 지원합니다.',           access: 'open' },
     seoul360:      { icon: Globe,         desc: '서울/360° 관광 가이드',     intro: '서울 지하철역 주변 관광 명소를 360° 뷰로 안내합니다.',            access: 'open' },
     townity:       { icon: Globe,         desc: '동네 커뮤니티',             intro: '우리 동네 이웃과 연결되는 하이퍼로컬 커뮤니티입니다.',            access: 'open' },
-    trendhunter:   { icon: Sparkles,      desc: '트렌드 헌터',               intro: '최신 트렌드를 발굴하고 큐레이션하는 미디어입니다.',               access: 'open' },
     luki:          { icon: Sparkles,      desc: 'AI 아이돌 그룹',            intro: 'AI 기반 엔터테인먼트 프로젝트입니다.',                            access: 'open' },
     evschool:      { icon: GraduationCap, desc: 'Evolution School',         intro: '실무 중심 마케팅·비즈니스 교육 프로그램입니다.',                  access: 'open' },
     brandgravity:  { icon: Palette,       desc: '브랜딩 컨설팅',             intro: '데이터 기반 브랜드 전략 컨설팅 서비스입니다.',                    access: 'subscription' },

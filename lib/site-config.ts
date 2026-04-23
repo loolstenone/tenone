@@ -1,6 +1,6 @@
 // 사이트 설정 데이터 — 서버/클라이언트 모두에서 사용 가능 ('use client' 없음)
 
-export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'trendhunter' | 'mindle' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio' | 'brandgravity' | 'wiki' | 'dokdae' | 'evschool' | 'namingfactory';
+export type SiteIdentifier = 'tenone' | 'madleague' | 'madleap' | 'youinone' | 'luki' | 'rook' | 'badak' | 'smarcomm' | 'hero' | 'ogamja' | 'seoul360' | 'mullaesian' | 'fwn' | 'montz' | 'mindle' | 'myverse' | 'townity' | 'naturebox' | 'domo' | 'jakka' | 'changeup' | 'planners' | 'wio' | 'brandgravity' | 'wiki' | 'dokdae' | 'evschool' | 'namingfactory';
 
 // 인증 전용 도메인 (OAuth redirect를 여기로 통일)
 export const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.tenone.biz';
@@ -335,29 +335,6 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },
     },
-    trendhunter: {
-        id: 'trendhunter', name: 'Trend Hunter', logoText: 'Trend Hunter', logoStyle: 'text' as const,
-        faviconUrl: '/brands/trendhunter/favicon.png', appleTouchIcon: '/brands/trendhunter/favicon.png',
-        colors: { primary: '#E50000', primaryDark: '#CC0000', secondary: '#FFB800', headerBg: '#0A0A0A', headerText: '#ffffff', footerBg: '#0A0A0A', footerText: '#a3a3a3', accent: '#00C853' },
-        meta: { title: 'Trend Hunter — AI가 데이터를 읽고, 우리가 트렌드를 만든다', description: 'AI 기반 트렌드 분석과 콘텐츠 보고서. 데이터 크롤링부터 인사이트 큐레이션까지, 트렌드를 읽고 실행합니다.', keywords: ['Trend Hunter', '트렌드', 'AI 분석', '트렌드 리포트', '콘텐츠 보고서', 'Ten:One'] },
-        homePath: '/trendhunter', signupPath: '/signup', domain: 'trendhunter.tenone.biz',
-        universeLabel: 'Powered by Ten:One™', showUniverseBadge: true,
-        authMethods: { email: false, google: false, kakao: false },
-        nav: [
-            { name: 'Weekly', href: '/trendhunter/weekly' },
-            { name: 'Signals', href: '/trendhunter/signals' },
-            { name: 'References', href: '/trendhunter/references' },
-            { name: 'Opportunities', href: '/trendhunter/opportunities' },
-        ],
-        footerLinks: [
-            { name: 'Weekly', href: '/trendhunter/weekly' },
-            { name: 'Signals', href: '/trendhunter/signals' },
-            { name: 'References', href: '/trendhunter/references' },
-            { name: 'About', href: '/trendhunter/about' },
-        ],
-        contact: { email: 'lools@tenone.biz', phone: '+82 10 2795 1001' },
-        tagline: 'AI가 데이터를 읽고, 우리가 트렌드를 만든다.',
-    },
     mindle: {
         id: 'mindle', name: 'Mindle', logoText: 'Mindle', logoStyle: 'text' as const,
         faviconUrl: '/brands/mindle/favicon.png', appleTouchIcon: '/brands/mindle/favicon.png',
@@ -645,7 +622,6 @@ export const domainMap: Record<string, SiteIdentifier> = {
     'fwn.co.kr': 'fwn',
     'www.fwn.co.kr': 'fwn',
     'montz.tenone.biz': 'montz',
-    'trendhunter.tenone.biz': 'trendhunter',
     'myverse.tenone.biz': 'myverse',
     'townity.tenone.biz': 'townity',
     'naturebox.tenone.biz': 'naturebox',

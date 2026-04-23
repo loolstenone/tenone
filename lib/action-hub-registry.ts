@@ -154,6 +154,18 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "high",
     },
 
+    // ── HeRo 탤런트 에이전시
+    {
+        key: "hero_talent_applications",
+        label: "HeRo 탤런트 에이전시 신청",
+        table: "hero_talent_applications",
+        filter: { column: "status", value: "pending" },
+        href: "/intra/hero/talent-agent/applications",
+        brand_id: "hero",
+        category: "approval",
+        priority: "high",
+    },
+
     // ── 비즈니스 기회 (Opportunity) — Whole See 수집 → ERP 운영
     {
         key: "opportunity_new",

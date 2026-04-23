@@ -34,7 +34,6 @@ const BRAND_DIRECTORY = [
     { name: '0gamja', domain: '0gamja.com', meaning: '영감자 (0 = 영, gamja = 감자)', role: '공감 콘텐츠. 심리 상담, 중고대학생 대상', core: '공감과 위로를 콘텐츠로 연결' },
     { name: 'FWN', domain: 'fwn.co.kr', meaning: 'Fashion Week Network', role: '전세계 패션위크 소식, 패션 종사자 네트워크', core: '패션 업계 전문 네트워크' },
     { name: 'MoNTZ', meaning: 'Ugly Modeling Agency', role: '독특한 캐릭터 모델 에이전시', core: '개성이 곧 경쟁력' },
-    { name: 'TrendHunter', meaning: '트렌드헌터', role: '소비자 연구 및 트렌드 분석 컨설팅', core: '소비자 인사이트 기반 컨설팅' },
     { name: 'Scribble', meaning: '낙서, 자유로운 글쓰기', role: '개인 창작. 소설, 드라마 극본', core: '개인 창작 아카이브' },
   ]},
   { title: '플랫폼 · 프로덕트', brands: [

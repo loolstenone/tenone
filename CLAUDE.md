@@ -148,7 +148,6 @@ docs/              # 설계 문서
 | FWN | fwn.co.kr | — | /fwn | fwn |
 | MoNTZ | — | montz.tenone.biz | /montz | montz |
 | Mullaesian | — | mullaesian.tenone.biz | /mullaesian | mullaesian |
-| TrendHunter | — | trendhunter.tenone.biz | /trendhunter | trendhunter |
 | Mindle | — | — | /mindle | mindle |
 | Townity | — | townity.tenone.biz | /townity | townity |
 | NatureBox | — | naturebox.tenone.biz | /naturebox | naturebox |
@@ -425,7 +424,7 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 
 ### 자라나는 브랜드 대응
 
-Mindle·FWN·TrendHunter처럼 처음엔 `community`만 있는 브랜드가 수익화하면:
+Mindle·FWN처럼 처음엔 `community`만 있는 브랜드가 수익화하면:
 - 정기 뉴스레터 구독 → `subscription` 탑재
 - 개별 리포트 판매 → `purchase` 탑재
 - 오프라인 모임 → `meetup` 탑재
@@ -455,7 +454,7 @@ brand_capabilities row 1개 추가로 확장 완료 — 데이터 모델 변경 
 
 | 접근 모델 | 가입 경로 | 멤버 권한 | 해당 브랜드 |
 |-----------|----------|----------|-----------|
-| **오픈** | 이메일만 있으면 즉시 이용 | member | 0gamja, FWN, Jakka, Mindle, MoNTZ, Mullaesian, Myverse, NamingFactory, RooK, Seoul360, Townity, TrendHunter |
+| **오픈** | 이메일만 있으면 즉시 이용 | member | 0gamja, FWN, Jakka, Mindle, MoNTZ, Mullaesian, Myverse, NamingFactory, RooK, Seoul360, Townity |
 | **구독** | 플랜 선택 + 결제 | subscriber | BrandGravity, SmarComm, WIO |
 | **구매** | 건별 결제 (상담·교육·제품·모임비) | purchaser | HeRo, Planner's, ChangeUp, NatureBox, Badak |
 | **승인 멤버십** | 신청서 → 운영진 심사/승인 | approved_member, leader | MADLeague, MADLeap, YouInOne, Domo |

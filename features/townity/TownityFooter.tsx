@@ -9,7 +9,6 @@ const universeProjects = [
     { name: "문래지앙", href: "https://mullaesian.tenone.biz" },
     { name: "몬츠", href: "https://montz.tenone.biz" },
     { name: "스크리블", href: "https://scribble.tenone.biz" },
-    { name: "트렌드 헌터", href: "https://trendhunter.tenone.biz" },
     { name: "스마컴", href: "https://smarcomm.tenone.biz" },
     { name: "마이버스", href: "https://myverse.tenone.biz" },
     { name: "서울 360°", href: "https://seoul360.tenone.biz" },
