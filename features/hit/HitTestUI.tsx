@@ -1,15 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
 import HitProgressBar from './HitProgressBar';
 import HitQuestionCard from './HitQuestionCard';
-import { ufQuestions } from '@/lib/hit/data/base-questions';
-import { mbtiQuestions } from '@/lib/hit/data/mbti-questions';
-import { discQuestions } from '@/lib/hit/data/disc-questions';
 
-/** UF 7점 리커트 옵션 */
 const LIKERT_7_OPTIONS = [
   { label: '전혀 아니다', value: '1' },
   { label: '아니다', value: '2' },
@@ -20,7 +16,17 @@ const LIKERT_7_OPTIONS = [
   { label: '매우 그렇다', value: '7' },
 ];
 
-type ModuleType = 'base' | 'mbti' | 'disc';
+type ModuleType = 'personality_type' | 'behavior_type' | 'character_core' | 'aptitude_core';
+
+interface DbQuestion {
+  id: string;
+  module: string;
+  question_index: number;
+  question_text: string;
+  sub_domain: string | null;
+  reverse_scored: boolean;
+  scoring_key: unknown;
+}
 
 interface QuestionItem {
   module: ModuleType;
@@ -39,78 +45,89 @@ interface HitTestUIProps {
 }
 
 const MODULE_NAMES: Record<ModuleType, string> = {
-  base: '기저요인(UF) 검사',
-  mbti: '성격 유형(MBTI) 검사',
-  disc: '행동 유형(DISC) 검사',
+  personality_type: '성격 유형(PT) 검사',
+  behavior_type: '행동 유형(BT) 검사',
+  character_core: '핵심 성품(CH) 검사',
+  aptitude_core: '핵심 적성(AP) 검사',
 };
 
+const MODULE_ORDER: ModuleType[] = ['personality_type', 'behavior_type', 'character_core', 'aptitude_core'];
+
 const TRANSITION_MESSAGES: Record<string, string> = {
-  'base→mbti': '기저요인 검사가 끝났습니다. 다음은 성격 유형(MBTI) 검사입니다',
-  'mbti→disc': '마지막으로 행동 유형(DISC) 검사입니다',
+  'personality_type→behavior_type': '성격 유형 검사가 끝났습니다. 다음은 행동 유형(BT) 검사입니다',
+  'behavior_type→character_core': '행동 유형 검사가 끝났습니다. 다음은 핵심 성품(CH) 검사입니다',
+  'character_core→aptitude_core': '마지막으로 핵심 적성(AP) 검사입니다',
 };
 
 const AVG_SECONDS_PER_QUESTION = 8;
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
-
-  const allQuestions = useMemo<QuestionItem[]>(() => {
-    // 셔플 함수
-    const shuffle = <T,>(arr: T[]): T[] => {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    };
-
-    // UF 문항: LikertQuestion → QuestionItem (7점 리커트 옵션 부여)
-    const ufTagged: QuestionItem[] = ufQuestions.map((q) => ({
-      module: 'base' as ModuleType,
-      id: q.id,
-      text: q.text,
-      options: LIKERT_7_OPTIONS,
-    }));
-
-    // MBTI/DISC: 기존 4지선다
-    const taggedMbti: QuestionItem[] = mbtiQuestions.map((q) => ({
-      module: 'mbti' as ModuleType, id: q.id, text: q.text, options: q.options,
-    }));
-    const taggedDisc: QuestionItem[] = discQuestions.map((q) => ({
-      module: 'disc' as ModuleType, id: q.id, text: q.text, options: q.options,
-    }));
-
-    // 단계별 셔플 (단계 간 순서: base → mbti → disc)
-    return [
-      ...shuffle(ufTagged),
-      ...shuffle(taggedMbti),
-      ...shuffle(taggedDisc),
-    ];
-  }, []);
+  const [allQuestions, setAllQuestions] = useState<QuestionItem[]>([]);
+  const [isRestored, setIsRestored] = useState(false);
 
   const [responses, setResponses] = useState<Map<string, Response>>(new Map());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
-  const [isRestored, setIsRestored] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = allQuestions.length;
   const currentQuestion = allQuestions[currentIndex];
-  const currentModule = currentQuestion?.module ?? 'base';
+  const currentModule = currentQuestion?.module ?? 'personality_type';
   const answeredCount = responses.size;
 
   const localStorageKey = `hit_a_${sessionToken}`;
 
-  // Restore session on mount: localStorage first (faster), server as fallback
+  // Load questions from DB, shuffle per module
   useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const res = await fetch('/api/hit/a/questions');
+        if (!res.ok) throw new Error('질문 로드 실패');
+        const data = await res.json();
+
+        const grouped: Partial<Record<ModuleType, QuestionItem[]>> = {};
+        for (const q of (data.questions ?? []) as DbQuestion[]) {
+          const mod = q.module as ModuleType;
+          grouped[mod] ??= [];
+          grouped[mod]!.push({ module: mod, id: q.id, text: q.question_text, options: LIKERT_7_OPTIONS });
+        }
+
+        const ordered: QuestionItem[] = [];
+        for (const mod of MODULE_ORDER) {
+          if (grouped[mod]?.length) {
+            ordered.push(...shuffle(grouped[mod]!));
+          }
+        }
+        setAllQuestions(ordered);
+      } catch {
+        // 질문 로드 실패 시 빈 배열 유지 — UI에서 오류 표시
+        setIsRestored(true); // unblock spinner so error state renders
+      }
+    }
+    loadQuestions();
+  }, []);
+
+  // Restore session once questions are ready
+  useEffect(() => {
+    if (allQuestions.length === 0) return;
+
     async function restoreSession() {
       let localRestored = false;
 
-      // 1. Try localStorage first (instant)
       try {
         const saved = localStorage.getItem(localStorageKey);
         if (saved) {
@@ -119,23 +136,17 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
           if (restoredMap.size > 0) {
             setResponses(restoredMap);
             const firstUnanswered = allQuestions.findIndex((q) => !restoredMap.has(q.id));
-            if (firstUnanswered >= 0) {
-              setCurrentIndex(firstUnanswered);
-            }
+            if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
             localRestored = true;
           }
         }
-      } catch {
-        // localStorage unavailable or corrupted — fall through to server
-      }
+      } catch { /* localStorage unavailable */ }
 
-      // 2. Server restore (fallback, or to get sessionId)
       try {
         const res = await fetch(`/api/hit/a/session/${sessionToken}`);
         if (res.ok) {
           const data = await res.json();
           if (data.session?.id) setSessionId(data.session.id);
-          // Only apply server responses if localStorage had nothing
           if (!localRestored && data.responses && Array.isArray(data.responses)) {
             const restored = new Map<string, Response>();
             for (const r of data.responses) {
@@ -144,31 +155,23 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
             if (restored.size > 0) {
               setResponses(restored);
               const firstUnanswered = allQuestions.findIndex((q) => !restored.has(q.id));
-              if (firstUnanswered >= 0) {
-                setCurrentIndex(firstUnanswered);
-              }
-              // Sync server data to localStorage
-              try {
-                localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(restored)));
-              } catch { /* quota exceeded — ignore */ }
+              if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
+              try { localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(restored))); } catch { /* ignore */ }
             }
           }
         }
-      } catch {
-        // Continue with whatever we have
-      } finally {
+      } catch { /* continue with what we have */ } finally {
         setIsRestored(true);
       }
     }
     restoreSession();
-  }, [sessionToken, allQuestions, localStorageKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allQuestions]);
 
   // Persist responses to localStorage on every change
   useEffect(() => {
     if (responses.size > 0) {
-      try {
-        localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(responses)));
-      } catch { /* quota exceeded — ignore */ }
+      try { localStorage.setItem(localStorageKey, JSON.stringify(Object.fromEntries(responses))); } catch { /* ignore */ }
     }
   }, [responses, localStorageKey]);
 
@@ -177,10 +180,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
     if (transitionMessage || isSubmitting || isComplete) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowLeft') {
-        goBack();
-        return;
-      }
+      if (e.key === 'ArrowLeft') { goBack(); return; }
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= (currentQuestion?.options.length ?? 0)) {
         handleSelect(num - 1);
@@ -189,14 +189,12 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, transitionMessage, isSubmitting, isComplete, currentQuestion]);
 
   const goBack = useCallback(() => {
     if (currentIndex > 0) {
-      if (autoAdvanceTimer.current) {
-        clearTimeout(autoAdvanceTimer.current);
-        autoAdvanceTimer.current = null;
-      }
+      if (autoAdvanceTimer.current) { clearTimeout(autoAdvanceTimer.current); autoAdvanceTimer.current = null; }
       setCurrentIndex((prev) => prev - 1);
     }
   }, [currentIndex]);
@@ -206,20 +204,11 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       fetch('/api/hit/a/response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionToken,
-          questionId,
-          module,
-          questionIndex,
-          selectedOption,
-          optionValue,
-        }),
+        body: JSON.stringify({ sessionToken, questionId, module, questionIndex, selectedOption, optionValue }),
       }).catch(() => {});
     },
     [sessionToken],
   );
-
-  const [error, setError] = useState<string | null>(null);
 
   const submitResults = useCallback(async () => {
     setIsSubmitting(true);
@@ -232,7 +221,6 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       });
       const data = await res.json();
       if (res.ok && data.resultId) {
-        // Clear localStorage on successful completion
         try { localStorage.removeItem(localStorageKey); } catch { /* ignore */ }
         setIsComplete(true);
         router.push(`/hero/hit/a/result/${data.resultId}`);
@@ -244,7 +232,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
       setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
       setIsSubmitting(false);
     }
-  }, [sessionToken, router]);
+  }, [sessionToken, router, localStorageKey]);
 
   const handleSelect = useCallback(
     (optionIndex: number) => {
@@ -261,26 +249,19 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
 
       fireAndForgetSave(q.id, q.module, currentIndex, optionIndex, optionValue);
 
-      // Auto-advance after 400ms
       if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
 
       autoAdvanceTimer.current = setTimeout(() => {
         const nextIndex = currentIndex + 1;
 
-        if (nextIndex >= total) {
-          submitResults();
-          return;
-        }
+        if (nextIndex >= total) { submitResults(); return; }
 
         const nextModule = allQuestions[nextIndex].module;
         const transKey = `${q.module}→${nextModule}`;
 
         if (q.module !== nextModule && TRANSITION_MESSAGES[transKey]) {
           setTransitionMessage(TRANSITION_MESSAGES[transKey]);
-          setTimeout(() => {
-            setTransitionMessage(null);
-            setCurrentIndex(nextIndex);
-          }, 2000);
+          setTimeout(() => { setTransitionMessage(null); setCurrentIndex(nextIndex); }, 2000);
         } else {
           setCurrentIndex(nextIndex);
         }
@@ -292,10 +273,26 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
   const remainingQuestions = total - answeredCount;
   const estimatedMinutes = Math.max(1, Math.ceil((remainingQuestions * AVG_SECONDS_PER_QUESTION) / 60));
 
+  // Loading: waiting for questions + session restore
   if (!isRestored) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-6 h-6 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Questions failed to load
+  if (allQuestions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <p className="text-neutral-500 text-sm">질문을 불러오지 못했습니다.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-5 py-2 bg-[#E53935] text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+        >
+          다시 시도
+        </button>
       </div>
     );
   }
@@ -330,9 +327,7 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
           <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
             <div className="w-2 h-2 rounded-full bg-[#E53935] animate-pulse" />
           </div>
-          <p className="text-base font-medium text-neutral-700">
-            {transitionMessage}
-          </p>
+          <p className="text-base font-medium text-neutral-700">{transitionMessage}</p>
         </div>
       </div>
     );
@@ -340,9 +335,11 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
 
   const selectedResponse = currentQuestion ? responses.get(currentQuestion.id) : undefined;
 
+  // suppress unused sessionId warning
+  void sessionId;
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Progress */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm px-4 pt-4 pb-2">
         <HitProgressBar
           current={answeredCount}
@@ -351,10 +348,8 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
         />
       </div>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-lg">
-          {/* Back button */}
           {currentIndex > 0 && (
             <button
               type="button"
@@ -378,7 +373,6 @@ export default function HitTestUI({ sessionToken }: HitTestUIProps) {
         </div>
       </div>
 
-      {/* Time estimate */}
       <div className="pb-6 text-center">
         <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
           <Clock className="w-3.5 h-3.5" />

@@ -24,7 +24,8 @@ interface HeroType {
     illustration_url: string | null;
 }
 
-// type_code prefix(C/P) × MBTI(INFP...) · C=Character DISC 축, P=Personality 축
+// type_code = {DISC primary}-{MBTI} 형식 (D/I/S/C × 16 = 64유형)
+// D=Dominance(주도형) · I=Influence(사교형) · S=Steadiness(안정형) · C=Conscientiousness(신중형)
 function prefix(code: string): { group: string; mbti: string } {
     const [g, m] = code.split("-");
     return { group: g, mbti: m };
@@ -34,7 +35,7 @@ export default function HeroTypesPage() {
     const [rows, setRows] = useState<HeroType[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [groupFilter, setGroupFilter] = useState<"all" | "C" | "P">("all");
+    const [groupFilter, setGroupFilter] = useState<"all" | "D" | "I" | "S" | "C">("all");
     const [editing, setEditing] = useState<HeroType | null>(null);
     const [saving, setSaving] = useState(false);
 
@@ -106,10 +107,10 @@ export default function HeroTypesPage() {
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-neutral-500">총 {rows.length}개 유형</span>
                             <div className="flex items-center gap-0.5 ml-3">
-                                {(["all", "C", "P"] as const).map(f => (
+                                {(["all", "D", "I", "S", "C"] as const).map(f => (
                                     <button key={f} onClick={() => setGroupFilter(f)}
                                         className={`px-2.5 py-1 text-[11px] rounded ${groupFilter === f ? "bg-neutral-900 text-white" : "text-neutral-500 hover:bg-neutral-100"}`}>
-                                        {f === "all" ? "전체" : f === "C" ? "C 그룹 (Character)" : "P 그룹 (Personality)"}
+                                        {f === "all" ? "전체" : f === "D" ? "D형 (주도)" : f === "I" ? "I형 (사교)" : f === "S" ? "S형 (안정)" : "C형 (신중)"}
                                     </button>
                                 ))}
                             </div>
