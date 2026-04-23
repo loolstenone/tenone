@@ -147,7 +147,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         <JourneyMap status={status} />
 
         {/* 탭 네비 */}
-        <div className="flex gap-1 border-b border-neutral-200 mb-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="sticky top-16 z-40 bg-white flex gap-1 border-b border-neutral-200 mb-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           {TABS.map((t) => (
             <button
               key={t.key}

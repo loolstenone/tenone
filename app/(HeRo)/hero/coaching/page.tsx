@@ -323,7 +323,7 @@ function ResumeSection() {
                         <div className="space-y-3">
                             {tips.map((tip, i) => (
                                 <div key={i} className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: HERO_RED }}>
+                                    <div className="w-5 h-5 rounded-full bg-neutral-700 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                                         {i + 1}
                                     </div>
                                     <p className="text-sm text-neutral-700">{tip}</p>
@@ -361,7 +361,7 @@ function MentorSection({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {programSteps.map((s) => (
                             <div key={s.step} className="flex items-start gap-3">
-                                <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ backgroundColor: HERO_RED }}>
+                                <div className="w-8 h-8 bg-neutral-700 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                                     {s.step}
                                 </div>
                                 <div>
@@ -489,7 +489,7 @@ function CareerSection() {
                         {tracks.map((track) => (
                             <div key={track.code} className="border border-neutral-200 rounded-xl p-6 hover:border-neutral-300 transition-colors">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 text-white rounded-lg flex items-center justify-center" style={{ backgroundColor: HERO_RED }}>
+                                    <div className="w-12 h-12 bg-neutral-100 text-neutral-500 rounded-lg flex items-center justify-center">
                                         <track.icon className="h-6 w-6" />
                                     </div>
                                     <div>
@@ -547,7 +547,7 @@ function BrandingSection() {
                         {brandingProcess.map((p, i) => (
                             <div key={p.step} className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: HERO_RED }}>
+                                    <div className="w-8 h-8 bg-neutral-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
                                         {p.step}
                                     </div>
                                     <div>

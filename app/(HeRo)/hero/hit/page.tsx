@@ -85,15 +85,15 @@ export default function HitOverviewPage() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <Brain className="h-4 w-4 text-[#E53935]" />
+                  <Brain className="h-4 w-4 text-neutral-400" />
                   <span>기저요인(UF) · 성격(MBTI) · 행동(DISC) · 인성 · 적성</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <Target className="h-4 w-4 text-[#E53935]" />
+                  <Target className="h-4 w-4 text-neutral-400" />
                   <span>결과: S-Power 핵심 강점 + 64유형 프로필</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <Clock className="h-4 w-4 text-[#E53935]" />
+                  <Clock className="h-4 w-4 text-neutral-400" />
                   <span>UF 50 · MBTI 160 · DISC 40 · 인성 220 · 적성 150</span>
                 </div>
               </div>

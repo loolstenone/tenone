@@ -518,7 +518,7 @@ export default function HitCResultPage() {
               </Link>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-5 w-5 text-[#E53935]" />
+                  <Sparkles className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">AI 경력전환 상담</p>
                     <p className="text-xs text-neutral-500 mt-0.5">이직 전략, 갭 분석, 액션 플랜 수립</p>
@@ -528,7 +528,7 @@ export default function HitCResultPage() {
               </div>
               <div className="border border-neutral-200 rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-[#E53935]" />
+                  <Users className="h-5 w-5 text-neutral-400" />
                   <div className="flex-1">
                     <p className="font-bold text-neutral-800">전문가 대면 상담</p>
                     <p className="text-xs text-neutral-500 mt-0.5">HeRo 멘토가 경력전환을 함께 설계합니다</p>

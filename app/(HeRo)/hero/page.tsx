@@ -270,11 +270,8 @@ export default function HeRoHomePage() {
                 >
                   {svc.num}
                 </span>
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: `${RED}10` }}
-                >
-                  <svc.icon className="h-6 w-6" style={{ color: RED }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-neutral-100">
+                  <svc.icon className="h-6 w-6 text-neutral-500" />
                 </div>
                 <h3 className="text-xl font-bold text-neutral-900 mb-1 group-hover:text-[#E53935] transition-colors">
                   {svc.title}
