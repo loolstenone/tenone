@@ -6,9 +6,16 @@
  *   - 해금 조건 상태 (HIT A/B · 이력서 · JH · 매칭)
  *   - 오늘 체크인 여부 + 스트릭
  *   - 다음 스테이지 진입 조건
+ *   - 스테이지 승급 감지 → UC 지급 + 이메일 발송
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { earnUC } from "@/lib/supabase/uc";
+import { Resend } from "resend";
+import { heroStageUpHtml } from "@/lib/email/hero-stage-up";
+import { buildFromHeader, DEFAULT_SENDERS } from "@/lib/email/senders";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function GET(req: NextRequest) {
     try {
@@ -63,6 +70,59 @@ export async function GET(req: NextRequest) {
             has_active_match: boolean;
         };
 
+        // ── 스테이지 승급 감지 ──────────────────────────────────────────
+        let stageUp: { from: string; to: string; ucAwarded: number } | null = null;
+
+        const { data: heroProfile } = await sb
+            .from("hero_profiles")
+            .select("last_stage_index")
+            .eq("member_id", memberId)
+            .maybeSingle();
+
+        const prevIndex = heroProfile?.last_stage_index ?? 0;
+        const currIndex = s.stage_index;
+
+        if (currIndex > prevIndex) {
+            // hero_profiles upsert (승급 기록)
+            await sb.from("hero_profiles").upsert(
+                { member_id: memberId, last_stage_index: currIndex, updated_at: new Date().toISOString() },
+                { onConflict: "member_id" },
+            );
+
+            // UC 지급
+            const ucResult = await earnUC(memberId, "hero_stage_up", "hero");
+            const ucAwarded = ucResult.granted ? ucResult.amount : 0;
+
+            // 이전 스테이지명 역산
+            const STAGE_NAMES = ["", "Dreamer", "Challenger", "Trainee", "Debut", "Star", "Legend"];
+            const fromStage = prevIndex > 0 ? (STAGE_NAMES[prevIndex] ?? "Dreamer") : "Dreamer";
+
+            stageUp = { from: fromStage, to: s.stage, ucAwarded };
+
+            // 이메일 발송 (비동기 — 실패해도 응답 블로킹 안 함)
+            const { data: member } = await sb
+                .from("members")
+                .select("name, email")
+                .eq("id", memberId)
+                .single();
+
+            if (member?.email) {
+                const heroBaseUrl = process.env.NEXT_PUBLIC_HERO_URL ?? "https://hero.ne.kr";
+                resend.emails.send({
+                    from: buildFromHeader(DEFAULT_SENDERS.noreply),
+                    to: member.email,
+                    subject: `🎉 ${s.stage} 스테이지 승급을 축하합니다!`,
+                    html: heroStageUpHtml({
+                        name: member.name ?? "헤로",
+                        fromStage,
+                        toStage: s.stage,
+                        ucAwarded,
+                        journeyUrl: `${heroBaseUrl}/hero/journey`,
+                    }),
+                }).catch(() => { /* fire & forget */ });
+            }
+        }
+
         return NextResponse.json({
             stage: s.stage,
             stageIndex: s.stage_index,
@@ -78,6 +138,7 @@ export async function GET(req: NextRequest) {
             todayCheckedIn: !!todayCheckin,
             todayCheckin: todayCheckin ?? null,
             pendingMatches: pendingMatches ?? 0,
+            stageUp,
         });
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "unknown error";

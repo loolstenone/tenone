@@ -7,7 +7,7 @@
  * 원칙: 모든 탭은 "액션 단위" (see가 아니라 do).
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
   Flame,
@@ -25,10 +25,15 @@ import {
   Rocket,
   Crown,
   Star,
+  Plus,
+  BookOpen,
 } from "lucide-react";
 import MatchingInbox from "@/features/hero/MatchingInbox";
 import { GoalsTab } from "@/features/hero/GoalsTab";
 import { JobsTab } from "@/features/hero/JobsTab";
+import { CoachingTab } from "@/features/hero/CoachingTab";
+import { ReflectionTab } from "@/features/hero/ReflectionTab";
+import { RecordTab } from "@/features/hero/RecordTab";
 
 const RED = "#E53935";
 
@@ -49,6 +54,7 @@ interface JourneyStatus {
   todayCheckedIn: boolean;
   todayCheckin: { id: string; energy_level: number; note: string | null } | null;
   pendingMatches: number;
+  stageUp?: { from: string; to: string; ucAwarded: number } | null;
 }
 
 const STAGES: { key: Stage; label: string; subtitle: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
@@ -65,7 +71,9 @@ const TABS = [
   { key: "herotype",  label: "Hero Type", icon: Target },
   { key: "goals",     label: "목표·성취", icon: Target },
   { key: "record",    label: "기록",      icon: FileText },
-  { key: "jobs",      label: "채용 피드", icon: Briefcase },
+  { key: "coaching",    label: "코칭",      icon: BookOpen },
+  { key: "reflection",  label: "월간 회고", icon: FileText },
+  { key: "jobs",        label: "채용 피드", icon: Briefcase },
   { key: "matching",  label: "매칭",      icon: Handshake },
 ] as const;
 
@@ -76,6 +84,7 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
   const [tab, setTab] = useState<TabKey>("today");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stageUpModal, setStageUpModal] = useState<{ from: string; to: string; ucAwarded: number } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,7 +92,9 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
     try {
       const res = await fetch(`/api/hero/journey/status?memberId=${memberId}`);
       if (res.ok) {
-        setStatus(await res.json());
+        const data: JourneyStatus = await res.json();
+        setStatus(data);
+        if (data.stageUp) setStageUpModal(data.stageUp);
       } else {
         const err = await res.json().catch(() => ({ error: "알 수 없는 오류" }));
         setError(err.error ?? `HTTP ${res.status}`);
@@ -123,6 +134,14 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
 
   return (
     <div className="bg-neutral-50 min-h-screen">
+      {stageUpModal && (
+        <StageUpModal
+          from={stageUpModal.from}
+          to={stageUpModal.to}
+          ucAwarded={stageUpModal.ucAwarded}
+          onClose={() => setStageUpModal(null)}
+        />
+      )}
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Journey 지도 */}
         <JourneyMap status={status} />
@@ -149,8 +168,10 @@ export function JourneyWorkspace({ memberId }: { memberId: string }) {
         {tab === "today"    && <TodayTab status={status} memberId={memberId} onRefresh={load} />}
         {tab === "herotype" && <HeroTypeTab status={status} />}
         {tab === "goals"    && <GoalsTab memberId={memberId} />}
-        {tab === "record"   && <RecordTab />}
-        {tab === "jobs"     && <JobsTab memberId={memberId} />}
+        {tab === "record"   && <RecordTab memberId={memberId} />}
+        {tab === "coaching"    && <CoachingTab memberId={memberId} />}
+        {tab === "reflection"  && <ReflectionTab memberId={memberId} />}
+        {tab === "jobs"        && <JobsTab memberId={memberId} />}
         {tab === "matching" && <MatchingTab status={status} memberId={memberId} />}
       </div>
     </div>
@@ -537,32 +558,7 @@ function HeroTypeTab({ status }: { status: JourneyStatus }) {
   );
 }
 
-/* ═════════════════════════ 기록 탭 ═════════════════════════ */
 
-function RecordTab() {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-6">
-      <h3 className="text-lg font-bold text-neutral-900 mb-1">이력서 · 포트폴리오</h3>
-      <p className="text-sm text-neutral-500 mb-6">평소 성과를 꾸준히 기록해서 자산으로 쌓아가세요.</p>
-      <div className="grid md:grid-cols-2 gap-3">
-        <Link
-          href="/hero/resume/workspace"
-          className="flex flex-col gap-2 p-5 rounded-xl border border-neutral-200 hover:border-[#E53935] hover:shadow-sm transition-all"
-        >
-          <FileText className="w-6 h-6" style={{ color: RED }} />
-          <span className="font-bold text-neutral-900">이력서 워크스페이스</span>
-          <span className="text-xs text-neutral-500">경력·학력·프로젝트 편집</span>
-          <span className="text-xs font-bold mt-1" style={{ color: RED }}>편집 →</span>
-        </Link>
-        <div className="flex flex-col gap-2 p-5 rounded-xl border border-dashed border-neutral-200 bg-neutral-50">
-          <Sparkles className="w-6 h-6 text-neutral-400" />
-          <span className="font-bold text-neutral-400">성과 한 줄 캡처</span>
-          <span className="text-xs text-neutral-400">V2에서 제공 예정</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ═════════════════════════ 매칭 탭 ═════════════════════════ */
 
@@ -587,6 +583,67 @@ function MatchingTab({ status, memberId }: { status: JourneyStatus; memberId: st
         </div>
       )}
       <MatchingInbox side="talent" memberId={memberId} />
+    </div>
+  );
+}
+
+/* ═════════════════════════ 스테이지 승급 모달 ═════════════════════════ */
+
+const STAGE_EMOJI: Record<string, string> = {
+  Dreamer: "✨", Challenger: "🚪", Trainee: "⚔️", Debut: "🚀", Star: "⭐", Legend: "👑",
+};
+const STAGE_SUBTITLE: Record<string, string> = {
+  Dreamer: "꿈을 품다", Challenger: "도전하다", Trainee: "훈련하다",
+  Debut: "데뷔하다", Star: "빛나다", Legend: "전설이 되다",
+};
+
+function StageUpModal({ from, to, ucAwarded, onClose }: {
+  from: string; to: string; ucAwarded: number; onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+        {/* 상단 배너 */}
+        <div className="bg-[#E53935] px-8 py-10 text-center">
+          <p className="text-5xl mb-3">{STAGE_EMOJI[to] ?? "🎉"}</p>
+          <h2 className="text-2xl font-black text-white mb-1">스테이지 승급!</h2>
+          <p className="text-white/80 text-sm">{to} · {STAGE_SUBTITLE[to] ?? ""}</p>
+        </div>
+
+        {/* 본문 */}
+        <div className="px-8 py-6 space-y-4">
+          {/* 승급 경로 */}
+          <div className="flex items-center justify-center gap-3 py-3 bg-neutral-50 rounded-xl">
+            <span className="text-sm font-bold text-neutral-500">{from}</span>
+            <span className="text-[#E53935] font-black">→</span>
+            <span className="text-sm font-black text-[#E53935]">{to}</span>
+          </div>
+
+          {/* UC 적립 */}
+          {ucAwarded > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
+              <div>
+                <p className="text-xs font-bold text-[#E53935] uppercase tracking-wider mb-0.5">UC 적립</p>
+                <p className="text-lg font-black text-neutral-900">+{ucAwarded.toLocaleString()} UC</p>
+              </div>
+              <span className="text-2xl">🎁</span>
+            </div>
+          )}
+
+          <p className="text-sm text-neutral-500 text-center leading-relaxed">
+            Journey를 계속 쌓아가세요.<br />다음 스테이지가 기다리고 있어요!
+          </p>
+
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "#E53935" }}
+          >
+            계속하기
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

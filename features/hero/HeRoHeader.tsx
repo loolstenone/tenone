@@ -73,6 +73,19 @@ export function HeRoHeader() {
                             {item.name}
                         </Link>
                     ))}
+                    {isAuthenticated && (
+                        <Link
+                            href="/hero/company"
+                            className={clsx(
+                                "text-sm font-medium transition-colors whitespace-nowrap",
+                                pathname.startsWith("/hero/company")
+                                    ? "text-[#E53935]"
+                                    : "text-neutral-500 hover:text-neutral-900"
+                            )}
+                        >
+                            기업 허브
+                        </Link>
+                    )}
                 </div>
 
                 {/* Right side — 우측 끝 */}
@@ -158,6 +171,20 @@ export function HeRoHeader() {
                         )}
                     >
                         나의 Journey
+                    </Link>
+                )}
+                {isAuthenticated && (
+                    <Link
+                        href="/hero/company"
+                        onClick={() => setMobileOpen(false)}
+                        className={clsx(
+                            "flex items-center rounded-lg px-4 py-3 text-base font-medium transition-colors mb-1",
+                            pathname.startsWith("/hero/company")
+                                ? "bg-red-50 text-[#E53935]"
+                                : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                        )}
+                    >
+                        기업 허브
                     </Link>
                 )}
                 {navItems.map((item) => (

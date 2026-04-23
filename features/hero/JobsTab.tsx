@@ -6,7 +6,7 @@
  * 액션: "관심 있어요" · "지금은 아님" · "자세히 보기"
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Briefcase,
     Building2,
@@ -122,7 +122,7 @@ export function JobsTab({ memberId }: { memberId: string }) {
                 ) : (
                     <div className="space-y-3">
                         {feed.items.map((job) => (
-                            <JobCard key={job.id} job={job} />
+                            <JobCard key={job.id} job={job} memberId={memberId} />
                         ))}
                     </div>
                 )}
@@ -131,10 +131,34 @@ export function JobsTab({ memberId }: { memberId: string }) {
     );
 }
 
-function JobCard({ job }: { job: JobItem }) {
+function JobCard({ job, memberId }: { job: JobItem; memberId: string }) {
+    const [interested, setInterested] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const pendingRef = useRef(false);
+
     const daysAgo = job.publishedAt
         ? Math.floor((Date.now() - new Date(job.publishedAt).getTime()) / 86400000)
         : null;
+
+    async function handleInterest() {
+        if (interested || pendingRef.current) return;
+        pendingRef.current = true;
+        setLoading(true);
+        setInterested(true); // optimistic
+        try {
+            const r = await fetch("/api/hero/jobs/interest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ memberId, jdId: job.id }),
+            });
+            if (!r.ok) setInterested(false);
+        } catch {
+            setInterested(false);
+        } finally {
+            setLoading(false);
+            pendingRef.current = false;
+        }
+    }
 
     return (
         <div className="border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 hover:shadow-sm transition-all">
@@ -202,8 +226,13 @@ function JobCard({ job }: { job: JobItem }) {
             )}
 
             <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
-                <button className="flex-1 py-2 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-opacity" style={{ backgroundColor: RED }}>
-                    관심 있어요
+                <button
+                    onClick={handleInterest}
+                    disabled={interested || loading}
+                    className="flex-1 py-2 rounded-lg text-white text-sm font-bold transition-all"
+                    style={{ backgroundColor: interested ? "#9E9E9E" : RED, opacity: loading ? 0.7 : 1 }}
+                >
+                    {interested ? "관심 등록됨 ✓" : "관심 있어요"}
                 </button>
                 <button className="px-4 py-2 rounded-lg border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50">
                     자세히
