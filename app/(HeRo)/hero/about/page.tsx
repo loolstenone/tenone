@@ -62,13 +62,14 @@ export default function AboutPage() {
                             <span className="text-amber-500">He</span>
                             <span className="text-neutral-900">Ro</span>
                         </span>
-                        <p className="text-lg text-neutral-500 mb-4">Hidden Intelligence &amp; Real Opportunity</p>
+                        <p className="text-lg text-neutral-500 mb-2">Human enhancement &amp; Recruit Optimization</p>
+                        <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#E53935] mb-4">Talent Agency</p>
                         <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6">
-                            숨겨진 인재를 발굴하고<br />성장시키는 플랫폼
+                            사람의 성장을 설계하고<br />최적의 무대를 연결하는 인재 기획사
                         </h1>
                         <p className="text-neutral-600 max-w-xl mx-auto">
-                            HeRo는 인재의 잠재력을 과학적으로 진단하고, 체계적인 성장 프로그램을 통해
-                            모든 사람이 자신만의 HeRo가 될 수 있도록 돕습니다.
+                            HeRo는 인재 한 사람 한 사람을 체계적으로 성장시키고, 그들의 역량이 가장 빛날 수 있는
+                            기업과 자리에 정교하게 연결합니다. 연예 기획사가 아티스트를 발굴하고 데뷔시키듯.
                         </p>
                     </div>
                 </div>

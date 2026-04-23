@@ -29,8 +29,8 @@ export function HeRoFooter() {
                             />
                         </Link>
                         <p className="text-sm leading-relaxed">
-                            Hidden Intelligence &amp; Real Opportunity.<br />
-                            숨겨진 인재를 발굴하고 성장시킵니다.
+                            Human enhancement &amp; Recruit Optimization.<br />
+                            <span className="text-[11px] tracking-[0.3em] uppercase text-[#E53935] font-bold">Talent Agency</span>
                         </p>
                     </div>
 

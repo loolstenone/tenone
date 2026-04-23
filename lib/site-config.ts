@@ -330,7 +330,7 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         faviconUrl: '/brands/hero/favicon.png', appleTouchIcon: '/brands/hero/favicon.png',
         accentColor: '#F59E0B', bgDark: '#171717',
         colors: { primary: '#F59E0B', primaryDark: '#D97706', secondary: '#FBBF24', headerBg: '#ffffff', headerText: '#171717', footerBg: '#171717', footerText: '#a3a3a3', accent: '#F59E0B' },
-        meta: { title: 'HeRo — 인재 발굴·성장 플랫폼', description: '숨겨진 인재를 발굴하고 성장시키는 HeRo 플랫폼. HIT 프로그램, 커리어 로드맵, 멘토링, 브랜딩.', keywords: ['HeRo', '인재발굴', '커리어', '멘토링', 'HIT', 'Ten:One'] },
+        meta: { title: 'HeRo — Talent Agency', description: 'Human enhancement & Recruit Optimization. HeRo는 인재의 성장을 설계하고 최적의 무대를 연결하는 인재 기획사입니다.', keywords: ['HeRo', 'Talent Agency', '인재기획사', '커리어', '매칭', 'HIT', 'Ten:One'] },
         homePath: '/hero', signupPath: '/signup', domain: 'hero.ne.kr',
         universeLabel: 'Part of Ten:One™ Universe', showUniverseBadge: true,
         authMethods: { email: true, google: true, kakao: true },

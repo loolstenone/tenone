@@ -107,7 +107,7 @@ VALUES
 
 ('hero', 'HeRo', 'hero.ne.kr', 'HeRo', 'text', '/brands/hero/favicon.png', '/brands/hero/favicon.png',
  '{"primary":"#F59E0B","primaryDark":"#D97706","secondary":"#FBBF24","headerBg":"#ffffff","headerText":"#171717","footerBg":"#171717","footerText":"#a3a3a3","accent":"#F59E0B"}',
- 'HeRo — 인재 발굴·성장 플랫폼', '숨겨진 인재를 발굴하고 성장시키는 HeRo 플랫폼. HIT 프로그램, 커리어 로드맵, 멘토링, 브랜딩.', NULL,
+ 'HeRo — Talent Agency', 'Human enhancement & Recruit Optimization. HeRo는 인재의 성장을 설계하고 최적의 무대를 연결하는 인재 기획사입니다.', NULL,
  '{"HeRo","인재발굴","커리어","멘토링","HIT","Ten:One"}', '/hero',
  NULL, 'Part of Ten:One™ Universe', true,
  '{"email":true,"google":true,"kakao":true}', '[]', '[]', '{}'),
