@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw } from "lucide-react";
+import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
 
@@ -124,6 +124,9 @@ export default function SettingsPage() {
     const [todoistModal, setTodoistModal] = useState(false);
     const [todoistToken, setTodoistToken] = useState("");
     const [todoistSubmit, setTodoistSubmit] = useState(false);
+    const [contextScope, setContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
+    const [sampleLoading, setSampleLoading] = useState(false);
+    const [sampleText, setSampleText] = useState<string | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -137,6 +140,7 @@ export default function SettingsPage() {
                     setTone(d.user.ai_tone);
                     setNotifyEmail(d.user.notify_email_briefing !== false);
                     setNotifyPush(!!d.user.notify_push_briefing);
+                    if (d.user.ai_context_scope?.length) setContextScope(d.user.ai_context_scope);
                     setSub({
                         status: d.user.subscription_status || 'free',
                         expires: d.user.subscription_expires_at || null,
@@ -300,6 +304,24 @@ export default function SettingsPage() {
         } finally { setSaving(false); }
     }
 
+    async function generateSample() {
+        setSampleLoading(true);
+        setSampleText(null);
+        try {
+            const res = await fetch(`/api/planners/briefing/generate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: "morning" }),
+            });
+            if (res.ok) {
+                const d = await res.json();
+                setSampleText(d.content || d.briefing?.content || "샘플 생성 완료 (내용 없음)");
+            } else {
+                setSampleText("샘플 생성에 실패했습니다. API 키 설정을 확인해 주세요.");
+            }
+        } finally { setSampleLoading(false); }
+    }
+
     if (loading) {
         return <div className="max-w-3xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
@@ -374,6 +396,57 @@ export default function SettingsPage() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                        <div className="pt-2 border-t border-neutral-100">
+                            <label className="block text-xs text-neutral-500 mb-1">컨텍스트 범위</label>
+                            <p className="text-[10px] text-neutral-400 mb-3">브리핑 생성 시 참조할 정보를 선택하세요</p>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { key: "identity", label: "아이덴티티" },
+                                    { key: "weekly", label: "이번 주" },
+                                    { key: "monthly", label: "이번 달" },
+                                    { key: "projects", label: "프로젝트" },
+                                    { key: "daily", label: "오늘 할 일" },
+                                ].map(({ key, label }) => {
+                                    const on = contextScope.includes(key);
+                                    return (
+                                        <button
+                                            key={key}
+                                            onClick={() => {
+                                                const next = on
+                                                    ? contextScope.filter(s => s !== key)
+                                                    : [...contextScope, key];
+                                                setContextScope(next);
+                                                save({ ai_context_scope: next });
+                                            }}
+                                            className={`px-3 py-1.5 text-xs rounded-full transition-colors border ${
+                                                on
+                                                    ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E]"
+                                                    : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        <div className="pt-2 border-t border-neutral-100">
+                            <button
+                                onClick={generateSample}
+                                disabled={sampleLoading}
+                                className="flex items-center gap-1.5 text-xs text-[#0F766E] hover:underline disabled:opacity-50"
+                            >
+                                {sampleLoading
+                                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                                    : <Sparkles className="h-3 w-3" />}
+                                브리핑 샘플 미리보기
+                            </button>
+                            {sampleText && (
+                                <div className="mt-3 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-xs text-neutral-700 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                    {sampleText}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
