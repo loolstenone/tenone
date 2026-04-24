@@ -1,5 +1,4 @@
-import { PlannersHeader } from "@/features/planners/PlannersHeader";
-import { PlannersFooter } from "@/features/planners/PlannersFooter";
+import { PlannersChrome } from "@/features/planners/PlannersChrome";
 import type { Metadata } from "next";
 import { siteConfigs } from "@/lib/site-config";
 import { getSiteConfigServer } from "@/lib/supabase/site-configs";
@@ -28,11 +27,7 @@ export default function PlannersLayout({
 }>) {
     return (
         <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-            <PlannersHeader />
-            <main className="flex-1 pt-14">
-                {children}
-            </main>
-            <PlannersFooter />
+            <PlannersChrome>{children}</PlannersChrome>
         </div>
     );
 }

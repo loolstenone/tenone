@@ -38,6 +38,12 @@ const PENDING_FILES = [
   'hero-reflections.sql',
   'hero-coaching-sessions.sql',
   'hero-profiles.sql',
+  'hero-matching-engine-v3.sql',
+  'planners-app.sql',
+  'planners-app-v2.sql',
+  'planners-templates.sql',
+  'planners-aggregation.sql',
+  'planners-payments.sql',
 ];
 
 async function runSQL(serviceRoleKey, sql, label) {

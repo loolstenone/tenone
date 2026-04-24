@@ -1,55 +1,233 @@
 # Planners 브랜드 가이드
 
-> **Planner's** — 우리는 모두 기획자다. "기획은 꾀하는 것, 계획은 세우는 것"
+> **Planner's** — 우리는 모두 기획자다. 적어도 자기 인생에서 만큼은.
+> **PP AI** — 능동 AI 비서가 있는 자기 성취 플랫폼.
 
 ---
 
 ## 정체성
 
-- **한 줄 소개**: 기획·기획자 교육 및 커뮤니티 플랫폼
-- **톤앤매너**: 지적·창의적·교육. 기획자 커뮤니티 중심.
-- **주 컬러**: 틸 (#0F766E)
-- **디자인 방향**: Planning 콘텐츠 + Planner's Planner (도구) + 교육
+- **한 줄 소개**: 기획·기획자 교육 커뮤니티 + 능동 AI 플래너 서비스
+- **톤앤매너**: 지적·창의적·철학적 깊이 · 종이 감성 + 디지털 편의
+- **주 컬러**: Teal `#0F766E`
+- **디자인 방향**: Minimal · Serif 헤더 + Sans 본문 · 종이 질감
+- **철학 3문**:
+  - "우리는 모두 기획자다 — 적어도 자기 인생에서 만큼은"
+  - "나는 무엇을 도모(圖謀)하고 있는가?"
+  - "생각한대로 살지 않으면, 사는대로 생각하게 된다"
+
+---
+
+## 제품 구성
+
+### 1. 종이/PDF 플래너 (기존)
+- 2026 Planner's Planner All in One (굿노트·삼성노트 호환)
+- Badak Mall (`badak.biz/planners`) 판매
+- 구성: Schedule 19 · Note 64 · FrameWorkBook 26 · Front Cover 27+ · Personal Identity 10p
+
+### 2. Planner's Planner AI (신규 MVP 완성)
+- 경로: `/planners/app/*`
+- 가격: **연간 19,000원** (PDF 구매자 무료 1년)
+- 모드: **Weekly** (기본) · **All in One** (고급)
+- 능동 AI: Haiku 4.5 아침 브리핑·저녁 정리 (~$0.18/유저/월)
 
 ---
 
 ## 접근 모델
 
-- **유형**: 오픈 + 교육 (기본 정보 자유, 고급 과정은 유료)
-- **가입 경로**: 회원가입 → Planning 콘텐츠 열람 가능
-- **멤버 권한**: member, instructor, admin
+- **유형**: 오픈 가입 + 유료 구독 (하이브리드)
+- **가입 경로**: 회원가입 → 온보딩 4단계 → 앱 진입
+- **멤버 권한**: member · subscriber · manager · admin · staff
 
 ---
 
 ## 프로필 특화
 
-- **특화 테이블**: 없음 (공통 members)
-- **고유 필드**: planning_experience, interests
+- **특화 테이블**: `planners_users` (mode · subscription · AI 설정 · 알림 설정 · PDF 구매자 플래그)
+- **Universe 연동**: members 테이블 SSOT, planners_users로 확장
+- `universe-profile.ts` 조회 함수: 향후 `getPlannersProfile()` 추가 가능
 
 ---
 
 ## 권한 체계
 
-- **role 종류**: member, instructor, admin
+- **role 종류**: member · subscriber · purchaser · manager · super_admin
 - **context**: `brand:planners`
+- **관리자 게이트**: `role IN ('staff','manager','super_admin')` → `/intra/planners`
 
 ---
 
 ## UC 정책 특이사항
 
-- **브랜드 전용 액션**: attend_workshop (월 2회, 1000 UC)
+- **브랜드 전용 액션**: 향후 추가 가능 (현재 미시드)
 - **brand_id 지정**: `brand_id = 'planners'`
+
+---
+
+## Action Hub Entries
+
+(현재 Action Hub 대상 없음 — PDF 구매자 검증은 관리자 수동 매칭)
 
 ---
 
 ## 핵심 파일
 
+### 마케팅 (공개 페이지)
 | 파일 | 역할 |
 |------|------|
-| `app/(Planners)/layout.tsx` | generateMetadata |
-| `app/(Planners)/planners/page.tsx` | 메인 |
+| `app/(Planners)/layout.tsx` | generateMetadata + PlannersChrome 래퍼 |
+| `app/(Planners)/planners/page.tsx` | 메인 랜딩 |
 | `app/(Planners)/planners/planning/page.tsx` | Planning 아카이브 |
-| `app/(Planners)/planners/planner-tool/page.tsx` | Planner's Planner (기획 도구) |
+| `app/(Planners)/planners/planner-tool/page.tsx` | PP 도구 소개 + PP AI "Now Live" CTA |
+| `app/(Planners)/planners/programs/page.tsx` | Programs |
+| `app/(Planners)/planners/gpr/page.tsx` | GPR |
+| `app/(Planners)/planners/my/page.tsx` | 마이페이지 |
+| `features/planners/PlannersChrome.tsx` | `/planners/app`·`/onboarding`·`/purchase`에서 헤더/푸터 숨김 |
+
+### PP AI 앱 쉘
+| 파일 | 역할 |
+|------|------|
+| `app/(Planners)/planners/app/layout.tsx` | 인증 게이트 + 구독 검증 + 사이드바 |
+| `app/(Planners)/planners/app/page.tsx` | /today로 리디렉트 |
+| `app/(Planners)/planners/onboarding/page.tsx` | 4단계 온보딩 |
+| `app/(Planners)/planners/purchase/page.tsx` | Toss 19,000원/년 결제 |
+| `app/(Planners)/planners/offline/page.tsx` | PWA 오프라인 |
+| `features/planners/AppSidebar.tsx` | 사이드바 (모드별 메뉴 분기 + 구독 상태 표시 + 업그레이드 CTA) |
+| `features/planners/PwaRegister.tsx` | SW 등록 + manifest 링크 |
+
+### 뷰 컴포넌트 (features/planners/)
+- DailyView · ThisWeekCard · ExternalEventsBanner — Today
+- WeeklyView — 주간 Vrief + GPR + 집계 + 7일 캘린더
+- MonthlyView — 월 그리드 + 공휴일 + 주차 링크 + 히트 인디케이터
+- YearlyView — 12개월 + 분기별 목표 + Anniversary 2p 스프레드
+- IdentityView — Vision/Mission/KR (Weekly) + Inside-Out/Outside-In/Vision House (All in One)
+- ProjectsView · ProjectDetailView · ProjectNotesTab — 프로젝트 목록/상세/노트
+- CoverPicker · CoverRender — 15종 Cover
+- TemplatesView — 59종 카탈로그
+- AiBriefingView — 아침/저녁 브리핑 생성·이력
+- SearchView — 풀텍스트
+- PurchaseView — 결제
+- CopyToAiButton — Claude/ChatGPT/Gemini deep link
+
+### 라이브러리 (lib/planners/)
+- types.ts — 타입 정의 + getISOWeek/getWeekBoundaries
+- client.ts — Supabase CRUD helpers
+- briefing.ts — Haiku 4.5 브리핑 생성 + 컨텍스트 수집
+- notifications.ts — 이메일(Resend) + Web Push(VAPID)
+- holidays.ts — 2026~2027 한국 공휴일·24절기
+- google-calendar.ts — OAuth + token refresh + events sync
+- todoist.ts — 토큰 검증 + 오늘 태스크 import
+
+### API 라우트 (app/api/planners/)
+- 핵심 CRUD: onboarding · daily · weekly · monthly · yearly · identity · projects/[id] · projects/[id]/notes(/[noteId]) · settings
+- 템플릿: templates · covers
+- 집계: summary(scope=weekly/monthly/yearly) · daily/month-hits
+- 검색: search
+- Daily 자동 이월: daily/carry-over
+- AI 브리핑: briefing · briefing/generate · cron/briefings
+- 결제: payment/request · payment/success · admin/activate
+- 알림: push/subscribe
+- 연동: integrations · integrations/google/{connect,callback,sync} · integrations/todoist/{connect,sync} · external-events
+- Intra 관리: intra/planners/subscribers · intra/planners/payments
+
+### SQL (sql/planners-*.sql)
+- planners-app · planners-app-v2 · planners-templates · planners-templates-phase2 · planners-aggregation · planners-payments · planners-security-hardening · planners-notifications · planners-covers · planners-anniversaries · planners-integrations
+
+### PWA 자산 (public/)
+- planners-manifest.json · planners-sw.js
+- ⚠️ 배포 전 필요: planners-icon-192.png · planners-icon-512.png
+
+---
+
+## 인트라 관리 경로
+
+| 경로 | 역할 |
+|------|------|
+| `/intra/planners` | PP AI 관리 (구독자·결제·수동 활성화) |
+| `/intra/ums/planners/planning` | Planning 콘텐츠 (기존) |
+| `/intra/ums/planners/gpr` | GPR (기존) |
+| `/intra/ums/planners/programs` | Programs (기존) |
+
+---
+
+## 개발 주의사항
+
+### 능동 AI
+- 프롬프트 SSOT: `lib/planners/briefing.ts` 내 `systemPrompt()` · 톤 3종(professional/friendly/brief)
+- 사용량 카운트: `planners_ai_usage` (upsert 실패해도 브리핑 성공)
+- 크론: `/api/planners/cron/briefings` 매 시간, `CRON_SECRET` Authorization Bearer 헤더 필수
+- 알림 발송: 브리핑 생성 후 `dispatchBriefingNotifications()` 백그라운드 호출 (실패해도 브리핑 반환 OK)
+
+### 결제 (Toss)
+- Flow: `/planners/purchase` → `/api/planners/payment/request` (주문 생성) → Toss widget → `successUrl` → confirm API → `planners_activate_subscription` RPC
+- `TOSS_SECRET_KEY` 미설정 시 confirm 단계에서 실패 → `/planners/purchase?failed=config` 리디렉트
+- 테스트 키 기본값 내장 (`test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq`) — 실 배포 시 live 키로 교체 필수
+
+### PDF 구매자 활성화
+- Badak Mall 주문 기록 자동 매칭 기능 없음 (향후 가능)
+- 관리자가 Intra에서 이메일 입력 → `pdf_buyer` 소스로 수동 활성화 → 1년 무료
+- `planners_activate_pdf_buyer` RPC 호출
+
+### 구독 접근 제어
+- `app/(Planners)/planners/app/layout.tsx`에서 검증
+- `subscription_status='expired'` → `/planners/purchase?expired=1` 리디렉트
+- `free` 상태는 진입 허용 (베타 기간)
+- 만료 예정 시 사이드바에 "1년 구독 시작" 배너 표시
+
+### Templates/Covers API
+- 공개 읽기 (RLS `USING (true)`)
+- API는 anon 클라이언트 사용 (admin client 필요 없음)
+- 로컬 dev에서도 조회 가능
+
+### 외부 연동
+- **Google Calendar**: `GOOGLE_CLIENT_ID`·`GOOGLE_CLIENT_SECRET` 설정 필요. Redirect URI = `{NEXT_PUBLIC_APP_URL}/api/planners/integrations/google/callback` Google Cloud Console에 등록 필수.
+- **Todoist**: 사용자가 직접 API 토큰 붙여넣기. OAuth 아님.
+
+### 보안
+- 함수 6개 `search_path = public, pg_temp` 고정 (planners_*_summary + activate_* + expire)
+- RLS: planners_users/identities/yearly/monthly/weekly/daily/projects/project_*/ai_briefings/ai_usage/payments/push_subscriptions/integrations/external_events — 전부 `본인만` 정책
+- templates/covers는 `FOR SELECT USING (true)` (공개 읽기)
+
+### UX 규약
+- 체크박스 순환: `□` 미완 → `V` 완료 → `→` 이월 → (다시 □)
+- 날짜 1개 = Daily 1 + Note 2 슬롯 (PDF 재현)
+- 공휴일/일요일 빨간색 · 절기 중성 회색
+- 빨강(#0F766E 아님): 공휴일·에러·기념일 등 semantic red만
+- Teal(#0F766E): Action·Accent·State layer만
+
+### 문구
+- "도모(圖謀)" 한자 병기 (원본 PDF 감성 유지)
+- "생각한대로 살지 않으면, 사는대로 생각하게 된다" Italic · border-t 구분
+- 영어 라벨 대문자: Today · Weekly · Monthly · Yearly · Identity · Projects · Templates · Settings (사이드바 통일)
+
+---
+
+## 환경변수 (전체)
+
+```bash
+# 공통
+ANTHROPIC_API_KEY=sk-ant-...
+CRON_SECRET=...
+SUPABASE_SERVICE_ROLE_KEY=...     # 이미 설정됨
+RESEND_API_KEY=...                # 이미 설정됨
+
+# Toss Payments
+NEXT_PUBLIC_TOSS_CLIENT_KEY=live_ck_... (또는 test_ck_)
+TOSS_SECRET_KEY=live_sk_... (또는 test_sk_)
+
+# Web Push (선택)
+VAPID_PUBLIC_KEY=...
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=...   # 동일 값
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:lools@tenone.biz
+
+# Google Calendar (선택)
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+NEXT_PUBLIC_APP_URL=https://planners.tenone.biz
+```
+
+VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 ---
 
@@ -57,11 +235,19 @@
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | Beta — 기획자 커뮤니티 구축 중 |
-| **이월 작업** | Planner's Planner 고도화 |
+| **Phase** | **MVP 런칭 준비 완료** — W1~P2 전 범위 구축 (2026-04-24 세션 84) |
+| **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
+| **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
+| **완료 범위** | W1 앱 쉘 · W2 주요 뷰 · W3 Project+Templates+집계 · W4 Copy-to-AI+검색+AI 크론 · P0 결제+PDF구매자+보안 · P1 PWA+알림+공휴일+자동이월+마케팅 · P2 Templates 59종+Cover 15종+Anniversary+Google Calendar+Todoist |
+| **배포 전 블로커** | PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · Supabase Redirect URL 추가 |
+| **이월 작업** | P3 필기입력·FrameWork 위젯·기업플랜·AI 고급설정·Copy-to-AI 편집 / P4 GTM·매뉴얼·피드백·Intra 확장 / P5 Notion·Slack·Outlook |
+| **주요 결정** | 19,000원/년 · Weekly 기본 · PDF 구매자 무료 · 커뮤니티 운영 안 함 |
+| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 |
 
 ---
 
-## 참고
+## 참고 문서
 
-- 서비스 접근 모델: [CLAUDE.md § 1.4](../../CLAUDE.md#14-서비스-접근-모델-6종)
+- 루트 CLAUDE.md § 1.4 (접근 모델 6종)
+- 루트 CLAUDE.md § 1.3.1 (Capability 모델)
+- docs/Universe_Coin_Policy.md

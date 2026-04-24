@@ -437,6 +437,7 @@ export const modules: NavModule[] = [
                     {
                         name: "Planner's", href: "/intra/ums/planners", icon: Globe,
                         children: [
+                            { name: "PP AI 관리", href: "/intra/planners" },
                             { name: "Planning", href: "/intra/ums/planners/planning", badge: "soon" },
                             { name: "GPR", href: "/intra/ums/planners/gpr", badge: "soon" },
                             { name: "Programs", href: "/intra/ums/planners/programs", badge: "soon" },

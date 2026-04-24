@@ -1,6 +1,22 @@
 # TenOne Universe — 개발 로드맵
 
-> 마지막 업데이트: 2026-04-21 (세션 65 — 이메일/CRM 6-Phase 완결)
+> 마지막 업데이트: 2026-04-24 (세션 84 — Planner's Planner AI MVP 완성)
+
+---
+
+## 🗓 Planner's Planner AI (세션 84 완결)
+
+- [x] **W1 — 앱 쉘**: DB 스키마 · 인증 게이트 · 온보딩 4단계 · 모드 선택(Weekly/AllInOne) · 사이드바
+- [x] **W2 — 메인 뷰**: Today · Weekly (Light Vrief + GPR) · Monthly · Yearly · Identity · Projects + AI 브리핑 인프라
+- [x] **W3 — 확장**: Project Notes CRUD · Templates 20종 시드 · 자동 집계 함수 (weekly/monthly/yearly)
+- [x] **W4 — AI + UX**: Copy-to-AI (Claude/ChatGPT/Gemini) · 풀텍스트 검색 · Vercel Cron (매시간 브리핑)
+- [x] **P0 — 결제·보안**: Toss Payments 19,000원/년 · PDF 구매자 무료 활성화 · 구독 게이트 · Supabase 보안 감사 완료
+- [x] **P1 — MVP 완성도**: PWA · Web Push · 이메일 백업 · 공휴일/절기 · Daily 자동 이월 · 마케팅 "Now Live"
+- [x] **P2 — 콘텐츠·연동**: Templates 59종 · Cover 15종 · Anniversary 2p · Google Calendar OAuth · Todoist
+- [ ] **P3 — 고급 기능**: 필기입력(Fabric.js) · FrameWork 위젯 · 기업 플랜 · AI 고급 설정 · Copy-to-AI 편집
+- [ ] **P4 — 운영·분석**: GTM 트래킹 · 사용자 매뉴얼 · 베타 피드백 · Intra 확장
+- [ ] **P5 — 추가 연동**: Notion · Slack · Apple/Outlook (CalDAV)
+- [ ] **배포 대기**: PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · domain planners.tenone.biz 연결
 
 ---
 

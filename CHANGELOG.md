@@ -4,6 +4,92 @@
 
 ---
 
+## 2026-04-24 (저녁) — 세션 84 · Planner's Planner AI MVP 풀스택 구축
+
+### 정체성
+종이 플래너 "2026 Planner's Planner All in One" (굿노트·삼성노트 PDF)를 능동 AI 비서를 탑재한 웹/앱 서비스로 확장.
+- 가격: 연간 19,000원 (PDF 구매자 무료)
+- 기본 모드: Weekly · 고급: All in One
+- 철학: "우리는 모두 기획자다 / 도모(圖謀) / 생각한대로 살지 않으면 사는대로 생각하게 된다"
+- 능동 AI: Haiku 4.5 기반 아침 브리핑·저녁 정리 (월 ~$0.18/유저)
+
+### DB (16 테이블 + 5 RPC)
+- `sql/planners-app.sql` — users·identities·yearly/monthly/weekly/daily·projects·project_vriefs/gprs/notes·ai_briefings·ai_usage
+- `sql/planners-app-v2.sql` — mode · is_pdf_buyer · vision/mission/kr 추가
+- `sql/planners-templates.sql` + `phase2.sql` — 59종 시드
+- `sql/planners-aggregation.sql` — weekly/monthly/yearly_summary 함수
+- `sql/planners-payments.sql` — planners_payments + activate_subscription/pdf_buyer RPC
+- `sql/planners-notifications.sql` — notify_email/push + planners_push_subscriptions
+- `sql/planners-covers.sql` — 15종 커버
+- `sql/planners-anniversaries.sql` — yearly에 anniversaries JSONB
+- `sql/planners-integrations.sql` — planners_integrations + external_events
+- `sql/planners-security-hardening.sql` — 함수 6개 search_path 고정
+
+### 핵심 페이지 (features/planners/)
+- AppSidebar · PlannersChrome · PwaRegister (레이아웃)
+- DailyView + ThisWeekCard + ExternalEventsBanner (Today)
+- WeeklyView · MonthlyView · YearlyView (스케줄 계층)
+- IdentityView (Inside-Out/Outside-In/Vision House/Vision+Mission+KR)
+- ProjectsView · ProjectDetailView · ProjectNotesTab · CoverPicker · CoverRender
+- TemplatesView · SearchView · AiBriefingView
+- PurchaseView · CopyToAiButton
+
+### API (20+ 라우트)
+- `/api/planners/onboarding`
+- `/api/planners/{daily,weekly,monthly,yearly,identity,projects,settings}`
+- `/api/planners/daily/carry-over` · `/api/planners/daily/month-hits`
+- `/api/planners/projects/[id]` · `/api/planners/projects/[id]/notes` · `.../notes/[noteId]`
+- `/api/planners/templates` · `/api/planners/covers`
+- `/api/planners/summary` (scope=weekly/monthly/yearly)
+- `/api/planners/search` — 풀텍스트
+- `/api/planners/briefing` · `/api/planners/briefing/generate` · `/api/planners/cron/briefings`
+- `/api/planners/payment/{request,success}` · `/api/planners/admin/activate`
+- `/api/planners/push/subscribe`
+- `/api/planners/integrations` · `/api/planners/integrations/google/{connect,callback,sync}` · `/api/planners/integrations/todoist/{connect,sync}`
+- `/api/planners/external-events`
+- `/api/intra/planners/{subscribers,payments}` + `/intra/planners` 페이지
+
+### PDF 원본 충실도
+- 상단 7대 메뉴 + 사이드바 모드 분기 (Weekly/AllInOne)
+- 체크박스 4순환 (□ → V → → → ┕)
+- 공휴일·절기 2026~2027 (법정 15개 + 24절기)
+- Anniversary & Big Event 2p 스프레드 (상반기/하반기)
+- 하루 = Daily 1 + Note 2슬롯 (PDF의 N 링크 2개)
+- 4계층 드릴다운 (Yearly→Monthly→Weekly→Daily, 상호 링크)
+
+### 외부 연동
+- **Google Calendar** OAuth 2.0 + access/refresh + 90일 sync + DB 캐시 + Today 노출
+- **Todoist** 토큰 방식 + 오늘 태스크 Daily import
+
+### 알림
+- 이메일 백업 (Resend `noreply@tenone.biz`) — 브리핑 HTML 템플릿
+- Web Push (VAPID) — Service Worker push 수신 핸들러 + 클릭 시 앱 열림
+
+### PWA
+- `public/planners-manifest.json` + `planners-sw.js`
+- 오프라인 페이지 + cache-first 브리핑 이력 + network-first 페이지
+- PwaRegister 컴포넌트 (production만 등록)
+
+### 마케팅
+- `/planners/planner-tool` AI 섹션 "Coming Soon" → "Now Live" + 19,000원 CTA + PDF 구매자 안내
+
+### 보안 감사
+- Supabase get_advisors 실행 → planners_* 테이블 RLS 0건 · 함수 search_path 6개 경고 전부 고침
+
+### 의존성 추가
+- `web-push` + `@types/web-push`
+
+### 환경변수 (배포 필요)
+- `ANTHROPIC_API_KEY` · `CRON_SECRET`
+- `TOSS_SECRET_KEY` · `NEXT_PUBLIC_TOSS_CLIENT_KEY`
+- `VAPID_PUBLIC_KEY` · `NEXT_PUBLIC_VAPID_PUBLIC_KEY` · `VAPID_PRIVATE_KEY` · `VAPID_SUBJECT`
+- `GOOGLE_CLIENT_ID` · `GOOGLE_CLIENT_SECRET` · `NEXT_PUBLIC_APP_URL`
+
+### 누적 통계
+- 파일 추가: 45+ · SQL: 11개 · 컴포넌트: 20+ · API: 25+
+
+---
+
 ## 2026-04-24 (낮) — 세션 82 · HeRo P3 UI/UX 색 SSOT 전 페이지 감사 완료
 
 ### P3 HeRo 색 규약 감사 — 범위 전 페이지

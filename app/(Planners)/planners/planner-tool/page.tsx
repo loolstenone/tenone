@@ -1,23 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import {
   PenTool,
   Tablet,
   Sparkles,
-  Mail,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 
 // ===== Planner's Planner Section =====
 function PlannersPlannerSection() {
-  const [aiFormData, setAiFormData] = useState({ name: "", email: "" });
-  const [aiSubmitted, setAiSubmitted] = useState(false);
-
-  const handleAiSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAiSubmitted(true);
-  };
-
   return (
     <section id="tool" className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
       <div className="max-w-4xl mx-auto">
@@ -113,12 +106,12 @@ function PlannersPlannerSection() {
         {/* 5-3. AI Planner's Planner */}
         <div className="mt-20 border-t border-[#e0e0e0] pt-12">
           <div className="flex items-center gap-3 mb-2">
-            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">AI Planner&apos;s Planner</h3>
-            <span className="text-xs px-2 py-0.5 border border-[#ccc] text-[#999] tracking-widest uppercase">
-              Coming Soon
+            <h3 className="font-serif text-xl md:text-2xl text-[#1a1a1a]">Planner&apos;s Planner AI</h3>
+            <span className="text-xs px-2 py-0.5 bg-[#0F766E] text-white tracking-widest uppercase">
+              Now Live
             </span>
           </div>
-          <p className="text-[#666] text-base mt-1">AI가 기획을 돕는다</p>
+          <p className="text-[#666] text-base mt-1">능동 AI 비서가 기획하는 삶을 돕는다</p>
 
           <div className="mt-6 space-y-2 text-[#444] text-sm md:text-base leading-relaxed max-w-2xl">
             <p>종이 플래너가 구조를 잡아줬다면,</p>
@@ -174,33 +167,36 @@ function PlannersPlannerSection() {
             </div>
           </div>
 
-          {/* AI 관심 등록 */}
-          <div className="mt-10 max-w-sm">
-            {!aiSubmitted ? (
-              <>
-                <p className="text-sm text-[#444] mb-4">
-                  AI Planner&apos;s Planner가 오픈되면 가장 먼저 알려드립니다
-                </p>
-                <form onSubmit={handleAiSubmit} className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="이메일"
-                    value={aiFormData.email}
-                    onChange={(e) => setAiFormData({ ...aiFormData, email: e.target.value })}
-                    className="flex-1 border border-[#ddd] px-3 py-2 text-sm text-[#1a1a1a] placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#1a1a1a] text-white text-sm hover:bg-[#333] transition-colors"
-                  >
-                    <Mail size={14} />
-                  </button>
-                </form>
-              </>
-            ) : (
-              <p className="text-sm text-[#1a1a1a]">등록되었습니다. 오픈 시 알려드리겠습니다.</p>
-            )}
+          {/* CTA + 가격 */}
+          <div className="mt-12 border border-[#0F766E] bg-white p-8 max-w-2xl">
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="font-serif text-4xl text-[#1a1a1a]">19,000</span>
+              <span className="text-[#666]">원 / 연</span>
+            </div>
+            <ul className="space-y-2 mb-6 text-sm text-[#444]">
+              {[
+                "능동 AI 비서 — 아침 브리핑 · 저녁 정리",
+                "Personal Identity · Yearly · Monthly · Weekly · Daily",
+                "Project Book (Vrief 4단계 + GPR 7필드)",
+                "Templates 109종 · 풀텍스트 검색",
+                "Copy-to-AI 심층 검증",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <Check size={14} className="text-[#0F766E] shrink-0 mt-0.5" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/planners/purchase"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+            >
+              지금 시작하기 <ArrowRight size={14} />
+            </Link>
+            <p className="text-xs text-[#999] mt-4 leading-relaxed">
+              종이 플래너'스 플래너(2026 All In One) 구매자는{" "}
+              <Link href="/planners/purchase" className="text-[#0F766E] underline">1년 무료 제공</Link>.
+            </p>
           </div>
         </div>
       </div>

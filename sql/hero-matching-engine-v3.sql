@@ -16,6 +16,10 @@
 -- readiness 점수 변환: A=100, B=75, C=50, D=25, NULL=50(중립)
 -- ────────────────────────────────────────────────────────────────
 
+-- ─── 기존 함수 제거 (반환 타입 변경 시 DROP 필요) ─────────────────
+DROP FUNCTION IF EXISTS hero_match_candidates_for_tih(UUID);
+DROP FUNCTION IF EXISTS hero_match_candidates_for_jh(UUID);
+
 -- ─── 헬퍼: readiness_grade → 점수 ───────────────────────────────
 CREATE OR REPLACE FUNCTION _hero_readiness_score(_grade TEXT)
 RETURNS DOUBLE PRECISION AS $$
