@@ -124,6 +124,15 @@ export default function SettingsPage() {
     const [todoistModal, setTodoistModal] = useState(false);
     const [todoistToken, setTodoistToken] = useState("");
     const [todoistSubmit, setTodoistSubmit] = useState(false);
+    const [notionModal, setNotionModal] = useState(false);
+    const [notionToken, setNotionToken] = useState("");
+    const [notionSubmit, setNotionSubmit] = useState(false);
+    const [slackModal, setSlackModal] = useState(false);
+    const [slackWebhook, setSlackWebhook] = useState("");
+    const [slackSubmit, setSlackSubmit] = useState(false);
+    const [icalModal, setIcalModal] = useState(false);
+    const [icalUrl, setIcalUrl] = useState("");
+    const [icalSubmit, setIcalSubmit] = useState(false);
     const [contextScope, setContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
@@ -229,6 +238,116 @@ export default function SettingsPage() {
                 alert(`연결 실패: ${d.error}`);
             }
         } finally { setTodoistSubmit(false); }
+    }
+
+    async function syncNotion() {
+        setSyncing("notion");
+        try {
+            const res = await fetch(`/api/planners/integrations/notion/sync`, { method: "POST" });
+            if (res.ok) {
+                const d = await res.json();
+                alert(`${d.imported}개 태스크 import 완료`);
+                const iRes = await fetch(`/api/planners/integrations`);
+                if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
+            } else {
+                const d = await res.json();
+                alert(`실패: ${d.error}`);
+            }
+        } finally { setSyncing(null); }
+    }
+
+    async function connectNotion() {
+        if (!notionToken.trim()) return;
+        setNotionSubmit(true);
+        try {
+            const res = await fetch(`/api/planners/integrations/notion/connect`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: notionToken.trim() }),
+            });
+            if (res.ok) {
+                setNotionModal(false);
+                setNotionToken("");
+                const iRes = await fetch(`/api/planners/integrations`);
+                if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
+            } else {
+                const d = await res.json();
+                alert(`연결 실패: ${d.error}`);
+            }
+        } finally { setNotionSubmit(false); }
+    }
+
+    async function syncSlack() {
+        setSyncing("slack");
+        try {
+            const res = await fetch(`/api/planners/integrations/slack/sync`, { method: "POST" });
+            if (res.ok) {
+                alert("Slack으로 브리핑 전송 완료");
+            } else {
+                const d = await res.json();
+                alert(`실패: ${d.error}`);
+            }
+        } finally { setSyncing(null); }
+    }
+
+    async function connectSlack() {
+        if (!slackWebhook.trim()) return;
+        setSlackSubmit(true);
+        try {
+            const res = await fetch(`/api/planners/integrations/slack/connect`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ webhook_url: slackWebhook.trim() }),
+            });
+            if (res.ok) {
+                setSlackModal(false);
+                setSlackWebhook("");
+                const iRes = await fetch(`/api/planners/integrations`);
+                if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
+            } else {
+                const d = await res.json();
+                alert(`연결 실패: ${d.error}`);
+            }
+        } finally { setSlackSubmit(false); }
+    }
+
+    async function syncIcal() {
+        setSyncing("ical");
+        try {
+            const res = await fetch(`/api/planners/integrations/ical/sync`, { method: "POST" });
+            if (res.ok) {
+                const d = await res.json();
+                alert(`${d.synced}개 이벤트 동기화 완료`);
+                const iRes = await fetch(`/api/planners/integrations`);
+                if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
+            } else {
+                const d = await res.json();
+                alert(`실패: ${d.error}`);
+            }
+        } finally { setSyncing(null); }
+    }
+
+    async function connectIcal() {
+        if (!icalUrl.trim()) return;
+        setIcalSubmit(true);
+        try {
+            const res = await fetch(`/api/planners/integrations/ical/connect`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ feed_url: icalUrl.trim() }),
+            });
+            if (res.ok) {
+                const d = await res.json();
+                setIcalModal(false);
+                setIcalUrl("");
+                alert(`연결 완료. ${d.eventCount ?? 0}개 이벤트 확인됨`);
+                const iRes = await fetch(`/api/planners/integrations`);
+                if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
+            } else {
+                const d = await res.json();
+                alert(`연결 실패: ${d.error}`);
+            }
+        } finally { setIcalSubmit(false); }
     }
 
     async function disconnectIntegration(provider: string) {
@@ -527,9 +646,39 @@ export default function SettingsPage() {
                             onDisconnect={() => disconnectIntegration('todoist')}
                             syncing={syncing === 'todoist'}
                         />
-                        <div className="text-[10px] text-neutral-400 leading-relaxed pt-2 border-t border-neutral-100">
-                            Notion · Slack 연동은 곧 추가됩니다.
-                        </div>
+                        <div className="pt-2 border-t border-neutral-100" />
+                        <IntegrationRow
+                            name="Notion"
+                            desc="Notion DB의 미완료 태스크를 Daily로 import"
+                            integration={integrations.find(i => i.provider === 'notion' && i.status === 'active')}
+                            connectHref="#"
+                            onConnectClick={() => setNotionModal(true)}
+                            onSync={syncNotion}
+                            onDisconnect={() => disconnectIntegration('notion')}
+                            syncing={syncing === 'notion'}
+                        />
+                        <div className="pt-2 border-t border-neutral-100" />
+                        <IntegrationRow
+                            name="Slack"
+                            desc="아침·저녁 브리핑을 Slack 채널로 자동 전송"
+                            integration={integrations.find(i => i.provider === 'slack' && i.status === 'active')}
+                            connectHref="#"
+                            onConnectClick={() => setSlackModal(true)}
+                            onSync={syncSlack}
+                            onDisconnect={() => disconnectIntegration('slack')}
+                            syncing={syncing === 'slack'}
+                        />
+                        <div className="pt-2 border-t border-neutral-100" />
+                        <IntegrationRow
+                            name="Apple Calendar / Outlook (iCal)"
+                            desc="iCal 구독 피드로 일정을 Monthly·Weekly·Today에 유입"
+                            integration={integrations.find(i => i.provider === 'ical' && i.status === 'active')}
+                            connectHref="#"
+                            onConnectClick={() => setIcalModal(true)}
+                            onSync={syncIcal}
+                            onDisconnect={() => disconnectIntegration('ical')}
+                            syncing={syncing === 'ical'}
+                        />
                     </div>
                 </section>
 
@@ -561,6 +710,115 @@ export default function SettingsPage() {
                                     className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
                                 >
                                     {todoistSubmit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                    연결
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {notionModal && (
+                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full p-5">
+                            <h3 className="font-semibold text-neutral-900 mb-2">Notion 연결</h3>
+                            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                                Notion 설정 → 연동 → API 통합 → 새 통합 만들기 → Internal Integration Token 복사 후 붙여넣기.
+                                연결 후 원하는 DB 페이지에서 &quot;연결 추가&quot;로 통합을 허용해 주세요.
+                            </p>
+                            <input
+                                type="text"
+                                value={notionToken}
+                                onChange={(e) => setNotionToken(e.target.value)}
+                                placeholder="secret_..."
+                                className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                                autoFocus
+                            />
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    onClick={() => { setNotionModal(false); setNotionToken(""); }}
+                                    className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={connectNotion}
+                                    disabled={notionSubmit || !notionToken.trim()}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                >
+                                    {notionSubmit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                    연결
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {slackModal && (
+                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full p-5">
+                            <h3 className="font-semibold text-neutral-900 mb-2">Slack 연결</h3>
+                            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                                Slack 채널 → 앱 추가 → Incoming WebHooks 설치 → Webhook URL 복사 후 붙여넣기.
+                                브리핑이 생성될 때마다 해당 채널로 자동 전송됩니다.
+                            </p>
+                            <input
+                                type="url"
+                                value={slackWebhook}
+                                onChange={(e) => setSlackWebhook(e.target.value)}
+                                placeholder="https://hooks.slack.com/services/..."
+                                className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                                autoFocus
+                            />
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    onClick={() => { setSlackModal(false); setSlackWebhook(""); }}
+                                    className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={connectSlack}
+                                    disabled={slackSubmit || !slackWebhook.trim()}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                >
+                                    {slackSubmit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                    연결
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {icalModal && (
+                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full p-5">
+                            <h3 className="font-semibold text-neutral-900 mb-2">Apple Calendar / Outlook 연결</h3>
+                            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                                Apple Calendar: 캘린더 우클릭 → 공유 → 공개 캘린더 → 링크 복사.<br />
+                                Google Calendar: 설정 → 캘린더 → 비공개 iCal 주소 복사.<br />
+                                Outlook: 캘린더 → 공유 → ICS 링크 복사.
+                            </p>
+                            <input
+                                type="url"
+                                value={icalUrl}
+                                onChange={(e) => setIcalUrl(e.target.value)}
+                                placeholder="webcal:// 또는 https://..."
+                                className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#0F766E]"
+                                autoFocus
+                            />
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    onClick={() => { setIcalModal(false); setIcalUrl(""); }}
+                                    className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={connectIcal}
+                                    disabled={icalSubmit || !icalUrl.trim()}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                                >
+                                    {icalSubmit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                                     연결
                                 </button>
                             </div>

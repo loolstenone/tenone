@@ -51,7 +51,7 @@ export async function DELETE(req: Request) {
         .eq("provider", provider);
 
     // 캐시된 이벤트도 삭제
-    if (provider === "google_calendar") {
+    if (provider === "google_calendar" || provider === "ical") {
         await admin.from("planners_external_events").delete().eq("member_id", memberId).eq("provider", provider);
     }
 
