@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { getISOWeek, getWeekBoundaries } from "@/lib/planners/types";
+import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
 
 interface WeekSummary {
@@ -83,6 +84,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     ...patch,
                 }),
             });
+            trackPlanners("planners_weekly_saved", { year, week, field: Object.keys(patch)[0] });
         } finally {
             setSaving(false);
         }

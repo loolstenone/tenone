@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Check, Sun, Moon, Layers, Compass } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
+import { trackPlanners } from "@/lib/planners/analytics";
 
 type Step = "welcome" | "mode" | "ai" | "identity_lite" | "done";
 
@@ -27,6 +28,10 @@ export default function OnboardingPage() {
         }
     }, [isLoading, isAuthenticated, router]);
 
+    useEffect(() => {
+        if (step !== "done") trackPlanners("planners_onboarding_step", { step });
+    }, [step]);
+
     async function handleFinish() {
         setSaving(true);
         try {
@@ -42,6 +47,7 @@ export default function OnboardingPage() {
                     mission_statement: missionStatement,
                 }),
             });
+            trackPlanners("planners_onboarding_complete", { mode, ai_tone: tone });
             router.replace("/planners/app");
         } finally {
             setSaving(false);

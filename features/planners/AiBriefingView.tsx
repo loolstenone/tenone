@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Sun, Moon, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import type { PlannerBriefing } from "@/lib/planners/types";
+import { trackPlanners } from "@/lib/planners/analytics";
 
 export function AiBriefingView() {
     const [briefings, setBriefings] = useState<PlannerBriefing[]>([]);
@@ -36,6 +37,7 @@ export function AiBriefingView() {
                 body: JSON.stringify({ type, date: today }),
             });
             if (res.ok) {
+                trackPlanners("planners_ai_briefing_generated", { type });
                 await load();
             } else {
                 const err = await res.json();
