@@ -75,7 +75,6 @@ export default function AiPromptsPage() {
             <PageHeader
                 title="AI 프롬프트"
                 description="HIT AI 큐레이션·상담 프롬프트 SSOT — 코드 하드코딩 없이 DB에서 관리"
-                icon={<Bot className="h-5 w-5" />}
             />
 
             {/* 플레이스홀더 가이드 */}

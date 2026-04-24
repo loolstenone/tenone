@@ -36,6 +36,8 @@ const PENDING_FILES = [
   'badaksoe-rooms-table.sql',
   'hero-achievements.sql',
   'hero-reflections.sql',
+  'hero-coaching-sessions.sql',
+  'hero-profiles.sql',
 ];
 
 async function runSQL(serviceRoleKey, sql, label) {

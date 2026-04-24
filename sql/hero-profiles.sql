@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS hero_profiles (
 
 ALTER TABLE hero_profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "본인 읽기" ON hero_profiles;
+
 CREATE POLICY "본인 읽기" ON hero_profiles
     FOR SELECT USING (auth.uid() = member_id);
 

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-);
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // GET /api/intra/jakka/settlements?month=YYYY-MM&creator_id=...&status=...
 export async function GET(req: NextRequest) {
+    const supabaseAdmin = createAdminClient();
     const { searchParams } = req.nextUrl;
     const month = searchParams.get("month");
     const creatorId = searchParams.get("creator_id");
@@ -35,6 +30,7 @@ export async function GET(req: NextRequest) {
 // POST /api/intra/jakka/settlements — { month: 'YYYY-MM' }
 // completed 주문 기반으로 작가별 정산 레코드 생성(draft)
 export async function POST(req: NextRequest) {
+    const supabaseAdmin = createAdminClient();
     const body = await req.json();
     const { month } = body as { month: string };
 
@@ -133,6 +129,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/intra/jakka/settlements — { id, status, note? }
 export async function PATCH(req: NextRequest) {
+    const supabaseAdmin = createAdminClient();
     const body = await req.json();
     const { id, status, note } = body as { id: string; status: string; note?: string };
 

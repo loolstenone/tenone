@@ -93,7 +93,6 @@ export default function ReportModulesPage() {
             <PageHeader
                 title="리포트 모듈"
                 description="HIT 결과 리포트 조립 모듈 (324개) — 64 타입 × 모듈 키별 콘텐츠"
-                icon={<BookOpen className="h-5 w-5" />}
             />
 
             {/* 통계 */}

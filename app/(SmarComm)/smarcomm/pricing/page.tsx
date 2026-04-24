@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import Header from '@/features/smarcomm/Header';
 import Footer from '@/features/smarcomm/Footer';
 
@@ -15,10 +15,7 @@ interface Plan {
 }
 
 async function getSmarCommPlans(): Promise<Plan[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from('wio_subscription_plans')
     .select('plan_key, display_name, price_monthly, price_yearly, max_members, features, is_popular')

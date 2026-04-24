@@ -133,7 +133,7 @@ export default function FunnelPage() {
     if (loading) {
         return (
             <div className="p-6">
-                <PageHeader title="Funnel 분석" description="비회원 → 회원 → 유료 전환율" icon={<TrendingUp className="h-5 w-5" />} />
+                <PageHeader title="Funnel 분석" description="비회원 → 회원 → 유료 전환율" />
                 <div className="flex justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-neutral-500" /></div>
             </div>
         );
@@ -161,7 +161,6 @@ export default function FunnelPage() {
             <PageHeader
                 title="Funnel 분석"
                 description="비회원 → 회원 → 유료 전환율 · 기업 Funnel"
-                icon={<TrendingUp className="h-5 w-5" />}
             />
 
             {/* 개인 Funnel */}
