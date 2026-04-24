@@ -13,6 +13,7 @@ import {
     Sparkles,
     Settings,
     Search,
+    HelpCircle,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 
@@ -111,6 +112,17 @@ export function AppSidebar({
                 >
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
+                </Link>
+                <Link
+                    href="/planners/app/help"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        pathname.startsWith("/planners/app/help")
+                            ? "bg-neutral-100 text-neutral-900"
+                            : "text-neutral-600 hover:bg-neutral-50"
+                    }`}
+                >
+                    <HelpCircle className="h-4 w-4" />
+                    <span>Help</span>
                 </Link>
                 <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
                     <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
