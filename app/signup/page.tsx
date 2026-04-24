@@ -249,22 +249,26 @@ function TenOneSignupPage() {
         if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
         setIsSubmitting(true);
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hitResultId = urlParams.get('resultId');
+            // 이메일 인증 대기 흐름을 위해 resultId를 localStorage에 미리 저장
+            if (hitResultId) localStorage.setItem('pending_hit_result_id', hitResultId);
+
             const result = await register(name, email, password, true);
             if (result.success) {
-                // HIT 결과 연결 (from=hit&resultId=xxx 파라미터)
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const hitResultId = urlParams.get('resultId');
-                    if (hitResultId && result.memberId) {
+                // 세션 즉시 생성된 경우 바로 연결
+                if (hitResultId && result.memberId) {
+                    try {
                         await fetch('/api/hit/link-member', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ resultId: hitResultId, memberId: result.memberId }),
                         });
-                    }
-                } catch {}
-                const from = new URLSearchParams(window.location.search).get('from');
-                const returnUrl = from === 'hit' ? `/hero/hit/a/result/${new URLSearchParams(window.location.search).get('resultId') || ''}` : '/';
+                        localStorage.removeItem('pending_hit_result_id');
+                    } catch {}
+                }
+                const from = urlParams.get('from');
+                const returnUrl = from === 'hit' ? `/hero/hit/a/result/${hitResultId || ''}` : '/';
                 router.push(returnUrl);
             }
             else { setError(result.error || '회원가입에 실패했습니다'); setIsSubmitting(false); }

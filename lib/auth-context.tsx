@@ -305,7 +305,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (session?.user) {
-                    await syncUserFromSession(session.user);
+                    const u = await syncUserFromSession(session.user);
+                    // 이메일 인증 후 HIT 결과 자동 연결
+                    if (event === 'SIGNED_IN' && u?.id) {
+                        const pendingHitId = localStorage.getItem('pending_hit_result_id');
+                        if (pendingHitId) {
+                            fetch('/api/hit/link-member', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ resultId: pendingHitId, memberId: u.id }),
+                            }).then(() => localStorage.removeItem('pending_hit_result_id')).catch(() => {});
+                        }
+                    }
                 }
             } else if (event === 'SIGNED_OUT') {
                 setUser(null);
