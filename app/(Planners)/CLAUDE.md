@@ -103,7 +103,7 @@
 - IdentityView — Vision/Mission/KR (Weekly) + Inside-Out/Outside-In/Vision House (All in One)
 - ProjectsView · ProjectDetailView · ProjectNotesTab — 프로젝트 목록/상세/노트
 - CoverPicker · CoverRender — 15종 Cover
-- TemplatesView — 59종 카탈로그
+- TemplatesView — 59종 카탈로그 + 27개 인터랙티브 그리드 컴포넌트 (2026-04-25 세션 87: 전 템플릿 시각 편집 완성)
 - AiBriefingView — 아침/저녁 브리핑 생성·이력
 - SearchView — 풀텍스트
 - PurchaseView — 결제
@@ -111,6 +111,7 @@
 
 ### 라이브러리 (lib/planners/)
 - types.ts — 타입 정의 + getISOWeek/getWeekBoundaries
+- templates.ts — 템플릿 공용 유틸 (isSpecialTemplate·exportFrameworkText·resolveTemplateContent·LABEL_MAP). DailyView·ProjectNotesTab에서 템플릿 삽입 시 localStorage 데이터를 markdown으로 export
 - client.ts — Supabase CRUD helpers
 - briefing.ts — Haiku 4.5 브리핑 생성 + 컨텍스트 수집
 - notifications.ts — 이메일(Resend) + Web Push(VAPID)
@@ -235,14 +236,14 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **MVP 런칭 준비 완료** — W1~P2 전 범위 구축 (2026-04-24 세션 84) |
+| **Phase** | **P4 완료 + P3 #17 완료** — W1~P5 + P4 #24 Intra 확장 + Templates 59종 그리드화까지 (2026-04-25 세션 87) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
-| **완료 범위** | W1 앱 쉘 · W2 주요 뷰 · W3 Project+Templates+집계 · W4 Copy-to-AI+검색+AI 크론 · P0 결제+PDF구매자+보안 · P1 PWA+알림+공휴일+자동이월+마케팅 · P2 Templates 59종+Cover 15종+Anniversary+Google Calendar+Todoist |
+| **완료 범위** | W1~P2 전 범위 + P3 #17·19·20 + P4 #21·22·23·24(GTM·Help·피드백·Intra) + P5 #25·26·27 |
 | **배포 전 블로커** | PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · Supabase Redirect URL 추가 |
-| **이월 작업** | P3 필기입력·FrameWork 위젯·기업플랜·AI 고급설정·Copy-to-AI 편집 / P4 GTM·매뉴얼·피드백·Intra 확장 / P5 Notion·Slack·Outlook |
+| **이월 작업** | P3 #16 필기입력 · #18 기업플랜 (대규모, 다음 Phase) · TemplatesView 분리 리팩토링(소규모) |
 | **주요 결정** | 19,000원/년 · Weekly 기본 · PDF 구매자 무료 · 커뮤니티 운영 안 함 |
-| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 |
+| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) |
 
 ---
 

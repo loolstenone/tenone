@@ -1,6 +1,42 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-24 (세션 84 — Planner's Planner AI MVP 풀스택 구축 완료)
+> 마지막 업데이트: 2026-04-25 (세션 87 — Templates 59종 전체 인터랙티브 그리드화 + P3 #17 완료)
+
+---
+
+## 세션 87 핵심 성과 (2026-04-25)
+
+### Templates 59종 전체 인터랙티브 그리드화 — P3 #17 완수
+
+기존 3종(BCG·SWOT·9Box) + Batch 1~10 총 56종 신규 → **59/59 전 템플릿 시각 편집 그리드 완성**.
+
+| Batch | 범주 | 신규 그리드 |
+|---|---|---|
+| 0 (기존 세션) | Framework | Empathy Map · Lean Canvas · Mandalart |
+| 1 | 4-cell | Eisenhower · PEST · MoSCoW · 4분면 |
+| 2 | 캔버스 | BMC · VPC |
+| 3 | 구조 | OKR · Persona · JTBD |
+| 4 | 표·랭킹 | RICE 🏆 · 5W1H · 5Why 사다리 |
+| 5 | 특수 도형 | Ikigai · Porter5 · SCAMPER · Kano · Pareto · Fishbone · Journey Map |
+| 6 | Note 구조 | KPT · OODA · Cornell · Decision Matrix · Feynman (swot_self 자동) |
+| 7 | Note 세션 | 1:1 · 회의록 · 인터뷰 · AAR · 브레인스토밍 ⭐ · 의사결정 로그 |
+| 8 | Note 로그 | 감정 로그 😊 · 감사 일기 · 독서 노트 · 스탠드업 · 주간 저널 · 제텔카스텐 · 마인드맵 |
+| 9 | Schedule 시간 | 타임블록 · 하루 설계 · 딥워크 · 포모도로 🍅 · 습관 트래커 ✅ · 에너지 지도 · 주간 리뷰 · 주간 WIN |
+| 10 | Schedule 계획 | 월간 테마 · 분기 계획 · 연간 12개월 맵 · 5년 비전 · 90일 실험 · 역산 계획 · 스프린트 |
+
+### 공통 장치
+- 모달 헤더 한국어 + 영문 부제 자동 표기
+- `localStorage` 자동 저장 → Daily/ProjectNotes 삽입 시 markdown export
+- JSON 구조 템플릿(RICE·Pareto·Journey·DM·TimeBlock·DeepWork·Pomodoro·Habit·Energy·YearPlan·Brainstorm)은 테이블 markdown으로 변환
+- 공용 헬퍼: `LabeledInput`·`LabeledBox`·`CellTextarea`·`QuadrantGrid`
+- 공용 유틸 `lib/planners/templates.ts` 추출 → `DailyView`·`ProjectNotesTab` 공유
+
+### 변경 파일
+- `features/planners/TemplatesView.tsx` (+2981줄 — 27개 그리드 컴포넌트 신규)
+- `lib/planners/templates.ts` (신규 · 공용 export 유틸)
+
+### 커밋
+- `ca75c371 feat(planners): 전 템플릿 59종 인터랙티브 그리드화`
 
 ---
 
@@ -103,23 +139,41 @@
 5. **Supabase Allowed URL**: `https://planners.tenone.biz/**` 추가
 6. Vercel 도메인 연결: planners.tenone.biz
 
-### 남은 기능 작업 (P3~P5)
+### 완료 확인 (세션 85 감사)
 
-**P3 고급 기능**
+세션 84에서 pending으로 기록된 아래 항목들이 이미 구현 완료 상태임을 확인:
+- ✅ P3 #19 AI 설정 고급화 (`ai_context_scope` UI + 브리핑 샘플 미리보기) — `settings/page.tsx`
+- ✅ P3 #20 Copy-to-AI 페이로드 편집 (`editing` state + textarea) — `CopyToAiButton.tsx`
+- ✅ P4 #22 사용자 매뉴얼·FAQ — `app/(Planners)/planners/app/help/page.tsx`
+- ✅ P4 #23 베타 피드백 버튼 — `features/planners/BetaFeedbackButton.tsx`
+- ✅ P5 #25 Notion · #26 Slack · #27 iCal — `settings/page.tsx` UI + API routes
+
+### 이번 세션 추가 완료 (세션 85)
+- ✅ P4 #21 GTM trackPlanners 추가:
+  - `CopyToAiButton.tsx` — `planners_copy_to_ai` (target: claude/chatgpt/gemini)
+  - `WelcomeTracker.tsx` (신규) + `app/layout.tsx` — `planners_subscription_started` (?welcome=1)
+  - `app/page.tsx` — welcome 파라미터 today 페이지로 전달
+
+### 완료 확인 (세션 86 감사)
+
+세션 85에서 pending으로 기록된 아래 항목이 이미 구현 완료 상태임을 확인:
+- ✅ P4 #24 Intra 관리 확장 — `/intra/planners` 4탭 (구독자·결제·브리핑 로그·AI 사용량) + 통계 그리드 완성
+  - `app/intra/planners/page.tsx` (421줄) — 탭·검색·수동 활성화 모달
+  - `app/api/intra/planners/briefings/route.ts` — 최근 200개 브리핑 + 이메일 조인
+  - `app/api/intra/planners/usage/route.ts` — 월별 사용량 + 집계 stats
+- ✅ 빌드 검증 (exit 0, 세션 86)
+
+### 남은 기능 작업 (대규모 이월)
+
+**P3 대규모**
 - #16 필기 입력 (Fabric.js/Excalidraw) — 태블릿·S Pen·Apple Pencil 지원
-- #17 FrameWorkBook 구조화 위젯 — 만다라트·SWOT을 자유 텍스트에서 전용 UI로
+- ~~#17 FrameWorkBook 구조화 위젯~~ — ✅ 세션 87 완료 (전 59종 그리드화)
 - #18 기업 플랜 — 팀·조직 협업 Project Book
-- #19 AI 설정 고급화 — `ai_context_scope` UI · 브리핑 샘플 미리보기
-- #20 Copy-to-AI 페이로드 편집
 
-**P4 운영·분석**
-- #21 GTM 이벤트 트래킹 (온보딩 완료율·Weekly 작성·AI 사용량)
-- #22 사용자 매뉴얼·FAQ (`/planners/app/help`)
-- #23 베타 피드백 버튼
-- #24 Intra 관리 확장 (사용량·브리핑 로그·구독 리포트)
-
-**P5 추가 연동**
-- #25 Notion · #26 Slack · #27 Apple Calendar/Outlook (CalDAV)
+### 세션 87 이월 (소규모)
+- `features/planners/TemplatesView.tsx` 2700+ 줄 → 다음 세션에서 `features/planners/template-grids/` 폴더로 그리드 컴포넌트 27개 분리 리팩토링 권장
+- 유저가 공유한 Google Drive 4개 폴더(프레임워크/노트/놀이/스케쥴) 미검토 — 추가 템플릿 후보 발굴 대상
+- 기타 미커밋 잔업 49 modified + 10 untracked (다른 Planner's 세션 진행중 코드로 판단, 본 세션과 별개) — 별도 정리 세션 필요
 
 ### 배포 후 모니터링 과제
 - 능동 AI 7일 연속 실동작 테스트 (크론 정상 트리거 확인)

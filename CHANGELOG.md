@@ -4,6 +4,57 @@
 
 ---
 
+## 2026-04-25 — 세션 87 · Planner's Templates 59종 전체 인터랙티브 그리드화
+
+### 배경
+기존 8종(BCG·SWOT·4P·Ansoff·9Box·Empathy·Lean·Mandalart)만 셀 편집 가능. 나머지 51종은 자유 텍스트. 유저 요청으로 "전 템플릿 첨부한 수준으로 고도화" 진행 → Framework 25·Note 19·Schedule 15 전부 시각 그리드화.
+
+### 결과 — P3 #17 완수
+Batch 1~10으로 10회 나눠 진행. 순차·정밀 개발 + 브라우저 실측 검증.
+
+### 장소
+집
+
+### 변경 파일
+- `features/planners/TemplatesView.tsx` — +2981줄 (27개 그리드 컴포넌트 신규)
+- `lib/planners/templates.ts` (신규) — `isSpecialTemplate`·`exportFrameworkText`·`resolveTemplateContent`·`LABEL_MAP` 공용 유틸. DailyView·ProjectNotesTab 공유.
+
+### 핵심 결정
+- **한 파일 집중**: 용량 부담에도 `TemplatesView.tsx` 유지 (2700줄). 다음 세션 별도 파일 분리 권장.
+- **JSON 배열 저장 11종**: RICE·Pareto·Journey·DM·TimeBlock·DeepWork·Pomodoro·Habit·Energy·YearPlan·Brainstorm → 테이블 markdown export.
+- **키워드 기반 detection**: 기존 템플릿 DB의 key/label 패턴으로 자동 매핑 (SQL insert 없음). `swot_self`는 기존 `SwotGrid`에 자동 합류.
+- **Bilingual 모달 헤더**: `getFrameworkBilingualName()` 헬퍼로 한국어 제목 + 영문 부제 자동 표시.
+- **공용 헬퍼 추출**: `LabeledInput`·`LabeledBox`·`CellTextarea`·`QuadrantGrid` 재사용 패턴 정립.
+
+### 커밋
+- `ca75c371 feat(planners): 전 템플릿 59종 인터랙티브 그리드화`
+
+### 다음 세션 이월
+- **대규모**: P3 #16 필기 입력 · #18 기업 플랜
+- **소규모**: TemplatesView 분리 리팩토링 · Drive 레퍼런스 4개 폴더 검토 · 다른 세션의 미커밋 잔업 49+10개 정리
+
+---
+
+## 2026-04-24 (야간) — 세션 85 · Planner's P4 GTM 이벤트 + 잔여 감사
+
+### 감사 결과
+세션 84 WORK_STATUS pending 항목 전수 검증 — P3 #19·20, P4 #22·23, P5 #25·26·27 모두 이미 구현 완료 확인.
+
+### 변경 파일
+- `features/planners/CopyToAiButton.tsx` — `trackPlanners("planners_copy_to_ai", { target })` 추가
+- `features/planners/WelcomeTracker.tsx` (신규) — 결제 완료 후 `?welcome=1` 감지 → `planners_subscription_started` GTM 이벤트
+- `app/(Planners)/planners/app/layout.tsx` — `<Suspense><WelcomeTracker /></Suspense>` 추가
+- `app/(Planners)/planners/app/page.tsx` — `?welcome=1` 파라미터 today 페이지로 전달
+- `WORK_STATUS.md` — 실제 상태로 갱신
+
+### 기존 trackPlanners 커버리지 (감사 확인)
+- 온보딩 완료: `onboarding/page.tsx` ✅
+- AI 브리핑 생성: `AiBriefingView.tsx` ✅
+- Weekly 저장: `WeeklyView.tsx` ✅
+- 베타 피드백: `BetaFeedbackButton.tsx` ✅
+
+---
+
 ## 2026-04-24 (저녁) — 세션 84 · Planner's Planner AI MVP 풀스택 구축
 
 ### 정체성
