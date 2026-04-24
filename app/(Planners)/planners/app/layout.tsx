@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { AppSidebar } from "@/features/planners/AppSidebar";
 import { PwaRegister } from "@/features/planners/PwaRegister";
+import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
 import { getPlannerUser } from "@/lib/planners/client";
 
 async function getMember() {
@@ -72,6 +73,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                     {children}
                 </main>
             </div>
+            <BetaFeedbackButton />
         </>
     );
 }
