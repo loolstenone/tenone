@@ -507,8 +507,12 @@ export function ContactsView() {
     // letterFilter: 'top' = 즐겨찾기+최근만 표시 (기본·빠른 로딩), 'all' = 전체, 'ㄱ'·'A' 등 = 해당 초성/알파벳만.
     // 우측 인덱스 클릭 시 해당 letter로 필터링 — 전체 렌더 X (성능 부담 방지).
     const [letterFilter, setLetterFilter] = useState<string>("top");
+    // 인스타식 무한 스크롤 — visibleRows를 50개씩 점진 노출
+    const PAGE_SIZE = 50;
+    const [renderLimit, setRenderLimit] = useState(PAGE_SIZE);
     const fileRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     function showToast(text: string, ok = true) {
         setToast({ text, ok });
@@ -526,6 +530,22 @@ export function ContactsView() {
     }
 
     useEffect(() => { load(); }, []);
+
+    // letterFilter / view / search 바뀔 때 무한 스크롤 limit 리셋
+    useEffect(() => { setRenderLimit(PAGE_SIZE); }, [letterFilter, view, search]);
+
+    // 인스타식 무한 스크롤 — sentinel이 viewport에 들어오면 50명씩 추가 로드
+    useEffect(() => {
+        const node = sentinelRef.current;
+        if (!node) return;
+        const io = new IntersectionObserver(entries => {
+            if (entries[0]?.isIntersecting) {
+                setRenderLimit(prev => prev + PAGE_SIZE);
+            }
+        }, { rootMargin: "300px 0px" });
+        io.observe(node);
+        return () => io.disconnect();
+    }, [letterFilter, view, search, contacts.length]);
 
     // 라벨/그룹별 카운트 — 좌측 사이드바에 표시
     const labelCounts: Record<string, number> = {};
@@ -598,12 +618,17 @@ export function ContactsView() {
             .sort((a, b) => (b.last_contacted_at || "").localeCompare(a.last_contacted_at || ""))
             .slice(0, 30)
         : [];
+    // 즐겨찾기·최근이 둘 다 비어 있으면 top 모드라도 자동으로 All 리스트 노출
+    const topHasContent = topFavoritesRows.length > 0 || topRecentRows.length > 0;
     const visibleRows = (() => {
         if (!isCompactView) return sortedRows;
-        if (letterFilter === "top") return [];
+        if (letterFilter === "top") return topHasContent ? [] : sortedRows;
         if (letterFilter === "all") return sortedRows;
         return sortedRows.filter(c => getInitialChar(c.name) === letterFilter);
     })();
+    // 인스타식 무한 스크롤 — 점진 노출
+    const renderedRows = visibleRows.slice(0, renderLimit);
+    const hasMore = visibleRows.length > renderedRows.length;
     // 인덱스별 카운트 (배지용)
     const initialCounts: Record<string, number> = {};
     sortedRows.forEach(c => {
@@ -1539,7 +1564,7 @@ export function ContactsView() {
                         <div className="py-16 text-center text-neutral-400 text-sm">
                             {contacts.length === 0 ? "연락처를 추가하거나 vCard 파일로 가져오세요." : "검색 결과가 없습니다."}
                         </div>
-                    ) : isCompactView && letterFilter === "top" ? (
+                    ) : isCompactView && letterFilter === "top" && topHasContent ? (
                         // ── 기본(top) 화면: 즐겨찾기 + 최근 사용. 전체 렌더링 X (빠른 로딩) ──
                         <div ref={listRef} className="space-y-4">
                             {topFavoritesRows.length > 0 && (
@@ -1614,7 +1639,7 @@ export function ContactsView() {
                                         title="표시 중인 연락처 전체 선택"
                                         className="hover:text-[#0F766E] transition-colors"
                                     >
-                                        {visibleRows.length > 0 && visibleRows.every(c => selectedIds.has(c.id))
+                                        {renderedRows.length > 0 && renderedRows.every(c => selectedIds.has(c.id))
                                             ? <CheckSquare className="h-4 w-4 text-[#0F766E]" />
                                             : <Square className="h-4 w-4 text-neutral-300 hover:text-[#0F766E]" />}
                                     </button>
@@ -1626,11 +1651,11 @@ export function ContactsView() {
                                 <div>회사 · 직책</div>
                                 <div></div>
                             </div>
-                            {/* 행 */}
+                            {/* 행 — 무한 스크롤로 점진 렌더 */}
                             <div className="divide-y divide-neutral-100">
-                                {visibleRows.map((c, idx) => {
+                                {renderedRows.map((c, idx) => {
                                     const init = getInitialChar(c.name);
-                                    const prevInit = idx > 0 ? getInitialChar(visibleRows[idx - 1].name) : null;
+                                    const prevInit = idx > 0 ? getInitialChar(renderedRows[idx - 1].name) : null;
                                     const showInitial = init !== prevInit;
                                     return (
                                         <ContactRow
@@ -1652,6 +1677,18 @@ export function ContactsView() {
                                     );
                                 })}
                             </div>
+                            {/* Sentinel — viewport에 들어오면 다음 50명 로드 */}
+                            {hasMore && (
+                                <div ref={sentinelRef} className="py-6 text-center text-xs text-neutral-400 border-t border-neutral-100">
+                                    <Loader2 className="h-4 w-4 inline-block animate-spin mr-1.5" />
+                                    {renderedRows.length.toLocaleString("ko-KR")} / {visibleRows.length.toLocaleString("ko-KR")}명 표시 중 — 스크롤하면 더 보기
+                                </div>
+                            )}
+                            {!hasMore && visibleRows.length > PAGE_SIZE && (
+                                <div className="py-4 text-center text-[10px] text-neutral-400 border-t border-neutral-100">
+                                    {visibleRows.length.toLocaleString("ko-KR")}명 모두 표시됨
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
