@@ -50,6 +50,8 @@ export function NatureBoxHeader() {
                         profilePath="/naturebox/my"
                         accentColor="#166534"
                         signupPath="/signup"
+                        siteId="naturebox"
+                        siteName="NatureBox"
                     />
                 </div>
 

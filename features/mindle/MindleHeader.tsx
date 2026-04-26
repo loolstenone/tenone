@@ -48,6 +48,8 @@ export function MindleHeader() {
                         accentColor="#F5C518"
                         signupPath="/signup"
                         searchPlaceholder="Search trends, reports, keywords..."
+                        siteId="mindle"
+                        siteName="Mindle"
                     />
                 </div>
 

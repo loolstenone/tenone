@@ -63,6 +63,8 @@ export function DomoHeader() {
                         profilePath="/domo/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
+                        siteId="domo"
+                        siteName="Domo"
                     />
                 </div>
 

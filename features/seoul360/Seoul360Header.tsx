@@ -66,6 +66,8 @@ export function Seoul360Header() {
                         profilePath="/seoul360/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
+                        siteId="seoul360"
+                        siteName="Seoul360"
                     />
                 </div>
 

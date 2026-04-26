@@ -73,7 +73,13 @@ export function PublicHeader() {
                 {/* Right side */}
                 <div className="hidden md:flex items-center gap-2">
                     <ThemeToggle />
-                    <UniverseUtilityBar config={{ aboutPath: '/about', hideAuth: true, accentColor: isDark ? '#fff' : '#000' }} />
+                    <UniverseUtilityBar
+                        aboutPath="/about"
+                        hideAuth={true}
+                        accentColor={isDark ? '#fff' : '#000'}
+                        siteId="tenone"
+                        siteName="Ten:One"
+                    />
                 </div>
 
                 {/* Mobile menu button */}

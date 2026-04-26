@@ -943,6 +943,146 @@ import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 
 ---
 
+## 1.9.3 유니버스 모바일 메뉴 (UniverseMobileMenu)
+
+> **원칙**: 모든 브랜드 사이트의 모바일 메뉴는 **우측 슬라이드 패널** 방식으로 통일한다.
+> 가로 화면 전체를 덮지 않는다. 너비는 **`w-2/3 max-w-sm`** (~67%, 최대 384px).
+> SSOT 컴포넌트: `components/UniverseMobileMenu.tsx`
+
+### 표준
+
+| 항목 | 값 |
+|------|----|
+| 위치 | 우측에서 슬라이드 인 |
+| 너비 | `w-2/3 max-w-sm` (모바일 기준 ~250–280px, 태블릿에서 384px 캡) |
+| 백드롭 | `bg-black/60`, 클릭 시 닫힘 |
+| z-index | 패널 9999 / 백드롭 9998 |
+| 트랜지션 | 300ms ease-out (첫 렌더는 트랜지션 X — 끊김 방지) |
+| 헤더 | 브랜드명 + 닫기 X |
+| 본문 | 스크롤 가능 nav |
+| 푸터 | 선택 — 프로필/로그아웃 등 |
+
+### 호출 패턴
+
+```tsx
+import { UniverseMobileMenu, UniverseMobileMenuLink } from "@/components/UniverseMobileMenu";
+
+<UniverseMobileMenu
+  open={mobileOpen}
+  onClose={() => setMobileOpen(false)}
+  brandName="Badak"
+  bgClass="bg-[#12122a]"
+  textTone="light"
+>
+  {navItems.map(item => (
+    <UniverseMobileMenuLink
+      key={item.href}
+      href={item.href}
+      active={isActive(item.href)}
+      onClick={() => setMobileOpen(false)}
+      textTone="light"
+      accentColor="#ffd93d"
+    >
+      {item.name}
+    </UniverseMobileMenuLink>
+  ))}
+</UniverseMobileMenu>
+```
+
+### 절대 하지 말 것
+
+- ❌ 가로 화면 전체를 덮는 모바일 메뉴 (`fixed inset-0` 풀스크린)
+- ❌ 헤더 아래에 인라인 드롭다운으로 펼치는 방식 (구식, 일관성 깨짐)
+- ❌ 너비를 `w-64`·`w-72`·`w-80` 등으로 임의 지정 — 반드시 `w-2/3 max-w-sm`
+- ❌ 자체 백드롭/슬라이드 로직 직접 구현 — `UniverseMobileMenu` 사용
+
+### 마이그레이션 가이드 (인라인 드롭다운 → 슬라이드 패널)
+
+기존 헤더에서:
+```tsx
+{mobileOpen && (
+  <div className="md:hidden bg-... px-... py-...">
+    {/* nav links */}
+  </div>
+)}
+```
+
+→ 변경:
+```tsx
+<UniverseMobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} brandName="..." bgClass="...">
+  {/* UniverseMobileMenuLink 들로 교체 */}
+</UniverseMobileMenu>
+```
+
+햄버거 토글 버튼은 그대로. 패널 자체만 표준 컴포넌트로 교체.
+
+---
+
+## 1.9.4 유니버스 푸터 (UniverseFooter)
+
+> **원칙**: 모든 브랜드 사이트의 푸터는 **동일한 레이아웃**을 가진다.
+> 브랜드별로 다른 건 (a) 컬러, (b) 링크 컨텐츠, (c) 상단 슬롯(뉴스레터 등). 구조는 동일.
+> SSOT 컴포넌트: `components/UniverseFooter.tsx`
+
+### 표준 4단 구조
+
+```
+┌─────────────────────────────────────────────────────┐
+│  (선택) 상단 슬롯 — 뉴스레터·CTA·소셜               │  ← children
+├─────────────────────────────────────────────────────┤
+│  [브랜드명]            [컬럼1]  [컬럼2]  [Universe] │  ← 4컬럼
+│  태그라인              링크들    링크들   자동추가   │
+│  Part of Ten:One™                                  │
+├─────────────────────────────────────────────────────┤
+│  © Year · Ten:One™ Universe   이용약관  개인정보   │  ← 카피라이트
+└─────────────────────────────────────────────────────┘
+```
+
+### 호출 패턴
+
+```tsx
+import { UniverseFooter } from "@/components/UniverseFooter";
+
+<UniverseFooter
+  brandName="Badak"
+  tagline="기획자 네트워크"
+  accentColor="#ffd93d"
+  dark={true}
+  linkColumns={[
+    { title: "서비스", links: [
+      { label: "모임", href: "/badak/groups" },
+      { label: "커뮤니티", href: "/badak/community" },
+    ]},
+    { title: "고객", links: [
+      { label: "문의", href: "/badak/contact" },
+      { label: "공지", href: "/badak/notice" },
+    ]},
+  ]}
+>
+  <NewsletterForm />  {/* 선택 슬롯 */}
+</UniverseFooter>
+```
+
+### 자동으로 들어가는 것
+
+- **Universe 컬럼**: Ten:One·About·Brands·Universe (`hideUniverseColumn={true}`로 끌 수 있음)
+- **카피라이트**: 자동 연도 + 브랜드명 + Ten:One™ Universe
+- **정책 링크**: 이용약관·개인정보처리방침 (하단 우측)
+
+### 절대 하지 말 것
+
+- ❌ 자체 푸터 컴포넌트 직접 작성 (`features/{brand}/{Brand}Footer.tsx` 더 이상 만들지 않음)
+- ❌ 카피라이트 연도 하드코딩
+- ❌ Universe 컬럼 누락 (TenOne 본체만 예외)
+- ❌ 정책 링크 누락
+- ❌ 푸터에서 GTM/script 직접 삽입 (`Analytics.tsx`가 전담)
+
+### 마이그레이션 (기존 21개 푸터 → UniverseFooter)
+
+차기 세션에서 brand 별로 점진 적용. 기존 푸터의 콘텐츠를 `linkColumns`와 `children`(상단 슬롯)으로 매핑하면 끝.
+
+---
+
 ## 1.10 개발 규칙 — 모순 방지 8원칙
 
 | # | 규칙 | 위반 시 문제 |

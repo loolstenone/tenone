@@ -71,6 +71,8 @@ export function OgamjaHeader() {
                         profilePath="/ogamja/my"
                         accentColor="#6B21A8"
                         signupPath="/signup"
+                        siteId="ogamja"
+                        siteName="0gamja"
                     />
                 </div>
 

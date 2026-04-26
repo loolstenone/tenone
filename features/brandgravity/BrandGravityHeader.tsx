@@ -53,13 +53,15 @@ export default function BrandGravityHeader() {
             신청하기
           </Link>
           <div className="hidden md:block">
-            <UniverseUtilityBar config={{
-              aboutPath: '/brandgravity/about',
-              profilePath: '/brandgravity/my',
-              workspacePath: null,
-              signupPath: '/signup',
-              accentColor: '#f59e0b',
-            }} />
+            <UniverseUtilityBar
+              aboutPath="/brandgravity/about"
+              profilePath="/brandgravity/my"
+              workspacePath={null}
+              signupPath="/signup"
+              accentColor="#f59e0b"
+              siteId="brandgravity"
+              siteName="Brand Gravity"
+            />
           </div>
 
           {/* Mobile hamburger */}

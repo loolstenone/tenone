@@ -98,7 +98,17 @@ export function WIOMarketingHeader() {
                         Orbi 시작하기
                     </Link>
                     <div className="hidden md:block">
-                        <UniverseUtilityBar config={{ aboutPath: '/wio/about', profilePath: '/wio/app', workspacePath: null, workspaceLabel: 'APP', signupPath: '/signup', accentColor: '#6366f1', loginPath: '/wio/login' }} />
+                        <UniverseUtilityBar
+                            aboutPath="/wio/about"
+                            profilePath="/wio/app"
+                            workspacePath={null}
+                            workspaceLabel="APP"
+                            signupPath="/signup"
+                            accentColor="#6366f1"
+                            loginPath="/wio/login"
+                            siteId="wio"
+                            siteName="WIO"
+                        />
                     </div>
                     {/* Mobile hamburger */}
                     <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1 text-slate-400">

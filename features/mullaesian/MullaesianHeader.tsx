@@ -51,6 +51,8 @@ export function MullaesianHeader() {
                         profilePath="/mullaesian/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
+                        siteId="mullaesian"
+                        siteName="Mullaesian"
                     />
                 </div>
 

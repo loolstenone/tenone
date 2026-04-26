@@ -61,6 +61,8 @@ export function ChangeUpHeader() {
                         profilePath="/changeup/my"
                         accentColor="#2563EB"
                         signupPath="/signup"
+                        siteId="changeup"
+                        siteName="ChangeUp"
                     />
                 </div>
 

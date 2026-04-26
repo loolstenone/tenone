@@ -63,6 +63,8 @@ export function RooKHeader() {
                         profilePath="/rook/my"
                         accentColor="#00d255"
                         signupPath="/signup"
+                        siteId="rook"
+                        siteName="RooK"
                     />
                 </div>
 

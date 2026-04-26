@@ -81,6 +81,8 @@ export function PlannersHeader() {
                         profilePath="/planners/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
+                        siteId="planners"
+                        siteName="Planner's"
                     />
                 </div>
 

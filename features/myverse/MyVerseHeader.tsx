@@ -56,9 +56,12 @@ export function MyVerseHeader() {
                     <div className="hidden md:flex">
                         <UniverseUtilityBar
                             aboutPath="/myverse/service"
+                            profilePath="/myverse/my"
                             signupPath="/signup"
                             accentColor="#6366f1"
                             searchPlaceholder="Myverse 검색"
+                            siteId="myverse"
+                            siteName="Myverse"
                         />
                     </div>
                     <button
@@ -87,9 +90,12 @@ export function MyVerseHeader() {
                     <div className="pt-2 border-t border-neutral-100">
                         <UniverseUtilityBar
                             aboutPath="/myverse/service"
+                            profilePath="/myverse/my"
                             signupPath="/signup"
                             accentColor="#6366f1"
                             searchPlaceholder="Myverse 검색"
+                            siteId="myverse"
+                            siteName="Myverse"
                         />
                     </div>
                 </div>

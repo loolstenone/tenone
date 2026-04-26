@@ -67,6 +67,8 @@ export function YouInOneHeader() {
                         profilePath="/youinone/my"
                         accentColor="#1AAD64"
                         signupPath="/signup"
+                        siteId="youinone"
+                        siteName="YouInOne"
                     />
                     <Link
                         href="/alliance"

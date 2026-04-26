@@ -26,7 +26,16 @@ export default function SmarCommHeader() {
           <Link href="/#process" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">서비스</Link>
           <Link href="/blog" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">블로그</Link>
           <Link href="/pricing" className="text-[13px] font-medium text-text-sub transition-colors hover:text-text">요금제</Link>
-          <UniverseUtilityBar config={{ aboutPath: '/about', profilePath: '/dashboard/profile', workspacePath: '/dashboard', workspaceLabel: '워크스페이스', signupPath: '/signup', accentColor: '#171717' }} />
+          <UniverseUtilityBar
+            aboutPath="/about"
+            profilePath="/dashboard/profile"
+            workspacePath="/dashboard"
+            workspaceLabel="워크스페이스"
+            signupPath="/signup"
+            accentColor="#171717"
+            siteId="smarcomm"
+            siteName="SmarComm"
+          />
         </nav>
 
         <button onClick={() => setMenuOpen(!menuOpen)} className="text-text-sub md:hidden">

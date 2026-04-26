@@ -55,6 +55,8 @@ export function MoNTZHeader() {
                         profilePath="/montz/my"
                         accentColor="#1a1a2e"
                         signupPath="/signup"
+                        siteId="montz"
+                        siteName="MoNTZ"
                     />
                 </nav>
 

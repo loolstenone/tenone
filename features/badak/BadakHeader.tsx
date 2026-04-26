@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import clsx from "clsx";
-import { Menu, X, User, Bell } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
 import { LoginModal } from "@/components/LoginModal";
 
@@ -28,25 +27,6 @@ export function BadakHeader() {
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const { isAuthenticated, user } = useAuth();
-    const [unreadCount, setUnreadCount] = useState(0);
-
-    useEffect(() => {
-        if (!isAuthenticated) { setUnreadCount(0); return; }
-        const fetchUnread = async () => {
-            const supabase = createClient();
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-            try {
-                const res = await fetch('/api/badak/notifications?unread=true&limit=50', {
-                    headers: { Authorization: `Bearer ${session.access_token}` },
-                });
-                if (!res.ok) return;
-                const json = await res.json();
-                setUnreadCount(json.unreadCount ?? json.notifications?.length ?? 0);
-            } catch { /* silent */ }
-        };
-        fetchUnread();
-    }, [isAuthenticated]);
 
     const openLogin = (tab: "login" | "signup" = "login") => {
         setLoginTab(tab);
@@ -91,22 +71,8 @@ export function BadakHeader() {
                     ))}
                 </div>
 
-                {/* Right side */}
+                {/* Right side — 알림은 UniverseUtilityBar의 Bell이 전담 (중복 제거) */}
                 <div className="hidden md:flex items-center gap-1 ml-auto">
-                    {isAuthenticated && (
-                        <Link
-                            href={`${PREFIX}/my?tab=notifications`}
-                            className="relative p-2 text-neutral-300 hover:text-white transition-colors"
-                            aria-label="알림"
-                        >
-                            <Bell className="h-5 w-5" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white leading-none">
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
-                        </Link>
-                    )}
                     <UniverseUtilityBar
                         aboutPath="/badak/about"
                         profilePath="/badak/my"
@@ -117,22 +83,8 @@ export function BadakHeader() {
                     />
                 </div>
 
-                {/* Mobile: 알림 + 프로필 + 햄버거 */}
+                {/* Mobile: 프로필 + 햄버거 (알림은 UniverseUtilityBar 전담) */}
                 <div className="md:hidden flex items-center gap-1">
-                    {isAuthenticated && (
-                        <Link
-                            href={`${PREFIX}/my?tab=notifications`}
-                            className="relative p-1.5 text-neutral-300 hover:text-white"
-                            aria-label="알림"
-                        >
-                            <Bell className="h-5 w-5" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white leading-none">
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
-                        </Link>
-                    )}
                     {isAuthenticated ? (
                         <Link href={`${PREFIX}/my`} className="p-1.5">
                             {user?.avatarUrl ? (
@@ -179,7 +131,7 @@ export function BadakHeader() {
         {/* 패널 */}
         <div
             className={clsx(
-                "fixed top-0 right-0 bottom-0 z-[9999] md:hidden w-64 flex flex-col",
+                "fixed top-0 right-0 bottom-0 z-[9999] md:hidden w-2/3 max-w-sm flex flex-col",
                 hasOpened && "transition-transform duration-300 ease-out",
                 mobileOpen ? "translate-x-0" : "translate-x-full"
             )}

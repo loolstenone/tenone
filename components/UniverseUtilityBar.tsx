@@ -203,10 +203,10 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
 
     return (
         <>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
                 {/* About */}
                 {!config.hideAbout && (
-                    <Link href={config.aboutPath} className="text-[11px] font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
+                    <Link href={config.aboutPath} className="text-xs font-semibold tracking-wider opacity-60 hover:opacity-100 transition-opacity">
                         ABOUT
                     </Link>
                 )}
@@ -218,13 +218,13 @@ export function UniverseUtilityBar(props: UtilityBarConfig | { config: UtilityBa
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => { setWsOpen(o => !o); setNotiOpen(false); }}
-                                    className="flex items-center gap-1 text-[11px] font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
+                                    className="flex items-center gap-1 text-xs font-semibold tracking-wider opacity-80 hover:opacity-100 transition-opacity"
                                     title="내 워크스페이스"
                                 >
-                                    <Briefcase className="h-3.5 w-3.5" />
+                                    <Briefcase className="h-4 w-4" />
                                     <span>WORK</span>
-                                    {workspaces.length > 1 && <span className="text-[9px] opacity-60">({workspaces.length})</span>}
-                                    <ChevronDown className={`h-3 w-3 transition-transform ${wsOpen ? "rotate-180" : ""}`} />
+                                    {workspaces.length > 1 && <span className="text-[10px] opacity-60">({workspaces.length})</span>}
+                                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${wsOpen ? "rotate-180" : ""}`} />
                                 </button>
                                 {wsOpen && (
                                     <div className="absolute right-0 top-full mt-2 w-64 bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-200 overflow-hidden z-50">

@@ -74,6 +74,8 @@ export function MadLeapHeader() {
                         profilePath="/madleap/my"
                         accentColor="#D32F2F"
                         signupPath="/signup"
+                        siteId="madleap"
+                        siteName="MADLeap"
                     />
                 </div>
 

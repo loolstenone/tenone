@@ -76,6 +76,8 @@ export function MadLeagueHeader() {
                         profilePath="/madleague/my"
                         accentColor="#EC1D25"
                         signupPath="/signup"
+                        siteId="madleague"
+                        siteName="MAD League"
                     />
                 </div>
 

@@ -97,6 +97,8 @@ export function HeRoHeader() {
                         workspaceLabel="Journey"
                         accentColor="#E53935"
                         signupPath="/signup"
+                        siteId="hero"
+                        siteName="HeRo"
                     />
                 </div>
 
@@ -144,7 +146,7 @@ export function HeRoHeader() {
         {/* 우측 슬라이드 패널 */}
         <div
             className={clsx(
-                "fixed top-0 right-0 bottom-0 z-[9999] lg:hidden w-64 bg-white flex flex-col shadow-xl",
+                "fixed top-0 right-0 bottom-0 z-[9999] lg:hidden w-2/3 max-w-sm bg-white flex flex-col shadow-xl",
                 hasOpened && "transition-transform duration-300 ease-out",
                 mobileOpen ? "translate-x-0" : "translate-x-full"
             )}

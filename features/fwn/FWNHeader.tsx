@@ -50,6 +50,8 @@ export function FWNHeader() {
                                 profilePath="/fwn/my"
                                 accentColor="#000000"
                                 signupPath="/signup"
+                                siteId="fwn"
+                                siteName="FWN"
                             />
                         </div>
                         <button
