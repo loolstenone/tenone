@@ -874,6 +874,75 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
 
 ---
 
+## 1.9.2 유니버스 유틸리티 바 (UniverseUtilityBar)
+
+> **원칙**: 모든 브랜드 사이트의 헤더 우측 상단에는 **동일한 유틸리티 바**가 들어간다.
+> 사이트가 28개여도 사용자에게는 하나의 일관된 컨트롤로 느껴져야 한다.
+> SSOT 컴포넌트: `components/UniverseUtilityBar.tsx` — 직접 새로 만들지 말고 import해서 쓴다.
+
+### 표준 7요소 (이 순서·이 모양)
+
+| # | 요소 | 노출 조건 | 동작 |
+|---|------|----------|------|
+| 1 | **About** | `hideAbout=false` (기본) | `aboutPath`로 이동 |
+| 2 | **Work Space** (Briefcase 드롭다운) | 인증 + (`workspaces[]` 또는 `user.affiliations[]`에서 자동 매칭) | 이용 중인 서비스 목록 → 각 워크스페이스 진입 |
+| 3 | **로그인 / 가입** | 비인증 | LoginModal 팝업 (또는 `loginPath` 지정 시 `/login?redirect=` 이동) |
+| 4 | **아바타** (이미지만) | 인증 | `profilePath`로 이동. **이름 텍스트 절대 노출 금지** — 이미지 없으면 이니셜 1글자. |
+| 5 | **알림** (Bell + 미확인 배지) | 인증 + `hideNotifications=false` | 드롭다운으로 `/api/notifications` 결과 노출 (미구현이면 빈 목록) |
+| 6 | **로그아웃** (LogOut 아이콘만) | 인증 | `logout()` |
+| 7 | **공유 / 검색** | 항상 | 공유 = 클립보드 복사·Web Share / 검색 = 풀스크린 오버레이 (`/api/search`) |
+
+### Workspace 레지스트리
+
+`UniverseUtilityBar.tsx` 상단의 `WORKSPACE_REGISTRY` 배열이 SSOT.
+사용자의 `members.affiliations[]`에 brandId가 있으면 자동으로 드롭다운에 노출된다.
+
+```typescript
+const WORKSPACE_REGISTRY: WorkspaceEntry[] = [
+  { brandId: "planners", label: "Planner's Planner AI", path: "/planners/app", description: "능동 AI 플래너" },
+  { brandId: "badak",    label: "Badak",                path: "/badak/my",     description: "기획자 네트워크" },
+  // ...
+];
+```
+
+**새 브랜드 워크스페이스 추가 시**: `WORKSPACE_REGISTRY`에 한 줄 추가 → 전 사이트 자동 노출 (개별 헤더 수정 불필요).
+
+### 호출 패턴
+
+각 브랜드 헤더(`features/{brand}/{Brand}Header.tsx` 등)에서:
+
+```tsx
+import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+
+<UniverseUtilityBar
+  aboutPath="/planners/about"
+  profilePath="/planners/my"
+  accentColor="#0F766E"
+  siteId="planners"
+  siteName="Planner's"
+  // workspaces 생략 → user.affiliations 기반 자동
+  // hideNotifications={true} → 랜딩 페이지에서 알림 숨김 가능
+/>
+```
+
+### 절대 하지 말 것
+
+- ❌ 아바타 옆에 이름·이메일 텍스트 직접 노출 (이미지 only가 표준)
+- ❌ 로그아웃 버튼에 "로그아웃" 텍스트 (LogOut 아이콘만)
+- ❌ 헤더에서 `UniverseUtilityBar` 우회하고 자체 로그인·검색·공유 버튼 직접 만들기
+- ❌ `WORKSPACE_REGISTRY`에 등록 안 하고 브랜드 헤더에서 `workspacePath`만 하드코딩 (다른 사이트에서 안 보임)
+- ❌ 7요소 순서·아이콘 임의 변경 (28개 브랜드 일관성 깨짐)
+
+### 새 브랜드 헤더 만들 때 체크리스트
+
+- [ ] 헤더 우측에 `<UniverseUtilityBar />` import해서 배치
+- [ ] `accentColor` = 브랜드 메인 컬러
+- [ ] `siteId`·`siteName` 명시 (검색 결과 라벨용)
+- [ ] 워크스페이스 있으면 `WORKSPACE_REGISTRY`에 등록 (헤더에 직접 prop 넘기는 것 지양)
+- [ ] About 경로가 브랜드 사이트 내인지 확인 (외부 tenone.biz로 튕기지 않도록)
+
+---
+
 ## 1.10 개발 규칙 — 모순 방지 8원칙
 
 | # | 규칙 | 위반 시 문제 |
