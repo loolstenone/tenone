@@ -418,11 +418,23 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
     const whys = [1, 2, 3, 4, 5];
     return (
         <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="발생일" valKey="why_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                <LabeledInput label="관련자·시스템" valKey="why_owner" data={data} onChange={onChange} placeholder="결제팀 · 결제 API" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Toyota 5Why</span> · 사람을 탓하지 말고 시스템·프로세스를 탓하라.
+                각 답이 다음 &quot;왜?&quot;를 자연스럽게 부르면 OK. 5번 안에 안 닿으면 문제 정의가 너무 클 가능성 ↑.
+            </div>
+
             {/* Problem */}
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-300">
-                <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">Problem · 문제 정의</p>
+                <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">Problem · 문제 정의 (5W1H로 구체화)</p>
                 <textarea value={data["why_problem"] ?? ""} onChange={e => onChange("why_problem", e.target.value)}
-                    placeholder="무엇이 일어났나?" rows={2}
+                    placeholder={"예: 4/26 18:00~18:15 동안 결제 API 응답 지연으로 142건 결제가 실패함."} rows={2}
                     className="w-full mt-1.5 resize-none bg-white/60 text-xs p-2 rounded border border-slate-200 focus:outline-none leading-relaxed" />
             </div>
             {/* 5 Whys ladder */}
@@ -451,15 +463,26 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
                 })}
             </div>
             {/* Root + Countermeasure */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="rounded-lg p-3 bg-slate-50 border border-slate-400">
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Root Cause · 근본 원인</p>
-                    <CellTextarea cellKey="why_root" value={data["why_root"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">시스템·프로세스 차원의 진짜 원인</p>
+                    <CellTextarea cellKey="why_root" value={data["why_root"] ?? ""} onChange={onChange} placeholder="예: 결제 API 호출 시 외부 PG 타임아웃 임계값이 30s로 설정되어 있고, 재시도 큐가 없음." />
                 </div>
                 <div className="rounded-lg p-3 bg-slate-50 border border-slate-300">
                     <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Countermeasure · 대응책</p>
-                    <CellTextarea cellKey="why_countermeasure" value={data["why_countermeasure"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">단기 응급 + 장기 시스템 개선</p>
+                    <CellTextarea cellKey="why_countermeasure" value={data["why_countermeasure"] ?? ""} onChange={onChange} placeholder={"단기: 타임아웃 10s + 즉시 재시도 1회\n장기: [백엔드팀] 결제 재시도 큐 도입 · 모니터링 알림 · ~05-20"} />
                 </div>
+            </div>
+
+            {/* 검증 + 재발 방지 */}
+            <div className="rounded-xl p-3 bg-stone-50 border border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Verify · 어떻게 효과를 검증할까?</p>
+                <p className="text-[10px] text-neutral-500 mb-1">대응책이 실제로 작동했음을 확인할 지표·기간</p>
+                <textarea value={data["why_verify"] ?? ""} onChange={e => onChange("why_verify", e.target.value)}
+                    placeholder={"예: 적용 후 2주 동안 결제 실패율 < 0.1% 유지 시 종료 · 미달 시 다른 근본원인 가능성 재탐색"} rows={2}
+                    className="w-full mt-1 resize-none bg-white text-xs p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
             </div>
         </div>
     );
@@ -794,19 +817,47 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 
 function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "kpt_keep", label: "Keep", sub: "잘한 것 · 계속할 것", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
-        { key: "kpt_problem", label: "Problem", sub: "문제 · 개선할 것", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
-        { key: "kpt_try", label: "Try", sub: "새로 시도할 것", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "kpt_keep",    label: "Keep",    sub: "잘한 것 · 계속할 것",   color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "- 데일리 스탠드업 10분 룰 지킴 → 회의 효율 ↑\n- 페어 코딩으로 신규 멤버 온보딩 가속" },
+        { key: "kpt_problem", label: "Problem", sub: "문제 · 개선할 것",      color: "bg-slate-50 border-slate-200", text: "text-stone-700",
+          ph: "- 스프린트 후반에 PR 리뷰가 몰림\n- 기획-개발 핸드오프에서 정보 누락" },
+        { key: "kpt_try",     label: "Try",     sub: "새로 시도할 것",        color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "- PR 리뷰 데드라인 24h 룰 도입\n- 핸드오프 체크리스트 v1 시범" },
     ];
     return (
-        <div className="my-2 grid md:grid-cols-3 gap-2">
-            {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-40`}>
-                    <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                    <p className="text-[10px] text-neutral-500">{c.sub}</p>
-                    <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder="항목을 줄바꿈으로 나열…" />
-                </div>
-            ))}
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-3 gap-2">
+                <LabeledInput label="Sprint·기간" valKey="kpt_sprint" data={data} onChange={onChange} placeholder="W18 · 2026-04-21~04-27" />
+                <LabeledInput label="Team·팀" valKey="kpt_team" data={data} onChange={onChange} placeholder="플래너스 코어팀" />
+                <LabeledInput label="Facilitator·진행" valKey="kpt_facilitator" data={data} onChange={onChange} placeholder="이름" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">진행 순서</span> · Keep(5분) → Problem(10분) → Try(10분, 다음 스프린트 실행 가능 1~3개로 좁히기).
+                Try는 반드시 <span className="font-semibold">담당자·기한</span>까지 정해야 다음 회고에서 점검 가능.
+            </div>
+
+            {/* 3 카테고리 */}
+            <div className="grid md:grid-cols-3 gap-2">
+                {cells.map(c => (
+                    <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-44`}>
+                        <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">{c.sub}</p>
+                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
+                    </div>
+                ))}
+            </div>
+
+            {/* Top Try with owner & deadline */}
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-300">
+                <p className="text-xs font-bold text-slate-900">Top Try · 다음 스프린트 핵심 시도 (1~3개)</p>
+                <p className="text-[10px] text-neutral-500 mb-2">담당·기한이 있어야 회고가 의미를 가진다.</p>
+                <textarea value={data["kpt_top_try"] ?? ""} onChange={e => onChange("kpt_top_try", e.target.value)}
+                    placeholder={"- [홍길동] PR 리뷰 24h 룰 시범 · ~05-04\n- [김영희] 핸드오프 체크리스트 v1 작성 · ~05-02"} rows={3}
+                    className="w-full mt-1 resize-none bg-white text-xs p-2 rounded border border-slate-200 focus:outline-none leading-relaxed" />
+            </div>
         </div>
     );
 }
@@ -1177,24 +1228,59 @@ function InterviewGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 
 function AarGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "aar_planned", label: "계획된 것은 무엇이었나?", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "aar_actual", label: "실제로 일어난 일은?", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "aar_diff", label: "왜 차이가 났나?", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-        { key: "aar_lessons", label: "배운 것 · 다음에 할 것", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "aar_planned", label: "계획된 것은 무엇이었나?", hint: "원래 의도·목표·예상 결과", color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: Q2 캠페인으로 신규 가입 1,500명 확보 · 4주 진행 · 광고비 800만원" },
+        { key: "aar_actual",  label: "실제로 일어난 일은?",     hint: "관찰 가능한 사실만 — 해석 X",   color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 신규 가입 1,180명 (목표의 79%) · 4주차 광고 전환율 급락 · 콘텐츠 1편 누락" },
+        { key: "aar_diff",    label: "왜 차이가 났나?",         hint: "원인 분석 — 잘된 것·안 된 것 모두", color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "잘된 것: 1~2주차 후킹 카피 적중 · 인플 협업 확장\n안 된 것: 3주차 크리에이티브 피로 · 검수 병목" },
+        { key: "aar_lessons", label: "배운 것 · 다음에 할 것",  hint: "재현 가능한 교훈으로 일반화",     color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "교훈: 4주 캠페인은 2주차에 크리에이티브 리프레시가 필수\n다음: [홍길동] 크리에이티브 풀 사전 확보 · 다음 캠페인 D-7" },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            {steps.map((s, i) => (
-                <div key={s.key} className={`rounded-lg p-3 border ${s.color}`}>
-                    <div className="flex items-start gap-2">
-                        <div className={`shrink-0 w-7 h-7 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>{i + 1}</div>
-                        <div className="flex-1">
-                            <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
-                            <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} />
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-3 gap-2">
+                <LabeledInput label="Event·이벤트" valKey="aar_event" data={data} onChange={onChange} placeholder="예: Q2 신규 가입 캠페인" />
+                <LabeledInput label="기간" valKey="aar_period" data={data} onChange={onChange} placeholder="2026-04-01 ~ 04-28" />
+                <LabeledInput label="참여자·관계자" valKey="aar_team" data={data} onChange={onChange} placeholder="마케팅 4 · 디자인 2 · 외부 인플 3" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">AAR 4질문 (US Army)</span> · 비난 X · 사실과 해석을 분리.
+                &quot;실제 일어난 일&quot;은 데이터·관찰만, &quot;왜&quot;에서 해석·원인. 결과는 <span className="font-semibold">재현 가능한 교훈</span>으로 끝나야 자산이 됨.
+            </div>
+
+            {/* 4단계 */}
+            <div className="space-y-1.5">
+                {steps.map((s, i) => (
+                    <div key={s.key} className={`rounded-lg p-3 border ${s.color}`}>
+                        <div className="flex items-start gap-2">
+                            <div className={`shrink-0 w-7 h-7 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>{i + 1}</div>
+                            <div className="flex-1">
+                                <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
+                                <p className="text-[10px] text-neutral-500 mb-1">{s.hint}</p>
+                                <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} placeholder={s.ph} />
+                            </div>
                         </div>
                     </div>
+                ))}
+            </div>
+
+            {/* Sustain / Improve 액션 분리 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300">
+                    <p className="text-xs font-bold text-slate-900">Sustain · 계속할 것</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">조직 자산으로 굳혀야 할 패턴</p>
+                    <CellTextarea cellKey="aar_sustain" value={data["aar_sustain"] ?? ""} onChange={onChange} placeholder="후킹 카피 A/B 테스트 절차 → 표준 매뉴얼화" />
                 </div>
-            ))}
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-300">
+                    <p className="text-xs font-bold text-stone-900">Improve · 고칠 것</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">담당·기한이 있어야 액션</p>
+                    <CellTextarea cellKey="aar_improve" value={data["aar_improve"] ?? ""} onChange={onChange} placeholder="- [김영희] 검수 워크플로 재설계 · ~05-15" />
+                </div>
+            </div>
         </div>
     );
 }
