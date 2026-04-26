@@ -7,9 +7,18 @@ import { CellTextarea, type FrameworkData } from "./_shared";
 
 interface GP { data: FrameworkData; onChange: (key: string, val: string) => void }
 
+function GuideBox({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed mb-2">
+            💡 {children}
+        </div>
+    );
+}
+
 export function LeanCanvasGrid({ data, onChange }: GP) {
     return (
         <div className="my-2 space-y-1">
+            <GuideBox><span className="font-semibold">Ash Maurya Lean Canvas</span> · 1페이지로 사업 가설 전체. 채워진 칸만 보면 못 봄 — <span className="font-semibold">빈 칸이 가장 큰 위험</span>. Problem → Customer → UVP 순서로 시작.</GuideBox>
             {/* 상단 5열 */}
             <div className="grid grid-cols-5 gap-1">
                 {/* Col 1: Problem + Existing Alt */}
@@ -98,6 +107,7 @@ export function BmcGrid({ data, onChange }: GP) {
     const sub = "text-[9px] text-neutral-400";
     return (
         <div className="my-2 space-y-1 overflow-x-auto">
+            <GuideBox><span className="font-semibold">Osterwalder BMC</span> · 9개 블록으로 사업 모델 전체. 우측(고객)부터 채우고 좌측(운영)으로. <span className="font-semibold">Value Proposition이 모든 다리의 시작점</span>.</GuideBox>
             {/* 상단 5열 */}
             <div className="grid grid-cols-5 gap-1 min-w-[520px]">
                 <div className={`${block} bg-slate-50 border-slate-200 min-h-48`}>
@@ -159,7 +169,9 @@ export function BmcGrid({ data, onChange }: GP) {
 
 export function VpcGrid({ data, onChange }: GP) {
     return (
-        <div className="my-2 grid md:grid-cols-2 gap-3">
+        <div className="my-2 space-y-2">
+            <GuideBox><span className="font-semibold">Strategyzer Value Proposition Canvas</span> · 우측 Customer Profile 먼저 → 좌측 Value Map 매칭. 좌·우의 <span className="font-semibold">Fit이 핵심</span> — Pain Reliever ↔ Pains, Gain Creator ↔ Gains.</GuideBox>
+            <div className="grid md:grid-cols-2 gap-3">
             {/* 좌: Value Map (사각형) */}
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-700">
                 <p className="text-[11px] font-bold text-slate-900 text-center mb-2">Value Map · 가치 제안 맵</p>
@@ -202,6 +214,7 @@ export function VpcGrid({ data, onChange }: GP) {
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     );
 }
@@ -210,6 +223,7 @@ export function OkrGrid({ data, onChange }: GP) {
     const krKeys = ["okr_kr1", "okr_kr2", "okr_kr3", "okr_kr4", "okr_kr5"];
     return (
         <div className="my-2 space-y-2">
+            <GuideBox><span className="font-semibold">Andy Grove → John Doerr OKR</span> · 정성적 O + 정량적 KR. KR 3개 권장, <span className="font-semibold">달성률 60~70%</span>가 적정 도전 (100% = 너무 쉬움). 분기 단위 추천.</GuideBox>
             {/* Objective */}
             <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
                 <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">Objective · 목표</p>
