@@ -2416,11 +2416,18 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 function WeeklyReviewGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Week · 주차" valKey="wr_week" data={data} onChange={onChange} />
-            <LabeledBox label="Wins · 이번 주 승리" valKey="wr_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" />
-            <LabeledBox label="Lessons · 배운 것" valKey="wr_lessons" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
-            <LabeledBox label="Blockers · 장애물" valKey="wr_blockers" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
-            <LabeledBox label="Next Week · 다음 주" valKey="wr_next" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Week · 주차" valKey="wr_week" data={data} onChange={onChange} placeholder="2026년 W17 · 04-21~04-27" />
+                <LabeledInput label="컨디션 · 1~5" valKey="wr_condition" data={data} onChange={onChange} placeholder="평균 4 · 잠 6.5h · 운동 3회" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">David Allen GTD Weekly Review</span> · 한 주의 모든 열린 고리를 점검·정리.
+                일요일 저녁 30~60분이 다음 주를 결정. <span className="font-semibold">Wins → Lessons → Blockers → Next</span>.
+            </div>
+            <LabeledBox label="Wins · 이번 주 승리" valKey="wr_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" placeholder={"- Q2 캠페인 1차 시안 완성\n- 신규 고객 미팅 2건\n- 매일 아침 6시 기상 유지"} />
+            <LabeledBox label="Lessons · 배운 것" valKey="wr_lessons" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder={"- 시안 리뷰는 미팅보다 비동기 코멘트가 빠름\n- 회의 직전 15분 준비 = 회의 효율 2배"} />
+            <LabeledBox label="Blockers · 장애물·미해결" valKey="wr_blockers" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" placeholder={"- 결제 API 재시도 큐 — 백엔드 일정 미정\n- 디자인팀 신규 멤버 온보딩 지연"} />
+            <LabeledBox label="Next Week · 다음 주 의도·핵심" valKey="wr_next" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder={"한 단어: 정착\nTop 3:\n  1. 신규 고객 온보딩 마무리\n  2. 캠페인 본격 라이브\n  3. 재시도 큐 PR 리뷰\n습관: 매일 30분 산책"} />
         </div>
     );
 }
@@ -2428,16 +2435,26 @@ function WeeklyReviewGrid({ data, onChange }: { data: FrameworkData; onChange: (
 function WeeklyWinGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Week · 주차" valKey="ww_week" data={data} onChange={onChange} />
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200">
+                <LabeledInput label="Week · 주차" valKey="ww_week" data={data} onChange={onChange} placeholder="2026년 W17" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Win Journaling</span> · 성취 기록은 자기효능감의 누적.
+                작은 것도 기록 — 나중에 어려운 시기에 꺼내볼 자산이 됨.
+            </div>
             <div className="rounded-xl p-4 bg-stone-50 border-2 border-stone-400">
                 <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider text-center">이번 주 가장 큰 WIN</p>
                 <textarea value={data["ww_biggest"] ?? ""} onChange={e => onChange("ww_biggest", e.target.value)}
-                    placeholder="자랑스러운 단 하나의 성취"
+                    placeholder='예: "신규 고객 첫 미팅에서 우리만의 차별점이 통한다는 확신을 얻었다."'
                     rows={3}
                     className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-stone-300 focus:outline-none text-center leading-relaxed" />
             </div>
-            <LabeledBox label="Other Wins · 다른 성취들" valKey="ww_other" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
-            <LabeledBox label="Celebrate · 어떻게 축하할까" valKey="ww_celebrate" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Work · 일에서의 성취" valKey="ww_work" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- 시안 3안 완성·1안 채택\n- 발표 슬라이드 13장 → 5장으로 압축" />
+                <LabeledBox label="Life · 삶에서의 성취" valKey="ww_life" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- 가족과 새 메뉴 시도\n- 헬스 3회 / 5km 신기록" />
+            </div>
+            <LabeledBox label="Other Wins · 작은 승리들" valKey="ww_other" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="자잘하지만 기록할 만한 것 — 새 카페 발견·책 1권 완독·새 자동화 1개 등" />
+            <LabeledBox label="Celebrate · 어떻게 축하할까" valKey="ww_celebrate" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" placeholder="예: 토요일 저녁 좋은 식당 / 오랫동안 미뤄둔 책 1시간 / 좋아하는 음악 1시간 무엇도 안 하기" />
         </div>
     );
 }
@@ -2445,18 +2462,27 @@ function WeeklyWinGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 function MonthlyThemeGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Month · 월" valKey="mt_month" data={data} onChange={onChange} placeholder="예: 2026년 5월" />
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Month · 월" valKey="mt_month" data={data} onChange={onChange} placeholder="2026년 5월" />
+                <LabeledInput label="이전 달과의 연결" valKey="mt_prev" data={data} onChange={onChange} placeholder="4월 회고 핵심 1줄" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">CGP Grey Theme System</span> · 한 달 = 한 가지 정신.
+                구체 목표가 아닌 <span className="font-semibold">방향성</span>으로 — &quot;운동 5kg&quot; 대신 &quot;몸을 챙기는 달&quot;. 부드럽지만 일관된다.
+            </div>
             <div className="rounded-xl p-4 bg-slate-50 border-2 border-slate-400">
-                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider text-center">이번 달 테마</p>
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider text-center">이번 달 테마 (한 단어 + 한 문장)</p>
                 <textarea value={data["mt_theme"] ?? ""} onChange={e => onChange("mt_theme", e.target.value)}
-                    placeholder="한 문장으로 — 예: '깊이 있는 집중의 달'"
+                    placeholder='예: "정착의 달 — 4월에 시작한 것들을 안정화하고 시스템으로 만든다."'
                     rows={2}
                     className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-slate-300 focus:outline-none text-center leading-relaxed" />
             </div>
-            <LabeledBox label="Focus · 핵심 포커스" valKey="mt_focus" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
-            <LabeledBox label="Wins · 기대하는 WIN" valKey="mt_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
-            <LabeledBox label="Habits · 만들 습관" valKey="mt_habits" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-            <LabeledBox label="Reflection · 월말 회고" valKey="mt_reflection" data={data} onChange={onChange} placeholder="월말에 돌아와 기록" />
+            <LabeledBox label="Focus · 핵심 포커스 (3가지 이내)" valKey="mt_focus" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder={"1. 신규 고객 온보딩 표준화\n2. 결제 안정성 시스템\n3. 콘텐츠 채널 구독자 +1,000"} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Wins · 기대하는 WIN" valKey="mt_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="월말 자랑하고 싶은 것 1~3가지" />
+                <LabeledBox label="Habits · 만들 습관" valKey="mt_habits" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="- 매일 30분 운동\n- 매주 일요일 저녁 30분 주간 회고" />
+            </div>
+            <LabeledBox label="Reflection · 월말 회고 (다음 달에 작성)" valKey="mt_reflection" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder="테마대로 살았는가? 다음 달 테마는?" />
         </div>
     );
 }
@@ -2464,29 +2490,37 @@ function MonthlyThemeGrid({ data, onChange }: { data: FrameworkData; onChange: (
 function QuarterlyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-                <LabeledInput label="Quarter · 분기" valKey="q_quarter" data={data} onChange={onChange} placeholder="예: 2026 Q2" />
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Quarter · 분기" valKey="q_quarter" data={data} onChange={onChange} placeholder="2026 Q2 · 04~06" />
+                <LabeledInput label="Year theme · 연간 테마와 연결" valKey="q_year_theme" data={data} onChange={onChange} placeholder="올해 테마: 정착·시스템화" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">90일 분기 플랜</span> · 1년은 너무 멀고 1주는 너무 짧다.
+                90일 = <span className="font-semibold">의미 있는 변화가 일어나기 충분</span>한 시간. OKR·12-Week-Year의 단위.
             </div>
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
-                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">분기 목표</p>
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">분기 목표 (Top 1~3 OKR)</p>
                 <textarea value={data["q_goal"] ?? ""} onChange={e => onChange("q_goal", e.target.value)}
-                    placeholder="3개월 뒤 달성하고 싶은 한 가지"
-                    rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
+                    placeholder={"O: 1인 사업가 100명이 우리 플래너로 매주 일요일 회고를 한다\nKR1: 유료 가입 100명 (현재 12)\nKR2: 주 1회 이상 사용 비율 60% (현재 35%)\nKR3: NPS 50+ (현재 측정 X)"}
+                    rows={5}
+                    className="w-full mt-2 resize-none bg-white/70 text-xs p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
             </div>
             <div className="grid md:grid-cols-3 gap-2">
                 {[
-                    { key: "q_m1", label: "Month 1", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-                    { key: "q_m2", label: "Month 2", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-                    { key: "q_m3", label: "Month 3", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+                    { key: "q_m1", label: "Month 1 · 시작·셋업",   color: "bg-stone-50 border-stone-200",  text: "text-stone-800",
+                      ph: "포커스: 가입 플로우 단순화\n핵심: 결제 안정화·온보딩 v1" },
+                    { key: "q_m2", label: "Month 2 · 가속·실험",   color: "bg-slate-50 border-slate-300",  text: "text-slate-900",
+                      ph: "포커스: 채널 실험\nA/B: 카피 3안·인플 2명·뉴스레터 8편" },
+                    { key: "q_m3", label: "Month 3 · 측정·다음 분기", color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+                      ph: "포커스: 회고·시스템화\n결과 측정·Q3 계획 수립" },
                 ].map(m => (
-                    <div key={m.key} className={`rounded-lg p-3 border ${m.color} min-h-28`}>
+                    <div key={m.key} className={`rounded-lg p-3 border ${m.color} min-h-32`}>
                         <p className={`text-xs font-bold ${m.text}`}>{m.label}</p>
-                        <CellTextarea cellKey={m.key} value={data[m.key] ?? ""} onChange={onChange} placeholder="이 달의 포커스·행동…" />
+                        <CellTextarea cellKey={m.key} value={data[m.key] ?? ""} onChange={onChange} placeholder={m.ph} />
                     </div>
                 ))}
             </div>
-            <LabeledBox label="Quarter Review · 분기 회고" valKey="q_review" data={data} onChange={onChange} placeholder="분기 끝에 돌아와 기록" />
+            <LabeledBox label="Quarter Review · 분기 회고 (분기 종료 시)" valKey="q_review" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder="OKR 달성률 · 다음 분기 가져갈 교훈 · 버릴 가설" />
         </div>
     );
 }
@@ -2507,9 +2541,13 @@ function YearPlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
 
     return (
         <div className="my-2 space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
                 <LabeledInput label="Year · 연도" valKey="yr_year" data={data} onChange={onChange} placeholder="2026" />
-                <LabeledInput label="Theme · 올해 테마" valKey="yr_theme" data={data} onChange={onChange} placeholder="한 문장으로" />
+                <LabeledInput label="Theme · 올해 테마 (한 단어 + 한 문장)" valKey="yr_theme" data={data} onChange={onChange} placeholder='예: "정착" — 작년에 시작한 것을 굳히는 해' />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">12개월 시즌 디자인</span> · 매 달이 똑같으면 1년이 지루.
+                계절·일정·체력 곡선에 따라 <span className="font-semibold">시즌별 색깔</span>을 — 봄 시도·여름 가속·가을 수확·겨울 회복.
             </div>
             <div className="grid grid-cols-3 md:grid-cols-4 gap-1.5">
                 {MONTHS_LBL.map((lbl, i) => {
@@ -2528,7 +2566,11 @@ function YearPlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                     );
                 })}
             </div>
-            <LabeledBox label="Milestones · 핵심 마일스톤" valKey="yr_milestones" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-800" placeholder="연중 꼭 달성할 것들" />
+            <LabeledBox label="Milestones · 핵심 마일스톤 (날짜 + 이정표)" valKey="yr_milestones" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder={"03-31: 시즌 1 출시\n06-30: 100명 베타 · NPS 50+\n09-30: 유료 200명 · 첫 흑자 월\n12-31: 시즌 2 종료 · 다음 해 계획"} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Habits · 1년 동안 굳힐 습관" valKey="yr_habits" data={data} onChange={onChange} placeholder="- 매일 아침 6시 기상\n- 매주 일요일 주간 회고\n- 매달 1회 분기 점검" />
+                <LabeledBox label="Anti-goals · 하지 않을 것" valKey="yr_anti" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- SNS 알림 ON 상태로 일하기 X\n- 검증 없는 신규 시도 X" />
+            </div>
         </div>
     );
 }
@@ -2542,24 +2584,42 @@ function FiveYearGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
         { key: "fy_y5",  label: "5년 후 · 비전", badge: "+5Y", color: "bg-stone-50 border-stone-400", text: "text-stone-800", strong: true },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            {steps.map((s, i) => (
-                <div key={s.key} className="flex items-start gap-2">
-                    <div className="shrink-0 flex flex-col items-center">
-                        <div className={`w-10 h-10 rounded-full bg-white border flex items-center justify-center text-[10px] font-bold tracking-wider ${s.strong ? "border-slate-700 text-slate-900" : "border-slate-300 text-slate-500"}`}>
-                            {s.badge}
+        <div className="my-2 space-y-2">
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">5년 비전 → 역산</span> · 5년 후 나(Now+5)에서 거꾸로 내려와 1년 후 무엇이 진실이어야 하는가.
+                숫자보다 <span className="font-semibold">상태·정체성</span>으로 — &quot;매출 N억&quot; 보다 &quot;100명 사업가가 우리를 매주 쓴다&quot;.
+            </div>
+            <div className="space-y-1.5">
+                {steps.map((s, i) => (
+                    <div key={s.key} className="flex items-start gap-2">
+                        <div className="shrink-0 flex flex-col items-center">
+                            <div className={`w-10 h-10 rounded-full bg-white border flex items-center justify-center text-[10px] font-bold tracking-wider ${s.strong ? "border-slate-700 text-slate-900" : "border-slate-300 text-slate-500"}`}>
+                                {s.badge}
+                            </div>
+                            {i < 4 && <div className="w-px flex-1 bg-neutral-300 my-1" style={{ minHeight: 24 }} />}
                         </div>
-                        {i < 4 && <div className="w-px flex-1 bg-neutral-300 my-1" style={{ minHeight: 24 }} />}
+                        <div className={`flex-1 rounded-lg p-3 border ${s.color}`}>
+                            <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
+                            <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange}
+                                placeholder={
+                                    i === 0 ? "예: 1인 베타 운영 · 첫 12명 유료 · 월 매출 100만원" :
+                                    i === 1 ? "예: 유료 200명 · 첫 흑자 월 · 채널 자동화 v1" :
+                                    i === 2 ? "예: 1,000명 · 외부 코치 5명 합류 · 카테고리 1위 인지" :
+                                    i === 3 ? "예: 5,000명 · 팀 8명 · 해외 시장 1개국 베타" :
+                                    "예: \"한국 1인 사업가의 일·삶 운영 OS\" 카테고리 정의 · 10,000명+ 매주 사용 · 자기다움으로 돈 버는 사람들의 표준 도구"
+                                } />
+                        </div>
                     </div>
-                    <div className={`flex-1 rounded-lg p-3 border ${s.color}`}>
-                        <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
-                        <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} placeholder={i === 4 ? "어떤 모습·삶으로 살고 있을까" : "그때 나는 무엇을 하고 있을까"} />
-                    </div>
-                </div>
-            ))}
-            <div className="rounded-lg p-3 bg-slate-50 border-2 border-slate-700 mt-3">
-                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">지켜야 할 원칙</p>
-                <CellTextarea cellKey="fy_principles" value={data["fy_principles"] ?? ""} onChange={onChange} placeholder="5년의 여정에서 타협하지 않을 가치" />
+                ))}
+            </div>
+            <div className="rounded-lg p-3 bg-slate-50 border-2 border-slate-700">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">지켜야 할 원칙 — 5년 동안 타협 X</p>
+                <CellTextarea cellKey="fy_principles" value={data["fy_principles"] ?? ""} onChange={onChange} placeholder={"- 사용자가 우리보다 우리 제품을 더 잘 알게 만들지 않는다 (단순함)\n- 짧은 호흡으로 큰 약속을 깨지 않는다\n- 팀 한 명 한 명의 성장이 회사 성장보다 빠르다"} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Worst case · 최악의 시나리오" valKey="fy_worst" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="실패해도 잃지 않을 것 · 회복 경로" />
+                <LabeledBox label="Identity · 5년 후 정체성" valKey="fy_identity" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="나는 어떤 사람으로 불릴까? 어떤 평판이 되어 있을까?" />
             </div>
         </div>
     );
@@ -2571,17 +2631,21 @@ function MovingAverageGrid({ data, onChange }: { data: FrameworkData; onChange: 
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
                 <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">90-Day Experiment</p>
                 <input type="text" value={data["ma_experiment"] ?? ""} onChange={e => onChange("ma_experiment", e.target.value)}
-                    placeholder="실험 제목 — 예: '아침 운동 90일 실험'"
+                    placeholder="예: '구독형 코칭 시범 90일 실험'"
                     className="w-full mt-2 px-2 py-1.5 text-sm font-bold bg-white/70 border border-slate-300 rounded focus:outline-none" />
             </div>
-            <LabeledBox label="Hypothesis · 가설" valKey="ma_hypothesis" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="If ~ then ~" />
-            <div className="grid md:grid-cols-3 gap-2">
-                <LabeledBox label="Baseline · 시작점" valKey="ma_baseline" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-neutral-700" />
-                <LabeledBox label="Metric · 측정 지표" valKey="ma_metric" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-                <LabeledBox label="Target · 90일 목표" valKey="ma_target" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">90일 실험 (Brian Moran 12 Week Year)</span> · 기간을 짧게 해 긴급함을 만든다.
+                가설·지표·목표를 처음부터 정의 — <span className="font-semibold">실패해도 학습</span>이 남게.
             </div>
-            <LabeledBox label="Check-ins · 30/60/90일" valKey="ma_checkins" data={data} onChange={onChange} placeholder="Day 30:&#10;Day 60:&#10;Day 90:" />
-            <LabeledBox label="Result · 결과" valKey="ma_result" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" placeholder="실험 종료 후 기록" />
+            <LabeledBox label="Hypothesis · 가설" valKey="ma_hypothesis" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="예: 월 19만원 구독형 코칭을 1:1 30분 + 비동기 코멘트로 제공하면, 90일 안에 5명 유료 가입 + NPS 50+를 만들 수 있다." />
+            <div className="grid md:grid-cols-3 gap-2">
+                <LabeledBox label="Baseline · 시작점" valKey="ma_baseline" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-neutral-700" placeholder="현재: 구독 0명 · 1:1 컨설팅 월 2건 (60만원)" />
+                <LabeledBox label="Metric · 측정 지표" valKey="ma_metric" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="가입자 수 · 90일 유지율 · NPS" />
+                <LabeledBox label="Target · 90일 목표" valKey="ma_target" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="5명 가입 · 80% 유지 · NPS 50+" />
+            </div>
+            <LabeledBox label="Check-ins · 30/60/90일 점검" valKey="ma_checkins" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder={"Day 30: 첫 2명 가입 · 시간 부족 호소 → 비동기 비중 ↑\nDay 60: 4명 / 1명 이탈 — 가격 부담\nDay 90: ___"} />
+            <LabeledBox label="Result · 결과 + Decision" valKey="ma_result" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder={"예: 가입 4명 · 유지 75% · NPS 60 — 가격은 적정, 콘텐츠 깊이가 차별화\n결정: 본격 런칭 (시즌 2부터 정식 BM)"} />
         </div>
     );
 }
@@ -2592,12 +2656,16 @@ function ReversePlanGrid({ data, onChange }: { data: FrameworkData; onChange: (k
             <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
                 <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider text-center">Goal · 최종 목표</p>
                 <textarea value={data["rp_goal"] ?? ""} onChange={e => onChange("rp_goal", e.target.value)}
-                    placeholder="무엇을 달성했을 때 '성공'인가"
+                    placeholder='예: "Q3 종료 시점에 유료 가입자 200명 확보"'
                     rows={2}
                     className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-stone-300 focus:outline-none text-center leading-relaxed" />
                 <input type="text" value={data["rp_deadline"] ?? ""} onChange={e => onChange("rp_deadline", e.target.value)}
-                    placeholder="마감일 (YYYY-MM-DD)"
+                    placeholder="마감일 — 2026-09-30"
                     className="w-full mt-2 px-2 py-1 text-xs text-center bg-white/60 border border-stone-200 rounded focus:outline-none" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Backwards Planning (NASA)</span> · 미래에서 현재로 거꾸로.
+                마감에서 출발해 <span className="font-semibold">&quot;그러려면 그 전에 무엇이 진실이어야 하는가?&quot;</span> 반복. 종착 → 중간 → 시작.
             </div>
             <div className="relative pl-8">
                 <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-400" />
@@ -2605,15 +2673,16 @@ function ReversePlanGrid({ data, onChange }: { data: FrameworkData; onChange: (k
                     <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 relative">
                         <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-slate-700 border-2 border-white" />
                         <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Milestones · 거꾸로 마일스톤</p>
-                        <CellTextarea cellKey="rp_milestones" value={data["rp_milestones"] ?? ""} onChange={onChange} placeholder="마감 1주 전에는…&#10;1개월 전에는…&#10;3개월 전에는…&#10;오늘부터는…" />
+                        <CellTextarea cellKey="rp_milestones" value={data["rp_milestones"] ?? ""} onChange={onChange} placeholder={"마감 1주 전 (09-23): 200명 안정 운영 — 자동 온보딩·결제 안정\n1개월 전 (08-30): 150명 — 주력 채널 고도화\n3개월 전 (06-30): 50명 — 가설 검증 마무리\n오늘 (04-27): 가입 12명 — 첫 50명 채널·가격 가설 정립"} />
                     </div>
                     <div className="rounded-lg p-3 bg-slate-50 border-2 border-slate-700 relative">
                         <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-slate-900 border-2 border-white" />
-                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Today · 오늘 시작할 일</p>
-                        <CellTextarea cellKey="rp_now" value={data["rp_now"] ?? ""} onChange={onChange} placeholder="가장 먼저 취할 작은 행동" />
+                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Today · 이번 주 시작할 일</p>
+                        <CellTextarea cellKey="rp_now" value={data["rp_now"] ?? ""} onChange={onChange} placeholder="예: 첫 50명 채널 가설 3개 작성 + 1주 내 인터뷰 5명" />
                     </div>
                 </div>
             </div>
+            <LabeledBox label="Risks · 가장 큰 장애물 + 대응" valKey="rp_risks" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder={"- 채널 효율 저조 → 6주차 점검 후 피벗 / 6/15까지 새 가설\n- 가격 저항 → 등급제 도입 옵션"} />
         </div>
     );
 }
@@ -2621,23 +2690,29 @@ function ReversePlanGrid({ data, onChange }: { data: FrameworkData; onChange: (k
 function SprintGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
-                <div className="grid grid-cols-3 gap-2">
-                    <LabeledInput label="Sprint #" valKey="sp_number" data={data} onChange={onChange} placeholder="25" />
-                    <LabeledInput label="Start · 시작일" valKey="sp_start" data={data} onChange={onChange} />
-                    <LabeledInput label="End · 종료일" valKey="sp_end" data={data} onChange={onChange} />
-                </div>
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-3 gap-2">
+                <LabeledInput label="Sprint #" valKey="sp_number" data={data} onChange={onChange} placeholder="W17·#25" />
+                <LabeledInput label="Start · 시작일" valKey="sp_start" data={data} onChange={onChange} placeholder="2026-04-21" />
+                <LabeledInput label="End · 종료일" valKey="sp_end" data={data} onChange={onChange} placeholder="2026-05-04 (2주)" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Sprint (Scrum/Shape Up)</span> · 1~4주의 시간 박스 안에 한 가지 의미 있는 산출물.
+                <span className="font-semibold"> Goal &gt; Backlog</span> — 목표가 없으면 단순 To-do. Stretch는 진짜 여유 있을 때만.
             </div>
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
-                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Sprint Goal</p>
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Sprint Goal · 한 문장</p>
+                <p className="text-[10px] text-neutral-500">스프린트 끝에 자랑할 결과물 — 시연 가능한 단위</p>
                 <textarea value={data["sp_goal"] ?? ""} onChange={e => onChange("sp_goal", e.target.value)}
-                    placeholder="이번 스프린트에서 가장 중요한 한 가지"
+                    placeholder='예: "구독형 코칭 시범 페이지 + 결제 + 첫 5명 가입 처리까지 완성"'
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
+                    className="w-full mt-1 resize-none bg-white/70 text-sm font-semibold p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
             </div>
-            <LabeledBox label="Commitments · 끝낼 것" valKey="sp_commitments" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- [ ] 항목 1&#10;- [ ] 항목 2" />
-            <LabeledBox label="Stretch · 여유 있으면" valKey="sp_stretch" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
-            <LabeledBox label="Retro · 스프린트 회고" valKey="sp_retro" data={data} onChange={onChange} placeholder="스프린트 끝에 돌아와 기록 (무엇이 잘 됐나 / 안 됐나 / 바꿀 것)" />
+            <LabeledBox label="Commitments · 끝낼 것 (체크박스)" valKey="sp_commitments" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder={"- [ ] 시범 페이지 디자인 시안 1안\n- [ ] 결제 플로우 구현\n- [ ] 첫 5명 가입·온보딩 가이드"} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Stretch · 여유 있으면" valKey="sp_stretch" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- [ ] A/B 테스트 셋업\n- [ ] 리퍼럴 코드 v1" />
+                <LabeledBox label="Risks · 위험 + 대응" valKey="sp_risks" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- PG 연동 일정 불확실 → 4/30까지 대안 결정\n- 디자이너 휴가 (5/2~5/4) — 미리 시안 확정" />
+            </div>
+            <LabeledBox label="Retro · 스프린트 회고 (종료 시 작성)" valKey="sp_retro" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder={"잘 됨: 결제 플로우 예상보다 빨리 완성\n안 됨: 디자인 시안 2회 리뷰 → 1회로 줄일 방법\n바꿀 것: 스프린트 시작 시 디자이너와 우선순위 합의 강화"} />
         </div>
     );
 }
