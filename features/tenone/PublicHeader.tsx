@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/lib/theme-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 
 type NavItem = { name: string; href: string; sub?: { name: string; href: string }[] };
@@ -30,6 +31,7 @@ export function PublicHeader() {
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + "?");
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
             style={{ backgroundColor: "color-mix(in srgb, var(--tn-header-bg) 90%, transparent)", borderColor: "var(--tn-border-light, var(--tn-border))" }}>
             <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex h-16 items-center justify-between">
@@ -91,73 +93,55 @@ export function PublicHeader() {
                 </div>
             </nav>
 
-            {/* Mobile backdrop overlay */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 top-16 bg-black/40 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
-            )}
-
-            {/* Mobile menu */}
-            {mobileMenuOpen && (
-                <div className="md:hidden border-t px-6 py-6 space-y-1 relative z-50"
-                    style={{ backgroundColor: "var(--tn-bg)", borderColor: "var(--tn-border)" }}>
-                    {publicNav.map(item => (
-                        <div key={item.name}>
-                            <Link href={item.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block py-3 text-sm transition-colors hover:opacity-70"
-                                style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-sub)" }}>
-                                {item.name}
-                            </Link>
-                            {'sub' in item && item.sub && (
-                                <div className="ml-4 mt-2 space-y-2">
-                                    {item.sub.map(sub => (
-                                        <Link key={sub.name} href={sub.href}
-                                            onClick={() => setMobileMenuOpen(false)}
-                                            className="block text-sm transition-colors hover:opacity-70"
-                                            style={{ color: "var(--tn-text-muted)" }}>
-                                            {sub.name}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                    {!isLoading && isAuthenticated && user ? (
-                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--tn-border)" }}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium"
-                                    style={{
-                                        background: isDark
-                                            ? "radial-gradient(circle at 35% 35%, #eee 0%, #ccc 60%, #aaa 100%)"
-                                            : "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
-                                        color: isDark ? "#111" : "#fff",
-                                    }}>
-                                    {user.avatarInitials}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium" style={{ color: "var(--tn-text)" }}>{user.name}</p>
-                                    <p className="text-xs" style={{ color: "var(--tn-text-muted)" }}>{user.email}</p>
-                                </div>
-                            </div>
-                            {canAccessIntra && (
-                                <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-1 py-2 text-sm transition-colors hover:opacity-70"
-                                    style={{ color: "var(--tn-text-sub)" }}>
-                                    Intra
-                                </Link>
-                            )}
-                            <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
-                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-sub)" }}>
-                                프로필
-                            </Link>
-                            <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
-                                className="block py-2 text-sm transition-colors hover:opacity-70" style={{ color: "var(--tn-text-muted)" }}>
-                                로그아웃
-                            </button>
-                        </div>
-                    ) : null}
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            brandName="Ten:One"
+            bgStyle={{ background: "var(--tn-bg)" }}
+            textTone={isDark ? "light" : "dark"}
+            footer={
+                !isLoading && isAuthenticated && user ? (
+                    <div className="flex flex-col gap-2">
+                        {canAccessIntra && (
+                            <Link href="/intra" onClick={() => setMobileMenuOpen(false)}
+                                className="block text-sm transition-colors hover:opacity-70"
+                                style={{ color: "var(--tn-text-sub)" }}>Intra</Link>
+                        )}
+                        <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
+                            className="block text-sm transition-colors hover:opacity-70"
+                            style={{ color: "var(--tn-text-sub)" }}>프로필</Link>
+                        <button onClick={() => { logout(); router.push('/'); setMobileMenuOpen(false); }}
+                            className="block text-left text-sm transition-colors hover:opacity-70"
+                            style={{ color: "var(--tn-text-muted)" }}>로그아웃</button>
+                    </div>
+                ) : null
+            }
+        >
+            {publicNav.map(item => (
+                <div key={item.name}>
+                    <Link href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block rounded-lg px-4 py-2.5 text-base font-medium transition-colors hover:opacity-70"
+                        style={{ color: isActive(item.href) ? "var(--tn-text)" : "var(--tn-text-sub)" }}>
+                        {item.name}
+                    </Link>
+                    {'sub' in item && item.sub && (
+                        <div className="ml-4 mt-1 space-y-1">
+                            {item.sub.map(sub => (
+                                <Link key={sub.name} href={sub.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-1.5 text-sm transition-colors hover:opacity-70"
+                                    style={{ color: "var(--tn-text-muted)" }}>
+                                    {sub.name}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </UniverseMobileMenu>
+        </>
     );
 }

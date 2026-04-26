@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
@@ -17,7 +18,7 @@ const navItems = [
 export function OgamjaHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -85,39 +86,41 @@ export function OgamjaHeader() {
                 </button>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-white border-t border-neutral-200 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors py-2",
-                                isActive(item.href)
-                                    ? "text-neutral-900"
-                                    : "text-neutral-500 hover:text-neutral-900"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="공감자"
+            bgClass="bg-white"
+            textTone="dark"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/ogamja/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
+                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#F5C518] text-neutral-900 font-semibold hover:bg-[#D4A017] rounded-full">가입</Link>
+                    </div>
+                )
+            }
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-[#F5C518]/20 text-neutral-900"
+                            : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

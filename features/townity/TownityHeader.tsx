@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
@@ -18,7 +19,7 @@ const navItems = [
 export function TownityHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     return (
         <>
@@ -63,33 +64,36 @@ export function TownityHeader() {
                 </button>
             </nav>
 
-            {mobileOpen && (
-                <div className="md:hidden bg-white border-t border-neutral-200 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className="block text-sm font-medium text-neutral-500 hover:text-[#10B981] transition-colors py-2"
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-neutral-200 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900 flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-neutral-900">가입</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Townity"
+            bgClass="bg-white"
+            textTone="dark"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/townity/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
+                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">가입</Link>
+                    </div>
+                )
+            }
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-[#10B981] transition-colors"
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

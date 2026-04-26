@@ -5,9 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const programItems = [
@@ -93,50 +94,51 @@ export function MadLeagueHeader() {
                 </button>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="lg:hidden bg-neutral-900 border-t border-neutral-800 px-6 py-6 space-y-3">
-                    {/* 프로그램 그룹 */}
-                    <div className="text-xs font-bold tracking-widest text-[#EC1D25] mb-2">PROGRAMS</div>
-                    {programItems.map((p) => (
-                        <Link
-                            key={p.href}
-                            href={p.href}
-                            onClick={() => setMobileOpen(false)}
-                            className="block text-sm font-medium text-neutral-400 hover:text-white transition pl-2"
-                        >
-                            {p.name}
-                        </Link>
-                    ))}
-                    <div className="pt-2 border-t border-neutral-800" />
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors",
-                                isActive(item.href) ? "text-white" : "text-neutral-400 hover:text-white"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-neutral-800 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/madleague/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="MAD League"
+            bgClass="bg-neutral-900"
+            textTone="light"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/madleague/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
+                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm px-4 py-1.5 bg-[#EC1D25] text-white rounded">가입</Link>
+                    </div>
+                )
+            }
+        >
+            <div className="text-[10px] font-bold tracking-widest text-[#EC1D25] px-4 mb-2">PROGRAMS</div>
+            {programItems.map((p) => (
+                <Link
+                    key={p.href}
+                    href={p.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="block rounded-lg px-4 py-2 text-sm font-medium text-neutral-400 hover:bg-white/5 hover:text-white transition pl-6"
+                >
+                    {p.name}
+                </Link>
+            ))}
+            <div className="my-2 border-t border-white/10" />
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href) ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

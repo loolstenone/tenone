@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
+import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
 
 const primaryNav = [
     { name: '솔루션', href: '/wio/solutions' },
@@ -46,6 +47,7 @@ export function WIOMarketingHeader() {
     const isMoreActive = moreNav.some(item => pathname === item.href);
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F0F23]/80 backdrop-blur-xl border-b border-white/5">
             <nav className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
                 <Link href="/wio" className="text-xl font-black tracking-tight">
@@ -117,21 +119,30 @@ export function WIOMarketingHeader() {
                 </div>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-[#0F0F23] border-t border-white/5 px-6 py-4 space-y-1">
-                    {allNav.map(item => (
-                        <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
-                            className={`block text-sm py-2 ${pathname === item.href ? 'text-white font-semibold' : 'text-slate-400'}`}>
-                            {item.name}
-                        </Link>
-                    ))}
-                    <Link href="/wio/login" onClick={() => setMobileOpen(false)}
-                        className="block text-center mt-3 px-4 py-2.5 bg-indigo-600 text-white text-sm rounded-lg font-semibold">
-                        시작하기
-                    </Link>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="WIO"
+            bgClass="bg-[#0F0F23]"
+            textTone="light"
+            footer={
+                <Link href="/wio/login" onClick={() => setMobileOpen(false)}
+                    className="block text-center px-4 py-2.5 bg-indigo-600 text-white text-sm rounded-lg font-semibold">
+                    시작하기
+                </Link>
+            }
+        >
+            {allNav.map(item => (
+                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
+                    className={`block rounded-lg px-4 py-2.5 text-base font-medium transition-colors ${
+                        pathname === item.href ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                    }`}>
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
+        </>
     );
 }

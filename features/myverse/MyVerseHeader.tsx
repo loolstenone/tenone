@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 const PREFIX = '/myverse';
 const navItems = [
@@ -74,33 +75,29 @@ export function MyVerseHeader() {
                 </div>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-white border-t border-neutral-100 px-5 py-4 space-y-1">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className="block px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded"
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-2 border-t border-neutral-100">
-                        <UniverseUtilityBar
-                            aboutPath="/myverse/service"
-                            profilePath="/myverse/my"
-                            signupPath="/signup"
-                            accentColor="#6366f1"
-                            searchPlaceholder="Myverse 검색"
-                            siteId="myverse"
-                            siteName="Myverse"
-                        />
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Myverse"
+            bgClass="bg-white"
+            textTone="dark"
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href) ? "bg-neutral-100 text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

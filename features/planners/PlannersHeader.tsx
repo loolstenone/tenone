@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 // Planner's 브랜드 메뉴 — 로고가 홈 역할이므로 "Planner's" 메뉴 제거 (중복 제거)
@@ -21,7 +22,7 @@ const navItems = [
 export function PlannersHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/planners") return pathname === "/planners";
@@ -96,49 +97,51 @@ export function PlannersHeader() {
                 </button>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-teal-950 border-t border-teal-800 px-4 py-4 space-y-1">
-                    {/* PP AI 진입 — 모바일 최상단 강조 */}
-                    <Link
-                        href={ppAiHref}
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 font-semibold rounded mb-3"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        {isAuthenticated ? "PP AI 앱 열기" : "PP AI 시작하기"}
-                    </Link>
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block px-3 py-2 text-sm rounded",
-                                isActive(item.href)
-                                    ? "text-white bg-white/10"
-                                    : "text-teal-200 hover:text-white hover:bg-white/5"
-                            )}
-                        >
-                            <div>{item.name}</div>
-                            <div className="text-[10px] text-teal-400 mt-0.5">{item.desc}</div>
-                        </Link>
-                    ))}
-                    <div className="pt-3 border-t border-teal-800 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/profile" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white flex items-center gap-2">
-                                <User className="h-4 w-4" /> {user?.name || "마이페이지"}
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
         </header>
+
+        {/* Mobile slide menu — UniverseMobileMenu 표준 */}
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Planner's"
+            bgClass="bg-teal-950"
+            textTone="light"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/planners/my" onClick={() => setMobileOpen(false)} className="block text-sm text-teal-200 hover:text-white">마이페이지</Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">로그인</Link>
+                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-teal-200 hover:text-white">가입</Link>
+                    </div>
+                )
+            }
+        >
+            <Link
+                href={ppAiHref}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 font-semibold rounded mb-3"
+            >
+                <Sparkles className="h-4 w-4" />
+                {isAuthenticated ? "PP AI 앱 열기" : "PP AI 시작하기"}
+            </Link>
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 transition-colors",
+                        isActive(item.href)
+                            ? "bg-white/10 text-white"
+                            : "text-teal-200 hover:bg-white/5 hover:text-white"
+                    )}
+                >
+                    <div className="text-base font-medium">{item.name}</div>
+                    <div className="text-[10px] text-teal-400 mt-0.5">{item.desc}</div>
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

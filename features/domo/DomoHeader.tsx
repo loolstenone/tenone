@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
@@ -19,7 +20,7 @@ const navItems = [
 export function DomoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -77,39 +78,41 @@ export function DomoHeader() {
                 </button>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="md:hidden bg-[#2D1B2E] border-t border-white/10 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors py-2",
-                                isActive(item.href)
-                                    ? "text-white"
-                                    : "text-neutral-400 hover:text-white"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-white/10 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-white">멤버 가입</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Domo"
+            bgClass="bg-[#2D1B2E]"
+            textTone="light"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/domo/my" onClick={() => setMobileOpen(false)} className="block text-sm text-neutral-300 hover:text-white">마이페이지</Link>
+                ) : (
+                    <div className="flex items-center gap-4">
+                        <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">로그인</Link>
+                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-300 hover:text-white">멤버 가입</Link>
+                    </div>
+                )
+            }
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-white/10 text-white"
+                            : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
         </>
     );
 }

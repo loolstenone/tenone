@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { loginHref } from "@/lib/login-href";
 
 const navItems = [
@@ -19,7 +20,7 @@ const navItems = [
 export function YouInOneHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
@@ -27,6 +28,7 @@ export function YouInOneHeader() {
     };
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
                 {/* Logo */}
@@ -87,45 +89,50 @@ export function YouInOneHeader() {
                 </button>
             </nav>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="lg:hidden bg-white border-t border-neutral-100 px-6 py-6 space-y-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "block text-sm font-medium transition-colors",
-                                isActive(item.href)
-                                    ? "text-[#1AAD64]"
-                                    : "text-neutral-400 hover:text-[#1AAD64]"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-4">
-                        {isAuthenticated ? (
-                            <Link href="/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-500 hover:text-[#1AAD64] flex items-center gap-2">
-                                <User className="h-4 w-4" /> 마이페이지
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">로그인</Link>
-                                <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-400 hover:text-[#1AAD64]">가입</Link>
-                            </>
-                        )}
-                        <Link
-                            href="/alliance"
-                            onClick={() => setMobileOpen(false)}
-                            className="inline-block text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] rounded transition-colors"
-                        >
-                            Members &amp; Alliance
-                        </Link>
-                    </div>
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="YouInOne"
+            bgClass="bg-white"
+            textTone="dark"
+            footer={
+                <div className="flex flex-col gap-3">
+                    {isAuthenticated ? (
+                        <Link href="/youinone/my" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">마이페이지</Link>
+                    ) : (
+                        <div className="flex items-center gap-4">
+                            <Link href={loginHref(pathname)} onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">로그인</Link>
+                            <Link href="/signup" onClick={() => setMobileOpen(false)} className="text-sm text-neutral-600 hover:text-[#1AAD64]">가입</Link>
+                        </div>
+                    )}
+                    <Link
+                        href="/alliance"
+                        onClick={() => setMobileOpen(false)}
+                        className="block text-center text-sm px-5 py-2 bg-[#1AAD64] text-white hover:bg-[#148B4A] rounded transition-colors"
+                    >
+                        Members &amp; Alliance
+                    </Link>
+                </div>
+            }
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-[#1AAD64]/10 text-[#1AAD64]"
+                            : "text-neutral-600 hover:bg-neutral-50 hover:text-[#1AAD64]"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
+        </>
     );
 }

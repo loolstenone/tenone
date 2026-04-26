@@ -8,8 +8,8 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { LoginModal } from "@/components/LoginModal";
-import { loginHref } from "@/lib/login-href";
 
 const navItems = [
     { name: "HIT 검사", href: "/hero/hit" },
@@ -23,7 +23,6 @@ const navItems = [
 export function HeRoHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [hasOpened, setHasOpened] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const { isAuthenticated, user } = useAuth();
@@ -121,7 +120,7 @@ export function HeRoHeader() {
                         </button>
                     )}
                     <button
-                        onClick={() => { if (!hasOpened) setHasOpened(true); setMobileOpen(!mobileOpen); }}
+                        onClick={() => setMobileOpen(!mobileOpen)}
                         className="p-2 text-neutral-500 hover:text-neutral-900"
                         aria-label="메뉴 열기"
                     >
@@ -130,110 +129,17 @@ export function HeRoHeader() {
                 </div>
             </nav>
 
-            {/* Mobile menu */}
         </header>
 
-        {/* 배경 오버레이 */}
-        <div
-            className={clsx(
-                "fixed inset-0 z-[9998] lg:hidden transition-opacity duration-300",
-                mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            )}
-            style={{ background: "rgba(0,0,0,0.5)" }}
-            onClick={() => setMobileOpen(false)}
-        />
-
-        {/* 우측 슬라이드 패널 */}
-        <div
-            className={clsx(
-                "fixed top-0 right-0 bottom-0 z-[9999] lg:hidden w-2/3 max-w-sm bg-white flex flex-col shadow-xl",
-                hasOpened && "transition-transform duration-300 ease-out",
-                mobileOpen ? "translate-x-0" : "translate-x-full"
-            )}
-        >
-            {/* 패널 헤더 */}
-            <div className="flex h-16 items-center justify-between px-5 border-b border-neutral-100">
-                <span className="text-sm font-semibold text-neutral-400">메뉴</span>
-                <button onClick={() => setMobileOpen(false)} className="p-1.5 text-neutral-400 hover:text-neutral-900">
-                    <X className="h-5 w-5" />
-                </button>
-            </div>
-
-            {/* 네비 링크 */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-                {isAuthenticated && (
-                    <Link
-                        href="/hero/journey"
-                        onClick={() => setMobileOpen(false)}
-                        className={clsx(
-                            "flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors mb-2",
-                            pathname.startsWith("/hero/journey")
-                                ? "bg-[#E53935] text-white"
-                                : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
-                        )}
-                    >
-                        나의 Journey
-                    </Link>
-                )}
-                {isAuthenticated && (
-                    <Link
-                        href="/hero/company"
-                        onClick={() => setMobileOpen(false)}
-                        className={clsx(
-                            "flex items-center rounded-lg px-4 py-3 text-base font-medium transition-colors mb-1",
-                            pathname.startsWith("/hero/company")
-                                ? "bg-red-50 text-[#E53935]"
-                                : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                        )}
-                    >
-                        기업 허브
-                    </Link>
-                )}
-                {navItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={clsx(
-                            "flex items-center rounded-lg px-4 py-3 text-base font-medium transition-colors",
-                            isActive(item.href)
-                                ? "bg-red-50 text-[#E53935]"
-                                : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                        )}
-                    >
-                        {item.name}
-                    </Link>
-                ))}
-                <Link
-                    href="/hero/about"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center rounded-lg px-4 py-3 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                >
-                    About
-                </Link>
-            </nav>
-
-            {/* 하단 */}
-            <div className="border-t border-neutral-100 px-3 py-4">
-                {isAuthenticated ? (
-                    <Link
-                        href="/hero/my"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                    >
-                        {user?.avatarUrl ? (
-                            <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                className="h-7 w-7 rounded-full object-cover shrink-0" />
-                        ) : (
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
-                                {user?.name?.charAt(0) ?? '?'}
-                            </div>
-                        )}
-                        <div className="min-w-0">
-                            <div className="truncate font-medium text-neutral-800">{user?.name ?? '마이페이지'}</div>
-                            <div className="truncate text-[11px] text-neutral-400">{user?.email}</div>
-                        </div>
-                    </Link>
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="HeRo"
+            bgClass="bg-white"
+            textTone="dark"
+            footer={
+                isAuthenticated ? (
+                    <Link href="/hero/my" onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-700 hover:text-neutral-900">마이페이지</Link>
                 ) : (
                     <div className="flex flex-col gap-2">
                         <button type="button" onClick={() => openLogin("login")}
@@ -246,9 +152,60 @@ export function HeRoHeader() {
                             가입하기
                         </button>
                     </div>
-                )}
-            </div>
-        </div>
+                )
+            }
+        >
+            {isAuthenticated && (
+                <Link
+                    href="/hero/journey"
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-bold transition-colors mb-2",
+                        pathname.startsWith("/hero/journey")
+                            ? "bg-[#E53935] text-white"
+                            : "border border-[#E53935] text-[#E53935] hover:bg-red-50"
+                    )}
+                >
+                    나의 Journey
+                </Link>
+            )}
+            {isAuthenticated && (
+                <Link
+                    href="/hero/company"
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        pathname.startsWith("/hero/company")
+                            ? "bg-red-50 text-[#E53935]"
+                            : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    )}
+                >
+                    기업 허브
+                </Link>
+            )}
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-red-50 text-[#E53935]"
+                            : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+            <Link
+                href="/hero/about"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+            >
+                About
+            </Link>
+        </UniverseMobileMenu>
 
         <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} accentColor="#E53935" defaultTab={loginTab} />
         </>

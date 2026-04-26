@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
+import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
 import { loginHref } from '@/lib/login-href';
 
 export default function SmarCommHeader() {
@@ -14,6 +15,7 @@ export default function SmarCommHeader() {
   const { isAuthenticated } = useAuth();
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center text-xl tracking-[-0.03em]">
@@ -43,24 +45,30 @@ export default function SmarCommHeader() {
         </button>
       </div>
 
-      {menuOpen && (
-        <div className="border-t border-border bg-white px-5 py-4 md:hidden">
-          <nav className="flex flex-col gap-3">
-            <Link href="/#process" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>서비스</Link>
-            <Link href="/blog" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>블로그</Link>
-            <Link href="/pricing" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>요금제</Link>
-            <Link href={isAuthenticated ? '/dashboard' : '/'} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>워크스페이스</Link>
-            {isAuthenticated ? (
-              <Link href="/dashboard/profile" className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>마이페이지</Link>
-            ) : (
-              <>
-                <Link href={loginHref(currentPath)} className="text-sm text-text-sub" onClick={() => setMenuOpen(false)}>로그인</Link>
-                <Link href="/signup" className="mt-1 rounded-full bg-text px-4 py-2.5 text-center text-sm font-semibold text-white" onClick={() => setMenuOpen(false)}>무료 가입</Link>
-              </>
-            )}
-          </nav>
-        </div>
-      )}
     </header>
+
+    <UniverseMobileMenu
+      open={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      brandName="SmarComm"
+      bgClass="bg-white"
+      textTone="dark"
+      footer={
+        isAuthenticated ? (
+          <Link href="/dashboard/profile" onClick={() => setMenuOpen(false)} className="block text-sm text-neutral-600 hover:text-neutral-900">마이페이지</Link>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Link href={loginHref(currentPath)} onClick={() => setMenuOpen(false)} className="text-sm text-neutral-600 hover:text-neutral-900">로그인</Link>
+            <Link href="/signup" onClick={() => setMenuOpen(false)} className="rounded-full bg-neutral-900 px-4 py-2.5 text-center text-sm font-semibold text-white">무료 가입</Link>
+          </div>
+        )
+      }
+    >
+      <Link href="/#process" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">서비스</Link>
+      <Link href="/blog" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">블로그</Link>
+      <Link href="/pricing" onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">요금제</Link>
+      <Link href={isAuthenticated ? '/dashboard' : '/'} onClick={() => setMenuOpen(false)} className="block rounded-lg px-4 py-2.5 text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900">워크스페이스</Link>
+    </UniverseMobileMenu>
+    </>
   );
 }

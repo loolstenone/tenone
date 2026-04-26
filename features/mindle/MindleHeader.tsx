@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import clsx from "clsx";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 const navItems = [
     { name: "트렌드", href: "/mindle/trends" },
@@ -19,6 +21,7 @@ export function MindleHeader() {
     const pathname = usePathname();
 
     return (
+        <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-neutral-800/50 backdrop-blur-md text-white">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-12 items-center">
                 {/* Logo */}
@@ -59,17 +62,25 @@ export function MindleHeader() {
                 </button>
             </div>
 
-            {/* Mobile menu */}
-            {mobileOpen && (
-                <div className="lg:hidden bg-[#0A0A0A] border-t border-neutral-800/50 px-6 py-4 space-y-3">
-                    {navItems.map((item) => (
-                        <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
-                            className={`block text-sm font-bold tracking-wider py-2 ${pathname?.startsWith(item.href) ? "text-[#F5C518]" : "text-neutral-400"}`}>
-                            {item.name}
-                        </Link>
-                    ))}
-                </div>
-            )}
         </header>
+
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Mindle"
+            bgClass="bg-[#0A0A0A]"
+            textTone="light"
+        >
+            {navItems.map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        pathname?.startsWith(item.href) ? "bg-[#F5C518]/10 text-[#F5C518]" : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                    )}>
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
+        </>
     );
 }

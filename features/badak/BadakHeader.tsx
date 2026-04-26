@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseUtilityBar } from "@/components/UniverseUtilityBar";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { LoginModal } from "@/components/LoginModal";
 
 const PREFIX = '/badak';
@@ -23,7 +24,6 @@ const navItems = [
 export function BadakHeader() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [hasOpened, setHasOpened] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginTab, setLoginTab] = useState<"login" | "signup">("login");
     const { isAuthenticated, user } = useAuth();
@@ -108,7 +108,7 @@ export function BadakHeader() {
                         </button>
                     )}
                     <button
-                        onClick={() => { if (!hasOpened) setHasOpened(true); setMobileOpen(!mobileOpen); }}
+                        onClick={() => setMobileOpen(!mobileOpen)}
                         className="p-2 text-neutral-300 hover:text-white"
                         aria-label="메뉴 열기"
                     >
@@ -118,74 +118,15 @@ export function BadakHeader() {
             </nav>
         </header>
 
-        {/* 모바일 우측 슬라이드 패널 */}
-        {/* 배경 오버레이 — z-[9998]: 클라우드 버블(max ~100)보다 훨씬 위 */}
-        <div
-            className={clsx(
-                "fixed inset-0 z-[9998] md:hidden transition-opacity duration-300",
-                mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            )}
-            style={{ background: 'rgba(0,0,0,0.6)' }}
-            onClick={() => setMobileOpen(false)}
-        />
-        {/* 패널 */}
-        <div
-            className={clsx(
-                "fixed top-0 right-0 bottom-0 z-[9999] md:hidden w-2/3 max-w-sm flex flex-col",
-                hasOpened && "transition-transform duration-300 ease-out",
-                mobileOpen ? "translate-x-0" : "translate-x-full"
-            )}
-            style={{ background: '#12122a', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
-        >
-            {/* 패널 헤더 */}
-            <div className="flex h-16 items-center justify-between px-5 border-b border-white/8">
-                <span className="text-base font-bold text-white/60">메뉴</span>
-                <button onClick={() => setMobileOpen(false)} className="p-1.5 text-white/40 hover:text-white">
-                    <X className="h-5 w-5" />
-                </button>
-            </div>
-
-            {/* 네비 링크 */}
-            <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-2">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={clsx(
-                            "flex items-center rounded-lg px-4 py-3 text-base font-medium transition-colors",
-                            isActive(item.href)
-                                ? "bg-amber-400/10 text-amber-400"
-                                : "text-neutral-400 hover:bg-white/5 hover:text-white"
-                        )}
-                    >
-                        {item.name}
-                    </Link>
-                ))}
-            </nav>
-
-            {/* 하단 */}
-            <div className="border-t border-white/8 px-4 py-4">
-                {isAuthenticated ? (
-                    <Link
-                        href={`${PREFIX}/my`}
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-300 hover:bg-white/5 hover:text-white"
-                    >
-                        {user?.avatarUrl ? (
-                            <Image src={user.avatarUrl} alt={user.name || ''} width={28} height={28}
-                                className="h-7 w-7 rounded-full object-cover shrink-0" />
-                        ) : (
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                                style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}>
-                                {user?.name?.charAt(0) ?? '?'}
-                            </div>
-                        )}
-                        <div className="min-w-0">
-                            <div className="truncate font-medium text-white/80">{user?.name ?? '마이페이지'}</div>
-                            <div className="truncate text-[11px] text-white/35">{user?.email}</div>
-                        </div>
-                    </Link>
+        <UniverseMobileMenu
+            open={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+            brandName="Badak"
+            bgStyle={{ background: '#12122a' }}
+            textTone="light"
+            footer={
+                isAuthenticated ? (
+                    <Link href={`${PREFIX}/my`} onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-neutral-300 hover:text-white">마이페이지</Link>
                 ) : (
                     <div className="flex flex-col gap-2">
                         <button
@@ -198,15 +139,31 @@ export function BadakHeader() {
                         <button
                             type="button"
                             onClick={() => openLogin("signup")}
-                            className="rounded-lg border-none px-4 py-2 text-center text-sm font-semibold"
+                            className="rounded-lg px-4 py-2 text-center text-sm font-semibold"
                             style={{ background: 'rgba(255,217,61,0.15)', color: '#ffd93d' }}
                         >
                             가입하기
                         </button>
                     </div>
-                )}
-            </div>
-        </div>
+                )
+            }
+        >
+            {navItems.map((item) => (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={clsx(
+                        "block rounded-lg px-4 py-2.5 text-base font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-amber-400/10 text-amber-400"
+                            : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                    )}
+                >
+                    {item.name}
+                </Link>
+            ))}
+        </UniverseMobileMenu>
 
         <LoginModal
             isOpen={loginOpen}

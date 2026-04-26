@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UniverseUtilityBar } from '@/components/UniverseUtilityBar';
+import { UniverseMobileMenu } from '@/components/UniverseMobileMenu';
 
 const navItems = [
   { name: '서비스', href: '/brandgravity/services' },
@@ -19,6 +20,7 @@ export default function BrandGravityHeader() {
   const { isAuthenticated } = useAuth();
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/5">
       <nav className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
         {/* Left: Logo */}
@@ -71,30 +73,37 @@ export default function BrandGravityHeader() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-[#0A0A0A] border-t border-white/5 px-6 py-4 space-y-1">
-          {navItems.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMenuOpen(false)}
-              className={`block text-sm py-2 ${
-                pathname === item.href ? 'text-white font-semibold' : 'text-neutral-400'
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-          <Link
-            href={isAuthenticated ? '/brandgravity/my' : '/login'}
-            onClick={() => setMenuOpen(false)}
-            className="block text-center mt-3 px-4 py-2.5 bg-amber-500 text-black text-sm rounded-lg font-bold"
-          >
-            {isAuthenticated ? '마이페이지' : '시작하기'}
-          </Link>
-        </div>
-      )}
     </header>
+
+    <UniverseMobileMenu
+      open={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      brandName="Brand Gravity"
+      bgClass="bg-[#0A0A0A]"
+      textTone="light"
+      footer={
+        <Link
+          href={isAuthenticated ? '/brandgravity/my' : '/login'}
+          onClick={() => setMenuOpen(false)}
+          className="block text-center px-4 py-2.5 bg-amber-500 text-black text-sm rounded-lg font-bold"
+        >
+          {isAuthenticated ? '마이페이지' : '시작하기'}
+        </Link>
+      }
+    >
+      {navItems.map(item => (
+        <Link
+          key={item.href}
+          href={item.href}
+          onClick={() => setMenuOpen(false)}
+          className={`block rounded-lg px-4 py-2.5 text-base font-medium transition-colors ${
+            pathname === item.href ? 'bg-white/10 text-white' : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </UniverseMobileMenu>
+    </>
   );
 }
