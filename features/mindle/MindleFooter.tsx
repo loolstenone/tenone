@@ -1,48 +1,33 @@
 "use client";
 
-import Link from "next/link";
+import { UniverseFooter } from "@/components/UniverseFooter";
 
 export function MindleFooter() {
     return (
-        <footer className="bg-[#0A0A0A] text-neutral-400 border-t border-neutral-800/50">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-                    <div className="md:col-span-1">
-                        <div className="mb-3 text-xl font-bold"><span className="text-[#F5C518]">Mindle</span> <span className="text-white text-sm font-normal">Whole See</span></div>
-                        <p className="text-sm leading-relaxed text-neutral-500">
-                            신호에서 인사이트를 피워냅니다.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">콘텐츠</h3>
-                        <div className="space-y-2">
-                            <Link href="/mindle/trends" className="block text-sm hover:text-[#F5C518] transition-colors">트렌드</Link>
-                            <Link href="/mindle/reports" className="block text-sm hover:text-[#F5C518] transition-colors">리포트</Link>
-                            <Link href="/mindle/data" className="block text-sm hover:text-[#F5C518] transition-colors">데이터</Link>
-                            <Link href="/mindle/references" className="block text-sm hover:text-[#F5C518] transition-colors">레퍼런스</Link>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">소개</h3>
-                        <div className="space-y-2">
-                            <Link href="/mindle/about" className="block text-sm hover:text-[#F5C518] transition-colors">Mindle 소개</Link>
-                            <Link href="/mindle/newsletter" className="block text-sm hover:text-[#F5C518] transition-colors">뉴스레터</Link>
-                            <Link href="/contact" className="block text-sm hover:text-[#F5C518] transition-colors">문의</Link>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-white text-xs font-semibold mb-3 tracking-wider">유니버스</h3>
-                        <div className="space-y-2">
-                            <Link href="/" className="block text-sm hover:text-[#F5C518] transition-colors">TenOne Universe</Link>
-                            <Link href="/badak" className="block text-sm hover:text-[#F5C518] transition-colors">Badak</Link>
-                            <Link href="/smarcomm" className="block text-sm hover:text-[#F5C518] transition-colors">SmarComm</Link>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-10 pt-6 border-t border-neutral-800/50 text-center text-xs text-neutral-600">
-                    &copy; Mindle. Powered by <a href="/about?tab=universe" className="hover:text-neutral-400 transition-colors">Ten:One&trade; Universe</a>.
-                </div>
-            </div>
-        </footer>
+        <UniverseFooter
+            brandName="Mindle"
+            tagline="신호에서 인사이트를 피워냅니다 · Whole See"
+            accentColor="#F5C518"
+            dark={true}
+            linkColumns={[
+                {
+                    title: "콘텐츠",
+                    links: [
+                        { label: "트렌드", href: "/mindle/trends" },
+                        { label: "리포트", href: "/mindle/reports" },
+                        { label: "데이터", href: "/mindle/data" },
+                        { label: "레퍼런스", href: "/mindle/references" },
+                    ],
+                },
+                {
+                    title: "소개",
+                    links: [
+                        { label: "Mindle 소개", href: "/mindle/about" },
+                        { label: "뉴스레터", href: "/mindle/newsletter" },
+                        { label: "문의", href: "/contact" },
+                    ],
+                },
+            ]}
+        />
     );
 }

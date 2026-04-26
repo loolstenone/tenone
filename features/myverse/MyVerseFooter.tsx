@@ -1,18 +1,36 @@
 "use client";
 
 import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
+import { UniverseFooter } from "@/components/UniverseFooter";
 
 export function MyVerseFooter() {
     return (
-        <footer className="border-t border-neutral-100">
-            <div className="mx-auto max-w-2xl px-6 py-10 border-b border-neutral-100">
+        <UniverseFooter
+            brandName="Myverse"
+            tagline="Personal Blackbox · 셀프 디스커버리"
+            accentColor="#6366f1"
+            linkColumns={[
+                {
+                    title: "Menu",
+                    links: [
+                        { label: "서비스", href: "/myverse/service" },
+                        { label: "기술", href: "/myverse/technology" },
+                        { label: "철학", href: "/myverse/philosophy" },
+                        { label: "팀", href: "/myverse/team" },
+                        { label: "로드맵", href: "/myverse/roadmap" },
+                    ],
+                },
+                {
+                    title: "Contact",
+                    links: [
+                        { label: "문의", href: "/myverse/contact" },
+                    ],
+                },
+            ]}
+        >
+            <div className="mx-auto max-w-2xl">
                 <NewsletterSubscribeForm source="myverse" brandName="Myverse" accentColor="#6366f1" />
             </div>
-            <div className="py-8 px-6 text-center">
-                <p className="text-xs text-neutral-400">
-                    &copy; Myverse. Powered by <a href="https://tenone.biz" className="hover:text-neutral-600 transition-colors">Ten:One&trade; Universe</a>.
-                </p>
-            </div>
-        </footer>
+        </UniverseFooter>
     );
 }

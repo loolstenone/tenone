@@ -1,20 +1,37 @@
 "use client";
 
 import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
+import { UniverseFooter } from "@/components/UniverseFooter";
 
 export function BadakFooter() {
     return (
-        <footer className="bg-[#1a1a2e] text-neutral-400 border-t border-neutral-800">
-            <div className="mx-auto max-w-2xl px-6 py-12">
-                <NewsletterSubscribeForm source="badak" brandName="Badak" dark accentColor="#D32F2F" />
+        <UniverseFooter
+            brandName="Badak"
+            tagline="기획자 네트워크"
+            accentColor="#ffd93d"
+            dark={true}
+            linkColumns={[
+                {
+                    title: "서비스",
+                    links: [
+                        { label: "모임", href: "/badak/groups" },
+                        { label: "니즈 탐색", href: "/badak/explore" },
+                        { label: "커뮤니티", href: "/badak/community" },
+                        { label: "스토리", href: "/badak/story" },
+                    ],
+                },
+                {
+                    title: "참여",
+                    links: [
+                        { label: "모임 개설", href: "/badak/groups/create" },
+                        { label: "바닥장 신청", href: "/badak/apply" },
+                    ],
+                },
+            ]}
+        >
+            <div className="mx-auto max-w-2xl">
+                <NewsletterSubscribeForm source="badak" brandName="Badak" dark accentColor="#ffd93d" />
             </div>
-            <div className="border-t border-neutral-800">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 py-6">
-                    <div className="text-xs text-center">
-                        &copy; Badak. Powered by <a href="/about?tab=universe" className="hover:text-white transition-colors">Ten:One&trade; Universe</a>.
-                    </div>
-                </div>
-            </div>
-        </footer>
+        </UniverseFooter>
     );
 }
