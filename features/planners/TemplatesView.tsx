@@ -59,7 +59,7 @@ function CellTextarea({
             onChange={e => onChange(cellKey, e.target.value)}
             placeholder={placeholder}
             rows={3}
-            className="w-full mt-2 resize-none bg-transparent text-[11px] text-neutral-700 placeholder:text-neutral-300 focus:outline-none leading-relaxed"
+            className="w-full mt-1.5 resize-none bg-transparent text-[11px] text-slate-700 placeholder:text-slate-300 placeholder:italic focus:outline-none leading-relaxed font-normal"
         />
     );
 }
@@ -67,6 +67,20 @@ function CellTextarea({
 // ── 특수 프레임워크 렌더러 ────────────────────────────────────────────
 type QuadrantDef = { key: string; label: string; desc: string; color: string; text: string };
 
+/**
+ * QuadrantGrid — 표준 데카르트 좌표 컨벤션
+ *
+ * X축: Low ← → High (왼쪽이 -, 오른쪽이 +)
+ * Y축: 위가 High (+), 아래가 Low (-)
+ *
+ * quads 배열 순서 (CSS grid 2x2 row-major):
+ *   [0] top-left    = X-, Y+ (Q2)
+ *   [1] top-right   = X+, Y+ (Q1)
+ *   [2] bottom-left = X-, Y- (Q3)
+ *   [3] bottom-right= X+, Y- (Q4)
+ *
+ * 컨설팅급 디자인: slate 베이스, 1px 좌측 액센트 보더, 미니멀 타이포
+ */
 function QuadrantGrid({
     axisX, axisXHigh, axisXLow,
     axisY, axisYHigh, axisYLow,
@@ -81,23 +95,35 @@ function QuadrantGrid({
     onChange: (key: string, val: string) => void;
 }) {
     return (
-        <div className="my-2 select-none">
-            <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-[10px] text-neutral-400 font-medium">← {axisXHigh}</span>
-                <span className="text-[11px] font-semibold text-neutral-600 tracking-wide uppercase">{axisX}</span>
-                <span className="text-[10px] text-neutral-400 font-medium">{axisXLow} →</span>
+        <div className="my-3 select-none">
+            {/* 상단 X축 — Low ← X → High (표준 컨벤션) */}
+            <div className="flex items-center justify-center mb-3 ml-9">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{axisXLow}</span>
+                <span className="mx-2 text-slate-300">←</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-700">{axisX}</span>
+                <span className="mx-2 text-slate-300">→</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{axisXHigh}</span>
             </div>
             <div className="flex gap-2">
-                <div className="flex flex-col items-center justify-center shrink-0 w-5">
-                    <span className="text-[9px] text-neutral-400 [writing-mode:vertical-rl] rotate-180 font-medium tracking-widest leading-none">{axisYHigh}</span>
-                    <span className="text-[9px] font-semibold text-neutral-500 my-1 [writing-mode:vertical-rl] rotate-180 tracking-wide uppercase leading-none">{axisY}</span>
-                    <span className="text-[9px] text-neutral-400 [writing-mode:vertical-rl] rotate-180 font-medium tracking-widest leading-none">{axisYLow}</span>
+                {/* Y축 — 위 High, 아래 Low (표준 컨벤션) */}
+                <div className="flex flex-col items-center justify-between shrink-0 w-7 py-2">
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYHigh}</span>
+                    <div className="flex flex-col items-center my-2 flex-1 justify-center">
+                        <span className="text-slate-300 leading-none">↑</span>
+                        <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 [writing-mode:vertical-rl] rotate-180 my-1">{axisY}</span>
+                        <span className="text-slate-300 leading-none">↓</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYLow}</span>
                 </div>
-                <div className="flex-1 grid grid-cols-2 gap-1.5">
+                {/* 2x2 그리드 */}
+                <div className="flex-1 grid grid-cols-2 gap-2">
                     {quads.map((q) => (
-                        <div key={q.key} className={`rounded-lg p-3 border ${q.color} min-h-28`}>
-                            <p className={`text-xs font-bold ${q.text}`}>{q.label}</p>
-                            <p className="text-[10px] text-neutral-400 mt-0.5 mb-1">{q.desc}</p>
+                        <div
+                            key={q.key}
+                            className={`rounded-md p-3 min-h-32 transition-shadow hover:shadow-sm ${q.color}`}
+                        >
+                            <p className={`text-[11px] font-bold tracking-wide uppercase ${q.text}`}>{q.label}</p>
+                            <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.desc}</p>
                             <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} />
                         </div>
                     ))}
@@ -108,27 +134,35 @@ function QuadrantGrid({
 }
 
 function SwotGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    // 표준 SWOT: 세로축=Helpful↔Harmful, 가로축=Internal↔External
+    // top-left=S(Internal,Helpful), top-right=O(External,Helpful)
+    // bottom-left=W(Internal,Harmful), bottom-right=T(External,Harmful)
     const cells = [
-        { key: "s", label: "S — Strengths", sub: "내부 강점", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-        { key: "w", label: "W — Weaknesses", sub: "내부 약점", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-        { key: "o", label: "O — Opportunities", sub: "외부 기회", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-        { key: "t", label: "T — Threats", sub: "외부 위협", color: "bg-red-50 border border-red-200", text: "text-red-700" },
+        { key: "s", label: "Strengths",     sub: "내부 · 긍정", tone: "primary"   as const },
+        { key: "o", label: "Opportunities", sub: "외부 · 긍정", tone: "secondary" as const },
+        { key: "w", label: "Weaknesses",    sub: "내부 · 부정", tone: "tertiary"  as const },
+        { key: "t", label: "Threats",       sub: "외부 · 부정", tone: "muted"     as const },
     ];
     return (
-        <div className="my-2">
-            <div className="grid grid-cols-2 gap-1.5">
+        <div className="my-3 select-none">
+            <div className="flex items-center justify-center mb-3">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Internal</span>
+                <span className="mx-2 text-slate-300">↔</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">External</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
                 {cells.map(q => (
-                    <div key={q.key} className={`rounded-lg p-3 min-h-28 ${q.color}`}>
-                        <p className={`text-xs font-bold ${q.text}`}>{q.label}</p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">{q.sub}</p>
+                    <div key={q.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
+                        <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[q.tone]}`}>{q.label}</p>
+                        <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.sub}</p>
                         <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} />
                     </div>
                 ))}
             </div>
-            <div className="flex justify-between mt-1.5 px-1">
-                <span className="text-[9px] text-neutral-400">↑ Helpful</span>
-                <span className="text-[9px] text-neutral-400">Internal ↔ External</span>
-                <span className="text-[9px] text-neutral-400">Harmful ↓</span>
+            <div className="flex items-center justify-center mt-2.5 gap-2">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Helpful</span>
+                <span className="text-slate-300">↑↓</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Harmful</span>
             </div>
         </div>
     );
@@ -136,16 +170,17 @@ function SwotGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 
 function FourPGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "product", label: "Product", emoji: "📦", color: "bg-violet-50 border border-violet-200", text: "text-violet-700" },
-        { key: "price", label: "Price", emoji: "💰", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-        { key: "place", label: "Place", emoji: "📍", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-        { key: "promotion", label: "Promotion", emoji: "📣", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
+        { key: "product",   label: "Product",   sub: "제품·서비스",       tone: "primary"   as const },
+        { key: "price",     label: "Price",     sub: "가격·수익 모델",    tone: "secondary" as const },
+        { key: "place",     label: "Place",     sub: "유통·접근",         tone: "tertiary"  as const },
+        { key: "promotion", label: "Promotion", sub: "프로모션·커뮤니케이션", tone: "muted" as const },
     ];
     return (
-        <div className="my-2 grid grid-cols-2 gap-1.5">
+        <div className="my-3 grid grid-cols-2 gap-2">
             {cells.map(q => (
-                <div key={q.key} className={`rounded-lg p-3 min-h-28 ${q.color}`}>
-                    <p className={`text-xs font-bold ${q.text}`}>{q.emoji} {q.label}</p>
+                <div key={q.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[q.tone]} transition-shadow hover:shadow-sm`}>
+                    <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[q.tone]}`}>{q.label}</p>
+                    <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{q.sub}</p>
                     <CellTextarea cellKey={q.key} value={data[q.key] ?? ""} onChange={onChange} />
                 </div>
             ))}
@@ -153,16 +188,38 @@ function FourPGrid({ data, onChange }: { data: FrameworkData; onChange: (key: st
     );
 }
 
+// ── 컨설팅급 카드 팔레트 (slate 베이스 + 좌측 1px 액센트 보더) ──
+// 사분면 매트릭스용: 의미 강도에 따라 4단계 톤
+const Q_TONE = {
+    primary:   "bg-slate-50 border-l-2 border-slate-900 border-y border-r border-slate-200",         // 핵심 (Star, Do)
+    secondary: "bg-white border-l-2 border-slate-600 border-y border-r border-slate-200",            // 주요 (Schedule, Cash Cow)
+    tertiary:  "bg-white border-l-2 border-slate-400 border-y border-r border-slate-200",            // 보조 (Question, Delegate)
+    muted:     "bg-slate-50/50 border-l-2 border-slate-300 border-y border-r border-slate-200",      // 약함 (Dog, Eliminate)
+} as const;
+const Q_TEXT = {
+    primary:   "text-slate-900",
+    secondary: "text-slate-800",
+    tertiary:  "text-slate-700",
+    muted:     "text-slate-500",
+} as const;
+
 function AnsoffGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    // 표준 Ansoff: X축=시장(Existing→New), Y축=제품(New→Existing 위가 Existing)
+    // 통상 Existing이 보수적/저위험, New가 공격적/고위험
+    // 배열 순서 [top-left=X-Y+, top-right=X+Y+, bottom-left=X-Y-, bottom-right=X+Y-]
     return (
         <QuadrantGrid
-            axisX="Products" axisXHigh="Existing" axisXLow="New"
-            axisY="Markets" axisYHigh="Existing" axisYLow="New"
+            axisX="시장 (Markets)" axisXLow="기존" axisXHigh="신규"
+            axisY="제품 (Products)" axisYHigh="기존" axisYLow="신규"
             quads={[
-                { key: "penetration", label: "시장 침투", desc: "기존 제품 × 기존 시장", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-                { key: "product_dev", label: "제품 개발", desc: "신제품 × 기존 시장", color: "bg-violet-50 border border-violet-200", text: "text-violet-700" },
-                { key: "market_dev", label: "시장 개발", desc: "기존 제품 × 신시장", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-                { key: "diversification", label: "다각화", desc: "신제품 × 신시장", color: "bg-orange-50 border border-orange-200", text: "text-orange-700" },
+                // top-left: 기존 시장 × 기존 제품 = Market Penetration
+                { key: "penetration", label: "Market Penetration", desc: "시장 침투 · 기존×기존", color: Q_TONE.primary, text: Q_TEXT.primary },
+                // top-right: 신규 시장 × 기존 제품 = Market Development
+                { key: "market_dev", label: "Market Development", desc: "시장 개발 · 신시장×기존제품", color: Q_TONE.secondary, text: Q_TEXT.secondary },
+                // bottom-left: 기존 시장 × 신제품 = Product Development
+                { key: "product_dev", label: "Product Development", desc: "제품 개발 · 기존시장×신제품", color: Q_TONE.tertiary, text: Q_TEXT.tertiary },
+                // bottom-right: 신규 시장 × 신제품 = Diversification
+                { key: "diversification", label: "Diversification", desc: "다각화 · 신시장×신제품 (고위험)", color: Q_TONE.muted, text: Q_TEXT.muted },
             ]}
             data={data}
             onChange={onChange}
@@ -171,15 +228,21 @@ function AnsoffGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 }
 
 function BcgGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    // 표준 BCG: X축=시장 점유율 (Low→High), Y축=시장 성장률 (Low→High, 위가 High)
+    // [top-left=X-Y+, top-right=X+Y+, bottom-left=X-Y-, bottom-right=X+Y-]
     return (
         <QuadrantGrid
-            axisX="Market Share" axisXHigh="High" axisXLow="Low"
+            axisX="Market Share" axisXLow="Low" axisXHigh="High"
             axisY="Market Growth" axisYHigh="High" axisYLow="Low"
             quads={[
-                { key: "star", label: "⭐ Star", desc: "고성장·고점유", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-                { key: "question", label: "❓ Question Mark", desc: "고성장·저점유", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-                { key: "cow", label: "🐄 Cash Cow", desc: "저성장·고점유", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-                { key: "dog", label: "🐕 Dog", desc: "저성장·저점유", color: "bg-neutral-100 border border-neutral-200", text: "text-neutral-500" },
+                // top-left: Low Share × High Growth = Question Mark
+                { key: "question", label: "Question Mark", desc: "저점유 · 고성장 (투자 검토)", color: Q_TONE.tertiary, text: Q_TEXT.tertiary },
+                // top-right: High Share × High Growth = Star
+                { key: "star", label: "Star", desc: "고점유 · 고성장 (전략 자산)", color: Q_TONE.primary, text: Q_TEXT.primary },
+                // bottom-left: Low Share × Low Growth = Dog
+                { key: "dog", label: "Dog", desc: "저점유 · 저성장 (철수 검토)", color: Q_TONE.muted, text: Q_TEXT.muted },
+                // bottom-right: High Share × Low Growth = Cash Cow
+                { key: "cow", label: "Cash Cow", desc: "고점유 · 저성장 (현금 창출)", color: Q_TONE.secondary, text: Q_TEXT.secondary },
             ]}
             data={data}
             onChange={onChange}
@@ -188,51 +251,56 @@ function BcgGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
 }
 
 function NineBoxGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
-    const perf = ["Low", "Mid", "High"];
-    const pot = ["High", "Mid", "Low"];
-    const LABELS: Record<string, { label: string; color: string }> = {
-        "High-High": { label: "Star", color: "bg-teal-100 border-teal-300 text-teal-800" },
-        "High-Mid": { label: "High Performer", color: "bg-teal-50 border-teal-200 text-teal-700" },
-        "High-Low": { label: "Trusted Professional", color: "bg-blue-50 border-blue-200 text-blue-700" },
-        "Mid-High": { label: "High Potential", color: "bg-violet-50 border-violet-200 text-violet-700" },
-        "Mid-Mid": { label: "Core Player", color: "bg-neutral-50 border-neutral-200 text-neutral-600" },
-        "Mid-Low": { label: "Average Performer", color: "bg-amber-50 border-amber-200 text-amber-700" },
-        "Low-High": { label: "Enigma", color: "bg-orange-50 border-orange-200 text-orange-700" },
-        "Low-Mid": { label: "Inconsistent Player", color: "bg-red-50 border-red-200 text-red-600" },
-        "Low-Low": { label: "Under Performer", color: "bg-red-50 border-red-200 text-red-700" },
+    // 표준 9-Box: X축=Performance (Low→High), Y축=Potential (Low→High, 위가 High)
+    const perf = ["Low", "Mid", "High"];      // X axis 좌→우
+    const pot = ["High", "Mid", "Low"];       // Y axis 위→아래 (위가 High)
+    // 의미 강도 분류: primary(우상단 영역) / secondary(중심 라인) / tertiary(나머지) / muted(좌하단)
+    const LABELS: Record<string, { label: string; tone: keyof typeof Q_TONE }> = {
+        "High-Low":  { label: "Enigma",                tone: "tertiary" },   // top-left  Low Perf, High Pot
+        "High-Mid":  { label: "High Potential",        tone: "secondary" },  // top-mid
+        "High-High": { label: "Star",                  tone: "primary" },    // top-right High Perf, High Pot
+        "Mid-Low":   { label: "Inconsistent Player",   tone: "muted" },
+        "Mid-Mid":   { label: "Core Player",           tone: "secondary" },
+        "Mid-High":  { label: "High Performer",        tone: "primary" },
+        "Low-Low":   { label: "Under Performer",       tone: "muted" },      // bottom-left
+        "Low-Mid":   { label: "Average Performer",     tone: "tertiary" },
+        "Low-High":  { label: "Trusted Professional",  tone: "secondary" },  // bottom-right High Perf, Low Pot
     };
     return (
-        <div className="my-2">
-            <div className="flex gap-1">
-                <div className="flex flex-col justify-around pr-1 py-1 shrink-0 w-14 text-right">
-                    {pot.map(p => <span key={p} className="text-[9px] text-neutral-400">{p} ↕</span>)}
-                </div>
-                <div className="flex-1">
-                    <div className="grid grid-cols-3 gap-1">
-                        {pot.map(p => perf.map(pf => {
-                            const k = `${p}-${pf}`;
-                            const info = LABELS[k] ?? { label: k, color: "bg-neutral-50 border-neutral-200 text-neutral-500" };
-                            return (
-                                <div key={k} className={`rounded border p-2 min-h-20 ${info.color}`}>
-                                    <p className="text-[9px] font-bold leading-tight mb-1">{info.label}</p>
-                                    <textarea
-                                        value={data[k] ?? ""}
-                                        onChange={e => onChange(k, e.target.value)}
-                                        placeholder="이름/메모…"
-                                        rows={2}
-                                        className="w-full resize-none bg-transparent text-[10px] placeholder:text-current placeholder:opacity-30 focus:outline-none leading-relaxed"
-                                    />
-                                </div>
-                            );
-                        }))}
-                    </div>
-                    <div className="flex justify-around mt-1">
-                        {perf.map(p => <span key={p} className="text-[9px] text-neutral-400">{p}</span>)}
-                    </div>
-                </div>
+        <div className="my-3 select-none">
+            {/* X축 상단 라벨 */}
+            <div className="flex items-center justify-center mb-3 ml-16">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">Low</span>
+                <span className="mx-2 text-slate-300">←</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-700">Performance</span>
+                <span className="mx-2 text-slate-300">→</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">High</span>
             </div>
-            <div className="flex justify-center gap-8 mt-1 text-[9px] text-neutral-400">
-                <span>↑ Potential</span><span>Performance →</span>
+            <div className="flex gap-2">
+                {/* Y축 — Potential High↑ Low↓ */}
+                <div className="flex flex-col items-center justify-between shrink-0 w-7 py-2">
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">High</span>
+                    <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 [writing-mode:vertical-rl] rotate-180">Potential</span>
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">Low</span>
+                </div>
+                <div className="flex-1 grid grid-cols-3 gap-1.5">
+                    {pot.map(p => perf.map(pf => {
+                        const k = `${p}-${pf}`;
+                        const info = LABELS[k] ?? { label: k, tone: "tertiary" as const };
+                        return (
+                            <div key={k} className={`rounded-md p-2 min-h-24 ${Q_TONE[info.tone]}`}>
+                                <p className={`text-[10px] font-bold tracking-wide uppercase leading-tight ${Q_TEXT[info.tone]}`}>{info.label}</p>
+                                <textarea
+                                    value={data[k] ?? ""}
+                                    onChange={e => onChange(k, e.target.value)}
+                                    placeholder="이름/메모…"
+                                    rows={2}
+                                    className="w-full mt-1.5 resize-none bg-transparent text-[10px] text-slate-700 placeholder:text-slate-300 placeholder:italic focus:outline-none leading-relaxed"
+                                />
+                            </div>
+                        );
+                    }))}
+                </div>
             </div>
         </div>
     );
@@ -435,15 +503,21 @@ function MandalartGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 }
 
 function EisenhowerGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    // 표준 Eisenhower: X축=중요도 (Low→High), Y축=긴급도 (Low→High, 위가 High)
+    // [top-left=X-Y+, top-right=X+Y+, bottom-left=X-Y-, bottom-right=X+Y-]
     return (
         <QuadrantGrid
-            axisX="중요도" axisXHigh="High" axisXLow="Low"
-            axisY="긴급도" axisYHigh="High" axisYLow="Low"
+            axisX="중요도 (Importance)" axisXLow="Low" axisXHigh="High"
+            axisY="긴급도 (Urgency)" axisYHigh="High" axisYLow="Low"
             quads={[
-                { key: "do_now", label: "🔥 Do", desc: "긴급 × 중요 · 즉시 실행", color: "bg-red-50 border border-red-200", text: "text-red-700" },
-                { key: "schedule_it", label: "📅 Schedule", desc: "비긴급 × 중요 · 일정 잡기", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-                { key: "delegate", label: "🤝 Delegate", desc: "긴급 × 비중요 · 위임", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-                { key: "eliminate", label: "🗑️ Eliminate", desc: "비긴급 × 비중요 · 제거", color: "bg-neutral-100 border border-neutral-200", text: "text-neutral-500" },
+                // top-left: 비중요 × 긴급 = Delegate
+                { key: "delegate", label: "Delegate", desc: "위임 · 비중요·긴급", color: Q_TONE.tertiary, text: Q_TEXT.tertiary },
+                // top-right: 중요 × 긴급 = Do
+                { key: "do_now", label: "Do", desc: "즉시 실행 · 중요·긴급", color: Q_TONE.primary, text: Q_TEXT.primary },
+                // bottom-left: 비중요 × 비긴급 = Eliminate
+                { key: "eliminate", label: "Eliminate", desc: "제거 · 비중요·비긴급", color: Q_TONE.muted, text: Q_TEXT.muted },
+                // bottom-right: 중요 × 비긴급 = Schedule
+                { key: "schedule_it", label: "Schedule", desc: "계획 · 중요·비긴급", color: Q_TONE.secondary, text: Q_TEXT.secondary },
             ]}
             data={data}
             onChange={onChange}
@@ -453,17 +527,17 @@ function EisenhowerGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 
 function PestGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "political", label: "Political", sub: "정치·법률", emoji: "🏛️", color: "bg-red-50 border border-red-200", text: "text-red-700" },
-        { key: "economic", label: "Economic", sub: "경제", emoji: "💰", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-        { key: "social", label: "Social", sub: "사회·문화", emoji: "👥", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-        { key: "technological", label: "Technological", sub: "기술", emoji: "⚙️", color: "bg-violet-50 border border-violet-200", text: "text-violet-700" },
+        { key: "political",     label: "Political",     sub: "정치·법률·규제",   tone: "primary"   as const },
+        { key: "economic",      label: "Economic",      sub: "경제·금리·환율",   tone: "secondary" as const },
+        { key: "social",        label: "Social",        sub: "사회·문화·인구",   tone: "tertiary"  as const },
+        { key: "technological", label: "Technological", sub: "기술·혁신",         tone: "muted"     as const },
     ];
     return (
-        <div className="my-2 grid grid-cols-2 gap-1.5">
+        <div className="my-3 grid grid-cols-2 gap-2">
             {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 min-h-28 ${c.color}`}>
-                    <p className={`text-xs font-bold ${c.text}`}>{c.emoji} {c.label}</p>
-                    <p className="text-[10px] text-neutral-400 mt-0.5">{c.sub}</p>
+                <div key={c.key} className={`rounded-md p-3 min-h-32 ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
+                    <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[c.tone]}`}>{c.label}</p>
+                    <p className="text-[10px] text-slate-400 mt-1 mb-1.5 font-medium tracking-wider">{c.sub}</p>
                     <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} />
                 </div>
             ))}
@@ -472,22 +546,20 @@ function PestGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 }
 
 function MoscowGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    // 우선순위 4단계 — 의미 강도에 따라 톤 그라데이션
     const cells = [
-        { key: "must", label: "Must have", sub: "반드시 포함", emoji: "🔴", color: "bg-red-50 border border-red-200", text: "text-red-700" },
-        { key: "should", label: "Should have", sub: "가능하면 포함", emoji: "🟠", color: "bg-orange-50 border border-orange-200", text: "text-orange-700" },
-        { key: "could", label: "Could have", sub: "있으면 좋음", emoji: "🟡", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-        { key: "wont", label: "Won't have", sub: "이번엔 제외", emoji: "⚫", color: "bg-neutral-100 border border-neutral-200", text: "text-neutral-500" },
+        { key: "must",   label: "Must have",   sub: "반드시 포함 · 핵심 요건",  tone: "primary"   as const },
+        { key: "should", label: "Should have", sub: "가능하면 포함 · 권장",      tone: "secondary" as const },
+        { key: "could",  label: "Could have",  sub: "있으면 좋음 · 옵션",        tone: "tertiary"  as const },
+        { key: "wont",   label: "Won't have",  sub: "이번엔 제외 · 차기 검토",  tone: "muted"     as const },
     ];
     return (
-        <div className="my-2 space-y-1.5">
+        <div className="my-3 space-y-2">
             {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 ${c.color}`}>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm">{c.emoji}</span>
-                        <div>
-                            <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                            <p className="text-[10px] text-neutral-400">{c.sub}</p>
-                        </div>
+                <div key={c.key} className={`rounded-md p-3 ${Q_TONE[c.tone]} transition-shadow hover:shadow-sm`}>
+                    <div className="flex items-baseline justify-between">
+                        <p className={`text-[11px] font-bold tracking-wide uppercase ${Q_TEXT[c.tone]}`}>{c.label}</p>
+                        <p className="text-[10px] text-slate-400 font-medium tracking-wider">{c.sub}</p>
                     </div>
                     <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder="항목들을 줄바꿈으로 나열…" />
                 </div>
@@ -499,40 +571,45 @@ function MoscowGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 function QuadrantBlankGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const axisX = data["q_axis_x"] ?? "";
     const axisY = data["q_axis_y"] ?? "";
-    const quads = [
-        { key: "q2", label: "2사분면", desc: "X−, Y+", color: "bg-violet-50 border border-violet-200", text: "text-violet-700" },
-        { key: "q1", label: "1사분면", desc: "X+, Y+", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-        { key: "q3", label: "3사분면", desc: "X−, Y−", color: "bg-neutral-100 border border-neutral-200", text: "text-neutral-500" },
-        { key: "q4", label: "4사분면", desc: "X+, Y−", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
-    ];
+    // 표준 데카르트 좌표: 1사분면=X+Y+ (오른쪽 위), 2사분면=X-Y+ (왼쪽 위),
+    //                    3사분면=X-Y- (왼쪽 아래), 4사분면=X+Y- (오른쪽 아래)
     return (
-        <div className="my-2 space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+        <div className="my-2 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
                 <label className="block">
-                    <span className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">X축 라벨</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">X축 라벨</span>
                     <input
                         type="text"
                         value={axisX}
                         onChange={e => onChange("q_axis_x", e.target.value)}
                         placeholder="예: 중요도, 비용, 난이도…"
-                        className="w-full mt-1 px-2 py-1.5 text-xs border border-neutral-200 rounded bg-white focus:outline-none focus:border-[#0F766E]"
+                        className="w-full mt-1.5 px-3 py-2 text-xs border border-slate-200 rounded bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-colors"
                     />
                 </label>
                 <label className="block">
-                    <span className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">Y축 라벨</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Y축 라벨</span>
                     <input
                         type="text"
                         value={axisY}
                         onChange={e => onChange("q_axis_y", e.target.value)}
                         placeholder="예: 긴급도, 가치, 노력…"
-                        className="w-full mt-1 px-2 py-1.5 text-xs border border-neutral-200 rounded bg-white focus:outline-none focus:border-[#0F766E]"
+                        className="w-full mt-1.5 px-3 py-2 text-xs border border-slate-200 rounded bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-colors"
                     />
                 </label>
             </div>
             <QuadrantGrid
-                axisX={axisX || "X축"} axisXHigh="High" axisXLow="Low"
+                axisX={axisX || "X축"} axisXLow="Low" axisXHigh="High"
                 axisY={axisY || "Y축"} axisYHigh="High" axisYLow="Low"
-                quads={[quads[1], quads[0], quads[3], quads[2]] as [typeof quads[0], typeof quads[0], typeof quads[0], typeof quads[0]]}
+                quads={[
+                    // top-left: 2사분면 (X-, Y+)
+                    { key: "q2", label: "Quadrant II", desc: "X−, Y+ · 좌상", color: Q_TONE.secondary, text: Q_TEXT.secondary },
+                    // top-right: 1사분면 (X+, Y+)
+                    { key: "q1", label: "Quadrant I", desc: "X+, Y+ · 우상", color: Q_TONE.primary, text: Q_TEXT.primary },
+                    // bottom-left: 3사분면 (X-, Y-)
+                    { key: "q3", label: "Quadrant III", desc: "X−, Y− · 좌하", color: Q_TONE.muted, text: Q_TEXT.muted },
+                    // bottom-right: 4사분면 (X+, Y-)
+                    { key: "q4", label: "Quadrant IV", desc: "X+, Y− · 우하", color: Q_TONE.tertiary, text: Q_TEXT.tertiary },
+                ]}
                 data={data}
                 onChange={onChange}
             />
