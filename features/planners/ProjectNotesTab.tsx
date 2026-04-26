@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { Track } from "@/lib/analytics";
+import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, type HandNoteData } from "./HandNote";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -413,6 +414,27 @@ function NoteCard({
     const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
     const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
 
+    // Handwriting detection (템플릿이 아닐 때만)
+    const isHand = !isTpl && isHandwritingContent(content);
+    const handData = isHand ? parseHandwriting(content) : null;
+    function saveHandwriting(next: HandNoteData) {
+        const text = serializeHandwriting(next);
+        setContent(text);
+        onUpdate({ content: text });
+    }
+    function toggleHandwriting() {
+        if (isHand) {
+            if (!confirm("손글씨를 텍스트 모드로 바꾸면 그림이 사라집니다. 계속할까요?")) return;
+            setContent(""); onUpdate({ content: "" });
+            setEditing(true);
+        } else {
+            if (content.trim() && !confirm("기존 텍스트 내용을 손글씨 캔버스로 바꿀까요? (기존 텍스트는 사라집니다)")) return;
+            const empty: HandNoteData = { strokes: [], width: 600, height: 240 };
+            const text = serializeHandwriting(empty);
+            setContent(text); onUpdate({ content: text });
+        }
+    }
+
     return (
         <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
             <div className="px-4 py-2 border-b border-neutral-100 bg-neutral-50 flex items-center gap-2">
@@ -441,13 +463,22 @@ function NoteCard({
                     placeholder={isTpl ? (tplInfo?.label || "제목을 입력하세요") : "노트 제목"}
                     className="flex-1 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:font-normal placeholder:italic"
                 />
-                {!isTpl && (
+                {!isTpl && !isHand && (
                     <button
                         onClick={() => setEditing(e => !e)}
                         className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
                         title={editing ? "미리보기" : "마크다운 편집"}
                     >
                         {editing ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                    </button>
+                )}
+                {!isTpl && (
+                    <button
+                        onClick={toggleHandwriting}
+                        className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isHand ? "bg-[#0F766E]/10 text-[#0F766E]" : "hover:bg-neutral-200 text-neutral-400 hover:text-neutral-700"}`}
+                        title={isHand ? "텍스트 모드로 전환" : "손글씨 모드로 전환 (Apple Pencil · S Pen)"}
+                    >
+                        <Pencil className="h-3.5 w-3.5" />
                     </button>
                 )}
                 <button
@@ -465,6 +496,10 @@ function NoteCard({
             </div>
             {grid ? (
                 <div className="p-4">{grid}</div>
+            ) : isHand ? (
+                <div className="p-4">
+                    <HandNote value={handData} onChange={saveHandwriting} height={260} />
+                </div>
             ) : editing ? (
                 <div className="p-4">
                     <textarea
@@ -532,6 +567,25 @@ function NoteExpandModal({
     const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
     const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
 
+    // Handwriting
+    const isHand = !isTpl && isHandwritingContent(content);
+    const handData = isHand ? parseHandwriting(content) : null;
+    function saveHand(next: HandNoteData) {
+        const text = serializeHandwriting(next);
+        setContent(text);
+    }
+    function toggleHandwriting() {
+        if (isHand) {
+            if (!confirm("손글씨를 텍스트 모드로 바꾸면 그림이 사라집니다. 계속할까요?")) return;
+            setContent("");
+            setEditing(true);
+        } else {
+            if (content.trim() && !confirm("기존 텍스트 내용을 손글씨 캔버스로 바꿀까요? (기존 텍스트는 사라집니다)")) return;
+            const empty: HandNoteData = { strokes: [], width: 800, height: 480 };
+            setContent(serializeHandwriting(empty));
+        }
+    }
+
     function handleClose() {
         onSave({ title, content });
         onClose();
@@ -550,12 +604,22 @@ function NoteExpandModal({
                         placeholder={isTpl ? (tplInfo?.label || "노트 제목") : "노트 제목"}
                         className="flex-1 text-base font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:italic placeholder:font-normal"
                     />
-                    {!isTpl && (
+                    {!isTpl && !isHand && (
                         <button
                             onClick={() => setEditing(e => !e)}
                             className="flex items-center gap-1 px-2.5 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors"
                         >
                             {editing ? <><Eye className="h-3.5 w-3.5 mr-1" />미리보기</> : <><Pencil className="h-3.5 w-3.5 mr-1" />편집</>}
+                        </button>
+                    )}
+                    {!isTpl && (
+                        <button
+                            onClick={toggleHandwriting}
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm border transition-colors ${isHand ? "bg-[#0F766E]/10 border-[#0F766E]/30 text-[#0F766E]" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"}`}
+                            title={isHand ? "텍스트 모드로 전환" : "손글씨 모드"}
+                        >
+                            <Pencil className="h-3.5 w-3.5 mr-1" />
+                            {isHand ? "손글씨" : "✏️"}
                         </button>
                     )}
                     <button
@@ -571,6 +635,10 @@ function NoteExpandModal({
                 {/* Body */}
                 {grid ? (
                     <div className="flex-1 p-6 overflow-auto">{grid}</div>
+                ) : isHand ? (
+                    <div className="flex-1 p-6 overflow-auto">
+                        <HandNote value={handData} onChange={saveHand} height={Math.max(480, (handData?.height ?? 480))} />
+                    </div>
                 ) : editing ? (
                     <div className="flex-1 p-6 overflow-auto">
                         <textarea
@@ -582,7 +650,7 @@ function NoteExpandModal({
                     </div>
                 ) : (
                     <div
-                        onClick={() => !isTpl && setEditing(true)}
+                        onClick={() => !isTpl && !isHand && setEditing(true)}
                         className="flex-1 p-6 overflow-auto text-sm text-neutral-900 leading-relaxed cursor-text
                             [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
                             [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3

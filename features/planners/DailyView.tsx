@@ -13,10 +13,11 @@ import { ThisWeekCard } from "./ThisWeekCard";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
+import { HandNote, type HandNoteData } from "./HandNote";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type CornellRow = { id: string; cue: string; note: string };
-type NoteItem = { id: string; type?: 'cornell' | 'template'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[] };
+type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
 
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -235,9 +236,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     try {
                         const attempt = JSON.parse(rawNotes || "[]");
                         if (Array.isArray(attempt)) {
-                            parsed = attempt.map((n: Record<string, string>) => {
-                                const type = (n.type === 'template' ? 'template' : 'cornell') as 'cornell' | 'template';
-                                return { id: n.id, type, templateKey: n.templateKey ?? '', title: n.title ?? "", cue: n.cue ?? "", content: n.content ?? "", summary: n.summary ?? "", rows: type === 'cornell' ? parseCornellRows(n) : [] };
+                            parsed = attempt.map((n: Record<string, unknown>) => {
+                                const rawType = n.type as string | undefined;
+                                const type = (rawType === 'template' ? 'template' : rawType === 'handwriting' ? 'handwriting' : 'cornell') as 'cornell' | 'template' | 'handwriting';
+                                return {
+                                    id: String(n.id),
+                                    type,
+                                    templateKey: typeof n.templateKey === 'string' ? n.templateKey : '',
+                                    templateLabel: typeof n.templateLabel === 'string' ? n.templateLabel : undefined,
+                                    title: typeof n.title === 'string' ? n.title : "",
+                                    cue: typeof n.cue === 'string' ? n.cue : "",
+                                    content: typeof n.content === 'string' ? n.content : "",
+                                    summary: typeof n.summary === 'string' ? n.summary : "",
+                                    rows: type === 'cornell' ? parseCornellRows(n as Record<string, string>) : [],
+                                    handwriting: type === 'handwriting' && n.handwriting && typeof n.handwriting === 'object' ? n.handwriting as HandNoteData : undefined,
+                                };
                             });
                         } else {
                             parsed = rawNotes ? [{ id: 'n1', type: 'cornell' as const, title: 'Note 1', cue: '', content: rawNotes, summary: '', rows: [{ id: 'r1', cue: '', note: rawNotes }] }] : [];
@@ -397,10 +410,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
     function serializeNotes(list: NoteItem[]): string {
         return JSON.stringify(list.map(n => {
-            if (n.type !== 'template') {
-                return { id: n.id, type: n.type, title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows }), summary: n.summary };
+            if (n.type === 'template') {
+                return { id: n.id, type: n.type, templateKey: n.templateKey, templateLabel: n.templateLabel, title: n.title, cue: n.cue, content: n.content, summary: n.summary };
             }
-            return { id: n.id, type: n.type, templateKey: n.templateKey, templateLabel: n.templateLabel, title: n.title, cue: n.cue, content: n.content, summary: n.summary };
+            if (n.type === 'handwriting') {
+                return { id: n.id, type: n.type, title: n.title, cue: '', content: '', summary: n.summary, handwriting: n.handwriting ?? { strokes: [], width: 600, height: 320 } };
+            }
+            return { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows }), summary: n.summary };
         }));
     }
 
@@ -594,6 +610,52 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 serializeNotesFn={serializeNotes}
                                 onExpand={() => setExpandedNote(note)}
                             />
+                        ) : note.type === 'handwriting' ? (
+                            /* Handwriting block */
+                            <section key={note.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+                                <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
+                                    <input
+                                        value={note.title}
+                                        onChange={(e) => {
+                                            const next = notesList.map(n => n.id === note.id ? { ...n, title: e.target.value } : n);
+                                            setNotesList(next);
+                                        }}
+                                        onBlur={() => save({ notes: serializeNotes(notesList) })}
+                                        placeholder="손글씨 노트 제목"
+                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-500 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
+                                    />
+                                    <div className="flex items-center gap-1 ml-2 shrink-0">
+                                        <button
+                                            onClick={() => setExpandedNote(note)}
+                                            className="text-neutral-300 hover:text-neutral-600 transition-colors"
+                                            title="크게 보기"
+                                        >
+                                            <Maximize2 className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const next = notesList.filter(n => n.id !== note.id);
+                                                setNotesList(next);
+                                                save({ notes: serializeNotes(next) });
+                                            }}
+                                            className="text-neutral-300 hover:text-red-400 transition-colors"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-3">
+                                    <HandNote
+                                        value={note.handwriting ?? null}
+                                        onChange={(d) => {
+                                            const next = notesList.map(n => n.id === note.id ? { ...n, handwriting: d } : n);
+                                            setNotesList(next);
+                                            save({ notes: serializeNotes(next) });
+                                        }}
+                                        height={300}
+                                    />
+                                </div>
+                            </section>
                         ) : (
                             /* Cornell Note block */
                             <section key={note.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
@@ -740,6 +802,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 노트 추가
                             </button>
                             <button
+                                onClick={() => {
+                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${notesList.length + 1}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
+                                    setNotesList(next);
+                                    save({ notes: serializeNotes(next) });
+                                }}
+                                title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
+                                className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                            >
+                                <Pencil className="h-4 w-4" />
+                                손글씨
+                            </button>
+                            <button
                                 onClick={openTemplatePicker}
                                 className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-400 hover:border-violet-400 hover:text-violet-600 transition-colors"
                             >
@@ -793,6 +867,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {/* Note Expand Modal */}
             {expandedNote && (() => {
                 const isTpl = expandedNote.type === 'template';
+                const isHand = expandedNote.type === 'handwriting';
                 const tplMeta = isTpl ? { id: expandedNote.id, key: expandedNote.templateKey ?? '', label: expandedNote.title, body_md: expandedNote.content } : null;
                 const tplHasGrid = tplMeta ? isSpecialTemplate(tplMeta) : false;
                 const dataKey = tplMeta ? tplDataKey(expandedNote.id) : '';
@@ -823,7 +898,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 </button>
                             </div>
                             {/* Body */}
-                            {isTpl && tplHasGrid && tplMeta ? (
+                            {isHand ? (
+                                <div className="flex-1 overflow-auto p-6 bg-neutral-50/30">
+                                    <HandNote
+                                        value={expandedNote.handwriting ?? null}
+                                        onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
+                                        height={Math.max(600, expandedNote.handwriting?.height ?? 600)}
+                                    />
+                                </div>
+                            ) : isTpl && tplHasGrid && tplMeta ? (
                                 <div className="flex-1 overflow-auto p-6 bg-violet-50/20">
                                     {renderFramework(
                                         tplMeta.key,
