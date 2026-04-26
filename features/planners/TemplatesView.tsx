@@ -417,8 +417,14 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 
     return (
         <div className="my-2 space-y-2">
-            <div className="text-[10px] text-neutral-500 leading-relaxed px-1">
-                <strong>Score = (Reach × Impact × Confidence%) ÷ Effort</strong> · Impact 1~3(미미·보통·대박), Confidence 0~100%, Effort 인-월(PM)
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Topic · 우선순위 대상" valKey="rice_topic" data={data} onChange={onChange} placeholder="예: Q3 백로그 후보 / 채용 후보 / 기능 후보" />
+                <LabeledInput label="Period · 평가 기간" valKey="rice_period" data={data} onChange={onChange} placeholder="2026 Q3 (분기 안에 시작·완성)" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Intercom RICE</span> · 직감을 숫자로. <span className="font-semibold">Score = (Reach × Impact × Confidence%) ÷ Effort</span>
+                <br/>Reach: 분기 영향 사용자 수 · Impact: 0.25/0.5/1/2/3 (미미·낮음·중·고·대박) · Confidence: 0~100% · Effort: 인-월(PM).
             </div>
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
                 <table className="w-full text-xs">
@@ -483,6 +489,13 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">
                 + 항목 추가
             </button>
+
+            {/* Top decision */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">★ Top 1~3 · 다음 분기 착수</p>
+                <p className="text-[10px] text-neutral-500 mb-1">점수만 보지 말고 의존성·전략 적합도 함께 판단</p>
+                <CellTextarea cellKey="rice_top" value={data["rice_top"] ?? ""} onChange={onChange} placeholder={"1. (점수 1240) 신규 가입 자동 온보딩 — Q3 핵심 OKR\n2. (점수 980) 결제 재시도 큐 — 의존성 ↓\n3. (점수 720) 모바일 알림 — 후순위지만 빠름"} />
+            </div>
         </div>
     );
 }
@@ -844,8 +857,14 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 
     return (
         <div className="my-2 space-y-3">
-            <div className="text-[10px] text-neutral-500 px-1">
-                <strong>80/20 파레토</strong> · 상위 20% 항목이 80%의 결과를 만든다
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Subject · 분석 대상" valKey="pareto_subject" data={data} onChange={onChange} placeholder="예: 매출 / CS 문의 유형 / 시간 사용 / 고객 이탈 원인" />
+                <LabeledInput label="Period · 기간" valKey="pareto_period" data={data} onChange={onChange} placeholder="2026 Q2 (3개월)" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Pareto 80/20</span> · 결과의 80%는 원인의 20%에서.
+                상위 누적 80%까지가 <span className="font-semibold">Vital Few</span> — 여기에 자원·집중을 몰아라. 나머지는 자동화하거나 버려라.
             </div>
             {/* 입력 테이블 */}
             <div className="rounded-lg border border-neutral-200 overflow-hidden">
@@ -895,6 +914,12 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
                     </p>
                 </div>
             )}
+
+            {/* Action */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Insight · 발견" valKey="pareto_insight" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="예: 매출의 80%가 상위 3개 패키지에서 나옴. 나머지 12개는 합쳐도 20%." />
+                <LabeledBox label="Action · 다음 행동" valKey="pareto_action" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder="- 상위 3개 마케팅·운영 강화\n- 하위 12개 중 6개는 단계적 종료" />
+            </div>
         </div>
     );
 }
@@ -1155,32 +1180,48 @@ function OodaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 
 function CornellGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
-        <div className="my-2 rounded-lg border-2 border-neutral-300 overflow-hidden bg-white">
-            {/* Top: Cue (left) + Notes (right) */}
-            <div className="grid grid-cols-[1fr_2fr]">
-                <div className="border-r border-neutral-300 bg-stone-50 p-3">
-                    <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">Cue</p>
-                    <p className="text-[9px] text-neutral-500">핵심 키워드 · 질문</p>
-                    <textarea value={data["cornell_cue"] ?? ""} onChange={e => onChange("cornell_cue", e.target.value)}
-                        placeholder="핵심 키워드들…" rows={10}
-                        className="w-full mt-2 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
+        <div className="my-2 space-y-2">
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-2">
+                <LabeledInput label="Subject · 과목·주제" valKey="cornell_subject" data={data} onChange={onChange} placeholder="예: 강화학습 / 마케팅 워크숍" />
+                <LabeledInput label="Date · 날짜" valKey="cornell_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                <LabeledInput label="Source · 출처" valKey="cornell_source" data={data} onChange={onChange} placeholder="강의명 · 책 · 영상 링크" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Walter Pauk Cornell Notes</span> · 듣기→정리→복습의 3단 시스템.
+                <span className="font-semibold"> 24h 안에 Cue+Summary 채우기</span>가 핵심 — 그래야 장기 기억으로 넘어감.
+            </div>
+
+            <div className="rounded-lg border-2 border-neutral-300 overflow-hidden bg-white">
+                {/* Top: Cue (left) + Notes (right) */}
+                <div className="grid grid-cols-[1fr_2fr]">
+                    <div className="border-r border-neutral-300 bg-stone-50 p-3">
+                        <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">Cue · 핵심 키워드·질문</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">강의 후 채우기 · 복습 시 이것만 보고 Notes 떠올리기</p>
+                        <textarea value={data["cornell_cue"] ?? ""} onChange={e => onChange("cornell_cue", e.target.value)}
+                            placeholder={"강화학습이란?\n보상 함수 설계 원리\nExploration vs Exploitation\n적용 사례 3가지"} rows={12}
+                            className="w-full mt-1 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
+                    </div>
+                    <div className="bg-white p-3">
+                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Notes · 본문</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">수업·강의·독서 내용 — 자유롭게</p>
+                        <textarea value={data["cornell_notes"] ?? ""} onChange={e => onChange("cornell_notes", e.target.value)}
+                            placeholder={"강화학습은 시행착오로 배우는 ML 분야...\n\n핵심 3요소:\n- Agent: 행동 주체\n- Reward: 보상 신호 (양수/음수)\n- Environment: 상호작용 공간\n\n주요 도전: 즉시 보상 vs 장기 보상 균형"} rows={12}
+                            className="w-full mt-1 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
+                    </div>
                 </div>
-                <div className="bg-white p-3">
-                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Notes</p>
-                    <p className="text-[9px] text-neutral-500">수업·강의·독서 내용</p>
-                    <textarea value={data["cornell_notes"] ?? ""} onChange={e => onChange("cornell_notes", e.target.value)}
-                        placeholder="본 내용을 자유롭게…" rows={10}
-                        className="w-full mt-2 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
+                {/* Bottom: Summary */}
+                <div className="border-t-2 border-neutral-300 bg-slate-50 p-3">
+                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Summary · 요약 (내 언어로)</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">강의 후 24h 안에 — 한 단락으로 압축</p>
+                    <textarea value={data["cornell_summary"] ?? ""} onChange={e => onChange("cornell_summary", e.target.value)}
+                        placeholder='예: 강화학습은 "보상으로 행동을 학습하는 AI". 핵심은 Agent가 Environment와 상호작용하며 보상을 누적 최대화하는 정책을 찾는 것. 가장 큰 도전은 단기 보상에 집착하지 않고 장기 가치도 추구하는 균형 (Exploration ↔ Exploitation).'
+                        rows={4}
+                        className="w-full mt-1 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
                 </div>
             </div>
-            {/* Bottom: Summary */}
-            <div className="border-t-2 border-neutral-300 bg-slate-50 p-3">
-                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Summary</p>
-                <p className="text-[9px] text-neutral-500">요약 · 종합 — 내 언어로 다시 쓰기</p>
-                <textarea value={data["cornell_summary"] ?? ""} onChange={e => onChange("cornell_summary", e.target.value)}
-                    placeholder="오늘 배운 것을 한 단락으로 요약…" rows={4}
-                    className="w-full mt-2 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
-            </div>
+
+            <LabeledBox label="Questions · 더 알아볼 것" valKey="cornell_questions" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- Reward function 설계 베스트 프랙티스?\n- 실제 비즈니스 적용 사례?" />
         </div>
     );
 }
@@ -1226,9 +1267,15 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
 
     return (
         <div className="my-2 space-y-2">
-            <p className="text-[10px] text-neutral-500 px-1">
-                <strong>기준 가중치 × 옵션 점수</strong> — 점수는 1~5 (높을수록 유리). 총점 = Σ(점수 × 가중치)
-            </p>
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Decision · 결정 안건" valKey="dm_decision" data={data} onChange={onChange} placeholder="예: Q3 핵심 채널 선정 / 새 도구 도입 / 채용 후보 비교" />
+                <LabeledInput label="Decider · 결정자" valKey="dm_decider" data={data} onChange={onChange} placeholder="대표 · 팀 합의" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Weighted Decision Matrix</span> · 직감 vs 분석 사이의 다리.
+                <span className="font-semibold"> 기준 가중치 × 옵션 점수</span> · 점수 1~5(높을수록 유리). 총점 = Σ(점수 × 가중치). 1등이 직감과 다르면 — 가중치를 다시 봐라.
+            </div>
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
                 <table className="w-full text-xs">
                     <thead className="bg-neutral-50 text-[10px] text-neutral-500 uppercase tracking-wider">
@@ -1295,6 +1342,12 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
             <div className="flex gap-2">
                 <button onClick={addOption} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 옵션</button>
                 <button onClick={addCriterion} className="flex-1 py-1.5 border border-dashed border-neutral-300 rounded-lg text-[11px] text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 기준</button>
+            </div>
+
+            {/* Decision + sanity check */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Final Decision · 최종 결정" valKey="dm_final" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="1등 옵션 + 결정 이유 한 줄" />
+                <LabeledBox label="Sanity check · 직감 vs 점수" valKey="dm_sanity" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="직감과 다르면 가중치를 다시. 일치하면 빨리 실행." />
             </div>
         </div>
     );
