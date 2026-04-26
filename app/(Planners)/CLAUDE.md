@@ -240,14 +240,14 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **P4 완료 + 운영 UX 정비** — 메뉴 재편(Templates·AI Briefing 본문 서브링크 이동) · 누적 미완료 이월(60일) · 프로젝트 상세 UX 고도화 · 프로젝트 노트 인터랙티브 템플릿 · PWA 설치 시스템(/planners/install, 6개 진입점) · Contacts 주소 검색기(Daum Postcode) · 새 로고 적용 (2026-04-27 세션 90) |
+| **Phase** | **P4 완료 + 템플릿 컨설턴트급 디테일 + Contacts UX 대전환** — 템플릿 59/59 전부 메타·저자/원전 amber 가이드·풍부 placeholder·회고 섹션 일관 적용 · TemplatesView Step 2 분리(quadrants 10 + canvas 4 = 523라인 추출, 3,072→2,549) · Daily 노트 추가 UX 정리(3분할·타이틀 placeholder·헤더 pl-10 정렬) · Contacts 무한 스크롤(50명/페이지 IntersectionObserver, rootMargin 300px) · letterFilter 도입(top/all/letter) · 자동 All 폴백(빈 화면 X) · 우측 인덱스 'All' 버튼·필터링 방식 통일(스크롤 점프 폐기) · 한국 휴대폰 정규화(+82·마지막 8자리)·이름·회사 fallback 중복 정리 · getInitialChar 견고화(invisible 문자·호환 자모 U+3131~·Choseong Jamo U+1100~) (2026-04-27 세션 91) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
 | **완료 범위** | W1~P2 전 범위 + P3 #17·19·20 + P4 #21·22·23·24(GTM·Help·피드백·Intra) + P5 #25·26·27 |
 | **배포 전 블로커** | PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · Supabase Redirect URL 추가 |
-| **이월 작업** | P3 #16 필기입력 · #18 기업플랜 (대규모, 다음 Phase) · TemplatesView 분리 리팩토링(소규모) |
+| **이월 작업** | P3 #18 기업플랜 (대규모, 결제 사업 시작 시) · (선택) TemplatesView Step 2b — empathy/retro/thinking/meeting/timing/planning 카테고리 추가 분리해 TemplatesView 2,500+ 라인 → 1,500 이하 |
 | **주요 결정** | 19,000원/년 · Weekly 기본 · PDF 구매자 무료 · 커뮤니티 운영 안 함 |
-| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) · **Templates · AI Briefing 은 본문 서브링크 (메인 메뉴는 Index/Today/Weekly/Monthly/Yearly/P.I/Project/Contact)** · **PWA 전용** (앱스토어 미등록, /planners/install 가이드) · **누적 이월 = 어제 한정이 아니라 60일 미완료 일괄 회수** |
+| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) · **Templates · AI Briefing 은 본문 서브링크 (메인 메뉴는 Index/Today/Weekly/Monthly/Yearly/P.I/Project/Contact)** · **PWA 전용** (앱스토어 미등록, /planners/install 가이드) · **누적 이월 = 어제 한정이 아니라 60일 미완료 일괄 회수** · **템플릿은 placeholder 차원이 아니라 컨설턴트급 가이드(저자·원칙·실제 시나리오)까지 일관 적용** · **Contacts는 진입 시 즐겨찾기+최근만 렌더, 우측 인덱스는 스크롤 점프 X·필터링 방식, 1,000명+ 데이터도 인스타식 점진 노출(50명/페이지)** · **getInitialChar는 invisible 문자·호환 자모·Choseong Jamo까지 견고하게 분류** |
 
 ---
 

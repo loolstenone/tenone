@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-04-27 — 세션 91 · Planners 템플릿 59종 컨설턴트급 고도화 · TemplatesView Step 2 분리 · Contacts 무한스크롤·자동 All·초성 분류 견고화
+
+### 장소
+집
+
+### 변경 내용
+
+**Daily UX 정리**
+- `features/planners/DailyView.tsx` — 노트 추가 버튼 3분할 그리드 (기본 노트/손글씨 노트/템플릿), 신규 노트 타이틀 빈 값 시작(placeholder가 예시), 타이틀 폰트 색 강화 + placeholder italic·light 구분, Cornell 헤더 pl-10 정렬
+
+**TemplatesView Step 2 — 14개 그리드 분리**
+- 신규 `features/planners/template-grids/quadrants.tsx` (10): SWOT, 4P, Ansoff, BCG, 9-Box, Eisenhower, PEST, MoSCoW, Quadrant Blank, Kano
+- 신규 `features/planners/template-grids/canvas.tsx` (4): Lean Canvas, BMC, VPC, OKR
+- TemplatesView.tsx 3,072 → 2,549 라인 (523 라인 추출)
+
+**템플릿 디테일 고도화 — 59/59 완료**
+- 일관 패턴: 메타(날짜·기간·관계자) + 저자/원전 amber 가이드 박스 + 컨설턴트급 placeholder(한국 1인 사업가 시나리오) + 회고·검증·Top N 액션 섹션 + 양립 항목 2-col
+- 카테고리: 미팅 3 / 회고 3 / 사고법 5 / 공감 4 / 시간관리 5 / 저널 4 / 분석·운영 5 / 노트·운영 4 / 계획 9 / 분석 테이블 4 / 사분면 10 / 캔버스 4
+- 인용 원전: Manager Tools, Mom Test, US Army AAR, Toyota 5Why, 오타니 만다라트, Ikigai, SCAMPER(Eberle), Feynman, Dave Gray, Christensen JTBD 4 Forces, Cal Newport(TimeBlock·DeepWork), Pomodoro, James Clear, CGP Grey Theme, Brian Moran 12 Week Year, NASA Backwards Planning, Ash Maurya Lean Canvas, Osterwalder BMC, Strategyzer VPC, Doerr OKR, Niklas Luhmann Zettelkasten, Tony Buzan Mindmap, Walter Pauk Cornell, Bezos Type 1/Type 2, Intercom RICE, Pareto, McKinsey 9-Box, Eisenhower, Porter 5 Forces, Ishikawa 6M, John Boyd OODA, Kano Model, MoSCoW, Ansoff, BCG
+
+**Contacts 페이지 UX 대전환**
+- `features/planners/ContactsView.tsx` — max-w-[1400px] → max-w-6xl (Daily/Weekly와 일치)
+- letterFilter 상태 도입 ('top' / 'all' / 'ㄱ'·'A'…) — 진입 시 즐겨찾기 + 최근 사용만 렌더, 우측 인덱스 클릭 = 필터링(스크롤 X)
+- 자동 All 폴백 — 즐겨찾기·최근 둘 다 비어 있으면 전체 노출 (빈 화면 방지)
+- 인스타식 무한 스크롤 — 50명씩 점진 렌더, IntersectionObserver(rootMargin 300px), state 변경 시 limit 자동 리셋
+- 우측 인덱스 'All' 버튼 추가 + 선택 letter highlight + 카운트 tooltip
+- 상단 즐겨찾기(amber border) / 최근 사용(Clock) 분리 섹션
+- 중복 정리 강화: 한국 휴대폰 마지막 8자리 정규화(+82 흡수) + 이름·회사 fallback
+- getInitialChar 견고화: invisible 문자(BOM/ZWSP/NBSP/control) 제거 + 한글 호환 자모(U+3131~U+314E) 19개 + Choseong Jamo(U+1100~U+1112) 19개 직접 매핑 — '심온' 잘못 분류 해소
+
+### 결정사항
+- 템플릿은 단순 placeholder 차원이 아니라 **컨설턴트급 사용 가이드(저자·원칙·실제 시나리오)**까지 일관 적용. 사용자가 처음 열었을 때 학습 비용 ↓.
+- TemplatesView 분리는 quadrants/canvas 까지로 일단 멈춤. empathy/retro/thinking 등 추가 카테고리 분리는 다음 세션 이후 필요시.
+- Contacts: 진입 첫 화면 부담 최소화가 핵심. 1,000명+ 데이터에도 즉시 반응. 우측 인덱스는 jumpToInitial(스크롤) 방식 폐기, letterFilter(필터링) 방식으로 통일.
+
+### 핵심 파일
+- `features/planners/DailyView.tsx`
+- `features/planners/TemplatesView.tsx`
+- `features/planners/template-grids/quadrants.tsx` (신규)
+- `features/planners/template-grids/canvas.tsx` (신규)
+- `features/planners/ContactsView.tsx`
+
+### 다음 할 일
+- (선택) TemplatesView Step 2b — empathy/retro/thinking/meeting/timing/planning 카테고리 추가 분리. 현 TemplatesView 2,500+ 라인 → 1,500 라인 이하 목표.
+- 사용자 실사용 후 placeholder·가이드 개선 (특히 사고법·계획 카테고리)
+- P3 #18 기업 플랜은 결제 사업 시작 시 진행 (이번엔 보류)
+
+---
+
 ## 2026-04-27 — 세션 90 · Planners 메뉴 재편 · 누적이월 · PWA 설치 · 주소 검색 · 새 로고
 
 ### 장소

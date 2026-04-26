@@ -1,6 +1,49 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-27 (세션 90 — Planners 메뉴 재편 · 누적이월 · PWA 설치 · 주소 검색 · 새 로고)
+> 마지막 업데이트: 2026-04-27 (세션 91 — Planners 템플릿 59종 컨설턴트급 고도화 · TemplatesView Step 2 분리 · Contacts 무한스크롤·자동 All·초성 분류 견고화)
+
+---
+
+## 세션 91 핵심 성과 (2026-04-27)
+
+### Daily UX 정리
+- 노트 추가 버튼 3분할 그리드 (기본 노트 / 손글씨 노트 / 템플릿)
+- 신규 노트 타이틀 빈 값으로 시작 → placeholder가 예시 역할
+- 타이틀 폰트 색 강화 (neutral-900) + placeholder italic·light 구분
+- Cornell 헤더 좌측 padding row(w-6 X컬럼)와 정렬 (pl-10)
+
+### TemplatesView Step 2 — 14개 그리드 카테고리 파일 분리
+- `features/planners/template-grids/quadrants.tsx` — SWOT, 4P, Ansoff, BCG, 9-Box, Eisenhower, PEST, MoSCoW, Quadrant Blank, Kano (10개)
+- `features/planners/template-grids/canvas.tsx` — Lean Canvas, BMC, VPC, OKR (4개)
+- TemplatesView.tsx 3,072 → 2,549 라인 (523라인 추출)
+
+### 템플릿 디테일 고도화 — 59종 모두 완료
+일관 적용 패턴: 메타 영역(날짜·기간·주제·관계자) + 저자/원전 가이드 박스(amber) + 컨설턴트급 placeholder 예시(한국 1인 사업가 시나리오) + 회고·검증·다음 액션 섹션(담당·기한 강제) + 양립 항목 2-col 레이아웃.
+
+| 카테고리 | 종 | 핵심 |
+|---|---|---|
+| 미팅 | 3 | Meeting / 1on1 / Interview — 회의록·Manager Tools·Mom Test |
+| 회고 | 3 | KPT / AAR / 5Why — Top Try·US Army·Toyota·Verify |
+| 사고법 | 5 | Mandalart / Ikigai / 5W1H / SCAMPER / Feynman |
+| 공감 | 4 | EmpathyMap / Persona / JTBD / JourneyMap — 4 Forces·Top 3 기회 |
+| 시간관리 | 5 | TimeBlock / DeepWork / Pomodoro / EnergyMap / HabitTracker |
+| 저널 | 4 | EmotionLog / Gratitude / Reading / WeeklyJournal — CBT·Three Good Things·Active Reading |
+| 분석·운영 | 5 | Porter5 / Fishbone / OODA / Brainstorm / DecisionLog — Bezos T1/T2·Lessons |
+| 노트·운영 | 4 | Standup / Zettelkasten / Mindmap / DailyDesign — Luhmann·Buzan·정체성 기반 |
+| 계획 | 9 | WeeklyReview/Win, Monthly, Quarterly, Year, FiveYear, MovingAverage, ReversePlan, Sprint |
+| 분석 테이블 | 4 | RICE / Pareto / DecisionMatrix / Cornell — Top 1~3 결정·Sanity check |
+| 사분면 | 10 | quadrants.tsx 그룹 — TOWS·6M·9-Box 등 |
+| 캔버스 | 4 | LeanCanvas / BMC / VPC / OKR |
+
+### Contacts 페이지 UX 대전환
+- **본문 폭 일치**: max-w-[1400px] → max-w-6xl (Daily/Weekly와 동일)
+- **letterFilter 도입**: 'top'(즐겨찾기+최근) / 'all'(전체) / 'ㄱ'·'A'(특정 letter)
+- **자동 All 폴백**: 즐겨찾기·최근 둘 다 비어 있으면 top 모드라도 전체 노출 (첫 사용자 빈 화면 X)
+- **인스타식 무한 스크롤**: 50명씩 점진 렌더, IntersectionObserver(rootMargin 300px), letterFilter/view/search 변경 시 limit 리셋
+- **우측 인덱스 강화**: All 버튼 추가, 클릭 = 필터링(스크롤 X), 선택 letter highlight, 카운트 tooltip
+- **상단 즐겨찾기 + 최근 분리 섹션**: amber border 즐겨찾기 / Clock 최근 사용
+- **중복 정리 강화**: 한국 휴대폰 마지막 8자리 정규화(+82 흡수) + 이름·회사 fallback
+- **초성 분류 견고화**: getInitialChar에서 invisible 문자(BOM/ZWSP/NBSP) 제거 + 호환 자모(U+3131~) + Choseong Jamo(U+1100~) 직접 매핑 — '심온' 같은 잘못 분류 케이스 해소
 
 ---
 
