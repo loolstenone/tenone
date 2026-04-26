@@ -68,34 +68,62 @@ const QuadrantGrid = SharedQuadrantGrid;
 
 function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const top = [
-        { key: "says", label: "Say", sub: "말하는 것", emoji: "", color: "bg-slate-50 border border-slate-200", text: "text-slate-800" },
-        { key: "thinks", label: "Think", sub: "생각하는 것", emoji: "", color: "bg-slate-50 border border-slate-200", text: "text-slate-800" },
-        { key: "does", label: "Do", sub: "행동하는 것", emoji: "", color: "bg-slate-50 border border-slate-300", text: "text-slate-900" },
-        { key: "feels", label: "Feel", sub: "느끼는 것", emoji: "", color: "bg-slate-50 border border-slate-200", text: "text-stone-700" },
+        { key: "says",   label: "Says · 말하는 것",     hint: "인터뷰·리뷰·SNS에서 직접 한 말 (그대로)", color: "bg-slate-50 border border-slate-200", text: "text-slate-800",
+          ph: "예: \"매주 화요일 새벽 2시까지 엑셀로 정리해요\"\n\"이게 진짜 짜증나는 게…\"" },
+        { key: "thinks", label: "Thinks · 생각하는 것", hint: "말은 안 하지만 행동·표정에서 추론",      color: "bg-slate-50 border border-slate-200", text: "text-slate-800",
+          ph: "예: \"이걸 하는 게 맞나?\"\n\"동료보다 뒤처지는 거 같아\"" },
+        { key: "does",   label: "Does · 행동하는 것",   hint: "관찰 가능한 행동 — 빈도·맥락",            color: "bg-slate-50 border border-slate-300", text: "text-slate-900",
+          ph: "예: 매주 화요일 야근\n월 1회 SaaS 구독 비교\n주말에 유튜브 강의 시청" },
+        { key: "feels",  label: "Feels · 느끼는 것",    hint: "감정 단어로 — 짜증·불안·자신감 등",       color: "bg-slate-50 border border-slate-200", text: "text-stone-700",
+          ph: "예: 마감 전 불안\n작업 끝나고 허무함\n동료 인정받을 때 자신감" },
     ];
     const bottom = [
-        { key: "pains", label: "Pain", sub: "고통·두려움", emoji: "", color: "bg-stone-50 border border-stone-300", text: "text-stone-800" },
-        { key: "gains", label: "Gain", sub: "바라는 것·이득", emoji: "", color: "bg-stone-50 border border-stone-200", text: "text-stone-800" },
+        { key: "pains", label: "Pains · 고통·두려움",     hint: "장애물·짜증·실패·리스크",         color: "bg-stone-50 border border-stone-300", text: "text-stone-800",
+          ph: "- 도구가 너무 복잡해 시간 낭비\n- 진척도가 안 보여 동기 저하\n- 야근 누적으로 번아웃 우려" },
+        { key: "gains", label: "Gains · 바라는 것·이득", hint: "성공·기쁨·이상적 결과 — 측정 가능하게", color: "bg-stone-50 border border-stone-200", text: "text-stone-800",
+          ph: "- 주 5시간 절감\n- 본인 성장 가시화\n- 팀에서 \"믿을 수 있는 사람\" 평가" },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            <div className="grid grid-cols-2 gap-1.5">
+        <div className="my-2 space-y-2">
+            {/* Persona meta */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="Persona · 누구를 위해?" valKey="em_persona" data={data} onChange={onChange} placeholder="예: 30대 1인 마케터 박지현" />
+                <LabeledInput label="Goal · 그가 원하는 것" valKey="em_goal" data={data} onChange={onChange} placeholder="예: 야근 없이 캠페인 효율 ↑" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Dave Gray Empathy Map</span> · 머릿속에 있는 한 사람의 입장이 되어보기.
+                Says·Does는 <span className="font-semibold">관찰</span>, Thinks·Feels는 <span className="font-semibold">추론</span> — 분리해야 가설이 명확해짐.
+            </div>
+
+            {/* 4사분면 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {top.map(c => (
-                    <div key={c.key} className={`rounded-lg p-3 min-h-24 ${c.color}`}>
+                    <div key={c.key} className={`rounded-lg p-3 min-h-32 ${c.color}`}>
                         <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">{c.sub}</p>
-                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} />
+                        <p className="text-[10px] text-neutral-500 mb-1">{c.hint}</p>
+                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
                     </div>
                 ))}
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
+
+            {/* Pains / Gains */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {bottom.map(c => (
-                    <div key={c.key} className={`rounded-lg p-3 min-h-20 ${c.color}`}>
+                    <div key={c.key} className={`rounded-lg p-3 min-h-24 ${c.color}`}>
                         <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">{c.sub}</p>
-                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} />
+                        <p className="text-[10px] text-neutral-500 mb-1">{c.hint}</p>
+                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
                     </div>
                 ))}
+            </div>
+
+            {/* Insights */}
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-300">
+                <p className="text-xs font-bold text-slate-900">Insights · 핵심 통찰 (제품·서비스에 줄 메시지)</p>
+                <p className="text-[10px] text-neutral-500 mb-1">6사분면을 종합 — &quot;이 사람을 위해 우리가 무엇을 할까?&quot;</p>
+                <CellTextarea cellKey="em_insights" value={data["em_insights"] ?? ""} onChange={onChange} placeholder={"- 진척도 시각화 + 자동 리포트가 핵심 차별화\n- 도구 복잡도가 진입장벽 → 첫 5분 온보딩 단순화 우선"} />
             </div>
         </div>
     );
@@ -199,65 +227,92 @@ function MandalartGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 
 function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
-        <div className="my-2 space-y-3">
+        <div className="my-2 space-y-2">
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">User Persona</span> · 한 명의 가상 인물에 N명 인터뷰 데이터를 응축.
+                <span className="font-semibold"> 실제 데이터에서 추출</span>한 디테일이 없으면 픽션. 인터뷰 3~5명 후 작성 권장.
+            </div>
+
             {/* 프로필 헤더 */}
             <div className="rounded-xl p-4 bg-slate-50 border border-slate-200">
                 <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-14 h-14 rounded-full bg-white border-2 border-slate-400 flex items-center justify-center text-2xl">
-                        
+                    <div className="shrink-0 w-14 h-14 rounded-full bg-white border-2 border-slate-400 flex items-center justify-center text-2xl text-slate-400 font-bold">
+                        ?
                     </div>
                     <div className="flex-1 space-y-1.5">
                         <input
                             type="text"
                             value={data["persona_name"] ?? ""}
                             onChange={e => onChange("persona_name", e.target.value)}
-                            placeholder="이름 (예: 김개발)"
+                            placeholder="이름 (예: 박지현 — 1인 마케터)"
                             className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-slate-200 rounded focus:outline-none focus:border-slate-700"
                         />
                         <div className="grid grid-cols-3 gap-1">
-                            <input type="text" value={data["persona_age"] ?? ""} onChange={e => onChange("persona_age", e.target.value)} placeholder="나이" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
-                            <input type="text" value={data["persona_occupation"] ?? ""} onChange={e => onChange("persona_occupation", e.target.value)} placeholder="직업" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
-                            <input type="text" value={data["persona_location"] ?? ""} onChange={e => onChange("persona_location", e.target.value)} placeholder="지역" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_age"] ?? ""} onChange={e => onChange("persona_age", e.target.value)} placeholder="33세" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_occupation"] ?? ""} onChange={e => onChange("persona_occupation", e.target.value)} placeholder="1인 마케터·프리랜서" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_location"] ?? ""} onChange={e => onChange("persona_location", e.target.value)} placeholder="서울 마포구" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
                         </div>
                         <input
                             type="text"
                             value={data["persona_bio"] ?? ""}
                             onChange={e => onChange("persona_bio", e.target.value)}
-                            placeholder="한줄 소개"
+                            placeholder="한줄 소개 (예: 5년차 마케터, 작년부터 독립해 SaaS 3곳 운영 보조)"
+                            className="w-full px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none"
+                        />
+                        <input
+                            type="text"
+                            value={data["persona_tech"] ?? ""}
+                            onChange={e => onChange("persona_tech", e.target.value)}
+                            placeholder="자주 쓰는 도구 (예: Notion · Slack · ChatGPT · 인스타그램)"
                             className="w-full px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none"
                         />
                     </div>
                 </div>
             </div>
+
             {/* 4분면 */}
-            <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-28">
                     <p className="text-xs font-bold text-slate-900">Goals · 목표</p>
-                    <CellTextarea cellKey="persona_goals" value={data["persona_goals"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">측정 가능한 결과</p>
+                    <CellTextarea cellKey="persona_goals" value={data["persona_goals"] ?? ""} onChange={onChange} placeholder={"- 야근 없이 월 500만원 매출\n- 클라이언트 3곳 → 5곳 확장\n- 본업 외 콘텐츠로 월 100만원"} />
                 </div>
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-24">
-                    <p className="text-xs font-bold text-stone-700">Frustrations · 좌절</p>
-                    <CellTextarea cellKey="persona_frustrations" value={data["persona_frustrations"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-28">
+                    <p className="text-xs font-bold text-stone-700">Frustrations · 좌절·짜증</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">반복적·구체적 불편</p>
+                    <CellTextarea cellKey="persona_frustrations" value={data["persona_frustrations"] ?? ""} onChange={onChange} placeholder={"- 도구가 너무 많아 매번 정보 옮김\n- 클라 보고서 매주 새로 만들기 노가다\n- 진척도 안 보여 동기 저하"} />
                 </div>
-                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-24">
-                    <p className="text-xs font-bold text-stone-800">Motivations · 동기</p>
-                    <CellTextarea cellKey="persona_motivations" value={data["persona_motivations"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-28">
+                    <p className="text-xs font-bold text-stone-800">Motivations · 동기·가치관</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">왜 이 일을 하는가</p>
+                    <CellTextarea cellKey="persona_motivations" value={data["persona_motivations"] ?? ""} onChange={onChange} placeholder={"- 자기 시간 통제\n- 커리어 자산 축적\n- 가족과의 시간 확보"} />
                 </div>
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-24">
-                    <p className="text-xs font-bold text-slate-800">Behaviors · 행동</p>
-                    <CellTextarea cellKey="persona_behaviors" value={data["persona_behaviors"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-28">
+                    <p className="text-xs font-bold text-slate-800">Behaviors · 행동·일상</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">실제 관찰된 패턴</p>
+                    <CellTextarea cellKey="persona_behaviors" value={data["persona_behaviors"] ?? ""} onChange={onChange} placeholder={"- 출근 7~8시 모닝 루틴\n- 매주 일요일 저녁 주간 리뷰\n- 주말 유튜브로 학습 1~2시간"} />
                 </div>
             </div>
+
             {/* Quote */}
-            <div className="rounded-xl p-3 bg-neutral-50 border-l-4 border-neutral-400">
-                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">대표 발언 (Quote)</p>
+            <div className="rounded-xl p-3 bg-white border-l-4 border-slate-500">
+                <p className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Quote · 대표 발언 (인터뷰에서 그대로)</p>
+                <p className="text-[10px] text-neutral-500 mb-1">패러프레이즈 X — 본인 입에서 나온 표현 그대로</p>
                 <textarea
                     value={data["persona_quote"] ?? ""}
                     onChange={e => onChange("persona_quote", e.target.value)}
-                    placeholder='예: "그냥 빠르게 쓰고 싶어요. 설정이 너무 많으면 지쳐요."'
-                    rows={2}
+                    placeholder={'예: "그냥 빠르게 쓰고 싶어요. 설정이 너무 많으면 지쳐요. 로그인하고 바로 일 시작하면 좋겠어요."'}
+                    rows={3}
                     className="w-full mt-1 resize-none bg-transparent text-xs italic text-neutral-700 placeholder:text-neutral-400 focus:outline-none leading-relaxed"
                 />
+            </div>
+
+            {/* Scenario */}
+            <div className="rounded-xl p-3 bg-stone-50 border border-stone-200">
+                <p className="text-xs font-bold text-stone-900">Scenario · 우리 제품을 쓰는 하루</p>
+                <p className="text-[10px] text-neutral-500 mb-1">아침 → 일과 → 저녁 — 우리 제품이 어디 끼어드는지</p>
+                <CellTextarea cellKey="persona_scenario" value={data["persona_scenario"] ?? ""} onChange={onChange} placeholder={"7AM 모닝 브리핑 받고 오늘 우선순위 확인\n10AM 클라 미팅 전 회의록 자동 정리\n6PM 일일 회고로 마감 — 야근 없이 퇴근"} />
             </div>
         </div>
     );
@@ -269,43 +324,71 @@ function JtbdGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
             {/* JTBD 한 문장 */}
             <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
                 <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">JTBD Statement · 한 문장 정의</p>
-                <p className="text-[9px] text-neutral-500 mt-0.5">"[상황]일 때, 나는 [동기]하고 싶다, 그래서 [결과]를 얻고 싶다"</p>
+                <p className="text-[9px] text-neutral-500 mt-0.5">&quot;[상황]일 때, 나는 [동기]하고 싶다, 그래서 [결과]를 얻고 싶다&quot;</p>
                 <textarea
                     value={data["jtbd_statement"] ?? ""}
                     onChange={e => onChange("jtbd_statement", e.target.value)}
-                    placeholder="예: 출근길에 집중할 음악이 필요할 때, 고르느라 시간 쓰지 않고 시작하고 싶다"
+                    placeholder="예: 일요일 저녁 한 주를 계획할 때, AI에게 우선순위 정리를 맡기고 싶다, 그래서 월요일 아침에 망설이지 않고 시작하고 싶다"
                     rows={2}
                     className="w-full mt-2 resize-none bg-white/60 text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none p-2 rounded border border-slate-200 leading-relaxed"
                 />
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Clayton Christensen JTBD</span> · 사람들은 제품을 &quot;사는&quot; 게 아니라 &quot;고용&quot;한다.
+                Job = 진보(progress)를 만드는 동기. <span className="font-semibold">Forces of Progress 4축</span> = Push(현재 불만) + Pull(새 매력) ↔ Anxiety(걱정) + Habit(관성).
+            </div>
+
             {/* 3단 구조 */}
-            <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-28">
-                    <p className="text-xs font-bold text-slate-800">Situation</p>
-                    <p className="text-[10px] text-neutral-500">언제·어디서·왜</p>
-                    <CellTextarea cellKey="jtbd_situation" value={data["jtbd_situation"] ?? ""} onChange={onChange} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-32">
+                    <p className="text-xs font-bold text-slate-800">Situation · 상황</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">언제·어디서·왜 — 트리거 순간</p>
+                    <CellTextarea cellKey="jtbd_situation" value={data["jtbd_situation"] ?? ""} onChange={onChange} placeholder={"- 일요일 저녁 7~10시\n- 한 주 시작 전 막막함 느낄 때\n- 노트북 앞에서 빈 화면 응시"} />
                 </div>
-                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-28">
-                    <p className="text-xs font-bold text-stone-800">Motivation</p>
-                    <p className="text-[10px] text-neutral-500">무엇을 하고 싶나</p>
-                    <CellTextarea cellKey="jtbd_motivation" value={data["jtbd_motivation"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-32">
+                    <p className="text-xs font-bold text-stone-800">Motivation · 동기</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">기능적 + 감정적 + 사회적</p>
+                    <CellTextarea cellKey="jtbd_motivation" value={data["jtbd_motivation"] ?? ""} onChange={onChange} placeholder={"기능: 우선순위 자동 정리\n감정: 불안 ↓ 자신감 ↑\n사회: 동료에게 \"준비된 사람\" 보이기"} />
                 </div>
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-28">
-                    <p className="text-xs font-bold text-slate-900">Outcome</p>
-                    <p className="text-[10px] text-neutral-500">어떤 결과를 원하나</p>
-                    <CellTextarea cellKey="jtbd_outcome" value={data["jtbd_outcome"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-32">
+                    <p className="text-xs font-bold text-slate-900">Outcome · 결과</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">측정 가능한 진보</p>
+                    <CellTextarea cellKey="jtbd_outcome" value={data["jtbd_outcome"] ?? ""} onChange={onChange} placeholder={"- 월요일 9시에 첫 작업 바로 시작\n- 주간 회고 시간 30분 → 10분\n- 마감 미스 0건"} />
                 </div>
             </div>
-            {/* 장벽 */}
-            <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-20">
-                    <p className="text-xs font-bold text-stone-700">Anxieties · 불안</p>
-                    <CellTextarea cellKey="jtbd_anxieties" value={data["jtbd_anxieties"] ?? ""} onChange={onChange} />
+
+            {/* Push·Pull / Anxiety·Habit (4 forces) */}
+            <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-wider mt-2">4 Forces of Progress</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-24">
+                    <p className="text-xs font-bold text-slate-900">Push · 현재 불만 (떠나는 힘)</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">기존 도구·방식의 짜증</p>
+                    <CellTextarea cellKey="jtbd_push" value={data["jtbd_push"] ?? ""} onChange={onChange} placeholder={"- Notion에 매번 같은 회의록 템플릿 복사\n- 우선순위 정리에 1시간씩 소요"} />
                 </div>
-                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-20">
-                    <p className="text-xs font-bold text-neutral-600">Habits · 기존 대안</p>
-                    <CellTextarea cellKey="jtbd_habits" value={data["jtbd_habits"] ?? ""} onChange={onChange} />
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-24">
+                    <p className="text-xs font-bold text-slate-900">Pull · 새로운 매력 (당기는 힘)</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">우리 제품이 약속하는 더 나은 미래</p>
+                    <CellTextarea cellKey="jtbd_pull" value={data["jtbd_pull"] ?? ""} onChange={onChange} placeholder={"- AI가 알아서 정리해주는 마법\n- 동료들이 \"어떻게 그렇게 빠르게?\" 묻기"} />
                 </div>
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-24">
+                    <p className="text-xs font-bold text-stone-800">Anxiety · 불안 (멈추는 힘)</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">새 도구로 갈 때 걱정</p>
+                    <CellTextarea cellKey="jtbd_anxieties" value={data["jtbd_anxieties"] ?? ""} onChange={onChange} placeholder={"- 데이터 이전 번거로움\n- AI가 잘못 추천하면?\n- 또 다른 학습 비용"} />
+                </div>
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-24">
+                    <p className="text-xs font-bold text-neutral-600">Habit · 기존 대안·관성</p>
+                    <p className="text-[10px] text-neutral-500 mb-1">지금 어떻게 우회하고 있는가</p>
+                    <CellTextarea cellKey="jtbd_habits" value={data["jtbd_habits"] ?? ""} onChange={onChange} placeholder={"- Notion + 종이 노트 병행\n- 매주 일요일 고정 루틴\n- ChatGPT에 직접 물어보기"} />
+                </div>
+            </div>
+
+            {/* Hire / Fire criteria */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Hire / Fire · 채용·해고 기준</p>
+                <p className="text-[10px] text-neutral-500 mb-1">우리 제품을 &quot;고용&quot;하려면 무엇이 필요? &quot;해고&quot;당하지 않으려면?</p>
+                <CellTextarea cellKey="jtbd_hire" value={data["jtbd_hire"] ?? ""} onChange={onChange} placeholder={"Hire: 첫 5분 안에 가치 보임 + 데이터 자동 임포트\nFire: AI 추천 정확도 < 70% · 월 1회 이상 답답한 순간"} />
             </div>
         </div>
     );
@@ -836,11 +919,11 @@ function FishboneGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
 type JourneyStage = { stage: string; action: string; thought: string; emotion: string; opportunity: string };
 function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const DEFAULT: JourneyStage[] = [
-        { stage: "Awareness · 인지", action: "", thought: "", emotion: "", opportunity: "" },
-        { stage: "Consideration · 고려", action: "", thought: "", emotion: "", opportunity: "" },
-        { stage: "Purchase · 구매", action: "", thought: "", emotion: "", opportunity: "" },
-        { stage: "Retention · 유지", action: "", thought: "", emotion: "", opportunity: "" },
-        { stage: "Advocacy · 추천", action: "", thought: "", emotion: "", opportunity: "" },
+        { stage: "Awareness · 인지", action: "검색 · SNS 발견 · 추천 듣기", thought: "이런 게 있구나, 진짜 도움될까?", emotion: "🤔", opportunity: "광고 카피·후기 노출 강화" },
+        { stage: "Consideration · 고려", action: "비교·리뷰·체험 신청", thought: "다른 거랑 뭐가 다르지? 가격은?", emotion: "🧐", opportunity: "1분 데모 영상·비교표·14일 무료" },
+        { stage: "Onboarding · 첫 사용", action: "가입·튜토리얼·첫 작업", thought: "복잡한가? 첫 5분에 가치 보일까?", emotion: "😟", opportunity: "체크리스트·실시간 코칭·첫 성공 보상" },
+        { stage: "Retention · 유지·습관화", action: "주 3회+ 사용 · 다른 기능 발견", thought: "이거 없으면 일이 안 되네", emotion: "😊", opportunity: "주간 리포트·성과 시각화·뱃지" },
+        { stage: "Advocacy · 추천·확산", action: "동료 추천 · 후기 작성", thought: "다른 사람도 알면 좋겠다", emotion: "🤩", opportunity: "초대 보상·앰버서더 프로그램" },
     ];
     const stages: JourneyStage[] = (() => {
         try {
@@ -856,14 +939,19 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
     const remove = (idx: number) => save(stages.filter((_, i) => i !== idx));
 
     return (
-        <div className="my-2 space-y-3">
-            {/* Persona */}
-            <div className="rounded-lg p-3 bg-slate-50 border border-slate-200">
-                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Persona · 대상 고객</p>
-                <input type="text" value={data["journey_persona"] ?? ""} onChange={e => onChange("journey_persona", e.target.value)}
-                    placeholder="여정을 그릴 고객의 프로필"
-                    className="w-full mt-1 px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none focus:border-slate-700" />
+        <div className="my-2 space-y-2">
+            {/* Persona + Scope */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Persona · 대상 고객" valKey="journey_persona" data={data} onChange={onChange} placeholder="예: 30대 1인 마케터 박지현" />
+                <LabeledInput label="Scope · 여정 범위" valKey="journey_scope" data={data} onChange={onChange} placeholder="예: 광고 노출 → 90일 유료 전환" />
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Customer Journey Map</span> · 행동(관찰) + 생각(추론) + 감정(공감) + 기회(개입점)를 한 줄로.
+                감정에 <span className="font-semibold">이모지·1~5점</span>으로 강도 표시하면 구간별 페인 즉시 보임. 가장 낮은 감정 = 가장 큰 기회.
+            </div>
+
             {/* Stage table */}
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
                 <table className="w-full text-xs" style={{ minWidth: 640 }}>
@@ -916,6 +1004,13 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">
                 + 단계 추가
             </button>
+
+            {/* Top opportunities */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Top 3 · 가장 시급한 개선 기회</p>
+                <p className="text-[10px] text-neutral-500 mb-1">감정 점수가 가장 낮은 구간 우선. 담당·기한까지.</p>
+                <CellTextarea cellKey="journey_top" value={data["journey_top"] ?? ""} onChange={onChange} placeholder={"1. Onboarding 첫 5분 — 체크리스트 v1 (홍길동, ~05-10)\n2. Retention 주차별 리포트 — 자동 발송 (김영희, ~05-20)\n3. Advocacy 초대 보상 — A/B 테스트 (박철수, ~06-01)"} />
+            </div>
         </div>
     );
 }
