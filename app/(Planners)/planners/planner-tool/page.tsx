@@ -7,6 +7,8 @@ import {
   Sparkles,
   ArrowRight,
   Check,
+  Download,
+  Smartphone,
 } from "lucide-react";
 
 // ===== Planner's Planner Section =====
@@ -19,6 +21,35 @@ function PlannersPlannerSection() {
         </h2>
         <p className="mt-4 text-[#666] text-lg">
           생각을 구조화하는 도구. 종이에서 디지털로, 디지털에서 AI로.
+        </p>
+
+        {/* 앱 다운로드 — 타이틀 바로 아래 */}
+        <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 p-5 bg-white border border-[#0F766E]/20 rounded-lg max-w-2xl">
+          <div className="flex items-center gap-3 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/planners-icon-192.png"
+              alt="PP AI"
+              className="w-12 h-12 rounded-xl shadow-md shadow-black/10 shrink-0"
+            />
+            <div>
+              <p className="text-sm font-semibold text-[#1a1a1a] leading-tight">
+                Planner&apos;s Planner<sup className="text-[9px] font-bold text-[#0F766E] ml-0.5">AI</sup>
+              </p>
+              <p className="text-[11px] text-[#666] mt-0.5">홈 화면에 설치 · Android · iOS · PC</p>
+            </div>
+          </div>
+          <Link
+            href="/planners/install"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-semibold rounded-lg hover:bg-[#0d5e56] transition-colors sm:ml-auto shrink-0"
+          >
+            <Download size={14} />
+            앱 다운로드
+            <Smartphone size={12} className="opacity-70" />
+          </Link>
+        </div>
+        <p className="mt-2 text-xs text-[#999] max-w-2xl">
+          앱스토어 등록 없이 1회 클릭으로 홈 화면에 추가 — 모든 기능은 웹과 100% 동일하게 작동합니다.
         </p>
 
         {/* 5-1. Planner's Planner 2026 */}
@@ -187,15 +218,27 @@ function PlannersPlannerSection() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/planners/purchase"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0d5e56] transition-colors"
-            >
-              지금 시작하기 <ArrowRight size={14} />
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/planners/purchase"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+              >
+                지금 시작하기 <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/planners/install"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#0F766E]/30 text-[#0F766E] text-sm font-medium hover:bg-[#0F766E]/5 transition-colors"
+                title="홈 화면에 PP AI 설치 (Android · iOS · PC)"
+              >
+                <Download size={14} />
+                앱 설치 <Smartphone size={12} className="opacity-60" />
+              </Link>
+            </div>
             <p className="text-xs text-[#999] mt-4 leading-relaxed">
-              종이 플래너'스 플래너(2026 All In One) 구매자는{" "}
+              종이 플래너's 플래너(2026 All In One) 구매자는{" "}
               <Link href="/planners/purchase" className="text-[#0F766E] underline">1년 무료 제공</Link>.
+              <br />
+              모든 기능은 웹에서 그대로 작동 — 별도 앱스토어 다운로드 없이 홈 화면에 추가만 하면 됩니다.
             </p>
           </div>
         </div>

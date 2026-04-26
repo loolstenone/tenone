@@ -4,6 +4,59 @@
 
 ---
 
+## 2026-04-27 — 세션 90 · Planners 메뉴 재편 · 누적이월 · PWA 설치 · 주소 검색 · 새 로고
+
+### 장소
+집
+
+### 변경 내용
+
+**메뉴 재편**
+- `features/planners/AppTopNav.tsx` · `AppSidebar.tsx` — Templates · AI Briefing 메인 메뉴에서 제거
+- 신규 `features/planners/PlannersUtilityLinks.tsx` — 본문 상단에 칩으로 제공되는 서브 링크
+- IndexView · DailyView · WeeklyView · MonthlyView · YearlyView · IdentityView · ProjectsView · ProjectDetailView 헤더에 적용
+- AppTopNav: 우측 클러스터에 Download 아이콘, 탭 영역 overflow-x 자연 스크롤 + 스크롤바 시각 숨김 + 우측 액션 분리선 (Contact 메뉴 가로 위배 해결)
+
+**Project 상세 고도화**
+- `features/planners/ProjectDetailView.tsx` — 기본 탭 cover→notes, 헤더 카드 재설계 (색상 바·상태 칩·일정), 표지 탭 2컬럼 (좌 커버 / 우 제목·상태·일정 divide), Block/Textarea 헬퍼 제거
+
+**Project 노트 인터랙티브 템플릿**
+- `features/planners/ProjectNotesTab.tsx` — content 첫 줄 `<!-- planners:tpl=KEY|label=L -->` 마커 파싱, NoteCard·NoteExpandModal 에서 `renderFramework` + localStorage(`tplDataKey(noteId)`) 로 인터랙티브 렌더
+- 템플릿 노트는 제목 빈 값 + placeholder, 연필 편집 버튼 숨김
+- DB 마이그레이션 없이 backward compatible
+
+**누적 미완료 이월**
+- `app/api/planners/daily/carry-over/route.ts` 재설계 — 과거 60일(1~180) 스캔, todo 만 수집, 가까운 과거 우선 dedupe, source_date 기록, 원본 자동 carried 처리
+- 신규 `app/api/planners/daily/pending-count/route.ts` — count·days·oldest 반환
+- `features/planners/DailyView.tsx` — `pendingInfo` state 로 교체, 버튼 라벨 "누적 미완료 N건 이월" + tooltip 출처 안내
+
+**PWA 설치 시스템**
+- 신규 `app/(Planners)/planners/install/page.tsx` + `features/planners/InstallView.tsx`
+- 자동 플랫폼 감지, beforeinstallprompt 캡처, iOS 4단계 가이드, standalone 감지, URL 복사 + QR
+- `app/(Planners)/planners/planner-tool/page.tsx` — 타이틀 바로 아래 다운로드 카드 (로고 + CTA)
+- `app/(Planners)/planners/app/help/page.tsx` — PWA FAQ 갱신, App Store/Play Store FAQ 추가
+- `app/(Planners)/planners/app/settings/page.tsx` — "앱 설치" 섹션 추가
+- `features/planners/PlannersFooter.tsx` — Menu 컬럼에 "앱 설치" 링크
+- 6개 진입점: 헤더·사이드바·Settings·planner-tool 상단·푸터·Help
+
+**Contacts 주소 검색**
+- 신규 `features/planners/AddressPicker.tsx` — Daum Postcode lazy-load (버튼 클릭 시), 모달 검색, 도로명/지번/건물명 매핑
+- `features/planners/ContactsView.tsx` — 주소 필드 옆에 "우편번호 검색" 버튼
+
+**새 로고 (검정 BG + 화이트 P + 펜촉)**
+- `public/planners-icon-192.png` · `planners-icon-512.png` 교체 → PWA 설치 아이콘 자동 반영
+- AppTopNav 좌측 24px · AppSidebar 상단 32px · InstallView Hero 64px · planner-tool 다운로드 카드 48px 노출
+- 검정 그라데이션 래퍼 제거 (로고 자체 검정 BG 활용)
+
+### 신규 파일
+- `app/(Planners)/planners/install/page.tsx`
+- `app/api/planners/daily/pending-count/route.ts`
+- `features/planners/AddressPicker.tsx`
+- `features/planners/InstallView.tsx`
+- `features/planners/PlannersUtilityLinks.tsx`
+
+---
+
 ## 2026-04-26 — 세션 89 · Contacts 극강화 + Planners 사이트 헤더 정비
 
 ### 장소

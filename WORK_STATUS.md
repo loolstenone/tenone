@@ -1,6 +1,46 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-26 (세션 89 — Contacts 극강화 + Planners 헤더 정비)
+> 마지막 업데이트: 2026-04-27 (세션 90 — Planners 메뉴 재편 · 누적이월 · PWA 설치 · 주소 검색 · 새 로고)
+
+---
+
+## 세션 90 핵심 성과 (2026-04-27)
+
+### 메뉴 재편 + 본문 서브 링크
+- AppTopNav · AppSidebar 에서 **Templates · AI Briefing 메인 메뉴 제거**
+- 신규 `PlannersUtilityLinks.tsx` 칩 컴포넌트 → Index · Today · Weekly · Monthly · Yearly · P.I · Project 본문 헤더에 일관 배치
+- AppTopNav 우측 클러스터 + 사이드바 + Settings + 푸터 + Help 등 6곳 **앱 설치 진입점** 추가
+- Contact 메뉴 가로 사이즈 위배 수정 (overflow-x 자연 스크롤 + 스크롤바 시각 숨김 + 우측 액션 분리선)
+
+### Project 상세 페이지 고도화
+- 기본 탭 cover→**notes** 로 전환 (작업 영역이 첫 화면)
+- 헤더: 색상 바 + 제목 + 상태 칩(컬러 토큰) + 일정 한 줄 → 정보 위계 명확
+- 표지 탭 2컬럼 레이아웃 (좌:커버 미리보기/변경, 우:제목·상태·시작·종료를 divide 라인으로 통합)
+
+### 프로젝트 노트에 인터랙티브 템플릿 적용
+- ProjectNotesTab 의 NoteCard / NoteExpandModal 가 콘텐츠 마커(`<!-- planners:tpl=key -->`) 감지 → `renderFramework` 로 그리드 렌더
+- DailyView 와 동일하게 localStorage 데이터 자동 저장 (key=`tplDataKey(noteId)`)
+- 템플릿 노트는 제목 빈 값 + placeholder 로 라벨 안내, 연필 편집 버튼 숨김
+- DB 마이그레이션 없이 backward compatible
+
+### 누적 미완료 이월 (어제→과거 60일)
+- `app/api/planners/daily/carry-over/route.ts` 재설계 — 과거 N일 일괄 스캔, status='todo' 만 수집, 가까운 과거 우선 dedupe, source_date 기록, 원본 row 자동 carried 처리
+- 신규 `app/api/planners/daily/pending-count/route.ts` — count·days·oldest 반환
+- DailyView 버튼 라벨: "어제 미완료 이월" → **"누적 미완료 N건 이월"** + tooltip 출처 안내
+
+### PWA 설치 시스템
+- 신규 `/planners/install` 페이지 (`app/(Planners)/planners/install/page.tsx` + `features/planners/InstallView.tsx`)
+- 자동 플랫폼 감지 (Android · iOS · PC), `beforeinstallprompt` 캡처해 1-click 설치 버튼, iOS 는 Safari 4단계 그림 가이드
+- 이미 standalone 이면 "설치됨" 안내, URL 복사 + QR 코드, "App Store / Play Store 에 없는 이유" FAQ
+- `/planners/planner-tool` 타이틀 바로 아래에 다운로드 카드 (로고 + 앱 다운로드 CTA + 보조 카피)
+
+### Contacts 주소 검색기
+- 신규 `features/planners/AddressPicker.tsx` — Daum Postcode lazy-load (버튼 클릭 시 1회), 모달 내 검색, 도로명/지번/건물명 자동 매핑
+- 무료·무인증·CORS 무관, 페이지 진입 비용 0
+
+### 새 로고 적용
+- `public/planners-icon-192.png` · `planners-icon-512.png` 교체 (검정 BG + 화이트 P + 펜촉)
+- AppTopNav 좌측(24px) · AppSidebar 상단(32px) · Install Hero(64px) · planner-tool 다운로드 카드(48px) 에 마크 노출, 불필요한 그라데이션 래퍼 제거
 
 ---
 

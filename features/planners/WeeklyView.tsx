@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
 import { getLunarDate } from "@/lib/planners/holidays";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
 
@@ -163,7 +164,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     </button>
                 </div>
 
-                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300 mt-1" />}
+                <div className="flex items-center gap-3">
+                    <PlannersUtilityLinks />
+                    {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300 mt-1" />}
+                </div>
             </div>
 
             {loading ? (

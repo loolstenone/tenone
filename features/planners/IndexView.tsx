@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 
 const MONTHS_EN = [
     "January", "February", "March", "April", "May", "June",
@@ -79,6 +80,7 @@ export function IndexView() {
                         <ChevronRight className="h-4 w-4" />
                     </button>
                 </div>
+                <PlannersUtilityLinks className="ml-auto" />
             </div>
 
             <div className="grid grid-cols-[3fr_1fr_1fr] gap-x-10 gap-y-0 items-start">

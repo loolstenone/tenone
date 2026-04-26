@@ -1,10 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { resolveTemplateContent } from "@/lib/planners/templates";
+import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
+import { renderFramework, type FrameworkData } from "./TemplatesView";
+
+// Embedded marker so we can persist template metadata in the existing
+// project_notes.content column without a DB migration. Format:
+//   <!-- planners:tpl=<key>|label=<label> -->\n<body>
+const TPL_MARKER_RE = /^<!--\s*planners:tpl=([a-z0-9_-]+)(?:\|label=([^>]*?))?\s*-->\n?/;
+function parseTemplateMarker(content: string | null): { key: string; label: string; body: string } | null {
+    if (!content) return null;
+    const m = content.match(TPL_MARKER_RE);
+    if (!m) return null;
+    return { key: m[1], label: (m[2] ?? '').trim(), body: content.slice(m[0].length) };
+}
+function buildTemplateContent(key: string, label: string, body: string): string {
+    return `<!-- planners:tpl=${key}|label=${label.replace(/[\r\n>]/g, ' ').trim()} -->\n${body}`;
+}
 
 interface ProjectNote {
     id: string;
@@ -99,10 +114,13 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
     async function insertFromTemplate(tpl: Template) {
         setSaving(true);
         try {
+            const body = resolveTemplateContent(tpl);
+            const content = buildTemplateContent(tpl.key, tpl.label, body);
+            // 사용자가 자기 제목을 쓰도록 title은 빈 값 (placeholder가 템플릿 이름 안내)
             const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: tpl.label, content: resolveTemplateContent(tpl) }),
+                body: JSON.stringify({ title: "", content }),
             });
             if (res.ok) {
                 const d = await res.json();
@@ -372,6 +390,27 @@ function NoteCard({
         setContent(note.content || "");
     }, [note.id, note.title, note.content]);
 
+    // Template detection
+    const tplInfo = parseTemplateMarker(content);
+    const isTpl = !!tplInfo;
+    const dataKey = isTpl ? tplDataKey(note.id) : '';
+    const [fwData, setFwData] = useState<FrameworkData>(() => {
+        if (!isTpl || typeof window === 'undefined') return {};
+        try { return JSON.parse(localStorage.getItem(tplDataKey(note.id)) || '{}'); }
+        catch { return {}; }
+    });
+    const handleFwChange = useCallback((k: string, v: string) => {
+        if (!isTpl) return;
+        setFwData(prev => {
+            const next = { ...prev, [k]: v };
+            try { localStorage.setItem(dataKey, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
+    }, [dataKey, isTpl]);
+    const tplMeta = tplInfo ? { id: note.id, key: tplInfo.key, label: tplInfo.label || title || '템플릿', body_md: tplInfo.body } : null;
+    const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
+    const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
+
     return (
         <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
             <div className="px-4 py-2 border-b border-neutral-100 bg-neutral-50 flex items-center gap-2">
@@ -391,21 +430,24 @@ function NoteCard({
                         <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                 </div>
+                {isTpl && <LayoutTemplate className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />}
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={() => onUpdate({ title })}
-                    placeholder="노트 제목"
-                    className="flex-1 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400"
+                    placeholder={isTpl ? (tplInfo?.label || "제목을 입력하세요") : "노트 제목"}
+                    className="flex-1 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:font-normal placeholder:italic"
                 />
-                <button
-                    onClick={() => setEditing(e => !e)}
-                    className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
-                    title={editing ? "미리보기" : "편집"}
-                >
-                    {editing ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-                </button>
+                {!isTpl && (
+                    <button
+                        onClick={() => setEditing(e => !e)}
+                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
+                        title={editing ? "미리보기" : "마크다운 편집"}
+                    >
+                        {editing ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                    </button>
+                )}
                 <button
                     onClick={onExpand}
                     className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
@@ -419,7 +461,9 @@ function NoteCard({
                     <Trash2 className="h-3.5 w-3.5" />
                 </button>
             </div>
-            {editing ? (
+            {grid ? (
+                <div className="p-4">{grid}</div>
+            ) : editing ? (
                 <div className="p-4">
                     <textarea
                         value={content}
@@ -432,7 +476,7 @@ function NoteCard({
                 </div>
             ) : (
                 <div
-                    onClick={() => setEditing(true)}
+                    onClick={() => !isTpl && setEditing(true)}
                     className="p-4 text-sm text-neutral-900 leading-relaxed min-h-[8rem] cursor-text
                         [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
                         [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
@@ -446,7 +490,7 @@ function NoteCard({
                         [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
                         [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
                 >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || "*내용 없음*"}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : content) || "*내용 없음*"}</ReactMarkdown>
                 </div>
             )}
         </section>
@@ -466,6 +510,26 @@ function NoteExpandModal({
     const [content, setContent] = useState(note.content || "");
     const [editing, setEditing] = useState(false);
 
+    const tplInfo = parseTemplateMarker(content);
+    const isTpl = !!tplInfo;
+    const dataKey = isTpl ? tplDataKey(note.id) : '';
+    const [fwData, setFwData] = useState<FrameworkData>(() => {
+        if (!isTpl || typeof window === 'undefined') return {};
+        try { return JSON.parse(localStorage.getItem(tplDataKey(note.id)) || '{}'); }
+        catch { return {}; }
+    });
+    const handleFwChange = useCallback((k: string, v: string) => {
+        if (!isTpl) return;
+        setFwData(prev => {
+            const next = { ...prev, [k]: v };
+            try { localStorage.setItem(dataKey, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
+    }, [dataKey, isTpl]);
+    const tplMeta = tplInfo ? { id: note.id, key: tplInfo.key, label: tplInfo.label || title || '템플릿', body_md: tplInfo.body } : null;
+    const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
+    const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
+
     function handleClose() {
         onSave({ title, content });
         onClose();
@@ -476,19 +540,22 @@ function NoteExpandModal({
             <div className="bg-white rounded-xl w-full h-full flex flex-col shadow-2xl">
                 {/* Header */}
                 <div className="px-6 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-3">
+                    {isTpl && <LayoutTemplate className="h-4 w-4 text-[#0F766E] shrink-0" />}
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="노트 제목"
-                        className="flex-1 text-base font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400"
+                        placeholder={isTpl ? (tplInfo?.label || "노트 제목") : "노트 제목"}
+                        className="flex-1 text-base font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:italic placeholder:font-normal"
                     />
-                    <button
-                        onClick={() => setEditing(e => !e)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors"
-                    >
-                        {editing ? <><Eye className="h-3.5 w-3.5 mr-1" />미리보기</> : <><Pencil className="h-3.5 w-3.5 mr-1" />편집</>}
-                    </button>
+                    {!isTpl && (
+                        <button
+                            onClick={() => setEditing(e => !e)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors"
+                        >
+                            {editing ? <><Eye className="h-3.5 w-3.5 mr-1" />미리보기</> : <><Pencil className="h-3.5 w-3.5 mr-1" />편집</>}
+                        </button>
+                    )}
                     <button
                         onClick={handleClose}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
@@ -500,7 +567,9 @@ function NoteExpandModal({
                     </button>
                 </div>
                 {/* Body */}
-                {editing ? (
+                {grid ? (
+                    <div className="flex-1 p-6 overflow-auto">{grid}</div>
+                ) : editing ? (
                     <div className="flex-1 p-6 overflow-auto">
                         <textarea
                             value={content}
@@ -511,7 +580,7 @@ function NoteExpandModal({
                     </div>
                 ) : (
                     <div
-                        onClick={() => setEditing(true)}
+                        onClick={() => !isTpl && setEditing(true)}
                         className="flex-1 p-6 overflow-auto text-sm text-neutral-900 leading-relaxed cursor-text
                             [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
                             [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
@@ -525,7 +594,7 @@ function NoteExpandModal({
                             [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
                             [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
                     >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || "*내용 없음*"}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : content) || "*내용 없음*"}</ReactMarkdown>
                     </div>
                 )}
             </div>

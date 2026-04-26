@@ -6,6 +6,7 @@ import {
     Pencil, Trash2, Upload, User, Cake, Loader2,
     Star, Copy, Check, Building2, MapPin, Briefcase, Download, CheckSquare, Square, Clock
 } from "lucide-react";
+import { AddressPickerButton } from "./AddressPicker";
 
 // ── vCard 파서 유틸 ─────────────────────────────────────────────
 // iPhone·Android·Outlook export 호환을 위해 다음을 처리한다:
@@ -2323,7 +2324,20 @@ function ContactModal({ form, setForm, editing, saving, onSave, onClose }: {
                         </Field>
                     </div>
                     <Field label="주소">
-                        <input type="text" value={form.address || ""} onChange={field("address")} placeholder="서울시…" className={INPUT} />
+                        <div className="flex items-stretch gap-2">
+                            <input
+                                type="text"
+                                value={form.address || ""}
+                                onChange={field("address")}
+                                placeholder="우편번호 검색을 누르거나 직접 입력"
+                                className={`${INPUT} flex-1 min-w-0`}
+                            />
+                            <AddressPickerButton
+                                onSelect={(addr) => setForm(f => ({ ...f, address: addr }))}
+                                label="우편번호 검색"
+                                className="shrink-0"
+                            />
+                        </div>
                     </Field>
                     <div className="grid grid-cols-2 gap-3">
                         <Field label="그룹">

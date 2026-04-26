@@ -586,6 +586,22 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
+                {/* 앱 설치 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-2">앱 설치</h2>
+                    <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+                        홈 화면에 PP AI 아이콘을 추가하면 브라우저 주소창 없이 앱처럼 빠르게 열 수 있습니다.
+                        Android · iPhone · iPad · PC 모두 지원하며, 모든 기능은 웹과 동일하게 작동합니다.
+                    </p>
+                    <Link
+                        href="/planners/install"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors"
+                    >
+                        <Download className="h-3.5 w-3.5" />
+                        설치 안내 페이지로 이동
+                    </Link>
+                </section>
+
                 {/* Color Theme */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">컬러 테마</h2>

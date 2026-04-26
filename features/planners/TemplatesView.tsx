@@ -105,12 +105,12 @@ function QuadrantGrid({
                 <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{axisXHigh}</span>
             </div>
             <div className="flex gap-2">
-                {/* Y축 — 위 High, 아래 Low (표준 컨벤션) */}
-                <div className="flex flex-col items-center justify-between shrink-0 w-7 py-2">
+                {/* Y축 — 위 High, 아래 Low (표준 컨벤션, transform 기반 회전으로 다국어 일관) */}
+                <div className="flex flex-col items-center justify-between shrink-0 w-8 py-2">
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYHigh}</span>
-                    <div className="flex flex-col items-center my-2 flex-1 justify-center">
+                    <div className="flex flex-col items-center justify-center flex-1 gap-1">
                         <span className="text-slate-300 leading-none">↑</span>
-                        <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 [writing-mode:vertical-rl] rotate-180 my-1">{axisY}</span>
+                        <span className="inline-block -rotate-90 whitespace-nowrap text-[10px] uppercase tracking-[0.25em] font-bold text-slate-700 my-3">{axisY}</span>
                         <span className="text-slate-300 leading-none">↓</span>
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-semibold leading-none">{axisYLow}</span>

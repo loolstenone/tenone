@@ -9,13 +9,13 @@ import {
     CalendarRange,
     CalendarClock,
     FolderKanban,
-    LayoutTemplate,
     Sparkles,
     Settings,
     Search,
     HelpCircle,
     Users,
     LayoutGrid,
+    Download,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 
@@ -35,9 +35,8 @@ const NAV: NavItem[] = [
     { href: "/planners/app/yearly",      label: "Yearly",      icon: CalendarClock,   modes: ["all_in_one"] },
     { href: "/planners/app/identity",    label: "P.I",         icon: Compass,         modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/projects",    label: "Project",     icon: FolderKanban,    modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/templates",   label: "Templates",   icon: LayoutTemplate,  modes: ["all_in_one"] },
-    { href: "/planners/app/ai-briefing", label: "AI Briefing", icon: Sparkles,        modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     icon: Users,           modes: ["weekly", "all_in_one"] },
+    // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
 export function AppSidebar({
@@ -58,9 +57,13 @@ export function AppSidebar({
         <aside className="w-60 shrink-0 bg-white border-r border-neutral-200 flex flex-col h-screen sticky top-0">
             {/* Brand */}
             <div className="px-5 py-5 border-b border-neutral-100">
-                <Link href="/planners/app" className="inline-flex items-baseline gap-1">
-                    <p className="text-base font-bold text-neutral-900 leading-none">Planner&apos;s Planner</p>
-                    <sup className="text-[10px] font-semibold text-[#0F766E] tracking-widest">AI</sup>
+                <Link href="/planners/app" className="inline-flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-8 h-8 rounded-md shrink-0" />
+                    <span className="inline-flex items-baseline gap-1">
+                        <span className="text-base font-bold text-neutral-900 leading-none">Planner&apos;s Planner</span>
+                        <sup className="text-[10px] font-semibold text-[#0F766E] tracking-widest">AI</sup>
+                    </span>
                 </Link>
                 {userName && (
                     <p className="text-xs text-neutral-500 mt-3">안녕하세요, {userName}님</p>
@@ -123,6 +126,14 @@ export function AppSidebar({
                 >
                     <HelpCircle className="h-4 w-4" />
                     <span>Help</span>
+                </Link>
+                <Link
+                    href="/planners/install"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
+                    title="홈 화면에 PP AI 아이콘 설치"
+                >
+                    <Download className="h-4 w-4" />
+                    <span>앱 설치</span>
                 </Link>
                 <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
                     <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">

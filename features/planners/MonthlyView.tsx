@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
 
 function localDateStr(d: Date) {
@@ -254,7 +255,10 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         </button>
                     </div>
                 </div>
-                {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                <div className="flex items-center gap-3">
+                    <PlannersUtilityLinks />
+                    {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                </div>
             </div>
 
             {loading ? (

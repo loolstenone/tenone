@@ -96,7 +96,11 @@ const SECTIONS = [
         items: [
             {
                 q: "앱을 홈 화면에 추가하는 방법은?",
-                a: "모바일 브라우저(Safari/Chrome)에서 공유 버튼 → '홈 화면에 추가'를 선택하세요. 이후 앱처럼 실행됩니다.",
+                a: "전용 안내 페이지를 따라가세요 → /planners/install. Android 는 Chrome 으로 열면 한 번 클릭으로 설치되고, iPhone·iPad 는 Safari 의 '공유 → 홈 화면에 추가' 로 추가됩니다. PC 는 Chrome·Edge 주소창 우측 설치 아이콘으로 설치할 수 있습니다.",
+            },
+            {
+                q: "Play Store · App Store 에는 없나요?",
+                a: "PP AI 는 PWA (Progressive Web App) 형태로만 제공됩니다. 별도의 설치 파일을 받지 않고 위 절차로 홈 화면에 추가하면 네이티브 앱과 동일하게 작동하며, 모든 기능이 웹과 100% 동일합니다.",
             },
             {
                 q: "인터넷이 없어도 사용할 수 있나요?",

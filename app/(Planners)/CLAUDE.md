@@ -106,6 +106,9 @@
 - TemplatesView — 59종 카탈로그 + 27개 인터랙티브 그리드 컴포넌트 (2026-04-25 세션 87: 전 템플릿 시각 편집 완성)
 - AiBriefingView — 아침/저녁 브리핑 생성·이력
 - ContactsView — 연락처 목록/그룹/검색/편집/vCard import
+- AddressPicker — Daum Postcode lazy-load 모달 (Contacts 주소 필드)
+- PlannersUtilityLinks — 본문 상단 Templates · AI Briefing 칩 서브링크
+- InstallView — `/planners/install` PWA 설치 가이드 (자동 플랫폼 감지 + beforeinstallprompt)
 - SearchView — 풀텍스트
 - PurchaseView — 결제
 - CopyToAiButton — Claude/ChatGPT/Gemini deep link
@@ -125,7 +128,7 @@
 - 템플릿: templates · covers
 - 집계: summary(scope=weekly/monthly/yearly) · daily/month-hits
 - 검색: search
-- Daily 자동 이월: daily/carry-over
+- Daily 누적 이월: daily/carry-over (60일 일괄 todo 회수) · daily/pending-count (count·days·oldest)
 - AI 브리핑: briefing · briefing/generate · cron/briefings
 - 결제: payment/request · payment/success · admin/activate
 - 알림: push/subscribe
@@ -237,14 +240,14 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **P4 완료 + Contacts 극강화** — Google Contacts급 기능 (라벨 관리·중복 자동 정리·CSV/vCard 양방향·다가오는 생일·빠른 추가·마지막 연락 추적·Bulk Edit·수동 병합) + 사이트 헤더 정비 (2026-04-26 세션 89) |
+| **Phase** | **P4 완료 + 운영 UX 정비** — 메뉴 재편(Templates·AI Briefing 본문 서브링크 이동) · 누적 미완료 이월(60일) · 프로젝트 상세 UX 고도화 · 프로젝트 노트 인터랙티브 템플릿 · PWA 설치 시스템(/planners/install, 6개 진입점) · Contacts 주소 검색기(Daum Postcode) · 새 로고 적용 (2026-04-27 세션 90) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
 | **완료 범위** | W1~P2 전 범위 + P3 #17·19·20 + P4 #21·22·23·24(GTM·Help·피드백·Intra) + P5 #25·26·27 |
 | **배포 전 블로커** | PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · Supabase Redirect URL 추가 |
 | **이월 작업** | P3 #16 필기입력 · #18 기업플랜 (대규모, 다음 Phase) · TemplatesView 분리 리팩토링(소규모) |
 | **주요 결정** | 19,000원/년 · Weekly 기본 · PDF 구매자 무료 · 커뮤니티 운영 안 함 |
-| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) |
+| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) · **Templates · AI Briefing 은 본문 서브링크 (메인 메뉴는 Index/Today/Weekly/Monthly/Yearly/P.I/Project/Contact)** · **PWA 전용** (앱스토어 미등록, /planners/install 가이드) · **누적 이월 = 어제 한정이 아니라 60일 미완료 일괄 회수** |
 
 ---
 

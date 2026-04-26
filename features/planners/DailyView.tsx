@@ -11,10 +11,11 @@ import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/pla
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ThisWeekCard } from "./ThisWeekCard";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type CornellRow = { id: string; cue: string; note: string };
-type NoteItem = { id: string; type?: 'cornell' | 'template'; templateKey?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[] };
+type NoteItem = { id: string; type?: 'cornell' | 'template'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[] };
 
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -69,11 +70,10 @@ function TemplateNoteBlock({
                             setNotesList(next);
                         }}
                         onBlur={() => save({ notes: serializeNotesFn(notesList) })}
-                        placeholder="제목을 입력하세요 (클릭해서 편집)"
-                        title="클릭해서 제목 편집"
-                        className="text-sm font-semibold text-violet-800 bg-transparent focus:outline-none focus:ring-2 focus:ring-violet-300 focus:bg-white rounded px-1.5 py-0.5 w-full placeholder:text-violet-400 placeholder:font-normal hover:bg-violet-100/60 transition-colors cursor-text"
+                        placeholder={note.templateLabel || "제목을 입력하세요"}
+                        title="제목 입력 (예시: 템플릿 이름)"
+                        className="text-sm font-semibold text-violet-800 bg-transparent focus:outline-none focus:ring-2 focus:ring-violet-300 focus:bg-white rounded px-1.5 py-0.5 w-full placeholder:text-violet-400 placeholder:font-normal placeholder:italic hover:bg-violet-100/60 transition-colors cursor-text"
                     />
-                    <Pencil className="h-3 w-3 text-violet-300 shrink-0 pointer-events-none" />
                 </div>
                 <div className="flex items-center gap-2 ml-2 shrink-0">
                     <button
@@ -133,7 +133,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [newTaskText, setNewTaskText] = useState("");
     const [newTaskTime, setNewTaskTime] = useState("");
     const [carrying, setCarrying] = useState(false);
-    const [yesterdayHasPending, setYesterdayHasPending] = useState(false);
+    const [pendingInfo, setPendingInfo] = useState<{ count: number; days: number; oldest: string | null } | null>(null);
     const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
     const [showTemplatePicker, setShowTemplatePicker] = useState(false);
     const [tplList, setTplList] = useState<Array<{ id: string; key: string; category: string; subcategory: string | null; label: string; description: string | null; body_md: string }>>([]);
@@ -195,19 +195,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Check yesterday's pending tasks
+    // 누적 미완료 카운트 (과거 60일)
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const y = new Date(date + "T00:00:00");
-            y.setDate(y.getDate() - 1);
-            const yStr = localDateStr(y);
-            const res = await fetch(`/api/planners/daily?date=${yStr}`);
+            const res = await fetch(`/api/planners/daily/pending-count?date=${date}&days=60`);
             if (cancelled) return;
             if (res.ok) {
                 const d = await res.json();
-                const yTasks = (d.daily?.tasks || []) as PlannerTask[];
-                setYesterdayHasPending(yTasks.some((t) => t.status === "todo" || t.status === "carried"));
+                setPendingInfo({ count: d.count ?? 0, days: d.days ?? 0, oldest: d.oldest ?? null });
             }
         })();
         return () => { cancelled = true; };
@@ -282,13 +278,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         }
     }
 
-    async function carryOverYesterday() {
+    async function carryOverPending() {
         setCarrying(true);
         try {
             const res = await fetch(`/api/planners/daily/carry-over`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ date }),
+                body: JSON.stringify({ date, days: 60 }),
             });
             if (res.ok) {
                 const d = await res.json();
@@ -299,7 +295,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         if (data.daily) setTasks(data.daily.tasks || []);
                     }
                 }
-                setYesterdayHasPending(false);
+                setPendingInfo({ count: 0, days: 0, oldest: null });
             }
         } finally { setCarrying(false); }
     }
@@ -402,7 +398,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (n.type !== 'template') {
                 return { id: n.id, type: n.type, title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows }), summary: n.summary };
             }
-            return { id: n.id, type: n.type, templateKey: n.templateKey, title: n.title, cue: n.cue, content: n.content, summary: n.summary };
+            return { id: n.id, type: n.type, templateKey: n.templateKey, templateLabel: n.templateLabel, title: n.title, cue: n.cue, content: n.content, summary: n.summary };
         }));
     }
 
@@ -411,7 +407,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             id: `n_${Date.now()}`,
             type: 'template' as const,
             templateKey: tpl.key,
-            title: tpl.label,
+            templateLabel: tpl.label,
+            title: "",
             cue: "",
             content: resolveTemplateContent(tpl),
             summary: "",
@@ -502,7 +499,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         )}
                     </p>
                 </div>
-                {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                <div className="flex items-center gap-3">
+                    <PlannersUtilityLinks />
+                    {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                </div>
             </div>
 
             {loading ? (
@@ -520,14 +520,17 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         ( · 미완 | <span className="font-mono">V</span> 완료 | <span className="font-mono">→</span> 이월 | <span className="font-mono">X</span> 취소 )
                                     </span>
                                 </h2>
-                                {yesterdayHasPending && (
+                                {pendingInfo && pendingInfo.count > 0 && (
                                     <button
-                                        onClick={carryOverYesterday}
+                                        onClick={carryOverPending}
                                         disabled={carrying}
+                                        title={pendingInfo.oldest
+                                            ? `${pendingInfo.oldest} 부터 누적된 미완료 ${pendingInfo.count}건 (${pendingInfo.days}일) 을 오늘로 이월`
+                                            : `누적 미완료 ${pendingInfo.count}건 이월`}
                                         className="flex items-center gap-1 text-[10px] px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition-colors disabled:opacity-50"
                                     >
                                         {carrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowDownToLine className="h-3 w-3" />}
-                                        어제 미완료 이월
+                                        누적 미완료 {pendingInfo.count}건 이월
                                     </button>
                                 )}
                             </div>

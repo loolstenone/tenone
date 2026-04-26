@@ -17,6 +17,7 @@ export function PlannersFooter() {
                         { label: "Planner's Planner", href: "/planners/planner-tool" },
                         { label: "Programs", href: "/planners/programs" },
                         { label: "GPR", href: "/planners/gpr" },
+                        { label: "앱 설치", href: "/planners/install" },
                     ],
                 },
                 {

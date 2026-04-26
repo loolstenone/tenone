@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 
 
@@ -22,9 +22,8 @@ const TABS: Tab[] = [
     { href: "/planners/app/yearly",      label: "Yearly",      modes: ["all_in_one"] },
     { href: "/planners/app/identity",    label: "P.I",         modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/projects",    label: "Project",     modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/templates",   label: "Templates",   modes: ["all_in_one"] },
-    { href: "/planners/app/ai-briefing", label: "AI Briefing", modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
+    // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
 export function AppTopNav({
@@ -42,18 +41,23 @@ export function AppTopNav({
     const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
 
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-1 shrink-0">
+        <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
             {/* Brand */}
-            <Link href="/planners/app" className="flex items-center mr-2 shrink-0">
+            <Link href="/planners/app" className="flex items-center gap-1.5 mr-1 shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-6 h-6 rounded shrink-0" />
                 <span className="text-xs font-semibold font-sans text-neutral-800 tracking-tight whitespace-nowrap">
                     Planner&apos;s Planner<sup className="text-[8px] font-bold text-[#0F766E] ml-0.5">AI</sup>
                 </span>
             </Link>
 
-            <div className="w-px h-4 bg-neutral-200 mr-1 shrink-0" />
+            <div className="w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* Tabs */}
-            <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto">
+            {/* Tabs — 가로 스크롤 가능, 스크롤바 시각적으로 숨김 */}
+            <nav
+                className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
                 {visibleTabs.map((tab) => {
                     const hrefPath = tab.href.split("?")[0];
                     const active =
@@ -63,7 +67,7 @@ export function AppTopNav({
                         <Link
                             key={tab.href}
                             href={tab.href}
-                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap ${
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
                                 active
                                     ? "bg-[#0F766E] text-white"
                                     : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
@@ -75,8 +79,8 @@ export function AppTopNav({
                 })}
             </nav>
 
-            {/* Right actions */}
-            <div className="flex items-center gap-0.5 shrink-0 ml-1">
+            {/* Right actions — 탭과 시각적 분리 */}
+            <div className="flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
                 {subscriptionStatus !== "active" && (
                     <Link
                         href="/planners/purchase"
@@ -86,6 +90,14 @@ export function AppTopNav({
                         <span>구독</span>
                     </Link>
                 )}
+
+                <Link
+                    href="/planners/install"
+                    className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors"
+                    title="앱 설치 (홈 화면에 추가)"
+                >
+                    <Download className="h-4 w-4" />
+                </Link>
 
                 <Link
                     href="/planners/app/search"

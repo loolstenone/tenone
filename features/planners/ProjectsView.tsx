@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FolderKanban, Plus, Loader2 } from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { CoverRender } from "./CoverRender";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 
 interface Cover {
     key: string;
@@ -73,6 +74,7 @@ export function ProjectsView() {
                     <FolderKanban className="h-6 w-6 text-[#0F766E]" />
                     <h1 className="font-serif text-3xl text-neutral-900">Projects</h1>
                 </div>
+                <PlannersUtilityLinks />
             </div>
 
             {/* Filter */}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Compass, Loader2, Plus, Trash2 } from "lucide-react";
 import type { PlannerIdentity } from "@/lib/planners/types";
+import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 
 type Tab = "vision" | "inside" | "outside" | "house";
 
@@ -53,15 +54,18 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3">
-                    <Compass className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">Personal Identity</h1>
-                    {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+            <div className="mb-8 flex items-start justify-between gap-4">
+                <div>
+                    <div className="flex items-center gap-3">
+                        <Compass className="h-6 w-6 text-[#0F766E]" />
+                        <h1 className="font-serif text-3xl text-neutral-900">Personal Identity</h1>
+                        {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                    </div>
+                    <p className="text-sm text-neutral-500 mt-2">
+                        나는 누구인가. 나는 무엇을 도모(圖謀)하고 있는가.
+                    </p>
                 </div>
-                <p className="text-sm text-neutral-500 mt-2">
-                    나는 누구인가. 나는 무엇을 도모(圖謀)하고 있는가.
-                </p>
+                <PlannersUtilityLinks />
             </div>
 
             {/* Tabs */}
