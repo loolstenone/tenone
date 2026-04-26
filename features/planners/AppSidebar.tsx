@@ -16,6 +16,7 @@ import {
     Users,
     LayoutGrid,
     Download,
+    Pencil,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
@@ -36,6 +37,7 @@ const NAV: NavItem[] = [
     { href: "/planners/app/yearly",      label: "Yearly",      icon: CalendarClock,   modes: ["all_in_one"] },
     { href: "/planners/app/identity",    label: "P.I",         icon: Compass,         modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/projects",    label: "Project",     icon: FolderKanban,    modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/canvas",      label: "Canvas",      icon: Pencil,          modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     icon: Users,           modes: ["weekly", "all_in_one"] },
     // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];

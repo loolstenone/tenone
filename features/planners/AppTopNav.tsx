@@ -23,6 +23,7 @@ const TABS: Tab[] = [
     { href: "/planners/app/yearly",      label: "Yearly",      modes: ["all_in_one"] },
     { href: "/planners/app/identity",    label: "P.I",         modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/projects",    label: "Project",     modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/canvas",      label: "Canvas",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
     // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
