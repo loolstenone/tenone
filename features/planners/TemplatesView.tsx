@@ -1758,7 +1758,18 @@ function TimeBlockGrid({ data, onChange }: { data: FrameworkData; onChange: (key
     const CATEGORIES = ["집중", "협업", "행정", "학습", "휴식", "식사"];
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Date · 날짜" valKey="tb_date" data={data} onChange={onChange} placeholder="YYYY-MM-DD" />
+            {/* 메타 + Top 3 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Date · 날짜" valKey="tb_date" data={data} onChange={onChange} placeholder="2026-04-27 (월)" />
+                <LabeledInput label="Top 3 · 오늘의 핵심" valKey="tb_top3" data={data} onChange={onChange} placeholder="1) 캠페인 리포트 2) 신규 가입 분석 3) 1on1 준비" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Cal Newport Time Blocking</span> · 모든 시간을 블록으로 — &quot;빈 시간 = 낭비될 시간&quot;.
+                Top 3에 90~120분 블록을 <span className="font-semibold">오전</span>에 배치. 회의·이메일은 오후. 종일 다 못 지켜도 OK — 다음 날 재구성.
+            </div>
+
             <div className="rounded-lg border border-neutral-200 overflow-hidden">
                 <div className="bg-neutral-50 px-3 py-2 text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex gap-2">
                     <span className="w-32">시작 ~ 종료</span>
@@ -1789,6 +1800,12 @@ function TimeBlockGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                 ))}
             </div>
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-neutral-50 hover:text-[#0F766E] hover:border-[#0F766E]">+ 블록 추가</button>
+
+            {/* Reflection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Wins · 잘 지킨 블록" valKey="tb_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="예: 09~11 캠페인 리포트 완성 (90분 풀집중)" />
+                <LabeledBox label="Slips · 못 지킨 이유·재배치" valKey="tb_slips" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="예: 14시 협업 블록 미팅 연장 → 분석은 내일 오전으로" />
+            </div>
         </div>
     );
 }
@@ -1822,9 +1839,28 @@ function DeepWorkGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
     const update = (i: number, patch: Partial<DwSession>) => { const n = [...ss]; n[i] = { ...n[i], ...patch }; save(n); };
     const add = () => save([...ss, { start: "", duration: 60, task: "", result: "", distractions: "" }]);
     const remove = (i: number) => save(ss.filter((_, x) => x !== i));
+    const totalMin = ss.reduce((sum, x) => sum + (x.duration || 0), 0);
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Date · 날짜" valKey="dw_date" data={data} onChange={onChange} />
+            {/* 메타 + 의도 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 space-y-2">
+                <div className="grid grid-cols-3 gap-2">
+                    <LabeledInput label="Date · 날짜" valKey="dw_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                    <LabeledInput label="목표 시간" valKey="dw_goal" data={data} onChange={onChange} placeholder="예: 4시간" />
+                    <div>
+                        <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">총 누적</p>
+                        <p className="text-base font-bold text-slate-700 mt-1">{totalMin}분 · {Math.floor(totalMin / 60)}시간 {totalMin % 60}분</p>
+                    </div>
+                </div>
+                <LabeledInput label="Why · 왜 이걸 하나" valKey="dw_why" data={data} onChange={onChange} placeholder="예: 분기 OKR 핵심 지표 — 이번 주 마무리해야 다음 단계 진행" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Cal Newport Deep Work</span> · 산만함 없이 <span className="font-semibold">90분 단위</span>로.
+                전·후 명확한 시작/끝, 휴대폰은 다른 방, 결과를 측정 가능한 산출물로. 진짜 가치는 시간 ÷ 산출물이 아니라 시간 × 집중도.
+            </div>
+
             {ss.map((s, i) => (
                 <div key={i} className="rounded-lg p-3 bg-slate-50 border border-slate-300 space-y-2 relative">
                     {ss.length > 1 && (
@@ -1844,17 +1880,24 @@ function DeepWorkGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                         </div>
                     </div>
                     <input type="text" value={s.task} onChange={e => update(i, { task: e.target.value })}
-                        placeholder="과업 — 무엇에 집중했나"
+                        placeholder="예: 분기 OKR 리포트 초안 — 1.5시간 풀집중"
                         className="w-full px-2 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded focus:outline-none" />
                     <textarea value={s.result} onChange={e => update(i, { result: e.target.value })}
-                        placeholder="결과 — 무엇을 완성했나" rows={2}
+                        placeholder="결과 — 무엇을 완성했나 (구체 산출물). 예: 1~3장 초안 완성, 그래프 4개" rows={2}
                         className="w-full resize-none px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none leading-relaxed" />
                     <textarea value={s.distractions} onChange={e => update(i, { distractions: e.target.value })}
-                        placeholder="방해 요소 — 무엇이 흐름을 끊었나" rows={1}
+                        placeholder="방해 요소 — 무엇이 흐름을 끊었나 (예: 슬랙 알림 3회 · 4시쯤 졸림)" rows={1}
                         className="w-full resize-none px-2 py-1.5 text-[11px] bg-white/60 border border-slate-200 rounded focus:outline-none text-stone-700 leading-relaxed" />
                 </div>
             ))}
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-400">+ 세션 추가</button>
+
+            {/* Daily learning */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Lesson · 오늘 배운 것 (집중 패턴·트리거)</p>
+                <p className="text-[10px] text-neutral-500 mb-1">언제 가장 잘 됐나? 무엇이 흐름을 끊는가?</p>
+                <CellTextarea cellKey="dw_lesson" value={data["dw_lesson"] ?? ""} onChange={onChange} placeholder={"- 오전 9~11시가 최고 집중 시간 — 회의 절대 금지\n- 휴대폰 다른 방 두면 1.5배 깊어짐\n- 점심 후 30분 산책 → 오후 집중 회복"} />
+            </div>
         </div>
     );
 }
@@ -1873,12 +1916,23 @@ function PomodoroGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
     const totalTomatoes = ss.reduce((s, x) => s + x.completed, 0);
     return (
         <div className="my-2 space-y-2">
-            <div className="flex items-center justify-between">
-                <LabeledInput label="Date · 날짜" valKey="pom_date" data={data} onChange={onChange} />
-                <div className="ml-3 shrink-0 text-right">
-                    <p className="text-[9px] text-neutral-500 font-semibold uppercase tracking-wider">총 </p>
-                    <p className="text-xl font-bold text-slate-700">{totalTomatoes}</p>
+            {/* 메타 + 집계 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex-1 grid grid-cols-2 gap-2">
+                    <LabeledInput label="Date · 날짜" valKey="pom_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                    <LabeledInput label="목표 토마토" valKey="pom_goal" data={data} onChange={onChange} placeholder="예: 12개 (= 5시간 집중)" />
                 </div>
+                <div className="shrink-0 text-right">
+                    <p className="text-[9px] text-neutral-500 font-semibold uppercase tracking-wider">총 토마토</p>
+                    <p className="text-2xl font-bold text-slate-700">{totalTomatoes} <span className="text-xs font-normal text-neutral-500">/ {totalTomatoes * 25}분</span></p>
+                </div>
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Pomodoro Technique</span> · 25분 집중 + 5분 휴식 = 1 토마토.
+                4 토마토마다 15~30분 긴 휴식. <span className="font-semibold">중간에 끊기면 그 토마토는 0</span> — 다시 시작.
+                알림 차단·핸드폰 멀리·한 가지 일만.
             </div>
             <div className="rounded-lg border border-neutral-200 overflow-hidden">
                 <div className="bg-neutral-50 px-3 py-2 text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex gap-2">
@@ -1907,6 +1961,12 @@ function PomodoroGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                 ))}
             </div>
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-400">+ 과업 추가</button>
+
+            {/* Reflection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Interruptions · 방해 발생" valKey="pom_interruptions" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- 11시쯤 슬랙 알림 (긴급 X) · 미루지 못함\n- 점심 후 졸림 — 토마토 1개 깨짐" />
+                <LabeledBox label="Insights · 오늘의 패턴" valKey="pom_insights" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- 오전 4토마토 = 최고 집중 / 오후 50% 효율\n- 회의 직후 토마토 시작은 어려움" />
+            </div>
         </div>
     );
 }
@@ -1931,7 +1991,18 @@ function HabitTrackerGrid({ data, onChange }: { data: FrameworkData; onChange: (
     const DOW = ["월", "화", "수", "목", "금", "토", "일"];
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Week · 주차" valKey="ht_week" data={data} onChange={onChange} placeholder="예: 2026년 W17" />
+            {/* 메타 + Identity */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Week · 주차" valKey="ht_week" data={data} onChange={onChange} placeholder="예: 2026년 W17 (04-21~04-27)" />
+                <LabeledInput label="Identity · 되고 싶은 사람" valKey="ht_identity" data={data} onChange={onChange} placeholder="예: 매일 글 쓰는 사람 / 건강한 30대" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">James Clear Atomic Habits</span> · 시스템 &gt; 목표.
+                <span className="font-semibold"> 2분 룰</span>로 시작 (예: 30분 운동 → 운동복 입기). 빠진 날은 다음 날 무조건 복귀 — &quot;Never miss twice.&quot;
+            </div>
+
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
                 <table className="w-full text-xs">
                     <thead className="bg-neutral-50 text-[10px] text-neutral-500 uppercase tracking-wider">
@@ -1974,6 +2045,12 @@ function HabitTrackerGrid({ data, onChange }: { data: FrameworkData; onChange: (
                 </table>
             </div>
             <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-400">+ 습관 추가</button>
+
+            {/* Reflection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="What worked · 잘 된 것" valKey="ht_worked" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="예: 알람 5분 일찍 → 명상 7/7 / 식후 산책 5/7" />
+                <LabeledBox label="What broke · 깨진 이유·재설계" valKey="ht_broke" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="예: 운동 4/7 — 퇴근 후 피로 → 다음 주 점심시간 변경" />
+            </div>
         </div>
     );
 }
@@ -1995,7 +2072,18 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
     };
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Date · 날짜" valKey="em_date" data={data} onChange={onChange} />
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="Date · 날짜" valKey="em_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                <LabeledInput label="컨디션 메모" valKey="em_condition" data={data} onChange={onChange} placeholder="잠 6h · 운동 X · 커피 2잔" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">에너지 매핑</span> · 시간이 아니라 <span className="font-semibold">에너지가 자원</span>이다.
+                1주일 트래킹하면 본인의 피크 패턴이 보임 → 가장 어려운 일을 피크에 배치, 단순 작업을 저점에. 5점 = 최고, 0 = 회복 필요.
+            </div>
+
             <div className="rounded-lg p-3 bg-slate-50 border border-slate-200">
                 <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-2">시간대별 에너지 (0~5, 클릭해서 조정)</p>
                 <div className="flex gap-0.5 items-end h-32">
@@ -2016,11 +2104,18 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                     ))}
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-                <LabeledBox label="Peaks · 피크 시간" valKey="em_peaks" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
-                <LabeledBox label="Lows · 저점 시간" valKey="em_lows" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Peaks · 피크 시간 (4~5점)" valKey="em_peaks" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="예: 09~11시 · 15~16시 — 가장 어려운 일 배치" />
+                <LabeledBox label="Lows · 저점 시간 (0~2점)" valKey="em_lows" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" placeholder="예: 14시·17시 — 행정·이메일·산책" />
             </div>
-            <LabeledBox label="Patterns · 패턴 메모" valKey="em_notes" data={data} onChange={onChange} />
+
+            {/* Triggers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Boost · 에너지 올리는 것" valKey="em_boost" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- 아침 산책 20분\n- 점심 후 짧은 낮잠\n- 동료와 짧은 대화" />
+                <LabeledBox label="Drain · 에너지 빨리는 것" valKey="em_drain" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- 알림 ON 상태로 메일 답장 30분\n- 점심 과식\n- 회의 연속 3개" />
+            </div>
+
+            <LabeledBox label="Patterns · 1주일 추적 후 발견" valKey="em_notes" data={data} onChange={onChange} placeholder="예: 화·목요일이 월·수보다 평균 1점 높음 — 운동 다음 날 효과 확인 / 회의 후 회복에 30분 필요" />
         </div>
     );
 }
