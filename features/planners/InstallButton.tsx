@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { usePwaInstall } from "@/lib/planners/use-pwa-install";
+import { Track } from "@/lib/analytics";
 
 interface Props {
     children?: ReactNode;
@@ -41,6 +42,7 @@ export function InstallButton({
         setBusy(true);
         try {
             const outcome = await install();
+            Track.pwaInstallPrompt({ outcome });
             if (outcome === "accepted") {
                 onInstalled?.();
             } else if (outcome === "unavailable") {

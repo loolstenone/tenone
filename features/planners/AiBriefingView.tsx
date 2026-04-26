@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Sun, Moon, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import type { PlannerBriefing } from "@/lib/planners/types";
-import { trackPlanners } from "@/lib/planners/analytics";
+import { Track } from "@/lib/analytics";
 
 export function AiBriefingView() {
     const [briefings, setBriefings] = useState<PlannerBriefing[]>([]);
@@ -30,16 +30,19 @@ export function AiBriefingView() {
 
     async function generate(type: "morning" | "evening") {
         setGenerating(type);
+        const startedAt = Date.now();
         try {
             const res = await fetch(`/api/planners/briefing/generate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type, date: today }),
             });
+            const duration_ms = Date.now() - startedAt;
             if (res.ok) {
-                trackPlanners("planners_ai_briefing_generated", { type });
+                Track.briefingGenerate({ kind: type, duration_ms, success: true });
                 await load(true);
             } else {
+                Track.briefingGenerate({ kind: type, duration_ms, success: false });
                 const err = await res.json();
                 alert(`브리핑 생성 실패: ${err.message || err.error}`);
             }

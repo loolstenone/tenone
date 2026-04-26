@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { MessageSquarePlus, X, Send, Check } from "lucide-react";
 import { trackPlanners } from "@/lib/planners/analytics";
 
 export function BetaFeedbackButton() {
+    const pathname = usePathname();
     const [open, setOpen] = useState(false);
     const [text, setText] = useState("");
     const [sending, setSending] = useState(false);
@@ -17,7 +19,7 @@ export function BetaFeedbackButton() {
             await fetch("/api/planners/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text.trim() }),
+                body: JSON.stringify({ message: text.trim(), page_path: pathname }),
             });
             trackPlanners("planners_beta_feedback_sent");
             setSent(true);

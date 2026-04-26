@@ -12,6 +12,7 @@ import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ThisWeekCard } from "./ThisWeekCard";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { Track } from "@/lib/analytics";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type CornellRow = { id: string; cue: string; note: string };
@@ -294,6 +295,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         const data = await r2.json();
                         if (data.daily) setTasks(data.daily.tasks || []);
                     }
+                    Track.carryOverPending({ count: d.carried, days: (d.from_days?.length ?? 0) });
                 }
                 setPendingInfo({ count: 0, days: 0, oldest: null });
             }
@@ -418,6 +420,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setNotesList(next);
         save({ notes: serializeNotes(next) });
         setShowTemplatePicker(false);
+        Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "daily" });
     }
 
     function navigateDate(deltaDays: number) {

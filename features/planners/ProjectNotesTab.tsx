@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
+import { Track } from "@/lib/analytics";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -126,6 +127,7 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                 const d = await res.json();
                 setNotes([...notes, d.note]);
                 setPicker(false);
+                Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "project" });
             }
         } finally { setSaving(false); }
     }

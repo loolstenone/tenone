@@ -187,6 +187,17 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "approval",
         priority: "critical",
     },
+    // ── Planner's
+    {
+        key: "planners_feedback_new",
+        label: "PP AI 베타 피드백",
+        table: "planners_feedback",
+        filter: { column: "status", value: "new" },
+        href: "/intra/planners/feedback",
+        brand_id: "planners",
+        category: "cs",
+        priority: "normal",
+    },
 ];
 
 /** category별 라벨 */

@@ -1,15 +1,6 @@
-declare global {
-    interface Window {
-        dataLayer: Record<string, unknown>[];
-    }
-}
+// 레거시 호환 — 신규 코드는 `@/lib/analytics` 의 `Track` / `trackPlannersEvent` 사용 권장.
+import { trackPlannersEvent } from "@/lib/analytics";
 
-export function trackPlanners(event: string, params: Record<string, unknown> = {}) {
-    if (typeof window === "undefined") return;
-    if (!window.dataLayer) return;
-    window.dataLayer.push({
-        event,
-        brand_id: "planners",
-        ...params,
-    });
+export function trackPlanners(event: string, params: Record<string, string | number | boolean | null | undefined> = {}) {
+    trackPlannersEvent(event, params);
 }

@@ -6,6 +6,7 @@ import { FolderKanban, Plus, Loader2 } from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { Track } from "@/lib/analytics";
 
 interface Cover {
     key: string;
@@ -57,6 +58,7 @@ export function ProjectsView() {
             if (res.ok) {
                 const d = await res.json();
                 setProjects([...projects, d.project]);
+                Track.projectCreate({ has_title: !!newTitle.trim() });
                 setNewTitle("");
             }
         } finally {
