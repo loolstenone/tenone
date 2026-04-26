@@ -504,6 +504,9 @@ export function ContactsView() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const [favoritingId, setFavoritingId] = useState<string | null>(null);
+    // letterFilter: 'top' = 즐겨찾기+최근만 표시 (기본·빠른 로딩), 'all' = 전체, 'ㄱ'·'A' 등 = 해당 초성/알파벳만.
+    // 우측 인덱스 클릭 시 해당 letter로 필터링 — 전체 렌더 X (성능 부담 방지).
+    const [letterFilter, setLetterFilter] = useState<string>("top");
     const fileRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -579,6 +582,34 @@ export function ContactsView() {
     // 가나다 인덱스 — 실제 존재하는 첫 글자만 활성화
     const presentInitials = new Set<string>();
     sortedRows.forEach(c => presentInitials.add(getInitialChar(c.name)));
+
+    // ── letterFilter 적용 (성능 최적화) ──
+    // - 'top' = 즐겨찾기 + 최근 사용한 사람만 표시 (초기 진입 화면)
+    // - 'all' = 전체
+    // - 'ㄱ', 'A' 등 = 해당 초성/알파벳만
+    // view가 favorites/recent/label/group일 때는 letterFilter 무시 (이미 좁혀진 결과)
+    const isCompactView = view === "all" && !search.trim();
+    const topFavoritesRows = view === "all" && letterFilter === "top"
+        ? sortedRows.filter(c => c.is_favorite).slice(0, 50)
+        : [];
+    const topRecentRows = view === "all" && letterFilter === "top"
+        ? sortedRows
+            .filter(c => !!c.last_contacted_at && !c.is_favorite)
+            .sort((a, b) => (b.last_contacted_at || "").localeCompare(a.last_contacted_at || ""))
+            .slice(0, 30)
+        : [];
+    const visibleRows = (() => {
+        if (!isCompactView) return sortedRows;
+        if (letterFilter === "top") return [];
+        if (letterFilter === "all") return sortedRows;
+        return sortedRows.filter(c => getInitialChar(c.name) === letterFilter);
+    })();
+    // 인덱스별 카운트 (배지용)
+    const initialCounts: Record<string, number> = {};
+    sortedRows.forEach(c => {
+        const init = getInitialChar(c.name);
+        initialCounts[init] = (initialCounts[init] || 0) + 1;
+    });
 
     function openNew() {
         setEditing(null);
@@ -1002,13 +1033,23 @@ export function ContactsView() {
         reader.readAsText(file, "utf-8");
     }
 
-    // 중복 검출 — phone(숫자만) 또는 email 기준
+    // 중복 검출 — phone(숫자만, 한국 끝 8자리), email(소문자 trim), 같은 이름+회사 fallback.
+    // 한국 휴대폰 +82 prefix·국가코드 변환 고려하여 마지막 8자리로 비교 (010-1234-5678 → 12345678).
     function findDuplicateGroups(): Contact[][] {
+        function normalizePhone(p: string): string {
+            const digits = p.replace(/[^0-9]/g, "");
+            if (!digits) return "";
+            // 국제번호 +82 → 0 변환
+            const normalized = digits.startsWith("82") && digits.length >= 11 ? "0" + digits.slice(2) : digits;
+            // 마지막 8자리 (한국 휴대폰·일반전화 모두 마지막 8자리는 식별자)
+            return normalized.length >= 8 ? normalized.slice(-8) : normalized;
+        }
         const byPhone = new Map<string, Contact[]>();
         const byEmail = new Map<string, Contact[]>();
+        const byNameOrg = new Map<string, Contact[]>();
         for (const c of contacts) {
             if (c.phone) {
-                const key = c.phone.replace(/[^0-9]/g, "");
+                const key = normalizePhone(c.phone);
                 if (key.length >= 7) {
                     const list = byPhone.get(key) || [];
                     list.push(c);
@@ -1023,6 +1064,13 @@ export function ContactsView() {
                     byEmail.set(key, list);
                 }
             }
+            // 이름+회사 fallback (전화·이메일 둘 다 없는 경우만 비교 의미)
+            if (!c.phone && !c.email && c.name) {
+                const key = `${c.name.trim().toLowerCase()}|${(c.organization || "").trim().toLowerCase()}`;
+                const list = byNameOrg.get(key) || [];
+                list.push(c);
+                byNameOrg.set(key, list);
+            }
         }
         const groupsMap = new Map<string, Contact[]>(); // dedupe by member overlap
         const seen = new Set<string>();
@@ -1035,6 +1083,7 @@ export function ContactsView() {
         };
         byPhone.forEach(addGroup);
         byEmail.forEach(addGroup);
+        byNameOrg.forEach(addGroup);
         return [...groupsMap.values()];
     }
 
@@ -1088,7 +1137,7 @@ export function ContactsView() {
     }
 
     return (
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Toast */}
             {toast && (
                 <div
@@ -1454,15 +1503,33 @@ export function ContactsView() {
                         </div>
                     )}
 
-                    {/* 결과 카운트 */}
+                    {/* 결과 카운트 + letter 필터 표시 */}
                     {!loading && (
-                        <div className="text-xs text-neutral-500 mb-2 px-1">
-                            {view === "all" ? "모든 연락처" :
-                             view === "favorites" ? "즐겨찾기" :
-                             view === "unclassified" ? "미분류" :
-                             view.startsWith("label:") ? `라벨: ${view.slice(6)}` :
-                             view.startsWith("group:") ? `그룹: ${view.slice(6)}` : ""}
-                            <span className="ml-2">({sortedRows.length.toLocaleString("ko-KR")}명)</span>
+                        <div className="text-xs text-neutral-500 mb-2 px-1 flex items-center gap-2 flex-wrap">
+                            <span>
+                                {view === "all" ? "모든 연락처" :
+                                 view === "favorites" ? "즐겨찾기" :
+                                 view === "unclassified" ? "미분류" :
+                                 view.startsWith("label:") ? `라벨: ${view.slice(6)}` :
+                                 view.startsWith("group:") ? `그룹: ${view.slice(6)}` : ""}
+                                <span className="ml-2 text-neutral-400">총 {sortedRows.length.toLocaleString("ko-KR")}명</span>
+                            </span>
+                            {isCompactView && letterFilter !== "top" && letterFilter !== "all" && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#0F766E]/10 text-[#0F766E] font-semibold">
+                                    {letterFilter} ({visibleRows.length.toLocaleString("ko-KR")}명)
+                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[#0F766E]/20 rounded p-0.5" title="기본 화면으로">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </span>
+                            )}
+                            {isCompactView && letterFilter === "all" && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#0F766E]/10 text-[#0F766E] font-semibold">
+                                    All ({visibleRows.length.toLocaleString("ko-KR")}명)
+                                    <button onClick={() => setLetterFilter("top")} className="hover:bg-[#0F766E]/20 rounded p-0.5" title="기본 화면으로">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </span>
+                            )}
                         </div>
                     )}
 
@@ -1471,6 +1538,71 @@ export function ContactsView() {
                     ) : sortedRows.length === 0 ? (
                         <div className="py-16 text-center text-neutral-400 text-sm">
                             {contacts.length === 0 ? "연락처를 추가하거나 vCard 파일로 가져오세요." : "검색 결과가 없습니다."}
+                        </div>
+                    ) : isCompactView && letterFilter === "top" ? (
+                        // ── 기본(top) 화면: 즐겨찾기 + 최근 사용. 전체 렌더링 X (빠른 로딩) ──
+                        <div ref={listRef} className="space-y-4">
+                            {topFavoritesRows.length > 0 && (
+                                <section className="bg-white border border-amber-200 rounded-lg overflow-hidden">
+                                    <div className="px-4 py-2.5 bg-amber-50 border-b border-amber-100 flex items-center gap-2">
+                                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                        <span className="text-xs font-semibold text-amber-900">즐겨찾기</span>
+                                        <span className="text-[10px] text-amber-700/70">{topFavoritesRows.length}명</span>
+                                    </div>
+                                    <div className="divide-y divide-neutral-100">
+                                        {topFavoritesRows.map(c => (
+                                            <ContactRow
+                                                key={c.id}
+                                                contact={c}
+                                                isSelected={selectedIds.has(c.id)}
+                                                anySelected={selectedIds.size > 0}
+                                                onToggleSelect={() => toggleSelected(c.id)}
+                                                onEdit={() => openEdit(c)}
+                                                onDelete={() => remove(c.id)}
+                                                onToggleFavorite={() => toggleFavorite(c)}
+                                                onCopy={copyText}
+                                                onRecordContact={() => recordContact(c.id)}
+                                                copiedKey={copiedKey}
+                                                deleting={deleting === c.id}
+                                                favoriting={favoritingId === c.id}
+                                            />
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                            {topRecentRows.length > 0 && (
+                                <section className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
+                                    <div className="px-4 py-2.5 bg-neutral-50 border-b border-neutral-200 flex items-center gap-2">
+                                        <Clock className="h-3.5 w-3.5 text-neutral-500" />
+                                        <span className="text-xs font-semibold text-neutral-700">최근 사용</span>
+                                        <span className="text-[10px] text-neutral-500">{topRecentRows.length}명 · 마지막 통화·이메일 순</span>
+                                    </div>
+                                    <div className="divide-y divide-neutral-100">
+                                        {topRecentRows.map(c => (
+                                            <ContactRow
+                                                key={c.id}
+                                                contact={c}
+                                                isSelected={selectedIds.has(c.id)}
+                                                anySelected={selectedIds.size > 0}
+                                                onToggleSelect={() => toggleSelected(c.id)}
+                                                onEdit={() => openEdit(c)}
+                                                onDelete={() => remove(c.id)}
+                                                onToggleFavorite={() => toggleFavorite(c)}
+                                                onCopy={copyText}
+                                                onRecordContact={() => recordContact(c.id)}
+                                                copiedKey={copiedKey}
+                                                deleting={deleting === c.id}
+                                                favoriting={favoritingId === c.id}
+                                            />
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                            {/* 안내 */}
+                            <div className="rounded-lg p-4 bg-neutral-50 border border-dashed border-neutral-300 text-xs text-neutral-500 text-center">
+                                전체 {sortedRows.length.toLocaleString("ko-KR")}명 중 즐겨찾기·최근 사용한 사람만 표시 중.
+                                <br/>우측 인덱스에서 <span className="font-semibold text-[#0F766E]">All</span> 또는 가나다·알파벳을 누르면 해당 그룹만 표시됩니다.
+                            </div>
                         </div>
                     ) : (
                         <div ref={listRef} className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
@@ -1482,7 +1614,7 @@ export function ContactsView() {
                                         title="표시 중인 연락처 전체 선택"
                                         className="hover:text-[#0F766E] transition-colors"
                                     >
-                                        {sortedRows.length > 0 && sortedRows.every(c => selectedIds.has(c.id))
+                                        {visibleRows.length > 0 && visibleRows.every(c => selectedIds.has(c.id))
                                             ? <CheckSquare className="h-4 w-4 text-[#0F766E]" />
                                             : <Square className="h-4 w-4 text-neutral-300 hover:text-[#0F766E]" />}
                                     </button>
@@ -1496,9 +1628,9 @@ export function ContactsView() {
                             </div>
                             {/* 행 */}
                             <div className="divide-y divide-neutral-100">
-                                {sortedRows.map((c, idx) => {
+                                {visibleRows.map((c, idx) => {
                                     const init = getInitialChar(c.name);
-                                    const prevInit = idx > 0 ? getInitialChar(sortedRows[idx - 1].name) : null;
+                                    const prevInit = idx > 0 ? getInitialChar(visibleRows[idx - 1].name) : null;
                                     const showInitial = init !== prevInit;
                                     return (
                                         <ContactRow
@@ -1524,20 +1656,36 @@ export function ContactsView() {
                     )}
                 </div>
 
-                {/* 가나다 사이드 인덱스 — viewport 우측에 fixed (md 이상에서 노출) */}
-                {contacts.length > 20 && (
+                {/* 가나다 사이드 인덱스 — viewport 우측에 fixed (md 이상에서 노출).
+                    클릭 시 해당 letter만 필터링 — 전체 렌더 X (성능). All = 전체 렌더 모드. */}
+                {contacts.length > 20 && isCompactView && (
                     <div className="hidden md:flex flex-col items-center fixed right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 backdrop-blur-sm rounded-lg py-2 px-1 shadow-md border border-neutral-200 text-[10px] text-neutral-400 select-none max-h-[80vh] overflow-y-auto">
+                        {/* All — 전체 보기 */}
+                        <button
+                            onClick={() => setLetterFilter(letterFilter === "all" ? "top" : "all")}
+                            className={`leading-tight px-1.5 py-0.5 mb-0.5 rounded font-bold transition-colors ${
+                                letterFilter === "all"
+                                    ? "bg-[#0F766E] text-white"
+                                    : "text-[#0F766E] hover:bg-[#0F766E]/10"
+                            }`}
+                            title="전체 연락처 보기"
+                        >All</button>
+                        <div className="w-4 border-t border-neutral-200 my-0.5" />
                         {ALPHABET_INDEX.map(ch => {
                             const active = presentInitials.has(ch);
+                            const selected = letterFilter === ch;
                             return (
                                 <button
                                     key={ch}
                                     disabled={!active}
-                                    onClick={() => jumpToInitial(ch)}
-                                    className={`leading-tight px-1.5 py-0.5 transition-colors ${
-                                        active
-                                            ? "text-neutral-700 hover:text-[#0F766E] hover:bg-[#0F766E]/10 cursor-pointer font-medium rounded"
-                                            : "text-neutral-300 cursor-default"
+                                    onClick={() => setLetterFilter(selected ? "top" : ch)}
+                                    title={active ? `${ch} (${initialCounts[ch] || 0}명)` : undefined}
+                                    className={`leading-tight px-1.5 py-0.5 transition-colors rounded ${
+                                        selected
+                                            ? "bg-[#0F766E] text-white font-bold"
+                                            : active
+                                                ? "text-neutral-700 hover:text-[#0F766E] hover:bg-[#0F766E]/10 cursor-pointer font-medium"
+                                                : "text-neutral-300 cursor-default"
                                     }`}
                                 >{ch}</button>
                             );
