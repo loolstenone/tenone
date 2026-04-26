@@ -1858,18 +1858,36 @@ function ReadingGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 
 function StandupGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "su_yesterday", label: "Yesterday · 어제 한 일", emoji: "", color: "bg-neutral-50 border-neutral-200", text: "text-neutral-600" },
-        { key: "su_today", label: "Today · 오늘 할 일", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
-        { key: "su_blockers", label: "Blockers · 장애물·도움 필요", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "su_yesterday", label: "Yesterday · 어제 한 일",         hint: "결과·완성한 것 위주 (시간 X)",  color: "bg-neutral-50 border-neutral-200", text: "text-neutral-700",
+          ph: "- Q2 캠페인 광고 카피 3안 완성\n- 디자인팀과 시안 리뷰 1회\n- 결제 API 버그 1건 수정" },
+        { key: "su_today",     label: "Today · 오늘 할 일",            hint: "Top 1~3 — 오늘 끝낼 수 있는 단위", color: "bg-slate-50 border-slate-300",      text: "text-slate-900",
+          ph: "- 카피 A/B 테스트 셋업\n- 클라 미팅 자료 초안\n- 1on1 (오후 2시)" },
+        { key: "su_blockers",  label: "Blockers · 장애물·도움 필요", hint: "혼자 못 푸는 것만 — 빠르게 핸드오프", color: "bg-slate-50 border-slate-200",      text: "text-stone-700",
+          ph: "- 광고 예산 승인 대기 (대표) → 11시 전 확인 필요\n- 데이터 권한 → 데브옵스 도움" },
     ];
     return (
-        <div className="my-2 grid md:grid-cols-3 gap-2">
-            {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-36`}>
-                    <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                    <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder="- 항목…" />
-                </div>
-            ))}
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Date" valKey="su_date" data={data} onChange={onChange} placeholder="2026-04-27 (월) 9:00" />
+                <LabeledInput label="Team·Project" valKey="su_team" data={data} onChange={onChange} placeholder="플래너스 코어 / Q2 캠페인" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Daily Standup 룰</span> · 15분 이하·서서·전원 한 사람당 1~2분.
+                상태 보고 X, <span className="font-semibold">동기화·블로커 해소</span>가 목적. 깊은 논의는 끝나고 따로.
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-2">
+                {cells.map(c => (
+                    <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-40`}>
+                        <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">{c.hint}</p>
+                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
@@ -1908,30 +1926,57 @@ function WeeklyJournalGrid({ data, onChange }: { data: FrameworkData; onChange: 
 }
 
 function ZettelkastenGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    const TYPES = [
+        { val: "fleeting",   label: "Fleeting · 즉흥 메모" },
+        { val: "literature", label: "Literature · 출처 메모" },
+        { val: "permanent",  label: "Permanent · 영속 메모" },
+    ];
+    const type = data["zet_type"] ?? "permanent";
     return (
         <div className="my-2 space-y-2">
+            {/* 메타 카드 */}
             <div className="rounded-xl p-3 bg-neutral-50 border border-neutral-200">
                 <div className="grid grid-cols-[auto_1fr] gap-2 items-start">
-                    <div className="shrink-0 w-16">
+                    <div className="shrink-0 w-24">
                         <p className="text-[9px] text-neutral-500 font-semibold">ZETTEL ID</p>
                         <input type="text" value={data["zet_id"] ?? ""} onChange={e => onChange("zet_id", e.target.value)}
-                            placeholder="202604251"
+                            placeholder="202604271"
                             className="w-full mt-0.5 px-1 py-1 text-xs font-mono bg-white border border-neutral-200 rounded focus:outline-none" />
                     </div>
                     <div>
-                        <p className="text-[9px] text-neutral-500 font-semibold">TITLE</p>
+                        <p className="text-[9px] text-neutral-500 font-semibold">TITLE — 한 줄 제목 = 한 아이디어</p>
                         <input type="text" value={data["zet_title"] ?? ""} onChange={e => onChange("zet_title", e.target.value)}
-                            placeholder="제목 (원자적 아이디어 하나)"
+                            placeholder="예: 환경 디자인이 의지력보다 강하다 (Atomic Habits)"
                             className="w-full mt-0.5 px-2 py-1 text-sm font-semibold bg-white border border-neutral-200 rounded focus:outline-none" />
                     </div>
                 </div>
+                {/* Type 토글 */}
+                <div className="mt-2 flex gap-1.5">
+                    {TYPES.map(t => (
+                        <button key={t.val} onClick={() => onChange("zet_type", t.val)}
+                            className={`flex-1 px-2 py-1.5 rounded text-[10px] font-semibold transition-all ${type === t.val ? "bg-slate-900 text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100"}`}>
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
             </div>
-            <LabeledBox label="Content · 내용" valKey="zet_content" data={data} onChange={onChange} placeholder="자신의 언어로, 문장 단위로…" />
-            <div className="grid grid-cols-2 gap-2">
-                <LabeledBox label="Source · 출처" valKey="zet_source" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
-                <LabeledBox label="Tags · 태그" valKey="zet_tags" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="#tag1 #tag2" />
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Niklas Luhmann Zettelkasten</span> · 한 카드 = 한 원자 아이디어, 자기 말로.
+                <span className="font-semibold"> 연결이 핵심</span> — 새 카드 만들 때 기존 카드와 link 1개+ 강제. 1년 누적되면 &quot;책이 저절로 써지는&quot; 시스템.
             </div>
-            <LabeledBox label="Links · 연결된 Zettel" valKey="zet_links" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="[[202604111]] ..." />
+
+            <LabeledBox label="Content · 내용 (자신의 언어, 문장 단위)" valKey="zet_content" data={data} onChange={onChange} placeholder={"환경이 행동을 결정한다. 책상 위에 펼쳐진 노트는 \"쓸 것\"이라는 신호. 휴대폰을 다른 방에 두면 의지력 없이도 집중이 시작된다.\n\n→ 핵심: 의지력은 유한한 자원. 환경 설계로 결정의 횟수 자체를 줄여야 한다."} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Source · 출처" valKey="zet_source" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="제임스 클리어, 「아주 작은 습관의 힘」 6장 · p.142" />
+                <LabeledBox label="Tags · 태그" valKey="zet_tags" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="#habit #environment-design #willpower" />
+            </div>
+
+            <LabeledBox label="Links · 연결된 Zettel (반드시 1개+)" valKey="zet_links" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder={"[[202604111-cal-newport-deep-work]] — 환경 격리로 집중 시간 ↑\n[[202602231-decision-fatigue]] — 결정 횟수가 의지력 고갈\n[[202603151-implementation-intentions]] — 환경 + 트리거 결합"} />
+
+            <LabeledBox label="So what · 이 아이디어의 의미·내가 쓰는 곳" valKey="zet_sowhat" data={data} onChange={onChange} placeholder="플래너 앱 UX에 적용 — 매일 첫 화면에 1개 액션만 자동 노출(환경 신호)" />
         </div>
     );
 }
@@ -1939,19 +1984,29 @@ function ZettelkastenGrid({ data, onChange }: { data: FrameworkData; onChange: (
 function MindmapGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
+            {/* 메타 + 중심 */}
             <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400 text-center">
                 <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Central Topic · 중심 주제</p>
                 <input type="text" value={data["mind_central"] ?? ""} onChange={e => onChange("mind_central", e.target.value)}
-                    placeholder="마인드맵의 가운데 (한 단어·한 구절)"
-                    className="w-full mt-2 px-3 py-2 text-sm font-bold text-center bg-white/70 border border-slate-300 rounded focus:outline-none" />
+                    placeholder="예: 1인 사업가 매출 100만원 → 500만원"
+                    className="w-full mt-2 px-3 py-2 text-base font-bold text-center bg-white/70 border border-slate-300 rounded focus:outline-none" />
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Tony Buzan Mind Map</span> · 중심 → 1차 가지(BOI: Basic Ordering Idea) 5~7개 → 하위 자유 확장.
+                <span className="font-semibold"> 키워드 위주</span>, 문장 X. 자유 캔버스(Canvas 메뉴)에서 그림으로도 가능.
+            </div>
+
             <div className="rounded-lg border border-neutral-200 bg-white">
-                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 py-2 border-b border-neutral-100">Outline · 계층 구조 (Tab으로 들여쓰기)</p>
+                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 py-2 border-b border-neutral-100">Outline · 계층 구조 (Tab/Space로 들여쓰기)</p>
                 <textarea value={data["mind_outline"] ?? ""} onChange={e => onChange("mind_outline", e.target.value)}
-                    placeholder={"- 1차 가지\n  - 2차 가지\n    - 3차 가지\n- 또 다른 1차 가지"}
-                    rows={14}
+                    placeholder={"- 제품·서비스\n  - 기존 강의 패키지화\n  - 1:1 컨설팅 단가 ↑\n  - 구독형 코칭 (월 5명)\n- 채널\n  - 인스타·유튜브\n  - 뉴스레터\n  - 추천·리퍼럴\n- 가격·BM\n  - 프리미엄 라인\n  - 묶음 할인\n- 운영·자동화\n  - 결제·예약 자동화\n  - 콘텐츠 캘린더\n  - AI 어시스턴트\n- 학습·역량\n  - 카피라이팅\n  - 마케팅 분석"}
+                    rows={16}
                     className="w-full resize-none px-3 py-2 text-xs font-mono placeholder:text-neutral-300 focus:outline-none leading-relaxed" />
             </div>
+
+            <LabeledBox label="Top 3 가지 · 다음 액션" valKey="mind_top" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder={"1. 구독형 코칭 시범 5명 (5월) — 가설 검증\n2. 인스타 콘텐츠 주 3편 (꾸준함)\n3. 결제·예약 자동화 v1 (6월)"} />
         </div>
     );
 }
@@ -2030,17 +2085,38 @@ function TimeBlockGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 function DailyDesignGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <LabeledInput label="Date · 날짜" valKey="dd_date" data={data} onChange={onChange} />
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Date · 날짜" valKey="dd_date" data={data} onChange={onChange} placeholder="2026-04-27 (월)" />
+                <LabeledInput label="컨디션 · 1~5" valKey="dd_condition" data={data} onChange={onChange} placeholder="잠 7h · 컨디션 4 · 운동 X" />
+            </div>
+
+            {/* Intention — 정체성 기반 */}
             <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
                 <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">Intention · 오늘의 의도</p>
+                <p className="text-[10px] text-neutral-500 mb-1">&quot;오늘 나는 ___한 사람이다&quot; — 정체성 기반 한 줄</p>
                 <textarea value={data["dd_intention"] ?? ""} onChange={e => onChange("dd_intention", e.target.value)}
-                    placeholder="오늘은 어떤 사람으로 살고 싶은가?"
+                    placeholder='예: "오늘 나는 마감을 지키고 동료에게 친절한 사람이다."'
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-xs p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
+                    className="w-full mt-1 resize-none bg-white/60 text-xs p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
             </div>
-            <LabeledBox label="Top 3 · 핵심 우선순위" valKey="dd_priorities" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="1.&#10;2.&#10;3." />
-            <LabeledBox label="Schedule · 일정" valKey="dd_schedule" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-            <LabeledBox label="Reflection · 저녁 회고" valKey="dd_reflection" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="오늘 한 일, 배운 것, 느낀 것…" />
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Daily Design</span> · 시간이 아니라 <span className="font-semibold">하루 자체를 디자인</span>한다.
+                Top 3로 우선순위 압축 → 시간표로 구체화 → 저녁 회고로 학습 사이클 완성.
+            </div>
+
+            <LabeledBox label="Top 3 · 핵심 우선순위 (Most Important Tasks)" valKey="dd_priorities" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder={"1. 캠페인 리포트 1차 초안 (90분)\n2. 디자인팀 시안 리뷰 (45분)\n3. 이번 주 1on1 준비"} />
+
+            <LabeledBox label="Schedule · 일정·시간 블록" valKey="dd_schedule" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder={"09:00~10:30 캠페인 리포트 (집중)\n10:30~11:00 메일·슬랙 처리\n11:00~12:00 시안 리뷰\n13:00~14:00 점심·산책\n14:00~15:00 1on1 준비\n15:00~ 회의·즉흥 대응"} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Energy Plan · 에너지 배치" valKey="dd_energy" data={data} onChange={onChange} placeholder="피크(09~11): 집중 작업 · 저점(14~15): 행정·산책" />
+                <LabeledBox label="Avoid · 오늘 안 할 것" valKey="dd_avoid" data={data} onChange={onChange} placeholder="- 슬랙 알림 ON 상태로 깊은 작업 X\n- 회의 5개 이상 X" />
+            </div>
+
+            <LabeledBox label="Reflection · 저녁 회고 (3 lines)" valKey="dd_reflection" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder={"잘된 것: 오전 90분 풀집중으로 리포트 70% 완성\n배운 것: 슬랙 알림 OFF로 효율 1.5배\n내일: 시안 리뷰가 30분 늦어짐 — 시간 버퍼 필요"} />
         </div>
     );
 }
