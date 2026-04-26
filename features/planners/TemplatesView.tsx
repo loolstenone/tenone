@@ -694,40 +694,61 @@ function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 }
 
 function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
-    const cellClass = "rounded-lg p-2.5 border min-h-20";
+    const cellClass = "rounded-lg p-2.5 border min-h-28";
     return (
-        <div className="my-2 grid grid-cols-3 gap-2">
-            <div />
-            <div className={`${cellClass} bg-slate-50 border-slate-200`}>
-                <p className="text-[10px] font-bold text-slate-800">New Entrants</p>
-                <p className="text-[9px] text-neutral-400">신규 진입</p>
-                <CellTextarea cellKey="p5_new_entrants" value={data["p5_new_entrants"] ?? ""} onChange={onChange} />
-            </div>
-            <div />
-
-            <div className={`${cellClass} bg-slate-50 border-slate-200`}>
-                <p className="text-[10px] font-bold text-slate-800">Suppliers</p>
-                <p className="text-[9px] text-neutral-400">공급자 협상력</p>
-                <CellTextarea cellKey="p5_suppliers" value={data["p5_suppliers"] ?? ""} onChange={onChange} />
-            </div>
-            <div className={`${cellClass} bg-slate-100 border-2 border-slate-700`}>
-                <p className="text-[10px] font-bold text-slate-900">Rivalry</p>
-                <p className="text-[9px] text-neutral-500">기존 경쟁</p>
-                <CellTextarea cellKey="p5_rivalry" value={data["p5_rivalry"] ?? ""} onChange={onChange} />
-            </div>
-            <div className={`${cellClass} bg-slate-50 border-slate-300`}>
-                <p className="text-[10px] font-bold text-slate-900">Buyers </p>
-                <p className="text-[9px] text-neutral-400">구매자 협상력</p>
-                <CellTextarea cellKey="p5_buyers" value={data["p5_buyers"] ?? ""} onChange={onChange} />
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="Industry · 산업·시장" valKey="p5_industry" data={data} onChange={onChange} placeholder="예: 국내 1인 사업자용 SaaS 플래너 시장" />
+                <LabeledInput label="Time horizon · 분석 시점" valKey="p5_horizon" data={data} onChange={onChange} placeholder="2026 Q2 · 향후 12개월" />
             </div>
 
-            <div />
-            <div className={`${cellClass} bg-stone-50 border-stone-200`}>
-                <p className="text-[10px] font-bold text-stone-800">Substitutes</p>
-                <p className="text-[9px] text-neutral-400">대체재</p>
-                <CellTextarea cellKey="p5_substitutes" value={data["p5_substitutes"] ?? ""} onChange={onChange} />
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Michael Porter 5 Forces</span> · 산업 매력도(=평균 수익률) 결정 5요인.
+                각 칸에 <span className="font-semibold">사실·증거 + 강도(상·중·하)</span>까지 표기. 5개 모두 강하면 시장 매력도 ↓.
             </div>
-            <div />
+
+            <div className="grid grid-cols-3 gap-2">
+                <div />
+                <div className={`${cellClass} bg-slate-50 border-slate-200`}>
+                    <p className="text-[10px] font-bold text-slate-800">New Entrants · 신규 진입</p>
+                    <p className="text-[9px] text-neutral-500 mb-1">진입장벽·자본·기술·규제</p>
+                    <CellTextarea cellKey="p5_new_entrants" value={data["p5_new_entrants"] ?? ""} onChange={onChange} placeholder="예: AI로 SaaS 진입장벽 ↓ — 6개월 내 유사 서비스 5개+ 예상 [강도: 상]" />
+                </div>
+                <div />
+
+                <div className={`${cellClass} bg-slate-50 border-slate-200`}>
+                    <p className="text-[10px] font-bold text-slate-800">Suppliers · 공급자 협상력</p>
+                    <p className="text-[9px] text-neutral-500 mb-1">우리에게 자원·인프라 제공</p>
+                    <CellTextarea cellKey="p5_suppliers" value={data["p5_suppliers"] ?? ""} onChange={onChange} placeholder="예: OpenAI·Claude API 가격 인상 시 즉각 영향 [강도: 중] / 대체 LLM 다양화로 협상력 ↓" />
+                </div>
+                <div className={`${cellClass} bg-slate-100 border-2 border-slate-700`}>
+                    <p className="text-[10px] font-bold text-slate-900">Rivalry · 기존 경쟁</p>
+                    <p className="text-[9px] text-neutral-500 mb-1">동종 경쟁사 강도</p>
+                    <CellTextarea cellKey="p5_rivalry" value={data["p5_rivalry"] ?? ""} onChange={onChange} placeholder="예: Notion·Sunsama·Motion 강력 / 가격 경쟁 시작 / 차별화 = AI 코치 [강도: 상]" />
+                </div>
+                <div className={`${cellClass} bg-slate-50 border-slate-300`}>
+                    <p className="text-[10px] font-bold text-slate-900">Buyers · 구매자 협상력</p>
+                    <p className="text-[9px] text-neutral-500 mb-1">고객 가격·전환 비용</p>
+                    <CellTextarea cellKey="p5_buyers" value={data["p5_buyers"] ?? ""} onChange={onChange} placeholder="예: 1인 사업자는 가격 민감 / 14일 무료로 쉽게 이탈 [강도: 중·상]" />
+                </div>
+
+                <div />
+                <div className={`${cellClass} bg-stone-50 border-stone-200`}>
+                    <p className="text-[10px] font-bold text-stone-800">Substitutes · 대체재</p>
+                    <p className="text-[9px] text-neutral-500 mb-1">동일 가치 다른 형태</p>
+                    <CellTextarea cellKey="p5_substitutes" value={data["p5_substitutes"] ?? ""} onChange={onChange} placeholder="예: 종이 플래너 / Notion + ChatGPT 조합 / 비서·코치 고용 [강도: 중]" />
+                </div>
+                <div />
+            </div>
+
+            {/* Strategic implications */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Strategy · 전략적 시사점 (어디로 갈 것인가)</p>
+                <p className="text-[10px] text-neutral-500 mb-1">5가지 힘에 어떻게 대응? 진입장벽 ↑·차별화·대체재 회피</p>
+                <CellTextarea cellKey="p5_strategy" value={data["p5_strategy"] ?? ""} onChange={onChange} placeholder={"1. AI 코치 차별화 → 데이터 학습 효과로 후발 주자 따라잡기 어려움\n2. B2B 채널 (커뮤니티·교육기관) 락인 — 대체재 회피\n3. 가격 경쟁 회피 — 가치 기반 가격 유지"} />
+            </div>
         </div>
     );
 }
@@ -880,38 +901,54 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 
 function FishboneGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const bones = [
-        { key: "fish_people", label: "People · 사람", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "fish_process", label: "Process · 프로세스", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
-        { key: "fish_technology", label: "Technology · 기술", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "fish_environment", label: "Environment · 환경", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-800" },
-        { key: "fish_materials", label: "Materials · 자원", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-        { key: "fish_measurement", label: "Measurement · 측정", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "fish_people",      label: "People · 사람",       hint: "스킬·교육·동기·소통·역할 분담", color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "- 신입 온보딩 부족\n- 백업 인력 X\n- 책임 소재 모호" },
+        { key: "fish_process",     label: "Process · 프로세스",  hint: "절차·흐름·승인·핸드오프",        color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "- 검수 단계 병목\n- 핸드오프 정보 누락\n- 우선순위 잦은 변경" },
+        { key: "fish_technology",  label: "Technology · 기술",   hint: "도구·시스템·자동화·버그",        color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "- 모니터링 알림 미설정\n- 결제 API 재시도 큐 X\n- 레거시 의존" },
+        { key: "fish_environment", label: "Environment · 환경",  hint: "조직·문화·외부 요인",            color: "bg-slate-50 border-slate-300", text: "text-slate-800",
+          ph: "- 분기말 부담 누적\n- 원격·대면 혼재\n- 시장 급변" },
+        { key: "fish_materials",   label: "Materials · 자원",    hint: "예산·인프라·데이터",              color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "- 분석용 데이터 통합 안 됨\n- 예산 부족\n- 외부 라이선스 만료" },
+        { key: "fish_measurement", label: "Measurement · 측정", hint: "지표·KPI·관찰 방법",              color: "bg-slate-50 border-slate-200", text: "text-stone-700",
+          ph: "- 결제 실패율 미추적\n- KPI 정의 모호\n- 사후 측정 only" },
     ];
     return (
         <div className="my-2 space-y-2">
             {/* Problem head */}
-            <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400 relative">
-                <div className="flex items-center gap-2">
-                    <span className="text-xl"></span>
-                    <div className="flex-1">
-                        <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">Problem · 문제 (물고기 머리)</p>
-                        <textarea value={data["fish_problem"] ?? ""} onChange={e => onChange("fish_problem", e.target.value)}
-                            placeholder="해결하려는 문제를 한 문장으로…"
-                            rows={1}
-                            className="w-full mt-1 resize-none bg-white/60 text-sm p-1.5 rounded border border-slate-200 focus:outline-none" />
-                    </div>
-                </div>
+            <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">Problem · 문제 (물고기 머리)</p>
+                <p className="text-[10px] text-neutral-500 mb-1">관찰 가능한 결과·증상으로 — 5W1H로 구체화</p>
+                <textarea value={data["fish_problem"] ?? ""} onChange={e => onChange("fish_problem", e.target.value)}
+                    placeholder="예: 4/26 18:00~18:15 결제 API 응답 지연으로 142건 결제가 실패함"
+                    rows={2}
+                    className="w-full mt-1 resize-none bg-white/60 text-sm p-2 rounded border border-slate-200 focus:outline-none leading-relaxed" />
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Ishikawa 6M</span> · 문제의 잠재 원인을 6범주로 빠짐없이 탐색.
+                각 카테고리별로 <span className="font-semibold">&quot;왜?&quot;를 3번</span> 물어 깊이 내려가기. 가설 다발 → 검증 우선순위.
+            </div>
+
             {/* 6 bones */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {bones.map(b => (
-                    <div key={b.key} className={`rounded-lg p-3 border ${b.color} min-h-24`}>
+                    <div key={b.key} className={`rounded-lg p-3 border ${b.color} min-h-28`}>
                         <p className={`text-xs font-bold ${b.text}`}>{b.label}</p>
-                        <CellTextarea cellKey={b.key} value={data[b.key] ?? ""} onChange={onChange} placeholder="원인들을 줄바꿈으로…" />
+                        <p className="text-[10px] text-neutral-500 mb-1">{b.hint}</p>
+                        <CellTextarea cellKey={b.key} value={data[b.key] ?? ""} onChange={onChange} placeholder={b.ph} />
                     </div>
                 ))}
             </div>
-            <p className="text-[10px] text-neutral-400 text-center">각 카테고리별로 "왜?"를 여러 번 물어 하위 원인을 내려가보세요.</p>
+
+            {/* Top causes + Verify */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Top 3 · 가장 유력한 원인 + 검증 방법</p>
+                <p className="text-[10px] text-neutral-500 mb-1">데이터·실험으로 어떻게 확인할 것인가</p>
+                <CellTextarea cellKey="fish_top" value={data["fish_top"] ?? ""} onChange={onChange} placeholder={"1. (Tech) 결제 API 타임아웃 30s 너무 김 — 로그 분석으로 평균/최악 응답 시간 확인\n2. (Process) 외부 PG 장애 시 재시도 없음 — 트래픽 시뮬레이션 테스트\n3. (Measurement) 알림 미설정 — 즉시 모니터링 + 알림 룰 추가"} />
+            </div>
         </div>
     );
 }
@@ -1064,29 +1101,54 @@ function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
 
 function OodaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "ooda_observe", label: "Observe", sub: "관찰 · 무엇이 일어나고 있나", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "ooda_orient", label: "Orient", sub: "방향 설정 · 맥락·가정 점검", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "ooda_decide", label: "Decide", sub: "결정 · 어떻게 움직일까", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-        { key: "ooda_act", label: "Act", sub: "실행 · 그리고 다시 관찰", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "ooda_observe", label: "Observe · 관찰", sub: "사실·데이터·신호 — 해석 X",            color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 경쟁사 A가 가격 30% 인하 발표 / 우리 주간 전환율 2주 연속 ↓ / 고객 지원 문의 50% ↑" },
+        { key: "ooda_orient",  label: "Orient · 방향",  sub: "내 가정·선입견 점검 — 가장 중요한 단계", color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 우리 가정 \"경쟁사는 프리미엄 시장 X\"가 흔들림 / 고객은 가격에 우리 생각보다 민감 / 1순위 차별화 = 가격 X, 자동화" },
+        { key: "ooda_decide",  label: "Decide · 결정",  sub: "옵션 1~3개 중 1개 선택",                 color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "옵션:\nA) 가격 동결 + 자동화 메시지 강화 (선택)\nB) 가격 인하 따라가기\nC) 무대응 + 데이터 추가 수집 2주" },
+        { key: "ooda_act",     label: "Act · 실행",     sub: "작게·빠르게 → 다시 Observe",             color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "이번 주: \"AI 자동화 ROI\" 캠페인 + 기존 고객 케이스 영상 / 다음 화요일 결과 측정" },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            {steps.map((s, i) => (
-                <div key={s.key} className="flex items-start gap-2">
-                    <div className="shrink-0 flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>
-                            {i + 1}
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="Situation · 상황" valKey="ooda_situation" data={data} onChange={onChange} placeholder="예: 경쟁사 가격 공세 대응 / 마감 임박 위기 대응" />
+                <LabeledInput label="Cycle · 사이클 주기" valKey="ooda_cycle" data={data} onChange={onChange} placeholder="예: 매일 30분 / 주 1회 / 분기" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">John Boyd OODA Loop</span> · 공군 도그파이트에서 유래.
+                <span className="font-semibold"> 빠른 사이클이 곧 우위</span> — 상대보다 한 번 더 도는 쪽이 이긴다. <span className="font-semibold">Orient가 가장 중요</span> — 잘못된 가정 위 결정은 무용지물.
+            </div>
+
+            {/* 4단계 */}
+            <div className="space-y-1.5">
+                {steps.map((s, i) => (
+                    <div key={s.key} className="flex items-start gap-2">
+                        <div className="shrink-0 flex flex-col items-center">
+                            <div className={`w-8 h-8 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>
+                                {i + 1}
+                            </div>
+                            {i < 3 && <div className="w-px flex-1 bg-neutral-300 my-1" style={{ minHeight: 20 }} />}
                         </div>
-                        {i < 3 && <div className="w-px flex-1 bg-neutral-300 my-1" style={{ minHeight: 20 }} />}
+                        <div className={`flex-1 rounded-lg p-3 border ${s.color}`}>
+                            <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
+                            <p className="text-[10px] text-neutral-500 mb-1">{s.sub}</p>
+                            <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} placeholder={s.ph} />
+                        </div>
                     </div>
-                    <div className={`flex-1 rounded-lg p-3 border ${s.color}`}>
-                        <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
-                        <p className="text-[10px] text-neutral-500">{s.sub}</p>
-                        <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} />
-                    </div>
-                </div>
-            ))}
-            <p className="text-[10px] text-neutral-400 text-center pt-1">⟳ 반복되는 루프 — Act 후 다시 Observe로</p>
+                ))}
+            </div>
+
+            {/* Next loop */}
+            <div className="rounded-xl p-3 bg-stone-50 border border-stone-300">
+                <p className="text-xs font-bold text-stone-900">⟳ Next Loop · 다음 사이클 트리거·체크포인트</p>
+                <p className="text-[10px] text-neutral-500 mb-1">언제 다시 Observe로 돌아갈 것인가? 어떤 신호를 보고?</p>
+                <CellTextarea cellKey="ooda_next" value={data["ooda_next"] ?? ""} onChange={onChange} placeholder="예: 다음 화요일 9AM 전환율 측정 / 경쟁사 추가 액션 즉시 트리거" />
+            </div>
         </div>
     );
 }
@@ -1526,21 +1588,41 @@ function BrainstormGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
     const remove = (i: number) => save(ensureMin.filter((_, x) => x !== i));
     const toggleStar = (i: number) => update(i, { starred: !ensureMin[i].starred });
 
+    const total = ensureMin.filter(i => i.text.trim()).length;
+    const starred = ensureMin.filter(i => i.starred).length;
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
-                <LabeledInput label="주제 · Topic" valKey="bs_topic" data={data} onChange={onChange} placeholder="무엇에 대해 아이디어를 낼까?" />
+            {/* 메타 + 집계 */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledInput label="주제 · Topic" valKey="bs_topic" data={data} onChange={onChange} placeholder="예: 1인 사업자가 우리 플래너를 더 자주 쓰게 하려면?" />
+                <div className="flex items-end gap-3">
+                    <div>
+                        <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">총 아이디어</p>
+                        <p className="text-xl font-bold text-stone-700">{total}</p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">★ 선정</p>
+                        <p className="text-xl font-bold text-amber-600">{starred}</p>
+                    </div>
+                </div>
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Brainstorming 룰</span> · ① 양 &gt; 질 (목표 30개+) ② 평가 금지 (다 적은 후 한 번에) ③ 다른 아이디어 위에 쌓기 ④ 엉뚱할수록 OK.
+                별표는 평가 단계에서만 — 처음엔 다 받아 적기.
+            </div>
+
             <div className="rounded-lg border border-neutral-200 bg-white">
-                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 py-2 border-b border-neutral-100">Ideas · 떠오르는 대로</p>
+                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 py-2 border-b border-neutral-100">Ideas · 떠오르는 대로 (★로 좋은 것 마킹)</p>
                 <div className="divide-y divide-neutral-100">
                     {ensureMin.map((idea, i) => (
                         <div key={i} className="flex items-center gap-2 px-3 py-1.5">
-                            <button onClick={() => toggleStar(i)} className={`shrink-0 w-6 h-6 rounded flex items-center justify-center ${idea.starred ? "text-slate-700" : "text-neutral-300 hover:text-slate-500"}`}>
-                                {idea.starred ? "" : ""}
+                            <button onClick={() => toggleStar(i)} className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-base ${idea.starred ? "text-amber-500" : "text-neutral-300 hover:text-amber-400"}`}>
+                                ★
                             </button>
                             <input type="text" value={idea.text} onChange={e => update(i, { text: e.target.value })}
-                                placeholder="아이디어…"
+                                placeholder={i === 0 ? "예: 일요일 저녁 자동 주간 브리핑" : i === 1 ? "예: 동료 추천 시 양쪽에 1개월 무료" : "아이디어…"}
                                 className="flex-1 px-1 py-1 text-xs bg-transparent border-b border-transparent focus:outline-none focus:border-neutral-300" />
                             {ensureMin.length > 1 && (
                                 <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
@@ -1550,26 +1632,59 @@ function BrainstormGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
                 </div>
                 <button onClick={add} className="w-full py-2 border-t border-neutral-100 text-xs text-neutral-400 hover:bg-neutral-50 hover:text-[#0F766E]">+ 아이디어 추가</button>
             </div>
-            <LabeledBox label="Criteria · 선정 기준" valKey="bs_criteria" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-            <LabeledBox label="Chosen · 최종 선택" valKey="bs_chosen" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" />
+
+            <LabeledBox label="Criteria · 선정 기준" valKey="bs_criteria" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder={"예: 1주 내 시범 가능 / 외부 자원 X / 핵심 가치 강화"} />
+            <LabeledBox label="Chosen · 최종 선택 (Top 1~3)" valKey="bs_chosen" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" placeholder={"1. 자동 주간 브리핑 (개발 1주)\n2. 동료 추천 보상 (실험 2주)"} />
+            <LabeledBox label="Next · 누가·언제·어떻게 시작" valKey="bs_next" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder="예: [홍길동] 자동 브리핑 와이어프레임 — 4/30까지" />
         </div>
     );
 }
 
 function DecisionLogGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
+    const reversibility = data["dl_reversibility"] ?? "";
     return (
         <div className="my-2 space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-                <LabeledInput label="결정 일자" valKey="dl_date" data={data} onChange={onChange} placeholder="YYYY-MM-DD" />
-                <LabeledInput label="결정자" valKey="dl_decider" data={data} onChange={onChange} />
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-2">
+                <LabeledInput label="결정 일자" valKey="dl_date" data={data} onChange={onChange} placeholder="2026-04-27" />
+                <LabeledInput label="결정자·승인자" valKey="dl_decider" data={data} onChange={onChange} placeholder="홍길동(대표) · 합의" />
+                <LabeledInput label="검토 일정" valKey="dl_review_date" data={data} onChange={onChange} placeholder="3개월 후 · 2026-07-27" />
             </div>
-            <LabeledBox label="Decision · 결정 내용" valKey="dl_decision" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" placeholder="무엇을 결정했나" />
-            <LabeledBox label="Context · 배경·맥락" valKey="dl_context" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-            <LabeledBox label="Alternatives · 대안·기각한 것" valKey="dl_alternatives" data={data} onChange={onChange} color="bg-neutral-100 border-neutral-300" textColor="text-neutral-600" />
-            <div className="grid md:grid-cols-2 gap-2">
-                <LabeledBox label="Expected · 기대 결과" valKey="dl_expected" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
-                <LabeledBox label="Actual · 실제 결과" valKey="dl_actual" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="나중에 돌아와 기록" />
+
+            {/* Reversibility — Bezos Type 1 / Type 2 */}
+            <div className="rounded-xl p-3 bg-stone-50 border border-stone-200">
+                <p className="text-xs font-bold text-stone-900">Reversibility · 되돌릴 수 있는가? (Bezos)</p>
+                <p className="text-[10px] text-neutral-500 mb-2">Type 1 (되돌리기 어려움) — 신중·다각 검토 / Type 2 (되돌리기 쉬움) — 빠르게 결정·실행</p>
+                <div className="flex gap-2">
+                    {[
+                        { val: "type1", label: "Type 1 · 일방통행 문 (Irreversible)" },
+                        { val: "type2", label: "Type 2 · 양방향 문 (Reversible)" },
+                    ].map(opt => (
+                        <button key={opt.val} onClick={() => onChange("dl_reversibility", opt.val)}
+                            className={`flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${reversibility === opt.val ? "bg-slate-900 text-white" : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-100"}`}>
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
             </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Decision Log</span> · 미래의 자신·후임자에게 보내는 편지.
+                결과만 기록하면 무용 — <span className="font-semibold">결정 시점의 정보·가정·대안</span>까지 적어야 사후 학습 가능. 검토 일정 잡고 Actual 채우는 게 핵심.
+            </div>
+
+            <LabeledBox label="Decision · 결정 내용 (한 문장)" valKey="dl_decision" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" placeholder="예: Q3에 모바일 앱 신규 개발 대신 기존 웹 PWA 강화에 집중한다." />
+            <LabeledBox label="Context · 배경·맥락 (왜 결정해야 했나)" valKey="dl_context" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="예: 사용자 60%가 데스크톱 / 모바일 개발 인력 0 / Q4에 펀딩 예정 — 리소스 우선순위 충돌" />
+            <LabeledBox label="Assumptions · 전제·가정 (틀릴 수 있는 것)" valKey="dl_assumptions" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- 모바일 사용자 비율은 6개월 내 60% 유지\n- PWA가 네이티브 앱과 경험 차이 작다\n- Q4 펀딩 성공 가능성 70%" />
+            <LabeledBox label="Alternatives · 대안·기각 이유" valKey="dl_alternatives" data={data} onChange={onChange} color="bg-neutral-100 border-neutral-300" textColor="text-neutral-700" placeholder={"A) 네이티브 앱 동시 개발 — 인력 부족\nB) 외주 — 통제력 ↓ + 비용 부담\nC) 6개월 후로 미루기 — 시장 변화 리스크"} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <LabeledBox label="Expected · 기대 결과" valKey="dl_expected" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="예: PWA 완성 후 모바일 사용 +30% / 개발 비용 60% 절감 / Q4 펀딩 시 모바일 앱 본격 시작" />
+                <LabeledBox label="Actual · 실제 결과 (검토 시 작성)" valKey="dl_actual" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="3개월 후 채우기 — 가설 vs 실제 격차 분석" />
+            </div>
+
+            <LabeledBox label="Lesson · 배운 것 (사후)" valKey="dl_lesson" data={data} onChange={onChange} color="bg-stone-50 border-stone-300" textColor="text-stone-900" placeholder="예: PWA 채택은 옳았으나, 모바일 알림 빠짐이 예상보다 큰 페인이었음 → 다음 결정 시 알림 인프라 우선 검토" />
         </div>
     );
 }
