@@ -5,7 +5,7 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 export function PlannersFooter() {
     return (
         <UniverseFooter
-            brandName="Planner's"
+            brandName="Planner's Planner"
             tagline="우리는 모두 기획자다 — 적어도 자기 인생에서 만큼은."
             accentColor="#0F766E"
             dark={true}
