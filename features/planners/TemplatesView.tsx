@@ -24,23 +24,23 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; colo
     framework: {
         label: "FrameWorkBook",
         icon: <BookOpen className="h-3 w-3" />,
-        color: "text-violet-700",
-        bg: "bg-violet-50 border-violet-200",
-        bar: "bg-violet-400",
+        color: "text-slate-800",
+        bg: "bg-slate-50 border-slate-200",
+        bar: "bg-slate-700",
     },
     schedule: {
         label: "Schedule",
         icon: <Calendar className="h-3 w-3" />,
-        color: "text-[#0F766E]",
-        bg: "bg-teal-50 border-teal-200",
-        bar: "bg-[#0F766E]",
+        color: "text-slate-900",
+        bg: "bg-slate-50 border-slate-300",
+        bar: "bg-slate-900",
     },
     note: {
         label: "Note",
         icon: <FileText className="h-3 w-3" />,
-        color: "text-amber-700",
-        bg: "bg-amber-50 border-amber-200",
-        bar: "bg-amber-400",
+        color: "text-stone-800",
+        bg: "bg-stone-50 border-stone-200",
+        bar: "bg-stone-700",
     },
 };
 
@@ -308,14 +308,14 @@ function NineBoxGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 
 function EmpathyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const top = [
-        { key: "says", label: "Say", sub: "말하는 것", emoji: "💬", color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
-        { key: "thinks", label: "Think", sub: "생각하는 것", emoji: "💭", color: "bg-violet-50 border border-violet-200", text: "text-violet-700" },
-        { key: "does", label: "Do", sub: "행동하는 것", emoji: "🏃", color: "bg-teal-50 border border-teal-200", text: "text-teal-700" },
-        { key: "feels", label: "Feel", sub: "느끼는 것", emoji: "❤️", color: "bg-rose-50 border border-rose-200", text: "text-rose-700" },
+        { key: "says", label: "Say", sub: "말하는 것", emoji: "💬", color: "bg-slate-50 border border-slate-200", text: "text-slate-800" },
+        { key: "thinks", label: "Think", sub: "생각하는 것", emoji: "💭", color: "bg-slate-50 border border-slate-200", text: "text-slate-800" },
+        { key: "does", label: "Do", sub: "행동하는 것", emoji: "🏃", color: "bg-slate-50 border border-slate-300", text: "text-slate-900" },
+        { key: "feels", label: "Feel", sub: "느끼는 것", emoji: "❤️", color: "bg-slate-50 border border-slate-200", text: "text-stone-700" },
     ];
     const bottom = [
-        { key: "pains", label: "Pain", sub: "고통·두려움", emoji: "😣", color: "bg-red-50 border border-red-200", text: "text-red-700" },
-        { key: "gains", label: "Gain", sub: "바라는 것·이득", emoji: "🌟", color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
+        { key: "pains", label: "Pain", sub: "고통·두려움", emoji: "😣", color: "bg-stone-50 border border-stone-300", text: "text-stone-800" },
+        { key: "gains", label: "Gain", sub: "바라는 것·이득", emoji: "🌟", color: "bg-stone-50 border border-stone-200", text: "text-stone-800" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -348,62 +348,62 @@ function LeanCanvasGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
             <div className="grid grid-cols-5 gap-1">
                 {/* Col 1: Problem + Existing Alt */}
                 <div className="flex flex-col gap-1">
-                    <div className="rounded-lg p-2 bg-red-50 border border-red-200 min-h-24">
-                        <p className="text-[10px] font-bold text-red-700">Problem</p>
+                    <div className="rounded-lg p-2 bg-stone-50 border border-stone-300 min-h-24">
+                        <p className="text-[10px] font-bold text-stone-800">Problem</p>
                         <p className="text-[9px] text-neutral-400">문제</p>
                         <CellTextarea cellKey="problem" value={data["problem"] ?? ""} onChange={onChange} placeholder="Top 3 problems…" />
                     </div>
-                    <div className="rounded-lg p-2 bg-red-50/60 border border-red-200/60 min-h-20">
-                        <p className="text-[10px] font-bold text-red-600">Existing Alt.</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200 min-h-20">
+                        <p className="text-[10px] font-bold text-stone-700">Existing Alt.</p>
                         <p className="text-[9px] text-neutral-400">기존 대안</p>
                         <CellTextarea cellKey="existing_alternatives" value={data["existing_alternatives"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
                 {/* Col 2: Solution + Key Metrics */}
                 <div className="flex flex-col gap-1">
-                    <div className="rounded-lg p-2 bg-teal-50 border border-teal-200 min-h-24">
-                        <p className="text-[10px] font-bold text-teal-700">Solution</p>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-300 min-h-24">
+                        <p className="text-[10px] font-bold text-slate-900">Solution</p>
                         <p className="text-[9px] text-neutral-400">솔루션</p>
                         <CellTextarea cellKey="solution" value={data["solution"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-teal-50/60 border border-teal-200/60 min-h-20">
-                        <p className="text-[10px] font-bold text-teal-600">Key Metrics</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200 min-h-20">
+                        <p className="text-[10px] font-bold text-slate-700">Key Metrics</p>
                         <p className="text-[9px] text-neutral-400">핵심 지표</p>
                         <CellTextarea cellKey="key_metrics" value={data["key_metrics"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
                 {/* Col 3: UVP + High-Level Concept (center, tall) */}
-                <div className="rounded-lg p-2 bg-amber-50 border border-amber-200 flex flex-col">
-                    <p className="text-[10px] font-bold text-amber-700">UVP</p>
+                <div className="rounded-lg p-2 bg-stone-50 border border-stone-200 flex flex-col">
+                    <p className="text-[10px] font-bold text-stone-800">UVP</p>
                     <p className="text-[9px] text-neutral-400">고유 가치 제안</p>
                     <CellTextarea cellKey="uvp" value={data["uvp"] ?? ""} onChange={onChange} placeholder="Single clear, compelling message…" />
-                    <div className="mt-2 pt-2 border-t border-amber-200">
-                        <p className="text-[10px] font-bold text-amber-600">High-Level Concept</p>
+                    <div className="mt-2 pt-2 border-t border-slate-200">
+                        <p className="text-[10px] font-bold text-stone-600">High-Level Concept</p>
                         <CellTextarea cellKey="high_level_concept" value={data["high_level_concept"] ?? ""} onChange={onChange} placeholder="X for Y…" />
                     </div>
                 </div>
                 {/* Col 4: Unfair Advantage + Channels */}
                 <div className="flex flex-col gap-1">
-                    <div className="rounded-lg p-2 bg-violet-50 border border-violet-200 min-h-24">
-                        <p className="text-[10px] font-bold text-violet-700">Unfair Adv.</p>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-200 min-h-24">
+                        <p className="text-[10px] font-bold text-slate-800">Unfair Adv.</p>
                         <p className="text-[9px] text-neutral-400">경쟁 우위</p>
                         <CellTextarea cellKey="unfair_advantage" value={data["unfair_advantage"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-violet-50/60 border border-violet-200/60 min-h-20">
-                        <p className="text-[10px] font-bold text-violet-600">Channels</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200 min-h-20">
+                        <p className="text-[10px] font-bold text-slate-600">Channels</p>
                         <p className="text-[9px] text-neutral-400">채널</p>
                         <CellTextarea cellKey="channels" value={data["channels"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
                 {/* Col 5: Customer Segments + Early Adopters */}
                 <div className="flex flex-col gap-1">
-                    <div className="rounded-lg p-2 bg-blue-50 border border-blue-200 min-h-24">
-                        <p className="text-[10px] font-bold text-blue-700">Customer Seg.</p>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-200 min-h-24">
+                        <p className="text-[10px] font-bold text-slate-800">Customer Seg.</p>
                         <p className="text-[9px] text-neutral-400">고객 세그먼트</p>
                         <CellTextarea cellKey="customer_segments" value={data["customer_segments"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-blue-50/60 border border-blue-200/60 min-h-20">
-                        <p className="text-[10px] font-bold text-blue-600">Early Adopters</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200 min-h-20">
+                        <p className="text-[10px] font-bold text-slate-600">Early Adopters</p>
                         <p className="text-[9px] text-neutral-400">초기 사용자</p>
                         <CellTextarea cellKey="early_adopters" value={data["early_adopters"] ?? ""} onChange={onChange} />
                     </div>
@@ -411,13 +411,13 @@ function LeanCanvasGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
             </div>
             {/* 하단 2열 */}
             <div className="grid grid-cols-2 gap-1">
-                <div className="rounded-lg p-2 bg-neutral-100 border border-neutral-200 min-h-16">
+                <div className="rounded-lg p-2 bg-slate-50 border border-slate-200 min-h-16">
                     <p className="text-[10px] font-bold text-neutral-600">Cost Structure</p>
                     <p className="text-[9px] text-neutral-400">비용 구조</p>
                     <CellTextarea cellKey="cost_structure" value={data["cost_structure"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-2 bg-green-50 border border-green-200 min-h-16">
-                    <p className="text-[10px] font-bold text-green-700">Revenue Streams</p>
+                <div className="rounded-lg p-2 bg-slate-50 border border-slate-300 min-h-16">
+                    <p className="text-[10px] font-bold text-slate-800">Revenue Streams</p>
                     <p className="text-[9px] text-neutral-400">수익 흐름</p>
                     <CellTextarea cellKey="revenue_streams" value={data["revenue_streams"] ?? ""} onChange={onChange} />
                 </div>
@@ -440,8 +440,8 @@ function MandalartGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 
     const cellBase = "rounded border text-[9px] font-semibold leading-tight p-1 flex flex-col";
     const actionCell = "bg-white border-neutral-200 text-neutral-600";
-    const themeCell = "bg-amber-50 border-amber-300 text-amber-800 font-bold";
-    const goalCell = "bg-amber-400 border-amber-500 text-white font-extrabold";
+    const themeCell = "bg-stone-50 border-stone-300 text-slate-900 font-bold";
+    const goalCell = "bg-slate-900 border-slate-900 text-white font-extrabold";
 
     return (
         <div className="my-2 overflow-x-auto">
@@ -625,42 +625,42 @@ function BmcGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
         <div className="my-2 space-y-1 overflow-x-auto">
             {/* 상단 5열 */}
             <div className="grid grid-cols-5 gap-1 min-w-[520px]">
-                <div className={`${block} bg-violet-50 border-violet-200 min-h-48`}>
-                    <p className={`${head} text-violet-700`}>🤝 Key Partners</p>
+                <div className={`${block} bg-slate-50 border-slate-200 min-h-48`}>
+                    <p className={`${head} text-slate-800`}>🤝 Key Partners</p>
                     <p className={sub}>핵심 파트너</p>
                     <CellTextarea cellKey="bmc_key_partners" value={data["bmc_key_partners"] ?? ""} onChange={onChange} />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <div className={`${block} bg-blue-50 border-blue-200 flex-1 min-h-24`}>
-                        <p className={`${head} text-blue-700`}>⚙️ Key Activities</p>
+                    <div className={`${block} bg-slate-50 border-slate-200 flex-1 min-h-24`}>
+                        <p className={`${head} text-slate-800`}>⚙️ Key Activities</p>
                         <p className={sub}>핵심 활동</p>
                         <CellTextarea cellKey="bmc_key_activities" value={data["bmc_key_activities"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className={`${block} bg-blue-50/60 border-blue-200/60 flex-1 min-h-24`}>
-                        <p className={`${head} text-blue-600`}>📦 Key Resources</p>
+                    <div className={`${block} bg-white border-slate-200 flex-1 min-h-24`}>
+                        <p className={`${head} text-slate-600`}>📦 Key Resources</p>
                         <p className={sub}>핵심 자원</p>
                         <CellTextarea cellKey="bmc_key_resources" value={data["bmc_key_resources"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
-                <div className={`${block} bg-amber-50 border-amber-300 min-h-48`}>
-                    <p className={`${head} text-amber-700`}>⭐ Value Propositions</p>
+                <div className={`${block} bg-stone-50 border-stone-300 min-h-48`}>
+                    <p className={`${head} text-stone-800`}>⭐ Value Propositions</p>
                     <p className={sub}>가치 제안</p>
                     <CellTextarea cellKey="bmc_value_propositions" value={data["bmc_value_propositions"] ?? ""} onChange={onChange} />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <div className={`${block} bg-rose-50 border-rose-200 flex-1 min-h-24`}>
-                        <p className={`${head} text-rose-700`}>❤️ Customer Relationships</p>
+                    <div className={`${block} bg-slate-50 border-slate-200 flex-1 min-h-24`}>
+                        <p className={`${head} text-stone-700`}>❤️ Customer Relationships</p>
                         <p className={sub}>고객 관계</p>
                         <CellTextarea cellKey="bmc_customer_relationships" value={data["bmc_customer_relationships"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className={`${block} bg-rose-50/60 border-rose-200/60 flex-1 min-h-24`}>
-                        <p className={`${head} text-rose-600`}>📡 Channels</p>
+                    <div className={`${block} bg-white border-slate-200 flex-1 min-h-24`}>
+                        <p className={`${head} text-slate-700`}>📡 Channels</p>
                         <p className={sub}>채널</p>
                         <CellTextarea cellKey="bmc_channels" value={data["bmc_channels"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
-                <div className={`${block} bg-teal-50 border-teal-200 min-h-48`}>
-                    <p className={`${head} text-teal-700`}>👥 Customer Segments</p>
+                <div className={`${block} bg-slate-50 border-slate-300 min-h-48`}>
+                    <p className={`${head} text-slate-900`}>👥 Customer Segments</p>
                     <p className={sub}>고객 세그먼트</p>
                     <CellTextarea cellKey="bmc_customer_segments" value={data["bmc_customer_segments"] ?? ""} onChange={onChange} />
                 </div>
@@ -672,8 +672,8 @@ function BmcGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
                     <p className={sub}>비용 구조</p>
                     <CellTextarea cellKey="bmc_cost_structure" value={data["bmc_cost_structure"] ?? ""} onChange={onChange} />
                 </div>
-                <div className={`${block} bg-green-50 border-green-200 min-h-16`}>
-                    <p className={`${head} text-green-700`}>💰 Revenue Streams</p>
+                <div className={`${block} bg-slate-50 border-slate-300 min-h-16`}>
+                    <p className={`${head} text-slate-800`}>💰 Revenue Streams</p>
                     <p className={sub}>수익 흐름</p>
                     <CellTextarea cellKey="bmc_revenue_streams" value={data["bmc_revenue_streams"] ?? ""} onChange={onChange} />
                 </div>
@@ -686,42 +686,42 @@ function VpcGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
     return (
         <div className="my-2 grid md:grid-cols-2 gap-3">
             {/* 좌: Value Map (사각형) */}
-            <div className="rounded-xl p-3 bg-teal-50/50 border-2 border-teal-300">
-                <p className="text-[11px] font-bold text-teal-800 text-center mb-2">🧭 Value Map · 가치 제안 맵</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-700">
+                <p className="text-[11px] font-bold text-slate-900 text-center mb-2">🧭 Value Map · 가치 제안 맵</p>
                 <div className="space-y-2">
-                    <div className="rounded-lg p-2 bg-white border border-teal-200">
-                        <p className="text-[10px] font-bold text-teal-700">📦 Products &amp; Services</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-300">
+                        <p className="text-[10px] font-bold text-slate-900">📦 Products &amp; Services</p>
                         <p className="text-[9px] text-neutral-400">제품·서비스</p>
                         <CellTextarea cellKey="vpc_products" value={data["vpc_products"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-white border border-green-200">
-                        <p className="text-[10px] font-bold text-green-700">🌟 Gain Creators</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-300">
+                        <p className="text-[10px] font-bold text-slate-800">🌟 Gain Creators</p>
                         <p className="text-[9px] text-neutral-400">이득 창출</p>
                         <CellTextarea cellKey="vpc_gain_creators" value={data["vpc_gain_creators"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-white border border-rose-200">
-                        <p className="text-[10px] font-bold text-rose-700">🩹 Pain Relievers</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200">
+                        <p className="text-[10px] font-bold text-stone-700">🩹 Pain Relievers</p>
                         <p className="text-[9px] text-neutral-400">고통 해소</p>
                         <CellTextarea cellKey="vpc_pain_relievers" value={data["vpc_pain_relievers"] ?? ""} onChange={onChange} />
                     </div>
                 </div>
             </div>
             {/* 우: Customer Profile (원형 느낌) */}
-            <div className="rounded-full p-3 bg-amber-50/50 border-2 border-amber-300 md:rounded-xl">
-                <p className="text-[11px] font-bold text-amber-800 text-center mb-2">👤 Customer Profile · 고객 프로필</p>
+            <div className="rounded-full p-3 bg-stone-50 border-2 border-stone-400 md:rounded-xl">
+                <p className="text-[11px] font-bold text-slate-900 text-center mb-2">👤 Customer Profile · 고객 프로필</p>
                 <div className="space-y-2">
-                    <div className="rounded-lg p-2 bg-white border border-amber-200">
-                        <p className="text-[10px] font-bold text-amber-700">🎯 Customer Jobs</p>
+                    <div className="rounded-lg p-2 bg-white border border-stone-200">
+                        <p className="text-[10px] font-bold text-stone-800">🎯 Customer Jobs</p>
                         <p className="text-[9px] text-neutral-400">고객 과업</p>
                         <CellTextarea cellKey="vpc_customer_jobs" value={data["vpc_customer_jobs"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-white border border-green-200">
-                        <p className="text-[10px] font-bold text-green-700">✨ Gains</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-300">
+                        <p className="text-[10px] font-bold text-slate-800">✨ Gains</p>
                         <p className="text-[9px] text-neutral-400">이득·기대</p>
                         <CellTextarea cellKey="vpc_gains" value={data["vpc_gains"] ?? ""} onChange={onChange} />
                     </div>
-                    <div className="rounded-lg p-2 bg-white border border-rose-200">
-                        <p className="text-[10px] font-bold text-rose-700">😣 Pains</p>
+                    <div className="rounded-lg p-2 bg-white border border-slate-200">
+                        <p className="text-[10px] font-bold text-stone-700">😣 Pains</p>
                         <p className="text-[9px] text-neutral-400">고통·장애물</p>
                         <CellTextarea cellKey="vpc_pains" value={data["vpc_pains"] ?? ""} onChange={onChange} />
                     </div>
@@ -736,24 +736,24 @@ function OkrGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
     return (
         <div className="my-2 space-y-2">
             {/* Objective */}
-            <div className="rounded-xl p-3 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300">
-                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">🎯 Objective · 목표</p>
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
+                <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">🎯 Objective · 목표</p>
                 <p className="text-[9px] text-neutral-500 mt-0.5">큰 방향. 정성적·영감적. "~를 달성한다"</p>
                 <textarea
                     value={data["okr_objective"] ?? ""}
                     onChange={e => onChange("okr_objective", e.target.value)}
                     placeholder="예: 고객이 첫 접속 15분 안에 가치를 느끼게 한다"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none p-2 rounded border border-amber-200 leading-relaxed"
+                    className="w-full mt-2 resize-none bg-white/60 text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none p-2 rounded border border-stone-200 leading-relaxed"
                 />
             </div>
             {/* Key Results */}
-            <div className="rounded-xl p-3 bg-teal-50/50 border border-teal-200">
-                <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider mb-2">📊 Key Results · 핵심 결과 (측정 가능)</p>
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-300">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider mb-2">📊 Key Results · 핵심 결과 (측정 가능)</p>
                 <div className="space-y-1.5">
                     {krKeys.map((k, i) => (
                         <div key={k} className="flex items-start gap-2">
-                            <span className="shrink-0 mt-1 w-6 h-6 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold flex items-center justify-center">
+                            <span className="shrink-0 mt-1 w-6 h-6 rounded-full bg-slate-200 text-slate-900 text-[10px] font-bold flex items-center justify-center">
                                 {i + 1}
                             </span>
                             <input
@@ -761,7 +761,7 @@ function OkrGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
                                 value={data[k] ?? ""}
                                 onChange={e => onChange(k, e.target.value)}
                                 placeholder={i < 3 ? "예: 주간 활성 사용자 1만 → 3만 달성" : "(선택) 추가 KR"}
-                                className="flex-1 px-2 py-1.5 text-xs bg-white border border-teal-200 rounded focus:outline-none focus:border-teal-500"
+                                className="flex-1 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:border-slate-700"
                             />
                         </div>
                     ))}
@@ -780,9 +780,9 @@ function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
     return (
         <div className="my-2 space-y-3">
             {/* 프로필 헤더 */}
-            <div className="rounded-xl p-4 bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-200">
+            <div className="rounded-xl p-4 bg-slate-50 border border-slate-200">
                 <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-14 h-14 rounded-full bg-white border-2 border-violet-300 flex items-center justify-center text-2xl">
+                    <div className="shrink-0 w-14 h-14 rounded-full bg-white border-2 border-slate-400 flex items-center justify-center text-2xl">
                         👤
                     </div>
                     <div className="flex-1 space-y-1.5">
@@ -791,39 +791,39 @@ function PersonaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
                             value={data["persona_name"] ?? ""}
                             onChange={e => onChange("persona_name", e.target.value)}
                             placeholder="이름 (예: 김개발)"
-                            className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-violet-200 rounded focus:outline-none focus:border-violet-500"
+                            className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-slate-200 rounded focus:outline-none focus:border-slate-700"
                         />
                         <div className="grid grid-cols-3 gap-1">
-                            <input type="text" value={data["persona_age"] ?? ""} onChange={e => onChange("persona_age", e.target.value)} placeholder="나이" className="px-2 py-1 text-xs bg-white/70 border border-violet-200 rounded focus:outline-none" />
-                            <input type="text" value={data["persona_occupation"] ?? ""} onChange={e => onChange("persona_occupation", e.target.value)} placeholder="직업" className="px-2 py-1 text-xs bg-white/70 border border-violet-200 rounded focus:outline-none" />
-                            <input type="text" value={data["persona_location"] ?? ""} onChange={e => onChange("persona_location", e.target.value)} placeholder="지역" className="px-2 py-1 text-xs bg-white/70 border border-violet-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_age"] ?? ""} onChange={e => onChange("persona_age", e.target.value)} placeholder="나이" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_occupation"] ?? ""} onChange={e => onChange("persona_occupation", e.target.value)} placeholder="직업" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
+                            <input type="text" value={data["persona_location"] ?? ""} onChange={e => onChange("persona_location", e.target.value)} placeholder="지역" className="px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none" />
                         </div>
                         <input
                             type="text"
                             value={data["persona_bio"] ?? ""}
                             onChange={e => onChange("persona_bio", e.target.value)}
                             placeholder="한줄 소개"
-                            className="w-full px-2 py-1 text-xs bg-white/70 border border-violet-200 rounded focus:outline-none"
+                            className="w-full px-2 py-1 text-xs bg-white/70 border border-slate-200 rounded focus:outline-none"
                         />
                     </div>
                 </div>
             </div>
             {/* 4분면 */}
             <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-teal-50 border border-teal-200 min-h-24">
-                    <p className="text-xs font-bold text-teal-700">🎯 Goals · 목표</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-24">
+                    <p className="text-xs font-bold text-slate-900">🎯 Goals · 목표</p>
                     <CellTextarea cellKey="persona_goals" value={data["persona_goals"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-rose-50 border border-rose-200 min-h-24">
-                    <p className="text-xs font-bold text-rose-700">😣 Frustrations · 좌절</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-24">
+                    <p className="text-xs font-bold text-stone-700">😣 Frustrations · 좌절</p>
                     <CellTextarea cellKey="persona_frustrations" value={data["persona_frustrations"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-amber-50 border border-amber-200 min-h-24">
-                    <p className="text-xs font-bold text-amber-700">💪 Motivations · 동기</p>
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-24">
+                    <p className="text-xs font-bold text-stone-800">💪 Motivations · 동기</p>
                     <CellTextarea cellKey="persona_motivations" value={data["persona_motivations"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-blue-50 border border-blue-200 min-h-24">
-                    <p className="text-xs font-bold text-blue-700">🔁 Behaviors · 행동</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-24">
+                    <p className="text-xs font-bold text-slate-800">🔁 Behaviors · 행동</p>
                     <CellTextarea cellKey="persona_behaviors" value={data["persona_behaviors"] ?? ""} onChange={onChange} />
                 </div>
             </div>
@@ -846,42 +846,42 @@ function JtbdGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
     return (
         <div className="my-2 space-y-2">
             {/* JTBD 한 문장 */}
-            <div className="rounded-xl p-3 bg-gradient-to-br from-violet-50 to-blue-50 border-2 border-violet-300">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">✍️ JTBD Statement · 한 문장 정의</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">✍️ JTBD Statement · 한 문장 정의</p>
                 <p className="text-[9px] text-neutral-500 mt-0.5">"[상황]일 때, 나는 [동기]하고 싶다, 그래서 [결과]를 얻고 싶다"</p>
                 <textarea
                     value={data["jtbd_statement"] ?? ""}
                     onChange={e => onChange("jtbd_statement", e.target.value)}
                     placeholder="예: 출근길에 집중할 음악이 필요할 때, 고르느라 시간 쓰지 않고 시작하고 싶다"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none p-2 rounded border border-violet-200 leading-relaxed"
+                    className="w-full mt-2 resize-none bg-white/60 text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none p-2 rounded border border-slate-200 leading-relaxed"
                 />
             </div>
             {/* 3단 구조 */}
             <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-lg p-3 bg-blue-50 border border-blue-200 min-h-28">
-                    <p className="text-xs font-bold text-blue-700">📍 Situation</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-28">
+                    <p className="text-xs font-bold text-slate-800">📍 Situation</p>
                     <p className="text-[10px] text-neutral-500">언제·어디서·왜</p>
                     <CellTextarea cellKey="jtbd_situation" value={data["jtbd_situation"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-amber-50 border border-amber-200 min-h-28">
-                    <p className="text-xs font-bold text-amber-700">💡 Motivation</p>
+                <div className="rounded-lg p-3 bg-stone-50 border border-stone-200 min-h-28">
+                    <p className="text-xs font-bold text-stone-800">💡 Motivation</p>
                     <p className="text-[10px] text-neutral-500">무엇을 하고 싶나</p>
                     <CellTextarea cellKey="jtbd_motivation" value={data["jtbd_motivation"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-teal-50 border border-teal-200 min-h-28">
-                    <p className="text-xs font-bold text-teal-700">🏁 Outcome</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300 min-h-28">
+                    <p className="text-xs font-bold text-slate-900">🏁 Outcome</p>
                     <p className="text-[10px] text-neutral-500">어떤 결과를 원하나</p>
                     <CellTextarea cellKey="jtbd_outcome" value={data["jtbd_outcome"] ?? ""} onChange={onChange} />
                 </div>
             </div>
             {/* 장벽 */}
             <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-rose-50 border border-rose-200 min-h-20">
-                    <p className="text-xs font-bold text-rose-700">😟 Anxieties · 불안</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-20">
+                    <p className="text-xs font-bold text-stone-700">😟 Anxieties · 불안</p>
                     <CellTextarea cellKey="jtbd_anxieties" value={data["jtbd_anxieties"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-neutral-100 border border-neutral-200 min-h-20">
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 min-h-20">
                     <p className="text-xs font-bold text-neutral-600">🔁 Habits · 기존 대안</p>
                     <CellTextarea cellKey="jtbd_habits" value={data["jtbd_habits"] ?? ""} onChange={onChange} />
                 </div>
@@ -936,7 +936,7 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
                             const rank = sorted.findIndex(x => x.i === idx) + 1;
                             const isTop = rank === 1 && s > 0;
                             return (
-                                <tr key={idx} className={`border-t border-neutral-100 ${isTop ? "bg-teal-50/50" : ""}`}>
+                                <tr key={idx} className={`border-t border-neutral-100 ${isTop ? "bg-slate-50" : ""}`}>
                                     <td className="px-2 py-1.5 text-neutral-400 text-[10px]">{isTop ? "🏆" : rank}</td>
                                     <td className="px-2 py-1.5">
                                         <input type="text" value={it.name} onChange={e => update(idx, { name: e.target.value })}
@@ -962,12 +962,12 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
                                         <input type="number" min={0.5} step={0.5} value={it.effort} onChange={e => update(idx, { effort: +e.target.value })}
                                             className="w-full px-1 py-1 text-xs text-center bg-transparent border border-transparent rounded focus:outline-none focus:bg-white focus:border-neutral-300" />
                                     </td>
-                                    <td className={`px-2 py-1.5 text-right font-mono font-bold ${isTop ? "text-teal-700" : s > 0 ? "text-neutral-700" : "text-neutral-300"}`}>
+                                    <td className={`px-2 py-1.5 text-right font-mono font-bold ${isTop ? "text-slate-900" : s > 0 ? "text-neutral-700" : "text-neutral-300"}`}>
                                         {s > 0 ? s.toFixed(1) : "—"}
                                     </td>
                                     <td className="px-1 text-center">
                                         {ensureMin.length > 1 && (
-                                            <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                                            <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                                         )}
                                     </td>
                                 </tr>
@@ -985,12 +985,12 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 
 function FiveW1HGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "who", label: "Who", sub: "누가", emoji: "👤", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "what", label: "What", sub: "무엇을", emoji: "📋", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "when", label: "When", sub: "언제", emoji: "🕐", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-        { key: "where", label: "Where", sub: "어디서", emoji: "📍", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "why", label: "Why", sub: "왜", emoji: "❓", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
-        { key: "how", label: "How", sub: "어떻게", emoji: "🛠️", color: "bg-orange-50 border-orange-200", text: "text-orange-700" },
+        { key: "who", label: "Who", sub: "누가", emoji: "👤", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "what", label: "What", sub: "무엇을", emoji: "📋", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "when", label: "When", sub: "언제", emoji: "🕐", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "where", label: "Where", sub: "어디서", emoji: "📍", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "why", label: "Why", sub: "왜", emoji: "❓", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "how", label: "How", sub: "어떻게", emoji: "🛠️", color: "bg-stone-50 border-stone-200", text: "text-stone-700" },
     ];
     return (
         <div className="my-2 grid grid-cols-3 gap-1.5">
@@ -1010,11 +1010,11 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
     return (
         <div className="my-2 space-y-2">
             {/* Problem */}
-            <div className="rounded-xl p-3 bg-rose-50 border-2 border-rose-300">
-                <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">🚨 Problem · 문제 정의</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-300">
+                <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">🚨 Problem · 문제 정의</p>
                 <textarea value={data["why_problem"] ?? ""} onChange={e => onChange("why_problem", e.target.value)}
                     placeholder="무엇이 일어났나?" rows={2}
-                    className="w-full mt-1.5 resize-none bg-white/60 text-xs p-2 rounded border border-rose-200 focus:outline-none leading-relaxed" />
+                    className="w-full mt-1.5 resize-none bg-white/60 text-xs p-2 rounded border border-slate-200 focus:outline-none leading-relaxed" />
             </div>
             {/* 5 Whys ladder */}
             <div className="space-y-1.5">
@@ -1025,12 +1025,12 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
                     return (
                         <div key={key} className="flex items-start gap-2">
                             <div className="shrink-0 flex flex-col items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${hasPrev ? "bg-amber-100 text-amber-700 border-2 border-amber-300" : "bg-neutral-100 text-neutral-400 border border-neutral-200"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${hasPrev ? "bg-slate-200 text-slate-900 border-2 border-slate-700" : "bg-neutral-100 text-neutral-400 border border-neutral-200"}`}>
                                     Why<br/>{n}
                                 </div>
-                                {n < 5 && <div className={`w-px flex-1 ${hasPrev ? "bg-amber-300" : "bg-neutral-200"} my-1`} style={{ minHeight: 12 }} />}
+                                {n < 5 && <div className={`w-px flex-1 ${hasPrev ? "bg-slate-400" : "bg-neutral-200"} my-1`} style={{ minHeight: 12 }} />}
                             </div>
-                            <div className={`flex-1 rounded-lg p-2 border ${hasPrev ? "bg-amber-50 border-amber-200" : "bg-neutral-50 border-neutral-200"}`}>
+                            <div className={`flex-1 rounded-lg p-2 border ${hasPrev ? "bg-stone-50 border-stone-200" : "bg-neutral-50 border-neutral-200"}`}>
                                 <p className="text-[10px] text-neutral-500">왜 그럴까?</p>
                                 <textarea value={data[key] ?? ""} onChange={e => onChange(key, e.target.value)}
                                     placeholder={hasPrev ? `${n}번째 '왜'에 대한 답…` : "이전 단계를 먼저 채워주세요"}
@@ -1043,12 +1043,12 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
             </div>
             {/* Root + Countermeasure */}
             <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-teal-50 border border-teal-300">
-                    <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">🌱 Root Cause · 근본 원인</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-400">
+                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">🌱 Root Cause · 근본 원인</p>
                     <CellTextarea cellKey="why_root" value={data["why_root"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-3 bg-violet-50 border border-violet-300">
-                    <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">💊 Countermeasure · 대응책</p>
+                <div className="rounded-lg p-3 bg-slate-50 border border-slate-300">
+                    <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">💊 Countermeasure · 대응책</p>
                     <CellTextarea cellKey="why_countermeasure" value={data["why_countermeasure"] ?? ""} onChange={onChange} />
                 </div>
             </div>
@@ -1061,49 +1061,49 @@ function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
         <div className="my-2 space-y-2">
             {/* 4대 원 */}
             <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-2xl p-3 bg-rose-50 border-2 border-rose-300">
-                    <p className="text-xs font-bold text-rose-700">❤️ LOVE · 좋아하는 것</p>
+                <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-300">
+                    <p className="text-xs font-bold text-stone-700">❤️ LOVE · 좋아하는 것</p>
                     <CellTextarea cellKey="ikigai_love" value={data["ikigai_love"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-2xl p-3 bg-blue-50 border-2 border-blue-300">
-                    <p className="text-xs font-bold text-blue-700">💪 GOOD AT · 잘하는 것</p>
+                <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-300">
+                    <p className="text-xs font-bold text-slate-800">💪 GOOD AT · 잘하는 것</p>
                     <CellTextarea cellKey="ikigai_good" value={data["ikigai_good"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-2xl p-3 bg-amber-50 border-2 border-amber-300">
-                    <p className="text-xs font-bold text-amber-700">🌍 WORLD NEEDS · 세상이 필요로 하는 것</p>
+                <div className="rounded-2xl p-3 bg-stone-50 border-2 border-stone-300">
+                    <p className="text-xs font-bold text-stone-800">🌍 WORLD NEEDS · 세상이 필요로 하는 것</p>
                     <CellTextarea cellKey="ikigai_needs" value={data["ikigai_needs"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-2xl p-3 bg-teal-50 border-2 border-teal-300">
-                    <p className="text-xs font-bold text-teal-700">💰 PAID FOR · 돈이 되는 것</p>
+                <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-700">
+                    <p className="text-xs font-bold text-slate-900">💰 PAID FOR · 돈이 되는 것</p>
                     <CellTextarea cellKey="ikigai_paid" value={data["ikigai_paid"] ?? ""} onChange={onChange} />
                 </div>
             </div>
             {/* 교집합 4개 */}
             <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-2 bg-gradient-to-br from-rose-50 to-blue-50 border border-rose-200">
-                    <p className="text-[10px] font-bold text-rose-700">🔥 Passion · Love × Good at</p>
+                <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
+                    <p className="text-[10px] font-bold text-stone-700">🔥 Passion · Love × Good at</p>
                     <CellTextarea cellKey="ikigai_passion" value={data["ikigai_passion"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-2 bg-gradient-to-br from-rose-50 to-amber-50 border border-amber-200">
-                    <p className="text-[10px] font-bold text-amber-700">🙏 Mission · Love × Needs</p>
+                <div className="rounded-lg p-2 bg-slate-50 border border-stone-200">
+                    <p className="text-[10px] font-bold text-stone-800">🙏 Mission · Love × Needs</p>
                     <CellTextarea cellKey="ikigai_mission" value={data["ikigai_mission"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-2 bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200">
-                    <p className="text-[10px] font-bold text-blue-700">🛠️ Profession · Good at × Paid</p>
+                <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-800">🛠️ Profession · Good at × Paid</p>
                     <CellTextarea cellKey="ikigai_profession" value={data["ikigai_profession"] ?? ""} onChange={onChange} />
                 </div>
-                <div className="rounded-lg p-2 bg-gradient-to-br from-amber-50 to-teal-50 border border-teal-200">
-                    <p className="text-[10px] font-bold text-teal-700">📞 Vocation · Needs × Paid</p>
+                <div className="rounded-lg p-2 bg-slate-50 border border-slate-300">
+                    <p className="text-[10px] font-bold text-slate-900">📞 Vocation · Needs × Paid</p>
                     <CellTextarea cellKey="ikigai_vocation" value={data["ikigai_vocation"] ?? ""} onChange={onChange} />
                 </div>
             </div>
             {/* Core */}
-            <div className="rounded-xl p-3 bg-gradient-to-br from-rose-100 via-amber-100 to-teal-100 border-2 border-amber-400">
-                <p className="text-[10px] font-bold text-orange-800 uppercase tracking-wider text-center">🌸 IKIGAI · 삶의 이유 (4가지 교집합)</p>
+            <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-700">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider text-center">🌸 IKIGAI · 삶의 이유 (4가지 교집합)</p>
                 <textarea value={data["ikigai_core"] ?? ""} onChange={e => onChange("ikigai_core", e.target.value)}
                     placeholder="4가지가 겹치는 지점. 내가 존재하는 이유."
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-sm p-2 rounded border border-amber-300 focus:outline-none text-center font-medium leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/60 text-sm p-2 rounded border border-stone-300 focus:outline-none text-center font-medium leading-relaxed" />
             </div>
         </div>
     );
@@ -1114,32 +1114,32 @@ function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange: (key: 
     return (
         <div className="my-2 grid grid-cols-3 gap-2">
             <div />
-            <div className={`${cellClass} bg-violet-50 border-violet-200`}>
-                <p className="text-[10px] font-bold text-violet-700">⬆️ New Entrants</p>
+            <div className={`${cellClass} bg-slate-50 border-slate-200`}>
+                <p className="text-[10px] font-bold text-slate-800">⬆️ New Entrants</p>
                 <p className="text-[9px] text-neutral-400">신규 진입</p>
                 <CellTextarea cellKey="p5_new_entrants" value={data["p5_new_entrants"] ?? ""} onChange={onChange} />
             </div>
             <div />
 
-            <div className={`${cellClass} bg-blue-50 border-blue-200`}>
-                <p className="text-[10px] font-bold text-blue-700">⬅️ Suppliers</p>
+            <div className={`${cellClass} bg-slate-50 border-slate-200`}>
+                <p className="text-[10px] font-bold text-slate-800">⬅️ Suppliers</p>
                 <p className="text-[9px] text-neutral-400">공급자 협상력</p>
                 <CellTextarea cellKey="p5_suppliers" value={data["p5_suppliers"] ?? ""} onChange={onChange} />
             </div>
-            <div className={`${cellClass} bg-rose-100 border-2 border-rose-400`}>
-                <p className="text-[10px] font-bold text-rose-800">🔥 Rivalry</p>
+            <div className={`${cellClass} bg-slate-100 border-2 border-slate-700`}>
+                <p className="text-[10px] font-bold text-slate-900">🔥 Rivalry</p>
                 <p className="text-[9px] text-neutral-500">기존 경쟁</p>
                 <CellTextarea cellKey="p5_rivalry" value={data["p5_rivalry"] ?? ""} onChange={onChange} />
             </div>
-            <div className={`${cellClass} bg-teal-50 border-teal-200`}>
-                <p className="text-[10px] font-bold text-teal-700">Buyers ➡️</p>
+            <div className={`${cellClass} bg-slate-50 border-slate-300`}>
+                <p className="text-[10px] font-bold text-slate-900">Buyers ➡️</p>
                 <p className="text-[9px] text-neutral-400">구매자 협상력</p>
                 <CellTextarea cellKey="p5_buyers" value={data["p5_buyers"] ?? ""} onChange={onChange} />
             </div>
 
             <div />
-            <div className={`${cellClass} bg-amber-50 border-amber-200`}>
-                <p className="text-[10px] font-bold text-amber-700">⬇️ Substitutes</p>
+            <div className={`${cellClass} bg-stone-50 border-stone-200`}>
+                <p className="text-[10px] font-bold text-stone-800">⬇️ Substitutes</p>
                 <p className="text-[9px] text-neutral-400">대체재</p>
                 <CellTextarea cellKey="p5_substitutes" value={data["p5_substitutes"] ?? ""} onChange={onChange} />
             </div>
@@ -1150,12 +1150,12 @@ function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 
 function ScamperGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "scamper_s", letter: "S", label: "Substitute", sub: "무엇으로 대체할까?", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
-        { key: "scamper_c", letter: "C", label: "Combine", sub: "무엇과 결합할까?", color: "bg-orange-50 border-orange-200", text: "text-orange-700" },
-        { key: "scamper_a", letter: "A", label: "Adapt", sub: "무엇에 응용할까?", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-        { key: "scamper_m", letter: "M", label: "Modify", sub: "변형·확대·축소?", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "scamper_p", letter: "P", label: "Put to other use", sub: "다른 용도는?", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "scamper_e", letter: "E", label: "Eliminate", sub: "무엇을 제거할까?", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
+        { key: "scamper_s", letter: "S", label: "Substitute", sub: "무엇으로 대체할까?", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "scamper_c", letter: "C", label: "Combine", sub: "무엇과 결합할까?", color: "bg-stone-50 border-stone-200", text: "text-stone-700" },
+        { key: "scamper_a", letter: "A", label: "Adapt", sub: "무엇에 응용할까?", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "scamper_m", letter: "M", label: "Modify", sub: "변형·확대·축소?", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "scamper_p", letter: "P", label: "Put to other use", sub: "다른 용도는?", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "scamper_e", letter: "E", label: "Eliminate", sub: "무엇을 제거할까?", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
         { key: "scamper_r", letter: "R", label: "Reverse", sub: "역발상·재배치?", color: "bg-neutral-100 border-neutral-200", text: "text-neutral-700" },
     ];
     return (
@@ -1178,11 +1178,11 @@ function ScamperGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 
 function KanoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "kano_attractive", label: "Attractive · 감동 품질", sub: "있으면 매우 만족, 없어도 불만 아님", emoji: "⭐", color: "bg-teal-50 border-teal-300", text: "text-teal-700" },
-        { key: "kano_performance", label: "One-dimensional · 성과 품질", sub: "많을수록 만족, 적을수록 불만", emoji: "📈", color: "bg-blue-50 border-blue-300", text: "text-blue-700" },
-        { key: "kano_must", label: "Must-be · 당연한 품질", sub: "있으면 당연, 없으면 극도 불만", emoji: "✅", color: "bg-amber-50 border-amber-300", text: "text-amber-700" },
+        { key: "kano_attractive", label: "Attractive · 감동 품질", sub: "있으면 매우 만족, 없어도 불만 아님", emoji: "⭐", color: "bg-slate-50 border-slate-400", text: "text-slate-900" },
+        { key: "kano_performance", label: "One-dimensional · 성과 품질", sub: "많을수록 만족, 적을수록 불만", emoji: "📈", color: "bg-slate-50 border-slate-300", text: "text-slate-800" },
+        { key: "kano_must", label: "Must-be · 당연한 품질", sub: "있으면 당연, 없으면 극도 불만", emoji: "✅", color: "bg-stone-50 border-stone-300", text: "text-stone-800" },
         { key: "kano_indifferent", label: "Indifferent · 무관심", sub: "있어도 없어도 상관없음", emoji: "⚪", color: "bg-neutral-100 border-neutral-300", text: "text-neutral-600" },
-        { key: "kano_reverse", label: "Reverse · 역품질", sub: "있을수록 불만, 없을수록 만족", emoji: "🚫", color: "bg-rose-50 border-rose-300", text: "text-rose-700" },
+        { key: "kano_reverse", label: "Reverse · 역품질", sub: "있을수록 불만, 없을수록 만족", emoji: "🚫", color: "bg-slate-50 border-slate-300", text: "text-stone-700" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -1241,7 +1241,7 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
                         <input type="number" min={0} value={it.value} onChange={e => update(idx, { value: +e.target.value })}
                             className="w-24 px-2 py-1 text-xs text-right bg-transparent border border-transparent rounded focus:outline-none focus:bg-white focus:border-neutral-300" />
                         {ensureMin.length > 1 && (
-                            <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                            <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                         )}
                     </div>
                 ))}
@@ -1260,16 +1260,16 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
                                 <div className="flex items-center gap-2 text-[11px]">
                                     <span className="w-4 text-neutral-400">{i + 1}</span>
                                     <span className="flex-1 truncate font-medium">{r.name}</span>
-                                    <span className={`tabular-nums ${isVital ? "text-teal-700 font-bold" : "text-neutral-500"}`}>{r.pct.toFixed(1)}%</span>
+                                    <span className={`tabular-nums ${isVital ? "text-slate-900 font-bold" : "text-neutral-500"}`}>{r.pct.toFixed(1)}%</span>
                                     <span className="w-14 text-right text-neutral-400 tabular-nums">누적 {r.cumPct.toFixed(0)}%</span>
                                 </div>
                                 <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                    <div className={`h-full rounded-full ${isVital ? "bg-teal-500" : "bg-neutral-400"}`} style={{ width: `${r.barPct}%` }} />
+                                    <div className={`h-full rounded-full ${isVital ? "bg-slate-900" : "bg-neutral-400"}`} style={{ width: `${r.barPct}%` }} />
                                 </div>
                             </div>
                         );
                     })}
-                    <p className="text-[10px] text-teal-600 mt-2 pt-2 border-t border-neutral-200">
+                    <p className="text-[10px] text-slate-700 mt-2 pt-2 border-t border-neutral-200">
                         🎯 <strong>Vital Few (누적 80% 이내)</strong> — 여기에 집중하세요.
                     </p>
                 </div>
@@ -1280,25 +1280,25 @@ function ParetoGrid({ data, onChange }: { data: FrameworkData; onChange: (key: s
 
 function FishboneGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const bones = [
-        { key: "fish_people", label: "People · 사람", emoji: "👥", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "fish_process", label: "Process · 프로세스", emoji: "🔄", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "fish_technology", label: "Technology · 기술", emoji: "💻", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "fish_environment", label: "Environment · 환경", emoji: "🌳", color: "bg-green-50 border-green-200", text: "text-green-700" },
-        { key: "fish_materials", label: "Materials · 자원", emoji: "📦", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-        { key: "fish_measurement", label: "Measurement · 측정", emoji: "📏", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
+        { key: "fish_people", label: "People · 사람", emoji: "👥", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "fish_process", label: "Process · 프로세스", emoji: "🔄", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "fish_technology", label: "Technology · 기술", emoji: "💻", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "fish_environment", label: "Environment · 환경", emoji: "🌳", color: "bg-slate-50 border-slate-300", text: "text-slate-800" },
+        { key: "fish_materials", label: "Materials · 자원", emoji: "📦", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "fish_measurement", label: "Measurement · 측정", emoji: "📏", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
     ];
     return (
         <div className="my-2 space-y-2">
             {/* Problem head */}
-            <div className="rounded-xl p-3 bg-gradient-to-r from-neutral-100 to-rose-100 border-2 border-rose-300 relative">
+            <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400 relative">
                 <div className="flex items-center gap-2">
                     <span className="text-xl">🐟</span>
                     <div className="flex-1">
-                        <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Problem · 문제 (물고기 머리)</p>
+                        <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider">Problem · 문제 (물고기 머리)</p>
                         <textarea value={data["fish_problem"] ?? ""} onChange={e => onChange("fish_problem", e.target.value)}
                             placeholder="해결하려는 문제를 한 문장으로…"
                             rows={1}
-                            className="w-full mt-1 resize-none bg-white/60 text-sm p-1.5 rounded border border-rose-200 focus:outline-none" />
+                            className="w-full mt-1 resize-none bg-white/60 text-sm p-1.5 rounded border border-slate-200 focus:outline-none" />
                     </div>
                 </div>
             </div>
@@ -1341,11 +1341,11 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
     return (
         <div className="my-2 space-y-3">
             {/* Persona */}
-            <div className="rounded-lg p-3 bg-violet-50 border border-violet-200">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">👤 Persona · 대상 고객</p>
+            <div className="rounded-lg p-3 bg-slate-50 border border-slate-200">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">👤 Persona · 대상 고객</p>
                 <input type="text" value={data["journey_persona"] ?? ""} onChange={e => onChange("journey_persona", e.target.value)}
                     placeholder="여정을 그릴 고객의 프로필"
-                    className="w-full mt-1 px-2 py-1.5 text-xs bg-white border border-violet-200 rounded focus:outline-none focus:border-violet-500" />
+                    className="w-full mt-1 px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none focus:border-slate-700" />
             </div>
             {/* Stage table */}
             <div className="overflow-x-auto rounded-lg border border-neutral-200">
@@ -1384,11 +1384,11 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
                                 <td className="px-2 py-2">
                                     <textarea value={s.opportunity} onChange={e => update(idx, { opportunity: e.target.value })}
                                         rows={2}
-                                        className="w-full resize-none px-1.5 py-1 text-xs bg-teal-50/30 border border-teal-100 rounded focus:outline-none focus:bg-white focus:border-teal-300" />
+                                        className="w-full resize-none px-1.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:bg-white focus:border-slate-700" />
                                 </td>
                                 <td className="px-1 py-2 text-center">
                                     {stages.length > 1 && (
-                                        <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                                        <button onClick={() => remove(idx)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                                     )}
                                 </td>
                             </tr>
@@ -1405,9 +1405,9 @@ function JourneyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 
 function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "kpt_keep", label: "Keep", sub: "잘한 것 · 계속할 것", emoji: "✅", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "kpt_problem", label: "Problem", sub: "문제 · 개선할 것", emoji: "⚠️", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
-        { key: "kpt_try", label: "Try", sub: "새로 시도할 것", emoji: "🚀", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
+        { key: "kpt_keep", label: "Keep", sub: "잘한 것 · 계속할 것", emoji: "✅", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "kpt_problem", label: "Problem", sub: "문제 · 개선할 것", emoji: "⚠️", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "kpt_try", label: "Try", sub: "새로 시도할 것", emoji: "🚀", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
     ];
     return (
         <div className="my-2 grid md:grid-cols-3 gap-2">
@@ -1424,10 +1424,10 @@ function KptGrid({ data, onChange }: { data: FrameworkData; onChange: (key: stri
 
 function OodaGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "ooda_observe", label: "Observe", sub: "관찰 · 무엇이 일어나고 있나", emoji: "👁️", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "ooda_orient", label: "Orient", sub: "방향 설정 · 맥락·가정 점검", emoji: "🧭", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "ooda_decide", label: "Decide", sub: "결정 · 어떻게 움직일까", emoji: "🎯", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-        { key: "ooda_act", label: "Act", sub: "실행 · 그리고 다시 관찰", emoji: "⚡", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
+        { key: "ooda_observe", label: "Observe", sub: "관찰 · 무엇이 일어나고 있나", emoji: "👁️", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "ooda_orient", label: "Orient", sub: "방향 설정 · 맥락·가정 점검", emoji: "🧭", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "ooda_decide", label: "Decide", sub: "결정 · 어떻게 움직일까", emoji: "🎯", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "ooda_act", label: "Act", sub: "실행 · 그리고 다시 관찰", emoji: "⚡", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -1456,15 +1456,15 @@ function CornellGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
         <div className="my-2 rounded-lg border-2 border-neutral-300 overflow-hidden bg-white">
             {/* Top: Cue (left) + Notes (right) */}
             <div className="grid grid-cols-[1fr_2fr]">
-                <div className="border-r border-neutral-300 bg-amber-50/50 p-3">
-                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">🔑 Cue</p>
+                <div className="border-r border-neutral-300 bg-stone-50 p-3">
+                    <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">🔑 Cue</p>
                     <p className="text-[9px] text-neutral-500">핵심 키워드 · 질문</p>
                     <textarea value={data["cornell_cue"] ?? ""} onChange={e => onChange("cornell_cue", e.target.value)}
                         placeholder="핵심 키워드들…" rows={10}
                         className="w-full mt-2 resize-none bg-transparent text-xs placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
                 </div>
                 <div className="bg-white p-3">
-                    <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">📝 Notes</p>
+                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">📝 Notes</p>
                     <p className="text-[9px] text-neutral-500">수업·강의·독서 내용</p>
                     <textarea value={data["cornell_notes"] ?? ""} onChange={e => onChange("cornell_notes", e.target.value)}
                         placeholder="본 내용을 자유롭게…" rows={10}
@@ -1472,8 +1472,8 @@ function CornellGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
                 </div>
             </div>
             {/* Bottom: Summary */}
-            <div className="border-t-2 border-neutral-300 bg-teal-50/40 p-3">
-                <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">💡 Summary</p>
+            <div className="border-t-2 border-neutral-300 bg-slate-50 p-3">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">💡 Summary</p>
                 <p className="text-[9px] text-neutral-500">요약 · 종합 — 내 언어로 다시 쓰기</p>
                 <textarea value={data["cornell_summary"] ?? ""} onChange={e => onChange("cornell_summary", e.target.value)}
                     placeholder="오늘 배운 것을 한 단락으로 요약…" rows={4}
@@ -1541,7 +1541,7 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
                                         <input type="number" min={1} max={9} value={c.weight} onChange={e => updateCriterion(i, { weight: +e.target.value })}
                                             className="w-8 text-center px-1 py-0.5 bg-white border border-neutral-200 rounded text-xs" />
                                         {parsed.criteria.length > 1 && (
-                                            <button onClick={() => removeCriterion(i)} className="text-neutral-300 hover:text-red-500 text-xs">×</button>
+                                            <button onClick={() => removeCriterion(i)} className="text-neutral-300 hover:text-slate-700 text-xs">×</button>
                                         )}
                                     </div>
                                 </th>
@@ -1555,7 +1555,7 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
                             const r = rank(oi);
                             const isTop = r === 1 && totals[oi] > 0;
                             return (
-                                <tr key={oi} className={`border-t border-neutral-100 ${isTop ? "bg-teal-50/50" : ""}`}>
+                                <tr key={oi} className={`border-t border-neutral-100 ${isTop ? "bg-slate-50" : ""}`}>
                                     <td className="px-2 py-2">
                                         <div className="flex items-center gap-1">
                                             <span className="text-[10px] text-neutral-400 shrink-0">{isTop ? "🏆" : r}</span>
@@ -1571,17 +1571,17 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
                                             </select>
                                         </td>
                                     ))}
-                                    <td className={`px-2 py-2 text-right font-mono font-bold ${isTop ? "text-teal-700" : "text-neutral-700"}`}>
+                                    <td className={`px-2 py-2 text-right font-mono font-bold ${isTop ? "text-slate-900" : "text-neutral-700"}`}>
                                         {totals[oi]}
                                         {totals[oi] > 0 && (
                                             <div className="h-1 bg-neutral-200 rounded-full overflow-hidden mt-1">
-                                                <div className={`h-full ${isTop ? "bg-teal-500" : "bg-neutral-400"}`} style={{ width: `${totals[oi] / maxTotal * 100}%` }} />
+                                                <div className={`h-full ${isTop ? "bg-slate-900" : "bg-neutral-400"}`} style={{ width: `${totals[oi] / maxTotal * 100}%` }} />
                                             </div>
                                         )}
                                     </td>
                                     <td className="px-1 text-center">
                                         {parsed.options.length > 1 && (
-                                            <button onClick={() => removeOption(oi)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                                            <button onClick={() => removeOption(oi)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                                         )}
                                     </td>
                                 </tr>
@@ -1600,10 +1600,10 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
 
 function FeynmanGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "feynman_concept", label: "Concept", sub: "가르치려는 주제를 한 줄로", emoji: "📚", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "feynman_teach", label: "Teach", sub: "6살에게 설명하듯 쉽게", emoji: "👶", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "feynman_gaps", label: "Gaps", sub: "막힌 곳·애매한 곳 찾기", emoji: "🔍", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
-        { key: "feynman_simplify", label: "Simplify", sub: "비유·예시로 다시 쓰기", emoji: "✨", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
+        { key: "feynman_concept", label: "Concept", sub: "가르치려는 주제를 한 줄로", emoji: "📚", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "feynman_teach", label: "Teach", sub: "6살에게 설명하듯 쉽게", emoji: "👶", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "feynman_gaps", label: "Gaps", sub: "막힌 곳·애매한 곳 찾기", emoji: "🔍", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
+        { key: "feynman_simplify", label: "Simplify", sub: "비유·예시로 다시 쓰기", emoji: "✨", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -1655,10 +1655,10 @@ function OneOnOneGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                 <LabeledInput label="With · 상대" valKey="oto_with" data={data} onChange={onChange} placeholder="이름" />
                 <LabeledInput label="일시" valKey="oto_date" data={data} onChange={onChange} placeholder="YYYY-MM-DD" />
             </div>
-            <LabeledBox label="Updates · 진행 상황" emoji="📋" valKey="oto_updates" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
-            <LabeledBox label="Feedback · 피드백" emoji="💬" valKey="oto_feedback" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-            <LabeledBox label="Blockers · 고민·장애물" emoji="🚧" valKey="oto_blockers" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
-            <LabeledBox label="Next · 다음 목표·액션" emoji="🎯" valKey="oto_next" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
+            <LabeledBox label="Updates · 진행 상황" emoji="📋" valKey="oto_updates" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <LabeledBox label="Feedback · 피드백" emoji="💬" valKey="oto_feedback" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <LabeledBox label="Blockers · 고민·장애물" emoji="🚧" valKey="oto_blockers" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <LabeledBox label="Next · 다음 목표·액션" emoji="🎯" valKey="oto_next" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
         </div>
     );
 }
@@ -1666,15 +1666,15 @@ function OneOnOneGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
 function MeetingGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-violet-50 border border-violet-200 grid grid-cols-2 gap-2">
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
                 <LabeledInput label="제목" valKey="mtg_title" data={data} onChange={onChange} />
                 <LabeledInput label="일시" valKey="mtg_date" data={data} onChange={onChange} />
                 <LabeledInput label="참석자" valKey="mtg_attendees" data={data} onChange={onChange} placeholder="이름1, 이름2…" />
                 <LabeledInput label="안건" valKey="mtg_agenda" data={data} onChange={onChange} placeholder="핵심 주제" />
             </div>
             <LabeledBox label="Discussion · 논의 내용" emoji="💬" valKey="mtg_discussion" data={data} onChange={onChange} />
-            <LabeledBox label="Decisions · 결정 사항" emoji="✅" valKey="mtg_decisions" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="- 결정 1&#10;- 결정 2" />
-            <LabeledBox label="Action Items · 액션 아이템" emoji="⚡" valKey="mtg_actions" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" placeholder="- [담당자] 액션 (마감일)" />
+            <LabeledBox label="Decisions · 결정 사항" emoji="✅" valKey="mtg_decisions" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- 결정 1&#10;- 결정 2" />
+            <LabeledBox label="Action Items · 액션 아이템" emoji="⚡" valKey="mtg_actions" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="- [담당자] 액션 (마감일)" />
         </div>
     );
 }
@@ -1682,33 +1682,33 @@ function MeetingGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 function InterviewGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-blue-50 to-violet-50 border border-blue-200 space-y-2">
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 space-y-2">
                 <div className="grid grid-cols-3 gap-2">
                     <LabeledInput label="인터뷰이" valKey="itv_name" data={data} onChange={onChange} />
                     <LabeledInput label="역할·직업" valKey="itv_role" data={data} onChange={onChange} />
                     <LabeledInput label="일시" valKey="itv_date" data={data} onChange={onChange} />
                 </div>
             </div>
-            <LabeledBox label="Goals · 목표·하고 있는 것" emoji="🎯" valKey="itv_goals" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-            <LabeledBox label="Pains · 문제·불편" emoji="😣" valKey="itv_pains" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
-            <LabeledBox label="Insights · 핵심 인사이트" emoji="💡" valKey="itv_insights" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
+            <LabeledBox label="Goals · 목표·하고 있는 것" emoji="🎯" valKey="itv_goals" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <LabeledBox label="Pains · 문제·불편" emoji="😣" valKey="itv_pains" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <LabeledBox label="Insights · 핵심 인사이트" emoji="💡" valKey="itv_insights" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
             <div className="rounded-lg p-3 bg-white border-l-4 border-neutral-400">
                 <p className="text-xs font-bold text-neutral-600">💬 Quotes · 인상 깊은 인용문</p>
                 <textarea value={data["itv_quotes"] ?? ""} onChange={e => onChange("itv_quotes", e.target.value)}
                     placeholder='"그대로 따라 적어보세요…"' rows={3}
                     className="w-full mt-1 resize-none bg-transparent text-xs italic text-neutral-700 placeholder:text-neutral-400 focus:outline-none leading-relaxed" />
             </div>
-            <LabeledBox label="Surprises · 예상 밖의 발견" emoji="⚡" valKey="itv_surprises" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
+            <LabeledBox label="Surprises · 예상 밖의 발견" emoji="⚡" valKey="itv_surprises" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
         </div>
     );
 }
 
 function AarGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "aar_planned", label: "계획된 것은 무엇이었나?", emoji: "🎯", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "aar_actual", label: "실제로 일어난 일은?", emoji: "📊", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "aar_diff", label: "왜 차이가 났나?", emoji: "🔍", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-        { key: "aar_lessons", label: "배운 것 · 다음에 할 것", emoji: "💡", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
+        { key: "aar_planned", label: "계획된 것은 무엇이었나?", emoji: "🎯", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "aar_actual", label: "실제로 일어난 일은?", emoji: "📊", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "aar_diff", label: "왜 차이가 났나?", emoji: "🔍", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+        { key: "aar_lessons", label: "배운 것 · 다음에 할 것", emoji: "💡", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -1744,7 +1744,7 @@ function BrainstormGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-amber-50 border-2 border-amber-300">
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
                 <LabeledInput label="🧠 주제 · Topic" valKey="bs_topic" data={data} onChange={onChange} placeholder="무엇에 대해 아이디어를 낼까?" />
             </div>
             <div className="rounded-lg border border-neutral-200 bg-white">
@@ -1752,22 +1752,22 @@ function BrainstormGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
                 <div className="divide-y divide-neutral-100">
                     {ensureMin.map((idea, i) => (
                         <div key={i} className="flex items-center gap-2 px-3 py-1.5">
-                            <button onClick={() => toggleStar(i)} className={`shrink-0 w-6 h-6 rounded flex items-center justify-center ${idea.starred ? "text-amber-500" : "text-neutral-300 hover:text-amber-400"}`}>
+                            <button onClick={() => toggleStar(i)} className={`shrink-0 w-6 h-6 rounded flex items-center justify-center ${idea.starred ? "text-slate-700" : "text-neutral-300 hover:text-slate-500"}`}>
                                 {idea.starred ? "⭐" : "☆"}
                             </button>
                             <input type="text" value={idea.text} onChange={e => update(i, { text: e.target.value })}
                                 placeholder="아이디어…"
                                 className="flex-1 px-1 py-1 text-xs bg-transparent border-b border-transparent focus:outline-none focus:border-neutral-300" />
                             {ensureMin.length > 1 && (
-                                <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                                <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                             )}
                         </div>
                     ))}
                 </div>
                 <button onClick={add} className="w-full py-2 border-t border-neutral-100 text-xs text-neutral-400 hover:bg-neutral-50 hover:text-[#0F766E]">+ 아이디어 추가</button>
             </div>
-            <LabeledBox label="Criteria · 선정 기준" emoji="📏" valKey="bs_criteria" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
-            <LabeledBox label="Chosen · 최종 선택" emoji="🏆" valKey="bs_chosen" data={data} onChange={onChange} color="bg-teal-50 border-teal-300" textColor="text-teal-700" />
+            <LabeledBox label="Criteria · 선정 기준" emoji="📏" valKey="bs_criteria" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <LabeledBox label="Chosen · 최종 선택" emoji="🏆" valKey="bs_chosen" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" />
         </div>
     );
 }
@@ -1779,12 +1779,12 @@ function DecisionLogGrid({ data, onChange }: { data: FrameworkData; onChange: (k
                 <LabeledInput label="결정 일자" valKey="dl_date" data={data} onChange={onChange} placeholder="YYYY-MM-DD" />
                 <LabeledInput label="결정자" valKey="dl_decider" data={data} onChange={onChange} />
             </div>
-            <LabeledBox label="Decision · 결정 내용" emoji="✅" valKey="dl_decision" data={data} onChange={onChange} color="bg-teal-50 border-teal-300" textColor="text-teal-700" placeholder="무엇을 결정했나" />
-            <LabeledBox label="Context · 배경·맥락" emoji="🌐" valKey="dl_context" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
+            <LabeledBox label="Decision · 결정 내용" emoji="✅" valKey="dl_decision" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" placeholder="무엇을 결정했나" />
+            <LabeledBox label="Context · 배경·맥락" emoji="🌐" valKey="dl_context" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
             <LabeledBox label="Alternatives · 대안·기각한 것" emoji="🔀" valKey="dl_alternatives" data={data} onChange={onChange} color="bg-neutral-100 border-neutral-300" textColor="text-neutral-600" />
             <div className="grid md:grid-cols-2 gap-2">
-                <LabeledBox label="Expected · 기대 결과" emoji="🔮" valKey="dl_expected" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
-                <LabeledBox label="Actual · 실제 결과" emoji="📊" valKey="dl_actual" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" placeholder="나중에 돌아와 기록" />
+                <LabeledBox label="Expected · 기대 결과" emoji="🔮" valKey="dl_expected" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+                <LabeledBox label="Actual · 실제 결과" emoji="📊" valKey="dl_actual" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="나중에 돌아와 기록" />
             </div>
         </div>
     );
@@ -1795,12 +1795,12 @@ function EmotionLogGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
     const intensity = parseInt(data["emo_intensity"] ?? "3", 10);
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-rose-50 to-amber-50 border border-rose-200">
-                <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider mb-2">오늘의 기분</p>
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200">
+                <p className="text-[10px] font-bold text-stone-700 uppercase tracking-wider mb-2">오늘의 기분</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                     {moods.map(m => (
                         <button key={m} onClick={() => onChange("emo_mood", m)}
-                            className={`w-9 h-9 rounded-full text-lg transition-all ${data["emo_mood"] === m ? "bg-white ring-2 ring-rose-400 scale-110" : "bg-white/50 hover:bg-white hover:scale-105"}`}>
+                            className={`w-9 h-9 rounded-full text-lg transition-all ${data["emo_mood"] === m ? "bg-white ring-2 ring-slate-700 scale-110" : "bg-white/50 hover:bg-white hover:scale-105"}`}>
                             {m}
                         </button>
                     ))}
@@ -1810,17 +1810,17 @@ function EmotionLogGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map(n => (
                             <button key={n} onClick={() => onChange("emo_intensity", String(n))}
-                                className={`flex-1 py-1 text-xs rounded ${intensity >= n ? "bg-rose-400 text-white font-bold" : "bg-white border border-rose-200 text-neutral-400"}`}>
+                                className={`flex-1 py-1 text-xs rounded ${intensity >= n ? "bg-slate-900 text-white font-bold" : "bg-white border border-slate-200 text-neutral-400"}`}>
                                 {n}
                             </button>
                         ))}
                     </div>
                 </div>
             </div>
-            <LabeledBox label="Trigger · 계기" emoji="⚡" valKey="emo_trigger" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" placeholder="무슨 일이 있었나?" />
-            <LabeledBox label="Body · 몸의 신호" emoji="💪" valKey="emo_body" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="어깨가 무겁다, 가슴이 두근거린다…" />
-            <LabeledBox label="Thought · 떠오른 생각" emoji="💭" valKey="emo_thought" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
-            <LabeledBox label="Reflection · 다시 본다면" emoji="🔄" valKey="emo_reflection" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
+            <LabeledBox label="Trigger · 계기" emoji="⚡" valKey="emo_trigger" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="무슨 일이 있었나?" />
+            <LabeledBox label="Body · 몸의 신호" emoji="💪" valKey="emo_body" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="어깨가 무겁다, 가슴이 두근거린다…" />
+            <LabeledBox label="Thought · 떠오른 생각" emoji="💭" valKey="emo_thought" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <LabeledBox label="Reflection · 다시 본다면" emoji="🔄" valKey="emo_reflection" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
         </div>
     );
 }
@@ -1828,21 +1828,21 @@ function EmotionLogGrid({ data, onChange }: { data: FrameworkData; onChange: (ke
 function GratitudeGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border border-amber-200">
-                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider text-center mb-3">🙏 오늘 감사한 일 세 가지</p>
+            <div className="rounded-xl p-4 bg-stone-50 border border-stone-200">
+                <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider text-center mb-3">🙏 오늘 감사한 일 세 가지</p>
                 <div className="space-y-2">
                     {[1, 2, 3].map(n => (
                         <div key={n} className="flex items-start gap-2">
-                            <div className="shrink-0 w-6 h-6 rounded-full bg-amber-400 text-white flex items-center justify-center text-[10px] font-bold">{n}</div>
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">{n}</div>
                             <textarea value={data[`grat_${n}`] ?? ""} onChange={e => onChange(`grat_${n}`, e.target.value)}
                                 placeholder={`감사한 일 ${n}`} rows={2}
-                                className="flex-1 resize-none bg-white/60 text-xs p-2 rounded border border-amber-200 focus:outline-none focus:border-amber-400 leading-relaxed" />
+                                className="flex-1 resize-none bg-white/60 text-xs p-2 rounded border border-stone-200 focus:outline-none focus:border-slate-700 leading-relaxed" />
                         </div>
                     ))}
                 </div>
             </div>
-            <LabeledBox label="Highlight · 오늘의 하이라이트" emoji="✨" valKey="grat_highlight" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-            <LabeledBox label="Tomorrow · 내일 기대하는 것" emoji="🌅" valKey="grat_tomorrow" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
+            <LabeledBox label="Highlight · 오늘의 하이라이트" emoji="✨" valKey="grat_highlight" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <LabeledBox label="Tomorrow · 내일 기대하는 것" emoji="🌅" valKey="grat_tomorrow" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
         </div>
     );
 }
@@ -1850,28 +1850,28 @@ function GratitudeGrid({ data, onChange }: { data: FrameworkData; onChange: (key
 function ReadingGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 space-y-2">
+            <div className="rounded-xl p-3 bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex gap-3 items-start">
-                    <div className="shrink-0 w-12 h-16 bg-white border-2 border-amber-300 rounded flex items-center justify-center text-xl">📖</div>
+                    <div className="shrink-0 w-12 h-16 bg-white border-2 border-stone-400 rounded flex items-center justify-center text-xl">📖</div>
                     <div className="flex-1 space-y-1.5">
                         <input type="text" value={data["read_title"] ?? ""} onChange={e => onChange("read_title", e.target.value)}
                             placeholder="책·아티클 제목"
-                            className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-amber-200 rounded focus:outline-none focus:border-amber-400" />
+                            className="w-full px-2 py-1 text-sm font-bold bg-white/70 border border-stone-200 rounded focus:outline-none focus:border-slate-700" />
                         <div className="grid grid-cols-2 gap-1.5">
                             <input type="text" value={data["read_author"] ?? ""} onChange={e => onChange("read_author", e.target.value)}
                                 placeholder="저자"
-                                className="px-2 py-1 text-xs bg-white/70 border border-amber-200 rounded focus:outline-none" />
+                                className="px-2 py-1 text-xs bg-white/70 border border-stone-200 rounded focus:outline-none" />
                             <input type="text" value={data["read_date"] ?? ""} onChange={e => onChange("read_date", e.target.value)}
                                 placeholder="읽은 날짜"
-                                className="px-2 py-1 text-xs bg-white/70 border border-amber-200 rounded focus:outline-none" />
+                                className="px-2 py-1 text-xs bg-white/70 border border-stone-200 rounded focus:outline-none" />
                         </div>
                     </div>
                 </div>
             </div>
             <LabeledBox label="Summary · 한 줄 요약" emoji="📝" valKey="read_summary" data={data} onChange={onChange} />
-            <LabeledBox label="Highlights · 밑줄 친 문장들" emoji="✍️" valKey="read_highlights" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
-            <LabeledBox label="Takeaways · 핵심 교훈 (3가지)" emoji="💡" valKey="read_takeaways" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="1.&#10;2.&#10;3." />
-            <LabeledBox label="Action · 실천에 옮길 것" emoji="⚡" valKey="read_action" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
+            <LabeledBox label="Highlights · 밑줄 친 문장들" emoji="✍️" valKey="read_highlights" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
+            <LabeledBox label="Takeaways · 핵심 교훈 (3가지)" emoji="💡" valKey="read_takeaways" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="1.&#10;2.&#10;3." />
+            <LabeledBox label="Action · 실천에 옮길 것" emoji="⚡" valKey="read_action" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
         </div>
     );
 }
@@ -1879,8 +1879,8 @@ function ReadingGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 function StandupGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
         { key: "su_yesterday", label: "Yesterday · 어제 한 일", emoji: "📅", color: "bg-neutral-50 border-neutral-200", text: "text-neutral-600" },
-        { key: "su_today", label: "Today · 오늘 할 일", emoji: "🎯", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "su_blockers", label: "Blockers · 장애물·도움 필요", emoji: "🚧", color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
+        { key: "su_today", label: "Today · 오늘 할 일", emoji: "🎯", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "su_blockers", label: "Blockers · 장애물·도움 필요", emoji: "🚧", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
     ];
     return (
         <div className="my-2 grid md:grid-cols-3 gap-2">
@@ -1898,10 +1898,10 @@ function WeeklyJournalGrid({ data, onChange }: { data: FrameworkData; onChange: 
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Week · 주차" valKey="wj_week" data={data} onChange={onChange} placeholder="예: 2026년 W17" />
-            <LabeledBox label="Events · 있었던 일" emoji="📆" valKey="wj_events" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
-            <LabeledBox label="Feelings · 느낀 감정" emoji="💝" valKey="wj_feelings" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
-            <LabeledBox label="Insights · 배움·인사이트" emoji="💡" valKey="wj_insights" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
-            <LabeledBox label="Next Week Intention · 다음 주 의도" emoji="🎯" valKey="wj_next" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
+            <LabeledBox label="Events · 있었던 일" emoji="📆" valKey="wj_events" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <LabeledBox label="Feelings · 느낀 감정" emoji="💝" valKey="wj_feelings" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <LabeledBox label="Insights · 배움·인사이트" emoji="💡" valKey="wj_insights" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
+            <LabeledBox label="Next Week Intention · 다음 주 의도" emoji="🎯" valKey="wj_next" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
         </div>
     );
 }
@@ -1927,10 +1927,10 @@ function ZettelkastenGrid({ data, onChange }: { data: FrameworkData; onChange: (
             </div>
             <LabeledBox label="Content · 내용" emoji="📝" valKey="zet_content" data={data} onChange={onChange} placeholder="자신의 언어로, 문장 단위로…" />
             <div className="grid grid-cols-2 gap-2">
-                <LabeledBox label="Source · 출처" emoji="📚" valKey="zet_source" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
-                <LabeledBox label="Tags · 태그" emoji="🏷️" valKey="zet_tags" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" placeholder="#tag1 #tag2" />
+                <LabeledBox label="Source · 출처" emoji="📚" valKey="zet_source" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
+                <LabeledBox label="Tags · 태그" emoji="🏷️" valKey="zet_tags" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="#tag1 #tag2" />
             </div>
-            <LabeledBox label="Links · 연결된 Zettel" emoji="🔗" valKey="zet_links" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="[[202604111]] ..." />
+            <LabeledBox label="Links · 연결된 Zettel" emoji="🔗" valKey="zet_links" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="[[202604111]] ..." />
         </div>
     );
 }
@@ -1938,11 +1938,11 @@ function ZettelkastenGrid({ data, onChange }: { data: FrameworkData; onChange: (
 function MindmapGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-violet-100 to-blue-100 border-2 border-violet-300 text-center">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">🧠 Central Topic · 중심 주제</p>
+            <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-400 text-center">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">🧠 Central Topic · 중심 주제</p>
                 <input type="text" value={data["mind_central"] ?? ""} onChange={e => onChange("mind_central", e.target.value)}
                     placeholder="마인드맵의 가운데 (한 단어·한 구절)"
-                    className="w-full mt-2 px-3 py-2 text-sm font-bold text-center bg-white/70 border border-violet-300 rounded focus:outline-none" />
+                    className="w-full mt-2 px-3 py-2 text-sm font-bold text-center bg-white/70 border border-slate-300 rounded focus:outline-none" />
             </div>
             <div className="rounded-lg border border-neutral-200 bg-white">
                 <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 py-2 border-b border-neutral-100">📝 Outline · 계층 구조 (Tab으로 들여쓰기)</p>
@@ -1999,7 +1999,7 @@ function TimeBlockGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                         <input type="text" value={b.task} onChange={e => update(i, { task: e.target.value })}
                             placeholder="할 일" className="flex-1 px-2 py-1 text-xs bg-transparent border border-transparent rounded focus:outline-none focus:bg-white focus:border-neutral-300" />
                         {blocks.length > 1 && (
-                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                         )}
                     </div>
                 ))}
@@ -2013,16 +2013,16 @@ function DailyDesignGrid({ data, onChange }: { data: FrameworkData; onChange: (k
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Date · 날짜" valKey="dd_date" data={data} onChange={onChange} />
-            <div className="rounded-xl p-3 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300">
-                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">🌅 Intention · 오늘의 의도</p>
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
+                <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider">🌅 Intention · 오늘의 의도</p>
                 <textarea value={data["dd_intention"] ?? ""} onChange={e => onChange("dd_intention", e.target.value)}
                     placeholder="오늘은 어떤 사람으로 살고 싶은가?"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-xs p-2 rounded border border-amber-200 focus:outline-none leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/60 text-xs p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
             </div>
-            <LabeledBox label="Top 3 · 핵심 우선순위" emoji="🎯" valKey="dd_priorities" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="1.&#10;2.&#10;3." />
-            <LabeledBox label="Schedule · 일정" emoji="📅" valKey="dd_schedule" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
-            <LabeledBox label="Reflection · 저녁 회고" emoji="🌙" valKey="dd_reflection" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" placeholder="오늘 한 일, 배운 것, 느낀 것…" />
+            <LabeledBox label="Top 3 · 핵심 우선순위" emoji="🎯" valKey="dd_priorities" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="1.&#10;2.&#10;3." />
+            <LabeledBox label="Schedule · 일정" emoji="📅" valKey="dd_schedule" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+            <LabeledBox label="Reflection · 저녁 회고" emoji="🌙" valKey="dd_reflection" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" placeholder="오늘 한 일, 배운 것, 느낀 것…" />
         </div>
     );
 }
@@ -2042,35 +2042,35 @@ function DeepWorkGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
         <div className="my-2 space-y-2">
             <LabeledInput label="Date · 날짜" valKey="dw_date" data={data} onChange={onChange} />
             {ss.map((s, i) => (
-                <div key={i} className="rounded-lg p-3 bg-violet-50 border border-violet-300 space-y-2 relative">
+                <div key={i} className="rounded-lg p-3 bg-slate-50 border border-slate-300 space-y-2 relative">
                     {ss.length > 1 && (
-                        <button onClick={() => remove(i)} className="absolute top-2 right-2 w-5 h-5 rounded text-violet-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                        <button onClick={() => remove(i)} className="absolute top-2 right-2 w-5 h-5 rounded text-slate-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                     )}
-                    <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">🧠 Session {i + 1}</p>
+                    <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">🧠 Session {i + 1}</p>
                     <div className="flex gap-2 items-center">
                         <div>
                             <span className="text-[9px] text-neutral-500">시작</span>
                             <input type="text" value={s.start} onChange={e => update(i, { start: e.target.value })}
-                                placeholder="09:00" className="w-16 ml-1 px-2 py-1 text-xs text-center bg-white border border-violet-200 rounded focus:outline-none" />
+                                placeholder="09:00" className="w-16 ml-1 px-2 py-1 text-xs text-center bg-white border border-slate-200 rounded focus:outline-none" />
                         </div>
                         <div>
                             <span className="text-[9px] text-neutral-500">분</span>
                             <input type="number" value={s.duration} onChange={e => update(i, { duration: +e.target.value })}
-                                className="w-14 ml-1 px-2 py-1 text-xs text-center bg-white border border-violet-200 rounded focus:outline-none" />
+                                className="w-14 ml-1 px-2 py-1 text-xs text-center bg-white border border-slate-200 rounded focus:outline-none" />
                         </div>
                     </div>
                     <input type="text" value={s.task} onChange={e => update(i, { task: e.target.value })}
                         placeholder="과업 — 무엇에 집중했나"
-                        className="w-full px-2 py-1.5 text-xs font-semibold bg-white border border-violet-200 rounded focus:outline-none" />
+                        className="w-full px-2 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded focus:outline-none" />
                     <textarea value={s.result} onChange={e => update(i, { result: e.target.value })}
                         placeholder="결과 — 무엇을 완성했나" rows={2}
-                        className="w-full resize-none px-2 py-1.5 text-xs bg-white border border-violet-200 rounded focus:outline-none leading-relaxed" />
+                        className="w-full resize-none px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none leading-relaxed" />
                     <textarea value={s.distractions} onChange={e => update(i, { distractions: e.target.value })}
                         placeholder="방해 요소 — 무엇이 흐름을 끊었나" rows={1}
-                        className="w-full resize-none px-2 py-1.5 text-[11px] bg-white/60 border border-violet-200 rounded focus:outline-none text-rose-700 leading-relaxed" />
+                        className="w-full resize-none px-2 py-1.5 text-[11px] bg-white/60 border border-slate-200 rounded focus:outline-none text-stone-700 leading-relaxed" />
                 </div>
             ))}
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-violet-50 hover:text-violet-600 hover:border-violet-400">+ 세션 추가</button>
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-600 hover:border-slate-400">+ 세션 추가</button>
         </div>
     );
 }
@@ -2093,7 +2093,7 @@ function PomodoroGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                 <LabeledInput label="Date · 날짜" valKey="pom_date" data={data} onChange={onChange} />
                 <div className="ml-3 shrink-0 text-right">
                     <p className="text-[9px] text-neutral-500 font-semibold uppercase tracking-wider">총 🍅</p>
-                    <p className="text-xl font-bold text-rose-500">{totalTomatoes}</p>
+                    <p className="text-xl font-bold text-slate-700">{totalTomatoes}</p>
                 </div>
             </div>
             <div className="rounded-lg border border-neutral-200 overflow-hidden">
@@ -2112,17 +2112,17 @@ function PomodoroGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                             <span className="flex-1 text-center text-sm">
                                 {s.completed > 0 ? "🍅".repeat(Math.min(s.completed, 8)) + (s.completed > 8 ? `+${s.completed - 8}` : "") : <span className="text-neutral-300">–</span>}
                             </span>
-                            <button onClick={() => update(i, { completed: s.completed + 1 })} className="w-6 h-6 rounded bg-rose-100 hover:bg-rose-200 text-xs">+</button>
+                            <button onClick={() => update(i, { completed: s.completed + 1 })} className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-xs">+</button>
                         </div>
                         <input type="text" value={s.notes} onChange={e => update(i, { notes: e.target.value })}
                             placeholder="메모" className="w-40 px-2 py-1 text-xs bg-transparent border border-transparent rounded focus:outline-none focus:bg-white focus:border-neutral-300" />
                         {ss.length > 1 && (
-                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                         )}
                     </div>
                 ))}
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-400">+ 과업 추가</button>
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-400">+ 과업 추가</button>
         </div>
     );
 }
@@ -2170,17 +2170,17 @@ function HabitTrackerGrid({ data, onChange }: { data: FrameworkData; onChange: (
                                     </td>
                                     {h.days.map((d, di) => (
                                         <td key={di} className="px-1 py-1 text-center">
-                                            <button onClick={() => toggle(i, di)} className={`w-7 h-7 rounded flex items-center justify-center text-sm transition-all ${d ? "bg-teal-500 text-white scale-105" : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"}`}>
+                                            <button onClick={() => toggle(i, di)} className={`w-7 h-7 rounded flex items-center justify-center text-sm transition-all ${d ? "bg-slate-900 text-white scale-105" : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"}`}>
                                                 {d ? "✓" : ""}
                                             </button>
                                         </td>
                                     ))}
-                                    <td className={`px-2 py-1 text-center font-mono font-bold ${done === 7 ? "text-teal-700" : done >= 4 ? "text-amber-600" : "text-neutral-400"}`}>
+                                    <td className={`px-2 py-1 text-center font-mono font-bold ${done === 7 ? "text-slate-900" : done >= 4 ? "text-stone-600" : "text-neutral-400"}`}>
                                         {done}/7
                                     </td>
                                     <td className="px-1 text-center">
                                         {habits.length > 1 && (
-                                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-red-500 hover:bg-red-50 text-sm leading-none">×</button>
+                                            <button onClick={() => remove(i)} className="w-5 h-5 rounded text-neutral-300 hover:text-slate-700 hover:bg-stone-100 text-sm leading-none">×</button>
                                         )}
                                     </td>
                                 </tr>
@@ -2189,7 +2189,7 @@ function HabitTrackerGrid({ data, onChange }: { data: FrameworkData; onChange: (
                     </tbody>
                 </table>
             </div>
-            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-400">+ 습관 추가</button>
+            <button onClick={add} className="w-full py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-400">+ 습관 추가</button>
         </div>
     );
 }
@@ -2212,7 +2212,7 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Date · 날짜" valKey="em_date" data={data} onChange={onChange} />
-            <div className="rounded-lg p-3 bg-gradient-to-r from-blue-50 via-amber-50 to-rose-50 border border-neutral-200">
+            <div className="rounded-lg p-3 bg-slate-50 border border-slate-200">
                 <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-2">⚡ 시간대별 에너지 (0~5, 클릭해서 조정)</p>
                 <div className="flex gap-0.5 items-end h-32">
                     {levels.map(l => (
@@ -2222,7 +2222,7 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                                     <button key={n} onClick={() => setLevel(l.hour, n === l.level ? 0 : n)}
                                         className={`h-4 border-t border-white transition-all ${
                                             l.level >= n
-                                                ? n >= 4 ? "bg-teal-500" : n >= 2 ? "bg-amber-400" : "bg-rose-400"
+                                                ? n >= 4 ? "bg-slate-900" : n >= 2 ? "bg-slate-500" : "bg-slate-300"
                                                 : "bg-neutral-100 hover:bg-neutral-200"
                                         }`} />
                                 ))}
@@ -2233,8 +2233,8 @@ function EnergyMapGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-                <LabeledBox label="Peaks · 피크 시간" emoji="🚀" valKey="em_peaks" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-                <LabeledBox label="Lows · 저점 시간" emoji="🪫" valKey="em_lows" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
+                <LabeledBox label="Peaks · 피크 시간" emoji="🚀" valKey="em_peaks" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+                <LabeledBox label="Lows · 저점 시간" emoji="🪫" valKey="em_lows" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
             </div>
             <LabeledBox label="Patterns · 패턴 메모" emoji="📝" valKey="em_notes" data={data} onChange={onChange} />
         </div>
@@ -2245,10 +2245,10 @@ function WeeklyReviewGrid({ data, onChange }: { data: FrameworkData; onChange: (
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Week · 주차" valKey="wr_week" data={data} onChange={onChange} />
-            <LabeledBox label="Wins · 이번 주 승리" emoji="🏆" valKey="wr_wins" data={data} onChange={onChange} color="bg-teal-50 border-teal-300" textColor="text-teal-700" />
-            <LabeledBox label="Lessons · 배운 것" emoji="💡" valKey="wr_lessons" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
-            <LabeledBox label="Blockers · 장애물" emoji="🚧" valKey="wr_blockers" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
-            <LabeledBox label="Next Week · 다음 주" emoji="🎯" valKey="wr_next" data={data} onChange={onChange} color="bg-violet-50 border-violet-200" textColor="text-violet-700" />
+            <LabeledBox label="Wins · 이번 주 승리" emoji="🏆" valKey="wr_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-400" textColor="text-slate-900" />
+            <LabeledBox label="Lessons · 배운 것" emoji="💡" valKey="wr_lessons" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
+            <LabeledBox label="Blockers · 장애물" emoji="🚧" valKey="wr_blockers" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
+            <LabeledBox label="Next Week · 다음 주" emoji="🎯" valKey="wr_next" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
         </div>
     );
 }
@@ -2257,15 +2257,15 @@ function WeeklyWinGrid({ data, onChange }: { data: FrameworkData; onChange: (key
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Week · 주차" valKey="ww_week" data={data} onChange={onChange} />
-            <div className="rounded-xl p-4 bg-gradient-to-br from-amber-100 via-orange-50 to-teal-50 border-2 border-amber-300">
-                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider text-center">🏆 이번 주 가장 큰 WIN</p>
+            <div className="rounded-xl p-4 bg-stone-50 border-2 border-stone-400">
+                <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider text-center">🏆 이번 주 가장 큰 WIN</p>
                 <textarea value={data["ww_biggest"] ?? ""} onChange={e => onChange("ww_biggest", e.target.value)}
                     placeholder="자랑스러운 단 하나의 성취"
                     rows={3}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-amber-300 focus:outline-none text-center leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-stone-300 focus:outline-none text-center leading-relaxed" />
             </div>
-            <LabeledBox label="Other Wins · 다른 성취들" emoji="✨" valKey="ww_other" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-            <LabeledBox label="Celebrate · 어떻게 축하할까" emoji="🎉" valKey="ww_celebrate" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" />
+            <LabeledBox label="Other Wins · 다른 성취들" emoji="✨" valKey="ww_other" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <LabeledBox label="Celebrate · 어떻게 축하할까" emoji="🎉" valKey="ww_celebrate" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" />
         </div>
     );
 }
@@ -2274,16 +2274,16 @@ function MonthlyThemeGrid({ data, onChange }: { data: FrameworkData; onChange: (
     return (
         <div className="my-2 space-y-2">
             <LabeledInput label="Month · 월" valKey="mt_month" data={data} onChange={onChange} placeholder="예: 2026년 5월" />
-            <div className="rounded-xl p-4 bg-gradient-to-br from-violet-50 via-blue-50 to-teal-50 border-2 border-violet-300">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider text-center">🌙 이번 달 테마</p>
+            <div className="rounded-xl p-4 bg-slate-50 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider text-center">🌙 이번 달 테마</p>
                 <textarea value={data["mt_theme"] ?? ""} onChange={e => onChange("mt_theme", e.target.value)}
                     placeholder="한 문장으로 — 예: '깊이 있는 집중의 달'"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-violet-300 focus:outline-none text-center leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-3 rounded border border-slate-300 focus:outline-none text-center leading-relaxed" />
             </div>
-            <LabeledBox label="Focus · 핵심 포커스" emoji="🎯" valKey="mt_focus" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
-            <LabeledBox label="Wins · 기대하는 WIN" emoji="🏆" valKey="mt_wins" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
-            <LabeledBox label="Habits · 만들 습관" emoji="🔁" valKey="mt_habits" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
+            <LabeledBox label="Focus · 핵심 포커스" emoji="🎯" valKey="mt_focus" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
+            <LabeledBox label="Wins · 기대하는 WIN" emoji="🏆" valKey="mt_wins" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
+            <LabeledBox label="Habits · 만들 습관" emoji="🔁" valKey="mt_habits" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
             <LabeledBox label="Reflection · 월말 회고" emoji="🌙" valKey="mt_reflection" data={data} onChange={onChange} placeholder="월말에 돌아와 기록" />
         </div>
     );
@@ -2295,18 +2295,18 @@ function QuarterlyGrid({ data, onChange }: { data: FrameworkData; onChange: (key
             <div className="grid grid-cols-2 gap-2">
                 <LabeledInput label="Quarter · 분기" valKey="q_quarter" data={data} onChange={onChange} placeholder="예: 2026 Q2" />
             </div>
-            <div className="rounded-xl p-3 bg-gradient-to-br from-teal-50 to-blue-50 border-2 border-teal-300">
-                <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">🎯 분기 목표</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">🎯 분기 목표</p>
                 <textarea value={data["q_goal"] ?? ""} onChange={e => onChange("q_goal", e.target.value)}
                     placeholder="3개월 뒤 달성하고 싶은 한 가지"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-2 rounded border border-teal-300 focus:outline-none leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/70 text-sm font-medium p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
             </div>
             <div className="grid md:grid-cols-3 gap-2">
                 {[
-                    { key: "q_m1", label: "Month 1", color: "bg-amber-50 border-amber-200", text: "text-amber-700" },
-                    { key: "q_m2", label: "Month 2", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-                    { key: "q_m3", label: "Month 3", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
+                    { key: "q_m1", label: "Month 1", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
+                    { key: "q_m2", label: "Month 2", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+                    { key: "q_m3", label: "Month 3", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
                 ].map(m => (
                     <div key={m.key} className={`rounded-lg p-3 border ${m.color} min-h-28`}>
                         <p className={`text-xs font-bold ${m.text}`}>📅 {m.label}</p>
@@ -2342,7 +2342,7 @@ function YearPlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
             <div className="grid grid-cols-3 md:grid-cols-4 gap-1.5">
                 {MONTHS_LBL.map((lbl, i) => {
                     const quarter = Math.floor(i / 3);
-                    const qColors = ["bg-teal-50 border-teal-200", "bg-amber-50 border-amber-200", "bg-rose-50 border-rose-200", "bg-violet-50 border-violet-200"];
+                    const qColors = ["bg-slate-50 border-slate-300", "bg-stone-50 border-stone-200", "bg-slate-50 border-slate-200", "bg-slate-50 border-slate-200"];
                     return (
                         <div key={i} className={`rounded-lg p-2 border ${qColors[quarter]} min-h-24`}>
                             <p className="text-[10px] font-bold text-neutral-600">{lbl}</p>
@@ -2356,7 +2356,7 @@ function YearPlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                     );
                 })}
             </div>
-            <LabeledBox label="Milestones · 핵심 마일스톤" emoji="🏁" valKey="yr_milestones" data={data} onChange={onChange} color="bg-violet-50 border-violet-300" textColor="text-violet-700" placeholder="연중 꼭 달성할 것들" />
+            <LabeledBox label="Milestones · 핵심 마일스톤" emoji="🏁" valKey="yr_milestones" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-800" placeholder="연중 꼭 달성할 것들" />
         </div>
     );
 }
@@ -2364,10 +2364,10 @@ function YearPlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
 function FiveYearGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
         { key: "fy_now", label: "Now · 현재 (0년)", emoji: "📍", color: "bg-neutral-50 border-neutral-200", text: "text-neutral-600" },
-        { key: "fy_y1", label: "1년 후", emoji: "🌱", color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
-        { key: "fy_y2", label: "2년 후", emoji: "🌿", color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
-        { key: "fy_y3", label: "3년 후", emoji: "🌳", color: "bg-violet-50 border-violet-200", text: "text-violet-700" },
-        { key: "fy_y5", label: "5년 후 · 비전", emoji: "🌠", color: "bg-gradient-to-br from-amber-50 to-rose-50 border-amber-300", text: "text-amber-700" },
+        { key: "fy_y1", label: "1년 후", emoji: "🌱", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "fy_y2", label: "2년 후", emoji: "🌿", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "fy_y3", label: "3년 후", emoji: "🌳", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
+        { key: "fy_y5", label: "5년 후 · 비전", emoji: "🌠", color: "bg-stone-50 border-stone-400", text: "text-stone-800" },
     ];
     return (
         <div className="my-2 space-y-1.5">
@@ -2383,8 +2383,8 @@ function FiveYearGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
                     </div>
                 </div>
             ))}
-            <div className="rounded-lg p-3 bg-teal-50 border-2 border-teal-300 mt-3">
-                <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">🛡️ 지켜야 할 원칙</p>
+            <div className="rounded-lg p-3 bg-slate-50 border-2 border-slate-700 mt-3">
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">🛡️ 지켜야 할 원칙</p>
                 <CellTextarea cellKey="fy_principles" value={data["fy_principles"] ?? ""} onChange={onChange} placeholder="5년의 여정에서 타협하지 않을 가치" />
             </div>
         </div>
@@ -2394,20 +2394,20 @@ function FiveYearGrid({ data, onChange }: { data: FrameworkData; onChange: (key:
 function MovingAverageGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-violet-50 to-blue-50 border-2 border-violet-300">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">🧪 90-Day Experiment</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">🧪 90-Day Experiment</p>
                 <input type="text" value={data["ma_experiment"] ?? ""} onChange={e => onChange("ma_experiment", e.target.value)}
                     placeholder="실험 제목 — 예: '아침 운동 90일 실험'"
-                    className="w-full mt-2 px-2 py-1.5 text-sm font-bold bg-white/70 border border-violet-300 rounded focus:outline-none" />
+                    className="w-full mt-2 px-2 py-1.5 text-sm font-bold bg-white/70 border border-slate-300 rounded focus:outline-none" />
             </div>
-            <LabeledBox label="Hypothesis · 가설" emoji="🔬" valKey="ma_hypothesis" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" placeholder="If ~ then ~" />
+            <LabeledBox label="Hypothesis · 가설" emoji="🔬" valKey="ma_hypothesis" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" placeholder="If ~ then ~" />
             <div className="grid md:grid-cols-3 gap-2">
                 <LabeledBox label="Baseline · 시작점" emoji="📍" valKey="ma_baseline" data={data} onChange={onChange} color="bg-neutral-50 border-neutral-200" textColor="text-neutral-700" />
-                <LabeledBox label="Metric · 측정 지표" emoji="📏" valKey="ma_metric" data={data} onChange={onChange} color="bg-blue-50 border-blue-200" textColor="text-blue-700" />
-                <LabeledBox label="Target · 90일 목표" emoji="🎯" valKey="ma_target" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" />
+                <LabeledBox label="Metric · 측정 지표" emoji="📏" valKey="ma_metric" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-slate-800" />
+                <LabeledBox label="Target · 90일 목표" emoji="🎯" valKey="ma_target" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" />
             </div>
             <LabeledBox label="Check-ins · 30/60/90일" emoji="📅" valKey="ma_checkins" data={data} onChange={onChange} placeholder="Day 30:&#10;Day 60:&#10;Day 90:" />
-            <LabeledBox label="Result · 결과" emoji="📊" valKey="ma_result" data={data} onChange={onChange} color="bg-rose-50 border-rose-200" textColor="text-rose-700" placeholder="실험 종료 후 기록" />
+            <LabeledBox label="Result · 결과" emoji="📊" valKey="ma_result" data={data} onChange={onChange} color="bg-slate-50 border-slate-200" textColor="text-stone-700" placeholder="실험 종료 후 기록" />
         </div>
     );
 }
@@ -2415,27 +2415,27 @@ function MovingAverageGrid({ data, onChange }: { data: FrameworkData; onChange: 
 function ReversePlanGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-amber-100 via-orange-50 to-rose-50 border-2 border-amber-300">
-                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider text-center">🏁 Goal · 최종 목표</p>
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-400">
+                <p className="text-[10px] font-bold text-stone-800 uppercase tracking-wider text-center">🏁 Goal · 최종 목표</p>
                 <textarea value={data["rp_goal"] ?? ""} onChange={e => onChange("rp_goal", e.target.value)}
                     placeholder="무엇을 달성했을 때 '성공'인가"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-amber-300 focus:outline-none text-center leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-stone-300 focus:outline-none text-center leading-relaxed" />
                 <input type="text" value={data["rp_deadline"] ?? ""} onChange={e => onChange("rp_deadline", e.target.value)}
                     placeholder="마감일 (YYYY-MM-DD)"
-                    className="w-full mt-2 px-2 py-1 text-xs text-center bg-white/60 border border-amber-200 rounded focus:outline-none" />
+                    className="w-full mt-2 px-2 py-1 text-xs text-center bg-white/60 border border-stone-200 rounded focus:outline-none" />
             </div>
             <div className="relative pl-8">
-                <div className="absolute left-3 top-2 bottom-2 w-px bg-gradient-to-b from-amber-400 via-violet-400 to-teal-400" />
+                <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-400" />
                 <div className="space-y-2">
-                    <div className="rounded-lg p-3 bg-violet-50 border border-violet-200 relative">
-                        <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-violet-400 border-2 border-white" />
-                        <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">⬅️ Milestones · 거꾸로 마일스톤</p>
+                    <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 relative">
+                        <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-slate-700 border-2 border-white" />
+                        <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">⬅️ Milestones · 거꾸로 마일스톤</p>
                         <CellTextarea cellKey="rp_milestones" value={data["rp_milestones"] ?? ""} onChange={onChange} placeholder="마감 1주 전에는…&#10;1개월 전에는…&#10;3개월 전에는…&#10;오늘부터는…" />
                     </div>
-                    <div className="rounded-lg p-3 bg-teal-50 border-2 border-teal-300 relative">
-                        <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-teal-500 border-2 border-white" />
-                        <p className="text-[10px] font-bold text-teal-700 uppercase tracking-wider">🚀 Today · 오늘 시작할 일</p>
+                    <div className="rounded-lg p-3 bg-slate-50 border-2 border-slate-700 relative">
+                        <div className="absolute -left-[18px] top-4 w-3 h-3 rounded-full bg-slate-900 border-2 border-white" />
+                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">🚀 Today · 오늘 시작할 일</p>
                         <CellTextarea cellKey="rp_now" value={data["rp_now"] ?? ""} onChange={onChange} placeholder="가장 먼저 취할 작은 행동" />
                     </div>
                 </div>
@@ -2447,22 +2447,22 @@ function ReversePlanGrid({ data, onChange }: { data: FrameworkData; onChange: (k
 function SprintGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
-            <div className="rounded-xl p-3 bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-300">
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
                 <div className="grid grid-cols-3 gap-2">
                     <LabeledInput label="Sprint #" valKey="sp_number" data={data} onChange={onChange} placeholder="25" />
                     <LabeledInput label="Start · 시작일" valKey="sp_start" data={data} onChange={onChange} />
                     <LabeledInput label="End · 종료일" valKey="sp_end" data={data} onChange={onChange} />
                 </div>
             </div>
-            <div className="rounded-xl p-3 bg-violet-50 border-2 border-violet-300">
-                <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wider">🎯 Sprint Goal</p>
+            <div className="rounded-xl p-3 bg-slate-50 border-2 border-slate-400">
+                <p className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">🎯 Sprint Goal</p>
                 <textarea value={data["sp_goal"] ?? ""} onChange={e => onChange("sp_goal", e.target.value)}
                     placeholder="이번 스프린트에서 가장 중요한 한 가지"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-violet-300 focus:outline-none leading-relaxed" />
+                    className="w-full mt-2 resize-none bg-white/70 text-sm font-bold p-2 rounded border border-slate-300 focus:outline-none leading-relaxed" />
             </div>
-            <LabeledBox label="Commitments · 끝낼 것" emoji="✅" valKey="sp_commitments" data={data} onChange={onChange} color="bg-teal-50 border-teal-200" textColor="text-teal-700" placeholder="- [ ] 항목 1&#10;- [ ] 항목 2" />
-            <LabeledBox label="Stretch · 여유 있으면" emoji="💪" valKey="sp_stretch" data={data} onChange={onChange} color="bg-amber-50 border-amber-200" textColor="text-amber-700" />
+            <LabeledBox label="Commitments · 끝낼 것" emoji="✅" valKey="sp_commitments" data={data} onChange={onChange} color="bg-slate-50 border-slate-300" textColor="text-slate-900" placeholder="- [ ] 항목 1&#10;- [ ] 항목 2" />
+            <LabeledBox label="Stretch · 여유 있으면" emoji="💪" valKey="sp_stretch" data={data} onChange={onChange} color="bg-stone-50 border-stone-200" textColor="text-stone-800" />
             <LabeledBox label="Retro · 스프린트 회고" emoji="🔄" valKey="sp_retro" data={data} onChange={onChange} placeholder="스프린트 끝에 돌아와 기록 (무엇이 잘 됐나 / 안 됐나 / 바꿀 것)" />
         </div>
     );
@@ -2896,10 +2896,10 @@ export function TemplatesView() {
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition-colors shrink-0 ${
                                 isActive
                                     ? isFav
-                                        ? "bg-rose-500 text-white"
+                                        ? "bg-slate-900 text-white"
                                         : "bg-[#0F766E] text-white"
                                     : isFav
-                                        ? "bg-white border border-neutral-200 text-rose-500 hover:bg-rose-50"
+                                        ? "bg-white border border-neutral-200 text-slate-700 hover:bg-slate-50"
                                         : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                             }`}
                         >
@@ -3008,8 +3008,8 @@ export function TemplatesView() {
                                     onClick={(e) => toggleFavorite(selected.id, e)}
                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                                         favorites.has(selected.id)
-                                            ? "text-rose-500 bg-rose-50 hover:bg-rose-100"
-                                            : "text-neutral-400 hover:bg-neutral-100 hover:text-rose-400"
+                                            ? "text-slate-700 bg-slate-100 hover:bg-slate-200"
+                                            : "text-neutral-400 hover:bg-neutral-100 hover:text-slate-700"
                                     }`}
                                     title="즐겨찾기"
                                 >
@@ -3103,7 +3103,7 @@ function TemplateCard({
                 onClick={onToggleFavorite}
                 className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all z-10 ${
                     isFavorite
-                        ? "text-rose-500 bg-rose-50 opacity-100"
+                        ? "text-slate-700 bg-slate-100 opacity-100"
                         : "text-neutral-300 bg-white/80 opacity-0 group-hover:opacity-100"
                 }`}
                 title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기"}
@@ -3121,7 +3121,7 @@ function TemplateCard({
                         <span className="text-[9px] text-neutral-400 truncate">{tpl.subcategory}</span>
                     )}
                     {isSpecial && (
-                        <span className="text-[9px] bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded font-medium">
+                        <span className="text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
                             채울 수 있음
                         </span>
                     )}
@@ -3149,11 +3149,11 @@ function TemplateCard({
                 )}
 
                 {isSpecial && (
-                    <div className="bg-violet-50 rounded-md px-3 py-2 flex items-center gap-2">
+                    <div className="bg-slate-50 rounded-md px-3 py-2 flex items-center gap-2">
                         <div className="grid grid-cols-2 gap-0.5 shrink-0">
-                            {[0,1,2,3].map(n => <div key={n} className="w-3 h-3 rounded-sm bg-violet-200" />)}
+                            {[0,1,2,3].map(n => <div key={n} className="w-3 h-3 rounded-sm bg-slate-300" />)}
                         </div>
-                        <span className="text-[10px] text-violet-500">클릭해서 바로 채우기</span>
+                        <span className="text-[10px] text-slate-500">클릭해서 바로 채우기</span>
                     </div>
                 )}
             </div>
