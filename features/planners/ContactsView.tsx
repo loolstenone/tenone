@@ -155,13 +155,33 @@ function getChosung(str: string): string {
 // 가나다 인덱스용 — 첫 글자에서 초성 1개. 한글 아니면 영문 대문자 또는 '#'.
 function getInitialChar(name: string): string {
     if (!name) return "#";
-    const ch = name.trim()[0];
-    if (!ch) return "#";
+    // 보이지 않는 문자 (BOM, ZWSP, RTL/LTR mark, control chars, NBSP) 제거 — 잘못 분류되는 원인.
+    const cleaned = Array.from(name).filter(c => { const cc = c.charCodeAt(0); return !(cc < 0x20 || (cc >= 0x7F && cc <= 0xA0) || (cc >= 0x200B && cc <= 0x200F) || (cc >= 0x2028 && cc <= 0x202F) || (cc >= 0x205F && cc <= 0x206F) || cc === 0xFEFF); }).join("").trim();
+    if (!cleaned) return "#";
+    const ch = cleaned[0];
     const code = ch.charCodeAt(0);
+    // 1) 한글 음절 (가-힣)
     if (code >= 0xac00 && code <= 0xd7a3) {
         return CHOSUNG[Math.floor((code - 0xac00) / 588)];
     }
+    // 2) 영문
     if (/[a-zA-Z]/.test(ch)) return ch.toUpperCase();
+    // 3) 한글 호환 자모 (ㄱ~ㅎ U+3131~U+314E) — 직접 매핑
+    const COMPAT: Record<number, string> = {
+        0x3131: "ㄱ", 0x3132: "ㄲ", 0x3134: "ㄴ", 0x3137: "ㄷ", 0x3138: "ㄸ",
+        0x3139: "ㄹ", 0x3141: "ㅁ", 0x3142: "ㅂ", 0x3143: "ㅃ", 0x3145: "ㅅ",
+        0x3146: "ㅆ", 0x3147: "ㅇ", 0x3148: "ㅈ", 0x3149: "ㅉ", 0x314A: "ㅊ",
+        0x314B: "ㅋ", 0x314C: "ㅌ", 0x314D: "ㅍ", 0x314E: "ㅎ",
+    };
+    if (COMPAT[code]) return COMPAT[code];
+    // 4) 한글 자모 초성 (U+1100~U+1112) — vCard 분해형 입력 대비
+    const JAMO_CHO: Record<number, string> = {
+        0x1100: "ㄱ", 0x1101: "ㄲ", 0x1102: "ㄴ", 0x1103: "ㄷ", 0x1104: "ㄸ",
+        0x1105: "ㄹ", 0x1106: "ㅁ", 0x1107: "ㅂ", 0x1108: "ㅃ", 0x1109: "ㅅ",
+        0x110A: "ㅆ", 0x110B: "ㅇ", 0x110C: "ㅈ", 0x110D: "ㅉ", 0x110E: "ㅊ",
+        0x110F: "ㅋ", 0x1110: "ㅌ", 0x1111: "ㅍ", 0x1112: "ㅎ",
+    };
+    if (JAMO_CHO[code]) return JAMO_CHO[code];
     return "#";
 }
 
