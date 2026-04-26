@@ -621,8 +621,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             setNotesList(next);
                                         }}
                                         onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="손글씨 노트 제목"
-                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-500 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
+                                        placeholder="예: 회의 메모, 스케치 아이디어"
+                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-900 bg-transparent focus:outline-none w-full placeholder:text-neutral-300 placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:italic"
                                     />
                                     <div className="flex items-center gap-1 ml-2 shrink-0">
                                         <button
@@ -659,8 +659,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         ) : (
                             /* Cornell Note block */
                             <section key={note.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-                                {/* Title row */}
-                                <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
+                                {/* Title row — 행 컬럼과 같은 구조(왼쪽 w-6 패딩)로 시작점 일치 */}
+                                <div className="flex items-center justify-between pl-10 pr-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
                                     <input
                                         value={note.title}
                                         onChange={(e) => {
@@ -668,8 +668,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             setNotesList(next);
                                         }}
                                         onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="제목"
-                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-500 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
+                                        placeholder="예: 회의록, 학습 노트, 일기"
+                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-900 bg-transparent focus:outline-none w-full placeholder:text-neutral-300 placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:italic"
                                     />
                                     <div className="flex items-center gap-1 ml-2 shrink-0">
                                         <button
@@ -788,34 +788,34 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </section>
                         ))}
 
-                        {/* Add note buttons */}
-                        <div className="flex gap-2">
+                        {/* Add note buttons — 비어있을 때도 항상 표시. 타이틀은 빈 값으로 시작해 placeholder가 예시처럼 보이게. */}
+                        <div className="grid grid-cols-3 gap-2">
                             <button
                                 onClick={() => {
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: `Note ${notesList.length + 1}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
+                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: '', cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
-                                className="flex-1 flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Plus className="h-4 w-4" />
-                                노트 추가
+                                기본 노트
                             </button>
                             <button
                                 onClick={() => {
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${notesList.length + 1}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
+                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: '', cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
                                 title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
-                                className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Pencil className="h-4 w-4" />
-                                손글씨
+                                손글씨 노트
                             </button>
                             <button
                                 onClick={openTemplatePicker}
-                                className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-400 hover:border-violet-400 hover:text-violet-600 transition-colors"
+                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
                             >
                                 <LayoutTemplate className="h-4 w-4" />
                                 템플릿
