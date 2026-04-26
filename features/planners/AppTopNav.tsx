@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Settings, HelpCircle, Sparkles, Download } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
+import { InstallButton } from "./InstallButton";
 
 
 interface Tab {
@@ -91,13 +92,11 @@ export function AppTopNav({
                     </Link>
                 )}
 
-                <Link
-                    href="/planners/install"
-                    className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors"
-                    title="앱 설치 (홈 화면에 추가)"
+                <InstallButton
+                    className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors inline-flex"
                 >
                     <Download className="h-4 w-4" />
-                </Link>
+                </InstallButton>
 
                 <Link
                     href="/planners/app/search"

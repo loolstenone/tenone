@@ -18,6 +18,7 @@ import {
     Download,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
+import { InstallButton } from "./InstallButton";
 
 interface NavItem {
     href: string;
@@ -127,14 +128,12 @@ export function AppSidebar({
                     <HelpCircle className="h-4 w-4" />
                     <span>Help</span>
                 </Link>
-                <Link
-                    href="/planners/install"
+                <InstallButton
                     className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors"
-                    title="홈 화면에 PP AI 아이콘 설치"
                 >
                     <Download className="h-4 w-4" />
                     <span>앱 설치</span>
-                </Link>
+                </InstallButton>
                 <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
                     <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
                         {mode === "weekly" ? "Weekly" : "All in One"}

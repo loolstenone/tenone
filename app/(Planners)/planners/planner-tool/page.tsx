@@ -10,6 +10,7 @@ import {
   Download,
   Smartphone,
 } from "lucide-react";
+import { InstallButton } from "@/features/planners/InstallButton";
 
 // ===== Planner's Planner Section =====
 function PlannersPlannerSection() {
@@ -39,14 +40,13 @@ function PlannersPlannerSection() {
               <p className="text-[11px] text-[#666] mt-0.5">홈 화면에 설치 · Android · iOS · PC</p>
             </div>
           </div>
-          <Link
-            href="/planners/install"
+          <InstallButton
             className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#0F766E] text-white text-sm font-semibold rounded-lg hover:bg-[#0d5e56] transition-colors sm:ml-auto shrink-0"
           >
             <Download size={14} />
             앱 다운로드
             <Smartphone size={12} className="opacity-70" />
-          </Link>
+          </InstallButton>
         </div>
         <p className="mt-2 text-xs text-[#999] max-w-2xl">
           앱스토어 등록 없이 1회 클릭으로 홈 화면에 추가 — 모든 기능은 웹과 100% 동일하게 작동합니다.
@@ -225,14 +225,12 @@ function PlannersPlannerSection() {
               >
                 지금 시작하기 <ArrowRight size={14} />
               </Link>
-              <Link
-                href="/planners/install"
+              <InstallButton
                 className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#0F766E]/30 text-[#0F766E] text-sm font-medium hover:bg-[#0F766E]/5 transition-colors"
-                title="홈 화면에 PP AI 설치 (Android · iOS · PC)"
               >
                 <Download size={14} />
                 앱 설치 <Smartphone size={12} className="opacity-60" />
-              </Link>
+              </InstallButton>
             </div>
             <p className="text-xs text-[#999] mt-4 leading-relaxed">
               종이 플래너's 플래너(2026 All In One) 구매자는{" "}

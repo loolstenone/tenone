@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePwaInstall } from "@/lib/planners/use-pwa-install";
 
 export function PwaRegister() {
+    // beforeinstallprompt 글로벌 캡처를 가장 빨리 초기화 — 사용자가 어떤 페이지에 진입하든 install 가능 상태 추적
+    usePwaInstall();
+
     useEffect(() => {
         if (!("serviceWorker" in navigator)) return;
         if (process.env.NODE_ENV !== "production") return;

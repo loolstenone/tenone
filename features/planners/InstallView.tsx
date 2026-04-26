@@ -14,72 +14,40 @@ import {
     Copy,
     QrCode,
 } from "lucide-react";
+import { usePwaInstall } from "@/lib/planners/use-pwa-install";
 
 type Platform = "ios" | "android" | "desktop" | "unknown";
-
-interface BIPEvent extends Event {
-    prompt: () => Promise<void>;
-    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
 
 function detectPlatform(): Platform {
     if (typeof navigator === "undefined") return "unknown";
     const ua = navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(ua)) return "ios";
-    // iPadOS 13+ reports as Mac with touch
     if (/macintosh/.test(ua) && navigator.maxTouchPoints > 1) return "ios";
     if (/android/.test(ua)) return "android";
     return "desktop";
-}
-
-function isStandalone(): boolean {
-    if (typeof window === "undefined") return false;
-    if (window.matchMedia("(display-mode: standalone)").matches) return true;
-    // iOS Safari
-    interface NavStandalone extends Navigator { standalone?: boolean }
-    return (navigator as NavStandalone).standalone === true;
 }
 
 const APP_URL = "https://planners.tenone.biz/planners/app";
 
 export function InstallView() {
     const [platform, setPlatform] = useState<Platform>("unknown");
-    const [installed, setInstalled] = useState(false);
-    const [bip, setBip] = useState<BIPEvent | null>(null);
     const [copied, setCopied] = useState(false);
     const [installing, setInstalling] = useState(false);
+    const { canInstall, isInstalled: installed, install } = usePwaInstall();
 
     useEffect(() => {
         setPlatform(detectPlatform());
-        setInstalled(isStandalone());
-
-        const handler = (e: Event) => {
-            e.preventDefault();
-            setBip(e as BIPEvent);
-        };
-        window.addEventListener("beforeinstallprompt", handler);
-
-        const installedHandler = () => setInstalled(true);
-        window.addEventListener("appinstalled", installedHandler);
-
-        return () => {
-            window.removeEventListener("beforeinstallprompt", handler);
-            window.removeEventListener("appinstalled", installedHandler);
-        };
     }, []);
 
     async function triggerInstall() {
-        if (!bip) return;
         setInstalling(true);
         try {
-            await bip.prompt();
-            const choice = await bip.userChoice;
-            if (choice.outcome === "accepted") setInstalled(true);
+            await install();
         } finally {
             setInstalling(false);
-            setBip(null);
         }
     }
+    const bip = canInstall;
 
     async function copyUrl() {
         try {
