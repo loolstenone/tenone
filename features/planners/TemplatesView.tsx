@@ -120,7 +120,18 @@ function MandalartGrid({ data, onChange }: { data: FrameworkData; onChange: (key
     const goalCell = "bg-slate-900 border-slate-900 text-white font-extrabold";
 
     return (
-        <div className="my-2 overflow-x-auto">
+        <div className="my-2 space-y-2">
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="기간" valKey="mdl_period" data={data} onChange={onChange} placeholder="2026년 · Q2 · 100일 챌린지" />
+                <LabeledInput label="검토 주기" valKey="mdl_review" data={data} onChange={onChange} placeholder="매주 일요일 · 매월 1일" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">오타니 쇼헤이 식 만다라트</span> · 중앙 = 한 줄 핵심 목표.
+                8테마는 목표를 이루기 위한 영역(체력·기술·인간관계·정신력 등). 각 테마의 8실행은 <span className="font-semibold">이번 주에 시작 가능한 구체 행동</span>.
+            </div>
+
+            <div className="overflow-x-auto">
             <div className="grid grid-cols-3 gap-1 min-w-[420px]">
                 {themeLayout.map((themeKey) => {
                     const isCenter = themeKey === null;
@@ -174,6 +185,7 @@ function MandalartGrid({ data, onChange }: { data: FrameworkData; onChange: (key
                 })}
             </div>
             <p className="text-[9px] text-neutral-400 mt-2 text-center">중앙 블록에 핵심 목표 + 8테마 → 각 블록에 테마별 실행 8개</p>
+            </div>
         </div>
     );
 }
@@ -394,22 +406,51 @@ function RiceGrid({ data, onChange }: { data: FrameworkData; onChange: (key: str
 
 function FiveW1HGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "who", label: "Who", sub: "누가", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "what", label: "What", sub: "무엇을", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
-        { key: "when", label: "When", sub: "언제", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-        { key: "where", label: "Where", sub: "어디서", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "why", label: "Why", sub: "왜", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
-        { key: "how", label: "How", sub: "어떻게", emoji: "", color: "bg-stone-50 border-stone-200", text: "text-stone-700" },
+        { key: "who",   label: "Who",   sub: "누가 · 대상자",      hint: "주체·관계자·청중·이해관계자",     color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "주최: 마케팅팀\n대상: 25~35세 1인 사업가\n승인: 대표" },
+        { key: "what",  label: "What",  sub: "무엇을 · 핵심 행동", hint: "한 문장으로 정의된 행위·결과물",   color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "Q2 신규 가입 캠페인 런칭 — 광고 + 인플루언서 + 콘텐츠 3축 운영" },
+        { key: "when",  label: "When",  sub: "언제 · 기간·시점",   hint: "시작·종료·마일스톤",               color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "2026-04-01 ~ 04-28 (4주)\nM1: 4/8 광고 라이브\nM2: 4/15 1차 리포트" },
+        { key: "where", label: "Where", sub: "어디서 · 채널·장소", hint: "물리·디지털 채널",                 color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "Meta·Google 광고\n인스타·유튜브 콜라보\n자사 블로그·뉴스레터" },
+        { key: "why",   label: "Why",   sub: "왜 · 목적·근거",     hint: "이걸 안 하면 어떻게 되는가?",      color: "bg-slate-50 border-slate-200", text: "text-stone-700",
+          ph: "MAU 정체 → 매출 성장 둔화\n경쟁사 대비 인지도 격차\n분기 OKR 핵심" },
+        { key: "how",   label: "How",   sub: "어떻게 · 방법·자원", hint: "단계·예산·도구·인력",              color: "bg-stone-50 border-stone-200", text: "text-stone-700",
+          ph: "광고비 800만원\n인플 협업 5건 (각 50만원)\n콘텐츠 8편 자체 제작" },
     ];
     return (
-        <div className="my-2 grid grid-cols-3 gap-1.5">
-            {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-28`}>
-                    <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                    <p className="text-[10px] text-neutral-400">{c.sub}</p>
-                    <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} />
-                </div>
-            ))}
+        <div className="my-2 space-y-2">
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200">
+                <LabeledInput label="Topic · 주제" valKey="w5h1_topic" data={data} onChange={onChange} placeholder="예: Q2 신규 가입 캠페인 / 채용 / 신제품 런칭" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">기획·보도 5W1H</span> · 어떤 안건이든 6칸이 채워지면 누구에게 설명해도 통한다.
+                Why가 약하면 다른 칸이 다 흔들림 — Why부터 시작.
+            </div>
+
+            {/* 6칸 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+                {cells.map(c => (
+                    <div key={c.key} className={`rounded-lg p-3 border ${c.color} min-h-32`}>
+                        <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
+                        <p className="text-[10px] text-neutral-500">{c.sub}</p>
+                        <p className="text-[10px] text-neutral-400 italic mb-1">{c.hint}</p>
+                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
+                    </div>
+                ))}
+            </div>
+
+            {/* Summary */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Summary · 한 줄 요약</p>
+                <p className="text-[10px] text-neutral-500 mb-1">6칸을 한 문장으로 — &quot;[Who]가 [Why] 위해 [When] [Where]에서 [What]을 [How] 한다&quot;</p>
+                <textarea value={data["w5h1_summary"] ?? ""} onChange={e => onChange("w5h1_summary", e.target.value)}
+                    placeholder="예: 마케팅팀이 MAU 정체를 깨기 위해 4월 한 달간 Meta·인플 채널에서 신규 가입 1,500명을 광고비 800만원으로 확보한다."
+                    rows={2}
+                    className="w-full mt-1 resize-none bg-white text-sm p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
+            </div>
         </div>
     );
 }
@@ -491,51 +532,79 @@ function FiveWhyGrid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 function IkigaiGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     return (
         <div className="my-2 space-y-2">
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Ikigai (生き甲斐)</span> · 일본 오키나와 장수 마을의 &quot;아침에 일어날 이유&quot;.
+                4원 채우기 → 2개씩 교집합(Passion·Mission·Profession·Vocation) → 4원 모두 겹치는 한 점이 Ikigai.
+                <span className="font-semibold"> 명사가 아닌 동사</span>로 적어야 살아 있는 답이 나옴.
+            </div>
+
             {/* 4대 원 */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-300">
                     <p className="text-xs font-bold text-stone-700">LOVE · 좋아하는 것</p>
-                    <CellTextarea cellKey="ikigai_love" value={data["ikigai_love"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">시간 가는 줄 모르는 일 · 하기만 해도 즐거움</p>
+                    <CellTextarea cellKey="ikigai_love" value={data["ikigai_love"] ?? ""} onChange={onChange} placeholder={"- 사람들과 이야기 나누기\n- 글쓰기·정리하기\n- 새로운 도구·서비스 시도하기"} />
                 </div>
                 <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-300">
                     <p className="text-xs font-bold text-slate-800">GOOD AT · 잘하는 것</p>
-                    <CellTextarea cellKey="ikigai_good" value={data["ikigai_good"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">남들이 칭찬하는 것 · 자연스럽게 빠른 일</p>
+                    <CellTextarea cellKey="ikigai_good" value={data["ikigai_good"] ?? ""} onChange={onChange} placeholder={"- 복잡한 정보를 구조로 정리\n- 사람·아이디어 연결\n- 빠른 의사결정"} />
                 </div>
                 <div className="rounded-2xl p-3 bg-stone-50 border-2 border-stone-300">
                     <p className="text-xs font-bold text-stone-800">WORLD NEEDS · 세상이 필요로 하는 것</p>
-                    <CellTextarea cellKey="ikigai_needs" value={data["ikigai_needs"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">주변 사람·사회가 진짜 원하는 것</p>
+                    <CellTextarea cellKey="ikigai_needs" value={data["ikigai_needs"] ?? ""} onChange={onChange} placeholder={"- 일과 삶의 우선순위 정리 도구\n- 1인 사업가 운영 자동화\n- 세대 간 지혜 전수"} />
                 </div>
                 <div className="rounded-2xl p-3 bg-slate-50 border-2 border-slate-700">
                     <p className="text-xs font-bold text-slate-900">PAID FOR · 돈이 되는 것</p>
-                    <CellTextarea cellKey="ikigai_paid" value={data["ikigai_paid"] ?? ""} onChange={onChange} />
+                    <p className="text-[10px] text-neutral-500 mb-1">시장이 비용을 지불하는 가치</p>
+                    <CellTextarea cellKey="ikigai_paid" value={data["ikigai_paid"] ?? ""} onChange={onChange} placeholder={"- B2B SaaS 컨설팅\n- 강의·교육 콘텐츠\n- AI 자동화 구축"} />
                 </div>
             </div>
+
             {/* 교집합 4개 */}
-            <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-bold text-stone-700">Passion · Love × Good at</p>
-                    <CellTextarea cellKey="ikigai_passion" value={data["ikigai_passion"] ?? ""} onChange={onChange} />
-                </div>
-                <div className="rounded-lg p-2 bg-slate-50 border border-stone-200">
-                    <p className="text-[10px] font-bold text-stone-800">Mission · Love × Needs</p>
-                    <CellTextarea cellKey="ikigai_mission" value={data["ikigai_mission"] ?? ""} onChange={onChange} />
-                </div>
-                <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-bold text-slate-800">Profession · Good at × Paid</p>
-                    <CellTextarea cellKey="ikigai_profession" value={data["ikigai_profession"] ?? ""} onChange={onChange} />
-                </div>
-                <div className="rounded-lg p-2 bg-slate-50 border border-slate-300">
-                    <p className="text-[10px] font-bold text-slate-900">Vocation · Needs × Paid</p>
-                    <CellTextarea cellKey="ikigai_vocation" value={data["ikigai_vocation"] ?? ""} onChange={onChange} />
+            <div className="rounded-xl p-3 bg-white border border-neutral-200">
+                <p className="text-[10px] font-bold text-neutral-700 uppercase tracking-wider mb-2">2원 교집합 — 4가지 상태</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
+                        <p className="text-[10px] font-bold text-stone-700">Passion · 열정 (Love × Good at)</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 잘하지만 돈은 안 됨 — 취미·열정</p>
+                        <CellTextarea cellKey="ikigai_passion" value={data["ikigai_passion"] ?? ""} onChange={onChange} />
+                    </div>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-stone-200">
+                        <p className="text-[10px] font-bold text-stone-800">Mission · 사명 (Love × Needs)</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">즐겁고 의미 있지만 잘하진 못함 — 사명</p>
+                        <CellTextarea cellKey="ikigai_mission" value={data["ikigai_mission"] ?? ""} onChange={onChange} />
+                    </div>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-200">
+                        <p className="text-[10px] font-bold text-slate-800">Profession · 직업 (Good at × Paid)</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">잘하고 돈도 되지만 즐겁진 않음 — 일</p>
+                        <CellTextarea cellKey="ikigai_profession" value={data["ikigai_profession"] ?? ""} onChange={onChange} />
+                    </div>
+                    <div className="rounded-lg p-2 bg-slate-50 border border-slate-300">
+                        <p className="text-[10px] font-bold text-slate-900">Vocation · 천직 (Needs × Paid)</p>
+                        <p className="text-[10px] text-neutral-500 mb-1">의미 있고 돈도 되지만 잘하지 못함 — 의무</p>
+                        <CellTextarea cellKey="ikigai_vocation" value={data["ikigai_vocation"] ?? ""} onChange={onChange} />
+                    </div>
                 </div>
             </div>
+
             {/* Core */}
             <div className="rounded-xl p-3 bg-slate-100 border-2 border-slate-700">
-                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider text-center">IKIGAI · 삶의 이유 (4가지 교집합)</p>
+                <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider text-center">IKIGAI · 삶의 이유 (4가지 모두 교집합)</p>
+                <p className="text-[10px] text-center text-neutral-600 mb-1">한 줄로 — &quot;나는 ___을 하기 위해 산다&quot;</p>
                 <textarea value={data["ikigai_core"] ?? ""} onChange={e => onChange("ikigai_core", e.target.value)}
-                    placeholder="4가지가 겹치는 지점. 내가 존재하는 이유."
+                    placeholder="예: 1인 사업가가 자기다운 방식으로 일·삶을 설계하도록 돕는다"
                     rows={2}
-                    className="w-full mt-2 resize-none bg-white/60 text-sm p-2 rounded border border-stone-300 focus:outline-none text-center font-medium leading-relaxed" />
+                    className="w-full mt-1 resize-none bg-white/60 text-sm p-2 rounded border border-stone-300 focus:outline-none text-center font-medium leading-relaxed" />
+            </div>
+
+            {/* Next steps */}
+            <div className="rounded-lg p-3 bg-stone-50 border border-stone-200">
+                <p className="text-xs font-bold text-stone-900">Next · 90일 동안 시도할 한 가지</p>
+                <p className="text-[10px] text-neutral-500 mb-1">Ikigai를 작게 검증할 실험</p>
+                <CellTextarea cellKey="ikigai_next" value={data["ikigai_next"] ?? ""} onChange={onChange} placeholder={"예: 매주 수요일 7~9PM, 1인 사업가 1명 무료 컨설팅 → 90일 후 12명 인터뷰 인사이트 정리"} />
             </div>
         </div>
     );
@@ -582,28 +651,64 @@ function Porter5Grid({ data, onChange }: { data: FrameworkData; onChange: (key: 
 
 function ScamperGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const cells = [
-        { key: "scamper_s", letter: "S", label: "Substitute", sub: "무엇으로 대체할까?", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
-        { key: "scamper_c", letter: "C", label: "Combine", sub: "무엇과 결합할까?", color: "bg-stone-50 border-stone-200", text: "text-stone-700" },
-        { key: "scamper_a", letter: "A", label: "Adapt", sub: "무엇에 응용할까?", color: "bg-stone-50 border-stone-200", text: "text-stone-800" },
-        { key: "scamper_m", letter: "M", label: "Modify", sub: "변형·확대·축소?", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
-        { key: "scamper_p", letter: "P", label: "Put to other use", sub: "다른 용도는?", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "scamper_e", letter: "E", label: "Eliminate", sub: "무엇을 제거할까?", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "scamper_r", letter: "R", label: "Reverse", sub: "역발상·재배치?", color: "bg-neutral-100 border-neutral-200", text: "text-neutral-700" },
+        { key: "scamper_s", letter: "S", label: "Substitute · 대체",         hint: "재료·사람·프로세스·규칙을 다른 것으로", prompt: "어떤 부품·요소를 대체하면 더 좋을까?",
+          color: "bg-slate-50 border-slate-200", text: "text-stone-700",
+          ph: "예: 종이 매뉴얼 → 영상 튜토리얼 / 이메일 응대 → AI 챗봇 1차" },
+        { key: "scamper_c", letter: "C", label: "Combine · 결합",            hint: "두 가지를 합쳐 새 가치 창출",         prompt: "다른 제품·서비스·기능과 합치면?",
+          color: "bg-stone-50 border-stone-200", text: "text-stone-700",
+          ph: "예: 플래너 + AI 코치 / 회의록 + 자동 액션 추적" },
+        { key: "scamper_a", letter: "A", label: "Adapt · 응용",              hint: "다른 분야·문맥의 해법을 가져와 적용",   prompt: "이걸 다른 곳/시기에 적용하면?",
+          color: "bg-stone-50 border-stone-200", text: "text-stone-800",
+          ph: "예: 음식 배달 추적 UX → SaaS 온보딩 진척도 표시" },
+        { key: "scamper_m", letter: "M", label: "Modify · 변형·확대·축소",   hint: "크기·빈도·강도·형태를 바꾸기",         prompt: "더 크게? 더 작게? 더 자주?",
+          color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "예: 1년 플랜 → 90일 챌린지 / 주간 회의 → 일일 5분 스탠드업" },
+        { key: "scamper_p", letter: "P", label: "Put to other use · 다른 용도", hint: "원래 용도 외 다른 곳에 쓸 수 있나",  prompt: "이걸 누가, 어디서, 또 쓸 수 있을까?",
+          color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: B2C 플래너 → 1인 사업가용 OKR / 학생용 시간표" },
+        { key: "scamper_e", letter: "E", label: "Eliminate · 제거",          hint: "없어도 되는 것을 과감히 빼기",         prompt: "이걸 제거하면 뭐가 단순해질까?",
+          color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 가입 단계 5 → 2 / 설정 옵션 30개 → 핵심 5개" },
+        { key: "scamper_r", letter: "R", label: "Reverse · 역발상·재배치",   hint: "순서 뒤집기·반대로 하기",              prompt: "거꾸로 하면? 사용자가 만들면?",
+          color: "bg-neutral-100 border-neutral-200", text: "text-neutral-700",
+          ph: "예: 우리가 가르치는 강의 → 사용자끼리 가르치는 커뮤니티 / 결제 후 사용 → 사용 후 결제" },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            {cells.map(c => (
-                <div key={c.key} className={`rounded-lg p-3 border ${c.color} flex items-start gap-3`}>
-                    <div className={`shrink-0 w-9 h-9 rounded-full bg-white border-2 flex items-center justify-center font-bold ${c.text}`}>
-                        {c.letter}
+        <div className="my-2 space-y-2">
+            {/* 메타 + 가이드 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200">
+                <LabeledInput label="Subject · 개선 대상" valKey="scamper_subject" data={data} onChange={onChange} placeholder="예: 우리 플래너 앱 / 회의 프로세스 / 신규 가입 플로우" />
+            </div>
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Bob Eberle SCAMPER</span> · 7가지 자극으로 기존 제품·프로세스를 재발명.
+                각 글자는 &quot;질문&quot; — 정답이 아니라 가능성 탐색. <span className="font-semibold">평가는 나중</span>, 일단 많이 써라.
+            </div>
+
+            {/* 7글자 */}
+            <div className="space-y-1.5">
+                {cells.map(c => (
+                    <div key={c.key} className={`rounded-lg p-3 border ${c.color} flex items-start gap-3`}>
+                        <div className={`shrink-0 w-9 h-9 rounded-full bg-white border-2 flex items-center justify-center font-bold ${c.text}`}>
+                            {c.letter}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
+                            <p className="text-[10px] text-neutral-500">{c.hint}</p>
+                            <p className="text-[10px] text-neutral-400 italic mb-1">❓ {c.prompt}</p>
+                            <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} placeholder={c.ph} />
+                        </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className={`text-xs font-bold ${c.text}`}>{c.label}</p>
-                        <p className="text-[10px] text-neutral-500">{c.sub}</p>
-                        <CellTextarea cellKey={c.key} value={data[c.key] ?? ""} onChange={onChange} />
-                    </div>
-                </div>
-            ))}
+                ))}
+            </div>
+
+            {/* Top idea */}
+            <div className="rounded-xl p-3 bg-stone-50 border-2 border-stone-300">
+                <p className="text-xs font-bold text-stone-900">Top 3 · 시도해볼 아이디어</p>
+                <p className="text-[10px] text-neutral-500 mb-1">7가지 중 가장 끌리는 3개 — 다음 스프린트에 작게 검증</p>
+                <textarea value={data["scamper_top"] ?? ""} onChange={e => onChange("scamper_top", e.target.value)}
+                    placeholder={"1. (M) 일일 5분 스탠드업 시범 — 다음 주 월요일\n2. (C) 회의록 + 자동 액션 추적 프로토타입 — 2주 내\n3. (E) 설정 옵션 30→5 단순화 — 디자인 시안 1주"} rows={3}
+                    className="w-full mt-1 resize-none bg-white text-xs p-2 rounded border border-stone-200 focus:outline-none leading-relaxed" />
+            </div>
         </div>
     );
 }
@@ -1040,25 +1145,51 @@ function DecisionMatrixGrid({ data, onChange }: { data: FrameworkData; onChange:
 
 function FeynmanGrid({ data, onChange }: { data: FrameworkData; onChange: (key: string, val: string) => void }) {
     const steps = [
-        { key: "feynman_concept", label: "Concept", sub: "가르치려는 주제를 한 줄로", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "feynman_teach", label: "Teach", sub: "6살에게 설명하듯 쉽게", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-slate-800" },
-        { key: "feynman_gaps", label: "Gaps", sub: "막힌 곳·애매한 곳 찾기", emoji: "", color: "bg-slate-50 border-slate-200", text: "text-stone-700" },
-        { key: "feynman_simplify", label: "Simplify", sub: "비유·예시로 다시 쓰기", emoji: "", color: "bg-slate-50 border-slate-300", text: "text-slate-900" },
+        { key: "feynman_concept",  label: "1. Concept · 주제 한 줄",          hint: "가르치려는 개념·내용을 한 줄로",         color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 강화학습이란 무엇인가? / OAuth 2.0 동작 원리 / Cash Flow Statement 읽는 법" },
+        { key: "feynman_teach",    label: "2. Teach · 6살에게 설명하듯",      hint: "전문용어·약어 금지 — 일상 단어로만",      color: "bg-slate-50 border-slate-200", text: "text-slate-800",
+          ph: "예: 강화학습은 강아지에게 간식 주면서 훈련시키는 것과 같아. 잘하면 점수를 주고, 못하면 점수를 안 줘. 강아지(컴퓨터)는 점수를 많이 받는 행동을 점점 더 자주 하게 돼." },
+        { key: "feynman_gaps",     label: "3. Gaps · 막힌 곳·애매한 곳",      hint: "설명하다 막힌 부분 = 진짜 모르는 부분",   color: "bg-slate-50 border-slate-200", text: "text-stone-700",
+          ph: "예: \"점수를 어떻게 정하지?\"에서 막힘 — Reward function 설계 원리 다시 공부\n\"왜 강화학습이 지도학습보다 어렵지?\" — Exploration vs Exploitation 이해 부족" },
+        { key: "feynman_simplify", label: "4. Simplify · 비유·예시로 다시",   hint: "갭을 메운 후 더 짧고 명료하게",          color: "bg-slate-50 border-slate-300", text: "text-slate-900",
+          ph: "예: 강화학습 = \"시행착오로 배우는 컴퓨터\". 핵심 3요소: 행동 / 보상 / 환경. 자전거 처음 배울 때처럼 — 넘어지면 (음수 보상) 다시 시도, 잘 가면 (양수 보상) 그 방법을 기억." },
     ];
     return (
-        <div className="my-2 space-y-1.5">
-            {steps.map((s, i) => (
-                <div key={s.key} className={`rounded-lg p-3 border ${s.color}`}>
-                    <div className="flex items-start gap-2">
-                        <div className={`shrink-0 w-7 h-7 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>{i + 1}</div>
-                        <div className="flex-1">
-                            <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
-                            <p className="text-[10px] text-neutral-500">{s.sub}</p>
-                            <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} />
+        <div className="my-2 space-y-2">
+            {/* 메타 */}
+            <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2">
+                <LabeledInput label="대상 청자" valKey="feynman_audience" data={data} onChange={onChange} placeholder="예: 6살 / 비전공자 동료 / 신입 인턴" />
+                <LabeledInput label="검증 시점" valKey="feynman_verify" data={data} onChange={onChange} placeholder="언제 누구에게 실제로 설명해볼까?" />
+            </div>
+
+            {/* 가이드 */}
+            <div className="rounded-lg px-3 py-2 bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                💡 <span className="font-semibold">Feynman Technique</span> · &quot;설명할 수 없으면 모르는 것이다.&quot;
+                4단계 사이클: 개념 → 단순 설명 → 막힌 곳 발견 → 재학습 후 단순화. <span className="font-semibold">완벽한 1회보다 거친 N회</span>.
+            </div>
+
+            {/* 4단계 */}
+            <div className="space-y-1.5">
+                {steps.map((s, i) => (
+                    <div key={s.key} className={`rounded-lg p-3 border ${s.color}`}>
+                        <div className="flex items-start gap-2">
+                            <div className={`shrink-0 w-7 h-7 rounded-full bg-white border-2 flex items-center justify-center text-[10px] font-bold ${s.text}`}>{i + 1}</div>
+                            <div className="flex-1">
+                                <p className={`text-xs font-bold ${s.text}`}>{s.label}</p>
+                                <p className="text-[10px] text-neutral-500 mb-1">{s.hint}</p>
+                                <CellTextarea cellKey={s.key} value={data[s.key] ?? ""} onChange={onChange} placeholder={s.ph} />
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
+
+            {/* Cycle again */}
+            <div className="rounded-lg p-3 bg-stone-50 border border-stone-300">
+                <p className="text-xs font-bold text-stone-900">5. Repeat · 다시 사이클로 돌아가기</p>
+                <p className="text-[10px] text-neutral-500 mb-1">막힘이 사라질 때까지 — 다음에 보강할 갭·읽을 자료</p>
+                <CellTextarea cellKey="feynman_repeat" value={data["feynman_repeat"] ?? ""} onChange={onChange} placeholder={"- Sutton & Barto 2장 다시 읽기\n- 동료에게 5분 발표 후 피드백\n- 1주일 뒤 다시 설명해보기"} />
+            </div>
         </div>
     );
 }
