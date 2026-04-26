@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
+import { applyPlannersTheme } from "@/features/planners/PlannersThemeProvider";
 
 interface Integration {
     id: string;
@@ -23,6 +25,9 @@ function IntegrationRow({
     onSync,
     onDisconnect,
     syncing,
+    pendingConfirm,
+    onConfirm,
+    onCancel,
 }: {
     name: string;
     desc: string;
@@ -32,6 +37,9 @@ function IntegrationRow({
     onSync: () => void;
     onDisconnect: () => void;
     syncing: boolean;
+    pendingConfirm?: boolean;
+    onConfirm?: () => void;
+    onCancel?: () => void;
 }) {
     const connected = !!integration;
     return (
@@ -41,7 +49,7 @@ function IntegrationRow({
                     <p className="text-sm text-neutral-900 font-medium">{name}</p>
                     {connected && (
                         <span className="text-[10px] px-1.5 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded">
-                            연결됨
+                            Connected
                         </span>
                     )}
                 </div>
@@ -50,7 +58,7 @@ function IntegrationRow({
                         {integration.external_email}
                         {integration.last_sync_at && (
                             <span className="text-neutral-400 ml-2">
-                                · 최근 동기화 {new Date(integration.last_sync_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                · Last synced {new Date(integration.last_sync_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </span>
                         )}
                     </p>
@@ -59,7 +67,23 @@ function IntegrationRow({
                 )}
             </div>
             <div className="flex items-center gap-2">
-                {connected ? (
+                {pendingConfirm ? (
+                    <>
+                        <span className="text-xs text-neutral-500">Disconnect?</span>
+                        <button
+                            onClick={onConfirm}
+                            className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs hover:bg-red-700 transition-colors"
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={onCancel}
+                            className="px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-lg text-xs hover:bg-neutral-200 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </>
+                ) : connected ? (
                     <>
                         <button
                             onClick={onSync}
@@ -67,13 +91,13 @@ function IntegrationRow({
                             className="flex items-center gap-1 px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-lg text-xs hover:bg-neutral-200 transition-colors disabled:opacity-50"
                         >
                             {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-                            동기화
+                            Sync
                         </button>
                         <button
                             onClick={onDisconnect}
                             className="flex items-center gap-1 px-3 py-1.5 bg-white border border-neutral-200 text-neutral-500 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
                         >
-                            <Unplug className="h-3 w-3" /> 해제
+                            <Unplug className="h-3 w-3" /> Disconnect
                         </button>
                     </>
                 ) : onConnectClick ? (
@@ -81,14 +105,14 @@ function IntegrationRow({
                         onClick={onConnectClick}
                         className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
                     >
-                        <LinkIcon className="h-3 w-3" /> 연결
+                        <LinkIcon className="h-3 w-3" /> Connect
                     </button>
                 ) : (
                     <a
                         href={connectHref}
                         className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-xs hover:bg-[#0d5e56] transition-colors"
                     >
-                        <LinkIcon className="h-3 w-3" /> 연결
+                        <LinkIcon className="h-3 w-3" /> Connect
                     </a>
                 )}
             </div>
@@ -108,6 +132,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export default function SettingsPage() {
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [mode, setMode] = useState<PlannerMode>("weekly");
@@ -136,6 +161,25 @@ export default function SettingsPage() {
     const [contextScope, setContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
+    const [colorTheme, setColorTheme] = useState("teal");
+    const [fontFamily, setFontFamily] = useState("serif");
+    const [exporting, setExporting] = useState(false);
+    const [toastMsg, setToastMsg] = useState<{ text: string; ok: boolean } | null>(null);
+    const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
+
+    const showToast = useCallback((text: string, ok = true) => {
+        setToastMsg({ text, ok });
+        setTimeout(() => setToastMsg(null), 3000);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const savedTheme = localStorage.getItem("planners_color_theme");
+            const savedFont = localStorage.getItem("planners_font_family");
+            if (savedTheme) setColorTheme(savedTheme);
+            if (savedFont) setFontFamily(savedFont);
+        }
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -171,8 +215,8 @@ export default function SettingsPage() {
             // URL 쿼리 메시지
             if (typeof window !== "undefined") {
                 const q = new URLSearchParams(window.location.search);
-                if (q.get("google") === "connected") alert("Google Calendar 연결 완료");
-                if (q.get("google_error")) alert(`Google 연결 실패: ${q.get("google_error")}`);
+                if (q.get("google") === "connected") showToast("Google Calendar 연결 완료");
+                if (q.get("google_error")) showToast(`Google 연결 실패: ${q.get("google_error")}`, false);
             }
             setLoading(false);
         })();
@@ -184,7 +228,7 @@ export default function SettingsPage() {
             const res = await fetch(`/api/planners/integrations/google/sync`, { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                alert(`${d.synced}개 이벤트 동기화 완료`);
+                showToast(`${d.synced}개 이벤트 동기화 완료`);
                 const iRes = await fetch(`/api/planners/integrations`);
                 if (iRes.ok) {
                     const id = await iRes.json();
@@ -192,7 +236,7 @@ export default function SettingsPage() {
                 }
             } else {
                 const d = await res.json();
-                alert(`동기화 실패: ${d.error}`);
+                showToast(`동기화 실패: ${d.error}`, false);
             }
         } finally { setSyncing(null); }
     }
@@ -203,7 +247,7 @@ export default function SettingsPage() {
             const res = await fetch(`/api/planners/integrations/todoist/sync`, { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                alert(`${d.imported}개 태스크 import 완료`);
+                showToast(`${d.imported}개 태스크 import 완료`);
                 const iRes = await fetch(`/api/planners/integrations`);
                 if (iRes.ok) {
                     const id = await iRes.json();
@@ -211,7 +255,7 @@ export default function SettingsPage() {
                 }
             } else {
                 const d = await res.json();
-                alert(`실패: ${d.error}`);
+                showToast(`실패: ${d.error}`, false);
             }
         } finally { setSyncing(null); }
     }
@@ -235,7 +279,7 @@ export default function SettingsPage() {
                 }
             } else {
                 const d = await res.json();
-                alert(`연결 실패: ${d.error}`);
+                showToast(`연결 실패: ${d.error}`, false);
             }
         } finally { setTodoistSubmit(false); }
     }
@@ -246,12 +290,12 @@ export default function SettingsPage() {
             const res = await fetch(`/api/planners/integrations/notion/sync`, { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                alert(`${d.imported}개 태스크 import 완료`);
+                showToast(`${d.imported}개 태스크 import 완료`);
                 const iRes = await fetch(`/api/planners/integrations`);
                 if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
             } else {
                 const d = await res.json();
-                alert(`실패: ${d.error}`);
+                showToast(`실패: ${d.error}`, false);
             }
         } finally { setSyncing(null); }
     }
@@ -272,7 +316,7 @@ export default function SettingsPage() {
                 if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
             } else {
                 const d = await res.json();
-                alert(`연결 실패: ${d.error}`);
+                showToast(`연결 실패: ${d.error}`, false);
             }
         } finally { setNotionSubmit(false); }
     }
@@ -282,10 +326,10 @@ export default function SettingsPage() {
         try {
             const res = await fetch(`/api/planners/integrations/slack/sync`, { method: "POST" });
             if (res.ok) {
-                alert("Slack으로 브리핑 전송 완료");
+                showToast("Slack으로 브리핑 전송 완료");
             } else {
                 const d = await res.json();
-                alert(`실패: ${d.error}`);
+                showToast(`실패: ${d.error}`, false);
             }
         } finally { setSyncing(null); }
     }
@@ -306,7 +350,7 @@ export default function SettingsPage() {
                 if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
             } else {
                 const d = await res.json();
-                alert(`연결 실패: ${d.error}`);
+                showToast(`연결 실패: ${d.error}`, false);
             }
         } finally { setSlackSubmit(false); }
     }
@@ -317,12 +361,12 @@ export default function SettingsPage() {
             const res = await fetch(`/api/planners/integrations/ical/sync`, { method: "POST" });
             if (res.ok) {
                 const d = await res.json();
-                alert(`${d.synced}개 이벤트 동기화 완료`);
+                showToast(`${d.synced}개 이벤트 동기화 완료`);
                 const iRes = await fetch(`/api/planners/integrations`);
                 if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
             } else {
                 const d = await res.json();
-                alert(`실패: ${d.error}`);
+                showToast(`실패: ${d.error}`, false);
             }
         } finally { setSyncing(null); }
     }
@@ -340,18 +384,22 @@ export default function SettingsPage() {
                 const d = await res.json();
                 setIcalModal(false);
                 setIcalUrl("");
-                alert(`연결 완료. ${d.eventCount ?? 0}개 이벤트 확인됨`);
+                showToast(`연결 완료. ${d.eventCount ?? 0}개 이벤트 확인됨`);
                 const iRes = await fetch(`/api/planners/integrations`);
                 if (iRes.ok) setIntegrations((await iRes.json()).integrations || []);
             } else {
                 const d = await res.json();
-                alert(`연결 실패: ${d.error}`);
+                showToast(`연결 실패: ${d.error}`, false);
             }
         } finally { setIcalSubmit(false); }
     }
 
-    async function disconnectIntegration(provider: string) {
-        if (!confirm(`${provider} 연결을 해제할까요? 캐시된 이벤트도 삭제됩니다.`)) return;
+    function disconnectIntegration(provider: string) {
+        setPendingDisconnect(provider);
+    }
+
+    async function confirmDisconnect(provider: string) {
+        setPendingDisconnect(null);
         setSaving(true);
         try {
             await fetch(`/api/planners/integrations`, {
@@ -359,7 +407,8 @@ export default function SettingsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ provider }),
             });
-            setIntegrations(integrations.filter(i => i.provider !== provider));
+            setIntegrations(prev => prev.filter(i => i.provider !== provider));
+            showToast("연결 해제 완료");
         } finally { setSaving(false); }
     }
 
@@ -387,7 +436,7 @@ export default function SettingsPage() {
             const reg = await navigator.serviceWorker.ready;
             const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
             if (!vapidPublic) {
-                alert("Push 알림 서버 설정이 아직 준비되지 않았습니다. 이메일 알림을 이용해 주세요.");
+                showToast("Push 알림 서버 설정이 아직 준비되지 않았습니다. 이메일 알림을 이용해 주세요.", false);
                 return;
             }
 
@@ -441,6 +490,70 @@ export default function SettingsPage() {
         } finally { setSampleLoading(false); }
     }
 
+    const COLOR_THEMES = [
+        { key: "teal",   label: "Teal",   hex: "#0F766E" },
+        { key: "sage",   label: "Sage",   hex: "#4D7C6F" },
+        { key: "slate",  label: "Slate",  hex: "#475569" },
+        { key: "rose",   label: "Rose",   hex: "#BE185D" },
+        { key: "amber",  label: "Amber",  hex: "#B45309" },
+        { key: "indigo", label: "Indigo", hex: "#4338CA" },
+    ];
+
+    const FONT_OPTIONS = [
+        { key: "serif", label: "Serif", desc: "클래식 · 종이 감성" },
+        { key: "sans",  label: "Sans",  desc: "모던 · 깔끔" },
+        { key: "mono",  label: "Mono",  desc: "정밀 · 코드" },
+    ];
+
+    async function exportBackup() {
+        setExporting(true);
+        try {
+            const [settingsRes, dailyRes, weeklyRes, monthlyRes, yearlyRes, identityRes, projectsRes] = await Promise.all([
+                fetch("/api/planners/settings"),
+                fetch("/api/planners/daily"),
+                fetch("/api/planners/weekly"),
+                fetch("/api/planners/monthly"),
+                fetch("/api/planners/yearly"),
+                fetch("/api/planners/identity"),
+                fetch("/api/planners/projects"),
+            ]);
+            const backup = {
+                exported_at: new Date().toISOString(),
+                version: "1.0",
+                settings: settingsRes.ok ? await settingsRes.json() : null,
+                daily: dailyRes.ok ? await dailyRes.json() : null,
+                weekly: weeklyRes.ok ? await weeklyRes.json() : null,
+                monthly: monthlyRes.ok ? await monthlyRes.json() : null,
+                yearly: yearlyRes.ok ? await yearlyRes.json() : null,
+                identity: identityRes.ok ? await identityRes.json() : null,
+                projects: projectsRes.ok ? await projectsRes.json() : null,
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const d = new Date();
+            const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+            a.href = url;
+            a.download = `planners-backup-${dateStr}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } finally {
+            setExporting(false);
+        }
+    }
+
+    function applyTheme(key: string) {
+        setColorTheme(key);
+        localStorage.setItem("planners_color_theme", key);
+        applyPlannersTheme(key);
+    }
+
+    function applyFont(key: string) {
+        setFontFamily(key);
+        localStorage.setItem("planners_font_family", key);
+        document.documentElement.setAttribute("data-planners-font", key);
+    }
+
     if (loading) {
         return <div className="max-w-3xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
@@ -460,7 +573,7 @@ export default function SettingsPage() {
                         {(["weekly", "all_in_one"] as PlannerMode[]).map((m) => (
                             <button
                                 key={m}
-                                onClick={() => { setMode(m); save({ mode: m }); }}
+                                onClick={async () => { setMode(m); await save({ mode: m }); router.refresh(); }}
                                 className={`py-3 rounded-lg text-sm transition-colors border-2 ${
                                     mode === m
                                         ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold"
@@ -470,6 +583,71 @@ export default function SettingsPage() {
                                 {m === "weekly" ? "Weekly 모드" : "All in One 모드"}
                             </button>
                         ))}
+                    </div>
+                </section>
+
+                {/* Color Theme */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">컬러 테마</h2>
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {COLOR_THEMES.map((t) => {
+                            const active = colorTheme === t.key;
+                            return (
+                                <button
+                                    key={t.key}
+                                    onClick={() => applyTheme(t.key)}
+                                    title={t.label}
+                                    className="flex flex-col items-center gap-1.5 group"
+                                >
+                                    <span
+                                        className={`h-8 w-8 rounded-full transition-all ${
+                                            active ? "scale-110" : "group-hover:scale-105"
+                                        }`}
+                                        style={{
+                                            backgroundColor: t.hex,
+                                            outline: active ? `3px solid ${t.hex}` : "none",
+                                            outlineOffset: "3px",
+                                        }}
+                                    />
+                                    <span className={`text-[10px] font-mono ${active ? "text-neutral-900 font-semibold" : "text-neutral-400"}`}>
+                                        {t.label}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* Font Selection */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">폰트</h2>
+                    <div className="grid grid-cols-3 gap-3">
+                        {FONT_OPTIONS.map((f) => {
+                            const active = fontFamily === f.key;
+                            return (
+                                <button
+                                    key={f.key}
+                                    onClick={() => applyFont(f.key)}
+                                    className={`py-3 px-4 rounded-lg text-left border-2 transition-colors ${
+                                        active
+                                            ? "border-[#0F766E] bg-[#0F766E]/5"
+                                            : "border-neutral-200 hover:border-neutral-300"
+                                    }`}
+                                >
+                                    <span className={`block text-base mb-0.5 ${
+                                        f.key === "serif" ? "font-serif" :
+                                        f.key === "mono" ? "font-mono" :
+                                        "font-sans"
+                                    } ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>
+                                        Aa
+                                    </span>
+                                    <span className={`text-[10px] font-semibold ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
+                                        {f.label}
+                                    </span>
+                                    <span className="block text-[9px] text-neutral-400 mt-0.5">{f.desc}</span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -588,8 +766,8 @@ export default function SettingsPage() {
                                     notifyEmail ? "bg-[#0F766E]" : "bg-neutral-300"
                                 }`}
                             >
-                                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                    notifyEmail ? "translate-x-5" : "translate-x-0.5"
+                                <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
+                                    notifyEmail ? "translate-x-[18px]" : "translate-x-0"
                                 }`} />
                             </button>
                         </div>
@@ -613,8 +791,8 @@ export default function SettingsPage() {
                                         notifyPush ? "bg-[#0F766E]" : "bg-neutral-300"
                                     }`}
                                 >
-                                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                        notifyPush ? "translate-x-5" : "translate-x-0.5"
+                                    <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform ${
+                                        notifyPush ? "translate-x-[18px]" : "translate-x-0"
                                     }`} />
                                 </button>
                             )}
@@ -634,6 +812,9 @@ export default function SettingsPage() {
                             onSync={syncGoogle}
                             onDisconnect={() => disconnectIntegration('google_calendar')}
                             syncing={syncing === 'google_calendar'}
+                            pendingConfirm={pendingDisconnect === 'google_calendar'}
+                            onConfirm={() => confirmDisconnect('google_calendar')}
+                            onCancel={() => setPendingDisconnect(null)}
                         />
                         <div className="pt-2 border-t border-neutral-100" />
                         <IntegrationRow
@@ -645,6 +826,9 @@ export default function SettingsPage() {
                             onSync={syncTodoist}
                             onDisconnect={() => disconnectIntegration('todoist')}
                             syncing={syncing === 'todoist'}
+                            pendingConfirm={pendingDisconnect === 'todoist'}
+                            onConfirm={() => confirmDisconnect('todoist')}
+                            onCancel={() => setPendingDisconnect(null)}
                         />
                         <div className="pt-2 border-t border-neutral-100" />
                         <IntegrationRow
@@ -656,6 +840,9 @@ export default function SettingsPage() {
                             onSync={syncNotion}
                             onDisconnect={() => disconnectIntegration('notion')}
                             syncing={syncing === 'notion'}
+                            pendingConfirm={pendingDisconnect === 'notion'}
+                            onConfirm={() => confirmDisconnect('notion')}
+                            onCancel={() => setPendingDisconnect(null)}
                         />
                         <div className="pt-2 border-t border-neutral-100" />
                         <IntegrationRow
@@ -667,6 +854,9 @@ export default function SettingsPage() {
                             onSync={syncSlack}
                             onDisconnect={() => disconnectIntegration('slack')}
                             syncing={syncing === 'slack'}
+                            pendingConfirm={pendingDisconnect === 'slack'}
+                            onConfirm={() => confirmDisconnect('slack')}
+                            onCancel={() => setPendingDisconnect(null)}
                         />
                         <div className="pt-2 border-t border-neutral-100" />
                         <IntegrationRow
@@ -678,6 +868,9 @@ export default function SettingsPage() {
                             onSync={syncIcal}
                             onDisconnect={() => disconnectIntegration('ical')}
                             syncing={syncing === 'ical'}
+                            pendingConfirm={pendingDisconnect === 'ical'}
+                            onConfirm={() => confirmDisconnect('ical')}
+                            onCancel={() => setPendingDisconnect(null)}
                         />
                     </div>
                 </section>
@@ -826,6 +1019,20 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                {/* 데이터 백업 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-1">데이터 백업</h2>
+                    <p className="text-xs text-neutral-500 mb-4">설정·일별·주별·월별·연간·아이덴티티·프로젝트 데이터를 JSON 파일로 내보냅니다.</p>
+                    <button
+                        onClick={exportBackup}
+                        disabled={exporting}
+                        className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                    >
+                        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                        {exporting ? "내보내는 중…" : "JSON으로 내보내기"}
+                    </button>
+                </section>
+
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">구독</h2>
 
@@ -870,6 +1077,16 @@ export default function SettingsPage() {
                     )}
                 </section>
             </div>
+
+            {/* Toast */}
+            {toastMsg && (
+                <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm transition-all ${
+                    toastMsg.ok ? "bg-[#0F766E] text-white" : "bg-red-600 text-white"
+                }`}>
+                    {toastMsg.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
+                    {toastMsg.text}
+                </div>
+            )}
         </div>
     );
 }

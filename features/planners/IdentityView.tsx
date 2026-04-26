@@ -51,7 +51,7 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
     const visibleTabs = mode === "weekly" ? tabs.filter(t => t.showInWeekly) : tabs;
 
     return (
-        <div className="max-w-4xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header */}
             <div className="mb-8">
                 <div className="flex items-center gap-3">

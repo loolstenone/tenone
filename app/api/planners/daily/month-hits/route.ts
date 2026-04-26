@@ -1,29 +1,6 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-async function getMemberId(): Promise<string | null> {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return cookieStore.getAll(); },
-                setAll() { /* read-only */ },
-            },
-        }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: member } = await supabase
-        .from('members')
-        .select('id')
-        .eq('email', user.email!)
-        .maybeSingle();
-    return member?.id ?? null;
-}
+import { getMemberId } from "@/lib/planners/auth";
 
 export async function GET(req: Request) {
     const memberId = await getMemberId();
@@ -46,12 +23,16 @@ export async function GET(req: Request) {
         .gte('date', firstDay)
         .lte('date', lastDay);
 
-    const hits = (data ?? []).map((row: { date: string; tasks: unknown[]; notes: string | null; notes_secondary: string | null; energy_level: number | null }) => ({
-        date: row.date,
-        has_tasks: Array.isArray(row.tasks) && row.tasks.length > 0,
-        has_notes: !!(row.notes || row.notes_secondary),
-        energy_level: row.energy_level,
-    }));
+    const hits = (data ?? []).map((row: { date: string; tasks: Array<{ text: string; status: string }> | null; notes: string | null; notes_secondary: string | null; energy_level: number | null }) => {
+        const tasks = Array.isArray(row.tasks) ? row.tasks : [];
+        const todoTasks = tasks.filter(t => t.status === "todo" || t.status === "done");
+
+        return {
+            date: row.date,
+            task_texts: todoTasks.slice(0, 4).map(t => t.text),
+            energy_level: row.energy_level,
+        };
+    });
 
     return NextResponse.json({ hits });
 }

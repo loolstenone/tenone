@@ -3,27 +3,8 @@
 // - 오늘 Daily에 같은 텍스트의 태스크를 추가 (중복 방지)
 
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-async function getMemberId(): Promise<string | null> {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return cookieStore.getAll(); },
-                setAll() { /* read-only */ },
-            },
-        }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: member } = await supabase.from('members').select('id').eq('email', user.email!).maybeSingle();
-    return member?.id ?? null;
-}
+import { getMemberId } from "@/lib/planners/auth";
 
 interface Task {
     id: string;
@@ -59,7 +40,7 @@ export async function POST(req: Request) {
     const toCarry = yTasks.filter((t) => t.status === "todo" || t.status === "carried");
 
     if (toCarry.length === 0) {
-        return NextResponse.json({ carried: 0 });
+        return NextResponse.json({ status: "empty", carried: 0 });
     }
 
     // 2. 오늘 Daily 로드
@@ -88,7 +69,7 @@ export async function POST(req: Request) {
     }
 
     if (newTasks.length === 0) {
-        return NextResponse.json({ carried: 0, already_present: toCarry.length });
+        return NextResponse.json({ status: "already_present", carried: 0, skipped: toCarry.length });
     }
 
     const mergedToday = [...existing, ...newTasks];
@@ -98,16 +79,21 @@ export async function POST(req: Request) {
         (t.status === "todo") ? { ...t, status: "carried" } : t
     );
 
-    await Promise.all([
-        admin.from("planners_daily").upsert(
-            { member_id: memberId, date: today, tasks: mergedToday, updated_at: new Date().toISOString() },
-            { onConflict: "member_id,date" }
-        ),
-        yRow
-            ? admin.from("planners_daily").update({ tasks: yTasksUpdated, updated_at: new Date().toISOString() })
-                .eq("member_id", memberId).eq("date", yesterday)
-            : Promise.resolve({ error: null }),
-    ]);
+    try {
+        await Promise.all([
+            admin.from("planners_daily").upsert(
+                { member_id: memberId, date: today, tasks: mergedToday, updated_at: new Date().toISOString() },
+                { onConflict: "member_id,date" }
+            ),
+            yRow
+                ? admin.from("planners_daily").update({ tasks: yTasksUpdated, updated_at: new Date().toISOString() })
+                    .eq("member_id", memberId).eq("date", yesterday)
+                : Promise.resolve({ error: null }),
+        ]);
+    } catch (e) {
+        console.error("[carry-over]", e);
+        return NextResponse.json({ status: "error", error: "db_write_failed" }, { status: 500 });
+    }
 
-    return NextResponse.json({ carried: newTasks.length, from: yesterday, to: today });
+    return NextResponse.json({ status: "done", carried: newTasks.length, from: yesterday, to: today });
 }

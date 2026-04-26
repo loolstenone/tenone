@@ -14,6 +14,8 @@ import {
     Settings,
     Search,
     HelpCircle,
+    Users,
+    LayoutGrid,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 
@@ -24,15 +26,18 @@ interface NavItem {
     modes: PlannerMode[];
 }
 
+// Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
 const NAV: NavItem[] = [
-    { href: "/planners/app/today", label: "Today", icon: Sun, modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/weekly", label: "Weekly", icon: CalendarDays, modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly", label: "Monthly", icon: CalendarRange, modes: ["all_in_one"] },
-    { href: "/planners/app/yearly", label: "Yearly", icon: CalendarClock, modes: ["all_in_one"] },
-    { href: "/planners/app/identity", label: "Personal Identity", icon: Compass, modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/projects", label: "Projects", icon: FolderKanban, modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/templates", label: "Templates", icon: LayoutTemplate, modes: ["all_in_one"] },
-    { href: "/planners/app/ai-briefing", label: "AI Briefing", icon: Sparkles, modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/index",       label: "Index",       icon: LayoutGrid,      modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/daily",       label: "Today",       icon: Sun,             modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/weekly",      label: "Weekly",      icon: CalendarDays,    modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/monthly",     label: "Monthly",     icon: CalendarRange,   modes: ["all_in_one"] },
+    { href: "/planners/app/yearly",      label: "Yearly",      icon: CalendarClock,   modes: ["all_in_one"] },
+    { href: "/planners/app/identity",    label: "P.I",         icon: Compass,         modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/projects",    label: "Project",     icon: FolderKanban,    modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/templates",   label: "Templates",   icon: LayoutTemplate,  modes: ["all_in_one"] },
+    { href: "/planners/app/ai-briefing", label: "AI Briefing", icon: Sparkles,        modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/contacts",    label: "Contact",     icon: Users,           modes: ["weekly", "all_in_one"] },
 ];
 
 export function AppSidebar({
@@ -53,14 +58,9 @@ export function AppSidebar({
         <aside className="w-60 shrink-0 bg-white border-r border-neutral-200 flex flex-col h-screen sticky top-0">
             {/* Brand */}
             <div className="px-5 py-5 border-b border-neutral-100">
-                <Link href="/planners/app" className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded bg-[#0F766E] flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">PP</span>
-                    </div>
-                    <div>
-                        <p className="text-sm font-bold text-neutral-900 leading-none">Planner&apos;s Planner</p>
-                        <p className="text-[10px] text-[#0F766E] uppercase tracking-widest mt-0.5">AI</p>
-                    </div>
+                <Link href="/planners/app" className="inline-flex items-baseline gap-1">
+                    <p className="text-base font-bold text-neutral-900 leading-none">Planner&apos;s Planner</p>
+                    <sup className="text-[10px] font-semibold text-[#0F766E] tracking-widest">AI</sup>
                 </Link>
                 {userName && (
                     <p className="text-xs text-neutral-500 mt-3">안녕하세요, {userName}님</p>
@@ -126,7 +126,7 @@ export function AppSidebar({
                 </Link>
                 <div className="px-3 pt-2 flex items-center gap-2 flex-wrap">
                     <span className="inline-block text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
-                        {mode === "weekly" ? "Weekly 모드" : "All in One 모드"}
+                        {mode === "weekly" ? "Weekly" : "All in One"}
                     </span>
                     {subscriptionStatus === 'active' && (
                         <span className="inline-block text-[10px] px-2 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded">

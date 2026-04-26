@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
-import { getHoliday } from "@/lib/planners/holidays";
+import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
+
+function localDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 interface MonthlyData {
     id?: string;
@@ -19,8 +23,7 @@ interface MonthlyData {
 
 interface DayHit {
     date: string;
-    has_tasks: boolean;
-    has_notes: boolean;
+    task_texts: string[];
     energy_level: number | null;
 }
 
@@ -175,13 +178,29 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         return m;
     }, [hits]);
 
-    const monthName = new Date(year, month - 1, 1).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
+    const [showYearPicker, setShowYearPicker] = useState(false);
+    const [showMonthPicker, setShowMonthPicker] = useState(false);
+    const yearRef = useRef<HTMLDivElement>(null);
+    const monthRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (yearRef.current && !yearRef.current.contains(e.target as Node)) setShowYearPicker(false);
+            if (monthRef.current && !monthRef.current.contains(e.target as Node)) setShowMonthPicker(false);
+        }
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    const yearRange = Array.from({ length: 10 }, (_, i) => 2024 + i);
 
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">Monthly</p>
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigateMonth(-1)}
@@ -189,7 +208,44 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
-                        <h1 className="font-serif text-3xl text-neutral-900">{monthName}</h1>
+                        {/* Year picker */}
+                        <div ref={yearRef} className="relative">
+                            <button
+                                onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
+                                className="font-serif text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors"
+                            >
+                                {year}년
+                            </button>
+                            {showYearPicker && (
+                                <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px]">
+                                    {yearRange.map(y => (
+                                        <button key={y} onClick={() => { setYear(y); setShowYearPicker(false); }}
+                                            className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
+                                            {y}년
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {/* Month picker */}
+                        <div ref={monthRef} className="relative">
+                            <button
+                                onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
+                                className="font-serif text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors"
+                            >
+                                {month}월
+                            </button>
+                            {showMonthPicker && (
+                                <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[80px]">
+                                    {MONTHS_KO.map((label, i) => (
+                                        <button key={i} onClick={() => { setMonth(i + 1); setShowMonthPicker(false); }}
+                                            className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${i + 1 === month ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <button
                             onClick={() => navigateMonth(1)}
                             className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
@@ -268,44 +324,56 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 {row.map((cell) => {
                                     const hit = hitMap.get(cell.date);
                                     const holiday = getHoliday(cell.date);
-                                    const isToday = cell.date === new Date().toISOString().slice(0, 10);
+                                    const lunar = getLunarDate(cell.date);
+                                    const isToday = cell.date === localDateStr(new Date());
                                     const isHoliday = holiday?.type === "holiday";
                                     const dow = new Date(cell.date + "T00:00:00Z").getUTCDay();
                                     const isSunday = dow === 0;
                                     return (
                                         <Link
                                             key={cell.date}
-                                            href={`/planners/app/today?date=${cell.date}`}
-                                            className={`aspect-square md:aspect-auto md:min-h-[80px] p-2 border-l border-neutral-100 transition-colors flex flex-col ${
+                                            href={`/planners/app/daily?date=${cell.date}`}
+                                            className={`aspect-square md:aspect-auto md:min-h-[96px] p-2 border-l border-neutral-100 transition-colors flex flex-col ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
                                         >
-                                            <div className="flex items-center justify-between">
-                                                <span className={`text-sm font-medium ${
-                                                    isToday ? "text-[#0F766E] font-bold" :
-                                                    !cell.inMonth ? "text-neutral-300" :
-                                                    isHoliday || isSunday ? "text-red-500" :
-                                                    "text-neutral-900"
-                                                }`}>
-                                                    {cell.dom}
-                                                </span>
-                                                {isToday && <span className="text-[9px] px-1 py-0.5 bg-[#0F766E] text-white rounded">오늘</span>}
+                                            <div className="flex items-start justify-between gap-1">
+                                                <div className="flex items-start gap-1 min-w-0">
+                                                    <span className={`text-sm font-medium shrink-0 ${
+                                                        isToday ? "text-[#0F766E] font-bold" :
+                                                        !cell.inMonth ? "text-neutral-300" :
+                                                        isHoliday || isSunday ? "text-red-500" :
+                                                        "text-neutral-900"
+                                                    }`}>
+                                                        {cell.dom}
+                                                    </span>
+                                                    {cell.inMonth && (holiday || lunar) && (
+                                                        <div className="flex flex-col leading-tight pt-px">
+                                                            {lunar && (
+                                                                <span className="text-[9px] text-neutral-300">
+                                                                    {lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
+                                                                </span>
+                                                            )}
+                                                            {holiday && (
+                                                                <span className={`text-[9px] truncate ${
+                                                                    holiday.type === "holiday" ? "text-red-500 font-medium" :
+                                                                    holiday.type === "memorial" ? "text-neutral-600" :
+                                                                    "text-neutral-400"
+                                                                }`}>
+                                                                    {holiday.label}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {isToday && <span className="text-[9px] px-1 py-0.5 bg-[#0F766E] text-white rounded shrink-0">오늘</span>}
                                             </div>
-                                            {/* 공휴일/절기 라벨 */}
-                                            {holiday && cell.inMonth && (
-                                                <span className={`text-[9px] mt-0.5 leading-tight ${
-                                                    holiday.type === "holiday" ? "text-red-500 font-medium" :
-                                                    holiday.type === "memorial" ? "text-neutral-600" :
-                                                    "text-neutral-400"
-                                                }`}>
-                                                    {holiday.label}
-                                                </span>
-                                            )}
-                                            {/* 히트 인디케이터 */}
-                                            {hit && (hit.has_tasks || hit.has_notes) && (
-                                                <div className="flex items-center gap-1 mt-auto">
-                                                    {hit.has_tasks && <div className="w-1 h-1 rounded-full bg-[#0F766E]" />}
-                                                    {hit.has_notes && <div className="w-1 h-1 rounded-full bg-amber-500" />}
+                                            {/* 할일 텍스트 */}
+                                            {hit && hit.task_texts.length > 0 && (
+                                                <div className="mt-1 space-y-0.5">
+                                                    {hit.task_texts.map((t, i) => (
+                                                        <p key={i} className="text-[9px] text-neutral-500 leading-tight truncate">{t}</p>
+                                                    ))}
                                                 </div>
                                             )}
                                         </Link>

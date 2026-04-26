@@ -1,6 +1,67 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-25 (세션 87 — Templates 59종 전체 인터랙티브 그리드화 + P3 #17 완료)
+> 마지막 업데이트: 2026-04-26 (세션 89 — Contacts 극강화 + Planners 헤더 정비)
+
+---
+
+## 세션 89 핵심 성과 (2026-04-26)
+
+### Contacts 기능 극강화 (Google Contacts급)
+
+| 영역 | 내용 |
+|---|---|
+| DB 정리 | 12,273명 → **6,064명** (6,209 중복 자동 제거 · 권오성 12→1) |
+| 시스템 라벨 정리 | myContacts·Remember 메타라벨 일괄 제거 |
+| 1만명 한도 → **무제한** | API 페이지네이션 (PostgREST max-rows 우회) |
+| 자동 dedupe | bulk POST `skip_duplicates` 기본 활성 (phone/email 키) |
+| 라벨 동기화 모드 | `merge_labels=true` — 기존 row에 라벨/빈 필드만 병합 |
+| 라벨 관리 API | `/api/planners/contacts/labels` (POST·PUT·DELETE) |
+| CSV 양방향 | Google Contacts CSV 헤더 자동 매핑. Export 토글 (vcf/csv) |
+| 빠른 추가 | 사이드바 한 줄 입력 자동 파싱 |
+| 다가오는 생일 카드 | 14일 내 생일자 위젯 (D-day 색상 구분) |
+| 마지막 연락 추적 | tel:/mailto: 클릭 시 last_contacted_at PATCH + "최근 연락" 뷰 |
+| Bulk Edit | 회사·직책·그룹·관계·즐겨찾기·메모 일괄 수정 |
+| 수동 병합 | 2명 선택 시 필드별 A/B 선택 UI |
+| Google Contacts 레이아웃 | 좌측 사이드바 + 테이블 행 + 가나다 fixed sidebar |
+| 천 단위 콤마 | 모든 카운트 `toLocaleString("ko-KR")` |
+
+### Planners 사이트 헤더 + 홈 정비
+
+- 헤더 4그룹 명확 분리 (로고·구분선·메뉴·CTA) + vertical divider
+- "Planner's" 메뉴 제거 (로고와 중복)
+- PP AI 진입 CTA 헤더 우측 (teal-emerald 그라디언트, 인증 상태별 라우팅)
+- 홈 ExploreSection 제거 (헤더와 100% 중복) → PPAISpotlight 신설
+- AppSidebar·AppTopNav 메뉴 순서·라벨 SSOT 통일
+
+### 기타 개선
+
+- TemplateNoteBlock ⤢ Maximize + 타이틀 편집 명확화
+- ProjectNotesTab 피커를 DailyView 동일 UX로 통일 (검색·즐겨찾기·바텀시트)
+- DailyView·ProjectNotesTab 즐겨찾기 필터 (localStorage 공유)
+- **PlannersThemeProvider 치명 버그 수정**: `*=` → `~=` selector — `hover:bg-[#0F766E]/5` 가 항상 teal 덮던 문제 해결
+- Settings: alert→toast, 컬러/폰트 섹션 최상단 이동
+
+### 신규 파일
+- `app/api/planners/contacts/labels/route.ts`
+- `sql/planners-contacts-v2.sql` (labels TEXT[], is_favorite, organization, title, address)
+
+---
+
+## 세션 88 (2026-04-26 이전)
+
+### 버그 수정 7종 + Contacts 신규
+
+| # | 항목 | 상태 |
+|---|------|------|
+| 1 | 오늘 날짜 에러 (UTC→KST) | ✅ DailyView·MonthlyView·AiBriefingView |
+| 2 | 기념일 요일 계산 | ✅ YearlyView 모달 getDayOfWeek |
+| 3 | 연락처 가져오기 (vCard) | ✅ ContactsView vCard import |
+| 4 | 연락처 그룹핑 | ✅ group_name 필터 + 섹션 분리 |
+| 5 | 기념일 관계유형 | ✅ YearlyView relationship 필드 |
+| 6 | 세팅 컬러 앱 전체 반영 | ✅ PlannersThemeProvider + applyPlannersTheme |
+| 7 | 세팅 데이터 백업 | ✅ JSON export (7 API 병렬) |
+
+**신규 파일**: `features/planners/ContactsView.tsx` · `app/(Planners)/planners/app/contacts/page.tsx` · `app/api/planners/contacts/route.ts` · `sql/planners-contacts.sql` · `features/planners/PlannersThemeProvider.tsx` · `lib/planners/auth.ts`
 
 ---
 

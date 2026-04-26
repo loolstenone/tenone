@@ -168,13 +168,14 @@ AS $$
 DECLARE
     _done_count INT := 0;
     _days_recorded INT := 0;
+    _days_with_tasks INT := 0;
     _projects_completed INT := 0;
     _projects_total INT := 0;
 BEGIN
     SELECT
         COUNT(*) FILTER (WHERE jsonb_typeof(tasks) = 'array'),
         COUNT(*)
-    INTO _days_recorded, _days_recorded
+    INTO _days_with_tasks, _days_recorded
     FROM planners_daily
     WHERE member_id = _member_id
       AND EXTRACT(YEAR FROM date) = _year;
@@ -205,6 +206,7 @@ BEGIN
     RETURN jsonb_build_object(
         'year', _year,
         'days_recorded', _days_recorded,
+        'days_with_tasks', _days_with_tasks,
         'done_tasks', _done_count,
         'projects_completed', _projects_completed,
         'projects_total', _projects_total

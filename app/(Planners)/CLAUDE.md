@@ -105,6 +105,7 @@
 - CoverPicker · CoverRender — 15종 Cover
 - TemplatesView — 59종 카탈로그 + 27개 인터랙티브 그리드 컴포넌트 (2026-04-25 세션 87: 전 템플릿 시각 편집 완성)
 - AiBriefingView — 아침/저녁 브리핑 생성·이력
+- ContactsView — 연락처 목록/그룹/검색/편집/vCard import
 - SearchView — 풀텍스트
 - PurchaseView — 결제
 - CopyToAiButton — Claude/ChatGPT/Gemini deep link
@@ -120,7 +121,7 @@
 - todoist.ts — 토큰 검증 + 오늘 태스크 import
 
 ### API 라우트 (app/api/planners/)
-- 핵심 CRUD: onboarding · daily · weekly · monthly · yearly · identity · projects/[id] · projects/[id]/notes(/[noteId]) · settings
+- 핵심 CRUD: onboarding · daily · weekly · monthly · yearly · identity · projects/[id] · projects/[id]/notes(/[noteId]) · settings · contacts
 - 템플릿: templates · covers
 - 집계: summary(scope=weekly/monthly/yearly) · daily/month-hits
 - 검색: search
@@ -236,7 +237,7 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **P4 완료 + P3 #17 완료** — W1~P5 + P4 #24 Intra 확장 + Templates 59종 그리드화까지 (2026-04-25 세션 87) |
+| **Phase** | **P4 완료 + Contacts 극강화** — Google Contacts급 기능 (라벨 관리·중복 자동 정리·CSV/vCard 양방향·다가오는 생일·빠른 추가·마지막 연락 추적·Bulk Edit·수동 병합) + 사이트 헤더 정비 (2026-04-26 세션 89) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
 | **완료 범위** | W1~P2 전 범위 + P3 #17·19·20 + P4 #21·22·23·24(GTM·Help·피드백·Intra) + P5 #25·26·27 |

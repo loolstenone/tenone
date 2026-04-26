@@ -4,15 +4,15 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowDown,
-  BookOpen,
-  Target,
-  PenTool,
-  BarChart3,
+  Sparkles,
 } from "lucide-react";
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
+import { useAuth } from "@/lib/auth-context";
 
 // ===== Hero Section =====
 function HeroSection() {
+  const { isAuthenticated } = useAuth();
+  const ppAiHref = isAuthenticated ? "/planners/app" : "/planners/planner-tool#pp-ai";
   return (
     <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-16 lg:px-24 py-20 md:py-28">
       <div className="max-w-3xl">
@@ -34,7 +34,16 @@ function HeroSection() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col sm:flex-row gap-4">
+        {/* CTA — 3 단계: 1순위 PP AI 앱 (강조) / 2순위 Planning / 3순위 도구 보기 */}
+        <div className="mt-12 flex flex-col sm:flex-row flex-wrap gap-3">
+          <Link
+            href={ppAiHref}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F766E] text-white text-sm font-medium tracking-wide hover:bg-[#0d5e56] transition-colors shadow-sm"
+          >
+            <Sparkles size={16} />
+            {isAuthenticated ? "PP AI 앱 열기" : "Planner's Planner AI 시작"}
+            <ArrowRight size={16} />
+          </Link>
           <Link
             href="/planners/planning"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a1a] text-white text-sm tracking-wide hover:bg-[#333] transition-colors"
@@ -46,7 +55,7 @@ function HeroSection() {
             href="/planners/planner-tool"
             className="inline-flex items-center gap-2 px-6 py-3 border border-[#1a1a1a] text-[#1a1a1a] text-sm tracking-wide hover:bg-[#f5f5f5] transition-colors"
           >
-            도구부터 받기
+            도구 보기 (PDF·AI)
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -56,6 +65,64 @@ function HeroSection() {
         <a href="#about" className="text-[#999] hover:text-[#1a1a1a] transition-colors">
           <ArrowDown size={20} className="animate-bounce" />
         </a>
+      </div>
+    </section>
+  );
+}
+
+// ===== PP AI 강조 섹션 — 헤더 메뉴와 중복 안 되는 신규 콘텐츠 =====
+function PPAISpotlight() {
+  const { isAuthenticated } = useAuth();
+  const ppAiHref = isAuthenticated ? "/planners/app" : "/planners/planner-tool#pp-ai";
+  return (
+    <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-gradient-to-br from-[#0F766E]/5 via-white to-[#0F766E]/10 border-y border-[#0F766E]/10">
+      <div className="max-w-4xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0F766E] text-white text-xs font-semibold rounded-full mb-6">
+          <Sparkles size={12} /> Now Live
+        </div>
+        <h2 className="font-serif text-3xl md:text-5xl text-[#1a1a1a] tracking-tight mb-6">
+          Planner&apos;s Planner <span className="text-[#0F766E]">AI</span>
+        </h2>
+        <p className="text-lg md:text-xl text-[#444] leading-relaxed max-w-2xl mb-8">
+          22년 기획 노하우를 담은 종이 플래너에 능동 AI 비서를 더했다.
+          <span className="block mt-2 text-[#1a1a1a] font-medium">
+            아침엔 브리핑하고, 저녁엔 정리한다.
+          </span>
+        </p>
+        <div className="grid sm:grid-cols-3 gap-4 mb-10 text-sm">
+          <div className="border-l-2 border-[#0F766E] pl-4">
+            <p className="font-semibold text-[#1a1a1a]">아침 브리핑</p>
+            <p className="text-[#666] text-xs mt-1">오늘 할 일·집중 포인트·날씨까지 한눈에</p>
+          </div>
+          <div className="border-l-2 border-[#0F766E] pl-4">
+            <p className="font-semibold text-[#1a1a1a]">저녁 회고</p>
+            <p className="text-[#666] text-xs mt-1">하루를 정리하고 내일을 미리 기획</p>
+          </div>
+          <div className="border-l-2 border-[#0F766E] pl-4">
+            <p className="font-semibold text-[#1a1a1a]">59종 템플릿</p>
+            <p className="text-[#666] text-xs mt-1">SWOT·OKR·만다라트 시각 편집</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 items-start">
+          <Link
+            href={ppAiHref}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F766E] text-white text-sm font-semibold rounded hover:bg-[#0d5e56] transition-colors"
+          >
+            <Sparkles size={16} />
+            {isAuthenticated ? "PP AI 앱 열기" : "1년 19,000원으로 시작"}
+            <ArrowRight size={16} />
+          </Link>
+          <Link
+            href="/planners/planner-tool"
+            className="inline-flex items-center gap-2 px-6 py-3 text-[#0F766E] text-sm hover:underline"
+          >
+            기능 자세히 보기
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+        <p className="text-xs text-[#888] mt-4">
+          PDF 플래너 구매자는 1년 무료 · Weekly·All in One 두 가지 모드
+        </p>
       </div>
     </section>
   );
@@ -129,73 +196,21 @@ function AboutSection() {
   );
 }
 
-// ===== Explore Section (CTAs to sub-pages) =====
-function ExploreSection() {
-  const pages = [
-    {
-      title: "Planning",
-      desc: "기획의 기본기 + Vrief + Vridge 순환",
-      href: "/planners/planning",
-      icon: BookOpen,
-    },
-    {
-      title: "GPR",
-      desc: "Goal · Plan · Result — 성장의 나침반",
-      href: "/planners/gpr",
-      icon: Target,
-    },
-    {
-      title: "Planner's Planner",
-      desc: "기획자를 위한 도구 — 종이에서 AI까지",
-      href: "/planners/planner-tool",
-      icon: PenTool,
-    },
-    {
-      title: "Programs",
-      desc: "AI 시대에 살아남는 기획력 훈련",
-      href: "/planners/programs",
-      icon: BarChart3,
-    },
-  ];
-
-  return (
-    <section className="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-[#FAFAFA]">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] tracking-tight mb-12">
-          더 알아보기
-        </h2>
-        <div className="grid sm:grid-cols-2 gap-6">
-          {pages.map((page) => (
-            <Link
-              key={page.href}
-              href={page.href}
-              className="group border border-[#e0e0e0] p-8 bg-white hover:border-[#1a1a1a] transition-colors"
-            >
-              <page.icon size={20} className="text-[#999] group-hover:text-[#1a1a1a] transition-colors mb-4" />
-              <h3 className="font-serif text-xl text-[#1a1a1a] mb-2">{page.title}</h3>
-              <p className="text-sm text-[#666] leading-relaxed">{page.desc}</p>
-              <span className="inline-flex items-center gap-1 mt-4 text-xs text-[#999] group-hover:text-[#1a1a1a] transition-colors">
-                자세히 보기 <ArrowRight size={12} />
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ===== Main Page =====
+// 페이지 흐름:
+//   Hero → PP AI Spotlight (제품 강조) → About (브랜드 철학 + Universe) → 뉴스레터
+// 기존 ExploreSection 4 카드는 헤더 메뉴와 100% 중복이라 제거.
+// 헤더 메뉴 = 사이트 탐색 기능, 본문 = 콘텐츠 흐름으로 역할 분리.
 export default function PlannersPage() {
   return (
     <main className="bg-white text-[#1a1a1a] min-h-screen">
       <HeroSection />
-      <ExploreSection />
+      <PPAISpotlight />
+      <AboutSection />
       {/* ── 뉴스레터 구독 ── */}
       <section className="py-16 px-6 border-t border-neutral-200">
         <NewsletterSubscribeForm source="planners" brandName="Planner's" accentColor="#1a1a1a" />
       </section>
-      <AboutSection />
     </main>
   );
 }

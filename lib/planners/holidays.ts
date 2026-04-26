@@ -71,3 +71,79 @@ export const HOLIDAYS: HolidayMap = {
 export function getHoliday(date: string): { label: string; type: 'holiday' | 'solar_term' | 'memorial' } | null {
     return HOLIDAYS[date] ?? null;
 }
+
+// ── 음력 변환 (2024~2027 사전 검증 테이블) ───────────────────────────────
+// 각 항목 s: 해당 음력 월 1일의 양력 날짜, y: 음력 연도, m: 음력 월, l: 윤달 여부
+// 검증: 설날(음1/1), 추석(음8/15), 부처님오신날(음4/8) 모두 공식 날짜와 일치 확인
+interface LunarEntry { s: string; y: number; m: number; l: boolean; }
+
+const LUNAR_TABLE: LunarEntry[] = [
+    // 2024
+    {s:'2024-02-10', y:2024, m:1,  l:false},
+    {s:'2024-03-11', y:2024, m:2,  l:false},
+    {s:'2024-04-09', y:2024, m:3,  l:false},
+    {s:'2024-05-08', y:2024, m:4,  l:false},
+    {s:'2024-06-06', y:2024, m:5,  l:false},
+    {s:'2024-07-06', y:2024, m:6,  l:false},
+    {s:'2024-08-04', y:2024, m:7,  l:false},
+    {s:'2024-09-03', y:2024, m:8,  l:false},
+    {s:'2024-10-03', y:2024, m:9,  l:false},
+    {s:'2024-11-01', y:2024, m:10, l:false},
+    {s:'2024-12-01', y:2024, m:11, l:false},
+    {s:'2024-12-31', y:2024, m:12, l:false},
+    // 2025 (윤6월)
+    {s:'2025-01-29', y:2025, m:1,  l:false},
+    {s:'2025-02-28', y:2025, m:2,  l:false},
+    {s:'2025-03-29', y:2025, m:3,  l:false},
+    {s:'2025-04-28', y:2025, m:4,  l:false},
+    {s:'2025-05-27', y:2025, m:5,  l:false},
+    {s:'2025-06-26', y:2025, m:6,  l:false},
+    {s:'2025-07-25', y:2025, m:6,  l:true },
+    {s:'2025-08-23', y:2025, m:7,  l:false},
+    {s:'2025-09-22', y:2025, m:8,  l:false},
+    {s:'2025-10-21', y:2025, m:9,  l:false},
+    {s:'2025-11-20', y:2025, m:10, l:false},
+    {s:'2025-12-19', y:2025, m:11, l:false},
+    {s:'2026-01-18', y:2025, m:12, l:false},
+    // 2026
+    {s:'2026-02-17', y:2026, m:1,  l:false},
+    {s:'2026-03-19', y:2026, m:2,  l:false},
+    {s:'2026-04-18', y:2026, m:3,  l:false},
+    {s:'2026-05-17', y:2026, m:4,  l:false},
+    {s:'2026-06-15', y:2026, m:5,  l:false},
+    {s:'2026-07-15', y:2026, m:6,  l:false},
+    {s:'2026-08-13', y:2026, m:7,  l:false},
+    {s:'2026-09-11', y:2026, m:8,  l:false},
+    {s:'2026-10-11', y:2026, m:9,  l:false},
+    {s:'2026-11-09', y:2026, m:10, l:false},
+    {s:'2026-12-09', y:2026, m:11, l:false},
+    {s:'2027-01-08', y:2026, m:12, l:false},
+    // 2027
+    {s:'2027-02-07', y:2027, m:1,  l:false},
+    {s:'2027-03-08', y:2027, m:2,  l:false},
+    {s:'2027-04-07', y:2027, m:3,  l:false},
+    {s:'2027-05-06', y:2027, m:4,  l:false},
+    {s:'2027-06-05', y:2027, m:5,  l:false},
+    {s:'2027-07-04', y:2027, m:6,  l:false},
+    {s:'2027-08-03', y:2027, m:7,  l:false},
+    {s:'2027-09-01', y:2027, m:8,  l:false},
+    {s:'2027-09-30', y:2027, m:9,  l:false},
+    {s:'2027-10-30', y:2027, m:10, l:false},
+    {s:'2027-11-29', y:2027, m:11, l:false},
+    {s:'2027-12-28', y:2027, m:12, l:false},
+];
+
+export interface LunarDate { year: number; month: number; day: number; isLeap: boolean; }
+
+export function getLunarDate(dateStr: string): LunarDate | null {
+    let lo = 0, hi = LUNAR_TABLE.length - 1, idx = -1;
+    while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (LUNAR_TABLE[mid].s <= dateStr) { idx = mid; lo = mid + 1; }
+        else hi = mid - 1;
+    }
+    if (idx < 0) return null;
+    const entry = LUNAR_TABLE[idx];
+    const diff = Math.round((new Date(dateStr).getTime() - new Date(entry.s).getTime()) / 86400000);
+    return { year: entry.y, month: entry.m, day: diff + 1, isLeap: entry.l };
+}

@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { AppSidebar } from "@/features/planners/AppSidebar";
+import { AppTopNav } from "@/features/planners/AppTopNav";
+import { AppMonthBar } from "@/features/planners/AppMonthBar";
 import { PwaRegister } from "@/features/planners/PwaRegister";
 import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
+import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
 import { getPlannerUser } from "@/lib/planners/client";
+import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
 
 async function getMember() {
     const cookieStore = await cookies();
@@ -18,6 +22,7 @@ async function getMember() {
                 },
                 setAll() { /* read-only */ },
             },
+            auth: { storageKey: 'tenone-auth' },
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
@@ -25,7 +30,7 @@ async function getMember() {
 
     const { data: member } = await supabase
         .from('members')
-        .select('id, name, email')
+        .select('id, name, email, avatar_url')
         .eq('email', user.email!)
         .maybeSingle();
     return member;
@@ -39,12 +44,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
     const plannerUser = await getPlannerUser(member.id);
 
-    // 온보딩 미완료 → 온보딩으로
     if (!plannerUser || !plannerUser.onboarding_completed) {
         redirect("/planners/onboarding");
     }
 
-    // 만료된 구독 자동 expired 처리
     if (
         plannerUser.subscription_status === 'active' &&
         plannerUser.subscription_expires_at &&
@@ -53,25 +56,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         plannerUser.subscription_status = 'expired';
     }
 
-    // 무료 구독 상태 → purchase로
-    // (베타 기간 운영자는 'free'를 허용하고 싶으면 이 블록 주석 처리)
     if (plannerUser.subscription_status === 'expired') {
         redirect("/planners/purchase?expired=1");
     }
 
     return (
         <>
+            <PlannersThemeProvider />
             <PwaRegister />
-            <div className="flex min-h-screen bg-[#FAFAF7]">
-                <AppSidebar
+            <Suspense><WelcomeTracker /></Suspense>
+            <div className="min-h-screen bg-[#FAFAF7] flex flex-col">
+                <AppTopNav
                     mode={plannerUser.mode}
                     userName={member.name || undefined}
+                    avatarUrl={member.avatar_url || undefined}
                     subscriptionStatus={plannerUser.subscription_status}
-                    subscriptionExpires={plannerUser.subscription_expires_at}
                 />
-                <main className="flex-1 overflow-x-hidden">
-                    {children}
-                </main>
+                <div className="flex flex-1 min-h-0">
+                    <main className="flex-1 overflow-x-hidden min-w-0">
+                        {children}
+                    </main>
+                    <AppMonthBar />
+                </div>
             </div>
             <BetaFeedbackButton />
         </>

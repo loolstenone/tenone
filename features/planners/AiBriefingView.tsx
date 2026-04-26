@@ -11,10 +11,10 @@ export function AiBriefingView() {
     const [generating, setGenerating] = useState<"morning" | "evening" | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
 
-    async function load() {
-        setLoading(true);
+    async function load(silent = false) {
+        if (!silent) setLoading(true);
         const res = await fetch(`/api/planners/briefing`);
         if (res.ok) {
             const d = await res.json();
@@ -23,7 +23,7 @@ export function AiBriefingView() {
             const todays = (d.briefings || []).filter((b: PlannerBriefing) => b.briefing_date === today);
             if (todays.length > 0) setExpandedId(todays[0].id);
         }
-        setLoading(false);
+        if (!silent) setLoading(false);
     }
 
     useEffect(() => { load(); }, []);
@@ -38,7 +38,7 @@ export function AiBriefingView() {
             });
             if (res.ok) {
                 trackPlanners("planners_ai_briefing_generated", { type });
-                await load();
+                await load(true);
             } else {
                 const err = await res.json();
                 alert(`브리핑 생성 실패: ${err.message || err.error}`);

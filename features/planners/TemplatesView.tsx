@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
     ChevronRight, Heart, Copy, Check,
@@ -17,7 +18,7 @@ interface Template {
     body_md: string;
 }
 
-type FrameworkData = Record<string, string>;
+export type FrameworkData = Record<string, string>;
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string; bar: string }> = {
     framework: {
@@ -2526,6 +2527,19 @@ function renderSpecial(
     return null;
 }
 
+export function renderFramework(
+    key: string,
+    label: string,
+    data: FrameworkData,
+    onChange: (k: string, v: string) => void,
+): React.ReactNode | null {
+    return renderSpecial(
+        { key, label, id: '', category: '', subcategory: null, description: null, body_md: '' },
+        data,
+        onChange,
+    );
+}
+
 const isSpecialTemplate = isSpecial;
 
 // ── 마크다운 렌더러 ──────────────────────────────────────────────────
@@ -2654,10 +2668,19 @@ const FAV_KEY = "planners_tpl_favorites";
 const dataKey = tplDataKey;
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────────────
+const VALID_CATS = ["all", "framework", "schedule", "note", "favorites"] as const;
+type CatType = typeof VALID_CATS[number];
+
 export function TemplatesView() {
+    const searchParams = useSearchParams();
+    const initialCat = (() => {
+        const c = searchParams.get("category");
+        return (VALID_CATS as readonly string[]).includes(c ?? "") ? (c as CatType) : "all";
+    })();
+
     const [templates, setTemplates] = useState<Template[]>([]);
     const [loading, setLoading] = useState(true);
-    const [cat, setCat] = useState<"all" | "framework" | "schedule" | "note" | "favorites">("all");
+    const [cat, setCat] = useState<CatType>(initialCat);
     const [query, setQuery] = useState("");
     const [selected, setSelected] = useState<Template | null>(null);
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -2671,13 +2694,9 @@ export function TemplatesView() {
         } catch { /* noop */ }
     }, []);
 
-    // 템플릿 선택 시 저장 데이터 로드
+    // 템플릿 선택 시 데이터 초기화 (Templates 페이지는 저장고 — 데이터 저장 없음)
     useEffect(() => {
-        if (!selected) { setTplData({}); return; }
-        try {
-            const raw = localStorage.getItem(dataKey(selected.id));
-            setTplData(raw ? JSON.parse(raw) : {});
-        } catch { setTplData({}); }
+        setTplData({});
     }, [selected?.id]);
 
     useEffect(() => {
@@ -2704,11 +2723,7 @@ export function TemplatesView() {
 
     const handleCellChange = useCallback((key: string, val: string) => {
         if (!selected) return;
-        setTplData(prev => {
-            const next = { ...prev, [key]: val };
-            try { localStorage.setItem(dataKey(selected.id), JSON.stringify(next)); } catch { /* noop */ }
-            return next;
-        });
+        setTplData(prev => ({ ...prev, [key]: val }));
     }, [selected]);
 
     async function copyToClipboard() {
@@ -2770,7 +2785,7 @@ export function TemplatesView() {
     const hasData = Object.values(tplData).some(v => v.trim());
 
     return (
-        <div className="max-w-5xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             <div className="flex items-center gap-3 mb-2">
                 <LayoutTemplate className="h-6 w-6 text-[#0F766E]" />
                 <h1 className="font-serif text-3xl text-neutral-900">Templates</h1>
@@ -2965,7 +2980,7 @@ export function TemplatesView() {
                         <div className="px-6 py-3 border-t border-neutral-100 flex items-center justify-between shrink-0">
                             <span className="text-[11px] text-neutral-400">
                                 {isSpecialTemplate(selected)
-                                    ? hasData ? "입력 내용이 자동 저장됩니다." : "각 셀을 클릭해 바로 입력하세요."
+                                    ? hasData ? "연습용 입력입니다. 여기서 입력한 내용은 저장되지 않습니다." : "각 셀을 클릭해 바로 입력하세요."
                                     : 'Daily · 프로젝트 노트에서 "템플릿 삽입"으로 사용하세요.'
                                 }
                             </span>

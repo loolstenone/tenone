@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getPlannerUser } from "@/lib/planners/client";
@@ -14,20 +13,23 @@ export default async function IdentityPage() {
                 getAll() { return cookieStore.getAll(); },
                 setAll() { /* read-only */ },
             },
+            auth: { storageKey: 'tenone-auth' },
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login?redirect=/planners/app/identity");
 
-    const { data: member } = await supabase
-        .from('members')
-        .select('id')
-        .eq('email', user.email!)
-        .maybeSingle();
-    if (!member) redirect("/login?redirect=/planners/app/identity");
-
-    const plannerUser = await getPlannerUser(member.id);
-    const mode = plannerUser?.mode ?? "weekly";
+    let mode: "weekly" | "all_in_one" = "weekly";
+    if (user) {
+        const { data: member } = await supabase
+            .from('members')
+            .select('id')
+            .eq('email', user.email!)
+            .maybeSingle();
+        if (member) {
+            const plannerUser = await getPlannerUser(member.id);
+            mode = plannerUser?.mode ?? "weekly";
+        }
+    }
 
     return <IdentityView mode={mode} />;
 }

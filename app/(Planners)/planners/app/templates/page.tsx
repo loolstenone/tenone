@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { TemplatesView } from "@/features/planners/TemplatesView";
 
 export default function TemplatesPage() {
-    return <TemplatesView />;
+    return <Suspense><TemplatesView /></Suspense>;
 }

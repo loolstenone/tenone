@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { getISOWeek, getWeekBoundaries } from "@/lib/planners/types";
+import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
+import { getLunarDate } from "@/lib/planners/holidays";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
+
+const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const DAYS_KO = ["일","월","화","수","목","금","토"];
 
 interface WeekSummary {
     days_recorded: number;
@@ -32,18 +36,46 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [result, setResult] = useState("");
     const [reflection, setReflection] = useState("");
     const [summary, setSummary] = useState<WeekSummary | null>(null);
+    const [dayHits, setDayHits] = useState<Record<string, string[]>>({});
 
     const boundaries = getWeekBoundaries(year, week);
+
+    const days = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date(boundaries.start + "T00:00:00");
+        d.setDate(d.getDate() + i);
+        return d;
+    });
+
+    const startMonth = days[0].getMonth();
+    const endMonth = days[6].getMonth();
+    const displayMonth = startMonth === endMonth
+        ? MONTHS_KO[startMonth]
+        : `${MONTHS_KO[startMonth]} · ${MONTHS_KO[endMonth]}`;
+
+    const _td = new Date();
+    const today = `${_td.getFullYear()}-${String(_td.getMonth() + 1).padStart(2, "0")}-${String(_td.getDate()).padStart(2, "0")}`;
 
     useEffect(() => {
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const [res, sumRes] = await Promise.all([
+            const months = [...new Set(days.map(d => d.getMonth() + 1))];
+            const [res, sumRes, ...hitResults] = await Promise.all([
                 fetch(`/api/planners/weekly?year=${year}&week=${week}`),
                 fetch(`/api/planners/summary?scope=weekly&year=${year}&week=${week}`),
+                ...months.map(m => fetch(`/api/planners/daily/month-hits?year=${year}&month=${m}`)),
             ]);
             if (cancelled) return;
+            const hitsMap: Record<string, string[]> = {};
+            for (const r of hitResults) {
+                if (r.ok) {
+                    const d = await r.json();
+                    for (const h of d.hits ?? []) {
+                        hitsMap[h.date] = h.task_texts ?? [];
+                    }
+                }
+            }
+            setDayHits(hitsMap);
             if (sumRes.ok) {
                 const sd = await sumRes.json();
                 setSummary(sd.summary || null);
@@ -77,8 +109,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    year,
-                    week,
+                    year, week,
                     week_start: boundaries.start,
                     week_end: boundaries.end,
                     ...patch,
@@ -99,68 +130,99 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         setYear(newYear);
     }
 
-    // 7일 배열
-    const days = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date(boundaries.start + 'T00:00:00');
-        d.setDate(d.getDate() + i);
-        return d;
-    });
+    // Left col: Mon(0), Wed(2), Fri(4) | Right col: Tue(1), Thu(3), [Sat(5) | Sun(6)]
+    const leftDays = [days[0], days[2], days[4]];
+    const rightMidDays = [days[1], days[3]];
+    const weekendDays = [days[5], days[6]];
 
     return (
-        <div className="max-w-5xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigateWeek(-1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </button>
-                        <h1 className="font-serif text-3xl text-neutral-900">
-                            {year}년 W{String(week).padStart(2, '0')}
-                        </h1>
-                        <button
-                            onClick={() => navigateWeek(1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
+            <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => navigateWeek(-1)}
+                        className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center text-neutral-400 transition-colors"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div>
+                        <div className="flex items-baseline gap-2.5">
+                            <h1 className="font-serif text-4xl text-neutral-900 leading-none">Weekly</h1>
+                            <span className="text-[11px] font-mono px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded-full tracking-widest">
+                                W{String(week).padStart(2, "0")}
+                            </span>
+                        </div>
+                        <p className="text-sm text-neutral-400 mt-1 font-light">{displayMonth} · {year}</p>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-1">
-                        {boundaries.start} ~ {boundaries.end}
-                    </p>
+                    <button
+                        onClick={() => navigateWeek(1)}
+                        className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center text-neutral-400 transition-colors"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </button>
                 </div>
-                {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+
+                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300 mt-1" />}
             </div>
 
             {loading ? (
-                <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
+                <div className="py-20 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
-                <div className="space-y-6">
-                    {/* Vrief Light + GPR 2 columns */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {/* Light Vrief */}
-                        <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-sm font-semibold text-neutral-900">이번 주 Vrief</h2>
-                                <span className="text-[10px] px-2 py-0.5 bg-[#0F766E]/10 text-[#0F766E] rounded uppercase tracking-wider">Light</span>
+                <div className="space-y-5">
+                    {/* Paper planner day grid */}
+                    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
+                        <div className="grid grid-cols-2 divide-x divide-neutral-200">
+                            {/* Left: Mon, Wed, Fri */}
+                            <div className="divide-y divide-neutral-200">
+                                {leftDays.map((d) => {
+                                    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                    return (
+                                        <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
+                                    );
+                                })}
                             </div>
-                            <div className="space-y-4">
+                            {/* Right: Tue, Thu, Sat+Sun */}
+                            <div className="divide-y divide-neutral-200">
+                                {rightMidDays.map((d) => {
+                                    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                    return (
+                                        <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
+                                    );
+                                })}
+                                {/* Weekend: Sat + Sun side by side */}
+                                <div className="grid grid-cols-2 divide-x divide-neutral-200">
+                                    {weekendDays.map((d) => {
+                                        const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                        return (
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Vrief + GPR */}
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">Vrief</h2>
+                                <span className="text-[9px] text-neutral-400 tracking-wider">WHW</span>
+                            </div>
+                            <div className="space-y-3">
                                 <Field label="What — 이번 주의 핵심" value={what} onChange={setWhat} onBlur={() => save({ vrief_what: what })} rows={2} />
                                 <Field label="Why — 왜 중요한가" value={why} onChange={setWhy} onBlur={() => save({ vrief_why: why })} rows={2} />
                                 <Field label="How — 어떻게" value={how} onChange={setHow} onBlur={() => save({ vrief_how: how })} rows={2} />
                             </div>
                         </section>
 
-                        {/* Weekly GPR */}
-                        <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-sm font-semibold text-neutral-900">이번 주 GPR</h2>
-                                <span className="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-700 rounded uppercase tracking-wider">Weekly</span>
+                                <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">GPR</h2>
+                                <span className="text-[9px] text-neutral-400 tracking-wider">GPR</span>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 <Field label="Goal" value={goal} onChange={setGoal} onBlur={() => save({ gpr_goal: goal })} rows={2} />
                                 <Field label="Plan" value={plan} onChange={setPlan} onBlur={() => save({ gpr_plan: plan })} rows={2} />
                                 <Field label="Result" value={result} onChange={setResult} onBlur={() => save({ gpr_result: result })} rows={2} placeholder="금요일 저녁 AI가 정리를 도와줍니다" />
@@ -168,60 +230,28 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                         </section>
                     </div>
 
-                    {/* 주간 집계 */}
+                    {/* Weekly summary stats */}
                     {summary && summary.days_recorded > 0 && (
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <div className="flex items-center gap-2 mb-3">
-                                <TrendingUp className="h-4 w-4 text-[#0F766E]" />
-                                <h2 className="text-sm font-semibold text-neutral-900">이번 주 기록 집계</h2>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <section className="border border-neutral-200 rounded-xl p-4">
+                            <div className="grid grid-cols-5 gap-3">
                                 <SummaryStat label="기록 일수" value={`${summary.days_recorded}일`} />
-                                <SummaryStat label="태스크 완료율" value={`${summary.completion_rate}%`} />
-                                <SummaryStat label="완료 태스크" value={`${summary.done_tasks}개`} />
-                                <SummaryStat label="이월 태스크" value={`${summary.carried_tasks}개`} />
-                                <SummaryStat label="평균 에너지" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
+                                <SummaryStat label="완료율" value={`${summary.completion_rate}%`} />
+                                <SummaryStat label="완료" value={`${summary.done_tasks}개`} />
+                                <SummaryStat label="이월" value={`${summary.carried_tasks}개`} />
+                                <SummaryStat label="에너지" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
                             </div>
                         </section>
                     )}
 
-                    {/* 7일 미니 캘린더 */}
-                    <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                        <h2 className="text-sm font-semibold text-neutral-900 mb-4">이번 주 일별</h2>
-                        <div className="grid grid-cols-7 gap-2">
-                            {days.map((d) => {
-                                const ds = d.toISOString().slice(0, 10);
-                                const dayLabel = d.toLocaleDateString('ko-KR', { weekday: 'short' });
-                                const isToday = ds === new Date().toISOString().slice(0, 10);
-                                return (
-                                    <Link
-                                        key={ds}
-                                        href={`/planners/app/today?date=${ds}`}
-                                        className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-center transition-colors ${
-                                            isToday
-                                                ? "border-[#0F766E] bg-[#0F766E]/5"
-                                                : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
-                                        }`}
-                                    >
-                                        <span className="text-[10px] text-neutral-500">{dayLabel}</span>
-                                        <span className={`text-lg font-semibold mt-1 ${isToday ? "text-[#0F766E]" : "text-neutral-900"}`}>
-                                            {d.getDate()}
-                                        </span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-                    {/* 주간 회고 */}
-                    <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                        <h2 className="text-sm font-semibold text-neutral-900 mb-3">주간 회고</h2>
+                    {/* Reflection */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest mb-3">주간 회고</h2>
                         <textarea
                             value={reflection}
                             onChange={(e) => setReflection(e.target.value)}
                             onBlur={() => save({ reflection })}
                             placeholder="이번 주를 돌아보며…"
-                            rows={5}
+                            rows={4}
                             className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none"
                         />
                     </section>
@@ -231,22 +261,85 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     );
 }
 
+function DayCell({
+    date, ds, isToday, lines, compact = false, taskTexts = [],
+}: {
+    date: Date;
+    ds: string;
+    isToday: boolean;
+    lines: number;
+    compact?: boolean;
+    taskTexts?: string[];
+}) {
+    const dayNum = date.getDate();
+    const dayKo = DAYS_KO[date.getDay()];
+    const isSun = date.getDay() === 0;
+    const isSat = date.getDay() === 6;
+    const lunar = getLunarDate(ds);
+
+    const dateColor = isToday
+        ? "text-[#0F766E]"
+        : isSun ? "text-rose-400"
+        : isSat ? "text-blue-400"
+        : "text-neutral-800";
+
+    const dayColor = isSun ? "text-rose-300" : isSat ? "text-blue-300" : "text-neutral-400";
+
+    return (
+        <Link
+            href={`/planners/app/daily?date=${ds}`}
+            className={`block group transition-colors ${isToday ? "bg-[#0F766E]/[0.03]" : "bg-white hover:bg-neutral-50/70"}`}
+        >
+            {/* Date header */}
+            <div className={`flex items-baseline gap-1.5 px-3 border-b border-neutral-100 ${compact ? "py-2" : "py-2.5"}`}>
+                <span className={`font-serif leading-none font-light ${compact ? "text-xl" : "text-2xl"} ${dateColor}`}>
+                    {String(dayNum).padStart(2, "0")}
+                </span>
+                <span className={`text-[11px] font-medium ${dayColor}`}>{dayKo}</span>
+                <span className="ml-auto flex items-center gap-1.5">
+                    {lunar && (
+                        <span className="text-[9px] text-neutral-300 font-mono">
+                            {lunar.isLeap ? "윤" : ""}{lunar.month}/{lunar.day}
+                        </span>
+                    )}
+                    {isToday && (
+                        <span className="text-[9px] text-[#0F766E] font-medium">Today</span>
+                    )}
+                </span>
+            </div>
+            {/* Lined writing area with task preview */}
+            <div>
+                {Array.from({ length: lines }).map((_, i) => {
+                    const task = taskTexts[i];
+                    return (
+                        <div
+                            key={i}
+                            className={`border-b border-neutral-100 group-hover:border-neutral-200/60 transition-colors flex items-center px-2.5 ${compact ? "h-6" : "h-7"}`}
+                        >
+                            {task && (
+                                <span className={`truncate leading-none text-neutral-400 ${compact ? "text-[9px]" : "text-[10px]"}`}>
+                                    {task}
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </Link>
+    );
+}
+
 function SummaryStat({ label, value }: { label: string; value: string }) {
     return (
         <div className="bg-neutral-50 rounded-lg p-3 text-center">
-            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">{label}</p>
+            <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-1">{label}</p>
             <p className="text-lg font-semibold text-neutral-900">{value}</p>
         </div>
     );
 }
 
 function Field({
-    label,
-    value,
-    onChange,
-    onBlur,
-    rows = 2,
-    placeholder,
+    label, value, onChange, onBlur, rows = 2, placeholder,
 }: {
     label: string;
     value: string;
@@ -257,7 +350,7 @@ function Field({
 }) {
     return (
         <div>
-            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">{label}</label>
+            <label className="block text-[9px] uppercase tracking-widest text-neutral-400 mb-1.5">{label}</label>
             <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

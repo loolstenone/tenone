@@ -4,6 +4,63 @@
 
 ---
 
+## 2026-04-26 — 세션 89 · Contacts 극강화 + Planners 사이트 헤더 정비
+
+### 장소
+집
+
+### 변경 내용
+
+**Contacts 기능 (Google Contacts급)**
+- `features/planners/ContactsView.tsx` — 전면 재작성. 좌측 사이드바(라벨·관리·빠른 추가·생일 카드) + 테이블 행 + 가나다 fixed sidebar + 컨텍스트 액션바
+- `app/api/planners/contacts/route.ts` — 페이지네이션 GET (1만명 → 무제한), bulk POST + skip_duplicates + merge_labels, bulk DELETE
+- `app/api/planners/contacts/labels/route.ts` — 신규. POST(적용/제거)·PUT(rename)·DELETE
+- `sql/planners-contacts-v2.sql` — is_favorite·organization·title·address·labels TEXT[]·last_contacted_at 추가
+- DB 정리 실행: 12,273 → 6,064명 (phone/email 기준 자동 dedupe). 시스템 라벨(myContacts·Remember) 제거
+- 즐겨찾기·한글 초성 검색·전화번호 자동 포맷·복사 버튼·다중 선택·vCard·CSV 양방향·라벨 관리(rename/delete/bulk apply)·중복 정리(자동 병합)·수동 병합·Bulk Edit·다가오는 생일·마지막 연락 추적·빠른 추가·천 단위 콤마
+
+**Planners 사이트 헤더 정비**
+- `features/planners/PlannersHeader.tsx` — 4그룹 명확 분리 (로고·구분선·메뉴·CTA), "Planner's" 메뉴 제거(로고 중복), PP AI 진입 CTA 우측 상시 노출
+- `app/(Planners)/planners/page.tsx` — ExploreSection 제거(헤더 중복) → PPAISpotlight 신규(Now Live + 3대 기능)
+- `features/planners/AppSidebar.tsx` · `AppTopNav.tsx` — 메뉴 순서/라벨 SSOT 통일
+
+**Templates·Daily 개선**
+- `features/planners/DailyView.tsx` — TemplateNoteBlock ⤢ Maximize 버튼 + 타이틀 편집 시각 강조 + 모달에서 grid 템플릿 그대로 표시
+- `features/planners/ProjectNotesTab.tsx` — 템플릿 피커를 DailyView와 동일 UX (검색·즐겨찾기·바텀시트·로딩)
+- 양쪽에 ⭐ 즐겨찾기 필터 + localStorage 공유
+
+**핵심 버그 수정**
+- `features/planners/PlannersThemeProvider.tsx` — `[class*="bg-[#0F766E]"]` → `[class~="..."]` 교체. substring match 때문에 `hover:bg-[#0F766E]/5` 도 항상 100% teal 덮던 치명 버그 해결. opacity variant(/5, /10, /20) rule 명시 추가
+
+**Settings UX**
+- `app/(Planners)/planners/app/settings/page.tsx` — alert() → inline toast, 컬러/폰트 섹션 최상단 이동, ringColor → outline 정상화
+
+---
+
+## 2026-04-26 — 세션 88 · PP AI 버그 수정 7종 + Contacts 신규
+
+### 장소
+집
+
+### 변경 내용
+
+**버그 수정**
+- `features/planners/DailyView.tsx` · `MonthlyView.tsx` · `AiBriefingView.tsx` — `toISOString()` UTC→KST localDateStr 헬퍼 적용
+- `features/planners/YearlyView.tsx` — 기념일 모달에 관계유형(가족/연인/친구/직장/기타) + 요일 표시(getDayOfWeek)
+- `features/planners/PlannersThemeProvider.tsx` (신규) — CSS 속성 선택자 인젝션으로 앱 전체 테마 반영. localStorage key `planners_color_theme`
+- `app/(Planners)/planners/app/layout.tsx` — PlannersThemeProvider 추가
+- `app/(Planners)/planners/app/settings/page.tsx` — applyPlannersTheme 호출 + 데이터 백업 JSON export
+
+**Contacts 신규 기능**
+- `sql/planners-contacts.sql` — planners_contacts 테이블 (member_id, name, phone, email, group_name, relationship, note, birthday) + RLS + Prod 적용
+- `app/api/planners/contacts/route.ts` — GET/POST/PATCH/DELETE
+- `features/planners/ContactsView.tsx` — 그룹 필터·검색·추가/수정/삭제 모달·vCard(.vcf) import
+- `app/(Planners)/planners/app/contacts/page.tsx` — 라우트 페이지
+- `features/planners/AppSidebar.tsx` — Contacts 메뉴 추가 (weekly·all_in_one)
+- `lib/planners/auth.ts` (신규) — getMemberId 헬퍼
+
+---
+
 ## 2026-04-25 — 세션 87 · Planner's Templates 59종 전체 인터랙티브 그리드화
 
 ### 배경
