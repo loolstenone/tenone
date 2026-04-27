@@ -156,24 +156,38 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                 </button>
             </header>
 
-            {/* Excalidraw */}
+            {/* Excalidraw — 풀 도구 활성화 (그림 그리기 본격 모드) */}
             <div className="flex-1 min-h-0">
                 <Excalidraw
                     excalidrawAPI={(api) => { apiRef.current = api; }}
                     initialData={{
                         elements: canvas.data?.elements ?? [],
-                        appState: canvas.data?.appState ?? {},
+                        appState: {
+                            ...(canvas.data?.appState ?? {}),
+                            // 라이브러리 패널 기본 닫혀 있도록 (사용자가 열어서 사용)
+                            openSidebar: undefined,
+                        },
+                        scrollToContent: true,
                     }}
                     onChange={onChange}
                     langCode="ko-KR"
+                    handleKeyboardGlobally={true}
+                    autoFocus
                     UIOptions={{
                         canvasActions: {
-                            export: false,
+                            // 모든 캔버스 액션 노출
+                            export: { saveFileToDisk: true },
                             saveAsImage: true,
-                            loadScene: false,
-                            saveToActiveFile: false,
+                            loadScene: true,
+                            saveToActiveFile: false,        // .excalidraw 파일 자동 저장 (내부 저장이 우선이므로 비활성)
                             toggleTheme: true,
+                            clearCanvas: true,
+                            changeViewBackgroundColor: true,
                         },
+                        // 도형 라이브러리 활성화 — 미리 만든 도형 모음을 가져와 쓸 수 있게
+                        tools: { image: true },
+                        // 환영 화면 비활성 (개인 캔버스라 매번 보일 필요 없음)
+                        welcomeScreen: false,
                     }}
                 />
             </div>

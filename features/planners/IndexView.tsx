@@ -68,25 +68,29 @@ export function IndexView() {
     }, []);
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            <div className="flex items-center gap-3 mb-8">
-                <h1 className="font-serif text-3xl text-neutral-900">Index</h1>
-                <div className="flex items-center gap-0.5 ml-1">
-                    <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
-                        <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-medium text-neutral-500 w-10 text-center">{year}</span>
-                    <button onClick={() => setYear(y => y + 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
-                        <ChevronRight className="h-4 w-4" />
-                    </button>
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+            {/* Header — 모바일은 세로 스택 */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
+                <div className="flex items-center gap-2">
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">Index</h1>
+                    <div className="flex items-center gap-0.5 ml-1">
+                        <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
+                            <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <span className="text-sm font-medium text-neutral-500 w-10 text-center">{year}</span>
+                        <button onClick={() => setYear(y => y + 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
+                            <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
-                <PlannersUtilityLinks className="ml-auto" />
+                <PlannersUtilityLinks className="sm:ml-auto" />
             </div>
 
-            <div className="grid grid-cols-[3fr_1fr_1fr] gap-x-10 gap-y-0 items-start">
+            {/* 모바일: 단일 컬럼 / 태블릿+: 3컬럼 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr_1fr] gap-x-10 gap-y-8 items-start">
 
-                {/* ── Left: 12-month calendar ── */}
-                <div className="grid grid-cols-3 gap-x-6 gap-y-8">
+                {/* ── Left: 12-month calendar (모바일 2열, 태블릿+ 3열) ── */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-6 sm:gap-y-8">
                     {MONTHS_EN.map((monthName, mIdx) => {
                         const rows = buildMonth(year, mIdx);
                         return (

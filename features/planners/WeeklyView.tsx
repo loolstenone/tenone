@@ -8,6 +8,9 @@ import { getLunarDate } from "@/lib/planners/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
+import { CalendarEntryList } from "./CalendarEntryList";
+import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import type { CalendarEntry } from "@/lib/planners/calendar-rules";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 const DAYS_KO = ["일","월","화","수","목","금","토"];
@@ -38,6 +41,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [reflection, setReflection] = useState("");
     const [summary, setSummary] = useState<WeekSummary | null>(null);
     const [dayHits, setDayHits] = useState<Record<string, string[]>>({});
+    const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
+    const [calEditorOpen, setCalEditorOpen] = useState(false);
+    const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
+    const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
 
     const boundaries = getWeekBoundaries(year, week);
 
@@ -61,9 +68,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         (async () => {
             setLoading(true);
             const months = [...new Set(days.map(d => d.getMonth() + 1))];
-            const [res, sumRes, ...hitResults] = await Promise.all([
+            const [res, sumRes, calRes, ...hitResults] = await Promise.all([
                 fetch(`/api/planners/weekly?year=${year}&week=${week}`),
                 fetch(`/api/planners/summary?scope=weekly&year=${year}&week=${week}`),
+                fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`),
                 ...months.map(m => fetch(`/api/planners/daily/month-hits?year=${year}&month=${m}`)),
             ]);
             if (cancelled) return;
@@ -80,6 +88,10 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
             if (sumRes.ok) {
                 const sd = await sumRes.json();
                 setSummary(sd.summary || null);
+            }
+            if (calRes.ok) {
+                const cd = await calRes.json();
+                setCalEntries(cd.entries ?? []);
             }
             if (res.ok) {
                 const d = await res.json();
@@ -249,6 +261,17 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                         </section>
                     )}
 
+                    {/* 이번 주 일정 */}
+                    <CalendarEntryList
+                        entries={calEntries}
+                        view="weekly"
+                        from={boundaries.start}
+                        to={boundaries.end}
+                        label="이번 주 일정"
+                        onAdd={() => { setCalEditing(null); setCalDefaultDate(boundaries.start); setCalEditorOpen(true); }}
+                        onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
+                    />
+
                     {/* Reflection */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">
                         <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest mb-3">주간 회고</h2>
@@ -263,6 +286,23 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     </section>
                 </div>
             )}
+
+            <CalendarEntryEditor
+                open={calEditorOpen}
+                onClose={() => { setCalEditorOpen(false); setCalEditing(null); setCalDefaultDate(undefined); }}
+                onSaved={() => {
+                    fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`)
+                        .then((r) => r.ok ? r.json() : null)
+                        .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+                }}
+                onDeleted={() => {
+                    fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`)
+                        .then((r) => r.ok ? r.json() : null)
+                        .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+                }}
+                initial={calEditing ?? undefined}
+                defaultDate={calDefaultDate}
+            />
         </div>
     );
 }

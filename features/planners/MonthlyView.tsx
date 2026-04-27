@@ -7,6 +7,15 @@ import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
+import { CalendarEntryList } from "./CalendarEntryList";
+import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import {
+    KIND_COLORS,
+    monthlyDisplayMode,
+    expandOccurrences,
+    isVisible,
+    type CalendarEntry,
+} from "@/lib/planners/calendar-rules";
 
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -46,6 +55,21 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         energy_avg: number | null;
         projects_completed: number;
     } | null>(null);
+    const [tracking, setTracking] = useState<{
+        stats: {
+            days_recorded: number;
+            energy_avg: number | null; satisfaction_avg: number | null; mood_avg: number | null;
+            exercise_minutes_total: number; exercise_distance_total: number; exercise_days: number;
+            bp_sys_avg: number | null; bp_dia_avg: number | null; sugar_avg: number | null;
+            weight_latest: number | null; temp_latest: number | null;
+        };
+        series: Array<{ date: string; energy: number | null; satisfaction: number | null; mood: number | null; exercise_min: number | null; weight: number | null; bp_sys: number | null; sugar: number | null }>;
+        one_liners: Array<{ date: string; text: string; category: string | null }>;
+    } | null>(null);
+    const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
+    const [calEditorOpen, setCalEditorOpen] = useState(false);
+    const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
+    const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -98,14 +122,34 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
 
     const weekNumbers = useMemo(() => calendar.map(r => r[0].week), [calendar]);
 
+    /** 날짜별 캘린더 엔트리 발생 맵 (반복 펼침) — 셀 dot/title 표시용 */
+    const entriesByDate = useMemo(() => {
+        const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
+        const lastDate = new Date(year, month, 0).getDate();
+        const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`;
+        const map: Record<string, CalendarEntry[]> = {};
+        calEntries.forEach((e) => {
+            if (!isVisible(e.kind, "monthly")) return;
+            expandOccurrences(e, firstDay, lastDay).forEach(({ date }) => {
+                (map[date] = map[date] || []).push(e);
+            });
+        });
+        return map;
+    }, [calEntries, year, month]);
+
     useEffect(() => {
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const [monthlyRes, hitsRes, summaryRes] = await Promise.all([
+            const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
+            const lastDate = new Date(year, month, 0).getDate();
+            const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`;
+            const [monthlyRes, hitsRes, summaryRes, trackingRes, calRes] = await Promise.all([
                 fetch(`/api/planners/monthly?year=${year}&month=${month}`),
                 fetch(`/api/planners/daily/month-hits?year=${year}&month=${month}`),
                 fetch(`/api/planners/summary?scope=monthly&year=${year}&month=${month}`),
+                fetch(`/api/planners/daily/month-tracking?year=${year}&month=${month}`),
+                fetch(`/api/planners/calendar?from=${firstDay}&to=${lastDay}`),
             ]);
             if (cancelled) return;
             if (monthlyRes.ok) {
@@ -127,6 +171,14 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
             if (summaryRes.ok) {
                 const d = await summaryRes.json();
                 setSummary(d.summary ?? null);
+            }
+            if (trackingRes.ok) {
+                const d = await trackingRes.json();
+                setTracking({ stats: d.stats, series: d.series ?? [], one_liners: d.one_liners ?? [] });
+            }
+            if (calRes.ok) {
+                const d = await calRes.json();
+                setCalEntries(d.entries ?? []);
             }
             setLoading(false);
         })();
@@ -439,12 +491,48 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                     ))}
                                                 </div>
                                             )}
+                                            {/* 캘린더 엔트리 — 셀별 dot/title */}
+                                            {entriesByDate[cell.date]?.length > 0 && (
+                                                <div className="mt-1 space-y-0.5">
+                                                    {entriesByDate[cell.date].slice(0, 3).map((e) => {
+                                                        const c = KIND_COLORS[e.kind];
+                                                        const titleOnly = monthlyDisplayMode(e.kind) === "title";
+                                                        return (
+                                                            <div key={e.id} className={`flex items-center gap-1 text-[9px] leading-tight ${c.text}`}>
+                                                                <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
+                                                                <span className="truncate">{titleOnly ? e.title : `${e.start_time?.slice(0, 5) || ""} ${e.title}`.trim()}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {entriesByDate[cell.date].length > 3 && (
+                                                        <p className="text-[9px] text-neutral-400">+{entriesByDate[cell.date].length - 3}</p>
+                                                    )}
+                                                </div>
+                                            )}
                                         </Link>
                                     );
                                 })}
                             </div>
                         ))}
                     </section>
+
+                    {/* 3.5) 이달 일정 리스트 */}
+                    {(() => {
+                        const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
+                        const lastDate = new Date(year, month, 0).getDate();
+                        const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`;
+                        return (
+                            <CalendarEntryList
+                                entries={calEntries}
+                                view="monthly"
+                                from={firstDay}
+                                to={lastDay}
+                                label="이달의 일정"
+                                onAdd={() => { setCalEditing(null); setCalDefaultDate(firstDay); setCalEditorOpen(true); }}
+                                onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
+                            />
+                        );
+                    })()}
 
                     {/* 4) 월간 회고 (4순위) */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">
@@ -459,46 +547,270 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         />
                     </section>
 
-                    {/* 5) 월간 통계 */}
-                    {summary && summary.total_tasks > 0 && (
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-sm font-semibold text-neutral-900 mb-4">월간 통계</h2>
+                    {/* 5) 월간 분석 — 3-탭 (통계 / 한 줄 / 트래킹) */}
+                    {(summary && summary.total_tasks > 0) || (tracking && (tracking.one_liners.length > 0 || tracking.stats.days_recorded > 0)) ? (
+                        <MonthlyAnalytics summary={summary} tracking={tracking} />
+                    ) : null}
 
-                            {/* Task 분포 5종 */}
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-                                <StatCell label="전체" value={summary.total_tasks} pct={null} accent="text-neutral-900" />
-                                <StatCell label="완료" value={summary.done_tasks} pct={percent(summary.done_tasks, summary.total_tasks)} accent="text-emerald-600" />
-                                <StatCell label="미완" value={summary.todo_tasks} pct={percent(summary.todo_tasks, summary.total_tasks)} accent="text-amber-600" />
-                                <StatCell label="이월" value={summary.carried_tasks} pct={percent(summary.carried_tasks, summary.total_tasks)} accent="text-orange-500" />
-                                <StatCell label="취소" value={summary.canceled_tasks} pct={percent(summary.canceled_tasks, summary.total_tasks)} accent="text-neutral-400" />
-                            </div>
-
-                            {/* 분포 막대 */}
-                            <div className="h-2 rounded-full overflow-hidden bg-neutral-100 flex mb-4">
-                                {summary.done_tasks > 0 && (
-                                    <span className="bg-emerald-500" style={{ width: `${percent(summary.done_tasks, summary.total_tasks)}%` }} />
-                                )}
-                                {summary.todo_tasks > 0 && (
-                                    <span className="bg-amber-400" style={{ width: `${percent(summary.todo_tasks, summary.total_tasks)}%` }} />
-                                )}
-                                {summary.carried_tasks > 0 && (
-                                    <span className="bg-orange-400" style={{ width: `${percent(summary.carried_tasks, summary.total_tasks)}%` }} />
-                                )}
-                                {summary.canceled_tasks > 0 && (
-                                    <span className="bg-neutral-300" style={{ width: `${percent(summary.canceled_tasks, summary.total_tasks)}%` }} />
-                                )}
-                            </div>
-
-                            {/* 보조 통계 */}
-                            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-neutral-100">
-                                <SubStat label="에너지 평균" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
-                                <SubStat label="일간 계획 수립" value={`${summary.days_recorded}일`} />
-                                <SubStat label="완료한 프로젝트" value={`${summary.projects_completed}개`} />
-                            </div>
-                        </section>
-                    )}
+                    {/* 6/7 → MonthlyAnalytics 통합 (위에서 렌더) */}
                 </div>
             )}
+
+            <CalendarEntryEditor
+                open={calEditorOpen}
+                onClose={() => { setCalEditorOpen(false); setCalEditing(null); setCalDefaultDate(undefined); }}
+                onSaved={() => {
+                    fetch(`/api/planners/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
+                        .then((r) => r.ok ? r.json() : null)
+                        .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+                }}
+                onDeleted={() => {
+                    fetch(`/api/planners/calendar?from=${year}-${String(month).padStart(2,"0")}-01&to=${year}-${String(month).padStart(2,"0")}-${String(new Date(year, month, 0).getDate()).padStart(2,"0")}`)
+                        .then((r) => r.ok ? r.json() : null)
+                        .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+                }}
+                initial={calEditing ?? undefined}
+                defaultDate={calDefaultDate}
+            />
+        </div>
+    );
+}
+
+const ONE_LINER_LABELS: Record<string, string> = {
+    summary: "정리", quote: "들은 말", idea: "아이디어",
+    insight: "인사이트", emotion: "감정", learning: "배움", free: "자유",
+};
+
+// ─────────────────────────────────────────────────────────────────
+// MonthlyAnalytics — 월간 통계/한 줄/트래킹 3-탭 통합
+// ─────────────────────────────────────────────────────────────────
+
+interface MonthlyAnalyticsProps {
+    summary: {
+        days_recorded: number;
+        total_tasks: number;
+        todo_tasks: number;
+        done_tasks: number;
+        carried_tasks: number;
+        canceled_tasks: number;
+        completion_rate: number;
+        energy_avg: number | null;
+        projects_completed: number;
+    } | null;
+    tracking: {
+        stats: TrackingStats;
+        series: TrackingSeries[];
+        one_liners: Array<{ date: string; text: string; category: string | null }>;
+    } | null;
+}
+
+function MonthlyAnalytics({ summary, tracking }: MonthlyAnalyticsProps) {
+    const [tab, setTab] = useState<"tasks" | "lines" | "tracking">("tasks");
+    const hasTasks = !!summary && summary.total_tasks > 0;
+    const hasLines = !!tracking && tracking.one_liners.length > 0;
+    const hasTracking = !!tracking && tracking.stats.days_recorded > 0;
+
+    return (
+        <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+            <div className="border-b border-neutral-100 flex">
+                {([
+                    { k: "tasks",    label: "Task 통계",    enabled: hasTasks },
+                    { k: "lines",    label: "이달의 한 줄", enabled: hasLines },
+                    { k: "tracking", label: "데일리 트래킹", enabled: hasTracking },
+                ] as const).map((t) => (
+                    <button
+                        key={t.k}
+                        onClick={() => setTab(t.k)}
+                        disabled={!t.enabled}
+                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                            tab === t.k
+                                ? "text-[#0F766E] border-b-2 border-[#0F766E] -mb-px"
+                                : t.enabled
+                                    ? "text-neutral-500 hover:text-neutral-900"
+                                    : "text-neutral-300 cursor-not-allowed"
+                        }`}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+            <div className="p-5">
+                {tab === "tasks" && summary && summary.total_tasks > 0 && <MonthlyTasksTab summary={summary} />}
+                {tab === "tasks" && (!summary || summary.total_tasks === 0) && (
+                    <p className="text-sm text-neutral-400 text-center py-8">이달 태스크 기록이 없습니다.</p>
+                )}
+                {tab === "lines" && tracking && tracking.one_liners.length > 0 && (
+                    <OneLinersGrouped lines={tracking.one_liners} />
+                )}
+                {tab === "lines" && (!tracking || tracking.one_liners.length === 0) && (
+                    <p className="text-sm text-neutral-400 text-center py-8">이달 한 줄 기록이 없습니다.</p>
+                )}
+                {tab === "tracking" && tracking && tracking.stats.days_recorded > 0 && (
+                    <TrackingSummary stats={tracking.stats} series={tracking.series} />
+                )}
+                {tab === "tracking" && (!tracking || tracking.stats.days_recorded === 0) && (
+                    <p className="text-sm text-neutral-400 text-center py-8">이달 트래킹 기록이 없습니다.</p>
+                )}
+            </div>
+        </section>
+    );
+}
+
+function MonthlyTasksTab({ summary }: { summary: NonNullable<MonthlyAnalyticsProps["summary"]> }) {
+    return (
+        <div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+                <StatCell label="전체"  value={summary.total_tasks}    pct={null}                                                          accent="text-neutral-900" />
+                <StatCell label="완료"  value={summary.done_tasks}     pct={percent(summary.done_tasks, summary.total_tasks)}             accent="text-emerald-600" />
+                <StatCell label="미완"  value={summary.todo_tasks}     pct={percent(summary.todo_tasks, summary.total_tasks)}             accent="text-amber-600" />
+                <StatCell label="이월"  value={summary.carried_tasks}  pct={percent(summary.carried_tasks, summary.total_tasks)}          accent="text-orange-500" />
+                <StatCell label="취소"  value={summary.canceled_tasks} pct={percent(summary.canceled_tasks, summary.total_tasks)}         accent="text-neutral-400" />
+            </div>
+            <div className="h-2 rounded-full overflow-hidden bg-neutral-100 flex mb-4">
+                {summary.done_tasks > 0     && <span className="bg-emerald-500" style={{ width: `${percent(summary.done_tasks, summary.total_tasks)}%` }} />}
+                {summary.todo_tasks > 0     && <span className="bg-amber-400"   style={{ width: `${percent(summary.todo_tasks, summary.total_tasks)}%` }} />}
+                {summary.carried_tasks > 0  && <span className="bg-orange-400"  style={{ width: `${percent(summary.carried_tasks, summary.total_tasks)}%` }} />}
+                {summary.canceled_tasks > 0 && <span className="bg-neutral-300" style={{ width: `${percent(summary.canceled_tasks, summary.total_tasks)}%` }} />}
+            </div>
+            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-neutral-100">
+                <SubStat label="에너지 평균"   value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
+                <SubStat label="일간 계획 수립" value={`${summary.days_recorded}일`} />
+                <SubStat label="완료한 프로젝트" value={`${summary.projects_completed}개`} />
+            </div>
+        </div>
+    );
+}
+
+function OneLinersGrouped({ lines }: { lines: Array<{ date: string; text: string; category: string | null }> }) {
+    const groups: Record<string, Array<{ date: string; text: string }>> = {};
+    lines.forEach((l) => {
+        const k = l.category || "_uncategorized";
+        (groups[k] = groups[k] || []).push({ date: l.date, text: l.text });
+    });
+    const order = ["summary", "quote", "idea", "insight", "emotion", "learning", "free", "_uncategorized"];
+    const visible = order.filter((k) => groups[k]?.length);
+    if (visible.length === 0) return null;
+    return (
+        <div className="space-y-4">
+            {visible.map((k) => (
+                <div key={k}>
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">
+                        {k === "_uncategorized" ? "분류 없음" : (ONE_LINER_LABELS[k] ?? k)}
+                        <span className="ml-1 text-neutral-300">{groups[k].length}</span>
+                    </p>
+                    <div className="space-y-1.5">
+                        {groups[k].map((l, i) => (
+                            <div key={i} className="flex items-baseline gap-3 text-sm">
+                                <span className="text-[10px] font-mono text-neutral-300 w-8 shrink-0">
+                                    {l.date.slice(8, 10)}
+                                </span>
+                                <p className="text-neutral-700 leading-relaxed flex-1 whitespace-pre-wrap">{l.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+interface TrackingStats {
+    days_recorded: number;
+    energy_avg: number | null; satisfaction_avg: number | null; mood_avg: number | null;
+    exercise_minutes_total: number; exercise_distance_total: number; exercise_days: number;
+    bp_sys_avg: number | null; bp_dia_avg: number | null; sugar_avg: number | null;
+    weight_latest: number | null; temp_latest: number | null;
+}
+
+interface TrackingSeries {
+    date: string;
+    energy: number | null; satisfaction: number | null; mood: number | null;
+    exercise_min: number | null; weight: number | null; bp_sys: number | null; sugar: number | null;
+}
+
+function TrackingSummary({ stats, series }: { stats: TrackingStats; series: TrackingSeries[] }) {
+    const has1to5 = stats.energy_avg !== null || stats.satisfaction_avg !== null || stats.mood_avg !== null;
+    const hasExercise = stats.exercise_days > 0;
+    const hasHealth = stats.bp_sys_avg !== null || stats.sugar_avg !== null || stats.weight_latest !== null || stats.temp_latest !== null;
+
+    return (
+        <div className="space-y-5">
+            {has1to5 && (
+                <div>
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-2">컨디션 평균</p>
+                    <div className="grid grid-cols-3 gap-3">
+                        <AvgCard label="에너지" value={stats.energy_avg} suffix="/5" color="bg-[#0F766E]" />
+                        <AvgCard label="만족도" value={stats.satisfaction_avg} suffix="/5" color="bg-amber-500" />
+                        <AvgCard label="기분" value={stats.mood_avg} suffix="/5" color="bg-rose-400" />
+                    </div>
+                    <SparkRow data={series.map((s) => ({ x: s.date, y: s.energy }))} color="#0F766E" max={5} label="에너지" />
+                    <SparkRow data={series.map((s) => ({ x: s.date, y: s.satisfaction }))} color="#F59E0B" max={5} label="만족도" />
+                    <SparkRow data={series.map((s) => ({ x: s.date, y: s.mood }))} color="#FB7185" max={5} label="기분" />
+                </div>
+            )}
+            {hasExercise && (
+                <div className="pt-4 border-t border-neutral-100">
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-2">운동</p>
+                    <div className="grid grid-cols-3 gap-3">
+                        <AvgCard label="누적 시간" value={stats.exercise_minutes_total} suffix="분" />
+                        <AvgCard label="누적 거리" value={stats.exercise_distance_total} suffix="km" />
+                        <AvgCard label="운동 일수" value={stats.exercise_days} suffix="일" />
+                    </div>
+                </div>
+            )}
+            {hasHealth && (
+                <div className="pt-4 border-t border-neutral-100">
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-2">건강</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {stats.bp_sys_avg !== null && stats.bp_dia_avg !== null && (
+                            <AvgCard label="혈압 평균" value={`${stats.bp_sys_avg}/${stats.bp_dia_avg}`} suffix="" />
+                        )}
+                        {stats.sugar_avg !== null && (
+                            <AvgCard label="혈당 평균" value={stats.sugar_avg} suffix="mg/dL" />
+                        )}
+                        {stats.weight_latest !== null && (
+                            <AvgCard label="체중 최근" value={stats.weight_latest} suffix="kg" />
+                        )}
+                        {stats.temp_latest !== null && (
+                            <AvgCard label="체온 최근" value={stats.temp_latest} suffix="°C" />
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function AvgCard({ label, value, suffix, color }: { label: string; value: number | string | null; suffix: string; color?: string }) {
+    return (
+        <div className="rounded-lg bg-neutral-50 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">{label}</p>
+            <p className="flex items-baseline justify-center gap-0.5">
+                <span className={`text-xl font-semibold text-neutral-900 ${color ? "" : ""}`}>
+                    {value ?? "—"}
+                </span>
+                {value != null && <span className="text-[10px] text-neutral-400">{suffix}</span>}
+            </p>
+            {color && <span className={`block mt-1 mx-auto h-0.5 w-6 rounded-full ${color}`} />}
+        </div>
+    );
+}
+
+function SparkRow({ data, color, max, label }: { data: Array<{ x: string; y: number | null }>; color: string; max: number; label: string }) {
+    const points = data.filter((p) => p.y !== null);
+    if (points.length === 0) return null;
+    const w = 100, h = 24;
+    const path = points.map((p, i) => {
+        const px = (i / Math.max(points.length - 1, 1)) * w;
+        const py = h - ((p.y as number) / max) * h;
+        return `${i === 0 ? "M" : "L"}${px},${py}`;
+    }).join(" ");
+    return (
+        <div className="flex items-center gap-2 mt-2 first:mt-3">
+            <span className="text-[10px] text-neutral-400 w-12 shrink-0">{label}</span>
+            <svg viewBox={`0 0 ${w} ${h}`} className="flex-1 h-6" preserveAspectRatio="none">
+                <path d={path} stroke={color} strokeWidth={1.4} fill="none" vectorEffect="non-scaling-stroke" />
+            </svg>
         </div>
     );
 }

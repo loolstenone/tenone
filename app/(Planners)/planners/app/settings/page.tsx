@@ -160,6 +160,9 @@ export default function SettingsPage() {
     const [icalUrl, setIcalUrl] = useState("");
     const [icalSubmit, setIcalSubmit] = useState(false);
     const [contextScope, setContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
+    const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
+    const [countryPref, setCountryPref] = useState<string[]>(["KR"]);
+    const [yearStartMonth, setYearStartMonth] = useState<number>(1);
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
     const [colorTheme, setColorTheme] = useState("teal");
@@ -195,6 +198,9 @@ export default function SettingsPage() {
                     setNotifyEmail(!!d.user.notify_email_briefing);
                     setNotifyPush(!!d.user.notify_push_briefing);
                     if (d.user.ai_context_scope?.length) setContextScope(d.user.ai_context_scope);
+                    setTrackingMetrics(Array.isArray(d.user.daily_tracking_metrics) ? d.user.daily_tracking_metrics : []);
+                    setCountryPref(Array.isArray(d.user.country_pref) && d.user.country_pref.length > 0 ? d.user.country_pref : ["KR"]);
+                    if (typeof d.user.year_start_month === "number") setYearStartMonth(d.user.year_start_month);
                     setSub({
                         status: d.user.subscription_status || 'free',
                         expires: d.user.subscription_expires_at || null,
@@ -416,11 +422,19 @@ export default function SettingsPage() {
     async function save(patch: Record<string, unknown>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/settings`, {
+            const res = await fetch(`/api/planners/settings`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patch),
             });
+            if (res.ok) {
+                showToast("저장되었습니다");
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showToast(`저장 실패: ${err.error || res.status}`, false);
+            }
+        } catch (e) {
+            showToast(`네트워크 오류: ${(e as Error).message}`, false);
         } finally {
             setSaving(false);
         }
@@ -764,6 +778,114 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
+                {/* 데일리 트래킹 */}
+                <section id="tracking" className="bg-white border border-neutral-200 rounded-xl p-6 scroll-mt-16">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-1">데일리 트래킹</h2>
+                    <p className="text-xs text-neutral-500 mb-4">
+                        Daily 페이지에 노출할 자기 점검 항목을 선택하세요. 모두 끄면 섹션이 숨겨집니다.
+                    </p>
+                    <div className="space-y-2">
+                        {[
+                            { key: "energy",       label: "에너지",   hint: "컨디션·체력 1~5" },
+                            { key: "satisfaction", label: "만족도",   hint: "오늘 하루 만족 1~5" },
+                            { key: "mood",         label: "기분",     hint: "감정 상태 1~5" },
+                            { key: "study",        label: "공부",     hint: "학습 집중도 1~5 + 메모" },
+                            { key: "faith",        label: "신앙",     hint: "영적 충만도 1~5 + 메모" },
+                            { key: "exercise",     label: "운동",     hint: "종류·시간(분)·거리(km)" },
+                            { key: "health",       label: "건강",     hint: "혈압·혈당·체중·체온" },
+                        ].map((m) => {
+                            const checked = trackingMetrics.includes(m.key);
+                            return (
+                                <label
+                                    key={m.key}
+                                    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer"
+                                >
+                                    <div>
+                                        <p className="text-sm text-neutral-900">{m.label}</p>
+                                        <p className="text-xs text-neutral-500 mt-0.5">{m.hint}</p>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={(e) => {
+                                            const next = e.target.checked
+                                                ? [...trackingMetrics, m.key]
+                                                : trackingMetrics.filter((k) => k !== m.key);
+                                            setTrackingMetrics(next);
+                                            save({ daily_tracking_metrics: next });
+                                        }}
+                                        className="w-4 h-4 accent-[#0F766E]"
+                                    />
+                                </label>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* Yearly 시작월 — 플래너 중간 시작자 대응 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-1">한 해 시작월</h2>
+                    <p className="text-xs text-neutral-500 mb-4">
+                        Yearly 페이지의 분기·반기 보기는 이 달부터 시작합니다. 플래너를 중간에 시작했다면 그 달로 설정하세요.
+                    </p>
+                    <select
+                        value={yearStartMonth}
+                        onChange={(e) => {
+                            const v = parseInt(e.target.value, 10);
+                            setYearStartMonth(v);
+                            save({ year_start_month: v });
+                        }}
+                        className="w-full md:w-48 text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
+                    >
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                            <option key={m} value={m}>{m}월부터 시작</option>
+                        ))}
+                    </select>
+                </section>
+
+                {/* 공휴일·절기 국가 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-1">공휴일·절기 국가</h2>
+                    <p className="text-xs text-neutral-500 mb-4">
+                        선택한 국가의 법정공휴일·절기가 일/주/월/연 캘린더에 자동 반영됩니다.
+                    </p>
+                    <div className="space-y-2">
+                        {[
+                            { code: "KR", label: "🇰🇷 한국", hint: "법정공휴일 + 24절기" },
+                            { code: "US", label: "🇺🇸 미국", hint: "Federal Holidays" },
+                            { code: "JP", label: "🇯🇵 일본", hint: "国民の祝日" },
+                            { code: "CN", label: "🇨🇳 중국", hint: "法定节假日" },
+                        ].map((c) => {
+                            const checked = countryPref.includes(c.code);
+                            return (
+                                <label
+                                    key={c.code}
+                                    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer"
+                                >
+                                    <div>
+                                        <p className="text-sm text-neutral-900">{c.label}</p>
+                                        <p className="text-xs text-neutral-500 mt-0.5">{c.hint}</p>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={(e) => {
+                                            const next = e.target.checked
+                                                ? [...countryPref, c.code]
+                                                : countryPref.filter((k) => k !== c.code);
+                                            // 최소 한 국가는 유지 (한국 default)
+                                            const final = next.length === 0 ? ["KR"] : next;
+                                            setCountryPref(final);
+                                            save({ country_pref: final });
+                                        }}
+                                        className="w-4 h-4 accent-[#0F766E]"
+                                    />
+                                </label>
+                            );
+                        })}
+                    </div>
+                </section>
+
                 {/* 알림 */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">알림</h2>
@@ -1050,7 +1172,7 @@ export default function SettingsPage() {
                 </section>
 
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">구독</h2>
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-4">구독 현황</h2>
 
                     {sub.status === 'active' ? (
                         <div className="space-y-3">
@@ -1062,6 +1184,11 @@ export default function SettingsPage() {
                                         PDF 구매자 혜택
                                     </span>
                                 )}
+                            </div>
+                            <div className="bg-neutral-50 rounded-lg p-3 space-y-1">
+                                <p className="text-[10px] uppercase tracking-widest text-neutral-400">이용 중</p>
+                                <p className="text-sm font-medium text-neutral-900">Planner&apos;s Planner AI · 무제한</p>
+                                <p className="text-[11px] text-neutral-500">능동 AI 비서 · 모든 템플릿 · Calendar/Notion/Slack 연동</p>
                             </div>
                             {sub.expires && (
                                 <p className="text-xs text-neutral-600">
@@ -1080,18 +1207,45 @@ export default function SettingsPage() {
                             <p className="text-xs text-neutral-500">
                                 {sub.status === 'expired' ? '구독이 만료되었습니다.' : '아직 구독하지 않으셨습니다.'}
                             </p>
-                            <Link
-                                href="/planners/purchase"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
-                            >
-                                연간 19,000원 구독 시작
-                            </Link>
+                            <div className="bg-gradient-to-br from-[#0F766E]/5 to-amber-50 border border-[#0F766E]/20 rounded-lg p-4">
+                                <p className="text-[10px] uppercase tracking-widest text-amber-700 font-semibold mb-1">🎉 런칭 프로모션</p>
+                                <p className="text-sm font-semibold text-neutral-900 mb-2">첫 1년 19,000원</p>
+                                <ul className="text-[11px] text-neutral-600 space-y-0.5 mb-3">
+                                    <li>• 능동 AI 비서 · 매일 아침 브리핑</li>
+                                    <li>• 59종 시각 템플릿 무제한</li>
+                                    <li>• Google Calendar / Notion / Slack 연동</li>
+                                    <li>• PDF 플래너 구매자 → 무료 1년</li>
+                                </ul>
+                                <Link
+                                    href="/planners/purchase"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
+                                >
+                                    구독 시작
+                                </Link>
+                            </div>
                             <p className="text-[10px] text-neutral-400">
-                                종이 플래너 구매자 → lools@tenone.biz로 무료 활성화 요청
+                                종이 플래너 구매자 → lools@tenone.biz 로 무료 활성화 요청
                             </p>
                         </div>
                     )}
                 </section>
+
+                {/* 변경사항 일괄 저장 — 자동 저장이 안 되는 경우 마지막 보루 */}
+                <SaveAllBar
+                    onSave={async () => {
+                        await save({
+                            mode,
+                            ai_morning_time: morning + ':00',
+                            ai_evening_time: evening + ':00',
+                            ai_tone: tone,
+                            ai_context_scope: contextScope,
+                            notify_email_briefing: notifyEmail,
+                            daily_tracking_metrics: trackingMetrics,
+                            country_pref: countryPref,
+                        });
+                    }}
+                    saving={saving}
+                />
             </div>
 
             {/* Toast */}
@@ -1103,6 +1257,26 @@ export default function SettingsPage() {
                     {toastMsg.text}
                 </div>
             )}
+        </div>
+    );
+}
+
+function SaveAllBar({ onSave, saving }: { onSave: () => Promise<void>; saving: boolean }) {
+    return (
+        <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 flex items-center justify-between gap-3">
+            <div>
+                <p className="text-sm text-neutral-900 font-medium">변경사항 일괄 저장</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                    각 항목은 변경 즉시 자동 저장됩니다. 저장이 안 된 것 같으면 이 버튼으로 한 번에 다시 저장하세요.
+                </p>
+            </div>
+            <button
+                onClick={onSave}
+                disabled={saving}
+                className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] disabled:opacity-50"
+            >
+                {saving ? "저장 중…" : "전체 저장"}
+            </button>
         </div>
     );
 }

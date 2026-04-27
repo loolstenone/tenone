@@ -1,6 +1,55 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-27 (세션 92 — Planners 모바일 PWA·HandNote·AI 브리핑 통합·Weekly/Monthly 정렬·Community 사이트화·온보딩 루프 fix)
+> 마지막 업데이트: 2026-04-27 (세션 93 — 통합 캘린더 시스템 + 4-View 통합 + 공공데이터 + Daily 우측 재구성 + 트래킹 7종 + Yearly 시작월/구간)
+
+---
+
+## 세션 93 핵심 성과 (2026-04-27)
+
+### 통합 캘린더 (Phase 2)
+- 단일 `planners_calendar_entries` 테이블 + `lib/planners/calendar-rules.ts` SSOT
+- 5 kinds × 4 views 노출 룰 매트릭스
+- Daily/Weekly/Monthly/Yearly 모두 통합 + reusable Editor/List
+- legacy anniversaries 일괄 마이그레이션
+
+### 공공 데이터 (Phase 3)
+- KR 공휴일 30개 + 24절기 시드 (member_id NULL 시스템 엔트리)
+- country_pref 기반 자동 노출 (4국 선택)
+- 공공데이터포털 특일정보 API 클라이언트 + cron(매년 1/1)
+
+### Settings 확장
+- 한 해 시작월 select
+- 공휴일·절기 국가 4종 다중 선택
+- 트래킹 7종(에너지·만족도·기분·공부·신앙·운동·건강), default 만족도
+- "구독 현황" 라벨 + 런칭 프로모션
+- 전체 저장 SaveAllBar
+
+### Daily UI 대수술
+- 별도 한 장면 카드 제거 → "오늘의 한 줄" 카테고리 8번째로 통합
+- 우측 컬럼: 미니 달력 + 트래킹(수정버튼) + 한 줄 + 프로젝트 카드
+- 4번째 노트 옵션 캔버스 추가
+- 서버 사이드 미디어 업로드(Storage RLS 우회)
+
+### Yearly 보기 개선
+- 분기/반기/연간 토글
+- 시작월 회전 적용
+- Anniversary 셀 텍스트 노출, 하단 목차 제거
+- 분기별 목표 "+ 추가" 명시 + 라벨 정정
+
+### 버그 fix 누적
+- Canvas API storageKey 누락
+- Settings update→upsert + 토스트
+- 노트 저장 에러 핸들링
+- Yearly 분기별 목표 입력
+- Anniversary 셀 텍스트
+- "오늘의 한 줄 결과"→"오늘의 한 줄" + 카테고리 8종
+
+### 환경변수 이슈 (사용자 조치 필요)
+`.env.local` 의 `# SUPABASE_SERVICE_ROLE_KEY=...` 주석 해제 필수. 미설정 시 모든 admin DB 작업이 "Invalid API key" 실패.
+
+---
+
+## 세션 92 핵심 성과 (2026-04-27)
 
 ---
 

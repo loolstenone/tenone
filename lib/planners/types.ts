@@ -64,7 +64,26 @@ export interface PlannerDaily {
     notes: string | null;
     notes_secondary: string | null;
     energy_level: number | null;
+    satisfaction_level: number | null;
+    mood_level: number | null;
+    exercise_type: string | null;
+    exercise_minutes: number | null;
+    exercise_distance: number | null;
+    exercise_note: string | null;
+    bp_systolic: number | null;
+    bp_diastolic: number | null;
+    blood_sugar: number | null;
+    body_weight: number | null;
+    body_temp: number | null;
+    health_note: string | null;
+    study_level: number | null;
+    study_note: string | null;
+    faith_level: number | null;
+    faith_note: string | null;
+    weather_temp: number | null;
+    weather_code: number | null;
     daily_result: string | null;
+    daily_result_category: string | null;
     created_at: string;
     updated_at: string;
 }

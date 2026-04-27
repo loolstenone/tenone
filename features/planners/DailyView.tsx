@@ -1,15 +1,21 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, Eye, Star } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, Eye, Star, Image as ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
+import { CalendarEntryList } from "./CalendarEntryList";
+import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import { DailyMomentsAuto } from "./DailyMoments";
+import { DailyProjectsCard } from "./DailyProjectsCard";
+import { DailyMiniMonth } from "./DailyMiniMonth";
+import type { CalendarEntry } from "@/lib/planners/calendar-rules";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
-import { ThisWeekCard } from "./ThisWeekCard";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
@@ -18,6 +24,26 @@ import { HandNote, type HandNoteData } from "./HandNote";
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
 type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
+
+export const RESULT_CATEGORIES = [
+    { key: "summary",  label: "정리",     hint: "오늘을 정리하면" },
+    { key: "quote",    label: "들은 말",   hint: "오늘 들은 말 한 마디" },
+    { key: "idea",     label: "아이디어", hint: "떠오른 생각" },
+    { key: "insight",  label: "인사이트", hint: "오늘의 깨달음" },
+    { key: "emotion",  label: "감정",     hint: "오늘의 감정 한 줄" },
+    { key: "learning", label: "배움",     hint: "오늘 배운 것" },
+    { key: "scene",    label: "한 장면", hint: "사진·동영상으로 남기는 오늘의 한 장면" },
+    { key: "free",     label: "자유",     hint: "자유로운 한 줄" },
+] as const;
+
+export function resultCategoryHint(key: string): string {
+    return RESULT_CATEGORIES.find((c) => c.key === key)?.hint ?? "오늘 어떤 한 줄을 남기시겠어요?";
+}
+
+export function resultCategoryLabel(key: string | null | undefined): string {
+    if (!key) return "";
+    return RESULT_CATEGORIES.find((c) => c.key === key)?.label ?? "";
+}
 
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -129,6 +155,27 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [tasks, setTasks] = useState<PlannerTask[]>([]);
     const [notesList, setNotesList] = useState<NoteItem[]>([]);
     const [energy, setEnergy] = useState<number | null>(null);
+    const [satisfaction, setSatisfaction] = useState<number | null>(null);
+    const [mood, setMood] = useState<number | null>(null);
+    const [resultCategory, setResultCategory] = useState<string>("");
+    const [exerciseType, setExerciseType] = useState("");
+    const [exerciseMinutes, setExerciseMinutes] = useState<string>("");
+    const [exerciseDistance, setExerciseDistance] = useState<string>("");
+    const [exerciseNote, setExerciseNote] = useState("");
+    const [bpSys, setBpSys] = useState<string>("");
+    const [bpDia, setBpDia] = useState<string>("");
+    const [bloodSugar, setBloodSugar] = useState<string>("");
+    const [bodyWeight, setBodyWeight] = useState<string>("");
+    const [bodyTemp, setBodyTemp] = useState<string>("");
+    const [healthNote, setHealthNote] = useState("");
+    const [study, setStudy] = useState<number | null>(null);
+    const [studyNote, setStudyNote] = useState("");
+    const [faith, setFaith] = useState<number | null>(null);
+    const [faithNote, setFaithNote] = useState("");
+    const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
+    const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
+    const [calEditorOpen, setCalEditorOpen] = useState(false);
+    const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [result, setResult] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -197,6 +244,42 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // 데일리 트래킹 사용자 설정 (Settings 에서 켠 항목만)
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/planners/settings');
+                if (cancelled || !res.ok) return;
+                const d = await res.json();
+                if (Array.isArray(d.user?.daily_tracking_metrics)) {
+                    setTrackingMetrics(d.user.daily_tracking_metrics);
+                }
+            } catch { /* noop */ }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    // 캘린더 엔트리 (당일 + 반복 row 전체) — 날짜 변경 시 refetch
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`/api/planners/calendar?from=${date}&to=${date}`);
+                if (cancelled || !res.ok) return;
+                const d = await res.json();
+                setCalEntries(d.entries ?? []);
+            } catch { /* noop */ }
+        })();
+        return () => { cancelled = true; };
+    }, [date]);
+
+    function refetchCalendar() {
+        fetch(`/api/planners/calendar?from=${date}&to=${date}`)
+            .then((r) => r.ok ? r.json() : null)
+            .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+    }
+
     // 누적 미완료 카운트 (과거 60일)
     useEffect(() => {
         let cancelled = false;
@@ -263,7 +346,24 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     }
                     setNotesList(parsed);
                     setEnergy(data.daily.energy_level);
+                    setSatisfaction(data.daily.satisfaction_level ?? null);
+                    setMood(data.daily.mood_level ?? null);
+                    setExerciseType(data.daily.exercise_type ?? "");
+                    setExerciseMinutes(data.daily.exercise_minutes != null ? String(data.daily.exercise_minutes) : "");
+                    setExerciseDistance(data.daily.exercise_distance != null ? String(data.daily.exercise_distance) : "");
+                    setExerciseNote(data.daily.exercise_note ?? "");
+                    setBpSys(data.daily.bp_systolic != null ? String(data.daily.bp_systolic) : "");
+                    setBpDia(data.daily.bp_diastolic != null ? String(data.daily.bp_diastolic) : "");
+                    setBloodSugar(data.daily.blood_sugar != null ? String(data.daily.blood_sugar) : "");
+                    setBodyWeight(data.daily.body_weight != null ? String(data.daily.body_weight) : "");
+                    setBodyTemp(data.daily.body_temp != null ? String(data.daily.body_temp) : "");
+                    setHealthNote(data.daily.health_note ?? "");
+                    setStudy(data.daily.study_level ?? null);
+                    setStudyNote(data.daily.study_note ?? "");
+                    setFaith(data.daily.faith_level ?? null);
+                    setFaithNote(data.daily.faith_note ?? "");
                     setResult(data.daily.daily_result || "");
+                    setResultCategory(data.daily.daily_result_category ?? "");
                     if (data.daily.weather_temp != null && data.daily.weather_code != null) {
                         setWeather({ temp: data.daily.weather_temp, code: data.daily.weather_code });
                     }
@@ -271,7 +371,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     setTasks([]);
                     setNotesList([]);
                     setEnergy(null);
+                    setSatisfaction(null);
+                    setMood(null);
+                    setExerciseType(""); setExerciseMinutes(""); setExerciseDistance(""); setExerciseNote("");
+                    setBpSys(""); setBpDia(""); setBloodSugar(""); setBodyWeight(""); setBodyTemp(""); setHealthNote("");
+                    setStudy(null); setStudyNote(""); setFaith(null); setFaithNote("");
                     setResult("");
+                    setResultCategory("");
                 }
             }
             setLoading(false);
@@ -282,11 +388,19 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     async function save(patch: Partial<PlannerDaily>) {
         setSaving(true);
         try {
-            await fetch(`/api/planners/daily`, {
+            const res = await fetch(`/api/planners/daily`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, ...patch }),
             });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                console.error("daily save failed", { patch: Object.keys(patch), err });
+                alert(`저장 실패: ${err.error || err.message || res.status}\n다시 시도해 주세요.`);
+            }
+        } catch (e) {
+            console.error("daily save network error", e);
+            alert(`네트워크 오류: ${(e as Error).message}`);
         } finally {
             setSaving(false);
         }
@@ -467,35 +581,35 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <div className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+            {/* Header — 모바일은 세로 스택, 데스크톱은 가로 분리 */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
+                <div className="min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                         <button
                             onClick={() => navigateDate(-1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
+                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
-                        <div className="flex items-center gap-2">
-                            <h1 className="font-serif text-3xl text-neutral-900">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap">
                                 {formattedDate}
                             </h1>
                             {isToday && (
-                                <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full">
+                                <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
                                     Today
                                 </span>
                             )}
                         </div>
                         <button
                             onClick={() => navigateDate(1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
+                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2">
+                    <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
                         {weather && (
                             <span className="text-neutral-600">
                                 {weatherEmoji(weather.code)} {weather.temp}°C
@@ -531,6 +645,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     {/* Tasks (col 2) */}
                     <div className="md:col-span-2 space-y-4">
                         <ExternalEventsBanner date={date} />
+                        <CalendarEntryList
+                            entries={calEntries}
+                            view="daily"
+                            from={date}
+                            to={date}
+                            label="오늘의 일정"
+                            onAdd={() => { setCalEditing(null); setCalEditorOpen(true); }}
+                            onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
+                        />
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xs text-neutral-400 flex items-center gap-1.5 flex-wrap">
@@ -556,7 +679,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                             <div className="space-y-0.5">
                                 {tasks.length === 0 && (
-                                    <p className="text-sm text-neutral-400 py-2">오늘의 할 일을 추가해 보세요.</p>
+                                    <p className="text-sm text-neutral-300 italic py-2">오늘의 할 일을 추가해 보세요.</p>
                                 )}
                                 {tasks.map((t, index) => (
                                     <TaskRow
@@ -591,7 +714,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         onChange={(e) => setNewTaskText(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') addTask(); }}
                                         placeholder="할 일 입력 후 Enter"
-                                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
                                     />
                                 </div>
                                 <p className="text-[10px] text-neutral-400 mt-2">좌측 핸들로 순서 변경 · 클릭으로 상태 전환</p>
@@ -789,7 +912,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         ))}
 
                         {/* Add note buttons — 비어있을 때도 항상 표시. 타이틀은 빈 값으로 시작해 placeholder가 예시처럼 보이게. */}
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: '', cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
@@ -820,49 +943,189 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 <LayoutTemplate className="h-4 w-4" />
                                 템플릿
                             </button>
+                            <button
+                                onClick={async () => {
+                                    const res = await fetch("/api/planners/canvases", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ title: `${date} 캔버스` }),
+                                    });
+                                    if (res.ok) {
+                                        const d = await res.json();
+                                        router.push(`/planners/app/canvas/${d.canvas.id}`);
+                                    } else {
+                                        const err = await res.json().catch(() => ({}));
+                                        alert(`캔버스 생성 실패: ${err.error || res.status}`);
+                                    }
+                                }}
+                                title="자유 캔버스 — 그림·도형·텍스트"
+                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-sky-400 hover:text-sky-600 transition-colors"
+                            >
+                                <ImageIcon className="h-4 w-4" />
+                                캔버스
+                            </button>
                         </div>
                     </div>
 
-                    {/* Right column */}
+                    {/* Right column — 해당월 달력 → 트래킹 → 한 줄 → 프로젝트 */}
                     <div className="space-y-4">
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-4">Energy</h2>
-                            <div className="flex items-center gap-1">
-                                {[1, 2, 3, 4, 5].map((n) => (
-                                    <button
-                                        key={n}
-                                        onClick={() => {
-                                            setEnergy(n);
-                                            save({ energy_level: n });
-                                        }}
-                                        className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                                            energy && n <= energy
-                                                ? "bg-[#0F766E] text-white"
-                                                : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
-                                        }`}
+                        <DailyMiniMonth date={date} />
+                        {trackingMetrics.length > 0 && (
+                            <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">Daily Tracking</h2>
+                                    <Link
+                                        href="/planners/app/settings#tracking"
+                                        className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
+                                        title="트래킹 항목 수정"
                                     >
-                                        {n}
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
+                                        <Pencil className="h-3 w-3" /> 수정
+                                    </Link>
+                                </div>
+                                <div className="space-y-4">
+                                    {trackingMetrics.includes("energy") && (
+                                        <TrackingRow
+                                            label="에너지" hint="컨디션·체력"
+                                            value={energy} activeColor="bg-[#0F766E]"
+                                            onPick={(n) => { setEnergy(n); save({ energy_level: n }); }}
+                                            onClear={() => { setEnergy(null); save({ energy_level: null }); }}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("satisfaction") && (
+                                        <TrackingRow
+                                            label="만족도" hint="오늘 하루 만족"
+                                            value={satisfaction} activeColor="bg-amber-500"
+                                            onPick={(n) => { setSatisfaction(n); save({ satisfaction_level: n }); }}
+                                            onClear={() => { setSatisfaction(null); save({ satisfaction_level: null }); }}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("mood") && (
+                                        <TrackingRow
+                                            label="기분" hint="감정 상태"
+                                            value={mood} activeColor="bg-rose-400"
+                                            onPick={(n) => { setMood(n); save({ mood_level: n }); }}
+                                            onClear={() => { setMood(null); save({ mood_level: null }); }}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("study") && (
+                                        <TrackingRowWithNote
+                                            label="공부" hint="학습 집중도"
+                                            value={study} activeColor="bg-sky-500"
+                                            note={studyNote}
+                                            placeholder="오늘 공부한 주제·범위"
+                                            onPick={(n) => { setStudy(n); save({ study_level: n }); }}
+                                            onClear={() => { setStudy(null); save({ study_level: null }); }}
+                                            onNoteChange={setStudyNote}
+                                            onNoteBlur={() => save({ study_note: studyNote || null })}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("faith") && (
+                                        <TrackingRowWithNote
+                                            label="신앙" hint="영적 충만도"
+                                            value={faith} activeColor="bg-violet-500"
+                                            note={faithNote}
+                                            placeholder="묵상·기도·예배 한 줄"
+                                            onPick={(n) => { setFaith(n); save({ faith_level: n }); }}
+                                            onClear={() => { setFaith(null); save({ faith_level: null }); }}
+                                            onNoteChange={setFaithNote}
+                                            onNoteBlur={() => save({ faith_note: faithNote || null })}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("exercise") && (
+                                        <ExerciseBlock
+                                            type={exerciseType} minutes={exerciseMinutes} distance={exerciseDistance} note={exerciseNote}
+                                            onChange={(p) => {
+                                                if (p.type !== undefined) setExerciseType(p.type);
+                                                if (p.minutes !== undefined) setExerciseMinutes(p.minutes);
+                                                if (p.distance !== undefined) setExerciseDistance(p.distance);
+                                                if (p.note !== undefined) setExerciseNote(p.note);
+                                            }}
+                                            onSave={() => save({
+                                                exercise_type: exerciseType || null,
+                                                exercise_minutes: exerciseMinutes ? parseInt(exerciseMinutes, 10) : null,
+                                                exercise_distance: exerciseDistance ? parseFloat(exerciseDistance) : null,
+                                                exercise_note: exerciseNote || null,
+                                            })}
+                                        />
+                                    )}
+                                    {trackingMetrics.includes("health") && (
+                                        <HealthBlock
+                                            sys={bpSys} dia={bpDia} sugar={bloodSugar} weight={bodyWeight} temp={bodyTemp} note={healthNote}
+                                            onChange={(p) => {
+                                                if (p.sys !== undefined) setBpSys(p.sys);
+                                                if (p.dia !== undefined) setBpDia(p.dia);
+                                                if (p.sugar !== undefined) setBloodSugar(p.sugar);
+                                                if (p.weight !== undefined) setBodyWeight(p.weight);
+                                                if (p.temp !== undefined) setBodyTemp(p.temp);
+                                                if (p.note !== undefined) setHealthNote(p.note);
+                                            }}
+                                            onSave={() => save({
+                                                bp_systolic: bpSys ? parseInt(bpSys, 10) : null,
+                                                bp_diastolic: bpDia ? parseInt(bpDia, 10) : null,
+                                                blood_sugar: bloodSugar ? parseInt(bloodSugar, 10) : null,
+                                                body_weight: bodyWeight ? parseFloat(bodyWeight) : null,
+                                                body_temp: bodyTemp ? parseFloat(bodyTemp) : null,
+                                                health_note: healthNote || null,
+                                            })}
+                                        />
+                                    )}
+                                </div>
+                            </section>
+                        )}
 
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">오늘의 한 줄 결과</h2>
-                            <textarea
-                                value={result}
-                                onChange={(e) => setResult(e.target.value)}
-                                onBlur={() => save({ daily_result: result })}
-                                placeholder="오늘 어떤 성취가 있었나요?"
-                                rows={4}
-                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none"
-                            />
+                            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">오늘의 한 줄</h2>
+                            <div className="flex flex-wrap gap-1 mb-2.5">
+                                {RESULT_CATEGORIES.map((c) => {
+                                    const active = resultCategory === c.key;
+                                    return (
+                                        <button
+                                            key={c.key}
+                                            onClick={() => {
+                                                const next = active ? "" : c.key;
+                                                setResultCategory(next);
+                                                save({ daily_result_category: next || null });
+                                            }}
+                                            className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${
+                                                active
+                                                    ? "bg-[#0F766E] text-white"
+                                                    : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                                            }`}
+                                            title={c.hint}
+                                        >
+                                            {c.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {resultCategory === "scene" ? (
+                                <DailyMomentsAuto date={date} compact />
+                            ) : (
+                                <textarea
+                                    value={result}
+                                    onChange={(e) => setResult(e.target.value)}
+                                    onBlur={() => save({ daily_result: result })}
+                                    placeholder={resultCategoryHint(resultCategory)}
+                                    rows={4}
+                                    className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none"
+                                />
+                            )}
                         </section>
 
-                        <ThisWeekCard date={date} />
+                        <DailyProjectsCard />
                     </div>
                 </div>
             )}
+
+            {/* Calendar Entry Editor Modal */}
+            <CalendarEntryEditor
+                open={calEditorOpen}
+                onClose={() => { setCalEditorOpen(false); setCalEditing(null); }}
+                onSaved={() => refetchCalendar()}
+                onDeleted={() => refetchCalendar()}
+                initial={calEditing ?? undefined}
+                defaultDate={date}
+            />
 
             {/* Note Expand Modal */}
             {expandedNote && (() => {
@@ -970,10 +1233,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 </div>
                             ) : (
                                 <div className="flex-1 flex flex-col overflow-hidden">
-                                    {/* Column headers */}
-                                    <div className="flex divide-x divide-neutral-200 border-b border-neutral-100 shrink-0">
-                                        <p className="w-[22%] shrink-0 px-4 py-2 text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">단서 · 키워드</p>
-                                        <div className="flex-1 flex items-center justify-between px-4 py-2">
+                                    {/* Column headers — 행의 삭제 버튼(w-6)과 폭 정렬 */}
+                                    <div className="flex border-b border-neutral-100 shrink-0">
+                                        <div className="w-6 shrink-0" aria-hidden />
+                                        <div className="w-[22%] shrink-0 border-l border-neutral-200 px-4 py-2">
+                                            <p className="text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">단서 · 키워드</p>
+                                        </div>
+                                        <div className="flex-1 border-l border-neutral-200 flex items-center justify-between px-4 py-2">
                                             <p className="text-[9px] uppercase tracking-widest text-neutral-300 font-semibold">노트</p>
                                             <p className="text-[9px] text-neutral-300 hidden sm:block">
                                                 <kbd className="font-mono">Enter</kbd> 새 주제 &nbsp;·&nbsp; <kbd className="font-mono">Shift+Enter</kbd> 줄바꿈
@@ -1065,7 +1331,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             {/* Template Picker Modal */}
             {showTemplatePicker && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={() => setShowTemplatePicker(false)}>
-                    <div className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[80vh] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
                             <div className="flex items-center gap-2">
@@ -1231,22 +1497,38 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onDragStar
 
             {/* Time badge */}
             {editingTime ? (
-                <input
-                    type="time"
-                    defaultValue={task.time || ""}
-                    autoFocus
-                    onBlur={(e) => {
-                        onTimeChange(e.target.value);
-                        setEditingTime(false);
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === 'Escape') {
-                            onTimeChange((e.target as HTMLInputElement).value);
-                            setEditingTime(false);
-                        }
-                    }}
-                    className="text-xs w-[68px] border border-[#0F766E] rounded px-1 py-0.5 focus:outline-none"
-                />
+                <span className="inline-flex items-center gap-0.5 shrink-0">
+                    <input
+                        type="time"
+                        defaultValue={task.time || ""}
+                        autoFocus
+                        onChange={(e) => onTimeChange(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === 'Escape') {
+                                onTimeChange((e.target as HTMLInputElement).value);
+                                setEditingTime(false);
+                            }
+                        }}
+                        className="text-xs w-[68px] border border-[#0F766E] rounded px-1 py-0.5 focus:outline-none"
+                    />
+                    {/* 모바일에서 확인 버튼 — onChange가 즉시 저장하므로 단순 닫기 역할 */}
+                    <button
+                        type="button"
+                        onClick={() => setEditingTime(false)}
+                        className="px-1.5 py-0.5 rounded bg-[#0F766E] text-white text-[10px] font-semibold hover:bg-[#0d5e56]"
+                        title="확인"
+                    >
+                        확인
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => { onTimeChange(""); setEditingTime(false); }}
+                        className="px-1 py-0.5 rounded text-neutral-400 hover:text-rose-500 text-[10px]"
+                        title="시간 지우기"
+                    >
+                        ×
+                    </button>
+                </span>
             ) : (
                 <button
                     onClick={() => setEditingTime(true)}
@@ -1276,3 +1558,128 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onDragStar
         </div>
     );
 }
+
+interface ExerciseBlockProps {
+    type: string; minutes: string; distance: string; note: string;
+    onChange: (patch: { type?: string; minutes?: string; distance?: string; note?: string }) => void;
+    onSave: () => void;
+}
+
+function ExerciseBlock({ type, minutes, distance, note, onChange, onSave }: ExerciseBlockProps) {
+    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]";
+    return (
+        <div>
+            <p className="text-xs font-semibold text-neutral-700 mb-2">운동 <span className="text-[10px] text-neutral-400 ml-1 font-normal">종류·시간·거리</span></p>
+            <div className="grid grid-cols-2 gap-2">
+                <input className={cls + " col-span-2"} placeholder="종류 (예: 러닝, 웨이트, 요가)" value={type} onChange={(e) => onChange({ type: e.target.value })} onBlur={onSave} />
+                <input className={cls} placeholder="시간 (분)" value={minutes} onChange={(e) => onChange({ minutes: e.target.value.replace(/[^0-9]/g, "") })} onBlur={onSave} inputMode="numeric" />
+                <input className={cls} placeholder="거리 (km)" value={distance} onChange={(e) => onChange({ distance: e.target.value.replace(/[^0-9.]/g, "") })} onBlur={onSave} inputMode="decimal" />
+                <input className={cls + " col-span-2 text-xs"} placeholder="메모" value={note} onChange={(e) => onChange({ note: e.target.value })} onBlur={onSave} />
+            </div>
+        </div>
+    );
+}
+
+interface HealthBlockProps {
+    sys: string; dia: string; sugar: string; weight: string; temp: string; note: string;
+    onChange: (patch: { sys?: string; dia?: string; sugar?: string; weight?: string; temp?: string; note?: string }) => void;
+    onSave: () => void;
+}
+
+function HealthBlock({ sys, dia, sugar, weight, temp, note, onChange, onSave }: HealthBlockProps) {
+    const cls = "w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]";
+    const onlyNum = (v: string, dec = false) => v.replace(dec ? /[^0-9.]/g : /[^0-9]/g, "");
+    return (
+        <div>
+            <p className="text-xs font-semibold text-neutral-700 mb-2">건강 <span className="text-[10px] text-neutral-400 ml-1 font-normal">혈압·혈당·체중·체온</span></p>
+            <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <input className={cls} placeholder="수축기 (mmHg)" value={sys} onChange={(e) => onChange({ sys: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
+                    <input className={cls} placeholder="이완기 (mmHg)" value={dia} onChange={(e) => onChange({ dia: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
+                </div>
+                <input className={cls} placeholder="혈당 (mg/dL)" value={sugar} onChange={(e) => onChange({ sugar: onlyNum(e.target.value) })} onBlur={onSave} inputMode="numeric" />
+                <div className="grid grid-cols-2 gap-2">
+                    <input className={cls} placeholder="체중 (kg)" value={weight} onChange={(e) => onChange({ weight: onlyNum(e.target.value, true) })} onBlur={onSave} inputMode="decimal" />
+                    <input className={cls} placeholder="체온 (°C)" value={temp} onChange={(e) => onChange({ temp: onlyNum(e.target.value, true) })} onBlur={onSave} inputMode="decimal" />
+                </div>
+                <input className={cls + " text-xs"} placeholder="메모 (증상·복약 등)" value={note} onChange={(e) => onChange({ note: e.target.value })} onBlur={onSave} />
+            </div>
+        </div>
+    );
+}
+
+interface TrackingRowWithNoteProps {
+    label: string; hint: string; value: number | null; activeColor: string;
+    note: string; placeholder: string;
+    onPick: (n: number) => void;
+    onClear: () => void;
+    onNoteChange: (v: string) => void;
+    onNoteBlur: () => void;
+}
+
+function TrackingRowWithNote(p: TrackingRowWithNoteProps) {
+    return (
+        <div>
+            <TrackingRow
+                label={p.label} hint={p.hint} value={p.value}
+                activeColor={p.activeColor}
+                onPick={p.onPick} onClear={p.onClear}
+            />
+            <input
+                type="text"
+                value={p.note}
+                onChange={(e) => p.onNoteChange(e.target.value)}
+                onBlur={p.onNoteBlur}
+                placeholder={p.placeholder}
+                className="w-full mt-1.5 text-xs border border-neutral-200 rounded px-2 py-1 placeholder:text-neutral-300 placeholder:italic focus:outline-none focus:border-[#0F766E]"
+            />
+        </div>
+    );
+}
+
+interface TrackingRowProps {
+    label: string;
+    hint: string;
+    value: number | null;
+    activeColor: string;
+    onPick: (n: number) => void;
+    onClear: () => void;
+}
+
+function TrackingRow({ label, hint, value, activeColor, onPick, onClear }: TrackingRowProps) {
+    return (
+        <div>
+            <div className="flex items-baseline justify-between mb-1.5">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-semibold text-neutral-700">{label}</span>
+                    <span className="text-[10px] text-neutral-400">{hint}</span>
+                </div>
+                {value !== null && (
+                    <button
+                        onClick={onClear}
+                        className="text-[10px] text-neutral-300 hover:text-rose-500 transition-colors"
+                        title="해제"
+                    >
+                        해제
+                    </button>
+                )}
+            </div>
+            <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                        key={n}
+                        onClick={() => onPick(n)}
+                        className={`flex-1 max-w-[40px] h-7 rounded text-xs font-medium transition-colors ${
+                            value && n <= value
+                                ? `${activeColor} text-white`
+                                : "bg-neutral-100 text-neutral-400 hover:bg-neutral-200"
+                        }`}
+                    >
+                        {n}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+

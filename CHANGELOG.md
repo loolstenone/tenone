@@ -4,6 +4,87 @@
 
 ---
 
+## 2026-04-27 — 세션 93 · 통합 캘린더 시스템 + 4-View 통합 + 공공데이터 · Daily 우측 재구성 · 프로젝트 카드 · 한 장면 카테고리 통합 · 트래킹 7종
+
+### 장소
+집
+
+### 변경 내용
+
+**Phase 2 — 통합 캘린더**
+- `sql/planners-calendar-entries.sql` — 단일 테이블(kind: anniversary/meeting/task/public_holiday/solar_term) + RLS + 트리거 + `country_pref` 컬럼
+- `lib/planners/calendar-rules.ts` — 노출 룰 SSOT(Daily/Weekly/Monthly/Yearly), `expandOccurrences` 반복 펼치기, KIND_COLORS/KIND_LABELS
+- `app/api/planners/calendar/{route,[id]}` — CRUD + country_pref 기반 시스템 엔트리 자동 포함
+- `features/planners/CalendarEntryEditor.tsx` · `CalendarEntryList.tsx` — 재사용 모달/리스트
+- 4 View 통합: Daily(오늘 일정 + Editor), Weekly(이번 주 일정), Monthly(셀 dot+title + 이달 일정), Yearly(올해 기념일·공휴일·절기)
+- `sql/planners-anniversaries-migration.sql` — legacy `planners_yearly.anniversaries` → `planners_calendar_entries(kind='anniversary', recurrence='yearly')` 일괄 이전
+
+**Phase 3 — 공공 데이터 자동 반영**
+- `sql/planners-seed-kr-holidays-2026-2027.sql` — 한국 법정공휴일 30개 + 24절기 24개 시스템 시드(member_id NULL 허용 + RLS 정책 갱신)
+- `lib/planners/public-holidays.ts` — 공공데이터포털 특일정보·24절기 API 클라이언트
+- `app/api/planners/cron/holidays/route.ts` + `vercel.json` — 매년 1/1 자동 prefetch (CRON_SECRET 인증)
+- `KOREA_HOLIDAYS_API_KEY` 환경변수 추가 필요
+
+**Settings 신규 섹션**
+- 공휴일·절기 국가 4종(🇰🇷·🇺🇸·🇯🇵·🇨🇳) 다중 선택, default ['KR']
+- 한 해 시작월 select (1~12월) — 플래너 중간 시작자 대응
+- 데일리 트래킹 7종(에너지·만족도·기분·공부·신앙·운동·건강), default `['satisfaction']`
+- 변경사항 저장 토스트 명시
+- "구독" → "구독 현황" + 런칭 프로모션 카드
+- 페이지 하단 "전체 저장" SaveAllBar (자동 저장 보정용)
+
+**오늘의 한 장면 통합**
+- 별도 카드 제거 → "오늘의 한 줄" 카테고리 8번째 항목으로 통합("scene")
+- 카테고리 선택 시 textarea → 미디어 업로드 폼 (compact 모드)
+- `app/api/planners/moments/upload/route.ts` 신설 — 서버 사이드 admin 업로드(Storage RLS 우회)
+- `sql/planners-daily-moments.sql` + `planners-moments-bucket.sql` — 50MB 한도, image+video MIME
+
+**Daily View 재구성**
+- 우측 컬럼: 미니 달력 → 데일리 트래킹(수정 버튼) → 오늘의 한 줄 → Project 카드
+- VRIEF/ThisWeekCard 제거(Weekly 페이지에서 다룸)
+- `DailyMiniMonth.tsx` — 7×6 미니 그리드, 일정 dot, 공휴일 색 구분
+- `DailyProjectsCard.tsx` — 활성 프로젝트 6개 + 노트 직진 CTA
+- 4-grid 노트 버튼: 기본/손글씨/템플릿/**캔버스** 추가
+- TrackingRowWithNote — 공부·신앙은 척도 + 메모 입력
+
+**Yearly 강화**
+- 분기/반기/연간 보기 토글 + 시작월 회전 적용
+- 신규 캘린더 엔트리 통합 리스트
+- YearlyAnalytics 3-탭(Task 통계/올해의 한 줄/트래킹) — SVG 라인·바 차트
+- 새 anniversaries 셀 텍스트 표시(8px → 10px), 하단 목차 제거
+
+**Monthly 강화**
+- MonthlyAnalytics 3-탭(Task/한 줄/트래킹) — Yearly 패턴
+- 셀별 캘린더 엔트리 dot+title (kind별 색)
+- 월간 RPC v2 — todo·canceled 카운트 + 월 평균 차트
+
+**버그 fix 누적**
+- Yearly 분기별 목표 입력: "+ 추가" 버튼 명시화 + 라벨 변경(올해의 테마→올해의 목표, 연간 목표→분기별 목표)
+- Anniversary 셀 ●→실제 텍스트 truncate
+- Daily/Project 노트 저장: 에러 핸들링 + alert
+- Canvas 메뉴: `auth: { storageKey: 'tenone-auth' }` 누락 fix
+- Settings 저장: update→upsert + 토스트
+- "오늘의 한 줄 결과"→"오늘의 한 줄" + 카테고리 7→8종(scene 추가)
+
+**모바일 UX**
+- AppTopNav UniverseMobileMenu(우측 2/3 슬라이드) 표준 적용
+- DailyView 헤더 세로 스택, Templates/AI Briefing 칩 날짜 아래
+- 햄버거 메뉴(구독/설치/검색/도움말/설정)
+- Daily/Project 템플릿 모달 고정 사이즈(h-[85vh] sm:h-[640px])
+- IndexView 12개월 캘린더 2열 그리드 + 세로 스택
+- Task 시간 입력에 명시적 "확인"/"×" 버튼
+
+### 환경변수 (배포 전)
+- `SUPABASE_SERVICE_ROLE_KEY` — Vercel 필수, 로컬 .env.local 주석 해제
+- `KOREA_HOLIDAYS_API_KEY` — 공공데이터포털(선택)
+- 기타: `ANTHROPIC_API_KEY`·`CRON_SECRET`·`TOSS_*`·`VAPID_*`·`GOOGLE_*`·`NEXT_PUBLIC_APP_URL`
+
+### 다음 패스 (D)
+- 프로젝트 타입(논문/설교/시험/런칭/결혼/창업/자녀교육/헬스케어/대학생/출산/마라톤/부업/자산/기타) + 추천 템플릿 매핑
+- 트래킹 항목 → 프로젝트 자동 생성 흐름
+
+---
+
 ## 2026-04-27 — 세션 92 · Planners 모바일 PWA·HandNote·AI 브리핑 통합·Weekly/Monthly 정렬·Community 사이트화·온보딩 루프 fix
 
 ### 장소

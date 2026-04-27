@@ -53,6 +53,10 @@
     {
       "path": "/api/planners/cron/briefings",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/planners/cron/holidays",
+      "schedule": "0 0 1 1 *"
     }
   ]
 }

@@ -15,6 +15,7 @@ async function getMember() {
                 getAll() { return cookieStore.getAll(); },
                 setAll() {},
             },
+            auth: { storageKey: 'tenone-auth' },
         }
     );
     const { data: { user } } = await supabase.auth.getUser();

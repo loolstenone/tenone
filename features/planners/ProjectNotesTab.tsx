@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star } from "lucide-react";
+import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star, Image as ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
@@ -82,7 +82,13 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
             if (res.ok) {
                 const d = await res.json();
                 setNotes([...notes, d.note]);
+            } else {
+                const err = await res.json().catch(() => ({}));
+                console.error("note add failed", err);
+                alert(`노트 추가 실패: ${err.error || res.status}`);
             }
+        } catch (e) {
+            alert(`네트워크 오류: ${(e as Error).message}`);
         } finally { setSaving(false); }
     }
 
@@ -129,7 +135,13 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                 setNotes([...notes, d.note]);
                 setPicker(false);
                 Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "project" });
+            } else {
+                const err = await res.json().catch(() => ({}));
+                console.error("template insert failed", err);
+                alert(`템플릿 삽입 실패: ${err.error || res.status}`);
             }
+        } catch (e) {
+            alert(`네트워크 오류: ${(e as Error).message}`);
         } finally { setSaving(false); }
     }
 
@@ -197,21 +209,63 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
 
     return (
         <div className="space-y-4">
-            {/* Action bar */}
-            <div className="flex items-center gap-2">
+            {/* Action bar — 4종 노트 옵션 */}
+            <div className="flex flex-wrap items-center gap-2">
                 <button
                     onClick={addBlankNote}
                     disabled={saving}
                     className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
                 >
-                    <Plus className="h-3.5 w-3.5" /> 빈 노트
+                    <Plus className="h-3.5 w-3.5" /> 기본 노트
+                </button>
+                <button
+                    onClick={async () => {
+                        const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ title: "손글씨 노트", content: "<!-- planners:handwriting -->\n" + JSON.stringify({ strokes: [], width: 600, height: 320 }) }),
+                        });
+                        if (res.ok) {
+                            const d = await res.json();
+                            setNotes([...notes, d.note]);
+                        } else {
+                            const err = await res.json().catch(() => ({}));
+                            alert(`손글씨 노트 추가 실패: ${err.error || res.status}`);
+                        }
+                    }}
+                    disabled={saving}
+                    title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                >
+                    <Pencil className="h-3.5 w-3.5" /> 손글씨 노트
                 </button>
                 <button
                     onClick={openPicker}
                     disabled={saving}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-violet-200 text-violet-700 rounded-lg text-sm hover:bg-violet-50 transition-colors disabled:opacity-50"
                 >
-                    <LayoutTemplate className="h-3.5 w-3.5" /> 템플릿에서 삽입
+                    <LayoutTemplate className="h-3.5 w-3.5" /> 템플릿
+                </button>
+                <button
+                    onClick={async () => {
+                        const res = await fetch("/api/planners/canvases", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ title: `프로젝트 캔버스` }),
+                        });
+                        if (res.ok) {
+                            const d = await res.json();
+                            window.location.href = `/planners/app/canvas/${d.canvas.id}`;
+                        } else {
+                            const err = await res.json().catch(() => ({}));
+                            alert(`캔버스 생성 실패: ${err.error || res.status}`);
+                        }
+                    }}
+                    disabled={saving}
+                    title="자유 캔버스 — 그림·도형·텍스트"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-sky-200 text-sky-700 rounded-lg text-sm hover:bg-sky-50 transition-colors disabled:opacity-50"
+                >
+                    <ImageIcon className="h-3.5 w-3.5" /> 캔버스
                 </button>
                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-400" />}
             </div>
@@ -261,7 +315,7 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                     onClick={() => setPicker(false)}
                 >
                     <div
-                        className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[80vh] shadow-2xl"
+                        className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[640px] shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}

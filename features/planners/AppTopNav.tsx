@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
+import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 
 
 interface Tab {
@@ -44,6 +46,18 @@ export function AppTopNav({
 }) {
     const pathname = usePathname();
     const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    // 라우트 변경 시 햄버거 메뉴 자동 닫기
+    useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+    // ESC 로 닫기
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [menuOpen]);
 
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
@@ -89,8 +103,8 @@ export function AppTopNav({
                 })}
             </nav>
 
-            {/* Right actions — 탭과 시각적 분리 */}
-            <div className="flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
+            {/* ── 데스크톱 우측 액션 (md 이상에만 표시) ────────────────── */}
+            <div className="hidden md:flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
                 {subscriptionStatus !== "active" && (
                     <Link
                         href="/planners/purchase"
@@ -101,9 +115,7 @@ export function AppTopNav({
                     </Link>
                 )}
 
-                <InstallButton
-                    className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors inline-flex"
-                >
+                <InstallButton className="p-1.5 rounded text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors inline-flex">
                     <Download className="h-4 w-4" />
                 </InstallButton>
 
@@ -157,6 +169,83 @@ export function AppTopNav({
                     </Link>
                 )}
             </div>
+
+            {/* ── 모바일 햄버거 (md 미만) ───────────────────────────── */}
+            <div className="md:hidden flex items-center gap-1 shrink-0 pl-1 ml-1 border-l border-neutral-100">
+                {userName && (
+                    <Link
+                        href="/profile"
+                        className="h-7 w-7 rounded-full shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
+                        title="유니버스 프로필"
+                    >
+                        {avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="h-full w-full bg-[#0F766E]/10 flex items-center justify-center text-[10px] font-bold text-[#0F766E]">
+                                {userName[0]}
+                            </span>
+                        )}
+                    </Link>
+                )}
+                <button
+                    type="button"
+                    onClick={() => setMenuOpen((o) => !o)}
+                    aria-label="메뉴"
+                    className="p-1.5 rounded text-neutral-600 hover:bg-neutral-100"
+                >
+                    <Menu className="h-4 w-4" />
+                </button>
+            </div>
+
+            {/* 모바일 햄버거 — UniverseMobileMenu 표준 (우측 2/3 슬라이드) */}
+            <UniverseMobileMenu
+                open={menuOpen}
+                onClose={() => setMenuOpen(false)}
+                brandName="PP AI"
+                bgClass="bg-white"
+                textTone="dark"
+            >
+                {subscriptionStatus !== "active" && (
+                    <Link
+                        href="/planners/purchase"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-[#0F766E] bg-[#0F766E]/5 hover:bg-[#0F766E]/10"
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        <span className="flex-1">구독</span>
+                        <span className="text-[10px] text-[#0F766E]/60">PP AI 1년 무제한</span>
+                    </Link>
+                )}
+                <InstallButton className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 w-full text-left">
+                    <Download className="h-4 w-4 text-[#0F766E]" />
+                    <span>앱 설치</span>
+                </InstallButton>
+                <Link
+                    href="/planners/app/search"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <Search className="h-4 w-4 text-neutral-400" />
+                    <span>검색</span>
+                </Link>
+                <Link
+                    href="/planners/app/help"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <HelpCircle className="h-4 w-4 text-neutral-400" />
+                    <span>도움말 / FAQ</span>
+                </Link>
+                <Link
+                    href="/planners/app/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <Settings className="h-4 w-4 text-neutral-400" />
+                    <span>설정</span>
+                </Link>
+            </UniverseMobileMenu>
         </header>
     );
 }
