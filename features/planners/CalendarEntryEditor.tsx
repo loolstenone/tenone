@@ -3,10 +3,14 @@
 // 통합 캘린더 엔트리 편집기 — Daily/Weekly/Monthly/Yearly 모두 같은 모달 사용
 // 신규/수정 모두 처리. is_system=true 엔트리는 편집 불가.
 
-import { useEffect, useState } from "react";
-import { Loader2, X, Trash2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Loader2, X, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/planners/calendar-rules";
 import { KIND_LABELS, KIND_COLORS } from "@/lib/planners/calendar-rules";
+import {
+    getLunarDate, lunarToSolar, getLunarMonths, getLunarMonthDays,
+    LUNAR_YEARS, LUNAR_YEARS_ANNIVERSARY,
+} from "@/lib/planners/holidays";
 
 type EditableEntry = Omit<CalendarEntry, "id" | "member_id" | "is_system" | "created_at" | "updated_at"> & {
     id?: string;
@@ -45,6 +49,15 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [recurrenceUntil, setRecurrenceUntil] = useState("");
     const [saving, setSaving] = useState(false);
 
+    // 날짜 입력 모드 토글
+    const [isLunar, setIsLunar] = useState(false);
+    const [lunarPickerOpen, setLunarPickerOpen] = useState(false);
+    // 음력 상태 (startDate와 항상 동기화)
+    const [lunarYear, setLunarYear] = useState(new Date().getFullYear());
+    const [lunarMonth, setLunarMonth] = useState(1);
+    const [lunarMonthLeap, setLunarMonthLeap] = useState(false);
+    const [lunarDay, setLunarDay] = useState(1);
+
     const isEdit = !!initial?.id;
     const isReadOnly = !!initial?.is_system;
 
@@ -53,12 +66,41 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
         setKind((initial?.kind as CalendarKind) || "meeting");
         setTitle(initial?.title || "");
         setDescription(initial?.description || "");
-        setStartDate(initial?.start_date || defaultDate || todayStr());
+        const sd = initial?.start_date || defaultDate || todayStr();
+        setStartDate(sd);
         setStartTime(initial?.start_time || "");
         setEndTime(initial?.end_time || "");
         setRecurrence(initial?.recurrence || "none");
         setRecurrenceUntil(initial?.recurrence_until || "");
-    }, [open, initial, defaultDate]);
+        setIsLunar(false);
+        syncLunarFromSolar(sd);
+    }, [open, initial, defaultDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    function syncLunarFromSolar(solar: string) {
+        const lunar = getLunarDate(solar);
+        if (lunar) {
+            setLunarYear(lunar.year);
+            setLunarMonth(lunar.month);
+            setLunarMonthLeap(lunar.isLeap);
+            setLunarDay(lunar.day);
+        }
+    }
+
+    // 테이블 범위 밖이면 1~12월 기본 목록
+    const lunarMonths = useMemo(() => {
+        const m = getLunarMonths(lunarYear);
+        return m.length > 0 ? m : Array.from({ length: 12 }, (_, i) => ({ month: i + 1, isLeap: false }));
+    }, [lunarYear]);
+    const lunarDayCount = useMemo(
+        () => getLunarMonthDays(lunarYear, lunarMonth, lunarMonthLeap),
+        [lunarYear, lunarMonth, lunarMonthLeap]
+    );
+
+    // 음력 변경 → 양력 업데이트
+    function applyLunar(y: number, m: number, d: number, leap: boolean) {
+        const solar = lunarToSolar(y, m, Math.min(d, getLunarMonthDays(y, m, leap)), leap);
+        if (solar) setStartDate(solar);
+    }
 
     // kind 가 바뀌면 허용되지 않는 recurrence 는 'none' 으로 리셋
     useEffect(() => {
@@ -171,38 +213,142 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                         />
                     </div>
 
-                    {/* Date */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">날짜</label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                disabled={isReadOnly}
-                                className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
-                            />
-                        </div>
-                        {kind !== "anniversary" && (
-                            <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">시간 (선택)</label>
-                                <div className="flex items-center gap-1">
-                                    <input
-                                        type="time"
-                                        value={startTime}
-                                        onChange={(e) => setStartTime(e.target.value)}
-                                        disabled={isReadOnly}
-                                        className="flex-1 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
-                                    />
-                                    <span className="text-xs text-neutral-300">~</span>
-                                    <input
-                                        type="time"
-                                        value={endTime}
-                                        onChange={(e) => setEndTime(e.target.value)}
-                                        disabled={isReadOnly}
-                                        className="flex-1 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
-                                    />
+                    {/* Date — 양력/음력 토글 입력 */}
+                    <div className="space-y-2">
+                        {/* 모드 토글 */}
+                        {!isReadOnly && (
+                            <div className="flex gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLunar(false)}
+                                    className={`px-3 py-1 rounded text-xs font-medium border transition-colors ${
+                                        !isLunar ? "bg-neutral-800 text-white border-neutral-800" : "bg-white text-neutral-400 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >양력</button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLunar(true)}
+                                    className={`px-3 py-1 rounded text-xs font-medium border transition-colors ${
+                                        isLunar ? "bg-neutral-800 text-white border-neutral-800" : "bg-white text-neutral-400 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >음력</button>
+                            </div>
+                        )}
+
+                        {!isLunar ? (
+                            /* ─── 양력: native date picker (한 곳) ─── */
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => {
+                                        setStartDate(e.target.value);
+                                        syncLunarFromSolar(e.target.value);
+                                    }}
+                                    disabled={isReadOnly}
+                                    className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
+                                />
+                                {kind !== "anniversary" && (
+                                    <div className="flex-1 flex items-center gap-1 min-w-0">
+                                        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isReadOnly}
+                                            className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                        <span className="text-xs text-neutral-300">~</span>
+                                        <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={isReadOnly}
+                                            className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            /* ─── 음력: 단일 버튼 + 캘린더 팝오버 (한 곳) ─── */
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="relative shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => setLunarPickerOpen((o) => !o)}
+                                            disabled={isReadOnly}
+                                            className="w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 text-left bg-white focus:outline-none focus:border-[#0F766E]"
+                                        >
+                                            {lunarYear}-{String(lunarMonth).padStart(2, "0")}{lunarMonthLeap ? "(윤)" : ""}-{String(lunarDay).padStart(2, "0")}
+                                        </button>
+                                        {lunarPickerOpen && (
+                                            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg p-3 z-20 w-[260px]">
+                                                {/* 연도 네비게이션 */}
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <button type="button"
+                                                        onClick={() => {
+                                                            const ny = lunarYear - 1;
+                                                            const yearList = kind === "anniversary" ? LUNAR_YEARS_ANNIVERSARY : LUNAR_YEARS;
+                                                            if (!yearList.includes(ny)) return;
+                                                            setLunarYear(ny);
+                                                            applyLunar(ny, lunarMonth, lunarDay, lunarMonthLeap);
+                                                        }}
+                                                        className="p-1 hover:bg-neutral-100 rounded">
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </button>
+                                                    <span className="text-sm font-medium">{lunarYear}년</span>
+                                                    <button type="button"
+                                                        onClick={() => {
+                                                            const ny = lunarYear + 1;
+                                                            const yearList = kind === "anniversary" ? LUNAR_YEARS_ANNIVERSARY : LUNAR_YEARS;
+                                                            if (!yearList.includes(ny)) return;
+                                                            setLunarYear(ny);
+                                                            applyLunar(ny, lunarMonth, lunarDay, lunarMonthLeap);
+                                                        }}
+                                                        className="p-1 hover:bg-neutral-100 rounded">
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                                {/* 월 그리드 */}
+                                                <div className="grid grid-cols-6 gap-1 mb-2">
+                                                    {lunarMonths.map(({ month, isLeap }) => {
+                                                        const active = month === lunarMonth && isLeap === lunarMonthLeap;
+                                                        return (
+                                                            <button key={`${month}-${isLeap}`} type="button"
+                                                                onClick={() => {
+                                                                    setLunarMonth(month);
+                                                                    setLunarMonthLeap(isLeap);
+                                                                    applyLunar(lunarYear, month, lunarDay, isLeap);
+                                                                }}
+                                                                className={`text-xs py-1 rounded ${active ? "bg-[#0F766E] text-white" : "hover:bg-neutral-100 text-neutral-600"}`}>
+                                                                {isLeap ? "윤" : ""}{month}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {/* 일 그리드 */}
+                                                <div className="grid grid-cols-7 gap-1">
+                                                    {Array.from({ length: lunarDayCount }, (_, i) => i + 1).map((d) => {
+                                                        const active = d === lunarDay;
+                                                        return (
+                                                            <button key={d} type="button"
+                                                                onClick={() => {
+                                                                    setLunarDay(d);
+                                                                    applyLunar(lunarYear, lunarMonth, d, lunarMonthLeap);
+                                                                    setLunarPickerOpen(false);
+                                                                }}
+                                                                className={`text-xs py-1 rounded ${active ? "bg-[#0F766E] text-white" : "hover:bg-neutral-100 text-neutral-700"}`}>
+                                                                {d}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {kind !== "anniversary" && (
+                                        <div className="flex-1 flex items-center gap-1 min-w-0">
+                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isReadOnly}
+                                                className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                            <span className="text-xs text-neutral-300">~</span>
+                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={isReadOnly}
+                                                className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                        </div>
+                                    )}
                                 </div>
+                                {kind === "anniversary" && !LUNAR_YEARS.includes(lunarYear) && (
+                                    <p className="text-[10px] text-amber-500">테이블 범위 외 — 근사 변환 적용</p>
+                                )}
                             </div>
                         )}
                     </div>

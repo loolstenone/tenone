@@ -135,6 +135,58 @@ const LUNAR_TABLE: LunarEntry[] = [
 
 export interface LunarDate { year: number; month: number; day: number; isLeap: boolean; }
 
+/** 음력 연도 목록 — 테이블 정밀 범위 */
+export const LUNAR_YEARS = [2024, 2025, 2026, 2027];
+
+/** 기념일용 확장 연도 목록 (1950~현재+2) */
+export const LUNAR_YEARS_ANNIVERSARY = Array.from(
+    { length: new Date().getFullYear() + 2 - 1950 + 1 },
+    (_, i) => 1950 + i
+);
+
+/** 특정 음력 연도의 월 목록 (isLeap 포함) */
+export function getLunarMonths(lunarYear: number): Array<{ month: number; isLeap: boolean }> {
+    const seen = new Set<string>();
+    const result: Array<{ month: number; isLeap: boolean }> = [];
+    for (const e of LUNAR_TABLE) {
+        if (e.y !== lunarYear) continue;
+        const key = `${e.m}-${e.l}`;
+        if (!seen.has(key)) { seen.add(key); result.push({ month: e.m, isLeap: e.l }); }
+    }
+    return result;
+}
+
+/** 해당 음력 월의 일수 */
+export function getLunarMonthDays(lunarYear: number, lunarMonth: number, isLeap = false): number {
+    const idx = LUNAR_TABLE.findIndex(e => e.y === lunarYear && e.m === lunarMonth && e.l === isLeap);
+    if (idx < 0 || idx + 1 >= LUNAR_TABLE.length) return 30;
+    const ms = new Date(LUNAR_TABLE[idx + 1].s).getTime() - new Date(LUNAR_TABLE[idx].s).getTime();
+    return Math.round(ms / 86400000);
+}
+
+/** 음력 → 양력 변환 (YYYY-MM-DD)
+ * - LUNAR_TABLE 범위(2024~2027) 내: 정밀 변환
+ * - 범위 밖(기념일 원본 연도 등): 2026년 기준 월/일만 변환 후 연도를 보정 */
+export function lunarToSolar(lunarYear: number, lunarMonth: number, lunarDay: number, isLeap = false): string | null {
+    // 정밀 변환 (테이블 보유 연도)
+    const exact = LUNAR_TABLE.find(e => e.y === lunarYear && e.m === lunarMonth && e.l === isLeap);
+    if (exact) {
+        const d = new Date(exact.s);
+        d.setDate(d.getDate() + lunarDay - 1);
+        return d.toISOString().slice(0, 10);
+    }
+    // 근사 변환 — 2026년 동일 월로 월/일만 추출 후 lunarYear로 연도 대체
+    const proxy = LUNAR_TABLE.find(e => e.y === 2026 && e.m === lunarMonth && e.l === false)
+               ?? LUNAR_TABLE.find(e => e.m === lunarMonth && e.l === false);
+    if (!proxy) return null;
+    const ref = new Date(proxy.s);
+    ref.setDate(ref.getDate() + lunarDay - 1);
+    // 연도를 lunarYear 기준으로 보정 (기념일 원본 연도 근사)
+    const yearOffset = lunarYear - proxy.y;
+    ref.setFullYear(ref.getFullYear() + yearOffset);
+    return ref.toISOString().slice(0, 10);
+}
+
 export function getLunarDate(dateStr: string): LunarDate | null {
     let lo = 0, hi = LUNAR_TABLE.length - 1, idx = -1;
     while (lo <= hi) {

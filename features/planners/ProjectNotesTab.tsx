@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star, Image as ImageIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star, Image as ImageIcon, GripVertical } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
@@ -58,6 +58,7 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
         catch { return new Set(); }
     });
     const [expandedNote, setExpandedNote] = useState<ProjectNote | null>(null);
+    const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
 
     async function load() {
         setLoading(true);
@@ -210,11 +211,11 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
     return (
         <div className="space-y-4">
             {/* Action bar — 4종 노트 옵션 */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-4 gap-2">
                 <button
                     onClick={addBlankNote}
                     disabled={saving}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
                 >
                     <Plus className="h-3.5 w-3.5" /> 기본 노트
                 </button>
@@ -235,14 +236,14 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                     }}
                     disabled={saving}
                     title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
                 >
                     <Pencil className="h-3.5 w-3.5" /> 손글씨 노트
                 </button>
                 <button
                     onClick={openPicker}
                     disabled={saving}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-violet-200 text-violet-700 rounded-lg text-sm hover:bg-violet-50 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-violet-400 hover:text-violet-600 transition-colors disabled:opacity-50"
                 >
                     <LayoutTemplate className="h-3.5 w-3.5" /> 템플릿
                 </button>
@@ -263,11 +264,10 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                     }}
                     disabled={saving}
                     title="자유 캔버스 — 그림·도형·텍스트"
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-sky-200 text-sky-700 rounded-lg text-sm hover:bg-sky-50 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-sky-400 hover:text-sky-600 transition-colors disabled:opacity-50"
                 >
                     <ImageIcon className="h-3.5 w-3.5" /> 캔버스
                 </button>
-                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-400" />}
             </div>
 
             {/* Notes */}
@@ -281,17 +281,49 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
             ) : (
                 <div className="space-y-3">
                     {notes.map((note, i) => (
-                        <NoteCard
+                        <div
                             key={note.id}
-                            note={note}
-                            isFirst={i === 0}
-                            isLast={i === notes.length - 1}
-                            onUpdate={(p) => updateNote(note.id, p)}
-                            onDelete={() => deleteNote(note.id)}
-                            onMoveUp={() => reorder(note.id, "up")}
-                            onMoveDown={() => reorder(note.id, "down")}
-                            onExpand={() => setExpandedNote(note)}
-                        />
+                            draggable
+                            onDragStart={() => { noteDragRef.current = { dragIdx: i, overIdx: i }; }}
+                            onDragOver={(e) => { e.preventDefault(); if (noteDragRef.current) noteDragRef.current.overIdx = i; }}
+                            onDrop={() => {
+                                if (!noteDragRef.current) return;
+                                const { dragIdx, overIdx } = noteDragRef.current;
+                                if (dragIdx === overIdx) { noteDragRef.current = null; return; }
+                                // order_index 스왑 방식 대신 전체 재정렬
+                                const next = [...notes];
+                                const [moved] = next.splice(dragIdx, 1);
+                                next.splice(overIdx, 0, moved);
+                                // order_index 재부여
+                                const reindexed = next.map((n, idx) => ({ ...n, order_index: idx }));
+                                setNotes(reindexed);
+                                // 서버에 일괄 저장
+                                reindexed.forEach(n => {
+                                    fetch(`/api/planners/projects/${projectId}/notes/${n.id}`, {
+                                        method: "PATCH",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ order_index: n.order_index }),
+                                    });
+                                });
+                                noteDragRef.current = null;
+                            }}
+                            onDragEnd={() => { noteDragRef.current = null; }}
+                            className="group/note-drag relative"
+                        >
+                            <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
+                                <GripVertical className="h-4 w-4 text-neutral-300" />
+                            </div>
+                            <NoteCard
+                                note={note}
+                                isFirst={i === 0}
+                                isLast={i === notes.length - 1}
+                                onUpdate={(p) => updateNote(note.id, p)}
+                                onDelete={() => deleteNote(note.id)}
+                                onMoveUp={() => reorder(note.id, "up")}
+                                onMoveDown={() => reorder(note.id, "down")}
+                                onExpand={() => setExpandedNote(note)}
+                            />
+                        </div>
                     ))}
                 </div>
             )}
@@ -551,8 +583,19 @@ function NoteCard({
             {grid ? (
                 <div className="p-4">{grid}</div>
             ) : isHand ? (
-                <div className="p-4">
-                    <HandNote value={handData} onChange={saveHandwriting} height={260} />
+                // 리스트: 고정 높이 프리뷰 — 편집은 크게 보기(모달)에서
+                <div
+                    className="relative h-32 overflow-hidden cursor-pointer group"
+                    onClick={onExpand}
+                >
+                    <div className="pointer-events-none px-3 pt-2">
+                        <HandNote value={handData} onChange={() => {}} height={120} />
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                        </span>
+                    </div>
                 </div>
             ) : editing ? (
                 <div className="p-4">

@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle } from "lucide-react";
+import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus } from "lucide-react";
 import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
-import { applyPlannersTheme } from "@/features/planners/PlannersThemeProvider";
+import { applyPlannersTheme, applyPlannersFont } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
 
 interface Integration {
@@ -166,10 +166,20 @@ export default function SettingsPage() {
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
     const [colorTheme, setColorTheme] = useState("teal");
-    const [fontFamily, setFontFamily] = useState("serif");
+    const [fontFamily, setFontFamily] = useState("sans");
     const [exporting, setExporting] = useState(false);
     const [toastMsg, setToastMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
+    const [projectLinks, setProjectLinks] = useState<Record<string, string | null>>(() => {
+        if (typeof window === "undefined") return {};
+        try { return JSON.parse(localStorage.getItem("planners_tracking_projects") || "{}"); }
+        catch { return {}; }
+    });
+    const [projectPickerMetric, setProjectPickerMetric] = useState<string | null>(null);
+    const [projects, setProjects] = useState<Array<{ id: string; title: string; status?: string }>>([]);
+    const [projectsLoading, setProjectsLoading] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState("");
+    const [creatingProject, setCreatingProject] = useState(false);
 
     const showToast = useCallback((text: string, ok = true) => {
         setToastMsg({ text, ok });
@@ -440,6 +450,51 @@ export default function SettingsPage() {
         }
     }
 
+    const METRIC_LABELS: Record<string, string> = {
+        energy: "에너지", satisfaction: "만족도", mood: "기분",
+        study: "공부", faith: "신앙", exercise: "운동", health: "건강",
+    };
+
+    async function openProjectPicker(metricKey: string) {
+        setProjectPickerMetric(metricKey);
+        setProjectsLoading(true);
+        try {
+            const res = await fetch("/api/planners/projects");
+            if (res.ok) {
+                const d = await res.json();
+                setProjects((d.projects || []).filter((p: { id: string; title: string; status?: string }) => p.status !== "completed"));
+            }
+        } finally { setProjectsLoading(false); }
+    }
+
+    function linkProject(metricKey: string, projectId: string | null) {
+        const next = { ...projectLinks, [metricKey]: projectId };
+        setProjectLinks(next);
+        if (typeof window !== "undefined") localStorage.setItem("planners_tracking_projects", JSON.stringify(next));
+        setProjectPickerMetric(null);
+        setNewProjectTitle("");
+    }
+
+    async function createAndLinkProject(metricKey: string) {
+        if (!newProjectTitle.trim()) return;
+        setCreatingProject(true);
+        try {
+            const res = await fetch("/api/planners/projects", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: newProjectTitle.trim(), description: `${METRIC_LABELS[metricKey] ?? metricKey} 트래킹 프로젝트` }),
+            });
+            if (res.ok) {
+                const d = await res.json();
+                const proj = d.project ?? d;
+                linkProject(metricKey, proj.id);
+                showToast(`"${proj.title}" 프로젝트 연결 완료`);
+            } else {
+                showToast("프로젝트 생성 실패", false);
+            }
+        } finally { setCreatingProject(false); }
+    }
+
     async function enablePush() {
         if (!pushSupported) return;
         setSaving(true);
@@ -507,7 +562,7 @@ export default function SettingsPage() {
 
     const COLOR_THEMES = [
         { key: "teal",   label: "Teal",   hex: "#0F766E" },
-        { key: "sage",   label: "Sage",   hex: "#4D7C6F" },
+        { key: "sage",   label: "Sage",   hex: "#4A7C59" },
         { key: "slate",  label: "Slate",  hex: "#475569" },
         { key: "rose",   label: "Rose",   hex: "#BE185D" },
         { key: "amber",  label: "Amber",  hex: "#B45309" },
@@ -515,9 +570,11 @@ export default function SettingsPage() {
     ];
 
     const FONT_OPTIONS = [
-        { key: "serif", label: "Serif", desc: "클래식 · 종이 감성" },
-        { key: "sans",  label: "Sans",  desc: "모던 · 깔끔" },
-        { key: "mono",  label: "Mono",  desc: "정밀 · 코드" },
+        { key: "serif",         label: "Serif",        desc: "클래식 · 종이 감성",   fontClass: "font-serif" },
+        { key: "strong-serif",  label: "강한 세리프",   desc: "묵직 · 고급 감성",    fontClass: "font-serif font-bold" },
+        { key: "sans",          label: "Sans",          desc: "모던 · 깔끔",          fontClass: "font-sans" },
+        { key: "gothic",        label: "고딕",          desc: "한국어 · 고딕 계열",   fontClass: "font-sans" },
+        { key: "mono",          label: "Mono",          desc: "정밀 · 코드",          fontClass: "font-mono" },
     ];
 
     async function exportBackup() {
@@ -566,7 +623,7 @@ export default function SettingsPage() {
     function applyFont(key: string) {
         setFontFamily(key);
         localStorage.setItem("planners_font_family", key);
-        document.documentElement.setAttribute("data-planners-font", key);
+        applyPlannersFont(key);
     }
 
     if (loading) {
@@ -589,13 +646,23 @@ export default function SettingsPage() {
                             <button
                                 key={m}
                                 onClick={async () => { setMode(m); await save({ mode: m }); router.refresh(); }}
-                                className={`py-3 rounded-lg text-sm transition-colors border-2 ${
+                                className={`py-3 px-2 rounded-lg text-sm transition-colors border-2 text-left ${
                                     mode === m
                                         ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-semibold"
                                         : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
                                 }`}
                             >
-                                {m === "weekly" ? "Weekly 모드" : "All in One 모드"}
+                                {m === "weekly" ? (
+                                    <span>
+                                        <span className="block font-semibold">Weekly</span>
+                                        <span className="block text-[11px] font-normal opacity-60">간단 모드</span>
+                                    </span>
+                                ) : (
+                                    <span>
+                                        <span className="block font-semibold">All in One</span>
+                                        <span className="block text-[11px] font-normal opacity-60">전문가 모드</span>
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -651,30 +718,26 @@ export default function SettingsPage() {
                 {/* Font Selection */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">폰트</h2>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                         {FONT_OPTIONS.map((f) => {
                             const active = fontFamily === f.key;
                             return (
                                 <button
                                     key={f.key}
                                     onClick={() => applyFont(f.key)}
-                                    className={`py-3 px-4 rounded-lg text-left border-2 transition-colors ${
+                                    className={`py-3 px-3 rounded-lg text-left border-2 transition-colors ${
                                         active
                                             ? "border-[#0F766E] bg-[#0F766E]/5"
                                             : "border-neutral-200 hover:border-neutral-300"
                                     }`}
                                 >
-                                    <span className={`block text-base mb-0.5 ${
-                                        f.key === "serif" ? "font-serif" :
-                                        f.key === "mono" ? "font-mono" :
-                                        "font-sans"
-                                    } ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>
+                                    <span className={`block text-base mb-0.5 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>
                                         Aa
                                     </span>
-                                    <span className={`text-[10px] font-semibold ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
+                                    <span className={`block text-[10px] font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
                                         {f.label}
                                     </span>
-                                    <span className="block text-[9px] text-neutral-400 mt-0.5">{f.desc}</span>
+                                    <span className="block text-[9px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
                                 </button>
                             );
                         })}
@@ -684,28 +747,6 @@ export default function SettingsPage() {
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">AI 비서</h2>
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs text-neutral-500 mb-2">아침 브리핑 시간</label>
-                                <input
-                                    type="time"
-                                    value={morning}
-                                    onChange={(e) => setMorning(e.target.value)}
-                                    onBlur={() => save({ ai_morning_time: morning })}
-                                    className="w-full text-base text-neutral-900 bg-neutral-50 rounded-lg px-3 py-2 focus:outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs text-neutral-500 mb-2">저녁 정리 시간</label>
-                                <input
-                                    type="time"
-                                    value={evening}
-                                    onChange={(e) => setEvening(e.target.value)}
-                                    onBlur={() => save({ ai_evening_time: evening })}
-                                    className="w-full text-base text-neutral-900 bg-neutral-50 rounded-lg px-3 py-2 focus:outline-none"
-                                />
-                            </div>
-                        </div>
                         <div>
                             <label className="block text-xs text-neutral-500 mb-2">AI 톤</label>
                             <div className="grid grid-cols-3 gap-2">
@@ -795,28 +836,60 @@ export default function SettingsPage() {
                             { key: "health",       label: "건강",     hint: "혈압·혈당·체중·체온" },
                         ].map((m) => {
                             const checked = trackingMetrics.includes(m.key);
+                            const linkedProjectId = projectLinks[m.key];
+                            const linkedProject = projects.find(p => p.id === linkedProjectId);
                             return (
-                                <label
+                                <div
                                     key={m.key}
-                                    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer"
+                                    className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
+                                        checked ? "border-neutral-200 hover:border-neutral-300" : "border-neutral-100 bg-neutral-50"
+                                    }`}
                                 >
-                                    <div>
-                                        <p className="text-sm text-neutral-900">{m.label}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm ${checked ? "text-neutral-900" : "text-neutral-400"}`}>{m.label}</p>
                                         <p className="text-xs text-neutral-500 mt-0.5">{m.hint}</p>
+                                        {checked && linkedProjectId && (
+                                            <button
+                                                onClick={() => linkProject(m.key, null)}
+                                                className="mt-1 flex items-center gap-1 text-[10px] text-[#0F766E] hover:text-red-500 transition-colors"
+                                                title="프로젝트 연결 해제"
+                                            >
+                                                <FolderOpen className="h-2.5 w-2.5" />
+                                                {linkedProject ? linkedProject.title : "연결됨"} ×
+                                            </button>
+                                        )}
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        onChange={(e) => {
-                                            const next = e.target.checked
-                                                ? [...trackingMetrics, m.key]
-                                                : trackingMetrics.filter((k) => k !== m.key);
-                                            setTrackingMetrics(next);
-                                            save({ daily_tracking_metrics: next });
-                                        }}
-                                        className="w-4 h-4 accent-[#0F766E]"
-                                    />
-                                </label>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {checked && (
+                                            <button
+                                                onClick={() => openProjectPicker(m.key)}
+                                                title="프로젝트와 연결"
+                                                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                                                    linkedProjectId
+                                                        ? "bg-[#0F766E]/10 text-[#0F766E] hover:bg-[#0F766E]/20"
+                                                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                                                }`}
+                                            >
+                                                <FolderOpen className="h-3 w-3" />
+                                                프로젝트화
+                                            </button>
+                                        )}
+                                        <label className="cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={checked}
+                                                onChange={(e) => {
+                                                    const next = e.target.checked
+                                                        ? [...trackingMetrics, m.key]
+                                                        : trackingMetrics.filter((k) => k !== m.key);
+                                                    setTrackingMetrics(next);
+                                                    save({ daily_tracking_metrics: next });
+                                                }}
+                                                className="w-4 h-4 accent-[#0F766E]"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
                             );
                         })}
                     </div>
@@ -826,7 +899,7 @@ export default function SettingsPage() {
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-1">한 해 시작월</h2>
                     <p className="text-xs text-neutral-500 mb-4">
-                        Yearly 페이지의 분기·반기 보기는 이 달부터 시작합니다. 플래너를 중간에 시작했다면 그 달로 설정하세요.
+                        처음 가입한 해에만 적용됩니다. 플래너를 중간에 시작했다면 그 달로 설정하세요. 다음 해부터는 1월로 자동 초기화됩니다.
                     </p>
                     <select
                         value={yearStartMonth}
@@ -1157,6 +1230,82 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                {/* 프로젝트화 모달 */}
+                {projectPickerMetric && (
+                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full p-5 max-h-[80vh] flex flex-col">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-neutral-900">
+                                    {METRIC_LABELS[projectPickerMetric] ?? projectPickerMetric} 프로젝트화
+                                </h3>
+                                <button onClick={() => { setProjectPickerMetric(null); setNewProjectTitle(""); }} className="p-1 rounded hover:bg-neutral-100">
+                                    <X className="h-4 w-4 text-neutral-400" />
+                                </button>
+                            </div>
+                            <p className="text-xs text-neutral-500 mb-4">
+                                이 트래킹 항목을 연결할 프로젝트를 선택하거나 새로 만드세요.
+                                Daily 트래킹 데이터가 해당 프로젝트 컨텍스트로 관리됩니다.
+                            </p>
+
+                            {/* 새 프로젝트 만들기 */}
+                            <div className="flex gap-2 mb-3">
+                                <input
+                                    type="text"
+                                    value={newProjectTitle}
+                                    onChange={(e) => setNewProjectTitle(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") createAndLinkProject(projectPickerMetric); }}
+                                    placeholder="새 프로젝트 이름 입력"
+                                    className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0F766E]"
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={() => createAndLinkProject(projectPickerMetric)}
+                                    disabled={creatingProject || !newProjectTitle.trim()}
+                                    className="flex items-center gap-1 px-3 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50 shrink-0"
+                                >
+                                    {creatingProject ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                                    만들기
+                                </button>
+                            </div>
+
+                            {/* 기존 프로젝트 목록 */}
+                            <div className="overflow-y-auto flex-1">
+                                {projectsLoading ? (
+                                    <div className="flex items-center justify-center py-6 text-neutral-400 text-sm">
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" /> 불러오는 중…
+                                    </div>
+                                ) : projects.length === 0 ? (
+                                    <p className="text-xs text-neutral-400 text-center py-4">
+                                        진행 중인 프로젝트가 없습니다.<br />위에서 새로 만드세요.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-1.5">
+                                        <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-2">기존 프로젝트 선택</p>
+                                        {projects.map((p) => {
+                                            const isLinked = projectLinks[projectPickerMetric] === p.id;
+                                            return (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => linkProject(projectPickerMetric, p.id)}
+                                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors border ${
+                                                        isLinked
+                                                            ? "border-[#0F766E] bg-[#0F766E]/5 text-[#0F766E] font-medium"
+                                                            : "border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+                                                    }`}
+                                                >
+                                                    <FolderOpen className="h-4 w-4 shrink-0 text-neutral-400" />
+                                                    <span className="flex-1 truncate">{p.title}</span>
+                                                    {isLinked && <Check className="h-3.5 w-3.5 shrink-0" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* 데이터 백업 */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-1">데이터 백업</h2>
@@ -1179,11 +1328,6 @@ export default function SettingsPage() {
                             <div className="flex items-center gap-2">
                                 <Check className="h-4 w-4 text-[#0F766E]" />
                                 <span className="text-sm font-semibold text-[#0F766E]">활성 구독</span>
-                                {sub.is_pdf_buyer && (
-                                    <span className="text-[10px] px-2 py-0.5 bg-amber-100 text-amber-700 rounded">
-                                        PDF 구매자 혜택
-                                    </span>
-                                )}
                             </div>
                             <div className="bg-neutral-50 rounded-lg p-3 space-y-1">
                                 <p className="text-[10px] uppercase tracking-widest text-neutral-400">이용 중</p>
@@ -1214,7 +1358,7 @@ export default function SettingsPage() {
                                     <li>• 능동 AI 비서 · 매일 아침 브리핑</li>
                                     <li>• 59종 시각 템플릿 무제한</li>
                                     <li>• Google Calendar / Notion / Slack 연동</li>
-                                    <li>• PDF 플래너 구매자 → 무료 1년</li>
+
                                 </ul>
                                 <Link
                                     href="/planners/purchase"

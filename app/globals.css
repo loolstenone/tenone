@@ -54,6 +54,14 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Planner's Planner AI — 폰트 테마 (PlannersThemeProvider가 설정) */
+html[data-planners-font] body,
+html[data-planners-font] input,
+html[data-planners-font] textarea,
+html[data-planners-font] button {
+  font-family: var(--planners-font, inherit);
+}
+
 /* ── TenOne 다크/라이트 테마 ── */
 
 :root, [data-theme="light"] {

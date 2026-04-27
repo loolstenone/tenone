@@ -82,29 +82,29 @@ export function DailyMiniMonth({ date }: Props) {
     }
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-                <button onClick={() => navigate(-1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400">
-                    <ChevronLeft className="h-3.5 w-3.5" />
+        <section className="bg-white border border-neutral-200 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1.5">
+                <button onClick={() => navigate(-1)} className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400">
+                    <ChevronLeft className="h-3 w-3" />
                 </button>
                 <Link
                     href={`/planners/app/monthly?year=${year}&month=${month}`}
-                    className="text-xs font-semibold text-neutral-700 hover:text-[#0F766E]"
+                    className="text-[11px] font-semibold text-neutral-700 hover:text-[#0F766E]"
                 >
                     {year}년 {month}월
                 </Link>
-                <button onClick={() => navigate(1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400">
-                    <ChevronRight className="h-3.5 w-3.5" />
+                <button onClick={() => navigate(1)} className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400">
+                    <ChevronRight className="h-3 w-3" />
                 </button>
             </div>
-            <div className="grid grid-cols-7 gap-0.5 text-center mb-1">
+            <div className="grid grid-cols-7 gap-px text-center mb-0.5">
                 {["월", "화", "수", "목", "금", "토", "일"].map((d, i) => (
-                    <span key={d} className={`text-[9px] ${i >= 5 ? (i === 6 ? "text-rose-400" : "text-rose-300") : "text-neutral-400"}`}>
+                    <span key={d} className={`text-[8px] ${i >= 5 ? (i === 6 ? "text-rose-400" : "text-rose-300") : "text-neutral-400"}`}>
                         {d}
                     </span>
                 ))}
             </div>
-            <div className="grid grid-cols-7 gap-0.5">
+            <div className="grid grid-cols-7 gap-px">
                 {cells.map((c) => {
                     const isToday = c.date === date;
                     const holiday = getHoliday(c.date);
@@ -117,7 +117,7 @@ export function DailyMiniMonth({ date }: Props) {
                         <Link
                             key={c.date}
                             href={`/planners/app/daily?date=${c.date}`}
-                            className={`relative aspect-square flex items-center justify-center text-[11px] rounded transition-colors
+                            className={`relative flex items-center justify-center text-[10px] rounded py-[3px] transition-colors
                                 ${isToday ? "bg-[#0F766E] text-white font-semibold"
                                 : !c.inMonth ? "text-neutral-200"
                                 : isHol || isSun ? "text-rose-500 hover:bg-rose-50"
@@ -127,7 +127,7 @@ export function DailyMiniMonth({ date }: Props) {
                         >
                             {c.dom}
                             {hasEntry && !isToday && (
-                                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#0F766E]" />
+                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-[#0F766E]" />
                             )}
                         </Link>
                     );

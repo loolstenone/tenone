@@ -11,6 +11,10 @@ const COLOR_MAP: Record<string, { hex: string; dark: string }> = {
     indigo: { hex: "#4338CA", dark: "#3730a3" },
 };
 
+// 모든 Planners 컴포넌트가 하드코딩하는 기본 teal 색상
+const BASE = "#0F766E";
+const BASE_DARK = "#0d5e56";
+
 export function applyPlannersTheme(key: string) {
     const theme = COLOR_MAP[key] ?? COLOR_MAP.teal;
     const root = document.documentElement;
@@ -26,36 +30,58 @@ export function applyPlannersTheme(key: string) {
 
     const h = theme.hex;
     const d = theme.dark;
-    // ⚠️ 반드시 ~= (whitespace-separated word 매치) 사용.
-    // *= (substring match)는 hover:bg-[hex]/5 같은 변형까지 모두 잡아서
-    // !important로 항상 색이 덮이는 치명적 버그를 만든다.
+
+    // teal이 선택된 경우 오버라이드 불필요 (BASE와 동일)
+    if (h === BASE) {
+        el.textContent = "";
+        return;
+    }
+
+    // 컴포넌트들이 BASE(#0F766E / #0d5e56)를 하드코딩하므로
+    // 새 테마 색상으로 치환하는 CSS를 주입한다.
     el.textContent = `
-[class~="bg-[${h}]"]{background-color:var(--planners-accent)!important}
-[class~="hover:bg-[${h}]"]:hover{background-color:var(--planners-accent)!important}
-[class~="text-[${h}]"]{color:var(--planners-accent)!important}
-[class~="hover:text-[${h}]"]:hover{color:var(--planners-accent)!important}
-[class~="border-[${h}]"]{border-color:var(--planners-accent)!important}
-[class~="hover:border-[${h}]"]:hover{border-color:var(--planners-accent)!important}
-[class~="focus:border-[${h}]"]:focus{border-color:var(--planners-accent)!important}
-[class~="from-[${h}]"]{--tw-gradient-from:var(--planners-accent)!important}
-[class~="to-[${h}]"]{--tw-gradient-to:var(--planners-accent)!important}
-[class~="ring-[${h}]"]{--tw-ring-color:var(--planners-accent)!important}
-[class~="bg-[${h}]/5"]{background-color:color-mix(in srgb,var(--planners-accent) 5%,transparent)!important}
-[class~="bg-[${h}]/10"]{background-color:color-mix(in srgb,var(--planners-accent) 10%,transparent)!important}
-[class~="bg-[${h}]/20"]{background-color:color-mix(in srgb,var(--planners-accent) 20%,transparent)!important}
-[class~="hover:bg-[${h}]/5"]:hover{background-color:color-mix(in srgb,var(--planners-accent) 5%,transparent)!important}
-[class~="hover:bg-[${h}]/10"]:hover{background-color:color-mix(in srgb,var(--planners-accent) 10%,transparent)!important}
-[class~="text-[${h}]/70"]{color:color-mix(in srgb,var(--planners-accent) 70%,transparent)!important}
-[class~="bg-[${d}]"]{background-color:var(--planners-accent-dark)!important}
-[class~="hover:bg-[${d}]"]:hover{background-color:var(--planners-accent-dark)!important}
-[class~="text-[${d}]"]{color:var(--planners-accent-dark)!important}
+[class~="bg-[${BASE}]"]{background-color:${h}!important}
+[class~="hover:bg-[${BASE}]"]:hover{background-color:${h}!important}
+[class~="text-[${BASE}]"]{color:${h}!important}
+[class~="hover:text-[${BASE}]"]:hover{color:${h}!important}
+[class~="border-[${BASE}]"]{border-color:${h}!important}
+[class~="hover:border-[${BASE}]"]:hover{border-color:${h}!important}
+[class~="focus:border-[${BASE}]"]:focus{border-color:${h}!important}
+[class~="from-[${BASE}]"]{--tw-gradient-from:${h}!important}
+[class~="to-[${BASE}]"]{--tw-gradient-to:${h}!important}
+[class~="ring-[${BASE}]"]{--tw-ring-color:${h}!important}
+[class~="accent-[${BASE}]"]{accent-color:${h}!important}
+[class~="bg-[${BASE}]/5"]{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
+[class~="bg-[${BASE}]/10"]{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
+[class~="bg-[${BASE}]/20"]{background-color:color-mix(in srgb,${h} 20%,transparent)!important}
+[class~="hover:bg-[${BASE}]/5"]:hover{background-color:color-mix(in srgb,${h} 5%,transparent)!important}
+[class~="hover:bg-[${BASE}]/10"]:hover{background-color:color-mix(in srgb,${h} 10%,transparent)!important}
+[class~="text-[${BASE}]/70"]{color:color-mix(in srgb,${h} 70%,transparent)!important}
+[class~="bg-[${BASE_DARK}]"]{background-color:${d}!important}
+[class~="hover:bg-[${BASE_DARK}]"]:hover{background-color:${d}!important}
+[class~="text-[${BASE_DARK}]"]{color:${d}!important}
 `;
+}
+
+const FONT_MAP: Record<string, string> = {
+    serif:         '"Georgia", "Times New Roman", serif',
+    "strong-serif": '"Playfair Display", "Georgia", "Times New Roman", serif',
+    sans:          'system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif',
+    gothic:        '"Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", "Microsoft YaHei", sans-serif',
+    mono:          '"Courier New", Courier, monospace',
+};
+
+export function applyPlannersFont(key: string) {
+    document.documentElement.setAttribute("data-planners-font", key);
+    document.documentElement.style.setProperty("--planners-font", FONT_MAP[key] ?? FONT_MAP.serif);
 }
 
 export function PlannersThemeProvider() {
     useEffect(() => {
-        const stored = localStorage.getItem("planners_color_theme") || "teal";
-        applyPlannersTheme(stored);
+        const storedTheme = localStorage.getItem("planners_color_theme") || "teal";
+        const storedFont = localStorage.getItem("planners_font_family") || "sans";
+        applyPlannersTheme(storedTheme);
+        applyPlannersFont(storedFont);
     }, []);
 
     return null;

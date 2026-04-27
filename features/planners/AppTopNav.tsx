@@ -18,7 +18,6 @@ interface Tab {
     external?: boolean;
 }
 
-// Order/labels MUST match AppSidebar.tsx NAV. Single source of truth for menu order.
 const TABS: Tab[] = [
     { href: "/planners/app/index",       label: "Index",       modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/daily",       label: "Today",       modes: ["weekly", "all_in_one"] },
@@ -30,7 +29,7 @@ const TABS: Tab[] = [
     { href: "/planners/app/canvas",      label: "Canvas",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
     { href: "/planners/community",       label: "Community",   modes: ["weekly", "all_in_one"], external: true },
-    // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
+    { href: "/planners/app/ai-briefing", label: "AI Briefing", modes: ["weekly", "all_in_one"] },
 ];
 
 export function AppTopNav({
@@ -206,6 +205,35 @@ export function AppTopNav({
                 bgClass="bg-white"
                 textTone="dark"
             >
+                {/* 네비게이션 메뉴 전체 */}
+                <div className="pb-1">
+                    {visibleTabs.map((tab) => {
+                        const hrefPath = tab.href.split("?")[0];
+                        const active = !tab.external && (pathname === hrefPath || pathname.startsWith(hrefPath + "/"));
+                        return (
+                            <Link
+                                key={tab.href}
+                                href={tab.href}
+                                target={tab.external ? "_blank" : undefined}
+                                rel={tab.external ? "noopener" : undefined}
+                                onClick={() => !tab.external && setMenuOpen(false)}
+                                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                                    active
+                                        ? "bg-[#0F766E] text-white font-medium"
+                                        : "text-neutral-700 hover:bg-neutral-50"
+                                }`}
+                            >
+                                <span>{tab.label}</span>
+                                {tab.external && <span className="text-[9px] opacity-50">↗</span>}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* 구분선 */}
+                <div className="h-px bg-neutral-100 my-1" />
+
+                {/* 유틸리티 */}
                 {subscriptionStatus !== "active" && (
                     <Link
                         href="/planners/purchase"

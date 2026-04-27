@@ -54,6 +54,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     const [activeQuarter, setActiveQuarter] = useState(1);
     const [viewMode, setViewMode] = useState<"Q" | "H" | "Y">("Q"); // 분기/반기/연간
     const [yearStartMonth, setYearStartMonth] = useState(1);   // 1~12
+    const [joinYear, setJoinYear] = useState<number | null>(null);
 
     // 사용자 시작월 fetch
     useEffect(() => {
@@ -65,6 +66,9 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                 const d = await res.json();
                 if (typeof d.user?.year_start_month === "number") {
                     setYearStartMonth(d.user.year_start_month);
+                }
+                if (d.user?.created_at) {
+                    setJoinYear(new Date(d.user.created_at).getFullYear());
                 }
             } catch { /* ignore */ }
         })();
@@ -344,9 +348,12 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                     </button>
                                 ))}
                             </div>
-                            {yearStartMonth !== 1 && (
-                                <span className="text-[10px] text-neutral-400">시작월: {yearStartMonth}월</span>
-                            )}
+                            {(() => {
+                                const esm = (joinYear !== null && year > joinYear) ? 1 : yearStartMonth;
+                                return esm !== 1 ? (
+                                    <span className="text-[10px] text-neutral-400">시작월: {esm}월 (가입 첫 해)</span>
+                                ) : null;
+                            })()}
                         </div>
 
                         {/* 섹션 네비게이션 — viewMode 에 따라 섹션 수 변동 */}
@@ -393,11 +400,13 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
 
                         {/* 그리드: 행=일(1~31), 열=N개월 (N=3/6/12 따라) */}
                         {(() => {
+                            // 처음 가입한 해에만 시작월 적용, 이후 해는 1월 고정
+                            const effectiveStartMonth = (joinYear !== null && year > joinYear) ? 1 : yearStartMonth;
                             // 시작월 + 보기 모드에 따른 섹션 계산
                             const sectionSize = viewMode === "Q" ? 3 : viewMode === "H" ? 6 : 12;
                             const monthsRotated: number[] = [];
                             for (let i = 0; i < 12; i++) {
-                                monthsRotated.push(((yearStartMonth - 1 + i) % 12) + 1);
+                                monthsRotated.push(((effectiveStartMonth - 1 + i) % 12) + 1);
                             }
                             const allSections: number[][] = [];
                             for (let i = 0; i < monthsRotated.length; i += sectionSize) {

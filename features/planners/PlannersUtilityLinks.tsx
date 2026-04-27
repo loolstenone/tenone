@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { LayoutTemplate, Sparkles } from "lucide-react";
 
-/**
- * 메인 네비에서 빠진 Templates / AI Briefing 을 본문 상단 서브 메뉴 링크로 제공.
- * Index / Today(DailyView) / Project 등 주요 본문 상단에 배치.
- */
 export function PlannersUtilityLinks({ className = "" }: { className?: string }) {
     return (
         <div className={`flex items-center gap-2 ${className}`}>

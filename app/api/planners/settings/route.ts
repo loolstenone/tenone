@@ -13,7 +13,12 @@ export async function GET() {
         .eq('member_id', memberId)
         .maybeSingle();
 
-    return NextResponse.json({ user: data });
+    // row 없거나 metrics 미설정이면 기본값 주입
+    const user = (data ?? {}) as Record<string, unknown>;
+    if (!Array.isArray(user.daily_tracking_metrics) || (user.daily_tracking_metrics as unknown[]).length === 0) {
+        user.daily_tracking_metrics = ["satisfaction"];
+    }
+    return NextResponse.json({ user });
 }
 
 export async function POST(req: Request) {

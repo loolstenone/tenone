@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, Eye, Star, Image as ImageIcon } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, Eye, Star, Image as ImageIcon, Sparkles, MapPin, Share2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
@@ -14,7 +14,7 @@ import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyProjectsCard } from "./DailyProjectsCard";
 import { DailyMiniMonth } from "./DailyMiniMonth";
-import type { CalendarEntry } from "@/lib/planners/calendar-rules";
+import { expandOccurrences, isVisible, KIND_COLORS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
@@ -174,11 +174,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [faithNote, setFaithNote] = useState("");
     const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
     const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
+    const [upcomingEntries, setUpcomingEntries] = useState<CalendarEntry[]>([]);
     const [calEditorOpen, setCalEditorOpen] = useState(false);
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [result, setResult] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [newTaskText, setNewTaskText] = useState("");
     const [newTaskTime, setNewTaskTime] = useState("");
     const [carrying, setCarrying] = useState(false);
@@ -196,6 +198,14 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     });
     const [expandedNote, setExpandedNote] = useState<NoteItem | null>(null);
     const [editingNoteIds, setEditingNoteIds] = useState<Set<string>>(new Set());
+    const [gpsEnabled, setGpsEnabled] = useState<boolean>(() => {
+        if (typeof window === "undefined") return false;
+        return localStorage.getItem("planners_gps_enabled") === "true";
+    });
+    const [gpsLocation, setGpsLocation] = useState<string>("");
+    const [shareCopied, setShareCopied] = useState(false);
+    // 노트 드래그 순서 변경
+    const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
 
     function toggleEditing(id: string) {
         setEditingNoteIds(prev => {
@@ -203,6 +213,48 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (next.has(id)) next.delete(id); else next.add(id);
             return next;
         });
+    }
+
+    async function toggleGps() {
+        const next = !gpsEnabled;
+        setGpsEnabled(next);
+        if (typeof window !== "undefined") localStorage.setItem("planners_gps_enabled", String(next));
+        if (!next) { setGpsLocation(""); return; }
+        if (!navigator.geolocation) { setGpsLocation("위치 접근 불가"); return; }
+        navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+                try {
+                    const r = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json&accept-language=ko`
+                    );
+                    if (r.ok) {
+                        const d = await r.json();
+                        const city = d.address?.city || d.address?.town || d.address?.county || "";
+                        const district = d.address?.suburb || d.address?.neighbourhood || d.address?.village || "";
+                        setGpsLocation([city, district].filter(Boolean).join(" ") || `${coords.latitude.toFixed(2)}, ${coords.longitude.toFixed(2)}`);
+                    }
+                } catch { setGpsLocation(""); }
+            },
+            () => setGpsLocation("")
+        );
+    }
+
+    async function shareResult() {
+        const shareText = [
+            date,
+            gpsEnabled && gpsLocation ? `📍 ${gpsLocation}` : "",
+            result?.trim(),
+        ].filter(Boolean).join("\n");
+        if (!shareText.includes("\n") && !result?.trim()) return;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: "Planner's Planner", text: shareText });
+            } else {
+                await navigator.clipboard.writeText(shareText);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+            }
+        } catch { /* user cancelled */ }
     }
 
     // Drag-and-drop state
@@ -244,18 +296,24 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // 데일리 트래킹 사용자 설정 (Settings 에서 켠 항목만)
+    // 데일리 트래킹 사용자 설정 (Settings 에서 켠 항목만, 미설정 시 만족도 기본)
     useEffect(() => {
         let cancelled = false;
         (async () => {
             try {
                 const res = await fetch('/api/planners/settings');
-                if (cancelled || !res.ok) return;
-                const d = await res.json();
-                if (Array.isArray(d.user?.daily_tracking_metrics)) {
-                    setTrackingMetrics(d.user.daily_tracking_metrics);
+                if (cancelled) return;
+                if (res.ok) {
+                    const d = await res.json();
+                    setTrackingMetrics(
+                        Array.isArray(d.user?.daily_tracking_metrics) && d.user.daily_tracking_metrics.length > 0
+                            ? d.user.daily_tracking_metrics
+                            : ["satisfaction"]
+                    );
+                } else {
+                    setTrackingMetrics(["satisfaction"]);
                 }
-            } catch { /* noop */ }
+            } catch { setTrackingMetrics(["satisfaction"]); }
         })();
         return () => { cancelled = true; };
     }, []);
@@ -279,6 +337,26 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
+
+    // 향후 4주 일정 (내일~28일 후, meeting·task 종류)
+    useEffect(() => {
+        let cancelled = false;
+        const d = new Date(date + "T00:00:00");
+        d.setDate(d.getDate() + 1);
+        const from = d.toISOString().slice(0, 10);
+        const d2 = new Date(date + "T00:00:00");
+        d2.setDate(d2.getDate() + 28);
+        const to = d2.toISOString().slice(0, 10);
+        (async () => {
+            try {
+                const res = await fetch(`/api/planners/calendar?from=${from}&to=${to}`);
+                if (cancelled || !res.ok) return;
+                const j = await res.json();
+                setUpcomingEntries(j.entries ?? []);
+            } catch { /* noop */ }
+        })();
+        return () => { cancelled = true; };
+    }, [date]);
 
     // 누적 미완료 카운트 (과거 60일)
     useEffect(() => {
@@ -396,11 +474,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 console.error("daily save failed", { patch: Object.keys(patch), err });
-                alert(`저장 실패: ${err.error || err.message || res.status}\n다시 시도해 주세요.`);
+                setSaveError("저장 실패 — 잠시 후 다시 시도해 주세요.");
+                setTimeout(() => setSaveError(null), 4000);
             }
         } catch (e) {
             console.error("daily save network error", e);
-            alert(`네트워크 오류: ${(e as Error).message}`);
+            setSaveError("네트워크 오류 — 연결을 확인해 주세요.");
+            setTimeout(() => setSaveError(null), 4000);
         } finally {
             setSaving(false);
         }
@@ -638,6 +718,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 </div>
             </div>
 
+            {saveError && (
+                <div className="mb-4 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex items-center justify-between">
+                    <span>{saveError}</span>
+                    <button onClick={() => setSaveError(null)} className="ml-3 text-red-400 hover:text-red-600">✕</button>
+                </div>
+            )}
+
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
@@ -721,8 +808,32 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </div>
                         </section>
 
-                        {/* Notes */}
-                        {notesList.map((note) => note.type === 'template' ? (
+                        {/* Notes 목록 — 드래그로 순서 변경 가능 */}
+                        {notesList.map((note, noteIdx) => (
+                        <div
+                            key={note.id}
+                            draggable
+                            onDragStart={() => { noteDragRef.current = { dragIdx: noteIdx, overIdx: noteIdx }; }}
+                            onDragOver={(e) => { e.preventDefault(); if (noteDragRef.current) noteDragRef.current.overIdx = noteIdx; }}
+                            onDrop={() => {
+                                if (!noteDragRef.current) return;
+                                const { dragIdx, overIdx } = noteDragRef.current;
+                                if (dragIdx === overIdx) return;
+                                const next = [...notesList];
+                                const [moved] = next.splice(dragIdx, 1);
+                                next.splice(overIdx, 0, moved);
+                                setNotesList(next);
+                                save({ notes: serializeNotes(next) });
+                                noteDragRef.current = null;
+                            }}
+                            onDragEnd={() => { noteDragRef.current = null; }}
+                            className="group/note-drag relative"
+                        >
+                            {/* 드래그 핸들 */}
+                            <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
+                                <GripVertical className="h-4 w-4 text-neutral-300" />
+                            </div>
+                        {note.type === 'template' ? (
                             /* Template block */
                             <TemplateNoteBlock
                                 key={note.id}
@@ -767,16 +878,23 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="p-3">
-                                    <HandNote
-                                        value={note.handwriting ?? null}
-                                        onChange={(d) => {
-                                            const next = notesList.map(n => n.id === note.id ? { ...n, handwriting: d } : n);
-                                            setNotesList(next);
-                                            save({ notes: serializeNotes(next) });
-                                        }}
-                                        height={300}
-                                    />
+                                {/* 리스트 상태: 고정 높이 프리뷰 — 편집은 크게 보기(모달)에서 */}
+                                <div
+                                    className="relative h-32 overflow-hidden cursor-pointer group"
+                                    onClick={() => setExpandedNote(note)}
+                                >
+                                    <div className="pointer-events-none px-3 pt-2">
+                                        <HandNote
+                                            value={note.handwriting ?? null}
+                                            onChange={() => {}}
+                                            height={120}
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                                        </span>
+                                    </div>
                                 </div>
                             </section>
                         ) : (
@@ -814,8 +932,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     </div>
                                 </div>
 
-                                {/* Cornell rows */}
-                                <div className="divide-y divide-neutral-100">
+                                {/* Cornell rows — 리스트 뷰 고정 높이 */}
+                                <div className="divide-y divide-neutral-100 max-h-[220px] overflow-y-auto">
                                     {note.rows.map((row, rIdx) => (
                                         <div key={row.id} className="flex group/row">
                                             {/* Delete button — always rendered, invisible when only 1 row */}
@@ -909,19 +1027,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     />
                                 </div>
                             </section>
+                        )}
+                        </div>
                         ))}
 
-                        {/* Add note buttons — 비어있을 때도 항상 표시. 타이틀은 빈 값으로 시작해 placeholder가 예시처럼 보이게. */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {/* 노트 추가 버튼 — 목록 맨 아래 */}
+                        <div className="grid grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: '', cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
-                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                                className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-3.5 w-3.5" />
                                 기본 노트
                             </button>
                             <button
@@ -931,16 +1051,16 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     save({ notes: serializeNotes(next) });
                                 }}
                                 title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
-                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
+                                className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-3.5 w-3.5" />
                                 손글씨 노트
                             </button>
                             <button
                                 onClick={openTemplatePicker}
-                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
+                                className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
                             >
-                                <LayoutTemplate className="h-4 w-4" />
+                                <LayoutTemplate className="h-3.5 w-3.5" />
                                 템플릿
                             </button>
                             <button
@@ -954,22 +1074,29 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         const d = await res.json();
                                         router.push(`/planners/app/canvas/${d.canvas.id}`);
                                     } else {
-                                        const err = await res.json().catch(() => ({}));
-                                        alert(`캔버스 생성 실패: ${err.error || res.status}`);
+                                        setSaveError("캔버스 생성 실패 — 잠시 후 다시 시도해 주세요.");
+                                        setTimeout(() => setSaveError(null), 4000);
                                     }
                                 }}
                                 title="자유 캔버스 — 그림·도형·텍스트"
-                                className="flex items-center justify-center gap-2 py-3 border border-dashed border-neutral-300 rounded-xl text-sm text-neutral-500 hover:border-sky-400 hover:text-sky-600 transition-colors"
+                                className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-sky-400 hover:text-sky-600 transition-colors"
                             >
-                                <ImageIcon className="h-4 w-4" />
+                                <ImageIcon className="h-3.5 w-3.5" />
                                 캔버스
                             </button>
                         </div>
+
                     </div>
 
-                    {/* Right column — 해당월 달력 → 트래킹 → 한 줄 → 프로젝트 */}
+                    {/* Right column — 달력 → 4주 일정·미팅 → 트래킹 → 프로젝트 → 한줄 */}
                     <div className="space-y-4">
+                        {/* 1. 당월 달력 */}
                         <DailyMiniMonth date={date} />
+
+                        {/* 2. 향후 4주 일정·미팅 */}
+                        <UpcomingSchedule date={date} entries={upcomingEntries} />
+
+                        {/* 3. 트래킹 */}
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
@@ -1073,8 +1200,36 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </section>
                         )}
 
+                        {/* 4. 진행중인 프로젝트 */}
+                        <DailyProjectsCard />
+
+                        {/* 5. 오늘의 한 줄 */}
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">오늘의 한 줄</h2>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘의 한 줄</h2>
+                                <div className="flex items-center gap-0.5">
+                                    <button
+                                        onClick={toggleGps}
+                                        title={gpsEnabled ? "GPS 끄기" : "GPS 켜기 (현재 위치 기록)"}
+                                        className={`p-1.5 rounded transition-colors ${gpsEnabled ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
+                                    >
+                                        <MapPin className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                        onClick={shareResult}
+                                        title={shareCopied ? "복사됨!" : "공유하기"}
+                                        className={`p-1.5 rounded transition-colors ${shareCopied ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
+                                    >
+                                        <Share2 className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                            {gpsEnabled && gpsLocation && (
+                                <p className="text-[10px] text-[#0F766E]/70 flex items-center gap-1 mb-2">
+                                    <MapPin className="h-2.5 w-2.5 shrink-0" />
+                                    {gpsLocation}
+                                </p>
+                            )}
                             <div className="flex flex-wrap gap-1 mb-2.5">
                                 {RESULT_CATEGORIES.map((c) => {
                                     const active = resultCategory === c.key;
@@ -1111,8 +1266,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 />
                             )}
                         </section>
-
-                        <DailyProjectsCard />
                     </div>
                 </div>
             )}
@@ -1680,6 +1833,86 @@ function TrackingRow({ label, hint, value, activeColor, onPick, onClear }: Track
                 ))}
             </div>
         </div>
+    );
+}
+
+// 향후 4주 일정 컴팩트 리스트
+const DAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+function UpcomingSchedule({ date, entries }: { date: string; entries: CalendarEntry[] }) {
+    const groups = useMemo(() => {
+        const d1 = new Date(date + "T00:00:00"); d1.setDate(d1.getDate() + 1);
+        const d2 = new Date(date + "T00:00:00"); d2.setDate(d2.getDate() + 28);
+        const from = d1.toISOString().slice(0, 10);
+        const to   = d2.toISOString().slice(0, 10);
+
+        const kinds: CalendarKind[] = ["anniversary", "meeting", "task"];
+        const result: Record<string, Array<{ date: string; entry: CalendarEntry }>> = {
+            anniversary: [], meeting: [], task: [],
+        };
+
+        entries.forEach((e) => {
+            if (!kinds.includes(e.kind as CalendarKind)) return;
+            expandOccurrences(e, from, to).forEach((o) => {
+                result[e.kind].push({ date: o.date, entry: e });
+            });
+        });
+
+        kinds.forEach(k => result[k].sort((a, b) => a.date.localeCompare(b.date)));
+        return result;
+    }, [date, entries]);
+
+    const total = Object.values(groups).reduce((s, arr) => s + arr.length, 0);
+    if (total === 0) return null;
+
+    const today = new Date(date + "T00:00:00");
+
+    function renderItem(o: { date: string; entry: CalendarEntry }, i: number) {
+        const d = new Date(o.date + "T00:00:00");
+        const days = Math.round((d.getTime() - today.getTime()) / 86400000);
+        const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
+        const dow  = DAY_KO[d.getDay()];
+        const c = KIND_COLORS[o.entry.kind as CalendarKind];
+        return (
+            <li key={i} className="flex items-center gap-2 min-w-0 py-1 border-b border-neutral-50 last:border-0">
+                <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
+                    {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
+                </span>
+                <span className="flex-1 truncate text-xs text-neutral-700">{o.entry.title}</span>
+                <span className="shrink-0 text-[9px] text-neutral-300 tabular-nums">D+{days}</span>
+            </li>
+        );
+    }
+
+    const sections: Array<{ kind: CalendarKind; label: string }> = [
+        { kind: "anniversary", label: "기념일" },
+        { kind: "meeting",     label: "미팅" },
+        { kind: "task",        label: "업무" },
+    ];
+
+    return (
+        <section className="bg-white border border-neutral-200 rounded-xl p-4">
+            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">향후 4주</h2>
+            <div className="space-y-3">
+                {sections.map(({ kind, label }) => {
+                    const items = groups[kind];
+                    if (items.length === 0) return null;
+                    const c = KIND_COLORS[kind];
+                    return (
+                        <div key={kind}>
+                            <div className={`flex items-center gap-1.5 mb-1.5 px-1 py-0.5 rounded ${c.bg}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+                                <span className={`text-[10px] font-semibold uppercase tracking-wider ${c.text}`}>{label}</span>
+                            </div>
+                            <ul className="pl-1">
+                                {items.map((o, i) => renderItem(o, i))}
+                            </ul>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
     );
 }
 
