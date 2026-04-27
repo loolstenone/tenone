@@ -1,6 +1,56 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-27 (세션 93 — 통합 캘린더 시스템 + 4-View 통합 + 공공데이터 + Daily 우측 재구성 + 트래킹 7종 + Yearly 시작월/구간)
+> 마지막 업데이트: 2026-04-27 (세션 95 — 프로젝트 메뉴 고도화 Phase 1-6 + UX 일관성 SSOT + Weekly 3섹션 + 양력/음력 토글 단일 picker + 기념일 80여 종 + 전체화면 모드)
+
+---
+
+## 세션 94-95 핵심 성과 (2026-04-27)
+
+### 프로젝트 메뉴 고도화 Phase 1-6 (통합 작업 공간 완성)
+- **Phase 1 (`955b213d`)** 카테고리 9종 SSOT + 추천 템플릿 매핑 + DB 마이그레이션
+  · `lib/planners/project-categories.ts` (학습/비즈니스/창작/헬스/여행/관계/재무/운영/커스텀)
+  · `lib/planners/template-recommendations.ts` 카테고리 → 템플릿 키 매핑
+  · planners_projects: category·custom_fields·tags·tracking_metrics·visibility · planners_project_milestones 신규
+  · ProjectsView 카테고리 칩 + 카드 배지 / Cover 탭에 카테고리·트래킹 메트릭 편집
+  · ProjectNotesTab 카테고리 기반 추천 템플릿 violet 박스
+- **Phase 2 (`f10600b3`)** Daily Task ↔ project_id 연결
+  · PlannerTask.project_id 필드 / Daily 추가 입력에 프로젝트 selector / TaskRow 배지
+  · `/api/planners/projects/dashboard` (진행률·D-N·오늘 task)
+  · DailyProjectsCard 강화 (카테고리·D-N·진행률 바·오늘 task)
+  · `/api/planners/projects/[id]/tasks` + ProjectTasksTab (날짜그룹·필터·통계)
+- **Phase 3 (`fbdc54a6`)** 트래킹 자동 시계열
+  · `/api/planners/projects/[id]/tracking` (planners_daily 7종 컬럼 자동 매핑)
+  · ProjectTrackingTab (SVG 스파크라인·avg/min/max·노트)
+- **Phase 4 (`c1edda34`)** 마일스톤 + 간트 + 진행률
+  · `/api/planners/projects/[id]/milestones` (CRUD)
+  · ProjectMilestonesTab (체크리스트·간트차트·자동 진행률)
+- **Phase 5 (`5b69b000`)** 5F 회고 + Identity Key Results 환류
+  · planners_projects.retrospective jsonb · ProjectRetrospective 타입
+  · ProjectRetroModal — Finding 줄단위 분리해 Identity로 환류
+  · status=completed 자동 트리거
+- **Phase 6 (`4fb7b863`)** 공개 링크 + 협업자
+  · public_token UNIQUE + collaborators jsonb
+  · `/api/planners/projects/[id]/share` (POST/DELETE) + `/api/planners/public/projects/[token]`
+  · `/planners/p/[token]` 공개 Server Component 페이지 (인증 X)
+  · ShareField (URL 복사·새 탭) + CollaboratorField (이메일·역할)
+
+### 세션 94 후속 — UX 일관성 SSOT
+- 4-View 헤더 통일 (Daily 패턴: < font-serif 2xl/3xl 제목 [상태 배지] >)
+- CalendarEntryEditor 단일 입력 (양력 native + 음력 캘린더 팝오버)
+- Weekly 셀 3섹션 (오늘의 일정 · Task · 메모) → planners_daily.tasks·notes 양방향 동기화
+- 노트 카드 헤더 통일 + 인덱싱 (기본 노트 N · 손글씨 N)
+- AI Briefing 상단 메뉴 제거 + Daily AI 정리 카드 (Haiku 4.5)
+- 로고 폰트 serif 통일 (AI 위첨자 sans 유지)
+- (Planners)/CLAUDE.md UX 일관성 가이드 SSOT 섹션 추가
+
+### 기념일 확장 + 전체화면 모드
+- HOLIDAYS commemoration 타입 + 2026/2027 정부지정 기념일 80여 종
+  · 색상: holiday(rose-500) / memorial(rose-400) / commemoration(amber-600) / solar_term(emerald-600)
+  · Yearly 우선순위: 사용자 입력 > 국가기념일 > 절기 (배경 X 폰트만)
+- PlannersUtilityLinks에 Maximize/Minimize 전체화면 토글 (`document.fullscreenElement`)
+
+### 음력 입력 확장
+- LUNAR_YEARS_ANNIVERSARY (1950+) + 범위 외 근사 변환
 
 ---
 

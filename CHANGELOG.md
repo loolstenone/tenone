@@ -4,6 +4,78 @@
 
 ---
 
+## 2026-04-27 — 세션 95 · 프로젝트 메뉴 고도화 Phase 1-6 + UX 일관성 + Weekly 3섹션 + 기념일 80여 종 + 전체화면 모드
+
+### 장소
+집
+
+### 변경 내용
+
+**프로젝트 메뉴 고도화 6단계** (전체 워크플로우)
+```
+카테고리 선택 → 추천 템플릿 → Daily Task 태그 → 트래킹 자동 적재 →
+마일스톤 진행률 → 5F 회고 → Identity Key Results 환류 → 공개 링크 / 협업자
+```
+
+- Phase 1 `955b213d` — 카테고리 9종 SSOT + 추천 템플릿 매핑 + DB 마이그레이션
+  · `lib/planners/project-categories.ts` · `lib/planners/template-recommendations.ts`
+  · `sql/planners-projects-categories.sql` (category·custom_fields·tags·tracking_metrics·visibility + planners_project_milestones)
+  · ProjectsView 카테고리 칩 + 카드 배지 / Cover 탭 카테고리·메트릭 편집
+  · ProjectNotesTab violet 추천 템플릿 박스
+- Phase 2 `f10600b3` — Daily Task ↔ project_id
+  · `app/api/planners/projects/dashboard/route.ts` (진행률·D-N·오늘 task)
+  · DailyProjectsCard 강화 / TaskRow 프로젝트 selector 배지
+  · `app/api/planners/projects/[id]/tasks/route.ts` + ProjectTasksTab
+- Phase 3 `fbdc54a6` — 트래킹 시계열
+  · `app/api/planners/projects/[id]/tracking/route.ts` (7종 메트릭 매핑)
+  · ProjectTrackingTab (SVG 스파크라인 + 통계 + 노트)
+- Phase 4 `c1edda34` — 마일스톤
+  · `app/api/planners/projects/[id]/milestones/route.ts`
+  · ProjectMilestonesTab (체크리스트·간트·진행률)
+- Phase 5 `5b69b000` — 5F 회고 + Identity 환류
+  · `sql/planners-projects-retrospective.sql` (retrospective jsonb)
+  · ProjectRetroModal (Finding 줄단위 분리 → Identity Key Results)
+  · status=completed 자동 트리거
+- Phase 6 `4fb7b863` — 공유·협업
+  · `sql/planners-projects-sharing.sql` (public_token UNIQUE + collaborators)
+  · `app/api/planners/projects/[id]/share/route.ts` (토큰 발급/철회)
+  · `app/api/planners/public/projects/[token]/route.ts` + `app/(Planners)/planners/p/[token]/page.tsx` 공개 페이지
+  · ShareField + CollaboratorField (CoverTab 통합)
+
+**UX 일관성 SSOT** (`060c695e`)
+- 4-View 헤더 Daily 패턴 통일 (Weekly·Monthly·Yearly 모두 동일 구조)
+- CalendarEntryEditor 단일 picker (양력/음력 토글, 음력은 캘린더 그리드 팝오버)
+- Weekly 셀 3섹션 (오늘의 일정·Task·메모) — planners_daily.tasks·notes 양방향
+- 노트 카드 헤더 통일 + 인덱싱 (기본 노트 N · 손글씨 N)
+- AI Briefing 상단 메뉴 제거 + Daily AI 정리 카드 (Haiku 4.5)
+- 로고 font-serif 통일 (AI 위첨자 sans)
+- globals.css `:not(.font-serif)` 예외로 .font-serif 보존
+- (Planners)/CLAUDE.md UX 일관성 가이드 SSOT 섹션
+
+**기념일 확장 + 음력**
+- HOLIDAYS commemoration 타입 신규 + 2026/2027 정부지정 80여 종
+  · 근로자의 날·식목일·어버이날·스승의 날·5·18·부부의 날·바다의 날·환경의 날·국군의 날·노인의 날 등
+- 색상: holiday(rose-500) / memorial(rose-400) / commemoration(amber-600) / solar_term(emerald-600)
+- Yearly 우선순위: 사용자 입력 > 국가기념일 > 절기 (배경 X 폰트만)
+- LUNAR_YEARS_ANNIVERSARY (1950+) + 범위 외 근사 변환 (기념일 원본 연도용)
+
+**전체화면 모드**
+- PlannersUtilityLinks에 Maximize/Minimize 토글 (`document.fullscreenElement`)
+- 주소창·탭 숨김 → PWA 같은 몰입 환경 (Esc 또는 같은 버튼으로 종료)
+
+### 결정 누적
+- 4-View는 같은 데이터를 다른 줌으로 본다 (단일 SSOT, 다른 뷰)
+- 카드 헤더는 무조건 명시적 제목 + 통일 스타일 (placeholder-as-title 금지)
+- 프로젝트는 단순 컨테이너가 아니라 트래킹·노트·태스크·캘린더·회고가 묶이는 통합 작업 공간
+- 회고는 자동 트리거 (status=completed) + Finding은 Identity로 환류
+
+### 다음 할 일
+- 프로젝트 협업자 권한 강제(편집 권한 RLS)는 Phase 6+ 협업 본격화 시 추가
+- 포트폴리오 모드 (`/planners/portfolio/[memberId]`) — 한 사용자의 모든 공개 프로젝트 갤러리
+- WIO·Mindle 등 다른 브랜드 작업으로 전환 (Planners는 충분히 깊어짐)
+
+---
+
 ## 2026-04-27 — 세션 93 · 통합 캘린더 시스템 + 4-View 통합 + 공공데이터 · Daily 우측 재구성 · 프로젝트 카드 · 한 장면 카테고리 통합 · 트래킹 7종
 
 ### 장소
