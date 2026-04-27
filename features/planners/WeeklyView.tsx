@@ -174,65 +174,67 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 <div className="py-20 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
                 <div className="space-y-5">
-                    {/* Paper planner day grid */}
-                    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
-                        <div className="grid grid-cols-2 divide-x divide-neutral-200">
-                            {/* Left: Mon, Wed, Fri */}
-                            <div className="divide-y divide-neutral-200">
-                                {leftDays.map((d) => {
-                                    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                                    return (
-                                        <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
-                                    );
-                                })}
-                            </div>
-                            {/* Right: Tue, Thu, Sat+Sun */}
-                            <div className="divide-y divide-neutral-200">
-                                {rightMidDays.map((d) => {
-                                    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                                    return (
-                                        <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
-                                    );
-                                })}
-                                {/* Weekend: Sat + Sun side by side */}
-                                <div className="grid grid-cols-2 divide-x divide-neutral-200">
-                                    {weekendDays.map((d) => {
+                    {/* GPR — 목표·계획·결과 (1순위) */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">GPR</h2>
+                            <span className="text-[9px] text-neutral-400 tracking-wider">Goal · Plan · Result</span>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-3">
+                            <Field label="Goal" value={goal} onChange={setGoal} onBlur={() => save({ gpr_goal: goal })} rows={3} />
+                            <Field label="Plan" value={plan} onChange={setPlan} onBlur={() => save({ gpr_plan: plan })} rows={3} />
+                            <Field label="Result" value={result} onChange={setResult} onBlur={() => save({ gpr_result: result })} rows={3} placeholder="금요일 저녁 AI가 정리를 도와줍니다" />
+                        </div>
+                    </section>
+
+                    {/* Vrief — What·Why·How (2순위) */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">Vrief</h2>
+                            <span className="text-[9px] text-neutral-400 tracking-wider">What · Why · How</span>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-3">
+                            <Field label="What — 이번 주의 핵심" value={what} onChange={setWhat} onBlur={() => save({ vrief_what: what })} rows={3} />
+                            <Field label="Why — 왜 중요한가" value={why} onChange={setWhy} onBlur={() => save({ vrief_why: why })} rows={3} />
+                            <Field label="How — 어떻게" value={how} onChange={setHow} onBlur={() => save({ vrief_how: how })} rows={3} />
+                        </div>
+                    </section>
+
+                    {/* 주간 계획 — 7일 paper planner grid (3순위) */}
+                    <section>
+                        <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest mb-3">주간 계획</h2>
+                        <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
+                            <div className="grid grid-cols-2 divide-x divide-neutral-200">
+                                {/* Left: Mon, Wed, Fri */}
+                                <div className="divide-y divide-neutral-200">
+                                    {leftDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
                                         );
                                     })}
                                 </div>
+                                {/* Right: Tue, Thu, Sat+Sun */}
+                                <div className="divide-y divide-neutral-200">
+                                    {rightMidDays.map((d) => {
+                                        const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                        return (
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
+                                        );
+                                    })}
+                                    {/* Weekend: Sat + Sun side by side */}
+                                    <div className="grid grid-cols-2 divide-x divide-neutral-200">
+                                        {weekendDays.map((d) => {
+                                            const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                            return (
+                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Vrief + GPR */}
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">Vrief</h2>
-                                <span className="text-[9px] text-neutral-400 tracking-wider">WHW</span>
-                            </div>
-                            <div className="space-y-3">
-                                <Field label="What — 이번 주의 핵심" value={what} onChange={setWhat} onBlur={() => save({ vrief_what: what })} rows={2} />
-                                <Field label="Why — 왜 중요한가" value={why} onChange={setWhy} onBlur={() => save({ vrief_why: why })} rows={2} />
-                                <Field label="How — 어떻게" value={how} onChange={setHow} onBlur={() => save({ vrief_how: how })} rows={2} />
-                            </div>
-                        </section>
-
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-[10px] font-semibold text-neutral-900 uppercase tracking-widest">GPR</h2>
-                                <span className="text-[9px] text-neutral-400 tracking-wider">GPR</span>
-                            </div>
-                            <div className="space-y-3">
-                                <Field label="Goal" value={goal} onChange={setGoal} onBlur={() => save({ gpr_goal: goal })} rows={2} />
-                                <Field label="Plan" value={plan} onChange={setPlan} onBlur={() => save({ gpr_plan: plan })} rows={2} />
-                                <Field label="Result" value={result} onChange={setResult} onBlur={() => save({ gpr_result: result })} rows={2} placeholder="금요일 저녁 AI가 정리를 도와줍니다" />
-                            </div>
-                        </section>
-                    </div>
+                    </section>
 
                     {/* Weekly summary stats */}
                     {summary && summary.days_recorded > 0 && (

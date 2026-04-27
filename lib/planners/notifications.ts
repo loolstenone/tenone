@@ -6,7 +6,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-type BriefingType = "morning" | "evening";
+type BriefingType = "morning" | "midday" | "evening";
+
+const TYPE_LABEL: Record<BriefingType, string> = {
+    morning: "아침 브리핑",
+    midday: "중간 점검",
+    evening: "저녁 정리",
+};
+const TYPE_COLOR: Record<BriefingType, string> = {
+    morning: "#F59E0B",
+    midday: "#10B981",
+    evening: "#6366F1",
+};
 
 /**
  * 브리핑 이메일 발송
@@ -22,11 +33,7 @@ export async function sendBriefingEmail(params: {
     if (!resend) return false;
 
     const { email, name, type, content, date } = params;
-    const isMorning = type === "morning";
-
-    const subject = isMorning
-        ? `[PP AI] 오늘의 아침 브리핑 · ${date}`
-        : `[PP AI] 오늘의 저녁 정리 · ${date}`;
+    const subject = `[PP AI] 오늘의 ${TYPE_LABEL[type]} · ${date}`;
 
     const html = renderBriefingHtml({ name, type, content, date });
 
@@ -46,9 +53,8 @@ export async function sendBriefingEmail(params: {
 }
 
 function renderBriefingHtml({ name, type, content, date }: { name?: string | null; type: BriefingType; content: string; date: string }): string {
-    const isMorning = type === "morning";
-    const heading = isMorning ? "오늘의 아침 브리핑" : "오늘의 저녁 정리";
-    const color = isMorning ? "#F59E0B" : "#6366F1";
+    const heading = `오늘의 ${TYPE_LABEL[type]}`;
+    const color = TYPE_COLOR[type];
     const greeting = name ? `${name}님,` : "";
 
     const htmlContent = content
@@ -156,7 +162,7 @@ export async function sendPushBriefing(params: {
 
     webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
-    const title = params.type === "morning" ? "아침 브리핑" : "저녁 정리";
+    const title = TYPE_LABEL[params.type];
     const body = params.content.slice(0, 140);
 
     let success = 0;

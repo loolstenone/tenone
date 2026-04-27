@@ -1,17 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Sparkles, Sun, Moon, Loader2, ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { Sparkles, Sun, Sunrise, Moon, Loader2, Send, Settings as SettingsIcon } from "lucide-react";
 import type { PlannerBriefing } from "@/lib/planners/types";
 import { Track } from "@/lib/analytics";
+
+type BriefingType = "morning" | "midday" | "evening";
+
+const TYPE_META: Record<BriefingType, { label: string; greet: string; icon: typeof Sun; color: string; bg: string }> = {
+    morning: { label: "아침 브리핑", greet: "오늘을 시작합시다", icon: Sunrise, color: "text-amber-500", bg: "bg-amber-50" },
+    midday:  { label: "중간 점검",   greet: "오전을 짚어 봅시다", icon: Sun,     color: "text-emerald-500", bg: "bg-emerald-50" },
+    evening: { label: "저녁 정리",   greet: "오늘을 정리합시다", icon: Moon,    color: "text-indigo-400", bg: "bg-indigo-50" },
+};
+
+function inferType(now = new Date()): BriefingType {
+    const hour = (now.getUTCHours() + 9) % 24; // KST
+    if (hour >= 4 && hour < 12) return "morning";
+    if (hour >= 12 && hour < 18) return "midday";
+    return "evening";
+}
+
+interface ChatMessage {
+    id: string;
+    role: "ai" | "user";
+    type?: BriefingType;
+    content: string;
+    timestamp: string;
+}
 
 export function AiBriefingView() {
     const [briefings, setBriefings] = useState<PlannerBriefing[]>([]);
     const [loading, setLoading] = useState(true);
-    const [generating, setGenerating] = useState<"morning" | "evening" | null>(null);
-    const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [generating, setGenerating] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
+    const scrollRef = useRef<HTMLDivElement | null>(null);
 
-    const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
+    const today = useMemo(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }, []);
+    const suggested = useMemo(() => inferType(), []);
 
     async function load(silent = false) {
         if (!silent) setLoading(true);
@@ -19,17 +48,21 @@ export function AiBriefingView() {
         if (res.ok) {
             const d = await res.json();
             setBriefings(d.briefings || []);
-            // 오늘치는 자동 펼치기
-            const todays = (d.briefings || []).filter((b: PlannerBriefing) => b.briefing_date === today);
-            if (todays.length > 0) setExpandedId(todays[0].id);
         }
         if (!silent) setLoading(false);
     }
 
     useEffect(() => { load(); }, []);
 
-    async function generate(type: "morning" | "evening") {
-        setGenerating(type);
+    // 스크롤 자동 하단
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [briefings.length, generating]);
+
+    async function generate(type: BriefingType | "auto") {
+        setGenerating(true);
         const startedAt = Date.now();
         try {
             const res = await fetch(`/api/planners/briefing/generate`, {
@@ -39,171 +72,172 @@ export function AiBriefingView() {
             });
             const duration_ms = Date.now() - startedAt;
             if (res.ok) {
-                Track.briefingGenerate({ kind: type, duration_ms, success: true });
+                const d = await res.json();
+                Track.briefingGenerate({ kind: d.type ?? type, duration_ms, success: true });
                 await load(true);
             } else {
-                Track.briefingGenerate({ kind: type, duration_ms, success: false });
+                Track.briefingGenerate({ kind: typeof type === "string" ? type : "auto", duration_ms, success: false });
                 const err = await res.json();
                 alert(`브리핑 생성 실패: ${err.message || err.error}`);
             }
         } finally {
-            setGenerating(null);
+            setGenerating(false);
         }
     }
 
-    const todayMorning = briefings.find(b => b.briefing_date === today && b.briefing_type === "morning");
-    const todayEvening = briefings.find(b => b.briefing_date === today && b.briefing_type === "evening");
-
-    // 날짜별 그룹핑 (오늘 제외)
+    const todayBriefings = briefings.filter(b => b.briefing_date === today)
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     const past = briefings.filter(b => b.briefing_date !== today);
-    const grouped: Record<string, PlannerBriefing[]> = {};
-    past.forEach(b => {
-        grouped[b.briefing_date] = grouped[b.briefing_date] || [];
-        grouped[b.briefing_date].push(b);
-    });
-    const pastDates = Object.keys(grouped).sort().reverse();
+    const pastByDate = useMemo(() => {
+        const grouped: Record<string, PlannerBriefing[]> = {};
+        past.forEach(b => { (grouped[b.briefing_date] = grouped[b.briefing_date] || []).push(b); });
+        return grouped;
+    }, [past]);
+    const pastDates = Object.keys(pastByDate).sort().reverse();
+
+    const messages: ChatMessage[] = todayBriefings.map(b => ({
+        id: b.id,
+        role: "ai",
+        type: b.briefing_type as BriefingType,
+        content: b.content,
+        timestamp: b.created_at,
+    }));
+
+    const Greet = TYPE_META[suggested].icon;
 
     return (
-        <div className="max-w-4xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            <div className="flex items-center gap-3 mb-8">
-                <Sparkles className="h-6 w-6 text-[#0F766E]" />
-                <h1 className="font-serif text-3xl text-neutral-900">AI Briefing</h1>
-            </div>
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10">
+            <header className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                    <Sparkles className="h-5 w-5 text-[#0F766E]" />
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">AI 비서</h1>
+                </div>
+                <Link href="/planners/app/settings#ai" className="text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center gap-1">
+                    <SettingsIcon className="h-3.5 w-3.5" /> 설정
+                </Link>
+            </header>
 
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
-                <div className="space-y-6">
-                    {/* 오늘 */}
-                    <section>
-                        <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">오늘 · {today}</h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <BriefingCard
-                                type="morning"
-                                briefing={todayMorning}
-                                onGenerate={() => generate("morning")}
-                                generating={generating === "morning"}
-                            />
-                            <BriefingCard
-                                type="evening"
-                                briefing={todayEvening}
-                                onGenerate={() => generate("evening")}
-                                generating={generating === "evening"}
-                            />
-                        </div>
-                    </section>
+                <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col h-[calc(100vh-12rem)] min-h-[480px]">
+                    {/* Chat thread */}
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-4">
+                        {/* Welcome */}
+                        {messages.length === 0 && (
+                            <div className={`rounded-xl p-5 ${TYPE_META[suggested].bg} border border-neutral-100`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Greet className={`h-4 w-4 ${TYPE_META[suggested].color}`} />
+                                    <p className={`text-xs font-semibold ${TYPE_META[suggested].color} tracking-wider uppercase`}>
+                                        {TYPE_META[suggested].label}
+                                    </p>
+                                </div>
+                                <p className="text-sm text-neutral-800 leading-relaxed">
+                                    {TYPE_META[suggested].greet}. 오늘의 컨텍스트를 모아 함께 이야기해 볼까요?
+                                </p>
+                            </div>
+                        )}
 
-                    {/* 과거 */}
-                    {pastDates.length > 0 && (
-                        <section>
-                            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">이력</h2>
-                            <div className="space-y-2">
-                                {pastDates.map((d) => (
-                                    <div key={d} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-                                        <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50">
-                                            <p className="text-sm font-medium text-neutral-700">{d}</p>
-                                        </div>
-                                        <div className="divide-y divide-neutral-100">
-                                            {grouped[d].map((b) => (
-                                                <div key={b.id}>
-                                                    <button
-                                                        onClick={() => setExpandedId(expandedId === b.id ? null : b.id)}
-                                                        className="w-full px-5 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors text-left"
-                                                    >
-                                                        {expandedId === b.id ? (
-                                                            <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
-                                                        ) : (
-                                                            <ChevronRight className="h-3.5 w-3.5 text-neutral-400" />
-                                                        )}
-                                                        {b.briefing_type === "morning" ? (
-                                                            <Sun className="h-3.5 w-3.5 text-amber-500" />
-                                                        ) : (
-                                                            <Moon className="h-3.5 w-3.5 text-indigo-400" />
-                                                        )}
-                                                        <span className="text-sm text-neutral-700">
-                                                            {b.briefing_type === "morning" ? "아침 브리핑" : "저녁 정리"}
-                                                        </span>
-                                                    </button>
-                                                    {expandedId === b.id && (
-                                                        <div className="px-5 pb-4 pt-1">
-                                                            <pre className="text-sm text-neutral-800 whitespace-pre-wrap font-sans leading-relaxed">
-                                                                {b.content}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
+                        {messages.map(m => {
+                            const meta = m.type ? TYPE_META[m.type] : TYPE_META[suggested];
+                            const Icon = meta.icon;
+                            return (
+                                <div key={m.id} className="flex gap-2.5">
+                                    <div className={`shrink-0 w-7 h-7 rounded-full ${meta.bg} flex items-center justify-center mt-0.5`}>
+                                        <Icon className={`h-3.5 w-3.5 ${meta.color}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
+                                            {meta.label} · {new Date(m.timestamp).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                                        </p>
+                                        <div className="text-sm text-neutral-800 whitespace-pre-wrap leading-relaxed">
+                                            {m.content}
                                         </div>
                                     </div>
-                                ))}
+                                </div>
+                            );
+                        })}
+
+                        {generating && (
+                            <div className="flex gap-2.5">
+                                <div className="shrink-0 w-7 h-7 rounded-full bg-neutral-100 flex items-center justify-center mt-0.5">
+                                    <Loader2 className="h-3.5 w-3.5 text-neutral-500 animate-spin" />
+                                </div>
+                                <p className="text-sm text-neutral-400 mt-1.5 italic">AI 비서가 생각 중…</p>
                             </div>
-                        </section>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function BriefingCard({
-    type,
-    briefing,
-    onGenerate,
-    generating,
-}: {
-    type: "morning" | "evening";
-    briefing: PlannerBriefing | undefined;
-    onGenerate: () => void;
-    generating: boolean;
-}) {
-    const isMorning = type === "morning";
-    return (
-        <div className={`rounded-xl border p-5 ${
-            isMorning
-                ? "bg-gradient-to-br from-amber-50 to-white border-amber-200"
-                : "bg-gradient-to-br from-indigo-50 to-white border-indigo-200"
-        }`}>
-            <div className="flex items-center gap-2 mb-3">
-                {isMorning ? (
-                    <Sun className="h-4 w-4 text-amber-500" />
-                ) : (
-                    <Moon className="h-4 w-4 text-indigo-400" />
-                )}
-                <h3 className="text-sm font-semibold text-neutral-900">
-                    {isMorning ? "아침 브리핑" : "저녁 정리"}
-                </h3>
-            </div>
-
-            {briefing ? (
-                <pre className="text-sm text-neutral-800 whitespace-pre-wrap font-sans leading-relaxed">
-                    {briefing.content}
-                </pre>
-            ) : (
-                <div>
-                    <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                        {isMorning
-                            ? "오늘의 도모를 AI와 함께 시작해 보세요."
-                            : "오늘을 정리하고 내일을 준비합니다."}
-                    </p>
-                    <button
-                        onClick={onGenerate}
-                        disabled={generating}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                            isMorning
-                                ? "bg-amber-500 text-white hover:bg-amber-600"
-                                : "bg-indigo-500 text-white hover:bg-indigo-600"
-                        }`}
-                    >
-                        {generating ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" /> 생성 중…
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles className="h-4 w-4" /> 지금 생성
-                            </>
                         )}
-                    </button>
+
+                        {/* History toggle */}
+                        {pastDates.length > 0 && (
+                            <div className="pt-2">
+                                <button
+                                    onClick={() => setShowHistory(s => !s)}
+                                    className="text-[11px] text-neutral-400 hover:text-neutral-700"
+                                >
+                                    {showHistory ? "지난 브리핑 숨기기" : `지난 브리핑 ${past.length}건 보기`}
+                                </button>
+                                {showHistory && (
+                                    <div className="mt-3 space-y-3">
+                                        {pastDates.map(d => (
+                                            <div key={d} className="border-l-2 border-neutral-200 pl-3">
+                                                <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1.5">{d}</p>
+                                                {pastByDate[d].map(b => {
+                                                    const meta = TYPE_META[b.briefing_type as BriefingType];
+                                                    const Icon = meta.icon;
+                                                    return (
+                                                        <details key={b.id} className="mb-1.5">
+                                                            <summary className="text-xs text-neutral-600 cursor-pointer flex items-center gap-1.5 hover:text-neutral-900">
+                                                                <Icon className={`h-3 w-3 ${meta.color}`} />
+                                                                {meta.label}
+                                                            </summary>
+                                                            <div className="mt-1.5 text-xs text-neutral-700 whitespace-pre-wrap leading-relaxed pl-4">
+                                                                {b.content}
+                                                            </div>
+                                                        </details>
+                                                    );
+                                                })}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action bar — 시간대 자동 + 전체 타입 선택 */}
+                    <div className="border-t border-neutral-100 px-3 md:px-4 py-3">
+                        <div className="flex items-center gap-2 mb-2">
+                            <button
+                                onClick={() => generate("auto")}
+                                disabled={generating}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                            >
+                                <Send className="h-4 w-4" />
+                                지금 시각에 맞춰 브리핑 받기 <span className="text-[10px] opacity-80">({TYPE_META[suggested].label})</span>
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-neutral-400 mr-1">또는</span>
+                            {(["morning", "midday", "evening"] as BriefingType[]).map(t => {
+                                const meta = TYPE_META[t];
+                                const Icon = meta.icon;
+                                return (
+                                    <button
+                                        key={t}
+                                        onClick={() => generate(t)}
+                                        disabled={generating}
+                                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
+                                    >
+                                        <Icon className={`h-3 w-3 ${meta.color}`} />
+                                        {meta.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="text-[10px] text-neutral-400 mt-2 italic">
+                            이메일/푸시는 <Link href="/planners/app/settings" className="underline hover:text-neutral-700">설정</Link>에서 따로 켤 수 있습니다.
+                        </p>
+                    </div>
                 </div>
             )}
         </div>

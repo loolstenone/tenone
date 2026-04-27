@@ -35,7 +35,7 @@ export default function OnboardingPage() {
     async function handleFinish() {
         setSaving(true);
         try {
-            await fetch("/api/planners/onboarding", {
+            const res = await fetch("/api/planners/onboarding", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -47,9 +47,19 @@ export default function OnboardingPage() {
                     mission_statement: missionStatement,
                 }),
             });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                console.error("onboarding save failed", err);
+                alert(`온보딩 저장 실패: ${err.error || res.status}\n다시 시도하거나 페이지를 새로고침해 주세요.`);
+                setSaving(false);
+                return;
+            }
             trackPlanners("planners_onboarding_complete", { mode, ai_tone: tone });
-            router.replace("/planners/app");
-        } finally {
+            // 하드 네비게이션 — 서버 레이아웃이 onboarding_completed 를 새로 읽도록 보장
+            window.location.assign("/planners/app");
+        } catch (e) {
+            console.error("onboarding fetch error", e);
+            alert(`네트워크 오류: ${(e as Error).message}\n다시 시도해 주세요.`);
             setSaving(false);
         }
     }

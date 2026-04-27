@@ -17,6 +17,7 @@ const navItems = [
     { name: "Planner's Planner", href: "/planners/planner-tool", desc: "PDF · AI 도구" },
     { name: "Programs",          href: "/planners/programs",     desc: "교육 프로그램" },
     { name: "GPR",               href: "/planners/gpr",          desc: "성과 관리" },
+    { name: "Community",         href: "/planners/community",    desc: "사용자 후기·사례" },
 ];
 
 export function PlannersHeader() {
@@ -66,17 +67,19 @@ export function PlannersHeader() {
                     ))}
                 </div>
 
-                {/* Right group — PP AI 진입 CTA + Utilities */}
+                {/* Right group — Utilities (PP AI 워크스페이스 진입은 UniverseUtilityBar 내부) */}
                 <div className="hidden md:flex items-center gap-2 shrink-0">
-                    {/* PP AI App 명시적 CTA */}
-                    <Link
-                        href={ppAiHref}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 text-sm font-semibold rounded-md hover:opacity-90 transition-opacity shadow-sm"
-                        title={isAuthenticated ? "Planner's Planner AI 앱 열기" : "Planner's Planner AI 시작하기"}
-                    >
-                        <Sparkles className="h-3.5 w-3.5" />
-                        <span>{isAuthenticated ? "PP AI 열기" : "PP AI 시작"}</span>
-                    </Link>
+                    {/* 비인증 사용자에게만 노출되는 시작 CTA */}
+                    {!isAuthenticated && (
+                        <Link
+                            href={ppAiHref}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 text-sm font-semibold rounded-md hover:opacity-90 transition-opacity shadow-sm"
+                            title="Planner's Planner AI 시작하기"
+                        >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            <span>PP AI 시작</span>
+                        </Link>
+                    )}
                     <UniverseUtilityBar
                         aboutPath="/planners/about"
                         profilePath="/planners/my"
@@ -84,6 +87,8 @@ export function PlannersHeader() {
                         signupPath="/signup"
                         siteId="planners"
                         siteName="Planner's"
+                        workspacePath="/planners/app"
+                        workspaceLabel="PP AI"
                     />
                 </div>
 

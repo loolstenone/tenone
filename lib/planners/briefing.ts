@@ -8,7 +8,21 @@ import { dispatchBriefingNotifications } from "./notifications";
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 1024;
 
-export type BriefingType = "morning" | "evening";
+export type BriefingType = "morning" | "midday" | "evening";
+
+/**
+ * 현재 시각(KST)으로부터 적합한 브리핑 타입 추론
+ * - 04:00~11:59 morning (시작)
+ * - 12:00~17:59 midday (중간 점검)
+ * - 18:00~03:59 evening (마무리)
+ */
+export function inferBriefingType(now: Date = new Date()): BriefingType {
+    // KST = UTC+9
+    const kstHour = (now.getUTCHours() + 9) % 24;
+    if (kstHour >= 4 && kstHour < 12) return "morning";
+    if (kstHour >= 12 && kstHour < 18) return "midday";
+    return "evening";
+}
 
 interface BriefingContext {
     memberId: string;
@@ -122,6 +136,8 @@ function systemPrompt(type: BriefingType, tone: string): string {
 
     const role = type === "morning"
         ? "당신은 Planner's Planner AI의 아침 비서입니다. 사용자가 오늘을 의식적으로 시작하도록 돕습니다."
+        : type === "midday"
+        ? "당신은 Planner's Planner AI의 중간 점검 비서입니다. 오전을 돌아보고 남은 시간의 우선순위를 다잡도록 돕습니다."
         : "당신은 Planner's Planner AI의 저녁 정리 비서입니다. 사용자가 오늘을 의미 있게 마무리하고 내일을 준비하도록 돕습니다.";
 
     return `${role}
@@ -141,6 +157,12 @@ ${type === "morning"
 3. 이번 주 Vrief 한 문장 요약 + 오늘과의 연결
 4. 활성 프로젝트 간결 상태
 5. 마무리 질문 한 줄 (오늘의 도모는 무엇인가)`
+    : type === "midday"
+    ? `중간 점검 구조:
+1. 오전 진행 상황 짧게 비춤 (완료·미시작 태스크 균형)
+2. 남은 오후의 우선순위 1~2개 (Identity·Vrief 정렬)
+3. 에너지 관리 한 줄 (휴식·전환 신호)
+4. 오후를 시작하는 질문 한 줄`
     : `저녁 정리 구조:
 1. 오늘 요약 (완료·이월·신규 건수)
 2. Identity 정렬도 한 줄 평가
@@ -246,7 +268,7 @@ export async function generateBriefing(
         messages: [
             {
                 role: "user",
-                content: `다음 컨텍스트를 바탕으로 ${type === "morning" ? "아침 브리핑" : "저녁 정리"}을 작성해 주세요.\n\n${contextToText(ctx)}`,
+                content: `다음 컨텍스트를 바탕으로 ${type === "morning" ? "아침 브리핑" : type === "midday" ? "중간 점검" : "저녁 정리"}을 작성해 주세요.\n\n${contextToText(ctx)}`,
             },
         ],
     });
@@ -270,12 +292,13 @@ export async function generateBriefing(
 
     if (error || !saved) return null;
 
-    // 사용량 카운트 (upsert로 단순화)
+    // 사용량 카운트 (upsert로 단순화) — midday 는 morning 컬럼에 합산
     try {
+        const usageColumn = type === "evening" ? "evening_count" : "morning_count";
         await admin.from("planners_ai_usage").upsert({
             member_id: memberId,
             usage_date: date,
-            [`${type}_count`]: 1,
+            [usageColumn]: 1,
         }, { onConflict: "member_id,usage_date" });
     } catch (_) { /* non-critical */ }
 

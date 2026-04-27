@@ -5,7 +5,7 @@
   "start_url": "/planners/app",
   "scope": "/planners/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#FAFAF7",
   "theme_color": "#0F766E",
   "lang": "ko",

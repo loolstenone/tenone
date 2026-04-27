@@ -1,6 +1,39 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-27 (세션 91 — Planners 템플릿 59종 컨설턴트급 고도화 · TemplatesView Step 2 분리 · Contacts 무한스크롤·자동 All·초성 분류 견고화)
+> 마지막 업데이트: 2026-04-27 (세션 92 — Planners 모바일 PWA·HandNote·AI 브리핑 통합·Weekly/Monthly 정렬·Community 사이트화·온보딩 루프 fix)
+
+---
+
+## 세션 92 핵심 성과 (2026-04-27)
+
+### 모바일 PWA + 회전
+- manifest `orientation: any`, AppMonthBar 모바일 숨김
+
+### HandNote 종합 개선
+- 펜 4종(펜·만년필·마커·형광펜), 스타일러스 지우개 자동 감지, 팜 리젝션, 캔버스 자동 확장, 클린 아이콘
+- `perfect-freehand` 패키지 누락 해소
+
+### AI 브리핑 통합
+- midday 타입 추가, 시간대 자동 추론, 단일 채팅 UI
+- 이메일 옵션화 (기본 OFF)
+
+### Weekly/Monthly 재정렬 + 월간 통계
+- Weekly: GPR → Vrief → 주간 계획 (3분할 그리드)
+- Monthly: 테마/목표 → 집중 영역 → 일정 → 회고 → 통계
+- 월간 RPC v2 (5종 task 분포 + 에너지 + 일간 계획 수립일)
+
+### Community 사이트화
+- `/planners/app/community` → `/planners/community` (공개 읽기, 로그인 회원 작성)
+- 4 카테고리: 후기·사례·제안·일상
+- posts·comments·likes 테이블 + RLS + 카운트 트리거
+- 앱 메뉴는 외부 링크(↗), 공개 헤더 Community 추가
+- PP AI 버튼 → UniverseUtilityBar `workspacePath` 슬롯(HeRo·SmarComm 패턴 통일)
+
+### 온보딩 루프 fix
+- API: `storageKey: tenone-auth` 추가, auth_id→email→자동생성 3단계 폴백
+- Layout: super_admin·staff·manager 게이트 우회
+- 마스터 계정 DB 직접 마킹
+- 데이터 잔존 확인(daily 8·weekly 3·monthly 1·projects 1·briefings 2 · 손실 없음)
 
 ---
 

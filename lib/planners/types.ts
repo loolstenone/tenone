@@ -134,7 +134,7 @@ export interface PlannerProjectGpr {
 export interface PlannerBriefing {
     id: string;
     member_id: string;
-    briefing_type: 'morning' | 'evening';
+    briefing_type: 'morning' | 'midday' | 'evening';
     briefing_date: string;
     content: string;
     context_snapshot: unknown;

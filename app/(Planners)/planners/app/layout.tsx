@@ -30,10 +30,17 @@ async function getMember() {
 
     const { data: member } = await supabase
         .from('members')
-        .select('id, name, email, avatar_url')
+        .select('id, name, email, avatar_url, member_roles!member_roles_member_id_fkey(role,is_active)')
         .eq('email', user.email!)
         .maybeSingle();
     return member;
+}
+
+const PRIVILEGED_ROLES = new Set(['super_admin', 'staff', 'manager']);
+
+function isPrivileged(member: { member_roles?: Array<{ role: string; is_active: boolean }> | null } | null): boolean {
+    if (!member?.member_roles) return false;
+    return member.member_roles.some((r) => r.is_active && PRIVILEGED_ROLES.has(r.role));
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -43,21 +50,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     }
 
     const plannerUser = await getPlannerUser(member.id);
+    const privileged = isPrivileged(member as { member_roles?: Array<{ role: string; is_active: boolean }> | null });
 
-    if (!plannerUser || !plannerUser.onboarding_completed) {
-        redirect("/planners/onboarding");
-    }
+    // 마스터·매니저·스태프는 온보딩/구독 게이트 우회 (운영·테스트 진입)
+    if (!privileged) {
+        if (!plannerUser || !plannerUser.onboarding_completed) {
+            redirect("/planners/onboarding");
+        }
 
-    if (
-        plannerUser.subscription_status === 'active' &&
-        plannerUser.subscription_expires_at &&
-        new Date(plannerUser.subscription_expires_at) < new Date()
-    ) {
-        plannerUser.subscription_status = 'expired';
-    }
+        if (
+            plannerUser.subscription_status === 'active' &&
+            plannerUser.subscription_expires_at &&
+            new Date(plannerUser.subscription_expires_at) < new Date()
+        ) {
+            plannerUser.subscription_status = 'expired';
+        }
 
-    if (plannerUser.subscription_status === 'expired') {
-        redirect("/planners/purchase?expired=1");
+        if (plannerUser.subscription_status === 'expired') {
+            redirect("/planners/purchase?expired=1");
+        }
     }
 
     return (
@@ -67,10 +78,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Suspense><WelcomeTracker /></Suspense>
             <div className="min-h-screen bg-[#FAFAF7] flex flex-col">
                 <AppTopNav
-                    mode={plannerUser.mode}
+                    mode={plannerUser?.mode ?? 'all_in_one'}
                     userName={member.name || undefined}
                     avatarUrl={member.avatar_url || undefined}
-                    subscriptionStatus={plannerUser.subscription_status}
+                    subscriptionStatus={plannerUser?.subscription_status ?? 'free'}
                 />
                 <div className="flex flex-1 min-h-0">
                     <main className="flex-1 overflow-x-hidden min-w-0">

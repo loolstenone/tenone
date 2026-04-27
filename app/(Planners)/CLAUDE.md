@@ -240,7 +240,7 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **P4 완료 + 템플릿 컨설턴트급 디테일 + Contacts UX 대전환** — 템플릿 59/59 전부 메타·저자/원전 amber 가이드·풍부 placeholder·회고 섹션 일관 적용 · TemplatesView Step 2 분리(quadrants 10 + canvas 4 = 523라인 추출, 3,072→2,549) · Daily 노트 추가 UX 정리(3분할·타이틀 placeholder·헤더 pl-10 정렬) · Contacts 무한 스크롤(50명/페이지 IntersectionObserver, rootMargin 300px) · letterFilter 도입(top/all/letter) · 자동 All 폴백(빈 화면 X) · 우측 인덱스 'All' 버튼·필터링 방식 통일(스크롤 점프 폐기) · 한국 휴대폰 정규화(+82·마지막 8자리)·이름·회사 fallback 중복 정리 · getInitialChar 견고화(invisible 문자·호환 자모 U+3131~·Choseong Jamo U+1100~) (2026-04-27 세션 91) |
+| **Phase** | **세션 92 (2026-04-27)** — 모바일 PWA(orientation any · AppMonthBar 모바일 숨김) · HandNote 종합 개선(펜 4종·스타일러스 지우개 자동 감지·팜 리젝션·캔버스 자동 확장 · perfect-freehand 추가) · AI 브리핑 통합(midday 타입 + 시간대 자동 추론 + 단일 채팅 UI · 이메일 기본 OFF) · Weekly 순서 재정렬(GPR→Vrief→주간 계획) · Monthly 재정렬(테마/목표→집중 영역→일정→회고)+월간 통계(5종 task 분포·에너지·일간 계획) · **Community 사이트화** (`/planners/community` 공개 읽기, 로그인 회원 작성, 카테고리 4종 · 앱 메뉴는 외부 링크) · **PP AI 워크스페이스 슬롯 통일** (UniverseUtilityBar `workspacePath`, HeRo·SmarComm 패턴) · **온보딩 루프 fix** (`storageKey: tenone-auth` · auth_id→email→자동생성 3단계 · super_admin/staff/manager 게이트 우회 · 마스터 DB 마킹) (2026-04-27 세션 92) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
 | **완료 범위** | W1~P2 전 범위 + P3 #17·19·20 + P4 #21·22·23·24(GTM·Help·피드백·Intra) + P5 #25·26·27 |

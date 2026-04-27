@@ -13,17 +13,76 @@ export async function POST(req: Request) {
                 getAll() { return cookieStore.getAll(); },
                 setAll() { /* read-only */ },
             },
+            auth: { storageKey: 'tenone-auth' },
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
-    const { data: member } = await supabase
+    const admin = createAdminClient();
+
+    // 1) auth_id 로 먼저 조회 (가장 정확)
+    let { data: member } = await admin
         .from('members')
         .select('id')
-        .eq('email', user.email!)
+        .eq('auth_id', user.id)
         .maybeSingle();
-    if (!member) return NextResponse.json({ error: "member_not_found" }, { status: 404 });
+
+    // 2) 없으면 email 로 fallback (legacy 데이터 호환)
+    if (!member && user.email) {
+        const { data: byEmail } = await admin
+            .from('members')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle();
+        if (byEmail) {
+            // auth_id 가 비어 있던 경우 보강
+            await admin.from('members').update({ auth_id: user.id }).eq('id', byEmail.id);
+            member = byEmail;
+        }
+    }
+
+    // 3) 그래도 없으면 자동 생성 (auth-context 동기화 누락 케이스 보강)
+    if (!member) {
+        const userName = (user.user_metadata?.full_name as string | undefined)
+            || (user.user_metadata?.name as string | undefined)
+            || user.email?.split('@')[0]
+            || '사용자';
+        const handleBase = (user.email || userName).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || 'user';
+        const handle = `${handleBase}${Math.floor(Math.random() * 10000)}`;
+        const { data: newMember, error: insertErr } = await admin
+            .from('members')
+            .insert({
+                auth_id: user.id,
+                email: user.email || '',
+                name: userName,
+                handle,
+                account_type: 'member',
+                primary_type: 'member',
+                roles: ['member'],
+                avatar_initials: userName.substring(0, 2).toUpperCase(),
+                avatar_url: (user.user_metadata?.avatar_url as string | undefined)
+                    || (user.user_metadata?.picture as string | undefined)
+                    || null,
+                role: 'Member',
+                origin_site: 'planners.tenone.biz',
+                intra_access: false,
+                module_access: [],
+                affiliations: [],
+                onboarding_completed: false,
+            })
+            .select('id')
+            .single();
+        if (insertErr || !newMember) {
+            console.error('onboarding members auto-create failed', insertErr);
+            return NextResponse.json({ error: 'member_create_failed', message: insertErr?.message }, { status: 500 });
+        }
+        // member_roles 기본 row
+        await admin.from('member_roles').insert({
+            member_id: newMember.id, role: 'member', context: 'universe',
+        });
+        member = newMember;
+    }
 
     const body = await req.json();
     const {
@@ -35,10 +94,8 @@ export async function POST(req: Request) {
         mission_statement,
     } = body;
 
-    const admin = createAdminClient();
-
     // 1. planners_users upsert
-    await admin
+    const { error: upsertErr } = await admin
         .from('planners_users')
         .upsert(
             {
@@ -52,10 +109,14 @@ export async function POST(req: Request) {
             },
             { onConflict: 'member_id' }
         );
+    if (upsertErr) {
+        console.error('onboarding planners_users upsert error', upsertErr);
+        return NextResponse.json({ error: 'upsert_failed', message: upsertErr.message }, { status: 500 });
+    }
 
     // 2. planners_identities upsert (vision/mission만)
     if (vision_statement || mission_statement) {
-        await admin
+        const { error: idErr } = await admin
             .from('planners_identities')
             .upsert(
                 {
@@ -66,6 +127,7 @@ export async function POST(req: Request) {
                 },
                 { onConflict: 'member_id' }
             );
+        if (idErr) console.error('onboarding planners_identities upsert error', idErr);
     }
 
     return NextResponse.json({ ok: true });

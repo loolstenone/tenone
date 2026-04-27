@@ -4,6 +4,73 @@
 
 ---
 
+## 2026-04-27 — 세션 92 · Planners 모바일 PWA·HandNote·AI 브리핑 통합·Weekly/Monthly 정렬·Community 사이트화·온보딩 루프 fix
+
+### 장소
+집
+
+### 변경 내용
+
+**Group D — 모바일 PWA 레이아웃**
+- `public/planners-manifest.json` — `orientation: portrait-primary → any` (가로/세로 자유 회전)
+- `features/planners/AppMonthBar.tsx` — `hidden md:flex` (모바일 본문 압박 해소)
+
+**Group A — 필기 입력 종합 개선 (HandNote.tsx 재작성)**
+- 펜 타입 4종(펜·만년필·마커·형광펜) 프리셋(thinning/streamline/opacity)
+- 스타일러스 지우개 버튼 자동 감지(`button===5` / `buttons & 32`)
+- 지우개 모드 토글 + 팜 리젝션(Pen Only) 토글(`Hand` 아이콘)
+- 캔버스 자동 확장(스트로크 하단 진입 시 +240px)
+- 모바일 툴바 가로 스크롤, 태블릿 pen/touch 무조건 통과
+- 전체 지우기 아이콘: `Trash2 → RotateCcw` (클린 느낌)
+- `package.json` — `perfect-freehand` 추가(빌드 에러 해소)
+
+**Group B — AI 브리핑 통합**
+- `sql/planners-briefing-midday.sql` — `briefing_type` CHECK 에 `midday` 추가
+- `lib/planners/briefing.ts` — `inferBriefingType()` 시간대 자동 추론(04~12 morning · 12~18 midday · 18~04 evening), midday 시스템 프롬프트 추가
+- `app/api/planners/briefing/generate/route.ts` — `type='auto'` 지원
+- `lib/planners/notifications.ts` — TYPE_LABEL/COLOR 맵 통합, 3종 일관 처리
+- `features/planners/AiBriefingView.tsx` — 분리형 카드 UI → 단일 채팅 스레드 (시간순 말풍선, 시간대 자동 CTA, 지난 브리핑 펼침)
+- `app/(Planners)/planners/app/settings/page.tsx` — 이메일 브리핑 기본 OFF, 라벨 "이메일로도 받기 (선택)"
+- `app/api/planners/integrations/slack/sync/route.ts` · `app/api/planners/search/route.ts` — midday 라벨 처리
+- `lib/planners/types.ts` — PlannerBriefing 타입에 midday 추가
+
+**Group C — Weekly/Monthly 정렬 + 월간 통계**
+- `features/planners/WeeklyView.tsx` — 순서 GPR → Vrief → 주간 계획 (각 3분할 그리드)
+- `features/planners/MonthlyView.tsx` — 순서 테마/목표 → 집중 영역 → 일정 → 회고 → 통계
+- `sql/planners-monthly-summary-v2.sql` — RPC v2 (todo_tasks·canceled_tasks 추가, search_path 고정)
+- 월간 통계 위젯: 5종 분포(전체/완료/미완/이월/취소) + % + 분포 막대 + 에너지·일간 계획 수립일·완료 프로젝트
+
+**Community 사이트화**
+- `sql/planners-community.sql` — posts/comments/likes 테이블 + RLS(공개 읽기, 본인만 쓰기) + 카운트 트리거
+- `app/api/planners/community/{route,[id],[id]/comments,[id]/likes}` — 공개 GET, 인증 필요 mutation
+- `app/(Planners)/planners/community/page.tsx` — 공개 사이트 페이지 신설
+- `features/planners/CommunityView.tsx` — 비로그인 모드(읽기 공개), 글쓰기/좋아요/댓글은 로그인 CTA
+- `features/planners/AppTopNav.tsx` · `AppSidebar.tsx` — Community 외부 링크(`target="_blank"` + ↗ 마커)
+- `features/planners/PlannersHeader.tsx` — 공개 헤더에 Community 메뉴 추가, PP AI 워크스페이스를 UniverseUtilityBar `workspacePath` 슬롯으로 통합 (HeRo·SmarComm 패턴)
+
+**온보딩 루프 fix**
+- `app/api/planners/onboarding/route.ts` — auth `storageKey: 'tenone-auth'` 추가(쿠키 인식), members 조회 admin 클라이언트 통일, auth_id 조회 → email 폴백 → 자동 생성 3단계, upsert 에러 클라이언트 노출
+- `app/(Planners)/planners/onboarding/page.tsx` — `res.ok` 체크, 실패 시 alert + 리턴, 성공 시 `window.location.assign` 하드 네비
+- `app/(Planners)/planners/app/layout.tsx` — `member_roles` 조인 + `isPrivileged()` 헬퍼 → super_admin·manager·staff 는 온보딩/구독 게이트 우회
+- `sql/planners-master-bypass.sql` — 마스터 계정 `onboarding_completed=true` 직접 마킹
+
+### 데이터 무결성 확인
+lools@tenone.biz 데이터 잔존 확인(daily 8 · weekly 3 · monthly 1 · projects 1 · briefings 2). 온보딩 루프는 게이트 문제일 뿐 데이터 손실 없음.
+
+### 다음 할 일
+
+**배포 직전(코드 0줄, 외부)**
+- Vercel 환경변수: `ANTHROPIC_API_KEY` · `CRON_SECRET` · Toss(`TOSS_SECRET_KEY`/`NEXT_PUBLIC_TOSS_CLIENT_KEY`) · VAPID 4종 · Google OAuth · `NEXT_PUBLIC_APP_URL=https://planners.tenone.biz`
+- Vercel 도메인 연결 + Supabase Allowed URL `https://planners.tenone.biz/**`
+- Toss 가맹점 승인 후 live 키 적용
+
+**기능 이월**
+- P3 #18 기업 플랜 (대규모, 결제 사업 시작 시)
+- TemplatesView Step 2b — empathy/retro/thinking/meeting/timing/planning 카테고리 분리(2,549 → 1,500 이하)
+- HandNote 실기기 검증(S Pen 지우개·iPad Pencil·팜 리젝션·태블릿)
+
+---
+
 ## 2026-04-27 — 세션 91 · Planners 템플릿 59종 컨설턴트급 고도화 · TemplatesView Step 2 분리 · Contacts 무한스크롤·자동 All·초성 분류 견고화
 
 ### 장소

@@ -148,7 +148,7 @@ export async function GET(req: Request) {
         hits.push({
             source: "briefing",
             id: r.id,
-            title: `${r.briefing_type === "morning" ? "아침" : "저녁"} 브리핑 · ${r.briefing_date}`,
+            title: `${r.briefing_type === "morning" ? "아침" : r.briefing_type === "midday" ? "중간" : "저녁"} 브리핑 · ${r.briefing_date}`,
             snippet: snippet(r.content, q),
             date: r.briefing_date,
             href: `/planners/app/ai-briefing`,

@@ -35,6 +35,17 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
 
     const [monthly, setMonthly] = useState<MonthlyData | null>(null);
     const [hits, setHits] = useState<DayHit[]>([]);
+    const [summary, setSummary] = useState<{
+        days_recorded: number;
+        total_tasks: number;
+        todo_tasks: number;
+        done_tasks: number;
+        carried_tasks: number;
+        canceled_tasks: number;
+        completion_rate: number;
+        energy_avg: number | null;
+        projects_completed: number;
+    } | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -91,9 +102,10 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const [monthlyRes, hitsRes] = await Promise.all([
+            const [monthlyRes, hitsRes, summaryRes] = await Promise.all([
                 fetch(`/api/planners/monthly?year=${year}&month=${month}`),
                 fetch(`/api/planners/daily/month-hits?year=${year}&month=${month}`),
+                fetch(`/api/planners/summary?scope=monthly&year=${year}&month=${month}`),
             ]);
             if (cancelled) return;
             if (monthlyRes.ok) {
@@ -111,6 +123,10 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
             if (hitsRes.ok) {
                 const d = await hitsRes.json();
                 setHits(d.hits || []);
+            }
+            if (summaryRes.ok) {
+                const d = await summaryRes.json();
+                setSummary(d.summary ?? null);
             }
             setLoading(false);
         })();
@@ -265,9 +281,9 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
                 <div className="space-y-6">
-                    {/* 테마 + 집중 영역 */}
-                    <div className="grid md:grid-cols-3 gap-4">
-                        <section className="md:col-span-1 bg-white border border-neutral-200 rounded-xl p-5">
+                    {/* 1) 이달의 테마 + 월간 목표 (1순위) */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">이달의 테마</label>
                             <input
                                 type="text"
@@ -279,33 +295,76 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             />
                         </section>
 
-                        <section className="md:col-span-2 bg-white border border-neutral-200 rounded-xl p-5">
-                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">집중 영역</label>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                                {(monthly?.focus_areas || []).map((f, i) => (
-                                    <span key={i} className="group inline-flex items-center gap-1 bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
-                                        {f}
-                                        <button onClick={() => removeFocusArea(i)} className="opacity-40 group-hover:opacity-100 hover:text-red-500 transition-opacity">
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                            <h2 className="text-[10px] uppercase tracking-widest text-neutral-400 mb-3">월간 목표</h2>
+                            <div className="space-y-1.5">
+                                {goals.length === 0 && (
+                                    <p className="text-xs text-neutral-400 py-1">이달에 이루고 싶은 것을 추가해 보세요.</p>
+                                )}
+                                {goals.map((g) => (
+                                    <div key={g.id} className="group flex items-center gap-3 py-1">
+                                        <button
+                                            onClick={() => toggleGoal(g.id)}
+                                            className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
+                                                g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
+                                            }`}
+                                        >
+                                            {g.done && "V"}
+                                        </button>
+                                        <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
+                                            {g.text}
+                                        </span>
+                                        <button
+                                            onClick={() => removeGoal(g.id)}
+                                            className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
+                                        >
                                             <Trash2 className="h-3 w-3" />
                                         </button>
-                                    </span>
+                                    </div>
                                 ))}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
                                 <Plus className="h-3.5 w-3.5 text-neutral-400" />
                                 <input
                                     type="text"
-                                    value={focusInput}
-                                    onChange={(e) => setFocusInput(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === "Enter") addFocusArea(); }}
-                                    placeholder="집중 영역 추가 후 Enter"
+                                    value={newGoal}
+                                    onChange={(e) => setNewGoal(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
+                                    placeholder="목표 추가"
                                     className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
                                 />
                             </div>
                         </section>
                     </div>
 
-                    {/* 달력 */}
+                    {/* 2) 집중 영역 (2순위) */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">집중 영역</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {(monthly?.focus_areas || []).map((f, i) => (
+                                <span key={i} className="group inline-flex items-center gap-1 bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
+                                    {f}
+                                    <button onClick={() => removeFocusArea(i)} className="opacity-40 group-hover:opacity-100 hover:text-red-500 transition-opacity">
+                                        <Trash2 className="h-3 w-3" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Plus className="h-3.5 w-3.5 text-neutral-400" />
+                            <input
+                                type="text"
+                                value={focusInput}
+                                onChange={(e) => setFocusInput(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") addFocusArea(); }}
+                                placeholder="집중 영역 추가 후 Enter"
+                                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                            />
+                        </div>
+                    </section>
+
+                    {/* 3) 일정 (3순위) */}
+                    <h2 className="text-[10px] uppercase tracking-widest text-neutral-400 -mb-3 pl-1">일정</h2>
                     <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
                         <div className="grid grid-cols-[40px_repeat(7,1fr)] border-b border-neutral-200 bg-neutral-50">
                             <div className="text-[10px] font-semibold text-neutral-400 text-center py-2">W</div>
@@ -387,63 +446,85 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         ))}
                     </section>
 
-                    {/* 월간 목표 + 회고 */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-sm font-semibold text-neutral-900 mb-4">월간 목표</h2>
-                            <div className="space-y-1.5">
-                                {goals.length === 0 && (
-                                    <p className="text-xs text-neutral-400 py-2">이달에 이루고 싶은 것을 추가해 보세요.</p>
-                                )}
-                                {goals.map((g) => (
-                                    <div key={g.id} className="group flex items-center gap-3 py-1">
-                                        <button
-                                            onClick={() => toggleGoal(g.id)}
-                                            className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
-                                                g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
-                                            }`}
-                                        >
-                                            {g.done && "V"}
-                                        </button>
-                                        <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
-                                            {g.text}
-                                        </span>
-                                        <button
-                                            onClick={() => removeGoal(g.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
-                                <Plus className="h-3.5 w-3.5 text-neutral-400" />
-                                <input
-                                    type="text"
-                                    value={newGoal}
-                                    onChange={(e) => setNewGoal(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
-                                    placeholder="목표 추가"
-                                    className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
-                                />
-                            </div>
-                        </section>
+                    {/* 4) 월간 회고 (4순위) */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <h2 className="text-sm font-semibold text-neutral-900 mb-3">월간 회고</h2>
+                        <textarea
+                            value={reflection}
+                            onChange={(e) => setReflection(e.target.value)}
+                            onBlur={() => save({ reflection })}
+                            placeholder="이달을 돌아보며…"
+                            rows={6}
+                            className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none"
+                        />
+                    </section>
 
+                    {/* 5) 월간 통계 */}
+                    {summary && summary.total_tasks > 0 && (
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-sm font-semibold text-neutral-900 mb-3">월간 회고</h2>
-                            <textarea
-                                value={reflection}
-                                onChange={(e) => setReflection(e.target.value)}
-                                onBlur={() => save({ reflection })}
-                                placeholder="이달을 돌아보며…"
-                                rows={8}
-                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none"
-                            />
+                            <h2 className="text-sm font-semibold text-neutral-900 mb-4">월간 통계</h2>
+
+                            {/* Task 분포 5종 */}
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+                                <StatCell label="전체" value={summary.total_tasks} pct={null} accent="text-neutral-900" />
+                                <StatCell label="완료" value={summary.done_tasks} pct={percent(summary.done_tasks, summary.total_tasks)} accent="text-emerald-600" />
+                                <StatCell label="미완" value={summary.todo_tasks} pct={percent(summary.todo_tasks, summary.total_tasks)} accent="text-amber-600" />
+                                <StatCell label="이월" value={summary.carried_tasks} pct={percent(summary.carried_tasks, summary.total_tasks)} accent="text-orange-500" />
+                                <StatCell label="취소" value={summary.canceled_tasks} pct={percent(summary.canceled_tasks, summary.total_tasks)} accent="text-neutral-400" />
+                            </div>
+
+                            {/* 분포 막대 */}
+                            <div className="h-2 rounded-full overflow-hidden bg-neutral-100 flex mb-4">
+                                {summary.done_tasks > 0 && (
+                                    <span className="bg-emerald-500" style={{ width: `${percent(summary.done_tasks, summary.total_tasks)}%` }} />
+                                )}
+                                {summary.todo_tasks > 0 && (
+                                    <span className="bg-amber-400" style={{ width: `${percent(summary.todo_tasks, summary.total_tasks)}%` }} />
+                                )}
+                                {summary.carried_tasks > 0 && (
+                                    <span className="bg-orange-400" style={{ width: `${percent(summary.carried_tasks, summary.total_tasks)}%` }} />
+                                )}
+                                {summary.canceled_tasks > 0 && (
+                                    <span className="bg-neutral-300" style={{ width: `${percent(summary.canceled_tasks, summary.total_tasks)}%` }} />
+                                )}
+                            </div>
+
+                            {/* 보조 통계 */}
+                            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-neutral-100">
+                                <SubStat label="에너지 평균" value={summary.energy_avg !== null ? `${summary.energy_avg}/5` : "—"} />
+                                <SubStat label="일간 계획 수립" value={`${summary.days_recorded}일`} />
+                                <SubStat label="완료한 프로젝트" value={`${summary.projects_completed}개`} />
+                            </div>
                         </section>
-                    </div>
+                    )}
                 </div>
             )}
+        </div>
+    );
+}
+
+function percent(part: number, total: number): number {
+    if (!total) return 0;
+    return Math.round((part / total) * 1000) / 10;
+}
+
+function StatCell({ label, value, pct, accent }: { label: string; value: number; pct: number | null; accent: string }) {
+    return (
+        <div className="text-center py-2 px-1 rounded-lg bg-neutral-50">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">{label}</p>
+            <p className={`text-xl font-semibold ${accent}`}>{value.toLocaleString("ko-KR")}</p>
+            {pct !== null && (
+                <p className="text-[10px] text-neutral-400 mt-0.5">{pct}%</p>
+            )}
+        </div>
+    );
+}
+
+function SubStat({ label, value }: { label: string; value: string }) {
+    return (
+        <div>
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">{label}</p>
+            <p className="text-sm font-medium text-neutral-900">{value}</p>
         </div>
     );
 }

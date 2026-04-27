@@ -12,6 +12,8 @@ interface Tab {
     label: string;
     modes: PlannerMode[];
     activePath?: string;
+    /** true 면 새 탭으로 외부(사이트) 열기 */
+    external?: boolean;
 }
 
 // Order/labels MUST match AppSidebar.tsx NAV. Single source of truth for menu order.
@@ -25,6 +27,7 @@ const TABS: Tab[] = [
     { href: "/planners/app/projects",    label: "Project",     modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/canvas",      label: "Canvas",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
+    { href: "/planners/community",       label: "Community",   modes: ["weekly", "all_in_one"], external: true },
     // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
@@ -63,12 +66,16 @@ export function AppTopNav({
                 {visibleTabs.map((tab) => {
                     const hrefPath = tab.href.split("?")[0];
                     const active =
-                        pathname === hrefPath ||
-                        pathname.startsWith(hrefPath + "/");
+                        !tab.external && (
+                            pathname === hrefPath ||
+                            pathname.startsWith(hrefPath + "/")
+                        );
                     return (
                         <Link
                             key={tab.href}
                             href={tab.href}
+                            target={tab.external ? "_blank" : undefined}
+                            rel={tab.external ? "noopener" : undefined}
                             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
                                 active
                                     ? "bg-[#0F766E] text-white"
@@ -76,6 +83,7 @@ export function AppTopNav({
                             }`}
                         >
                             {tab.label}
+                            {tab.external && <span className="ml-0.5 text-[9px] opacity-50">↗</span>}
                         </Link>
                     );
                 })}

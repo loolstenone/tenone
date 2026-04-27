@@ -17,6 +17,7 @@ import {
     LayoutGrid,
     Download,
     Pencil,
+    MessageCircle,
 } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
@@ -26,6 +27,7 @@ interface NavItem {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     modes: PlannerMode[];
+    external?: boolean;
 }
 
 // Order/labels MUST match AppTopNav.tsx TABS. Single source of truth for menu order.
@@ -39,6 +41,7 @@ const NAV: NavItem[] = [
     { href: "/planners/app/projects",    label: "Project",     icon: FolderKanban,    modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/canvas",      label: "Canvas",      icon: Pencil,          modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     icon: Users,           modes: ["weekly", "all_in_one"] },
+    { href: "/planners/community",       label: "Community",   icon: MessageCircle,   modes: ["weekly", "all_in_one"], external: true },
     // Templates / AI Briefing 은 메인 메뉴에서 제외 — 각 본문에서 서브 메뉴 링크로 제공
 ];
 
@@ -87,12 +90,14 @@ export function AppSidebar({
             {/* Nav */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
                 {visibleNav.map((item) => {
-                    const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                    const active = !item.external && (pathname === item.href || pathname.startsWith(item.href + "/"));
                     const Icon = item.icon;
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
+                            target={item.external ? "_blank" : undefined}
+                            rel={item.external ? "noopener" : undefined}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                                 active
                                     ? "bg-[#0F766E] text-white"
@@ -100,7 +105,8 @@ export function AppSidebar({
                             }`}
                         >
                             <Icon className="h-4 w-4" />
-                            <span>{item.label}</span>
+                            <span className="flex-1">{item.label}</span>
+                            {item.external && <span className="text-[10px] text-neutral-400">↗</span>}
                         </Link>
                     );
                 })}

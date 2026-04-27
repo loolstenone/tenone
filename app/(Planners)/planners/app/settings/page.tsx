@@ -192,7 +192,7 @@ export default function SettingsPage() {
                     setMorning(d.user.ai_morning_time?.slice(0, 5) || "08:00");
                     setEvening(d.user.ai_evening_time?.slice(0, 5) || "21:00");
                     setTone(d.user.ai_tone);
-                    setNotifyEmail(d.user.notify_email_briefing !== false);
+                    setNotifyEmail(!!d.user.notify_email_briefing);
                     setNotifyPush(!!d.user.notify_push_briefing);
                     if (d.user.ai_context_scope?.length) setContextScope(d.user.ai_context_scope);
                     setSub({
@@ -771,9 +771,9 @@ export default function SettingsPage() {
                         {/* 이메일 */}
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-neutral-900">이메일로 브리핑 받기</p>
+                                <p className="text-sm text-neutral-900">이메일로도 받기 <span className="text-[10px] text-neutral-400 ml-1">선택</span></p>
                                 <p className="text-xs text-neutral-500 mt-0.5">
-                                    아침·저녁 브리핑을 이메일로 함께 전송
+                                    앱 안에서 보는 게 기본. 이메일 전송이 추가로 필요하면 켜기
                                 </p>
                             </div>
                             <button
