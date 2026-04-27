@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-04-28 — 세션 96 · 협업자 RLS 권한 강제 + 이월 작업 전체 완료 검증
+
+### 장소
+집
+
+### 변경 파일
+- `lib/planners/auth.ts` — `getMemberIdAndEmail()` email 반환 추가
+- `app/api/planners/projects/[id]/route.ts` — `resolveRole()` + owner/editor/viewer 권한 분기
+- `features/planners/ProjectDetailView.tsx` — 역할 기반 조건부 UI
+- `features/planners/ProjectsView.tsx` — 포트폴리오 링크 조건부
+- `features/planners/TemplatesView.tsx` + `template-grids/*` — (분리 완료 확인)
+- `app/(Planners)/planners/portfolio/[memberId]/page.tsx` — (완료 확인)
+
+### 핵심 결정
+- 협업자는 JSONB `planners_projects.collaborators` email 매칭 (RLS 아닌 API 레이어 수동 체크)
+- viewer: 읽기 전용 (PATCH 403), editor: owner-only 필드(collaborators/visibility/public_token/member_id) 차단
+- 이월 작업 TemplatesView/포트폴리오 모두 이미 완료 상태 확인
+- 배포 전 블로커 5개는 사용자 액션 필요
+
+---
+
 ## 2026-04-27 — 세션 95 · 프로젝트 메뉴 고도화 Phase 1-6 + UX 일관성 + Weekly 3섹션 + 기념일 80여 종 + 전체화면 모드
 
 ### 장소

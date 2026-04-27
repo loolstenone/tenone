@@ -5,12 +5,14 @@ import Link from "next/link";
 import {
     FolderKanban, Plus, Loader2,
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
+    LayoutGrid,
 } from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
+import { useAuth } from "@/lib/auth-context";
 
 const CATEGORY_ICONS: Record<string, typeof FolderKanban> = {
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
@@ -26,6 +28,7 @@ interface Cover {
 }
 
 export function ProjectsView() {
+    const { user } = useAuth();
     const [projects, setProjects] = useState<PlannerProject[]>([]);
     const [covers, setCovers] = useState<Map<string, Cover>>(new Map());
     const [loading, setLoading] = useState(true);
@@ -82,6 +85,7 @@ export function ProjectsView() {
     }
 
     const filtered = filter === "all" ? projects : projects.filter(p => p.status === filter);
+    const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
@@ -91,7 +95,20 @@ export function ProjectsView() {
                     <FolderKanban className="h-6 w-6 text-[#0F766E]" />
                     <h1 className="font-serif text-3xl text-neutral-900">Projects</h1>
                 </div>
-                <PlannersUtilityLinks />
+                <div className="flex items-center gap-2">
+                    {hasPublicProjects && user?.id && (
+                        <Link
+                            href={`/planners/portfolio/${user.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0F766E] border border-[#0F766E] rounded-lg hover:bg-[#0F766E] hover:text-white transition-colors"
+                        >
+                            <LayoutGrid className="h-3.5 w-3.5" />
+                            내 포트폴리오
+                        </Link>
+                    )}
+                    <PlannersUtilityLinks />
+                </div>
             </div>
 
             {/* Filter */}

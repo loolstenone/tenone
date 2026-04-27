@@ -1,49 +1,77 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getMemberId } from "@/lib/planners/auth";
+import { getMemberIdAndEmail } from "@/lib/planners/auth";
+
+type UserRole = "owner" | "editor" | "viewer";
+type Collaborator = { email: string; role: "viewer" | "editor"; invited_at?: string };
+
+async function resolveRole(
+    admin: ReturnType<typeof createAdminClient>,
+    id: string,
+    memberId: string,
+    email: string,
+    selectFields = '*'
+): Promise<{ project: Record<string, unknown>; userRole: UserRole } | null> {
+    const { data: project } = await admin
+        .from('planners_projects')
+        .select(selectFields)
+        .eq('id', id)
+        .maybeSingle();
+
+    if (!project) return null;
+
+    if (project.member_id === memberId) return { project, userRole: "owner" };
+
+    const collabs: Collaborator[] = project.collaborators ?? [];
+    const collab = collabs.find(c => c.email === email);
+    if (!collab) return null;
+
+    return { project, userRole: collab.role };
+}
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const memberId = await getMemberId();
-    if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const auth = await getMemberIdAndEmail();
+    if (!auth) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const { memberId, email } = auth;
 
     const admin = createAdminClient();
-    const { data: project } = await admin
-        .from('planners_projects')
-        .select('*')
-        .eq('id', id)
-        .eq('member_id', memberId)
-        .maybeSingle();
-
-    if (!project) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const resolved = await resolveRole(admin, id, memberId, email);
+    if (!resolved) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const { project, userRole } = resolved;
 
     const { data: vrief } = await admin.from('planners_project_vriefs').select('*').eq('project_id', id).maybeSingle();
     const { data: gpr } = await admin.from('planners_project_gprs').select('*').eq('project_id', id).maybeSingle();
 
-    return NextResponse.json({ project, vrief, gpr });
+    return NextResponse.json({ project, vrief, gpr, userRole });
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const memberId = await getMemberId();
-    if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const auth = await getMemberIdAndEmail();
+    if (!auth) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const { memberId, email } = auth;
 
     const body = await req.json();
     const admin = createAdminClient();
 
-    // Verify ownership
-    const { data: owned } = await admin
-        .from('planners_projects')
-        .select('id')
-        .eq('id', id)
-        .eq('member_id', memberId)
-        .maybeSingle();
-    if (!owned) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const resolved = await resolveRole(admin, id, memberId, email, 'id, member_id, collaborators');
+    if (!resolved) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const { userRole } = resolved;
 
-    if (body.project) {
+    if (userRole === "viewer") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+
+    let projectPatch = body.project;
+    if (userRole === "editor" && projectPatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { collaborators, visibility, public_token, member_id, ...safeFields } = projectPatch;
+        projectPatch = safeFields;
+    }
+
+    if (projectPatch && Object.keys(projectPatch).length > 0) {
         await admin
             .from('planners_projects')
-            .update({ ...body.project, updated_at: new Date().toISOString() })
+            .update({ ...projectPatch, updated_at: new Date().toISOString() })
             .eq('id', id);
     }
     if (body.vrief) {

@@ -1,6 +1,32 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-27 (세션 95 — 프로젝트 메뉴 고도화 Phase 1-6 + UX 일관성 SSOT + Weekly 3섹션 + 양력/음력 토글 단일 picker + 기념일 80여 종 + 전체화면 모드)
+> 마지막 업데이트: 2026-04-28 (세션 96 — 협업자 RLS 권한 강제 완료 + 이월 작업 전체 검증 완료)
+
+---
+
+## 세션 96 핵심 성과 (2026-04-28)
+
+### 협업자 RLS 권한 강제 (이월 작업 완료)
+- `lib/planners/auth.ts` — `getMemberIdAndEmail()` email 반환 추가
+- `app/api/planners/projects/[id]/route.ts` — `resolveRole()` 헬퍼 (owner/editor/viewer 3단계)
+  · owner: `project.member_id === memberId`
+  · editor/viewer: `project.collaborators[]` email 매칭
+  · GET: `userRole` 반환 → 클라이언트 조건부 UI
+  · PATCH: viewer → 403 / editor → `collaborators·visibility·public_token·member_id` 필드 차단
+- `features/planners/ProjectDetailView.tsx` — `userRole` state + 역할 배지 + ShareField/CollaboratorField 오너만 노출
+- `features/planners/ProjectsView.tsx` — 포트폴리오 링크 조건부 표시
+
+### 이월 작업 전체 검증 완료
+- TemplatesView Step 2b: 754줄 + 7개 grid 파일 분리 확인 (완료 상태)
+- 포트폴리오 모드: `/planners/portfolio/[memberId]` 서버 컴포넌트 확인 (완료 상태)
+- P3 #18 기업플랜: 유보 (결제 사업 시작 시)
+
+### 배포 전 블로커 (사용자 액션 필요)
+- `public/planners-icon-192.png`, `public/planners-icon-512.png` 생성
+- Vercel 환경변수: `ANTHROPIC_API_KEY`, `TOSS_SECRET_KEY`, `VAPID_*`, `GOOGLE_CLIENT_ID/SECRET`
+- Toss 가맹점 승인
+- Google Cloud Console Redirect URI 등록
+- Supabase Auth Redirect URL 추가
 
 ---
 

@@ -35,12 +35,14 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [retroOpen, setRetroOpen] = useState(false);
+    const [userRole, setUserRole] = useState<"owner" | "editor" | "viewer">("owner");
 
     async function reload() {
         const res = await fetch(`/api/planners/projects/${projectId}`);
         if (res.ok) {
             const d = await res.json();
             setProject(d.project);
+            setUserRole(d.userRole ?? "owner");
         }
     }
 
@@ -53,6 +55,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     }, [projectId]);
 
     async function saveProject(patch: Partial<PlannerProject>) {
+        if (userRole === "viewer") return;
         setSaving(true);
         try {
             await fetch(`/api/planners/projects/${projectId}`, {
@@ -120,6 +123,16 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                                     회고하고 완료
                                 </button>
                             )}
+                            {userRole === "viewer" && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-neutral-100 text-neutral-500 border border-neutral-200">
+                                    읽기 전용
+                                </span>
+                            )}
+                            {userRole === "editor" && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                                    편집자
+                                </span>
+                            )}
                             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-400" />}
                         </div>
                         {dateRange && (
@@ -156,7 +169,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 </div>
             </div>
 
-            {tab === "cover" && <CoverTab project={project} save={saveProject} />}
+            {tab === "cover" && <CoverTab project={project} save={saveProject} userRole={userRole} />}
             {tab === "notes" && <NotesTab projectId={projectId} projectCategory={project.category ?? null} />}
             {tab === "tasks" && <ProjectTasksTab projectId={projectId} projectColor={project.color || "#0F766E"} />}
             {tab === "tracking" && <ProjectTrackingTab projectId={projectId} projectColor={project.color || "#0F766E"} />}
@@ -180,7 +193,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     );
 }
 
-function CoverTab({ project, save }: { project: PlannerProject; save: (p: Partial<PlannerProject>) => void }) {
+function CoverTab({ project, save, userRole }: { project: PlannerProject; save: (p: Partial<PlannerProject>) => void; userRole: "owner" | "editor" | "viewer" }) {
     const [title, setTitle] = useState(project.title);
     const [status, setStatus] = useState(project.status);
     const [startDate, setStartDate] = useState(project.start_date || "");
@@ -332,8 +345,8 @@ function CoverTab({ project, save }: { project: PlannerProject; save: (p: Partia
                     </div>
                     <p className="text-[10px] text-neutral-400 mt-1.5">{getCategoryMeta(category).description} · Daily에서 입력하면 이 프로젝트 통계로 적재됩니다 (Phase 3).</p>
                 </Field>
-                <ShareField project={project} />
-                <CollaboratorField project={project} save={save} />
+                {userRole === "owner" && <ShareField project={project} />}
+                {userRole === "owner" && <CollaboratorField project={project} save={save} />}
             </section>
         </div>
     );
@@ -497,7 +510,6 @@ function CollaboratorField({ project, save }: { project: PlannerProject; save: (
                         초대
                     </button>
                 </div>
-                <p className="text-[10px] text-neutral-400">협업자 권한 강제(편집 권한 등)는 추후 RLS 확장 시 적용. 현재는 초대 기록만 저장됩니다.</p>
             </div>
         </Field>
     );
