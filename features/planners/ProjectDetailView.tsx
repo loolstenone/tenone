@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Loader2, ImageIcon, NotebookPen, ListTodo, LineChart, Flag } from "lucide-react";
-import type { PlannerProject } from "@/lib/planners/types";
+import type { PlannerProject, ProjectCollaborator } from "@/lib/planners/types";
 import { ProjectNotesTab } from "./ProjectNotesTab";
 import { ProjectTasksTab } from "./ProjectTasksTab";
 import { ProjectTrackingTab } from "./ProjectTrackingTab";
@@ -332,8 +332,174 @@ function CoverTab({ project, save }: { project: PlannerProject; save: (p: Partia
                     </div>
                     <p className="text-[10px] text-neutral-400 mt-1.5">{getCategoryMeta(category).description} · Daily에서 입력하면 이 프로젝트 통계로 적재됩니다 (Phase 3).</p>
                 </Field>
+                <ShareField project={project} />
+                <CollaboratorField project={project} save={save} />
             </section>
         </div>
+    );
+}
+
+function ShareField({ project }: { project: PlannerProject }) {
+    const [token, setToken] = useState(project.public_token ?? "");
+    const [busy, setBusy] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const isPublic = project.visibility === "public_link" && !!token;
+
+    async function makePublic() {
+        setBusy(true);
+        try {
+            const res = await fetch(`/api/planners/projects/${project.id}/share`, { method: "POST" });
+            if (res.ok) {
+                const d = await res.json();
+                setToken(d.token);
+            }
+        } finally { setBusy(false); }
+    }
+
+    async function revoke() {
+        if (!confirm("공개 링크를 철회하시겠습니까? 기존 URL은 더 이상 작동하지 않습니다.")) return;
+        setBusy(true);
+        try {
+            await fetch(`/api/planners/projects/${project.id}/share`, { method: "DELETE" });
+            setToken("");
+        } finally { setBusy(false); }
+    }
+
+    const url = typeof window !== "undefined" && token ? `${window.location.origin}/planners/p/${token}` : "";
+
+    async function copyUrl() {
+        if (!url) return;
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {}
+    }
+
+    return (
+        <Field label="공개 링크">
+            {!isPublic ? (
+                <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs text-neutral-500">공개 링크를 만들면 누구나 URL로 이 프로젝트를 읽을 수 있습니다 (수정 불가).</p>
+                    <button
+                        onClick={makePublic}
+                        disabled={busy}
+                        className="px-3 py-1.5 text-xs bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] disabled:opacity-50 shrink-0"
+                    >
+                        공개로 전환
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <input
+                            value={url}
+                            readOnly
+                            onFocus={(e) => e.currentTarget.select()}
+                            className="flex-1 text-xs text-neutral-600 bg-neutral-50 border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] font-mono"
+                        />
+                        <button
+                            onClick={copyUrl}
+                            className="px-3 py-1.5 text-xs bg-white border border-neutral-200 rounded hover:bg-neutral-50 shrink-0"
+                        >
+                            {copied ? "복사됨" : "복사"}
+                        </button>
+                        <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 text-xs bg-white border border-neutral-200 rounded hover:bg-neutral-50 shrink-0"
+                        >
+                            열기
+                        </a>
+                    </div>
+                    <button
+                        onClick={revoke}
+                        disabled={busy}
+                        className="text-[11px] text-rose-500 hover:underline disabled:opacity-50"
+                    >
+                        공개 링크 철회
+                    </button>
+                </div>
+            )}
+        </Field>
+    );
+}
+
+function CollaboratorField({ project, save }: { project: PlannerProject; save: (p: Partial<PlannerProject>) => void }) {
+    const initial: ProjectCollaborator[] = Array.isArray(project.collaborators) ? project.collaborators : [];
+    const [collaborators, setCollaborators] = useState<ProjectCollaborator[]>(initial);
+    const [newEmail, setNewEmail] = useState("");
+
+    async function persist(next: ProjectCollaborator[]) {
+        setCollaborators(next);
+        await save({ collaborators: next });
+    }
+
+    function add() {
+        const e = newEmail.trim().toLowerCase();
+        if (!e || !/^.+@.+\..+$/.test(e)) { alert("이메일 형식이 올바르지 않습니다."); return; }
+        if (collaborators.some((c) => c.email === e)) { alert("이미 추가된 이메일입니다."); return; }
+        const next: ProjectCollaborator[] = [...collaborators, { email: e, role: "viewer", invited_at: new Date().toISOString() }];
+        persist(next);
+        setNewEmail("");
+    }
+
+    function remove(email: string) {
+        persist(collaborators.filter((c) => c.email !== email));
+    }
+
+    function setRole(email: string, role: "viewer" | "editor") {
+        persist(collaborators.map((c) => c.email === email ? { ...c, role } : c));
+    }
+
+    return (
+        <Field label="협업자">
+            <div className="space-y-2">
+                {collaborators.length === 0 ? (
+                    <p className="text-xs text-neutral-400 italic">아직 초대된 협업자가 없습니다.</p>
+                ) : (
+                    <ul className="space-y-1">
+                        {collaborators.map(c => (
+                            <li key={c.email} className="flex items-center gap-2 text-xs">
+                                <span className="flex-1 text-neutral-700 truncate">{c.email}</span>
+                                <select
+                                    value={c.role}
+                                    onChange={(e) => setRole(c.email, e.target.value as "viewer" | "editor")}
+                                    className="text-[11px] border border-neutral-200 rounded px-1.5 py-0.5 bg-white"
+                                >
+                                    <option value="viewer">뷰어</option>
+                                    <option value="editor">에디터</option>
+                                </select>
+                                <button
+                                    onClick={() => remove(c.email)}
+                                    className="text-neutral-300 hover:text-rose-500 text-[11px]"
+                                >
+                                    삭제
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                <div className="flex items-center gap-2">
+                    <input
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") add(); }}
+                        placeholder="email@example.com"
+                        className="flex-1 text-xs border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-[#0F766E]"
+                    />
+                    <button
+                        onClick={add}
+                        className="px-3 py-1 text-xs bg-[#0F766E] text-white rounded hover:bg-[#0d5e56]"
+                    >
+                        초대
+                    </button>
+                </div>
+                <p className="text-[10px] text-neutral-400">협업자 권한 강제(편집 권한 등)는 추후 RLS 확장 시 적용. 현재는 초대 기록만 저장됩니다.</p>
+            </div>
+        </Field>
     );
 }
 

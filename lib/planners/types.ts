@@ -127,6 +127,15 @@ export interface PlannerProject {
     tracking_metrics?: string[];
     // Phase 5 — 회고 (5F)
     retrospective?: ProjectRetrospective | null;
+    // Phase 6 — 공유·협업
+    public_token?: string | null;
+    collaborators?: ProjectCollaborator[];
+}
+
+export interface ProjectCollaborator {
+    email: string;
+    role: "viewer" | "editor";
+    invited_at: string;
 }
 
 export interface ProjectRetrospective {
