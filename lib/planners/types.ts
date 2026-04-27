@@ -118,6 +118,24 @@ export interface PlannerProject {
     color: string;
     created_at: string;
     updated_at: string;
+    // Phase 1 — 카테고리·커스텀
+    category?: string | null;
+    custom_fields?: Record<string, unknown>;
+    tags?: string[];
+    visibility?: "private" | "team" | "public_link";
+    tracking_metrics?: string[];
+}
+
+export interface PlannerProjectMilestone {
+    id: string;
+    project_id: string;
+    title: string;
+    description: string | null;
+    due_date: string | null;
+    done_at: string | null;
+    order_index: number;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface PlannerProjectVrief {

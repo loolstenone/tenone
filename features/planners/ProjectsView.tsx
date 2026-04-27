@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FolderKanban, Plus, Loader2 } from "lucide-react";
+import {
+    FolderKanban, Plus, Loader2,
+    GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
+} from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { Track } from "@/lib/analytics";
+import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
+
+const CATEGORY_ICONS: Record<string, typeof FolderKanban> = {
+    GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
+};
 
 interface Cover {
     key: string;
@@ -23,6 +31,7 @@ export function ProjectsView() {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [newTitle, setNewTitle] = useState("");
+    const [newCategory, setNewCategory] = useState<ProjectCategory>("custom");
     const [filter, setFilter] = useState<"all" | "active" | "completed" | "archived">("active");
 
     useEffect(() => {
@@ -50,16 +59,22 @@ export function ProjectsView() {
         if (!newTitle.trim()) return;
         setCreating(true);
         try {
+            const meta = getCategoryMeta(newCategory);
             const res = await fetch(`/api/planners/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: newTitle.trim() }),
+                body: JSON.stringify({
+                    title: newTitle.trim(),
+                    category: newCategory,
+                    tracking_metrics: meta.suggested_metrics,
+                }),
             });
             if (res.ok) {
                 const d = await res.json();
                 setProjects([...projects, d.project]);
                 Track.projectCreate({ has_title: !!newTitle.trim() });
                 setNewTitle("");
+                setNewCategory("custom");
             }
         } finally {
             setCreating(false);
@@ -97,23 +112,51 @@ export function ProjectsView() {
             </div>
 
             {/* New project */}
-            <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-                <Plus className="h-4 w-4 text-neutral-400" />
-                <input
-                    type="text"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') createProject(); }}
-                    placeholder="새 프로젝트 제목"
-                    className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
-                />
-                <button
-                    onClick={createProject}
-                    disabled={creating || !newTitle.trim()}
-                    className="px-4 py-1.5 text-sm bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
-                >
-                    {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
-                </button>
+            <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 space-y-3">
+                <div className="flex items-center gap-3">
+                    <Plus className="h-4 w-4 text-neutral-400" />
+                    <input
+                        type="text"
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') createProject(); }}
+                        placeholder="새 프로젝트 제목"
+                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                    />
+                    <button
+                        onClick={createProject}
+                        disabled={creating || !newTitle.trim()}
+                        className="px-4 py-1.5 text-sm bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                    >
+                        {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
+                    </button>
+                </div>
+                {/* 카테고리 선택 — 추천 템플릿·트래킹 자동 적용 */}
+                <div>
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">카테고리</p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {PROJECT_CATEGORIES.map((c) => {
+                            const Icon = CATEGORY_ICONS[c.icon] ?? Sparkles;
+                            const active = newCategory === c.key;
+                            return (
+                                <button
+                                    key={c.key}
+                                    onClick={() => setNewCategory(c.key)}
+                                    title={c.description}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                                        active
+                                            ? "border-current text-white"
+                                            : "border-neutral-200 text-neutral-500 bg-white hover:bg-neutral-50"
+                                    }`}
+                                    style={active ? { backgroundColor: c.color, borderColor: c.color } : undefined}
+                                >
+                                    <Icon className="h-3 w-3" />
+                                    {c.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
 
             {/* List */}
@@ -144,10 +187,22 @@ export function ProjectsView() {
                                     <h3 className="font-semibold text-neutral-900 group-hover:text-[#0F766E] transition-colors">
                                         {p.title}
                                     </h3>
-                                    <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500">
+                                    <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500 flex-wrap">
                                         <span className="px-2 py-0.5 bg-neutral-100 rounded">
                                             {p.status === "active" ? "진행중" : p.status === "completed" ? "완료" : p.status === "archived" ? "보관" : "일시정지"}
                                         </span>
+                                        {p.category && (() => {
+                                            const meta = getCategoryMeta(p.category);
+                                            const Icon = CATEGORY_ICONS[meta.icon] ?? Sparkles;
+                                            return (
+                                                <span
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-white"
+                                                    style={{ backgroundColor: meta.color }}
+                                                >
+                                                    <Icon className="h-3 w-3" /> {meta.label}
+                                                </span>
+                                            );
+                                        })()}
                                         {p.start_date && <span>{p.start_date}</span>}
                                     </div>
                                 </div>

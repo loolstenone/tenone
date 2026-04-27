@@ -476,6 +476,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                         const hcls = holiday
                                                             ? holiday.type === "holiday" ? "text-rose-500 hover:bg-neutral-100"
                                                             : holiday.type === "memorial" ? "text-rose-400 hover:bg-neutral-100"
+                                                            : holiday.type === "commemoration" ? "text-amber-600 hover:bg-neutral-100"
                                                             : "text-emerald-600 hover:bg-neutral-100"
                                                             : "";
                                                         const label = entry ? entry.title : holiday ? holiday.label : "·";

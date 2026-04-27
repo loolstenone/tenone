@@ -8,7 +8,6 @@ import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
-import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
 import { KIND_COLORS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
@@ -42,6 +41,8 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [reflection, setReflection] = useState("");
     const [summary, setSummary] = useState<WeekSummary | null>(null);
     const [dayHits, setDayHits] = useState<Record<string, string[]>>({});
+    // 메모 (각 날의 첫 코넬 노트 content 동기화)
+    const [dayMemos, setDayMemos] = useState<Record<string, string>>({});
     const [calEntries, setCalEntries] = useState<CalendarEntry[]>([]);
     const [calEditorOpen, setCalEditorOpen] = useState(false);
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
@@ -68,24 +69,34 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         let cancelled = false;
         (async () => {
             setLoading(true);
-            const months = [...new Set(days.map(d => d.getMonth() + 1))];
-            const [res, sumRes, calRes, ...hitResults] = await Promise.all([
+            const dayDates = days.map(d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+            const [res, sumRes, calRes, ...dailyResults] = await Promise.all([
                 fetch(`/api/planners/weekly?year=${year}&week=${week}`),
                 fetch(`/api/planners/summary?scope=weekly&year=${year}&week=${week}`),
                 fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`),
-                ...months.map(m => fetch(`/api/planners/daily/month-hits?year=${year}&month=${m}`)),
+                ...dayDates.map(ds => fetch(`/api/planners/daily?date=${ds}`)),
             ]);
             if (cancelled) return;
             const hitsMap: Record<string, string[]> = {};
-            for (const r of hitResults) {
-                if (r.ok) {
-                    const d = await r.json();
-                    for (const h of d.hits ?? []) {
-                        hitsMap[h.date] = h.task_texts ?? [];
-                    }
+            const memoMap: Record<string, string> = {};
+            for (let i = 0; i < dailyResults.length; i++) {
+                const r = dailyResults[i];
+                const ds = dayDates[i];
+                if (!r.ok) continue;
+                const d = await r.json();
+                if (d.daily) {
+                    const tasks = Array.isArray(d.daily.tasks) ? d.daily.tasks : [];
+                    hitsMap[ds] = tasks.map((t: { text: string }) => t.text);
+                    // 첫 코넬 노트의 content를 메모로
+                    try {
+                        const arr = JSON.parse(d.daily.notes || "[]");
+                        const cornell = Array.isArray(arr) ? arr.find((n: { type?: string }) => !n.type || n.type === "cornell") : null;
+                        memoMap[ds] = cornell?.content ?? "";
+                    } catch { memoMap[ds] = ""; }
                 }
             }
             setDayHits(hitsMap);
+            setDayMemos(memoMap);
             if (sumRes.ok) {
                 const sd = await sumRes.json();
                 setSummary(sd.summary || null);
@@ -162,14 +173,14 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         return map;
     }, [calEntries, boundaries.start, boundaries.end]);
 
-    async function addTaskToDay(ds: string, text: string) {
+    async function addTaskToDay(ds: string, text: string, time: string | null) {
         const trimmed = text.trim();
         if (!trimmed) return;
         try {
             const res = await fetch(`/api/planners/daily?date=${ds}`);
             const d = res.ok ? await res.json() : null;
             const existing: Array<{ id: string; text: string; status: string; time?: string | null }> = d?.daily?.tasks ?? [];
-            const newTask = { id: `t_${Date.now()}`, text: trimmed, status: "todo" as const, time: null };
+            const newTask = { id: `t_${Date.now()}`, text: trimmed, status: "todo" as const, time: time || null };
             const next = [...existing, newTask];
             await fetch(`/api/planners/daily`, {
                 method: "POST",
@@ -177,6 +188,36 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 body: JSON.stringify({ date: ds, tasks: next }),
             });
             setDayHits((prev) => ({ ...prev, [ds]: [...(prev[ds] ?? []), trimmed] }));
+        } catch {}
+    }
+
+    async function saveMemoForDay(ds: string, content: string) {
+        try {
+            const res = await fetch(`/api/planners/daily?date=${ds}`);
+            const d = res.ok ? await res.json() : null;
+            let arr: Array<Record<string, unknown>>;
+            try {
+                arr = JSON.parse(d?.daily?.notes || "[]");
+                if (!Array.isArray(arr)) arr = [];
+            } catch { arr = []; }
+            // 첫 코넬 노트 찾아 content 갱신, 없으면 새로 추가
+            const cornellIdx = arr.findIndex((n) => !n.type || n.type === "cornell");
+            if (cornellIdx >= 0) {
+                arr[cornellIdx] = { ...arr[cornellIdx], content };
+            } else {
+                arr.unshift({
+                    id: `n_default_${Date.now()}`,
+                    type: "cornell",
+                    title: "기본 노트 1",
+                    cue: "", content, summary: "",
+                    rows: [{ id: "r1", cue: "", note: content }],
+                });
+            }
+            await fetch(`/api/planners/daily`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: ds, notes: JSON.stringify(arr) }),
+            });
         } catch {}
     }
 
@@ -270,7 +311,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {leftDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                         );
                                     })}
                                 </div>
@@ -279,7 +320,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {rightMidDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                         );
                                     })}
                                     {/* Weekend: Sat + Sun side by side */}
@@ -287,7 +328,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {weekendDays.map((d) => {
                                             const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                             return (
-                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
+                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                             );
                                         })}
                                     </div>
@@ -309,16 +350,6 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                         </section>
                     )}
 
-                    {/* 이번 주 일정 */}
-                    <CalendarEntryList
-                        entries={calEntries}
-                        view="weekly"
-                        from={boundaries.start}
-                        to={boundaries.end}
-                        label="이번 주 일정"
-                        onAdd={() => { setCalEditing(null); setCalDefaultDate(boundaries.start); setCalEditorOpen(true); }}
-                        onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
-                    />
 
                     {/* Reflection */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">
@@ -356,16 +387,20 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 }
 
 function DayCell({
-    date, ds, isToday, lines, compact = false, taskTexts = [], entries = [], onAddTask,
+    date, ds, isToday, compact = false, taskTexts = [], entries = [], onAddTask,
+    memo = "", onMemoChange, onMemoBlur,
 }: {
     date: Date;
     ds: string;
     isToday: boolean;
-    lines: number;
+    lines?: number;
     compact?: boolean;
     taskTexts?: string[];
     entries?: CalendarEntry[];
-    onAddTask?: (ds: string, text: string) => void;
+    onAddTask?: (ds: string, text: string, time: string | null) => void;
+    memo?: string;
+    onMemoChange?: (v: string) => void;
+    onMemoBlur?: (v: string) => void;
 }) {
     const dayNum = date.getDate();
     const dayKo = DAYS_KO[date.getDay()];
@@ -373,7 +408,8 @@ function DayCell({
     const isSat = date.getDay() === 6;
     const lunar = getLunarDate(ds);
     const holiday = HOLIDAYS[ds];
-    const [adding, setAdding] = useState("");
+    const [addText, setAddText] = useState("");
+    const [addTime, setAddTime] = useState("");
 
     const dateColor = isToday
         ? "text-[#0F766E]"
@@ -384,10 +420,12 @@ function DayCell({
     const dayColor = isSun ? "text-rose-300" : isSat ? "text-blue-300" : "text-neutral-400";
 
     function commit() {
-        if (!adding.trim() || !onAddTask) { setAdding(""); return; }
-        onAddTask(ds, adding);
-        setAdding("");
+        if (!addText.trim() || !onAddTask) { setAddText(""); setAddTime(""); return; }
+        onAddTask(ds, addText, addTime || null);
+        setAddText(""); setAddTime("");
     }
+
+    const overflowing = entries.length > 3 || taskTexts.length > 6 || (memo && memo.length > 200);
 
     return (
         <div className={`group transition-colors ${isToday ? "bg-[#0F766E]/[0.03]" : "bg-white hover:bg-neutral-50/30"}`}>
@@ -408,20 +446,23 @@ function DayCell({
                     )}
                     <Link
                         href={`/planners/app/daily?date=${ds}`}
-                        title="Daily 보기"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-neutral-100"
+                        title="Daily 자세히 보기"
+                        className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400 hover:text-[#0F766E] transition-colors"
                     >
-                        <ArrowUpRight className="h-3 w-3 text-neutral-400" />
+                        <ArrowUpRight className="h-3 w-3" />
                     </Link>
                 </span>
             </div>
-            {/* 기념일·공휴일·절기·미팅 — 본문 상단 라인 */}
-            {(holiday || entries.length > 0) && (
-                <div className="px-3 py-1.5 border-b border-neutral-100 space-y-0.5">
+
+            {/* 1) 오늘의 일정 (calendar entries + 공휴일/절기) */}
+            <div className="px-3 py-2 border-b border-neutral-100">
+                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-1">오늘의 일정</p>
+                <div className="space-y-0.5">
                     {holiday && (
                         <p className={`text-[10px] font-medium leading-tight truncate ${
                             holiday.type === "holiday" ? "text-rose-500" :
                             holiday.type === "memorial" ? "text-rose-400" :
+                            holiday.type === "commemoration" ? "text-amber-600" :
                             "text-emerald-600"
                         }`} title={holiday.label}>
                             · {holiday.label}
@@ -436,42 +477,62 @@ function DayCell({
                             </p>
                         );
                     })}
-                    {entries.length > 3 && (
-                        <p className="text-[9px] text-neutral-400">+{entries.length - 3}</p>
+                    {!holiday && entries.length === 0 && <p className="text-[10px] text-neutral-300">—</p>}
+                </div>
+            </div>
+
+            {/* 2) Task — Daily 동기화 */}
+            <div className="px-3 py-2 border-b border-neutral-100">
+                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-1">Task</p>
+                <div className="space-y-0.5">
+                    {taskTexts.length === 0 && <p className="text-[10px] text-neutral-300">—</p>}
+                    {taskTexts.slice(0, 6).map((t, i) => (
+                        <p key={i} className="text-[11px] leading-tight text-neutral-700 truncate" title={t}>· {t}</p>
+                    ))}
+                    {taskTexts.length > 6 && (
+                        <p className="text-[9px] text-neutral-400">+{taskTexts.length - 6}개</p>
                     )}
                 </div>
-            )}
-            {/* Task lines (Daily 동기화) */}
-            <div>
-                {Array.from({ length: lines }).map((_, i) => {
-                    const task = taskTexts[i];
-                    return (
-                        <div
-                            key={i}
-                            className={`border-b border-neutral-100 group-hover:border-neutral-200/60 transition-colors flex items-center px-2.5 ${compact ? "h-6" : "h-7"}`}
-                        >
-                            {task && (
-                                <span className={`truncate leading-none text-neutral-500 ${compact ? "text-[10px]" : "text-[11px]"}`}>
-                                    {task}
-                                </span>
-                            )}
-                        </div>
-                    );
-                })}
-                {/* 인라인 task 추가 */}
                 {onAddTask && (
-                    <div className="flex items-center px-2.5 py-1 border-t border-neutral-100">
-                        <Plus className="h-3 w-3 text-neutral-300 mr-1 shrink-0" />
+                    <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-neutral-100">
+                        <Plus className="h-3 w-3 text-neutral-300 shrink-0" />
+                        <input
+                            type="time"
+                            value={addTime}
+                            onChange={(e) => setAddTime(e.target.value)}
+                            className="text-[10px] text-neutral-500 w-[68px] focus:outline-none bg-white border border-neutral-200 rounded px-1 py-0.5"
+                        />
                         <input
                             type="text"
-                            value={adding}
-                            onChange={(e) => setAdding(e.target.value)}
+                            value={addText}
+                            onChange={(e) => setAddText(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
                             onBlur={commit}
                             placeholder="할 일 추가"
-                            className={`flex-1 bg-transparent focus:outline-none placeholder:text-neutral-300 text-neutral-700 ${compact ? "text-[10px]" : "text-[11px]"}`}
+                            className="flex-1 min-w-0 bg-transparent focus:outline-none placeholder:text-neutral-300 text-neutral-700 text-[11px]"
                         />
                     </div>
+                )}
+            </div>
+
+            {/* 3) 메모 — Daily의 첫 코넬 노트 동기화 */}
+            <div className="px-3 py-2">
+                <p className="text-[9px] uppercase tracking-widest text-neutral-400 mb-1">메모</p>
+                <textarea
+                    value={memo}
+                    onChange={(e) => onMemoChange?.(e.target.value)}
+                    onBlur={(e) => onMemoBlur?.(e.target.value)}
+                    placeholder="자유롭게 기록…"
+                    rows={3}
+                    className="w-full text-[11px] text-neutral-700 placeholder:text-neutral-300 focus:outline-none bg-transparent resize-none leading-relaxed"
+                />
+                {overflowing && (
+                    <Link
+                        href={`/planners/app/daily?date=${ds}`}
+                        className="inline-flex items-center gap-0.5 text-[10px] text-[#0F766E] hover:underline mt-1"
+                    >
+                        자세히 보기 <ArrowUpRight className="h-2.5 w-2.5" />
+                    </Link>
                 )}
             </div>
         </div>

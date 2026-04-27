@@ -54,11 +54,12 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Planner's Planner AI — 폰트 테마 (PlannersThemeProvider가 설정) */
+/* Planner's Planner AI — 폰트 테마 (PlannersThemeProvider가 설정)
+   .font-serif 명시된 요소는 예외(타이틀·로고 등 — 위클리 본문 타이틀 SSOT) */
 html[data-planners-font] body,
-html[data-planners-font] input,
-html[data-planners-font] textarea,
-html[data-planners-font] button {
+html[data-planners-font] input:not(.font-serif),
+html[data-planners-font] textarea:not(.font-serif),
+html[data-planners-font] button:not(.font-serif) {
   font-family: var(--planners-font, inherit);
 }
 

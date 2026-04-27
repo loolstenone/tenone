@@ -8,6 +8,7 @@ import { ProjectNotesTab } from "./ProjectNotesTab";
 import { CoverPicker } from "./CoverPicker";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
 
 type Tab = "cover" | "notes";
 
@@ -119,7 +120,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             </div>
 
             {tab === "cover" && <CoverTab project={project} save={saveProject} />}
-            {tab === "notes" && <NotesTab projectId={projectId} />}
+            {tab === "notes" && <NotesTab projectId={projectId} projectCategory={project.category ?? null} />}
         </div>
     );
 }
@@ -129,6 +130,8 @@ function CoverTab({ project, save }: { project: PlannerProject; save: (p: Partia
     const [status, setStatus] = useState(project.status);
     const [startDate, setStartDate] = useState(project.start_date || "");
     const [endDate, setEndDate] = useState(project.end_date || "");
+    const [category, setCategory] = useState<ProjectCategory>((project.category as ProjectCategory) ?? "custom");
+    const [trackingMetrics, setTrackingMetrics] = useState<string[]>(project.tracking_metrics ?? []);
     const [coverId, setCoverId] = useState(project.cover_id || "teal_solid");
     const [coverData, setCoverData] = useState<{ key: string; label: string; pattern: "solid" | "gradient" | "grid" | "dot" | "paper" | "line" | "stripe" | "circle"; primary_color: string; accent_color: string | null; emoji: string | null } | null>(null);
     const [pickerOpen, setPickerOpen] = useState(false);
@@ -218,6 +221,62 @@ function CoverTab({ project, save }: { project: PlannerProject; save: (p: Partia
                         />
                     </Field>
                 </div>
+                <Field label="카테고리">
+                    <div className="flex flex-wrap gap-1.5">
+                        {PROJECT_CATEGORIES.map((c) => {
+                            const active = category === c.key;
+                            return (
+                                <button
+                                    key={c.key}
+                                    onClick={() => {
+                                        setCategory(c.key);
+                                        // 메트릭이 비어있을 때만 카테고리의 추천 메트릭으로 자동 채움
+                                        const nextMetrics = trackingMetrics.length === 0 ? c.suggested_metrics : trackingMetrics;
+                                        setTrackingMetrics(nextMetrics);
+                                        save({ category: c.key, tracking_metrics: nextMetrics });
+                                    }}
+                                    className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                                        active ? "border-current text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"
+                                    }`}
+                                    style={active ? { backgroundColor: c.color, borderColor: c.color } : undefined}
+                                >
+                                    {c.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </Field>
+                <Field label="연결 트래킹 메트릭">
+                    <div className="flex flex-wrap gap-1.5">
+                        {(["energy","satisfaction","mood","study","faith","exercise","health"] as const).map((m) => {
+                            const labels: Record<string, string> = {
+                                energy: "에너지", satisfaction: "만족도", mood: "기분",
+                                study: "공부", faith: "신앙", exercise: "운동", health: "건강",
+                            };
+                            const active = trackingMetrics.includes(m);
+                            return (
+                                <button
+                                    key={m}
+                                    onClick={() => {
+                                        const next = active
+                                            ? trackingMetrics.filter(x => x !== m)
+                                            : [...trackingMetrics, m];
+                                        setTrackingMetrics(next);
+                                        save({ tracking_metrics: next });
+                                    }}
+                                    className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                                        active
+                                            ? "bg-[#0F766E] text-white border-[#0F766E]"
+                                            : "bg-white border-neutral-200 text-neutral-500 hover:bg-neutral-50"
+                                    }`}
+                                >
+                                    {labels[m]}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-[10px] text-neutral-400 mt-1.5">{getCategoryMeta(category).description} · Daily에서 입력하면 이 프로젝트 통계로 적재됩니다 (Phase 3).</p>
+                </Field>
             </section>
         </div>
     );
@@ -232,7 +291,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-function NotesTab({ projectId }: { projectId: string }) {
-    return <ProjectNotesTab projectId={projectId} />;
+function NotesTab({ projectId, projectCategory }: { projectId: string; projectCategory: string | null }) {
+    return <ProjectNotesTab projectId={projectId} projectCategory={projectCategory} />;
 }
 

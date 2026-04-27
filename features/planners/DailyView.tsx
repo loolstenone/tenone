@@ -45,6 +45,18 @@ export function resultCategoryLabel(key: string | null | undefined): string {
     return RESULT_CATEGORIES.find((c) => c.key === key)?.label ?? "";
 }
 
+function makeDefaultCornellNote(): NoteItem {
+    return {
+        id: `n_default_${Date.now()}`,
+        type: 'cornell',
+        title: '기본 노트 1',
+        cue: '',
+        content: '',
+        summary: '',
+        rows: [{ id: 'r1', cue: '', note: '' }],
+    };
+}
+
 function localDateStr(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
@@ -86,11 +98,11 @@ function TemplateNoteBlock({
     const grid = hasGrid ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleChange) : null;
 
     return (
-        <section className="bg-white border border-violet-200 rounded-xl overflow-hidden">
-            {/* Header — 타이틀 직접 편집 가능 */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-violet-100 bg-violet-50/60">
+        <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+            {/* Header — 통일 패턴 (text-xs uppercase tracking-widest text-neutral-400) */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <LayoutTemplate className="h-4 w-4 text-violet-500 shrink-0" />
+                    <LayoutTemplate className="h-3.5 w-3.5 text-violet-500 shrink-0" />
                     <input
                         value={note.title}
                         onChange={(e) => {
@@ -98,9 +110,8 @@ function TemplateNoteBlock({
                             setNotesList(next);
                         }}
                         onBlur={() => save({ notes: serializeNotesFn(notesList) })}
-                        placeholder={note.templateLabel || "제목을 입력하세요"}
-                        title="제목 입력 (예시: 템플릿 이름)"
-                        className="text-sm font-semibold text-violet-800 bg-transparent focus:outline-none focus:ring-2 focus:ring-violet-300 focus:bg-white rounded px-1.5 py-0.5 w-full placeholder:text-violet-400 placeholder:font-normal placeholder:italic hover:bg-violet-100/60 transition-colors cursor-text"
+                        placeholder={note.templateLabel || "템플릿"}
+                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
                     />
                 </div>
                 <div className="flex items-center gap-2 ml-2 shrink-0">
@@ -422,7 +433,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     if (rawNotes2 && !parsed.find(n => n.id === 'n2')) {
                         parsed.push({ id: 'n2', type: 'cornell', title: 'Note 2', cue: '', content: rawNotes2, summary: '', rows: [{ id: 'r1', cue: '', note: rawNotes2 }] });
                     }
-                    setNotesList(parsed);
+                    // 기본: 코넬 노트 1개 자동 표시 (저장 안 되어 있으면 ephemeral)
+                    setNotesList(parsed.length === 0 ? [makeDefaultCornellNote()] : parsed);
                     setEnergy(data.daily.energy_level);
                     setSatisfaction(data.daily.satisfaction_level ?? null);
                     setMood(data.daily.mood_level ?? null);
@@ -447,7 +459,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     }
                 } else {
                     setTasks([]);
-                    setNotesList([]);
+                    setNotesList([makeDefaultCornellNote()]);
                     setEnergy(null);
                     setSatisfaction(null);
                     setMood(null);
@@ -705,6 +717,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             <span className={`text-xs font-medium ${
                                 HOLIDAYS[date].type === 'holiday' ? 'text-rose-400' :
                                 HOLIDAYS[date].type === 'memorial' ? 'text-rose-300' :
+                                HOLIDAYS[date].type === 'commemoration' ? 'text-amber-600' :
                                 'text-emerald-500'
                             }`}>
                                 · {HOLIDAYS[date].label}
@@ -793,7 +806,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         type="time"
                                         value={newTaskTime}
                                         onChange={(e) => setNewTaskTime(e.target.value)}
-                                        className="text-xs text-neutral-500 w-[72px] focus:outline-none bg-transparent border border-neutral-200 rounded px-1 py-0.5"
+                                        className="text-sm text-neutral-700 w-[110px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
                                     />
                                     <input
                                         type="text"
@@ -1090,11 +1103,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
-                    {/* Right column — AI정리 → 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 */}
+                    {/* Right column — 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 → AI 정리 */}
                     <div className="space-y-4">
-                        {/* 0. AI 정리 — 오늘 하루 간략 요약 */}
-                        <DailyAiSummary date={date} />
-
                         {/* 1. 당월 달력 */}
                         <DailyMiniMonth date={date} />
 
@@ -1271,6 +1281,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 />
                             )}
                         </section>
+
+                        {/* 6. AI 정리 — 오늘 하루 간략 요약 */}
+                        <DailyAiSummary date={date} />
                     </div>
                 </div>
             )}

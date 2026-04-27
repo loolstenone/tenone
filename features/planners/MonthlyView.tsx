@@ -476,8 +476,9 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                                             {holiday && (
                                                                 <span className={`text-[9px] truncate ${
                                                                     holiday.type === "holiday" ? "text-red-500 font-medium" :
-                                                                    holiday.type === "memorial" ? "text-neutral-600" :
-                                                                    "text-neutral-400"
+                                                                    holiday.type === "memorial" ? "text-rose-400" :
+                                                                    holiday.type === "commemoration" ? "text-amber-600" :
+                                                                    "text-emerald-600"
                                                                 }`}>
                                                                     {holiday.label}
                                                                 </span>

@@ -63,8 +63,8 @@ export function AppTopNav({
             <Link href="/planners/app" className="flex items-center gap-1.5 mr-1 shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-6 h-6 rounded shrink-0" />
-                <span className="text-xs font-semibold font-sans text-neutral-800 tracking-tight whitespace-nowrap">
-                    Planner&apos;s Planner<sup className="text-[8px] font-bold text-[#0F766E] ml-0.5">AI</sup>
+                <span className="font-serif text-sm text-neutral-900 whitespace-nowrap">
+                    Planner&apos;s Planner<sup className="text-[8px] font-sans font-bold text-[#0F766E] ml-0.5 align-super">AI</sup>
                 </span>
             </Link>
 

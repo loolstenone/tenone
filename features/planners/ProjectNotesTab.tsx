@@ -8,6 +8,7 @@ import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/pla
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { Track } from "@/lib/analytics";
 import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, type HandNoteData } from "./HandNote";
+import { getRecommendedTemplateKeys } from "@/lib/planners/template-recommendations";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -43,7 +44,7 @@ interface Template {
     body_md: string;
 }
 
-export function ProjectNotesTab({ projectId }: { projectId: string }) {
+export function ProjectNotesTab({ projectId, projectCategory }: { projectId: string; projectCategory?: string | null }) {
     const [notes, setNotes] = useState<ProjectNote[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -71,6 +72,20 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
     }
 
     useEffect(() => { load(); }, [projectId]);
+
+    // 카테고리 추천 템플릿 칩 노출용 — 템플릿 목록 사전 로드
+    useEffect(() => {
+        if (!projectCategory || templates.length > 0) return;
+        (async () => {
+            try {
+                const res = await fetch(`/api/planners/templates`);
+                if (res.ok) {
+                    const d = await res.json();
+                    setTemplates(d.templates || []);
+                }
+            } catch {}
+        })();
+    }, [projectCategory, templates.length]);
 
     async function addBlankNote() {
         setSaving(true);
@@ -209,8 +224,36 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
         return <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
 
+    const recommendedTpls = (() => {
+        const keys = getRecommendedTemplateKeys(projectCategory);
+        if (keys.length === 0) return [] as Template[];
+        return keys
+            .map(k => templates.find(t => t.key === k))
+            .filter((t): t is Template => !!t)
+            .slice(0, 6);
+    })();
+
     return (
         <div className="space-y-4">
+            {/* 추천 템플릿 — 카테고리 기반 */}
+            {recommendedTpls.length > 0 && (
+                <div className="bg-violet-50/50 border border-violet-100 rounded-xl px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-widest text-violet-600 mb-2">이 프로젝트 추천 템플릿</p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {recommendedTpls.map((t) => (
+                            <button
+                                key={t.id}
+                                onClick={() => insertFromTemplate(t)}
+                                disabled={saving}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-violet-200 rounded-full text-xs text-violet-700 hover:bg-violet-100 hover:border-violet-400 transition-colors disabled:opacity-50"
+                            >
+                                <LayoutTemplate className="h-3 w-3" /> {t.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Action bar — 4종 노트 옵션 */}
             <div className="grid grid-cols-4 gap-2">
                 <button

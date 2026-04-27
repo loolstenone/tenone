@@ -3,11 +3,11 @@
 // 음력 공휴일(설날·추석·부처님오신날)은 연도별로 양력 날짜가 다르므로 하드코딩.
 
 interface HolidayMap {
-    [yyyyMMdd: string]: { label: string; type: 'holiday' | 'solar_term' | 'memorial' };
+    [yyyyMMdd: string]: { label: string; type: 'holiday' | 'solar_term' | 'memorial' | 'commemoration' };
 }
 
 export const HOLIDAYS: HolidayMap = {
-    // ── 2026년 ─────────────────────────────────────────────────
+    // ── 2026년 법정 공휴일 ─────────────────────────────────────
     '2026-01-01': { label: '신정', type: 'holiday' },
     '2026-02-16': { label: '설날 연휴', type: 'holiday' },
     '2026-02-17': { label: '설날', type: 'holiday' },
@@ -24,6 +24,51 @@ export const HOLIDAYS: HolidayMap = {
     '2026-10-09': { label: '한글날', type: 'holiday' },
     '2026-12-25': { label: '성탄절', type: 'holiday' },
 
+    // ── 2026년 정부지정 기념일 (법정 비공휴일) ──────────────────
+    '2026-02-14': { label: '발렌타인데이', type: 'commemoration' },
+    '2026-03-03': { label: '납세자의 날', type: 'commemoration' },
+    '2026-03-08': { label: '세계 여성의 날', type: 'commemoration' },
+    '2026-03-14': { label: '화이트데이', type: 'commemoration' },
+    '2026-04-03': { label: '4·3 희생자 추념일', type: 'memorial' },
+    '2026-04-05': { label: '식목일 · 청명', type: 'commemoration' },
+    '2026-04-11': { label: '대한민국 임시정부 수립일', type: 'commemoration' },
+    '2026-04-19': { label: '4·19 혁명 기념일', type: 'commemoration' },
+    '2026-04-20': { label: '장애인의 날 · 곡우', type: 'commemoration' },
+    '2026-04-21': { label: '과학의 날', type: 'commemoration' },
+    '2026-04-22': { label: '정보통신의 날 · 지구의 날', type: 'commemoration' },
+    '2026-04-25': { label: '법의 날', type: 'commemoration' },
+    '2026-04-28': { label: '충무공 이순신 탄신일', type: 'commemoration' },
+    '2026-05-01': { label: '근로자의 날 (노동절)', type: 'commemoration' },
+    '2026-05-08': { label: '어버이날', type: 'commemoration' },
+    '2026-05-10': { label: '유권자의 날', type: 'commemoration' },
+    '2026-05-11': { label: '입양의 날', type: 'commemoration' },
+    '2026-05-15': { label: '스승의 날', type: 'commemoration' },
+    '2026-05-18': { label: '5·18 민주화운동 기념일', type: 'commemoration' },
+    '2026-05-19': { label: '발명의 날 · 성년의 날', type: 'commemoration' },
+    '2026-05-21': { label: '부부의 날 · 소만', type: 'commemoration' },
+    '2026-05-31': { label: '바다의 날', type: 'commemoration' },
+    '2026-06-05': { label: '환경의 날', type: 'commemoration' },
+    '2026-06-10': { label: '6·10 민주항쟁 기념일', type: 'commemoration' },
+    '2026-06-25': { label: '6·25 전쟁일', type: 'memorial' },
+    '2026-07-17': { label: '제헌절', type: 'commemoration' },
+    '2026-09-07': { label: '사회복지의 날', type: 'commemoration' },
+    '2026-09-18': { label: '철도의 날', type: 'commemoration' },
+    '2026-10-01': { label: '국군의 날', type: 'commemoration' },
+    '2026-10-02': { label: '노인의 날', type: 'commemoration' },
+    '2026-10-05': { label: '세계 한인의 날', type: 'commemoration' },
+    '2026-10-08': { label: '재향군인의 날 · 한로', type: 'commemoration' },
+    '2026-10-15': { label: '체육의 날', type: 'commemoration' },
+    '2026-10-21': { label: '경찰의 날', type: 'commemoration' },
+    '2026-10-24': { label: 'UN의 날', type: 'commemoration' },
+    '2026-10-28': { label: '교정의 날', type: 'commemoration' },
+    '2026-11-03': { label: '학생독립운동 기념일', type: 'commemoration' },
+    '2026-11-09': { label: '소방의 날', type: 'commemoration' },
+    '2026-11-11': { label: '농업인의 날 · 빼빼로데이', type: 'commemoration' },
+    '2026-11-17': { label: '순국선열의 날', type: 'commemoration' },
+    '2026-12-03': { label: '소비자의 날', type: 'commemoration' },
+    '2026-12-05': { label: '무역의 날', type: 'commemoration' },
+    '2026-12-10': { label: '세계 인권의 날', type: 'commemoration' },
+
     // ── 2026년 24절기 ──────────────────────────────────────────
     '2026-01-05': { label: '소한', type: 'solar_term' },
     '2026-01-20': { label: '대한', type: 'solar_term' },
@@ -31,10 +76,8 @@ export const HOLIDAYS: HolidayMap = {
     '2026-02-19': { label: '우수', type: 'solar_term' },
     '2026-03-06': { label: '경칩', type: 'solar_term' },
     '2026-03-20': { label: '춘분', type: 'solar_term' },
-    '2026-04-05': { label: '청명', type: 'solar_term' },
-    '2026-04-20': { label: '곡우', type: 'solar_term' },
+    // 2026-04-05 식목일·청명 / 2026-04-20 장애인의 날·곡우 / 2026-05-21 부부의 날·소만 → commemoration 으로 통합
     '2026-05-06': { label: '입하', type: 'solar_term' },
-    '2026-05-21': { label: '소만', type: 'solar_term' },
     // 2026-06-06 현충일·망종 (위 holiday에 통합 표기)
     '2026-06-21': { label: '하지', type: 'solar_term' },
     '2026-07-07': { label: '소서', type: 'solar_term' },
@@ -43,14 +86,14 @@ export const HOLIDAYS: HolidayMap = {
     '2026-08-23': { label: '처서', type: 'solar_term' },
     '2026-09-08': { label: '백로', type: 'solar_term' },
     '2026-09-23': { label: '추분', type: 'solar_term' },
-    '2026-10-08': { label: '한로', type: 'solar_term' },
+    // 2026-10-08 재향군인의 날·한로 → commemoration 통합
     '2026-10-23': { label: '상강', type: 'solar_term' },
     '2026-11-07': { label: '입동', type: 'solar_term' },
     '2026-11-22': { label: '소설', type: 'solar_term' },
     '2026-12-07': { label: '대설', type: 'solar_term' },
     '2026-12-22': { label: '동지', type: 'solar_term' },
 
-    // ── 2027년 (법정공휴일만) ──────────────────────────────────
+    // ── 2027년 법정 공휴일 ─────────────────────────────────────
     '2027-01-01': { label: '신정', type: 'holiday' },
     '2027-02-06': { label: '설날 연휴', type: 'holiday' },
     '2027-02-07': { label: '설날', type: 'holiday' },
@@ -66,9 +109,54 @@ export const HOLIDAYS: HolidayMap = {
     '2027-10-03': { label: '개천절', type: 'holiday' },
     '2027-10-09': { label: '한글날', type: 'holiday' },
     '2027-12-25': { label: '성탄절', type: 'holiday' },
+
+    // ── 2027년 정부지정 기념일 (법정 비공휴일) ──────────────────
+    '2027-02-14': { label: '발렌타인데이', type: 'commemoration' },
+    '2027-03-03': { label: '납세자의 날', type: 'commemoration' },
+    '2027-03-08': { label: '세계 여성의 날', type: 'commemoration' },
+    '2027-03-14': { label: '화이트데이', type: 'commemoration' },
+    '2027-04-03': { label: '4·3 희생자 추념일', type: 'memorial' },
+    '2027-04-05': { label: '식목일', type: 'commemoration' },
+    '2027-04-11': { label: '대한민국 임시정부 수립일', type: 'commemoration' },
+    '2027-04-19': { label: '4·19 혁명 기념일', type: 'commemoration' },
+    '2027-04-20': { label: '장애인의 날', type: 'commemoration' },
+    '2027-04-21': { label: '과학의 날', type: 'commemoration' },
+    '2027-04-22': { label: '정보통신의 날 · 지구의 날', type: 'commemoration' },
+    '2027-04-25': { label: '법의 날', type: 'commemoration' },
+    '2027-04-28': { label: '충무공 이순신 탄신일', type: 'commemoration' },
+    '2027-05-01': { label: '근로자의 날 (노동절)', type: 'commemoration' },
+    '2027-05-08': { label: '어버이날', type: 'commemoration' },
+    '2027-05-10': { label: '유권자의 날', type: 'commemoration' },
+    '2027-05-11': { label: '입양의 날', type: 'commemoration' },
+    '2027-05-15': { label: '스승의 날', type: 'commemoration' },
+    '2027-05-17': { label: '성년의 날', type: 'commemoration' },
+    '2027-05-18': { label: '5·18 민주화운동 기념일', type: 'commemoration' },
+    '2027-05-19': { label: '발명의 날', type: 'commemoration' },
+    '2027-05-21': { label: '부부의 날', type: 'commemoration' },
+    '2027-05-31': { label: '바다의 날', type: 'commemoration' },
+    '2027-06-05': { label: '환경의 날', type: 'commemoration' },
+    '2027-06-10': { label: '6·10 민주항쟁 기념일', type: 'commemoration' },
+    '2027-06-25': { label: '6·25 전쟁일', type: 'memorial' },
+    '2027-07-17': { label: '제헌절', type: 'commemoration' },
+    '2027-09-07': { label: '사회복지의 날', type: 'commemoration' },
+    '2027-09-18': { label: '철도의 날', type: 'commemoration' },
+    '2027-10-01': { label: '국군의 날', type: 'commemoration' },
+    '2027-10-02': { label: '노인의 날', type: 'commemoration' },
+    '2027-10-05': { label: '세계 한인의 날', type: 'commemoration' },
+    '2027-10-15': { label: '체육의 날', type: 'commemoration' },
+    '2027-10-21': { label: '경찰의 날', type: 'commemoration' },
+    '2027-10-24': { label: 'UN의 날', type: 'commemoration' },
+    '2027-10-28': { label: '교정의 날', type: 'commemoration' },
+    '2027-11-03': { label: '학생독립운동 기념일', type: 'commemoration' },
+    '2027-11-09': { label: '소방의 날', type: 'commemoration' },
+    '2027-11-11': { label: '농업인의 날 · 빼빼로데이', type: 'commemoration' },
+    '2027-11-17': { label: '순국선열의 날', type: 'commemoration' },
+    '2027-12-03': { label: '소비자의 날', type: 'commemoration' },
+    '2027-12-05': { label: '무역의 날', type: 'commemoration' },
+    '2027-12-10': { label: '세계 인권의 날', type: 'commemoration' },
 };
 
-export function getHoliday(date: string): { label: string; type: 'holiday' | 'solar_term' | 'memorial' } | null {
+export function getHoliday(date: string): { label: string; type: 'holiday' | 'solar_term' | 'memorial' | 'commemoration' } | null {
     return HOLIDAYS[date] ?? null;
 }
 
