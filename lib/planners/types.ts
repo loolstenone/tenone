@@ -125,6 +125,17 @@ export interface PlannerProject {
     tags?: string[];
     visibility?: "private" | "team" | "public_link";
     tracking_metrics?: string[];
+    // Phase 5 — 회고 (5F)
+    retrospective?: ProjectRetrospective | null;
+}
+
+export interface ProjectRetrospective {
+    fact: string;          // 무엇을 했는가
+    feeling: string;       // 어떤 감정/경험이었는가
+    finding: string;       // 배운 것 (Identity Key Results 후보)
+    future: string;        // 다음에 어떻게
+    feedback: string;      // 피드백
+    completed_at: string;  // ISO timestamp
 }
 
 export interface PlannerProjectMilestone {

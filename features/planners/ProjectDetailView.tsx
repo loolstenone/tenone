@@ -8,6 +8,7 @@ import { ProjectNotesTab } from "./ProjectNotesTab";
 import { ProjectTasksTab } from "./ProjectTasksTab";
 import { ProjectTrackingTab } from "./ProjectTrackingTab";
 import { ProjectMilestonesTab } from "./ProjectMilestonesTab";
+import { ProjectRetroModal } from "./ProjectRetroModal";
 import { CoverPicker } from "./CoverPicker";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
@@ -33,15 +34,20 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
     const [project, setProject] = useState<PlannerProject | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [retroOpen, setRetroOpen] = useState(false);
+
+    async function reload() {
+        const res = await fetch(`/api/planners/projects/${projectId}`);
+        if (res.ok) {
+            const d = await res.json();
+            setProject(d.project);
+        }
+    }
 
     useEffect(() => {
         (async () => {
             setLoading(true);
-            const res = await fetch(`/api/planners/projects/${projectId}`);
-            if (res.ok) {
-                const d = await res.json();
-                setProject(d.project);
-            }
+            await reload();
             setLoading(false);
         })();
     }, [projectId]);
@@ -54,6 +60,13 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ project: patch }),
             });
+            // status를 completed로 바꾸고 회고가 없으면 모달 자동 오픈
+            if (patch.status === "completed" && !project?.retrospective) {
+                setProject(p => p ? { ...p, ...patch } : p);
+                setRetroOpen(true);
+            } else if (patch) {
+                setProject(p => p ? { ...p, ...patch } : p);
+            }
         } finally { setSaving(false); }
     }
 
@@ -89,6 +102,24 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_TONE[project.status] || STATUS_TONE.active}`}>
                                 {STATUS_LABEL[project.status] || project.status}
                             </span>
+                            {project.retrospective && (
+                                <button
+                                    onClick={() => setRetroOpen(true)}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 border border-violet-200 text-violet-700 rounded-full text-[11px] font-medium hover:bg-violet-100"
+                                    title="저장된 회고 보기"
+                                >
+                                    회고 보기
+                                </button>
+                            )}
+                            {project.status !== "completed" && !project.retrospective && (
+                                <button
+                                    onClick={() => setRetroOpen(true)}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-[11px] font-medium hover:bg-amber-100"
+                                    title="5F 회고 작성하고 완료 처리"
+                                >
+                                    회고하고 완료
+                                </button>
+                            )}
                             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-400" />}
                         </div>
                         {dateRange && (
@@ -137,6 +168,14 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                     projectEndDate={project.end_date}
                 />
             )}
+
+            {/* 5F 회고 모달 */}
+            <ProjectRetroModal
+                open={retroOpen}
+                project={project}
+                onClose={() => setRetroOpen(false)}
+                onSaved={() => { reload(); }}
+            />
         </div>
     );
 }
