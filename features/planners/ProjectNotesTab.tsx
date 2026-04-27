@@ -75,10 +75,11 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
     async function addBlankNote() {
         setSaving(true);
         try {
+            const idx = notes.filter(n => !(n.content ?? "").includes("planners:handwriting") && !(n.content ?? "").includes("planners-template")).length + 1;
             const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: "새 노트", content: "" }),
+                body: JSON.stringify({ title: `기본 노트 ${idx}`, content: "" }),
             });
             if (res.ok) {
                 const d = await res.json();
@@ -224,7 +225,10 @@ export function ProjectNotesTab({ projectId }: { projectId: string }) {
                         const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ title: "손글씨 노트", content: "<!-- planners:handwriting -->\n" + JSON.stringify({ strokes: [], width: 600, height: 320 }) }),
+                            body: JSON.stringify({
+                                title: `손글씨 ${notes.filter(n => (n.content ?? "").includes("planners:handwriting")).length + 1}`,
+                                content: "<!-- planners:handwriting -->\n" + JSON.stringify({ strokes: [], width: 600, height: 320 })
+                            }),
                         });
                         if (res.ok) {
                             const d = await res.json();

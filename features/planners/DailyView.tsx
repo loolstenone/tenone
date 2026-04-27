@@ -696,18 +696,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </span>
                         )}
                         <span>{weekday}</span>
+                        {lunar && (
+                            <span className="text-neutral-300">
+                                음력 {lunar.isLeap ? "윤" : ""}{lunar.month}월 {lunar.day}일
+                            </span>
+                        )}
                         {HOLIDAYS[date] && (
                             <span className={`text-xs font-medium ${
                                 HOLIDAYS[date].type === 'holiday' ? 'text-rose-400' :
                                 HOLIDAYS[date].type === 'memorial' ? 'text-rose-300' :
-                                'text-neutral-400'
+                                'text-emerald-500'
                             }`}>
-                                {HOLIDAYS[date].label}
-                            </span>
-                        )}
-                        {lunar && (
-                            <span className="text-neutral-300">
-                                음력 {lunar.isLeap ? "윤" : ""}{lunar.month}월 {lunar.day}일
+                                · {HOLIDAYS[date].label}
                             </span>
                         )}
                     </p>
@@ -855,8 +855,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             setNotesList(next);
                                         }}
                                         onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="예: 회의 메모, 스케치 아이디어"
-                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-900 bg-transparent focus:outline-none w-full placeholder:text-neutral-300 placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:italic"
+                                        placeholder="손글씨 메모"
+                                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
                                     />
                                     <div className="flex items-center gap-1 ml-2 shrink-0">
                                         <button
@@ -909,8 +909,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             setNotesList(next);
                                         }}
                                         onBlur={() => save({ notes: serializeNotes(notesList) })}
-                                        placeholder="예: 회의록, 학습 노트, 일기"
-                                        className="text-xs font-semibold uppercase tracking-wider text-neutral-900 bg-transparent focus:outline-none w-full placeholder:text-neutral-300 placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:italic"
+                                        placeholder="기본 노트"
+                                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
                                     />
                                     <div className="flex items-center gap-1 ml-2 shrink-0">
                                         <button
@@ -1035,7 +1035,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         <div className="grid grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: '', cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
+                                    const idx = notesList.filter(n => n.type === 'cornell').length + 1;
+                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] }];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
@@ -1046,7 +1047,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </button>
                             <button
                                 onClick={() => {
-                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: '', cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
+                                    const idx = notesList.filter(n => n.type === 'handwriting').length + 1;
+                                    const next: NoteItem[] = [...notesList, { id: `n_${Date.now()}`, type: 'handwriting', title: `손글씨 ${idx}`, cue: "", content: "", summary: "", rows: [], handwriting: { strokes: [], width: 600, height: 300 } }];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
                                 }}
@@ -1088,8 +1090,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                     </div>
 
-                    {/* Right column — 달력 → 4주 일정·미팅 → 트래킹 → 프로젝트 → 한줄 */}
+                    {/* Right column — AI정리 → 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 */}
                     <div className="space-y-4">
+                        {/* 0. AI 정리 — 오늘 하루 간략 요약 */}
+                        <DailyAiSummary date={date} />
+
                         {/* 1. 당월 달력 */}
                         <DailyMiniMonth date={date} />
 
@@ -1203,10 +1208,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         {/* 4. 진행중인 프로젝트 */}
                         <DailyProjectsCard />
 
-                        {/* 5. 오늘의 한 줄 */}
+                        {/* 5. 오늘 — 한 줄 결과 */}
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘의 한 줄</h2>
+                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘</h2>
                                 <div className="flex items-center gap-0.5">
                                     <button
                                         onClick={toggleGps}
@@ -1833,6 +1838,68 @@ function TrackingRow({ label, hint, value, activeColor, onPick, onClear }: Track
                 ))}
             </div>
         </div>
+    );
+}
+
+// 오늘 하루 AI 간략 정리 — 사용자가 "정리" 버튼 누르면 호출
+function DailyAiSummary({ date }: { date: string }) {
+    const [summary, setSummary] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+
+    async function generate() {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/planners/daily/ai-summary", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date }),
+            });
+            const d = await res.json();
+            if (!res.ok) {
+                setError(d.error === "ai_not_configured" ? "AI 키 미설정" : (d.message || "정리 실패"));
+            } else {
+                setSummary(d.summary);
+                setGeneratedAt(d.generated_at);
+            }
+        } catch {
+            setError("네트워크 오류");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <section className="bg-white border border-neutral-200 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs uppercase tracking-widest text-neutral-400">AI 정리</h2>
+                <button
+                    onClick={generate}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-[#0F766E] disabled:opacity-50 transition-colors"
+                >
+                    {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                    {summary ? "다시 정리" : "정리하기"}
+                </button>
+            </div>
+            {error && <p className="text-xs text-rose-500">{error}</p>}
+            {summary ? (
+                <div className="space-y-1.5">
+                    <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">{summary}</p>
+                    {generatedAt && (
+                        <p className="text-[10px] text-neutral-400">
+                            {new Date(generatedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 생성
+                        </p>
+                    )}
+                </div>
+            ) : !error && !loading && (
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                    오늘의 일정·태스크·트래킹·노트를 바탕으로 AI가 2~3문장으로 정리해 드립니다.
+                </p>
+            )}
+        </section>
     );
 }
 

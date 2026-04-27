@@ -266,68 +266,72 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
 
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">Monthly</p>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigateMonth(-1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </button>
-                        {/* Year picker */}
-                        <div ref={yearRef} className="relative">
-                            <button
-                                onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
-                                className="font-serif text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors"
-                            >
-                                {year}년
-                            </button>
-                            {showYearPicker && (
-                                <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px]">
-                                    {yearRange.map(y => (
-                                        <button key={y} onClick={() => { setYear(y); setShowYearPicker(false); }}
-                                            className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
-                                            {y}년
+            {/* Header — Daily 패턴 통일 */}
+            {(() => {
+                const now = new Date();
+                const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
+                return (
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                                <button onClick={() => navigateMonth(-1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <div ref={yearRef} className="relative">
+                                        <button
+                                            onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
+                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                        >
+                                            {year}년
                                         </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        {/* Month picker */}
-                        <div ref={monthRef} className="relative">
-                            <button
-                                onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
-                                className="font-serif text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors"
-                            >
-                                {month}월
-                            </button>
-                            {showMonthPicker && (
-                                <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[80px]">
-                                    {MONTHS_KO.map((label, i) => (
-                                        <button key={i} onClick={() => { setMonth(i + 1); setShowMonthPicker(false); }}
-                                            className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${i + 1 === month ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
-                                            {label}
+                                        {showYearPicker && (
+                                            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px]">
+                                                {yearRange.map(y => (
+                                                    <button key={y} onClick={() => { setYear(y); setShowYearPicker(false); }}
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
+                                                        {y}년
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div ref={monthRef} className="relative">
+                                        <button
+                                            onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
+                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                        >
+                                            {month}월
                                         </button>
-                                    ))}
+                                        {showMonthPicker && (
+                                            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[80px]">
+                                                {MONTHS_KO.map((label, i) => (
+                                                    <button key={i} onClick={() => { setMonth(i + 1); setShowMonthPicker(false); }}
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${i + 1 === month ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}>
+                                                        {label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {isCurrentMonth && (
+                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                            이번 달
+                                        </span>
+                                    )}
                                 </div>
-                            )}
+                                <button onClick={() => navigateMonth(1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
                         </div>
-                        <button
-                            onClick={() => navigateMonth(1)}
-                            className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <PlannersUtilityLinks />
+                            {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                        </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <PlannersUtilityLinks />
-                    {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
-                </div>
-            </div>
+                );
+            })()}
 
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
@@ -515,24 +519,6 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             </div>
                         ))}
                     </section>
-
-                    {/* 3.5) 이달 일정 리스트 */}
-                    {(() => {
-                        const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
-                        const lastDate = new Date(year, month, 0).getDate();
-                        const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`;
-                        return (
-                            <CalendarEntryList
-                                entries={calEntries}
-                                view="monthly"
-                                from={firstDay}
-                                to={lastDay}
-                                label="이달의 일정"
-                                onAdd={() => { setCalEditing(null); setCalDefaultDate(firstDay); setCalEditorOpen(true); }}
-                                onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
-                            />
-                        );
-                    })()}
 
                     {/* 4) 월간 회고 (4순위) */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">

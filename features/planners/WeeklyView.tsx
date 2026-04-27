@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
-import { getLunarDate } from "@/lib/planners/holidays";
+import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
-import type { CalendarEntry } from "@/lib/planners/calendar-rules";
+import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
+import { KIND_COLORS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 const DAYS_KO = ["일","월","화","수","목","금","토"];
@@ -148,39 +149,86 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const rightMidDays = [days[1], days[3]];
     const weekendDays = [days[5], days[6]];
 
+    // 캘린더 엔트리를 날짜별로 그룹핑 (반복 펼침 포함)
+    const entriesByDate = useMemo(() => {
+        const map: Record<string, CalendarEntry[]> = {};
+        calEntries
+            .filter((e) => isVisible(e.kind, "weekly"))
+            .forEach((e) => {
+                expandOccurrences(e, boundaries.start, boundaries.end).forEach(({ date }) => {
+                    (map[date] ??= []).push(e);
+                });
+            });
+        return map;
+    }, [calEntries, boundaries.start, boundaries.end]);
+
+    async function addTaskToDay(ds: string, text: string) {
+        const trimmed = text.trim();
+        if (!trimmed) return;
+        try {
+            const res = await fetch(`/api/planners/daily?date=${ds}`);
+            const d = res.ok ? await res.json() : null;
+            const existing: Array<{ id: string; text: string; status: string; time?: string | null }> = d?.daily?.tasks ?? [];
+            const newTask = { id: `t_${Date.now()}`, text: trimmed, status: "todo" as const, time: null };
+            const next = [...existing, newTask];
+            await fetch(`/api/planners/daily`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: ds, tasks: next }),
+            });
+            setDayHits((prev) => ({ ...prev, [ds]: [...(prev[ds] ?? []), trimmed] }));
+        } catch {}
+    }
+
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => navigateWeek(-1)}
-                        className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center text-neutral-400 transition-colors"
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <div>
-                        <div className="flex items-baseline gap-2.5">
-                            <h1 className="font-serif text-4xl text-neutral-900 leading-none">Weekly</h1>
-                            <span className="text-[11px] font-mono px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded-full tracking-widest">
-                                W{String(week).padStart(2, "0")}
-                            </span>
+            {/* Header — Daily 패턴 통일 */}
+            {(() => {
+                const sM = days[0].getMonth() + 1;
+                const sD = days[0].getDate();
+                const eM = days[6].getMonth() + 1;
+                const eD = days[6].getDate();
+                const rangeText = sM === eM
+                    ? `${year}년 ${sM}월 ${sD}일 — ${eD}일`
+                    : `${year}년 ${sM}월 ${sD}일 — ${eM}월 ${eD}일`;
+                const todayInWeek = days.some(d => {
+                    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                    return ds === today;
+                });
+                return (
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                                <button onClick={() => navigateWeek(-1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900 whitespace-nowrap">
+                                        {rangeText}
+                                    </h1>
+                                    {todayInWeek && (
+                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                            이번 주
+                                        </span>
+                                    )}
+                                </div>
+                                <button onClick={() => navigateWeek(1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
+                            <p className="text-sm text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                                <span className="font-mono text-neutral-400">W{String(week).padStart(2, "0")}</span>
+                                <span className="text-neutral-300">·</span>
+                                <span>{displayMonth}</span>
+                            </p>
                         </div>
-                        <p className="text-sm text-neutral-400 mt-1 font-light">{displayMonth} · {year}</p>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <PlannersUtilityLinks />
+                            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300" />}
+                        </div>
                     </div>
-                    <button
-                        onClick={() => navigateWeek(1)}
-                        className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center text-neutral-400 transition-colors"
-                    >
-                        <ChevronRight className="h-4 w-4" />
-                    </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <PlannersUtilityLinks />
-                    {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-300 mt-1" />}
-                </div>
-            </div>
+                );
+            })()}
 
             {loading ? (
                 <div className="py-20 text-center text-neutral-400 text-sm">로딩 중…</div>
@@ -222,7 +270,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {leftDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
                                         );
                                     })}
                                 </div>
@@ -231,7 +279,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {rightMidDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
                                         );
                                     })}
                                     {/* Weekend: Sat + Sun side by side */}
@@ -239,7 +287,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {weekendDays.map((d) => {
                                             const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                             return (
-                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} />
+                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} />
                                             );
                                         })}
                                     </div>
@@ -308,7 +356,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 }
 
 function DayCell({
-    date, ds, isToday, lines, compact = false, taskTexts = [],
+    date, ds, isToday, lines, compact = false, taskTexts = [], entries = [], onAddTask,
 }: {
     date: Date;
     ds: string;
@@ -316,12 +364,16 @@ function DayCell({
     lines: number;
     compact?: boolean;
     taskTexts?: string[];
+    entries?: CalendarEntry[];
+    onAddTask?: (ds: string, text: string) => void;
 }) {
     const dayNum = date.getDate();
     const dayKo = DAYS_KO[date.getDay()];
     const isSun = date.getDay() === 0;
     const isSat = date.getDay() === 6;
     const lunar = getLunarDate(ds);
+    const holiday = HOLIDAYS[ds];
+    const [adding, setAdding] = useState("");
 
     const dateColor = isToday
         ? "text-[#0F766E]"
@@ -331,11 +383,14 @@ function DayCell({
 
     const dayColor = isSun ? "text-rose-300" : isSat ? "text-blue-300" : "text-neutral-400";
 
+    function commit() {
+        if (!adding.trim() || !onAddTask) { setAdding(""); return; }
+        onAddTask(ds, adding);
+        setAdding("");
+    }
+
     return (
-        <Link
-            href={`/planners/app/daily?date=${ds}`}
-            className={`block group transition-colors ${isToday ? "bg-[#0F766E]/[0.03]" : "bg-white hover:bg-neutral-50/70"}`}
-        >
+        <div className={`group transition-colors ${isToday ? "bg-[#0F766E]/[0.03]" : "bg-white hover:bg-neutral-50/30"}`}>
             {/* Date header */}
             <div className={`flex items-baseline gap-1.5 px-3 border-b border-neutral-100 ${compact ? "py-2" : "py-2.5"}`}>
                 <span className={`font-serif leading-none font-light ${compact ? "text-xl" : "text-2xl"} ${dateColor}`}>
@@ -351,9 +406,42 @@ function DayCell({
                     {isToday && (
                         <span className="text-[9px] text-[#0F766E] font-medium">Today</span>
                     )}
+                    <Link
+                        href={`/planners/app/daily?date=${ds}`}
+                        title="Daily 보기"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-neutral-100"
+                    >
+                        <ArrowUpRight className="h-3 w-3 text-neutral-400" />
+                    </Link>
                 </span>
             </div>
-            {/* Lined writing area with task preview */}
+            {/* 기념일·공휴일·절기·미팅 — 본문 상단 라인 */}
+            {(holiday || entries.length > 0) && (
+                <div className="px-3 py-1.5 border-b border-neutral-100 space-y-0.5">
+                    {holiday && (
+                        <p className={`text-[10px] font-medium leading-tight truncate ${
+                            holiday.type === "holiday" ? "text-rose-500" :
+                            holiday.type === "memorial" ? "text-rose-400" :
+                            "text-emerald-600"
+                        }`} title={holiday.label}>
+                            · {holiday.label}
+                        </p>
+                    )}
+                    {entries.slice(0, 3).map((e) => {
+                        const c = KIND_COLORS[e.kind as CalendarKind];
+                        return (
+                            <p key={e.id} className={`text-[10px] leading-tight flex items-center gap-1 truncate ${c.text}`} title={e.title}>
+                                <span className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
+                                <span className="truncate">{e.start_time ? `${e.start_time.slice(0,5)} ` : ""}{e.title}</span>
+                            </p>
+                        );
+                    })}
+                    {entries.length > 3 && (
+                        <p className="text-[9px] text-neutral-400">+{entries.length - 3}</p>
+                    )}
+                </div>
+            )}
+            {/* Task lines (Daily 동기화) */}
             <div>
                 {Array.from({ length: lines }).map((_, i) => {
                     const task = taskTexts[i];
@@ -363,15 +451,30 @@ function DayCell({
                             className={`border-b border-neutral-100 group-hover:border-neutral-200/60 transition-colors flex items-center px-2.5 ${compact ? "h-6" : "h-7"}`}
                         >
                             {task && (
-                                <span className={`truncate leading-none text-neutral-400 ${compact ? "text-[9px]" : "text-[10px]"}`}>
+                                <span className={`truncate leading-none text-neutral-500 ${compact ? "text-[10px]" : "text-[11px]"}`}>
                                     {task}
                                 </span>
                             )}
                         </div>
                     );
                 })}
+                {/* 인라인 task 추가 */}
+                {onAddTask && (
+                    <div className="flex items-center px-2.5 py-1 border-t border-neutral-100">
+                        <Plus className="h-3 w-3 text-neutral-300 mr-1 shrink-0" />
+                        <input
+                            type="text"
+                            value={adding}
+                            onChange={(e) => setAdding(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
+                            onBlur={commit}
+                            placeholder="할 일 추가"
+                            className={`flex-1 bg-transparent focus:outline-none placeholder:text-neutral-300 text-neutral-700 ${compact ? "text-[10px]" : "text-[11px]"}`}
+                        />
+                    </div>
+                )}
             </div>
-        </Link>
+        </div>
     );
 }
 

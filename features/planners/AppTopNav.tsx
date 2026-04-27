@@ -29,7 +29,6 @@ const TABS: Tab[] = [
     { href: "/planners/app/canvas",      label: "Canvas",      modes: ["weekly", "all_in_one"] },
     { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
     { href: "/planners/community",       label: "Community",   modes: ["weekly", "all_in_one"], external: true },
-    { href: "/planners/app/ai-briefing", label: "AI Briefing", modes: ["weekly", "all_in_one"] },
 ];
 
 export function AppTopNav({

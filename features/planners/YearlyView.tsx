@@ -7,6 +7,8 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry } from "@/lib/planners/calendar-rules";
+import { KIND_COLORS } from "@/lib/planners/calendar-rules";
+import { HOLIDAYS } from "@/lib/planners/holidays";
 
 interface Anniversary {
     id: string;
@@ -52,7 +54,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     const [calEditorOpen, setCalEditorOpen] = useState(false);
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [activeQuarter, setActiveQuarter] = useState(1);
-    const [viewMode, setViewMode] = useState<"Q" | "H" | "Y">("Q"); // 분기/반기/연간
+    const [viewMode, setViewMode] = useState<"Q" | "H" | "Y">("Y"); // 분기/반기/연간 — 기본 연간
     const [yearStartMonth, setYearStartMonth] = useState(1);   // 1~12
     const [joinYear, setJoinYear] = useState<number | null>(null);
 
@@ -155,12 +157,29 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     }
 
     function openDayEditor(mm: number, dd: number) {
-        const dateStr = `${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
-        const existing = anniversaries.find((a) => a.date === dateStr);
-        setEditingDate(dateStr);
-        setEditingLabel(existing?.label || "");
-        setEditingType(existing?.type || "event");
-        setEditingRelationship(existing?.relationship || "");
+        const dateStr = `${year}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+        // 통합 CalendarEntryEditor 모달로 열기 — 일/주/월/연 입력 방식 통일
+        const existing = getEntryAt(mm, dd);
+        if (existing) {
+            setCalEditing(existing);
+        } else {
+            setCalEditing({ kind: "anniversary", start_date: dateStr, recurrence: "yearly" });
+        }
+        setCalEditorOpen(true);
+    }
+
+    // 해당 월/일에 노출될 첫 캘린더 엔트리 조회 (yearly 반복 + 정확 일자 포함)
+    function getEntryAt(mm: number, dd: number): CalendarEntry | null {
+        const mmStr = String(mm).padStart(2, "0");
+        const ddStr = String(dd).padStart(2, "0");
+        for (const e of calEntries) {
+            if (!e.start_date) continue;
+            const [, em, ed] = e.start_date.split("-");
+            if (em === mmStr && ed === ddStr) {
+                if (e.recurrence === "yearly" || e.start_date.startsWith(String(year))) return e;
+            }
+        }
+        return null;
     }
 
     function saveAnniversary() {
@@ -195,45 +214,56 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
 
     return (
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">Yearly</p>
-                    <div className="flex items-center gap-3">
-                    <button onClick={() => setYear(year - 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500">
-                        <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <div ref={yearPickerRef} className="relative">
-                        <button
-                            onClick={() => setShowYearPicker(v => !v)}
-                            className="font-serif text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors"
-                        >
-                            {year}
-                        </button>
-                        {showYearPicker && (
-                            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px] max-h-60 overflow-y-auto">
-                                {YEAR_RANGE.map(y => (
-                                    <button
-                                        key={y}
-                                        onClick={() => { setYear(y); setShowYearPicker(false); }}
-                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}
-                                    >
-                                        {y}
-                                    </button>
-                                ))}
+            {/* Header — Daily 패턴 통일 */}
+            {(() => {
+                const isCurrentYear = year === new Date().getFullYear();
+                return (
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                                <button onClick={() => setYear(year - 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <div ref={yearPickerRef} className="relative">
+                                        <button
+                                            onClick={() => setShowYearPicker(v => !v)}
+                                            className="font-serif text-2xl md:text-3xl text-neutral-900 hover:text-[#0F766E] transition-colors whitespace-nowrap"
+                                        >
+                                            {year}년
+                                        </button>
+                                        {showYearPicker && (
+                                            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 py-1 min-w-[100px] max-h-60 overflow-y-auto">
+                                                {YEAR_RANGE.map(y => (
+                                                    <button
+                                                        key={y}
+                                                        onClick={() => { setYear(y); setShowYearPicker(false); }}
+                                                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-neutral-50 ${y === year ? "text-[#0F766E] font-semibold" : "text-neutral-700"}`}
+                                                    >
+                                                        {y}년
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {isCurrentYear && (
+                                        <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
+                                            올해
+                                        </span>
+                                    )}
+                                </div>
+                                <button onClick={() => setYear(year + 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500 shrink-0">
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
                             </div>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <PlannersUtilityLinks />
+                            {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+                        </div>
                     </div>
-                    <button onClick={() => setYear(year + 1)} className="w-8 h-8 rounded hover:bg-neutral-100 flex items-center justify-center text-neutral-500">
-                        <ChevronRight className="h-4 w-4" />
-                    </button>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <PlannersUtilityLinks />
-                    {saving && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
-                </div>
-            </div>
+                );
+            })()}
 
             {loading ? (
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
@@ -414,12 +444,17 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                             }
                             const qMonths = allSections[activeQuarter - 1] ?? allSections[0];
                             const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                            const colWidth = `${(100 - 6) / qMonths.length}%`;
                             return (
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-[10px]">
+                                    <table className="w-full text-[10px]" style={{ tableLayout: "fixed" }}>
+                                        <colgroup>
+                                            <col style={{ width: "6%" }} />
+                                            {qMonths.map(m => <col key={m} style={{ width: colWidth }} />)}
+                                        </colgroup>
                                         <thead>
                                             <tr>
-                                                <th className="text-left pb-1.5 w-6 font-medium text-neutral-400">일</th>
+                                                <th className="text-left pb-1.5 font-medium text-neutral-400">일</th>
                                                 {qMonths.map(m => (
                                                     <th key={m} className="text-center pb-1.5 font-medium text-neutral-500">
                                                         {monthLabels[m - 1]}
@@ -433,22 +468,33 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                                                     <td className="pr-2 py-0.5 text-neutral-400 font-mono">{d}</td>
                                                     {qMonths.map(m => {
                                                         const disabled = d > daysInMonth(m);
-                                                        const anno = disabled ? null : getAnniversary(m, d);
+                                                        // 우선순위: 사용자 입력 > 국가 기념일·추모일 > 절기
+                                                        const dateKey = `${year}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+                                                        const entry = disabled ? null : getEntryAt(m, d);
+                                                        const holiday = !disabled && !entry ? HOLIDAYS[dateKey] : null;
+                                                        const c = entry ? KIND_COLORS[entry.kind] : null;
+                                                        const hcls = holiday
+                                                            ? holiday.type === "holiday" ? "text-rose-500 hover:bg-neutral-100"
+                                                            : holiday.type === "memorial" ? "text-rose-400 hover:bg-neutral-100"
+                                                            : "text-emerald-600 hover:bg-neutral-100"
+                                                            : "";
+                                                        const label = entry ? entry.title : holiday ? holiday.label : "·";
+                                                        const titleAttr = entry ? `[${entry.kind}] ${entry.title}` : holiday ? `[${holiday.type}] ${holiday.label}` : `${m}/${d}`;
                                                         return (
-                                                            <td key={m} className={`text-center p-0.5 ${disabled ? "bg-neutral-50/50" : ""}`}>
+                                                            <td key={m} className={`p-0.5 overflow-hidden ${disabled ? "bg-neutral-50/50" : ""}`}>
                                                                 {!disabled && (
                                                                     <button
                                                                         onClick={() => openDayEditor(m, d)}
-                                                                        className={`w-full min-h-[20px] px-1.5 py-0.5 flex items-center justify-start rounded text-[10px] leading-tight transition-colors ${
-                                                                            anno
-                                                                                ? anno.type === 'anniversary'
-                                                                                    ? "bg-red-500 text-white hover:bg-red-600"
-                                                                                    : "bg-[#0F766E] text-white hover:bg-[#0d5e56]"
+                                                                        className={`w-full min-h-[20px] px-1.5 py-0.5 flex items-center justify-start rounded text-[10px] leading-tight transition-colors overflow-hidden ${
+                                                                            entry && c
+                                                                                ? `${c.text} hover:bg-neutral-100`
+                                                                                : holiday
+                                                                                ? hcls
                                                                                 : "hover:bg-neutral-100 text-neutral-200"
                                                                         }`}
-                                                                        title={anno?.label || `${m}/${d}`}
+                                                                        title={titleAttr}
                                                                     >
-                                                                        <span className="truncate w-full text-left">{anno ? anno.label : "·"}</span>
+                                                                        <span className="truncate w-full text-left">{label}</span>
                                                                     </button>
                                                                 )}
                                                             </td>
@@ -473,88 +519,6 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                         </div>
                     </section>
 
-                    {/* 편집 모달 */}
-                    {editingDate && (
-                        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-                            <div className="bg-white rounded-xl max-w-sm w-full p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-semibold text-neutral-900">
-                                        {year}.{editingDate.replace('-', '.')}
-                                        {' '}
-                                        <span className="text-sm font-normal text-neutral-400">
-                                            ({(() => {
-                                                const [mm, dd] = editingDate.split('-').map(Number);
-                                                return getDayOfWeek(mm, dd);
-                                            })()}요일)
-                                        </span>
-                                    </h3>
-                                    <button onClick={() => setEditingDate(null)}>
-                                        <X className="h-4 w-4 text-neutral-400" />
-                                    </button>
-                                </div>
-                                <div className="space-y-3">
-                                    <input
-                                        type="text"
-                                        value={editingLabel}
-                                        onChange={(e) => setEditingLabel(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') saveAnniversary(); }}
-                                        placeholder="기념일 또는 행사 이름 (비우면 삭제)"
-                                        className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0F766E]"
-                                        autoFocus
-                                    />
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {(['anniversary', 'event'] as const).map((t) => (
-                                            <button
-                                                key={t}
-                                                onClick={() => setEditingType(t)}
-                                                className={`py-2 text-xs rounded-lg transition-colors ${
-                                                    editingType === t
-                                                        ? t === 'anniversary'
-                                                            ? 'bg-red-500 text-white'
-                                                            : 'bg-[#0F766E] text-white'
-                                                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                                                }`}
-                                            >
-                                                {t === 'anniversary' ? '기념일' : '행사'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-neutral-500 mb-1 block">관계 유형</label>
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {RELATIONSHIP_OPTIONS.map((r) => (
-                                                <button
-                                                    key={r}
-                                                    onClick={() => setEditingRelationship(editingRelationship === r ? "" : r)}
-                                                    className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                                                        editingRelationship === r
-                                                            ? 'bg-neutral-800 text-white'
-                                                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                                                    }`}
-                                                >
-                                                    {r}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex justify-end gap-2 mt-5">
-                                    <button
-                                        onClick={() => setEditingDate(null)}
-                                        className="px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900"
-                                    >
-                                        취소
-                                    </button>
-                                    <button
-                                        onClick={saveAnniversary}
-                                        className="px-4 py-1.5 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56]"
-                                    >
-                                        저장
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* 통합 캘린더 — 기념일·공휴일·절기 (신규 시스템) */}
                     <CalendarEntryList

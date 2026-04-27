@@ -207,6 +207,96 @@
 
 ---
 
+## 🎯 UX 일관성 가이드 (세션 94 SSOT)
+
+> **원칙**: PP AI는 Daily/Weekly/Monthly/Yearly 4-View가 한 사람의 시간을 다른 줌 레벨로 보는 것이다.
+> 같은 데이터·같은 모달·같은 시각 패턴 — 줌만 바뀐다. 사용자가 "다른 앱에 들어왔나?" 느끼는 순간이 가장 큰 실패.
+
+### 1) 페이지 헤더 — 4-View 단일 패턴
+```
+< [font-serif text-2xl md:text-3xl 제목] [상태배지(이번 주/이번 달/올해/Today)] >
+[서브라인 text-sm text-neutral-500]
+```
+
+| View | 제목 | 배지 | 서브 |
+|---|---|---|---|
+| Daily | `2026년 4월 27일` | `Today` (오늘일 때) | weather · 요일 · 음력 · 공휴일/절기 |
+| Weekly | `2026년 4월 27일 — 5월 3일` | `이번 주` | `W18 · 4월 - 5월` |
+| Monthly | `2026년 4월` | `이번 달` | (없음) |
+| Yearly | `2026년` | `올해` | (없음) |
+| Canvas/PI/Project/Contact | 한국어 제목 + 보조 영문 라벨 | — | 한 줄 설명 |
+
+좌우 prev/next 화살표는 시간뷰만. 비시간뷰는 화살표 없음.
+
+### 2) 카드 헤더 — 단일 패턴
+```tsx
+<section className="bg-white border border-neutral-200 rounded-xl p-5">
+  <div className="flex items-center justify-between mb-3">
+    <h2 className="text-xs uppercase tracking-widest text-neutral-400">{TITLE}</h2>
+    {/* 우측 액션: + 추가 / 수정 / 공유 등 */}
+  </div>
+  ...
+</section>
+```
+
+- **제목 형식**: 한국어 우선, 영어는 라벨/배지 용도만 (예: `Daily Tracking` 같은 영문 카테고리 라벨 OK)
+- **금지**: placeholder 텍스트를 제목처럼 쓰는 것 (예: 노트 카드의 "예: 회의록..." italic이 헤더 자리에 있는 패턴 — 명시적 헤더 필요)
+- **금지**: 카드마다 다른 폰트 크기·웨이트
+- 인덱싱이 있는 카드 (손글씨, 캔버스 등): `손글씨 N`, `캔버스 N` 형식 — 사용자 입력 제목 있으면 그것 우선
+
+### 3) 입력 패턴
+- **날짜·시간·반복 입력**: 모든 뷰에서 `CalendarEntryEditor` 모달 단일 사용
+  · 양력/음력 토글 (한 곳에서 전환) — 표기는 `YYYY-MM-DD` 통일
+  · 음력은 단일 트리거 + 캘린더 그리드 팝오버 (드롭다운 3개 X)
+- **인라인 task 추가**: Daily/Weekly 셀 하단에 `+` 입력. Enter 또는 blur로 저장 → `planners_daily.tasks`
+- **노트/캔버스 추가**: Daily/Project 본문 하단의 4개 버튼 (기본 노트·손글씨·템플릿·캔버스)
+
+### 4) 데이터 SSOT
+- **task**: `planners_daily.tasks` JSON 배열 — Daily에서 입력하든 Weekly에서 입력하든 같은 row 업데이트
+- **calendar 엔트리** (anniversary/meeting/task/public_holiday/solar_term): `planners_calendar_entries` 단일 테이블
+- **법정 공휴일·24절기**: `lib/planners/holidays.ts` `HOLIDAYS` 정적 테이블 (DB 아님)
+
+### 5) 뷰 간 이동 규칙
+- 셀/카드 본문 클릭 → 인라인 입력 또는 모달 (페이지 이동 X)
+- 다른 뷰로 가는 명시적 이동은 `↗` (ArrowUpRight) 아이콘 hover 시 노출
+- 사이드바·상단 탭으로만 페이지 이동 (Index/Today/Weekly/Monthly/Yearly/P.I/Project/Canvas/Contact/Community)
+
+### 6) 표기 우선순위 (셀 텍스트 1개만 보여줄 때)
+1. **사용자 입력** (calEntries — anniversary/meeting/task)
+2. **국가 기념일 / 추모일** (HOLIDAYS `type='holiday'|'memorial'`)
+3. **절기** (HOLIDAYS `type='solar_term'`)
+
+### 7) 색상 컨벤션
+| 의미 | Tailwind |
+|---|---|
+| Today/이번주/올해 배지 | `bg-[#0F766E] text-white` |
+| 공휴일 | `text-rose-500` |
+| 추모일 | `text-rose-400` |
+| 절기 | `text-emerald-600` |
+| Anniversary kind | `KIND_COLORS.anniversary` (rose) |
+| Meeting kind | `KIND_COLORS.meeting` (sky) |
+| Task kind | `KIND_COLORS.task` (teal) |
+| Public holiday kind | `KIND_COLORS.public_holiday` (red) |
+| Solar term kind | `KIND_COLORS.solar_term` (neutral) |
+
+### 8) 상단 탭 (메인 메뉴)
+`Index · Today · Weekly · Monthly · Yearly · P.I · Project · Canvas · Contact · Community↗`
+
+- **AI Briefing은 메인 탭에 두지 않는다** — Daily 우측 "AI 정리" 카드 또는 본문 서브링크로만
+- **Templates는 메인 탭에 두지 않는다** — 각 뷰(Weekly/Monthly/Yearly) 우측 상단 버튼으로
+
+### 9) 4-View 줌 모델 (논리적 일관성)
+```
+Yearly  : 12개월 한눈에 — 기념일/큰 행사/공휴일/절기 (우선순위 한 줄만 셀)
+Monthly : 달 그리드 — 각 일에 task + entry dot
+Weekly  : 7일 펼침 — 각 일에 task 인라인 입력 + 일정 미리보기
+Daily   : 한 날 깊이 — task 풀편집 · 노트 · 트래킹 · AI 정리
+```
+
+같은 데이터를 다른 줌으로 본다. 한 곳에서 입력 → 다른 모든 뷰에 즉시 반영.
+
+---
+
 ## 환경변수 (전체)
 
 ```bash
@@ -240,7 +330,8 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 93 (2026-04-27)** — 통합 캘린더 시스템(`planners_calendar_entries` 단일 테이블 + `calendar-rules.ts` SSOT 5 kinds × 4 views 노출 룰) · 4-View 통합 렌더(Daily 오늘 일정·Weekly 이번주·Monthly 셀 dot+title·Yearly 올해 캘린더) · legacy anniversaries 마이그레이션 · 공공데이터 자동 반영(KR 공휴일 30 + 24절기 시드, country_pref 기반 다국가 4종 선택, 공공데이터포털 API 클라이언트 + cron 매년 1/1) · Daily 우측 재구성(미니달력→트래킹(수정)→한줄→프로젝트) · 한 장면 별도 카드 → "한 줄" 카테고리 통합(scene) + 서버 사이드 업로드(Storage RLS 우회) · 트래킹 7종(에너지·만족도·기본·공부·신앙·운동·건강) default 만족도 · TrackingRowWithNote 메모 동시 입력 · Yearly 보기 토글(분기/반기/연간) + 시작월 회전 · 분기별 목표 +추가 버튼 명시 + 라벨 정정(올해의 목표/분기별 목표) · Anniversary 셀 텍스트 노출 · MonthlyAnalytics·YearlyAnalytics 3-탭(통계/한 줄/트래킹) SVG 차트 · 4번째 노트 옵션 캔버스 · Canvas API storageKey fix · Settings upsert + 토스트 + SaveAllBar · 구독 현황 + 런칭 프로모션 (2026-04-27 세션 93)
+| **Phase** | **세션 94 (2026-04-27)** — **헤더 4-View 통일** (Daily 패턴 SSOT: `< font-serif 2xl/3xl 제목 [상태배지] >` + 서브라인 / Weekly·Monthly·Yearly 모두 동일 구조 · 상단 메뉴에서 AI Briefing 제거) · **CalendarEntryEditor 단일 입력 통일** (양력/음력 토글 단일 picker — 양력 native date input, 음력 단일 트리거 버튼 + 캘린더 팝오버 / 표기 형식 `YYYY-MM-DD` / 날짜칸 150px 고정) · **음력 변환 확장** (`LUNAR_YEARS_ANNIVERSARY` 1950+ / 범위 외 근사 변환 — 기념일 원본 연도용) · **Yearly 셀 통합** (`getEntryAt` calEntries 기반 표시 / `table-layout: fixed`+colgroup으로 폭 고정 / 우선순위: 사용자 입력 > 국가 기념일·추모일 > 절기 / 배경색 제거 폰트 색만 / 기본 보기 = 연간) · **Weekly 인터랙션 전환** (셀 click → Daily 이동 X / 인라인 `+ 할 일 추가` 입력 → `planners_daily.tasks` 동기화 / hover 시 `↗` 아이콘 명시적 Daily 이동 / 셀 본문에 holiday + calEntries dot 표시) · **AI 정리 카드** (Daily 우측 최상단 `/api/planners/daily/ai-summary` POST → Haiku 4.5 100~180자 요약, 일정·태스크·트래킹·노트 컨텍스트) · 노트 4종 추가 버튼 하단 이동 · HandNote 리스트 fixed h-32 + 클릭 확장 · 노트 드래그 정렬 (Daily/Project) · 기본 폰트 sans · YearlyView 첫 가입 해에만 year_start_month 적용 · "오늘의 한 줄" → "오늘" (2026-04-27 세션 94)
+| **Phase 93** | 세션 93 — 통합 캘린더 시스템(`planners_calendar_entries` 단일 테이블 + `calendar-rules.ts` SSOT 5 kinds × 4 views 노출 룰) · 4-View 통합 렌더 · 공공데이터 자동 반영(KR 공휴일 30 + 24절기 시드 + cron 매년 1/1) · Daily 우측 재구성 · 트래킹 7종 · MonthlyAnalytics·YearlyAnalytics 3-탭 · Canvas storageKey fix · Settings upsert + SaveAllBar · 구독 + 런칭 프로모션
 | **Phase 92** | 세션 92 (2026-04-27) — 모바일 PWA(orientation any · AppMonthBar 모바일 숨김) · HandNote 종합 개선(펜 4종·스타일러스 지우개 자동 감지·팜 리젝션·캔버스 자동 확장 · perfect-freehand 추가) · AI 브리핑 통합(midday 타입 + 시간대 자동 추론 + 단일 채팅 UI · 이메일 기본 OFF) · Weekly 순서 재정렬(GPR→Vrief→주간 계획) · Monthly 재정렬(테마/목표→집중 영역→일정→회고)+월간 통계(5종 task 분포·에너지·일간 계획) · **Community 사이트화** (`/planners/community` 공개 읽기, 로그인 회원 작성, 카테고리 4종 · 앱 메뉴는 외부 링크) · **PP AI 워크스페이스 슬롯 통일** (UniverseUtilityBar `workspacePath`, HeRo·SmarComm 패턴) · **온보딩 루프 fix** (`storageKey: tenone-auth` · auth_id→email→자동생성 3단계 · super_admin/staff/manager 게이트 우회 · 마스터 DB 마킹) (2026-04-27 세션 92) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
 | **배포 대기** | `/planners/app/*` 전체 + 결제 + 온보딩 + AI 브리핑 + PWA + 연동 |
