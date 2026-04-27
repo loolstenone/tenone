@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Loader2, ImageIcon, NotebookPen } from "lucide-react";
+import { ChevronLeft, Loader2, ImageIcon, NotebookPen, ListTodo } from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { ProjectNotesTab } from "./ProjectNotesTab";
+import { ProjectTasksTab } from "./ProjectTasksTab";
 import { CoverPicker } from "./CoverPicker";
 import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
 
-type Tab = "cover" | "notes";
+type Tab = "cover" | "notes" | "tasks";
 
 const STATUS_LABEL: Record<string, string> = {
     active: "진행중",
@@ -100,6 +101,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 <div className="flex gap-1">
                     {([
                         { key: "notes" as Tab, label: "노트", icon: NotebookPen, hint: "프로젝트 작업 영역" },
+                        { key: "tasks" as Tab, label: "Task", icon: ListTodo, hint: "이 프로젝트의 모든 Task 합산" },
                         { key: "cover" as Tab, label: "표지·설정", icon: ImageIcon, hint: "커버·제목·상태·일정" },
                     ]).map(({ key, label, icon: Icon, hint }) => (
                         <button
@@ -121,6 +123,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
             {tab === "cover" && <CoverTab project={project} save={saveProject} />}
             {tab === "notes" && <NotesTab projectId={projectId} projectCategory={project.category ?? null} />}
+            {tab === "tasks" && <ProjectTasksTab projectId={projectId} projectColor={project.color || "#0F766E"} />}
         </div>
     );
 }

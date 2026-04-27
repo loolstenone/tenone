@@ -194,6 +194,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [newTaskText, setNewTaskText] = useState("");
     const [newTaskTime, setNewTaskTime] = useState("");
+    const [newTaskProjectId, setNewTaskProjectId] = useState<string>("");
+    // 활성 프로젝트 목록 (Task 태그용)
+    const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [carrying, setCarrying] = useState(false);
     const [pendingInfo, setPendingInfo] = useState<{ count: number; days: number; oldest: string | null } | null>(null);
     const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
@@ -369,6 +372,19 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         return () => { cancelled = true; };
     }, [date]);
 
+    // 활성 프로젝트 목록 (Task 태그용)
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const res = await fetch(`/api/planners/projects`);
+            if (cancelled || !res.ok) return;
+            const d = await res.json();
+            const all: Array<{ id: string; title: string; color: string | null; status: string }> = d.projects ?? [];
+            setActiveProjects(all.filter(p => p.status === "active").map(p => ({ id: p.id, title: p.title, color: p.color })));
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
     // 누적 미완료 카운트 (과거 60일)
     useEffect(() => {
         let cancelled = false;
@@ -528,11 +544,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             text: newTaskText.trim(),
             status: 'todo',
             time: newTaskTime.trim() || null,
+            project_id: newTaskProjectId || null,
         };
         const next = [...tasks, newTask];
         setTasks(next);
         setNewTaskText("");
         setNewTaskTime("");
+        // newTaskProjectId 유지 — 같은 프로젝트로 연속 추가
         save({ tasks: next });
     }
 
@@ -555,6 +573,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
     function updateTaskTime(taskId: string, time: string) {
         const next = tasks.map(t => t.id === taskId ? { ...t, time: time || null } : t);
+        setTasks(next);
+        save({ tasks: next });
+    }
+
+    function updateTaskProject(taskId: string, projectId: string | null) {
+        const next = tasks.map(t => t.id === taskId ? { ...t, project_id: projectId } : t);
         setTasks(next);
         save({ tasks: next });
     }
@@ -790,6 +814,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         onCycle={() => cycleStatus(t.id)}
                                         onRemove={() => removeTask(t.id)}
                                         onTimeChange={(time) => updateTaskTime(t.id, time)}
+                                        onProjectChange={(pid) => updateTaskProject(t.id, pid)}
+                                        projects={activeProjects}
                                         onDragStart={() => onDragStart(index)}
                                         onDragOver={(e) => onDragOver(e, index)}
                                         onDrop={() => onDrop(index)}
@@ -800,7 +826,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                             {/* Add task row */}
                             <div className="mt-3 pt-3 border-t border-neutral-100">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     <Plus className="h-4 w-4 text-neutral-400 shrink-0" />
                                     <input
                                         type="time"
@@ -808,13 +834,26 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         onChange={(e) => setNewTaskTime(e.target.value)}
                                         className="text-sm text-neutral-700 w-[110px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
                                     />
+                                    {activeProjects.length > 0 && (
+                                        <select
+                                            value={newTaskProjectId}
+                                            onChange={(e) => setNewTaskProjectId(e.target.value)}
+                                            title="프로젝트 태그 (선택)"
+                                            className="text-sm text-neutral-600 max-w-[140px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
+                                        >
+                                            <option value="">프로젝트 없음</option>
+                                            {activeProjects.map(p => (
+                                                <option key={p.id} value={p.id}>{p.title}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                     <input
                                         type="text"
                                         value={newTaskText}
                                         onChange={(e) => setNewTaskText(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') addTask(); }}
                                         placeholder="할 일 입력 후 Enter"
-                                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
+                                        className="flex-1 min-w-0 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
                                     />
                                 </div>
                                 <p className="text-[10px] text-neutral-400 mt-2">좌측 핸들로 순서 변경 · 클릭으로 상태 전환</p>
@@ -1216,7 +1255,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         )}
 
                         {/* 4. 진행중인 프로젝트 */}
-                        <DailyProjectsCard />
+                        <DailyProjectsCard date={date} />
 
                         {/* 5. 오늘 — 한 줄 결과 */}
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
@@ -1623,13 +1662,15 @@ interface TaskRowProps {
     onCycle: () => void;
     onRemove: () => void;
     onTimeChange: (time: string) => void;
+    onProjectChange?: (projectId: string | null) => void;
+    projects?: Array<{ id: string; title: string; color: string | null }>;
     onDragStart: () => void;
     onDragOver: (e: React.DragEvent) => void;
     onDrop: () => void;
     onDragEnd: () => void;
 }
 
-function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
+function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onProjectChange, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
     const [editingTime, setEditingTime] = useState(false);
     const strike = task.status === 'done' || task.status === 'cancelled';
 
@@ -1718,6 +1759,29 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onDragStar
             <span className={`flex-1 text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
                 {task.text}
             </span>
+
+            {/* Project tag (선택 가능) */}
+            {projects.length > 0 && onProjectChange && (() => {
+                const project = task.project_id ? projects.find(p => p.id === task.project_id) : null;
+                return (
+                    <select
+                        value={task.project_id ?? ""}
+                        onChange={(e) => onProjectChange(e.target.value || null)}
+                        title={project ? `프로젝트: ${project.title}` : "프로젝트 태그"}
+                        className={`shrink-0 text-[10px] max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
+                            project
+                                ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/30"
+                                : "text-neutral-300 border-transparent opacity-0 group-hover:opacity-100"
+                        }`}
+                        style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}
+                    >
+                        <option value="">— 프로젝트 —</option>
+                        {projects.map(p => (
+                            <option key={p.id} value={p.id}>{p.title}</option>
+                        ))}
+                    </select>
+                );
+            })()}
 
             {/* Remove */}
             <button

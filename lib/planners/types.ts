@@ -54,6 +54,7 @@ export interface PlannerTask {
     parent_id?: string | null;
     priority?: 'low' | 'normal' | 'high' | null;
     time?: string | null;
+    project_id?: string | null;   // Phase 2 — 프로젝트 태그
 }
 
 export interface PlannerDaily {
