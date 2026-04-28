@@ -1,6 +1,42 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-28 (세션 96 — 협업자 RLS 권한 강제 완료 + 이월 작업 전체 검증 완료)
+> 마지막 업데이트: 2026-04-28 (세션 97 — Daily 앱 에러 수정 + Weekly 뷰 재설계 + 미완 업무 모달 + 노트 동기화 수정)
+
+---
+
+## 세션 97 핵심 성과 (2026-04-28)
+
+### Daily 앱 에러 수정 (`b5bcbada`)
+- `lib/planners/calendar-rules.ts` — `isVisible()` 미지 kind guard 추가 (`if (!rule) return false`)
+- `monthlyDisplayMode()` optional chaining (`VISIBILITY[kind]?.monthly ?? "none"`)
+- 원인: DB에 알 수 없는 `kind` 값이 있을 때 `VISIBILITY[kind].monthly`에서 `TypeError` 발생
+- `DailyMiniMonth.tsx` useMemo 크래시 → 앱 전체 화이트스크린 차단
+
+### 미완 업무 선택적 불러오기 모달 (`5aa42856`)
+- `app/api/planners/daily/pending-tasks/route.ts` — 신규 API (과거 60일 미완료 태스크 날짜별 그룹)
+- `DailyView.tsx` — 일괄 이월 버튼 → **선택 모달** 전환
+  · 날짜별 섹션 + 체크박스 + 전체선택/해제
+  · "오늘로 가져오기" → 선택 항목만 today tasks에 추가 + 원본 status='carried'
+  · 이미 오늘에 있는 텍스트 중복 제외 (API 레벨)
+
+### Weekly 뷰 재설계 (`21f00be7`)
+- GPR(Goal/Plan/Result) · Vrief(What/Why/How) 섹션 완전 제거
+- 새 레이아웃: 7일을 **세로 목록**으로 배치 (`divide-y` 경계선)
+  · 좌측 32%: 날짜 헤더(요일·Today 배지) + 날씨 이모지·기온 + 음력 + 국경일/절기/기념일 칩 + 미팅 항목(클릭 가능) + 업무(완료 취소선)
+  · 우측 flex-1: 노트 textarea (`planners_daily.notes` 동기화)
+- 용기 최대 폭: `max-w-5xl` → `max-w-6xl`
+
+### Daily·Weekly 버튼/모달 통일 (`0d69bb64`, `0b99127d`)
+- 일정 추가 버튼: bordered text → 아이콘 전용 `p-1.5 rounded` 스타일 통일
+- Weekly 새 일정 모달에 **업무 탭** 추가 (`onTaskCreated` + `activeProjects` props)
+  · `handleTaskCreated()` — `calDefaultDate || today` 날짜 daily record에 저장 + `dayDataMap` 갱신
+
+### 노트 레이블 통일 + 동기화 수정 (`e567b14a`, `cc33b1d4`)
+- "기본 노트" → **"노트"** (DailyView makeDefaultCornellNote · add button 레이블)
+- Weekly "메모" → **"노트"** (placeholder · 저장 기본 제목)
+- Weekly ↔ Daily 노트 양방향 동기화 수정
+  · 읽기: `_cornell` JSON 파싱 → `rows[].note` 조인 (이전: raw JSON 문자열 표시)
+  · 쓰기: `JSON.stringify({_cornell:true, rows:[{id:"r1",cue:"",note:content}]})` (이전: plain string)
 
 ---
 

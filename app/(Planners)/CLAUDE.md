@@ -97,7 +97,7 @@
 
 ### 뷰 컴포넌트 (features/planners/)
 - DailyView · ThisWeekCard · ExternalEventsBanner — Today
-- WeeklyView — 주간 Vrief + GPR + 집계 + 7일 캘린더
+- WeeklyView — 7일 세로 목록 (좌 32% 정보 패널: 날씨·음력·절기·기념일·미팅·업무 / 우 flex-1 노트 textarea)
 - MonthlyView — 월 그리드 + 공휴일 + 주차 링크 + 히트 인디케이터
 - YearlyView — 12개월 + 분기별 목표 + Anniversary 2p 스프레드
 - IdentityView — Vision/Mission/KR (Weekly) + Inside-Out/Outside-In/Vision House (All in One)
@@ -128,7 +128,7 @@
 - 템플릿: templates · covers
 - 집계: summary(scope=weekly/monthly/yearly) · daily/month-hits
 - 검색: search
-- Daily 누적 이월: daily/carry-over (60일 일괄 todo 회수) · daily/pending-count (count·days·oldest)
+- Daily 누적 이월: daily/carry-over (60일 일괄 todo 회수) · daily/pending-count (count·days·oldest) · daily/pending-tasks (날짜별 그룹 반환, 선택 모달 용도)
 - AI 브리핑: briefing · briefing/generate · cron/briefings
 - 결제: payment/request · payment/success · admin/activate
 - 알림: push/subscribe
@@ -330,7 +330,8 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 
 | 항목 | 내용 |
 |------|------|
-| **Phase** | **세션 96 (2026-04-28)** — **협업자 RLS 권한 강제 완료** (resolveRole() owner/editor/viewer 3단계 · viewer PATCH 403 · editor owner-only 필드 차단 · userRole 클라이언트 반환 · 역할 배지 + ShareField/CollaboratorField 오너만 노출) · **이월 작업 전체 완료** (TemplatesView 754줄+7개 grid 파일 분리 확인 · 포트폴리오 모드 /planners/portfolio/[memberId] 확인) · 배포 전 블로커 5개 사용자 액션 대기 |
+| **Phase** | **세션 97 (2026-04-28)** — **앱 크래시 수정** (`isVisible()` 미지 kind guard — DB에 알 수 없는 kind 값 있을 때 DailyMiniMonth useMemo TypeError → 화이트스크린) · **미완 업무 선택 모달** (daily/pending-tasks API 신규 + DailyView 날짜별 체크박스 선택 UI) · **Weekly 뷰 재설계** (GPR/Vrief 제거 → 7일 세로 목록, 좌 32% 정보패널 + 우 노트) · **Daily·Weekly 버튼/모달 통일** (아이콘 전용 스타일 + Weekly에 업무 탭) · **노트 레이블 통일** ("기본 노트" → "노트", "메모" → "노트") · **Weekly↔Daily 노트 동기화 수정** (`_cornell` JSON 포맷 양방향 호환) |
+| **Phase 96** | 세션 96 (2026-04-28) — **협업자 RLS 권한 강제 완료** (resolveRole() owner/editor/viewer 3단계 · viewer PATCH 403 · editor owner-only 필드 차단 · userRole 클라이언트 반환 · 역할 배지 + ShareField/CollaboratorField 오너만 노출) · **이월 작업 전체 완료** (TemplatesView 754줄+7개 grid 파일 분리 확인 · 포트폴리오 모드 /planners/portfolio/[memberId] 확인) · 배포 전 블로커 5개 사용자 액션 대기 |
 | **Phase 93** | 세션 93 — 통합 캘린더 시스템(`planners_calendar_entries` 단일 테이블 + `calendar-rules.ts` SSOT 5 kinds × 4 views 노출 룰) · 4-View 통합 렌더 · 공공데이터 자동 반영(KR 공휴일 30 + 24절기 시드 + cron 매년 1/1) · Daily 우측 재구성 · 트래킹 7종 · MonthlyAnalytics·YearlyAnalytics 3-탭 · Canvas storageKey fix · Settings upsert + SaveAllBar · 구독 + 런칭 프로모션
 | **Phase 92** | 세션 92 (2026-04-27) — 모바일 PWA(orientation any · AppMonthBar 모바일 숨김) · HandNote 종합 개선(펜 4종·스타일러스 지우개 자동 감지·팜 리젝션·캔버스 자동 확장 · perfect-freehand 추가) · AI 브리핑 통합(midday 타입 + 시간대 자동 추론 + 단일 채팅 UI · 이메일 기본 OFF) · Weekly 순서 재정렬(GPR→Vrief→주간 계획) · Monthly 재정렬(테마/목표→집중 영역→일정→회고)+월간 통계(5종 task 분포·에너지·일간 계획) · **Community 사이트화** (`/planners/community` 공개 읽기, 로그인 회원 작성, 카테고리 4종 · 앱 메뉴는 외부 링크) · **PP AI 워크스페이스 슬롯 통일** (UniverseUtilityBar `workspacePath`, HeRo·SmarComm 패턴) · **온보딩 루프 fix** (`storageKey: tenone-auth` · auth_id→email→자동생성 3단계 · super_admin/staff/manager 게이트 우회 · 마스터 DB 마킹) (2026-04-27 세션 92) |
 | **운영 중** | 마케팅 랜딩 (`/planners`, `/planner-tool`, `/planning` 등) |
@@ -339,7 +340,7 @@ VAPID 키 생성: `npx web-push generate-vapid-keys`
 | **배포 전 블로커** | PWA 아이콘 2개 · Toss 가맹점 승인 · 환경변수 Vercel 설정 · Google OAuth 자격 · Supabase Redirect URL 추가 |
 | **이월 작업** | P3 #18 기업플랜 (대규모, 결제 사업 시작 시) — 나머지 이월 작업 모두 완료 |
 | **주요 결정** | 19,000원/년 · Weekly 기본 · PDF 구매자 무료 · 커뮤니티 운영 안 함 |
-| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) · **Templates · AI Briefing 은 본문 서브링크 (메인 메뉴는 Index/Today/Weekly/Monthly/Yearly/P.I/Project/Contact)** · **PWA 전용** (앱스토어 미등록, /planners/install 가이드) · **누적 이월 = 어제 한정이 아니라 60일 미완료 일괄 회수** · **템플릿은 placeholder 차원이 아니라 컨설턴트급 가이드(저자·원칙·실제 시나리오)까지 일관 적용** · **Contacts는 진입 시 즐겨찾기+최근만 렌더, 우측 인덱스는 스크롤 점프 X·필터링 방식, 1,000명+ 데이터도 인스타식 점진 노출(50명/페이지)** · **getInitialChar는 invisible 문자·호환 자모·Choseong Jamo까지 견고하게 분류** |
+| **최근 결정 누적** | 능동 AI가 핵심 차별점 · 이메일 백업 · Web Push 선택 · 외부 연동은 플래너 중심 입출력 채널 · 59종 템플릿 전부 시각 그리드 편집 지원 (localStorage 자동 저장 + markdown export) · **Templates · AI Briefing 은 본문 서브링크 (메인 메뉴는 Index/Today/Weekly/Monthly/Yearly/P.I/Project/Contact)** · **PWA 전용** (앱스토어 미등록, /planners/install 가이드) · **누적 이월 = 어제 한정이 아니라 60일 미완료 일괄 회수** · **미완 업무는 자동 이월이 아닌 선택 모달 방식** · **Weekly 뷰는 GPR/Vrief 없이 7일 세로 목록 + 좌 정보 패널(32%) + 우 노트(flex-1)** · **노트 레이블 = "노트" (Daily·Weekly 통일)** · **Daily↔Weekly 노트는 `_cornell` JSON 포맷으로 양방향 호환** · **Daily·Weekly 일정 추가 버튼 = 아이콘 전용 `p-1.5 rounded` 스타일** · **Weekly 새 일정 모달에 업무 탭 포함** · **템플릿은 placeholder 차원이 아니라 컨설턴트급 가이드(저자·원칙·실제 시나리오)까지 일관 적용** · **Contacts는 진입 시 즐겨찾기+최근만 렌더, 우측 인덱스는 스크롤 점프 X·필터링 방식, 1,000명+ 데이터도 인스타식 점진 노출(50명/페이지)** · **getInitialChar는 invisible 문자·호환 자모·Choseong Jamo까지 견고하게 분류** |
 
 ---
 

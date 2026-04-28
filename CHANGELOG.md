@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-28 — 세션 97 · Daily 앱 에러 수정 + Weekly 뷰 재설계 + 미완 업무 선택 모달 + 노트 동기화
+
+### 장소
+집
+
+### 변경 파일
+- `lib/planners/calendar-rules.ts` — `isVisible()` 미지 kind guard + `monthlyDisplayMode()` optional chaining
+- `app/api/planners/daily/pending-tasks/route.ts` — 신규 API (날짜별 미완료 태스크)
+- `features/planners/DailyView.tsx` — 선택 모달 + 노트 레이블 통일 + 버튼 스타일
+- `features/planners/WeeklyView.tsx` — 전면 재설계(GPR/Vrief 제거, 7일 세로, 업무탭, 노트 동기화)
+
+### 커밋
+- `b5bcbada` fix: isVisible unknown kind guard (DailyMiniMonth crash)
+- `5aa42856` feat: 미완 업무 선택적 불러오기 모달
+- `21f00be7` feat: 위클리 뷰 재설계
+- `0d69bb64` style: Daily·Weekly 버튼 스타일 통일
+- `0b99127d` feat: Weekly 새 일정 모달 업무 탭
+- `e567b14a` style: 노트 레이블 통일 + 위클리 레이아웃
+- `cc33b1d4` fix: Weekly ↔ Daily 노트 양방향 동기화
+
+### 핵심 결정
+- Weekly 뷰는 GPR/Vrief 없이 7일 세로 목록 + 좌측 정보 패널(32%) + 우측 노트(flex-1)
+- 미완 업무는 자동 이월 아닌 **선택 모달** 방식 (날짜별 그룹, 체크박스)
+- 노트는 Daily·Weekly 모두 `_cornell` JSON 포맷으로 양방향 호환
+- 레이블 SSOT: "기본 노트" → "노트" (Daily), "메모" → "노트" (Weekly)
+
+---
+
 ## 2026-04-28 — 세션 96 · 협업자 RLS 권한 강제 + 이월 작업 전체 완료 검증
 
 ### 장소
