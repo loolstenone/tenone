@@ -331,7 +331,9 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     }
 
     return (
-        <div className="fixed inset-0 top-12 flex flex-col bg-neutral-50 z-30">
+        <div className="fixed inset-0 top-12 flex flex-col bg-neutral-50 z-30"
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        >
             {/* 상단 바 */}
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
                 <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
@@ -380,7 +382,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
 
             {/* tldraw 무한 캔버스 + 배경 오버레이 */}
             {/* absolute inset-0 로 tldraw 에 명시적 크기 전달 (flex-1만으로는 tldraw가 높이 0으로 인식) */}
-            <div className="flex-1 min-h-0 relative overflow-hidden">
+            <div className="flex-1 min-h-0 relative">
                 <div className="absolute inset-0">
                     {/* 배경 패턴 레이어 — tldraw CSS 아래 */}
                     {bgTemplate !== "blank" && (
