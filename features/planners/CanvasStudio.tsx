@@ -180,6 +180,21 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     // bgTemplate을 ref로도 유지 → saveCanvas 클로저에서 최신값 참조
     const bgTemplateRef = useRef<BgTemplate>("blank");
+
+    // ── 펜 전용 모드 (글로벌 pp-pen-mode 이벤트 수신) ────────────────────────
+    const editorRef = useRef<Editor | null>(null);
+    useEffect(() => {
+        // 초기값: localStorage 참조
+        const initial = localStorage.getItem("pp-pen-mode") === "1";
+        if (editorRef.current) editorRef.current.updateInstanceState({ isPenMode: initial });
+
+        const handler = (e: Event) => {
+            const enabled = (e as CustomEvent<{ enabled: boolean }>).detail.enabled;
+            if (editorRef.current) editorRef.current.updateInstanceState({ isPenMode: enabled });
+        };
+        window.addEventListener("pp-pen-mode", handler);
+        return () => window.removeEventListener("pp-pen-mode", handler);
+    }, []);
     bgTemplateRef.current = bgTemplate;
 
     // ── 초기 로드 ──────────────────────────────────────────────────────────
@@ -230,6 +245,10 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     // ── tldraw 마운트 콜백 ─────────────────────────────────────────────────
     const handleMount = useCallback((ed: Editor) => {
         setEditor(ed);
+        editorRef.current = ed;
+        // 마운트 시 현재 펜 모드 상태 반영
+        const penMode = localStorage.getItem("pp-pen-mode") === "1";
+        ed.updateInstanceState({ isPenMode: penMode });
         if (snapshot) {
             try { ed.loadSnapshot(snapshot); } catch { /* 새 캔버스로 시작 */ }
         }

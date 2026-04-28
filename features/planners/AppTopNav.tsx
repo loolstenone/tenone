@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -46,6 +46,10 @@ export function AppTopNav({
     const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isPenMode, setIsPenMode] = useState(() => {
+        if (typeof window === "undefined") return false;
+        return localStorage.getItem("pp-pen-mode") === "1";
+    });
 
     // 브라우저 전체화면 상태 동기화
     useEffect(() => {
@@ -64,6 +68,27 @@ export function AppTopNav({
         } catch (e) {
             console.warn("fullscreen toggle failed", e);
         }
+    }
+
+    // 펜 전용 모드 — capture phase 터치 차단 (팜 리젝션)
+    useEffect(() => {
+        if (!isPenMode) return;
+        const block = (e: PointerEvent) => {
+            if (e.pointerType === "touch") e.stopImmediatePropagation();
+        };
+        document.addEventListener("pointerdown", block, { capture: true });
+        document.addEventListener("pointermove", block, { capture: true });
+        return () => {
+            document.removeEventListener("pointerdown", block, { capture: true });
+            document.removeEventListener("pointermove", block, { capture: true });
+        };
+    }, [isPenMode]);
+
+    function togglePenMode() {
+        const next = !isPenMode;
+        setIsPenMode(next);
+        localStorage.setItem("pp-pen-mode", next ? "1" : "0");
+        window.dispatchEvent(new CustomEvent("pp-pen-mode", { detail: { enabled: next } }));
     }
 
     // 라우트 변경 시 햄버거 메뉴 자동 닫기
@@ -179,6 +204,20 @@ export function AppTopNav({
                 >
                     <Settings className="h-4 w-4" />
                 </Link>
+
+                {/* 펜 전용 모드 — 손바닥 터치 차단 (팜 리젝션) */}
+                <button
+                    type="button"
+                    onClick={togglePenMode}
+                    title={isPenMode ? "펜 전용 모드 해제" : "펜 전용 모드 (손 터치 차단)"}
+                    className={`p-1.5 rounded transition-colors ${
+                        isPenMode
+                            ? "bg-[#0F766E]/15 text-[#0F766E]"
+                            : "text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/10"
+                    }`}
+                >
+                    <PenLine className="h-4 w-4" />
+                </button>
 
                 {/* 전체화면 토글 — 주소창·탭 숨김 */}
                 <button

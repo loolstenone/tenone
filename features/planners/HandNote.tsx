@@ -24,7 +24,7 @@ import {
     type PointerEvent as ReactPointerEvent,
 } from "react";
 import { getStroke } from "perfect-freehand";
-import { Eraser, Undo2, Redo2, RotateCcw, Pencil, Hand, SlidersHorizontal } from "lucide-react";
+import { Eraser, Undo2, Redo2, RotateCcw, Pencil, SlidersHorizontal } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -189,6 +189,17 @@ export function HandNote({
     // ── Init ──────────────────────────────────────────────────────────────────
 
     useEffect(() => setRecentColors(loadRecent()), []);
+
+    // 글로벌 펜 전용 모드 동기화 (pp-pen-mode CustomEvent)
+    useEffect(() => {
+        // 초기값 반영
+        setPenOnly(localStorage.getItem("pp-pen-mode") === "1");
+        const handler = (e: Event) => {
+            setPenOnly((e as CustomEvent<{ enabled: boolean }>).detail.enabled);
+        };
+        window.addEventListener("pp-pen-mode", handler);
+        return () => window.removeEventListener("pp-pen-mode", handler);
+    }, []);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -577,18 +588,6 @@ export function HandNote({
                         title="손 떨림 보정 (Stabilizer)"
                     >
                         <SlidersHorizontal className="h-3 w-3" />
-                    </button>
-
-                    {/* 팜 리젝션 */}
-                    <button
-                        onClick={() => setPenOnly(p => !p)}
-                        type="button"
-                        className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-                            penOnly ? "bg-amber-100 text-amber-700" : "text-slate-400 hover:bg-slate-100"
-                        }`}
-                        title={penOnly ? "Pen Only ON — 손은 스크롤만" : "Pen Only OFF"}
-                    >
-                        <Hand className="h-3.5 w-3.5" />
                     </button>
 
                     {/* 지우개 */}
