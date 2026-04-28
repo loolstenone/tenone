@@ -65,6 +65,8 @@ const RECURRENCE_OPTIONS: Array<{ value: RecurrenceUnit; label: string; allowedK
     { value: "yearly",  label: "매년",      allowedKinds: ["anniversary"] },
 ];
 
+type ModalTab = CalendarKind | "task";
+
 interface Props {
     open: boolean;
     onClose: () => void;
@@ -74,10 +76,15 @@ interface Props {
     initial?: Partial<EditableEntry>;
     /** 기본 시작일 — 신규 생성 시 (YYYY-MM-DD) */
     defaultDate?: string;
+    /** 업무(Task) 추가 콜백 */
+    onTaskCreated?: (task: { text: string; time?: string | null; project_id?: string | null }) => void;
+    /** 업무 프로젝트 목록 */
+    activeProjects?: Array<{ id: string; title: string; color: string | null }>;
 }
 
-export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial, defaultDate }: Props) {
-    const [kind, setKind] = useState<CalendarKind>("meeting");
+export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial, defaultDate, onTaskCreated, activeProjects = [] }: Props) {
+    const [tab, setTab] = useState<ModalTab>("meeting");
+    const kind = tab === "task" ? "meeting" : tab as CalendarKind; // calendar form 내부용
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [startDate, setStartDate] = useState(defaultDate || todayStr());
@@ -87,6 +94,11 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [recurrenceUntil, setRecurrenceUntil] = useState("");
     const [saving, setSaving] = useState(false);
     const [kbOffset, setKbOffset] = useState(0);  // 모바일 키보드 오프셋
+
+    // 업무 탭 전용 상태
+    const [taskText, setTaskText] = useState("");
+    const [taskTime, setTaskTime] = useState("");
+    const [taskProjectId, setTaskProjectId] = useState("");
 
     // 모바일 키보드 올라올 때 바텀시트 위로 밀어올리기
     useEffect(() => {
@@ -119,7 +131,8 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
     useEffect(() => {
         if (!open) return;
-        setKind((initial?.kind as CalendarKind) || "meeting");
+        setTab((initial?.kind as CalendarKind) || "meeting");
+        setTaskText(""); setTaskTime(""); setTaskProjectId("");
         setTitle(initial?.title || "");
         setDescription(initial?.description || "");
         const sd = initial?.start_date || defaultDate || todayStr();
@@ -241,13 +254,13 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                     ) : (
                         <div className="flex flex-wrap gap-1.5">
                             {EDITABLE_KINDS.map((k) => {
-                                const active = kind === k;
+                                const active = tab === k;
                                 const c = KIND_COLORS[k];
                                 return (
                                     <button
                                         key={k}
                                         type="button"
-                                        onClick={() => setKind(k)}
+                                        onClick={() => setTab(k)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                                             active ? `${c.bg} ${c.text} border-current` : "bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
                                         }`}
@@ -257,11 +270,62 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     </button>
                                 );
                             })}
+                            {/* 업무 탭 */}
+                            {onTaskCreated && (
+                                <button
+                                    type="button"
+                                    onClick={() => setTab("task")}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                                        tab === "task"
+                                            ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/40"
+                                            : "bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+                                    }`}
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E] shrink-0" />
+                                    업무
+                                </button>
+                            )}
                         </div>
                     )}
 
-                    {/* Title */}
-                    <div>
+                    {/* ── 업무 탭 폼 ── */}
+                    {tab === "task" && (
+                        <div className="space-y-4 py-1">
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">할 일</label>
+                                <input
+                                    type="text"
+                                    value={taskText}
+                                    onChange={(e) => setTaskText(e.target.value)}
+                                    placeholder="업무 내용 입력"
+                                    className="w-full text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#0F766E]"
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">시간 (선택)</label>
+                                <TimeSelect value={taskTime} onChange={setTaskTime} />
+                            </div>
+                            {activeProjects.length > 0 && (
+                                <div>
+                                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">프로젝트 (선택)</label>
+                                    <select
+                                        value={taskProjectId}
+                                        onChange={(e) => setTaskProjectId(e.target.value)}
+                                        className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white"
+                                    >
+                                        <option value="">프로젝트 없음</option>
+                                        {activeProjects.map(p => (
+                                            <option key={p.id} value={p.id}>{p.title}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ── 캘린더 엔트리 폼 (미팅·기념일) ── */}
+                    {tab !== "task" && <><div>
                         <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">제목</label>
                         <input
                             type="text"
@@ -449,6 +513,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                             className="w-full text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E] resize-none"
                         />
                     </div>
+                    </>}  {/* end tab !== "task" */}
                 </div>
 
                 {/* Footer */}
@@ -465,14 +530,33 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                 </button>
                             )}
                         </div>
-                        <button
-                            onClick={submit}
-                            disabled={saving || !title.trim()}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
-                        >
-                            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                            {isEdit ? "저장" : "추가"}
-                        </button>
+                        {tab === "task" ? (
+                            <button
+                                type="button"
+                                disabled={!taskText.trim()}
+                                onClick={() => {
+                                    if (!taskText.trim()) return;
+                                    onTaskCreated?.({
+                                        text: taskText.trim(),
+                                        time: taskTime || null,
+                                        project_id: taskProjectId || null,
+                                    });
+                                    onClose();
+                                }}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                            >
+                                추가
+                            </button>
+                        ) : (
+                            <button
+                                onClick={submit}
+                                disabled={saving || !title.trim()}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-sm rounded-lg hover:bg-[#0d5e56] disabled:opacity-50"
+                            >
+                                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                                {isEdit ? "저장" : "추가"}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

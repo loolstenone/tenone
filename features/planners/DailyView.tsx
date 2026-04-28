@@ -1487,6 +1487,19 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 onDeleted={() => refetchCalendar()}
                 initial={calEditing ?? undefined}
                 defaultDate={date}
+                onTaskCreated={(t) => {
+                    const newTask: PlannerTask = {
+                        id: `t_${Date.now()}`,
+                        text: t.text,
+                        status: "todo",
+                        time: t.time ?? null,
+                        project_id: t.project_id ?? null,
+                    };
+                    const next = [...tasks, newTask];
+                    setTasks(next);
+                    save({ tasks: next });
+                }}
+                activeProjects={activeProjects}
             />
 
             {/* Note Expand Modal */}
