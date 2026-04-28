@@ -57,7 +57,7 @@ function makeDefaultCornellNote(): NoteItem {
     return {
         id: `n_default_${Date.now()}`,
         type: 'cornell',
-        title: '기본 노트 1',
+        title: '노트 1',
         cue: '',
         content: '',
         summary: '',
@@ -1089,7 +1089,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'cornell').length + 1;
-                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
+                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
                                     const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
@@ -1098,7 +1098,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Plus className="h-3.5 w-3.5" />
-                                기본 노트
+                                노트
                             </button>
                             <button
                                 onClick={() => {
@@ -1433,7 +1433,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 const tplHasGrid = tplMeta ? isSpecialTemplate(tplMeta) : false;
                 const dataKey = tplMeta ? tplDataKey(expandedNote.id) : '';
                 // 자동 생성 제목 여부 — 힌트 스타일(이탤릭·흐림) 적용
-                const isAutoTitle = /^(기본 노트|손글씨|캔버스) \d+$/.test(expandedNote.title)
+                const isAutoTitle = /^(노트|손글씨|캔버스) \d+$/.test(expandedNote.title)
                     || (isTpl && expandedNote.title === (expandedNote.templateLabel ?? ''));
                 function saveAndClose() {
                     const next = notesList.map(n => n.id === expandedNote!.id ? expandedNote! : n);

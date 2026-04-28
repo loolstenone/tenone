@@ -206,7 +206,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 arr.unshift({
                     id: `n_default_${Date.now()}`,
                     type: "cornell",
-                    title: "기본 노트 1",
+                    title: "노트 1",
                     cue: "", content, summary: "",
                     rows: [{ id: "r1", cue: "", note: content }],
                 });
@@ -259,7 +259,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     }
 
     return (
-        <div ref={swipeRef} className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10">
             {/* Header */}
             {(() => {
                 const sM = days[0].getMonth() + 1;
@@ -344,7 +344,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             return (
                                 <div key={ds} className={`flex min-h-[100px] ${isToday ? "bg-[#0F766E]/[0.025]" : "bg-white"}`}>
                                     {/* 좌측: 날짜 정보 */}
-                                    <div className="w-[42%] shrink-0 border-r border-neutral-100 px-4 py-3 flex flex-col gap-1.5">
+                                    <div className="w-[32%] shrink-0 border-r border-neutral-100 px-4 py-3 flex flex-col gap-1.5">
                                         {/* 날짜 헤더 */}
                                         <div className="flex items-baseline gap-1.5 mb-0.5">
                                             <span className={`font-serif text-2xl leading-none font-light ${dateColor}`}>
@@ -454,7 +454,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                 }));
                                             }}
                                             onBlur={(e) => saveMemoForDay(ds, e.target.value)}
-                                            placeholder="메모…"
+                                            placeholder="노트…"
                                             className="w-full h-full min-h-[80px] text-sm text-neutral-700 placeholder:text-neutral-200 focus:outline-none bg-transparent resize-none leading-relaxed"
                                         />
                                     </div>
