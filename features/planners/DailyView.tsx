@@ -928,9 +928,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                             )}
                                             <button
                                                 onClick={() => { setCalEditing(null); setCalEditorOpen(true); }}
-                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 border border-[#0F766E]/30"
+                                                title="일정 추가"
+                                                className="p-1.5 rounded text-neutral-300 hover:text-[#0F766E] hover:bg-neutral-100 transition-colors"
                                             >
-                                                <Plus className="h-3 w-3" /> 일정
+                                                <Plus className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
                                     </div>
