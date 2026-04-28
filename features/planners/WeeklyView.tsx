@@ -59,6 +59,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [calEditorOpen, setCalEditorOpen] = useState(false);
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
+    const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
 
     const boundaries = getWeekBoundaries(year, week);
 
@@ -80,6 +81,13 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     function dsOf(d: Date) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     }
+
+    // 활성 프로젝트 1회 로드
+    useEffect(() => {
+        fetch("/api/planners/projects?status=active&limit=30")
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.projects) setActiveProjects(d.projects); });
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -215,6 +223,39 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         fetch(`/api/planners/calendar?from=${boundaries.start}&to=${boundaries.end}`)
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
+    }
+
+    async function handleTaskCreated(task: { text: string; time?: string | null; project_id?: string | null; priority?: string | null; memo?: string | null }) {
+        // calDefaultDate가 있으면 그 날, 없으면 오늘
+        const targetDate = calDefaultDate || today;
+        try {
+            const r = await fetch(`/api/planners/daily?date=${targetDate}`);
+            const d = r.ok ? await r.json() : null;
+            const existing = Array.isArray(d?.daily?.tasks) ? d.daily.tasks : [];
+            const newTask = {
+                id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                text: task.text,
+                status: "todo",
+                time: task.time ?? null,
+                project_id: task.project_id ?? null,
+                priority: task.priority ?? null,
+                memo: task.memo ?? null,
+            };
+            const updated = [...existing, newTask];
+            await fetch(`/api/planners/daily`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: targetDate, tasks: updated }),
+            });
+            // dayDataMap 업데이트
+            setDayDataMap(prev => ({
+                ...prev,
+                [targetDate]: {
+                    ...(prev[targetDate] ?? { memo: "", weather: null }),
+                    tasks: updated,
+                },
+            }));
+        } catch { /* skip */ }
     }
 
     return (
@@ -457,6 +498,8 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 onDeleted={refetchCalendar}
                 initial={calEditing ?? undefined}
                 defaultDate={calDefaultDate}
+                onTaskCreated={handleTaskCreated}
+                activeProjects={activeProjects}
             />
         </div>
     );
