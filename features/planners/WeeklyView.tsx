@@ -117,7 +117,19 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                     try {
                         const arr = JSON.parse(d.daily.notes || "[]");
                         const cornell = Array.isArray(arr) ? arr.find((n: { type?: string }) => !n.type || n.type === "cornell") : null;
-                        newDayData[ds].memo = cornell?.content ?? "";
+                        if (cornell?.content) {
+                            // DailyView는 content를 {_cornell:true, rows:[...]} JSON으로 저장
+                            try {
+                                const parsed = JSON.parse(cornell.content);
+                                if (parsed._cornell && Array.isArray(parsed.rows)) {
+                                    newDayData[ds].memo = parsed.rows.map((rw: { note?: string }) => rw.note ?? "").join("\n\n").trim();
+                                } else {
+                                    newDayData[ds].memo = cornell.content;
+                                }
+                            } catch {
+                                newDayData[ds].memo = cornell.content;
+                            }
+                        }
                     } catch { /* skip */ }
                 }
             }
@@ -199,16 +211,17 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                 arr = JSON.parse(d?.daily?.notes || "[]");
                 if (!Array.isArray(arr)) arr = [];
             } catch { arr = []; }
-            const cornellIdx = arr.findIndex((n) => !n.type || n.type === "cornell");
+            const cornellIdx = arr.findIndex((n: Record<string, unknown>) => !n.type || n.type === "cornell");
+            // DailyView 포맷(_cornell JSON)으로 저장해 양방향 호환
+            const cornellContent = JSON.stringify({ _cornell: true, rows: [{ id: "r1", cue: "", note: content }] });
             if (cornellIdx >= 0) {
-                arr[cornellIdx] = { ...arr[cornellIdx], content };
+                arr[cornellIdx] = { ...arr[cornellIdx], content: cornellContent };
             } else {
                 arr.unshift({
                     id: `n_default_${Date.now()}`,
                     type: "cornell",
                     title: "노트 1",
-                    cue: "", content, summary: "",
-                    rows: [{ id: "r1", cue: "", note: content }],
+                    cue: "", content: cornellContent, summary: "",
                 });
             }
             await fetch(`/api/planners/daily`, {
