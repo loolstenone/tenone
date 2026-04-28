@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-29 — 세션 100 · Planners 캔버스 Excalidraw → tldraw 마이그레이션
+
+### 장소
+사무실
+
+### 변경 요약
+- **CanvasEditor.tsx — Excalidraw → tldraw 전환**
+  - 라이선스: Excalidraw 상용 유료(v0.17+ 워터마크) → tldraw MIT 무료
+  - CSS: `@excalidraw/excalidraw/index.css` → `tldraw/tldraw.css`
+  - 컴포넌트: `<Excalidraw excalidrawAPI=...>` → `<Tldraw onMount={...}>`
+  - 데이터 형식: `{ elements, appState }` → `TLEditorSnapshot { document, session }`
+  - 저장 감지: `onChange(elements, appState)` → `editor.store.listen({ scope: "document" })`
+  - 불러오기: `initialData={{ elements }}` → `loadSnapshot(editor.store, canvas.data)`
+  - 썸네일: `exportToBlob` → `editor.getSvgString()` + `getSvgAsImage()`
+  - 기존 Excalidraw 형식 DB 데이터는 `loadSnapshot` 실패 시 try/catch로 잡아 빈 캔버스로 시작
+
+### 변경 파일
+- `features/planners/CanvasEditor.tsx` — 전체 재작성 (Excalidraw → tldraw)
+
+### 커밋
+- (이번 세션 단일 커밋)
+
+### 핵심 결정
+- tldraw v4.5.10 (MIT) 이미 `package.json`에 설치됨 → 별도 패키지 추가 불필요
+- 기존 캔버스 데이터 형식 불일치 → 빈 캔버스로 시작 (데이터 마이그레이션 불필요)
+
+---
+
 ## 2026-04-29 — 세션 99 · Planners 노트 병기·캔버스 UI 통일·AI Sparkles 제거
 
 ### 장소

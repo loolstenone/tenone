@@ -1,6 +1,20 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-29 (세션 99 — Planners 노트 병기·캔버스 UI 통일·AI 기능 정리)
+> 마지막 업데이트: 2026-04-29 (세션 100 — Planners CanvasEditor Excalidraw → tldraw 마이그레이션)
+
+---
+
+## 세션 100 핵심 성과 (2026-04-29)
+
+### Planners — CanvasEditor Excalidraw → tldraw 마이그레이션
+- Excalidraw v0.18 상용 라이선스 워터마크 문제 → tldraw v4.5.10 (MIT) 전환
+- `CanvasEditor.tsx` 전체 재작성: `<Tldraw onMount>` + `editor.store.listen` + `getSnapshot/loadSnapshot`
+- 썸네일: `editor.getSvgString()` + `getSvgAsImage()` → JPEG base64 → DB PATCH
+- 기존 Excalidraw DB 데이터는 형식 불일치 → try/catch로 빈 캔버스 폴백
+
+### 다음 할 것
+- 배포 후 기존 캔버스 "데이터 없음" 안내 또는 일괄 삭제 여부 결정
+- `@excalidraw/excalidraw` 패키지 `package.json`에서 제거 (불필요)
 
 ---
 
