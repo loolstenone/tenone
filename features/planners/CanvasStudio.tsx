@@ -379,23 +379,23 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
             </header>
 
             {/* tldraw 무한 캔버스 + 배경 오버레이 */}
-            <div className="flex-1 min-h-0 relative">
-                {/* 배경 패턴 레이어 — tldraw 아래 */}
-                {bgTemplate !== "blank" && (
-                    <div
-                        className="absolute inset-0 pointer-events-none z-0"
-                        style={bgStyle(bgTemplate)}
-                    />
-                )}
+            {/* absolute inset-0 로 tldraw 에 명시적 크기 전달 (flex-1만으로는 tldraw가 높이 0으로 인식) */}
+            <div className="flex-1 min-h-0 relative overflow-hidden">
+                <div className="absolute inset-0">
+                    {/* 배경 패턴 레이어 — tldraw CSS 아래 */}
+                    {bgTemplate !== "blank" && (
+                        <div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{ ...bgStyle(bgTemplate), zIndex: 0 }}
+                        />
+                    )}
 
-                <Tldraw
-                    onMount={handleMount}
-                    inferDarkMode
-                    components={{
-                        // tldraw 내장 전체화면 버튼 제거 — AppTopNav의 전체화면 버튼과 충돌 방지
-                        SharePanel: null,
-                    }}
-                />
+                    <Tldraw
+                        onMount={handleMount}
+                        /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
+                        /* components prop 제거 — tldraw v4에서 SharePanel 키가 달라 렌더 방해 */
+                    />
+                </div>
 
                 {/* QuickShape 래디얼 메뉴 */}
                 <div className="absolute bottom-24 right-6 z-[500]" style={{ width: 48, height: 48 }}>

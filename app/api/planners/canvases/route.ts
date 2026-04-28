@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const admin = createAdminClient();
     const { data, error } = await admin
         .from("planners_canvases")
-        .insert({ member_id: user.id, title, data: { elements: [], appState: {} } })
+        .insert({ member_id: user.id, title, data: {} })
         .select("id, title, created_at, updated_at")
         .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
