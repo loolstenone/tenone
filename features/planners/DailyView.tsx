@@ -9,13 +9,12 @@ import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
-import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyProjectsCard } from "./DailyProjectsCard";
 import { useSwipeNav } from "./useSwipeNav";
 import { DailyMiniMonth } from "./DailyMiniMonth";
-import { expandOccurrences, isVisible, KIND_COLORS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
+import { expandOccurrences, isVisible, KIND_COLORS, KIND_LABELS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { ExternalEventsBanner } from "./ExternalEventsBanner";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
@@ -776,99 +775,242 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     {/* Tasks (col 2) */}
                     <div className="md:col-span-2 space-y-4">
                         <ExternalEventsBanner date={date} />
-                        <CalendarEntryList
-                            entries={calEntries.filter(e => e.kind === "meeting" || e.kind === "anniversary")}
-                            view="daily"
-                            from={date}
-                            to={date}
-                            label="오늘의 일정"
-                            onAdd={() => { setCalEditing(null); setCalEditorOpen(true); }}
-                            onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
-                        />
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xs text-neutral-400 flex items-center gap-1.5 flex-wrap">
-                                    <span className="uppercase tracking-widest">Tasks</span>
-                                    <span className="text-neutral-300 font-normal normal-case tracking-normal">
-                                        ( · 미완 | <span className="font-mono">V</span> 완료 | <span className="font-mono">→</span> 이월 | <span className="font-mono">X</span> 취소 )
-                                    </span>
-                                </h2>
-                                {pendingInfo && pendingInfo.count > 0 && (
-                                    <button
-                                        onClick={carryOverPending}
-                                        disabled={carrying}
-                                        title={pendingInfo.oldest
-                                            ? `${pendingInfo.oldest} 부터 누적된 미완료 ${pendingInfo.count}건 (${pendingInfo.days}일) 을 오늘로 이월`
-                                            : `누적 미완료 ${pendingInfo.count}건 이월`}
-                                        className="flex items-center gap-1 text-[10px] px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition-colors disabled:opacity-50"
-                                    >
-                                        {carrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowDownToLine className="h-3 w-3" />}
-                                        누적 미완료 {pendingInfo.count}건 이월
-                                    </button>
-                                )}
-                            </div>
 
-                            <div className="space-y-0.5">
-                                {tasks.length === 0 && (
-                                    <p className="text-sm text-neutral-300 italic py-2">오늘의 할 일을 추가해 보세요.</p>
-                                )}
-                                {tasks.map((t, index) => (
-                                    <TaskRow
-                                        key={t.id}
-                                        task={t}
-                                        index={index}
-                                        isDragOver={dragOverIndex === index}
-                                        onCycle={() => cycleStatus(t.id)}
-                                        onRemove={() => removeTask(t.id)}
-                                        onTimeChange={(time) => updateTaskTime(t.id, time)}
-                                        onProjectChange={(pid) => updateTaskProject(t.id, pid)}
-                                        projects={activeProjects}
-                                        onDragStart={() => onDragStart(index)}
-                                        onDragOver={(e) => onDragOver(e, index)}
-                                        onDrop={() => onDrop(index)}
-                                        onDragEnd={onDragEnd}
-                                    />
-                                ))}
-                            </div>
+                        {/* ── 통합 타임테이블 (일정 + 업무) ── */}
+                        {(() => {
+                            // 오늘 calEntries를 발생일 기준으로 펼침
+                            const todayOccurrences = calEntries.flatMap(e =>
+                                expandOccurrences(e, date, date).map(o => ({ ...o }))
+                            );
+                            // 하루 종일: 기념일·공휴일·절기
+                            const allDayEntries = todayOccurrences.filter(o =>
+                                o.entry.kind === "anniversary" || o.entry.kind === "public_holiday" || o.entry.kind === "solar_term"
+                            );
+                            // 시간 있는 미팅
+                            const timedMeetings = todayOccurrences
+                                .filter(o => o.entry.kind === "meeting" && o.entry.start_time)
+                                .map(o => ({ type: "meeting" as const, time: o.entry.start_time!, entry: o.entry }));
+                            // 시간 없는 미팅 (하루 종일로 처리)
+                            const untimedMeetings = todayOccurrences
+                                .filter(o => o.entry.kind === "meeting" && !o.entry.start_time)
+                                .map(o => ({ entry: o.entry }));
+                            // 시간 있는 태스크
+                            const timedTasks = tasks
+                                .filter(t => t.time)
+                                .map(t => ({ type: "task" as const, time: t.time!, task: t }));
+                            // 시간 없는 태스크 (원래 순서 유지, 드래그용 index 포함)
+                            const untimedTasks = tasks
+                                .map((t, idx) => ({ task: t, idx }))
+                                .filter(({ task }) => !task.time);
 
-                            {/* Add task row */}
-                            <div className="mt-3 pt-3 border-t border-neutral-100">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <Plus className="h-4 w-4 text-neutral-400 shrink-0" />
-                                    <input
-                                        type="time"
-                                        value={newTaskTime}
-                                        onChange={(e) => setNewTaskTime(e.target.value)}
-                                        className="text-sm text-neutral-700 w-[110px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
-                                    />
-                                    {activeProjects.length > 0 && (
-                                        <select
-                                            value={newTaskProjectId}
-                                            onChange={(e) => setNewTaskProjectId(e.target.value)}
-                                            title="프로젝트 태그 (선택)"
-                                            className="text-sm text-neutral-600 max-w-[140px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
-                                        >
-                                            <option value="">프로젝트 없음</option>
-                                            {activeProjects.map(p => (
-                                                <option key={p.id} value={p.id}>{p.title}</option>
-                                            ))}
-                                        </select>
+                            // 시간 기반 항목 정렬
+                            const timedItems = [...timedMeetings, ...timedTasks]
+                                .sort((a, b) => a.time.localeCompare(b.time));
+
+                            const isEmpty = allDayEntries.length === 0 && timedItems.length === 0
+                                && untimedMeetings.length === 0 && untimedTasks.length === 0;
+
+                            return (
+                                <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                                    {/* 헤더 */}
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-xs uppercase tracking-widest text-neutral-400">일정 & 업무</h2>
+                                        <div className="flex items-center gap-2">
+                                            {pendingInfo && pendingInfo.count > 0 && (
+                                                <button
+                                                    onClick={carryOverPending}
+                                                    disabled={carrying}
+                                                    title={pendingInfo.oldest
+                                                        ? `${pendingInfo.oldest}부터 미완료 ${pendingInfo.count}건 이월`
+                                                        : `미완료 ${pendingInfo.count}건 이월`}
+                                                    className="flex items-center gap-1 text-[10px] px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition-colors disabled:opacity-50"
+                                                >
+                                                    {carrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowDownToLine className="h-3 w-3" />}
+                                                    미완 {pendingInfo.count}건 이월
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => { setCalEditing(null); setCalEditorOpen(true); }}
+                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] text-[#0F766E] hover:bg-[#0F766E]/10 border border-[#0F766E]/30"
+                                            >
+                                                <Plus className="h-3 w-3" /> 일정
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* 1. 하루 종일 항목 */}
+                                    {(allDayEntries.length > 0 || untimedMeetings.length > 0) && (
+                                        <div className="mb-3 pb-3 border-b border-neutral-100 space-y-1">
+                                            {allDayEntries.map(({ entry }) => {
+                                                const c = KIND_COLORS[entry.kind];
+                                                return (
+                                                    <button
+                                                        key={entry.id}
+                                                        onClick={() => { setCalEditing(entry); setCalEditorOpen(true); }}
+                                                        className="w-full flex items-center gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
+                                                    >
+                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+                                                        <span className="flex-1 text-sm text-neutral-800">{entry.title}</span>
+                                                        <span className="text-[10px] text-neutral-400">하루 종일</span>
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.bg} ${c.text}`}>
+                                                            {KIND_LABELS[entry.kind]}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                            {untimedMeetings.map(({ entry }) => {
+                                                const c = KIND_COLORS[entry.kind];
+                                                return (
+                                                    <button
+                                                        key={entry.id}
+                                                        onClick={() => { setCalEditing(entry); setCalEditorOpen(true); }}
+                                                        className="w-full flex items-center gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
+                                                    >
+                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+                                                        <span className="flex-1 text-sm text-neutral-800">{entry.title}</span>
+                                                        {entry.description && (
+                                                            <span className="text-[11px] text-neutral-400 truncate max-w-[120px]">{entry.description}</span>
+                                                        )}
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.bg} ${c.text}`}>미팅</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     )}
-                                    <input
-                                        type="text"
-                                        value={newTaskText}
-                                        onChange={(e) => setNewTaskText(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') addTask(); }}
-                                        onFocus={(e) => {
-                                            setTimeout(() => e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
-                                        }}
-                                        placeholder="할 일 입력 후 Enter"
-                                        className="flex-1 min-w-0 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
-                                    />
-                                </div>
-                                <p className="text-[10px] text-neutral-400 mt-2">좌측 핸들로 순서 변경 · 클릭으로 상태 전환</p>
-                            </div>
-                        </section>
+
+                                    {/* 2. 시간 기반 항목 (미팅 + 시간 있는 태스크) */}
+                                    <div className="space-y-0.5">
+                                        {isEmpty && (
+                                            <p className="text-sm text-neutral-300 italic py-2">일정이나 할 일을 추가해 보세요.</p>
+                                        )}
+                                        {timedItems.map((item, i) => {
+                                            if (item.type === "meeting") {
+                                                const c = KIND_COLORS["meeting"];
+                                                const t = item.time.slice(0, 5);
+                                                const h = parseInt(t.split(":")[0], 10);
+                                                const ampm = h < 12 ? "오전" : "오후";
+                                                return (
+                                                    <button
+                                                        key={`m-${item.entry.id}-${i}`}
+                                                        onClick={() => { setCalEditing(item.entry); setCalEditorOpen(true); }}
+                                                        className="w-full flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 text-left group"
+                                                    >
+                                                        <span className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center ${c.ring} border-sky-300`} />
+                                                        <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
+                                                            {ampm} {t}
+                                                        </span>
+                                                        <span className="flex-1 text-sm text-neutral-800">{item.entry.title}</span>
+                                                        {item.entry.description && (
+                                                            <span className="text-[11px] text-neutral-400 truncate max-w-[130px] hidden sm:block">
+                                                                {item.entry.description}
+                                                            </span>
+                                                        )}
+                                                        <span className="text-[9px] text-sky-500 opacity-0 group-hover:opacity-60">미팅</span>
+                                                    </button>
+                                                );
+                                            } else {
+                                                // task with time
+                                                const t = item.task;
+                                                const timeStr = (t.time || "").slice(0, 5);
+                                                const h = parseInt(timeStr.split(":")[0], 10);
+                                                const ampm = h < 12 ? "오전" : "오후";
+                                                const strike = t.status === "done" || t.status === "cancelled";
+                                                const taskIdx = tasks.findIndex(x => x.id === t.id);
+                                                return (
+                                                    <div key={`t-${t.id}`} className="flex items-center gap-2.5 px-1 py-1.5 rounded hover:bg-neutral-50 group">
+                                                        <button
+                                                            onClick={() => cycleStatus(t.id)}
+                                                            title="클릭: 미완 → 완료 → 이월 → 취소"
+                                                            className={`w-5 h-5 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors shrink-0 ${
+                                                                t.status === "done"      ? "bg-[#0F766E] border-[#0F766E] text-white"
+                                                                : t.status === "carried" ? "bg-amber-500 border-amber-500 text-white"
+                                                                : t.status === "cancelled" ? "bg-neutral-300 border-neutral-300 text-white"
+                                                                : "border-neutral-300 hover:border-[#0F766E]"
+                                                            }`}
+                                                        >
+                                                            {t.status === "done" ? "V" : t.status === "carried" ? "→" : t.status === "cancelled" ? "X" : ""}
+                                                        </button>
+                                                        <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
+                                                            {ampm} {timeStr}
+                                                        </span>
+                                                        <span className={`flex-1 text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
+                                                            {t.text}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => removeTask(t.id)}
+                                                            className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-rose-400 transition-colors"
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            }
+                                        })}
+
+                                        {/* 구분선 (시간 항목 + 미완료 항목 모두 있을 때) */}
+                                        {timedItems.length > 0 && untimedTasks.length > 0 && (
+                                            <div className="border-t border-dashed border-neutral-100 my-2" />
+                                        )}
+
+                                        {/* 3. 시간 없는 태스크 (드래그 가능) */}
+                                        {untimedTasks.map(({ task: t, idx }) => (
+                                            <TaskRow
+                                                key={t.id}
+                                                task={t}
+                                                index={idx}
+                                                isDragOver={dragOverIndex === idx}
+                                                onCycle={() => cycleStatus(t.id)}
+                                                onRemove={() => removeTask(t.id)}
+                                                onTimeChange={(time) => updateTaskTime(t.id, time)}
+                                                onProjectChange={(pid) => updateTaskProject(t.id, pid)}
+                                                projects={activeProjects}
+                                                onDragStart={() => onDragStart(idx)}
+                                                onDragOver={(e) => onDragOver(e, idx)}
+                                                onDrop={() => onDrop(idx)}
+                                                onDragEnd={onDragEnd}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* 4. 할 일 추가 입력 */}
+                                    <div className="mt-3 pt-3 border-t border-neutral-100">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <Plus className="h-4 w-4 text-neutral-300 shrink-0" />
+                                            <input
+                                                type="time"
+                                                value={newTaskTime}
+                                                onChange={(e) => setNewTaskTime(e.target.value)}
+                                                className="text-sm text-neutral-700 w-[110px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
+                                            />
+                                            {activeProjects.length > 0 && (
+                                                <select
+                                                    value={newTaskProjectId}
+                                                    onChange={(e) => setNewTaskProjectId(e.target.value)}
+                                                    title="프로젝트 태그 (선택)"
+                                                    className="text-sm text-neutral-600 max-w-[140px] focus:outline-none bg-white border border-neutral-200 rounded px-2 py-1 focus:border-[#0F766E]"
+                                                >
+                                                    <option value="">프로젝트 없음</option>
+                                                    {activeProjects.map(p => (
+                                                        <option key={p.id} value={p.id}>{p.title}</option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                            <input
+                                                type="text"
+                                                value={newTaskText}
+                                                onChange={(e) => setNewTaskText(e.target.value)}
+                                                onKeyDown={(e) => { if (e.key === "Enter") addTask(); }}
+                                                onFocus={(e) => {
+                                                    setTimeout(() => e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+                                                }}
+                                                placeholder="업무 입력 후 Enter"
+                                                className="flex-1 min-w-0 text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+                            );
+                        })()}
 
                         {/* Notes 목록 — 드래그로 순서 변경 가능 */}
                         {notesList.map((note, noteIdx) => (
