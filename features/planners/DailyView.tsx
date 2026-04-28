@@ -13,6 +13,7 @@ import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyProjectsCard } from "./DailyProjectsCard";
+import { useSwipeNav } from "./useSwipeNav";
 import { DailyMiniMonth } from "./DailyMiniMonth";
 import { expandOccurrences, isVisible, KIND_COLORS, type CalendarEntry, type CalendarKind } from "@/lib/planners/calendar-rules";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
@@ -677,6 +678,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         router.replace(`/planners/app/daily?date=${newDate}`);
     }
 
+    // 스와이프 내비게이션 (모바일 터치)
+    const swipeRef = useSwipeNav(
+        () => navigateDate(1),   // 왼쪽 스와이프 → 다음 날
+        () => navigateDate(-1),  // 오른쪽 스와이프 → 이전 날
+    );
+
     const weekday = new Date(date + 'T00:00:00').toLocaleDateString('ko-KR', { weekday: 'long' });
     const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
     const isToday = date === localDateStr(new Date());
@@ -697,7 +704,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — 모바일은 세로 스택, 데스크톱은 가로 분리 */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
                 <div className="min-w-0">

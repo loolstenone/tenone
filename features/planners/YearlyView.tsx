@@ -8,6 +8,7 @@ import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry } from "@/lib/planners/calendar-rules";
 import { KIND_COLORS } from "@/lib/planners/calendar-rules";
+import { useSwipeNav } from "./useSwipeNav";
 import { HOLIDAYS } from "@/lib/planners/holidays";
 
 interface Anniversary {
@@ -212,8 +213,14 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
         return 31;
     }
 
+    // 스와이프 내비게이션
+    const swipeRef = useSwipeNav(
+        () => setYear(y => y + 1),  // 왼쪽 → 다음 연도
+        () => setYear(y => y - 1),  // 오른쪽 → 이전 연도
+    );
+
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const isCurrentYear = year === new Date().getFullYear();

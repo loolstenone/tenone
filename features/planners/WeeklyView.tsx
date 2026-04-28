@@ -10,6 +10,7 @@ import { trackPlanners } from "@/lib/planners/analytics";
 import type { PlannerWeekly } from "@/lib/planners/types";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import type { CalendarEntry, CalendarKind } from "@/lib/planners/calendar-rules";
+import { useSwipeNav } from "./useSwipeNav";
 import { KIND_COLORS, expandOccurrences, isVisible } from "@/lib/planners/calendar-rules";
 
 const MONTHS_KO = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
@@ -155,6 +156,12 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         setYear(newYear);
     }
 
+    // 스와이프 내비게이션
+    const swipeRef = useSwipeNav(
+        () => navigateWeek(1),   // 왼쪽 → 다음 주
+        () => navigateWeek(-1),  // 오른쪽 → 이전 주
+    );
+
     // Left col: Mon(0), Wed(2), Fri(4) | Right col: Tue(1), Thu(3), [Sat(5) | Sun(6)]
     const leftDays = [days[0], days[2], days[4]];
     const rightMidDays = [days[1], days[3]];
@@ -204,7 +211,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const sM = days[0].getMonth() + 1;

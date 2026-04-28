@@ -9,6 +9,7 @@ import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
 import { CalendarEntryList } from "./CalendarEntryList";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
+import { useSwipeNav } from "./useSwipeNav";
 import {
     KIND_COLORS,
     monthlyDisplayMode,
@@ -207,6 +208,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         setYear(newYear);
     }
 
+    // 스와이프 내비게이션
+    const swipeRef = useSwipeNav(
+        () => navigateMonth(1),   // 왼쪽 → 다음 달
+        () => navigateMonth(-1),  // 오른쪽 → 이전 달
+    );
+
     function addFocusArea() {
         if (!focusInput.trim()) return;
         const next = [...(monthly?.focus_areas || []), focusInput.trim()];
@@ -265,7 +272,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const yearRange = Array.from({ length: 10 }, (_, i) => 2024 + i);
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const now = new Date();
