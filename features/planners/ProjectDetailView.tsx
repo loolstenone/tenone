@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSwipeNav } from "./useSwipeNav";
 import Link from "next/link";
 import { ChevronLeft, Loader2, ImageIcon, NotebookPen, ListTodo, LineChart, Flag } from "lucide-react";
 import type { PlannerProject, ProjectCollaborator } from "@/lib/planners/types";
@@ -85,8 +86,15 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         ? `${project.start_date || "?"} → ${project.end_date || "진행중"}`
         : null;
 
+    const TABS: Tab[] = ["notes", "tasks", "milestones", "tracking", "cover"];
+    const tabIdx = TABS.indexOf(tab);
+    const swipeRef = useSwipeNav(
+        () => { if (tabIdx < TABS.length - 1) setTab(TABS[tabIdx + 1]); },
+        () => { if (tabIdx > 0) setTab(TABS[tabIdx - 1]); },
+    );
+
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-10">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-10">
             {/* Breadcrumb + utility */}
             <div className="flex items-center justify-between mb-5">
                 <Link href="/planners/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">

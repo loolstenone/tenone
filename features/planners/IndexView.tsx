@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { useSwipeNav } from "./useSwipeNav";
 
 const MONTHS_EN = [
     "January", "February", "March", "April", "May", "June",
@@ -67,8 +68,13 @@ export function IndexView() {
             .catch(() => { setProjectsLoaded(true); });
     }, []);
 
+    const swipeRef = useSwipeNav(
+        () => setYear(y => y + 1),
+        () => setYear(y => y - 1),
+    );
+
     return (
-        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — 모바일은 세로 스택 */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
                 <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@
 // 통합 캘린더 엔트리 편집기 — Daily/Weekly/Monthly/Yearly 모두 같은 모달 사용
 // 신규/수정 모두 처리. is_system=true 엔트리는 편집 불가.
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Loader2, X, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { CalendarEntry, CalendarKind, RecurrenceUnit } from "@/lib/planners/calendar-rules";
 import { KIND_LABELS, KIND_COLORS } from "@/lib/planners/calendar-rules";
@@ -17,7 +17,7 @@ type EditableEntry = Omit<CalendarEntry, "id" | "member_id" | "is_system" | "cre
     is_system?: boolean;
 };
 
-const EDITABLE_KINDS: CalendarKind[] = ["meeting", "task", "anniversary"];
+const EDITABLE_KINDS: CalendarKind[] = ["meeting", "anniversary"];
 
 // ── 시간 선택 컴포넌트 ─────────────────────────────────────────────────────
 // input type="time" 은 모바일에서 OS 네이티브 원형 시계를 띄워 OK버튼이 가려지는 문제가 있음.
@@ -87,6 +87,24 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [recurrence, setRecurrence] = useState<RecurrenceUnit>("none");
     const [recurrenceUntil, setRecurrenceUntil] = useState("");
     const [saving, setSaving] = useState(false);
+    const [kbOffset, setKbOffset] = useState(0);  // 모바일 키보드 오프셋
+
+    // 모바일 키보드 올라올 때 바텀시트 위로 밀어올리기
+    useEffect(() => {
+        if (!open || typeof window === "undefined" || !window.visualViewport) return;
+        const vv = window.visualViewport!;
+        function onResize() {
+            // visualViewport.offsetTop 이 키보드 높이만큼 증가
+            const offset = window.innerHeight - vv.height - vv.offsetTop;
+            setKbOffset(Math.max(0, offset));
+        }
+        vv.addEventListener("resize", onResize);
+        vv.addEventListener("scroll", onResize);
+        return () => {
+            vv.removeEventListener("resize", onResize);
+            vv.removeEventListener("scroll", onResize);
+        };
+    }, [open]);
 
     // 날짜 입력 모드 토글
     const [isLunar, setIsLunar] = useState(false);
@@ -201,7 +219,11 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={onClose}>
-            <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-auto sm:max-h-[85vh] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-auto sm:max-h-[85vh] shadow-2xl transition-transform duration-150"
+                style={{ transform: `translateY(-${kbOffset}px)` }}
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200 shrink-0">
                     <h2 className="text-sm font-semibold text-neutral-900">
                         {isReadOnly ? "일정 보기" : isEdit ? "일정 수정" : "새 일정"}

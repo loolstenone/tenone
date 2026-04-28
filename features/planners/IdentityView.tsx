@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Compass, Loader2, Plus, Trash2 } from "lucide-react";
 import type { PlannerIdentity } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
+import { useSwipeNav } from "./useSwipeNav";
 
 type Tab = "vision" | "inside" | "outside" | "house";
 
@@ -51,8 +52,14 @@ export function IdentityView({ mode }: { mode: "weekly" | "all_in_one" }) {
     ];
     const visibleTabs = mode === "weekly" ? tabs.filter(t => t.showInWeekly) : tabs;
 
+    const tabIdx = visibleTabs.findIndex(t => t.key === tab);
+    const swipeRef = useSwipeNav(
+        () => { if (tabIdx < visibleTabs.length - 1) setTab(visibleTabs[tabIdx + 1].key); },
+        () => { if (tabIdx > 0) setTab(visibleTabs[tabIdx - 1].key); },
+    );
+
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
             {/* Header */}
             <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
