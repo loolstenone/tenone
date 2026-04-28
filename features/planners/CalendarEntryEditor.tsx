@@ -77,7 +77,7 @@ interface Props {
     /** 기본 시작일 — 신규 생성 시 (YYYY-MM-DD) */
     defaultDate?: string;
     /** 업무(Task) 추가 콜백 */
-    onTaskCreated?: (task: { text: string; time?: string | null; project_id?: string | null }) => void;
+    onTaskCreated?: (task: { text: string; time?: string | null; project_id?: string | null; priority?: "low" | "normal" | "high" | null }) => void;
     /** 업무 프로젝트 목록 */
     activeProjects?: Array<{ id: string; title: string; color: string | null }>;
 }
@@ -99,6 +99,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     const [taskText, setTaskText] = useState("");
     const [taskTime, setTaskTime] = useState("");
     const [taskProjectId, setTaskProjectId] = useState("");
+    const [taskPriority, setTaskPriority] = useState<"low" | "normal" | "high" | null>(null);
 
     // 모바일 키보드 올라올 때 바텀시트 위로 밀어올리기
     useEffect(() => {
@@ -321,6 +322,34 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     </select>
                                 </div>
                             )}
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1">경중완급 (선택)</label>
+                                <div className="flex items-center gap-2">
+                                    {([null, "low", "normal", "high"] as const).map((p) => {
+                                        const meta: Record<string, { label: string; cls: string }> = {
+                                            low:    { label: "경", cls: "text-neutral-500 bg-neutral-100 border-neutral-300 hover:bg-neutral-200" },
+                                            normal: { label: "중", cls: "text-sky-600    bg-sky-50    border-sky-300    hover:bg-sky-100"    },
+                                            high:   { label: "급", cls: "text-rose-600   bg-rose-50   border-rose-300   hover:bg-rose-100"   },
+                                        };
+                                        const isActive = taskPriority === p;
+                                        if (p === null) {
+                                            return (
+                                                <button key="none" type="button"
+                                                    onClick={() => setTaskPriority(null)}
+                                                    className={`text-xs px-2 py-1 rounded border transition-colors ${isActive ? "bg-neutral-200 border-neutral-400 text-neutral-700" : "bg-white border-neutral-200 text-neutral-400 hover:bg-neutral-50"}`}
+                                                >없음</button>
+                                            );
+                                        }
+                                        const m = meta[p];
+                                        return (
+                                            <button key={p} type="button"
+                                                onClick={() => setTaskPriority(p)}
+                                                className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${m.cls} ${isActive ? "ring-2 ring-offset-1 ring-current opacity-100" : "opacity-60"}`}
+                                            >{m.label}</button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -540,6 +569,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         text: taskText.trim(),
                                         time: taskTime || null,
                                         project_id: taskProjectId || null,
+                                        priority: taskPriority,
                                     });
                                     onClose();
                                 }}

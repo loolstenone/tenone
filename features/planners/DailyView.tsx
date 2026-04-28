@@ -22,6 +22,13 @@ import { Track } from "@/lib/analytics";
 import { HandNote, type HandNoteData } from "./HandNote";
 
 type TaskStatus = 'todo' | 'done' | 'carried' | 'cancelled';
+type TaskPriority = 'low' | 'normal' | 'high';
+
+const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: string }> = {
+    low:    { label: "경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200",  dotCls: "bg-neutral-400" },
+    normal: { label: "중", cls: "text-sky-600    bg-sky-50    border-sky-200",          dotCls: "bg-sky-500"     },
+    high:   { label: "급", cls: "text-rose-600   bg-rose-50   border-rose-200",         dotCls: "bg-rose-500"    },
+};
 type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting'; templateKey?: string; templateLabel?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
 
@@ -554,6 +561,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         save({ tasks: next });
     }
 
+    function updateTaskPriority(taskId: string, priority: PlannerTask["priority"]) {
+        const next = tasks.map(t => t.id === taskId ? { ...t, priority } : t);
+        setTasks(next);
+        save({ tasks: next });
+    }
+
     function cycleStatus(taskId: string) {
         const order: TaskStatus[] = ['todo', 'done', 'carried', 'cancelled'];
         const next = tasks.map(t => {
@@ -933,6 +946,14 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                         <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
                                                             {ampm} {timeStr}
                                                         </span>
+                                                        {t.priority && PRIORITY_META[t.priority as TaskPriority] && (
+                                                            <PriorityBadge
+                                                                priority={t.priority as TaskPriority}
+                                                                onClick={() => updateTaskPriority(t.id,
+                                                                    t.priority === "low" ? "normal" : t.priority === "normal" ? "high" : null
+                                                                )}
+                                                            />
+                                                        )}
                                                         <span className={`flex-1 text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                                             {t.text}
                                                         </span>
@@ -962,6 +983,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 onCycle={() => cycleStatus(t.id)}
                                                 onRemove={() => removeTask(t.id)}
                                                 onTimeChange={(time) => updateTaskTime(t.id, time)}
+                                                onPriorityChange={(p) => updateTaskPriority(t.id, p)}
                                                 onProjectChange={(pid) => updateTaskProject(t.id, pid)}
                                                 projects={activeProjects}
                                                 onDragStart={() => onDragStart(idx)}
@@ -1494,6 +1516,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         status: "todo",
                         time: t.time ?? null,
                         project_id: t.project_id ?? null,
+                        priority: t.priority ?? null,
                     };
                     const next = [...tasks, newTask];
                     setTasks(next);
@@ -1827,6 +1850,7 @@ interface TaskRowProps {
     onCycle: () => void;
     onRemove: () => void;
     onTimeChange: (time: string) => void;
+    onPriorityChange?: (p: PlannerTask["priority"]) => void;
     onProjectChange?: (projectId: string | null) => void;
     projects?: Array<{ id: string; title: string; color: string | null }>;
     onDragStart: () => void;
@@ -1835,7 +1859,49 @@ interface TaskRowProps {
     onDragEnd: () => void;
 }
 
-function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onProjectChange, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
+/** 우선순위 뱃지 — 클릭하면 순환: 없음→경→중→급→없음 */
+function PriorityBadge({ priority, onClick }: { priority: TaskPriority | null; onClick: () => void }) {
+    if (!priority) return null;
+    const m = PRIORITY_META[priority];
+    return (
+        <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${m.cls}`}
+            title="클릭: 경→중→급→없음"
+        >
+            {m.label}
+        </button>
+    );
+}
+
+/** 우선순위 선택기 — 없음/경/중/급 버튼 4개 */
+function PriorityPicker({ value, onChange }: { value: PlannerTask["priority"]; onChange: (p: PlannerTask["priority"]) => void }) {
+    const options: Array<{ key: PlannerTask["priority"]; label: string; cls: string }> = [
+        { key: null,     label: "없음", cls: "text-neutral-400 bg-white border-neutral-200 hover:bg-neutral-50" },
+        { key: "low",    label: "경",   cls: PRIORITY_META.low.cls },
+        { key: "normal", label: "중",   cls: PRIORITY_META.normal.cls },
+        { key: "high",   label: "급",   cls: PRIORITY_META.high.cls },
+    ];
+    return (
+        <div className="flex items-center gap-1">
+            {options.map(o => (
+                <button
+                    key={String(o.key)}
+                    type="button"
+                    onClick={() => onChange(o.key)}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors ${
+                        value === o.key ? o.cls : "text-neutral-300 bg-white border-neutral-100 hover:bg-neutral-50"
+                    }`}
+                >
+                    {o.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriorityChange, onProjectChange, projects = [], onDragStart, onDragOver, onDrop, onDragEnd }: TaskRowProps) {
     const [editingTime, setEditingTime] = useState(false);
     const strike = task.status === 'done' || task.status === 'cancelled';
 
@@ -1917,6 +1983,27 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onProjectC
                     title="시간 설정"
                 >
                     {task.time ? task.time.slice(0, 5) : <Clock className="h-3 w-3" />}
+                </button>
+            )}
+
+            {/* 우선순위 뱃지 (있을 때만) */}
+            {task.priority && PRIORITY_META[task.priority as TaskPriority] && (
+                <PriorityBadge
+                    priority={task.priority as TaskPriority}
+                    onClick={() => onPriorityChange?.(
+                        task.priority === "low" ? "normal" : task.priority === "normal" ? "high" : null
+                    )}
+                />
+            )}
+            {/* 우선순위 없을 때 — hover 시 빠른 설정 버튼 */}
+            {!task.priority && onPriorityChange && (
+                <button
+                    type="button"
+                    onClick={() => onPriorityChange("low")}
+                    className="opacity-0 group-hover:opacity-100 shrink-0 text-[10px] text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
+                    title="우선순위 설정"
+                >
+                    경중
                 </button>
             )}
 
