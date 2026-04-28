@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getWeekBoundaries, getISOWeek } from "@/lib/planners/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
@@ -173,24 +173,6 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
         return map;
     }, [calEntries, boundaries.start, boundaries.end]);
 
-    async function addTaskToDay(ds: string, text: string, time: string | null) {
-        const trimmed = text.trim();
-        if (!trimmed) return;
-        try {
-            const res = await fetch(`/api/planners/daily?date=${ds}`);
-            const d = res.ok ? await res.json() : null;
-            const existing: Array<{ id: string; text: string; status: string; time?: string | null }> = d?.daily?.tasks ?? [];
-            const newTask = { id: `t_${Date.now()}`, text: trimmed, status: "todo" as const, time: time || null };
-            const next = [...existing, newTask];
-            await fetch(`/api/planners/daily`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ date: ds, tasks: next }),
-            });
-            setDayHits((prev) => ({ ...prev, [ds]: [...(prev[ds] ?? []), trimmed] }));
-        } catch {}
-    }
-
     async function saveMemoForDay(ds: string, content: string) {
         try {
             const res = await fetch(`/api/planners/daily?date=${ds}`);
@@ -311,7 +293,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {leftDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                         );
                                     })}
                                 </div>
@@ -320,7 +302,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                     {rightMidDays.map((d) => {
                                         const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                         return (
-                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
+                                            <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={8} taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                         );
                                     })}
                                     {/* Weekend: Sat + Sun side by side */}
@@ -328,7 +310,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                         {weekendDays.map((d) => {
                                             const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                                             return (
-                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} onAddTask={addTaskToDay} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
+                                                <DayCell key={ds} date={d} ds={ds} isToday={ds === today} lines={4} compact taskTexts={dayHits[ds] ?? []} entries={entriesByDate[ds] ?? []} memo={dayMemos[ds] ?? ""} onMemoChange={(v) => setDayMemos(p => ({ ...p, [ds]: v }))} onMemoBlur={(v) => saveMemoForDay(ds, v)} />
                                             );
                                         })}
                                     </div>
@@ -397,7 +379,6 @@ function DayCell({
     compact?: boolean;
     taskTexts?: string[];
     entries?: CalendarEntry[];
-    onAddTask?: (ds: string, text: string, time: string | null) => void;
     memo?: string;
     onMemoChange?: (v: string) => void;
     onMemoBlur?: (v: string) => void;
@@ -408,9 +389,6 @@ function DayCell({
     const isSat = date.getDay() === 6;
     const lunar = getLunarDate(ds);
     const holiday = HOLIDAYS[ds];
-    const [addText, setAddText] = useState("");
-    const [addTime, setAddTime] = useState("");
-
     const dateColor = isToday
         ? "text-[#0F766E]"
         : isSun ? "text-rose-400"
@@ -418,12 +396,6 @@ function DayCell({
         : "text-neutral-800";
 
     const dayColor = isSun ? "text-rose-300" : isSat ? "text-blue-300" : "text-neutral-400";
-
-    function commit() {
-        if (!addText.trim() || !onAddTask) { setAddText(""); setAddTime(""); return; }
-        onAddTask(ds, addText, addTime || null);
-        setAddText(""); setAddTime("");
-    }
 
     const overflowing = entries.length > 3 || taskTexts.length > 6 || (memo && memo.length > 200);
 
@@ -493,26 +465,6 @@ function DayCell({
                         <p className="text-[9px] text-neutral-400">+{taskTexts.length - 6}개</p>
                     )}
                 </div>
-                {onAddTask && (
-                    <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-neutral-100">
-                        <Plus className="h-3 w-3 text-neutral-300 shrink-0" />
-                        <input
-                            type="time"
-                            value={addTime}
-                            onChange={(e) => setAddTime(e.target.value)}
-                            className="text-[10px] text-neutral-500 w-[68px] focus:outline-none bg-white border border-neutral-200 rounded px-1 py-0.5"
-                        />
-                        <input
-                            type="text"
-                            value={addText}
-                            onChange={(e) => setAddText(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
-                            onBlur={commit}
-                            placeholder="할 일 추가"
-                            className="flex-1 min-w-0 bg-transparent focus:outline-none placeholder:text-neutral-300 text-neutral-700 text-[11px]"
-                        />
-                    </div>
-                )}
             </div>
 
             {/* 3) 메모 — Daily의 첫 코넬 노트 동기화 */}

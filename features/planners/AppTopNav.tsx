@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -45,6 +45,26 @@ export function AppTopNav({
     const pathname = usePathname();
     const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // 브라우저 전체화면 상태 동기화
+    useEffect(() => {
+        function onChange() { setIsFullscreen(!!document.fullscreenElement); }
+        document.addEventListener("fullscreenchange", onChange);
+        return () => document.removeEventListener("fullscreenchange", onChange);
+    }, []);
+
+    async function toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+        } catch (e) {
+            console.warn("fullscreen toggle failed", e);
+        }
+    }
 
     // 라우트 변경 시 햄버거 메뉴 자동 닫기
     useEffect(() => { setMenuOpen(false); }, [pathname]);
@@ -59,20 +79,20 @@ export function AppTopNav({
 
     return (
         <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 flex items-center h-12 px-3 gap-2 shrink-0">
-            {/* Brand */}
+            {/* Brand — 모바일: 아이콘만, sm+: 전체 텍스트 */}
             <Link href="/planners/app" className="flex items-center gap-1.5 mr-1 shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/planners-icon-192.png" alt="" aria-hidden="true" className="w-6 h-6 rounded shrink-0" />
-                <span className="font-serif text-sm text-neutral-900 whitespace-nowrap">
+                <span className="hidden sm:inline font-serif text-sm text-neutral-900 whitespace-nowrap">
                     Planner&apos;s Planner<sup className="text-[8px] font-sans font-bold text-[#0F766E] ml-0.5 align-super">AI</sup>
                 </span>
             </Link>
 
-            <div className="w-px h-4 bg-neutral-200 shrink-0" />
+            <div className="hidden md:block w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* Tabs — 가로 스크롤 가능, 스크롤바 시각적으로 숨김 */}
+            {/* Tabs — 데스크톱만 (모바일은 햄버거 메뉴 전담) */}
             <nav
-                className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                className="hidden md:flex items-center gap-1 flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
                 {visibleTabs.map((tab) => {
@@ -101,7 +121,17 @@ export function AppTopNav({
                 })}
             </nav>
 
-            {/* ── 데스크톱 우측 액션 (md 이상에만 표시) ────────────────── */}
+            {/* 모바일: 현재 페이지명 표시 (탭 nav 대신) */}
+            <div className="flex md:hidden flex-1 min-w-0 items-center">
+                <span className="text-xs font-medium text-neutral-700 truncate">
+                    {visibleTabs.find(t => {
+                        const p = t.href.split("?")[0];
+                        return pathname === p || pathname.startsWith(p + "/");
+                    })?.label ?? ""}
+                </span>
+            </div>
+
+            {/* ── 데스크톱 우측 액션 ────────────────── */}
             <div className="hidden md:flex items-center gap-0.5 shrink-0 pl-2 ml-1 border-l border-neutral-100">
                 {subscriptionStatus !== "active" && (
                     <Link
@@ -150,6 +180,16 @@ export function AppTopNav({
                     <Settings className="h-4 w-4" />
                 </Link>
 
+                {/* 전체화면 토글 — 주소창·탭 숨김 */}
+                <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    title={isFullscreen ? "전체화면 종료 (Esc)" : "전체화면 (주소창·탭 숨김)"}
+                    className="p-1.5 rounded text-neutral-400 hover:text-[#0F766E] hover:bg-[#0F766E]/10 transition-colors"
+                >
+                    {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                </button>
+
                 {userName && (
                     <Link
                         href="/profile"
@@ -168,8 +208,8 @@ export function AppTopNav({
                 )}
             </div>
 
-            {/* ── 모바일 햄버거 (md 미만) ───────────────────────────── */}
-            <div className="md:hidden flex items-center gap-1 shrink-0 pl-1 ml-1 border-l border-neutral-100">
+            {/* ── 모바일 우측 — 아바타 + 햄버거 ─────────────────────── */}
+            <div className="md:hidden flex items-center gap-1.5 shrink-0 pl-1 ml-auto border-l border-neutral-100">
                 {userName && (
                     <Link
                         href="/profile"
@@ -192,7 +232,7 @@ export function AppTopNav({
                     aria-label="메뉴"
                     className="p-1.5 rounded text-neutral-600 hover:bg-neutral-100"
                 >
-                    <Menu className="h-4 w-4" />
+                    <Menu className="h-5 w-5" />
                 </button>
             </div>
 

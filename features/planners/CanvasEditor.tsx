@@ -171,8 +171,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                     }}
                     onChange={onChange}
                     langCode="ko-KR"
-                    handleKeyboardGlobally={true}
-                    autoFocus
+                    handleKeyboardGlobally={false}
                     UIOptions={{
                         canvasActions: {
                             // 모든 캔버스 액션 노출
