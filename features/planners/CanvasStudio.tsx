@@ -123,35 +123,30 @@ const QUICK_ITEMS = [
 
 function QuickShapeMenu({ editor }: { editor: Editor | null }) {
     const [open, setOpen] = useState(false);
-    const count = QUICK_ITEMS.length;
-    const radius = 68;
 
     return (
-        <div className="relative" style={{ width: 48, height: 48 }}>
-            {open && QUICK_ITEMS.map((item, i) => {
-                const angleDeg = -180 + i * (180 / (count - 1));
-                const rad = (angleDeg * Math.PI) / 180;
-                const x = Math.round(radius * Math.cos(rad));
-                const y = Math.round(radius * Math.sin(rad));
-                return (
-                    <button
-                        key={item.tool + i}
-                        title={item.label}
-                        onClick={() => { if (editor) editor.setCurrentTool(item.tool); setOpen(false); }}
-                        className="absolute flex items-center justify-center w-9 h-9 rounded-full bg-white border border-neutral-200 shadow-md text-neutral-600 hover:bg-[#0F766E] hover:text-white hover:border-[#0F766E] transition-colors"
-                        style={{
-                            left: 24 + x - 18,
-                            top:  24 + y - 18,
-                            animation: `qs-pop 140ms ease-out ${i * 18}ms both`,
-                        }}
-                    >
-                        {item.icon}
-                    </button>
-                );
-            })}
+        // 세로 리스트로 변경 — 래디얼은 우측 화면 밖으로 요소가 빠져나가므로 폐기
+        <div className="relative flex flex-col items-center gap-1.5" style={{ minWidth: 44 }}>
+            {/* 아이템 목록 — 위로 펼쳐짐 */}
+            {open && (
+                <div className="flex flex-col-reverse gap-1.5 mb-1.5">
+                    {QUICK_ITEMS.map((item, i) => (
+                        <button
+                            key={item.tool + i}
+                            title={item.label}
+                            onClick={() => { if (editor) editor.setCurrentTool(item.tool); setOpen(false); }}
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-neutral-200 shadow-md text-neutral-600 hover:bg-[#0F766E] hover:text-white hover:border-[#0F766E] transition-colors"
+                            style={{ animation: `qs-pop 120ms ease-out ${i * 14}ms both` }}
+                        >
+                            {item.icon}
+                        </button>
+                    ))}
+                </div>
+            )}
+            {/* 토글 버튼 */}
             <button
                 onClick={() => setOpen((p) => !p)}
-                className={`absolute inset-0 flex items-center justify-center rounded-full shadow-lg transition-all duration-150 ${
+                className={`flex items-center justify-center w-11 h-11 rounded-full shadow-lg transition-all duration-150 ${
                     open
                         ? "bg-[#0F766E] text-white"
                         : "bg-white border border-neutral-200 text-neutral-600 hover:bg-[#0F766E] hover:text-white"
@@ -399,8 +394,8 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
                     />
                 </div>
 
-                {/* QuickShape 래디얼 메뉴 */}
-                <div className="absolute bottom-24 right-6 z-[500]" style={{ width: 48, height: 48 }}>
+                {/* QuickShape 세로 메뉴 — 우측 하단에서 위로 펼쳐짐 */}
+                <div className="absolute bottom-6 right-6 z-[500] flex flex-col items-end">
                     <QuickShapeMenu editor={editor} />
                 </div>
             </div>

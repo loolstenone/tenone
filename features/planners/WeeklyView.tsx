@@ -369,7 +369,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
 }
 
 function DayCell({
-    date, ds, isToday, compact = false, taskTexts = [], entries = [], onAddTask,
+    date, ds, isToday, compact = false, taskTexts = [], entries = [],
     memo = "", onMemoChange, onMemoBlur,
 }: {
     date: Date;

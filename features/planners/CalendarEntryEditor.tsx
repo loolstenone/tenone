@@ -19,6 +19,45 @@ type EditableEntry = Omit<CalendarEntry, "id" | "member_id" | "is_system" | "cre
 
 const EDITABLE_KINDS: CalendarKind[] = ["meeting", "task", "anniversary"];
 
+// ── 시간 선택 컴포넌트 ─────────────────────────────────────────────────────
+// input type="time" 은 모바일에서 OS 네이티브 원형 시계를 띄워 OK버튼이 가려지는 문제가 있음.
+// select 드롭다운으로 대체.
+const HOURS   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"];
+
+function TimeSelect({
+    value, onChange, disabled,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    disabled?: boolean;
+}) {
+    const [h, m] = value ? value.split(":") : ["", ""];
+    const selectCls = "text-sm border border-neutral-200 rounded px-1.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50 disabled:cursor-not-allowed";
+    return (
+        <div className="flex items-center gap-1">
+            <select
+                value={h ?? ""}
+                onChange={(e) => onChange(e.target.value ? `${e.target.value}:${m || "00"}` : "")}
+                disabled={disabled}
+                className={selectCls}
+            >
+                <option value="">시</option>
+                {HOURS.map(hh => <option key={hh} value={hh}>{hh}</option>)}
+            </select>
+            <span className="text-xs text-neutral-400">:</span>
+            <select
+                value={m ?? ""}
+                onChange={(e) => onChange(h ? `${h}:${e.target.value}` : "")}
+                disabled={disabled || !h}
+                className={selectCls}
+            >
+                {MINUTES.map(mm => <option key={mm} value={mm}>{mm}</option>)}
+            </select>
+        </div>
+    );
+}
+
 const RECURRENCE_OPTIONS: Array<{ value: RecurrenceUnit; label: string; allowedKinds: CalendarKind[] }> = [
     { value: "none",    label: "반복 없음", allowedKinds: ["meeting", "task", "anniversary"] },
     { value: "daily",   label: "매일",      allowedKinds: ["task"] },
@@ -249,12 +288,10 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
                                 />
                                 {kind !== "anniversary" && (
-                                    <div className="flex-1 flex items-center gap-1 min-w-0">
-                                        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isReadOnly}
-                                            className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <TimeSelect value={startTime} onChange={setStartTime} disabled={isReadOnly} />
                                         <span className="text-xs text-neutral-300">~</span>
-                                        <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={isReadOnly}
-                                            className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                        <TimeSelect value={endTime} onChange={setEndTime} disabled={isReadOnly} />
                                     </div>
                                 )}
                             </div>
@@ -337,12 +374,10 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         )}
                                     </div>
                                     {kind !== "anniversary" && (
-                                        <div className="flex-1 flex items-center gap-1 min-w-0">
-                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isReadOnly}
-                                                className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                                            <TimeSelect value={startTime} onChange={setStartTime} disabled={isReadOnly} />
                                             <span className="text-xs text-neutral-300">~</span>
-                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={isReadOnly}
-                                                className="flex-1 min-w-0 text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]" />
+                                            <TimeSelect value={endTime} onChange={setEndTime} disabled={isReadOnly} />
                                         </div>
                                     )}
                                 </div>
