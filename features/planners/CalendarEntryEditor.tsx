@@ -241,7 +241,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4" onClick={onClose}>
             <div
-                className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-auto sm:max-h-[85vh] shadow-2xl transition-transform duration-150"
+                className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[85vh] sm:h-[600px] shadow-2xl transition-transform duration-150"
                 style={{ transform: `translateY(-${kbOffset}px)` }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -299,7 +299,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
 
                     {/* ── 업무 탭 폼 ── */}
                     {tab === "task" && (
-                        <div className="space-y-5 py-1">
+                        <div className="space-y-4 py-1">
                             {/* 할 일 */}
                             <div>
                                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">할 일</label>
@@ -313,38 +313,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                 />
                             </div>
 
-                            {/* 경중완급 사분면 */}
-                            <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">경중완급 (선택)</label>
-                                <div className="flex flex-col items-center gap-1">
-                                    <span className="text-[9px] text-neutral-300 tracking-widest uppercase">급 (긴급)</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[9px] text-neutral-300 w-5 text-right">경</span>
-                                        <div className="grid grid-cols-2 rounded-xl overflow-hidden border border-neutral-200 shadow-sm w-[200px]">
-                                            {([
-                                                { q: "급경" as TaskQuadrant, label: "급경", sub: "긴급·쉬운", activeCls: "bg-amber-500 text-white", idleCls: "bg-amber-50 hover:bg-amber-100 text-amber-700", borderCls: "border-b border-r border-neutral-200" },
-                                                { q: "급중" as TaskQuadrant, label: "급중", sub: "긴급·중요", activeCls: "bg-rose-500 text-white",   idleCls: "bg-rose-50 hover:bg-rose-100 text-rose-700",   borderCls: "border-b border-neutral-200" },
-                                                { q: "완경" as TaskQuadrant, label: "완경", sub: "여유·쉬운", activeCls: "bg-neutral-500 text-white", idleCls: "bg-neutral-50 hover:bg-neutral-100 text-neutral-500", borderCls: "border-r border-neutral-200" },
-                                                { q: "완중" as TaskQuadrant, label: "완중", sub: "여유·중요", activeCls: "bg-sky-500 text-white",     idleCls: "bg-sky-50 hover:bg-sky-100 text-sky-700",       borderCls: "" },
-                                            ] as const).map(({ q, label, sub, activeCls, idleCls, borderCls }) => (
-                                                <button
-                                                    key={q}
-                                                    type="button"
-                                                    onClick={() => setTaskPriority(taskPriority === q ? null : q)}
-                                                    className={`py-3 text-center transition-colors ${borderCls} ${taskPriority === q ? activeCls : idleCls}`}
-                                                >
-                                                    <div className="text-sm font-bold leading-none">{label}</div>
-                                                    <div className={`text-[9px] mt-0.5 ${taskPriority === q ? "opacity-80" : "opacity-60"}`}>{sub}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <span className="text-[9px] text-neutral-300 w-5">중</span>
-                                    </div>
-                                    <span className="text-[9px] text-neutral-300 tracking-widest uppercase">완 (여유)</span>
-                                </div>
-                            </div>
-
-                            {/* 시간 */}
+                            {/* 시간 — 사분면보다 먼저 */}
                             <div>
                                 <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">시간 (선택)</label>
                                 <input
@@ -353,6 +322,41 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     onChange={(e) => setTaskTime(e.target.value)}
                                     className="text-sm border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
                                 />
+                            </div>
+
+                            {/* 경중완급 사분면 — 단색 */}
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">경중완급 (선택)</label>
+                                <div className="flex flex-col items-center gap-1">
+                                    <span className="text-[9px] text-neutral-300">급</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] text-neutral-300 w-4 text-right">경</span>
+                                        <div className="grid grid-cols-2 rounded-lg overflow-hidden border border-neutral-200 w-[180px]">
+                                            {([
+                                                { q: "급경" as TaskQuadrant, sub: "긴급·쉬운", bCls: "border-b border-r border-neutral-200" },
+                                                { q: "급중" as TaskQuadrant, sub: "긴급·중요", bCls: "border-b border-neutral-200" },
+                                                { q: "완경" as TaskQuadrant, sub: "여유·쉬운", bCls: "border-r border-neutral-200" },
+                                                { q: "완중" as TaskQuadrant, sub: "여유·중요", bCls: "" },
+                                            ] as const).map(({ q, sub, bCls }) => (
+                                                <button
+                                                    key={q}
+                                                    type="button"
+                                                    onClick={() => setTaskPriority(taskPriority === q ? null : q)}
+                                                    className={`py-2.5 text-center transition-colors ${bCls} ${
+                                                        taskPriority === q
+                                                            ? "bg-neutral-900 text-white"
+                                                            : "bg-white hover:bg-neutral-50 text-neutral-600"
+                                                    }`}
+                                                >
+                                                    <div className="text-xs font-semibold leading-none">{q}</div>
+                                                    <div className="text-[9px] mt-0.5 opacity-50">{sub}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <span className="text-[9px] text-neutral-300 w-4">중</span>
+                                    </div>
+                                    <span className="text-[9px] text-neutral-300">완</span>
+                                </div>
                             </div>
 
                             {/* 프로젝트 */}
@@ -465,10 +469,22 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                     className="shrink-0 w-[150px] text-sm border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#0F766E]"
                                 />
                                 {kind !== "anniversary" && (
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                        <TimeSelect value={startTime} onChange={setStartTime} disabled={isReadOnly} />
+                                    <div className="flex items-center gap-1.5">
+                                        <input
+                                            type="time"
+                                            value={startTime}
+                                            onChange={(e) => setStartTime(e.target.value)}
+                                            disabled={isReadOnly}
+                                            className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                        />
                                         <span className="text-xs text-neutral-300">~</span>
-                                        <TimeSelect value={endTime} onChange={setEndTime} disabled={isReadOnly} />
+                                        <input
+                                            type="time"
+                                            value={endTime}
+                                            onChange={(e) => setEndTime(e.target.value)}
+                                            disabled={isReadOnly}
+                                            className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -551,10 +567,22 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                                         )}
                                     </div>
                                     {kind !== "anniversary" && (
-                                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                                            <TimeSelect value={startTime} onChange={setStartTime} disabled={isReadOnly} />
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                            <input
+                                                type="time"
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                                disabled={isReadOnly}
+                                                className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            />
                                             <span className="text-xs text-neutral-300">~</span>
-                                            <TimeSelect value={endTime} onChange={setEndTime} disabled={isReadOnly} />
+                                            <input
+                                                type="time"
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                                disabled={isReadOnly}
+                                                className="text-sm border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F766E] bg-white disabled:opacity-50"
+                                            />
                                         </div>
                                     )}
                                 </div>
