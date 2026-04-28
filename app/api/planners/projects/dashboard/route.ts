@@ -9,7 +9,8 @@ export async function GET(req: Request) {
     if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
     const url = new URL(req.url);
-    const date = url.searchParams.get("date") || new Date().toISOString().slice(0, 10);
+    // date 파라미터는 클라이언트가 항상 전달해야 함 (서버에서 로컬 타임존 모름)
+    const date = url.searchParams.get("date") || new Date().toISOString().slice(0, 10); // fallback: UTC 기준
 
     const admin = createAdminClient();
 

@@ -5,9 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
     ChevronLeft, Loader2, Trash2, Check,
-    Plus, Minus, Square, Type,
-    ArrowRight, Pen, Eraser, StickyNote,
-    X, Download, LayoutGrid, ChevronDown,
+    Download, LayoutGrid, ChevronDown,
 } from "lucide-react";
 import type { Editor, TLEditorSnapshot } from "tldraw";
 import "tldraw/tldraw.css";
@@ -109,55 +107,6 @@ function BgSelector({
     );
 }
 
-// ─── QuickShape 래디얼 메뉴 ────────────────────────────────────────────────
-
-const QUICK_ITEMS = [
-    { icon: <Pen className="h-4 w-4" />,         label: "펜",      tool: "draw" },
-    { icon: <Type className="h-4 w-4" />,         label: "텍스트",  tool: "text" },
-    { icon: <Square className="h-4 w-4" />,        label: "도형",    tool: "geo" },
-    { icon: <ArrowRight className="h-4 w-4" />,    label: "화살표",  tool: "arrow" },
-    { icon: <Minus className="h-4 w-4" />,         label: "선",      tool: "line" },
-    { icon: <StickyNote className="h-4 w-4" />,    label: "메모",    tool: "note" },
-    { icon: <Eraser className="h-4 w-4" />,        label: "지우개",  tool: "eraser" },
-];
-
-function QuickShapeMenu({ editor }: { editor: Editor | null }) {
-    const [open, setOpen] = useState(false);
-
-    return (
-        // 세로 리스트로 변경 — 래디얼은 우측 화면 밖으로 요소가 빠져나가므로 폐기
-        <div className="relative flex flex-col items-center gap-1.5" style={{ minWidth: 44 }}>
-            {/* 아이템 목록 — 위로 펼쳐짐 */}
-            {open && (
-                <div className="flex flex-col-reverse gap-1.5 mb-1.5">
-                    {QUICK_ITEMS.map((item, i) => (
-                        <button
-                            key={item.tool + i}
-                            title={item.label}
-                            onClick={() => { if (editor) editor.setCurrentTool(item.tool); setOpen(false); }}
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-neutral-200 shadow-md text-neutral-600 hover:bg-[#0F766E] hover:text-white hover:border-[#0F766E] transition-colors"
-                            style={{ animation: `qs-pop 120ms ease-out ${i * 14}ms both` }}
-                        >
-                            {item.icon}
-                        </button>
-                    ))}
-                </div>
-            )}
-            {/* 토글 버튼 */}
-            <button
-                onClick={() => setOpen((p) => !p)}
-                className={`flex items-center justify-center w-11 h-11 rounded-full shadow-lg transition-all duration-150 ${
-                    open
-                        ? "bg-[#0F766E] text-white"
-                        : "bg-white border border-neutral-200 text-neutral-600 hover:bg-[#0F766E] hover:text-white"
-                }`}
-            >
-                {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            </button>
-        </div>
-    );
-}
-
 // ─── tldraw Background 슬롯 (CSS 오버레이 대신 내부에서 렌더) ────────────────
 
 const BgCtx = createContext<BgTemplate>("blank");
@@ -168,8 +117,18 @@ function TlBackground() {
     return <div className="absolute inset-0 pointer-events-none" style={bgStyle(t)} />;
 }
 
-// components 객체 안정 참조 — Background만 교체, SharePanel 등 건드리지 않음
-const TL_COMPONENTS = { Background: TlBackground };
+// components 객체 안정 참조 — Background 교체 + 우리 헤더와 겹치는 tldraw 기본 UI 숨김
+// MenuPanel(좌상단 메인메뉴)·PageMenu·SharePanel(우상단)은 우리 헤더가 대체하므로 제거
+const TL_COMPONENTS = {
+    Background: TlBackground,
+    MenuPanel: null,
+    PageMenu: null,
+    SharePanel: null,
+    NavigationPanel: null,
+    DebugPanel: null,
+    DebugMenu: null,
+    HelpMenu: null,
+};
 
 // ─── 메인 CanvasStudio ─────────────────────────────────────────────────────
 
@@ -326,14 +285,14 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="fixed inset-0 top-12 flex items-center justify-center text-neutral-400 text-sm gap-2 bg-neutral-50 z-30">
+            <div className="fixed inset-0 flex items-center justify-center text-neutral-400 text-sm gap-2 bg-neutral-50 z-50">
                 <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 스튜디오 불러오는 중…
             </div>
         );
     }
     if (notFound) {
         return (
-            <div className="fixed inset-0 top-12 flex items-center justify-center bg-neutral-50 z-30">
+            <div className="fixed inset-0 flex items-center justify-center bg-neutral-50 z-50">
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
                     <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
@@ -343,7 +302,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     }
 
     return (
-        <div className="fixed inset-0 top-12 flex flex-col bg-neutral-50 z-30"
+        <div className="fixed inset-0 flex flex-col bg-neutral-50 z-50"
             style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
             {/* 상단 바 */}
@@ -357,7 +316,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
                     value={title}
                     onChange={(e) => { setTitle(e.target.value); setTitleDirty(true); }}
                     onBlur={(e) => { if (titleDirty) saveTitle(e.target.value); }}
-                    className="flex-1 min-w-0 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-300"
+                    className="flex-1 min-w-0 text-sm font-medium text-neutral-500 bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 transition-colors"
                     placeholder="캔버스 제목"
                 />
 
@@ -406,18 +365,9 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
                     </BgCtx.Provider>
                 </div>
 
-                {/* QuickShape 세로 메뉴 — 우측 하단에서 위로 펼쳐짐 */}
-                <div className="absolute bottom-6 right-6 z-[500] flex flex-col items-end">
-                    <QuickShapeMenu editor={editor} />
-                </div>
+                {/* tldraw 기본 Toolbar(하단)가 도구 선택 담당 — 중복 제거 */}
             </div>
 
-            <style>{`
-                @keyframes qs-pop {
-                    from { opacity: 0; transform: scale(0.35); }
-                    to   { opacity: 1; transform: scale(1); }
-                }
-            `}</style>
         </div>
     );
 }

@@ -25,14 +25,14 @@ const SOURCE_ICON = {
 };
 
 const SOURCE_LABEL: Record<string, string> = {
-    daily: "Daily",
-    weekly: "Weekly",
-    monthly: "Monthly",
-    yearly: "Yearly",
-    project: "Project",
-    project_note: "Note",
-    briefing: "Briefing",
-    identity: "Identity",
+    daily: "오늘",
+    weekly: "주간",
+    monthly: "월간",
+    yearly: "연간",
+    project: "프로젝트",
+    project_note: "노트",
+    briefing: "브리핑",
+    identity: "아이덴티티",
 };
 
 export function SearchView({ initialQuery }: { initialQuery: string }) {
@@ -74,10 +74,10 @@ export function SearchView({ initialQuery }: { initialQuery: string }) {
     }, [hits]);
 
     return (
-        <div className="max-w-3xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-3xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center gap-3 mb-6">
                 <Search className="h-6 w-6 text-[#0F766E]" />
-                <h1 className="font-serif text-3xl text-neutral-900">Search</h1>
+                <h1 className="font-serif text-3xl text-neutral-900">검색</h1>
             </div>
 
             <div className="relative mb-8">

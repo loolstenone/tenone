@@ -4,7 +4,46 @@
 
 ---
 
-## 2026-04-28 — 세션 97 · Daily 앱 에러 수정 + Weekly 뷰 재설계 + 미완 업무 선택 모달 + 노트 동기화
+## 2026-04-29 — 세션 99 · Planners 노트 병기·캔버스 UI 통일·AI Sparkles 제거
+
+### 장소
+사무실
+
+### 변경 요약
+- **노트 병기(非破壞 모드 전환)**: Daily·Project 노트 모두 텍스트 ↔ 손글씨 전환 시 기존 내용 보존
+  - DailyView: `toggleHandwriting()` — 손→텍스트 시 `handwriting.text` 복원, 텍스트→손 시 `.text` 보존
+  - ProjectNotesTab: `handModeOverride` state + `setHandPart/extractTextPart/setTextPart` 헬퍼 활용
+- **노트 모달 이중 제목 삭제**: Daily·Project 모달 헤더 부제(`기본 제목입니다. 무엇에...`) 제거
+- **캔버스 UI 통일**: ProjectNotesTab 캔버스 카드 아이콘 `text-sky-400/500` → `text-neutral-300`, 텍스트 `text-sky-500` → `text-neutral-500`. DailyView 모달 캔버스 헤더 아이콘 `text-sky-400` → `text-sky-500` (ProjectNotesTab 일치)
+- **AI Sparkles 제거**: DailyView.tsx에서 `Sparkles` import 삭제
+
+### 변경 파일
+- `features/planners/DailyView.tsx` — 병기 toggleHandwriting · 부제 삭제 · 캔버스 아이콘 sky-500 · Sparkles 삭제
+- `features/planners/ProjectNotesTab.tsx` — handModeOverride 병기 · 부제 삭제 · 캔버스 카드 neutral 색상
+
+### 커밋
+- (이번 세션 단일 커밋)
+
+### 핵심 결정
+- 노트 모드 전환은 항상 **비파괴(non-destructive)** — 텍스트·스트로크 동시 보존
+- Daily: `NoteItem.handwriting.text` 필드에 텍스트 백업 / Project: HW_MARKER+JSON 내 `.text` 필드 활용
+- 캔버스 카드 색상 = `text-neutral-*` (sky 제거), 모달 캔버스 아이콘 = `text-sky-500` 통일
+
+---
+
+## 2026-04-29 — 세션 98 · Planners Daily↔Project 노트 일관성 + 캔버스 노트 버그 + 템플릿 추천 탭 + AI 브리핑 정리
+
+### 장소
+사무실
+
+### 변경 요약
+- **Planners 노트 일관성 (DailyView·ProjectNotesTab)**
+  - Daily/Project 추가 노트 4종(기본·손글씨·캔버스·템플릿) 동작·디자인·구성 통일
+  - 카드 = 미리보기(max-h-64 페이드), 편집 = 모달
+  - 자동 제목 placeholder 스타일(이탤릭·연한 회색) + 부제 안내, 클릭 시 비워짐
+  - 모달 X 버튼 제거, 텍스트로/손글씨로 토글 제거 (생성 시 모드 고정)
+  - Project 진입 시 "기본 노트 1" 자동 생성
+  - 삭제 시 confirm() 양쪽 일
 
 ### 장소
 집

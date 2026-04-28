@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Sun, Sunrise, Moon, Loader2, Send, Settings as SettingsIcon } from "lucide-react";
+import { Sparkles, Sun, Sunrise, Moon, Loader2, Send } from "lucide-react";
 import type { PlannerBriefing } from "@/lib/planners/types";
 import { Track } from "@/lib/analytics";
 
@@ -106,15 +106,10 @@ export function AiBriefingView() {
     const Greet = TYPE_META[suggested].icon;
 
     return (
-        <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10">
-            <header className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2.5">
-                    <Sparkles className="h-5 w-5 text-[#0F766E]" />
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">AI 비서</h1>
-                </div>
-                <Link href="/planners/app/settings#ai" className="text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center gap-1">
-                    <SettingsIcon className="h-3.5 w-3.5" /> 설정
-                </Link>
+        <div className="max-w-3xl mx-auto px-4 md:px-10 py-6 md:py-12">
+            <header className="flex items-center gap-2.5 mb-5">
+                <Sparkles className="h-5 w-5 text-[#0F766E]" />
+                <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">AI 브리핑</h1>
             </header>
 
             {loading ? (
@@ -163,7 +158,7 @@ export function AiBriefingView() {
                                 <div className="shrink-0 w-7 h-7 rounded-full bg-neutral-100 flex items-center justify-center mt-0.5">
                                     <Loader2 className="h-3.5 w-3.5 text-neutral-500 animate-spin" />
                                 </div>
-                                <p className="text-sm text-neutral-400 mt-1.5 italic">AI 비서가 생각 중…</p>
+                                <p className="text-sm text-neutral-400 mt-1.5 italic">AI가 생각 중…</p>
                             </div>
                         )}
 

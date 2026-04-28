@@ -35,21 +35,21 @@ export type FrameworkData = SharedFrameworkData;
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string; bar: string }> = {
     framework: {
-        label: "FrameWorkBook",
+        label: "프레임워크북",
         icon: <BookOpen className="h-3 w-3" />,
         color: "text-slate-800",
         bg: "bg-slate-50 border-slate-200",
         bar: "bg-slate-700",
     },
     schedule: {
-        label: "Schedule",
+        label: "일정",
         icon: <Calendar className="h-3 w-3" />,
         color: "text-slate-900",
         bg: "bg-slate-50 border-slate-300",
         bar: "bg-slate-900",
     },
     note: {
-        label: "Note",
+        label: "노트",
         icon: <FileText className="h-3 w-3" />,
         color: "text-stone-800",
         bg: "bg-stone-50 border-stone-200",
@@ -471,10 +471,10 @@ export function TemplatesView() {
     const hasData = Object.values(tplData).some(v => v.trim());
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center gap-3 mb-2">
                 <LayoutTemplate className="h-6 w-6 text-[#0F766E]" />
-                <h1 className="font-serif text-3xl text-neutral-900">Templates</h1>
+                <h1 className="font-serif text-3xl text-neutral-900">템플릿</h1>
             </div>
             <p className="text-sm text-neutral-500 mb-8">
                 기획자의 사고 틀. Schedule · Note · FrameWorkBook. 프레임워크는 바로 채워 쓸 수 있습니다.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { localDateStr } from "@/lib/planners/types";
 import {
     Users, Plus, Search, Phone, Mail, Tag, X, ChevronDown,
     Pencil, Trash2, Upload, User, Cake, Loader2,
@@ -811,7 +812,7 @@ export function ContactsView() {
                 showToast("내보낼 연락처가 없습니다.", false);
                 return;
             }
-            const date = new Date().toISOString().slice(0, 10);
+            const date = localDateStr(new Date());
             let blob: Blob;
             let filename: string;
             if (format === "csv") {
@@ -1182,7 +1183,7 @@ export function ContactsView() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Toast */}
             {toast && (
                 <div
@@ -1198,7 +1199,7 @@ export function ContactsView() {
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                     <Users className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">Contacts</h1>
+                    <h1 className="font-serif text-3xl text-neutral-900">연락처</h1>
                     {!loading && (
                         <span className="text-xs text-neutral-500 ml-1">
                             전체 {contacts.length.toLocaleString("ko-KR")}명

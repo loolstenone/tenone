@@ -56,3 +56,70 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ items, stats });
 }
+
+// POST — 프로젝트 페이지에서 직접 업무 추가
+// body: { date: "YYYY-MM-DD", text: string, time?: "HH:MM", priority?: string }
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id: projectId } = await params;
+    const memberId = await getMemberId();
+    if (!memberId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+
+    const admin = createAdminClient();
+
+    // 소유권 확인
+    const { data: project } = await admin
+        .from("planners_projects")
+        .select("id")
+        .eq("id", projectId)
+        .eq("member_id", memberId)
+        .maybeSingle();
+    if (!project) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
+    const body = await req.json();
+    const date: string = body.date;
+    const text: string = (body.text ?? "").trim();
+    if (!date || !text) return NextResponse.json({ error: "date_and_text_required" }, { status: 400 });
+
+    // 해당 날짜 daily 조회 후 tasks 배열에 추가
+    const { data: row } = await admin
+        .from("planners_daily")
+        .select("id, tasks")
+        .eq("member_id", memberId)
+        .eq("date", date)
+        .maybeSingle();
+
+    type Task = {
+        id: string; text: string; status: string;
+        time?: string | null; project_id?: string | null;
+        priority?: string | null; source?: string;
+    };
+
+    const newTask: Task = {
+        id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        text,
+        status: "todo",
+        time: body.time ?? null,
+        project_id: projectId,
+        priority: body.priority ?? null,
+        source: "project",
+    };
+
+    const existing = (row && Array.isArray((row as { tasks?: Task[] }).tasks))
+        ? ((row as { tasks: Task[] }).tasks)
+        : [];
+    const next = [...existing, newTask];
+
+    if (row) {
+        const { error } = await admin.from("planners_daily").update({ tasks: next }).eq("id", (row as { id: string }).id);
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+        const { error } = await admin.from("planners_daily").insert({
+            member_id: memberId,
+            date,
+            tasks: next,
+        });
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ task: newTask, date });
+}

@@ -60,6 +60,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     const [calEditing, setCalEditing] = useState<Partial<CalendarEntry> | null>(null);
     const [calDefaultDate, setCalDefaultDate] = useState<string | undefined>(undefined);
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
+    const [dragOverDate, setDragOverDate] = useState<string | null>(null);
 
     const boundaries = getWeekBoundaries(year, week);
 
@@ -238,6 +239,37 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
 
+    // 드래그앤드롭 — task를 다른 날짜로 이동
+    async function moveTaskBetweenDays(fromDate: string, toDate: string, taskIndex: number) {
+        if (fromDate === toDate) return;
+        const fromTasksOrig = dayDataMap[fromDate]?.tasks ?? [];
+        if (taskIndex < 0 || taskIndex >= fromTasksOrig.length) return;
+        const fromTasks = [...fromTasksOrig];
+        const [moved] = fromTasks.splice(taskIndex, 1);
+        const toTasks = [...(dayDataMap[toDate]?.tasks ?? []), moved];
+        // optimistic update
+        setDayDataMap(prev => ({
+            ...prev,
+            [fromDate]: { ...(prev[fromDate] ?? { memo: "", weather: null, tasks: [] }), tasks: fromTasks },
+            [toDate]:   { ...(prev[toDate]   ?? { memo: "", weather: null, tasks: [] }), tasks: toTasks },
+        }));
+        // server save (병렬)
+        try {
+            await Promise.all([
+                fetch(`/api/planners/daily`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ date: fromDate, tasks: fromTasks }),
+                }),
+                fetch(`/api/planners/daily`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ date: toDate, tasks: toTasks }),
+                }),
+            ]);
+        } catch { /* 실패 시 다음 페치에서 회복 */ }
+    }
+
     async function handleTaskCreated(task: { text: string; time?: string | null; project_id?: string | null; priority?: string | null; memo?: string | null }) {
         // calDefaultDate가 있으면 그 날, 없으면 오늘
         const targetDate = calDefaultDate || today;
@@ -272,7 +304,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
     }
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header */}
             {(() => {
                 const sM = days[0].getMonth() + 1;
@@ -355,7 +387,34 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                             const todoTasks = dayData.tasks.filter(t => t.status === "todo" || t.status === "done");
 
                             return (
-                                <div key={ds} className={`flex min-h-[100px] ${isToday ? "bg-[#0F766E]/[0.025]" : "bg-white"}`}>
+                                <div
+                                    key={ds}
+                                    onDragOver={(e) => {
+                                        if (e.dataTransfer.types.includes("application/x-pp-task")) {
+                                            e.preventDefault();
+                                            e.dataTransfer.dropEffect = "move";
+                                            if (dragOverDate !== ds) setDragOverDate(ds);
+                                        }
+                                    }}
+                                    onDragLeave={(e) => {
+                                        // 자식 요소로 이동하는 경우는 무시
+                                        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                                        if (dragOverDate === ds) setDragOverDate(null);
+                                    }}
+                                    onDrop={(e) => {
+                                        const data = e.dataTransfer.getData("application/x-pp-task");
+                                        if (!data) return;
+                                        e.preventDefault();
+                                        try {
+                                            const { fromDate, taskIndex } = JSON.parse(data);
+                                            void moveTaskBetweenDays(fromDate, ds, taskIndex);
+                                        } catch { /* noop */ }
+                                        setDragOverDate(null);
+                                    }}
+                                    className={`flex min-h-[100px] transition-colors ${
+                                        isToday ? "bg-[#0F766E]/[0.025]" : "bg-white"
+                                    } ${dragOverDate === ds ? "ring-2 ring-[#0F766E] ring-inset bg-[#0F766E]/[0.04]" : ""}`}
+                                >
                                     {/* 좌측: 날짜 정보 */}
                                     <div className="w-[32%] shrink-0 border-r border-neutral-100 px-4 py-3 flex flex-col gap-1.5">
                                         {/* 날짜 헤더 */}
@@ -364,7 +423,7 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                                 {String(d.getDate()).padStart(2, "0")}
                                             </span>
                                             <span className={`text-xs font-medium ${dayColor}`}>{DAYS_KO[d.getDay()]}</span>
-                                            {isToday && <span className="text-[9px] text-[#0F766E] font-semibold ml-0.5">Today</span>}
+                                            {isToday && <span className="text-[9px] text-[#0F766E] font-semibold ml-0.5">오늘</span>}
                                             <span className="ml-auto flex items-center gap-1">
                                                 {dayData.weather && (
                                                     <span className="text-[10px] text-neutral-500">
@@ -433,16 +492,31 @@ export function WeeklyView({ initialYear, initialWeek }: { initialYear: number; 
                                             );
                                         })}
 
-                                        {/* 업무 (Daily tasks) */}
+                                        {/* 업무 (Daily tasks) — 드래그하여 다른 날짜로 이동 */}
                                         {todoTasks.length > 0 && (
                                             <div className="mt-0.5 space-y-0.5">
-                                                {todoTasks.slice(0, 5).map((t, i) => (
-                                                    <p key={i} className={`text-[10px] leading-tight truncate ${
-                                                        t.status === "done" ? "text-neutral-300 line-through" : "text-neutral-600"
-                                                    }`}>
-                                                        · {t.text}
-                                                    </p>
-                                                ))}
+                                                {todoTasks.slice(0, 5).map((t) => {
+                                                    const origIdx = dayData.tasks.indexOf(t);
+                                                    return (
+                                                        <div
+                                                            key={origIdx}
+                                                            draggable
+                                                            onDragStart={(e) => {
+                                                                e.dataTransfer.effectAllowed = "move";
+                                                                e.dataTransfer.setData(
+                                                                    "application/x-pp-task",
+                                                                    JSON.stringify({ fromDate: ds, taskIndex: origIdx })
+                                                                );
+                                                            }}
+                                                            title="끌어서 다른 날짜로 이동"
+                                                            className={`text-[10px] leading-tight truncate cursor-grab active:cursor-grabbing select-none ${
+                                                                t.status === "done" ? "text-neutral-300 line-through" : "text-neutral-600"
+                                                            }`}
+                                                        >
+                                                            · {t.text}
+                                                        </div>
+                                                    );
+                                                })}
                                                 {todoTasks.length > 5 && (
                                                     <p className="text-[9px] text-neutral-400">+{todoTasks.length - 5}개</p>
                                                 )}

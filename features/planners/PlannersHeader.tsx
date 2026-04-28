@@ -17,7 +17,7 @@ const navItems = [
     { name: "Planner's Planner", href: "/planners/planner-tool", desc: "PDF · AI 도구" },
     { name: "Programs",          href: "/planners/programs",     desc: "교육 프로그램" },
     { name: "GPR",               href: "/planners/gpr",          desc: "성과 관리" },
-    { name: "Community",         href: "/planners/community",    desc: "사용자 후기·사례" },
+    { name: "커뮤니티",           href: "/planners/community",    desc: "사용자 후기·사례" },
 ];
 
 export function PlannersHeader() {

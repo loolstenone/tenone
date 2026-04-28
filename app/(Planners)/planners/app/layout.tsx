@@ -7,6 +7,8 @@ import { AppMonthBar } from "@/features/planners/AppMonthBar";
 import { PwaRegister } from "@/features/planners/PwaRegister";
 import { BetaFeedbackButton } from "@/features/planners/BetaFeedbackButton";
 import { WelcomeTracker } from "@/features/planners/WelcomeTracker";
+import { KeyboardShortcuts } from "@/features/planners/KeyboardShortcuts";
+import { AiSidePanel } from "@/features/planners/AiSidePanel";
 import { getPlannerUser } from "@/lib/planners/client";
 import { PlannersThemeProvider } from "@/features/planners/PlannersThemeProvider";
 
@@ -91,6 +93,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 </div>
             </div>
             <BetaFeedbackButton />
+            <KeyboardShortcuts />
+            <AiSidePanel />
         </>
     );
 }

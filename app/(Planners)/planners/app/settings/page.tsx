@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus } from "lucide-react";
+import { Settings, Loader2, Check, ExternalLink, Link as LinkIcon, Unplug, RefreshCw, Sparkles, Download, X, AlertCircle, FolderOpen, Plus, Sun, Moon, Monitor } from "lucide-react";
 import Link from "next/link";
 import type { PlannerMode, AiTone } from "@/lib/planners/types";
-import { applyPlannersTheme, applyPlannersFont } from "@/features/planners/PlannersThemeProvider";
+import { applyPlannersTheme, applyPlannersFont, applyPlannersUserFont, applyPlannersThemeMode, type PlannersThemeMode } from "@/features/planners/PlannersThemeProvider";
 import { InstallButton } from "@/features/planners/InstallButton";
 
 interface Integration {
@@ -162,11 +162,13 @@ export default function SettingsPage() {
     const [contextScope, setContextScope] = useState<string[]>(["identity", "weekly", "monthly", "projects"]);
     const [trackingMetrics, setTrackingMetrics] = useState<string[]>([]);
     const [countryPref, setCountryPref] = useState<string[]>(["KR"]);
-    const [yearStartMonth, setYearStartMonth] = useState<number>(1);
     const [sampleLoading, setSampleLoading] = useState(false);
     const [sampleText, setSampleText] = useState<string | null>(null);
     const [colorTheme, setColorTheme] = useState("teal");
     const [fontFamily, setFontFamily] = useState("sans");
+    const [themeMode, setThemeMode] = useState<PlannersThemeMode>("system");
+    const [userFontFamily, setUserFontFamily] = useState("serif");
+    const [customFonts, setCustomFonts] = useState<string[]>(["", "", "", "", "", ""]);
     const [exporting, setExporting] = useState(false);
     const [toastMsg, setToastMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
@@ -190,8 +192,16 @@ export default function SettingsPage() {
         if (typeof window !== "undefined") {
             const savedTheme = localStorage.getItem("planners_color_theme");
             const savedFont = localStorage.getItem("planners_font_family");
+            const savedUserFont = localStorage.getItem("planners_user_font");
             if (savedTheme) setColorTheme(savedTheme);
             if (savedFont) setFontFamily(savedFont);
+            if (savedUserFont) setUserFontFamily(savedUserFont);
+            const savedMode = localStorage.getItem("planners_theme_mode") as PlannersThemeMode | null;
+            if (savedMode === "light" || savedMode === "dark" || savedMode === "system") setThemeMode(savedMode);
+            try {
+                const savedCustom = localStorage.getItem("planners_custom_fonts");
+                if (savedCustom) setCustomFonts(JSON.parse(savedCustom));
+            } catch { /* ignore */ }
         }
     }, []);
 
@@ -210,7 +220,6 @@ export default function SettingsPage() {
                     if (d.user.ai_context_scope?.length) setContextScope(d.user.ai_context_scope);
                     setTrackingMetrics(Array.isArray(d.user.daily_tracking_metrics) ? d.user.daily_tracking_metrics : []);
                     setCountryPref(Array.isArray(d.user.country_pref) && d.user.country_pref.length > 0 ? d.user.country_pref : ["KR"]);
-                    if (typeof d.user.year_start_month === "number") setYearStartMonth(d.user.year_start_month);
                     setSub({
                         status: d.user.subscription_status || 'free',
                         expires: d.user.subscription_expires_at || null,
@@ -561,20 +570,27 @@ export default function SettingsPage() {
     }
 
     const COLOR_THEMES = [
-        { key: "teal",   label: "Teal",   hex: "#0F766E" },
-        { key: "sage",   label: "Sage",   hex: "#4A7C59" },
-        { key: "slate",  label: "Slate",  hex: "#475569" },
-        { key: "rose",   label: "Rose",   hex: "#BE185D" },
-        { key: "amber",  label: "Amber",  hex: "#B45309" },
-        { key: "indigo", label: "Indigo", hex: "#4338CA" },
+        { key: "teal",    label: "Teal",    hex: "#0F766E" },
+        { key: "coral",   label: "Coral",   hex: "#C2553D" },
+        { key: "slate",   label: "Slate",   hex: "#475569" },
+        { key: "rose",    label: "Rose",    hex: "#BE185D" },
+        { key: "amber",   label: "Amber",   hex: "#B45309" },
+        { key: "indigo",  label: "Indigo",  hex: "#4338CA" },
+        { key: "violet",  label: "Violet",  hex: "#7C3AED" },
+        { key: "crimson", label: "Crimson", hex: "#DC2626" },
+        { key: "brown",   label: "Brown",   hex: "#92400E" },
+        { key: "sky",     label: "Sky",     hex: "#0369A1" },
+        { key: "plum",    label: "Plum",    hex: "#86198F" },
+        { key: "navy",    label: "Navy",    hex: "#1E40AF" },
     ];
 
-    const FONT_OPTIONS = [
-        { key: "serif",         label: "Serif",        desc: "클래식 · 종이 감성",   fontClass: "font-serif" },
-        { key: "strong-serif",  label: "강한 세리프",   desc: "묵직 · 고급 감성",    fontClass: "font-serif font-bold" },
-        { key: "sans",          label: "Sans",          desc: "모던 · 깔끔",          fontClass: "font-sans" },
-        { key: "gothic",        label: "고딕",          desc: "한국어 · 고딕 계열",   fontClass: "font-sans" },
-        { key: "mono",          label: "Mono",          desc: "정밀 · 코드",          fontClass: "font-mono" },
+    const PP_FONT_OPTIONS = [
+        { key: "serif",        label: "Serif",      desc: "클래식 · 종이 감성",      fontClass: "font-serif" },
+        { key: "strong-serif", label: "강한 세리프", desc: "묵직 · 고급 (Playfair)",  fontClass: "font-serif font-bold" },
+        { key: "sans",         label: "Sans",       desc: "모던 · 깔끔",            fontClass: "font-sans" },
+        { key: "gothic",       label: "고딕",       desc: "나눔고딕 · 한국어",       fontClass: "font-sans" },
+        { key: "mono",         label: "Mono",       desc: "정밀 · 코드",            fontClass: "font-mono" },
+        { key: "round",        label: "둥근",       desc: "부드러움 · 친근함",       fontClass: "font-sans" },
     ];
 
     async function exportBackup() {
@@ -620,10 +636,23 @@ export default function SettingsPage() {
         applyPlannersTheme(key);
     }
 
+    function applyMode(mode: PlannersThemeMode) {
+        setThemeMode(mode);
+        localStorage.setItem("planners_theme_mode", mode);
+        applyPlannersThemeMode(mode);
+        window.dispatchEvent(new CustomEvent("pp-theme-mode-change", { detail: { mode } }));
+    }
+
     function applyFont(key: string) {
         setFontFamily(key);
         localStorage.setItem("planners_font_family", key);
         applyPlannersFont(key);
+    }
+
+    function applyUserFont(key: string) {
+        setUserFontFamily(key);
+        localStorage.setItem("planners_user_font", key);
+        applyPlannersUserFont(key);
     }
 
     if (loading) {
@@ -683,6 +712,40 @@ export default function SettingsPage() {
                     </InstallButton>
                 </section>
 
+                {/* Display Mode — 라이트 / 다크 / 시스템 */}
+                <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-sm font-semibold text-neutral-900">표시 모드</h2>
+                            <p className="text-[11px] text-neutral-400 mt-0.5">라이트 · 다크 · 시스템 자동 (Phase 1 인프라 — 컴포넌트별 다크 적용은 점진 마이그레이션)</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {([
+                            { key: "light",  label: "라이트", icon: Sun },
+                            { key: "system", label: "시스템", icon: Monitor },
+                            { key: "dark",   label: "다크",   icon: Moon },
+                        ] as const).map((m) => {
+                            const active = themeMode === m.key;
+                            const Icon = m.icon;
+                            return (
+                                <button
+                                    key={m.key}
+                                    onClick={() => applyMode(m.key)}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
+                                        active
+                                            ? "border-[#0F766E] text-[#0F766E] bg-[#0F766E]/5"
+                                            : "border-neutral-200 text-neutral-500 hover:border-neutral-300 hover:text-neutral-700"
+                                    }`}
+                                >
+                                    <Icon className="h-3.5 w-3.5" />
+                                    {m.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </section>
+
                 {/* Color Theme */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">컬러 테마</h2>
@@ -718,29 +781,101 @@ export default function SettingsPage() {
                 {/* Font Selection */}
                 <section className="bg-white border border-neutral-200 rounded-xl p-6">
                     <h2 className="text-sm font-semibold text-neutral-900 mb-4">폰트</h2>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                        {FONT_OPTIONS.map((f) => {
-                            const active = fontFamily === f.key;
-                            return (
-                                <button
-                                    key={f.key}
-                                    onClick={() => applyFont(f.key)}
-                                    className={`py-3 px-3 rounded-lg text-left border-2 transition-colors ${
-                                        active
-                                            ? "border-[#0F766E] bg-[#0F766E]/5"
-                                            : "border-neutral-200 hover:border-neutral-300"
-                                    }`}
-                                >
-                                    <span className={`block text-base mb-0.5 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>
-                                        Aa
-                                    </span>
-                                    <span className={`block text-[10px] font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>
-                                        {f.label}
-                                    </span>
-                                    <span className="block text-[9px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
-                                </button>
-                            );
-                        })}
+                    <div className="space-y-6">
+                        {/* 시스템 폰트 */}
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">시스템 폰트</p>
+                            <p className="text-[10px] text-neutral-400 mb-3">메뉴·버튼·라벨 등 앱 UI에 적용</p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {PP_FONT_OPTIONS.map((f) => {
+                                    const active = fontFamily === f.key;
+                                    return (
+                                        <button
+                                            key={f.key}
+                                            onClick={() => applyFont(f.key)}
+                                            className={`flex flex-col py-3 px-3 rounded-lg text-left border-2 transition-colors ${
+                                                active ? "border-[#0F766E] bg-[#0F766E]/5" : "border-neutral-200 hover:border-neutral-300"
+                                            }`}
+                                        >
+                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>Aa</span>
+                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>{f.label}</span>
+                                            <span className="text-[10px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        {/* 사용자 폰트 */}
+                        <div>
+                            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-0.5">사용자 폰트</p>
+                            <p className="text-[10px] text-neutral-400 mb-3">노트·할 일 등 직접 입력한 내용에 적용</p>
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                                {PP_FONT_OPTIONS.map((f) => {
+                                    const active = userFontFamily === f.key;
+                                    return (
+                                        <button
+                                            key={f.key}
+                                            onClick={() => applyUserFont(f.key)}
+                                            className={`flex flex-col py-3 px-3 rounded-lg text-left border-2 transition-colors ${
+                                                active ? "border-[#0F766E] bg-[#0F766E]/5" : "border-neutral-200 hover:border-neutral-300"
+                                            }`}
+                                        >
+                                            <span className={`text-xl mb-1 ${f.fontClass} ${active ? "text-[#0F766E]" : "text-neutral-900"}`}>Aa</span>
+                                            <span className={`text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-600"}`}>{f.label}</span>
+                                            <span className="text-[10px] text-neutral-400 mt-0.5 leading-tight">{f.desc}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <p className="text-[10px] text-neutral-400 mb-2">커스텀 — CSS font-family 이름을 직접 입력하세요. 예: &apos;Noto Sans KR&apos;, Georgia</p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {customFonts.map((cf, idx) => {
+                                    const key = `custom_${idx}`;
+                                    const active = userFontFamily === key;
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className={`rounded-lg border-2 transition-colors overflow-hidden ${
+                                                active ? "border-[#0F766E]" : "border-neutral-200"
+                                            }`}
+                                        >
+                                            <button
+                                                onClick={() => { if (cf.trim()) applyUserFont(key); }}
+                                                disabled={!cf.trim()}
+                                                className={`w-full py-3 px-3 text-left transition-colors disabled:opacity-40 ${
+                                                    active ? "bg-[#0F766E]/5" : "hover:bg-neutral-50"
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`block text-xl mb-1 ${active ? "text-[#0F766E]" : "text-neutral-900"}`}
+                                                    style={{ fontFamily: cf.trim() || undefined }}
+                                                >
+                                                    Aa
+                                                </span>
+                                                <span className={`block text-xs font-semibold leading-tight ${active ? "text-[#0F766E]" : "text-neutral-400"}`}>
+                                                    커스텀 {idx + 1}
+                                                </span>
+                                            </button>
+                                            <div className="px-2 pb-2">
+                                                <input
+                                                    type="text"
+                                                    value={cf}
+                                                    placeholder="font-family"
+                                                    onChange={(e) => {
+                                                        const next = [...customFonts];
+                                                        next[idx] = e.target.value;
+                                                        setCustomFonts(next);
+                                                        localStorage.setItem("planners_custom_fonts", JSON.stringify(next));
+                                                        if (userFontFamily === key) applyUserFont(key);
+                                                    }}
+                                                    className="w-full text-[10px] border border-neutral-200 rounded px-1.5 py-1 focus:outline-none focus:border-[#0F766E] bg-white text-neutral-700 placeholder:text-neutral-300"
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -893,27 +1028,6 @@ export default function SettingsPage() {
                             );
                         })}
                     </div>
-                </section>
-
-                {/* Yearly 시작월 — 플래너 중간 시작자 대응 */}
-                <section className="bg-white border border-neutral-200 rounded-xl p-6">
-                    <h2 className="text-sm font-semibold text-neutral-900 mb-1">한 해 시작월</h2>
-                    <p className="text-xs text-neutral-500 mb-4">
-                        처음 가입한 해에만 적용됩니다. 플래너를 중간에 시작했다면 그 달로 설정하세요. 다음 해부터는 1월로 자동 초기화됩니다.
-                    </p>
-                    <select
-                        value={yearStartMonth}
-                        onChange={(e) => {
-                            const v = parseInt(e.target.value, 10);
-                            setYearStartMonth(v);
-                            save({ year_start_month: v });
-                        }}
-                        className="w-full md:w-48 text-sm border border-neutral-200 rounded px-3 py-2 focus:outline-none focus:border-[#0F766E] bg-white"
-                    >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                            <option key={m} value={m}>{m}월부터 시작</option>
-                        ))}
-                    </select>
                 </section>
 
                 {/* 공휴일·절기 국가 */}

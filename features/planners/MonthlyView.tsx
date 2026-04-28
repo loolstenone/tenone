@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Plus, Trash2, ArrowUpRight } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { getHoliday, getLunarDate } from "@/lib/planners/holidays";
@@ -43,6 +43,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const [year, setYear] = useState(initialYear);
     const [month, setMonth] = useState(initialMonth);
 
+    // URL의 ?year=&month= 변경(좌측 월 바·외부 링크 등) → 내부 state 동기화
+    useEffect(() => {
+        setYear(initialYear);
+        setMonth(initialMonth);
+    }, [initialYear, initialMonth]);
+
     const [monthly, setMonthly] = useState<MonthlyData | null>(null);
     const [hits, setHits] = useState<DayHit[]>([]);
     const [summary, setSummary] = useState<{
@@ -79,6 +85,36 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const [reflection, setReflection] = useState("");
     const [goals, setGoals] = useState<Array<{ id: string; text: string; done?: boolean }>>([]);
     const [newGoal, setNewGoal] = useState("");
+    const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
+
+    // 활성 프로젝트 목록 — 집중 영역 빠른 추가용
+    // 조건: status='active' AND 프로젝트 기간이 보고 있는 월과 겹침
+    //   (start_date <= 월말) AND (end_date >= 월초) — 날짜 비어 있으면 항상 겹침으로 간주
+    useEffect(() => {
+        let cancelled = false;
+        const monthFirst = `${year}-${String(month).padStart(2, "0")}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const monthLast = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+        fetch(`/api/planners/projects`)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (cancelled) return;
+                const list = (d?.projects ?? [])
+                    .filter((p: { status?: string; start_date?: string | null; end_date?: string | null }) => {
+                        if (p.status !== "active") return false;
+                        // start <= 월말
+                        if (p.start_date && p.start_date > monthLast) return false;
+                        // end >= 월초
+                        if (p.end_date && p.end_date < monthFirst) return false;
+                        return true;
+                    })
+                    .map((p: { id: string; title: string; color: string | null }) => ({ id: p.id, title: p.title, color: p.color }));
+                setActiveProjects(list);
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [year, month]);
 
     // 달력 메트릭스 계산: Mon~Sun 7열
     const calendar = useMemo(() => {
@@ -121,8 +157,6 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         return rows;
     }, [year, month]);
 
-    const weekNumbers = useMemo(() => calendar.map(r => r[0].week), [calendar]);
-
     /** 날짜별 캘린더 엔트리 발생 맵 (반복 펼침) — 셀 dot/title 표시용 */
     const entriesByDate = useMemo(() => {
         const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -140,6 +174,15 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
 
     useEffect(() => {
         let cancelled = false;
+        // ⚠️ 월 변경 즉시 이전 달의 데이터 클리어 — fetch 동안 stale 상태 노출 방지
+        setMonthly(null);
+        setTheme("");
+        setReflection("");
+        setGoals([]);
+        setHits([]);
+        setSummary(null);
+        setTracking(null);
+        setCalEntries([]);
         (async () => {
             setLoading(true);
             const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -204,8 +247,8 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         let newYear = year;
         if (newMonth < 1) { newYear -= 1; newMonth = 12; }
         if (newMonth > 12) { newYear += 1; newMonth = 1; }
-        setMonth(newMonth);
-        setYear(newYear);
+        // URL과 state 동시 갱신 — 좌측 월 바도 함께 업데이트
+        router.push(`/planners/app/monthly?year=${newYear}&month=${newMonth}`);
     }
 
     // 스와이프 내비게이션
@@ -218,14 +261,14 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
         if (!focusInput.trim()) return;
         const next = [...(monthly?.focus_areas || []), focusInput.trim()];
         save({ focus_areas: next });
-        setMonthly(m => m ? { ...m, focus_areas: next } : m);
+        setMonthly(m => m ? { ...m, focus_areas: next } : { year, month, theme: null, focus_areas: next, goals: [], reflection: null });
         setFocusInput("");
     }
 
     function removeFocusArea(idx: number) {
         const next = (monthly?.focus_areas || []).filter((_, i) => i !== idx);
         save({ focus_areas: next });
-        setMonthly(m => m ? { ...m, focus_areas: next } : m);
+        setMonthly(m => m ? { ...m, focus_areas: next } : { year, month, theme: null, focus_areas: next, goals: [], reflection: null });
     }
 
     function addGoal() {
@@ -272,7 +315,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
     const yearRange = Array.from({ length: 10 }, (_, i) => 2024 + i);
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const now = new Date();
@@ -344,75 +387,154 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                 <div className="py-16 text-center text-neutral-400 text-sm">로딩 중…</div>
             ) : (
                 <div className="space-y-6">
-                    {/* 1) 이달의 테마 + 월간 목표 (1순위) */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">이달의 테마</label>
-                            <input
-                                type="text"
-                                value={theme}
-                                onChange={(e) => setTheme(e.target.value)}
-                                onBlur={() => save({ theme })}
-                                placeholder="예: 몰입의 달"
-                                className="w-full text-lg font-serif text-neutral-900 focus:outline-none bg-transparent"
-                            />
-                        </section>
-
-                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                            <h2 className="text-[10px] uppercase tracking-widest text-neutral-400 mb-3">월간 목표</h2>
-                            <div className="space-y-1.5">
-                                {goals.length === 0 && (
-                                    <p className="text-xs text-neutral-400 py-1">이달에 이루고 싶은 것을 추가해 보세요.</p>
-                                )}
-                                {goals.map((g) => (
-                                    <div key={g.id} className="group flex items-center gap-3 py-1">
-                                        <button
-                                            onClick={() => toggleGoal(g.id)}
-                                            className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
-                                                g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
-                                            }`}
-                                        >
-                                            {g.done && "V"}
-                                        </button>
-                                        <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
-                                            {g.text}
-                                        </span>
-                                        <button
-                                            onClick={() => removeGoal(g.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
-                                <Plus className="h-3.5 w-3.5 text-neutral-400" />
+                    {/* 1) 이달의 방향 — 테마 + 목표 통합 카드 */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-6">
+                        <div className="flex items-baseline gap-2 mb-4">
+                            <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">DIRECTION</span>
+                            <h2 className="text-sm font-semibold text-neutral-800">이달의 방향</h2>
+                        </div>
+                        <div className="grid md:grid-cols-[1fr_1.3fr] gap-6">
+                            {/* 좌: 테마 (큰 인용) */}
+                            <div className="md:border-r md:border-neutral-100 md:pr-6">
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">이달의 테마</label>
                                 <input
                                     type="text"
-                                    value={newGoal}
-                                    onChange={(e) => setNewGoal(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
-                                    placeholder="목표 추가"
-                                    className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                                    value={theme}
+                                    onChange={(e) => setTheme(e.target.value)}
+                                    onBlur={() => save({ theme })}
+                                    placeholder="예: 몰입의 달"
+                                    className="w-full text-2xl font-serif text-neutral-900 focus:outline-none bg-transparent placeholder:text-neutral-300 placeholder:italic placeholder:text-base"
                                 />
+                                <p className="text-[11px] text-neutral-400 mt-2 italic leading-relaxed">
+                                    이달 한 단어로 무엇을 도모(圖謀)할 것인가.
+                                </p>
                             </div>
-                        </section>
-                    </div>
-
-                    {/* 2) 집중 영역 (2순위) */}
-                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                        <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">집중 영역</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {(monthly?.focus_areas || []).map((f, i) => (
-                                <span key={i} className="group inline-flex items-center gap-1 bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
-                                    {f}
-                                    <button onClick={() => removeFocusArea(i)} className="opacity-40 group-hover:opacity-100 hover:text-red-500 transition-opacity">
-                                        <Trash2 className="h-3 w-3" />
-                                    </button>
-                                </span>
-                            ))}
+                            {/* 우: 월간 목표 체크리스트 */}
+                            <div>
+                                <label className="block text-[10px] uppercase tracking-widest text-neutral-400 mb-2">월간 목표</label>
+                                <div className="space-y-1.5">
+                                    {goals.length === 0 && (
+                                        <p className="text-xs text-neutral-400 py-1">이달에 이루고 싶은 것을 추가해 보세요.</p>
+                                    )}
+                                    {goals.map((g) => (
+                                        <div key={g.id} className="group flex items-center gap-3 py-1">
+                                            <button
+                                                onClick={() => toggleGoal(g.id)}
+                                                className={`w-4 h-4 rounded border-2 flex items-center justify-center text-[10px] font-bold transition-colors ${
+                                                    g.done ? "bg-[#0F766E] border-[#0F766E] text-white" : "border-neutral-300 hover:border-neutral-500"
+                                                }`}
+                                            >
+                                                {g.done && "V"}
+                                            </button>
+                                            <span className={`flex-1 text-sm ${g.done ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
+                                                {g.text}
+                                            </span>
+                                            <button
+                                                onClick={() => removeGoal(g.id)}
+                                                className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity"
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
+                                    <Plus className="h-3.5 w-3.5 text-neutral-400" />
+                                    <input
+                                        type="text"
+                                        value={newGoal}
+                                        onChange={(e) => setNewGoal(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === "Enter") addGoal(); }}
+                                        placeholder="목표 추가"
+                                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
+                                    />
+                                </div>
+                            </div>
                         </div>
+                    </section>
+
+                    {/* 2) 집중 영역 — 활성 프로젝트 토글 + 자유 텍스트 */}
+                    <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                        <div className="flex items-baseline gap-2 mb-1">
+                            <span className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold">FOCUS</span>
+                            <h2 className="text-sm font-semibold text-neutral-800">집중 영역</h2>
+                        </div>
+                        <p className="text-[11px] text-neutral-500 mb-3">이번 달 깊이 들어갈 프로젝트와 키워드.</p>
+
+                        {/* 선택된 집중 영역 — 위, 강조 */}
+                        {(monthly?.focus_areas ?? []).length > 0 ? (
+                            <div className="mb-4 bg-[#0F766E]/5 border border-[#0F766E]/20 rounded-lg p-3">
+                                <p className="text-[10px] uppercase tracking-widest text-[#0F766E] font-semibold mb-2">이달 집중 ({(monthly?.focus_areas ?? []).length})</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {(monthly?.focus_areas ?? []).map((f, i) => {
+                                        const matched = activeProjects.find(p => p.title === f);
+                                        return (
+                                            <span key={i} className="group inline-flex items-center gap-1.5 bg-[#0F766E] text-white text-sm px-3 py-1.5 rounded-full font-medium shadow-sm">
+                                                {matched ? (
+                                                    <Link
+                                                        href={`/planners/app/projects/${matched.id}`}
+                                                        title="프로젝트로 이동"
+                                                        className="hover:underline inline-flex items-center gap-0.5"
+                                                    >
+                                                        {f} <ArrowUpRight className="h-3.5 w-3.5" />
+                                                    </Link>
+                                                ) : (
+                                                    <span>{f}</span>
+                                                )}
+                                                <button
+                                                    onClick={() => removeFocusArea(i)}
+                                                    title="제거"
+                                                    className="opacity-60 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-4 border border-dashed border-neutral-200 rounded-lg py-4 text-center">
+                                <p className="text-xs text-neutral-400">아래 활성 프로젝트에서 클릭해 이달 집중 영역에 추가하세요.</p>
+                            </div>
+                        )}
+
+                        {/* 활성 프로젝트 — 후보 풀, 약하게 */}
+                        {activeProjects.length > 0 && (
+                            <div className="mb-3 pb-3 border-b border-neutral-100">
+                                <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">이달 진행 중 활성 프로젝트 ({activeProjects.length}) — 클릭으로 추가</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {activeProjects.map((p) => {
+                                        const added = (monthly?.focus_areas ?? []).includes(p.title);
+                                        return (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => {
+                                                    if (added) {
+                                                        const idx = (monthly?.focus_areas ?? []).indexOf(p.title);
+                                                        if (idx >= 0) removeFocusArea(idx);
+                                                    } else {
+                                                        const next = [...(monthly?.focus_areas ?? []), p.title];
+                                                        save({ focus_areas: next });
+                                                        setMonthly(m => m ? { ...m, focus_areas: next } : { year, month, theme: null, focus_areas: next, goals: [], reflection: null });
+                                                    }
+                                                }}
+                                                className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                                                    added
+                                                        ? "bg-neutral-100 border-neutral-200 text-neutral-400 line-through"
+                                                        : "bg-white border-neutral-200 text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E]"
+                                                }`}
+                                                style={!added && p.color ? { borderLeftColor: p.color, borderLeftWidth: 3 } : undefined}
+                                            >
+                                                {added ? "추가됨" : "+"} {p.title}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 자유 텍스트 추가 */}
                         <div className="flex items-center gap-2">
                             <Plus className="h-3.5 w-3.5 text-neutral-400" />
                             <input
@@ -420,33 +542,24 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                 value={focusInput}
                                 onChange={(e) => setFocusInput(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") addFocusArea(); }}
-                                placeholder="집중 영역 추가 후 Enter"
+                                placeholder="키워드·영역 자유 입력 후 Enter (예: 영업 활동, 글쓰기 루틴)"
                                 className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
                             />
                         </div>
                     </section>
 
-                    {/* 3) 일정 (3순위) */}
-                    <h2 className="text-[10px] uppercase tracking-widest text-neutral-400 -mb-3 pl-1">일정</h2>
+                    {/* 캘린더 그리드 */}
                     <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-                        <div className="grid grid-cols-[40px_repeat(7,1fr)] border-b border-neutral-200 bg-neutral-50">
-                            <div className="text-[10px] font-semibold text-neutral-400 text-center py-2">W</div>
-                            {["월", "화", "수", "목", "금", "토", "일"].map((d) => (
-                                <div key={d} className="text-xs font-semibold text-neutral-600 text-center py-2 border-l border-neutral-200">
+                        <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50">
+                            {["월", "화", "수", "목", "금", "토", "일"].map((d, i) => (
+                                <div key={d} className={`text-xs font-semibold text-neutral-600 text-center py-2 ${i > 0 ? "border-l border-neutral-200" : ""}`}>
                                     {d}
                                 </div>
                             ))}
                         </div>
 
                         {calendar.map((row, ri) => (
-                            <div key={ri} className="grid grid-cols-[40px_repeat(7,1fr)] border-b border-neutral-100 last:border-0">
-                                {/* 주차 */}
-                                <Link
-                                    href={`/planners/app/weekly?year=${year}&week=${weekNumbers[ri]}`}
-                                    className="flex items-center justify-center text-[10px] text-neutral-400 hover:text-[#0F766E] hover:bg-neutral-50 transition-colors"
-                                >
-                                    W{String(weekNumbers[ri]).padStart(2, "0")}
-                                </Link>
+                            <div key={ri} className="grid grid-cols-7 border-b border-neutral-100 last:border-0">
                                 {row.map((cell) => {
                                     const hit = hitMap.get(cell.date);
                                     const holiday = getHoliday(cell.date);
@@ -459,7 +572,7 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                                         <Link
                                             key={cell.date}
                                             href={`/planners/app/daily?date=${cell.date}`}
-                                            className={`aspect-square md:aspect-auto md:min-h-[96px] p-2 border-l border-neutral-100 transition-colors flex flex-col ${
+                                            className={`aspect-square md:aspect-auto md:min-h-[96px] p-2 border-l border-neutral-100 transition-colors flex flex-col min-w-0 overflow-hidden ${
                                                 cell.inMonth ? "bg-white hover:bg-neutral-50" : "bg-neutral-50/50 text-neutral-300 hover:bg-neutral-50"
                                             }`}
                                         >
@@ -528,7 +641,12 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                         ))}
                     </section>
 
-                    {/* 4) 월간 회고 (4순위) */}
+                    {/* 4) 월간 분석 — 3-탭 (통계 / 한 줄 / 트래킹) — Yearly 와 일관: 통계 먼저 */}
+                    {(summary && summary.total_tasks > 0) || (tracking && (tracking.one_liners.length > 0 || tracking.stats.days_recorded > 0)) ? (
+                        <MonthlyAnalytics summary={summary} tracking={tracking} />
+                    ) : null}
+
+                    {/* 5) 월간 회고 — Yearly 와 일관: 회고가 마지막 (한 사이클을 닫는 섹션) */}
                     <section className="bg-white border border-neutral-200 rounded-xl p-5">
                         <h2 className="text-sm font-semibold text-neutral-900 mb-3">월간 회고</h2>
                         <textarea
@@ -540,13 +658,6 @@ export function MonthlyView({ initialYear, initialMonth }: { initialYear: number
                             className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none"
                         />
                     </section>
-
-                    {/* 5) 월간 분석 — 3-탭 (통계 / 한 줄 / 트래킹) */}
-                    {(summary && summary.total_tasks > 0) || (tracking && (tracking.one_liners.length > 0 || tracking.stats.days_recorded > 0)) ? (
-                        <MonthlyAnalytics summary={summary} tracking={tracking} />
-                    ) : null}
-
-                    {/* 6/7 → MonthlyAnalytics 통합 (위에서 렌더) */}
                 </div>
             )}
 
@@ -608,7 +719,7 @@ function MonthlyAnalytics({ summary, tracking }: MonthlyAnalyticsProps) {
         <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
             <div className="border-b border-neutral-100 flex">
                 {([
-                    { k: "tasks",    label: "Task 통계",    enabled: hasTasks },
+                    { k: "tasks",    label: "업무",         enabled: hasTasks },
                     { k: "lines",    label: "이달의 한 줄", enabled: hasLines },
                     { k: "tracking", label: "데일리 트래킹", enabled: hasTracking },
                 ] as const).map((t) => (
@@ -791,20 +902,53 @@ function AvgCard({ label, value, suffix, color }: { label: string; value: number
 }
 
 function SparkRow({ data, color, max, label }: { data: Array<{ x: string; y: number | null }>; color: string; max: number; label: string }) {
-    const points = data.filter((p) => p.y !== null);
+    const points = data.filter((p) => p.y !== null) as Array<{ x: string; y: number }>;
     if (points.length === 0) return null;
-    const w = 100, h = 24;
+    const w = 100, h = 28;
+
+    // 실제 데이터 범위에 맞춰 스케일 — 좁은 범위(예: 4~5) 변동도 보이게
+    const ys = points.map(p => p.y);
+    const lo = Math.min(...ys);
+    const hi = Math.max(...ys);
+    const flat = lo === hi;
+    // 위·아래 5% 패딩 + 평탄선이면 중앙 고정
+    const span = flat ? 1 : (hi - lo);
+    const padTop = h * 0.1;
+    const padBot = h * 0.1;
+    const drawH = h - padTop - padBot;
+
     const path = points.map((p, i) => {
         const px = (i / Math.max(points.length - 1, 1)) * w;
-        const py = h - ((p.y as number) / max) * h;
+        const norm = flat ? 0.5 : (p.y - lo) / span;
+        const py = padTop + (1 - norm) * drawH;
         return `${i === 0 ? "M" : "L"}${px},${py}`;
     }).join(" ");
+
+    // 채움 영역 (반투명)
+    const area = path + ` L${w},${h} L0,${h} Z`;
+
+    // 마지막 값
+    const last = points[points.length - 1].y;
+
     return (
         <div className="flex items-center gap-2 mt-2 first:mt-3">
             <span className="text-[10px] text-neutral-400 w-12 shrink-0">{label}</span>
-            <svg viewBox={`0 0 ${w} ${h}`} className="flex-1 h-6" preserveAspectRatio="none">
+            <svg viewBox={`0 0 ${w} ${h}`} className="flex-1 h-7" preserveAspectRatio="none">
+                <path d={area} fill={color} fillOpacity={0.08} />
                 <path d={path} stroke={color} strokeWidth={1.4} fill="none" vectorEffect="non-scaling-stroke" />
+                {/* 첫·마지막 포인트만 점 표시 */}
+                {points.length > 1 && (() => {
+                    const lastP = points[points.length - 1];
+                    const px = w;
+                    const norm = flat ? 0.5 : (lastP.y - lo) / span;
+                    const py = padTop + (1 - norm) * drawH;
+                    return <circle cx={px} cy={py} r={1.4} fill={color} vectorEffect="non-scaling-stroke" />;
+                })()}
             </svg>
+            <span className="text-[9px] text-neutral-500 font-mono w-20 text-right shrink-0 tabular-nums">
+                {flat ? `${lo}/${max}` : `${lo}~${hi}/${max}`}
+                <span className="text-neutral-300 ml-1">→{last}</span>
+            </span>
         </div>
     );
 }

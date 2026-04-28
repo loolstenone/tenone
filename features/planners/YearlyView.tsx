@@ -220,7 +220,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
     );
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div ref={swipeRef} className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header — Daily 패턴 통일 */}
             {(() => {
                 const isCurrentYear = year === new Date().getFullYear();
@@ -359,7 +359,7 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                     <section className="bg-white border border-neutral-200 rounded-xl p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Gift className="h-4 w-4 text-[#0F766E]" />
-                            <h2 className="text-sm font-semibold text-neutral-900">Anniversary & Big Event</h2>
+                            <h2 className="text-sm font-semibold text-neutral-900">기념일 & 중요 이벤트</h2>
                             <span className="text-[10px] text-neutral-400">· {anniversaries.length}개 등록</span>
                         </div>
                         <p className="text-xs text-neutral-500 mb-4">
@@ -527,17 +527,6 @@ export function YearlyView({ initialYear }: { initialYear: number }) {
                         </div>
                     </section>
 
-
-                    {/* 통합 캘린더 — 기념일·공휴일·절기 (신규 시스템) */}
-                    <CalendarEntryList
-                        entries={calEntries}
-                        view="yearly"
-                        from={`${year}-01-01`}
-                        to={`${year}-12-31`}
-                        label="올해 기념일·공휴일·절기"
-                        onAdd={() => { setCalEditing({ kind: 'anniversary' }); setCalEditorOpen(true); }}
-                        onEdit={(entry) => { setCalEditing(entry); setCalEditorOpen(true); }}
-                    />
 
                     {/* 연간 통계 — 3-탭 (Task 통계 / 한 줄 모음 / 트래킹) */}
                     <YearlyAnalytics year={year} />

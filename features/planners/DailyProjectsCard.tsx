@@ -41,9 +41,9 @@ export function DailyProjectsCard({ date }: { date?: string }) {
     return (
         <section className="bg-white border border-neutral-200 rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                <h2 className="text-xs tracking-widest text-neutral-400 flex items-center gap-2">
                     <FolderKanban className="h-3.5 w-3.5" />
-                    Project
+                    프로젝트
                 </h2>
                 <Link
                     href="/planners/app/projects"

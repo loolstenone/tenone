@@ -1,8 +1,14 @@
 // 프로젝트 마일스톤 — 체크리스트 + 간트 표시용
 // planners_project_milestones 테이블
+// + due_date 변경 시 planners_daily.tasks 자동 동기화 (마일스톤은 일정에도 표시)
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMemberId } from "@/lib/planners/auth";
+import {
+    syncMilestoneToTasks,
+    removeMilestoneTask,
+    type MilestoneRow,
+} from "@/lib/planners/milestone-sync";
 
 async function checkOwnership(admin: ReturnType<typeof createAdminClient>, memberId: string, projectId: string) {
     const { data } = await admin
@@ -57,6 +63,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // 일정 동기화 (실패해도 마일스톤 자체는 성공 응답)
+    if (data) {
+        try {
+            await syncMilestoneToTasks(admin, memberId, projectId, data as MilestoneRow);
+        } catch (e) {
+            console.warn("milestone sync failed (POST):", e);
+        }
+    }
+
     return NextResponse.json({ milestone: data });
 }
 
@@ -74,6 +90,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const { id, ...patch } = body;
     if (!id) return NextResponse.json({ error: "id_required" }, { status: 400 });
 
+    // 이전 due_date 조회 (날짜 변경 감지용)
+    const { data: prev } = await admin
+        .from("planners_project_milestones")
+        .select("due_date")
+        .eq("id", id)
+        .eq("project_id", projectId)
+        .maybeSingle();
+    const prevDueDate = (prev as { due_date: string | null } | null)?.due_date ?? null;
+
     const { data, error } = await admin
         .from("planners_project_milestones")
         .update(patch)
@@ -83,6 +108,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (data) {
+        try {
+            await syncMilestoneToTasks(admin, memberId, projectId, data as MilestoneRow, prevDueDate);
+        } catch (e) {
+            console.warn("milestone sync failed (PATCH):", e);
+        }
+    }
+
     return NextResponse.json({ milestone: data });
 }
 
@@ -100,6 +134,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id_required" }, { status: 400 });
 
+    // 삭제 전 due_date 조회 — 일정에서 함께 제거
+    const { data: prev } = await admin
+        .from("planners_project_milestones")
+        .select("due_date")
+        .eq("id", id)
+        .eq("project_id", projectId)
+        .maybeSingle();
+    const prevDueDate = (prev as { due_date: string | null } | null)?.due_date ?? null;
+
     const { error } = await admin
         .from("planners_project_milestones")
         .delete()
@@ -107,5 +150,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         .eq("project_id", projectId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (prevDueDate) {
+        try {
+            await removeMilestoneTask(admin, memberId, id, prevDueDate);
+        } catch (e) {
+            console.warn("milestone sync failed (DELETE):", e);
+        }
+    }
+
     return NextResponse.json({ ok: true });
 }

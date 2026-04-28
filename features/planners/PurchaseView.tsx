@@ -130,7 +130,7 @@ export function PurchaseView() {
 
                         <ul className="space-y-3 mb-8">
                             {[
-                                "능동 AI 비서 (아침 브리핑·저녁 정리)",
+                                "능동 AI 브리핑 (아침·점심·저녁 정리)",
                                 "Personal Identity · Yearly · Monthly · Weekly · Daily",
                                 "Project Book (Vrief 4단계 + GPR 7필드)",
                                 "Templates 109종 (Schedule·Note·FrameWorkBook)",

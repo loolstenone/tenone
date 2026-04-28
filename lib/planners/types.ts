@@ -232,6 +232,11 @@ export function formatDate(date: Date): string {
     return date.toISOString().slice(0, 10);
 }
 
+// 로컬 타임존 기준 YYYY-MM-DD — 날짜 비교·표시에 사용
+export function localDateStr(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function todayString(): string {
-    return formatDate(new Date());
+    return localDateStr(new Date());
 }

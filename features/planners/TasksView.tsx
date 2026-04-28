@@ -78,7 +78,7 @@ export function TasksView() {
         <div className="max-w-2xl mx-auto px-6 md:px-10 py-8">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-                <h1 className="font-serif text-2xl text-neutral-900">Tasks</h1>
+                <h1 className="font-serif text-2xl text-neutral-900">할 일</h1>
                 <span className="text-sm text-neutral-400">· 상태별 모아보기</span>
             </div>
 

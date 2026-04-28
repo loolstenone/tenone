@@ -36,3 +36,27 @@ export function getRecommendedTemplateKeys(category: ProjectCategory | string | 
     if (!category) return [];
     return RECOMMEND_BY_CATEGORY[category as ProjectCategory] ?? [];
 }
+
+/** 일간(Daily) 진입 시 노출할 추천 템플릿 — 하루를 깊게 다루는 데 적합한 6종 */
+export const DAILY_RECOMMENDED: string[] = [
+    "cornell",        // 코넬 노트
+    "gratitude",      // 감사 일기
+    "emotion_log",    // 감정 로그
+    "energy_map",     // 에너지 지도
+    "kpt",            // KPT 회고
+    "weekly_review",  // 주간 리뷰
+];
+
+/** 전체 추천(Top) — 템플릿 라이브러리의 "추천" 탭과 동일 SSOT */
+export const TOP_RECOMMENDED: string[] = [
+    "daily_design",
+    "weekly_review",
+    "meeting",
+    "cornell",
+    "eisenhower",
+    "brainstorm",
+    "retrospective",
+    "habit_tracker",
+    "okr",
+    "swot",
+];

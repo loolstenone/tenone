@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, Eye, Search, Star, Image as ImageIcon, GripVertical } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Plus, Trash2, Loader2, ChevronUp, ChevronDown, LayoutTemplate, X, Maximize2, Pencil, PenLine, Eye, Search, Star, Image as ImageIcon, GripVertical, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
 import { renderFramework, type FrameworkData } from "./TemplatesView";
 import { Track } from "@/lib/analytics";
-import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, type HandNoteData } from "./HandNote";
-import { getRecommendedTemplateKeys } from "@/lib/planners/template-recommendations";
+import { HandNote, isHandwritingContent, parseHandwriting, serializeHandwriting, extractTextPart, setTextPart, setHandPart, type HandNoteData } from "./HandNote";
+import { CornellRowsInline, type CornellRow } from "./DailyView";
+import { getRecommendedTemplateKeys, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
 
 // Embedded marker so we can persist template metadata in the existing
 // project_notes.content column without a DB migration. Format:
@@ -22,6 +23,18 @@ function parseTemplateMarker(content: string | null): { key: string; label: stri
 }
 function buildTemplateContent(key: string, label: string, body: string): string {
     return `<!-- planners:tpl=${key}|label=${label.replace(/[\r\n>]/g, ' ').trim()} -->\n${body}`;
+}
+
+// 캔버스 노트 마커 — 캔버스 id를 노트 content에 임베드 (DB 마이그레이션 없이)
+const CANVAS_MARKER_RE = /^<!--\s*planners:canvas=([a-zA-Z0-9_-]+)\s*-->/;
+function parseCanvasMarker(content: string | null): { canvasId: string } | null {
+    if (!content) return null;
+    const m = content.match(CANVAS_MARKER_RE);
+    if (!m) return null;
+    return { canvasId: m[1] };
+}
+function buildCanvasContent(canvasId: string): string {
+    return `<!-- planners:canvas=${canvasId} -->`;
 }
 
 interface ProjectNote {
@@ -52,13 +65,14 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
     const [templates, setTemplates] = useState<Template[]>([]);
     const [tplLoading, setTplLoading] = useState(false);
     const [tplQuery, setTplQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState<"all" | "favs" | "framework" | "schedule" | "note">("all");
+    const [categoryFilter, setCategoryFilter] = useState<"all" | "favs" | "recommended" | "framework" | "schedule" | "note">("all");
     const [tplFavs, setTplFavs] = useState<Set<string>>(() => {
         if (typeof window === "undefined") return new Set();
         try { return new Set(JSON.parse(localStorage.getItem("planners_fav_templates") || "[]")); }
         catch { return new Set(); }
     });
     const [expandedNote, setExpandedNote] = useState<ProjectNote | null>(null);
+    const [flashNoteId, setFlashNoteId] = useState<string | null>(null);
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
 
     async function load() {
@@ -66,12 +80,32 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         const res = await fetch(`/api/planners/projects/${projectId}/notes`);
         if (res.ok) {
             const d = await res.json();
-            setNotes(d.notes || []);
+            const list: ProjectNote[] = d.notes || [];
+            setNotes(list);
+            // 첫 진입 시 노트 0개면 기본 코넬 노트 1개 자동 생성 (Daily와 동일)
+            if (list.length === 0) {
+                try {
+                    const cornellContent = JSON.stringify({
+                        _cornell: true,
+                        rows: [{ id: "r1", cue: "", note: "" }],
+                        summary: "",
+                    });
+                    const r2 = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ title: "기본 노트 1", content: cornellContent }),
+                    });
+                    if (r2.ok) {
+                        const dd = await r2.json();
+                        if (dd?.note) setNotes([dd.note]);
+                    }
+                } catch { /* ignore — empty 상태 그대로 */ }
+            }
         }
         setLoading(false);
     }
 
-    useEffect(() => { load(); }, [projectId]);
+    useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [projectId]);
 
     // 카테고리 추천 템플릿 칩 노출용 — 템플릿 목록 사전 로드
     useEffect(() => {
@@ -91,10 +125,16 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
         setSaving(true);
         try {
             const idx = notes.filter(n => !(n.content ?? "").includes("planners:handwriting") && !(n.content ?? "").includes("planners-template")).length + 1;
+            // 코넬 포맷으로 생성 — Daily와 동일한 SSOT 형식
+            const cornellContent = JSON.stringify({
+                _cornell: true,
+                rows: [{ id: "r1", cue: "", note: "" }],
+                summary: "",
+            });
             const res = await fetch(`/api/planners/projects/${projectId}/notes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: `기본 노트 ${idx}`, content: "" }),
+                body: JSON.stringify({ title: `기본 노트 ${idx}`, content: cornellContent }),
             });
             if (res.ok) {
                 const d = await res.json();
@@ -149,9 +189,16 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
             });
             if (res.ok) {
                 const d = await res.json();
-                setNotes([...notes, d.note]);
+                const newNote = d.note as ProjectNote;
+                setNotes([...notes, newNote]);
                 setPicker(false);
                 Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "project" });
+                // 시각 피드백 — 새 노트로 스크롤 + 1.5s 깜빡임
+                setFlashNoteId(newNote.id);
+                setTimeout(() => {
+                    document.getElementById(`note-${newNote.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 50);
+                setTimeout(() => setFlashNoteId(null), 1800);
             } else {
                 const err = await res.json().catch(() => ({}));
                 console.error("template insert failed", err);
@@ -212,7 +259,8 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
 
     const filteredTpl = templates.filter(t => {
         if (categoryFilter === "favs" && !tplFavs.has(t.id)) return false;
-        if (categoryFilter !== "all" && categoryFilter !== "favs" && t.category !== categoryFilter) return false;
+        if (categoryFilter === "recommended" && !TOP_RECOMMENDED.includes(t.key)) return false;
+        if (categoryFilter !== "all" && categoryFilter !== "favs" && categoryFilter !== "recommended" && t.category !== categoryFilter) return false;
         if (tplQuery) {
             const q = tplQuery.toLowerCase();
             return t.label.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q);
@@ -278,14 +326,14 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                             setNotes([...notes, d.note]);
                         } else {
                             const err = await res.json().catch(() => ({}));
-                            alert(`손글씨 노트 추가 실패: ${err.error || res.status}`);
+                            alert(`손글씨 추가 실패: ${err.error || res.status}`);
                         }
                     }}
                     disabled={saving}
                     title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
                     className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors disabled:opacity-50"
                 >
-                    <Pencil className="h-3.5 w-3.5" /> 손글씨 노트
+                    <Pencil className="h-3.5 w-3.5" /> 손글씨
                 </button>
                 <button
                     onClick={openPicker}
@@ -296,18 +344,37 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                 </button>
                 <button
                     onClick={async () => {
-                        const res = await fetch("/api/planners/canvases", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ title: `프로젝트 캔버스` }),
-                        });
-                        if (res.ok) {
-                            const d = await res.json();
-                            window.location.href = `/planners/app/canvas/${d.canvas.id}`;
-                        } else {
-                            const err = await res.json().catch(() => ({}));
-                            alert(`캔버스 생성 실패: ${err.error || res.status}`);
-                        }
+                        setSaving(true);
+                        try {
+                            const idx = notes.filter(n => parseCanvasMarker(n.content)).length + 1;
+                            const cTitle = `캔버스 ${idx}`;
+                            const cRes = await fetch("/api/planners/canvases", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ title: cTitle }),
+                            });
+                            if (!cRes.ok) {
+                                const err = await cRes.json().catch(() => ({}));
+                                alert(`캔버스 생성 실패: ${err.error || cRes.status}`);
+                                return;
+                            }
+                            const cData = await cRes.json();
+                            const canvasId = cData.canvas.id as string;
+                            const nRes = await fetch(`/api/planners/projects/${projectId}/notes`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ title: cTitle, content: buildCanvasContent(canvasId) }),
+                            });
+                            if (nRes.ok) {
+                                const d = await nRes.json();
+                                setNotes([...notes, d.note]);
+                            } else {
+                                const err = await nRes.json().catch(() => ({}));
+                                alert(`노트 추가 실패: ${err.error || nRes.status}`);
+                            }
+                        } catch (e) {
+                            alert(`네트워크 오류: ${(e as Error).message}`);
+                        } finally { setSaving(false); }
                     }}
                     disabled={saving}
                     title="자유 캔버스 — 그림·도형·텍스트"
@@ -355,7 +422,8 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                 noteDragRef.current = null;
                             }}
                             onDragEnd={() => { noteDragRef.current = null; }}
-                            className="group/note-drag relative"
+                            id={`note-${note.id}`}
+                            className={`group/note-drag relative transition-shadow rounded-xl ${flashNoteId === note.id ? "ring-2 ring-violet-300 ring-offset-2 shadow-lg" : ""}`}
                         >
                             <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
                                 <GripVertical className="h-4 w-4 text-neutral-300" />
@@ -419,13 +487,14 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                 />
                             </div>
                             <div className="flex gap-1 overflow-x-auto">
-                                {(["all", "favs", "framework", "schedule", "note"] as const).map((c) => (
+                                {(["all", "favs", "recommended", "framework", "schedule", "note"] as const).map((c) => (
                                     <button
                                         key={c}
                                         onClick={() => setCategoryFilter(c)}
                                         className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                                             categoryFilter === c
                                                 ? c === "favs" ? "bg-amber-500 text-white"
+                                                : c === "recommended" ? "bg-rose-500 text-white"
                                                 : c === "framework" ? "bg-violet-600 text-white"
                                                 : c === "schedule" ? "bg-teal-600 text-white"
                                                 : c === "note" ? "bg-amber-500 text-white"
@@ -433,7 +502,7 @@ export function ProjectNotesTab({ projectId, projectCategory }: { projectId: str
                                                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                                         }`}
                                     >
-                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "framework" ? "FrameWorkBook" : c === "schedule" ? "Schedule" : "Note"}
+                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "프레임워크북" : c === "schedule" ? "일정" : "노트"}
                                     </button>
                                 ))}
                             </div>
@@ -526,8 +595,12 @@ function NoteCard({
         setContent(note.content || "");
     }, [note.id, note.title, note.content]);
 
+    // Canvas detection (캔버스 ID 임베드 마커)
+    const canvasInfo = parseCanvasMarker(content);
+    const isCanvas = !!canvasInfo;
+
     // Template detection
-    const tplInfo = parseTemplateMarker(content);
+    const tplInfo = !isCanvas ? parseTemplateMarker(content) : null;
     const isTpl = !!tplInfo;
     const dataKey = isTpl ? tplDataKey(note.id) : '';
     const [fwData, setFwData] = useState<FrameworkData>(() => {
@@ -547,24 +620,67 @@ function NoteCard({
     const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
     const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
 
-    // Handwriting detection (템플릿이 아닐 때만)
-    const isHand = !isTpl && isHandwritingContent(content);
-    const handData = isHand ? parseHandwriting(content) : null;
+    // Handwriting detection (템플릿/캔버스가 아닐 때만)
+    const [handMode, setHandMode] = useState<boolean>(!isTpl && !isCanvas && isHandwritingContent(content));
+    useEffect(() => {
+        if (isTpl || isCanvas) return;
+        // 외부에서 content가 새로 들어왔을 때 — 손글씨 콘텐츠면 hand 우선, 아니면 text 우선
+        setHandMode(isHandwritingContent(content));
+        // 의도적으로 content만 의존
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [note.id]);
+    const isHand = !isTpl && !isCanvas && handMode;
+    const handData = isHand ? (parseHandwriting(content) ?? { strokes: [], width: 600, height: 240 }) : null;
+
+    // Cornell 포맷 감지 — Daily와 동일한 SSOT JSON 구조
+    const cornellData = useMemo(() => {
+        if (isTpl || isHand || isCanvas || !content) return null;
+        try {
+            const parsed = JSON.parse(content);
+            if (parsed?._cornell && Array.isArray(parsed.rows)) {
+                return { rows: parsed.rows as CornellRow[], summary: typeof parsed.summary === "string" ? parsed.summary : "" };
+            }
+        } catch { /* not cornell */ }
+        return null;
+    }, [content, isTpl, isHand, isCanvas]);
+    const isCornell = cornellData !== null;
+
+    const lastCornellRef = useRef<string>("");
+    function saveCornell(rows: CornellRow[], summary: string) {
+        const next = JSON.stringify({ _cornell: true, rows, summary });
+        lastCornellRef.current = next;
+        setContent(next);
+    }
+    function commitCornell() {
+        // blur 시 서버 저장 — 최신 content를 ref로 보장
+        const final = lastCornellRef.current || content;
+        onUpdate({ content: final });
+    }
+
     function saveHandwriting(next: HandNoteData) {
-        const text = serializeHandwriting(next);
+        const text = setHandPart(content, next);
         setContent(text);
         onUpdate({ content: text });
     }
+    function saveText(newText: string) {
+        const updated = setTextPart(content, newText);
+        setContent(updated);
+        onUpdate({ content: updated });
+    }
     function toggleHandwriting() {
         if (isHand) {
-            if (!confirm("손글씨를 텍스트 모드로 바꾸면 그림이 사라집니다. 계속할까요?")) return;
-            setContent(""); onUpdate({ content: "" });
+            // 손글씨 → 텍스트: 데이터 보존, 모드만 전환
+            setHandMode(false);
             setEditing(true);
         } else {
-            if (content.trim() && !confirm("기존 텍스트 내용을 손글씨 캔버스로 바꿀까요? (기존 텍스트는 사라집니다)")) return;
-            const empty: HandNoteData = { strokes: [], width: 600, height: 240 };
-            const text = serializeHandwriting(empty);
-            setContent(text); onUpdate({ content: text });
+            // 텍스트 → 손글씨: 기존 손글씨가 없으면 빈 캔버스로 초기화하되, 텍스트는 .text에 보존
+            if (!isHandwritingContent(content)) {
+                const empty: HandNoteData = { strokes: [], width: 600, height: 240 };
+                const merged = setHandPart(content, empty);
+                setContent(merged);
+                onUpdate({ content: merged });
+            }
+            setHandMode(true);
         }
     }
 
@@ -588,55 +704,83 @@ function NoteCard({
                     </button>
                 </div>
                 {isTpl && <LayoutTemplate className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />}
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => onUpdate({ title })}
-                    placeholder={isTpl ? (tplInfo?.label || "제목을 입력하세요") : "노트 제목"}
-                    className="flex-1 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:font-normal placeholder:italic"
-                />
-                {!isTpl && !isHand && (
-                    <button
-                        onClick={() => setEditing(e => !e)}
-                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
-                        title={editing ? "미리보기" : "마크다운 편집"}
-                    >
-                        {editing ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-                    </button>
-                )}
-                {!isTpl && (
-                    <button
-                        onClick={toggleHandwriting}
-                        className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isHand ? "bg-[#0F766E]/10 text-[#0F766E]" : "hover:bg-neutral-200 text-neutral-400 hover:text-neutral-700"}`}
-                        title={isHand ? "텍스트 모드로 전환" : "손글씨 모드로 전환 (Apple Pencil · S Pen)"}
-                    >
-                        <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                )}
+                {isCanvas && <ImageIcon className="h-3.5 w-3.5 text-sky-500 shrink-0" />}
+                {(() => {
+                    const isAutoTitle = !title || /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(title) || title === tplInfo?.label;
+                    return (
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            onBlur={() => onUpdate({ title })}
+                            placeholder={
+                                isTpl ? (tplInfo?.label || "이 템플릿으로 기록할 주제 한 줄")
+                                : isCanvas ? "예: 동선 스케치"
+                                : isHand ? "예: 회의 메모 · 손글씨 정리"
+                                : "예: 인터뷰 메모 / 자료 정리"
+                            }
+                            className={`flex-1 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
+                                isAutoTitle
+                                    ? "italic font-light text-neutral-400"
+                                    : "font-medium text-neutral-700"
+                            }`}
+                        />
+                    );
+                })()}
+                {/* 편집·손글씨 토글은 모달 안으로 이동 — 카드는 미리보기 전용 */}
                 <button
                     onClick={onExpand}
+                    title="크게 보기"
                     className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
                 >
                     <Maximize2 className="h-3.5 w-3.5" />
                 </button>
                 <button
                     onClick={onDelete}
+                    title="삭제"
                     className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
                 >
                     <Trash2 className="h-3.5 w-3.5" />
                 </button>
             </div>
-            {grid ? (
+            {isCanvas ? (
+                <div
+                    onClick={onExpand}
+                    className="px-4 py-8 text-center cursor-pointer hover:bg-neutral-50 transition-colors"
+                >
+                    <ImageIcon className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
+                    <p className="text-xs text-neutral-500">자유 캔버스 — 클릭해서 그리기</p>
+                </div>
+            ) : grid ? (
                 <div className="p-4">{grid}</div>
+            ) : isCornell && cornellData ? (
+                // 코넬 — 미리보기 (편집은 모달)
+                <div onClick={onExpand} className="px-4 py-3 cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative">
+                    {cornellData.rows.length > 0 && cornellData.rows.some(r => r.cue || r.note) ? (
+                        <div className="space-y-1.5">
+                            {cornellData.rows.map((r) => (
+                                <div key={r.id} className="grid grid-cols-[140px_1fr] gap-3 text-sm">
+                                    <span className="text-[#0F766E] font-medium truncate">{r.cue || <span className="text-neutral-300 italic">키워드</span>}</span>
+                                    <span className="text-neutral-700 whitespace-pre-wrap line-clamp-2">{r.note || <span className="text-neutral-300 italic">노트</span>}</span>
+                                </div>
+                            ))}
+                            {cornellData.summary && (
+                                <p className="pt-2 mt-2 border-t border-neutral-100 text-xs text-neutral-600 italic line-clamp-2">{cornellData.summary}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
+                    )}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
+                </div>
             ) : isHand ? (
                 // 리스트: 고정 높이 프리뷰 — 편집은 크게 보기(모달)에서
                 <div
-                    className="relative h-32 overflow-hidden cursor-pointer group"
+                    className="relative h-48 overflow-hidden cursor-pointer group"
                     onClick={onExpand}
                 >
                     <div className="pointer-events-none px-3 pt-2">
-                        <HandNote value={handData} onChange={() => {}} height={120} />
+                        <HandNote value={handData} onChange={() => {}} height={180} />
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-xs text-neutral-500 flex items-center gap-1">
@@ -644,21 +788,11 @@ function NoteCard({
                         </span>
                     </div>
                 </div>
-            ) : editing ? (
-                <div className="p-4">
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        onBlur={() => onUpdate({ content })}
-                        placeholder="노트 내용 (마크다운 지원)"
-                        rows={12}
-                        className="w-full text-sm text-neutral-900 focus:outline-none bg-transparent resize-none font-mono leading-relaxed"
-                    />
-                </div>
             ) : (
+                /* 마크다운 노트 — 미리보기 (편집은 모달) */
                 <div
-                    onClick={() => !isTpl && setEditing(true)}
-                    className="p-4 text-sm text-neutral-900 leading-relaxed min-h-[8rem] cursor-text
+                    onClick={onExpand}
+                    className="px-4 py-3 text-sm text-neutral-900 leading-relaxed cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative
                         [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3
                         [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
                         [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-2
@@ -671,7 +805,12 @@ function NoteCard({
                         [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
                         [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
                 >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : content) || "*내용 없음*"}</ReactMarkdown>
+                    {((tplInfo ? tplInfo.body : extractTextPart(content)) || "").trim() ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : extractTextPart(content)) || ""}</ReactMarkdown>
+                    ) : (
+                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
+                    )}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
                 </div>
             )}
         </section>
@@ -690,8 +829,12 @@ function NoteExpandModal({
     const [title, setTitle] = useState(note.title || "");
     const [content, setContent] = useState(note.content || "");
     const [editing, setEditing] = useState(false);
+    // null = content으로 자동 감지, false = HW 스트로크 보존하면서 텍스트 모드 강제
+    const [handModeOverride, setHandModeOverride] = useState<boolean | null>(null);
 
-    const tplInfo = parseTemplateMarker(content);
+    const canvasInfo = parseCanvasMarker(content);
+    const isCanvas = !!canvasInfo;
+    const tplInfo = !isCanvas ? parseTemplateMarker(content) : null;
     const isTpl = !!tplInfo;
     const dataKey = isTpl ? tplDataKey(note.id) : '';
     const [fwData, setFwData] = useState<FrameworkData>(() => {
@@ -711,22 +854,46 @@ function NoteExpandModal({
     const hasGrid = !!(tplMeta && isSpecialTemplate(tplMeta));
     const grid = hasGrid && tplMeta ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleFwChange) : null;
 
-    // Handwriting
-    const isHand = !isTpl && isHandwritingContent(content);
+    // Handwriting — handModeOverride=false: 스트로크 보존하면서 텍스트 모드
+    const isHand = !isTpl && !isCanvas && (
+        handModeOverride !== null ? handModeOverride : isHandwritingContent(content)
+    );
     const handData = isHand ? parseHandwriting(content) : null;
+    // 텍스트 편집 시 HW 스트로크를 보존하기 위한 파생 값
+    const textDisplayValue = isHandwritingContent(content) ? extractTextPart(content) : content;
+    function handleTextChange(v: string) {
+        setContent(isHandwritingContent(content) ? setTextPart(content, v) : v);
+    }
+
+    // Cornell
+    const cornellData = useMemo(() => {
+        if (isTpl || isHand || isCanvas || !content) return null;
+        try {
+            const parsed = JSON.parse(content);
+            if (parsed?._cornell && Array.isArray(parsed.rows)) {
+                return { rows: parsed.rows as CornellRow[], summary: typeof parsed.summary === "string" ? parsed.summary : "" };
+            }
+        } catch { /* not cornell */ }
+        return null;
+    }, [content, isTpl, isHand, isCanvas]);
+    const isCornell = cornellData !== null;
+    function saveCornellModal(rows: CornellRow[], summary: string) {
+        setContent(JSON.stringify({ _cornell: true, rows, summary }));
+    }
     function saveHand(next: HandNoteData) {
-        const text = serializeHandwriting(next);
-        setContent(text);
+        setContent(setHandPart(content, next));
     }
     function toggleHandwriting() {
         if (isHand) {
-            if (!confirm("손글씨를 텍스트 모드로 바꾸면 그림이 사라집니다. 계속할까요?")) return;
-            setContent("");
+            // 손글씨 → 텍스트: 스트로크를 content에 그대로 보존, 표시만 텍스트로
+            setHandModeOverride(false);
             setEditing(true);
         } else {
-            if (content.trim() && !confirm("기존 텍스트 내용을 손글씨 캔버스로 바꿀까요? (기존 텍스트는 사라집니다)")) return;
-            const empty: HandNoteData = { strokes: [], width: 800, height: 480 };
-            setContent(serializeHandwriting(empty));
+            // 텍스트 → 손글씨: 기존 텍스트를 .text 필드에 보존한 채 HW 형식으로 전환
+            if (!isHandwritingContent(content)) {
+                setContent(setHandPart(content, { strokes: [], width: 800, height: 480 }));
+            }
+            setHandModeOverride(null);
         }
     }
 
@@ -741,29 +908,45 @@ function NoteExpandModal({
                 {/* Header */}
                 <div className="px-6 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-3">
                     {isTpl && <LayoutTemplate className="h-4 w-4 text-[#0F766E] shrink-0" />}
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder={isTpl ? (tplInfo?.label || "노트 제목") : "노트 제목"}
-                        className="flex-1 text-base font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-400 placeholder:italic placeholder:font-normal"
-                    />
-                    {!isTpl && !isHand && (
-                        <button
-                            onClick={() => setEditing(e => !e)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors"
-                        >
-                            {editing ? <><Eye className="h-3.5 w-3.5 mr-1" />미리보기</> : <><Pencil className="h-3.5 w-3.5 mr-1" />편집</>}
-                        </button>
-                    )}
-                    {!isTpl && (
+                    {isCanvas && <ImageIcon className="h-4 w-4 text-sky-500 shrink-0" />}
+                    {(() => {
+                        const isAutoTitle = !title || /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(title) || title === tplInfo?.label;
+                        return (
+                            <div className="flex-1 min-w-0">
+                                <input
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder={
+                                        isTpl ? (tplInfo?.label || "이 템플릿으로 기록할 주제 한 줄")
+                                        : isCanvas ? "예: 동선 스케치"
+                                        : isHand ? "예: 회의 메모 · 손글씨 정리"
+                                        : "예: 인터뷰 메모 / 자료 정리"
+                                    }
+                                    className={`w-full text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
+                                        isAutoTitle
+                                            ? "italic font-light text-neutral-400"
+                                            : isTpl ? "font-semibold text-[#0F766E]" : isCanvas ? "font-semibold text-sky-700" : "font-semibold text-neutral-900"
+                                    }`}
+                                />
+                            </div>
+                        );
+                    })()}
+                    {!isTpl && !isCanvas && (
                         <button
                             onClick={toggleHandwriting}
-                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm border transition-colors ${isHand ? "bg-[#0F766E]/10 border-[#0F766E]/30 text-[#0F766E]" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"}`}
-                            title={isHand ? "텍스트 모드로 전환" : "손글씨 모드"}
+                            title={isHand ? "텍스트 모드로 전환" : "손글씨 모드로 전환"}
+                            className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors shrink-0"
                         >
-                            <Pencil className="h-3.5 w-3.5 mr-1" />
-                            {isHand ? "손글씨" : "✏️"}
+                            {isHand ? <><Type className="h-3.5 w-3.5" /> 텍스트</> : <><PenLine className="h-3.5 w-3.5" /> 손글씨</>}
+                        </button>
+                    )}
+                    {!isTpl && !isHand && !isCornell && !isCanvas && (
+                        <button
+                            onClick={() => setEditing(e => !e)}
+                            className="px-3 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors"
+                        >
+                            {editing ? "미리보기" : "편집"}
                         </button>
                     )}
                     <button
@@ -772,22 +955,36 @@ function NoteExpandModal({
                     >
                         저장 후 닫기
                     </button>
-                    <button onClick={handleClose} className="p-1.5 rounded hover:bg-neutral-200 text-neutral-400 hover:text-neutral-700">
-                        <X className="h-4 w-4" />
-                    </button>
                 </div>
                 {/* Body */}
-                {grid ? (
+                {isCanvas && canvasInfo ? (
+                    <div className="flex-1 min-h-0">
+                        <iframe
+                            src={`/planners/app/canvas/${canvasInfo.canvasId}?embed=1`}
+                            className="w-full h-full border-0"
+                            title="Canvas"
+                        />
+                    </div>
+                ) : grid ? (
                     <div className="flex-1 p-6 overflow-auto">{grid}</div>
                 ) : isHand ? (
-                    <div className="flex-1 p-6 overflow-auto">
-                        <HandNote value={handData} onChange={saveHand} height={Math.max(480, (handData?.height ?? 480))} />
+                    <div className="flex-1 min-h-0 flex flex-col overflow-auto">
+                        <HandNote value={handData} onChange={saveHand} fillHeight />
+                    </div>
+                ) : isCornell && cornellData ? (
+                    <div className="flex-1 overflow-auto">
+                        <CornellRowsInline
+                            rows={cornellData.rows}
+                            summary={cornellData.summary}
+                            onChange={saveCornellModal}
+                            onCommit={() => { /* 모달 닫을 때 일괄 저장 */ }}
+                        />
                     </div>
                 ) : editing ? (
                     <div className="flex-1 p-6 overflow-auto">
                         <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            value={textDisplayValue}
+                            onChange={(e) => handleTextChange(e.target.value)}
                             placeholder="노트 내용 (마크다운 지원)"
                             className="w-full h-full text-sm text-neutral-900 focus:outline-none bg-transparent resize-none font-mono leading-relaxed"
                         />
@@ -808,7 +1005,7 @@ function NoteExpandModal({
                             [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
                             [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-neutral-600"
                     >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : content) || "*내용 없음*"}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{(tplInfo ? tplInfo.body : textDisplayValue) || "*내용 없음*"}</ReactMarkdown>
                     </div>
                 )}
             </div>

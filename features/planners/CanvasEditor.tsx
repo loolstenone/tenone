@@ -44,6 +44,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     const [savedAt, setSavedAt] = useState<Date | null>(null);
     const apiRef = useRef<ExcalidrawImperativeAPI | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const thumbDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -75,6 +76,36 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
         }
     }, [canvasId]);
 
+    const saveThumbnail = useCallback(async () => {
+        if (!apiRef.current) return;
+        const elements = apiRef.current.getSceneElements();
+        if (elements.length === 0) return;
+        try {
+            const { exportToBlob } = await import("@excalidraw/excalidraw");
+            const blob = await exportToBlob({
+                elements: [...elements],
+                appState: { exportBackground: true },
+                files: apiRef.current.getFiles(),
+                maxWidthOrHeight: 400,
+                quality: 0.65,
+                mimeType: "image/jpeg",
+            });
+            const dataUrl: string = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            await fetch(`/api/planners/canvases/${canvasId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ thumbnail_url: dataUrl }),
+            });
+        } catch {
+            // 썸네일 오류는 무시
+        }
+    }, [canvasId]);
+
     const saveTitle = useCallback(async (next: string) => {
         if (!canvas || next === canvas.title) return;
         await fetch(`/api/planners/canvases/${canvasId}`, {
@@ -88,7 +119,6 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
     function onChange(elements: readonly ExcalidrawElement[], appState: AppState) {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => {
-            // appState 는 스크롤·커서·줌·뷰만 저장 (선택 등은 휘발)
             const slimAppState: Partial<AppState> = {
                 viewBackgroundColor: appState.viewBackgroundColor,
                 gridSize: appState.gridSize,
@@ -99,6 +129,10 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
             };
             saveData({ elements: [...elements] as ExcalidrawElement[], appState: slimAppState });
         }, 1500);
+
+        // 썸네일은 5초 debounce — 데이터 저장보다 느슨하게
+        if (thumbDebounceRef.current) clearTimeout(thumbDebounceRef.current);
+        thumbDebounceRef.current = setTimeout(saveThumbnail, 5000);
     }
 
     async function deleteCanvas() {
@@ -137,7 +171,7 @@ export function CanvasEditor({ canvasId }: { canvasId: string }) {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={() => saveTitle(title.trim() || "제목 없음")}
-                    className="flex-1 text-sm font-semibold text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-300"
+                    className="flex-1 text-sm font-medium text-neutral-500 bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 transition-colors"
                     placeholder="캔버스 제목"
                 />
                 <div className="flex items-center gap-2 text-xs text-neutral-400">

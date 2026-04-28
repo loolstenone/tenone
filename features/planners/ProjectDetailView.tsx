@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSwipeNav } from "./useSwipeNav";
 import Link from "next/link";
-import { ChevronLeft, Loader2, ImageIcon, NotebookPen, ListTodo, LineChart, Flag } from "lucide-react";
+import { ChevronLeft, Loader2, NotebookPen, ListTodo, Flag, Settings as SettingsIcon, ChevronDown, ChevronUp } from "lucide-react";
 import type { PlannerProject, ProjectCollaborator } from "@/lib/planners/types";
 import { ProjectNotesTab } from "./ProjectNotesTab";
 import { ProjectTasksTab } from "./ProjectTasksTab";
-import { ProjectTrackingTab } from "./ProjectTrackingTab";
 import { ProjectMilestonesTab } from "./ProjectMilestonesTab";
 import { ProjectRetroModal } from "./ProjectRetroModal";
 import { CoverPicker } from "./CoverPicker";
@@ -15,7 +13,24 @@ import { CoverRender } from "./CoverRender";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { PROJECT_CATEGORIES, getCategoryMeta, type ProjectCategory } from "@/lib/planners/project-categories";
 
-type Tab = "cover" | "notes" | "tasks" | "tracking" | "milestones";
+// 통합 페이지의 각 섹션 — Tab 컴포넌트가 자체 카드를 갖고 있으므로 헤더만 plain 렌더
+function SectionCard({ icon: Icon, title, hint, children }: {
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+    hint?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div>
+            <div className="flex items-center gap-2 mb-2 px-1">
+                <Icon className="h-3.5 w-3.5 text-[#0F766E]" />
+                <h2 className="text-xs tracking-widest text-neutral-500 font-semibold">{title}</h2>
+                {hint && <span className="text-[10px] text-neutral-300 ml-1">{hint}</span>}
+            </div>
+            {children}
+        </div>
+    );
+}
 
 const STATUS_LABEL: Record<string, string> = {
     active: "진행중",
@@ -31,12 +46,12 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export function ProjectDetailView({ projectId }: { projectId: string }) {
-    const [tab, setTab] = useState<Tab>("notes");
     const [project, setProject] = useState<PlannerProject | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [retroOpen, setRetroOpen] = useState(false);
     const [userRole, setUserRole] = useState<"owner" | "editor" | "viewer">("owner");
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     async function reload() {
         const res = await fetch(`/api/planners/projects/${projectId}`);
@@ -76,29 +91,36 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
 
     if (loading) {
-        return <div className="max-w-6xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
+        return <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 text-center text-neutral-400 text-sm">로딩 중…</div>;
     }
     if (!project) {
-        return <div className="max-w-6xl mx-auto px-6 py-12 text-center text-neutral-400 text-sm">프로젝트를 찾을 수 없습니다.</div>;
+        return <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12 text-center text-neutral-400 text-sm">프로젝트를 찾을 수 없습니다.</div>;
     }
 
     const dateRange = project.start_date || project.end_date
         ? `${project.start_date || "?"} → ${project.end_date || "진행중"}`
         : null;
 
-    const TABS: Tab[] = ["notes", "tasks", "milestones", "tracking", "cover"];
-    const tabIdx = TABS.indexOf(tab);
-    const swipeRef = useSwipeNav(
-        () => { if (tabIdx < TABS.length - 1) setTab(TABS[tabIdx + 1]); },
-        () => { if (tabIdx > 0) setTab(TABS[tabIdx - 1]); },
-    );
+    // D-day 계산 — 종료일 기준
+    let dDay: { label: string; tone: string } | null = null;
+    if (project.end_date) {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const end = new Date(project.end_date + "T00:00:00");
+        const diffDays = Math.round((end.getTime() - today.getTime()) / 86400000);
+        if (diffDays > 0) dDay = { label: `D-${diffDays}`, tone: diffDays <= 7 ? "text-rose-600 bg-rose-50 border-rose-200" : "text-neutral-600 bg-neutral-50 border-neutral-200" };
+        else if (diffDays === 0) dDay = { label: "D-Day", tone: "text-rose-600 bg-rose-50 border-rose-200 font-bold" };
+        else dDay = { label: `D+${-diffDays}`, tone: "text-neutral-400 bg-neutral-50 border-neutral-200" };
+    }
+
+    // 카테고리 메타
+    const categoryMeta = project.category ? getCategoryMeta(project.category as ProjectCategory) : null;
 
     return (
-        <div ref={swipeRef} className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Breadcrumb + utility */}
             <div className="flex items-center justify-between mb-5">
                 <Link href="/planners/app/projects" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-                    <ChevronLeft className="h-4 w-4" /> Projects
+                    <ChevronLeft className="h-4 w-4" /> 프로젝트
                 </Link>
                 <PlannersUtilityLinks />
             </div>
@@ -143,52 +165,99 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                             )}
                             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-400" />}
                         </div>
-                        {dateRange && (
-                            <p className="text-xs text-neutral-500 mt-1.5 font-mono">{dateRange}</p>
-                        )}
+                        {/* 메타 라인 — 카테고리 · D-day · 일정 한눈에 */}
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            {categoryMeta && (
+                                <span
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-white font-medium"
+                                    style={{ backgroundColor: categoryMeta.color }}
+                                >
+                                    {categoryMeta.label}
+                                </span>
+                            )}
+                            {dDay && (
+                                <span className={`inline-flex items-center px-2 py-0.5 border rounded text-[11px] font-mono ${dDay.tone}`}>
+                                    {dDay.label}
+                                </span>
+                            )}
+                            {dateRange && (
+                                <span className="text-xs text-neutral-500 font-mono">{dateRange}</span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </header>
 
-            {/* Tabs — 노트(작업) 가 기본, 표지(설정) 는 보조 */}
-            <div className="border-b border-neutral-200 mb-6">
-                <div className="flex gap-1">
-                    {([
-                        { key: "notes" as Tab, label: "노트", icon: NotebookPen, hint: "프로젝트 작업 영역" },
-                        { key: "tasks" as Tab, label: "Task", icon: ListTodo, hint: "이 프로젝트의 모든 Task 합산" },
-                        { key: "milestones" as Tab, label: "마일스톤", icon: Flag, hint: "체크리스트 + 간트 + 진행률" },
-                        { key: "tracking" as Tab, label: "트래킹", icon: LineChart, hint: "Daily 트래킹 시계열" },
-                        { key: "cover" as Tab, label: "표지·설정", icon: ImageIcon, hint: "커버·제목·상태·일정·카테고리" },
-                    ]).map(({ key, label, icon: Icon, hint }) => (
-                        <button
-                            key={key}
-                            onClick={() => setTab(key)}
-                            title={hint}
-                            className={`flex items-center gap-1.5 px-4 py-3 text-sm transition-colors border-b-2 -mb-px ${
-                                tab === key
-                                    ? "border-[#0F766E] text-[#0F766E] font-semibold"
-                                    : "border-transparent text-neutral-500 hover:text-neutral-900"
-                            }`}
-                        >
-                            <Icon className="h-3.5 w-3.5" />
-                            {label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {/* DailyView 패턴 — 탭 없이 한 페이지에 우선순위 흐름으로 세로 배치 */}
+            <div className="space-y-5">
 
-            {tab === "cover" && <CoverTab project={project} save={saveProject} userRole={userRole} />}
-            {tab === "notes" && <NotesTab projectId={projectId} projectCategory={project.category ?? null} />}
-            {tab === "tasks" && <ProjectTasksTab projectId={projectId} projectColor={project.color || "#0F766E"} />}
-            {tab === "tracking" && <ProjectTrackingTab projectId={projectId} projectColor={project.color || "#0F766E"} />}
-            {tab === "milestones" && (
-                <ProjectMilestonesTab
-                    projectId={projectId}
-                    projectColor={project.color || "#0F766E"}
-                    projectStartDate={project.start_date}
-                    projectEndDate={project.end_date}
-                />
-            )}
+                {/* 1. 마일스톤 — 다음 행동이 가장 명확. 가장 위 */}
+                <SectionCard icon={Flag} title="마일스톤" hint="체크리스트 + 간트 + 진행률">
+                    <ProjectMilestonesTab
+                        projectId={projectId}
+                        projectColor={project.color || "#0F766E"}
+                        projectStartDate={project.start_date}
+                        projectEndDate={project.end_date}
+                    />
+                </SectionCard>
+
+                {/* 2. 업무 — 오늘·이번주 진행할 일 */}
+                <SectionCard icon={ListTodo} title="업무" hint="이 프로젝트의 모든 업무 합산">
+                    <ProjectTasksTab projectId={projectId} projectColor={project.color || "#0F766E"} />
+                </SectionCard>
+
+                {/* 노트 — 기록·아이디어 (기본 노트·손글씨·템플릿·캔버스) */}
+                <SectionCard icon={NotebookPen} title="노트" hint="프로젝트 작업 기록">
+                    <NotesTab projectId={projectId} projectCategory={project.category ?? null} />
+                </SectionCard>
+
+                {/* 5. 표지·설정 — 보조. 접기 가능 */}
+                <section className="bg-white border border-neutral-200 rounded-xl">
+                    <button
+                        onClick={() => setSettingsOpen(o => !o)}
+                        className="w-full flex items-center gap-2 px-5 py-3 text-left"
+                    >
+                        <SettingsIcon className="h-3.5 w-3.5 text-neutral-400" />
+                        <h2 className="text-xs tracking-widest text-neutral-400 flex-1">표지 · 설정</h2>
+                        {settingsOpen ? <ChevronUp className="h-3.5 w-3.5 text-neutral-400" /> : <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />}
+                    </button>
+                    {settingsOpen && (
+                        <div className="px-5 pb-5 border-t border-neutral-100 pt-5">
+                            <CoverTab project={project} save={saveProject} userRole={userRole} />
+                        </div>
+                    )}
+                </section>
+
+                {/* 6. 프로젝트 삭제 — 오너만, 항상 표시 (접기 X) */}
+                {userRole === "owner" && (
+                    <section className="bg-rose-50/40 border border-rose-200 rounded-xl p-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 className="text-sm font-semibold text-rose-700 mb-1">프로젝트 삭제</h3>
+                                <p className="text-[11px] text-rose-600/80 leading-relaxed">
+                                    노트·업무·마일스톤·Vrief·GPR 모두 영구 삭제됩니다. 되돌릴 수 없습니다.
+                                </p>
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    const title = (project.title ?? "(제목 없음)") as string;
+                                    if (!confirm(`"${title}" 프로젝트를 영구 삭제할까요?`)) return;
+                                    const res = await fetch(`/api/planners/projects/${projectId}`, { method: "DELETE" });
+                                    if (res.ok) {
+                                        window.location.href = "/planners/app/projects";
+                                    } else {
+                                        const d = await res.json().catch(() => ({}));
+                                        alert(`삭제 실패: ${d.message || d.error || res.status}`);
+                                    }
+                                }}
+                                className="shrink-0 px-3 py-1.5 text-xs bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors font-medium"
+                            >
+                                영구 삭제
+                            </button>
+                        </div>
+                    </section>
+                )}
+            </div>
 
             {/* 5F 회고 모달 */}
             <ProjectRetroModal
@@ -262,7 +331,7 @@ function CoverTab({ project, save, userRole }: { project: PlannerProject; save: 
                         onChange={(e) => setTitle(e.target.value)}
                         onBlur={() => save({ title })}
                         placeholder="프로젝트 제목"
-                        className="w-full text-base font-serif text-neutral-900 bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:font-sans placeholder:italic"
+                        className="w-full text-base font-medium text-neutral-500 bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 transition-colors"
                     />
                 </Field>
                 <Field label="상태">
@@ -356,6 +425,7 @@ function CoverTab({ project, save, userRole }: { project: PlannerProject; save: 
                 {userRole === "owner" && <ShareField project={project} />}
                 {userRole === "owner" && <CollaboratorField project={project} save={save} />}
             </section>
+
         </div>
     );
 }

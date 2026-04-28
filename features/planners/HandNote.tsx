@@ -42,6 +42,8 @@ export interface HandNoteData {
     strokes: HandStroke[];
     width: number;
     height: number;
+    /** 같은 노트의 텍스트 모드 본문 — 손글씨와 공존 보존 (모드 전환 시 사라지지 않음) */
+    text?: string;
 }
 
 interface HandNoteProps {
@@ -51,6 +53,7 @@ interface HandNoteProps {
     className?: string;
     placeholder?: string;
     minHeight?: number;
+    fillHeight?: boolean;
 }
 
 // ─── Pen Presets ──────────────────────────────────────────────────────────────
@@ -147,9 +150,12 @@ export function HandNote({
     className = "",
     placeholder = "Apple Pencil · S Pen 또는 마우스로 직접 쓰세요",
     minHeight,
+    fillHeight = false,
 }: HandNoteProps) {
     // DOM
     const containerRef    = useRef<HTMLDivElement>(null);
+    const outerRef        = useRef<HTMLDivElement>(null);
+    const [fillH, setFillH] = useState(0);
     const svgRef          = useRef<SVGSVGElement>(null);
     const paletteRef      = useRef<HTMLDivElement>(null);  // 팝오버 자체 (외부클릭 감지용)
     const paletteBtnRef   = useRef<HTMLButtonElement>(null); // 무지개 버튼 (위치 기준)
@@ -183,7 +189,7 @@ export function HandNote({
     const [hexInput,     setHexInput]     = useState("");
 
     const effectiveErase = eraserMode || stylusEraser;
-    const height  = Math.max(autoH, value?.height ?? initH);
+    const height  = fillHeight && fillH > 0 ? fillH : Math.max(autoH, value?.height ?? initH);
     const strokes = value?.strokes ?? [];
 
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -207,6 +213,13 @@ export function HandNote({
         ro.observe(containerRef.current);
         return () => ro.disconnect();
     }, []);
+
+    useEffect(() => {
+        if (!fillHeight || !outerRef.current) return;
+        const ro = new ResizeObserver(([e]) => setFillH(e.contentRect.height));
+        ro.observe(outerRef.current);
+        return () => ro.disconnect();
+    }, [fillHeight]);
 
     // 팔레트 외부 클릭 시 닫기 (팝오버 자체 + 열기 버튼은 제외)
     useEffect(() => {
@@ -412,6 +425,7 @@ export function HandNote({
     // ── Render ────────────────────────────────────────────────────────────────
 
     return (
+        <div ref={outerRef} className={fillHeight ? "flex-1 min-h-0" : undefined}>
         <div
             ref={containerRef}
             className={`relative bg-white border border-slate-200 rounded-lg overflow-hidden select-none ${className}`}
@@ -678,7 +692,10 @@ export function HandNote({
                     style={{
                         touchAction: touchAct,
                         cursor: effectiveErase ? "cell" : "crosshair",
-                        background: "repeating-linear-gradient(transparent 0 31px, rgba(15,23,42,0.04) 31px 32px)",
+                        background: [
+                            "linear-gradient(to right, transparent 198px, rgba(200,30,30,0.12) 198px, rgba(200,30,30,0.12) 200px, transparent 200px)",
+                            "repeating-linear-gradient(transparent 0 31px, rgba(15,23,42,0.04) 31px 32px)"
+                        ].join(", "),
                     }}
                 >
                     {strokes.map((s, i) => (
@@ -711,6 +728,7 @@ export function HandNote({
                 )}
             </div>
         </div>
+        </div>
     );
 }
 
@@ -732,4 +750,28 @@ export function parseHandwriting(content: string | null | undefined): HandNoteDa
 
 export function serializeHandwriting(data: HandNoteData): string {
     return `${HW_MARKER}\n${JSON.stringify(data)}`;
+}
+
+/** content에서 텍스트 본문만 꺼내기 — 손글씨 모드에서도 .text가 있으면 그걸 반환 */
+export function extractTextPart(content: string | null | undefined): string {
+    if (!content) return "";
+    if (content.startsWith(HW_MARKER)) {
+        return parseHandwriting(content)?.text ?? "";
+    }
+    return content;
+}
+
+/** 텍스트 본문만 갱신 — 기존 손글씨가 있으면 보존, 없으면 평문 저장 */
+export function setTextPart(content: string | null | undefined, newText: string): string {
+    if (content?.startsWith(HW_MARKER)) {
+        const data = parseHandwriting(content) ?? { strokes: [], width: 600, height: 240 };
+        return serializeHandwriting({ ...data, text: newText });
+    }
+    return newText;
+}
+
+/** content를 손글씨 모드로 전환(또는 갱신) — 기존 텍스트는 .text 로 보존 */
+export function setHandPart(content: string | null | undefined, hand: HandNoteData): string {
+    const prevText = extractTextPart(content);
+    return serializeHandwriting({ ...hand, text: hand.text ?? prevText });
 }

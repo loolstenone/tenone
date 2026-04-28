@@ -93,3 +93,27 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const auth = await getMemberIdAndEmail();
+    if (!auth) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const { memberId, email } = auth;
+
+    const admin = createAdminClient();
+    const resolved = await resolveRole(admin, id, memberId, email, "id, member_id, collaborators");
+    if (!resolved) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    // 오너만 삭제 가능 — editor / viewer 차단
+    if (resolved.userRole !== "owner") {
+        return NextResponse.json({ error: "forbidden", message: "프로젝트 삭제는 오너만 가능합니다." }, { status: 403 });
+    }
+
+    // 자식 데이터 정리 (FK CASCADE 가정 — 없을 시 명시 삭제)
+    await admin.from("planners_project_vriefs").delete().eq("project_id", id);
+    await admin.from("planners_project_gprs").delete().eq("project_id", id);
+    await admin.from("planners_project_notes").delete().eq("project_id", id);
+    const { error } = await admin.from("planners_projects").delete().eq("id", id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ ok: true });
+}

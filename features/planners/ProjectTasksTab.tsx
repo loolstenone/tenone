@@ -1,11 +1,13 @@
 "use client";
 
-// 프로젝트별 Task 합산 뷰 — Daily에서 project_id로 태깅된 모든 task를 한 곳에 모음
+// 프로젝트별 업무 합산 뷰 — Daily에서 project_id로 태깅된 모든 업무를 한 곳에 모음
 // 데이터 소스: planners_daily.tasks (단일 SSOT)
+// "업무" = task — 유니버스 전반에서 통일된 표기
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon } from "lucide-react";
+import { Loader2, ArrowUpRight, CheckCircle2, Circle, RotateCw, X as XIcon, Plus } from "lucide-react";
+import { localDateStr } from "@/lib/planners/types";
 
 interface TaskItem {
     date: string;
@@ -15,6 +17,7 @@ interface TaskItem {
         status: string;
         time?: string | null;
         project_id?: string | null;
+        source?: string;
     };
 }
 
@@ -39,21 +42,46 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "todo" | "done" | "carried">("all");
 
-    useEffect(() => {
-        (async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`/api/planners/projects/${projectId}/tasks`);
-                if (res.ok) {
-                    const d = await res.json();
-                    setItems(d.items ?? []);
-                    setStats(d.stats ?? null);
-                }
-            } finally {
-                setLoading(false);
+    // 새 업무 입력
+    const today = useMemo(() => localDateStr(new Date()), []);
+    const [newDate, setNewDate] = useState(today);
+    const [newText, setNewText] = useState("");
+    const [adding, setAdding] = useState(false);
+
+    async function load() {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/planners/projects/${projectId}/tasks`);
+            if (res.ok) {
+                const d = await res.json();
+                setItems(d.items ?? []);
+                setStats(d.stats ?? null);
             }
-        })();
-    }, [projectId]);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [projectId]);
+
+    async function addTask() {
+        const text = newText.trim();
+        if (!text || !newDate) return;
+        setAdding(true);
+        try {
+            const res = await fetch(`/api/planners/projects/${projectId}/tasks`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: newDate, text }),
+            });
+            if (res.ok) {
+                setNewText("");
+                await load();
+            }
+        } finally {
+            setAdding(false);
+        }
+    }
 
     const filtered = items.filter(i => filter === "all" ? true : i.task.status === filter);
     const completionRate = stats && stats.total > 0
@@ -68,62 +96,95 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
         );
     }
 
+    const isEmpty = !stats || stats.total === 0;
+
     return (
-        <div className="space-y-4">
-            {/* 통계 */}
-            {stats && (
-                <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-xs uppercase tracking-widest text-neutral-400">집계</h2>
-                        <span className="text-2xl font-serif text-neutral-900">{completionRate}<span className="text-sm text-neutral-400">%</span></span>
-                    </div>
-                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mb-3">
-                        <div
-                            className="h-full rounded-full transition-all"
-                            style={{ width: `${completionRate}%`, backgroundColor: projectColor }}
-                        />
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                        <Cell label="전체" value={stats.total} />
-                        <Cell label="미완" value={stats.todo} accent="text-neutral-700" />
-                        <Cell label="완료" value={stats.done} accent="text-[#0F766E]" />
-                        <Cell label="이월" value={stats.carried} accent="text-amber-600" />
-                    </div>
-                </section>
-            )}
+        <div className="space-y-3">
+            {/* 새 업무 추가 — 항상 노출 */}
+            <section className="bg-white border border-neutral-200 rounded-xl p-3 flex items-center gap-2">
+                <input
+                    type="date"
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="text-xs px-2 py-1.5 border border-neutral-200 rounded font-mono focus:outline-none focus:border-[#0F766E]"
+                />
+                <input
+                    type="text"
+                    value={newText}
+                    onChange={(e) => setNewText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") addTask(); }}
+                    placeholder="이 프로젝트의 새 업무 추가…"
+                    className="flex-1 text-sm bg-transparent focus:outline-none px-1"
+                />
+                <button
+                    onClick={addTask}
+                    disabled={adding || !newText.trim() || !newDate}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0F766E] text-white text-xs rounded hover:bg-[#0d5e56] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                >
+                    {adding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                    추가
+                </button>
+            </section>
 
-            {/* 필터 */}
-            <div className="flex items-center gap-1.5">
-                {([
-                    { k: "all" as const,     label: "전체" },
-                    { k: "todo" as const,    label: "미완" },
-                    { k: "done" as const,    label: "완료" },
-                    { k: "carried" as const, label: "이월" },
-                ]).map(({ k, label }) => (
-                    <button
-                        key={k}
-                        onClick={() => setFilter(k)}
-                        className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                            filter === k
-                                ? "bg-[#0F766E] text-white"
-                                : "bg-white border border-neutral-200 text-neutral-500 hover:bg-neutral-50"
-                        }`}
-                    >
-                        {label}
-                    </button>
-                ))}
-            </div>
-
-            {/* 태스크 리스트 (날짜 그룹) */}
-            {filtered.length === 0 ? (
-                <div className="py-12 text-center bg-white border border-neutral-200 rounded-xl">
-                    <p className="text-sm text-neutral-400">
-                        {filter === "all"
-                            ? "이 프로젝트에 연결된 Task가 없습니다. Daily에서 Task를 추가할 때 이 프로젝트로 태그하세요."
-                            : "해당 상태의 Task가 없습니다."}
+            {isEmpty ? (
+                <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-8 px-5 text-center">
+                    <p className="text-sm text-neutral-500 mb-1">아직 연결된 업무가 없어요.</p>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                        위에서 직접 추가하거나, <Link href="/planners/app/today" className="text-[#0F766E] hover:underline">일간</Link>·<Link href="/planners/app/weekly" className="text-[#0F766E] hover:underline">주간</Link>에서 업무 추가 시 이 프로젝트를 태그하세요.
                     </p>
                 </div>
             ) : (
+                <>
+                    {/* 통계 */}
+                    {stats && (
+                        <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-xs tracking-widest text-neutral-500">집계</h2>
+                                <span className="text-2xl font-serif text-neutral-900">{completionRate}<span className="text-sm text-neutral-400">%</span></span>
+                            </div>
+                            <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mb-3">
+                                <div
+                                    className="h-full rounded-full transition-all"
+                                    style={{ width: `${completionRate}%`, backgroundColor: projectColor }}
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                                <Cell label="전체" value={stats.total} />
+                                <Cell label="미완" value={stats.todo} accent="text-neutral-700" />
+                                <Cell label="완료" value={stats.done} accent="text-[#0F766E]" />
+                                <Cell label="이월" value={stats.carried} accent="text-amber-600" />
+                            </div>
+                        </section>
+                    )}
+
+                    {/* 필터 */}
+                    <div className="flex items-center gap-1.5">
+                        {([
+                            { k: "all" as const,     label: "전체" },
+                            { k: "todo" as const,    label: "미완" },
+                            { k: "done" as const,    label: "완료" },
+                            { k: "carried" as const, label: "이월" },
+                        ]).map(({ k, label }) => (
+                            <button
+                                key={k}
+                                onClick={() => setFilter(k)}
+                                className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                                    filter === k
+                                        ? "bg-[#0F766E] text-white"
+                                        : "bg-white border border-neutral-200 text-neutral-500 hover:bg-neutral-50"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* 업무 리스트 (날짜 그룹) */}
+                    {filtered.length === 0 ? (
+                        <div className="py-8 text-center bg-white border border-neutral-200 rounded-xl">
+                            <p className="text-sm text-neutral-400">해당 상태의 업무가 없습니다.</p>
+                        </div>
+                    ) : (
                 <section className="bg-white border border-neutral-200 rounded-xl divide-y divide-neutral-100">
                     {(() => {
                         const grouped: Record<string, TaskItem[]> = {};
@@ -138,7 +199,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                         href={`/planners/app/daily?date=${date}`}
                                         className="inline-flex items-center gap-0.5 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
                                     >
-                                        Daily <ArrowUpRight className="h-2.5 w-2.5" />
+                                        일간 <ArrowUpRight className="h-2.5 w-2.5" />
                                     </Link>
                                 </div>
                                 <ul className="space-y-1">
@@ -146,6 +207,7 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                         const meta = STATUS_META[i.task.status] ?? STATUS_META.todo;
                                         const Icon = meta.icon;
                                         const strike = i.task.status === "done" || i.task.status === "cancelled";
+                                        const isMilestone = i.task.source === "milestone";
                                         return (
                                             <li key={i.task.id} className="flex items-center gap-2 py-0.5">
                                                 <Icon className={`h-3.5 w-3.5 shrink-0 ${meta.cls}`} />
@@ -155,6 +217,9 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                                                 <span className={`text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
                                                     {i.task.text}
                                                 </span>
+                                                {isMilestone && (
+                                                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#0F766E]/10 text-[#0F766E] shrink-0">마일스톤</span>
+                                                )}
                                             </li>
                                         );
                                     })}
@@ -163,6 +228,8 @@ export function ProjectTasksTab({ projectId, projectColor }: { projectId: string
                         ));
                     })()}
                 </section>
+                    )}
+                </>
             )}
         </div>
     );

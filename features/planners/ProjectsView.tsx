@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
     FolderKanban, Plus, Loader2,
     GraduationCap, Briefcase, Palette, HeartPulse, MapPin, Users, Wallet, BarChart3, Sparkles,
-    LayoutGrid,
+    LayoutGrid, Trash2,
 } from "lucide-react";
 import type { PlannerProject } from "@/lib/planners/types";
 import { CoverRender } from "./CoverRender";
@@ -33,6 +33,7 @@ export function ProjectsView() {
     const [covers, setCovers] = useState<Map<string, Cover>>(new Map());
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [newTitle, setNewTitle] = useState("");
     const [newCategory, setNewCategory] = useState<ProjectCategory>("custom");
     const [filter, setFilter] = useState<"all" | "active" | "completed" | "archived">("active");
@@ -58,6 +59,19 @@ export function ProjectsView() {
         })();
     }, []);
 
+    async function deleteProject(id: string, title: string, e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!confirm(`"${title}" 프로젝트를 영구 삭제할까요? 노트·태스크·마일스톤 모두 함께 삭제됩니다.`)) return;
+        const res = await fetch(`/api/planners/projects/${id}`, { method: "DELETE" });
+        if (res.ok) {
+            setProjects(prev => prev.filter(p => p.id !== id));
+        } else {
+            const d = await res.json().catch(() => ({}));
+            alert(`삭제 실패: ${d.message || d.error || res.status}`);
+        }
+    }
+
     async function createProject() {
         if (!newTitle.trim()) return;
         setCreating(true);
@@ -78,6 +92,7 @@ export function ProjectsView() {
                 Track.projectCreate({ has_title: !!newTitle.trim() });
                 setNewTitle("");
                 setNewCategory("custom");
+                setShowForm(false);
             }
         } finally {
             setCreating(false);
@@ -88,12 +103,12 @@ export function ProjectsView() {
     const hasPublicProjects = projects.some(p => p.visibility === "public_link");
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <FolderKanban className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">Projects</h1>
+                    <h1 className="font-serif text-3xl text-neutral-900">프로젝트</h1>
                 </div>
                 <div className="flex items-center gap-2">
                     {hasPublicProjects && user?.id && (
@@ -128,53 +143,73 @@ export function ProjectsView() {
                 ))}
             </div>
 
-            {/* New project */}
-            <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 space-y-3">
-                <div className="flex items-center gap-3">
-                    <Plus className="h-4 w-4 text-neutral-400" />
-                    <input
-                        type="text"
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') createProject(); }}
-                        placeholder="새 프로젝트 제목"
-                        className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent"
-                    />
-                    <button
-                        onClick={createProject}
-                        disabled={creating || !newTitle.trim()}
-                        className="px-4 py-1.5 text-sm bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
-                    >
-                        {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
-                    </button>
-                </div>
-                {/* 카테고리 선택 — 추천 템플릿·트래킹 자동 적용 */}
-                <div>
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">카테고리</p>
-                    <div className="flex flex-wrap gap-1.5">
-                        {PROJECT_CATEGORIES.map((c) => {
-                            const Icon = CATEGORY_ICONS[c.icon] ?? Sparkles;
-                            const active = newCategory === c.key;
-                            return (
-                                <button
-                                    key={c.key}
-                                    onClick={() => setNewCategory(c.key)}
-                                    title={c.description}
-                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-colors ${
-                                        active
-                                            ? "border-current text-white"
-                                            : "border-neutral-200 text-neutral-500 bg-white hover:bg-neutral-50"
-                                    }`}
-                                    style={active ? { backgroundColor: c.color, borderColor: c.color } : undefined}
-                                >
-                                    <Icon className="h-3 w-3" />
-                                    {c.label}
-                                </button>
-                            );
-                        })}
+            {/* New project — 캔버스 패턴 통일: 점선 박스 → 클릭 시 폼 펼침 */}
+            {!showForm ? (
+                <button
+                    onClick={() => setShowForm(true)}
+                    className="w-full mb-6 flex items-center justify-center gap-2 py-4 border-2 border-dashed border-neutral-200 rounded-xl text-neutral-400 hover:border-[#0F766E] hover:text-[#0F766E] hover:bg-[#0F766E]/5 transition-colors text-sm"
+                >
+                    <Plus className="h-4 w-4" />
+                    새 프로젝트 만들기
+                </button>
+            ) : (
+                <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 space-y-3">
+                    <div className="flex items-center gap-3">
+                        <Plus className="h-4 w-4 text-neutral-400" />
+                        <input
+                            type="text"
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') createProject();
+                                if (e.key === 'Escape') { setShowForm(false); setNewTitle(""); }
+                            }}
+                            placeholder="새 프로젝트 제목"
+                            autoFocus
+                            className="flex-1 text-sm font-medium text-neutral-500 bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 transition-colors"
+                        />
+                        <button
+                            onClick={() => { setShowForm(false); setNewTitle(""); setNewCategory("custom"); }}
+                            className="text-xs text-neutral-400 hover:text-neutral-700 transition-colors"
+                        >
+                            취소
+                        </button>
+                        <button
+                            onClick={createProject}
+                            disabled={creating || !newTitle.trim()}
+                            className="px-4 py-1.5 text-sm bg-[#0F766E] text-white rounded-lg hover:bg-[#0d5e56] transition-colors disabled:opacity-50"
+                        >
+                            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "추가"}
+                        </button>
+                    </div>
+                    {/* 카테고리 선택 — 추천 템플릿·트래킹 자동 적용 */}
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1.5">카테고리</p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {PROJECT_CATEGORIES.map((c) => {
+                                const Icon = CATEGORY_ICONS[c.icon] ?? Sparkles;
+                                const active = newCategory === c.key;
+                                return (
+                                    <button
+                                        key={c.key}
+                                        onClick={() => setNewCategory(c.key)}
+                                        title={c.description}
+                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                                            active
+                                                ? "border-current text-white"
+                                                : "border-neutral-200 text-neutral-500 bg-white hover:bg-neutral-50"
+                                        }`}
+                                        style={active ? { backgroundColor: c.color, borderColor: c.color } : undefined}
+                                    >
+                                        <Icon className="h-3 w-3" />
+                                        {c.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* List */}
             {loading ? (
@@ -189,8 +224,16 @@ export function ProjectsView() {
                         <Link
                             key={p.id}
                             href={`/planners/app/projects/${p.id}`}
-                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#0F766E] hover:shadow-sm transition-all group"
+                            className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#0F766E] hover:shadow-sm transition-all group relative"
                         >
+                            {/* 호버 시 삭제 버튼 — 우상단 */}
+                            <button
+                                onClick={(e) => deleteProject(p.id, p.title, e)}
+                                title="프로젝트 삭제"
+                                className="absolute top-2 right-2 p-1.5 rounded text-neutral-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                             <div className="flex items-start gap-4">
                                 {covers.get(p.cover_id || "teal_solid") ? (
                                     <CoverRender cover={covers.get(p.cover_id || "teal_solid")!} size="sm" />

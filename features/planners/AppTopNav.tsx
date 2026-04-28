@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine } from "lucide-react";
+import { Search, Settings, HelpCircle, Sparkles, Download, Menu, Maximize, Minimize, PenLine, LayoutTemplate } from "lucide-react";
 import type { PlannerMode, SubscriptionStatus } from "@/lib/planners/types";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
@@ -19,16 +19,16 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-    { href: "/planners/app/index",       label: "Index",       modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/daily",       label: "Today",       modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/weekly",      label: "Weekly",      modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/monthly",     label: "Monthly",     modes: ["all_in_one"] },
-    { href: "/planners/app/yearly",      label: "Yearly",      modes: ["all_in_one"] },
-    { href: "/planners/app/identity",    label: "P.I",         modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/projects",    label: "Project",     modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/canvas",      label: "Canvas",      modes: ["weekly", "all_in_one"] },
-    { href: "/planners/app/contacts",    label: "Contact",     modes: ["weekly", "all_in_one"] },
-    { href: "/planners/community",       label: "Community",   modes: ["weekly", "all_in_one"], external: true },
+    { href: "/planners/app/index",       label: "홈",          modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/daily",       label: "일간",        modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/weekly",      label: "주간",        modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/monthly",     label: "월간",        modes: ["all_in_one"] },
+    { href: "/planners/app/yearly",      label: "연간",        modes: ["all_in_one"] },
+    { href: "/planners/app/projects",    label: "프로젝트",    modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/canvas",      label: "캔버스",      modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/contacts",    label: "연락처",      modes: ["weekly", "all_in_one"] },
+    { href: "/planners/app/identity",    label: "아이덴티티",  modes: ["weekly", "all_in_one"] },
+    { href: "/planners/community",       label: "커뮤니티",    modes: ["weekly", "all_in_one"], external: true },
 ];
 
 export function AppTopNav({
@@ -43,6 +43,7 @@ export function AppTopNav({
     subscriptionStatus?: SubscriptionStatus;
 }) {
     const pathname = usePathname();
+    if (/^\/planners\/app\/canvas\/.+/.test(pathname)) return null;
     const visibleTabs = TABS.filter((t) => t.modes.includes(mode));
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -350,6 +351,23 @@ export function AppTopNav({
                 >
                     <Settings className="h-4 w-4 text-neutral-400" />
                     <span>설정</span>
+                </Link>
+                <div className="h-px bg-neutral-100 my-1" />
+                <Link
+                    href="/planners/app/templates"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <LayoutTemplate className="h-4 w-4 text-neutral-400" />
+                    <span>템플릿</span>
+                </Link>
+                <Link
+                    href="/planners/app/ai-briefing"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                    <Sparkles className="h-4 w-4 text-neutral-400" />
+                    <span>AI 브리핑</span>
                 </Link>
             </UniverseMobileMenu>
         </header>

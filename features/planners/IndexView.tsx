@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
 import { getISOWeek } from "@/lib/planners/types";
 import { PlannersUtilityLinks } from "./PlannersUtilityLinks";
 import { useSwipeNav } from "./useSwipeNav";
 
-const MONTHS_EN = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+const MONTHS_KO = [
+    "1월", "2월", "3월", "4월", "5월", "6월",
+    "7월", "8월", "9월", "10월", "11월", "12월",
 ];
 
 type CalCell = { date: string; dom: number; inMonth: boolean; week: number };
@@ -78,7 +78,8 @@ export function IndexView() {
             {/* Header — 모바일은 세로 스택 */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-6 md:mb-8">
                 <div className="flex items-center gap-2">
-                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">Index</h1>
+                    <LayoutGrid className="h-6 w-6 text-[#0F766E]" />
+                    <h1 className="font-serif text-2xl md:text-3xl text-neutral-900">인덱스</h1>
                     <div className="flex items-center gap-0.5 ml-1">
                         <button onClick={() => setYear(y => y - 1)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors">
                             <ChevronLeft className="h-4 w-4" />
@@ -97,7 +98,7 @@ export function IndexView() {
 
                 {/* ── Left: 12-month calendar (모바일 2열, 태블릿+ 3열) ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-6 sm:gap-y-8">
-                    {MONTHS_EN.map((monthName, mIdx) => {
+                    {MONTHS_KO.map((monthName, mIdx) => {
                         const rows = buildMonth(year, mIdx);
                         return (
                             <div key={mIdx}>
@@ -154,7 +155,7 @@ export function IndexView() {
 
                 {/* ── Center: Project ── */}
                 <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">Project</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">프로젝트</p>
                     {!projectsLoaded ? (
                         <div className="space-y-1.5">
                             {Array.from({ length: 10 }).map((_, i) => (
@@ -201,22 +202,22 @@ export function IndexView() {
 
                 {/* ── Right: Templates ── */}
                 <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">Templates</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">템플릿</p>
                     <Link href="/planners/app/templates?category=note" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        Note <span className="text-[10px] font-normal text-neutral-400">64</span>
+                        노트 <span className="text-[10px] font-normal text-neutral-400">64</span>
                     </Link>
                     <Link href="/planners/app/templates?category=schedule" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        Schedule <span className="text-[10px] font-normal text-neutral-400">19</span>
+                        일정 <span className="text-[10px] font-normal text-neutral-400">19</span>
                     </Link>
                     <Link href="/planners/app/templates?category=framework" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                        FrameWorkBook <span className="text-[10px] font-normal text-neutral-400">26</span>
+                        프레임워크북 <span className="text-[10px] font-normal text-neutral-400">26</span>
                     </Link>
                     <div className="border-t border-neutral-100 pt-2 space-y-2">
                         <Link href="/planners/app/templates?category=cover" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                            Front Cover
+                            표지
                         </Link>
                         <Link href="/planners/app/identity" className="block text-sm font-semibold text-neutral-700 hover:text-[#0F766E] transition-colors">
-                            Personal Identity
+                            퍼스널 아이덴티티
                         </Link>
                     </div>
                 </div>

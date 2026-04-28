@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Check } from "lucide-react";
 import type { PlannerProjectMilestone } from "@/lib/planners/types";
+import { localDateStr } from "@/lib/planners/types";
 
 export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate, projectEndDate }: {
     projectId: string;
@@ -96,24 +97,26 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
 
     return (
         <div className="space-y-4">
-            {/* 진행률 */}
-            <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">전체 진행률</h2>
-                    <span className="text-2xl font-serif text-neutral-900">
-                        {completionRate}<span className="text-sm text-neutral-400">%</span>
-                    </span>
-                </div>
-                <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${completionRate}%`, backgroundColor: projectColor }}
-                    />
-                </div>
-                <p className="text-[11px] text-neutral-400 mt-2">
-                    {done} / {total} 마일스톤 완료
-                </p>
-            </section>
+            {/* 진행률 — 마일스톤 1개 이상일 때만 (빈 상태에서는 의미 없음) */}
+            {total > 0 && (
+                <section className="bg-white border border-neutral-200 rounded-xl p-5">
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xs tracking-widest text-neutral-500">전체 진행률</h2>
+                        <span className="text-2xl font-serif text-neutral-900">
+                            {completionRate}<span className="text-sm text-neutral-400">%</span>
+                        </span>
+                    </div>
+                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                        <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${completionRate}%`, backgroundColor: projectColor }}
+                        />
+                    </div>
+                    <p className="text-[11px] text-neutral-400 mt-2">
+                        {done} / {total} 마일스톤 완료
+                    </p>
+                </section>
+            )}
 
             {/* 간트 차트 (시작일·종료일이 있을 때만) */}
             {projectStartDate && projectEndDate && milestones.some(m => m.due_date) && (
@@ -125,13 +128,12 @@ export function ProjectMilestonesTab({ projectId, projectColor, projectStartDate
                 />
             )}
 
-            {/* 체크리스트 */}
+            {/* 체크리스트 — 외부 SectionCard 가 이미 "마일스톤" 헤더를 그리므로 자체 제목 생략 */}
             <section className="bg-white border border-neutral-200 rounded-xl p-5">
-                <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">마일스톤</h2>
                 <ul className="space-y-2">
                     {milestones.map((m) => {
                         const isDone = !!m.done_at;
-                        const isOverdue = !isDone && m.due_date && m.due_date < new Date().toISOString().slice(0, 10);
+                        const isOverdue = !isDone && m.due_date && m.due_date < localDateStr(new Date());
                         return (
                             <li key={m.id} className="group flex items-center gap-3">
                                 <button

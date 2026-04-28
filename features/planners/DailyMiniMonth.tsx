@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getHoliday } from "@/lib/planners/holidays";
 import { expandOccurrences, isVisible, type CalendarEntry } from "@/lib/planners/calendar-rules";
+import { getISOWeek } from "@/lib/planners/types";
 
 interface Props {
     date: string;  // YYYY-MM-DD (현재 보고 있는 날짜)
@@ -97,39 +98,58 @@ export function DailyMiniMonth({ date }: Props) {
                     <ChevronRight className="h-3 w-3" />
                 </button>
             </div>
-            <div className="grid grid-cols-7 gap-px text-center mb-0.5">
+            <div className="grid grid-cols-[18px_repeat(7,1fr)] gap-px text-center mb-0.5">
+                <span className="text-[7px] text-neutral-300">W</span>
                 {["월", "화", "수", "목", "금", "토", "일"].map((d, i) => (
                     <span key={d} className={`text-[8px] ${i >= 5 ? (i === 6 ? "text-rose-400" : "text-rose-300") : "text-neutral-400"}`}>
                         {d}
                     </span>
                 ))}
             </div>
-            <div className="grid grid-cols-7 gap-px">
-                {cells.map((c) => {
-                    const isToday = c.date === date;
-                    const holiday = getHoliday(c.date);
-                    const dow = new Date(c.date + "T00:00:00Z").getUTCDay();
-                    const isSun = dow === 0;
-                    const isSat = dow === 6;
-                    const isHol = holiday?.type === "holiday";
-                    const hasEntry = entryDates.has(c.date);
+            {/* 주 단위로 행 분할 — 좌측에 W주차 표시 */}
+            <div className="space-y-px">
+                {Array.from({ length: cells.length / 7 }, (_, rowIdx) => {
+                    const rowCells = cells.slice(rowIdx * 7, rowIdx * 7 + 7);
+                    const firstDate = new Date(rowCells[0].date + "T00:00:00Z");
+                    const { week } = getISOWeek(firstDate);
+                    const weekYear = rowCells[0].date.slice(0, 4);
                     return (
-                        <Link
-                            key={c.date}
-                            href={`/planners/app/daily?date=${c.date}`}
-                            className={`relative flex items-center justify-center text-[10px] rounded py-[3px] transition-colors
-                                ${isToday ? "bg-[#0F766E] text-white font-semibold"
-                                : !c.inMonth ? "text-neutral-200"
-                                : isHol || isSun ? "text-rose-500 hover:bg-rose-50"
-                                : isSat ? "text-sky-500 hover:bg-neutral-50"
-                                : "text-neutral-700 hover:bg-neutral-50"}`}
-                            title={holiday?.label || c.date}
-                        >
-                            {c.dom}
-                            {hasEntry && !isToday && (
-                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-[#0F766E]" />
-                            )}
-                        </Link>
+                        <div key={rowIdx} className="grid grid-cols-[18px_repeat(7,1fr)] gap-px">
+                            <Link
+                                href={`/planners/app/weekly?year=${weekYear}&week=${week}`}
+                                title={`W${week} 주간 보기`}
+                                className="flex items-center justify-center text-[8px] text-neutral-300 hover:text-[#0F766E] font-mono leading-none"
+                            >
+                                {week}
+                            </Link>
+                            {rowCells.map((c) => {
+                                const isToday = c.date === date;
+                                const holiday = getHoliday(c.date);
+                                const dow = new Date(c.date + "T00:00:00Z").getUTCDay();
+                                const isSun = dow === 0;
+                                const isSat = dow === 6;
+                                const isHol = holiday?.type === "holiday";
+                                const hasEntry = entryDates.has(c.date);
+                                return (
+                                    <Link
+                                        key={c.date}
+                                        href={`/planners/app/daily?date=${c.date}`}
+                                        className={`relative flex items-center justify-center text-[10px] rounded py-[3px] transition-colors
+                                            ${isToday ? "bg-[#0F766E] text-white font-semibold"
+                                            : !c.inMonth ? "text-neutral-200"
+                                            : isHol || isSun ? "text-rose-500 hover:bg-rose-50"
+                                            : isSat ? "text-sky-500 hover:bg-neutral-50"
+                                            : "text-neutral-700 hover:bg-neutral-50"}`}
+                                        title={holiday?.label || c.date}
+                                    >
+                                        {c.dom}
+                                        {hasEntry && !isToday && (
+                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-[#0F766E]" />
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </div>
                     );
                 })}
             </div>

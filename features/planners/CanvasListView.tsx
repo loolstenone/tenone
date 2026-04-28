@@ -56,11 +56,11 @@ export function CanvasListView() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-10 py-6 md:py-12">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <Pencil className="h-6 w-6 text-[#0F766E]" />
-                    <h1 className="font-serif text-3xl text-neutral-900">자유 캔버스</h1>
+                    <h1 className="font-serif text-3xl text-neutral-900">캔버스</h1>
                 </div>
                 <PlannersUtilityLinks />
             </div>

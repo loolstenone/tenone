@@ -63,6 +63,28 @@ html[data-planners-font] button:not(.font-serif) {
   font-family: var(--planners-font, inherit);
 }
 
+/* ── Planner's 다크모드 인프라 (Phase 1) ──
+   PlannersThemeProvider가 .planners-dark 클래스를 documentElement에 토글한다.
+   다른 브랜드에는 영향 없음 (.planners-dark 가 없으면 비활성).
+   현 단계는 인프라만 — 컴포넌트별 시각 적용은 후속 PR에서 점진 마이그레이션. */
+html.planners-dark {
+  --planners-bg: #0f0f0f;
+  --planners-bg-alt: #1a1a1a;
+  --planners-surface: #161616;
+  --planners-text: #f5f5f5;
+  --planners-text-sub: #a3a3a3;
+  --planners-border: #2a2a2a;
+}
+html.planners-dark .planners-app-shell {
+  background-color: var(--planners-bg);
+  color-scheme: dark;
+}
+/* Tailwind v4 dark: variant 가 .planners-dark 안에서 작동하도록 등록 */
+@custom-variant planners-dark (&:where(.planners-dark, .planners-dark *));
+
+/* AI 사이드패널 open 시 — 우하단 floating CTA(베타 피드백 등) 자동 숨김 */
+body.pp-ai-panel-open .pp-hide-when-ai-open { display: none !important; }
+
 /* ── TenOne 다크/라이트 테마 ── */
 
 :root, [data-theme="light"] {

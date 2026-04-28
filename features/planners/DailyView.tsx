@@ -3,12 +3,14 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, Eye, Star, Image as ImageIcon, Sparkles, MapPin, Share2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Loader2, ArrowDownToLine, GripVertical, Clock, LayoutTemplate, Search, X, Maximize2, Pencil, PenLine, Eye, Star, Image as ImageIcon, Share2, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { PlannerDaily, PlannerTask } from "@/lib/planners/types";
+import { localDateStr } from "@/lib/planners/types";
 import { getLunarDate, HOLIDAYS } from "@/lib/planners/holidays";
 import { resolveTemplateContent, isSpecialTemplate, tplDataKey } from "@/lib/planners/templates";
+import { DAILY_RECOMMENDED, TOP_RECOMMENDED } from "@/lib/planners/template-recommendations";
 import { CalendarEntryEditor } from "./CalendarEntryEditor";
 import { DailyMomentsAuto } from "./DailyMoments";
 import { DailyProjectsCard } from "./DailyProjectsCard";
@@ -30,7 +32,7 @@ const PRIORITY_META: Record<TaskPriority, { label: string; cls: string; dotCls: 
     '완중': { label: "완중", cls: "text-sky-600    bg-sky-50    border-sky-200",       dotCls: "bg-sky-500"     },
     '완경': { label: "완경", cls: "text-neutral-500 bg-neutral-100 border-neutral-200", dotCls: "bg-neutral-400" },
 };
-type CornellRow = { id: string; cue: string; note: string };
+export type CornellRow = { id: string; cue: string; note: string };
 type NoteItem = { id: string; type?: 'cornell' | 'template' | 'handwriting' | 'canvas'; templateKey?: string; templateLabel?: string; canvas_id?: string; title: string; cue: string; content: string; summary: string; rows: CornellRow[]; handwriting?: HandNoteData };
 
 export const RESULT_CATEGORIES = [
@@ -40,7 +42,6 @@ export const RESULT_CATEGORIES = [
     { key: "insight",  label: "인사이트", hint: "오늘의 깨달음" },
     { key: "emotion",  label: "감정",     hint: "오늘의 감정 한 줄" },
     { key: "learning", label: "배움",     hint: "오늘 배운 것" },
-    { key: "scene",    label: "한 장면", hint: "사진·동영상으로 남기는 오늘의 한 장면" },
     { key: "free",     label: "자유",     hint: "자유로운 한 줄" },
 ] as const;
 
@@ -63,10 +64,6 @@ function makeDefaultCornellNote(): NoteItem {
         summary: '',
         rows: [{ id: 'r1', cue: '', note: '' }],
     };
-}
-
-function localDateStr(d: Date) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 // ── Template note block (interactive grid) ──────────────────────────
@@ -105,43 +102,77 @@ function TemplateNoteBlock({
     const hasGrid = isSpecialTemplate(tplMeta);
     const grid = hasGrid ? renderFramework(tplMeta.key, tplMeta.label, fwData, handleChange) : null;
 
+    function move(dir: "up" | "down") {
+        const idx = notesList.findIndex(n => n.id === note.id);
+        const other = dir === "up" ? idx - 1 : idx + 1;
+        if (idx < 0 || other < 0 || other >= notesList.length) return;
+        const next = [...notesList];
+        [next[idx], next[other]] = [next[other], next[idx]];
+        setNotesList(next);
+        save({ notes: serializeNotesFn(next) });
+    }
+    const idx = notesList.findIndex(n => n.id === note.id);
+    const isFirst = idx === 0;
+    const isLast = idx === notesList.length - 1;
+    // 자동 제목 — 사용자가 입력 안 한 상태 (템플릿은 라벨 그대로면 자동 취급)
+    const isAutoTitle = !note.title || note.title === note.templateLabel || /^(노트|손글씨|캔버스|템플릿) \d+$/.test(note.title);
+
     return (
         <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-            {/* Header — 통일 패턴 (text-xs uppercase tracking-widest text-neutral-400) */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-neutral-200 bg-neutral-50">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <LayoutTemplate className="h-3.5 w-3.5 text-violet-500 shrink-0" />
-                    <input
-                        value={note.title}
-                        onChange={(e) => {
-                            const next = notesList.map(n => n.id === note.id ? { ...n, title: e.target.value } : n);
-                            setNotesList(next);
-                        }}
-                        onBlur={() => save({ notes: serializeNotesFn(notesList) })}
-                        placeholder={note.templateLabel || "템플릿"}
-                        className="text-xs uppercase tracking-widest text-neutral-400 bg-transparent focus:outline-none w-full placeholder:text-neutral-300"
-                    />
-                </div>
-                <div className="flex items-center gap-2 ml-2 shrink-0">
+            {/* Header — DailyNoteCard와 동일 패턴 */}
+            <div className="px-4 py-2 border-b border-neutral-100 bg-neutral-50 flex items-center gap-2">
+                <div className="flex items-center gap-0.5 shrink-0">
                     <button
-                        onClick={onExpand}
-                        className="text-neutral-300 hover:text-violet-600 transition-colors"
-                        title="크게 보기"
+                        onClick={() => move("up")}
+                        disabled={isFirst}
+                        title="위로"
+                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
-                        <Maximize2 className="h-3.5 w-3.5" />
+                        <ChevronUp className="h-3.5 w-3.5" />
                     </button>
                     <button
-                        onClick={() => {
-                            const next = notesList.filter(n => n.id !== note.id);
-                            setNotesList(next);
-                            save({ notes: serializeNotesFn(next) });
-                        }}
-                        className="text-neutral-300 hover:text-red-400 transition-colors"
-                        title="삭제"
+                        onClick={() => move("down")}
+                        disabled={isLast}
+                        title="아래로"
+                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                 </div>
+                <LayoutTemplate className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+                <input
+                    value={note.title}
+                    onChange={(e) => {
+                        const next = notesList.map(n => n.id === note.id ? { ...n, title: e.target.value } : n);
+                        setNotesList(next);
+                    }}
+                    onBlur={() => save({ notes: serializeNotesFn(notesList) })}
+                    placeholder={note.templateLabel || "이 템플릿으로 기록할 주제 한 줄"}
+                    className={`flex-1 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
+                        isAutoTitle
+                            ? "italic font-normal text-neutral-400"
+                            : "font-medium text-neutral-700"
+                    }`}
+                />
+                <button
+                    onClick={onExpand}
+                    title="크게 보기"
+                    className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
+                >
+                    <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                    onClick={() => {
+                        if (!confirm(`"${note.title || '이 노트'}"를 삭제할까요?`)) return;
+                        const next = notesList.filter(n => n.id !== note.id);
+                        setNotesList(next);
+                        save({ notes: serializeNotesFn(next) });
+                    }}
+                    title="삭제"
+                    className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
+                >
+                    <Trash2 className="h-3.5 w-3.5" />
+                </button>
             </div>
             {/* Body: interactive grid or markdown fallback */}
             {grid ? (
@@ -168,9 +199,265 @@ function TemplateNoteBlock({
     );
 }
 
+// ── 코넬 rows 인라인 편집 — Daily/Project 공통 ──
+export function CornellRowsInline({
+    rows,
+    summary,
+    onChange,
+    onCommit,
+}: {
+    rows: CornellRow[];
+    summary: string;
+    onChange: (rows: CornellRow[], summary: string) => void;
+    onCommit: () => void;
+}) {
+    function updateRow(id: string, patch: Partial<CornellRow>) {
+        onChange(rows.map(r => r.id === id ? { ...r, ...patch } : r), summary);
+    }
+    function addRow() {
+        const nextRow: CornellRow = { id: `r_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, cue: "", note: "" };
+        onChange([...rows, nextRow], summary);
+        onCommit();
+    }
+    function removeRow(id: string) {
+        const next = rows.filter(r => r.id !== id);
+        onChange(next.length > 0 ? next : [{ id: "r1", cue: "", note: "" }], summary);
+        onCommit();
+    }
+    function setSummaryVal(v: string) {
+        onChange(rows, v);
+    }
+
+    return (
+        <div className="px-4 py-3">
+            {/* 컬럼 헤더 */}
+            <div className="grid grid-cols-[140px_1fr_auto] gap-3 text-[10px] uppercase tracking-widest text-neutral-300 mb-1.5 px-1">
+                <span>단서 · 키워드</span>
+                <span>노트</span>
+                <span></span>
+            </div>
+            {rows.length === 0 ? (
+                <p className="text-xs text-neutral-300 py-3 text-center italic">행이 없습니다 · 아래 + 행 추가</p>
+            ) : (
+                <div className="space-y-1">
+                    {rows.map((r) => (
+                        <div key={r.id} className="group grid grid-cols-[140px_1fr_auto] gap-3 items-start">
+                            <input
+                                type="text"
+                                value={r.cue}
+                                onChange={(e) => updateRow(r.id, { cue: e.target.value })}
+                                onBlur={onCommit}
+                                placeholder="키워드"
+                                className="text-sm text-[#0F766E] font-medium bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light py-1"
+                            />
+                            <textarea
+                                value={r.note}
+                                onChange={(e) => updateRow(r.id, { note: e.target.value })}
+                                onBlur={onCommit}
+                                placeholder="이 키워드에 대한 노트"
+                                rows={1}
+                                className="text-sm text-neutral-800 bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light resize-none py-1 leading-relaxed"
+                                onInput={(e) => {
+                                    const t = e.currentTarget;
+                                    t.style.height = "auto";
+                                    t.style.height = `${t.scrollHeight}px`;
+                                }}
+                            />
+                            <button
+                                onClick={() => removeRow(r.id)}
+                                title="행 삭제"
+                                className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-red-500 transition-opacity p-1"
+                            >
+                                <Trash2 className="h-3 w-3" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+            {/* 행 추가 */}
+            <button
+                onClick={addRow}
+                className="w-full mt-2 py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#0F766E] hover:not-italic border border-dashed border-neutral-200 hover:border-[#0F766E] rounded transition-colors"
+            >
+                + 행 추가
+            </button>
+            {/* 요약 */}
+            <div className="mt-3 pt-3 border-t border-neutral-100">
+                <p className="text-[10px] uppercase tracking-widest text-neutral-300 mb-1">요약</p>
+                <textarea
+                    value={summary}
+                    onChange={(e) => setSummaryVal(e.target.value)}
+                    onBlur={onCommit}
+                    placeholder="이 노트의 핵심 한 줄"
+                    rows={1}
+                    className="w-full text-xs text-neutral-600 italic bg-transparent focus:outline-none placeholder:text-neutral-300 placeholder:italic placeholder:font-light resize-none leading-relaxed"
+                    onInput={(e) => {
+                        const t = e.currentTarget;
+                        t.style.height = "auto";
+                        t.style.height = `${t.scrollHeight}px`;
+                    }}
+                />
+            </div>
+        </div>
+    );
+}
+
+// ── 코넬·손글씨·캔버스 노트 인라인 카드 (프로젝트 NoteCard와 같은 패턴) ──
+function DailyNoteCard({
+    note,
+    notesList,
+    setNotesList,
+    save,
+    serializeNotesFn,
+    onExpand,
+}: {
+    note: NoteItem;
+    notesList: NoteItem[];
+    setNotesList: (v: NoteItem[]) => void;
+    save: (fields: Record<string, unknown>) => void;
+    serializeNotesFn: (list: NoteItem[]) => string;
+    onExpand: () => void;
+}) {
+    function updateTitle(v: string) {
+        const next = notesList.map(n => n.id === note.id ? { ...n, title: v } : n);
+        setNotesList(next);
+    }
+    function commitTitle() { save({ notes: serializeNotesFn(notesList) }); }
+    function remove() {
+        if (!confirm(`"${note.title || '이 노트'}"를 삭제할까요?`)) return;
+        const next = notesList.filter(n => n.id !== note.id);
+        setNotesList(next);
+        save({ notes: serializeNotesFn(next) });
+    }
+    function move(dir: "up" | "down") {
+        const idx = notesList.findIndex(n => n.id === note.id);
+        const other = dir === "up" ? idx - 1 : idx + 1;
+        if (idx < 0 || other < 0 || other >= notesList.length) return;
+        const next = [...notesList];
+        [next[idx], next[other]] = [next[other], next[idx]];
+        setNotesList(next);
+        save({ notes: serializeNotesFn(next) });
+    }
+    const idx = notesList.findIndex(n => n.id === note.id);
+    const isFirst = idx === 0;
+    const isLast = idx === notesList.length - 1;
+
+    // 자동 제목인지 — "기본 노트 1", "손글씨 2" 같은 기본값
+    const isAutoTitle = /^(기본 노트|노트|손글씨|캔버스) \d+$/.test(note.title);
+    const placeholder =
+        note.type === 'handwriting' ? "예: 회의 메모 · 손글씨 정리"
+        : note.type === 'canvas' ? "예: 동선 스케치"
+        : "예: AI 마케팅 특강 — 강의 구성안";
+
+    return (
+        <section className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+            <div className="px-4 py-2 border-b border-neutral-100 bg-neutral-50 flex items-center gap-2">
+                {/* 위/아래 이동 — 프로젝트 NoteCard와 동일 패턴 */}
+                <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                        onClick={() => move("up")}
+                        disabled={isFirst}
+                        title="위로"
+                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                        onClick={() => move("down")}
+                        disabled={isLast}
+                        title="아래로"
+                        className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                </div>
+                {note.type === 'handwriting' && <PenLine className="h-3.5 w-3.5 text-[#0F766E] shrink-0" />}
+                {note.type === 'canvas' && <ImageIcon className="h-3.5 w-3.5 text-sky-500 shrink-0" />}
+                <input
+                    type="text"
+                    value={note.title}
+                    onChange={(e) => updateTitle(e.target.value)}
+                    onBlur={commitTitle}
+                    placeholder={placeholder}
+                    className={`flex-1 text-sm bg-transparent focus:outline-none focus:text-neutral-900 placeholder:text-neutral-300 placeholder:italic transition-colors ${
+                        isAutoTitle
+                            ? "italic font-light text-neutral-400"
+                            : "font-medium text-neutral-700"
+                    }`}
+                />
+                <button
+                    onClick={onExpand}
+                    title="크게 보기"
+                    className="w-6 h-6 rounded hover:bg-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700"
+                >
+                    <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                    onClick={remove}
+                    title="삭제"
+                    className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-neutral-400 hover:text-red-500"
+                >
+                    <Trash2 className="h-3.5 w-3.5" />
+                </button>
+            </div>
+
+            {note.type === 'handwriting' ? (
+                <div
+                    onClick={onExpand}
+                    className="relative h-48 overflow-hidden cursor-pointer group"
+                >
+                    {note.handwriting ? (
+                        <div className="pointer-events-none px-3 pt-2">
+                            <HandNote value={note.handwriting} onChange={() => {}} height={180} />
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-xs text-neutral-300">손글씨 비어 있음 — 클릭해 시작</div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                            <Maximize2 className="h-3.5 w-3.5" /> 클릭해서 편집
+                        </span>
+                    </div>
+                </div>
+            ) : note.type === 'canvas' ? (
+                <div
+                    onClick={onExpand}
+                    className="px-4 py-8 text-center cursor-pointer hover:bg-neutral-50 transition-colors"
+                >
+                    <ImageIcon className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
+                    <p className="text-xs text-neutral-500">자유 캔버스 — 클릭해서 그리기</p>
+                </div>
+            ) : (
+                /* cornell — 미리보기 (편집은 모달) */
+                <div onClick={onExpand} className="px-4 py-3 cursor-pointer hover:bg-neutral-50/50 transition-colors max-h-64 overflow-hidden relative">
+                    {(note.rows && note.rows.length > 0 && note.rows.some(r => r.cue || r.note)) ? (
+                        <div className="space-y-1.5">
+                            {note.rows.map((r) => (
+                                <div key={r.id} className="grid grid-cols-[140px_1fr] gap-3 text-sm">
+                                    <span className="text-[#0F766E] font-medium truncate">{r.cue || <span className="text-neutral-300 italic">키워드</span>}</span>
+                                    <span className="text-neutral-700 whitespace-pre-wrap line-clamp-2">{r.note || <span className="text-neutral-300 italic">노트</span>}</span>
+                                </div>
+                            ))}
+                            {note.summary && (
+                                <p className="pt-2 mt-2 border-t border-neutral-100 text-xs text-neutral-600 italic line-clamp-2">{note.summary}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-neutral-300 py-4 text-center italic">내용 없음 — 클릭해 작성</p>
+                    )}
+                    {/* 잘린 콘텐츠 fade */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
+                </div>
+            )}
+        </section>
+    );
+}
+
 export function DailyView({ initialDate }: { initialDate: string }) {
     const router = useRouter();
     const [date, setDate] = useState(initialDate);
+    // URL ?date= 변경 시 state 동기화 (미니 캘린더·향후 일정 등에서 같은 페이지 내 날짜 점프)
+    useEffect(() => { setDate(initialDate); }, [initialDate]);
     const [tasks, setTasks] = useState<PlannerTask[]>([]);
     const [notesList, setNotesList] = useState<NoteItem[]>([]);
     const [energy, setEnergy] = useState<number | null>(null);
@@ -222,11 +509,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     });
     const [expandedNote, setExpandedNote] = useState<NoteItem | null>(null);
     const [editingNoteIds, setEditingNoteIds] = useState<Set<string>>(new Set());
-    const [gpsEnabled, setGpsEnabled] = useState<boolean>(() => {
-        if (typeof window === "undefined") return false;
-        return localStorage.getItem("planners_gps_enabled") === "true";
-    });
-    const [gpsLocation, setGpsLocation] = useState<string>("");
     const [shareCopied, setShareCopied] = useState(false);
     // 노트 드래그 순서 변경
     const noteDragRef = useRef<{ dragIdx: number; overIdx: number } | null>(null);
@@ -239,34 +521,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         });
     }
 
-    async function toggleGps() {
-        const next = !gpsEnabled;
-        setGpsEnabled(next);
-        if (typeof window !== "undefined") localStorage.setItem("planners_gps_enabled", String(next));
-        if (!next) { setGpsLocation(""); return; }
-        if (!navigator.geolocation) { setGpsLocation("위치 접근 불가"); return; }
-        navigator.geolocation.getCurrentPosition(
-            async ({ coords }) => {
-                try {
-                    const r = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json&accept-language=ko`
-                    );
-                    if (r.ok) {
-                        const d = await r.json();
-                        const city = d.address?.city || d.address?.town || d.address?.county || "";
-                        const district = d.address?.suburb || d.address?.neighbourhood || d.address?.village || "";
-                        setGpsLocation([city, district].filter(Boolean).join(" ") || `${coords.latitude.toFixed(2)}, ${coords.longitude.toFixed(2)}`);
-                    }
-                } catch { setGpsLocation(""); }
-            },
-            () => setGpsLocation("")
-        );
-    }
-
     async function shareResult() {
         const shareText = [
             date,
-            gpsEnabled && gpsLocation ? `📍 ${gpsLocation}` : "",
             result?.trim(),
         ].filter(Boolean).join("\n");
         if (!shareText.includes("\n") && !result?.trim()) return;
@@ -361,6 +618,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             .then((r) => r.ok ? r.json() : null)
             .then((d) => { if (d?.entries) setCalEntries(d.entries); });
     }
+
+    // 추천 템플릿 칩 노출용 — 진입 시 템플릿 목록 사전 로드
+    useEffect(() => {
+        if (tplList.length > 0) return;
+        (async () => {
+            try {
+                const res = await fetch("/api/planners/templates");
+                if (res.ok) {
+                    const d = await res.json();
+                    setTplList(d.templates || []);
+                }
+            } catch { /* noop */ }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // 향후 4주 일정 (내일~28일 후, meeting·task 종류)
     useEffect(() => {
@@ -742,7 +1014,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
             if (n.type === 'canvas') {
                 return { id: n.id, type: n.type, canvas_id: n.canvas_id, title: n.title, cue: '', content: '', summary: '' };
             }
-            return { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows }), summary: n.summary };
+            return { id: n.id, type: n.type ?? 'cornell', title: n.title, cue: '', content: JSON.stringify({ _cornell: true, rows: n.rows, summary: n.summary || "" }), summary: n.summary };
         }));
     }
 
@@ -762,7 +1034,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         setNotesList(next);
         save({ notes: serializeNotes(next) });
         setShowTemplatePicker(false);
-        setExpandedNote(newNote);
+        // 인라인 추가 — 모달 자동 오픈 X (Project와 동일 동작)
         Track.templateInsert({ template_key: tpl.key, template_label: tpl.label, surface: "daily" });
     }
 
@@ -817,7 +1089,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </h1>
                             {isToday && (
                                 <span className="px-2 py-0.5 bg-[#0F766E] text-white text-xs font-semibold rounded-full shrink-0">
-                                    Today
+                                    오늘
                                 </span>
                             )}
                         </div>
@@ -948,7 +1220,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                         className="w-full flex items-center gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
                                                     >
                                                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                                                        <span className="flex-1 text-sm text-neutral-800">{entry.title}</span>
+                                                        <span className="flex-1 text-xs text-neutral-800">{entry.title}</span>
                                                         <span className="text-[10px] text-neutral-400">하루 종일</span>
                                                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.bg} ${c.text}`}>
                                                             {KIND_LABELS[entry.kind]}
@@ -965,7 +1237,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                         className="w-full flex items-center gap-2.5 px-1 py-1 rounded hover:bg-neutral-50 text-left"
                                                     >
                                                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                                                        <span className="flex-1 text-sm text-neutral-800">{entry.title}</span>
+                                                        <span className="flex-1 text-xs text-neutral-800">{entry.title}</span>
                                                         {entry.description && (
                                                             <span className="text-[11px] text-neutral-400 truncate max-w-[120px]">{entry.description}</span>
                                                         )}
@@ -979,7 +1251,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     {/* 2. 시간 기반 항목 (미팅 + 시간 있는 태스크) */}
                                     <div className="space-y-0.5">
                                         {isEmpty && (
-                                            <p className="text-sm text-neutral-300 italic py-2">일정이나 할 일을 추가해 보세요.</p>
+                                            <p className="text-xs text-neutral-300 italic py-2">일정이나 할 일을 추가해 보세요.</p>
                                         )}
                                         {timedItems.map((item, i) => {
                                             if (item.type === "meeting") {
@@ -997,13 +1269,13 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                         <span className="shrink-0 text-[11px] font-mono text-neutral-400 w-[76px]">
                                                             {ampm} {t}
                                                         </span>
-                                                        <span className="flex-1 text-sm text-neutral-800">{item.entry.title}</span>
+                                                        <span className="flex-1 text-xs text-neutral-800">{item.entry.title}</span>
                                                         {item.entry.description && (
                                                             <span className="text-[11px] text-neutral-400 truncate max-w-[130px] hidden sm:block">
                                                                 {item.entry.description}
                                                             </span>
                                                         )}
-                                                        <span className="text-[9px] text-sky-500 opacity-0 group-hover:opacity-60">미팅</span>
+                                                        <span className="text-[9px] text-sky-500 opacity-40 group-hover:opacity-80">미팅</span>
                                                     </button>
                                                 );
                                             } else {
@@ -1039,12 +1311,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                                 )}
                                                             />
                                                         )}
-                                                        <span className={`flex-1 text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
+                                                        <span className={`flex-1 text-xs ${strike ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
                                                             {t.text}
                                                         </span>
                                                         <button
                                                             onClick={() => removeTask(t.id)}
-                                                            className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-rose-400 transition-colors"
+                                                            className="text-neutral-300 hover:text-rose-400 transition-colors"
                                                         >
                                                             <Trash2 className="h-3 w-3" />
                                                         </button>
@@ -1084,21 +1356,45 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             );
                         })()}
 
+                        {/* 오늘 추천 템플릿 — 칩 형태 배너 (Project와 동일 패턴) */}
+                        {(() => {
+                            const recs = DAILY_RECOMMENDED
+                                .map(k => tplList.find(t => t.key === k))
+                                .filter((t): t is NonNullable<typeof t> => !!t)
+                                .slice(0, 6);
+                            if (recs.length === 0) return null;
+                            return (
+                                <div className="bg-violet-50/50 border border-violet-100 rounded-xl px-4 py-3">
+                                    <p className="text-[10px] uppercase tracking-widest text-violet-600 mb-2">오늘 추천 템플릿</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {recs.map((t) => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => insertTemplate(t)}
+                                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-violet-200 rounded-full text-xs text-violet-700 hover:bg-violet-100 hover:border-violet-400 transition-colors"
+                                            >
+                                                <LayoutTemplate className="h-3 w-3" /> {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         {/* 노트 추가 버튼 */}
                         <div className="grid grid-cols-4 gap-2">
                             <button
                                 onClick={() => {
                                     const idx = notesList.filter(n => n.type === 'cornell').length + 1;
-                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
+                                    const newNote: NoteItem = { id: `n_${Date.now()}`, type: 'cornell', title: `기본 노트 ${idx}`, cue: "", content: "", summary: "", rows: [{ id: 'r1', cue: '', note: '' }] };
                                     const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
-                                    setExpandedNote(newNote);
                                 }}
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Plus className="h-3.5 w-3.5" />
-                                노트
+                                기본 노트
                             </button>
                             <button
                                 onClick={() => {
@@ -1107,13 +1403,12 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     const next = [...notesList, newNote];
                                     setNotesList(next);
                                     save({ notes: serializeNotes(next) });
-                                    setExpandedNote(newNote);
                                 }}
                                 title="Apple Pencil · S Pen · 마우스로 직접 쓰기"
                                 className="flex items-center justify-center gap-1.5 py-2 border border-dashed border-neutral-300 rounded-lg text-xs text-neutral-500 hover:border-[#0F766E] hover:text-[#0F766E] transition-colors"
                             >
                                 <Pencil className="h-3.5 w-3.5" />
-                                손글씨 노트
+                                손글씨
                             </button>
                             <button
                                 onClick={openTemplatePicker}
@@ -1137,7 +1432,6 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         const next = [...notesList, newNote];
                                         setNotesList(next);
                                         save({ notes: serializeNotes(next) });
-                                        setExpandedNote(newNote);
                                     } else {
                                         setSaveError("캔버스 생성 실패 — 잠시 후 다시 시도해 주세요.");
                                         setTimeout(() => setSaveError(null), 4000);
@@ -1151,16 +1445,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             </button>
                         </div>
 
-                        {/* Notes 목록 — 2열 카드 그리드, 클릭 시 확장 모달 */}
+                        {/* Notes 목록 — 프로젝트와 동일 패턴: 전체 너비 인라인 렌더 */}
                         {notesList.length > 0 && (
-                        <div className="grid grid-cols-2 gap-2">
-                            {notesList.map((note, noteIdx) => {
-                                const previewText =
-                                    note.type === 'handwriting' ? '손글씨 메모'
-                                    : note.type === 'canvas' ? '자유 캔버스'
-                                    : note.type === 'template' ? (note.content || note.templateLabel || '템플릿 노트')
-                                    : (note.rows[0]?.note || note.summary || '');
-                                return (
+                        <div className="space-y-3">
+                            {notesList.map((note, noteIdx) => (
                                 <div
                                     key={note.id}
                                     draggable
@@ -1178,55 +1466,52 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         noteDragRef.current = null;
                                     }}
                                     onDragEnd={() => { noteDragRef.current = null; }}
-                                    onClick={() => setExpandedNote(note)}
-                                    className="group relative bg-white border border-neutral-200 rounded-xl p-3 cursor-pointer hover:border-neutral-300 hover:shadow-sm transition-all"
+                                    className="group/note-drag relative"
                                 >
-                                    {/* 상단: 타입 뱃지 + 삭제 */}
-                                    <div className="flex items-center justify-between mb-1.5">
-                                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-medium">
-                                            {note.type === 'handwriting' ? '손글씨' : note.type === 'template' ? '템플릿' : note.type === 'canvas' ? '캔버스' : '기본'}
-                                        </span>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const next = notesList.filter(n => n.id !== note.id);
-                                                setNotesList(next);
-                                                save({ notes: serializeNotes(next) });
-                                            }}
-                                            className="text-neutral-300 hover:text-red-400 transition-colors"
-                                        >
-                                            <X className="h-3 w-3" />
-                                        </button>
+                                    <div className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/note-drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10">
+                                        <GripVertical className="h-4 w-4 text-neutral-300" />
                                     </div>
-                                    {/* 제목 */}
-                                    <p className="text-xs font-medium text-neutral-800 truncate mb-1">{note.title || '제목 없음'}</p>
-                                    {/* 미리보기 텍스트 */}
-                                    <p className="text-[10px] text-neutral-400 line-clamp-2 leading-relaxed">{previewText || '비어 있음'}</p>
-                                    {/* 드래그 핸들 */}
-                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-30 transition-opacity cursor-grab active:cursor-grabbing">
-                                        <GripVertical className="h-3.5 w-3.5 text-neutral-400" />
-                                    </div>
+                                    {note.type === 'template' ? (
+                                        <TemplateNoteBlock
+                                            note={note}
+                                            notesList={notesList}
+                                            setNotesList={setNotesList}
+                                            save={save}
+                                            serializeNotesFn={serializeNotes}
+                                            onExpand={() => setExpandedNote(note)}
+                                        />
+                                    ) : (
+                                        <DailyNoteCard
+                                            note={note}
+                                            notesList={notesList}
+                                            setNotesList={setNotesList}
+                                            save={save}
+                                            serializeNotesFn={serializeNotes}
+                                            onExpand={() => setExpandedNote(note)}
+                                        />
+                                    )}
                                 </div>
-                                );
-                            })}
+                            ))}
                         </div>
                         )}
 
                     </div>
 
-                    {/* Right column — 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 → AI 정리 */}
+                    {/* Right column — 달력 → 4주 일정 → 트래킹 → 프로젝트 → 오늘 */}
                     <div className="space-y-4">
-                        {/* 1. 당월 달력 */}
-                        <DailyMiniMonth date={date} />
+                        {/* 1. 당월 달력 — 모바일에서 숨김 */}
+                        <div className="hidden md:block">
+                            <DailyMiniMonth date={date} />
+                        </div>
 
                         {/* 2. 향후 4주 일정·미팅 */}
-                        <UpcomingSchedule date={date} entries={upcomingEntries} />
+                        <UpcomingSchedule date={date} />
 
                         {/* 3. 트래킹 */}
                         {trackingMetrics.length > 0 && (
                             <section className="bg-white border border-neutral-200 rounded-xl p-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">Daily Tracking</h2>
+                                    <h2 className="text-xs uppercase tracking-widest text-neutral-400">일간 기록</h2>
                                     <Link
                                         href="/planners/app/settings#tracking"
                                         className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-[#0F766E] transition-colors"
@@ -1329,33 +1614,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         {/* 4. 진행중인 프로젝트 */}
                         <DailyProjectsCard date={date} />
 
-                        {/* 5. 오늘 — 한 줄 결과 */}
+                        {/* 5. 오늘 한 장면 — 한 줄 + 사진/동영상 (통합) */}
                         <section className="bg-white border border-neutral-200 rounded-xl p-5">
                             <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘</h2>
-                                <div className="flex items-center gap-0.5">
-                                    <button
-                                        onClick={toggleGps}
-                                        title={gpsEnabled ? "GPS 끄기" : "GPS 켜기 (현재 위치 기록)"}
-                                        className={`p-1.5 rounded transition-colors ${gpsEnabled ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
-                                    >
-                                        <MapPin className="h-3.5 w-3.5" />
-                                    </button>
-                                    <button
-                                        onClick={shareResult}
-                                        title={shareCopied ? "복사됨!" : "공유하기"}
-                                        className={`p-1.5 rounded transition-colors ${shareCopied ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
-                                    >
-                                        <Share2 className="h-3.5 w-3.5" />
-                                    </button>
-                                </div>
+                                <h2 className="text-xs uppercase tracking-widest text-neutral-400">오늘 한 장면</h2>
+                                <button
+                                    onClick={shareResult}
+                                    title={shareCopied ? "복사됨!" : "공유하기"}
+                                    className={`p-1.5 rounded transition-colors ${shareCopied ? "text-[#0F766E] bg-[#0F766E]/10" : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"}`}
+                                >
+                                    <Share2 className="h-3.5 w-3.5" />
+                                </button>
                             </div>
-                            {gpsEnabled && gpsLocation && (
-                                <p className="text-[10px] text-[#0F766E]/70 flex items-center gap-1 mb-2">
-                                    <MapPin className="h-2.5 w-2.5 shrink-0" />
-                                    {gpsLocation}
-                                </p>
-                            )}
                             <div className="flex flex-wrap gap-1 mb-2.5">
                                 {RESULT_CATEGORIES.map((c) => {
                                     const active = resultCategory === c.key;
@@ -1379,22 +1649,20 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     );
                                 })}
                             </div>
-                            {resultCategory === "scene" ? (
+                            <textarea
+                                value={result}
+                                onChange={(e) => setResult(e.target.value)}
+                                onBlur={() => save({ daily_result: result })}
+                                placeholder={resultCategoryHint(resultCategory)}
+                                rows={4}
+                                className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none mb-3"
+                            />
+                            {/* 사진/동영상 첨부 — 같은 카드 안에서 한 장면 완성 */}
+                            <div className="border-t border-neutral-100 pt-3">
                                 <DailyMomentsAuto date={date} compact />
-                            ) : (
-                                <textarea
-                                    value={result}
-                                    onChange={(e) => setResult(e.target.value)}
-                                    onBlur={() => save({ daily_result: result })}
-                                    placeholder={resultCategoryHint(resultCategory)}
-                                    rows={4}
-                                    className="w-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic focus:outline-none bg-transparent resize-none"
-                                />
-                            )}
+                            </div>
                         </section>
 
-                        {/* 6. AI 정리 — 오늘 하루 간략 요약 */}
-                        <DailyAiSummary date={date} />
                     </div>
                 </div>
             )}
@@ -1433,8 +1701,21 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                 const tplHasGrid = tplMeta ? isSpecialTemplate(tplMeta) : false;
                 const dataKey = tplMeta ? tplDataKey(expandedNote.id) : '';
                 // 자동 생성 제목 여부 — 힌트 스타일(이탤릭·흐림) 적용
-                const isAutoTitle = /^(노트|손글씨|캔버스) \d+$/.test(expandedNote.title)
+                const isAutoTitle = /^(기본 노트|노트|손글씨|캔버스|템플릿) \d+$/.test(expandedNote.title)
                     || (isTpl && expandedNote.title === (expandedNote.templateLabel ?? ''));
+                function toggleHandwriting() {
+                    if (isHand) {
+                        // 손글씨 → 텍스트: 스트로크 보존, 텍스트 복원
+                        setExpandedNote({ ...expandedNote!, type: 'cornell', content: expandedNote!.handwriting?.text ?? '' });
+                    } else {
+                        // 텍스트 → 손글씨: 기존 텍스트를 handwriting.text에 보존
+                        const prev = expandedNote!.handwriting;
+                        const nextHand: HandNoteData = prev
+                            ? { ...prev, text: expandedNote!.content || '' }
+                            : { strokes: [], width: 800, height: 480, text: expandedNote!.content || '' };
+                        setExpandedNote({ ...expandedNote!, type: 'handwriting', handwriting: nextHand });
+                    }
+                }
                 function saveAndClose() {
                     const next = notesList.map(n => n.id === expandedNote!.id ? expandedNote! : n);
                     setNotesList(next);
@@ -1447,18 +1728,34 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             {/* Header */}
                             <div className={`px-6 py-3 border-b border-neutral-200 flex items-center gap-3 ${isTpl ? 'bg-violet-50' : isCanvas ? 'bg-sky-50' : 'bg-neutral-50'}`}>
                                 {isTpl && <LayoutTemplate className="h-4 w-4 text-violet-400 shrink-0" />}
-                                {isCanvas && <ImageIcon className="h-4 w-4 text-sky-400 shrink-0" />}
-                                <input
-                                    type="text"
-                                    value={expandedNote.title}
-                                    onChange={(e) => setExpandedNote({ ...expandedNote, title: e.target.value })}
-                                    placeholder="제목을 입력하세요"
-                                    className={`flex-1 text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
-                                        isAutoTitle
-                                            ? 'italic font-normal text-neutral-400'
-                                            : isTpl ? 'font-semibold text-violet-700' : isCanvas ? 'font-semibold text-sky-700' : 'font-semibold text-neutral-900'
-                                    }`}
-                                />
+                                {isCanvas && <ImageIcon className="h-4 w-4 text-sky-500 shrink-0" />}
+                                <div className="flex-1 min-w-0">
+                                    <input
+                                        type="text"
+                                        value={expandedNote.title}
+                                        onChange={(e) => setExpandedNote({ ...expandedNote, title: e.target.value })}
+                                        placeholder={
+                                            isTpl ? "이 템플릿으로 기록할 주제 한 줄"
+                                            : isCanvas ? "예: 동선 스케치 / 와이어프레임"
+                                            : isHand ? "예: 회의 메모 · 손글씨 정리"
+                                            : "예: AI 마케팅 특강 — 강의 구성안"
+                                        }
+                                        className={`w-full text-base bg-transparent focus:outline-none placeholder:text-neutral-300 transition-all ${
+                                            isAutoTitle
+                                                ? 'italic font-light text-neutral-400'
+                                                : isTpl ? 'font-semibold text-violet-700' : isCanvas ? 'font-semibold text-sky-700' : 'font-semibold text-neutral-900'
+                                        }`}
+                                    />
+                                </div>
+                                {!isTpl && !isCanvas && (
+                                    <button
+                                        onClick={toggleHandwriting}
+                                        title={isHand ? "텍스트 모드로 전환" : "손글씨 모드로 전환"}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors shrink-0"
+                                    >
+                                        {isHand ? <><Type className="h-3.5 w-3.5" /> 텍스트</> : <><PenLine className="h-3.5 w-3.5" /> 손글씨</>}
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => saveAndClose()}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white rounded-lg text-sm hover:bg-[#0d5e56] transition-colors"
@@ -1474,11 +1771,11 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                     title={expandedNote.title}
                                 />
                             ) : isHand ? (
-                                <div className="flex-1 overflow-auto p-6 bg-neutral-50/30">
+                                <div className="flex-1 min-h-0 flex flex-col overflow-auto">
                                     <HandNote
                                         value={expandedNote.handwriting ?? null}
                                         onChange={(d) => setExpandedNote({ ...expandedNote, handwriting: d })}
-                                        height={Math.max(600, expandedNote.handwriting?.height ?? 600)}
+                                        fillHeight
                                     />
                                 </div>
                             ) : isTpl && tplHasGrid && tplMeta ? (
@@ -1571,7 +1868,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                     }}
                                                     className={`shrink-0 w-6 flex items-start justify-center pt-3.5 transition-colors text-neutral-300 hover:text-red-400 ${(expandedNote.rows ?? []).length <= 1 ? 'invisible' : ''}`}
                                                 >
-                                                    <X className="h-3 w-3" />
+                                                    <Trash2 className="h-3 w-3" />
                                                 </button>
                                                 {/* Cue cell */}
                                                 <div className="w-[22%] shrink-0 relative border-l border-neutral-200">
@@ -1583,7 +1880,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                             setExpandedNote({ ...expandedNote, rows });
                                                         }}
                                                         placeholder="키워드"
-                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-600 placeholder:text-neutral-300 focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
+                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-600 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
                                                     />
                                                 </div>
                                                 {/* Note cell */}
@@ -1603,8 +1900,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                                 setExpandedNote({ ...expandedNote, rows });
                                                             }
                                                         }}
-                                                        placeholder={rIdx === 0 ? "자유롭게 기록…" : ""}
-                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
+                                                        placeholder={rIdx === 0 ? "이 키워드에 대한 노트" : ""}
+                                                        className="absolute inset-0 w-full h-full text-sm text-neutral-900 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-3 leading-relaxed"
                                                     />
                                                 </div>
                                             </div>
@@ -1617,7 +1914,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 const rows = [...(expandedNote.rows ?? []), { id: `r_${Date.now()}`, cue: '', note: '' }];
                                                 setExpandedNote({ ...expandedNote, rows });
                                             }}
-                                            className="w-full py-1.5 text-[10px] text-neutral-300 hover:text-[#0F766E] transition-colors"
+                                            className="w-full py-1.5 text-[11px] italic font-light text-neutral-300 hover:text-[#0F766E] hover:not-italic transition-colors"
                                         >
                                             + 행 추가
                                         </button>
@@ -1628,9 +1925,9 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         <textarea
                                             value={expandedNote.summary}
                                             onChange={(e) => setExpandedNote({ ...expandedNote, summary: e.target.value })}
-                                            placeholder="핵심을 한두 줄로 요약…"
+                                            placeholder="이 노트의 핵심 한 줄"
                                             rows={3}
-                                            className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-relaxed"
+                                            className="w-full text-sm text-neutral-700 placeholder:text-neutral-300 placeholder:italic placeholder:font-light focus:outline-none bg-transparent resize-none px-4 py-2 pb-4 leading-relaxed"
                                         />
                                     </div>
                                 </div>
@@ -1729,7 +2026,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                                 <input
                                                                     type="checkbox"
                                                                     checked={checked}
-                                                                    onChange={() => {}}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedPendingIds(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (next.has(task.id)) next.delete(task.id);
+                                                                            else next.add(task.id);
+                                                                            return next;
+                                                                        });
+                                                                    }}
                                                                     onClick={(e) => e.stopPropagation()}
                                                                     className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500 shrink-0"
                                                                 />
@@ -1809,13 +2114,14 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                 />
                             </div>
                             <div className="flex gap-1 overflow-x-auto">
-                                {["all", "favs", "framework", "schedule", "note"].map((c) => (
+                                {["all", "favs", "recommended", "framework", "schedule", "note"].map((c) => (
                                     <button
                                         key={c}
                                         onClick={() => setTplCat(c)}
                                         className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                                             tplCat === c
                                                 ? c === "favs" ? "bg-amber-500 text-white"
+                                                : c === "recommended" ? "bg-rose-500 text-white"
                                                 : c === "framework" ? "bg-violet-600 text-white"
                                                 : c === "schedule" ? "bg-teal-600 text-white"
                                                 : c === "note" ? "bg-amber-500 text-white"
@@ -1823,7 +2129,7 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                                         }`}
                                     >
-                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "framework" ? "FrameWorkBook" : c === "schedule" ? "Schedule" : "Note"}
+                                        {c === "all" ? "전체" : c === "favs" ? "⭐ 즐겨찾기" : c === "recommended" ? "📈 추천" : c === "framework" ? "FrameWorkBook" : c === "schedule" ? "Schedule" : "Note"}
                                     </button>
                                 ))}
                             </div>
@@ -1831,6 +2137,30 @@ export function DailyView({ initialDate }: { initialDate: string }) {
 
                         {/* List */}
                         <div className="overflow-y-auto flex-1 px-5 pb-5">
+                            {/* 오늘 추천 — 검색·필터 없을 때만 노출 */}
+                            {!tplLoading && tplCat === "all" && !tplQuery && (() => {
+                                const recs = DAILY_RECOMMENDED
+                                    .map(k => tplList.find(t => t.key === k))
+                                    .filter((t): t is NonNullable<typeof t> => !!t)
+                                    .slice(0, 6);
+                                if (recs.length === 0) return null;
+                                return (
+                                    <div className="bg-violet-50/50 border border-violet-100 rounded-xl px-4 py-3 mt-2 mb-3">
+                                        <p className="text-[10px] uppercase tracking-widest text-violet-600 mb-2">오늘 추천</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {recs.map((t) => (
+                                                <button
+                                                    key={t.id}
+                                                    onClick={() => insertTemplate(t)}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-violet-200 rounded-full text-xs text-violet-700 hover:bg-violet-100 hover:border-violet-400 transition-colors"
+                                                >
+                                                    <LayoutTemplate className="h-3 w-3" /> {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                             {tplLoading ? (
                                 <div className="flex items-center justify-center py-10">
                                     <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
@@ -1838,7 +2168,8 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                             ) : (() => {
                                 const filtered = tplList.filter(t => {
                                     if (tplCat === "favs" && !tplFavs.has(t.id)) return false;
-                                    if (tplCat !== "all" && tplCat !== "favs" && t.category !== tplCat) return false;
+                                    if (tplCat === "recommended" && !TOP_RECOMMENDED.includes(t.key)) return false;
+                                    if (tplCat !== "all" && tplCat !== "favs" && tplCat !== "recommended" && t.category !== tplCat) return false;
                                     if (tplQuery) {
                                         const q = tplQuery.toLowerCase();
                                         return t.label.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q);
@@ -1987,7 +2318,7 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
             onDragOver={onDragOver}
             onDrop={onDrop}
             onDragEnd={onDragEnd}
-            className={`group flex items-center gap-2 py-1.5 rounded transition-colors ${
+            className={`group flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 rounded transition-colors ${
                 isDragOver ? "bg-neutral-50 border-t-2 border-[#0F766E]" : ""
             }`}
         >
@@ -2029,11 +2360,10 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                         }}
                         className="text-xs w-[68px] border border-[#0F766E] rounded px-1 py-0.5 focus:outline-none"
                     />
-                    {/* 모바일에서 확인 버튼 — onChange가 즉시 저장하므로 단순 닫기 역할 */}
                     <button
                         type="button"
                         onClick={() => setEditingTime(false)}
-                        className="px-1.5 py-0.5 rounded bg-[#0F766E] text-white text-[10px] font-semibold hover:bg-[#0d5e56]"
+                        className="px-1.5 py-0.5 rounded bg-[#0F766E] text-white text-xs font-semibold hover:bg-[#0d5e56]"
                         title="확인"
                     >
                         확인
@@ -2041,7 +2371,7 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                     <button
                         type="button"
                         onClick={() => { onTimeChange(""); setEditingTime(false); }}
-                        className="px-1 py-0.5 rounded text-neutral-400 hover:text-rose-500 text-[10px]"
+                        className="px-1 py-0.5 rounded text-neutral-400 hover:text-rose-500 text-xs"
                         title="시간 지우기"
                     >
                         ×
@@ -2075,17 +2405,15 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                 <button
                     type="button"
                     onClick={() => onPriorityChange("급중")}
-                    className="opacity-0 group-hover:opacity-100 shrink-0 text-[10px] text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
+                    className="shrink-0 text-xs text-neutral-300 hover:text-neutral-500 border border-dashed border-neutral-200 rounded px-1 transition-all"
                     title="우선순위 설정"
                 >
                     급중
                 </button>
             )}
 
-            {/* Task text */}
-            <span className={`flex-1 text-sm ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
-                {task.text}
-            </span>
+            {/* 모바일 스페이서 — project+delete를 우측으로 밀기 */}
+            <span className="flex-1 sm:hidden" />
 
             {/* Project tag (선택 가능) */}
             {projects.length > 0 && onProjectChange && (() => {
@@ -2095,10 +2423,10 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
                         value={task.project_id ?? ""}
                         onChange={(e) => onProjectChange(e.target.value || null)}
                         title={project ? `프로젝트: ${project.title}` : "프로젝트 태그"}
-                        className={`shrink-0 text-[10px] max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
+                        className={`shrink-0 text-xs max-w-[100px] focus:outline-none rounded px-1.5 py-0.5 border transition-colors ${
                             project
                                 ? "bg-[#0F766E]/10 text-[#0F766E] border-[#0F766E]/30"
-                                : "text-neutral-300 border-transparent opacity-0 group-hover:opacity-100"
+                                : "text-neutral-300 border-transparent opacity-40"
                         }`}
                         style={project?.color ? { color: project.color, borderColor: `${project.color}55`, backgroundColor: `${project.color}11` } : undefined}
                     >
@@ -2113,10 +2441,15 @@ function TaskRow({ task, isDragOver, onCycle, onRemove, onTimeChange, onPriority
             {/* Remove */}
             <button
                 onClick={onRemove}
-                className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-red-500 transition-opacity shrink-0"
+                className="text-neutral-300 hover:text-red-500 transition-opacity shrink-0"
             >
                 <Trash2 className="h-3.5 w-3.5" />
             </button>
+
+            {/* Task text — 모바일 2번째 줄, 데스크톱 인라인 */}
+            <span className={`basis-full sm:basis-auto sm:flex-1 sm:min-w-0 order-last sm:order-none pl-6 sm:pl-0 text-xs leading-snug ${strike ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
+                {task.text}
+            </span>
         </div>
     );
 }
@@ -2245,96 +2578,85 @@ function TrackingRow({ label, hint, value, activeColor, onPick, onClear }: Track
     );
 }
 
-// 오늘 하루 AI 간략 정리 — 사용자가 "정리" 버튼 누르면 호출
-function DailyAiSummary({ date }: { date: string }) {
-    const [summary, setSummary] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [generatedAt, setGeneratedAt] = useState<string | null>(null);
-
-    async function generate() {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await fetch("/api/planners/daily/ai-summary", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ date }),
-            });
-            const d = await res.json();
-            if (!res.ok) {
-                setError(d.error === "ai_not_configured" ? "AI 키 미설정" : (d.message || "정리 실패"));
-            } else {
-                setSummary(d.summary);
-                setGeneratedAt(d.generated_at);
-            }
-        } catch {
-            setError("네트워크 오류");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    return (
-        <section className="bg-white border border-neutral-200 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs uppercase tracking-widest text-neutral-400">AI 정리</h2>
-                <button
-                    onClick={generate}
-                    disabled={loading}
-                    className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-[#0F766E] disabled:opacity-50 transition-colors"
-                >
-                    {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    {summary ? "다시 정리" : "정리하기"}
-                </button>
-            </div>
-            {error && <p className="text-xs text-rose-500">{error}</p>}
-            {summary ? (
-                <div className="space-y-1.5">
-                    <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">{summary}</p>
-                    {generatedAt && (
-                        <p className="text-[10px] text-neutral-400">
-                            {new Date(generatedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 생성
-                        </p>
-                    )}
-                </div>
-            ) : !error && !loading && (
-                <p className="text-xs text-neutral-400 leading-relaxed">
-                    오늘의 일정·태스크·트래킹·노트를 바탕으로 AI가 2~3문장으로 정리해 드립니다.
-                </p>
-            )}
-        </section>
-    );
-}
-
 // 향후 4주 일정 컴팩트 리스트
 const DAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
 
-function UpcomingSchedule({ date, entries }: { date: string; entries: CalendarEntry[] }) {
-    const groups = useMemo(() => {
-        const d1 = new Date(date + "T00:00:00"); d1.setDate(d1.getDate() + 1);
-        const d2 = new Date(date + "T00:00:00"); d2.setDate(d2.getDate() + 28);
-        const from = d1.toISOString().slice(0, 10);
-        const to   = d2.toISOString().slice(0, 10);
+interface UpcomingTask {
+    id: string;
+    text: string;
+    status: string;
+    project_id?: string | null;
+    source?: string;
+    time?: string | null;
+}
 
+function UpcomingSchedule({ date }: { date: string }) {
+    const [offset, setOffset] = useState(0);
+    const [entries, setEntries] = useState<CalendarEntry[]>([]);
+    const [taskRows, setTaskRows] = useState<Array<{ date: string; tasks: UpcomingTask[] }>>([]);
+    const [loading, setLoading] = useState(false);
+
+    const { from, to } = useMemo(() => {
+        const d1 = new Date(date + "T00:00:00"); d1.setDate(d1.getDate() + 1 + offset);
+        const d2 = new Date(date + "T00:00:00"); d2.setDate(d2.getDate() + 28 + offset);
+        return { from: localDateStr(d1), to: localDateStr(d2) };
+    }, [date, offset]);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        Promise.all([
+            fetch(`/api/planners/calendar?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
+            fetch(`/api/planners/daily/range?from=${from}&to=${to}`).then(r => r.ok ? r.json() : null),
+        ])
+            .then(([cal, daily]) => {
+                if (cancelled) return;
+                if (cal?.entries) setEntries(cal.entries);
+                if (daily?.rows) {
+                    const rows = (daily.rows as Array<{ date: string; tasks: unknown }>)
+                        .map(r => ({ date: r.date, tasks: Array.isArray(r.tasks) ? (r.tasks as UpcomingTask[]) : [] }))
+                        .filter(r => r.tasks.length > 0);
+                    setTaskRows(rows);
+                }
+            })
+            .catch(() => {})
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, [from, to]);
+
+    const groups = useMemo(() => {
         const kinds: CalendarKind[] = ["anniversary", "meeting"];
         const result: Record<string, Array<{ date: string; entry: CalendarEntry }>> = {
             anniversary: [], meeting: [],
         };
-
         entries.forEach((e) => {
             if (!kinds.includes(e.kind as CalendarKind)) return;
             expandOccurrences(e, from, to).forEach((o) => {
                 result[e.kind].push({ date: o.date, entry: e });
             });
         });
-
         kinds.forEach(k => result[k].sort((a, b) => a.date.localeCompare(b.date)));
         return result;
-    }, [date, entries]);
+    }, [entries, from, to]);
 
-    const total = Object.values(groups).reduce((s, arr) => s + arr.length, 0);
-    if (total === 0) return null;
+    // 업무 — planners_daily.tasks 평탄화 (취소·완료 제외)
+    const taskItems = useMemo(() => {
+        const out: Array<{ date: string; task: UpcomingTask }> = [];
+        for (const row of taskRows) {
+            for (const t of row.tasks) {
+                if (!t || !t.text) continue;
+                if (t.status === "cancelled" || t.status === "done") continue;
+                out.push({ date: row.date, task: t });
+            }
+        }
+        out.sort((a, b) => a.date.localeCompare(b.date));
+        return out;
+    }, [taskRows]);
+
+    const total = Object.values(groups).reduce((s, arr) => s + arr.length, 0) + taskItems.length;
+    // offset === 0 + 데이터 없음 → 카드 자체 숨김 (오늘 기준 향후 4주 무일정)
+    // offset !== 0 + 데이터 없음 → 카드 유지 (과거·미래로 이동 중인 사용자)
+    if (total === 0 && offset === 0) return null;
 
     const today = new Date(date + "T00:00:00");
 
@@ -2355,7 +2677,9 @@ function UpcomingSchedule({ date, entries }: { date: string; entries: CalendarEn
                         {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
                     </span>
                     <span className="flex-1 truncate text-xs text-neutral-700">{o.entry.title}</span>
-                    <span className="shrink-0 text-[9px] text-neutral-300 tabular-nums">D+{days}</span>
+                    <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">
+                        {days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`}
+                    </span>
                 </a>
             </li>
         );
@@ -2368,7 +2692,35 @@ function UpcomingSchedule({ date, entries }: { date: string; entries: CalendarEn
 
     return (
         <section className="bg-white border border-neutral-200 rounded-xl p-4">
-            <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">향후 4주</h2>
+            <div className="flex items-center gap-1 mb-3">
+                <button
+                    onClick={() => setOffset(o => o - 28)}
+                    title="이전 4주"
+                    className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors"
+                >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <div className="flex-1 text-center">
+                    <h2 className="text-xs font-medium text-neutral-600">
+                        {offset < 0 ? "과거 일정 & 업무" : offset > 0 ? "다음 일정 & 업무" : "향후 일정 & 업무"}
+                    </h2>
+                    {offset !== 0 && (
+                        <button
+                            onClick={() => setOffset(0)}
+                            className="text-[9px] text-neutral-400 hover:text-[#0F766E] transition-colors mt-0.5"
+                        >
+                            오늘로 ↺
+                        </button>
+                    )}
+                </div>
+                <button
+                    onClick={() => setOffset(o => o + 28)}
+                    title="다음 4주"
+                    className="p-1 rounded hover:bg-neutral-100 text-neutral-400 transition-colors"
+                >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+            </div>
             <div className="space-y-3">
                 {sections.map(({ kind, label }) => {
                     const items = groups[kind];
@@ -2386,6 +2738,46 @@ function UpcomingSchedule({ date, entries }: { date: string; entries: CalendarEn
                         </div>
                     );
                 })}
+                {taskItems.length > 0 && (
+                    <div>
+                        <div className="flex items-center gap-1.5 mb-1.5 px-1 py-0.5 rounded bg-teal-50">
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-teal-500" />
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-teal-700">업무</span>
+                        </div>
+                        <ul className="pl-1">
+                            {taskItems.map((o, i) => {
+                                const d = new Date(o.date + "T00:00:00");
+                                const days = Math.round((d.getTime() - today.getTime()) / 86400000);
+                                const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
+                                const dow = DAY_KO[d.getDay()];
+                                const isMs = o.task.source === "milestone";
+                                return (
+                                    <li key={`${o.date}-${o.task.id}-${i}`} className="border-b border-neutral-50 last:border-0">
+                                        <a
+                                            href={`/planners/app/daily?date=${o.date}`}
+                                            className="flex items-center gap-2 min-w-0 py-1 hover:bg-neutral-50 rounded transition-colors"
+                                        >
+                                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500" />
+                                            <span className="shrink-0 w-10 text-[10px] text-neutral-500 font-mono tabular-nums">
+                                                {mmdd}<span className="text-neutral-300 ml-0.5">({dow})</span>
+                                            </span>
+                                            <span className="flex-1 truncate text-xs text-neutral-700">{o.task.text}</span>
+                                            {isMs && <span className="shrink-0 text-[8px] uppercase tracking-wider px-1 py-px rounded bg-[#0F766E]/10 text-[#0F766E]">MS</span>}
+                                            <span className="shrink-0 text-[9px] tabular-nums text-neutral-300">
+                                                {days < 0 ? `D+${-days}` : days === 0 ? "D-Day" : `D-${days}`}
+                                            </span>
+                                        </a>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
+                {total === 0 && (
+                    <div className="text-[11px] text-neutral-400 text-center py-6">
+                        {loading ? "불러오는 중…" : `${from} ~ ${to} 일정 없음`}
+                    </div>
+                )}
             </div>
         </section>
     );

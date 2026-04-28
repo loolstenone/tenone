@@ -1,12 +1,31 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-04-28 (세션 97 — Daily 앱 에러 수정 + Weekly 뷰 재설계 + 미완 업무 모달 + 노트 동기화 수정)
+> 마지막 업데이트: 2026-04-29 (세션 99 — Planners 노트 병기·캔버스 UI 통일·AI 기능 정리)
 
 ---
 
-## 세션 97 핵심 성과 (2026-04-28)
+## 세션 98 핵심 성과 (2026-04-29)
 
-### Daily 앱 에러 수정 (`b5bcbada`)
+### Planners — Daily ↔ Project 노트 일관성 통일
+- 추가 노트 4종(기본·손글씨·캔버스·템플릿) 동작·구성·디자인 양쪽 통일
+- 카드 = 미리보기(max-h-64 페이드), 편집 = 모달 (Daily 패턴)
+- 자동 제목(`기본 노트 1`·`손글씨 1` 등) → 이탤릭·연한 회색 + "기본 제목입니다…" 부제 안내
+- 모달에서 텍스트로/손글씨로 토글 제거 (생성 시 모드 고정 — Daily와 동일)
+- Project 진입 시 "기본 노트 1" 자동 생성, ↑↓ 카드 위치 이동, X 닫기 제거, 삭제 confirm 통일
+
+### Planners — 프로젝트 캔버스 노트 버그
+- 프로젝트 [캔버스] 클릭 → 캔버스 페이지로 튕기던 동작 수정 → 노트 카드로 인라인 등록
+- 마커: `<!-- planners:canvas={id} -->` (DB 마이그 없이 content 컬럼에 임베드)
+- 카드 = 캔버스 진입 링크, 모달 = iframe 임베드
+
+### Planners — 템플릿 모달에 "📈 추천" 탭 추가
+- `lib/planners/template-recommendations.ts` → `TOP_RECOMMENDED` SSOT (라이브러리 추천과 동일 키)
+- 일간/프로젝트 양쪽 템플릿 추가 모달에 추천 탭 노출
+
+### Planners — AI 브리핑 카드 정리
+- 우측 상단 "설정" 버튼 제거 (헤더 단순화)
+
+### 세션 97 잔여 (이전 컨텍스트, 미커밋)
 - `lib/planners/calendar-rules.ts` — `isVisible()` 미지 kind guard 추가 (`if (!rule) return false`)
 - `monthlyDisplayMode()` optional chaining (`VISIBILITY[kind]?.monthly ?? "none"`)
 - 원인: DB에 알 수 없는 `kind` 값이 있을 때 `VISIBILITY[kind].monthly`에서 `TypeError` 발생
