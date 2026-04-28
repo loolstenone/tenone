@@ -432,12 +432,18 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                         if (Array.isArray(attempt)) {
                             parsed = attempt.map((n: Record<string, unknown>) => {
                                 const rawType = n.type as string | undefined;
-                                const type = (rawType === 'template' ? 'template' : rawType === 'handwriting' ? 'handwriting' : 'cornell') as 'cornell' | 'template' | 'handwriting';
+                                const type = (
+                                    rawType === 'template' ? 'template'
+                                    : rawType === 'handwriting' ? 'handwriting'
+                                    : rawType === 'canvas' ? 'canvas'
+                                    : 'cornell'
+                                ) as 'cornell' | 'template' | 'handwriting' | 'canvas';
                                 return {
                                     id: String(n.id),
                                     type,
                                     templateKey: typeof n.templateKey === 'string' ? n.templateKey : '',
                                     templateLabel: typeof n.templateLabel === 'string' ? n.templateLabel : undefined,
+                                    canvas_id: typeof n.canvas_id === 'string' ? n.canvas_id : undefined,
                                     title: typeof n.title === 'string' ? n.title : "",
                                     cue: typeof n.cue === 'string' ? n.cue : "",
                                     content: typeof n.content === 'string' ? n.content : "",
