@@ -28,15 +28,23 @@ export function useSwipeNav(
 
         let startX = 0;
         let startY = 0;
+        let ignored = false;  // 인터랙티브 요소에서 시작한 터치는 무시
 
         function onTouchStart(e: TouchEvent) {
             const tag = (e.target as HTMLElement)?.tagName?.toLowerCase() ?? "";
-            if (["input", "button", "select", "textarea", "a"].includes(tag)) return;
+            if (["input", "button", "select", "textarea", "a"].includes(tag)) {
+                // startX를 갱신하지 않으면 이전 값(0 포함)이 남아
+                // onTouchEnd에서 오탐(false positive)이 발생하므로 ignored 플래그로 막음
+                ignored = true;
+                return;
+            }
+            ignored = false;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
         }
 
         function onTouchEnd(e: TouchEvent) {
+            if (ignored) return;
             const dx = e.changedTouches[0].clientX - startX;
             const dy = e.changedTouches[0].clientY - startY;
             if (Math.abs(dx) < threshold) return;
