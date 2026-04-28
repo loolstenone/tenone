@@ -69,7 +69,7 @@ export function CalendarEntryList({ entries, view, from, to, onAdd, onEdit, labe
                                         </span>
                                     )}
                                     <span className="flex-1 min-w-0">
-                                        <span className={`text-sm ${entry.kind === "task" && entry.status === "done" ? "text-neutral-400 line-through" : "text-neutral-800"}`}>
+                                        <span className="text-sm text-neutral-800">
                                             {entry.title}
                                         </span>
                                         {!titleOnly && entry.description && (

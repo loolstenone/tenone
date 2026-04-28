@@ -59,10 +59,9 @@ function TimeSelect({
 }
 
 const RECURRENCE_OPTIONS: Array<{ value: RecurrenceUnit; label: string; allowedKinds: CalendarKind[] }> = [
-    { value: "none",    label: "반복 없음", allowedKinds: ["meeting", "task", "anniversary"] },
-    { value: "daily",   label: "매일",      allowedKinds: ["task"] },
-    { value: "weekly",  label: "매주",      allowedKinds: ["meeting", "task"] },
-    { value: "monthly", label: "매월",      allowedKinds: ["meeting", "task", "anniversary"] },
+    { value: "none",    label: "반복 없음", allowedKinds: ["meeting", "anniversary"] },
+    { value: "weekly",  label: "매주",      allowedKinds: ["meeting"] },
+    { value: "monthly", label: "매월",      allowedKinds: ["meeting", "anniversary"] },
     { value: "yearly",  label: "매년",      allowedKinds: ["anniversary"] },
 ];
 
@@ -178,7 +177,7 @@ export function CalendarEntryEditor({ open, onClose, onSaved, onDeleted, initial
                 end_time:   kind === "anniversary" ? null : (endTime || null),
                 recurrence,
                 recurrence_until: recurrenceUntil || null,
-                status: kind === "task" ? (initial?.status || "todo") : null,
+                status: null,
             };
             const url = isEdit ? `/api/planners/calendar/${initial!.id}` : "/api/planners/calendar";
             const method = isEdit ? "PATCH" : "POST";
@@ -489,7 +488,6 @@ function todayStr(): string {
 function kindPlaceholder(kind: CalendarKind): string {
     switch (kind) {
         case "meeting":     return "예: 클라이언트 미팅, 팀 스탠드업";
-        case "task":        return "예: 보고서 마감, 이메일 회신";
         case "anniversary": return "예: 어머니 생신, 결혼기념일";
         default:            return "제목";
     }

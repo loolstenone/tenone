@@ -5,7 +5,7 @@ import type { CalendarKind } from "@/lib/planners/calendar-rules";
 
 export const dynamic = "force-dynamic";
 
-const VALID_KINDS: CalendarKind[] = ["anniversary", "meeting", "task", "public_holiday", "solar_term"];
+const VALID_KINDS: CalendarKind[] = ["anniversary", "meeting", "public_holiday", "solar_term"];
 const VALID_RECURRENCE = ["none", "daily", "weekly", "monthly", "yearly"];
 const VALID_STATUS = ["todo", "done", "carried", "canceled"];
 
