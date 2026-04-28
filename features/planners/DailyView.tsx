@@ -205,6 +205,10 @@ export function DailyView({ initialDate }: { initialDate: string }) {
     const [activeProjects, setActiveProjects] = useState<Array<{ id: string; title: string; color: string | null }>>([]);
     const [carrying, setCarrying] = useState(false);
     const [pendingInfo, setPendingInfo] = useState<{ count: number; days: number; oldest: string | null } | null>(null);
+    const [showPendingModal, setShowPendingModal] = useState(false);
+    const [pendingGroups, setPendingGroups] = useState<Array<{ date: string; tasks: Array<{ id: string; text: string; priority?: string | null; time?: string | null }> }>>([]);
+    const [pendingLoading, setPendingLoading] = useState(false);
+    const [selectedPendingIds, setSelectedPendingIds] = useState<Set<string>>(new Set());
     const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
     const [showTemplatePicker, setShowTemplatePicker] = useState(false);
     const [tplList, setTplList] = useState<Array<{ id: string; key: string; category: string; subcategory: string | null; label: string; description: string | null; body_md: string }>>([]);
@@ -549,6 +553,94 @@ export function DailyView({ initialDate }: { initialDate: string }) {
         } finally { setCarrying(false); }
     }
 
+    async function openPendingModal() {
+        setShowPendingModal(true);
+        setPendingLoading(true);
+        setSelectedPendingIds(new Set());
+        try {
+            const res = await fetch(`/api/planners/daily/pending-tasks?date=${date}&days=60`);
+            if (res.ok) {
+                const d = await res.json();
+                const groups = d.groups ?? [];
+                setPendingGroups(groups);
+                // 기본: 전체 선택
+                const allIds = new Set<string>(groups.flatMap((g: { tasks: Array<{ id: string }> }) => g.tasks.map((t: { id: string }) => t.id)));
+                setSelectedPendingIds(allIds);
+            }
+        } finally {
+            setPendingLoading(false);
+        }
+    }
+
+    async function importSelectedPending() {
+        if (selectedPendingIds.size === 0) { setShowPendingModal(false); return; }
+        setCarrying(true);
+        try {
+            // 선택된 태스크만 수집
+            const toImport: Array<{ id: string; text: string; priority?: string | null; time?: string | null; source_date: string }> = [];
+            const sourceUpdates: Map<string, Array<{ id: string; text: string; status: string; priority?: string | null; time?: string | null }>> = new Map();
+
+            for (const group of pendingGroups) {
+                for (const t of group.tasks) {
+                    // 해당 date의 전체 tasks를 가져와야 carried 처리가 정확 — 여기선 간단하게 처리
+                    if (selectedPendingIds.has(t.id)) {
+                        toImport.push({ ...t, source_date: group.date });
+                    }
+                }
+                // source_date별 변경할 task id 목록
+                const selectedInGroup = group.tasks.filter(t => selectedPendingIds.has(t.id)).map(t => t.id);
+                if (selectedInGroup.length > 0) {
+                    sourceUpdates.set(group.date, selectedInGroup.map(id => ({ id, status: 'carried' } as { id: string; text: string; status: string })));
+                }
+            }
+
+            if (toImport.length === 0) { setShowPendingModal(false); return; }
+
+            // 1. 오늘 tasks에 추가
+            const newTasks: PlannerTask[] = toImport.map(t => ({
+                id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                text: t.text,
+                status: "todo" as const,
+                time: null,
+                project_id: null,
+                priority: (t.priority as PlannerTask["priority"]) ?? null,
+                memo: null,
+            }));
+            const next = [...tasks, ...newTasks];
+            setTasks(next);
+            await save({ tasks: next });
+
+            // 2. 원본 날짜에서 carried 처리 (각 날짜의 전체 tasks 불러와서 선택 항목만 carried)
+            await Promise.all(
+                Array.from(sourceUpdates.entries()).map(async ([srcDate, selectedIds]) => {
+                    const r = await fetch(`/api/planners/daily?date=${srcDate}`);
+                    if (!r.ok) return;
+                    const d = await r.json();
+                    if (!d.daily?.tasks) return;
+                    const idSet = new Set(selectedIds.map(s => s.id));
+                    const updated = (d.daily.tasks as PlannerTask[]).map(t =>
+                        idSet.has(t.id) ? { ...t, status: 'carried' } : t
+                    );
+                    await fetch(`/api/planners/daily`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ date: srcDate, tasks: updated }),
+                    });
+                })
+            );
+
+            // 3. pendingInfo 리셋
+            const remaining = pendingGroups.flatMap(g => g.tasks).filter(t => !selectedPendingIds.has(t.id)).length;
+            if (remaining === 0) setPendingInfo({ count: 0, days: 0, oldest: null });
+            else setPendingInfo(prev => prev ? { ...prev, count: remaining } : null);
+
+            Track.carryOverPending({ count: toImport.length, days: sourceUpdates.size });
+            setShowPendingModal(false);
+        } finally {
+            setCarrying(false);
+        }
+    }
+
     function updateTaskPriority(taskId: string, priority: PlannerTask["priority"]) {
         const next = tasks.map(t => t.id === taskId ? { ...t, priority } : t);
         setTasks(next);
@@ -823,15 +915,15 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                                         <div className="flex items-center gap-2">
                                             {pendingInfo && pendingInfo.count > 0 && (
                                                 <button
-                                                    onClick={carryOverPending}
+                                                    onClick={openPendingModal}
                                                     disabled={carrying}
                                                     title={pendingInfo.oldest
-                                                        ? `${pendingInfo.oldest}부터 미완료 ${pendingInfo.count}건 이월`
-                                                        : `미완료 ${pendingInfo.count}건 이월`}
+                                                        ? `${pendingInfo.oldest}부터 미완료 ${pendingInfo.count}건`
+                                                        : `미완료 ${pendingInfo.count}건`}
                                                     className="flex items-center gap-1 text-[10px] px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition-colors disabled:opacity-50"
                                                 >
                                                     {carrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowDownToLine className="h-3 w-3" />}
-                                                    미완 {pendingInfo.count}건 이월
+                                                    미완 {pendingInfo.count}건
                                                 </button>
                                             )}
                                             <button
@@ -1546,6 +1638,149 @@ export function DailyView({ initialDate }: { initialDate: string }) {
                     </div>
                 );
             })()}
+
+            {/* 미완 업무 불러오기 Modal */}
+            {showPendingModal && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-0 sm:px-4" onClick={() => setShowPendingModal(false)}>
+                    <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl flex flex-col h-[80vh] sm:h-auto sm:max-h-[640px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 shrink-0">
+                            <div className="flex items-center gap-2">
+                                <ArrowDownToLine className="h-4 w-4 text-amber-600" />
+                                <span className="font-semibold text-sm text-neutral-900">미완 업무 불러오기</span>
+                                {!pendingLoading && pendingGroups.length > 0 && (
+                                    <span className="text-xs text-neutral-400">
+                                        {pendingGroups.flatMap(g => g.tasks).length}건
+                                    </span>
+                                )}
+                            </div>
+                            <button onClick={() => setShowPendingModal(false)} className="text-xs text-neutral-400 hover:text-neutral-700">닫기</button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="flex-1 overflow-y-auto">
+                            {pendingLoading ? (
+                                <div className="flex items-center justify-center py-12 text-neutral-400 gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span className="text-sm">불러오는 중…</span>
+                                </div>
+                            ) : pendingGroups.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-neutral-400 gap-2">
+                                    <p className="text-sm">미완료 업무가 없습니다.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-neutral-100">
+                                    {/* 전체 선택/해제 */}
+                                    <div className="px-5 py-3 bg-neutral-50 flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="pending-select-all"
+                                            checked={selectedPendingIds.size === pendingGroups.flatMap(g => g.tasks).length}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedPendingIds(new Set(pendingGroups.flatMap(g => g.tasks).map(t => t.id)));
+                                                } else {
+                                                    setSelectedPendingIds(new Set());
+                                                }
+                                            }}
+                                            className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500"
+                                        />
+                                        <label htmlFor="pending-select-all" className="text-xs text-neutral-600 cursor-pointer select-none">
+                                            전체 선택 ({pendingGroups.flatMap(g => g.tasks).length}건)
+                                        </label>
+                                        {selectedPendingIds.size > 0 && selectedPendingIds.size < pendingGroups.flatMap(g => g.tasks).length && (
+                                            <span className="text-xs text-amber-600 ml-auto">{selectedPendingIds.size}건 선택</span>
+                                        )}
+                                    </div>
+
+                                    {/* 날짜별 그룹 */}
+                                    {pendingGroups.map((group) => {
+                                        const d = new Date(group.date + "T00:00:00");
+                                        const today = new Date();
+                                        const diffDays = Math.round((today.getTime() - d.getTime()) / 86400000);
+                                        const dayLabel = diffDays === 1 ? "어제" : diffDays === 2 ? "그저께" : `${diffDays}일 전`;
+                                        const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
+                                        const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+                                        return (
+                                            <div key={group.date}>
+                                                <div className="px-5 py-2 bg-amber-50/60 border-b border-amber-100">
+                                                    <span className="text-[10px] font-semibold text-amber-700 uppercase tracking-wide">
+                                                        {mmdd} ({DOW[d.getDay()]}) · {dayLabel}
+                                                    </span>
+                                                </div>
+                                                <ul className="divide-y divide-neutral-50">
+                                                    {group.tasks.map((task) => {
+                                                        const checked = selectedPendingIds.has(task.id);
+                                                        const pMeta = task.priority ? PRIORITY_META[task.priority as TaskPriority] : null;
+                                                        return (
+                                                            <li
+                                                                key={task.id}
+                                                                onClick={() => {
+                                                                    setSelectedPendingIds(prev => {
+                                                                        const next = new Set(prev);
+                                                                        if (next.has(task.id)) next.delete(task.id);
+                                                                        else next.add(task.id);
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                                className={`flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-neutral-50 transition-colors ${checked ? '' : 'opacity-50'}`}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={checked}
+                                                                    onChange={() => {}}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500 shrink-0"
+                                                                />
+                                                                <span className="flex-1 text-sm text-neutral-800 leading-snug">{task.text}</span>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    {task.time && (
+                                                                        <span className="text-[10px] text-neutral-400 flex items-center gap-0.5">
+                                                                            <Clock className="h-2.5 w-2.5" />{task.time}
+                                                                        </span>
+                                                                    )}
+                                                                    {pMeta && (
+                                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded border ${pMeta.cls}`}>{pMeta.label}</span>
+                                                                    )}
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        {!pendingLoading && pendingGroups.length > 0 && (
+                            <div className="px-5 py-4 border-t border-neutral-200 flex items-center justify-between shrink-0 bg-white">
+                                <span className="text-xs text-neutral-400">
+                                    {selectedPendingIds.size === 0 ? '항목을 선택하세요' : `${selectedPendingIds.size}건 선택됨`}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setShowPendingModal(false)}
+                                        className="px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
+                                    >
+                                        취소
+                                    </button>
+                                    <button
+                                        onClick={importSelectedPending}
+                                        disabled={selectedPendingIds.size === 0 || carrying}
+                                        className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-500 text-white text-xs rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-40"
+                                    >
+                                        {carrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowDownToLine className="h-3 w-3" />}
+                                        오늘로 가져오기
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Template Picker Modal */}
             {showTemplatePicker && (
