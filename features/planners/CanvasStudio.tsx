@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, createContext, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
@@ -158,6 +158,19 @@ function QuickShapeMenu({ editor }: { editor: Editor | null }) {
     );
 }
 
+// ─── tldraw Background 슬롯 (CSS 오버레이 대신 내부에서 렌더) ────────────────
+
+const BgCtx = createContext<BgTemplate>("blank");
+
+function TlBackground() {
+    const t = useContext(BgCtx);
+    if (t === "blank") return null;
+    return <div className="absolute inset-0 pointer-events-none" style={bgStyle(t)} />;
+}
+
+// components 객체 안정 참조 — Background만 교체, SharePanel 등 건드리지 않음
+const TL_COMPONENTS = { Background: TlBackground };
+
 // ─── 메인 CanvasStudio ─────────────────────────────────────────────────────
 
 export function CanvasStudio({ canvasId }: { canvasId: string }) {
@@ -245,7 +258,11 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
         const penMode = localStorage.getItem("pp-pen-mode") === "1";
         ed.updateInstanceState({ isPenMode: penMode });
         if (snapshot) {
-            try { ed.loadSnapshot(snapshot); } catch { /* 새 캔버스로 시작 */ }
+            try {
+                ed.loadSnapshot(snapshot);
+                // 저장된 스냅샷에 isGridMode=true가 있어도 초기화 (모눈종이 잔류 방지)
+                ed.updateInstanceState({ isGridMode: false });
+            } catch { /* 새 캔버스로 시작 */ }
         }
         const unsub = ed.store.listen(
             () => {
@@ -379,19 +396,14 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
             {/* absolute inset-0 로 tldraw 에 명시적 크기 전달 (flex-1만으로는 tldraw가 높이 0으로 인식) */}
             <div className="flex-1 min-h-0 relative">
                 <div className="absolute inset-0">
-                    {/* 배경 패턴 레이어 — tldraw CSS 아래 */}
-                    {bgTemplate !== "blank" && (
-                        <div
-                            className="absolute inset-0 pointer-events-none"
-                            style={{ ...bgStyle(bgTemplate), zIndex: 0 }}
+                    {/* BgCtx.Provider → TlBackground가 tldraw 내부에서 배경 패턴 렌더 */}
+                    <BgCtx.Provider value={bgTemplate}>
+                        <Tldraw
+                            onMount={handleMount}
+                            components={TL_COMPONENTS}
+                            /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
                         />
-                    )}
-
-                    <Tldraw
-                        onMount={handleMount}
-                        /* inferDarkMode 제거 — 시스템 다크모드 감지 시 검은 화면 플래시 발생 */
-                        /* components prop 제거 — tldraw v4에서 SharePanel 키가 달라 렌더 방해 */
-                    />
+                    </BgCtx.Provider>
                 </div>
 
                 {/* QuickShape 세로 메뉴 — 우측 하단에서 위로 펼쳐짐 */}

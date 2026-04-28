@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     LayoutTemplate, Search, Loader2, X, FileText, Calendar, BookOpen,
-    ChevronRight, Heart, Copy, Check,
+    ChevronRight, Heart, Copy, Check, TrendingUp,
 } from "lucide-react";
 import { isSpecialTemplate as isSpecial, exportFrameworkText as exportFwText, tplDataKey } from "@/lib/planners/templates";
 import {
@@ -336,8 +336,22 @@ function renderMd(md: string): React.ReactNode {
 const FAV_KEY = "planners_tpl_favorites";
 const dataKey = tplDataKey;
 
+// ── 추천 템플릿 (사용 빈도 기준 Top 10) ──────────────────────────────
+const RECOMMENDED_KEYS = [
+    "daily_design",   // 하루 설계 — 매일 사용
+    "weekly_review",  // 주간 리뷰 — 매주 회고
+    "meeting",        // 회의록 — 직장인 가장 빈번
+    "cornell",        // 코넬 노트 — 독서·강의 표준
+    "eisenhower",     // 아이젠하워 — 우선순위 결정
+    "brainstorm",     // 브레인스토밍 — 아이디어 발산
+    "retrospective",  // KPT 회고 — 팀·개인 성찰
+    "habit_tracker",  // 습관 트래커 — 루틴 관리
+    "okr",            // OKR — 목표·핵심결과
+    "swot",           // SWOT — 자기·사업 분석
+] as const;
+
 // ── 메인 컴포넌트 ────────────────────────────────────────────────────
-const VALID_CATS = ["all", "framework", "schedule", "note", "favorites"] as const;
+const VALID_CATS = ["all", "framework", "schedule", "note", "recommended", "favorites"] as const;
 type CatType = typeof VALID_CATS[number];
 
 export function TemplatesView() {
@@ -410,6 +424,7 @@ export function TemplatesView() {
     const filtered = useMemo(() => {
         let list = templates;
         if (cat === "favorites") list = list.filter(t => favorites.has(t.id));
+        else if (cat === "recommended") list = list.filter(t => (RECOMMENDED_KEYS as readonly string[]).includes(t.key));
         else if (cat !== "all") list = list.filter(t => t.category === cat);
         if (query.trim()) {
             const q = query.toLowerCase();
@@ -423,11 +438,12 @@ export function TemplatesView() {
     }, [templates, cat, query, favorites]);
 
     const counts = useMemo(() => {
-        const c = { all: templates.length, framework: 0, schedule: 0, note: 0, favorites: 0 };
+        const c = { all: templates.length, framework: 0, schedule: 0, note: 0, recommended: 0, favorites: 0 };
         templates.forEach(t => {
             if (t.category === "framework") c.framework++;
             else if (t.category === "schedule") c.schedule++;
             else if (t.category === "note") c.note++;
+            if ((RECOMMENDED_KEYS as readonly string[]).includes(t.key)) c.recommended++;
             if (favorites.has(t.id)) c.favorites++;
         });
         return c;
@@ -448,6 +464,7 @@ export function TemplatesView() {
         { id: "framework" as const, label: "FrameWorkBook" },
         { id: "schedule" as const, label: "Schedule" },
         { id: "note" as const, label: "Note" },
+        { id: "recommended" as const, label: "추천" },
         { id: "favorites" as const, label: "즐겨찾기" },
     ];
 
@@ -478,9 +495,10 @@ export function TemplatesView() {
             {/* 탭 필터 */}
             <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
                 {TABS.map(tab => {
-                    const meta = tab.id !== "all" && tab.id !== "favorites" ? CATEGORY_META[tab.id] : null;
+                    const meta = tab.id !== "all" && tab.id !== "favorites" && tab.id !== "recommended" ? CATEGORY_META[tab.id] : null;
                     const isActive = cat === tab.id;
                     const isFav = tab.id === "favorites";
+                    const isRec = tab.id === "recommended";
                     return (
                         <button
                             key={tab.id}
@@ -489,13 +507,18 @@ export function TemplatesView() {
                                 isActive
                                     ? isFav
                                         ? "bg-slate-900 text-white"
-                                        : "bg-[#0F766E] text-white"
+                                        : isRec
+                                            ? "bg-amber-500 text-white"
+                                            : "bg-[#0F766E] text-white"
                                     : isFav
                                         ? "bg-white border border-neutral-200 text-slate-700 hover:bg-slate-50"
-                                        : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                                        : isRec
+                                            ? "bg-white border border-amber-200 text-amber-700 hover:bg-amber-50"
+                                            : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                             }`}
                         >
                             {isFav && <Heart className="h-3 w-3" fill={isActive ? "currentColor" : "none"} />}
+                            {isRec && <TrendingUp className="h-3 w-3" />}
                             {meta && <span className="opacity-70">{meta.icon}</span>}
                             {tab.label}
                             {counts[tab.id] > 0 && (
