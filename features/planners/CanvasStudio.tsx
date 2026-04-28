@@ -295,14 +295,14 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     // ── 로딩 / 에러 ────────────────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="h-[calc(100svh-3rem)] flex items-center justify-center text-neutral-400 text-sm gap-2">
+            <div className="fixed inset-0 top-12 flex items-center justify-center text-neutral-400 text-sm gap-2 bg-neutral-50 z-30">
                 <Loader2 className="h-4 w-4 animate-spin" /> 캔버스 스튜디오 불러오는 중…
             </div>
         );
     }
     if (notFound) {
         return (
-            <div className="h-[calc(100svh-3rem)] flex items-center justify-center">
+            <div className="fixed inset-0 top-12 flex items-center justify-center bg-neutral-50 z-30">
                 <div className="text-center">
                     <p className="text-sm text-neutral-500 mb-3">캔버스를 찾을 수 없습니다.</p>
                     <Link href="/planners/app/canvas" className="text-sm text-[#0F766E] hover:underline">목록으로</Link>
@@ -312,7 +312,7 @@ export function CanvasStudio({ canvasId }: { canvasId: string }) {
     }
 
     return (
-        <div className="h-[calc(100svh-3rem)] flex flex-col bg-neutral-50">
+        <div className="fixed inset-0 top-12 flex flex-col bg-neutral-50 z-30">
             {/* 상단 바 */}
             <header className="flex items-center gap-2 px-4 py-2 bg-white border-b border-neutral-200 shrink-0 z-10">
                 <Link href="/planners/app/canvas" className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0">
