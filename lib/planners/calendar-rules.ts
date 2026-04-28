@@ -48,13 +48,14 @@ export const KIND_LABELS: Record<CalendarKind, string> = {
 /** 어떤 kind 가 어떤 view 에 노출되는지 boolean 반환 */
 export function isVisible(kind: CalendarKind, view: ViewScope): boolean {
     const rule = VISIBILITY[kind];
+    if (!rule) return false; // 알 수 없는 kind → 숨김
     if (view === "monthly") return rule.monthly !== "none";
     return rule[view];
 }
 
 /** Monthly 에서 풀 텍스트 vs 타이틀만 vs 숨김 */
 export function monthlyDisplayMode(kind: CalendarKind): MonthlyDisplay {
-    return VISIBILITY[kind].monthly;
+    return VISIBILITY[kind]?.monthly ?? "none";
 }
 
 export type RecurrenceUnit = "none" | "daily" | "weekly" | "monthly" | "yearly";
